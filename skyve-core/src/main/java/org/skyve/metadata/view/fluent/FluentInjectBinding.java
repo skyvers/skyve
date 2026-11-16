@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.InjectBinding;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link InjectBinding} metadata.
  */
@@ -21,7 +24,7 @@ public class FluentInjectBinding extends FluentBoundWidget<FluentInjectBinding> 
 	 * @param binding
 	 *            the metadata instance to mutate
 	 */
-	public FluentInjectBinding(InjectBinding binding) {
+	public FluentInjectBinding(@Nonnull InjectBinding binding) {
 		this.binding = binding;
 	}
 
@@ -32,7 +35,7 @@ public class FluentInjectBinding extends FluentBoundWidget<FluentInjectBinding> 
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentInjectBinding from(@SuppressWarnings("hiding") InjectBinding binding) {
+	public @Nonnull FluentInjectBinding from(@SuppressWarnings("hiding") @Nonnull InjectBinding binding) {
 		readOnly(binding.getReadOnly());
 		super.from(binding);
 		return this;
@@ -45,7 +48,7 @@ public class FluentInjectBinding extends FluentBoundWidget<FluentInjectBinding> 
 	 *            {@code Boolean.TRUE} to mark the binding read-only, {@code Boolean.FALSE} to allow changes, or {@code null} to clear the setting
 	 * @return this builder
 	 */
-	public FluentInjectBinding readOnly(Boolean readOnly) {
+	public @Nonnull FluentInjectBinding readOnly(@Nullable Boolean readOnly) {
 		binding.setReadOnly(readOnly);
 		return this;
 	}
@@ -56,7 +59,7 @@ public class FluentInjectBinding extends FluentBoundWidget<FluentInjectBinding> 
 	 * @return the wrapped inject-binding metadata
 	 */
 	@Override
-	public InjectBinding get() {
+	public @Nonnull InjectBinding get() {
 		return binding;
 	}
 

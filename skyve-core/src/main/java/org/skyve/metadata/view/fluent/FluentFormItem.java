@@ -32,6 +32,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaData;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for {@link FormItem} metadata.
@@ -53,7 +54,7 @@ public class FluentFormItem {
 	 * @param item
 	 *            the form-item metadata to mutate
 	 */
-	public FluentFormItem(FormItem item) {
+	public FluentFormItem(@Nonnull FormItem item) {
 		this.item = item;
 	}
 
@@ -70,7 +71,7 @@ public class FluentFormItem {
 	 *             if the widget type is not supported by this fluent adapter
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public FluentFormItem from(@SuppressWarnings("hiding") FormItem item) {
+	public @Nonnull FluentFormItem from(@SuppressWarnings("hiding") @Nonnull FormItem item) {
 		Integer i = item.getColspan();
 		if (i != null) {
 			colspan(i.intValue());
@@ -186,6 +187,8 @@ public class FluentFormItem {
 			throw new IllegalStateException(widget + " is not catered for");
 		}
 
+		item.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -196,7 +199,7 @@ public class FluentFormItem {
 	 *            number of columns this item spans
 	 * @return this builder
 	 */
-	public FluentFormItem colspan(int colspan) {
+	public @Nonnull FluentFormItem colspan(int colspan) {
 		item.setColspan(Integer.valueOf(colspan));
 		return this;
 	}
@@ -208,7 +211,7 @@ public class FluentFormItem {
 	 *            number of rows this item spans
 	 * @return this builder
 	 */
-	public FluentFormItem rowspan(int rowspan) {
+	public @Nonnull FluentFormItem rowspan(int rowspan) {
 		item.setRowspan(Integer.valueOf(rowspan));
 		return this;
 	}
@@ -220,7 +223,7 @@ public class FluentFormItem {
 	 *            item horizontal alignment
 	 * @return this builder
 	 */
-	public FluentFormItem horizontalAlignment(HorizontalAlignment horizontalAlignment) {
+	public @Nonnull FluentFormItem horizontalAlignment(@Nullable HorizontalAlignment horizontalAlignment) {
 		item.setHorizontalAlignment(horizontalAlignment);
 		return this;
 	}
@@ -232,7 +235,7 @@ public class FluentFormItem {
 	 *            label text
 	 * @return this builder
 	 */
-	public FluentFormItem label(String label) {
+	public @Nonnull FluentFormItem label(@Nullable String label) {
 		item.setLabel(label);
 		return this;
 	}
@@ -243,7 +246,7 @@ public class FluentFormItem {
 	 * @param escapeLabel {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentFormItem escapeLabel(boolean escapeLabel) {
+	public @Nonnull FluentFormItem escapeLabel(boolean escapeLabel) {
 		return escapeLabel(escapeLabel ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -253,7 +256,7 @@ public class FluentFormItem {
 	 * @param escapeLabel {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentFormItem escapeLabel(Boolean escapeLabel) {
+	public @Nonnull FluentFormItem escapeLabel(@Nullable Boolean escapeLabel) {
 		item.setEscapeLabel(escapeLabel);
 		return this;
 	}
@@ -265,7 +268,7 @@ public class FluentFormItem {
 	 *            {@code true} to show the label
 	 * @return this builder
 	 */
-	public FluentFormItem showLabel(boolean showLabel) {
+	public @Nonnull FluentFormItem showLabel(boolean showLabel) {
 		item.setShowLabel(showLabel ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -277,7 +280,7 @@ public class FluentFormItem {
 	 *            label horizontal alignment
 	 * @return this builder
 	 */
-	public FluentFormItem labelHorizontalAlignment(HorizontalAlignment labelHorizontalAlignment) {
+	public @Nonnull FluentFormItem labelHorizontalAlignment(@Nullable HorizontalAlignment labelHorizontalAlignment) {
 		item.setLabelHorizontalAlignment(labelHorizontalAlignment);
 		return this;
 	}
@@ -289,7 +292,7 @@ public class FluentFormItem {
 	 *            {@code true} to show help
 	 * @return this builder
 	 */
-	public FluentFormItem showHelp(boolean showHelp) {
+	public @Nonnull FluentFormItem showHelp(boolean showHelp) {
 		item.setShowHelp(showHelp ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -301,7 +304,7 @@ public class FluentFormItem {
 	 *            help text
 	 * @return this builder
 	 */
-	public FluentFormItem help(String help) {
+	public @Nonnull FluentFormItem help(@Nullable String help) {
 		item.setHelp(help);
 		return this;
 	}
@@ -312,7 +315,7 @@ public class FluentFormItem {
 	 * @param escapeHelp {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentFormItem escapeHelp(boolean escapeHelp) {
+	public @Nonnull FluentFormItem escapeHelp(boolean escapeHelp) {
 		return escapeHelp(escapeHelp ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -322,7 +325,7 @@ public class FluentFormItem {
 	 * @param escapeHelp {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentFormItem escapeHelp(Boolean escapeHelp) {
+	public @Nonnull FluentFormItem escapeHelp(@Nullable Boolean escapeHelp) {
 		item.setEscapeHelp(escapeHelp);
 		return this;
 	}
@@ -334,7 +337,7 @@ public class FluentFormItem {
 	 *            {@code true} if value is required
 	 * @return this builder
 	 */
-	public FluentFormItem required(boolean required) {
+	public @Nonnull FluentFormItem required(boolean required) {
 		item.setRequired(required ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -345,7 +348,7 @@ public class FluentFormItem {
 	 * @param requiredMessage required-message override
 	 * @return this builder
 	 */
-	public FluentFormItem requiredMessage(String requiredMessage) {
+	public @Nonnull FluentFormItem requiredMessage(@Nullable String requiredMessage) {
 		item.setRequiredMessage(requiredMessage);
 		return this;
 	}
@@ -356,7 +359,7 @@ public class FluentFormItem {
 	 * @param escapeRequiredMessage {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentFormItem escapeRequiredMessage(boolean escapeRequiredMessage) {
+	public @Nonnull FluentFormItem escapeRequiredMessage(boolean escapeRequiredMessage) {
 		return escapeRequiredMessage(escapeRequiredMessage ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -366,7 +369,7 @@ public class FluentFormItem {
 	 * @param escapeRequiredMessage {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentFormItem escapeRequiredMessage(Boolean escapeRequiredMessage) {
+	public @Nonnull FluentFormItem escapeRequiredMessage(@Nullable Boolean escapeRequiredMessage) {
 		item.setEscapeRequiredMessage(escapeRequiredMessage);
 		return this;
 	}
@@ -378,7 +381,7 @@ public class FluentFormItem {
 	 *            default widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem defaultWidget(FluentDefaultWidget widget) {
+	public @Nonnull FluentFormItem defaultWidget(@Nonnull FluentDefaultWidget widget) {
 		item.setWidget(widget.get());
 		return this;
 	}
@@ -401,7 +404,7 @@ public class FluentFormItem {
 	 *            content-signature widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem contentSignature(FluentContentSignature signature) {
+	public @Nonnull FluentFormItem contentSignature(@Nonnull FluentContentSignature signature) {
 		item.setWidget(signature.get());
 		return this;
 	}
@@ -413,7 +416,7 @@ public class FluentFormItem {
 	 *            button widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem button(FluentButton button) {
+	public @Nonnull FluentFormItem button(@Nonnull FluentButton button) {
 		item.setWidget(button.get());
 		return this;
 	}
@@ -425,7 +428,7 @@ public class FluentFormItem {
 	 *            zoom-in widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem zoomIn(FluentZoomIn zoomIn) {
+	public @Nonnull FluentFormItem zoomIn(@Nonnull FluentZoomIn zoomIn) {
 		item.setWidget(zoomIn.get());
 		return this;
 	}
@@ -437,7 +440,7 @@ public class FluentFormItem {
 	 *            dialog button widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem dialogButton(FluentDialogButton button) {
+	public @Nonnull FluentFormItem dialogButton(@Nonnull FluentDialogButton button) {
 		item.setWidget(button.get());
 		return this;
 	}
@@ -449,7 +452,7 @@ public class FluentFormItem {
 	 *            geometry widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem geometry(FluentGeometry geometry) {
+	public @Nonnull FluentFormItem geometry(@Nonnull FluentGeometry geometry) {
 		item.setWidget(geometry.get());
 		return this;
 	}
@@ -461,7 +464,7 @@ public class FluentFormItem {
 	 *            geometry-map widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem geometryMap(FluentGeometryMap map) {
+	public @Nonnull FluentFormItem geometryMap(@Nonnull FluentGeometryMap map) {
 		item.setWidget(map.get());
 		return this;
 	}
@@ -473,7 +476,7 @@ public class FluentFormItem {
 	 *            HTML widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem html(FluentHTML html) {
+	public @Nonnull FluentFormItem html(@Nonnull FluentHTML html) {
 		item.setWidget(html.get());
 		return this;
 	}
@@ -485,7 +488,7 @@ public class FluentFormItem {
 	 *            label widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem label(FluentLabel label) {
+	public @Nonnull FluentFormItem label(@Nonnull FluentLabel label) {
 		item.setWidget(label.get());
 		return this;
 	}
@@ -497,7 +500,7 @@ public class FluentFormItem {
 	 *            blurb widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem blurb(FluentBlurb blurb) {
+	public @Nonnull FluentFormItem blurb(@Nonnull FluentBlurb blurb) {
 		item.setWidget(blurb.get());
 		return this;
 	}
@@ -509,7 +512,7 @@ public class FluentFormItem {
 	 *            progress-bar widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem progressBar(FluentProgressBar bar) {
+	public @Nonnull FluentFormItem progressBar(@Nonnull FluentProgressBar bar) {
 		item.setWidget(bar.get());
 		return this;
 	}
@@ -521,7 +524,7 @@ public class FluentFormItem {
 	 *            check-box widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem checkBox(FluentCheckBox check) {
+	public @Nonnull FluentFormItem checkBox(@Nonnull FluentCheckBox check) {
 		item.setWidget(check.get());
 		return this;
 	}
@@ -533,7 +536,7 @@ public class FluentFormItem {
 	 *            colour-picker widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem colourPicker(FluentColourPicker colour) {
+	public @Nonnull FluentFormItem colourPicker(@Nonnull FluentColourPicker colour) {
 		item.setWidget(colour.get());
 		return this;
 	}
@@ -545,7 +548,7 @@ public class FluentFormItem {
 	 *            combo widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem combo(FluentCombo combo) {
+	public @Nonnull FluentFormItem combo(@Nonnull FluentCombo combo) {
 		item.setWidget(combo.get());
 		return this;
 	}
@@ -557,7 +560,7 @@ public class FluentFormItem {
 	 *            radio widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem radio(FluentRadio radio) {
+	public @Nonnull FluentFormItem radio(@Nonnull FluentRadio radio) {
 		item.setWidget(radio.get());
 		return this;
 	}
@@ -569,7 +572,7 @@ public class FluentFormItem {
 	 *            lookup-description widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem lookupDescription(FluentLookupDescription lookup) {
+	public @Nonnull FluentFormItem lookupDescription(@Nonnull FluentLookupDescription lookup) {
 		item.setWidget(lookup.get());
 		return this;
 	}
@@ -581,7 +584,7 @@ public class FluentFormItem {
 	 *            password widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem password(FluentPassword password) {
+	public @Nonnull FluentFormItem password(@Nonnull FluentPassword password) {
 		item.setWidget(password.get());
 		return this;
 	}
@@ -593,7 +596,7 @@ public class FluentFormItem {
 	 *            rich-text widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem richText(FluentRichText text) {
+	public @Nonnull FluentFormItem richText(@Nonnull FluentRichText text) {
 		item.setWidget(text.get());
 		return this;
 	}
@@ -605,7 +608,7 @@ public class FluentFormItem {
 	 *            slider widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem slider(FluentSlider slider) {
+	public @Nonnull FluentFormItem slider(@Nonnull FluentSlider slider) {
 		item.setWidget(slider.get());
 		return this;
 	}
@@ -617,7 +620,7 @@ public class FluentFormItem {
 	 *            spacer widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem spacer(FluentSpacer spacer) {
+	public @Nonnull FluentFormItem spacer(@Nonnull FluentSpacer spacer) {
 		item.setWidget(spacer.get());
 		return this;
 	}
@@ -629,7 +632,7 @@ public class FluentFormItem {
 	 *            spinner widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem spinner(FluentSpinner spinner) {
+	public @Nonnull FluentFormItem spinner(@Nonnull FluentSpinner spinner) {
 		item.setWidget(spinner.get());
 		return this;
 	}
@@ -641,7 +644,7 @@ public class FluentFormItem {
 	 *            static-image widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem staticImage(FluentStaticImage image) {
+	public @Nonnull FluentFormItem staticImage(@Nonnull FluentStaticImage image) {
 		item.setWidget(image.get());
 		return this;
 	}
@@ -653,7 +656,7 @@ public class FluentFormItem {
 	 *            link widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem link(FluentLink link) {
+	public @Nonnull FluentFormItem link(@Nonnull FluentLink link) {
 		item.setWidget(link.get());
 		return this;
 	}
@@ -665,7 +668,7 @@ public class FluentFormItem {
 	 *            text-area widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem textArea(FluentTextArea text) {
+	public @Nonnull FluentFormItem textArea(@Nonnull FluentTextArea text) {
 		item.setWidget(text.get());
 		return this;
 	}
@@ -677,7 +680,7 @@ public class FluentFormItem {
 	 *            text-field widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem textField(FluentTextField text) {
+	public @Nonnull FluentFormItem textField(@Nonnull FluentTextField text) {
 		item.setWidget(text.get());
 		return this;
 	}
@@ -689,17 +692,30 @@ public class FluentFormItem {
 	 *            inject widget builder
 	 * @return this builder
 	 */
-	public FluentFormItem inject(FluentInject inject) {
+	public @Nonnull FluentFormItem inject(@Nonnull FluentInject inject) {
 		item.setWidget(inject.get());
 		return this;
 	}
 	
 	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentFormItem putProperty(@Nonnull String k, @Nonnull String v) {
+		item.getProperties().put(k, v);
+		return this;
+	}
+
+	/**
 	 * Returns the backing metadata instance.
 	 *
 	 * @return the mutable form-item metadata
 	 */
-	public FormItem get() {
+	public @Nonnull FormItem get() {
 		return item;
 	}
 }

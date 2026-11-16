@@ -11,6 +11,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.Role;
 import org.skyve.util.ExpressionEvaluator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves {@code {role:module.role}} expressions to booleans based on user membership.
  */
@@ -32,7 +35,7 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 * @return {@link Boolean#TRUE} when the user is in the role, otherwise {@link Boolean#FALSE}
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		int dotIndex = expression.indexOf('.');
 		return CORE.getUser().isInRole(expression.substring(0, dotIndex),
 										expression.substring(dotIndex + 1)) ?
@@ -48,7 +51,7 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the display representation of the membership boolean
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
@@ -63,11 +66,11 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 * @return a validation error message when malformed, otherwise {@code null}
 	 */
 	@Override
-	public String validateWithoutPrefixOrSuffix(String expression,
-													Class<?> returnType,
-													Customer customer,
-													Module module,
-													Document document) {
+	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		if (expression.indexOf('.') <= 0) {
 			return "Role " + expression + " needs to be in the format <module>.<role>";
 		}
@@ -84,10 +87,10 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 * @return matching role names in {@code module.role} format
 	 */
 	@Override
-	public List<String> completeWithoutPrefixOrSuffix(String fragment,
-														Customer customer,
-														Module module,
-														Document document) {
+	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 		
 		for (Module m : customer.getModules()) {
@@ -111,7 +114,7 @@ public class RoleExpressionEvaluator extends ExpressionEvaluator {
 	 * @param binding ignored for role expressions
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
 		// nothing to do here as the binding has nothing to do with role expressions
 	}
 }

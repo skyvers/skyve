@@ -63,24 +63,24 @@ class ProgressBarTest {
 	}
 
 	@Test
-	void invisibleConditionNameRoundTrip() {
+	void invisibleConditionRoundTrip() {
 		ProgressBar pb = new ProgressBar();
-		pb.setInvisibleConditionName("hidden");
-		assertEquals("hidden", pb.getInvisibleConditionName());
+		pb.setXmlInvisibleCondition("hidden");
+		assertEquals("hidden", pb.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameNegated() {
+	void visibleConditionNegated() {
 		ProgressBar pb = new ProgressBar();
-		pb.setVisibleConditionName("visible");
-		assertEquals("notVisible", pb.getInvisibleConditionName());
+		pb.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", pb.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameBlankBecomesNullInvisible() {
+	void visibleConditionBlankBecomesNullInvisible() {
 		ProgressBar pb = new ProgressBar();
-		pb.setVisibleConditionName("  ");
-		assertNull(pb.getInvisibleConditionName());
+		pb.setXmlVisibleCondition("  ");
+		assertNull(pb.getInvisibleCondition());
 	}
 
 	@Test
@@ -92,7 +92,7 @@ class ProgressBarTest {
 	}
 
 	@Test
-	void visibleConditionNameJaxbGetterReturnsNull() {
-		assertNull(new ProgressBar().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new ProgressBar().getXmlVisibleCondition());
 	}
 }

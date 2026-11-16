@@ -38,6 +38,9 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.Role;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates static HTML documentation from Skyve metadata.
  *
@@ -79,7 +82,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
-	public static void renderCustomer(Customer customer, PrintStream out) throws Exception {
+	public static void renderCustomer(@Nonnull Customer customer, @Nonnull PrintStream out) throws Exception {
 
 		// Create title page with index of modules
 
@@ -103,7 +106,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void renderModule(Customer customer, Module module, PrintStream out) {
+	public static void renderModule(@Nonnull Customer customer, @Nonnull Module module, @Nonnull PrintStream out) {
 
 		// Create title page
 		String localisedTitle = module.getLocalisedTitle();
@@ -247,7 +250,7 @@ public class DoctorUtil {
 	 * @throws Exception if metadata access or rendering fails
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public static void renderDocument(Customer customer, Module module, Document document, PrintStream out) {
+	public static void renderDocument(@Nonnull Customer customer, @Nonnull Module module, @Nonnull Document document, @Nonnull PrintStream out) {
 
 		DocSection title = new DocSection(createIndentifier(customer.getName(), module.getName(), document.getName(), "documentTitle"));
 		title.setSectionType(SectionType.SubChapter);
@@ -326,7 +329,7 @@ public class DoctorUtil {
 			table.getHtmlContent().add(document.getPluralAlias() + " have the following references to other documents:");
 			table.setHeaderValues("Reference", "Type", "Document", "Required", "Description", "Documentation", "Usage", "Deprecated");
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				UsageType usage = reference.getUsage();
 				table.setRowValues(reference.getLocalisedDisplayName(), 
 									reference.getAttributeType().toString(), 
@@ -415,7 +418,7 @@ public class DoctorUtil {
 	 * @throws Exception if metadata access or rendering fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void renderQuery(Customer customer, Module module, QueryDefinition q, PrintStream out) {
+	public static void renderQuery(@Nonnull Customer customer, @Nonnull Module module, @Nonnull QueryDefinition q, @Nonnull PrintStream out) {
 		// Documentation for Query
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), q.getName() + "Overview"));
 		section.setSectionType(SectionType.SubChapter);
@@ -473,7 +476,7 @@ public class DoctorUtil {
 	 * @param out destination stream receiving HTML fragments
 	 * @throws Exception if metadata access or rendering fails
 	 */
-	public static void renderRole(Customer customer, Module module, Role r, PrintStream out) {
+	public static void renderRole(@Nonnull Customer customer, @Nonnull Module module, @Nonnull Role r, @Nonnull PrintStream out) {
 		// Documentation for Role
 		DocSection section = new DocSection(createIndentifier(customer.getName(), module.getName(), r.getName() + "Overview"));
 		section.setSectionTitle(r.getName());
@@ -540,7 +543,7 @@ public class DoctorUtil {
 	 * @param s identifier fragments
 	 * @return normalised identifier string
 	 */
-	public static String createIndentifier(String... s) {
+	public static @Nonnull String createIndentifier(@Nonnull String... s) {
 
 		StringBuilder id = new StringBuilder();
 
@@ -567,7 +570,7 @@ public class DoctorUtil {
 	 * @param f attribute/binding name
 	 * @return matching attribute, or {@code null} when none exists
 	 */
-	private static Attribute getAttributeFromFieldName(Document d, String f) {
+	private static @Nullable Attribute getAttributeFromFieldName(@Nonnull Document d, @Nonnull String f) {
 		// TODO - do this properly for all bindings
 		Attribute result = null;
 		System.out.println("getAttributeFromFieldName " + d.getName() + f);
@@ -587,7 +590,7 @@ public class DoctorUtil {
 	 * @param b permission flag
 	 * @return centered {@code X} marker when {@code true}; otherwise {@code null}
 	 */
-	private static String getCheckHTML(boolean b) {
+	private static @Nullable String getCheckHTML(boolean b) {
 		String result = null;
 		if (b) {
 			result = "<div style=\"text-align:center;\">X</div>"; // TODO
@@ -602,7 +605,7 @@ public class DoctorUtil {
 	 * @param s source value
 	 * @return source with first character uppercased
 	 */
-	private static String titleCase(String s) {
+	private static @Nonnull String titleCase(@Nonnull String s) {
 		if (s.length() > 1) {
 			return s.substring(0, 1).toUpperCase() + s.substring(1);
 		}
@@ -618,10 +621,10 @@ public class DoctorUtil {
 	 * @param args command-line arguments
 	 * @throws Exception if repository access or file generation fails
 	 */
-	public static void main(String[] args)
+	public static void main(@Nonnull String[] args)
 	throws Exception {
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		
 		Customer customer = repository.getCustomer(args[1]);
 		if (customer == null) {

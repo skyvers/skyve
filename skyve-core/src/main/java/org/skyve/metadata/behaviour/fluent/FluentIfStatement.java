@@ -2,6 +2,8 @@ package org.skyve.metadata.behaviour.fluent;
 
 import org.skyve.impl.metadata.behaviour.IfStatement;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds a behaviour {@code if} statement with then/else branches.
  */
@@ -20,7 +22,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 *
 	 * @param ifStatement backing if statement metadata
 	 */
-	public FluentIfStatement(IfStatement ifStatement) {
+	public FluentIfStatement(@Nonnull IfStatement ifStatement) {
 		this.ifStatement = ifStatement;
 	}
 
@@ -30,7 +32,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param ifStatement source metadata
 	 * @return this builder
 	 */
-	public FluentIfStatement from(@SuppressWarnings("hiding") IfStatement ifStatement) {
+	public @Nonnull FluentIfStatement from(@SuppressWarnings("hiding") @Nonnull IfStatement ifStatement) {
 		super.fromBase(ifStatement);
 		condition(ifStatement.getCondition());
 		ifStatement.getThenStatements().forEach(s -> addThenStatement(FluentStatement.from(s)));
@@ -45,7 +47,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param condition Skyve condition expression
 	 * @return this builder
 	 */
-	public FluentIfStatement condition(String condition) {
+	public @Nonnull FluentIfStatement condition(@Nonnull String condition) {
 		ifStatement.setCondition(condition);
 		return this;
 	}
@@ -56,7 +58,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param statement statement wrapper to append
 	 * @return this builder
 	 */
-	public FluentIfStatement addThenStatement(FluentStatement<?> statement) {
+	public @Nonnull FluentIfStatement addThenStatement(@Nonnull FluentStatement<?> statement) {
 		ifStatement.getThenStatements().add(statement.get());
 		return this;
 	}
@@ -68,7 +70,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param statement statement wrapper to insert
 	 * @return this builder
 	 */
-	public FluentIfStatement addThenStatement(int index, FluentStatement<?> statement) {
+	public @Nonnull FluentIfStatement addThenStatement(int index, @Nonnull FluentStatement<?> statement) {
 		ifStatement.getThenStatements().add(index, statement.get());
 		return this;
 	}
@@ -78,7 +80,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 *
 	 * @return this builder
 	 */
-	public FluentIfStatement clearThenStatements() {
+	public @Nonnull FluentIfStatement clearThenStatements() {
 		ifStatement.getThenStatements().clear();
 		return this;
 	}
@@ -89,7 +91,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param statement statement wrapper to append
 	 * @return this builder
 	 */
-	public FluentIfStatement addElseStatement(FluentStatement<?> statement) {
+	public @Nonnull FluentIfStatement addElseStatement(@Nonnull FluentStatement<?> statement) {
 		ifStatement.getElseStatements().add(statement.get());
 		return this;
 	}
@@ -101,7 +103,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @param statement statement wrapper to insert
 	 * @return this builder
 	 */
-	public FluentIfStatement addElseStatement(int index, FluentStatement<?> statement) {
+	public @Nonnull FluentIfStatement addElseStatement(int index, @Nonnull FluentStatement<?> statement) {
 		ifStatement.getElseStatements().add(index, statement.get());
 		return this;
 	}
@@ -111,7 +113,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 *
 	 * @return this builder
 	 */
-	public FluentIfStatement clearElseStatements() {
+	public @Nonnull FluentIfStatement clearElseStatements() {
 		ifStatement.getElseStatements().clear();
 		return this;
 	}
@@ -122,7 +124,7 @@ public class FluentIfStatement extends FluentStatement<FluentIfStatement> {
 	 * @return backing if statement metadata
 	 */
 	@Override
-	public IfStatement get() {
+	public @Nonnull IfStatement get() {
 		return ifStatement;
 	}
 }

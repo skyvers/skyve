@@ -2,6 +2,7 @@ package org.skyve.metadata.model;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
@@ -64,9 +65,10 @@ class ModelDefaultMethodsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void getLocalisedPluralAliasWithNullReturnsNull() {
+	void getLocalisedPluralAliasWithNullThrows() {
+		// the plural alias is required metadata; the localised plural alias is non-null
 		MinimalModel model = new MinimalModel(null, null, null, null);
-		assertNull(model.getLocalisedPluralAlias());
+		assertThrows(NullPointerException.class, model::getLocalisedPluralAlias);
 	}
 
 	@Test
@@ -79,9 +81,10 @@ class ModelDefaultMethodsTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void getLocalisedSingularAliasWithNullReturnsNull() {
+	void getLocalisedSingularAliasWithNullThrows() {
+		// the singular alias is required metadata; the localised singular alias is non-null
 		MinimalModel model = new MinimalModel(null, null, null, null);
-		assertNull(model.getLocalisedSingularAlias());
+		assertThrows(NullPointerException.class, model::getLocalisedSingularAlias);
 	}
 
 	@Test

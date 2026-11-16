@@ -25,6 +25,9 @@ import org.skyve.metadata.module.menu.MenuRenderer;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /*
  * TODO convert this away from string concatenation so
  * we can prune emtpy items etc.
@@ -43,7 +46,7 @@ public class FlutterRouting {
 	private int indentationLevel = 0;
 	private Customer customer;
 	
-	public FlutterRouting(FlutterGenerator generator) {
+	public FlutterRouting(@Nonnull FlutterGenerator generator) {
 		this.generator = generator;
 		this.customer = generator.getConfig().getCustomer();
 		menu.append(" \n");
@@ -89,7 +92,7 @@ public class FlutterRouting {
 		generator.refreshFile("lib/main.dart", "lib/main.dart", substitutions);
 	}
 	
-    private void viewImportsAndRoutes(BiPredicate<Module, Document> whiteListPredicate) {
+    private void viewImportsAndRoutes(@Nonnull BiPredicate<Module, Document> whiteListPredicate) {
         LOGGER.debug("Rendering view items");
 
         for (Module module : customer.getModules()) {
@@ -116,7 +119,7 @@ public class FlutterRouting {
     }
 
     @SuppressWarnings("java:S3776") // Complexity OK
-    private void menuImportsAndRoutes(BiPredicate<Module, Document> whiteListPredicate) {
+    private void menuImportsAndRoutes(@Nonnull BiPredicate<Module, Document> whiteListPredicate) {
         LOGGER.debug("Rendering menu items");
 
         final GeneratorConfig config = generator.getConfig();
@@ -124,13 +127,13 @@ public class FlutterRouting {
 
         new MenuRenderer(uxui, null) {
 			@Override
-			public void renderCalendarItem(CalendarItem item,
-											Module menuModule,
-											Module itemModule,
-											Document itemDocument,
-											String itemQueryName,
-											String icon16,
-											String iconStyleClass) {
+			public void renderCalendarItem(@Nonnull CalendarItem item,
+											@Nonnull Module menuModule,
+											@Nonnull Module itemModule,
+											@Nonnull Document itemDocument,
+											@Nullable String itemQueryName,
+											@Nullable String icon16,
+											@Nullable String iconStyleClass) {
 
                 if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
@@ -143,33 +146,33 @@ public class FlutterRouting {
 			}
 			
 			@Override
-			public void renderMenuGroup(MenuGroup menuGroup, Module menuModule) {
+			public void renderMenuGroup(@Nonnull MenuGroup menuGroup, @Nonnull Module menuModule) {
 				openMenuGroup(menuGroup.getLocalisedName());
 			}
 
 			@Override
-			public void renderedMenuGroup(MenuGroup menuGroup, Module menuModule) {
+			public void renderedMenuGroup(@Nonnull MenuGroup menuGroup, @Nonnull Module menuModule) {
 				closeMenuGroup();
 			}
 
 			@Override
-			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu skyveMenu, Module menuModule, boolean open) {
+			public void renderModuleMenu(@Nonnull org.skyve.metadata.module.menu.Menu skyveMenu, @Nonnull Module menuModule, boolean open) {
 			    
 				openMenuModule(menuModule.getName(), menuModule.getLocalisedTitle());
 			}
 
 			@Override
-			public void renderedModuleMenu(org.skyve.metadata.module.menu.Menu skyveMenu, Module menuModule, boolean open) {
+			public void renderedModuleMenu(@Nonnull org.skyve.metadata.module.menu.Menu skyveMenu, @Nonnull Module menuModule, boolean open) {
 				closeMenuModule();
 			}
 
 			@Override
-			public void renderEditItem(EditItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String icon16,
-										String iconStyleClass) {
+			public void renderEditItem(@Nonnull EditItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 			    
                 if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
@@ -183,13 +186,13 @@ public class FlutterRouting {
 			}
 
 			@Override
-			public void renderListItem(ListItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderListItem(@Nonnull ListItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 			    
                 if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
@@ -219,13 +222,13 @@ public class FlutterRouting {
 			}
 			
 			@Override
-			public void renderMapItem(MapItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderMapItem(@Nonnull MapItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 			    
                 if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
@@ -238,13 +241,13 @@ public class FlutterRouting {
 			}
 			
 			@Override
-			public void renderTreeItem(TreeItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderTreeItem(@Nonnull TreeItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 			    
                 if (!whiteListPredicate.test(itemModule, itemDocument)) {
                     return;
@@ -258,7 +261,7 @@ public class FlutterRouting {
 		}.render(customer);
 	}
 	
-	private void processItem(FlutterView view, MenuItem item) {
+	private void processItem(@Nonnull FlutterView view, @Nullable MenuItem item) {
 		final String className = view.className;
 
 		// Add the import
@@ -290,7 +293,7 @@ public class FlutterRouting {
 		generator.views.add(view);
 	}
 
-    private void openMenuModule(String moduleName, String moduleTitle) {
+    private void openMenuModule(@Nullable String moduleName, @Nonnull String moduleTitle) {
         indent();
 
         menu.append("SkyveModuleMenuModel(");
@@ -305,7 +308,7 @@ public class FlutterRouting {
 		closeCollapsibleMenu();
 	}
 
-	private void openMenuGroup(String menuGroupName) {
+	private void openMenuGroup(@Nullable String menuGroupName) {
 		indent();
 		
 		menu.append("SkyveMenuGroupModel(title: '").append(menuGroupName).append("', items: [\n");

@@ -23,6 +23,7 @@ import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.cache.Caching;
 import org.skyve.content.ContentManager;
 import org.skyve.dataaccess.sql.SQLDataAccess;
+import org.skyve.dialog.Dialogs;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.PersistentBean;
@@ -41,7 +42,9 @@ import org.skyve.impl.bizport.StandardLoader;
 import org.skyve.impl.cache.DefaultCaching;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.dataaccess.sql.SQLDataAccessImpl;
-import org.skyve.impl.dataaccess.sql.StreamableConnection;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
+import org.skyve.impl.dataaccess.sql.TuneableConnection;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.generate.charts.JFreeChartGenerator;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -49,7 +52,6 @@ import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
-import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.report.DefaultReporting;
 import org.skyve.impl.sms.SMSServiceStaticSingleton;
 import org.skyve.impl.tag.DefaultTagManager;
@@ -75,9 +77,9 @@ import org.skyve.persistence.Persistence;
 import org.skyve.report.Reporting;
 import org.skyve.tag.TagManager;
 import org.skyve.util.GeoIPService;
-import org.skyve.util.OWASP;
 import org.skyve.util.Mail;
 import org.skyve.util.MailService;
+import org.skyve.util.OWASP;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
 import org.skyve.util.SMSService;
@@ -198,6 +200,19 @@ public class EXT {
 	}
 
 	/**
+	 * Get the service that asks the user questions from server code.
+	 *
+	 * <p>It can ask only during an HTTP request on a path that can rerun its request; see
+	 * {@link Dialogs#ask(org.skyve.dialog.Question)} for those paths and the limits that apply.
+	 *
+	 * @return The installed dialogs service; never {@code null}.
+	 * @since 10.0
+	 */
+	public static @Nonnull Dialogs getDialogs() {
+		return DialogsStaticSingleton.get();
+	}
+
+	/**
 	 * Get an SMS (text message) service
 	 * @return An SMS service
 	 */
@@ -227,7 +242,7 @@ public class EXT {
 	 *            will automatically throw <code>e</code> if any errors are
 	 *            added to it.
 	 */
-	public static @Nonnull BizPortWorkbook newBizPortWorkbook(Customer customer, Workbook workbook, UploadException e) {
+	public static @Nonnull BizPortWorkbook newBizPortWorkbook(@Nonnull Customer customer, @Nonnull Workbook workbook, @Nonnull UploadException e) {
 		return new POIWorkbook(customer, workbook, e);
 	}
 
@@ -239,7 +254,7 @@ public class EXT {
 	 * @param title
 	 *            The title of the sheet, used to name the excel sheet tab.
 	 */
-	public static @Nonnull BizPortSheet newBizPortSheet(String title) {
+	public static @Nonnull BizPortSheet newBizPortSheet(@Nonnull String title) {
 		return new POISheet(title);
 	}
 
@@ -515,13 +530,10 @@ public class EXT {
 	 * {@link org.skyve.persistence.SQL}.
 	 * 
 	 * @param dataStore	The data store definition.
-	 * @param streaming	Whether the connection is for streaming use.
-	 *					Some JDBC drivers need special handling for streaming use.
-	 *					Ensure a Connection wrapper is returned where statements and prepared statements are created with FORWARD_ONLY and CONCUR_READ_ONLY and setFetchSize() is set appropriately.
 	 * @return a database connection from the container supplied pool.
 	 */
 	@SuppressWarnings("resource")
-	public static @Nonnull Connection getDataStoreConnection(@Nonnull DataStore dataStore, boolean streaming) {
+	public static @Nonnull Connection getDataStoreConnection(@Nonnull DataStore dataStore) {
 		Connection result = null;
 		try {
 			String jndiDataSourceName = dataStore.getJndiDataSourceName();
@@ -547,6 +559,7 @@ public class EXT {
 			}
 
 			result.setAutoCommit(false);
+			customiseDataStoreConnection(result, dataStore);
 		}
 		catch (SQLException e) {
 			throw new DomainException("Could not get a database connection", e);
@@ -558,13 +571,45 @@ public class EXT {
 			throw new DomainException("Could not instantiate the JDBC driver", e);
 		}
 
-		if (streaming) {
-			result = new StreamableConnection(result, AbstractHibernatePersistence.getDialect(dataStore.getDialectClassName()).getRDBMS());
-		}
-		
-		return result;
+		return new TuneableConnection(result);
 	}
 	
+	/**
+	 * Customises a data store connection for the user of the thread's persistence, or for no user when the
+	 * thread has none, with the {@code factories.connectionCustomiserClass} implementation if there is one.
+	 * A connection that cannot be customised is closed.
+	 *
+	 * @param connection	The connection just taken from the data store.
+	 * @param dataStore	The data store it belongs to.
+	 */
+	private static void customiseDataStoreConnection(@Nonnull Connection connection, @Nonnull DataStore dataStore) {
+		if (ConnectionCustomiserStaticSingleton.get() != null) {
+			User user = AbstractPersistence.isPresent() ? AbstractPersistence.get().getUser() : null;
+			try {
+				ConnectionCustomiserStaticSingleton.customise(connection, user, dataStore);
+			}
+			catch (RuntimeException e) {
+				closeQuietly(connection, e);
+				throw e;
+			}
+		}
+	}
+
+	/**
+	 * Closes a connection that is not to be handed out, recording a failure to close on the original failure.
+	 *
+	 * @param connection	The connection.
+	 * @param failure	The failure that stops the connection being handed out.
+	 */
+	private static void closeQuietly(@Nonnull Connection connection, @Nonnull Exception failure) {
+		try {
+			connection.close();
+		}
+		catch (SQLException e) {
+			failure.addSuppressed(e);
+		}
+	}
+
 	/**
 	 * Get a connection to the default data store.
 	 * Note that this is not a CDI provider as it is auto-closeable.
@@ -573,7 +618,7 @@ public class EXT {
 	 */
 	@SuppressWarnings("resource")
 	public static @Nonnull Connection getDataStoreConnection() {
-		return getDataStoreConnection(UtilImpl.DATA_STORE, true);
+		return getDataStoreConnection(UtilImpl.DATA_STORE);
 	}
 
 	/**
@@ -690,14 +735,11 @@ public class EXT {
 		q.getFilter().addEquals(AppConstants.USER_NAME_ATTRIBUTE_NAME, UtilImpl.BOOTSTRAP_USER);
 		PersistentBean user = q.beanResult();
 		if (user == null) {
-            LOGGER.info("CREATING BOOTSTRAP USER {}/{} ({})",
-                    UtilImpl.BOOTSTRAP_CUSTOMER,
-                    UtilImpl.BOOTSTRAP_USER,
-                    UtilImpl.BOOTSTRAP_EMAIL);
+            LOGGER.info("CREATING BOOTSTRAP USER {}/{} ({})", UtilImpl.BOOTSTRAP_CUSTOMER, UtilImpl.BOOTSTRAP_USER, UtilImpl.BOOTSTRAP_EMAIL);
 
 			// Create user
 			user = userDoc.newInstance(u);
-			u.setId(user.getBizId());
+			u.setId(user.getBizId()); // set the persistence super-user bizId
 			user.setBizUserId(u.getId());
 			BindUtil.set(user, AppConstants.USER_NAME_ATTRIBUTE_NAME, UtilImpl.BOOTSTRAP_USER);
 			BindUtil.set(user, AppConstants.PASSWORD_ATTRIBUTE_NAME, u.getPasswordHash());
@@ -730,9 +772,8 @@ public class EXT {
 			p.save(user);
 		}
 		else {
-            LOGGER.info("BOOTSTRAP USER {}/{} ALREADY EXISTS",
-                    UtilImpl.BOOTSTRAP_CUSTOMER,
-                    UtilImpl.BOOTSTRAP_USER);
+            LOGGER.info("BOOTSTRAP USER {}/{} ALREADY EXISTS", UtilImpl.BOOTSTRAP_CUSTOMER, UtilImpl.BOOTSTRAP_USER);
+			u.setId(user.getBizId()); // set the persistence super-user bizId
 		}
 	}
 

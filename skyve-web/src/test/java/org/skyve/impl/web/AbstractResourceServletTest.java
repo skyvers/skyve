@@ -1,5 +1,6 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -133,6 +135,8 @@ class AbstractResourceServletTest {
 		servlet.doGet(request, response);
 
 		verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+		// Not kept by the browser, so it is asked for again once it exists or the user signs in
+		verify(response).setHeader("Cache-Control", "no-store");
 	}
 
 	@Test
@@ -163,8 +167,39 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
+	void doGetReturns503WhenTheThumbnailCouldNotBeMadeInTime() {
+		TestServlet servlet = new TestServlet();
+		servlet.resource = TestResource.throwing(new Thumbnail.BusyException("Timed out waiting to make a thumbnail"));
+
+		HttpServletRequest request = request(Map.of(), null, null, false);
+		HttpServletResponse response = responseWithOutput();
+
+		servlet.doGet(request, response);
+
+		verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		verify(response).setHeader("Retry-After", "5");
+		verify(response).setHeader("Cache-Control", "no-store");
+	}
+
+	@Test
+	void doGetReturns500ForASocketTimeoutNot503() {
+		TestServlet servlet = new TestServlet();
+		// A SocketTimeoutException is an InterruptedIOException, but the server isn't busy making thumbnails
+		servlet.resource = TestResource.throwing(new SocketTimeoutException("Read timed out"));
+
+		HttpServletRequest request = request(Map.of(), null, null, false);
+		HttpServletResponse response = responseWithOutput();
+
+		servlet.doGet(request, response);
+
+		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		verify(response, never()).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+	}
+
+	@Test
 	void logResourceIOExceptionWarnsWithoutThrowableStackTrace() {
 		Logger logger = mock(Logger.class);
+		when(Boolean.valueOf(logger.isWarnEnabled())).thenReturn(Boolean.TRUE);
 		IOException failure = new IOException("Broken pipe");
 
 		AbstractResourceServlet.logResourceIOException(logger, failure);
@@ -176,7 +211,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetStreamsOriginalResourceWithoutLoadingBytes() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "video/mp4", "clip.mp4");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "video/mp4", "clip.mp4");
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 
@@ -196,7 +231,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetWritesPartialStreamResponseForValidRange() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 
@@ -217,7 +252,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetHonoursRangeWhenIfRangeDateMatchesResourceLastModified() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		resource.lastModified = 1_700_000_000_000L;
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
@@ -240,7 +275,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetIgnoresRangeWhenIfRangeDateIsStale() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		resource.lastModified = 1_700_000_000_000L;
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
@@ -263,7 +298,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetReturns416ForUnsatisfiableRangeWithoutOpeningStream() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 
@@ -283,7 +318,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetFallsBackToFullStreamForMalformedRange() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 
@@ -302,7 +337,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetIgnoresRangeWhenStreamableResourceDisablesRangeSupport() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		resource.rangeSupported = false;
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
@@ -324,7 +359,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetUsesBufferedPathWhenStreamableLengthIsUnknown() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "application/octet-stream", "data.bin");
 		resource.contentLength = -1L;
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
@@ -345,7 +380,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doHeadSetsStreamHeadersWithoutWritingBody() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "audio/mpeg", "clip.mp3");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "audio/mpeg", "clip.mp3");
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 
@@ -365,7 +400,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doHeadPerformsSecurityBeforeStreamHeaders() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "audio/mpeg", "clip.mp3");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "audio/mpeg", "clip.mp3");
 		servlet.resource = resource;
 		servlet.securityFailure = mock(SecurityException.class);
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
@@ -384,7 +419,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetPerformsSecurityBeforeOpeningStreamForRangeRequests() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "audio/mpeg", "clip.mp3");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "audio/mpeg", "clip.mp3");
 		servlet.resource = resource;
 		servlet.securityFailure = mock(SecurityException.class);
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
@@ -405,7 +440,7 @@ class AbstractResourceServletTest {
 	@Test
 	void doGetUsesBufferedPathWhenThumbnailDimensionsAreRequested() {
 		TestServlet servlet = new TestServlet();
-		TestStreamableResource resource = TestStreamableResource.with("abcdef".getBytes(StandardCharsets.UTF_8), "image/png", "image.png");
+		TestStreamableResource resource = TestStreamableResource.streamableWith("abcdef".getBytes(StandardCharsets.UTF_8), "image/png", "image.png");
 		servlet.resource = resource;
 		CapturingServletOutputStream out = new CapturingServletOutputStream();
 
@@ -580,6 +615,58 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
+	void parseRequestParamsCapsTheSizeAtTheMaximumDimension() throws Exception {
+		assertAll(() -> assertEquals("2048x2048", parsedImageSize("8192", "2048"), "both sides at or above the cap"),
+					() -> assertEquals("2048x2048", parsedImageSize("2048", "2048"), "exactly at the cap"),
+					() -> assertEquals("2048x2048", parsedImageSize("200", "4096"), "one side above the cap"),
+					() -> assertEquals("2048x2048", parsedImageSize(String.valueOf(Integer.MAX_VALUE), null), "no height requested"));
+
+		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 100;
+			assertEquals("100x100", parsedImageSize("400", "200"));
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
+		}
+	}
+
+	@Test
+	void parseRequestParamsMakesASquareOfTheLargerSideRoundedUpToAStep() throws Exception {
+		assertAll(() -> assertEquals("64x64", parsedImageSize("24", "24"), "a small fixed size"),
+					() -> assertEquals("64x64", parsedImageSize("64", "48"), "exactly a step"),
+					() -> assertEquals("512x512", parsedImageSize("257", "100"), "just over a step"),
+					() -> assertEquals("1024x1024", parsedImageSize("1000", "1000"), "a large square"),
+					() -> assertEquals("256x256", parsedImageSize("200", null), "width only"),
+					() -> assertEquals("256x256", parsedImageSize("0", "200"), "height only"),
+					() -> assertEquals("256x256", parsedImageSize("-1", "200"), "negative width"),
+					() -> assertEquals("0x0", parsedImageSize("0", "0"), "no size is the original"),
+					() -> assertEquals("0x0", parsedImageSize(null, null), "no parameters is the original"));
+
+		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 1000;
+			assertEquals("1000x1000", parsedImageSize("600", "600"), "the maximum is the last step");
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
+		}
+	}
+
+	private static String parsedImageSize(String width, String height) throws Exception {
+		clearThreadLocalResource();
+		TestServlet servlet = new TestServlet();
+		servlet.resource = TestResource.with("x".getBytes(StandardCharsets.UTF_8), "text/plain", "x.txt");
+		Map<String, String> parameters = new HashMap<>();
+		parameters.put("_w", width);
+		if (height != null) {
+			parameters.put("_h", height);
+		}
+		servlet.doGet(request(parameters, null, null, false), responseWithOutput());
+		return servlet.lastParams.imageWidth() + "x" + servlet.lastParams.imageHeight();
+	}
+
+	@Test
 	void abstractResourceUsesResolveValuesWhenNoThumbnailRequested() throws Exception {
 		SimpleAbstractResource resource = new SimpleAbstractResource();
 		resource.bytes = "abc".getBytes(StandardCharsets.UTF_8);
@@ -607,6 +694,18 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
+	void abstractResourceReturnsNullThumbnailDetailsWhenThumbnailTypeIsUnknown() throws Exception {
+		SimpleAbstractResource resource = new SimpleAbstractResource();
+		resource.thumbnail = thumbnailForFile("thumbnail-test", ".unknownsuffix");
+		resource.imageWidth = 100;
+		resource.imageHeight = 50;
+
+		assertNull(resource.thumbnail.getMimeType());
+		assertNull(resource.getContentType());
+		assertNull(resource.getFileName());
+	}
+
+	@Test
 	void abstractResourceReturnsNullThumbnailDetailsWhenLoadReturnsNull() throws Exception {
 		SimpleAbstractResource resource = new SimpleAbstractResource();
 		resource.imageWidth = 10;
@@ -615,6 +714,19 @@ class AbstractResourceServletTest {
 
 		assertNull(resource.getContentType());
 		assertNull(resource.getFileName());
+	}
+
+	@Test
+	void abstractResourceLoadsOnceWhenLoadReturnsNull() throws Exception {
+		SimpleAbstractResource resource = new SimpleAbstractResource();
+		resource.imageWidth = 10;
+		resource.imageHeight = 10;
+
+		// The servlet asks for each of these, so a slow load would otherwise run three times
+		assertNull(resource.getContentType());
+		assertNull(resource.getFileName());
+		assertNull(resource.getBytes());
+		assertEquals(1, resource.loadCalls);
 	}
 
 	private static Thumbnail thumbnailForFile(String prefix, String suffix) throws Exception {
@@ -783,7 +895,7 @@ class AbstractResourceServletTest {
 		private long contentLength;
 		private boolean rangeSupported = true;
 
-		static TestStreamableResource with(byte[] bytes, String contentType, String fileName) {
+		static TestStreamableResource streamableWith(byte[] bytes, String contentType, String fileName) {
 			TestStreamableResource result = new TestStreamableResource();
 			result.bytes = bytes;
 			result.contentType = contentType;

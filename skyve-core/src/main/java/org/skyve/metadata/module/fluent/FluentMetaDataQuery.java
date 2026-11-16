@@ -8,6 +8,9 @@ import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds metadata query definitions including projected and content columns.
  */
@@ -26,7 +29,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 *
 	 * @param query The metadata to mutate.
 	 */
-	public FluentMetaDataQuery(MetaDataQueryMetaData query) {
+	public FluentMetaDataQuery(@Nonnull MetaDataQueryMetaData query) {
 		this.query = query;
 	}
 	
@@ -36,7 +39,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param query The source metadata query definition.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery from(@SuppressWarnings("hiding") MetaDataQueryDefinition query) {
+	public @Nonnull FluentMetaDataQuery from(@SuppressWarnings("hiding") @Nonnull MetaDataQueryDefinition query) {
 		super.from(query);
 		documentName(query.getDocumentName());
 		polymorphic(Boolean.TRUE.equals(query.getPolymorphic()));
@@ -63,7 +66,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param documentName The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery documentName(String documentName) {
+	public @Nonnull FluentMetaDataQuery documentName(@Nonnull String documentName) {
 		query.setDocumentName(documentName);
 		return this;
 	}
@@ -74,7 +77,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param polymorphic {@code true} to include polymorphic types.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery polymorphic(boolean polymorphic) {
+	public @Nonnull FluentMetaDataQuery polymorphic(boolean polymorphic) {
 		query.setPolymorphic(polymorphic ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -85,7 +88,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param aggregate {@code true} when aggregate query semantics apply.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery aggregate(boolean aggregate) {
+	public @Nonnull FluentMetaDataQuery aggregate(boolean aggregate) {
 		query.setAggregate(aggregate ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -96,7 +99,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param from The FROM clause.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery from(String from) {
+	public @Nonnull FluentMetaDataQuery from(@Nullable String from) {
 		query.setFrom(from);
 		return this;
 	}
@@ -107,7 +110,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param filter The filter clause.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery filter(String filter) {
+	public @Nonnull FluentMetaDataQuery filter(@Nullable String filter) {
 		query.setFilter(filter);
 		return this;
 	}
@@ -118,7 +121,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param grouping The grouping clause.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery grouping(String grouping) {
+	public @Nonnull FluentMetaDataQuery grouping(@Nullable String grouping) {
 		query.setGrouping(grouping);
 		return this;
 	}
@@ -129,7 +132,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param ordering The ordering clause.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery ordering(String ordering) {
+	public @Nonnull FluentMetaDataQuery ordering(@Nullable String ordering) {
 		query.setOrdering(ordering);
 		return this;
 	}
@@ -140,7 +143,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param column The projected column wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery addProjectedColumn(FluentMetaDataQueryProjectedColumn column) {
+	public @Nonnull FluentMetaDataQuery addProjectedColumn(@Nonnull FluentMetaDataQueryProjectedColumn column) {
 		query.getColumns().add(column.get());
 		return this;
 	}
@@ -151,7 +154,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param name The projected column name.
 	 * @return A fluent wrapper for the matched column, or {@code null} when not found.
 	 */
-	public FluentMetaDataQueryProjectedColumn findProjectedColumnByName(String name) {
+	public @Nullable FluentMetaDataQueryProjectedColumn findProjectedColumnByName(@Nonnull String name) {
 		MetaDataQueryProjectedColumnMetaData result = (MetaDataQueryProjectedColumnMetaData) query.getColumns().stream().filter(c -> name.equals(c.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQueryProjectedColumn(result);
@@ -165,7 +168,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param binding The projected column binding.
 	 * @return A fluent wrapper for the matched column, or {@code null} when not found.
 	 */
-	public FluentMetaDataQueryProjectedColumn findProjectedColumnByBinding(String binding) {
+	public @Nullable FluentMetaDataQueryProjectedColumn findProjectedColumnByBinding(@Nonnull String binding) {
 		MetaDataQueryProjectedColumnMetaData result = (MetaDataQueryProjectedColumnMetaData) query.getColumns().stream().filter(c -> binding.equals(c.getBinding())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQueryProjectedColumn(result);
@@ -179,7 +182,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param displayName The projected column display name.
 	 * @return A fluent wrapper for the matched column, or {@code null} when not found.
 	 */
-	public FluentMetaDataQueryProjectedColumn findProjectedColumnByDisplayName(String displayName) {
+	public @Nullable FluentMetaDataQueryProjectedColumn findProjectedColumnByDisplayName(@Nonnull String displayName) {
 		MetaDataQueryProjectedColumnMetaData result = (MetaDataQueryProjectedColumnMetaData) query.getColumns().stream().filter(c -> displayName.equals(c.getDisplayName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQueryProjectedColumn(result);
@@ -193,7 +196,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param column The content column wrapper.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery addContentColumn(FluentMetaDataQueryContentColumn column) {
+	public @Nonnull FluentMetaDataQuery addContentColumn(@Nonnull FluentMetaDataQueryContentColumn column) {
 		query.getColumns().add(column.get());
 		return this;
 	}
@@ -204,7 +207,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param name The content column name.
 	 * @return A fluent wrapper for the matched column, or {@code null} when not found.
 	 */
-	public FluentMetaDataQueryContentColumn findContentColumnByName(String name) {
+	public @Nullable FluentMetaDataQueryContentColumn findContentColumnByName(@Nonnull String name) {
 		MetaDataQueryContentColumnMetaData result = (MetaDataQueryContentColumnMetaData) query.getColumns().stream().filter(c -> name.equals(c.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQueryContentColumn(result);
@@ -218,7 +221,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param binding The content column binding.
 	 * @return A fluent wrapper for the matched column, or {@code null} when not found.
 	 */
-	public FluentMetaDataQueryContentColumn findContentColumnByBinding(String binding) {
+	public @Nullable FluentMetaDataQueryContentColumn findContentColumnByBinding(@Nonnull String binding) {
 		MetaDataQueryContentColumnMetaData result = (MetaDataQueryContentColumnMetaData) query.getColumns().stream().filter(c -> binding.equals(c.getBinding())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQueryContentColumn(result);
@@ -232,7 +235,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param displayName The content column display name.
 	 * @return A fluent wrapper for the matched column, or {@code null} when not found.
 	 */
-	public FluentMetaDataQueryContentColumn findContentColumnByDisplayName(String displayName) {
+	public @Nullable FluentMetaDataQueryContentColumn findContentColumnByDisplayName(@Nonnull String displayName) {
 		MetaDataQueryContentColumnMetaData result = (MetaDataQueryContentColumnMetaData) query.getColumns().stream().filter(c -> displayName.equals(c.getDisplayName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentMetaDataQueryContentColumn(result);
@@ -246,7 +249,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param name The logical column name.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery removeColumnByName(String name) {
+	public @Nonnull FluentMetaDataQuery removeColumnByName(@Nonnull String name) {
 		query.getColumns().removeIf(c -> name.equals(c.getName()));
 		return this;
 	}
@@ -257,7 +260,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param binding The column binding.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery removeColumnByBinding(String binding) {
+	public @Nonnull FluentMetaDataQuery removeColumnByBinding(@Nonnull String binding) {
 		query.getColumns().removeIf(c -> binding.equals(c.getBinding()));
 		return this;
 	}
@@ -268,7 +271,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @param displayName The display name.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery removeColumnByDisplayName(String displayName) {
+	public @Nonnull FluentMetaDataQuery removeColumnByDisplayName(@Nonnull String displayName) {
 		query.getColumns().removeIf(c -> displayName.equals(c.getDisplayName()));
 		return this;
 	}
@@ -278,7 +281,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQuery clearColumns() {
+	public @Nonnull FluentMetaDataQuery clearColumns() {
 		query.getColumns().clear();
 		return this;
 	}
@@ -289,7 +292,7 @@ public class FluentMetaDataQuery extends FluentQueryDefinition<FluentMetaDataQue
 	 * @return The metadata query metadata instance.
 	 */
 	@Override
-	public MetaDataQueryMetaData get() {
+	public @Nonnull MetaDataQueryMetaData get() {
 		return query;
 	}
 }

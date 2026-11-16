@@ -6,6 +6,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Allows bean method calls from SQL type reports 
  * 
@@ -22,7 +25,7 @@ public class BeanForReport {
 	 * @param bizId The business identifier of the row being rendered.
 	 * @return The resolved bean, or {@code null} when no matching row exists.
 	 */
-	public static Bean getBean(String moduleName, String documentName, String bizId) {
+	public static @Nullable Bean getBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId) {
 		Persistence pers = CORE.getPersistence();
 		return pers.retrieve(moduleName, documentName, bizId);
 	}
@@ -32,7 +35,7 @@ public class BeanForReport {
 	 *
 	 * @return The current persistence user.
 	 */
-	public static User getUser() {
+	public static @Nonnull User getUser() {
 		return CORE.getPersistence().getUser();
 	}
 
@@ -45,7 +48,7 @@ public class BeanForReport {
 	 * @param message The message pattern containing Skyve bindings.
 	 * @return The formatted message text.
 	 */
-	public static String getMessage(String moduleName, String documentName, String bizId, String message) {
+	public static @Nonnull String getMessage(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId, @Nonnull String message) {
 		Bean bean = getBean(moduleName, documentName, bizId);
 
 		return getMessage(bean, message);
@@ -58,21 +61,25 @@ public class BeanForReport {
 	 * @param message The message pattern containing Skyve bindings.
 	 * @return The formatted message text.
 	 */
-	public static String getMessage(Bean bean, String message) {
+	public static @Nonnull String getMessage(@Nullable Bean bean, @Nonnull String message) {
 		return Binder.formatMessage(message, bean);
 	}
 
 	/**
-	 * Evaluates a named bean condition for the supplied document row.
+	 * Evaluates a bean condition for the supplied document row.
 	 *
 	 * @param moduleName The owning module name.
 	 * @param documentName The document name within the module.
 	 * @param bizId The business identifier of the row being rendered.
-	 * @param conditionName The condition method name to evaluate.
+	 * @param condition The condition name or inline condition expression to evaluate.
 	 * @return {@code true} when the condition evaluates to true for the bean.
+	 * @throws IllegalStateException When no matching row exists.
 	 */
-	public static boolean evaluateCondition(String moduleName, String documentName, String bizId, String conditionName) {
+	public static boolean evaluateCondition(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId, @Nonnull String condition) {
 		Bean bean = getBean(moduleName, documentName, bizId);
-		return bean.evaluateCondition(conditionName);
+		if (bean == null) {
+			throw new IllegalStateException("Cannot evaluate condition " + condition + " as " + moduleName + '.' + documentName + " with bizId " + bizId + " does not exist");
+		}
+		return bean.evaluateCondition(condition);
 	}
 }

@@ -8,6 +8,9 @@ import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Skyve Hibernate dialect for PostgreSQL 8.2 with PostGIS spatial extensions.
  */
@@ -32,7 +35,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return the geometry type descriptor bound to this dialect
 	 */
 	@Override
-	public JTSGeometryType getGeometryType() {
+	public @Nonnull JTSGeometryType getGeometryType() {
 		return delegate.getGeometryType();
 	}
 
@@ -43,7 +46,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return the converted value suitable for JDBC persistence
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nonnull Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		return delegate.convertToPersistedValue(geometry);
 	}
 
@@ -54,7 +57,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return the converted JTS geometry value
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nullable Geometry convertFromPersistedValue(@Nullable Object geometry) {
 		return delegate.convertFromPersistedValue(geometry);
 	}
 
@@ -66,7 +69,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return true when column change DDL should be emitted, otherwise false
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		return delegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 
@@ -76,7 +79,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return the SQL fragment used for alter-column statements
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return delegate.getModifyColumnString();
 	}
 
@@ -86,7 +89,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return the Skyve RDBMS enum value for this dialect
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return delegate.getRDBMS();
 	}
 	
@@ -96,7 +99,7 @@ public class PostgreSQL82SpatialDialect extends PostgisPG82Dialect implements Sk
 	 * @return the index exporter used by this dialect
 	 */
 	@Override
-	public Exporter<Index> getIndexExporter() {
+	public @Nonnull Exporter<Index> getIndexExporter() {
 		return delegate.getIndexExporter();
 	}
 }

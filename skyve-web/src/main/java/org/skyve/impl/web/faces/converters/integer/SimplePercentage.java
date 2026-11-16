@@ -3,6 +3,8 @@ package org.skyve.impl.web.faces.converters.integer;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
@@ -25,7 +27,7 @@ public class SimplePercentage extends org.skyve.domain.types.converters.integer.
 	 * @throws ConverterException when the submitted value cannot be parsed using this format
 	 */
 	@Override
-	public Integer getAsObject(FacesContext fc, UIComponent component, String value) {
+	public @Nullable Integer getAsObject(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable String value) {
 		String processedValue = UtilImpl.processStringValue(value);
 		if (processedValue != null) {
 			try {
@@ -48,7 +50,7 @@ public class SimplePercentage extends org.skyve.domain.types.converters.integer.
 	 * @return a formatted display value, or an empty string when the value is {@code null} or formatting fails
 	 */
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Integer value) {
+	public @Nonnull String getAsString(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable Integer value) {
 		if (value == null) {
 			return "";
 		}

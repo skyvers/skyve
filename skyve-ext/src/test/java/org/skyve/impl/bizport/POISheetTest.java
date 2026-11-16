@@ -1,10 +1,11 @@
 package org.skyve.impl.bizport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +16,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.SheetKey;
 import org.skyve.domain.ChildBean;
@@ -36,35 +37,35 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
 @SuppressWarnings("static-method")
-public class POISheetTest {
+class POISheetTest {
 
 	@Test
-	public void constructorSetsTitle() {
+	void constructorSetsTitle() {
 		POISheet sheet = new POISheet("MySheet");
 		assertEquals("MySheet", sheet.getTitle());
 	}
 
 	@Test
-	public void toStringReturnsTitle() {
+	void toStringReturnsTitle() {
 		POISheet sheet = new POISheet("TestTitle");
 		assertEquals("TestTitle", sheet.toString());
 	}
 
 	@Test
-	public void setTitleUpdatesTitle() {
+	void setTitleUpdatesTitle() {
 		POISheet sheet = new POISheet("Original");
 		sheet.setTitle("Updated");
 		assertEquals("Updated", sheet.getTitle());
 	}
 
 	@Test
-	public void getColumnBindingsEmptyInitially() {
+	void getColumnBindingsEmptyInitially() {
 		POISheet sheet = new POISheet("TestSheet");
 		assertTrue(sheet.getColumnBindings().isEmpty());
 	}
 
 	@Test
-	public void addColumnAndGetColumn() {
+	void addColumnAndGetColumn() {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("My Column", null);
 		sheet.addColumn("binding1", col);
@@ -72,13 +73,13 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void getColumnReturnsNullForMissingBinding() {
+	void getColumnReturnsNullForMissingBinding() {
 		POISheet sheet = new POISheet("TestSheet");
 		assertNull(sheet.getColumn("nonexistent"));
 	}
 
 	@Test
-	public void removeColumnReturnsPreviousValue() {
+	void removeColumnReturnsPreviousValue() {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Col", null);
 		sheet.addColumn("myBinding", col);
@@ -88,13 +89,13 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void removeColumnReturnsNullForAbsentBinding() {
+	void removeColumnReturnsNullForAbsentBinding() {
 		POISheet sheet = new POISheet("TestSheet");
 		assertNull(sheet.removeColumn("absent"));
 	}
 
 	@Test
-	public void getColumnBindingsReflectsAddedColumns() {
+	void getColumnBindingsReflectsAddedColumns() {
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("a", new BizPortColumn("A", null));
 		sheet.addColumn("b", new BizPortColumn("B", null));
@@ -103,41 +104,47 @@ public class POISheetTest {
 		assertEquals(2, sheet.getColumnBindings().size());
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void addRowThrowsWhenNotMaterialised() {
-		new POISheet("TestSheet").addRow("key");
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void moveToRowThrowsWhenNotMaterialised() {
-		new POISheet("TestSheet").moveToRow("key");
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void nextRowThrowsWhenNotMaterialised() {
-		new POISheet("TestSheet").nextRow();
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void getValueThrowsWhenNotMaterialised() {
-		new POISheet("TestSheet").getValue("binding", null, null);
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void setValueThrowsWhenNotMaterialised() {
-		new POISheet("TestSheet").setValue("binding", "value");
+	@Test
+	void addRowThrowsWhenNotMaterialised() {
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.addRow("key"));
 	}
 
 	@Test
-	public void resetRowDoesNotThrowWhenNotMaterialised() {
+	void moveToRowThrowsWhenNotMaterialised() {
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.moveToRow("key"));
+	}
+
+	@Test
+	void nextRowThrowsWhenNotMaterialised() {
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(NullPointerException.class, sheet::nextRow);
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void getValueThrowsWhenNotMaterialised() {
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.getValue("binding", null, null));
+	}
+
+	@Test
+	void setValueThrowsWhenNotMaterialised() {
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.setValue("binding", "value"));
+	}
+
+	@Test
+	void resetRowDoesNotThrowWhenNotMaterialised() {
 		// resetRow does not check for materialisation; it just resets internal state
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.resetRow(); // should not throw
 		assertNotNull(sheet);
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void addColumnThrowsWhenMaterialised() {
+	@Test
+	void addColumnThrowsWhenMaterialised() {
 		POISheet sheet = new POISheet("TestSheet");
 		// Directly set the internal `sheet` field via addRow path isn't available,
 		// but we can test the normal add first to exercise the not-materialized path
@@ -156,15 +163,16 @@ public class POISheetTest {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		sheet.addColumn("col", new BizPortColumn("Col", null));
+		BizPortColumn column = new BizPortColumn("Col", null);
+		assertThrows(IllegalStateException.class, () -> sheet.addColumn("col", column));
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void removeColumnThrowsWhenMaterialised() throws Exception {
+	@Test
+	void removeColumnThrowsWhenMaterialised() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("col", new BizPortColumn("Col", null));
 		try (XSSFWorkbook wb = materialize(sheet)) {
-			sheet.removeColumn("col");
+			assertThrows(IllegalStateException.class, () -> sheet.removeColumn("col"));
 		}
 	}
 
@@ -182,52 +190,56 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueAndGetValueReturnsSameString() throws Exception {
+	void setValueAndGetValueReturnsSameString() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("My Column", null);
 		sheet.addColumn("name", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("name", "hello");
+			@SuppressWarnings("null") // passes null on purpose
 			String result = sheet.getValue("name", AttributeType.text, null);
 			assertEquals("hello", result);
 		}
 	}
 
 	@Test
-	public void setValueAndGetValueReturnsInteger() throws Exception {
+	void setValueAndGetValueReturnsInteger() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Amount", null);
 		sheet.addColumn("amount", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("amount", Integer.valueOf(42));
+			@SuppressWarnings("null") // passes null on purpose
 			Integer result = sheet.getValue("amount", AttributeType.integer, null);
 			assertEquals(Integer.valueOf(42), result);
 		}
 	}
 
 	@Test
-	public void setValueAndGetValueReturnsBoolean() throws Exception {
+	void setValueAndGetValueReturnsBoolean() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Flag", null);
 		sheet.addColumn("flag", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("flag", Boolean.TRUE);
+			@SuppressWarnings("null") // passes null on purpose
 			Boolean result = sheet.getValue("flag", AttributeType.bool, null);
 			assertEquals(Boolean.TRUE, result);
 		}
 	}
 
 	@Test
-	public void setValueAndGetValueReturnsDecimal2() throws Exception {
+	void setValueAndGetValueReturnsDecimal2() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Price", null);
 		sheet.addColumn("price", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("price", new Decimal2("3.14"));
+			@SuppressWarnings("null") // passes null on purpose
 			Decimal2 result = sheet.getValue("price", AttributeType.decimal2, null);
 			assertNotNull(result);
 			assertEquals(new Decimal2("3.14"), result);
@@ -235,58 +247,61 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void getValueNullCellReturnsNull() throws Exception {
+	void getValueNullCellReturnsNull() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Name", null);
 		sheet.addColumn("name", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			// no cell has been created — getValue should return null
+			@SuppressWarnings("null") // passes null on purpose
 			String result = sheet.getValue("name", AttributeType.text, null);
 			assertNull(result);
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void getValueMissingColumnThrowsIllegalArgument() throws Exception {
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void getValueMissingColumnThrowsIllegalArgument() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
-			sheet.getValue("nonexistent", AttributeType.text, null);
+			assertThrows(IllegalArgumentException.class, () -> sheet.getValue("nonexistent", AttributeType.text, null));
 		}
 	}
 
-	@Test(expected = IllegalStateException.class)
-	public void getValueNoCurrentRowThrowsIllegalState() throws Exception {
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void getValueNoCurrentRowThrowsIllegalState() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("name", new BizPortColumn("Name", null));
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			// currentRow is null — never called addRow
-			sheet.getValue("name", AttributeType.text, null);
-		}
-	}
-
-	@Test(expected = IllegalArgumentException.class)
-	public void setValueMissingColumnThrowsIllegalArgument() throws Exception {
-		POISheet sheet = new POISheet("TestSheet");
-		try (XSSFWorkbook wb = materialize(sheet)) {
-			sheet.addRow("r1");
-			sheet.setValue("nonexistent", "value");
-		}
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void setValueNoCurrentRowThrowsIllegalState() throws Exception {
-		POISheet sheet = new POISheet("TestSheet");
-		sheet.addColumn("name", new BizPortColumn("Name", null));
-		try (XSSFWorkbook wb = materialize(sheet)) {
-			// currentRow is null — never called addRow
-			sheet.setValue("name", "value");
+			assertThrows(IllegalStateException.class, () -> sheet.getValue("name", AttributeType.text, null));
 		}
 	}
 
 	@Test
-	public void moveToRowReturnsFalseForMissingKey() throws Exception {
+	void setValueMissingColumnThrowsIllegalArgument() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			sheet.addRow("r1");
+			assertThrows(IllegalArgumentException.class, () -> sheet.setValue("nonexistent", "value"));
+		}
+	}
+
+	@Test
+	void setValueNoCurrentRowThrowsIllegalState() throws Exception {
+		POISheet sheet = new POISheet("TestSheet");
+		sheet.addColumn("name", new BizPortColumn("Name", null));
+		try (XSSFWorkbook wb = materialize(sheet)) {
+			// currentRow is null — never called addRow
+			assertThrows(IllegalStateException.class, () -> sheet.setValue("name", "value"));
+		}
+	}
+
+	@Test
+	void moveToRowReturnsFalseForMissingKey() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			boolean result = sheet.moveToRow("nonexistent");
@@ -295,7 +310,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void moveToRowAcceptsCompositeRowKey() throws Exception {
+	void moveToRowAcceptsCompositeRowKey() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("owner", "element");
@@ -305,7 +320,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void nextRowReturnsFalseOnEmptySheet() throws Exception {
+	void nextRowReturnsFalseOnEmptySheet() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			boolean result = sheet.nextRow();
@@ -314,7 +329,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void nextRowIteratesAddedRows() throws Exception {
+	void nextRowIteratesAddedRows() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
@@ -328,7 +343,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void nextRowSkipsBlankRows() throws Exception {
+	void nextRowSkipsBlankRows() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			XSSFSheet xssfSheet = wb.getSheet("data");
@@ -341,7 +356,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void addErrorAtCurrentRowDoesNotThrow() throws Exception {
+	void addErrorAtCurrentRowDoesNotThrow() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Name", null);
 		sheet.addColumn("name", col);
@@ -354,7 +369,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void addWarningAtCurrentRowDoesNotThrow() throws Exception {
+	void addWarningAtCurrentRowDoesNotThrow() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Name", null);
 		sheet.addColumn("name", col);
@@ -367,7 +382,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void addErrorWithoutCurrentRowUsesRefPlaceholder() throws Exception {
+	void addErrorWithoutCurrentRowUsesRefPlaceholder() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Name", null);
 		sheet.addColumn("name", col);
@@ -382,33 +397,35 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueAndGetValueReturnsLong() throws Exception {
+	void setValueAndGetValueReturnsLong() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("BigNum", null);
 		sheet.addColumn("num", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("num", Long.valueOf(12345678L));
+			@SuppressWarnings("null") // passes null on purpose
 			Long result = sheet.getValue("num", AttributeType.longInteger, null);
 			assertEquals(Long.valueOf(12345678L), result);
 		}
 	}
 
 	@Test
-	public void setValueStringAndGetWithMemoTypeReturnsValue() throws Exception {
+	void setValueStringAndGetWithMemoTypeReturnsValue() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Notes", null);
 		sheet.addColumn("notes", col);
 		try (XSSFWorkbook wb = materialize(sheet)) {
 			sheet.addRow("r1");
 			sheet.setValue("notes", "memo text");
+			@SuppressWarnings("null") // passes null on purpose
 			String result = sheet.getValue("notes", AttributeType.memo, null);
 			assertEquals("memo text", result);
 		}
 	}
 
 	@Test
-	public void getValueStringCellWithWrongTypeAddsError() throws Exception {
+	void getValueStringCellWithWrongTypeAddsError() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Flag", null);
 		sheet.addColumn("flag", col);
@@ -423,7 +440,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void multipleRowsCanBeSetAndRead() throws Exception {
+	void multipleRowsCanBeSetAndRead() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		BizPortColumn col = new BizPortColumn("Name", null);
 		sheet.addColumn("name", col);
@@ -433,13 +450,14 @@ public class POISheetTest {
 			sheet.addRow("r2");
 			sheet.setValue("name", "Bob");
 			// currentRow is still row2 after second addRow
+			@SuppressWarnings("null") // passes null on purpose
 			String second = sheet.getValue("name", AttributeType.text, null);
 			assertEquals("Bob", second);
 		}
 	}
 
 	@Test
-	public void setValueDecimal5RoundtripsAsNumeric() {
+	void setValueDecimal5RoundtripsAsNumeric() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("price", new BizPortColumn("Price", null, AttributeType.decimal5));
@@ -447,12 +465,13 @@ public class POISheetTest {
 		wb.materialise();
 		sheet.addRow("r1");
 		sheet.setValue("price", new Decimal5("1.23456"));
+		@SuppressWarnings("null") // passes null on purpose
 		Decimal5 result = sheet.getValue("price", AttributeType.decimal5, null);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void setValueDecimal10RoundtripsAsNumeric() {
+	void setValueDecimal10RoundtripsAsNumeric() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("amount", new BizPortColumn("Amount", null, AttributeType.decimal10));
@@ -460,12 +479,13 @@ public class POISheetTest {
 		wb.materialise();
 		sheet.addRow("r1");
 		sheet.setValue("amount", new Decimal10("9.99"));
+		@SuppressWarnings("null") // passes null on purpose
 		Decimal10 result = sheet.getValue("amount", AttributeType.decimal10, null);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void setValueDateOnlyAndGetValueReturnsDateOnly() {
+	void setValueDateOnlyAndGetValueReturnsDateOnly() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("date", new BizPortColumn("Date", null, AttributeType.date));
@@ -474,12 +494,13 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		DateOnly today = new DateOnly();
 		sheet.setValue("date", today);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("date", AttributeType.date, null);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void setValueDateTimeAndGetValueReturnsDateTime() {
+	void setValueDateTimeAndGetValueReturnsDateTime() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("dt", new BizPortColumn("DT", null, AttributeType.dateTime));
@@ -488,12 +509,13 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		DateTime now = new DateTime();
 		sheet.setValue("dt", now);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("dt", AttributeType.dateTime, null);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void setValueTimestampAndGetValueReturnsTimestamp() {
+	void setValueTimestampAndGetValueReturnsTimestamp() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("ts", new BizPortColumn("TS", null, AttributeType.timestamp));
@@ -502,12 +524,13 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		Timestamp ts = new Timestamp();
 		sheet.setValue("ts", ts);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("ts", AttributeType.timestamp, null);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void setValueTimeOnlyAndGetValueReturnsTimeOnly() {
+	void setValueTimeOnlyAndGetValueReturnsTimeOnly() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("time", new BizPortColumn("Time", null, AttributeType.time));
@@ -516,12 +539,14 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		TimeOnly t = new TimeOnly();
 		sheet.setValue("time", t);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = sheet.getValue("time", AttributeType.time, null);
 		assertNotNull(result);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void setValueEnumerationWritesCode() throws Exception {
+	void setValueEnumerationWritesCode() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("status", new BizPortColumn("Status", null));
 		try (XSSFWorkbook wb = materialize(sheet)) {
@@ -550,8 +575,9 @@ public class POISheetTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void setValueGeometryWritesWkt() throws Exception {
+	void setValueGeometryWritesWkt() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("location", new BizPortColumn("Location", null));
 		try (XSSFWorkbook wb = materialize(sheet)) {
@@ -564,7 +590,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void numericCellWithStringTypeReturnsStringConversion() {
+	void numericCellWithStringTypeReturnsStringConversion() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("num", new BizPortColumn("Num", null, AttributeType.integer));
@@ -573,12 +599,13 @@ public class POISheetTest {
 		sheet.addRow("r1");
 		// set numeric value but ask for text — should convert to string via NumberToTextConverter
 		sheet.setValue("num", Integer.valueOf(99));
+		@SuppressWarnings("null") // passes null on purpose
 		String result = sheet.getValue("num", AttributeType.text, null);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void booleanCellWithTextTypeAddsError() throws Exception {
+	void booleanCellWithTextTypeAddsError() throws Exception {
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("flag", new BizPortColumn("Flag", null));
 		try (XSSFWorkbook wb = materialize(sheet)) {
@@ -594,7 +621,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void dateCellWithIntegerTypeAddsError() {
+	void dateCellWithIntegerTypeAddsError() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("date", new BizPortColumn("Date", null, AttributeType.date));
@@ -611,7 +638,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void numericCellWithBooleanTypeAddsError() {
+	void numericCellWithBooleanTypeAddsError() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("TestSheet");
 		sheet.addColumn("num", new BizPortColumn("Num", null, AttributeType.integer));
@@ -628,7 +655,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setValueOnReferencedColumnAddsLookupFormula() {
+	void setValueOnReferencedColumnAddsLookupFormula() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet referenceSheet = new POISheet("Customers");
 		wb.addSheet(new SheetKey("crm", "Customer"), referenceSheet);
@@ -647,7 +674,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void setTitleUpdatesMaterialisedWorkbookSheetName() {
+	void setTitleUpdatesMaterialisedWorkbookSheetName() {
 		POIWorkbook wb = new POIWorkbook(true);
 		POISheet sheet = new POISheet("OldName");
 		wb.addSheet(new SheetKey("m", "d"), sheet);
@@ -659,7 +686,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void existingChildDocumentSheetSetsParentReferenceWithoutDataRows() throws Exception {
+	void existingChildDocumentSheetSetsParentReferenceWithoutDataRows() throws Exception {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -684,7 +711,7 @@ public class POISheetTest {
 	}
 
 	@Test
-	public void existingCollectionSheetSetsSimpleOwnerReferenceWithoutDataRows() throws Exception {
+	void existingCollectionSheetSetsSimpleOwnerReferenceWithoutDataRows() throws Exception {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);

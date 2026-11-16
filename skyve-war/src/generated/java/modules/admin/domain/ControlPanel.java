@@ -1197,6 +1197,25 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
+	 * The user has the DevOps role, so sees all of the Control Panel, not only its SAIL recording controls.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isDevOps() {
+		return (isUserInRole("admin", "DevOps"));
+	}
+
+	/**
+	 * {@link #isDevOps} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotDevOps() {
+		return (! isDevOps());
+	}
+
+	/**
 	 * If this instance is for 1 fixed customer only.
 	 *
 	 * @return The condition
@@ -1251,6 +1270,63 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 */
 	public boolean isNotResultsNotNull() {
 		return (! isResultsNotNull());
+	}
+
+	/**
+	 * This session is recording SAIL.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSailRecording() {
+		return (modules.admin.ControlPanel.ControlPanelExtension.recordingStarted());
+	}
+
+	/**
+	 * {@link #isSailRecording} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSailRecording() {
+		return (! isSailRecording());
+	}
+
+	/**
+	 * The configuration (sail.recording) and the user's roles (admin.SAILRecorder) allow SAIL recording.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSailRecordingAllowed() {
+		return (modules.admin.ControlPanel.ControlPanelExtension.recordingAllowed());
+	}
+
+	/**
+	 * {@link #isSailRecordingAllowed} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSailRecordingAllowed() {
+		return (! isSailRecordingAllowed());
+	}
+
+	/**
+	 * This session's SAIL recording has stopped and its script can be downloaded.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSailRecordingDownloadable() {
+		return (modules.admin.ControlPanel.ControlPanelExtension.recordingDownloadable());
+	}
+
+	/**
+	 * {@link #isSailRecordingDownloadable} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSailRecordingDownloadable() {
+		return (! isSailRecordingDownloadable());
 	}
 
 	/**

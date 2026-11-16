@@ -1,17 +1,17 @@
 package org.skyve.impl.web.faces.converters.select;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
@@ -24,42 +24,46 @@ import jakarta.faces.model.SelectItem;
 import jakarta.faces.model.SelectItemGroup;
 
 @SuppressWarnings("static-method")
-public class SelectItemsBeanConverterTest {
+class SelectItemsBeanConverterTest {
 
 	private SelectItemsBeanConverter converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new SelectItemsBeanConverter();
 	}
 
 	// ---- getAsObject ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void getAsObjectReturnsNullForNullValue() {
+	void getAsObjectReturnsNullForNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void getAsObjectReturnsNullForEmptyString() {
+	void getAsObjectReturnsNullForEmptyString() {
 		assertNull(converter.getAsObject(null, null, ""));
 	}
 
 	// ---- getAsString ----
 
 	@Test
-	public void getAsStringReturnsEmptyStringForNull() {
+	void getAsStringReturnsEmptyStringForNull() {
 		assertEquals("", converter.getAsString(null, null, null));
 	}
 
 	@Test
-	public void getAsStringDelegatesToToStringForOtherValues() {
+	void getAsStringDelegatesToToStringForOtherValues() {
 		assertEquals("42", converter.getAsString(null, null, Integer.valueOf(42)));
 	}
 
 	@Test
-	public void getAsStringUsesToCodeForEnumeration() {
+	void getAsStringUsesToCodeForEnumeration() {
 		Enumeration e = new Enumeration() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String toCode() {
 				return "TEST_CODE";
@@ -81,36 +85,42 @@ public class SelectItemsBeanConverterTest {
 	// ---- isEmpty ----
 
 	@Test
-	public void isEmptyReturnsTrueForNull() {
+	void isEmptyReturnsTrueForNull() {
 		assertTrue(SelectItemsBeanConverter.isEmpty(null));
 	}
 
 	@Test
-	public void isEmptyReturnsTrueForEmptyArray() {
+	void isEmptyReturnsTrueForEmptyArray() {
 		assertTrue(SelectItemsBeanConverter.isEmpty(new SelectItem[0]));
 	}
 
 	@Test
-	public void isEmptyReturnsFalseForNonEmptyArray() {
+	void isEmptyReturnsFalseForNonEmptyArray() {
 		assertFalse(SelectItemsBeanConverter.isEmpty(new SelectItem[]{new SelectItem("v", "l")}));
 	}
 
 	// ---- getAsString with Bean and BeanMapAdapter ----
 
 	@Test
-	public void getAsStringReturnsBizIdForBean() {
+	void getAsStringReturnsBizIdForBean() {
 		Bean bean = mock(Bean.class);
 		when(bean.getBizId()).thenReturn("testBizId");
 		assertEquals("testBizId", converter.getAsString(null, null, bean));
 	}
 
 	@Test
-	public void getAsStringReturnsBizIdForBeanMapAdapter() {
+	void getAsStringReturnsBizIdForBeanMapAdapter() {
 		Bean bean = mock(Bean.class);
 		when(bean.getBizId()).thenReturn("adapterBizId");
 		WebContext webContext = mock(WebContext.class);
 		BeanMapAdapter adapter = new BeanMapAdapter(bean, webContext);
 		assertEquals("adapterBizId", converter.getAsString(null, null, adapter));
+	}
+
+	@Test
+	void getAsStringReturnsEmptyStringForBeanMapAdapterOfNoBean() {
+		BeanMapAdapter adapter = new BeanMapAdapter(null, mock(WebContext.class));
+		assertEquals("", converter.getAsString(null, null, adapter));
 	}
 
 	// ---- getAsObject with component items ----
@@ -139,47 +149,52 @@ public class SelectItemsBeanConverterTest {
 	}
 
 	@Test
-	public void getAsObjectFindsMatchingSelectItem() {
+	void getAsObjectFindsMatchingSelectItem() {
 		UISelectItem uiItem = mockSelectItem("myValue", "My Label", false);
 		UIComponent menu = mockMenuWithItems(uiItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "myValue");
 		assertEquals("myValue", result);
 	}
 
 	@Test
-	public void getAsObjectReturnsNullWhenNoMatchingSelectItem() {
+	void getAsObjectReturnsNullWhenNoMatchingSelectItem() {
 		UISelectItem uiItem = mockSelectItem("other", "Other", false);
 		UIComponent menu = mockMenuWithItems(uiItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "notFound");
 		assertNull(result);
 	}
 
 	@Test
-	public void getAsObjectSkipsNoSelectionOption() {
+	void getAsObjectSkipsNoSelectionOption() {
 		UISelectItem uiItem = mockSelectItem("target", "Target", true);
 		UIComponent menu = mockMenuWithItems(uiItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "target");
 		assertNull(result);
 	}
 
 	@Test
-	public void getAsObjectSearchesWithinSelectItemGroup() {
+	void getAsObjectSearchesWithinSelectItemGroup() {
 		SelectItem[] subItems = {new SelectItem("grouped", "Grouped Label")};
 		SelectItemGroup group = new SelectItemGroup("Group", "group-desc", false, subItems);
 		UISelectItem groupItem = mock(UISelectItem.class);
 		when(groupItem.getValue()).thenReturn(group);
 		UIComponent menu = mockMenuWithItems(groupItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "grouped");
 		assertEquals("grouped", result);
 	}
 
 	@Test
-	public void getAsObjectReturnsNullWhenGroupHasNoMatch() {
+	void getAsObjectReturnsNullWhenGroupHasNoMatch() {
 		SelectItem[] subItems = {new SelectItem("sub", "Sub Label")};
 		SelectItemGroup group = new SelectItemGroup("Group", "", false, subItems);
 		UISelectItem groupItem = mock(UISelectItem.class);
 		when(groupItem.getValue()).thenReturn(group);
 		UIComponent menu = mockMenuWithItems(groupItem);
+		@SuppressWarnings("null") // passes null on purpose
 		Object result = converter.getAsObject(null, menu, "notFound");
 		assertNull(result);
 	}

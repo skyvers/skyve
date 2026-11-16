@@ -73,9 +73,9 @@ class FluentStaticImageTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentStaticImage img = new FluentStaticImage();
-		FluentStaticImage result = img.invisibleConditionName("hiddenCond");
+		FluentStaticImage result = img.invisibleCondition("hiddenCond");
 		assertSame(img, result);
 	}
 }

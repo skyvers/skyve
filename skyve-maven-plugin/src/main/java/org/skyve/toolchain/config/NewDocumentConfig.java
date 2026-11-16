@@ -2,6 +2,8 @@ package org.skyve.toolchain.config;
 
 import org.apache.maven.plugins.annotations.Parameter;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Stores the parameters for the new-document mojo.
  */
@@ -17,7 +19,7 @@ public class NewDocumentConfig {
 	 *
 	 * @return the default module name, or {@code null}
 	 */
-	public String getDefaultModule() {
+	public @Nullable String getDefaultModule() {
 		return defaultModule;
 	}
 
@@ -26,7 +28,7 @@ public class NewDocumentConfig {
 	 *
 	 * @param defaultModule the default module name
 	 */
-	public void setDefaultModule(String defaultModule) {
+	public void setDefaultModule(@Nullable String defaultModule) {
 		this.defaultModule = defaultModule;
 	}
 }

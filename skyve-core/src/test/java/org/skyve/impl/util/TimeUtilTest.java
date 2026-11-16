@@ -426,6 +426,7 @@ class TimeUtilTest {
 		assertEquals(15, resultCal.get(Calendar.DAY_OF_MONTH));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void addDaysToNewThrowsForNullDate() {
 		assertThrows(IllegalArgumentException.class, () -> TimeUtil.addDaysToNew(null, 5));
@@ -442,6 +443,7 @@ class TimeUtilTest {
 		assertEquals(Calendar.MARCH, resultCal.get(Calendar.MONTH));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void addMonthsToNewThrowsForNullDate() {
 		assertThrows(IllegalArgumentException.class, () -> TimeUtil.addMonthsToNew(null, 2));
@@ -458,6 +460,7 @@ class TimeUtilTest {
 		assertEquals(2023, resultCal.get(Calendar.YEAR));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void addYearsToNewThrowsForNullDate() {
 		assertThrows(IllegalArgumentException.class, () -> TimeUtil.addYearsToNew(null, 1));

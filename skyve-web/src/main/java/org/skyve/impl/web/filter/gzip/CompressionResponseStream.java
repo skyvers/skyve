@@ -23,6 +23,7 @@ import java.util.zip.GZIPOutputStream;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,7 +51,7 @@ public class CompressionResponseStream
      * @param response The associated response
      */
     @SuppressWarnings("resource")
-    public CompressionResponseStream(HttpServletResponse response) throws IOException{
+    public CompressionResponseStream(@Nonnull HttpServletResponse response) throws IOException{
 
         super();
         closed = false;
@@ -229,7 +230,7 @@ public class CompressionResponseStream
      * @exception IOException if an input/output error occurs
      */
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(@SuppressWarnings("null") @Nonnull byte[] b) throws IOException {
 
         write(b, 0, b.length);
 
@@ -247,7 +248,7 @@ public class CompressionResponseStream
      * @exception IOException if an input/output error occurs
      */
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(@SuppressWarnings("null") @Nonnull byte[] b, int off, int len) throws IOException {
 
         if (debug > 1) {
 	        LOGGER.info("write, bufferCount = {} len = {} off = {}", Integer.valueOf(bufferCount), Integer.valueOf(len), Integer.valueOf(off));
@@ -280,7 +281,7 @@ public class CompressionResponseStream
         writeToGZip(b, off, len);
     }
 
-    public void writeToGZip(byte[] b, int off, int len) throws IOException {
+    public void writeToGZip(@Nonnull byte[] b, int off, int len) throws IOException {
 
         if (debug > 1) {
 	        	LOGGER.info("writeToGZip, len = {}", Integer.valueOf(len));
@@ -323,7 +324,7 @@ public class CompressionResponseStream
 
 
 	@Override
-	public void setWriteListener(WriteListener listener) {
+	public void setWriteListener(@SuppressWarnings("null") @Nonnull WriteListener listener) {
 		// no listener is set
 	}
 }

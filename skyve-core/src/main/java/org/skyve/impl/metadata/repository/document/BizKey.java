@@ -6,6 +6,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.model.Attribute.Sensitivity;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
@@ -29,28 +30,28 @@ public class BizKey implements SerializableMetaData {
 	private String code;
 	private Sensitivity sensitivity;
 
-	public String getExpression() {
+	public @Nullable String getExpression() {
 		return expression;
 	}
 	@XmlAttribute
-	public void setExpression(String expression) {
+	public void setExpression(@Nullable String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
 	
-	public String getCode() {
+	public @Nullable String getCode() {
 		return code;
 	}
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setCode(String code) {
+	public void setCode(@Nullable String code) {
 		this.code = UtilImpl.processStringValue(code);
 	}
 
-	public Sensitivity getSensitivity() {
+	public @Nullable Sensitivity getSensitivity() {
 		return sensitivity;
 	}
 	@XmlAttribute
-	public void setSensitivity(Sensitivity sensitivity) {
+	public void setSensitivity(@Nullable Sensitivity sensitivity) {
 		this.sensitivity = sensitivity;
 	}
 }

@@ -90,6 +90,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -105,6 +106,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
@@ -142,7 +144,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param view     the view metadata to render
 	 * @param uxui     the target UX/UI profile
 	 */
-	public ClientViewRenderer(User user, Module module, Document document, View view, String uxui) {
+	public ClientViewRenderer(@Nonnull User user, @Nonnull Module module, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui) {
 		super(user, module, document, view, uxui);
 		createView = ViewType.create.toString().equals(view.getName());
 	}
@@ -153,7 +155,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param cr component renderer implementation
 	 * @param lr layout renderer implementation
 	 */
-	protected void setRenderers(ComponentRenderer cr, LayoutRenderer lr) {
+	protected void setRenderers(@Nonnull ComponentRenderer cr, @Nonnull LayoutRenderer lr) {
 		this.cr = cr;
 		this.lr = lr;
 	}
@@ -164,7 +166,20 @@ public class ClientViewRenderer extends ViewRenderer {
 	 *
 	 * @return rendered root component, or {@code null} before rendering starts
 	 */
-	public RenderedComponent getResult() {
+	public @Nullable RenderedComponent getResult() {
+		return result;
+	}
+
+	/**
+	 * Returns the rendered root component once the view has been visited.
+	 *
+	 * @return rendered root component; never {@code null}
+	 * @throws IllegalStateException when the view has not been rendered yet
+	 */
+	public @Nonnull RenderedComponent getNullSafeResult() {
+		if (result == null) {
+			throw new IllegalStateException("The view has not been rendered");
+		}
 		return result;
 	}
 
@@ -222,20 +237,20 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderTabPane(TabPane tabPane) {
+	public void renderTabPane(@Nonnull TabPane tabPane) {
 		RenderedComponent component = cr.tabPane(null, tabPane);
 		addToContainer(component, 
         				tabPane.getPixelWidth(), 
         				tabPane.getResponsiveWidth(), 
         				tabPane.getPercentageWidth(),
-        				tabPane.getInvisibleConditionName());
+        				tabPane.getInvisibleCondition());
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedTabPane(TabPane tabPane) {
+	public void renderedTabPane(@Nonnull TabPane tabPane) {
 		addedToContainer();
 	}
 
@@ -243,7 +258,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderTab(String title, String icon16x16Url, Tab tab) {
+	public void renderTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 		RenderedComponent component = cr.tab(null, title, tab);
 		lr.addTab(current, component);
 		current = component;
@@ -257,7 +272,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedTab(String title, String icon16x16Url, Tab tab) {
+	public void renderedTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 		current = lr.addedTab(null, current);
 	}
 
@@ -265,16 +280,16 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderVBox(String borderTitle, VBox vbox) {
+	public void renderVBox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 		// Cater for a border if this thing has a border
 		RenderedComponent border = null;
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
-			border = cr.border(null, borderTitle, vbox.getInvisibleConditionName(), vbox.getPixelWidth());
+			border = cr.border(null, borderTitle, vbox.getInvisibleCondition(), vbox.getPixelWidth());
 			addToContainer(border, 
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
 							vbox.getPercentageWidth(),
-							vbox.getInvisibleConditionName());
+							vbox.getInvisibleCondition());
 		}
 
 		RenderedComponent layout = lr.vboxLayout(null, vbox);
@@ -288,7 +303,7 @@ public class ClientViewRenderer extends ViewRenderer {
 							vbox.getPixelWidth(), 
 							vbox.getResponsiveWidth(),
 							vbox.getPercentageWidth(),
-							vbox.getInvisibleConditionName());
+							vbox.getInvisibleCondition());
 		}
 		current = layout;
 	}
@@ -297,7 +312,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedVBox(String borderTitle, VBox vbox) {
+	public void renderedVBox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(vbox.getBorder())) {
 			current = lr.addedBorderLayout(null, current);
@@ -309,16 +324,16 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderHBox(String borderTitle, HBox hbox) {
+	public void renderHBox(@Nullable String borderTitle, @Nonnull HBox hbox) {
 		// Cater for a border if this thing has a border
 		RenderedComponent border = null;
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
-			border = cr.border(null, borderTitle, hbox.getInvisibleConditionName(), hbox.getPixelWidth());
+			border = cr.border(null, borderTitle, hbox.getInvisibleCondition(), hbox.getPixelWidth());
 			addToContainer(border, 
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
 							hbox.getPercentageWidth(),
-							hbox.getInvisibleConditionName());
+							hbox.getInvisibleCondition());
 		}
 
 		RenderedComponent layout = lr.hboxLayout(null, hbox);
@@ -332,7 +347,7 @@ public class ClientViewRenderer extends ViewRenderer {
 							hbox.getPixelWidth(), 
 							hbox.getResponsiveWidth(),
 							hbox.getPercentageWidth(),
-							hbox.getInvisibleConditionName());
+							hbox.getInvisibleCondition());
 		}
 		current = layout;
 	}
@@ -341,7 +356,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedHBox(String title, HBox hbox) {
+	public void renderedHBox(@Nullable String title, @Nonnull HBox hbox) {
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(hbox.getBorder())) {
 			current = lr.addedBorderLayout(null, current);
@@ -353,16 +368,16 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderForm(String borderTitle, Form form) {
+	public void renderForm(@Nullable String borderTitle, @Nonnull Form form) {
 		// Cater for a border if this thing has a border
 		RenderedComponent border = null;
 		if (Boolean.TRUE.equals(form.getBorder())) {
-			border = cr.border(null, borderTitle, form.getInvisibleConditionName(), form.getPixelWidth());
+			border = cr.border(null, borderTitle, form.getInvisibleCondition(), form.getPixelWidth());
 			addToContainer(border, 
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
 							form.getPercentageWidth(),
-							form.getInvisibleConditionName());
+							form.getInvisibleCondition());
 		}
 
 		RenderedComponent layout = lr.formLayout(null, form);
@@ -376,17 +391,17 @@ public class ClientViewRenderer extends ViewRenderer {
 							form.getPixelWidth(), 
 							form.getResponsiveWidth(),
 							form.getPercentageWidth(),
-							form.getInvisibleConditionName());
+							form.getInvisibleCondition());
 		}
 		current = layout;
-// TODO form.getDisabledConditionName() form.getLabelDefaultHorizontalAlignment()
+// TODO form.getDisabledCondition() form.getLabelDefaultHorizontalAlignment()
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedForm(String borderTitle, Form form) {
+	public void renderedForm(@Nullable String borderTitle, @Nonnull Form form) {
 		// Cater for border, if one was added
 		if (Boolean.TRUE.equals(form.getBorder())) {
 			current = lr.addedBorderLayout(null, current);
@@ -398,7 +413,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormColumn(FormColumn column) {
+	public void renderFormColumn(@Nonnull FormColumn column) {
 		// Nothing to do here - for columns are a spec for html tables in this renderer.
 	}
 
@@ -409,7 +424,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderFormRow(FormRow row) {
+	public void renderFormRow(@Nonnull FormRow row) {
 		formRowLayout = lr.formRowLayout(null, row);
 		if (formRowLayout != null) {
 			current = lr.addFormRowLayout(null, current, formRowLayout);
@@ -420,12 +435,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormItem(String label,
-								String requiredMessage,
-								String help,
+	public void renderFormItem(@Nullable String label,
+								@Nullable String requiredMessage,
+								@Nullable String help,
 								boolean showsLabel,
 								int colspan,
-								FormItem item) {
+								@Nonnull FormItem item) {
 		// TODO not implemented yet
 	}
 
@@ -433,12 +448,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormItem(String label,
-									String requiredMessage,
-									String help,
+	public void renderedFormItem(@Nullable String label,
+									@Nullable String requiredMessage,
+									@Nullable String help,
 									boolean showLabel,
 									int colspan,
-									FormItem item) {
+									@Nonnull FormItem item) {
 		// TODO not implemented yet
 	}
 
@@ -446,23 +461,37 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormRow(FormRow row) {
+	public void renderedFormRow(@Nonnull FormRow row) {
 		if (formRowLayout != null) {
 			current = lr.addedFormRowLayout(null, formRowLayout);
 		}
 		formRowLayout = null;
 	}
 
+	/**
+	 * Returns the data grid or data repeater whose columns are being rendered.
+	 *
+	 * @return the current data widget; never {@code null}
+	 * @throws IllegalStateException when no data widget is being rendered
+	 */
+	private @Nonnull AbstractDataWidget getNullSafeCurrentDataWidget() {
+		AbstractDataWidget dataWidget = getCurrentDataWidget();
+		if (dataWidget == null) { // cannot happen as data widget columns are only visited within a data widget
+			throw new IllegalStateException("Data widget column is rendered outside of a data widget");
+		}
+		return dataWidget;
+	}
+
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private void addComponent(String widgetLabel,
+	private void addComponent(@Nullable String widgetLabel,
 								int formColspan,
 								@Nullable String widgetRequiredMessage,
-								String widgetInvisible,
-								String helpText,
-								RenderedComponent component,
-								Integer pixelWidth,
-								Integer responsiveWidth,
-								Integer percentageWidth) {
+								@Nullable String widgetInvisible,
+								@Nullable String helpText,
+								@Nullable RenderedComponent component,
+								@Nullable Integer pixelWidth,
+								@Nullable Integer responsiveWidth,
+								@Nullable Integer percentageWidth) {
 		if (component == null) {
 			return;
 		}
@@ -500,6 +529,9 @@ public class ClientViewRenderer extends ViewRenderer {
 			else { // a form item
 				FormItem formItem = getCurrentFormItem();
 				FormColumn formColumn = getCurrentFormColumn();
+				if ((formItem == null) || (formColumn == null)) { // cannot happen as a form widget is always within a form item and column
+					throw new IllegalStateException("Form widget " + widgetLabel + " is not within a form item and column");
+				}
 				if (isCurrentWidgetShowLabel()) {
 					lr.layoutFormItemLabel(current,
 											component,
@@ -533,14 +565,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormButton(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									Action action,
-									Button button) {
+	public void renderFormButton(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull Action action,
+									@Nonnull Button button) {
 		renderButton(name,
 						label,
 						getCurrentWidgetColspan(),
@@ -556,27 +588,27 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderButton(String name,
-								String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action,
-								Button button) {
+	public void renderButton(@Nullable String name,
+								@Nullable String label,
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull Action action,
+								@Nonnull Button button) {
 		renderButton(name, label, 0, iconUrl, iconStyleClass, toolTip, confirmationText, action, button);
 	}
 
 	@SuppressWarnings({"java:S107", "unused"}) // Long parameter list preserves the existing framework/API contract.
-	private void renderButton(String name,
-								String label,
+	private void renderButton(@Nullable String name,
+								@Nullable String label,
 								int formColspan,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action,
-								Button button) {
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull Action action,
+								@Nonnull Button button) {
 		ImplicitActionName type = action.getImplicitName();
 		RenderedComponent c = null;
 		if (ImplicitActionName.Report.equals(type)) {
@@ -591,7 +623,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				action.getInvisibleConditionName(), 
+	    				action.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				button.getPixelWidth(), 
@@ -603,11 +635,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormZoomIn(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									ZoomIn zoomIn) {
+	public void renderFormZoomIn(@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nonnull ZoomIn zoomIn) {
 		renderZoomIn(label, getCurrentWidgetColspan(), iconUrl, iconStyleClass, toolTip, zoomIn);
 	}
 
@@ -615,21 +647,21 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderZoomIn(String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								ZoomIn zoomIn) {
+	public void renderZoomIn(@Nullable String label,
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nonnull ZoomIn zoomIn) {
 		renderZoomIn(label, 0, iconUrl, iconStyleClass, toolTip, zoomIn);
 	}
 
 	@SuppressWarnings("unused")
-	private void renderZoomIn(String label,
+	private void renderZoomIn(@Nullable String label,
 								int formColspan,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								ZoomIn zoomIn) {
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nonnull ZoomIn zoomIn) {
 //		String title = getCurrentWidgetLabel();
 //		boolean required = isCurrentWidgetRequired();
 		RenderedComponent c = cr.label(null, "zoomIn " + label); // TODO geometry
@@ -637,7 +669,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				zoomIn.getInvisibleConditionName(), 
+	    				zoomIn.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				zoomIn.getPixelWidth(), 
@@ -650,7 +682,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderBoundColumnGeometry(Geometry geometry) {
+	public void renderBoundColumnGeometry(@Nonnull Geometry geometry) {
 		renderGeometry(0, geometry);
 	}
 
@@ -659,7 +691,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderFormGeometry(Geometry geometry) {
+	public void renderFormGeometry(@Nonnull Geometry geometry) {
 		renderGeometry(getCurrentWidgetColspan(), geometry);
 	}
 
@@ -670,7 +702,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param formColspan the form column span to apply when rendering inside a form
 	 * @param geometry    the geometry widget metadata being rendered
 	 */
-	public void renderGeometry(int formColspan, Geometry geometry) {
+	public void renderGeometry(int formColspan, @Nonnull Geometry geometry) {
 //		String title = getCurrentWidgetLabel();
 //		boolean required = isCurrentWidgetRequired();
 		RenderedComponent c = cr.label(null, "geometry"); // TODO geometry
@@ -678,7 +710,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null,
 	    				formColspan,
 	    				null, 
-	    				geometry.getInvisibleConditionName(), 
+	    				geometry.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				geometry.getPixelWidth(), 
@@ -690,7 +722,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnGeometry(Geometry geometry) {
+	public void renderedBoundColumnGeometry(@Nonnull Geometry geometry) {
 		renderedFormGeometry(geometry);
 	}
 
@@ -698,7 +730,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormGeometry(Geometry geometry) {
+	public void renderedFormGeometry(@Nonnull Geometry geometry) {
 		eventSource = null;
 	}
 
@@ -706,7 +738,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormGeometryMap(GeometryMap geometry) {
+	public void renderFormGeometryMap(@Nonnull GeometryMap geometry) {
 //		String title = getCurrentWidgetLabel();
 //		boolean required = isCurrentWidgetRequired();
 		RenderedComponent c = cr.label(null, "geometryMap"); // TODO geometryMap
@@ -714,7 +746,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				getCurrentWidgetColspan(),
 	    				null, 
-	    				geometry.getInvisibleConditionName(), 
+	    				geometry.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				geometry.getPixelWidth(), 
@@ -726,7 +758,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormGeometryMap(GeometryMap geometry) {
+	public void renderedFormGeometryMap(@Nonnull GeometryMap geometry) {
 		eventSource = null;
 	}
 
@@ -735,12 +767,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderMap(MapDisplay map) {
+	public void renderMap(@Nonnull MapDisplay map) {
 		RenderedComponent l = cr.label(null, "map"); // TODO map
 	    addComponent(null, 
 	    				0,
 	    				null, 
-	    				map.getInvisibleConditionName(), 
+	    				map.getInvisibleCondition(), 
 	    				null,
 	    				l, 
 	    				map.getPixelWidth(), 
@@ -752,12 +784,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderChart(Chart chart) {
+	public void renderChart(@Nonnull Chart chart) {
 		RenderedComponent l = cr.label(null, "chart"); // TODO chart
 	    addComponent(null, 
 	    				0,
 	    				null, 
-	    				chart.getInvisibleConditionName(), 
+	    				chart.getInvisibleCondition(), 
 	    				null,
 	    				l, 
 	    				chart.getPixelWidth(), 
@@ -769,7 +801,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormDialogButton(String label, DialogButton button) {
+	public void renderFormDialogButton(@Nullable String label, @Nonnull DialogButton button) {
 		renderDialogButton(label, getCurrentWidgetColspan(), button);
 	}
 
@@ -778,19 +810,19 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderDialogButton(String label, DialogButton button) {
+	public void renderDialogButton(@Nullable String label, @Nonnull DialogButton button) {
 		renderDialogButton(label, 0, button);
 	}
 
 	/**
 	 * Renders a dialog-button placeholder with explicit form colspan handling.
 	 */
-	private void renderDialogButton(@SuppressWarnings("unused") String label, int formColspan, DialogButton button) {
+	private void renderDialogButton(@SuppressWarnings("unused") @Nullable String label, int formColspan, @Nonnull DialogButton button) {
 		RenderedComponent bn = cr.label(null, "dialogButton"); // TODO dialog button
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				button.getInvisibleConditionName(), 
+	    				button.getInvisibleCondition(), 
 	    				null,
 	    				bn, 
 	    				null, 
@@ -802,7 +834,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderContainerColumnDynamicImage(DynamicImage image) {
+	public void renderContainerColumnDynamicImage(@Nonnull DynamicImage image) {
 		renderDynamicImage(image);
 	}
 
@@ -810,12 +842,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDynamicImage(DynamicImage image) {
+	public void renderDynamicImage(@Nonnull DynamicImage image) {
 		RenderedComponent i = cr.dynamicImage(null, image, module.getName(), document.getName());
 		addComponent(null, 
 						0,
 						null, 
-						image.getInvisibleConditionName(), 
+						image.getInvisibleCondition(), 
 						null,
 						i, 
 						image.getPixelWidth(), 
@@ -827,7 +859,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormSpacer(Spacer spacer) {
+	public void renderFormSpacer(@Nonnull Spacer spacer) {
 		renderSpacer(getCurrentWidgetColspan(), spacer);
 	}
 
@@ -835,20 +867,20 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderSpacer(Spacer spacer) {
+	public void renderSpacer(@Nonnull Spacer spacer) {
 		renderSpacer(0, spacer);
 	}
 
 	/**
 	 * Renders a spacer component with explicit form colspan handling.
 	 */
-	private void renderSpacer(int formColspan, Spacer spacer) {
+	private void renderSpacer(int formColspan, @Nonnull Spacer spacer) {
 		RenderedComponent component = cr.spacer(null, spacer);
 		if (component != null) {
 			addComponent(null, 
 							formColspan,
 							null, 
-							spacer.getInvisibleConditionName(), 
+							spacer.getInvisibleCondition(), 
 							null,
 							component, 
 							spacer.getPixelWidth(), 
@@ -861,7 +893,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormStaticImage(String fileUrl, StaticImage image) {
+	public void renderFormStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 		renderStaticImage(fileUrl, getCurrentWidgetColspan(), image);
 	}
 
@@ -870,7 +902,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
+	public void renderContainerColumnStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 		renderStaticImage(fileUrl, 0, image);
 	}
 
@@ -879,7 +911,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderStaticImage(String fileUrl, StaticImage image) {
+	public void renderStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 		renderStaticImage(fileUrl, 0, image);
 	}
 
@@ -890,12 +922,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param formColspan the form column span to apply when rendering inside a form
 	 * @param image       the static-image metadata being rendered
 	 */
-	public void renderStaticImage(String fileUrl, int formColspan, StaticImage image) {
+	public void renderStaticImage(@Nonnull String fileUrl, int formColspan, @Nonnull StaticImage image) {
 		RenderedComponent i = cr.staticImage(null, fileUrl, image);
 		addComponent(null, 
 						formColspan,
 						null, 
-						image.getInvisibleConditionName(), 
+						image.getInvisibleCondition(), 
 						null,
 						i, 
 						image.getPixelWidth(), 
@@ -907,7 +939,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormBlurb(String markup, Blurb blurb) {
+	public void renderFormBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 		renderBlurb(markup, getCurrentWidgetColspan(), blurb);
 	}
 
@@ -915,7 +947,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
+	public void renderContainerColumnBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 		renderBlurb(markup, 0, blurb);
 	}
 
@@ -924,14 +956,17 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderBlurb(String markup, Blurb blurb) {
+	public void renderBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 		renderBlurb(markup, 0, blurb);
 	}
 
 	/**
 	 * Renders a blurb using either literal markup or a bound expression.
 	 */
-	private void renderBlurb(String markup, int formColspan, Blurb blurb) {
+	private void renderBlurb(@Nullable String markup, int formColspan, @Nonnull Blurb blurb) {
+		if (markup == null) { // validated when the view is validated
+			throw new MetaDataException("A Blurb has no markup specified.");
+		}
 		String value = null;
 		String binding = null;
 		if (markup.indexOf('{') > -1) {
@@ -944,7 +979,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						formColspan,
 						null, 
-						blurb.getInvisibleConditionName(), 
+						blurb.getInvisibleCondition(), 
 						null,
 						c, 
 						blurb.getPixelWidth(), 
@@ -956,7 +991,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormLink(String value, Link link) {
+	public void renderFormLink(@Nullable String value, @Nonnull Link link) {
 		renderLink(value, getCurrentWidgetColspan(), link);
 	}
 
@@ -965,7 +1000,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderContainerColumnLink(String value, Link link) {
+	public void renderContainerColumnLink(@Nullable String value, @Nonnull Link link) {
 		renderLink(value, 0, link);
 	}
 
@@ -973,7 +1008,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderLink(String value, Link link) {
+	public void renderLink(@Nullable String value, @Nonnull Link link) {
 		renderLink(value, 0, link);
 	}
 
@@ -981,7 +1016,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Renders a link by resolving its reference type into a target client
 	 * component.
 	 */
-	private void renderLink(@SuppressWarnings("unused") String value, int formColspan, Link link) {
+	private void renderLink(@SuppressWarnings("unused") @Nullable String value, int formColspan, @Nonnull Link link) {
 		org.skyve.impl.metadata.view.reference.Reference outerReference = link.getReference();
 		@SuppressWarnings("unused")
 		final ReferenceTarget target = link.getTarget();
@@ -991,7 +1026,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processResourceReference(ResourceReference reference) {
+			public void processResourceReference(@Nonnull ResourceReference reference) {
 				c.set(cr.label(null, "resource link")); // TODO link
 			}
 
@@ -999,7 +1034,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processReportReference(ReportReference reference) {
+			public void processReportReference(@Nonnull ReportReference reference) {
 				c.set(cr.label(null, "report link")); // TODO link
 			}
 
@@ -1007,7 +1042,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processQueryListViewReference(QueryListViewReference reference) {
+			public void processQueryListViewReference(@Nonnull QueryListViewReference reference) {
 				c.set(cr.label(null, "list view link")); // TODO link
 			}
 
@@ -1015,7 +1050,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processImplicitActionReference(ImplicitActionReference reference) {
+			public void processImplicitActionReference(@Nonnull ImplicitActionReference reference) {
 				c.set(cr.label(null, "implicit action link")); // TODO link
 			}
 
@@ -1023,7 +1058,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processExternalReference(ExternalReference reference) {
+			public void processExternalReference(@Nonnull ExternalReference reference) {
 				c.set(cr.label(null, "external link")); // TODO link
 			}
 
@@ -1031,19 +1066,19 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processEditViewReference(EditViewReference reference) {
+			public void processEditViewReference(@Nonnull EditViewReference reference) {
 				StringBuilder href = new StringBuilder(128);
 				href.append("./?a=").append(WebAction.e.toString()).append("&m=").append(reference.getModuleName());
 				href.append("&d=").append(reference.getDocumentName()).append("&i={").append(reference.getBinding()).append('}');
 				c.set(cr.label(null, "external link")); // TODO link
-				//c.set(cr.outputLink(listVar, value, href.toString(), link.getInvisibleConditionName(), target));
+				//c.set(cr.outputLink(listVar, value, href.toString(), link.getInvisibleCondition(), target));
 			}
 
 			/**
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processDefaultListViewReference(DefaultListViewReference reference) {
+			public void processDefaultListViewReference(@Nonnull DefaultListViewReference reference) {
 				c.set(cr.label(null, "default list view link")); // TODO link
 			}
 
@@ -1051,7 +1086,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processContentReference(ContentReference reference) {
+			public void processContentReference(@Nonnull ContentReference reference) {
 				c.set(cr.label(null, "content link")); // TODO link
 			}
 
@@ -1059,7 +1094,7 @@ public class ClientViewRenderer extends ViewRenderer {
 			 * Executes this renderer lifecycle override for the current view context.
 			 */
 			@Override
-			public void processActionReference(ActionReference reference) {
+			public void processActionReference(@Nonnull ActionReference reference) {
 /* TODO we need the dataWidget binding to make this call
 				Action action = obtainActionForActionReference(reference, customer, module, document, dataWidgetBinding, cr.userAgentType);
 				if (action != null) {
@@ -1072,7 +1107,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(null, 
 						formColspan,
 						null, 
-						link.getInvisibleConditionName(), 
+						link.getInvisibleCondition(), 
 						null,
 						c.get(), 
 						link.getPixelWidth(), 
@@ -1084,7 +1119,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormLabel(String value, boolean boundValue, Label label) {
+	public void renderFormLabel(@Nullable String value, boolean boundValue, @Nonnull Label label) {
 		renderLabel(value, getCurrentWidgetColspan(), boundValue, label);
 	}
 
@@ -1092,7 +1127,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderContainerColumnLabel(String value, Label label) {
+	public void renderContainerColumnLabel(@Nullable String value, @Nonnull Label label) {
 		renderLabel(value, 0, false, label);
 	}
 
@@ -1100,7 +1135,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderLabel(String value, boolean boundValue, Label label) {
+	public void renderLabel(@Nullable String value, boolean boundValue, @Nonnull Label label) {
 		renderLabel(value, 0, boundValue, label);
 	}
 
@@ -1108,7 +1143,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Renders a label with optional bound-value semantics and explicit form colspan
 	 * handling.
 	 */
-	private void renderLabel(String value, int formColspan, boolean boundValue, Label label) {
+	private void renderLabel(@Nullable String value, int formColspan, boolean boundValue, @Nonnull Label label) {
 		String ultimateValue = value;
 		String binding = label.getBinding();
 		if (boundValue) {
@@ -1119,7 +1154,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	    addComponent(null, 
 	    				formColspan,
 	    				null, 
-	    				label.getInvisibleConditionName(), 
+	    				label.getInvisibleCondition(), 
 	    				null,
 	    				c, 
 	    				label.getPixelWidth(), 
@@ -1131,12 +1166,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormProgressBar(ProgressBar progressBar) {
+	public void renderFormProgressBar(@Nonnull ProgressBar progressBar) {
 		RenderedComponent p = cr.label(null, "progressBar"); // TODO progress bar
 	    addComponent(null,
 	    				getCurrentWidgetColspan(),
 	    				null, 
-	    				progressBar.getInvisibleConditionName(), 
+	    				progressBar.getInvisibleCondition(), 
 	    				null,
 	    				p, 
 	    				progressBar.getPixelWidth(), 
@@ -1148,22 +1183,28 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+	public void renderListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
+		String modelDocumentName = getCurrentListWidgetModelDocumentName();
+		String modelName = getCurrentListWidgetModelName();
+		ListModel<Bean> model = getCurrentListWidgetModel();
+		if ((modelDocumentName == null) || (modelName == null) || (model == null)) { // cannot happen as the list widget is pre-processed
+			throw new IllegalStateException("List grid " + title + " is rendered without a list model");
+		}
 		RenderedComponent l = cr.listGrid(null,
-											getCurrentListWidgetModelDocumentName(),
-											getCurrentListWidgetModelName(),
-											getCurrentListWidgetModel(),
+											modelDocumentName,
+											modelName,
+											model,
 											title,
 											grid,
 											aggregateQuery);
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleCondition());
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+	public void renderListGridProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 	}
 
@@ -1171,7 +1212,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
+	public void renderListGridContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 	}
 
@@ -1179,7 +1220,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+	public void renderedListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
 		addedToContainer();
 	}
 
@@ -1187,24 +1228,30 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListRepeater(String title, ListRepeater repeater) {
+	public void renderListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
+		String modelDocumentName = getCurrentListWidgetModelDocumentName();
+		String modelName = getCurrentListWidgetModelName();
+		ListModel<Bean> model = getCurrentListWidgetModel();
+		if ((modelDocumentName == null) || (modelName == null) || (model == null)) { // cannot happen as the list widget is pre-processed
+			throw new IllegalStateException("List repeater " + title + " is rendered without a list model");
+		}
 		RenderedComponent r = cr.listRepeater(null,
-												getCurrentListWidgetModelDocumentName(), 
-												getCurrentListWidgetModelName(), 
-												getCurrentListWidgetModel(), 
+												modelDocumentName, 
+												modelName, 
+												model, 
 												repeater.getFilterParameters(),
 												repeater.getParameters(),
 												title,
 												Boolean.TRUE.equals(repeater.getShowColumnHeaders()),
 												Boolean.TRUE.equals(repeater.getShowGrid()));
-		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+		addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleCondition());
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
+	public void renderListRepeaterProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 	}
 
@@ -1212,7 +1259,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
+	public void renderListRepeaterContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 	}
 
@@ -1220,7 +1267,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedListRepeater(String title, ListRepeater repeater) {
+	public void renderedListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
 		addedToContainer();
 	}
 
@@ -1228,16 +1275,16 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderTreeGrid(String title, TreeGrid grid) {
+	public void renderTreeGrid(@Nullable String title, @Nonnull TreeGrid grid) {
 		RenderedComponent l = cr.label(null, "treeGrid");
-		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName()); // TODO tree grid
+		addToContainer(l, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleCondition()); // TODO tree grid
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+	public void renderTreeGridProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 	}
 
@@ -1245,7 +1292,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
+	public void renderTreeGridContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 	}
 
@@ -1253,7 +1300,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedTreeGrid(String title, TreeGrid grid) {
+	public void renderedTreeGrid(@Nullable String title, @Nonnull TreeGrid grid) {
 		addedToContainer();
 	}
 
@@ -1264,7 +1311,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDataGrid(String title, DataGrid grid) {
+	public void renderDataGrid(@Nullable String title, @Nonnull DataGrid grid) {
 		// Determine if the grid collection is ordered
 		dataWidgetBinding = grid.getBinding();
 		boolean ordered = false;
@@ -1279,7 +1326,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		// Create the datagrid faces component
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
 		RenderedComponent g = cr.dataGrid(null, dataWidgetVar, ordered, title, grid);
-        addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleConditionName());
+        addToContainer(g, grid.getPixelWidth(), grid.getResponsiveWidth(), grid.getPercentageWidth(), grid.getInvisibleCondition());
 		gridColumnExpression = new StringBuilder(512);
 	}
 
@@ -1287,12 +1334,12 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDataRepeater(String title, DataRepeater repeater) {
+	public void renderDataRepeater(@Nullable String title, @Nonnull DataRepeater repeater) {
 		// Create the data repeater faces component
 		dataWidgetBinding = repeater.getBinding();
 		dataWidgetVar = BindUtil.sanitiseBinding(dataWidgetBinding) + "Row";
 		RenderedComponent r = cr.dataRepeater(null, dataWidgetVar, title, repeater);
-        addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleConditionName());
+        addToContainer(r, repeater.getPixelWidth(), repeater.getResponsiveWidth(), repeater.getPercentageWidth(), repeater.getInvisibleCondition());
 		gridColumnExpression = new StringBuilder(512);
 	}
 
@@ -1300,7 +1347,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedDataGrid(String title, DataGrid grid) {
+	public void renderedDataGrid(@Nullable String title, @Nonnull DataGrid grid) {
 		renderedDataWidget(grid);
 	}
 
@@ -1308,14 +1355,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedDataRepeater(String title, DataRepeater repeater) {
+	public void renderedDataRepeater(@Nullable String title, @Nonnull DataRepeater repeater) {
 		renderedDataWidget(repeater);
 	}
 
 	/**
 	 * Finalises rendering for a data-grid style widget and clears row-scoped state.
 	 */
-	private void renderedDataWidget(AbstractDataWidget widget) {
+	private void renderedDataWidget(@Nonnull AbstractDataWidget widget) {
 		// Determine the document alias
 		String alias = null;
 		TargetMetaData target = getCurrentTarget();
@@ -1347,7 +1394,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderDataRepeaterBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		renderDataGridBoundColumn(title, column);
 	}
 
@@ -1355,7 +1402,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderDataGridBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		String binding = column.getBinding();
 		if (binding == null) {
 			binding = Bean.BIZ_KEY;
@@ -1371,7 +1418,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		}
 		current = cr.addDataGridBoundColumn(null,
 												current, 
-												getCurrentDataWidget(),
+												getNullSafeCurrentDataWidget(),
 												column, 
 												dataWidgetVar,
 												title, 
@@ -1383,7 +1430,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderedDataRepeaterBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		renderedDataGridBoundColumn(title, column);
 	}
 
@@ -1391,7 +1438,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderedDataGridBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		current = cr.addedDataGridBoundColumn(null, current);
 	}
 
@@ -1399,7 +1446,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderDataRepeaterContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		renderDataGridContainerColumn(title, column);
 	}
 
@@ -1407,15 +1454,15 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
-		current = cr.addDataGridContainerColumn(null, current, getCurrentDataWidget(), title, column);
+	public void renderDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
+		current = cr.addDataGridContainerColumn(null, current, getNullSafeCurrentDataWidget(), title, column);
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderedDataRepeaterContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		renderedDataGridContainerColumn(title, column);
 	}
 
@@ -1423,7 +1470,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderedDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		current = cr.addedDataGridContainerColumn(null, current);
 	}
 
@@ -1434,7 +1481,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnCheckBox(CheckBox checkBox) {
+	public void renderBoundColumnCheckBox(@Nonnull CheckBox checkBox) {
 		renderCheckBox(0, checkBox);
 	}
 
@@ -1442,14 +1489,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormCheckBox(CheckBox checkBox) {
+	public void renderFormCheckBox(@Nonnull CheckBox checkBox) {
 		renderCheckBox(getCurrentWidgetColspan(), checkBox);
 	}
 
 	/**
 	 * Renders a checkbox input with explicit form colspan handling.
 	 */
-	private void renderCheckBox(int formColspan, CheckBox checkBox) {
+	private void renderCheckBox(int formColspan, @Nonnull CheckBox checkBox) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.checkBox(null, dataWidgetVar, checkBox, title, requiredMessage);
@@ -1457,7 +1504,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						requiredMessage,
-						checkBox.getInvisibleConditionName(), 
+						checkBox.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						checkBox.getPixelWidth(), 
@@ -1469,7 +1516,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
+	public void renderedBoundColumnCheckBox(@Nonnull CheckBox checkBox) {
 		renderedFormCheckBox(checkBox);
 	}
 
@@ -1477,7 +1524,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormCheckBox(CheckBox checkBox) {
+	public void renderedFormCheckBox(@Nonnull CheckBox checkBox) {
 		eventSource = null;
 	}
 
@@ -1485,17 +1532,17 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderCheckMembership(CheckMembership membership) {
+	public void renderCheckMembership(@Nonnull CheckMembership membership) {
 		RenderedComponent c = cr.label(null, "checkMembership"); // TODO check membership
         eventSource = c;
-        addToContainer(c, null, null, null, membership.getInvisibleConditionName());
+        addToContainer(c, null, null, null, membership.getInvisibleCondition());
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedCheckMembership(CheckMembership membership) {
+	public void renderedCheckMembership(@Nonnull CheckMembership membership) {
 	    addedToContainer();
 	    eventSource = null;
 	}
@@ -1504,7 +1551,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnColourPicker(ColourPicker colour) {
+	public void renderBoundColumnColourPicker(@Nonnull ColourPicker colour) {
 		renderColourPicker(0, colour);
 	}
 
@@ -1512,14 +1559,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormColourPicker(ColourPicker colour) {
+	public void renderFormColourPicker(@Nonnull ColourPicker colour) {
 		renderColourPicker(getCurrentWidgetColspan(), colour);
 	}
 
 	/**
 	 * Renders a colour-picker input with explicit form colspan handling.
 	 */
-	private void renderColourPicker(int formColspan, ColourPicker colour) {
+	private void renderColourPicker(int formColspan, @Nonnull ColourPicker colour) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.colourPicker(null, dataWidgetVar, colour, title, requiredMessage);
@@ -1527,7 +1574,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						colour.getInvisibleConditionName(), 
+						colour.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						colour.getPixelWidth(), 
@@ -1539,7 +1586,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnColourPicker(ColourPicker colour) {
+	public void renderedBoundColumnColourPicker(@Nonnull ColourPicker colour) {
 		renderedFormColourPicker(colour);
 	}
 
@@ -1547,7 +1594,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormColourPicker(ColourPicker colour) {
+	public void renderedFormColourPicker(@Nonnull ColourPicker colour) {
 		eventSource = null;
 	}
 
@@ -1555,7 +1602,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnCombo(Combo combo) {
+	public void renderBoundColumnCombo(@Nonnull Combo combo) {
 		renderCombo(0, combo);
 	}
 
@@ -1563,14 +1610,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormCombo(Combo combo) {
+	public void renderFormCombo(@Nonnull Combo combo) {
 		renderCombo(getCurrentWidgetColspan(), combo);
 	}
 
 	/**
 	 * Renders a combo input with explicit form colspan handling.
 	 */
-	private void renderCombo(int formColspan, Combo combo) {
+	private void renderCombo(int formColspan, @Nonnull Combo combo) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent s = cr.combo(null, dataWidgetVar, combo, title, requiredMessage);
@@ -1578,7 +1625,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						combo.getInvisibleConditionName(), 
+						combo.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						s, 
 						combo.getPixelWidth(), 
@@ -1590,7 +1637,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnCombo(Combo combo) {
+	public void renderedBoundColumnCombo(@Nonnull Combo combo) {
 		renderedFormCombo(combo);
 	}
 
@@ -1598,7 +1645,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormCombo(Combo combo) {
+	public void renderedFormCombo(@Nonnull Combo combo) {
 		eventSource = null;
 	}
 
@@ -1645,7 +1692,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title,
 						formColspan,
 						null,
-						content.getInvisibleConditionName(),
+						content.getInvisibleCondition(),
 						getCurrentWidgetHelp(),
 						c,
 						content.getPixelWidth(),
@@ -1657,14 +1704,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormContentSignature(ContentSignature signature) {
+	public void renderFormContentSignature(@Nonnull ContentSignature signature) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.contentSignature(null, dataWidgetVar, signature, title, requiredMessage);
         addComponent(title, 
         				getCurrentWidgetColspan(),
         				null, 
-        				signature.getInvisibleConditionName(), 
+        				signature.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				signature.getPixelWidth(), 
@@ -1676,7 +1723,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnHTML(HTML html) {
+	public void renderBoundColumnHTML(@Nonnull HTML html) {
 		renderHTML(0, html);
 	}
 
@@ -1684,21 +1731,21 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormHTML(HTML html) {
+	public void renderFormHTML(@Nonnull HTML html) {
 		renderHTML(getCurrentWidgetColspan(), html);
 	}
 
 	/**
 	 * Renders an HTML input with explicit form colspan handling.
 	 */
-	private void renderHTML(int formColspan, HTML html) {
+	private void renderHTML(int formColspan, @Nonnull HTML html) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.html(null, dataWidgetVar, html, title, requiredMessage);
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				html.getInvisibleConditionName(), 
+        				html.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				html.getPixelWidth(), 
@@ -1710,17 +1757,17 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+	public void renderListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
 		RenderedComponent c = cr.listMembership(null, membership);
 		eventSource = c;
-		addToContainer(c, membership.getPixelWidth(), null, null, membership.getInvisibleConditionName());
+		addToContainer(c, membership.getPixelWidth(), null, null, membership.getInvisibleCondition());
 	}
 
 	/**
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+	public void renderedListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
 		addedToContainer();
 		eventSource = null;
 	}
@@ -1729,9 +1776,9 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderComparison(Comparison comparison) {
+	public void renderComparison(@Nonnull Comparison comparison) {
 		RenderedComponent c = cr.label(null, "comparison"); // TODO comparison
-        addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleConditionName());
+        addToContainer(c, comparison.getPixelWidth(), comparison.getResponsiveWidth(), comparison.getPercentageWidth(), comparison.getInvisibleCondition());
         addedToContainer();
 	}
 
@@ -1739,11 +1786,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
+	public void renderBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 													boolean canCreate,
 													boolean canUpdate,
-													String descriptionBinding,
-													LookupDescription lookup) {
+													@Nonnull String descriptionBinding,
+													@Nonnull LookupDescription lookup) {
 		renderLookupDescription(0, query, canCreate, canUpdate, descriptionBinding, lookup);
 	}
 
@@ -1751,20 +1798,20 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormLookupDescription(MetaDataQueryDefinition query,
+	public void renderFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 												boolean canCreate,
 												boolean canUpdate,
-												String descriptionBinding,
-												LookupDescription lookup) {
+												@Nonnull String descriptionBinding,
+												@Nonnull LookupDescription lookup) {
 		renderLookupDescription(getCurrentWidgetColspan(), query, canCreate, canUpdate, descriptionBinding, lookup);
 	}
 	
 	private void renderLookupDescription(int formColspan,
-											MetaDataQueryDefinition query,
+											@Nullable MetaDataQueryDefinition query,
 											@SuppressWarnings("unused") boolean canCreate,
 											@SuppressWarnings("unused") boolean canUpdate,
-											String descriptionBinding,
-											LookupDescription lookup) {
+											@Nonnull String descriptionBinding,
+											@Nonnull LookupDescription lookup) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.lookupDescription(null,
@@ -1778,7 +1825,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title,
         				formColspan,
         				requiredMessage, 
-        				lookup.getInvisibleConditionName(), 
+        				lookup.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				lookup.getPixelWidth(), 
@@ -1790,11 +1837,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
+	public void renderedBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 														boolean canCreate,
 														boolean canUpdate,
-														String descriptionBinding,
-														LookupDescription lookup) {
+														@Nonnull String descriptionBinding,
+														@Nonnull LookupDescription lookup) {
 		renderedFormLookupDescription(query, canCreate, canUpdate, descriptionBinding, lookup);
 	}
 
@@ -1802,11 +1849,11 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
+	public void renderedFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 												boolean canCreate,
 												boolean canUpdate,
-												String descriptionBinding,
-												LookupDescription lookup) {
+												@Nonnull String descriptionBinding,
+												@Nonnull LookupDescription lookup) {
 		eventSource = null;
 	}
 
@@ -1814,7 +1861,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnPassword(Password password) {
+	public void renderBoundColumnPassword(@Nonnull Password password) {
 		renderPassword(0, password);
 	}
 
@@ -1822,14 +1869,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormPassword(Password password) {
+	public void renderFormPassword(@Nonnull Password password) {
 		renderPassword(getCurrentWidgetColspan(), password);
 	}
 
 	/**
 	 * Renders a password input with explicit form colspan handling.
 	 */
-	private void renderPassword(int formColspan, Password password) {
+	private void renderPassword(int formColspan, @Nonnull Password password) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.password(null, dataWidgetVar, password, title, requiredMessage);
@@ -1837,7 +1884,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title,
         				formColspan,
         				requiredMessage, 
-        				password.getInvisibleConditionName(), 
+        				password.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				password.getPixelWidth(), 
@@ -1849,7 +1896,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnPassword(Password password) {
+	public void renderedBoundColumnPassword(@Nonnull Password password) {
 		renderedFormPassword(password);
 	}
 
@@ -1857,7 +1904,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormPassword(Password password) {
+	public void renderedFormPassword(@Nonnull Password password) {
 		eventSource = null;
 	}
 
@@ -1865,7 +1912,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnRadio(Radio radio) {
+	public void renderBoundColumnRadio(@Nonnull Radio radio) {
 		renderRadio(0, radio);
 	}
 
@@ -1873,14 +1920,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormRadio(Radio radio) {
+	public void renderFormRadio(@Nonnull Radio radio) {
 		renderRadio(getCurrentWidgetColspan(), radio);
 	}
 
 	/**
 	 * Renders a radio input with explicit form colspan handling.
 	 */
-	private void renderRadio(int formColspan, Radio radio) {
+	private void renderRadio(int formColspan, @Nonnull Radio radio) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.radio(null, dataWidgetVar, radio, title, requiredMessage);
@@ -1888,7 +1935,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						radio.getInvisibleConditionName(), 
+						radio.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						radio.getPixelWidth(), 
@@ -1900,7 +1947,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnRadio(Radio radio) {
+	public void renderedBoundColumnRadio(@Nonnull Radio radio) {
 		renderedFormRadio(radio);
 	}
 
@@ -1908,7 +1955,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormRadio(Radio radio) {
+	public void renderedFormRadio(@Nonnull Radio radio) {
 		eventSource = null;
 	}
 
@@ -1916,7 +1963,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnRichText(RichText text) {
+	public void renderBoundColumnRichText(@Nonnull RichText text) {
 		renderRichText(0, text);
 	}
 
@@ -1924,14 +1971,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormRichText(RichText text) {
+	public void renderFormRichText(@Nonnull RichText text) {
 		renderRichText(getCurrentWidgetColspan(), text);
 	}
 
 	/**
 	 * Renders a rich-text input with explicit form colspan handling.
 	 */
-	private void renderRichText(int formColspan, RichText text) {
+	private void renderRichText(int formColspan, @Nonnull RichText text) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.richText(null, dataWidgetVar, text, title, requiredMessage);
@@ -1939,7 +1986,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				text.getInvisibleConditionName(), 
+        				text.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
@@ -1951,7 +1998,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnRichText(RichText text) {
+	public void renderedBoundColumnRichText(@Nonnull RichText text) {
 		renderedFormRichText(text);
 	}
 
@@ -1959,7 +2006,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormRichText(RichText text) {
+	public void renderedFormRichText(@Nonnull RichText text) {
 		eventSource = null;
 	}
 
@@ -1967,7 +2014,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnSlider(Slider slider) {
+	public void renderBoundColumnSlider(@Nonnull Slider slider) {
 		renderSlider(0, slider);
 	}
 
@@ -1975,14 +2022,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormSlider(Slider slider) {
+	public void renderFormSlider(@Nonnull Slider slider) {
 		renderSlider(getCurrentWidgetColspan(), slider);
 	}
 
 	/**
 	 * Renders a slider input placeholder with explicit form colspan handling.
 	 */
-	private void renderSlider(int formColspan, Slider slider) {
+	private void renderSlider(int formColspan, @Nonnull Slider slider) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.label(null, "slider"); // TODO slider
@@ -1990,7 +2037,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				slider.getInvisibleConditionName(), 
+        				slider.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				slider.getPixelWidth(), 
@@ -2002,7 +2049,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnSlider(Slider slider) {
+	public void renderedBoundColumnSlider(@Nonnull Slider slider) {
 		renderedFormSlider(slider);
 	}
 
@@ -2010,7 +2057,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormSlider(Slider slider) {
+	public void renderedFormSlider(@Nonnull Slider slider) {
 		eventSource = null;
 	}
 
@@ -2018,7 +2065,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnSpinner(Spinner spinner) {
+	public void renderBoundColumnSpinner(@Nonnull Spinner spinner) {
 		renderSpinner(0, spinner);
 	}
 
@@ -2026,14 +2073,14 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormSpinner(Spinner spinner) {
+	public void renderFormSpinner(@Nonnull Spinner spinner) {
 		renderSpinner(getCurrentWidgetColspan(), spinner);
 	}
 
 	/**
 	 * Renders a spinner input with explicit form colspan handling.
 	 */
-	private void renderSpinner(int formColspan, Spinner spinner) {
+	private void renderSpinner(int formColspan, @Nonnull Spinner spinner) {
 		String title = getCurrentWidgetLabel();
 		String requiredMessage = getCurrentWidgetRequiredMessage();
 		RenderedComponent c = cr.spinner(null, dataWidgetVar, spinner, title, requiredMessage);
@@ -2041,7 +2088,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title, 
         				formColspan,
         				requiredMessage, 
-        				spinner.getInvisibleConditionName(), 
+        				spinner.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				spinner.getPixelWidth(), 
@@ -2053,7 +2100,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnSpinner(Spinner spinner) {
+	public void renderedBoundColumnSpinner(@Nonnull Spinner spinner) {
 		renderedFormSpinner(spinner);
 	}
 
@@ -2061,7 +2108,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormSpinner(Spinner spinner) {
+	public void renderedFormSpinner(@Nonnull Spinner spinner) {
 		eventSource = null;
 	}
 
@@ -2069,7 +2116,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnTextArea(TextArea text) {
+	public void renderBoundColumnTextArea(@Nonnull TextArea text) {
 		renderTextArea(0, text);
 	}
 
@@ -2077,7 +2124,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormTextArea(TextArea text) {
+	public void renderFormTextArea(@Nonnull TextArea text) {
 		renderTextArea(getCurrentWidgetColspan(), text);
 	}
 
@@ -2085,7 +2132,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Renders a text-area input with attribute-derived length and explicit form
 	 * colspan handling.
 	 */
-	private void renderTextArea(int formColspan, TextArea text) {
+	private void renderTextArea(int formColspan, @Nonnull TextArea text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		Integer length = null;
@@ -2100,7 +2147,7 @@ public class ClientViewRenderer extends ViewRenderer {
         addComponent(title,
         				formColspan,
         				requiredMessage, 
-        				text.getInvisibleConditionName(), 
+        				text.getInvisibleCondition(), 
         				getCurrentWidgetHelp(),
         				c, 
         				text.getPixelWidth(), 
@@ -2112,7 +2159,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnTextArea(TextArea text) {
+	public void renderedBoundColumnTextArea(@Nonnull TextArea text) {
 		renderedFormTextArea(text);
 	}
 
@@ -2120,7 +2167,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormTextArea(TextArea text) {
+	public void renderedFormTextArea(@Nonnull TextArea text) {
 		eventSource = null;
 	}
 
@@ -2128,7 +2175,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBoundColumnTextField(TextField text) {
+	public void renderBoundColumnTextField(@Nonnull TextField text) {
 		renderTextField(0, text);
 	}
 
@@ -2136,7 +2183,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormTextField(TextField text) {
+	public void renderFormTextField(@Nonnull TextField text) {
 		renderTextField(getCurrentWidgetColspan(), text);
 	}
 
@@ -2148,7 +2195,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param text        the text-field metadata being rendered
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void renderTextField(int formColspan, TextField text) {
+	public void renderTextField(int formColspan, @Nonnull TextField text) {
 		TargetMetaData target = getCurrentTarget();
 		Attribute attribute = (target == null) ? null : target.getAttribute();
 		AttributeType type = (attribute == null) ? AttributeType.text : attribute.getAttributeType();
@@ -2197,7 +2244,7 @@ public class ClientViewRenderer extends ViewRenderer {
 		addComponent(title, 
 						formColspan,
 						requiredMessage, 
-						text.getInvisibleConditionName(), 
+						text.getInvisibleCondition(), 
 						getCurrentWidgetHelp(),
 						c, 
 						text.getPixelWidth(), 
@@ -2209,7 +2256,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderFormInject(Inject inject) {
+	public void renderFormInject(@Nonnull Inject inject) {
 		// TODO
 	}
 
@@ -2217,7 +2264,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderInject(Inject inject) {
+	public void renderInject(@Nonnull Inject inject) {
 		// TODO
 	}
 
@@ -2225,7 +2272,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedBoundColumnTextField(TextField text) {
+	public void renderedBoundColumnTextField(@Nonnull TextField text) {
 		renderedFormTextField(text);
 	}
 
@@ -2233,15 +2280,15 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedFormTextField(TextField text) {
+	public void renderedFormTextField(@Nonnull TextField text) {
 		eventSource = null;
 	}
 
-	private void addToContainer(RenderedComponent component, 
-									Integer pixelWidth, 
-									Integer responsiveWidth,
-									Integer percentageWidth,
-									String invisibleConditionName) {
+	private void addToContainer(@Nonnull RenderedComponent component, 
+									@Nullable Integer pixelWidth, 
+									@Nullable Integer responsiveWidth,
+									@Nullable Integer percentageWidth,
+									@Nullable String invisibleCondition) {
 		Deque<Container> currentContainers = getCurrentContainers();
 		if (currentContainers.isEmpty()) {
 			throw new IllegalStateException("Trying to add to a container but there is nothing in the stack of currentContainers!!");
@@ -2255,7 +2302,7 @@ public class ClientViewRenderer extends ViewRenderer {
 										pixelWidth, 
 										responsiveWidth, 
 										percentageWidth,
-										invisibleConditionName);
+										invisibleCondition);
 	}
 
 	/**
@@ -2275,7 +2322,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnChangedEventHandler(Changeable changeable,
+	public void visitOnChangedEventHandler(@Nonnull Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = changeable.getBinding();
@@ -2287,7 +2334,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable,
+	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
@@ -2297,7 +2344,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnFocusEventHandler(Focusable blurable,
+	public void visitOnFocusEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
@@ -2308,7 +2355,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable,
+	public void visitedOnFocusEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
@@ -2318,7 +2365,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnBlurEventHandler(Focusable blurable,
+	public void visitOnBlurEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (blurable instanceof Bound bound) ? bound.getBinding() : null;
@@ -2329,7 +2376,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable,
+	public void visitedOnBlurEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
@@ -2339,7 +2386,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnAddedEventHandler(Addable addable,
+	public void visitOnAddedEventHandler(@Nonnull Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
@@ -2350,7 +2397,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnAddedEventHandler(Addable addable,
+	public void visitedOnAddedEventHandler(@Nonnull Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
@@ -2361,7 +2408,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnEditedEventHandler(Editable editable,
+	public void visitOnEditedEventHandler(@Nonnull Editable editable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
@@ -2372,7 +2419,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnEditedEventHandler(Editable editable,
+	public void visitedOnEditedEventHandler(@Nonnull Editable editable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
@@ -2383,7 +2430,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnRemovedEventHandler(Removable removable,
+	public void visitOnRemovedEventHandler(@Nonnull Removable removable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
@@ -2394,7 +2441,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnRemovedEventHandler(Removable removable,
+	public void visitedOnRemovedEventHandler(@Nonnull Removable removable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// Cannot edit/zoom in on lookup descriptions in these faces views, so ignore the event
@@ -2405,17 +2452,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnSelectedEventHandler(Selectable selectable,
-												boolean parentVisible,
-												boolean parentEnabled) {
-		// TODO - need to account for data/list/tree grids in here
-	}
-
-	/**
-	 * Executes this renderer lifecycle override for the current view context.
-	 */
-	@Override
-	public void visitedOnSelectedEventHandler(Selectable editable,
+	public void visitOnSelectedEventHandler(@Nonnull Selectable selectable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// TODO - need to account for data/list/tree grids in here
@@ -2425,7 +2462,17 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnPickedEventHandler(LookupDescription lookup,
+	public void visitedOnSelectedEventHandler(@Nonnull Selectable editable,
+												boolean parentVisible,
+												boolean parentEnabled) {
+		// TODO - need to account for data/list/tree grids in here
+	}
+
+	/**
+	 * Executes this renderer lifecycle override for the current view context.
+	 */
+	@Override
+	public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		cr.addAjaxBehavior(eventSource, "itemSelect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(), lookup.getPickedActions());
@@ -2435,7 +2482,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnPickedEventHandler(LookupDescription lookup,
+	public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
@@ -2445,7 +2492,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitOnClearedEventHandler(LookupDescription lookup,
+	public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		cr.addAjaxBehavior(eventSource, "itemUnselect", dataWidgetBinding, dataWidgetVar, lookup.getBinding(), lookup.getClearedActions());
@@ -2455,7 +2502,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitedOnClearedEventHandler(LookupDescription lookup,
+	public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
@@ -2465,8 +2512,8 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender,
-											EventSource source,
+	public void visitRerenderEventAction(@Nonnull RerenderEventAction rerender,
+											@Nonnull EventSource source,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
@@ -2476,7 +2523,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
+	public void visitServerSideActionEventAction(@Nonnull Action action, @Nonnull ServerSideActionEventAction server) {
 		// event actions are handled when visiting the action handlers
 	}
 
@@ -2484,7 +2531,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
+	public void visitSetDisabledEventAction(@Nonnull SetDisabledEventAction setDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
@@ -2494,7 +2541,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
+	public void visitSetInvisibleEventAction(@Nonnull SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
@@ -2504,7 +2551,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+	public void visitToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
@@ -2514,7 +2561,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+	public void visitToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
 													boolean parentEnabled) {
 		// event actions are handled when visiting the action handlers
@@ -2524,13 +2571,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderCustomAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderCustomAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (RenderedComponent toolbarLayout : toolbarLayouts) {
@@ -2553,7 +2600,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param name   the implicit action type to render
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void processImplicitAction(ActionImpl action, ImplicitActionName name) {
+	private void processImplicitAction(@Nonnull ActionImpl action, @Nonnull ImplicitActionName name) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
 			if (toolbarLayouts != null) {
 				for (RenderedComponent toolbarLayout : toolbarLayouts) {
@@ -2590,13 +2637,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderAddAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderAddAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Add);
 	}
 
@@ -2604,13 +2651,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderRemoveAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action,
+	public void renderRemoveAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action,
 									boolean canDelete) {
 		processImplicitAction(action, ImplicitActionName.Remove);
 	}
@@ -2619,13 +2666,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderZoomOutAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderZoomOutAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.ZoomOut);
 	}
 
@@ -2633,13 +2680,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderNavigateAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderNavigateAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Navigate);
 	}
 
@@ -2647,13 +2694,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderOKAction(String name,
-								String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								ActionImpl action) {
+	public void renderOKAction(@Nullable String name,
+								@Nullable String label,
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.OK);
 	}
 
@@ -2661,13 +2708,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderSaveAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderSaveAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Save);
 	}
 
@@ -2675,13 +2722,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderCancelAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderCancelAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Cancel);
 	}
 
@@ -2689,13 +2736,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDeleteAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderDeleteAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Delete);
 	}
 
@@ -2706,13 +2753,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * @param action
 	 */
 	@Override
-	public void renderReportAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderReportAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Report);
 	}
 
@@ -2720,13 +2767,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBizExportAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderBizExportAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.BizExport);
 	}
 
@@ -2734,13 +2781,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderBizImportAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderBizImportAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.BizImport);
 	}
 
@@ -2748,13 +2795,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderDownloadAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderDownloadAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Download);
 	}
 
@@ -2762,13 +2809,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderUploadAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderUploadAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		processImplicitAction(action, ImplicitActionName.Upload);
 	}
 
@@ -2776,13 +2823,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderNewAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderNewAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.New);
 	}
 
@@ -2790,13 +2837,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderEditAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderEditAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 //		processImplicitAction(action, ImplicitActionName.Edit);
 	}
 
@@ -2804,13 +2851,13 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderPrintAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderPrintAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		// TODO implement
 	}
 
@@ -2818,7 +2865,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitParameter(Parameter parameter,
+	public void visitParameter(@Nonnull Parameter parameter,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// nothing to see here
@@ -2828,7 +2875,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void visitFilterParameter(FilterParameter parameter,
+	public void visitFilterParameter(@Nonnull FilterParameter parameter,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// TODO Auto-generated method stub
@@ -2839,7 +2886,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderSidebar(Sidebar sidebar) {
+	public void renderSidebar(@Nonnull Sidebar sidebar) {
 		// TODO Auto-generated method stub
 	}
 
@@ -2847,7 +2894,7 @@ public class ClientViewRenderer extends ViewRenderer {
 	 * Executes this renderer lifecycle override for the current view context.
 	 */
 	@Override
-	public void renderedSidebar(Sidebar sidebar) {
+	public void renderedSidebar(@Nonnull Sidebar sidebar) {
 		// TODO Auto-generated method stub
 	}
 }

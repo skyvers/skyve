@@ -2,6 +2,9 @@ package org.skyve.domain.types;
 
 import java.math.BigDecimal;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base class for Skyve's fixed-scale, fixed-precision decimal numbers.
  *
@@ -42,7 +45,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param operand the value to add; must not be {@code null}
 	 * @return a new instance of the same concrete subtype
 	 */
-	public abstract Decimal add(Decimal operand);
+	public abstract @Nonnull Decimal add(@Nonnull Decimal operand);
 
 	/**
 	 * Divides this value by {@code operand} and returns the result as a new instance
@@ -52,7 +55,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @return a new instance of the same concrete subtype
 	 * @throws ArithmeticException if {@code operand} is zero
 	 */
-	public abstract Decimal divide(Decimal operand);
+	public abstract @Nonnull Decimal divide(@Nonnull Decimal operand);
 
 	/**
 	 * Multiplies this value by {@code operand} and returns the result as a new instance
@@ -61,7 +64,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param operand the multiplier; must not be {@code null}
 	 * @return a new instance of the same concrete subtype
 	 */
-	public abstract Decimal multiply(Decimal operand);
+	public abstract @Nonnull Decimal multiply(@Nonnull Decimal operand);
 
 	/**
 	 * Subtracts {@code operand} from this value and returns the result as a new instance
@@ -70,7 +73,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param operand the value to subtract; must not be {@code null}
 	 * @return a new instance of the same concrete subtype
 	 */
-	public abstract Decimal subtract(Decimal operand);
+	public abstract @Nonnull Decimal subtract(@Nonnull Decimal operand);
 
 	/**
 	 * Returns the absolute value of this decimal as a new instance of the same
@@ -78,7 +81,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 *
 	 * @return a non-negative instance of the same concrete subtype
 	 */
-	public abstract Decimal abs();
+	public abstract @Nonnull Decimal abs();
 
 	/**
 	 * Raises this value to the given integer power and returns the result as a new
@@ -88,7 +91,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @return a new instance of the same concrete subtype
 	 * @throws ArithmeticException if {@code power} is negative
 	 */
-	public abstract Decimal pow(int power);
+	public abstract @Nonnull Decimal pow(int power);
 
 	/**
 	 * Returns the arithmetic negation of this decimal as a new instance of the same
@@ -96,7 +99,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 *
 	 * @return a new instance with the sign reversed
 	 */
-	public abstract Decimal negate();
+	public abstract @Nonnull Decimal negate();
 
 	/**
 	 * Returns the lesser of this value and {@code other}.
@@ -104,7 +107,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param other the value to compare with; must not be {@code null}
 	 * @return the smaller decimal as a new instance of the same concrete subtype
 	 */
-	public abstract Decimal min(Decimal other);
+	public abstract @Nonnull Decimal min(@Nonnull Decimal other);
 
 	/**
 	 * Returns the greater of this value and {@code other}.
@@ -112,7 +115,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param other the value to compare with; must not be {@code null}
 	 * @return the larger decimal as a new instance of the same concrete subtype
 	 */
-	public abstract Decimal max(Decimal other);
+	public abstract @Nonnull Decimal max(@Nonnull Decimal other);
 	
 	/**
 	 * Returns the scale (number of digits to the right of the decimal point) of
@@ -132,7 +135,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 *
 	 * @return the underlying big decimal; never {@code null}
 	 */
-	public final BigDecimal bigDecimalValue() {
+	public final @Nonnull BigDecimal bigDecimalValue() {
 		return value;
 	}
 
@@ -181,7 +184,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * 
 	 */
 	@Override
-	public final boolean equals(Object o) {
+	public final boolean equals(@Nullable Object o) {
 		if (o instanceof Decimal decimal) {
 			return value.equals(decimal.value);
 		}
@@ -205,7 +208,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param tolerance  the maximum permissible absolute difference as a {@code double}
 	 * @return {@code true} if {@code |this - otherValue| <= tolerance}
 	 */
-	public boolean approximately(Decimal otherValue, double tolerance) {
+	public boolean approximately(@Nonnull Decimal otherValue, double tolerance) {
 		Decimal difference = this.subtract(otherValue).abs();
 		return difference.lessThan(Decimal10.MAX_DOUBLE_VALUE) && (difference.doubleValue() <= tolerance);
 	}
@@ -228,7 +231,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @throws IllegalArgumentException if {@code o} is not a {@link Decimal} or {@link BigDecimal}
 	 */
 	@Override
-	public int compareTo(Number o) {
+	public int compareTo(@SuppressWarnings("null") @Nonnull Number o) {
 		if (o instanceof Decimal decimal) {
 			return value.compareTo(decimal.value);
 		}
@@ -246,7 +249,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param o the value to compare with; must be a {@link Decimal} or {@link BigDecimal}
 	 * @return {@code true} if {@code this < o}
 	 */
-	public boolean lessThan(Number o) {
+	public boolean lessThan(@Nonnull Number o) {
 		return (compareTo(o) < 0);
 	}
 
@@ -256,7 +259,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param o the value to compare with; must be a {@link Decimal} or {@link BigDecimal}
 	 * @return {@code true} if {@code this > o}
 	 */
-	public boolean greaterThan(Number o) {
+	public boolean greaterThan(@Nonnull Number o) {
 		return (compareTo(o) > 0);
 	}
 
@@ -266,7 +269,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param o the value to compare with; must be a {@link Decimal} or {@link BigDecimal}
 	 * @return {@code true} if {@code this <= o}
 	 */
-	public boolean lessThanOrEqual(Number o) {
+	public boolean lessThanOrEqual(@Nonnull Number o) {
 		return (compareTo(o) <= 0);
 	}
 
@@ -276,7 +279,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @param o the value to compare with; must be a {@link Decimal} or {@link BigDecimal}
 	 * @return {@code true} if {@code this >= o}
 	 */
-	public boolean greaterThanOrEqual(Number o) {
+	public boolean greaterThanOrEqual(@Nonnull Number o) {
 		return (compareTo(o) >= 0);
 	}
 
@@ -287,7 +290,7 @@ public abstract class Decimal extends Number implements Comparable<Number> {
 	 * @return the plain decimal string; {@code "null"} if the internal value is {@code null}
 	 */
 	@Override
-	public final String toString() {
+	public final @Nonnull String toString() {
 		return (value == null) ? "null" : value.toPlainString();
 	}
 }

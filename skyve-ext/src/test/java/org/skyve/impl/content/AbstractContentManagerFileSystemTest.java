@@ -3,8 +3,8 @@ package org.skyve.impl.content;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -20,11 +20,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.metadata.user.SuperUser;
@@ -34,28 +33,28 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class AbstractContentManagerFileSystemTest {
+class AbstractContentManagerFileSystemTest {
 	private static final String CONTENT_ID = "ABCDE12FGH34IJK56LMNOP";
 
 	private boolean originalContentFileSuffixes;
 
-	@Rule
-	public TemporaryFolder temp = new TemporaryFolder();
+	@TempDir
+	Path temp;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		originalContentFileSuffixes = UtilImpl.CONTENT_FILE_SUFFIXES;
 		UtilImpl.CONTENT_FILE_SUFFIXES = true;
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		UtilImpl.CONTENT_FILE_SUFFIXES = originalContentFileSuffixes;
 		unbindPersistenceFromThread();
 	}
 
 	@Test
-	public void appendBalancedFolderPathFromContentIdUsesExpectedSegments() {
+	void appendBalancedFolderPathFromContentIdUsesExpectedSegments() {
 		StringBuilder path = new StringBuilder();
 
 		AbstractContentManager.appendBalancedFolderPathFromContentId(CONTENT_ID, path);
@@ -64,12 +63,12 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void mainRequiresContentIdArgument() {
+	void mainRequiresContentIdArgument() {
 		assertThrows(IllegalArgumentException.class, () -> AbstractContentManager.main(new String[0]));
 	}
 
 	@Test
-	public void mainPrintsBalancedFolderPathForContentId() {
+	void mainPrintsBalancedFolderPathForContentId() {
 		PrintStream originalOut = System.out;
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try (PrintStream printStream = new PrintStream(out, true, StandardCharsets.UTF_8)) {
@@ -85,7 +84,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void writeAndReadContentFilesWithDerivedSuffix() throws Exception {
+	void writeAndReadContentFilesWithDerivedSuffix() throws Exception {
 		AttachmentContent attachment = attachment("report.PDF", "application/pdf");
 		StringBuilder root = rootBuilder();
 
@@ -112,7 +111,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void writeAndReadContentFilesWithoutSuffix() throws Exception {
+	void writeAndReadContentFilesWithoutSuffix() throws Exception {
 		AttachmentContent attachment = attachment("photo.jpg", "image/jpeg");
 		StringBuilder root = rootBuilder();
 
@@ -125,7 +124,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void writeContentFilesOverwritesExistingContentAndRemovesOldFile() throws Exception {
+	void writeContentFilesOverwritesExistingContentAndRemovesOldFile() throws Exception {
 		AttachmentContent attachment = attachment("report.pdf", "application/pdf");
 		AbstractContentManager.writeContentFiles(rootBuilder(), attachment, new ByteArrayInputStream("old".getBytes(StandardCharsets.UTF_8)), false);
 
@@ -138,7 +137,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void writeContentFilesCanDeriveSuffixFromContentTypeOrSuppressGlobalSuffixes() throws Exception {
+	void writeContentFilesCanDeriveSuffixFromContentTypeOrSuppressGlobalSuffixes() throws Exception {
 		AttachmentContent attachment = attachment("content", "application/pdf");
 
 		AbstractContentManager.writeContentFiles(rootBuilder(), attachment, new ByteArrayInputStream("pdf".getBytes(StandardCharsets.UTF_8)), false);
@@ -150,8 +149,8 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void writeExternalContentFileReadsExternalFilePath() throws Exception {
-		Path external = temp.getRoot().toPath().resolve("outside.txt");
+	void writeExternalContentFileReadsExternalFilePath() throws Exception {
+		Path external = temp.resolve("outside.txt");
 		Files.writeString(external, "external");
 		AttachmentContent attachment = attachment("ignored.txt", "text/plain");
 		attachment.setExternalAbsoluteFilePath(external.toString());
@@ -165,8 +164,8 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void writeExternalContentFileUsesDefaultNameWhenAttachmentHasContentTypeOnly() throws Exception {
-		Path external = temp.getRoot().toPath().resolve("unsafe name.txt");
+	void writeExternalContentFileUsesDefaultNameWhenAttachmentHasContentTypeOnly() throws Exception {
+		Path external = temp.resolve("unsafe name.txt");
 		Files.writeString(external, "external");
 		AttachmentContent attachment = attachment(null, "text/plain");
 		attachment.setExternalAbsoluteFilePath(external.toString());
@@ -179,7 +178,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void getFromFileSystemReturnsNullForMissingFolderMetaOrContent() throws Exception {
+	void getFromFileSystemReturnsNullForMissingFolderMetaOrContent() throws Exception {
 		assertNull(AbstractContentManager.getFromFileSystem(rootBuilder(), CONTENT_ID, false));
 
 		Files.createDirectories(balancedPath());
@@ -191,7 +190,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void getFailsWhenImplementationClassCannotBeInstantiated() {
+	void getFailsWhenImplementationClassCannotBeInstantiated() {
 		Class<? extends AbstractContentManager> original = AbstractContentManager.IMPLEMENTATION_CLASS;
 		AbstractContentManager.IMPLEMENTATION_CLASS = BadContentManager.class;
 		try {
@@ -204,14 +203,14 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void canAccessContentAllowsSuperUserWithoutDelegatingPermissionChecks() throws Exception {
+	void canAccessContentAllowsSuperUserWithoutDelegatingPermissionChecks() throws Exception {
 		bindUserToThread(new SuperUser());
 
 		assertThat(AbstractContentManager.canAccessContent("customer", "module", "document", "group", "user", "biz", "attachment"), is(true));
 	}
 
 	@Test
-	public void canAccessContentUsesBeanPermissionWhenAttributeNameIsNull() throws Exception {
+	void canAccessContentUsesBeanPermissionWhenAttributeNameIsNull() throws Exception {
 		User user = mock(User.class);
 		bindUserToThread(user);
 		when(user.canReadBean("biz", "module", "document", "customer", "group", "user")).thenReturn(Boolean.TRUE);
@@ -220,7 +219,7 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	@Test
-	public void canAccessContentReturnsFalseWhenPermissionCheckCannotResolveMetadataOrBean() throws Exception {
+	void canAccessContentReturnsFalseWhenPermissionCheckCannotResolveMetadataOrBean() throws Exception {
 		User user = mock(User.class);
 		bindUserToThread(user);
 		when(user.canAccessContent("biz", "module", "document", "customer", "group", "user", "attachment"))
@@ -241,11 +240,11 @@ public class AbstractContentManagerFileSystemTest {
 	}
 
 	private StringBuilder rootBuilder() {
-		return new StringBuilder(temp.getRoot().toString()).append(File.separator);
+		return new StringBuilder(temp.toString()).append(File.separator);
 	}
 
 	private Path balancedPath() {
-		return temp.getRoot().toPath().resolve("12").resolve("34").resolve("56").resolve(CONTENT_ID.toLowerCase());
+		return temp.resolve("12").resolve("34").resolve("56").resolve(CONTENT_ID.toLowerCase());
 	}
 
 	private static void bindUserToThread(User user) throws Exception {

@@ -129,6 +129,7 @@ class DefaultReportingTest {
 		assertEquals("csv-content", new String(download.getBytes(), StandardCharsets.UTF_8));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void freemarkerPdfFacadeMethodsPropagateMissingTemplateErrors() throws Exception {
 		DefaultReporting reporting = DefaultReporting.get();

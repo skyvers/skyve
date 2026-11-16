@@ -20,6 +20,9 @@ import freemarker.template.Template;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Renders JasperReports and Freemarker report templates against Skyve domain data.
  *
@@ -58,7 +61,7 @@ public interface Reporting extends SystemObserver {
 	 * @return the Jasper print model generated for the run
 	 * @throws Exception if template resolution, data binding, or export fails
 	 */
-	JasperPrint runJasperBeanReport(User user, Document document, String reportName, Map<String, Object> parameters, Bean bean, ReportFormat format, OutputStream out)
+	@Nullable JasperPrint runJasperBeanReport(@Nonnull User user, @Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nullable Bean bean, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception;
 	
 	/**
@@ -73,7 +76,7 @@ public interface Reporting extends SystemObserver {
 	 * @return the Jasper print model generated for the run
 	 * @throws Exception if query execution, template resolution, or export fails
 	 */
-	JasperPrint runJasperSQLReport(User user, Document document, String reportName, Map<String, Object> parameters, ReportFormat format, OutputStream out)
+	@Nullable JasperPrint runJasperSQLReport(@Nonnull User user, @Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception;
 
 	/**
@@ -89,7 +92,7 @@ public interface Reporting extends SystemObserver {
 	 * @return the Jasper print model generated for the run
 	 * @throws Exception if report execution or export fails
 	 */
-	JasperPrint runJasperReport(User user, Document document, String reportName, Map<String, Object> parameters, Bean bean, ReportFormat format, OutputStream out)
+	@Nullable JasperPrint runJasperReport(@Nonnull User user, @Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nullable Bean bean, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception;
 
 	/**
@@ -102,7 +105,7 @@ public interface Reporting extends SystemObserver {
 	 * @return Jasper print list produced by each request in order
 	 * @throws Exception if report execution or export fails
 	 */
-	List<JasperPrint> runJasperReport(User user, List<ReportParameters> reportParameters, ReportFormat format, OutputStream out)
+	@Nonnull List<JasperPrint> runJasperReport(@Nonnull User user, @Nonnull List<ReportParameters> reportParameters, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception;
 
 	/**
@@ -113,7 +116,7 @@ public interface Reporting extends SystemObserver {
 	 * @param out	output stream for exported bytes
 	 * @throws JRException if Jasper export fails
 	 */
-	void runJasperReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out)
+	void runJasperReport(@Nonnull JasperPrint jasperPrint, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception;
 
 	/**
@@ -124,7 +127,7 @@ public interface Reporting extends SystemObserver {
 	 * @param out	output stream for exported bytes
 	 * @throws JRException if Jasper export fails
 	 */
-	void runJasperReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out)
+	void runJasperReport(@Nonnull List<JasperPrint> jasperPrintList, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception;
 
 	/**
@@ -137,10 +140,10 @@ public interface Reporting extends SystemObserver {
 	 * @return rendered PDF attachment
 	 * @throws Exception if report execution or attachment creation fails
 	 */
-	MailAttachment getMailAttachmentFromJasperReport(String reportModuleName,
-														String reportDocumentName,
-														String reportName,
-														Map<String, Object> parameters)
+	@Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull String reportModuleName,
+																@Nonnull String reportDocumentName,
+																@Nonnull String reportName,
+																@Nonnull Map<String, Object> parameters)
 	throws Exception;
 
 	/**
@@ -150,7 +153,7 @@ public interface Reporting extends SystemObserver {
 	 * @return rendered PDF attachment
 	 * @throws Exception if report execution or attachment creation fails
 	 */
-	MailAttachment getMailAttachmentFromJasperReport(List<ReportParameters> reportParameters)
+	@Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull List<ReportParameters> reportParameters)
 	throws Exception;
 
 	/**
@@ -162,7 +165,7 @@ public interface Reporting extends SystemObserver {
 	 * @param templateName The name of the template, e.g. <code>myDynamicReport</code>
 	 * @param templateMarkup The markup in the template, e.g. <code>"Hello ${user}"</code>
 	 */
-	void addTemplate(final String templateName, final String templateMarkup);
+	void addTemplate(final @Nonnull String templateName, final @Nonnull String templateMarkup);
 
 	/**
 	 * Returns a resolved Freemarker template by name.
@@ -171,7 +174,7 @@ public interface Reporting extends SystemObserver {
 	 * @return resolved template
 	 * @throws Exception if template lookup or parsing fails
 	 */
-	Template getFreemarkerTemplate(String templateName) throws Exception;
+	@Nonnull Template getFreemarkerTemplate(@Nonnull String templateName) throws Exception;
 	
 	/**
 	 * Generates a PDF from a HTML file
@@ -180,7 +183,7 @@ public interface Reporting extends SystemObserver {
 	 * @param outputFile The file to write the resulting PDF file to
 	 * @throws Exception if PDF generation fails
 	 */
-	void generateFreemarkerPDFFromHTML(InputStream in, File outputFile) throws Exception;
+	void generateFreemarkerPDFFromHTML(@Nonnull InputStream in, @Nonnull File outputFile) throws Exception;
 
 	/**
 	 * Generates a PDF from a HTML file
@@ -189,7 +192,7 @@ public interface Reporting extends SystemObserver {
 	 * @param outputFile The file to write the resulting PDF file to
 	 * @throws Exception if PDF generation fails
 	 */
-	void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception;
+	void generateFreemarkerPDFFromHTML(@Nonnull String html, @Nonnull File outputFile) throws Exception;
 
 	/**
 	 * Generates a PDF from a HTML file
@@ -198,7 +201,7 @@ public interface Reporting extends SystemObserver {
 	 * @param outputFile The file to write the resulting PDF file to
 	 * @throws Exception if PDF generation fails
 	 */
-	void generateFreemarkerPDFFromHTMLURL(String url, File outputFile) throws Exception;
+	void generateFreemarkerPDFFromHTMLURL(@Nonnull String url, @Nonnull File outputFile) throws Exception;
 
 	/**
 	 * Generates a PDF from a HTML file
@@ -207,7 +210,7 @@ public interface Reporting extends SystemObserver {
 	 * @param outputStream The outputStream to write the resulting PDF to
 	 * @throws Exception if PDF generation fails
 	 */
-	void generateFreemarkerPDFFromHTML(InputStream in, OutputStream out) throws Exception;
+	void generateFreemarkerPDFFromHTML(@Nonnull InputStream in, @Nonnull OutputStream out) throws Exception;
 
 	/**
 	 * Generates a PDF from a HTML file
@@ -216,7 +219,7 @@ public interface Reporting extends SystemObserver {
 	 * @param outputStream The outputStream to write the resulting PDF to
 	 * @throws Exception if PDF generation fails
 	 */
-	void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception;
+	void generateFreemarkerPDFFromHTML(@Nonnull String html, @Nonnull OutputStream out) throws Exception;
 
 	/**
 	 * Creates a new Freemarker report and returns the merged output as a String, ready to be processed further.
@@ -227,7 +230,7 @@ public interface Reporting extends SystemObserver {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception if template lookup or merge fails
 	 */
-	String createFreemarkerBeanReport(final Bean bean, final String reportName, final Map<String, Object> reportParameters)
+	@Nonnull String createFreemarkerBeanReport(final @Nonnull Bean bean, final @Nonnull String reportName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception;
 	
 	/**
@@ -241,10 +244,10 @@ public interface Reporting extends SystemObserver {
 	 * @return A temporary {@link File} pointing to the written out PDF report on disk
 	 * @throws Exception if template lookup, merge, or PDF generation fails
 	 */
-	File createFreemarkerBeanReportPDF(final Bean bean,
-										final String reportName,
-										final Map<String, Object> reportParameters,
-										final String reportFilename)
+	@Nonnull File createFreemarkerBeanReportPDF(final @Nonnull Bean bean,
+												final @Nonnull String reportName,
+												final @Nullable Map<String, Object> reportParameters,
+												final @Nonnull String reportFilename)
 	throws Exception;
 	
 	/**
@@ -256,7 +259,7 @@ public interface Reporting extends SystemObserver {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception if template lookup or merge fails
 	 */
-	String createFreemarkerReport(final String templateName, final Map<String, Object> reportParameters)
+	@Nonnull String createFreemarkerReport(final @Nonnull String templateName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception;
 
 	/**
@@ -270,7 +273,7 @@ public interface Reporting extends SystemObserver {
 	 * @return A temporary {@link File} pointing to the written out PDF report on disk
 	 * @throws Exception if template lookup, merge, or PDF generation fails
 	 */
-	File createFreemarkerReportPDF(final String templateName, final Map<String, Object> reportParameters, final String reportFilename)
+	@Nonnull File createFreemarkerReportPDF(final @Nonnull String templateName, final @Nullable Map<String, Object> reportParameters, final @Nonnull String reportFilename)
 	throws Exception;
 	
 	/**
@@ -286,10 +289,10 @@ public interface Reporting extends SystemObserver {
 	 * @return A download to be returned from a {@link DownloadAction}
 	 * @throws Exception if template execution or output generation fails
 	 */
-	Download downloadFreemarkerReport(final String reportName,
-										final Map<String, Object> reportParameters,
-										final ReportFormat format,
-										final String downloadFilename)
+	@Nonnull Download downloadFreemarkerReport(final @Nonnull String reportName,
+												final @Nullable Map<String, Object> reportParameters,
+												final @Nonnull ReportFormat format,
+												final @Nonnull String downloadFilename)
 	throws Exception;
 
 	/**
@@ -302,7 +305,7 @@ public interface Reporting extends SystemObserver {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception if template execution fails
 	 */
-	String runFreemarkerReport(final String reportName, final Map<String, Object> reportParameters)
+	@Nonnull String runFreemarkerReport(final @Nonnull String reportName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception;
 
 	/**
@@ -313,6 +316,6 @@ public interface Reporting extends SystemObserver {
 	 * @return resolved Freemarker template
 	 * @throws Exception if template lookup fails
 	 */
-	Template getBeanReport(final Bean bean, final String reportName)
+	@Nonnull Template getBeanReport(final @Nonnull Bean bean, final @Nonnull String reportName)
 	throws Exception;
 }

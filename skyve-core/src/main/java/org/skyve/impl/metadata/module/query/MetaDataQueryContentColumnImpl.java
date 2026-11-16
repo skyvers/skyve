@@ -1,11 +1,14 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Implementation of a content (file) column in a metadata query.
@@ -27,37 +30,37 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	private DisplayType display;
 	private Integer pixelHeight;
 	private String emptyThumbnailRelativeFile;
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public DisplayType getDisplay() {
+	public @Nonnull DisplayType getDisplay() {
 		return display;
 	}
 	
-	public void setDisplay(DisplayType display) {
+	public void setDisplay(@Nonnull DisplayType display) {
 		this.display = display;
 	}
 	
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 	
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 	
 	@Override
-	public String getEmptyThumbnailRelativeFile() {
+	public @Nullable String getEmptyThumbnailRelativeFile() {
 		return emptyThumbnailRelativeFile;
 	}
 
-	public void setEmptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
+	public void setEmptyThumbnailRelativeFile(@Nullable String emptyThumbnailRelativeFile) {
 		this.emptyThumbnailRelativeFile = emptyThumbnailRelativeFile;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -73,7 +76,7 @@ public class MetaDataQueryContentColumnImpl extends AbstractMetaDataQueryColumn 
 	 * Don't sanitise content columns
 	 */
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nonnull Sanitisation getSanitise() {
 		return Sanitisation.none;
 	}
 }

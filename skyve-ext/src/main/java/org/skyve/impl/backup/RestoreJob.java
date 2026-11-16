@@ -28,6 +28,7 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.backup.RestoreOptions.ContentOption;
@@ -35,18 +36,23 @@ import org.skyve.impl.backup.RestoreOptions.IndexingOption;
 import org.skyve.impl.backup.RestoreOptions.PreProcess;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.metadata.customer.CustomerImpl;
-import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.util.FileUtil;
 import org.skyve.util.PushMessage;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Restores a Skyve application from a backup ZIP, re-creating table data and
@@ -55,21 +61,39 @@ import org.supercsv.prefs.CsvPreference;
 public class RestoreJob extends CancellableJob {
 	private static final String CREATE_SQL = "create.sql";
 	private static final String ID_COLUMN_SUFFIX = "_id";
+	private static final String KICK_OFF_INSTRUCTION = "Kick off the job with the appropriate options from the Data Maintenance page.";
+	private static final String REDACTED_WARNING_START = "WARNING: This backup was made with a data sensitivity above none, " +
+															"so it redacted ";
+	private static final String REDACTED_PASSWORDS_FORMAT = "the passwords of %d user(s)";
+	private static final String REDACTED_USER_NAMES_FORMAT = "the user names of %d user(s)";
 
 	private Calendar gmt = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
 
+	/** The agnostic identifier of the admin User document's table, which holds the user names and passwords. */
+	private @Nullable String userTableIdentifier;
+	/** The number of restored user passwords that the backup had redacted. */
+	private int redactedPasswordCount;
+	/** The number of restored user names that the backup had redacted. */
+	private int redactedUserNameCount;
+
 	/**
 	 * Executes a restore job when invoked with {@link RestoreOptions}.
-	 * Logs a user-facing message if the job is triggered with the wrong bean type.
+	 * Logs a user-facing message if the job is triggered with the wrong bean type or without a selected backup.
 	 */
 	@Override
 	public void execute() throws Exception {
 		Bean bean = getBean();
 		if (! (bean instanceof RestoreOptions)) {
-			getLog().add("Kick off the job with the appropriate options from the Data Maintenance page.");
+			getLog().add(KICK_OFF_INSTRUCTION);
 			return;
 		}
-		restore((RestoreOptions) bean);
+		RestoreOptions options = (RestoreOptions) bean;
+		String selectedBackupName = options.getSelectedBackupName();
+		if (selectedBackupName == null) {
+			getLog().add(KICK_OFF_INSTRUCTION);
+			return;
+		}
+		restore(options, selectedBackupName);
 	}
 
 	/**
@@ -77,7 +101,7 @@ public class RestoreJob extends CancellableJob {
 	 * data restore, indexing, and cleanup.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void restore(RestoreOptions options) throws Exception {
+	private void restore(@Nonnull RestoreOptions options, @Nonnull String selectedBackupName) throws Exception {
 		CustomerImpl customer = (CustomerImpl) CORE.getCustomer();
 		String customerName = customer.getName();
 
@@ -87,7 +111,6 @@ public class RestoreJob extends CancellableJob {
 		Collection<String> log = getLog();
 		String trace;
 
-		String selectedBackupName = options.getSelectedBackupName();
 		Path backupDir = Paths.get(Util.getBackupDirectory(), "backup_" + customerName);
 		File backup = backupDir.resolve(selectedBackupName).toFile();
 		boolean deleteLocalBackup = false;
@@ -203,12 +226,24 @@ public class RestoreJob extends CancellableJob {
 			log.add(trace);
 			LOGGER.info(trace);
 			FileUtil.delete(extractDir);
+			boolean redacted = (redactedPasswordCount > 0) || (redactedUserNameCount > 0);
+			if (redacted) {
+				trace = redactedWarning(redactedPasswordCount, redactedUserNameCount);
+				log.add(trace);
+				LOGGER.warn(trace);
+			}
 			trace = "DONE";
 			log.add(trace);
 			LOGGER.info(trace);
 			setPercentComplete(100);
 
-			EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+			if (redacted) {
+				EXT.push(new PushMessage().growl(MessageSeverity.warn,
+													redactedGrowl(redactedPasswordCount, redactedUserNameCount)));
+			}
+			else {
+				EXT.push(new PushMessage().growl(MessageSeverity.info, "System Restore complete."));
+			}
 		}
 		catch (IOException zipLimitEx) {
 			String msg = zipLimitEx.getMessage();
@@ -265,6 +300,61 @@ public class RestoreJob extends CancellableJob {
 	}
 
 	/**
+	 * Returns the job log's warning for a restore of a redacted backup: what it redacted, and what must be set again
+	 * before the users can sign in.
+	 *
+	 * @param passwordCount the number of restored user passwords that the backup redacted
+	 * @param userNameCount the number of restored user names that the backup redacted
+	 * @return the warning, for at least one count above zero
+	 */
+	static @Nonnull String redactedWarning(int passwordCount, int userNameCount) {
+		String consequence;
+		if (userNameCount == 0) {
+			consequence = "They cannot sign in until their passwords are reset: reset them before you sign out.";
+		}
+		else if (passwordCount == 0) {
+			consequence = "They cannot sign in by name until their user names are set again: set them before you sign out.";
+		}
+		else {
+			consequence = "They cannot sign in until their passwords are reset and their user names are set again: " +
+							"do this before you sign out.";
+		}
+		return REDACTED_WARNING_START + redacted(passwordCount, userNameCount) + ". " + consequence;
+	}
+
+	/**
+	 * Returns the completion growl for a restore of a redacted backup, which points to the job log's warning.
+	 *
+	 * @param passwordCount the number of restored user passwords that the backup redacted
+	 * @param userNameCount the number of restored user names that the backup redacted
+	 * @return the growl's message, for at least one count above zero
+	 */
+	static @Nonnull String redactedGrowl(int passwordCount, int userNameCount) {
+		return "System Restore complete, but the backup redacted " + redacted(passwordCount, userNameCount) +
+				((userNameCount == 0) ? ", which must be reset" : ", which must be set again") +
+				": see the restore job's log.";
+	}
+
+	/**
+	 * Returns what a redacted backup redacted, such as "the passwords of 2 user(s) and the user names of 2 user(s)".
+	 *
+	 * @param passwordCount the number of restored user passwords that the backup redacted
+	 * @param userNameCount the number of restored user names that the backup redacted
+	 * @return the counts that are above zero, joined with "and"
+	 */
+	private static @Nonnull String redacted(int passwordCount, int userNameCount) {
+		String passwords = String.format(REDACTED_PASSWORDS_FORMAT, Integer.valueOf(passwordCount));
+		String userNames = String.format(REDACTED_USER_NAMES_FORMAT, Integer.valueOf(userNameCount));
+		if (userNameCount == 0) {
+			return passwords;
+		}
+		if (passwordCount == 0) {
+			return userNames;
+		}
+		return passwords + " and " + userNames;
+	}
+
+	/**
 	 * Restores data and foreign keys from a validated backup directory.
 	 *
 	 * @param backupDirectory The extracted backup folder containing CSV data.
@@ -272,14 +362,20 @@ public class RestoreJob extends CancellableJob {
 	 * @param contentRestoreOption How to handle missing content on restore.
 	 * @param indexingOption Which content/text indexes to rebuild.
 	 */
-	private void restore(File backupDirectory,
+	private void restore(@Nonnull File backupDirectory,
 							boolean createUsingBackup,
-							ContentOption contentRestoreOption,
-							IndexingOption indexingOption)
+							@Nonnull ContentOption contentRestoreOption,
+							@Nonnull IndexingOption indexingOption)
 	throws Exception {
 		Collection<Table> tables = createUsingBackup ?
 									BackupUtil.readTables(new File(backupDirectory, "tables.txt")) :
 									BackupUtil.getTables();
+
+		Customer customer = CORE.getCustomer();
+		Persistent userPersistent = customer.getModule(AppConstants.ADMIN_MODULE_NAME)
+												.getDocument(customer, AppConstants.USER_DOCUMENT_NAME)
+												.getPersistent();
+		userTableIdentifier = (userPersistent == null) ? null : userPersistent.getAgnosticIdentifier();
 
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
@@ -297,6 +393,12 @@ public class RestoreJob extends CancellableJob {
 			restoreData(backupDirectory, tables, connection, true, false, contentRestoreOption, indexingOption);
 			setPercentComplete(100);
 		}
+		finally {
+			// The tables were written with JDBC, so Hibernate's shared (second-level) cache still holds the data from
+			// before the restore. Its stale versions would fail the next save with an optimistic lock, and the reindex
+			// that follows would read them.
+			CORE.getPersistence().evictAllSharedCache();
+		}
 	}
 
 //	update bizKeys
@@ -309,13 +411,13 @@ public class RestoreJob extends CancellableJob {
 	 * and content attachments according to restore options.
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private void restoreData(File backupDirectory,
-								Collection<Table> tables,
-								Connection connection,
+	private void restoreData(@Nonnull File backupDirectory,
+								@Nonnull Collection<Table> tables,
+								@Nonnull Connection connection,
 								boolean joinTables,
 								boolean extensionTables,
-								ContentOption contentRestoreOption,
-								IndexingOption indexingOption)
+								@Nonnull ContentOption contentRestoreOption,
+								@Nonnull IndexingOption indexingOption)
 			throws Exception {
 		try (ContentManager cm = EXT.newContentManager()) {
 			for (Table table : tables) {
@@ -352,6 +454,7 @@ public class RestoreJob extends CancellableJob {
 				}
 
 				long rowCount = 0;
+				boolean userTable = (! joinTables) && table.agnosticIdentifier.equalsIgnoreCase(userTableIdentifier);
 
 				try (InputStreamReader in = new InputStreamReader(new FileInputStream(backupFile), StandardCharsets.UTF_8)) {
 					try (CsvMapReader reader = new CsvMapReader(in, CsvPreference.STANDARD_PREFERENCE)) {
@@ -418,6 +521,16 @@ public class RestoreJob extends CancellableJob {
 												AttributeType.enumeration.equals(attributeType) ||
 												AttributeType.id.equals(attributeType)) {
 										statement.setString(index++, stringValue);
+										if (userTable) {
+											if (AppConstants.PASSWORD_ATTRIBUTE_NAME.equalsIgnoreCase(header) &&
+													BackupUtil.isRedactedString(stringValue)) {
+												redactedPasswordCount++;
+											}
+											else if (AppConstants.USER_NAME_ATTRIBUTE_NAME.equalsIgnoreCase(header) &&
+														BackupUtil.isRedactedUserName(stringValue)) {
+												redactedUserNameCount++;
+											}
+										}
 									}
 									else if (AttributeType.geometry.equals(attributeType)) {
 										Geometry geometry = new WKTReader().read(stringValue);
@@ -484,10 +597,7 @@ public class RestoreJob extends CancellableJob {
 											}
 										}
 										else {
-											IndexType indexType = table.indexes.get(header);
-											boolean textIndex = (indexType == null) ||
-																	IndexType.textual.equals(indexType) ||
-																	IndexType.both.equals(indexType);
+											boolean textIndex = Content.isTextuallyIndexed(table.indexes.get(header));
 											if (textIndex) {
 												textIndex = IndexingOption.both.equals(indexingOption) ||
 																IndexingOption.content.equals(indexingOption);
@@ -561,9 +671,9 @@ public class RestoreJob extends CancellableJob {
 	 * Restores foreign keys for non-join tables after base data is loaded.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void restoreForeignKeys(File backupDirectory,
-										Collection<Table> tables,
-										Connection connection)
+	private void restoreForeignKeys(@Nonnull File backupDirectory,
+										@Nonnull Collection<Table> tables,
+										@Nonnull Connection connection)
 			throws Exception {
 		Collection<String> log = getLog();
 		String trace;

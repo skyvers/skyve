@@ -11,6 +11,7 @@ import org.skyve.metadata.user.User;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -34,7 +35,9 @@ public class SessionFilter extends AbstractRestFilter {
 	 * @throws ServletException when downstream servlet processing fails
 	 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		if (super.doUnsecuredFilter(request, response, chain)) {
 			return;

@@ -2,6 +2,8 @@ package org.skyve.metadata.customer;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Customer-specific HTML resource overrides.
  *
@@ -17,5 +19,5 @@ public interface HTMLResources extends SerializableMetaData {
 	 *
 	 * @return the CSS file path; may be {@code null} if not configured
 	 */
-	public String getCssRelativeFileName();
+	public @Nullable String getCssRelativeFileName();
 }

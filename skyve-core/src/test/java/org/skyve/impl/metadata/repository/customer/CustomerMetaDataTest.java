@@ -49,6 +49,7 @@ class CustomerMetaDataTest {
 		assertEquals("en", customer.getLanguage());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultDateConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -57,6 +58,7 @@ class CustomerMetaDataTest {
 		assertEquals(ConverterName.DD_MMM_YYYY, customer.getDefaultDateConverter());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultDateTimeConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -65,6 +67,7 @@ class CustomerMetaDataTest {
 		assertEquals(ConverterName.DD_MMM_YYYY_HH_MI, customer.getDefaultDateTimeConverter());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultTimeConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -73,6 +76,7 @@ class CustomerMetaDataTest {
 		assertEquals(ConverterName.HH_MI, customer.getDefaultTimeConverter());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetDefaultTimestampConverter() {
 		CustomerMetaData customer = new CustomerMetaData();
@@ -136,6 +140,7 @@ class CustomerMetaDataTest {
 	void testSetAndGetModules() {
 		CustomerMetaData customer = new CustomerMetaData();
 		assertNull(customer.getModules());
+		@SuppressWarnings("unused") // asserts null where the annotations say non-null
 		CustomerModulesMetaData modules = new CustomerModulesMetaData();
 		customer.setModules(modules);
 		assertEquals(modules, customer.getModules());
@@ -217,6 +222,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultDateConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -224,6 +230,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultDateTimeConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -231,6 +238,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultTimeConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -238,6 +246,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenDefaultTimestampConverterIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -245,6 +254,7 @@ class CustomerMetaDataTest {
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenHomeModuleIsNull() {
 		CustomerMetaData customer = createMinimalCustomerMetaData();
@@ -301,8 +311,10 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData roles = new CustomerRolesMetaData();
 		CustomerRoleMetaData role1 = new CustomerRoleMetaData();
 		role1.setName("admin");
+		role1.setDescription("Customer administrator");
 		CustomerRoleMetaData role2 = new CustomerRoleMetaData();
 		role2.setName("admin"); // duplicate
+		role2.setDescription("Customer administrator");
 		roles.getRoles().add(role1);
 		roles.getRoles().add(role2);
 		customer.setRoles(roles);
@@ -363,6 +375,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName("BasicUser");
 		moduleRole.setModuleName("admin");
@@ -378,6 +391,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName(null); // null name - should throw
 		moduleRole.setModuleName("admin");
@@ -393,6 +407,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName("SomeRole");
 		moduleRole.setModuleName("nonExistentModule"); // not a valid module
@@ -409,6 +424,7 @@ class CustomerMetaDataTest {
 		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
 		CustomerRoleMetaData role = new CustomerRoleMetaData();
 		role.setName("SearchRole");
+		role.setDescription("Can use text search");
 		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
 		moduleRole.setName("BasicUser");
 		moduleRole.setModuleName("admin");
@@ -487,5 +503,48 @@ class CustomerMetaDataTest {
 		customer.getFlagRoles().add(featureRole1);
 		customer.getFlagRoles().add(featureRole2);
 		assertThrows(MetaDataException.class, () -> customer.convert("test"));
+	}
+
+	// ── Required values that metadata built in code can omit ─────────────────
+
+	private static void assertConvertFails(CustomerMetaData customer, String expectedMessagePart) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> customer.convert("test"));
+		assertTrue(e.getMessage().contains(expectedMessagePart), e.getMessage());
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void convertThrowsWhenModulesIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		customer.setModules(null);
+		assertConvertFails(customer, "The customer [modules] is required");
+	}
+
+	@Test
+	void convertThrowsWhenCustomerRoleDescriptionIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		// description is null
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertConvertFails(customer, "The [description] for customer role AdminRole is required");
+	}
+
+	@Test
+	void convertThrowsWhenModuleRoleModuleNameIsNull() {
+		CustomerMetaData customer = createMinimalCustomerMetaData();
+		CustomerRolesMetaData rolesMetaData = new CustomerRolesMetaData();
+		CustomerRoleMetaData role = new CustomerRoleMetaData();
+		role.setName("AdminRole");
+		role.setDescription("Administers the customer");
+		CustomerModuleRoleMetaData moduleRole = new CustomerModuleRoleMetaData();
+		moduleRole.setName("BasicUser");
+		// module name is null
+		role.getRoles().add(moduleRole);
+		rolesMetaData.getRoles().add(role);
+		customer.setRoles(rolesMetaData);
+		assertConvertFails(customer, "The [module] of module role BasicUser for customer role AdminRole is required");
 	}
 }

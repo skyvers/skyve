@@ -5,17 +5,20 @@ import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * The default Skyve behaviour with no customisations.
  */
 public class NoCustomisations implements Customisations {
 	@Override
-	public HorizontalAlignment determineDefaultWidgetTextAlignment(String uxui, AttributeType attributeType) {
+	public @Nonnull HorizontalAlignment determineDefaultWidgetTextAlignment(@Nonnull String uxui, @Nullable AttributeType attributeType) {
 		return determineDefaultColumnTextAlignment(uxui, attributeType);
 	}
 	
 	@Override
-	public HorizontalAlignment determineDefaultColumnTextAlignment(String uxui, AttributeType attributeType) {
+	public @Nonnull HorizontalAlignment determineDefaultColumnTextAlignment(@Nonnull String uxui, @Nullable AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType) || 
 				AttributeType.dateTime.equals(attributeType) ||
 				AttributeType.time.equals(attributeType) || 
@@ -36,7 +39,7 @@ public class NoCustomisations implements Customisations {
 	}
 	
 	@Override
-	public Integer determineDefaultColumnWidth(String uxui, AttributeType attributeType) {
+	public @Nullable Integer determineDefaultColumnWidth(@Nonnull String uxui, @Nullable AttributeType attributeType) {
 		if (AttributeType.date.equals(attributeType)) {
 			return Integer.valueOf(110);
 		}
@@ -57,7 +60,20 @@ public class NoCustomisations implements Customisations {
 	}
 
 	@Override
-	public ReportFormat[] listGridExportFormats() {
+	public @Nullable Integer determineDefaultEditableColumnWidth(@Nonnull String uxui, @Nullable AttributeType attributeType) {
+		Integer width = determineDefaultColumnWidth(uxui, attributeType);
+		if ((width != null) &&
+				(AttributeType.date.equals(attributeType) ||
+					AttributeType.dateTime.equals(attributeType) ||
+					AttributeType.time.equals(attributeType) ||
+					AttributeType.timestamp.equals(attributeType))) {
+			return Integer.valueOf(width.intValue() + 30);
+		}
+		return width;
+	}
+
+	@Override
+	public @Nonnull ReportFormat[] listGridExportFormats() {
 		return ReportFormat.values(); // ordered as per the report format enum
 	}
 

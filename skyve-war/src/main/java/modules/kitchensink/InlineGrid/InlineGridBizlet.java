@@ -8,6 +8,9 @@ import org.skyve.metadata.model.document.Bizlet;
 import modules.kitchensink.domain.InlineGrid;
 import modules.kitchensink.domain.ListAttributes;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Supplies static demonstration domain values for the {@link InlineGrid} document.
  */
@@ -28,7 +31,7 @@ public class InlineGridBizlet extends Bizlet<InlineGrid> {
 	 * @throws Exception if domain value resolution fails
 	 */
 	@Override
-	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getConstantDomainValues(@Nonnull String attributeName) throws Exception {
 		if (ListAttributes.constantDomainPropertyName.equals(attributeName)) {
 			return dvs;
 		}
@@ -43,7 +46,7 @@ public class InlineGridBizlet extends Bizlet<InlineGrid> {
 	 * @throws Exception if domain value resolution fails
 	 */
 	@Override
-	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getVariantDomainValues(@Nonnull String attributeName) throws Exception {
 		if (ListAttributes.variantDomainPropertyName.equals(attributeName)) {
 			return dvs;
 		}
@@ -59,7 +62,7 @@ public class InlineGridBizlet extends Bizlet<InlineGrid> {
 	 * @throws Exception if domain value resolution fails
 	 */
 	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, InlineGrid bean) throws Exception {
+	public @Nullable List<DomainValue> getDynamicDomainValues(@Nonnull String attributeName, @Nonnull InlineGrid bean) throws Exception {
 		if (ListAttributes.dynamicDomainPropertyName.equals(attributeName)) {
 			return dvs;
 		}

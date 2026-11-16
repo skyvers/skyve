@@ -11,9 +11,12 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
-import org.skyve.impl.metadata.model.document.field.Field.IndexType;
+import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.job.CancellableJob;
 import org.skyve.metadata.model.Attribute.AttributeType;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Reindexes all binary attachment content (uploaded files) in the content
@@ -24,6 +27,9 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public void execute() throws Exception {
 		String customerName = getCustomerName();
+		if (customerName == null) { // the indexing is per customer
+			throw new IllegalStateException("Cannot reindex attachments as the user has no customer");
+		}
 		List<String> log = getLog();
 		String trace;
 		
@@ -85,10 +91,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 													LOGGER.error(trace);
 												}
 												else {
-													IndexType indexType = table.indexes.get(name);
-													boolean index = ((indexType == null) || 
-																		IndexType.textual.equals(indexType) ||
-																		IndexType.both.equals(indexType));
+													boolean index = Content.isTextuallyIndexed(table.indexes.get(name));
 													acm.reindex(content, index);
 												}
 											}
@@ -120,7 +123,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return the active customer name
 	 */
 	@SuppressWarnings("static-method")
-	protected String getCustomerName() {
+	protected @Nullable String getCustomerName() {
 		return CORE.getUser().getCustomerName();
 	}
 
@@ -132,7 +135,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return a new content manager instance
 	 */
 	@SuppressWarnings({"static-method", "resource"})
-	protected ContentManager newContentManager() {
+	protected @Nonnull ContentManager newContentManager() {
 		return EXT.newContentManager();
 	}
 
@@ -142,7 +145,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return an open JDBC connection
 	 */
 	@SuppressWarnings({"static-method", "resource"})
-	protected Connection getDataStoreConnection() {
+	protected @Nonnull Connection getDataStoreConnection() {
 		return EXT.getDataStoreConnection();
 	}
 
@@ -153,7 +156,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @throws Exception if metadata lookup fails
 	 */
 	@SuppressWarnings("static-method")
-	protected Collection<Table> getTables() throws Exception {
+	protected @Nonnull Collection<Table> getTables() throws Exception {
 		return BackupUtil.getTables();
 	}
 
@@ -165,7 +168,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @param customerName the customer scope to apply
 	 */
 	@SuppressWarnings("static-method")
-	protected void secureSQL(StringBuilder sql, Table table, String customerName) {
+	protected void secureSQL(@Nonnull StringBuilder sql, @Nonnull Table table, @Nonnull String customerName) {
 		BackupUtil.secureSQL(sql, table, customerName);
 	}
 
@@ -176,7 +179,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @return {@code true} when the manager is an {@link AbstractContentManager}
 	 */
 	@SuppressWarnings("static-method")
-	protected boolean isAbstractContentManager(ContentManager cm) {
+	protected boolean isAbstractContentManager(@Nonnull ContentManager cm) {
 		return cm instanceof AbstractContentManager;
 	}
 	
@@ -186,7 +189,7 @@ public class ReindexAttachmentsJob extends CancellableJob {
 	 * @param table the table metadata to inspect
 	 * @return {@code true} when the table has at least one content-bearing field
 	 */
-	private static boolean hasContent(Table table) {
+	private static boolean hasContent(@Nonnull Table table) {
 		for (String name : table.fields.keySet()) {
 			AttributeType attributeType = table.fields.get(name).getAttributeType();
 			if (AttributeType.content.equals(attributeType) ||

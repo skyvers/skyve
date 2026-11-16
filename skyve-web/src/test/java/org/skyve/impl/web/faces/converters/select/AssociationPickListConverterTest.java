@@ -14,7 +14,6 @@ import org.primefaces.component.picklist.PickList;
 import org.primefaces.model.DualListModel;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
-@SuppressWarnings({"static-method", "unchecked"})
 class AssociationPickListConverterTest {
 
 	private AssociationPickListConverter converter;
@@ -39,11 +38,13 @@ class AssociationPickListConverterTest {
 
 	// ---- getAsObject ----
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAsObjectReturnsNullForNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getAsObjectReturnsNullForEmptyValue() {
 		assertNull(converter.getAsObject(null, null, ""));

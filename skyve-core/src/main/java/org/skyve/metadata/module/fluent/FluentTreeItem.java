@@ -2,6 +2,9 @@ package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.TreeItemMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds tree menu item metadata.
  */
@@ -20,7 +23,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 *
 	 * @param item The metadata to mutate.
 	 */
-	public FluentTreeItem(TreeItemMetaData item) {
+	public FluentTreeItem(@Nonnull TreeItemMetaData item) {
 		this.item = item;
 	}
 
@@ -30,7 +33,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 * @param item The source tree menu item.
 	 * @return this fluent instance.
 	 */
-	public FluentTreeItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.TreeItem item) {
+	public @Nonnull FluentTreeItem from(@SuppressWarnings("hiding") @Nonnull org.skyve.impl.metadata.module.menu.TreeItem item) {
 		super.from(item);
 		documentName(item.getDocumentName());
 		queryName(item.getQueryName());
@@ -45,7 +48,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 * @param documentName The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentTreeItem documentName(String documentName) {
+	public @Nonnull FluentTreeItem documentName(@Nullable String documentName) {
 		item.setDocumentName(documentName);
 		return this;
 	}
@@ -56,7 +59,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 * @param queryName The query name.
 	 * @return this fluent instance.
 	 */
-	public FluentTreeItem queryName(String queryName) {
+	public @Nonnull FluentTreeItem queryName(@Nullable String queryName) {
 		item.setQueryName(queryName);
 		return this;
 	}
@@ -67,7 +70,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 * @param modelName The model name.
 	 * @return this fluent instance.
 	 */
-	public FluentTreeItem modelName(String modelName) {
+	public @Nonnull FluentTreeItem modelName(@Nullable String modelName) {
 		item.setModelName(modelName);
 		return this;
 	}
@@ -78,7 +81,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 * @param autoPopulate {@code true} to auto-populate.
 	 * @return this fluent instance.
 	 */
-	public FluentTreeItem autoPopulate(boolean autoPopulate) {
+	public @Nonnull FluentTreeItem autoPopulate(boolean autoPopulate) {
 		item.setAutoPopulate(autoPopulate ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -89,7 +92,7 @@ public class FluentTreeItem extends FluentMenuItem<FluentTreeItem> {
 	 * @return The tree item metadata instance.
 	 */
 	@Override
-	public TreeItemMetaData get() {
+	public @Nonnull TreeItemMetaData get() {
 		return item;
 	}
 }

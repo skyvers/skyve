@@ -2,6 +2,8 @@ package org.skyve.metadata.sail.language.step.interaction.navigation;
 
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -29,7 +31,7 @@ public class NavigateMap extends NavigateList {
 	 * Returns the geometryBinding.
 	 * @return the result
 	 */
-	public String getGeometryBinding() {
+	public @Nullable String getGeometryBinding() {
 		return geometryBinding;
 	}
 	
@@ -38,7 +40,7 @@ public class NavigateMap extends NavigateList {
 	 * @param geometryBinding the geometryBinding
 	 */
 	@XmlAttribute
-	public void setGeometryBinding(String geometryBinding) {
+	public void setGeometryBinding(@Nullable String geometryBinding) {
 		this.geometryBinding = UtilImpl.processStringValue(geometryBinding);
 	}
 
@@ -46,7 +48,7 @@ public class NavigateMap extends NavigateList {
 	 * Returns the refreshTimeInSeconds.
 	 * @return the result
 	 */
-	public Integer getRefreshTimeInSeconds() {
+	public @Nullable Integer getRefreshTimeInSeconds() {
 		return refreshTimeInSeconds;
 	}
 	
@@ -55,7 +57,7 @@ public class NavigateMap extends NavigateList {
 	 * @param refreshTimeInSeconds the refreshTimeInSeconds
 	 */
 	@XmlAttribute(required = false)
-	public void setRefreshTimeInSeconds(Integer refreshTimeInSeconds) {
+	public void setRefreshTimeInSeconds(@Nullable Integer refreshTimeInSeconds) {
 		this.refreshTimeInSeconds = refreshTimeInSeconds;
 	}
 	
@@ -63,7 +65,7 @@ public class NavigateMap extends NavigateList {
 	 * Returns the showRefreshControls.
 	 * @return the result
 	 */
-	public Boolean getShowRefreshControls() {
+	public @Nullable Boolean getShowRefreshControls() {
 		return showRefreshControls;
 	}
 	
@@ -72,7 +74,7 @@ public class NavigateMap extends NavigateList {
 	 * @param showRefreshControls the showRefreshControls
 	 */
 	@XmlAttribute(required = false)
-	public void setShowRefreshControls(Boolean showRefreshControls) {
+	public void setShowRefreshControls(@Nullable Boolean showRefreshControls) {
 		this.showRefreshControls = showRefreshControls;
 	}
 
@@ -81,7 +83,7 @@ public class NavigateMap extends NavigateList {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeNavigateMap(this);
 	}
 }

@@ -17,7 +17,6 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.hibernate.AbstractHibernatePersistence;
 import org.skyve.impl.security.LegacyBCryptPasswordEncoder;
-import org.skyve.impl.security.SkyveLegacyPasswordEncoder;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.HttpServletRequestResponse;
 import org.skyve.impl.web.WebContainer;
@@ -40,13 +39,20 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 @SuppressWarnings("java:S2068") // Suppress "Hardcoded password" false positives
 public class SecurityUtil {
-
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SecurityUtil.class);
 
 	private static final String ANONYMOUS_SECURITY_USER = "securityUser";
 	private static final String ARGON2_ALGORITHM = "argon2";
 	private static final String HTML_LINE_BREAK = "<br/>";
+	private static final String UNKNOWN_IP_ADDRESS = "unknown";
 	private static final PasswordEncoder BCRYPT_PASSWORD_ENCODER = new LegacyBCryptPasswordEncoder();
+
+	/**
+	 * Prevent instantiation.
+	 */
+	private SecurityUtil() {
+		// nothing to see here
+	}
 
 	/**
 	 * Creates a security log entry and optionally sends an email notification for the specified exception.
@@ -106,12 +112,12 @@ public class SecurityUtil {
 	 * @param email Whether to attempt sending an email notification
 	 * @throws IllegalArgumentException if eventType or eventMessage is null
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
+	@SuppressWarnings({"java:S3776", "java:S1141", "null", "unused"}) // Complexity OK, nested try OK, null test associated user regardless of interface contract here for robustness
 	private static void log(@Nonnull String eventType, @Nonnull String eventMessage, @Nullable String provenance, @Nullable User user, boolean email) {
 		// If no user is specified, attempt to retrieve from current persistence
 		User associatedUser = user;
 		if (associatedUser == null) {
-			associatedUser = CORE.getPersistence().getUser();
+			associatedUser = CORE.getUser();
 		}
 
 		// Create a new, temporary persistence
@@ -321,32 +327,46 @@ public class SecurityUtil {
 	 * 3. Remote address
 	 *
 	 * @param request The HTTP request to extract the IP address from
-	 * @return The source IP address as a string
+	 * @return The first non-blank source IP address, or {@code "unknown"} when none is available
 	 * @throws IllegalArgumentException if request is null
 	 */
+	@SuppressWarnings("java:S3776") // complexity OK
 	public static @Nonnull String getSourceIpAddress(@Nonnull HttpServletRequest request) {
 		// Check "Forwarded" header
-	    String forwardedHeader = request.getHeader("Forwarded");
-	    if (forwardedHeader != null) {
-	        // Parse the "Forwarded" header for the 'for' field
-	        for (String part : forwardedHeader.split(";")) {
-	            if (part.trim().startsWith("for=")) {
-	                return part.substring(4).split(",")[0].trim();
-	            }
-	        }
-	    }
-	    
-	    // Check "X-Forwarded-For" header
-	    String xForwardedForHeader = request.getHeader("X-Forwarded-For");
-	    if (xForwardedForHeader != null) {
-	    	StringTokenizer tokenizer = new StringTokenizer(xForwardedForHeader, ",");
-			if (tokenizer.hasNext()) {
-                return tokenizer.nextToken().trim();
-            }
-	    }
+		String forwardedHeader = UtilImpl.processStringValue(request.getHeader("Forwarded"));
+		if (forwardedHeader != null) {
+			// Parse the "Forwarded" header for the 'for' field
+			for (String rawPart : forwardedHeader.split(";")) {
+				String part = UtilImpl.processStringValue(rawPart);
+				if ((part != null) && part.startsWith("for=")) {
+					String forwardedFor = part.substring(4);
+					int commaIndex = forwardedFor.indexOf(',');
+					if (commaIndex >= 0) {
+						forwardedFor = forwardedFor.substring(0, commaIndex);
+					}
+					String ipAddress = UtilImpl.processStringValue(forwardedFor);
+					if (ipAddress != null) {
+						return ipAddress;
+					}
+				}
+			}
+		}
 
-		// If none are present, return the remote address
-		return request.getRemoteAddr();
+		// Check "X-Forwarded-For" header
+		String xForwardedForHeader = UtilImpl.processStringValue(request.getHeader("X-Forwarded-For"));
+		if (xForwardedForHeader != null) {
+			StringTokenizer tokenizer = new StringTokenizer(xForwardedForHeader, ",");
+			if (tokenizer.hasNext()) {
+				String ipAddress = UtilImpl.processStringValue(tokenizer.nextToken());
+				if (ipAddress != null) {
+					return ipAddress;
+				}
+			}
+		}
+
+		// If no header address is present, return the remote address or unknown
+		String remoteAddress = UtilImpl.processStringValue(request.getRemoteAddr());
+		return (remoteAddress == null) ? UNKNOWN_IP_ADDRESS : remoteAddress;
 	}
 
 	/**
@@ -366,7 +386,15 @@ public class SecurityUtil {
 	}
 
 	/**
-	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class)
+	 * Create Skyve's version of Spring Security's DelegatingPasswordEncoder (from their PasswordEncoderFactories class).
+	 *
+	 * <p>Unlike Spring's, its {@code matches} never throws for a stored password it cannot use: one with no
+	 * {@code {id}} prefix, a malformed or unknown prefix, or a hash its encoder cannot decode. Such a stored
+	 * password matches no password, so a sign in with it fails as bad credentials. This is what a password
+	 * redacted in a backup (sensitivity secret) looks like after a restore.
+	 *
+	 * <p>Side effects: logs a warning, without the stored value, each time a stored password cannot be used.
+	 *
 	 * @return	Skyve's delegating password encoder
 	 */
 	public static @Nonnull PasswordEncoder createDelegatingPasswordEncoder() {
@@ -376,12 +404,20 @@ public class SecurityUtil {
 		encoders.put("bcrypt", BCRYPT_PASSWORD_ENCODER);
 		encoders.put("pbkdf2", Pbkdf2PasswordEncoder.defaultsForSpringSecurity_v5_8());
 		encoders.put("scrypt", SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8());
-		DelegatingPasswordEncoder result = new DelegatingPasswordEncoder(encodingId, encoders);
-
-		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
-		result.setDefaultPasswordEncoderForMatches(new SkyveLegacyPasswordEncoder());
-
-		return result;
+		return new DelegatingPasswordEncoder(encodingId, encoders) {
+			@Override
+			public boolean matches(CharSequence rawPassword, String prefixEncodedPassword) {
+				try {
+					return super.matches(rawPassword, prefixEncodedPassword);
+				}
+				// Spring Security and its encoders throw these for a stored value they cannot decode.
+				// Their messages can hold the stored value, so only the exception type is logged.
+				catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+					LOGGER.warn("A stored password hash cannot be used, so it matches no password ({})", e.getClass().getSimpleName());
+					return false;
+				}
+			}
+		};
 	}
 	
 	/**
@@ -405,10 +441,6 @@ public class SecurityUtil {
 		}
 		else if ("scrypt".equals(passwordHashingAlgorithm)) {
 			result = "{scrypt}" + SCryptPasswordEncoder.defaultsForSpringSecurity_v5_8().encode(clearText);
-		}
-		// TODO Legacy hashing with no SALT - REMOVE when RevSA password time period expires 
-		else if ("SHA1".equals(passwordHashingAlgorithm)) {
-			result = SkyveLegacyPasswordEncoder.encode(clearText, passwordHashingAlgorithm);
 		}
 		else {
 			throw new DomainException(passwordHashingAlgorithm + " not supported");

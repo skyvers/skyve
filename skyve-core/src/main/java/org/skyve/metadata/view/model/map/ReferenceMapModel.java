@@ -9,6 +9,8 @@ import org.locationtech.jts.geom.Geometry;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A class to extend to make a quick model based on a collection or an association within the edited bean.
  * The referenceBinding can be compound.
@@ -23,12 +25,12 @@ import org.skyve.util.Binder;
 public class ReferenceMapModel<T extends Bean> extends DefaultMapModel<T> {
 	private String referenceBinding;
 
-	public ReferenceMapModel(String referenceBinding) {
+	public ReferenceMapModel(@Nonnull String referenceBinding) {
 		this.referenceBinding = referenceBinding;
 	}
 
 	@Override
-	public MapResult getResult(Geometry mapBounds) throws Exception {
+	public @Nonnull MapResult getResult(@Nonnull Geometry mapBounds) throws Exception {
 		Envelope mapEnvelope = mapBounds.getEnvelopeInternal();
 		
 		List<MapItem> items = Collections.emptyList();

@@ -20,6 +20,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.MenuRenderer;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates React Native navigation routes for generated views.
  */
@@ -31,7 +34,7 @@ public class ReactNativeRouter {
 	private Set<String> imports = new TreeSet<>();
 	private Set<String> routes = new TreeSet<>();
 
-	public ReactNativeRouter(ReactGenerator generator) {
+	public ReactNativeRouter(@Nonnull ReactGenerator generator) {
 		this.generator = generator;
 	}
 
@@ -113,13 +116,13 @@ public class ReactNativeRouter {
 		Customer c = CORE.getCustomer();
 		new MenuRenderer(generator.uxui, null) {
 			@Override
-			public void renderCalendarItem(CalendarItem item,
-											Module menuModule,
-											Module itemModule,
-											Document itemDocument,
-											String itemQueryName,
-											String icon16,
-											String iconStyleClass) {
+			public void renderCalendarItem(@Nonnull CalendarItem item,
+											@Nonnull Module menuModule,
+											@Nonnull Module itemModule,
+											@Nonnull Document itemDocument,
+											@Nullable String itemQueryName,
+											@Nullable String icon16,
+											@Nullable String iconStyleClass) {
 				//String moduleName = itemModule.getName();
 				//String modelName = item.getModelName();
 				//String componentName = ((modelName == null) ? itemQueryName : modelName) + "Cal";
@@ -127,12 +130,12 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			public void renderEditItem(EditItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String icon16,
-										String iconStyleClass) {
+			public void renderEditItem(@Nonnull EditItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				String moduleName = itemModule.getName();
 				String componentName = itemDocument.getName();
 				ReactEditView view = new ReactEditView(generator, moduleName, componentName);
@@ -142,13 +145,13 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			public void renderListItem(ListItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderListItem(@Nonnull ListItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				String moduleName = itemModule.getName();
 				String modelName = item.getModelName();
 				String componentName = ((modelName == null) ? itemQueryName : modelName) + "List";
@@ -173,13 +176,13 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			public void renderMapItem(MapItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderMapItem(@Nonnull MapItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				//String moduleName = itemModule.getName();
 				//String modelName = item.getModelName();
 				//String componentName = ((modelName == null) ? itemQueryName : modelName) + "Map";
@@ -187,13 +190,13 @@ public class ReactNativeRouter {
 			}
 
 			@Override
-			public void renderTreeItem(TreeItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderTreeItem(@Nonnull TreeItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				//String moduleName = itemModule.getName();
 				//String modelName = item.getModelName();
 				//String componentName = ((modelName == null) ? itemQueryName : modelName) + "Tree";
@@ -202,7 +205,7 @@ public class ReactNativeRouter {
 		}.render(c);
 	}
 
-	private void processItem(ReactComponent component, @SuppressWarnings("unused") String[] params) {
+	private void processItem(@Nonnull ReactComponent component, @SuppressWarnings("unused") @Nullable String[] params) {
 		String moduleName = component.moduleName;
 		String componentName = component.componentName;
 

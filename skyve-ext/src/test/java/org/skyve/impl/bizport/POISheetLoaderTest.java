@@ -126,6 +126,40 @@ class POISheetLoaderTest {
 	}
 
 	@Test
+	void isNoDataInDebugModeIndexesAnUnindexedFieldAtTheFirstColumnAndReportsItEmpty() throws Exception {
+		bindPersistenceWithCustomer(customer(null));
+		POISheetLoader loader = loader(workbookBytes(row -> row.createCell(1).setCellValue("second column only")));
+		loader.setDebugMode(true);
+		DataFileField field = new DataFileField(null);
+		field.setIndex((Integer) null);
+		// added directly so that addField() does not assign an index
+		loader.getFields().add(field);
+		loader.nextData();
+
+		assertTrue(loader.isNoData());
+		assertThat(field.getIndex(), is(Integer.valueOf(0)));
+	}
+
+	@Test
+	void dateCellThatCannotBeReadAndHasNoStringValueThrowsDomainException() throws Exception {
+		Converter<DateTime> converter = mock(Converter.class);
+		bindPersistenceWithCustomer(customer(converter));
+		POISheetLoader loader = loader(workbookBytes(row -> row.createCell(0).setCellValue("first")));
+		Cell unreadable = mock(Cell.class);
+		when(unreadable.getDateCellValue()).thenThrow(new IllegalStateException("not a date"));
+		Row row = mock(Row.class);
+		// the cell is there when its date is read but gone when its string value is read for the fallback conversion
+		when(row.getCell(0, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL)).thenReturn(unreadable, (Cell) null);
+		Field rowField = POISheetLoader.class.getDeclaredField("row");
+		rowField.setAccessible(true);
+		rowField.set(loader, row);
+
+		DomainException e = assertThrows(DomainException.class, () -> loader.getDateFieldValue(0));
+
+		assertThat(e.getMessage(), containsString("The value 'null' is not a valid date"));
+	}
+
+	@Test
 	void poiCellTypeDescriptionsCoverCommonCellTypes() throws Exception {
 		assertThat(invokeCellTypeDescription(null), is("unknown"));
 		assertThat(invokeCellTypeDescription(cell(CellType.BOOLEAN, null)), is("Boolean"));

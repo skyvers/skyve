@@ -14,6 +14,7 @@ import org.skyve.util.IPGeolocation;
 @SuppressWarnings("static-method")
 class GeoIPMapTest {
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mapModelWithEmptyGeoIPReturnsEmptyList() {
 		MapResult result = GeoIPMap.mapModel(IPGeolocation.EMPTY);
@@ -21,6 +22,7 @@ class GeoIPMapTest {
 		assertTrue(result.getItems().isEmpty());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mapModelWithNullLocationReturnsEmptyList() {
 		IPGeolocation geoIP = new IPGeolocation("Sydney", "Australia", "AU", null);
@@ -29,6 +31,7 @@ class GeoIPMapTest {
 		assertTrue(result.getItems().isEmpty());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mapModelWithValidLocationReturnsSingleItem() {
 		GeometryFactory factory = new GeometryFactory();

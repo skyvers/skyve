@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.views;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -21,6 +22,7 @@ import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.router.UxUi;
+import org.skyve.web.WebAction;
 import org.skyve.web.UserAgentType;
 
 import jakarta.faces.context.ExternalContext;
@@ -77,6 +79,26 @@ class MenuViewTest {
 		assertSame(view.lastMenu, phoneMenu);
 		assertEquals(2, view.createCount);
 		assertEquals("phone", view.lastUxUiName);
+	}
+
+	@Test
+	void rebuildForANewModuleClearsTheDocumentQueryAndActionFromTheLastBuild() {
+		// the session scoped view was last initialised for another module's home document
+		TestMenuView view = new TestMenuView();
+		view.setBizModuleParameter("serviceCentre");
+		view.setBizDocumentParameter("Home");
+		view.setQueryNameParameter("qPending");
+		view.setWebActionParameter(WebAction.e);
+		installRequest("tablet", UserAgentType.tablet, false, "time");
+
+		view.getMenu();
+
+		// initialise() validates these against the new module, so stale values make the URL "malformed"
+		assertEquals(1, view.initialiseCount);
+		assertEquals("time", view.moduleAtInitialise);
+		assertNull(view.documentAtInitialise);
+		assertNull(view.queryAtInitialise);
+		assertNull(view.webActionAtInitialise);
 	}
 
 	@Test
@@ -185,10 +207,18 @@ class MenuViewTest {
 		private String lastBizModule;
 		private String lastUxUiName;
 		private MenuModel lastMenu;
+		private String moduleAtInitialise;
+		private String documentAtInitialise;
+		private String queryAtInitialise;
+		private WebAction webActionAtInitialise;
 
 		@Override
 		public void initialise() {
 			initialiseCount++;
+			moduleAtInitialise = getBizModuleParameter();
+			documentAtInitialise = getBizDocumentParameter();
+			queryAtInitialise = getQueryNameParameter();
+			webActionAtInitialise = getWebActionParameter();
 		}
 
 		@Override

@@ -2,6 +2,8 @@ package org.skyve.cache;
 
 import java.io.Serializable;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Configures a JCache-backed cache region.
  *
@@ -22,12 +24,12 @@ public class JCacheConfig<K extends Serializable, V extends Serializable> extend
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public JCacheConfig(String name,
+	public JCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 	}
 
@@ -39,7 +41,7 @@ public class JCacheConfig<K extends Serializable, V extends Serializable> extend
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public JCacheConfig(String name, long heapSizeEntries, Class<K> keyClass, Class<V> valueClass) {
+	public JCacheConfig(@Nonnull String name, long heapSizeEntries, @Nonnull Class<K> keyClass, @Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, keyClass, valueClass);
 	}
 
@@ -54,13 +56,13 @@ public class JCacheConfig<K extends Serializable, V extends Serializable> extend
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public JCacheConfig(String name,
+	public JCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, offHeapSizeInMB, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 	}
 
@@ -73,11 +75,11 @@ public class JCacheConfig<K extends Serializable, V extends Serializable> extend
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public JCacheConfig(String name,
+	public JCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, offHeapSizeInMB, keyClass, valueClass);
 	}
 	
@@ -87,7 +89,7 @@ public class JCacheConfig<K extends Serializable, V extends Serializable> extend
 	 * @return config details in JSON-like form
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("{name:\"").append(getName());
 		sb.append("\",type:\"jcache");

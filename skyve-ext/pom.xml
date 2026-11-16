@@ -9,7 +9,7 @@
 	<artifactId>skyve-ext</artifactId>
 	
 	<properties>
-		<azure-sdk.version>12.25.2</azure-sdk.version>
+		<azure-sdk.version>12.36.0</azure-sdk.version>
 	</properties>
 
 	<build>
@@ -22,6 +22,12 @@
 			<groupId>org.skyve</groupId>
 			<artifactId>skyve-core</artifactId>
 			<version>${skyve.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<!-- Declared directly so this version wins dependency mediation in downstream projects over hibernate-spatial's transitive version -->
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -161,7 +167,7 @@
 		<dependency>
 		    <groupId>org.jsoup</groupId>
 		    <artifactId>jsoup</artifactId>
-		    <version>1.18.3</version>
+		    <version>1.23.2</version>
 		</dependency>
 		<!-- For image markup -->
 		<dependency>
@@ -214,6 +220,12 @@
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-params</artifactId>
+			<version>${junit-jupiter.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

@@ -220,7 +220,7 @@ public class Monitoring {
 	/**
 	 * Returns accumulated measurements for a request key code.
 	 */
-	public static @Nullable RequestMeasurements getRequestMeasurements(String requestKeyCode) {
+	public static @Nullable RequestMeasurements getRequestMeasurements(@Nonnull String requestKeyCode) {
 		return REQUEST_MEASUREMENTS.get(requestKeyCode);
 	}
 

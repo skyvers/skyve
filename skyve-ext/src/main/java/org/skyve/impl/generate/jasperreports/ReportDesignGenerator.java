@@ -1,6 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
@@ -14,6 +15,9 @@ import org.skyve.metadata.module.Module;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for all JasperReports design generators.
  *
@@ -25,15 +29,6 @@ public abstract class ReportDesignGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ReportDesignGenerator.class);
 
     /**
-     * Creates a fresh design instance and populates it with derived report metadata.
-     *
-     * @return A populated design ready for rendering.
-     */
-    public DesignSpecification generateDesign() {
-        return populateDesign(new DesignSpecification());
-    }
-
-    /**
      * Populates a design with parameters, fields, variables, subreports and bands.
      *
      * <p>Side effects: clears any existing generated collections on {@code design}
@@ -42,7 +37,7 @@ public abstract class ReportDesignGenerator {
      * @param design The mutable design to populate.
      * @return The same design instance after population.
      */
-    public DesignSpecification populateDesign(DesignSpecification design) {
+    public @Nonnull DesignSpecification populateDesign(@Nonnull DesignSpecification design) {
         assert(design.getModuleName() != null);
         assert(design.getDocumentName() != null);
 
@@ -61,9 +56,9 @@ public abstract class ReportDesignGenerator {
         return design;
     }
 
-    protected abstract ReportDesignGenerator getSubreportGenerator();
+    protected abstract @Nonnull ReportDesignGenerator getSubreportGenerator();
 
-    private static void clearDesign(DesignSpecification design) {
+    private static void clearDesign(@Nonnull DesignSpecification design) {
         design.getBands().clear();
         design.getFields().clear();
         design.getParameters().clear();
@@ -76,12 +71,18 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The design receiving parameters.
      */
-    protected static void addParameters(DesignSpecification design) {
+    protected static void addParameters(@Nonnull DesignSpecification design) {
         ReportParameter p1 = new ReportParameter();
         p1.setName("SUBREPORT_DIR");
         p1.setTypeClass("java.lang.String");
 
-        String pathToReport = Renderer.pathToReport(design.getModuleName(), design.getDocumentName(), true);
+        // populateDesign() requires a module and document name
+        final String moduleName = design.getModuleName();
+        final String documentName = design.getDocumentName();
+        if ((moduleName == null) || (documentName == null)) {
+            throw new IllegalStateException("Report design " + design.getName() + " has no module or document name");
+        }
+        String pathToReport = Renderer.pathToReport(moduleName, documentName, true);
         p1.setDefaultValueExpression(pathToReport);
         design.getParameters().add(p1);
 
@@ -103,7 +104,7 @@ public abstract class ReportDesignGenerator {
      * @param design The design receiving fields.
      */
     @SuppressWarnings("static-method") // overridable
-	protected void addFields(DesignSpecification design) {
+	protected void addFields(@Nonnull DesignSpecification design) {
         final Customer customer = CORE.getCustomer();
         final Module module = design.getModule();
         final Document document = design.getDocument();
@@ -131,12 +132,13 @@ public abstract class ReportDesignGenerator {
 
             Document extDocument = null;
             Extends inherits = document.getExtends();
+            String extDocumentName = (inherits == null) ? null : inherits.getDocumentName();
             Persistent persistent = document.getPersistent();
             if (inherits != null && 
-	    			inherits.getDocumentName() != null && 
+	    			extDocumentName != null && 
 	    			persistent != null && 
 	    			Persistent.ExtensionStrategy.joined.equals(persistent.getStrategy())) {
-                extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
+                extDocument = module.getDocument(customer, extDocumentName);
 
                 design.setAlias(design.getAlias() + 1);
                 StringBuilder sJoin = new StringBuilder();
@@ -144,8 +146,13 @@ public abstract class ReportDesignGenerator {
                 sJoin.append(" on ").append("a.bizId = ").append((char) design.getAlias()).append(".bizId");
 
                 design.addJoin(extDocument.getName(), Character.toString((char) design.getAlias()), sJoin.toString());
+                // addJoin() ensures the join aliases exist
+                final Map<String, String> joinAlias = design.getJoinAlias();
+                if (joinAlias == null) {
+                    throw new IllegalStateException("Report design " + design.getName() + " has no join aliases after adding a join");
+                }
                 fbK.setJoinSql(sJoin.toString());
-                fbK.setNameSql(design.getJoinAlias().get(sJoin.toString()) + ".bizKey ");
+                fbK.setNameSql(joinAlias.get(sJoin.toString()) + ".bizKey ");
             } else {
                 fbK.setNameSql("a.bizKey");
             }
@@ -159,7 +166,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The design receiving variables.
      */
-    protected static void addVariables(DesignSpecification design) {
+    protected static void addVariables(@Nonnull DesignSpecification design) {
         if (DesignSpecification.ReportType.subreport.equals(design.getReportType())) {
             for (ReportField a : design.getFields()) {
                 if (!Attribute.AttributeType.collection.name().equals(a.getSkyveType()) && !Boolean.TRUE.equals(a.getImplicit())) {
@@ -181,7 +188,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The parent design receiving subreport specifications.
      */
-    protected void addSubreports(DesignSpecification design) {
+    protected void addSubreports(@Nonnull DesignSpecification design) {
         //only generate default reports if subreports is empty (allows for manual creation of subreports instead of default)
         if (design.getSubReports().isEmpty()) {
 
@@ -201,7 +208,7 @@ public abstract class ReportDesignGenerator {
      *
      * @param design The design receiving generated bands.
      */
-	protected void addBands(DesignSpecification design) {
+	protected void addBands(@Nonnull DesignSpecification design) {
         ReportBand background = new ReportBand();
         background.setBandType(ReportBand.BandType.background);
         background.setParent(design);
@@ -278,7 +285,7 @@ public abstract class ReportDesignGenerator {
      * @return A title band bound to the supplied design.
      */
 	   @SuppressWarnings("static-method") // overridable
-	protected ReportBand createTitleBand(DesignSpecification design) {
+	protected @Nonnull ReportBand createTitleBand(@Nonnull DesignSpecification design) {
         final ReportBand title = new ReportBand();
         title.setName("Title");
         title.setBandType(ReportBand.BandType.title);
@@ -298,7 +305,7 @@ public abstract class ReportDesignGenerator {
      * @param fieldPrefix Field-name prefix accumulated for nested bindings.
      * @return The generated report field descriptor.
      */
-    protected static ReportField fieldFromAttribute(DesignSpecification bean, Customer customer, Document document, Attribute a, StringBuilder sJoin, StringBuilder fieldPrefix) {
+    protected static @Nonnull ReportField fieldFromAttribute(@Nonnull DesignSpecification bean, @Nonnull Customer customer, @Nonnull Document document, @Nonnull Attribute a, @Nonnull StringBuilder sJoin, @Nonnull StringBuilder fieldPrefix) {
     	StringBuilder mutableSJoin = sJoin;
     	ReportField f = new ReportField();
         f.setParent(bean);
@@ -333,8 +340,13 @@ public abstract class ReportDesignGenerator {
                 if (mutableSJoin.isEmpty()) {
                     f.setNameSql("a." + f.getName());
                 } else {
+                    // populateDesign() initialises the join aliases
+                    final Map<String, String> joinAlias = bean.getJoinAlias();
+                    if (joinAlias == null) {
+                        throw new IllegalStateException("Report design " + bean.getName() + " has no join aliases");
+                    }
                     f.setJoinSql(mutableSJoin.toString());
-                    f.setNameSql(bean.getJoinAlias().get(mutableSJoin.toString()) + "." + a.getName() + " as " + f.getName());
+                    f.setNameSql(joinAlias.get(mutableSJoin.toString()) + "." + a.getName() + " as " + f.getName());
                 }
 
                 if (DesignSpecification.Mode.bean.equals(bean.getMode())) {
@@ -369,7 +381,7 @@ public abstract class ReportDesignGenerator {
      * @return A resolved report field, or {@code null} when the binding cannot be represented.
      */
     @SuppressWarnings("java:S3776") // Complexity OK
-    protected static ReportField fieldFromBinding(DesignSpecification design, Customer customer, Document document, String binding) {
+    protected static @Nullable ReportField fieldFromBinding(@Nonnull DesignSpecification design, @Nonnull Customer customer, @Nonnull Document document, @Nonnull String binding) {
 
         ReportField result = null;
         StringBuilder sJoin = new StringBuilder();
@@ -420,15 +432,24 @@ public abstract class ReportDesignGenerator {
         return result;
     }
 
-    protected static StringBuilder addJoinForAssociation(StringBuilder sJoin, Customer customer, DesignSpecification bean,
-                                                         Document document, Attribute a, String uniqueJoinIdentifier) {
+    protected static @Nonnull StringBuilder addJoinForAssociation(@Nonnull StringBuilder sJoin, @Nonnull Customer customer, @Nonnull DesignSpecification bean,
+                                                                  @Nonnull Document document, @Nonnull Attribute a, @Nonnull String uniqueJoinIdentifier) {
 
-        if (!bean.getJoins().containsKey(document.getName())) {
+        // populateDesign() initialises the joins and requires a module name
+        final Map<String, String> joins = bean.getJoins();
+        if (joins == null) {
+            throw new IllegalStateException("Report design " + bean.getName() + " has no joins");
+        }
+        final String moduleName = bean.getModuleName();
+        if (moduleName == null) {
+            throw new IllegalStateException("Report design " + bean.getName() + " has no module name");
+        }
+        if (!joins.containsKey(document.getName())) {
             // get the next alias
             bean.setAlias(bean.getAlias() + 1);
         }
 
-        Module fMod = customer.getModule(bean.getModuleName());
+        Module fMod = customer.getModule(moduleName);
         Association assoc = (Association) a;
         Document fDoc = fMod.getDocument(customer, assoc.getDocumentName());
         if (!a.isRequired()) {
@@ -441,7 +462,7 @@ public abstract class ReportDesignGenerator {
         sJoin.append(" on ").append("a.bizId = ");
         sJoin.append(" ").append((char) bean.getAlias()).append(".").append(a.getName()).append("_id");
 
-        if (!bean.getJoins().containsKey(document.getName())) {
+        if (!joins.containsKey(document.getName())) {
             bean.addJoin(document.getName() + ":" + uniqueJoinIdentifier, Character.toString((char) bean.getAlias()), sJoin.toString());
         }
 
@@ -456,7 +477,7 @@ public abstract class ReportDesignGenerator {
      * @param colWidth The available column width for the subreport.
      */
 	@SuppressWarnings("boxing")
-	public void constructSubreportFromField(DesignSpecification design, ReportField fld, Integer colWidth) {
+	public void constructSubreportFromField(@Nonnull DesignSpecification design, @Nonnull ReportField fld, @Nonnull Integer colWidth) {
         final Document document = design.getDocument();
 
         DesignSpecification subreport = new DesignSpecification();

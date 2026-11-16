@@ -30,6 +30,7 @@ class ViewParameterTest {
 		assertNull(vp.getFromBinding());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void fromBindingNullBecomesNull() {
 		ViewParameter vp = new ViewParameter();
@@ -51,6 +52,7 @@ class ViewParameterTest {
 		assertNull(vp.getBoundTo());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void defaultsAreNull() {
 		ViewParameter vp = new ViewParameter();

@@ -60,6 +60,7 @@ class AbstractEJBRemoteContentManagerClientTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void unsupportedRepositoryOperationsThrow() throws Exception {
 		try (TestClient client = new TestClient(mock(EJBRemoteContentManagerServer.class))) {

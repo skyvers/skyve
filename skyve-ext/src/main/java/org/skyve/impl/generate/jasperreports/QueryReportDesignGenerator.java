@@ -3,9 +3,12 @@ package org.skyve.impl.generate.jasperreports;
 import java.util.List;
 
 import org.skyve.CORE;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Generates a JasperReports design from a Skyve named document query,
@@ -19,7 +22,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
      * @throws UnsupportedOperationException Always.
      */
     @Override
-    protected QueryReportDesignGenerator getSubreportGenerator() {
+    protected @Nonnull QueryReportDesignGenerator getSubreportGenerator() {
         throw new UnsupportedOperationException("Subreports are not supported in query reports.");
     }
 
@@ -29,10 +32,14 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design being populated.
      */
     @Override
-    protected void addFields(DesignSpecification design) {
+    protected void addFields(@Nonnull DesignSpecification design) {
         super.addFields(design);
 
-        final MetaDataQueryDefinition queryDefinition = design.getModule().getNullSafeMetaDataQuery(design.getQueryName());
+        final String queryName = design.getQueryName();
+        if (queryName == null) {
+            throw new MetaDataException("Query report design " + design.getName() + " has no query name");
+        }
+        final MetaDataQueryDefinition queryDefinition = design.getModule().getNullSafeMetaDataQuery(queryName);
 
         final List<? extends Attribute> documentAttributes = design.getDocument().getAttributes();
         for (MetaDataQueryColumn queryColumn : queryDefinition.getColumns()) {
@@ -53,7 +60,7 @@ public class QueryReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design being populated.
      */
     @Override
-    protected void addBands(DesignSpecification design) {
+    protected void addBands(@Nonnull DesignSpecification design) {
         super.addBands(design);
 
         for (ReportField a : design.getFields()) {

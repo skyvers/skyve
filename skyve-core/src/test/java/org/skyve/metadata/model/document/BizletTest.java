@@ -58,7 +58,7 @@ class BizletTest {
 	// ---- Bizlet default methods (with null metaDataBizlet) ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletNewInstanceReturnsSameBean() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		// metaDataBizlet is null so newInstance returns the same bean
@@ -86,12 +86,13 @@ class BizletTest {
 	@SuppressWarnings("static-method")
 	void bizletGetDynamicDomainValuesReturnsNullWhenNoMetaDataBizlet() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
+		@SuppressWarnings("null") // passes null on purpose
 		List<DomainValue> result = bizlet.getDynamicDomainValues("anyAttribute", null);
 		assertNull(result);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletValidateDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		ValidationException e = new ValidationException();
@@ -115,35 +116,35 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPreSaveDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.preSave(null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostSaveDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.postSave(null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPreDeleteDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.preDelete(null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostDeleteDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.postDelete(null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostLoadDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.postLoad(null));
@@ -153,19 +154,20 @@ class BizletTest {
 	@SuppressWarnings("static-method")
 	void bizletPreExecuteReturnsNullWhenNoMetaDataBizlet() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
+		@SuppressWarnings("null") // passes null on purpose
 		org.skyve.domain.Bean result = bizlet.preExecute(ImplicitActionName.Save, null, null, null);
 		assertNull(result);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPreRerenderDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.preRerender("source", null, null));
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostRenderDoesNotThrowWhenNoMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		assertDoesNotThrow(() -> bizlet.postRender(null, null));
@@ -178,12 +180,13 @@ class BizletTest {
 	void bizletNewInstanceDelegatesToMetaDataBizlet() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
+		@SuppressWarnings("null") // passes null on purpose
 		org.skyve.domain.Bean result = bizlet.newInstance(null);
 		assertNull(result);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletValidateDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -213,6 +216,7 @@ class BizletTest {
 	void bizletGetDynamicDomainValuesDelegatesToMetaDataBizlet() throws Exception {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
+		@SuppressWarnings("null") // passes null on purpose
 		List<DomainValue> result = bizlet.getDynamicDomainValues("attr", null);
 		assertNull(result);
 	}
@@ -236,7 +240,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPreSaveDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -244,7 +248,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostSaveDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -252,7 +256,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPreDeleteDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -260,7 +264,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostDeleteDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -268,7 +272,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostLoadDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -276,7 +280,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPreRerenderDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());
@@ -284,7 +288,7 @@ class BizletTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void bizletPostRenderDelegatesToMetaDataBizlet() {
 		Bizlet<org.skyve.domain.Bean> bizlet = new Bizlet<>();
 		bizlet.setMetaDataBizlet(new BizletMetaData());

@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Content;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentContent metadata.
  */
@@ -18,7 +20,7 @@ public class FluentContent extends FluentConstrainableField<FluentContent> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentContent(Content content) {
+	public FluentContent(@Nonnull Content content) {
 		this.content = content;
 	}
 
@@ -26,7 +28,7 @@ public class FluentContent extends FluentConstrainableField<FluentContent> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentContent from(@SuppressWarnings("hiding") Content content) {
+	public @Nonnull FluentContent from(@SuppressWarnings("hiding") @Nonnull Content content) {
 		super.from(content);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentContent extends FluentConstrainableField<FluentContent> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Content get() {
+	public @Nonnull Content get() {
 		return content;
 	}
 }

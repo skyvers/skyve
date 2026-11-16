@@ -77,7 +77,7 @@ public interface DocumentFilter {
 	 * @param operands the candidate values; an empty array matches nothing
 	 * @return this filter for fluent chaining
 	 */
-	@Nonnull DocumentFilter addIn(@Nonnull String binding, Object...operands);
+	@Nonnull DocumentFilter addIn(@Nonnull String binding, @Nonnull Object...operands);
 	
 	/**
 	 * Adds an IN filter from the specified entity alias.
@@ -87,7 +87,7 @@ public interface DocumentFilter {
 	 * @param operands    the candidate values; an empty array matches nothing
 	 * @return this filter for fluent chaining
 	 */
-	@Nonnull DocumentFilter addAliasedIn (@Nonnull String entityAlias, @Nonnull String binding, Object...operands);
+	@Nonnull DocumentFilter addAliasedIn (@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object...operands);
 
 	/**
 	 * Adds a NOT IN filter: the value at {@code binding} must not be any of the given operands.
@@ -96,7 +96,7 @@ public interface DocumentFilter {
 	 * @param operands the excluded values; an empty array matches everything
 	 * @return this filter for fluent chaining
 	 */
-	@Nonnull DocumentFilter addNotIn(@Nonnull String binding, Object... operands);
+	@Nonnull DocumentFilter addNotIn(@Nonnull String binding, @Nonnull Object... operands);
 
 	/**
 	 * Adds a NOT IN filter from the specified entity alias.
@@ -106,7 +106,7 @@ public interface DocumentFilter {
 	 * @param operands    the excluded values; an empty array matches everything
 	 * @return this filter for fluent chaining
 	 */
-	@Nonnull DocumentFilter addAliasedNotIn(@Nonnull String entityAlias, @Nonnull String binding, Object... operands);
+	@Nonnull DocumentFilter addAliasedNotIn(@Nonnull String entityAlias, @Nonnull String binding, @Nonnull Object... operands);
 
 	/**
 	 * Adds an inequality filter: the value at {@code binding} must not equal {@code operand}.

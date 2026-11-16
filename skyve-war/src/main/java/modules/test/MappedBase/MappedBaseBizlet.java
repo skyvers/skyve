@@ -4,6 +4,8 @@ import org.skyve.metadata.model.document.Bizlet;
 
 import modules.test.domain.MappedBase;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Guards mapped-base lifecycle callbacks that should be overridden by extensions.
  */
@@ -15,7 +17,7 @@ public class MappedBaseBizlet extends Bizlet<MappedBase> {
 	 * @throws Exception always, because extension Bizlets should override this callback
 	 */
 	@Override
-	public void preSave(MappedBase bean) throws Exception {
+	public void preSave(@Nonnull MappedBase bean) throws Exception {
 		throw new IllegalStateException("preSave() should never be called as it is overridden and NOT called in MappedExtension");
 	}
 
@@ -26,7 +28,7 @@ public class MappedBaseBizlet extends Bizlet<MappedBase> {
 	 * @throws Exception always, because extension Bizlets should override this callback
 	 */
 	@Override
-	public void postSave(MappedBase bean) throws Exception {
+	public void postSave(@Nonnull MappedBase bean) throws Exception {
 		throw new IllegalStateException("postSave() should never be called as it is overridden and NOT called in MappedExtension");
 	}
 }

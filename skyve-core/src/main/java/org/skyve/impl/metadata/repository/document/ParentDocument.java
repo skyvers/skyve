@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
@@ -26,18 +27,18 @@ public class ParentDocument implements SerializableMetaData {
 	private String parentDocumentName;
 
 	@XmlAttribute
-	public Boolean getDatabaseIndex() {
+	public @Nullable Boolean getDatabaseIndex() {
 		return databaseIndex;
 	}
-	public void setDatabaseIndex(Boolean databaseIndex) {
+	public void setDatabaseIndex(@Nullable Boolean databaseIndex) {
 		this.databaseIndex = databaseIndex;
 	}
 	
 	@XmlValue
-	public String getParentDocumentName() {
+	public @Nullable String getParentDocumentName() {
 		return parentDocumentName;
 	}
-	public void setParentDocumentName(String parentDocumentName) {
+	public void setParentDocumentName(@Nullable String parentDocumentName) {
 		this.parentDocumentName = UtilImpl.processStringValue(parentDocumentName);
 	}
 }

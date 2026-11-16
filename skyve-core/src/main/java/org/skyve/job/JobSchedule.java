@@ -3,6 +3,8 @@ package org.skyve.job;
 
 import java.util.Date;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Defines the scheduling contract for a background job execution entry.
  *
@@ -30,7 +32,7 @@ public class JobSchedule {
 	 * 
 	 * @return the UUID of this schedule
 	 */
-	public String getUuid() {
+	public @Nullable String getUuid() {
 		return uuid;
 	}
 	
@@ -39,7 +41,7 @@ public class JobSchedule {
 	 * 
 	 * @param uuid the UUID to set
 	 */
-	public void setUuid(String uuid) {
+	public void setUuid(@Nullable String uuid) {
 		this.uuid = uuid;
 	}
 	
@@ -48,7 +50,7 @@ public class JobSchedule {
 	 * 
 	 * @return the job name
 	 */
-	public String getJobName() {
+	public @Nullable String getJobName() {
 		return jobName;
 	}
 	
@@ -57,7 +59,7 @@ public class JobSchedule {
 	 * 
 	 * @param jobName the job name to set
 	 */
-	public void setJobName(String jobName) {
+	public void setJobName(@Nullable String jobName) {
 		this.jobName = jobName;
 	}
 	
@@ -66,7 +68,7 @@ public class JobSchedule {
 	 * 
 	 * @return the start time, or {@code null} if no start time constraint exists
 	 */
-	public Date getStartTime() {
+	public @Nullable Date getStartTime() {
 		return startTime;
 	}
 	
@@ -75,7 +77,7 @@ public class JobSchedule {
 	 * 
 	 * @param startTime the start time to set, or {@code null} for no constraint
 	 */
-	public void setStartTime(Date startTime) {
+	public void setStartTime(@Nullable Date startTime) {
 		this.startTime = startTime;
 	}
 	
@@ -84,7 +86,7 @@ public class JobSchedule {
 	 * 
 	 * @return the end time, or {@code null} if no end time constraint exists
 	 */
-	public Date getEndTime() {
+	public @Nullable Date getEndTime() {
 		return endTime;
 	}
 	
@@ -93,7 +95,7 @@ public class JobSchedule {
 	 * 
 	 * @param endTime the end time to set, or {@code null} for no constraint
 	 */
-	public void setEndTime(Date endTime) {
+	public void setEndTime(@Nullable Date endTime) {
 		this.endTime = endTime;
 	}
 	
@@ -102,7 +104,7 @@ public class JobSchedule {
 	 * 
 	 * @return the cron expression
 	 */
-	public String getCronExpression() {
+	public @Nullable String getCronExpression() {
 		return cronExpression;
 	}
 	
@@ -111,7 +113,7 @@ public class JobSchedule {
 	 * 
 	 * @param cronExpression the cron expression to set
 	 */
-	public void setCronExpression(String cronExpression) {
+	public void setCronExpression(@Nullable String cronExpression) {
 		this.cronExpression = cronExpression;
 	}
 }

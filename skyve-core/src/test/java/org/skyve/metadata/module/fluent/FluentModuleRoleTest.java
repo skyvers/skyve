@@ -187,6 +187,7 @@ class FluentModuleRoleTest {
 		assertEquals(0, fluent.get().getAccesses().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindSingularAccess() {
 		// setup the test data
@@ -210,6 +211,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getDocumentName(), is("TestDocument1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindDocumentAggregateAccess() {
 		// setup the test data
@@ -233,6 +235,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getDocumentName(), is("TestDocument1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindQueryAggregateAccess() {
 		// setup the test data
@@ -256,6 +259,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getQueryName(), is("TestQuery1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindModelAggregateAccess() {
 		// setup the test data
@@ -280,6 +284,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getModelName(), is("TestModel1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindPreviousCompleteAccess() {
 		// setup the test data
@@ -304,6 +309,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getBinding(), is("binding1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindReportAccess() {
 		// setup the test data
@@ -329,6 +335,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getReportName(), is("TestReport1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindDynamicImageAccess() {
 		// setup the test data
@@ -353,6 +360,7 @@ class FluentModuleRoleTest {
 		assertThat(result.get().getImageName(), is("TestImage1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testFindContentAccess() {
 		// setup the test data
@@ -848,7 +856,7 @@ class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testFromCopiesContentPermission() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");
@@ -870,7 +878,7 @@ class FluentModuleRoleTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testFromCopiesContentRestriction() {
 		RoleImpl role = new RoleImpl();
 		role.setName("TestRole");

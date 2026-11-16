@@ -36,7 +36,7 @@ public interface Filter {
 	public void addEquals(@Nonnull String binding, @Nonnull Integer value);
 	public void addEquals(@Nonnull String binding, @Nonnull Long value);
 	public void addEquals(@Nonnull String binding, @Nonnull Decimal value);
-	public void addEquals(@Nonnull String binding, Boolean value);
+	public void addEquals(@Nonnull String binding, @Nonnull Boolean value);
 	public void addEquals(@Nonnull String binding, @Nonnull Enum<?> value);
 	public void addEquals(@Nonnull String binding, @Nonnull Geometry value);
 	public void addNotEquals(@Nonnull String binding, @Nonnull String value);
@@ -86,14 +86,14 @@ public interface Filter {
 	public void addBetween(@Nonnull String binding, @Nonnull Long start, @Nonnull Long end);
 	public void addBetween(@Nonnull String binding, @Nonnull Decimal start, @Nonnull Decimal end);
 
-	public void addIn(@Nonnull String binding, Object... values);
-	public void addNotIn(@Nonnull String binding, Object... values);
+	public void addIn(@Nonnull String binding, @Nonnull Object... values);
+	public void addNotIn(@Nonnull String binding, @Nonnull Object... values);
 	
 	public void addWithin(@Nonnull String binding, @Nonnull Geometry value);
 	public void addContains(@Nonnull String binding, @Nonnull Geometry value);
 	public void addCrosses(@Nonnull String binding, @Nonnull Geometry value);
 	public void addDisjoint(@Nonnull String binding, @Nonnull Geometry value);
-	public void addIntersects(@Nonnull String binding, Geometry value);
+	public void addIntersects(@Nonnull String binding, @Nonnull Geometry value);
 	public void addOverlaps(@Nonnull String binding, @Nonnull Geometry value);
 	public void addTouches(@Nonnull String binding, @Nonnull Geometry value);
 	// TODO need not versions of these geospatial relations

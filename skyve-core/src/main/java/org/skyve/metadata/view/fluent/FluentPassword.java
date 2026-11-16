@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Password} widget metadata using a fluent API.
  */
@@ -22,7 +24,7 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 * @param password
 	 *            the metadata instance to mutate
 	 */
-	public FluentPassword(Password password) {
+	public FluentPassword(@Nonnull Password password) {
 		this.password = password;
 	}
 
@@ -33,11 +35,11 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentPassword from(@SuppressWarnings("hiding") Password password) {
-
+	public @Nonnull FluentPassword from(@SuppressWarnings("hiding") @Nonnull Password password) {
 		absoluteWidth(password, this);
-
 		super.from(password);
+		password.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -49,8 +51,21 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentPassword pixelWidth(int width) {
+	public @Nonnull FluentPassword pixelWidth(int width) {
 		password.setPixelWidth(Integer.valueOf(width));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentPassword putProperty(@Nonnull String k, @Nonnull String v) {
+		password.getProperties().put(k, v);
 		return this;
 	}
 
@@ -60,7 +75,7 @@ public class FluentPassword extends FluentChangeableInputWidget<FluentPassword> 
 	 * @return the wrapped password metadata
 	 */
 	@Override
-	public Password get() {
+	public @Nonnull Password get() {
 		return password;
 	}
 }

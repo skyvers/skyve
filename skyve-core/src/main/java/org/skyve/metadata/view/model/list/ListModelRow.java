@@ -6,6 +6,9 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class ListModelRow extends DynamicBean {
 	private static final long serialVersionUID = 477773812246146903L;
 /*
@@ -22,20 +25,20 @@ public class ListModelRow extends DynamicBean {
 		}
 	}
 */
-	public ListModelRow(String bizModule, 
-							String bizDocument,
-							Map<String, Object> properties) {
+	public ListModelRow(@Nonnull String bizModule, 
+							@Nonnull String bizDocument,
+							@Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 	
 	private String bizLock;
-	public String getBizLock() {
+	public @Nullable String getBizLock() {
 		if (isDynaProperty(PersistentBean.LOCK_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(PersistentBean.LOCK_NAME);
 		}
 		return bizLock;
 	}
-	public void setBizLock(String bizLock) {
+	public void setBizLock(@Nullable String bizLock) {
 		if (isDynaProperty(PersistentBean.LOCK_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(PersistentBean.LOCK_NAME, bizLock);
 		}
@@ -45,13 +48,13 @@ public class ListModelRow extends DynamicBean {
 	}
 	
 	private String bizTagged;
-	public String getBizTagged() {
+	public @Nullable String getBizTagged() {
 		if (isDynaProperty(PersistentBean.TAGGED_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(PersistentBean.TAGGED_NAME);
 		}
 		return bizTagged;
 	}
-	public void setBizTagged(String bizTagged) {
+	public void setBizTagged(@Nullable String bizTagged) {
 		if (isDynaProperty(PersistentBean.TAGGED_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(PersistentBean.TAGGED_NAME, bizLock);
 		}
@@ -61,13 +64,13 @@ public class ListModelRow extends DynamicBean {
 	}
 	
 	private String bizFlagComment;
-	public String getBizFlagComment() {
+	public @Nullable String getBizFlagComment() {
 		if (isDynaProperty(PersistentBean.FLAG_COMMENT_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(PersistentBean.FLAG_COMMENT_NAME);
 		}
 		return bizFlagComment;
 	}
-	public void setBizFlagComment(String bizFlagComment) {
+	public void setBizFlagComment(@Nullable String bizFlagComment) {
 		if (isDynaProperty(PersistentBean.FLAG_COMMENT_NAME) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(PersistentBean.FLAG_COMMENT_NAME, bizLock);
 		}
@@ -78,13 +81,13 @@ public class ListModelRow extends DynamicBean {
 
 	private String bizKey;
 	@Override
-	public String getBizKey() {
+	public @Nullable String getBizKey() {
 		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			return (String) get(Bean.BIZ_KEY);
 		}
 		return bizKey;
 	}
-	public void setBizKey(String bizKey) {
+	public void setBizKey(@Nullable String bizKey) {
 		if (isDynaProperty(Bean.BIZ_KEY) || isDynaProperty(BEAN_PROPERTY_KEY)) {
 			set(Bean.BIZ_KEY, bizLock);
 		}

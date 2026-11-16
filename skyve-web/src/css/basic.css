@@ -1,3 +1,6 @@
+/* Environment banners - inlined by the lightningcss --bundle step in build.xml */
+@import "env-banner.css";
+
 html, body, input, select, textArea, button, a, fieldset, legend, pre, table {
     font-family: Arial,Verdana,sans-serif;
     font-size: 11px;
@@ -215,25 +218,6 @@ a.buttonlink {
 	filter: alpha(opacity = 100);
 }
 
-.skyveEnvBanner {
-	background: red;
-	font-size: 8px;
-	color: white;
-	position: fixed;
-	text-align: center;
-	left: 0px;
-	z-index: 2147483646;
-	width: 100%;
-	height: 8px;
-	line-height: 8px;
-}
-.skyveTopEnvBanner {
-	top: 0px;
-}
-.skyveBottomEnvBanner {
-	bottom: 0px;
-}
-
 input[type=submit] {
 	border: 1px solid #cccccc;
 	box-shadow: 3px 3px 2px #dddddd;
@@ -252,6 +236,23 @@ input[type=submit] {
 }
 
 /* SmartClient style overrides */
+/* Darken disabled field values only; the skin's grey background and border still show they're disabled */
+.textItemLiteDisabled, .textItemLiteDisabledRTL,
+.selectItemLiteTextDisabled, .selectItemLiteTextDisabledRTL,
+.textAreaItemLiteDisabled, .textAreaItemLiteDisabledRTL,
 .textItemDisabled, .selectItemTextDisabled {
-    color: #898989 !important;
+	color: #5f5f5f !important;
+	-webkit-text-fill-color: #5f5f5f !important;
+}
+/* Disabled field labels: halfway between the skin's enabled (#003168) and disabled (#ababab) colours */
+.formTitleDisabled, .formTitleDisabledRTL,
+.formTitleErrorDisabled, .formTitleErrorDisabledRTL,
+.formTitleDisabledError, .formTitleDisabledErrorRTL,
+.formTitlePendingDisabled, .formTitlePendingDisabledRTL,
+.formTitleVerticalDisabled, .formTitleVerticalDisabledRTL,
+.formTitleVerticalErrorDisabled, .formTitleVerticalErrorDisabledRTL,
+.formTitleVerticalDisabledError, .formTitleVerticalDisabledErrorRTL,
+.formTitleVerticalPendingDisabled, .formTitleVerticalPendingDisabledRTL {
+	color: #566e8a !important;
+	-webkit-text-fill-color: #566e8a !important;
 }

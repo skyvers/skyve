@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -45,7 +46,7 @@ public abstract class FocusableInputWidget extends InputWidget implements Focusa
 						@XmlElementRef(type = SetInvisibleEventAction.class),
 						@XmlElementRef(type = ToggleDisabledEventAction.class),
 						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
-	public List<EventAction> getFocusActions() {
+	public @Nonnull List<EventAction> getFocusActions() {
 		return focusActions;
 	}
 
@@ -57,7 +58,7 @@ public abstract class FocusableInputWidget extends InputWidget implements Focusa
 						@XmlElementRef(type = SetInvisibleEventAction.class),
 						@XmlElementRef(type = ToggleDisabledEventAction.class),
 						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
-	public List<EventAction> getBlurActions() {
+	public @Nonnull List<EventAction> getBlurActions() {
 		return blurActions;
 	}
 }

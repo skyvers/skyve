@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Describes a JasperReports report band (title, column header, detail, summary,
  * etc.) used during programmatic {@code .jrxml} generation.
@@ -31,7 +34,7 @@ public class ReportBand {
 		stretch;
 
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			return StringUtils.capitalize(super.toString());
 		}
 	}
@@ -59,24 +62,26 @@ public class ReportBand {
 	private String invisibleConditionName;
 	private DesignSpecification parent;	
 	
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
-	public BandType getBandType() {
+	public @Nullable BandType getBandType() {
 		return type;
 	}
-	public void setBandType(BandType type) {
+	public void setBandType(@Nullable BandType type) {
 		this.type = type;
 	}
-	public Integer getHeight() {
-		int maxHeight = this.getParent().getDefaultElementHeight().intValue();
+	public @Nonnull Integer getHeight() {
+		int maxHeight = getNullSafeParent().getDefaultElementHeight().intValue();
 		for (ReportElement e : this.getElements()) {
-			if (e.getElementTop() != null && e.getElementHeight() != null) {
-				if ((e.getElementTop().intValue() + e.getElementHeight().intValue()) > maxHeight) {
-					maxHeight = e.getElementTop().intValue() + e.getElementHeight().intValue();
+			final Integer elementTop = e.getElementTop();
+			final Integer elementHeight = e.getElementHeight();
+			if (elementTop != null && elementHeight != null) {
+				if ((elementTop.intValue() + elementHeight.intValue()) > maxHeight) {
+					maxHeight = elementTop.intValue() + elementHeight.intValue();
 				}
 			}
 		}
@@ -88,37 +93,51 @@ public class ReportBand {
 		
 		return height;
 	}
-	public void setHeight(Integer height) {
+	public void setHeight(@Nullable Integer height) {
 		this.height = height;
 	}
-	public List<ReportElement> getElements() {
+	public @Nonnull List<ReportElement> getElements() {
 		return elements;
 	}
-	public void setElements(List<ReportElement> elements) {
+	public void setElements(@Nonnull List<ReportElement> elements) {
 		this.elements = elements;
 	}
-	public SplitType getSplitType() {
+	public @Nullable SplitType getSplitType() {
 		return splitType;
 	}
-	public void setSplitType(SplitType splitType) {
+	public void setSplitType(@Nullable SplitType splitType) {
 		this.splitType = splitType;
 	}
-	public String getJrxml() {
+	public @Nonnull String getJrxml() {
 		return Renderer.renderBand(this);
 	}
-	public DesignSpecification getParent() {
+	public @Nullable DesignSpecification getParent() {
 		return parent;
 	}
-	public void setParent(DesignSpecification parent) {
+	public void setParent(@Nullable DesignSpecification parent) {
 		this.parent = parent;
 	}
 
-	public String getInvisibleConditionName() {
+	/**
+	 * Returns the design this band has been added to.
+	 *
+	 * @return The parent design.
+	 * @throws IllegalStateException If the band has not been added to a design.
+	 */
+	@Nonnull DesignSpecification getNullSafeParent() {
+		final DesignSpecification result = parent;
+		if (result == null) {
+			throw new IllegalStateException("Report band " + name + " has not been added to a design");
+		}
+		return result;
+	}
+
+	public @Nullable String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
 
 
-	public void setInvisibleConditionName(String invisibleConditionName) {
+	public void setInvisibleConditionName(@Nullable String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
 	}
 
@@ -127,49 +146,51 @@ public class ReportBand {
 	 * 
 	 * @param tE
 	 */
-	public void addElement(ReportElement tE) {
+	public void addElement(@Nonnull ReportElement tE) {
 
 		this.getElements().add(tE);
 		tE.setParent(this);
 
+		final DesignSpecification design = getNullSafeParent();
+
 		// inherit from band
 		if (tE.getElementFontName() == null) {
-			tE.setElementFontName(this.getParent().getDefaultFontName());
+			tE.setElementFontName(design.getDefaultFontName());
 		}
 
 		// font size
 		if (tE.getElementFontSize() == null) {
-			tE.setElementFontSize(this.getParent().getDefaultFontSize());
+			tE.setElementFontSize(design.getDefaultFontSize());
 		}
 
 		// height
 		if (tE.getElementHeight() == null) {
-			tE.setElementHeight(this.getParent().getDefaultElementHeight());
+			tE.setElementHeight(design.getDefaultElementHeight());
 		}
 
 		// dynamic flow
 		if (tE.getDynamicFlow() == null) {
-			tE.setDynamicFlow(this.getParent().getDynamicFlow());
+			tE.setDynamicFlow(design.getDynamicFlow());
 		}
 
 		// border
 		if (tE.getElementBorder() == null) {
-			tE.setElementBorder(this.getParent().getDefaultBorder());
+			tE.setElementBorder(design.getDefaultBorder());
 		}
 
-		tE.setBorderLineWidth(this.getParent().getDefaultLineWidth());
-		tE.setBorderColour(this.getParent().getDefaultLineColour());
+		tE.setBorderLineWidth(design.getDefaultLineWidth());
+		tE.setBorderColour(design.getDefaultLineColour());
 
-		tE.setBorderTop(this.getParent().getDefaultBorderTop());
-		tE.setBorderLeft(this.getParent().getDefaultBorderLeft());
-		tE.setBorderBottom(this.getParent().getDefaultBorderBottom());
-		tE.setBorderRight(this.getParent().getDefaultBorderRight());
+		tE.setBorderTop(design.getDefaultBorderTop());
+		tE.setBorderLeft(design.getDefaultBorderLeft());
+		tE.setBorderBottom(design.getDefaultBorderBottom());
+		tE.setBorderRight(design.getDefaultBorderRight());
 
 		// padding
-		tE.setTopPadding(this.getParent().getDefaultCellTopPadding());
-		tE.setLeftPadding(this.getParent().getDefaultCellLeftPadding());
-		tE.setBottomPadding(this.getParent().getDefaultCellBottomPadding());
-		tE.setRightPadding(this.getParent().getDefaultCellRightPadding());
+		tE.setTopPadding(design.getDefaultCellTopPadding());
+		tE.setLeftPadding(design.getDefaultCellLeftPadding());
+		tE.setBottomPadding(design.getDefaultCellBottomPadding());
+		tE.setRightPadding(design.getDefaultCellRightPadding());
 	}
 
 
@@ -179,24 +200,29 @@ public class ReportBand {
 	public void spreadElements() {
 		if (this.getElements().isEmpty()) {
 			return;
-		} else if (this.getParent().getWidth() != null) {
-			int width = this.getParent().getWidth().intValue() / this.getElements().size();
-			int left = 0;
-			for (ReportElement e : this.getElements()) {
-				e.setElementLeft(Integer.valueOf(left));
-				if (this.getElements().indexOf(e) == 0) {
-					// first
-					width = e.getElementHeight().intValue() * 5;
-				} else if (this.getElements().indexOf(e) == this.getElements().size() - 1) {
-					// last
-					width = this.getParent().getColumnWidth().intValue() - left;
-				} else {
-					// other
-					width = e.getElementHeight().intValue() * 5;
-				}
-				e.setElementWidth(Integer.valueOf(width));
-				left = left + width;
+		}
+		final DesignSpecification design = getNullSafeParent();
+		int width = design.getWidth().intValue() / this.getElements().size();
+		int left = 0;
+		for (ReportElement e : this.getElements()) {
+			e.setElementLeft(Integer.valueOf(left));
+			// an element without a height is sized as addElement() would size it - with the design default
+			Integer elementHeight = e.getElementHeight();
+			if (elementHeight == null) {
+				elementHeight = design.getDefaultElementHeight();
 			}
+			if (this.getElements().indexOf(e) == 0) {
+				// first
+				width = elementHeight.intValue() * 5;
+			} else if (this.getElements().indexOf(e) == this.getElements().size() - 1) {
+				// last
+				width = design.getColumnWidth().intValue() - left;
+			} else {
+				// other
+				width = elementHeight.intValue() * 5;
+			}
+			e.setElementWidth(Integer.valueOf(width));
+			left = left + width;
 		}
 	}
 
@@ -206,7 +232,7 @@ public class ReportBand {
 	 * @param band
 	 * @param container
 	 */
-	public void addContainer(Container container) {
+	public void addContainer(@Nonnull Container container) {
 
 		// and add all elements of the top level child
 		for (ReportElement e : container.getElements()) {

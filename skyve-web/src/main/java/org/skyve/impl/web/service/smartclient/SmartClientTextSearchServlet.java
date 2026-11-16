@@ -32,6 +32,7 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,7 +59,8 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings({"java:S1989", "java:S3776"}) // there exists JavaEE error pages; Complexity OK
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response) 
 	throws ServletException, IOException {
 		Enumeration<String> parameterNames = request.getParameterNames();
 		while (parameterNames.hasMoreElements()) {
@@ -107,6 +109,11 @@ public class SmartClientTextSearchServlet extends HttpServlet {
 							String moduleName = result.getModuleName();
 							String documentName = result.getDocumentName();
 							String bizId = result.getBizId();
+							if ((moduleName == null) || (documentName == null) || (bizId == null)) { // can't be resolved
+								LOGGER.warn("Skipping content search result with no module, document or bizId.");
+								resultIterator.remove(); // remove the offending result
+								continue;
+							}
 							
 							Module module = customer.getModule(moduleName);
 							Document document = module.getDocument(customer, documentName);

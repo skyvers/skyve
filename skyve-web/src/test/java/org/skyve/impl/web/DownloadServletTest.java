@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,23 +17,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.DownloadAction;
 import org.skyve.metadata.controller.WebFileInputStream;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
-import org.skyve.domain.messages.MessageSeverity;
-import org.skyve.web.BackgroundTask;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.ServletException;
@@ -83,6 +81,82 @@ class DownloadServletTest {
 		assertTrue(output.asString().contains("An error occured whilst processing your report."));
 		verify(action, never()).download(any(), any());
 		verify(response, never()).setHeader("Accept-Ranges", "bytes");
+	}
+
+	@Test
+	void downloadTheConversationDidNotPrepareIsRefusedBeforeItRuns() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		lifecycle.webContext.recordPreparedDownload("OtherDownload", "mod", "Doc", null, null, null);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Doc", "DownloadResult", null), response(output));
+
+		// The refusal's message, not the generic error
+		String body = output.asString();
+		assertTrue(body.startsWith("<html><head/><body><h3>"), body);
+		assertFalse(body.contains("An error occured whilst processing your report."), body);
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(lifecycle.document, never()).getDownloadAction(any(), any(), anyBoolean());
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.customer, never()).interceptBeforeDownloadAction(any(), any(), any(), any());
+		verify(lifecycle.persistence).rollback();
+		verify(lifecycle.persistence).commit(true);
+	}
+
+	@Test
+	void missingConversationBeanIsReportedWithoutRunningTheDownload() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		lifecycle.webContext.setCurrentBean(null);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Doc", "DownloadResult", null), response(output));
+
+		assertTrue(output.asString().contains("An error occured whilst processing your report."));
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(lifecycle.customer, never()).interceptBeforeDownloadAction(any(), any(), any(), any());
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.persistence).rollback();
+		verify(lifecycle.persistence).commit(true);
+	}
+
+	@Test
+	void preparedActionOnAnotherDocumentIsRefused() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		when(lifecycle.module.getDocument(lifecycle.customer, "Other")).thenReturn(lifecycle.document);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Other", "DownloadResult", null), response(output));
+
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.persistence).rollback();
+	}
+
+	@Test
+	void cachedConversationWithoutPersistenceWritesGenericFallbackWithoutRunningTheDownload() throws Exception {
+		DownloadAction<Bean> action = actionReturning(new Download("result.txt", "download body", MimeType.plain));
+		Lifecycle lifecycle = lifecycle(action, false, true);
+		lifecycle.webContext.setConversation(null);
+		TestableDownloadServlet servlet = new TestableDownloadServlet(lifecycle.webContext);
+		CapturingServletOutputStream output = new CapturingServletOutputStream();
+
+		servlet.doGet(request(lifecycle.user, "mod.Doc", "DownloadResult", null), response(output));
+
+		// The invariant failure is unexpected, so it gets the generic error page
+		assertTrue(output.asString().contains("An error occured whilst processing your report."), output.asString());
+		assertFalse(servlet.writeInvoked);
+		assertFalse(servlet.cacheInvoked);
+		verify(action, never()).download(any(), any());
+		verify(lifecycle.persistence, never()).begin();
 	}
 
 	@Test
@@ -208,6 +282,7 @@ class DownloadServletTest {
 		when(result.bean.getBizId()).thenReturn("bean-id");
 		result.webContext.setConversation(result.persistence);
 		result.webContext.setCurrentBean(result.bean);
+		result.webContext.recordPreparedDownload("DownloadResult", "mod", "Doc", null, null, null);
 		when(result.user.getCustomer()).thenReturn(result.customer);
 		when(result.user.getName()).thenReturn("tester");
 		when(result.user.canExecuteAction(result.document, "DownloadResult")).thenReturn(Boolean.valueOf(canExecute));
@@ -258,7 +333,7 @@ class DownloadServletTest {
 	}
 
 	private static final class Lifecycle {
-		private final TestWebContext webContext = new TestWebContext();
+		private final SmartClientWebContext webContext = webContext();
 		private final AbstractPersistence persistence = mock(AbstractPersistence.class);
 		private final CustomerImpl customer = mock(CustomerImpl.class);
 		private final Module module = mock(Module.class);
@@ -267,47 +342,12 @@ class DownloadServletTest {
 		private final Bean bean = mock(Bean.class);
 	}
 
-	private static final class TestWebContext extends AbstractWebContext {
-		private static final long serialVersionUID = 1L;
-
-		private TestWebContext() {
-			super("test-web-context");
-		}
-
-		@Override
-		public List<Map<String, String>> getGrowls() {
-			return null;
-		}
-
-		@Override
-		public List<Map<String, String>> getMessages() {
-			return null;
-		}
-
-		@Override
-		public void message(MessageSeverity severity, String message) {
-			// Not needed for these lifecycle tests.
-		}
-
-		@Override
-		public void growl(MessageSeverity severity, String message) {
-			// Not needed for these lifecycle tests.
-		}
-
-		@Override
-		public void cacheConversation() {
-			// Not needed for these lifecycle tests.
-		}
-
-		@Override
-		public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) {
-			// Not needed for these lifecycle tests.
-		}
-
-		@Override
-		public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) {
-			// Not needed for these lifecycle tests.
-		}
+	private static SmartClientWebContext webContext() {
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn("session-1");
+		return new SmartClientWebContext("context-key", request);
 	}
 
 	private static final class TestableDownloadServlet extends org.skyve.impl.web.DownloadServlet {
@@ -332,6 +372,13 @@ class DownloadServletTest {
 			return webContext;
 		}
 
+		// Stands in for WebUtil, whose session registry check needs the real cache
+		@Override
+		User processUserPrincipalForRequest(HttpServletRequest request) {
+			HttpSession session = request.getSession(false);
+			return (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		}
+
 		@Override
 		void writeDownloadResponse(Download result, String rangeHeader, String ifRangeHeader, HttpServletResponse response, boolean headOnly)
 		throws IOException {
@@ -346,7 +393,7 @@ class DownloadServletTest {
 		}
 
 		@Override
-		void cacheConversation(AbstractWebContext contextToCache) {
+		void commitAndCacheConversation(AbstractWebContext contextToCache) {
 			cacheInvoked = true;
 			cachedWebContext = contextToCache;
 		}

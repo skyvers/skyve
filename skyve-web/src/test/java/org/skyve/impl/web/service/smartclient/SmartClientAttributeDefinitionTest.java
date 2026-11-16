@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashMap;
@@ -34,7 +35,11 @@ import org.skyve.impl.metadata.model.document.field.Time;
 import org.skyve.impl.metadata.model.document.field.Timestamp;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.converters.decimal.Decimal10Integer;
+import org.skyve.domain.types.converters.decimal.Decimal10IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal10OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -78,7 +83,7 @@ class SmartClientAttributeDefinitionTest {
 	@Test
 	void constructorWithConstantDomainBindingUsesCustomisationsAndConstantValueMap() throws Exception {
 		User user = mock(User.class);
-		CustomerImpl customer = org.mockito.Mockito.spy(new CustomerImpl());
+		CustomerImpl customer = spy(new CustomerImpl());
 		Module module = mock(Module.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		DocumentImpl document = new DocumentImpl();
@@ -294,6 +299,36 @@ class SmartClientAttributeDefinitionTest {
 		decimal10.setDisplayName("Decimal 10");
 		decimal10.setConverter(new Decimal10TwoDecimalPlaces());
 		assertEquals("bizDecimal2", definitionFor(decimal10).getType());
+
+		Decimal10 decimal10Cents = new Decimal10();
+		decimal10Cents.setName("decimal10Cents");
+		decimal10Cents.setDisplayName("Decimal 10 Cents");
+		decimal10Cents.setConverter(new org.skyve.domain.types.converters.decimal.currency.Decimal10DollarsAndCents());
+		assertEquals("bizDollarsAndCents", definitionFor(decimal10Cents).getType());
+
+		Decimal10 decimal10WholeNumber = new Decimal10();
+		decimal10WholeNumber.setName("decimal10WholeNumber");
+		decimal10WholeNumber.setDisplayName("Decimal 10 Whole Number");
+		decimal10WholeNumber.setConverter(new Decimal10Integer());
+		assertEquals("bizDecimal0", definitionFor(decimal10WholeNumber).getType());
+
+		Decimal10 decimal10OneDecimalPlace = new Decimal10();
+		decimal10OneDecimalPlace.setName("decimal10OneDecimalPlace");
+		decimal10OneDecimalPlace.setDisplayName("Decimal 10 One Decimal Place");
+		decimal10OneDecimalPlace.setConverter(new Decimal10OneDecimalPlace());
+		assertEquals("bizDecimal1", definitionFor(decimal10OneDecimalPlace).getType());
+
+		Decimal10 decimal10Percentage = new Decimal10();
+		decimal10Percentage.setName("decimal10Percentage");
+		decimal10Percentage.setDisplayName("Decimal 10 Percentage");
+		decimal10Percentage.setConverter(new Decimal10IntegerPercentage());
+		assertEquals("bizIntegerPercentage", definitionFor(decimal10Percentage).getType());
+
+		Decimal10 decimal10TwoDecimalPercentage = new Decimal10();
+		decimal10TwoDecimalPercentage.setName("decimal10TwoDecimalPercentage");
+		decimal10TwoDecimalPercentage.setDisplayName("Decimal 10 Two Decimal Percentage");
+		decimal10TwoDecimalPercentage.setConverter(new Decimal10TwoDecimalPlacesPercentage());
+		assertEquals("bizTwoDecimalPlacesPercentage", definitionFor(decimal10TwoDecimalPercentage).getType());
 	}
 
 	@Test
@@ -423,9 +458,12 @@ class SmartClientAttributeDefinitionTest {
 
 		String result = js.toString();
 		assertTrue(result.contains("formatCellValue:function"));
-		assertTrue(result.contains("_w=72&_h=48"));
+		// The thumbnail size comes from the 72x48 box, allowing for the screen's pixel ratio
+		assertTrue(result.contains("formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(72,48);"), result);
 		assertTrue(result.contains("images/placeholder.png"));
-		assertTrue(result.contains("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_w=72&_h=48\"/>'}return ''}"), result);
+		// Both images are drawn in the 72x48 box, keeping their shape
+		assertTrue(result.contains("&_w='+s+'&_h='+s+'\" style=\"width:72px;height:48px;object-fit:contain\"/></a>'}"), result);
+		assertTrue(result.contains("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_w='+s+'&_h='+s+'\" style=\"width:72px;height:48px;object-fit:contain\"/>'}return ''}"), result);
 	}
 
 	@Test
@@ -671,7 +709,7 @@ class SmartClientAttributeDefinitionTest {
 		definition.appendEditorProperties(js, false, null, null);
 
 		String result = js.toString();
-		assertTrue(result.contains("_w=64&_h=64"));
+		assertTrue(result.contains("var s=SKYVE.Util.contentPreviewSize(64,64);"), result);
 		assertTrue(result.contains("if(rec && rec.bizId){return ''}"));
 	}
 
@@ -706,6 +744,7 @@ class SmartClientAttributeDefinitionTest {
 	}
 
 	private static final class TestDefinition extends SmartClientAttributeDefinition {
+		@SuppressWarnings("null") // passes null on purpose
 		private TestDefinition(String name) {
 			super(null, null, null, null, null, name, false, false, false, null);
 			this.valueMap = new LinkedHashMap<>();

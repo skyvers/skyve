@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -30,7 +32,7 @@ public abstract class ClassAction extends ValidatableAction {
 	 *
 	 * @return action implementation class name, or {@code null}
 	 */
-	public String getClassName() {
+	public @Nullable String getClassName() {
 		return className;
 	}
 	
@@ -40,7 +42,7 @@ public abstract class ClassAction extends ValidatableAction {
 	 * @param className action implementation class name
 	 */
 	@XmlAttribute(required = false)
-	public void setClassName(String className) {
+	public void setClassName(@Nullable String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
@@ -53,7 +55,7 @@ public abstract class ClassAction extends ValidatableAction {
 	 * @return runtime action metadata with resource linkage applied
 	 */
 	@Override
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
 		
 		result.setResourceName(className);

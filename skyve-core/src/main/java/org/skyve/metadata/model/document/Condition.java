@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.model.Attribute.UsageType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A named boolean expression evaluated against a bean instance.
  *
@@ -21,14 +24,14 @@ public interface Condition extends DecoratedMetaData {
 	 *
 	 * @return the documentation; may be {@code null}
 	 */
-	public String getDocumentation();
+	public @Nullable String getDocumentation();
 
 	/**
 	 * Returns a short human-readable description of what this condition tests.
 	 *
 	 * @return the description; may be {@code null}
 	 */
-	public String getDescription();
+	public @Nullable String getDescription();
 
 	/**
 	 * Returns the Java boolean expression that this condition evaluates.
@@ -38,11 +41,11 @@ public interface Condition extends DecoratedMetaData {
 	 *
 	 * @return the boolean expression; never {@code null}
 	 */
-	public String getExpression();
+	public @Nonnull String getExpression();
 
 	/**
 	 * Informs the Skyve framework when to include and exclude the attributes.
 	 * @return	the usage.
 	 */
-	public UsageType getUsage();
+	public @Nullable UsageType getUsage();
 }

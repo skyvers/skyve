@@ -361,7 +361,7 @@ public abstract class Job extends AbstractPersistentBean {
 	}
 
 	/**
-	 * True when this job can be re-run - it has a status, and a unique job name.
+	 * True when this job can be re-run - it has a status, was started without a bean (a rerun cannot give it back), and has a unique job name.
 	 *
 	 * @return The condition
 	 */

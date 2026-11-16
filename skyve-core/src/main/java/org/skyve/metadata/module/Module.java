@@ -1,8 +1,8 @@
 package org.skyve.metadata.module;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.DecoratedMetaData;
@@ -60,7 +60,7 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 
 		private String defaultQueryName;
 		
-		private Map<String, String> properties = new TreeMap<>();
+		private Map<String, String> properties = new LinkedHashMap<>();
 
 		/**
 		 * Returns the default query name for this document reference.
@@ -141,11 +141,19 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 		 * @return the result
 		 */
 		@Override
-		public Map<String, String> getProperties() {
+		public @Nonnull Map<String, String> getProperties() {
 			return properties;
 		}
 	}
 	
+	/**
+	 * Returns the name of this module, which module conversion requires.
+	 *
+	 * @return The module name
+	 */
+	@Override
+	@Nonnull String getName();
+
 	/**
 	 * Returns the title of this module.
 	 * 
@@ -328,9 +336,9 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	/**
 	 * Returns the home document name for this module.
 	 * 
-	 * @return The home document name or null if not defined
+	 * @return The home document name
 	 */
-	@Nullable String getHomeDocumentName();
+	@Nonnull String getHomeDocumentName();
 	
 	/**
 	 * Returns the menu definition for this module.

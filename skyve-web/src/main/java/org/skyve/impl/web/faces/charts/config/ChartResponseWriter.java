@@ -5,6 +5,8 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.ResponseWriter;
 
@@ -31,7 +33,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @return {@code "application/json"}
 	 */
 	@Override
-	public String getContentType() {
+	public @Nonnull String getContentType() {
 		return "application/json";
 	}
 
@@ -41,7 +43,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @return UTF-8 name as a string
 	 */
 	@Override
-	public String getCharacterEncoding() {
+	public @Nonnull String getCharacterEncoding() {
 		return StandardCharsets.UTF_8.name();
 	}
 
@@ -83,7 +85,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void startElement(String name, UIComponent component) throws IOException {
+	public void startElement(@SuppressWarnings("null") @Nonnull String name, @Nullable UIComponent component) throws IOException {
 		// no-op
 	}
 
@@ -94,7 +96,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void endElement(String name) throws IOException {
+	public void endElement(@SuppressWarnings("null") @Nonnull String name) throws IOException {
 		// no-op
 	}
 
@@ -107,7 +109,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void writeAttribute(String name, Object value, String property) throws IOException {
+	public void writeAttribute(@SuppressWarnings("null") @Nonnull String name, @Nullable Object value, @Nullable String property) throws IOException {
 		// no-op
 	}
 
@@ -120,7 +122,9 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void writeURIAttribute(String name, Object value, String property) throws IOException {
+	public void writeURIAttribute(@SuppressWarnings("null") @Nonnull String name,
+									@Nullable Object value,
+									@Nullable String property) throws IOException {
 		// no-op
 	}
 
@@ -131,7 +135,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException never thrown
 	 */
 	@Override
-	public void writeComment(Object comment) throws IOException {
+	public void writeComment(@SuppressWarnings("null") @Nonnull Object comment) throws IOException {
 		// no-op
 	}
 
@@ -143,7 +147,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void writeText(Object text, String property) throws IOException {
+	public void writeText(@SuppressWarnings("null") @Nonnull Object text, @Nullable String property) throws IOException {
 		writer.write(text.toString());
 	}
 
@@ -156,7 +160,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void writeText(char[] text, int off, int len) throws IOException {
+	public void writeText(@SuppressWarnings("null") @Nonnull char[] text, int off, int len) throws IOException {
 		writer.write(text, off, len);
 	}
 
@@ -167,7 +171,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @return always {@code null}
 	 */
 	@Override
-	public jakarta.faces.context.ResponseWriter cloneWithWriter(@SuppressWarnings("hiding") Writer writer) {
+	public @Nullable jakarta.faces.context.ResponseWriter cloneWithWriter(@SuppressWarnings({"hiding", "null"}) @Nonnull Writer writer) {
 		return null;
 	}
 
@@ -180,7 +184,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 * @throws IOException if an I/O error occurs
 	 */
 	@Override
-	public void write(char[] cbuf, int off, int len) throws IOException {
+	public void write(@SuppressWarnings("null") @Nonnull char[] cbuf, int off, int len) throws IOException {
 		writer.write(cbuf, off, len);
 	}
 
@@ -199,7 +203,7 @@ public class ChartResponseWriter extends ResponseWriter {
 	 *
 	 * @return the internal StringWriter buffer containing the generated JSON payload
 	 */
-	public StringWriter getStringWriter() {
+	public @Nonnull StringWriter getStringWriter() {
 		return writer;
 	}
 }

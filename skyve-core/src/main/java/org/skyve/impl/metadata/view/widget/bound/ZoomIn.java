@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -16,9 +16,12 @@ import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -29,10 +32,10 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
 			propOrder = {"displayName", 
 							"escapeDisplayName",
-							"invisibleConditionName", 
-							"visibleConditionName",
-							"disabledConditionName", 
-							"enabledConditionName",
+							"xmlInvisibleCondition", 
+							"xmlVisibleCondition",
+							"xmlDisabledCondition", 
+							"xmlEnabledCondition",
 							"properties"})
 public class ZoomIn extends AbstractBound implements Disableable,
 														Invisible,
@@ -52,13 +55,15 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
-	private String disabledConditionName;
-	private String invisibleConditionName;
+	private String disabledCondition;
+	private String enabledCondition;
+	private String invisibleCondition;
+	private String visibleCondition;
 	private ActionShow show;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates that this widget does not render a separate form label by default.
@@ -75,7 +80,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the button label, or {@code null} to use the default label
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -86,7 +91,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the localised button label
 	 */
-	public String getLocalisedDisplayName() {
+	public @Nonnull String getLocalisedDisplayName() {
 		return Util.nullSafeI18n((displayName == null) ? "Zoom In" : displayName);
 	}
 
@@ -95,7 +100,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 	
@@ -105,7 +110,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param displayName the button label, or {@code null} to use the default label
 	 */
 	@XmlAttribute
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
@@ -115,7 +120,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -124,7 +129,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the project-relative icon file path, or {@code null} when not set
 	 */
-	public String getRelativeIconFileName() {
+	public @Nullable String getRelativeIconFileName() {
 		return relativeIconFileName;
 	}
 
@@ -134,7 +139,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param relativeIconFileName the project-relative icon file path
 	 */
 	@XmlAttribute(required = false)
-	public void setRelativeIconFileName(String relativeIconFileName) {
+	public void setRelativeIconFileName(@Nullable String relativeIconFileName) {
 		this.relativeIconFileName = UtilImpl.processStringValue(relativeIconFileName);
 	}
 
@@ -143,7 +148,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the icon CSS class, or {@code null} when not set
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -153,7 +158,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param iconStyleClass the icon CSS class
 	 */
 	@XmlAttribute(required = false)
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -162,7 +167,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the tooltip text, or {@code null} when not set
 	 */
-	public String getToolTip() {
+	public @Nullable String getToolTip() {
 		return toolTip;
 	}
 
@@ -171,7 +176,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the localised tooltip text, or {@code null} when no tooltip is configured
 	 */
-	public String getLocalisedToolTip() {
+	public @Nullable String getLocalisedToolTip() {
 		return Util.i18n(toolTip);
 	}
 
@@ -180,7 +185,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeToolTip() {
+	public @Nullable Boolean getEscapeToolTip() {
 		return escapeToolTip;
 	}
 	
@@ -190,7 +195,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param toolTip the tooltip text
 	 */
 	@XmlAttribute(required = false)
-	public void setToolTip(String toolTip) {
+	public void setToolTip(@Nullable String toolTip) {
 		this.toolTip = UtilImpl.processStringValue(toolTip);
 	}
 
@@ -200,7 +205,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeToolTip(Boolean escapeToolTip) {
+	public void setEscapeToolTip(@Nullable Boolean escapeToolTip) {
 		this.escapeToolTip = escapeToolTip;
 	}
 
@@ -210,7 +215,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the pixel width, or {@code null} when width is not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -221,7 +226,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -231,7 +236,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the pixel height, or {@code null} when height is not fixed
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -242,7 +247,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -252,7 +257,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the minimum pixel height, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -263,7 +268,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -273,7 +278,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the maximum pixel height, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -284,7 +289,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -293,7 +298,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 *
 	 * @return the display policy for this action, or {@code null} when the default policy applies
 	 */
-	public ActionShow getShow() {
+	public @Nullable ActionShow getShow() {
 		return show;
 	}
 
@@ -303,94 +308,130 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @param show the display policy for this action
 	 */
 	@XmlAttribute
-	public void setShow(ActionShow show) {
+	public void setShow(@Nullable ActionShow show) {
 		this.show = show;
 	}
 
 	/**
-	 * Returns the disabled condition expression.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return the disabled condition expression, or {@code null} when not set
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the disabled condition expression directly.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName the disabled condition expression
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the enabled condition attribute.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * @return always {@code null}; the enabled condition is derived from the disabled condition
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
 	 */
-	// to enable JAXB XML marshalling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
 	}
 
 	/**
-	 * Sets the enabled condition by storing its negation as the disabled condition.
+	 * Returns the {@code enabled} attribute as authored.
 	 *
-	 * @param enabledConditionName the enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
-	 * Returns the invisible condition expression.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return the invisible condition expression, or {@code null} when not set
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible condition expression directly.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition expression
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the visible condition attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; the visible condition is derived from the invisible condition
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshalling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName the visible condition expression
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
@@ -399,7 +440,7 @@ public class ZoomIn extends AbstractBound implements Disableable,
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link SaveAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentSaveAction extends FluentValidatableAction<FluentSaveAction> 
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentSaveAction(SaveAction action) {
+	public FluentSaveAction(@Nonnull SaveAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentSaveAction extends FluentValidatableAction<FluentSaveAction> 
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentSaveAction from(@SuppressWarnings("hiding") SaveAction action) {
+	public @Nonnull FluentSaveAction from(@SuppressWarnings("hiding") @Nonnull SaveAction action) {
 		super.from(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentSaveAction extends FluentValidatableAction<FluentSaveAction> 
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public SaveAction get() {
+	public @Nonnull SaveAction get() {
 		return action;
 	}
 }

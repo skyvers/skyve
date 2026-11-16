@@ -147,6 +147,7 @@ class DynamicEnumerationConverterTest {
 		assertEquals("", c.toDisplayValue("Z"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void toDisplayValueNullThrowsConversionException() {
 		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));

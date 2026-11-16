@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -20,6 +20,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -45,16 +47,16 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"disabledConditionName",
-							"enabledConditionName",
-							"disableAddConditionName",
-							"enableAddConditionName",
-							"disableZoomConditionName",
-							"enableZoomConditionName",
-							"disableEditConditionName",
-							"enableEditConditionName",
-							"disableRemoveConditionName",
-							"enableRemoveConditionName",
+			propOrder = {"xmlDisabledCondition",
+							"xmlEnabledCondition",
+							"xmlDisableAddCondition",
+							"xmlEnableAddCondition",
+							"xmlDisableZoomCondition",
+							"xmlEnableZoomCondition",
+							"xmlDisableEditCondition",
+							"xmlEnableEditCondition",
+							"xmlDisableRemoveCondition",
+							"xmlEnableRemoveCondition",
 							"showAdd",
 							"showZoom",
 							"showEdit",
@@ -82,12 +84,17 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 																Selectable {
 	private static final long serialVersionUID = 4739299969425100550L;
 
-	private String disabledConditionName;
+	private String disabledCondition;
+	private String enabledCondition;
 
-	private String disableAddConditionName;
-	private String disableZoomConditionName;
-	private String disableEditConditionName;
-	private String disableRemoveConditionName;
+	private String disableAddCondition;
+	private String enableAddCondition;
+	private String disableZoomCondition;
+	private String enableZoomCondition;
+	private String disableEditCondition;
+	private String enableEditCondition;
+	private String disableRemoveCondition;
+	private String enableRemoveCondition;
 
 	private Boolean showAdd;
 	private Boolean showZoom;
@@ -113,7 +120,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates whether row actions should continue the existing conversation context.
@@ -135,218 +142,310 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	}
 
 	/**
-	 * Returns the disabled condition expression.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return the disabled condition expression, or {@code null} when not set
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the disabled condition expression directly.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName the disabled condition expression
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the enabled condition attribute.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * @return always {@code null}; the enabled value is derived from the disabled condition
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
 	}
 
 	/**
-	 * Sets the enabled condition by storing its negation as the disabled condition.
+	 * Returns the {@code enabled} attribute as authored.
 	 *
-	 * @param enabledConditionName the enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
-	 * Returns the disable-add condition expression.
+	 * Returns the derived {@code disableAdd} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-add condition expression, or {@code null} when not set
+	 * @return the {@code disableAdd} attribute as authored, or else the negation of the authored
+	 * 			{@code enableAdd} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableAddConditionName() {
-		return disableAddConditionName;
+	@XmlTransient
+	public @Nullable String getDisableAddCondition() {
+		return (disableAddCondition != null) ? disableAddCondition : BindUtil.negateCondition(enableAddCondition);
 	}
 
 	/**
-	 * Sets the disable-add condition expression directly.
+	 * Sets the {@code disableAdd} attribute as authored.
 	 *
-	 * @param disableAddConditionName the disable-add condition expression
+	 * <p>Side effects: clears any authored {@code enableAdd} attribute.
+	 *
+	 * @param disableAddCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableAdd", required = false)
-	public void setDisableAddConditionName(String disableAddConditionName) {
-		this.disableAddConditionName = UtilImpl.processStringValue(disableAddConditionName);
-	}
-	
-	/**
-	 * JAXB placeholder for the disable-add attribute's enabled counterpart.
-	 *
-	 * @return always {@code null}; the enabled value is derived from the disabled condition
-	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableAddConditionName() {
-		return null;
+	public void setXmlDisableAddCondition(@Nullable String disableAddCondition) {
+		this.disableAddCondition = UtilImpl.processStringValue(disableAddCondition);
+		this.enableAddCondition = null;
 	}
 
 	/**
-	 * Sets the add-enabled condition by storing its negation as the add-disabled condition.
+	 * Returns the {@code disableAdd} attribute as authored.
 	 *
-	 * @param enableAddConditionName the add-enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code enableAdd} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisableAddCondition() {
+		return disableAddCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enableAdd} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disableAdd} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableAddCondition() {
+		return enableAddCondition;
+	}
+
+	/**
+	 * Sets the {@code enableAdd} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableAdd} attribute, so that
+	 * {@link #getDisableAddCondition()} returns the negation of this condition.
+	 *
+	 * @param enableAddCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableAdd", required = false)
-	public void setEnableAddConditionName(String enableAddConditionName) {
-		this.disableAddConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableAddConditionName));
+	public void setXmlEnableAddCondition(@Nullable String enableAddCondition) {
+		this.enableAddCondition = UtilImpl.processStringValue(enableAddCondition);
+		this.disableAddCondition = null;
 	}
 
 	/**
-	 * Returns the disable-zoom condition expression.
+	 * Returns the derived {@code disableZoom} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-zoom condition expression, or {@code null} when not set
+	 * @return the {@code disableZoom} attribute as authored, or else the negation of the authored
+	 * 			{@code enableZoom} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableZoomConditionName() {
-		return disableZoomConditionName;
+	@XmlTransient
+	public @Nullable String getDisableZoomCondition() {
+		return (disableZoomCondition != null) ? disableZoomCondition : BindUtil.negateCondition(enableZoomCondition);
 	}
 
 	/**
-	 * Sets the disable-zoom condition expression directly.
+	 * Sets the {@code disableZoom} attribute as authored.
 	 *
-	 * @param disableZoomConditionName the disable-zoom condition expression
+	 * <p>Side effects: clears any authored {@code enableZoom} attribute.
+	 *
+	 * @param disableZoomCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableZoom", required = false)
-	public void setDisableZoomConditionName(String disableZoomConditionName) {
-		this.disableZoomConditionName = UtilImpl.processStringValue(disableZoomConditionName);
+	public void setXmlDisableZoomCondition(@Nullable String disableZoomCondition) {
+		this.disableZoomCondition = UtilImpl.processStringValue(disableZoomCondition);
+		this.enableZoomCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the disable-zoom attribute's enabled counterpart.
+	 * Returns the {@code disableZoom} attribute as authored.
 	 *
-	 * @return always {@code null}; the enabled value is derived from the disabled condition
+	 * @return the authored condition, or {@code null} when {@code enableZoom} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableZoomConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisableZoomCondition() {
+		return disableZoomCondition;
 	}
 
 	/**
-	 * Sets the zoom-enabled condition by storing its negation as the zoom-disabled condition.
+	 * Returns the {@code enableZoom} attribute as authored.
 	 *
-	 * @param enableZoomConditionName the zoom-enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code disableZoom} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableZoomCondition() {
+		return enableZoomCondition;
+	}
+
+	/**
+	 * Sets the {@code enableZoom} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableZoom} attribute, so that
+	 * {@link #getDisableZoomCondition()} returns the negation of this condition.
+	 *
+	 * @param enableZoomCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableZoom", required = false)
-	public void setEnableZoomConditionName(String enableZoomConditionName) {
-		this.disableZoomConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableZoomConditionName));
+	public void setXmlEnableZoomCondition(@Nullable String enableZoomCondition) {
+		this.enableZoomCondition = UtilImpl.processStringValue(enableZoomCondition);
+		this.disableZoomCondition = null;
 	}
 
 	/**
-	 * Returns the disable-edit condition expression.
+	 * Returns the derived {@code disableEdit} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-edit condition expression, or {@code null} when not set
+	 * @return the {@code disableEdit} attribute as authored, or else the negation of the authored
+	 * 			{@code enableEdit} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableEditConditionName() {
-		return disableEditConditionName;
+	@XmlTransient
+	public @Nullable String getDisableEditCondition() {
+		return (disableEditCondition != null) ? disableEditCondition : BindUtil.negateCondition(enableEditCondition);
 	}
 
 	/**
-	 * Sets the disable-edit condition expression directly.
+	 * Sets the {@code disableEdit} attribute as authored.
 	 *
-	 * @param disableEditConditionName the disable-edit condition expression
+	 * <p>Side effects: clears any authored {@code enableEdit} attribute.
+	 *
+	 * @param disableEditCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableEdit", required = false)
-	public void setDisableEditConditionName(String disableEditConditionName) {
-		this.disableEditConditionName = UtilImpl.processStringValue(disableEditConditionName);
+	public void setXmlDisableEditCondition(@Nullable String disableEditCondition) {
+		this.disableEditCondition = UtilImpl.processStringValue(disableEditCondition);
+		this.enableEditCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the disable-edit attribute's enabled counterpart.
+	 * Returns the {@code disableEdit} attribute as authored.
 	 *
-	 * @return always {@code null}; the enabled value is derived from the disabled condition
+	 * @return the authored condition, or {@code null} when {@code enableEdit} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableEditConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisableEditCondition() {
+		return disableEditCondition;
 	}
 
 	/**
-	 * Sets the edit-enabled condition by storing its negation as the edit-disabled condition.
+	 * Returns the {@code enableEdit} attribute as authored.
 	 *
-	 * @param enableEditConditionName the edit-enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code disableEdit} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableEditCondition() {
+		return enableEditCondition;
+	}
+
+	/**
+	 * Sets the {@code enableEdit} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableEdit} attribute, so that
+	 * {@link #getDisableEditCondition()} returns the negation of this condition.
+	 *
+	 * @param enableEditCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableEdit", required = false)
-	public void setEnableEditConditionName(String enableEditConditionName) {
-		this.disableEditConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableEditConditionName));
+	public void setXmlEnableEditCondition(@Nullable String enableEditCondition) {
+		this.enableEditCondition = UtilImpl.processStringValue(enableEditCondition);
+		this.disableEditCondition = null;
 	}
 
 	/**
-	 * Returns the disable-remove condition expression.
+	 * Returns the derived {@code disableRemove} condition that renderers and other consumers read.
 	 *
-	 * @return the disable-remove condition expression, or {@code null} when not set
+	 * @return the {@code disableRemove} attribute as authored, or else the negation of the authored
+	 * 			{@code enableRemove} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisableRemoveConditionName() {
-		return disableRemoveConditionName;
+	@XmlTransient
+	public @Nullable String getDisableRemoveCondition() {
+		return (disableRemoveCondition != null) ? disableRemoveCondition : BindUtil.negateCondition(enableRemoveCondition);
 	}
 
 	/**
-	 * Sets the disable-remove condition expression directly.
+	 * Sets the {@code disableRemove} attribute as authored.
 	 *
-	 * @param disableRemoveConditionName the disable-remove condition expression
+	 * <p>Side effects: clears any authored {@code enableRemove} attribute.
+	 *
+	 * @param disableRemoveCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disableRemove", required = false)
-	public void setDisableRemoveConditionName(String disableRemoveConditionName) {
-		this.disableRemoveConditionName = UtilImpl.processStringValue(disableRemoveConditionName);
-	}
-	
-	/**
-	 * JAXB placeholder for the disable-remove attribute's enabled counterpart.
-	 *
-	 * @return always {@code null}; the enabled value is derived from the disabled condition
-	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnableRemoveConditionName() {
-		return null;
+	public void setXmlDisableRemoveCondition(@Nullable String disableRemoveCondition) {
+		this.disableRemoveCondition = UtilImpl.processStringValue(disableRemoveCondition);
+		this.enableRemoveCondition = null;
 	}
 
 	/**
-	 * Sets the remove-enabled condition by storing its negation as the remove-disabled condition.
+	 * Returns the {@code disableRemove} attribute as authored.
 	 *
-	 * @param enableRemoveConditionName the remove-enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code enableRemove} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisableRemoveCondition() {
+		return disableRemoveCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enableRemove} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disableRemove} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnableRemoveCondition() {
+		return enableRemoveCondition;
+	}
+
+	/**
+	 * Sets the {@code enableRemove} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disableRemove} attribute, so that
+	 * {@link #getDisableRemoveCondition()} returns the negation of this condition.
+	 *
+	 * @param enableRemoveCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enableRemove", required = false)
-	public void setEnableRemoveConditionName(String enableRemoveConditionName) {
-		this.disableRemoveConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enableRemoveConditionName));
+	public void setXmlEnableRemoveCondition(@Nullable String enableRemoveCondition) {
+		this.enableRemoveCondition = UtilImpl.processStringValue(enableRemoveCondition);
+		this.disableRemoveCondition = null;
 	}
 
 	/**
@@ -354,7 +453,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the add action is shown
 	 */
-	public Boolean getShowAdd() {
+	public @Nullable Boolean getShowAdd() {
 		return showAdd;
 	}
 
@@ -364,7 +463,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showAdd {@code true} to show the add action
 	 */
 	@XmlAttribute(name = "showAdd", required = false)
-	public void setShowAdd(Boolean showAdd) {
+	public void setShowAdd(@Nullable Boolean showAdd) {
 		this.showAdd = showAdd;
 	}
 
@@ -373,7 +472,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the zoom action is shown
 	 */
-	public Boolean getShowZoom() {
+	public @Nullable Boolean getShowZoom() {
 		return showZoom;
 	}
 
@@ -383,7 +482,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showZoom {@code true} to show the zoom action
 	 */
 	@XmlAttribute(name = "showZoom", required = false)
-	public void setShowZoom(Boolean showZoom) {
+	public void setShowZoom(@Nullable Boolean showZoom) {
 		this.showZoom = showZoom;
 	}
 
@@ -392,7 +491,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the edit action is shown
 	 */
-	public Boolean getShowEdit() {
+	public @Nullable Boolean getShowEdit() {
 		return showEdit;
 	}
 
@@ -402,7 +501,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showEdit {@code true} to show the edit action
 	 */
 	@XmlAttribute(name = "showEdit", required = false)
-	public void setShowEdit(Boolean showEdit) {
+	public void setShowEdit(@Nullable Boolean showEdit) {
 		this.showEdit = showEdit;
 	}
 
@@ -411,7 +510,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the remove action is shown
 	 */
-	public Boolean getShowRemove() {
+	public @Nullable Boolean getShowRemove() {
 		return showRemove;
 	}
 
@@ -421,7 +520,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showRemove {@code true} to show the remove action
 	 */
 	@XmlAttribute(name = "showRemove", required = false)
-	public void setShowRemove(Boolean showRemove) {
+	public void setShowRemove(@Nullable Boolean showRemove) {
 		this.showRemove = showRemove;
 	}
 
@@ -430,7 +529,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the deselect action is shown
 	 */
-	public Boolean getShowDeselect() {
+	public @Nullable Boolean getShowDeselect() {
 		return showDeselect;
 	}
 
@@ -440,7 +539,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showDeselect {@code true} to show the deselect action
 	 */
 	@XmlAttribute(name = "showDeselect", required = false)
-	public void setShowDeselect(Boolean showDeselect) {
+	public void setShowDeselect(@Nullable Boolean showDeselect) {
 		this.showDeselect = showDeselect;
 	}
 
@@ -449,7 +548,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when export is shown
 	 */
-	public Boolean getShowExport() {
+	public @Nullable Boolean getShowExport() {
 		return showExport;
 	}
 
@@ -459,7 +558,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showExport {@code true} to show export
 	 */
 	@XmlAttribute(name = "showExport", required = false)
-	public void setShowExport(Boolean showExport) {
+	public void setShowExport(@Nullable Boolean showExport) {
 		this.showExport = showExport;
 	}
 
@@ -468,7 +567,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when charting is shown
 	 */
-	public Boolean getShowChart() {
+	public @Nullable Boolean getShowChart() {
 		return showChart;
 	}
 
@@ -478,7 +577,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showChart {@code true} to show charting
 	 */
 	@XmlAttribute(name = "showChart", required = false)
-	public void setShowChart(Boolean showChart) {
+	public void setShowChart(@Nullable Boolean showChart) {
 		this.showChart = showChart;
 	}
 
@@ -487,7 +586,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when the filter UI is shown
 	 */
-	public Boolean getShowFilter() {
+	public @Nullable Boolean getShowFilter() {
 		return showFilter;
 	}
 
@@ -497,7 +596,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showFilter {@code true} to show the filter UI
 	 */
 	@XmlAttribute(name = "showFilter", required = false)
-	public void setShowFilter(Boolean showFilter) {
+	public void setShowFilter(@Nullable Boolean showFilter) {
 		this.showFilter = showFilter;
 	}
 
@@ -506,7 +605,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when summary information is shown
 	 */
-	public Boolean getShowSummary() {
+	public @Nullable Boolean getShowSummary() {
 		return showSummary;
 	}
 
@@ -516,7 +615,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showSummary {@code true} to show summary information
 	 */
 	@XmlAttribute(name = "showSummary", required = false)
-	public void setShowSummary(Boolean showSummary) {
+	public void setShowSummary(@Nullable Boolean showSummary) {
 		this.showSummary = showSummary;
 	}
 
@@ -525,7 +624,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when snap actions are shown
 	 */
-	public Boolean getShowSnap() {
+	public @Nullable Boolean getShowSnap() {
 		return showSnap;
 	}
 
@@ -535,7 +634,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showSnap {@code true} to show snap actions
 	 */
 	@XmlAttribute(name = "showSnap", required = false)
-	public void setShowSnap(Boolean showSnap) {
+	public void setShowSnap(@Nullable Boolean showSnap) {
 		this.showSnap = showSnap;
 	}
 
@@ -544,7 +643,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when tag actions are shown
 	 */
-	public Boolean getShowTag() {
+	public @Nullable Boolean getShowTag() {
 		return showTag;
 	}
 
@@ -554,7 +653,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showTag {@code true} to show tag actions
 	 */
 	@XmlAttribute(name = "showTag", required = false)
-	public void setShowTag(Boolean showTag) {
+	public void setShowTag(@Nullable Boolean showTag) {
 		this.showTag = showTag;
 	}
 
@@ -563,7 +662,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when flag actions are shown
 	 */
-	public Boolean getShowFlag() {
+	public @Nullable Boolean getShowFlag() {
 		return showFlag;
 	}
 
@@ -573,7 +672,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param showFlag {@code true} to show flag actions
 	 */
 	@XmlAttribute(name = "showFlag", required = false)
-	public void setShowFlag(Boolean showFlag) {
+	public void setShowFlag(@Nullable Boolean showFlag) {
 		this.showFlag = showFlag;
 	}
 
@@ -582,7 +681,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 *
 	 * @return {@code true} when auto-population is enabled
 	 */
-	public Boolean getAutoPopulate() {
+	public @Nullable Boolean getAutoPopulate() {
 		return autoPopulate;
 	}
 
@@ -592,7 +691,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @param autoPopulate {@code true} to enable auto-population
 	 */
 	@XmlAttribute(name = "autoPopulate", required = false)
-	public void setAutoPopulate(Boolean autoPopulate) {
+	public void setAutoPopulate(@Nullable Boolean autoPopulate) {
 		this.autoPopulate = autoPopulate;
 	}
 
@@ -602,7 +701,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @return the selected-row identifier binding, or {@code null} when not set
 	 */
 	@Override
-	public String getSelectedIdBinding() {
+	public @Nullable String getSelectedIdBinding() {
 		return selectedIdBinding;
 	}
 
@@ -613,7 +712,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 */
 	@Override
 	@XmlAttribute(name = "selectedIdBinding")
-	public void setSelectedIdBinding(String selectedIdBinding) {
+	public void setSelectedIdBinding(@Nullable String selectedIdBinding) {
 		this.selectedIdBinding = UtilImpl.processStringValue(selectedIdBinding);
 	}
 
@@ -628,7 +727,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getEditedActions() {
+	public @Nonnull List<EventAction> getEditedActions() {
 		return editedActions;
 	}
 
@@ -643,7 +742,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getRemovedActions() {
+	public @Nonnull List<EventAction> getRemovedActions() {
 		return removedActions;
 	}
 
@@ -658,7 +757,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 						@XmlElementRef(type = ServerSideActionEventAction.class),
 						@XmlElementRef(type = SetDisabledEventAction.class),
 						@XmlElementRef(type = SetInvisibleEventAction.class)})
-	public List<EventAction> getSelectedActions() {
+	public @Nonnull List<EventAction> getSelectedActions() {
 		return selectedActions;
 	}
 	
@@ -671,7 +770,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 */
 	@Override
 	@XmlTransient
-	public String getSource() {
+	public @Nullable String getSource() {
 		String queryName = getQueryName();
 		return (queryName == null) ? getModelName() : queryName;
 	}
@@ -682,7 +781,7 @@ public class ListGrid extends AbstractListWidget implements DecoratedMetaData,
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

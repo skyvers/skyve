@@ -13,6 +13,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Renders React edit view component code from Skyve metadata.
  */
@@ -22,11 +24,11 @@ public class ReactEditView extends ReactComponent {
 	private View createView;
 	private View editView;
 	
-	public ReactEditView(ReactGenerator generator, String moduleName, String componentName) {
+	public ReactEditView(@Nonnull ReactGenerator generator, @Nonnull String moduleName, @Nonnull String componentName) {
 		super(generator, moduleName, componentName);
 	}
 
-	public void setViews(Module module, Document document) {
+	public void setViews(@Nonnull Module module, @Nonnull Document document) {
 		this.module = module;
 		this.document = document;
 		Customer c = CORE.getCustomer();
@@ -36,7 +38,7 @@ public class ReactEditView extends ReactComponent {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void create(FileWriter fw) throws IOException {
+	protected void create(@Nonnull FileWriter fw) throws IOException {
 		Map<String, String> imports = new TreeMap<>();
 		String editJsx = null;
 		String createJsx = null;
@@ -48,12 +50,12 @@ public class ReactEditView extends ReactComponent {
 		if (editView != null) {
 			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, editView, generator.uxui, imports, bothViews);
 			v.visit();
-			editJsx = v.getResult().toString();
+			editJsx = v.getNullSafeResult().toString();
 		}
 		if (createView != null) {
 			ReactViewRenderer v = new PrimeReactViewRenderer(u, module, document, createView, generator.uxui, imports, bothViews);
 			v.visit();
-			createJsx = v.getResult().toString();
+			createJsx = v.getNullSafeResult().toString();
 		}
 
 		fw.write("import React from 'react';\n");

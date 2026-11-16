@@ -14,16 +14,20 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nullable;
+import modules.admin.Job.JobExtension;
 import modules.admin.domain.Job;
 
 /**
- * Re-runs a completed job when a unique metadata job definition can be resolved.
+ * Re-runs a completed job when a unique metadata job definition can be resolved, and the job was started without a bean.
+ * A job started with a bean is refused, as its bean cannot be given back to it (see {@link JobExtension#startedWithABean()}).
  */
 public class RerunJob implements ServerSideAction<Job> {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(RerunJob.class);
 
 	/**
-	 * Resolves the metadata job by display name and runs it immediately.
+	 * Resolves the metadata job by display name and runs it immediately, without a bean, as it first ran.
+	 * A job that was started with a bean is not run: a warning growl says why.
 	 *
 	 * @param bean
 	 *        the selected historical job entry
@@ -33,30 +37,22 @@ public class RerunJob implements ServerSideAction<Job> {
 	 */
 	@Override
 	public ServerSideActionResult<Job> execute(Job bean, WebContext webContext) {
-		// try to find the job to re-run, based on unique display name
-		JobMetaData jobToRerun = null;
-		Customer c = CORE.getCustomer();
-		List<org.skyve.metadata.module.Module> modules = c.getModules();
-		for (org.skyve.metadata.module.Module m : modules) {
-			List<JobMetaData> jobs = m.getJobs();
-			for (JobMetaData j : jobs) {
-				if (j.getDisplayName().equals(bean.getDisplayName())) {
-					jobToRerun = j;
-					break;
-				}
+		if (((JobExtension) bean).startedWithABean()) {
+			if (webContext != null) {
+				webContext.growl(MessageSeverity.warn,
+									"This job can't be re-run, as the values it was started with are not kept. Start it again where it was started.");
 			}
-
-			if (jobToRerun != null) {
-				break;
-			}
+			return new ServerSideActionResult<>(bean);
 		}
 
+		// try to find the job to re-run, based on unique display name
+		JobMetaData jobToRerun = findJob(bean.getDisplayName());
 		if (jobToRerun != null) {
 			if (isJobAlreadyActive(jobToRerun)) {
 				webContext.growl(MessageSeverity.warn, "This job is already running");
 			} else {
-				// start the job immediately as the current user
-				EXT.getJobScheduler().runOneShotJob(jobToRerun, bean, CORE.getUser());
+				// start the job immediately as the current user, without a bean as it first ran
+				EXT.getJobScheduler().runOneShotJob(jobToRerun, null, CORE.getUser());
 				webContext.growl(MessageSeverity.info, "Started " + jobToRerun.getDisplayName());
 			}
 		} else {
@@ -64,6 +60,26 @@ public class RerunJob implements ServerSideAction<Job> {
 		}
 
 		return new ServerSideActionResult<>(bean);
+	}
+
+	/**
+	 * Finds the first of the customer's jobs, module by module, with a display name.
+	 *
+	 * @param displayName	the display name
+	 * @return the job, or {@code null} if no job has the name
+	 */
+	private static @Nullable JobMetaData findJob(@Nullable String displayName) {
+		Customer c = CORE.getCustomer();
+		List<org.skyve.metadata.module.Module> modules = c.getModules();
+		for (org.skyve.metadata.module.Module m : modules) {
+			List<JobMetaData> jobs = m.getJobs();
+			for (JobMetaData j : jobs) {
+				if (j.getDisplayName().equals(displayName)) {
+					return j;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**

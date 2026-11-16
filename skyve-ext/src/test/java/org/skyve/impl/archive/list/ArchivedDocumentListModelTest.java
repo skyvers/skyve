@@ -1,10 +1,10 @@
 package org.skyve.impl.archive.list;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,7 +26,7 @@ import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.util.UtilImpl;
@@ -41,10 +41,10 @@ import org.skyve.metadata.view.model.list.Filter;
 import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
-public class ArchivedDocumentListModelTest {
+class ArchivedDocumentListModelTest {
 	@Test
-	@SuppressWarnings("static-method")
-	public void fetchReturnsEmptyPageWhenNoArchiveConfigExists() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void fetchReturnsEmptyPageWhenNoArchiveConfigExists() throws Exception {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 		model.setStartRow(0);
 		model.setEndRow(10);
@@ -56,8 +56,8 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void fetchCreatesCountSummaryWhenSummaryIsCount() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void fetchCreatesCountSummaryWhenSummaryIsCount() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -93,8 +93,8 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void fetchCreatesSummaryForUnsupportedAggregateWithoutThrowing() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void fetchCreatesSummaryForUnsupportedAggregateWithoutThrowing() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -128,7 +128,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getIndexDirectoryThrowsWhenArchiveDocConfigIsMissing() {
+	void getIndexDirectoryThrowsWhenArchiveDocConfigIsMissing() {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -147,7 +147,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSortReturnsDefaultRelevanceWhenNoSortParameters() {
+	void getSortReturnsDefaultRelevanceWhenNoSortParameters() {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 		Sort sort = model.exposeSort();
 		assertSame(Sort.RELEVANCE, sort);
@@ -155,7 +155,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getSortUsesSortParametersAndToSortBinding() {
+	void getSortUsesSortParametersAndToSortBinding() {
 		SortParameterImpl parameter = new SortParameterImpl();
 		parameter.setBy("name");
 		parameter.setDirection(SortDirection.descending);
@@ -171,7 +171,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void getFilterAndNewFilterReturnLuceneFilterInstances() {
+	void getFilterAndNewFilterReturnLuceneFilterInstances() {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 
 		Filter filter = model.getFilter();
@@ -183,7 +183,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void postConstructResolvesDrivingDocumentFromCustomerModule() {
+	void postConstructResolvesDrivingDocumentFromCustomerModule() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		org.skyve.metadata.model.document.Document document = mock(org.skyve.metadata.model.document.Document.class);
@@ -197,8 +197,8 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void updateAndRemoveAreUnsupported() {
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
+	void updateAndRemoveAreUnsupported() {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 
 		assertThrows(UnsupportedOperationException.class, () -> model.update("bizId", null));
@@ -207,15 +207,15 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void putParameterIsNoOp() {
+	void putParameterIsNoOp() {
 		TestArchivedDocumentListModel model = new TestArchivedDocumentListModel();
 		model.putParameter("unused", "value");
 		assertTrue(model.getFilter() instanceof LuceneFilter);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void fetchUsesLucenePathWhenArchiveConfigExists() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void fetchUsesLucenePathWhenArchiveConfigExists() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -250,8 +250,8 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void fetchReturnsEmptyPageWhenIndexFilesMissing() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void fetchReturnsEmptyPageWhenIndexFilesMissing() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -285,7 +285,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void iterateTryCloseSwallowsCloseExceptions() throws Exception {
+	void iterateTryCloseSwallowsCloseExceptions() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -316,8 +316,8 @@ public class ArchivedDocumentListModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void fetchWithNonEmptyFilterUsesConfiguredQueryPath() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void fetchWithNonEmptyFilterUsesConfiguredQueryPath() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -349,7 +349,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "resource"})
-	public void iterateNextReturnsConvertedBeanForIndexedDocument() throws Exception {
+	void iterateNextReturnsConvertedBeanForIndexedDocument() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -391,7 +391,7 @@ public class ArchivedDocumentListModelTest {
 
 	@Test
 	@SuppressWarnings({"static-method", "resource"})
-	public void iterateNextWrapsIOExceptionFromStoredDocumentRead() throws Exception {
+	void iterateNextWrapsIOExceptionFromStoredDocumentRead() throws Exception {
 		ArchiveConfig previousConfig = UtilImpl.ARCHIVE_CONFIG;
 		String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 
@@ -468,6 +468,7 @@ public class ArchivedDocumentListModelTest {
 			return binding + "_sort";
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		protected Bean convertToBean(Document luceneDoc) {
 			return null;
@@ -527,6 +528,7 @@ public class ArchivedDocumentListModelTest {
 			return binding + "_sort";
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		protected Bean convertToBean(Document luceneDoc) {
 			return null;

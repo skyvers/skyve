@@ -23,10 +23,13 @@ import org.skyve.CORE;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.impl.job.JobSchedulerStaticSingleton;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.job.JobScheduler;
 import org.skyve.metadata.controller.Download;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.controller.Upload;
@@ -37,6 +40,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
+import org.skyve.web.WebContext;
 
 import modules.admin.UserProxy.UserProxyExtension;
 import modules.admin.domain.Audit;
@@ -44,7 +48,12 @@ import modules.admin.domain.DataMaintenance;
 import util.AbstractH2Test;
 
 /**
- * Tests for DataMaintenance DDL and utility actions.
+ * Verifies Data Maintenance DDL and utility actions against the H2 test application.
+ *
+ * <p>Actions are exercised through their server-side interfaces with persistence and web-context
+ * effects asserted where relevant. Content garbage-collection coverage confirms that the manual
+ * action delegates to the configured job scheduler, reports successful submission to the user and
+ * preserves the action bean.
  */
 class DataMaintenanceActionsH2Test extends AbstractH2Test {
 	@TempDir
@@ -55,11 +64,13 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 	private MockWebContext webContext;
 	private String savedBackupDirectory;
 	private String savedExternalBackupClass;
+	private JobScheduler savedJobScheduler;
 
 	@BeforeEach
 	void setup() {
 		savedBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
 		savedExternalBackupClass = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
+		savedJobScheduler = JobSchedulerStaticSingleton.get();
 		UtilImpl.BACKUP_DIRECTORY = tempDir.toString() + File.separator;
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = null;
 
@@ -72,6 +83,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 	void teardown() {
 		UtilImpl.BACKUP_DIRECTORY = savedBackupDirectory;
 		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = savedExternalBackupClass;
+		JobSchedulerStaticSingleton.set(savedJobScheduler);
 	}
 
 	// ---- Create action ----
@@ -233,6 +245,20 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 		assertThat(result.getBean(), is(notNullValue()));
 	}
 
+	/** Confirms that the maintenance action submits garbage collection and reports that submission. */
+	@Test
+	void collectContentGarbageActionStartsJobAndReturnsBean() throws Exception {
+		JobScheduler scheduler = mock(JobScheduler.class);
+		WebContext context = mock(WebContext.class);
+		JobSchedulerStaticSingleton.set(scheduler);
+
+		ServerSideActionResult<DataMaintenance> result = new CollectContentGarbage().execute(bean, context);
+
+		verify(scheduler).runContentGarbageCollector();
+		verify(context).growl(MessageSeverity.info, "Content Garbage Collection Job has been started");
+		assertThat(result.getBean(), is(bean));
+	}
+
 	// ---- ReindexData action ----
 
 	@Test
@@ -290,7 +316,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void truncateAuditLogSetResultCountUsesAggregateCount() throws Exception {
+	void truncateAuditLogSetResultCountUsesAggregateCount() {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);

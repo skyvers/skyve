@@ -9,8 +9,13 @@ import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Method;
@@ -29,6 +34,8 @@ import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.TextFormat;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
@@ -41,6 +48,7 @@ import org.skyve.util.test.TestUtil;
 @SuppressWarnings({"static-method", "boxing"})
 class TestUtilTest {
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomRegexAllowedDigitCount() {
 		// setup the test data
@@ -83,6 +91,7 @@ void testRandomRegexListOfAllowedValuesWithAnchors() {
 				Arrays.asList("ACT", "NSW", "NT", "QLD", "SA", "TAS", "VIC", "WA"), hasItem(result));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomRegexLowercaseDashSeparatedString() {
 		// setup the test data
@@ -96,6 +105,7 @@ void testRandomRegexLowercaseDashSeparatedString() {
 		assertTrue(result.matches("[a-z0-9]+(-[a-z0-9]+)*"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomRegexLowercaseDashSeparatedStringWithAnchors() {
 		// setup the test data
@@ -222,7 +232,7 @@ void testRandomRegexReturnsNullForInvalidExpression() {
 
 	@Test
 void testRandomIntegerDefaultRangeForGenericAttribute() {
-		Attribute attribute = org.mockito.Mockito.mock(Attribute.class);
+		Attribute attribute = mock(Attribute.class);
 		java.lang.Integer result = TestUtil.randomInteger(attribute);
 		assertThat(result, is(greaterThanOrEqualTo(0)));
 		assertThat(result, is(lessThanOrEqualTo(10000)));
@@ -244,10 +254,10 @@ void testRandomDecimalHonoursValidatorRangeWhenConfigured() {
 
 	@Test
 void testRetrieveExcludedUpdateAttributesFromFactoryAnnotation() {
-		Module module = org.mockito.Mockito.mock(Module.class);
-		Document document = org.mockito.Mockito.mock(Document.class);
-		org.mockito.Mockito.when(module.getName()).thenReturn("utmod");
-		org.mockito.Mockito.when(document.getName()).thenReturn("UtDoc");
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(module.getName()).thenReturn("utmod");
+		when(document.getName()).thenReturn("UtDoc");
 
 		List<String> excluded = TestUtil.retrieveExcludedUpdateAttributes(module, document);
 		assertThat(excluded, is(Arrays.asList("auditStamp", "lockVersion")));
@@ -255,10 +265,10 @@ void testRetrieveExcludedUpdateAttributesFromFactoryAnnotation() {
 
 	@Test
 void testRetrieveExcludedUpdateAttributesReturnsEmptyWhenFactoryMissing() {
-		Module module = org.mockito.Mockito.mock(Module.class);
-		Document document = org.mockito.Mockito.mock(Document.class);
-		org.mockito.Mockito.when(module.getName()).thenReturn("missing");
-		org.mockito.Mockito.when(document.getName()).thenReturn("NoFactory");
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(module.getName()).thenReturn("missing");
+		when(document.getName()).thenReturn("NoFactory");
 
 		List<String> excluded = TestUtil.retrieveExcludedUpdateAttributes(module, document);
 		Assertions.assertTrue(excluded.isEmpty());
@@ -290,16 +300,39 @@ void testHasExtensionAndAttributeKeyPrivateHelpers() throws Exception {
 		Method attributeKey = TestUtil.class.getDeclaredMethod("attributeKey", Module.class, Document.class, String.class);
 		attributeKey.setAccessible(true);
 
-		Module module = org.mockito.Mockito.mock(Module.class);
-		Document document = org.mockito.Mockito.mock(Document.class);
-		org.mockito.Mockito.when(module.getName()).thenReturn("utmod");
-		org.mockito.Mockito.when(document.getName()).thenReturn("UtDoc");
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(module.getName()).thenReturn("utmod");
+		when(document.getName()).thenReturn("UtDoc");
 
 		assertThat((String) attributeKey.invoke(null, module, document, "name"), is("utmod.UtDoc.name"));
 		assertThat((String) attributeKey.invoke(null, null, null, "name"), is("name"));
 		assertThat(attributeKey.invoke(null, module, document, null), is((Object) null));
 	}
 
+	@Test
+void testRandomTextWithoutRepositoryDataFiles() {
+		// The repository has no data files at all (findResourceFile() returns null)
+		Text text = new Text();
+		text.setName("noDataFileForThisAttribute");
+		text.setLength(20);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.isConfigured() ? ProvidedRepositoryFactory.get() : null;
+		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+		try {
+			Assertions.assertDoesNotThrow(() -> TestUtil.randomText("customer", null, null, text));
+		}
+		finally {
+			if (previousRepository == null) {
+				ProvidedRepositoryFactory.clear();
+			}
+			else {
+				ProvidedRepositoryFactory.set(previousRepository);
+			}
+		}
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithFormatMask() throws Exception {
 		Text text = new Text();
@@ -315,6 +348,7 @@ void testRandomTextWithFormatMask() throws Exception {
 		Assertions.assertTrue(result.matches("[a-z]{2}-\\d{3}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithValidatorTypeEmail() throws Exception {
 		Text text = new Text();
@@ -330,6 +364,7 @@ void testRandomTextWithValidatorTypeEmail() throws Exception {
 		Assertions.assertTrue(result.contains("@"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Exception {
 		Text text = new Text();
@@ -347,6 +382,7 @@ void testRandomTextPrefersRegexOverFormatWhenValidatorTypeIsNull() throws Except
 		Assertions.assertTrue(result.matches("\\d{4}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exception {
 		Text text = new Text();
@@ -361,6 +397,7 @@ void testRandomTextWithRegexAndNoFormatWhenValidatorTypeIsNull() throws Exceptio
 		Assertions.assertTrue(result.matches("[A-Z]{3}"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 void testRandomTextWithValidatorTypeAndRegex() throws Exception {
 		Text text = new Text();
@@ -406,26 +443,26 @@ void testRandomValueFromFileReturnsNullForNullAttributeName() throws Exception {
 
 	@Test
 void testFindRandomDocumentQueryResultReturnsNullWhenNoRows() {
-		AbstractDocumentQuery query = org.mockito.Mockito.mock(AbstractDocumentQuery.class);
-		org.mockito.Mockito.when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(0)));
+		AbstractDocumentQuery query = mock(AbstractDocumentQuery.class);
+		when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(0)));
 
 		Bean result = TestUtil.findRandomDocumentQueryResult(query);
 		assertThat(result, is((Bean) null));
-		org.mockito.Mockito.verify(query).clearProjections();
-		org.mockito.Mockito.verify(query).addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
+		verify(query).clearProjections();
+		verify(query).addAggregateProjection(AggregateFunction.Count, Bean.DOCUMENT_ID, "CountOfId");
 	}
 
 	@Test
 void testFindRandomDocumentQueryResultReturnsBeanWhenRowsExist() {
-		AbstractDocumentQuery query = org.mockito.Mockito.mock(AbstractDocumentQuery.class);
-		Bean bean = org.mockito.Mockito.mock(Bean.class);
-		org.mockito.Mockito.when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(2)));
-		org.mockito.Mockito.when(query.beanResults()).thenReturn(Arrays.asList(bean));
+		AbstractDocumentQuery query = mock(AbstractDocumentQuery.class);
+		Bean bean = mock(Bean.class);
+		when(query.scalarResults(Number.class)).thenReturn(Arrays.asList(Long.valueOf(2)));
+		when(query.beanResults()).thenReturn(Arrays.asList(bean));
 
 		Bean result = TestUtil.findRandomDocumentQueryResult(query);
 		assertThat(result, is(bean));
-		org.mockito.Mockito.verify(query).setFirstResult(0);
-		org.mockito.Mockito.verify(query).setMaxResults(1);
+		verify(query).setFirstResult(0);
+		verify(query).setMaxResults(1);
 	}
 
 	@Test
@@ -628,13 +665,13 @@ void testUpdateAttributeText() throws Exception {
 
 		// randomText with regex but no module/document uses the private randomText(Module, Document, Attribute)
 		// which calls CORE.getUser() - set up thread-local persistence
-		org.skyve.metadata.user.User user = org.mockito.Mockito.mock(org.skyve.metadata.user.User.class);
-		org.skyve.metadata.customer.Customer customer = org.mockito.Mockito.mock(org.skyve.metadata.customer.Customer.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
-		org.mockito.Mockito.when(user.getCustomerName()).thenReturn("test");
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getCustomerName()).thenReturn("test");
 		org.skyve.impl.persistence.AbstractPersistence persistence =
-			org.mockito.Mockito.mock(org.skyve.impl.persistence.AbstractPersistence.class,
-				org.mockito.Mockito.withSettings().defaultAnswer(org.mockito.Mockito.CALLS_REAL_METHODS));
+			mock(org.skyve.impl.persistence.AbstractPersistence.class,
+				withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {

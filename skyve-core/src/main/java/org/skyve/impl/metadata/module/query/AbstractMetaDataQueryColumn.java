@@ -5,6 +5,8 @@ import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for all metadata query column implementations.
  *
@@ -41,56 +43,56 @@ public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn
 	private HorizontalAlignment alignment;
 	
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
 	@Override
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
 	@Override
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = binding;
 	}
 
 	@Override
-	public FilterOperator getFilterOperator() {
+	public @Nullable FilterOperator getFilterOperator() {
 		return filterOperator;
 	}
 
-	public void setFilterOperator(FilterOperator filterOperator) {
+	public void setFilterOperator(@Nullable FilterOperator filterOperator) {
 		this.filterOperator = filterOperator;
 	}
 
 	@Override
-	public String getFilterExpression() {
+	public @Nullable String getFilterExpression() {
 		return filterExpression;
 	}
 
-	public void setFilterExpression(String filterExpression) {
+	public void setFilterExpression(@Nullable String filterExpression) {
 		this.filterExpression = filterExpression;
 	}
 
 	@Override
-	public SortDirection getSortOrder() {
+	public @Nullable SortDirection getSortOrder() {
 		return sortOrder;
 	}
 
-	public void setSortOrder(SortDirection sortOrder) {
+	public void setSortOrder(@Nullable SortDirection sortOrder) {
 		this.sortOrder = sortOrder;
 	}
 
@@ -104,20 +106,20 @@ public abstract class AbstractMetaDataQueryColumn implements MetaDataQueryColumn
 	}
 
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
-	public HorizontalAlignment getAlignment() {
+	public @Nullable HorizontalAlignment getAlignment() {
 		return alignment;
 	}
 
-	public void setAlignment(HorizontalAlignment alignment) {
+	public void setAlignment(@Nullable HorizontalAlignment alignment) {
 		this.alignment = alignment;
 	}
 }

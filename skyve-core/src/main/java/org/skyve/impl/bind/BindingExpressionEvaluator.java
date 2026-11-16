@@ -3,6 +3,9 @@ package org.skyve.impl.bind;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves {@code {bean:...}} expressions using Skyve binding paths.
  *
@@ -27,7 +30,7 @@ public class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
 	 * @return the resolved value, or {@code null} when {@code bean} is {@code null}
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nullable Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		if (bean == null) {
 			return null;
 		}
@@ -43,7 +46,7 @@ public class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
 	 * @throws IllegalArgumentException if {@code bean} is {@code null}
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		if (bean == null) {
 			throw new IllegalArgumentException("bean cannot be null");
 		}
@@ -57,7 +60,7 @@ public class BindingExpressionEvaluator extends MetaDataExpressionEvaluator {
 	 * @param binding the binding path to prepend
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
 		expression.insert(0, '.');
 		expression.insert(0, binding);
 	}

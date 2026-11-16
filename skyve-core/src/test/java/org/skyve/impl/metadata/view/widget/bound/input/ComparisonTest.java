@@ -14,14 +14,14 @@ class ComparisonTest {
 	}
 
 	@Test
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		// InputWidget.getEnabledConditionName() is package-private; test via Comparison
-		assertNull(new Comparison().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		// InputWidget is abstract; test via Comparison
+		assertNull(new Comparison().getXmlEnabledCondition());
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		// InputWidget.getVisibleConditionName() is package-private; test via Comparison
-		assertNull(new Comparison().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		// InputWidget is abstract; test via Comparison
+		assertNull(new Comparison().getXmlVisibleCondition());
 	}
 }

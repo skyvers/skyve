@@ -10,6 +10,8 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * An implementation of MapModel that is driven by a meta data query.
  * NB Skyve cannot determine the access control required to zoom in on features
@@ -31,12 +33,12 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 		// nothing to see here
 	}
 
-	public DocumentQueryMapModel(MetaDataQueryDefinition query) {
+	public DocumentQueryMapModel(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 
 	@Override
-	public MapResult getResult(Geometry mapBounds) throws Exception {
+	public @Nonnull MapResult getResult(@Nonnull Geometry mapBounds) throws Exception {
 		if (documentQuery == null) {
 			documentQuery = query.constructDocumentQuery(null, null);
 		}
@@ -57,7 +59,7 @@ public class DocumentQueryMapModel<T extends Bean> extends DefaultMapModel<T> {
 	 * 
 	 * @param query
 	 */
-	protected void setQuery(MetaDataQueryDefinition query) {
+	protected void setQuery(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 }

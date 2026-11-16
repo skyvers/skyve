@@ -3,6 +3,8 @@ package org.skyve.domain.types.converters;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
@@ -38,10 +40,10 @@ public abstract class Validator<T extends Object> {
 	 * @param converter            the converter that produced {@code value}, for formatting error messages
 	 * @param e                    the exception to add {@link org.skyve.domain.messages.Message} entries to; must not be {@code null}
 	 */
-	public abstract void validate(User user,
-									T value,
-									String binding,
-									String localisedDisplayName,
-									Converter<T> converter,
-									ValidationException e);
+	public abstract void validate(@Nonnull User user,
+									@Nullable T value,
+									@Nonnull String binding,
+									@Nullable String localisedDisplayName,
+									@Nullable Converter<T> converter,
+									@Nonnull ValidationException e);
 }

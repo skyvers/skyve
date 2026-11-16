@@ -9,10 +9,24 @@ import org.skyve.metadata.model.document.ModuleDocument;
  */
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public enum KitchensinkDocument implements ModuleDocument {
+	/** The "ActionsFixture" document. */
+	ACTIONS_FIXTURE("ActionsFixture"),
+	/** The "ActionsFixtureRow" document. */
+	ACTIONS_FIXTURE_ROW("ActionsFixtureRow"),
+	/** The "ConditionsFixture" document. */
+	CONDITIONS_FIXTURE("ConditionsFixture"),
+	/** The "ConditionsFixtureNode" document. */
+	CONDITIONS_FIXTURE_NODE("ConditionsFixtureNode"),
+	/** The "ConditionsFixtureRow" document. */
+	CONDITIONS_FIXTURE_ROW("ConditionsFixtureRow"),
 	/** The "ContainerGrid" document. */
 	CONTAINER_GRID("ContainerGrid"),
 	/** The "DataRepeater" document. */
 	DATA_REPEATER("DataRepeater"),
+	/** The "DialogsFixture" document. */
+	DIALOGS_FIXTURE("DialogsFixture"),
+	/** The "DialogsFixtureRow" document. */
+	DIALOGS_FIXTURE_ROW("DialogsFixtureRow"),
 	/** The "EscapingFixture" document. */
 	ESCAPING_FIXTURE("EscapingFixture"),
 	/** The "InlineGrid" document. */
@@ -21,10 +35,22 @@ public enum KitchensinkDocument implements ModuleDocument {
 	KITCHEN_SINK("KitchenSink"),
 	/** The "ListAttributes" document. */
 	LIST_ATTRIBUTES("ListAttributes"),
+	/** The "ListGridFixture" document. */
+	LIST_GRID_FIXTURE("ListGridFixture"),
 	/** The "LookupDescription" document. */
 	LOOKUP_DESCRIPTION("LookupDescription"),
+	/** The "ModelLookupFixture" document. */
+	MODEL_LOOKUP_FIXTURE("ModelLookupFixture"),
+	/** The "ModelLookupRow" document. */
+	MODEL_LOOKUP_ROW("ModelLookupRow"),
 	/** The "OrderedGrid" document. */
 	ORDERED_GRID("OrderedGrid"),
+	/** The "OrderedGridFixture" document. */
+	ORDERED_GRID_FIXTURE("OrderedGridFixture"),
+	/** The "OrderedGridFixtureLine" document. */
+	ORDERED_GRID_FIXTURE_LINE("OrderedGridFixtureLine"),
+	/** The "OrderedGridFixtureRow" document. */
+	ORDERED_GRID_FIXTURE_ROW("OrderedGridFixtureRow"),
 	/** The "UploadFixture" document. */
 	UPLOAD_FIXTURE("UploadFixture"),
 	/** The "UploadFixtureGridRow" document. */

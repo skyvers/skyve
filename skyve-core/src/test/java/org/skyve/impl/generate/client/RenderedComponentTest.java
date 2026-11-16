@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -41,6 +42,18 @@ class RenderedComponentTest {
 		RenderedComponent child = new RenderedComponent();
 		component.addChild(child);
 		assertThat(child.getParent(), sameInstance(component));
+	}
+
+	@Test
+	void getNullSafeParentReturnsParentWhenAdded() {
+		RenderedComponent child = new RenderedComponent();
+		component.addChild(child);
+		assertThat(child.getNullSafeParent(), sameInstance(component));
+	}
+
+	@Test
+	void getNullSafeParentThrowsWhenNotAdded() {
+		assertThrows(IllegalStateException.class, () -> component.getNullSafeParent());
 	}
 
 	@Test

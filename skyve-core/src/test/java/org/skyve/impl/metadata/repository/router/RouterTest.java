@@ -125,8 +125,7 @@ class RouterTest implements TaggingUxUiSelector {
 		Router router = routerWithUxUi("desktop");
 		router.getDirects().add(direct("/missing.xhtml", "missing"));
 
-		MetaDataException exception = assertThrows(MetaDataException.class,
-				() -> router.validateDirectTargets());
+		MetaDataException exception = assertThrows(MetaDataException.class, router::validateDirectTargets);
 
 		assertTrue(exception.getMessage().contains("unknown UX/UI missing"));
 	}
@@ -423,6 +422,18 @@ class RouterTest implements TaggingUxUiSelector {
 		result.setPath(path);
 		result.setUxui(uxui);
 		return result;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void convertThrowsWhenRouteOutcomeUrlIsNull() {
+		Router router = new Router();
+		UxUiMetadata uxui = new UxUiMetadata();
+		uxui.setName("desktop");
+		uxui.getRoutes().add(new Route()); // outcome URL is null
+		router.getUxUis().add(uxui);
+		MetaDataException exception = assertThrows(MetaDataException.class, () -> router.convert("test router"));
+		assertEquals("test router route outcome is required for UX/UI desktop.", exception.getMessage());
 	}
 
 	private static Router routerWithUxUi(String name) {

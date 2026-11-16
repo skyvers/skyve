@@ -90,10 +90,10 @@ class ViewMetaDataTest {
 	}
 
 	@Test
-	void refreshConditionNameRoundTrip() {
+	void refreshIfConditionRoundTrip() {
 		ViewMetaData v = new ViewMetaData();
-		v.setRefreshConditionName("canRefresh");
-		assertEquals("canRefresh", v.getRefreshConditionName());
+		v.setRefreshIfCondition("canRefresh");
+		assertEquals("canRefresh", v.getRefreshIfCondition());
 	}
 
 	@Test
@@ -218,11 +218,11 @@ class ViewMetaDataTest {
 	}
 
 	@Test
-	void convertThrowsWhenRefreshConditionSetWithoutRefreshTime() {
+	void convertThrowsWhenRefreshIfConditionSetWithoutRefreshTime() {
 		ViewMetaData v = new ViewMetaData();
 		v.setName("edit");
 		v.setTitle("My View");
-		v.setRefreshConditionName("canRefresh");
+		v.setRefreshIfCondition("canRefresh");
 		// no refreshTimeInSeconds → MetaDataException
 		assertThrows(MetaDataException.class, () -> v.convert("TestModule.TestDoc.edit.xml"));
 	}

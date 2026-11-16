@@ -1,14 +1,14 @@
 package modules.kitchensink.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Decimal10;
@@ -22,22 +22,22 @@ import org.skyve.domain.types.Timestamp;
  * These are transient beans (no H2/CORE required).
  */
 @SuppressWarnings("static-method")
-public class KitchenSinkDomainTest {
+class KitchenSinkDomainTest {
 
 	// ---- Constants ----
 
 	@Test
-	public void moduleNameConstant() {
+	void moduleNameConstant() {
 		assertEquals("kitchensink", KitchenSink.MODULE_NAME);
 	}
 
 	@Test
-	public void documentNameConstant() {
+	void documentNameConstant() {
 		assertEquals("KitchenSink", KitchenSink.DOCUMENT_NAME);
 	}
 
 	@Test
-	public void propertyNameConstants() {
+	void propertyNameConstants() {
 		assertNotNull(KitchenSink.booleanFlagPropertyName);
 		assertNotNull(KitchenSink.colourPropertyName);
 		assertNotNull(KitchenSink.datePropertyName);
@@ -47,37 +47,37 @@ public class KitchenSinkDomainTest {
 	// ---- Constructor ----
 
 	@Test
-	public void defaultConstructorCreatesInstance() {
+	void defaultConstructorCreatesInstance() {
 		KitchenSink ks = new KitchenSink();
 		assertNotNull(ks);
 	}
 
 	@Test
-	public void getBizModuleReturnsKitchensink() {
+	void getBizModuleReturnsKitchensink() {
 		assertEquals("kitchensink", new KitchenSink().getBizModule());
 	}
 
 	@Test
-	public void getBizDocumentReturnsKitchenSink() {
+	void getBizDocumentReturnsKitchenSink() {
 		assertEquals("KitchenSink", new KitchenSink().getBizDocument());
 	}
 
 	// ---- Boolean field ----
 
 	@Test
-	public void booleanFlagNullByDefault() {
+	void booleanFlagNullByDefault() {
 		assertNull(new KitchenSink().getBooleanFlag());
 	}
 
 	@Test
-	public void setBooleanFlagStoresValue() {
+	void setBooleanFlagStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setBooleanFlag(Boolean.TRUE);
 		assertEquals(Boolean.TRUE, ks.getBooleanFlag());
 	}
 
 	@Test
-	public void setBooleanFlagToFalse() {
+	void setBooleanFlagToFalse() {
 		KitchenSink ks = new KitchenSink();
 		ks.setBooleanFlag(Boolean.FALSE);
 		assertEquals(Boolean.FALSE, ks.getBooleanFlag());
@@ -86,12 +86,12 @@ public class KitchenSinkDomainTest {
 	// ---- Colour field ----
 
 	@Test
-	public void colourNullByDefault() {
+	void colourNullByDefault() {
 		assertNull(new KitchenSink().getColour());
 	}
 
 	@Test
-	public void setColourStoresValue() {
+	void setColourStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setColour("#FF0000");
 		assertEquals("#FF0000", ks.getColour());
@@ -100,12 +100,12 @@ public class KitchenSinkDomainTest {
 	// ---- Date field ----
 
 	@Test
-	public void dateNullByDefault() {
+	void dateNullByDefault() {
 		assertNull(new KitchenSink().getDate());
 	}
 
 	@Test
-	public void setDateStoresValue() {
+	void setDateStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		DateOnly date = new DateOnly();
 		ks.setDate(date);
@@ -115,12 +115,12 @@ public class KitchenSinkDomainTest {
 	// ---- DateTime field ----
 
 	@Test
-	public void dateTimeNullByDefault() {
+	void dateTimeNullByDefault() {
 		assertNull(new KitchenSink().getDateTime());
 	}
 
 	@Test
-	public void setDateTimeStoresValue() {
+	void setDateTimeStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		DateTime dt = new DateTime();
 		ks.setDateTime(dt);
@@ -130,12 +130,12 @@ public class KitchenSinkDomainTest {
 	// ---- Decimal fields ----
 
 	@Test
-	public void decimal10NullByDefault() {
+	void decimal10NullByDefault() {
 		assertNull(new KitchenSink().getDecimal10());
 	}
 
 	@Test
-	public void setDecimal10StoresValue() {
+	void setDecimal10StoresValue() {
 		KitchenSink ks = new KitchenSink();
 		Decimal10 d = new Decimal10("1.5");
 		ks.setDecimal10(d);
@@ -143,12 +143,12 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void decimal2NullByDefault() {
+	void decimal2NullByDefault() {
 		assertNull(new KitchenSink().getDecimal2());
 	}
 
 	@Test
-	public void setDecimal2StoresValue() {
+	void setDecimal2StoresValue() {
 		KitchenSink ks = new KitchenSink();
 		Decimal2 d = new Decimal2("2.5");
 		ks.setDecimal2(d);
@@ -156,12 +156,12 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void decimal5NullByDefault() {
+	void decimal5NullByDefault() {
 		assertNull(new KitchenSink().getDecimal5());
 	}
 
 	@Test
-	public void setDecimal5StoresValue() {
+	void setDecimal5StoresValue() {
 		KitchenSink ks = new KitchenSink();
 		Decimal5 d = new Decimal5("3.5");
 		ks.setDecimal5(d);
@@ -171,24 +171,24 @@ public class KitchenSinkDomainTest {
 	// ---- Enum fields ----
 
 	@Test
-	public void comboNullByDefault() {
+	void comboNullByDefault() {
 		assertNull(new KitchenSink().getCombo());
 	}
 
 	@Test
-	public void setComboStoresValue() {
+	void setComboStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setCombo(KitchenSink.Combo.one);
 		assertEquals(KitchenSink.Combo.one, ks.getCombo());
 	}
 
 	@Test
-	public void radioNullByDefault() {
+	void radioNullByDefault() {
 		assertNull(new KitchenSink().getRadio());
 	}
 
 	@Test
-	public void setRadioStoresValue() {
+	void setRadioStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setRadio(KitchenSink.Radio.one);
 		assertEquals(KitchenSink.Radio.one, ks.getRadio());
@@ -197,36 +197,36 @@ public class KitchenSinkDomainTest {
 	// ---- Integer fields ----
 
 	@Test
-	public void normalIntegerNullByDefault() {
+	void normalIntegerNullByDefault() {
 		assertNull(new KitchenSink().getNormalInteger());
 	}
 
 	@Test
-	public void setNormalIntegerStoresValue() {
+	void setNormalIntegerStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setNormalInteger(Integer.valueOf(42));
 		assertEquals(Integer.valueOf(42), ks.getNormalInteger());
 	}
 
 	@Test
-	public void spinnerNullByDefault() {
+	void spinnerNullByDefault() {
 		assertNull(new KitchenSink().getSpinner());
 	}
 
 	@Test
-	public void setSpinnerStoresValue() {
+	void setSpinnerStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setSpinner(Integer.valueOf(10));
 		assertEquals(Integer.valueOf(10), ks.getSpinner());
 	}
 
 	@Test
-	public void sliderNullByDefault() {
+	void sliderNullByDefault() {
 		assertNull(new KitchenSink().getSlider());
 	}
 
 	@Test
-	public void setSliderStoresValue() {
+	void setSliderStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setSlider(Integer.valueOf(5));
 		assertEquals(Integer.valueOf(5), ks.getSlider());
@@ -235,12 +235,12 @@ public class KitchenSinkDomainTest {
 	// ---- Long field ----
 
 	@Test
-	public void longIntegerNullByDefault() {
+	void longIntegerNullByDefault() {
 		assertNull(new KitchenSink().getLongInteger());
 	}
 
 	@Test
-	public void setLongIntegerStoresValue() {
+	void setLongIntegerStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setLongInteger(Long.valueOf(100L));
 		assertEquals(Long.valueOf(100L), ks.getLongInteger());
@@ -249,48 +249,48 @@ public class KitchenSinkDomainTest {
 	// ---- String fields ----
 
 	@Test
-	public void htmlNullByDefault() {
+	void htmlNullByDefault() {
 		assertNull(new KitchenSink().getHtml());
 	}
 
 	@Test
-	public void setHtmlStoresValue() {
+	void setHtmlStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setHtml("<p>Hello</p>");
 		assertEquals("<p>Hello</p>", ks.getHtml());
 	}
 
 	@Test
-	public void markupNullByDefault() {
+	void markupNullByDefault() {
 		assertNull(new KitchenSink().getMarkup());
 	}
 
 	@Test
-	public void setMarkupStoresValue() {
+	void setMarkupStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setMarkup("# Heading");
 		assertEquals("# Heading", ks.getMarkup());
 	}
 
 	@Test
-	public void memoNullByDefault() {
+	void memoNullByDefault() {
 		assertNull(new KitchenSink().getMemo());
 	}
 
 	@Test
-	public void setMemoStoresValue() {
+	void setMemoStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setMemo("A memo");
 		assertEquals("A memo", ks.getMemo());
 	}
 
 	@Test
-	public void textNullByDefault() {
+	void textNullByDefault() {
 		assertNull(new KitchenSink().getText());
 	}
 
 	@Test
-	public void setTextStoresValue() {
+	void setTextStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setText("Hello World");
 		assertEquals("Hello World", ks.getText());
@@ -299,12 +299,12 @@ public class KitchenSinkDomainTest {
 	// ---- Time and Timestamp fields ----
 
 	@Test
-	public void timeNullByDefault() {
+	void timeNullByDefault() {
 		assertNull(new KitchenSink().getTime());
 	}
 
 	@Test
-	public void setTimeStoresValue() {
+	void setTimeStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		TimeOnly t = new TimeOnly();
 		ks.setTime(t);
@@ -312,12 +312,12 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void timestampNullByDefault() {
+	void timestampNullByDefault() {
 		assertNull(new KitchenSink().getTimestamp());
 	}
 
 	@Test
-	public void setTimestampStoresValue() {
+	void setTimestampStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		Timestamp ts = new Timestamp();
 		ks.setTimestamp(ts);
@@ -327,36 +327,36 @@ public class KitchenSinkDomainTest {
 	// ---- Content fields ----
 
 	@Test
-	public void contentLinkNullByDefault() {
+	void contentLinkNullByDefault() {
 		assertNull(new KitchenSink().getContentLink());
 	}
 
 	@Test
-	public void setContentLinkStoresValue() {
+	void setContentLinkStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setContentLink("abc-123");
 		assertEquals("abc-123", ks.getContentLink());
 	}
 
 	@Test
-	public void contentImageNullByDefault() {
+	void contentImageNullByDefault() {
 		assertNull(new KitchenSink().getContentImage());
 	}
 
 	@Test
-	public void setContentImageStoresValue() {
+	void setContentImageStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setContentImage("img-456");
 		assertEquals("img-456", ks.getContentImage());
 	}
 
 	@Test
-	public void contentSignatureNullByDefault() {
+	void contentSignatureNullByDefault() {
 		assertNull(new KitchenSink().getContentSignature());
 	}
 
 	@Test
-	public void setContentSignatureStoresValue() {
+	void setContentSignatureStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setContentSignature("sig-789");
 		assertEquals("sig-789", ks.getContentSignature());
@@ -365,12 +365,12 @@ public class KitchenSinkDomainTest {
 	// ---- ID field ----
 
 	@Test
-	public void idNullByDefault() {
+	void idNullByDefault() {
 		assertNull(new KitchenSink().getId());
 	}
 
 	@Test
-	public void setIdStoresValue() {
+	void setIdStoresValue() {
 		KitchenSink ks = new KitchenSink();
 		ks.setId("my-id");
 		assertEquals("my-id", ks.getId());
@@ -379,14 +379,14 @@ public class KitchenSinkDomainTest {
 	// ---- Child collections ----
 
 	@Test
-	public void containerGridEmptyByDefault() {
+	void containerGridEmptyByDefault() {
 		List<ContainerGrid> cg = new KitchenSink().getContainerGrid();
 		assertNotNull(cg);
 		assertTrue(cg.isEmpty());
 	}
 
 	@Test
-	public void addContainerGridElementAddsToList() {
+	void addContainerGridElementAddsToList() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg = new ContainerGrid();
 		boolean result = ks.addContainerGridElement(cg);
@@ -395,7 +395,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void addContainerGridElementSetsParent() {
+	void addContainerGridElementSetsParent() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg = new ContainerGrid();
 		ks.addContainerGridElement(cg);
@@ -403,7 +403,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeContainerGridElementRemovesFromList() {
+	void removeContainerGridElementRemovesFromList() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg = new ContainerGrid();
 		ks.addContainerGridElement(cg);
@@ -413,7 +413,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeContainerGridElementClearsParent() {
+	void removeContainerGridElementClearsParent() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg = new ContainerGrid();
 		ks.addContainerGridElement(cg);
@@ -422,7 +422,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void addContainerGridElementAtIndexInsertsAtCorrectPosition() {
+	void addContainerGridElementAtIndexInsertsAtCorrectPosition() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg1 = new ContainerGrid();
 		ContainerGrid cg2 = new ContainerGrid();
@@ -432,7 +432,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeContainerGridByIndexRemovesElement() {
+	void removeContainerGridByIndexRemovesElement() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg = new ContainerGrid();
 		ks.addContainerGridElement(cg);
@@ -442,7 +442,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void getContainerGridElementByIdFindsElement() {
+	void getContainerGridElementByIdFindsElement() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg = new ContainerGrid();
 		ks.addContainerGridElement(cg);
@@ -451,7 +451,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void setContainerGridElementByIdUpdatesElement() {
+	void setContainerGridElementByIdUpdatesElement() {
 		KitchenSink ks = new KitchenSink();
 		ContainerGrid cg1 = new ContainerGrid();
 		ContainerGrid cg2 = new ContainerGrid();
@@ -464,19 +464,19 @@ public class KitchenSinkDomainTest {
 	// ---- InlineGrid collection field (list accessible, but child bean needs CORE to instantiate) ----
 
 	@Test
-	public void inlineGridEmptyByDefault() {
+	void inlineGridEmptyByDefault() {
 		assertTrue(new KitchenSink().getInlineGrid().isEmpty());
 	}
 
 	// ---- OrderedGrid child ----
 
 	@Test
-	public void orderedGridEmptyByDefault() {
+	void orderedGridEmptyByDefault() {
 		assertTrue(new KitchenSink().getOrderedGrid().isEmpty());
 	}
 
 	@Test
-	public void addOrderedGridElementAddsToList() {
+	void addOrderedGridElementAddsToList() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og = new OrderedGrid();
 		assertTrue(ks.addOrderedGridElement(og));
@@ -484,7 +484,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void addOrderedGridElementSetsParent() {
+	void addOrderedGridElementSetsParent() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og = new OrderedGrid();
 		ks.addOrderedGridElement(og);
@@ -492,7 +492,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeOrderedGridElementClearsParent() {
+	void removeOrderedGridElementClearsParent() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og = new OrderedGrid();
 		ks.addOrderedGridElement(og);
@@ -501,7 +501,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void addOrderedGridAtIndex() {
+	void addOrderedGridAtIndex() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og1 = new OrderedGrid();
 		OrderedGrid og2 = new OrderedGrid();
@@ -511,7 +511,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeOrderedGridByIndex() {
+	void removeOrderedGridByIndex() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og = new OrderedGrid();
 		ks.addOrderedGridElement(og);
@@ -520,7 +520,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void getOrderedGridElementByIdFindsElement() {
+	void getOrderedGridElementByIdFindsElement() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og = new OrderedGrid();
 		ks.addOrderedGridElement(og);
@@ -528,7 +528,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void setOrderedGridElementById() {
+	void setOrderedGridElementById() {
 		KitchenSink ks = new KitchenSink();
 		OrderedGrid og1 = new OrderedGrid();
 		OrderedGrid og2 = new OrderedGrid();
@@ -541,12 +541,12 @@ public class KitchenSinkDomainTest {
 	// ---- DataRepeater child ----
 
 	@Test
-	public void dataRepeaterEmptyByDefault() {
+	void dataRepeaterEmptyByDefault() {
 		assertTrue(new KitchenSink().getDataRepeater().isEmpty());
 	}
 
 	@Test
-	public void addDataRepeaterElementAddsToList() {
+	void addDataRepeaterElementAddsToList() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr = new DataRepeater();
 		assertTrue(ks.addDataRepeaterElement(dr));
@@ -554,7 +554,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void addDataRepeaterElementSetsParent() {
+	void addDataRepeaterElementSetsParent() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr = new DataRepeater();
 		ks.addDataRepeaterElement(dr);
@@ -562,7 +562,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeDataRepeaterElementClearsParent() {
+	void removeDataRepeaterElementClearsParent() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr = new DataRepeater();
 		ks.addDataRepeaterElement(dr);
@@ -571,7 +571,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void addDataRepeaterAtIndex() {
+	void addDataRepeaterAtIndex() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr1 = new DataRepeater();
 		DataRepeater dr2 = new DataRepeater();
@@ -581,7 +581,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void removeDataRepeaterByIndex() {
+	void removeDataRepeaterByIndex() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr = new DataRepeater();
 		ks.addDataRepeaterElement(dr);
@@ -590,7 +590,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void getDataRepeaterElementByIdFindsElement() {
+	void getDataRepeaterElementByIdFindsElement() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr = new DataRepeater();
 		ks.addDataRepeaterElement(dr);
@@ -598,7 +598,7 @@ public class KitchenSinkDomainTest {
 	}
 
 	@Test
-	public void setDataRepeaterElementById() {
+	void setDataRepeaterElementById() {
 		KitchenSink ks = new KitchenSink();
 		DataRepeater dr1 = new DataRepeater();
 		DataRepeater dr2 = new DataRepeater();
@@ -611,82 +611,82 @@ public class KitchenSinkDomainTest {
 	// ---- LookupDescription ----
 
 	@Test
-	public void lookupDescriptionNullByDefault() {
+	void lookupDescriptionNullByDefault() {
 		assertNull(new KitchenSink().getLookupDescription());
 	}
 
 	// ---- Combo enum ----
 
 	@Test
-	public void comboEnumValues() {
+	void comboEnumValues() {
 		KitchenSink.Combo[] values = KitchenSink.Combo.values();
 		assertTrue(values.length > 0);
 	}
 
 	@Test
-	public void comboToLocalisedDescription() {
+	void comboToLocalisedDescription() {
 		assertNotNull(KitchenSink.Combo.one.toLocalisedDescription());
 	}
 
 	@Test
-	public void comboFromLocalisedDescriptionReturnsValue() {
+	void comboFromLocalisedDescriptionReturnsValue() {
 		KitchenSink.Combo c = KitchenSink.Combo.fromLocalisedDescription(KitchenSink.Combo.one.toLocalisedDescription());
 		assertEquals(KitchenSink.Combo.one, c);
 	}
 
 	@Test
-	public void comboToDomainValuesNotEmpty() {
+	void comboToDomainValuesNotEmpty() {
 		assertFalse(KitchenSink.Combo.toDomainValues().isEmpty());
 	}
 
         @Test
-        public void comboFromCodeReturnsValue() {
+        void comboFromCodeReturnsValue() {
                 assertEquals(KitchenSink.Combo.one, KitchenSink.Combo.fromCode("one"));
                 assertNull(KitchenSink.Combo.fromCode("notexist"));
         }
 
         @Test
-        public void comboFromLocalisedDescriptionReturnsNullForUnknown() {
+        void comboFromLocalisedDescriptionReturnsNullForUnknown() {
                 assertNull(KitchenSink.Combo.fromLocalisedDescription("notexist"));
         }
 
 
         @Test
-        public void radioToLocalisedDescription() {
+        void radioToLocalisedDescription() {
 		assertNotNull(KitchenSink.Radio.one.toLocalisedDescription());
 	}
 
 	@Test
-	public void radioFromLocalisedDescriptionReturnsValue() {
+	void radioFromLocalisedDescriptionReturnsValue() {
 		KitchenSink.Radio r = KitchenSink.Radio.fromLocalisedDescription(KitchenSink.Radio.one.toLocalisedDescription());
 		assertEquals(KitchenSink.Radio.one, r);
 	}
 
 	@Test
-	public void radioToDomainValuesNotEmpty() {
+	void radioToDomainValuesNotEmpty() {
 		assertFalse(KitchenSink.Radio.toDomainValues().isEmpty());
 	}
 
         @Test
-        public void radioFromCodeReturnsValue() {
+        void radioFromCodeReturnsValue() {
                 assertEquals(KitchenSink.Radio.one, KitchenSink.Radio.fromCode("one"));
                 assertNull(KitchenSink.Radio.fromCode("notexist"));
         }
 
         @Test
-        public void radioFromLocalisedDescriptionReturnsNullForUnknown() {
+        void radioFromLocalisedDescriptionReturnsNullForUnknown() {
                 assertNull(KitchenSink.Radio.fromLocalisedDescription("notexist"));
         }
 
         @Test
-        public void comboToCodeAndToDomainValue() {
+        void comboToCodeAndToDomainValue() {
                 assertEquals("one", KitchenSink.Combo.one.toCode());
                 assertNotNull(KitchenSink.Combo.one.toDomainValue());
                 assertEquals("one", KitchenSink.Combo.one.toDomainValue().getCode());
         }
 
         @Test
-        public void radioToCodeAndToDomainValue() {
+        void radioToCodeAndToDomainValue() {
                 assertEquals("one", KitchenSink.Radio.one.toCode());
                 assertNotNull(KitchenSink.Radio.one.toDomainValue());
                 assertEquals("one", KitchenSink.Radio.one.toDomainValue().getCode());

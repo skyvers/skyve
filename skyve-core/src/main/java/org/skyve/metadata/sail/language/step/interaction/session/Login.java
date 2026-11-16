@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -17,6 +19,16 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Side effects: the executor establishes a Skyve web session for the authenticated
  * user; all subsequent steps run in the context of that session until a
  * {@link Logout} step is reached or the procedure ends.
+ *
+ * <p>When the next step is a {@link org.skyve.metadata.sail.language.step.TestFailure},
+ * the login is expected to fail: the executor must not throw when it is rejected, and the
+ * {@code testFailure} step asserts that it was.
+ *
+ * <p>Login does not switch renderers; follow it with {@link SwitchMode} when the router may not
+ * route the browser to the renderer that the automation's {@code uxui} targets.
+ *
+ * <p>{@code {run}} and {@code {var:name}} in {@code user} or {@code password} are replaced by the run token
+ * and the captured variables, so a script can log in as a user that it created earlier in the same run.
  *
  * @see Logout
  * @see org.skyve.metadata.sail.execution.Executor#executeLogin
@@ -33,7 +45,7 @@ public class Login implements Step {
 	 * Returns the customer.
 	 * @return the result
 	 */
-	public String getCustomer() {
+	public @Nullable String getCustomer() {
 		return customer;
 	}
 
@@ -42,7 +54,7 @@ public class Login implements Step {
 	 * @param customer the customer
 	 */
 	@XmlAttribute
-	public void setCustomer(String customer) {
+	public void setCustomer(@Nullable String customer) {
 		this.customer = UtilImpl.processStringValue(customer);
 	}
 
@@ -50,7 +62,7 @@ public class Login implements Step {
 	 * Returns the user.
 	 * @return the result
 	 */
-	public String getUser() {
+	public @Nonnull String getUser() {
 		return user;
 	}
 
@@ -59,7 +71,7 @@ public class Login implements Step {
 	 * @param user the user
 	 */
 	@XmlAttribute(required = true)
-	public void setUser(String user) {
+	public void setUser(@Nonnull String user) {
 		this.user = UtilImpl.processStringValue(user);
 	}
 
@@ -67,7 +79,7 @@ public class Login implements Step {
 	 * Returns the password.
 	 * @return the result
 	 */
-	public String getPassword() {
+	public @Nonnull String getPassword() {
 		return password;
 	}
 
@@ -76,7 +88,7 @@ public class Login implements Step {
 	 * @param password the password
 	 */
 	@XmlAttribute(required = true)
-	public void setPassword(String password) {
+	public void setPassword(@Nonnull String password) {
 		this.password = UtilImpl.processStringValue(password);
 	}
 
@@ -85,7 +97,7 @@ public class Login implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeLogin(this);
 	}
 	
@@ -95,7 +107,7 @@ public class Login implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return null;
 	}
 }

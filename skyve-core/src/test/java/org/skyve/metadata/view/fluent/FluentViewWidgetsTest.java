@@ -159,10 +159,10 @@ class FluentViewWidgetsTest {
 	}
 
 	@Test
-	void progressBarInvisibleConditionNameSetsValue() {
+	void progressBarInvisibleConditionSetsValue() {
 		FluentProgressBar pb = new FluentProgressBar();
-		pb.invisibleConditionName("isHidden");
-		assertThat(pb.get().getInvisibleConditionName(), is("isHidden"));
+		pb.invisibleCondition("isHidden");
+		assertThat(pb.get().getInvisibleCondition(), is("isHidden"));
 	}
 
 	@Test
@@ -259,10 +259,10 @@ class FluentViewWidgetsTest {
 	}
 
 	@Test
-	void componentInvisibleConditionNameSetsValue() {
+	void componentInvisibleConditionSetsValue() {
 		FluentComponent c = new FluentComponent();
-		c.invisibleConditionName("notAdmin");
-		assertThat(c.get().getInvisibleConditionName(), is("notAdmin"));
+		c.invisibleCondition("notAdmin");
+		assertThat(c.get().getInvisibleCondition(), is("notAdmin"));
 	}
 
 	// ---- FluentZoomIn ----
@@ -295,17 +295,17 @@ class FluentViewWidgetsTest {
 	}
 
 	@Test
-	void zoomInDisabledConditionNameSetsValue() {
+	void zoomInDisabledConditionSetsValue() {
 		FluentZoomIn z = new FluentZoomIn();
-		z.disabledConditionName("notEditable");
-		assertThat(z.get().getDisabledConditionName(), is("notEditable"));
+		z.disabledCondition("notEditable");
+		assertThat(z.get().getDisabledCondition(), is("notEditable"));
 	}
 
 	@Test
-	void zoomInInvisibleConditionNameSetsValue() {
+	void zoomInInvisibleConditionSetsValue() {
 		FluentZoomIn z = new FluentZoomIn();
-		z.invisibleConditionName("isHidden");
-		assertThat(z.get().getInvisibleConditionName(), is("isHidden"));
+		z.invisibleCondition("isHidden");
+		assertThat(z.get().getInvisibleCondition(), is("isHidden"));
 	}
 
 	@Test
@@ -373,17 +373,17 @@ class FluentViewWidgetsTest {
 	}
 
 	@Test
-	void listRepeaterInvisibleConditionNameSetsValue() {
+	void listRepeaterInvisibleConditionSetsValue() {
 		FluentListRepeater lr = new FluentListRepeater();
-		lr.invisibleConditionName("notVisible");
-		assertThat(lr.get().getInvisibleConditionName(), is("notVisible"));
+		lr.invisibleCondition("notVisible");
+		assertThat(lr.get().getInvisibleCondition(), is("notVisible"));
 	}
 
 	@Test
-	void listRepeaterPostRefreshConditionNameSetsValue() {
+	void listRepeaterPostRefreshConditionSetsValue() {
 		FluentListRepeater lr = new FluentListRepeater();
-		lr.postRefreshConditionName("afterRefresh");
-		assertThat(lr.get().getPostRefreshConditionName(), is("afterRefresh"));
+		lr.postRefreshCondition("afterRefresh");
+		assertThat(lr.get().getPostRefreshCondition(), is("afterRefresh"));
 	}
 
 	@Test
@@ -438,31 +438,31 @@ class FluentViewWidgetsTest {
 	}
 
 	@Test
-	void lookupDescriptionDisableEditConditionNameSetsValue() {
+	void lookupDescriptionDisableEditConditionSetsValue() {
 		FluentLookupDescription ld = new FluentLookupDescription();
-		ld.disableEditConditionName("notEditable");
-		assertThat(ld.get().getDisableEditConditionName(), is("notEditable"));
+		ld.disableEditCondition("notEditable");
+		assertThat(ld.get().getDisableEditCondition(), is("notEditable"));
 	}
 
 	@Test
-	void lookupDescriptionDisableAddConditionNameSetsValue() {
+	void lookupDescriptionDisableAddConditionSetsValue() {
 		FluentLookupDescription ld = new FluentLookupDescription();
-		ld.disableAddConditionName("notAddable");
-		assertThat(ld.get().getDisableAddConditionName(), is("notAddable"));
+		ld.disableAddCondition("notAddable");
+		assertThat(ld.get().getDisableAddCondition(), is("notAddable"));
 	}
 
 	@Test
-	void lookupDescriptionDisableClearConditionNameSetsValue() {
+	void lookupDescriptionDisableClearConditionSetsValue() {
 		FluentLookupDescription ld = new FluentLookupDescription();
-		ld.disableClearConditionName("notClearable");
-		assertThat(ld.get().getDisableClearConditionName(), is("notClearable"));
+		ld.disableClearCondition("notClearable");
+		assertThat(ld.get().getDisableClearCondition(), is("notClearable"));
 	}
 
 	@Test
-	void lookupDescriptionDisablePickConditionNameSetsValue() {
+	void lookupDescriptionDisablePickConditionSetsValue() {
 		FluentLookupDescription ld = new FluentLookupDescription();
-		ld.disablePickConditionName("notPickable");
-		assertThat(ld.get().getDisablePickConditionName(), is("notPickable"));
+		ld.disablePickCondition("notPickable");
+		assertThat(ld.get().getDisablePickCondition(), is("notPickable"));
 	}
 
 	// ---- FluentLookupDescriptionColumn ----

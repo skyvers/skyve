@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.model.document.field;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -27,5 +28,16 @@ public class Content extends ConstrainableField {
 
 	public Content() {
 		setAttributeType(AttributeType.content);
+	}
+
+	/**
+	 * Determines whether an attachment should be included in the textual content index.
+	 * Content and image attributes default to textual indexing when no index type is configured.
+	 *
+	 * @param indexType the configured index type, or {@code null} when it is undefined
+	 * @return {@code true} when textual content extraction is enabled
+	 */
+	public static boolean isTextuallyIndexed(@Nullable IndexType indexType) {
+		return (indexType == null) || IndexType.textual.equals(indexType) || IndexType.both.equals(indexType);
 	}
 }

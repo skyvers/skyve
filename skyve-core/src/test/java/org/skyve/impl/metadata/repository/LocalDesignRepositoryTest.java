@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,19 +11,28 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Geometry;
 import org.mockito.ArgumentCaptor;
+import org.skyve.impl.metadata.OrderingImpl;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
@@ -39,14 +48,18 @@ import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.user.ActionPrivilege;
 import org.skyve.impl.metadata.user.RoleImpl;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DynamicImage;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
@@ -56,6 +69,9 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 @SuppressWarnings("static-method")
 class LocalDesignRepositoryTest {
@@ -195,7 +211,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainPassesForMinimalValidSetup() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 
@@ -212,7 +228,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForTopLayoutMismatch() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module module = mock(Module.class);
@@ -236,7 +252,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForInvalidFeatureRole() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module module = mock(Module.class);
@@ -257,7 +273,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForUnknownModuleEntry() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 
@@ -279,7 +295,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForInvalidCustomerRoleModuleRole() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module moduleFromCustomer = mock(Module.class);
@@ -309,7 +325,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedQueryModuleUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 
@@ -318,7 +334,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -330,7 +346,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedMetaDataQueryUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -340,7 +356,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -353,7 +369,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedSQLQueryUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -363,7 +379,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -376,7 +392,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedBizQLQueryUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -386,7 +402,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -399,7 +415,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedQueryDrivingDocumentUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -410,7 +426,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -425,7 +441,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenMenuDocumentMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 
@@ -437,7 +453,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -448,7 +464,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenTransientDocumentUsedInListItem() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -461,7 +477,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -473,7 +489,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenMenuQueryMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -487,12 +503,13 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 		when(module.getMetaDataQuery("MissingQuery")).thenReturn(null);
 
 		assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
@@ -500,7 +517,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenTreeDocumentNotHierarchical() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -513,12 +530,13 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 		when(document.getParentDocumentName()).thenReturn("ParentDoc");
 		when(document.getName()).thenReturn("Doc");
 
@@ -527,7 +545,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenListModelCannotBeResolved() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -541,12 +559,13 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 
 		doReturn(null).when(repository).getListModel(customer, document, "MissingModel", false);
 
@@ -554,33 +573,37 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
-	@SuppressWarnings("null")
 	void validateModuleForGenerateDomainThrowsWhenMapModelCannotBeResolved() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
+		Document document = mock(Document.class);
 
 		MapItem menuItem = new MapItem();
 		menuItem.setName("mapModelItem");
+		menuItem.setDocumentName("Doc");
 		menuItem.setModelName("MissingMapModel");
 		MenuImpl menu = new MenuImpl();
 		menu.getItems().add(menuItem);
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 
-		doThrow(new RuntimeException("missing map model")).when(repository).getMapModel(customer, null, "MissingMapModel", false);
+		doThrow(new RuntimeException("missing map model")).when(repository).getMapModel(customer, document, "MissingMapModel", false);
 
 		assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
 	}
 
 	@Test
 	void validateModuleForGenerateDomainAllowsTransientDocumentForListModelItem() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -596,7 +619,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -611,7 +634,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenActionPrivilegeReferencesMissingAction() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -626,7 +649,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -641,7 +664,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenModelAggregateAccessModelMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -652,7 +675,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -665,7 +688,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenReportAccessReportMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Module reportModule = mock(Module.class);
@@ -677,7 +700,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -691,7 +714,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenActionPrivilegeResolvesToMetaDataAction() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -709,7 +732,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -723,7 +746,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenModelAggregateAccessResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -735,7 +758,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -748,7 +771,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenReportAccessResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Module reportModule = mock(Module.class);
@@ -760,7 +783,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -774,7 +797,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenDynamicImageAccessMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -785,7 +808,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -798,7 +821,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenDynamicImageAccessResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -810,7 +833,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -823,7 +846,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenActionPrivilegeResolvesToClassAction() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -839,7 +862,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of(role));
@@ -852,7 +875,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainAllowsTransientDocumentForEditItem() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -865,7 +888,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
@@ -876,12 +899,45 @@ class LocalDesignRepositoryTest {
 	}
 
 	@Test
-	@SuppressWarnings("null")
 	void validateModuleForGenerateDomainPassesWhenMapModelResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
+		Document document = mock(Document.class);
 		MapModel<org.skyve.domain.Bean> mapModel = mock(MapModel.class);
+
+		MapItem menuItem = new MapItem();
+		menuItem.setName("mapModelItem");
+		menuItem.setDocumentName("Doc");
+		menuItem.setModelName("ExistingMapModel");
+		menuItem.setGeometryBinding("location");
+		MenuImpl menu = new MenuImpl();
+		menu.getItems().add(menuItem);
+		Attribute location = mock(Attribute.class);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(module.getName()).thenReturn("testModule");
+		stubPersistentHomeDocument(customer, module);
+		when(module.getMetadataQueries()).thenReturn(List.of());
+		when(module.getMenu()).thenReturn(menu);
+		when(module.getRoles()).thenReturn(List.of());
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
+		when(document.getAttribute("location")).thenReturn(location);
+		when(location.getAttributeType()).thenReturn(AttributeType.geometry);
+		doReturn(Geometry.class).when(location).getImplementingType();
+
+		doReturn(mapModel).when(repository).getMapModel(customer, document, "ExistingMapModel", false);
+
+		assertDoesNotThrow(() -> repository.validateModuleForGenerateDomain(customer, module));
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenModelMenuItemHasNoDocument() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
 
 		MapItem menuItem = new MapItem();
 		menuItem.setName("mapModelItem");
@@ -891,19 +947,19 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 
-		doReturn(mapModel).when(repository).getMapModel(customer, null, "ExistingMapModel", false);
-
-		assertDoesNotThrow(() -> repository.validateModuleForGenerateDomain(customer, module));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().contains("has no document"));
+		verify(repository, never()).getMapModel(any(), any(), any(), org.mockito.ArgumentMatchers.anyBoolean());
 	}
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenImportedSQLQueryExists() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -914,7 +970,7 @@ class LocalDesignRepositoryTest {
 
 		when(customer.getName()).thenReturn("testCustomer");
 		when(module.getName()).thenReturn("testModule");
-		when(module.getHomeDocumentName()).thenReturn(null);
+		stubPersistentHomeDocument(customer, module);
 		when(module.getMetadataQueries()).thenReturn(List.of(query));
 		when(module.getMenu()).thenReturn(new MenuImpl());
 		when(module.getRoles()).thenReturn(List.of());
@@ -923,6 +979,313 @@ class LocalDesignRepositoryTest {
 		doReturn(importedModule).when(repository).getModule(customer, "external");
 
 		assertDoesNotThrow(() -> repository.validateModuleForGenerateDomain(customer, module));
+	}
+
+	@Test
+	void validateCustomerForGenerateDomainThrowsWhenFeatureRoleModuleCannotBeResolved() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module homeModule = mock(Module.class);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(customer.getHomeModule()).thenReturn(homeModule);
+		when(customer.getModuleEntries()).thenReturn(Map.of());
+		when(customer.getRoles()).thenReturn(List.of());
+		when(customer.getTextSearchRoles()).thenReturn(Set.of("admin.someRole"));
+		when(customer.getFlagRoles()).thenReturn(Set.of());
+		when(customer.getSwitchModeRoles()).thenReturn(Set.of());
+
+		doReturn(null).when(repository).getModule(customer, "admin");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateCustomerForGenerateDomain(customer));
+		assertEquals("Repository returned null for module admin for customer testCustomer", e.getMessage());
+	}
+
+	@Test
+	void validateCustomerForGenerateDomainThrowsForUnnamedCustomerRoleModuleRole() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module homeModule = mock(Module.class);
+		Module moduleFromCustomer = mock(Module.class);
+
+		CustomerModuleRoleMetaData moduleRoleMetaData = new CustomerModuleRoleMetaData();
+		moduleRoleMetaData.setModuleName("admin");
+
+		CustomerRoleMetaData customerRoleMetaData = new CustomerRoleMetaData();
+		customerRoleMetaData.setName("testRole");
+		customerRoleMetaData.getRoles().add(moduleRoleMetaData);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(customer.getHomeModule()).thenReturn(homeModule);
+		when(customer.getModuleEntries()).thenReturn(Map.of());
+		when(customer.getRoles()).thenReturn(List.of(customerRoleMetaData));
+
+		doReturn(moduleFromCustomer).when(repository).getModule(customer, "admin");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateCustomerForGenerateDomain(customer));
+		assertTrue(e.getMessage().contains("does not reference a valid module role"));
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenInverseTargetModuleCannotBeResolved() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Document document = inverseDocument(module);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(null).when(repository).getModule(customer, "other");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("Repository returned null for module other for customer testCustomer", e.getMessage());
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenInverseTargetDocumentCannotBeFound() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Module otherModule = mock(Module.class);
+		Document document = inverseDocument(module);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(otherModule).when(repository).getModule(customer, "other");
+		doReturn(null).when(repository).getDocument(customer, otherModule, "Target");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("The target [documentName] of Target in Inverse inverse in document admin.Owner cannot be found.", e.getMessage());
+	}
+
+	@Test
+	void resetMenusThrowsWhenAMenuItemHasNoRoleNames() {
+		LocalDesignRepository repository = new LocalDesignRepository();
+		MenuImpl moduleMenu = new MenuImpl();
+		moduleMenu.getItems().add(new RolelessMenuItem());
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
+		when(module.getMenu()).thenReturn(moduleMenu);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getModules()).thenReturn(List.of(module));
+		UserImpl user = mock(UserImpl.class);
+		when(user.getCustomer()).thenReturn(customer);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.resetMenus(user));
+		assertEquals("Menu item roleless in module admin has no role names", e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenContentAccessBindingIsInvalid() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		Module module = moduleWithRoleAccess(customer, UserAccess.content("testModule", "Doc", "missing"));
+		Document document = mock(Document.class);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().endsWith("] in module testModule with binding missing is not a valid binding."), e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenADocumentAccessHasNoDocumentName() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		@SuppressWarnings("null") // passes null on purpose
+		UserAccess access = UserAccess.dynamicImage("testModule", null, "image");
+		Module module = moduleWithRoleAccess(customer, access);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().endsWith("] has no document name"), e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenAContentAccessHasNoBinding() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		@SuppressWarnings("null") // passes null on purpose
+		UserAccess access = UserAccess.content("testModule", "Doc", null);
+		Module module = moduleWithRoleAccess(customer, access);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertTrue(e.getMessage().endsWith("] has no component"), e.getMessage());
+	}
+
+	@Test
+	void validateModuleForGenerateDomainThrowsWhenMapItemHasNoGeometryBinding() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		MapItem menuItem = new MapItem();
+		menuItem.setName("mapItem");
+		menuItem.setDocumentName("Doc");
+		MenuImpl menu = new MenuImpl();
+		menu.getItems().add(menuItem);
+
+		when(customer.getName()).thenReturn("testCustomer");
+		when(module.getName()).thenReturn("testModule");
+		stubPersistentHomeDocument(customer, module);
+		when(module.getMetadataQueries()).thenReturn(List.of());
+		when(module.getMenu()).thenReturn(menu);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
+		assertEquals("Map Menu [mapItem] in module testModule has no geometryBinding.", e.getMessage());
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenANamedConditionIsNotDefined() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Owner");
+		when(document.getConditionNames()).thenReturn(Set.of("active"));
+		doReturn(mock(Module.class)).when(repository).getModule(customer, "admin");
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("Condition active in document admin.Owner is named but not defined", e.getMessage());
+	}
+
+	@Test
+	void validateDocumentForGenerateDomainThrowsWhenACollectionOrderingBindingIsInvalid() {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Module otherModule = mock(Module.class);
+		Document targetDocument = mock(Document.class);
+		when(targetDocument.getOwningModuleName()).thenReturn("other");
+		when(targetDocument.getName()).thenReturn("Target");
+		when(module.getDocumentRefs()).thenReturn(Map.of("Target", new DocumentRef()));
+		when(module.getDocument(customer, "Target")).thenReturn(targetDocument);
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(otherModule).when(repository).getModule(customer, "other");
+
+		CollectionImpl collection = new CollectionImpl();
+		collection.setName("items");
+		collection.setDocumentName("Target");
+		collection.getOrdering().add(new OrderingImpl("missing", SortDirection.ascending));
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Owner");
+		when(document.getConditionNames()).thenReturn(Set.of());
+		doReturn(List.of(collection)).when(document).getAttributes();
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateDocumentForGenerateDomain(customer, document));
+		assertEquals("The order by binding of missing in collection items in document admin.Owner is invalid", e.getMessage());
+	}
+
+	@Test
+	void validateViewForGenerateDomainThrowsWhenAReportAccessReportDoesNotExist() throws Exception {
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
+		CustomerImpl customer = mock(CustomerImpl.class);
+		ModuleImpl module = mock(ModuleImpl.class);
+		when(module.getName()).thenReturn("admin");
+		DocumentImpl document = new DocumentImpl();
+		document.setOwningModuleName("admin");
+		document.setName("Doc");
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		doReturn(module).when(repository).getModule(customer, "admin");
+		doReturn(null).when(repository).getReportFileName(customer, document, "missingReport");
+
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		view.setTitle("Edit");
+		Set<UserAccess> accesses = new TreeSet<>();
+		accesses.add(UserAccess.report("admin", "Doc", "missingReport"));
+		Field accessesField = ViewImpl.class.getDeclaredField("accesses");
+		accessesField.setAccessible(true);
+		accessesField.set(view, accesses);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateViewForGenerateDomain(customer, document, view, "desktop"));
+		assertTrue(e.getMessage().endsWith(" in view edit for module/document/report admin/Doc/missingReport does not exist."), e.getMessage());
+	}
+
+	/**
+	 * Stubs a module whose single role has the given access, with no menu items or queries.
+	 */
+	private static Module moduleWithRoleAccess(Customer customer, UserAccess access) {
+		Module module = mock(Module.class);
+		RoleImpl role = new RoleImpl();
+		role.setName("admin");
+		role.getAccesses().put(access, Set.of());
+		when(customer.getName()).thenReturn("testCustomer");
+		when(module.getName()).thenReturn("testModule");
+		stubPersistentHomeDocument(customer, module);
+		when(module.getMetadataQueries()).thenReturn(List.of());
+		when(module.getMenu()).thenReturn(new MenuImpl());
+		when(module.getRoles()).thenReturn(List.of(role));
+		return module;
+	}
+
+	/**
+	 * A menu item (not a group) that breaks the invariant that menu items have role names.
+	 */
+	private static final class RolelessMenuItem implements MenuItem {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public @Nonnull String getName() {
+			return "roleless";
+		}
+
+		@Override
+		public @Nullable Set<String> getRoleNames() {
+			return null;
+		}
+
+		@Override
+		public @Nonnull Set<String> getUxUis() {
+			return Set.of();
+		}
+
+		@Override
+		public boolean isApplicable(@Nonnull String uxui) {
+			return true;
+		}
+
+		@Override
+		public @Nonnull Map<String, String> getProperties() {
+			return Map.of();
+		}
+	}
+
+	/**
+	 * Stubs a persistent home document so the module home document check passes.
+	 */
+	private static void stubPersistentHomeDocument(Customer customer, Module module) {
+		Document homeDocument = mock(Document.class);
+		Persistent persistent = mock(Persistent.class);
+		when(homeDocument.getPersistent()).thenReturn(persistent);
+		when(module.getHomeDocumentName()).thenReturn("PersistentHomeDocument");
+		when(module.getDocument(customer, "PersistentHomeDocument")).thenReturn(homeDocument);
+	}
+
+	/**
+	 * Builds an admin.Owner document mock with a single inverse to other.Target (imported into the admin module).
+	 */
+	private static Document inverseDocument(Module module) {
+		InverseOne inverse = new InverseOne();
+		inverse.setName("inverse");
+		inverse.setDocumentName("Target");
+		inverse.setReferenceName("owner");
+
+		DocumentRef targetRef = mock(DocumentRef.class);
+		when(targetRef.getReferencedModuleName()).thenReturn("other");
+		when(module.getDocumentRefs()).thenReturn(Map.of("Target", targetRef));
+
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getName()).thenReturn("Owner");
+		when(document.getConditionNames()).thenReturn(Set.of());
+		doReturn(List.of(inverse)).when(document).getAttributes();
+		when(document.getUniqueConstraints()).thenReturn(List.of());
+		return document;
 	}
 
 	private static ListItem menuItem(String name, String roleName) {

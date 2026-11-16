@@ -41,7 +41,7 @@ public class ConversationEndedException extends DomainException implements Messa
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

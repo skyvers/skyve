@@ -31,6 +31,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
@@ -77,7 +78,7 @@ public abstract class Container implements SerializableMetaData {
 	 *
 	 * @return the live contained-element list; never {@code null}
 	 */
-	public List<SerializableMetaData> getContained() {
+	public @Nonnull List<SerializableMetaData> getContained() {
 		return contained;
 	}
 }

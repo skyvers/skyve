@@ -5,6 +5,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -39,7 +40,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 *
 	 * @return the query documentation text, or {@code null} when unspecified
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -53,7 +54,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -62,7 +63,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 *
 	 * @return the raw description value, or {@code null} when unspecified
 	 */
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
@@ -71,7 +72,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 *
 	 * @return the localised description, or {@code null} when no description is defined
 	 */
-	public String getLocalisedDescription() {
+	public @Nullable String getLocalisedDescription() {
 		return Util.i18n(description);
 	}
 	
@@ -85,7 +86,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
@@ -94,7 +95,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 *
 	 * @return the timeout in seconds, or {@code null} when no timeout is configured
 	 */
-	public Integer getTimeoutInSeconds() {
+	public @Nullable Integer getTimeoutInSeconds() {
 		return timeoutInSeconds;
 	}
 
@@ -104,7 +105,7 @@ public abstract class QueryDefinitionMetaData extends QueryMetaData {
 	 * @param timeoutInSeconds the timeout in seconds; {@code null} disables timeout enforcement
 	 */
 	@XmlAttribute
-	public void setTimeoutInSeconds(Integer timeoutInSeconds) {
+	public void setTimeoutInSeconds(@Nullable Integer timeoutInSeconds) {
 		this.timeoutInSeconds = timeoutInSeconds;
 	}
 }

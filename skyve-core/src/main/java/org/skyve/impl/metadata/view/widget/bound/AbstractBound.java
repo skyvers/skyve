@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
@@ -27,7 +28,7 @@ public abstract class AbstractBound implements Bound {
 	private String binding;
 
 	@Override
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
@@ -36,7 +37,7 @@ public abstract class AbstractBound implements Bound {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -45,7 +46,7 @@ public abstract class AbstractBound implements Bound {
 	 */
 	@Override
 	@XmlTransient
-	public String getSource() {
+	public @Nullable String getSource() {
 		return binding;
 	}
 }

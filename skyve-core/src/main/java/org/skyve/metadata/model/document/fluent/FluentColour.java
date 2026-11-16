@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Colour;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentColour metadata.
  */
@@ -18,7 +20,7 @@ public class FluentColour extends FluentConvertibleField<FluentColour> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentColour(Colour colour) {
+	public FluentColour(@Nonnull Colour colour) {
 		this.colour = colour;
 	}
 
@@ -26,7 +28,7 @@ public class FluentColour extends FluentConvertibleField<FluentColour> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentColour from(@SuppressWarnings("hiding") Colour colour) {
+	public @Nonnull FluentColour from(@SuppressWarnings("hiding") @Nonnull Colour colour) {
 		super.from(colour);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentColour extends FluentConvertibleField<FluentColour> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Colour get() {
+	public @Nonnull Colour get() {
 		return colour;
 	}
 }

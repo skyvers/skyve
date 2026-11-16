@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ConditionsFixtureNode"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Hierarchical node listed by the tree grids of the Kitchen Sink conditions fixture.
+		]]>
+	</documentation>
+	<persistent name="KS_ConditionsFixtureNode" />
+	<singularAlias>Conditions Fixture Node</singularAlias>
+	<pluralAlias>Conditions Fixture Nodes</pluralAlias>
+	<parentDocument>ConditionsFixtureNode</parentDocument>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text" required="true">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

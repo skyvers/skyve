@@ -8,6 +8,8 @@ import org.skyve.web.UserAgentType;
 
 import java.util.Map;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * React Native-oriented view renderer specialisation.
  */
@@ -16,12 +18,12 @@ public class ReactNativeViewRenderer extends ReactViewRenderer {
 	static final String REACT_NATIVE_IMPORT = "react-native";
 	static final String STARTING_INDENT = "\t\t\t";
 
-	protected ReactNativeViewRenderer(User user,
-									  Module module,
-									  Document document,
-									  View view,
-									  String uxui,
-									  Map<String, String> imports,
+	protected ReactNativeViewRenderer(@Nonnull User user,
+									  @Nonnull Module module,
+									  @Nonnull Document document,
+									  @Nonnull View view,
+									  @Nonnull String uxui,
+									  @Nonnull Map<String, String> imports,
 									  boolean extraIndent) {
 		super(user, module, document, view, uxui, imports);
 		final String startingIndent = (extraIndent ? STARTING_INDENT + "\t" : STARTING_INDENT);

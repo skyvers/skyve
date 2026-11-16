@@ -3,6 +3,7 @@ package org.skyve.impl.snapshot;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -31,7 +32,7 @@ public abstract class SnapshotAdapter {
 	 * @param snapshot	The potential SmartClient snapshot payload
 	 * @return	true if SmartClient, otherwise false.
 	 */
-	private static boolean isSmartClientSnapshot(String snapshot) {
+	private static boolean isSmartClientSnapshot(@Nonnull String snapshot) {
 		return snapshot.contains("\"advancedCriteriaStyle\"");
 	}
 	
@@ -41,7 +42,7 @@ public abstract class SnapshotAdapter {
 	 * @param snapshot	The snapshot payload to convert.
 	 * @return	The corresponding Vue snapshot payload.
 	 */
-	public static @Nullable String toVue(String snapshot) {
+	public static @Nullable String toVue(@Nonnull String snapshot) {
 		String result = null;
 		
 		if (isSmartClientSnapshot(snapshot)) {
@@ -66,7 +67,7 @@ public abstract class SnapshotAdapter {
 	 * @param snapshot	The snapshot payload to convert.
 	 * @return	The corresponding SmartClient snapshot payload.
 	 */
-	public static @Nullable String toSmartClient(String snapshot) {
+	public static @Nullable String toSmartClient(@Nonnull String snapshot) {
 		String result = null;
 		
 		if (isSmartClientSnapshot(snapshot)) {
@@ -91,12 +92,12 @@ public abstract class SnapshotAdapter {
 	 * @param payload	The payload to convert.
 	 * @return	A Snapshot representing the payload or null if conversion cannot occur.
 	 */
-	public abstract @Nullable Snapshot fromClientPayload(String payload);
+	public abstract @Nullable Snapshot fromClientPayload(@Nonnull String payload);
 
 	/**
 	 * Take a Snapshot object and convert into a String snapshot definition payload for a client
 	 * @param snapshot	The Snapshot to convert
 	 * @return	The payload representing the Snapshot of null if conversion cannot occur.
 	 */
-	public abstract @Nullable String toClientPayload(Snapshot snapshot);
+	public abstract @Nullable String toClientPayload(@Nonnull Snapshot snapshot);
 }

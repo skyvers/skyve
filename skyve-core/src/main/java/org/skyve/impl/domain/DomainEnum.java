@@ -1,5 +1,7 @@
 package org.skyve.impl.domain;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Marker interface for generated enumeration types used as domain-value providers
  * in Skyve documents.
@@ -10,6 +12,6 @@ package org.skyve.impl.domain;
  * treat all domain enums uniformly.
  */
 public interface DomainEnum {
-	public abstract String getCode();
-	public abstract String getDescription();
+	public abstract @Nonnull String getCode();
+	public abstract @Nonnull String getDescription();
 }

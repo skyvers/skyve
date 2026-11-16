@@ -24,6 +24,9 @@ import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.Action;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds and queries an {@link Actions} collection using fluent wrappers.
  *
@@ -46,7 +49,7 @@ public class FluentActions {
 	 * @param actions
 	 *            the mutable action collection to wrap
 	 */
-	public FluentActions(Actions actions) {
+	public FluentActions(@Nonnull Actions actions) {
 		this.actions = actions;
 	}
 	
@@ -62,7 +65,7 @@ public class FluentActions {
 	 *            actions to convert and append
 	 * @return this builder
 	 */
-	public FluentActions from(String widgetId, @SuppressWarnings("hiding") Collection<Action> actions) {
+	public @Nonnull FluentActions from(@Nullable String widgetId, @SuppressWarnings("hiding") @Nonnull Collection<Action> actions) {
 		widgetId(widgetId);
 		actions.forEach(a -> addAction(FluentAction.from(a)));
 		return this;
@@ -75,38 +78,38 @@ public class FluentActions {
 	 *            the owning widget identifier
 	 * @return this builder
 	 */
-	public FluentActions widgetId(String widgetId) {
+	public @Nonnull FluentActions widgetId(@Nullable String widgetId) {
 		actions.setWidgetId(widgetId);
 		return this;
 	}
 	
-	private FluentActions addAction(FluentAction<?> action) {
+	private @Nonnull FluentActions addAction(@Nonnull FluentAction<?> action) {
 		actions.getActions().add(action.get());
 		return this;
 	}
 	
-	private FluentActions addAction(int index, FluentAction<?> action) {
+	private @Nonnull FluentActions addAction(int index, @Nonnull FluentAction<?> action) {
 		actions.getActions().add(index, action.get());
 		return this;
 	}
 
-	private ActionMetaData findNamedAction(String name) {
+	private @Nullable ActionMetaData findNamedAction(@Nonnull String name) {
 		return actions.getActions().stream().filter(a -> name.equals(a.getName())).findAny().orElse(null);
 	}
 
-	private ActionMetaData findImplicitAction(ImplicitActionName name) {
+	private @Nullable ActionMetaData findImplicitAction(@Nonnull ImplicitActionName name) {
 		return actions.getActions().stream().filter(a -> name.equals(a.getImplicitName())).findAny().orElse(null);
 	}
 
-	private ActionMetaData findClassAction(String className) {
+	private @Nullable ActionMetaData findClassAction(@Nonnull String className) {
 		return actions.getActions().stream().filter(a -> ((a instanceof ClassAction ca) && className.equals(ca.getClassName()))).findAny().orElse(null);
 	}
 
-	public FluentActions addAddAction(FluentAddAction action) {
+	public @Nonnull FluentActions addAddAction(@Nonnull FluentAddAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addAddAction(int index, FluentAddAction action) {
+	public @Nonnull FluentActions addAddAction(int index, @Nonnull FluentAddAction action) {
 		return addAction(index, action);
 	}
 
@@ -117,7 +120,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentAddAction findNamedAddAction(String name) {
+	public @Nullable FluentAddAction findNamedAddAction(@Nonnull String name) {
 		AddAction result = (AddAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentAddAction(result);
@@ -130,7 +133,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit add action exists
 	 */
-	public FluentAddAction findAddAction() {
+	public @Nullable FluentAddAction findAddAction() {
 		AddAction result = (AddAction) findImplicitAction(ImplicitActionName.Add);
 		if (result != null) {
 			return new FluentAddAction(result);
@@ -138,11 +141,11 @@ public class FluentActions {
 		return null;
 	}
 	
-	public FluentActions addCancelAction(FluentCancelAction action) {
+	public @Nonnull FluentActions addCancelAction(@Nonnull FluentCancelAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addCancelAction(int index, FluentCancelAction action) {
+	public @Nonnull FluentActions addCancelAction(int index, @Nonnull FluentCancelAction action) {
 		return addAction(index, action);
 	}
 
@@ -153,7 +156,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentCancelAction findNamedCancelAction(String name) {
+	public @Nullable FluentCancelAction findNamedCancelAction(@Nonnull String name) {
 		CancelAction result = (CancelAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentCancelAction(result);
@@ -166,7 +169,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit cancel action exists
 	 */
-	public FluentCancelAction findCancelAction() {
+	public @Nullable FluentCancelAction findCancelAction() {
 		CancelAction result = (CancelAction) findImplicitAction(ImplicitActionName.Cancel);
 		if (result != null) {
 			return new FluentCancelAction(result);
@@ -174,11 +177,11 @@ public class FluentActions {
 		return null;
 	}
 	
-	public FluentActions addDefaultsAction(FluentDefaultsAction action) {
+	public @Nonnull FluentActions addDefaultsAction(@Nonnull FluentDefaultsAction action) {
 		return addAction(action);
 	}
 	
-	public FluentActions addDefaultsAction(int index, FluentDefaultsAction action) {
+	public @Nonnull FluentActions addDefaultsAction(int index, @Nonnull FluentDefaultsAction action) {
 		return addAction(index, action);
 	}
 
@@ -189,7 +192,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentDefaultsAction findNamedDefaultsAction(String name) {
+	public @Nullable FluentDefaultsAction findNamedDefaultsAction(@Nonnull String name) {
 		DefaultsAction result = (DefaultsAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentDefaultsAction(result);
@@ -202,7 +205,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit defaults action exists
 	 */
-	public FluentDefaultsAction findDefaultsAction() {
+	public @Nullable FluentDefaultsAction findDefaultsAction() {
 		DefaultsAction result = (DefaultsAction) findImplicitAction(ImplicitActionName.DEFAULTS);
 		if (result != null) {
 			return new FluentDefaultsAction(result);
@@ -210,11 +213,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addNewAction(FluentNewAction action) {
+	public @Nonnull FluentActions addNewAction(@Nonnull FluentNewAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addNewAction(int index, FluentNewAction action) {
+	public @Nonnull FluentActions addNewAction(int index, @Nonnull FluentNewAction action) {
 		return addAction(index, action);
 	}
 
@@ -225,7 +228,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentNewAction findNamedNewAction(String name) {
+	public @Nullable FluentNewAction findNamedNewAction(@Nonnull String name) {
 		NewAction result = (NewAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentNewAction(result);
@@ -238,7 +241,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit new action exists
 	 */
-	public FluentNewAction findNewAction() {
+	public @Nullable FluentNewAction findNewAction() {
 		NewAction result = (NewAction) findImplicitAction(ImplicitActionName.New);
 		if (result != null) {
 			return new FluentNewAction(result);
@@ -246,11 +249,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addRemoveAction(FluentRemoveAction action) {
+	public @Nonnull FluentActions addRemoveAction(@Nonnull FluentRemoveAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addRemoveAction(int index, FluentRemoveAction action) {
+	public @Nonnull FluentActions addRemoveAction(int index, @Nonnull FluentRemoveAction action) {
 		return addAction(index, action);
 	}
 
@@ -261,7 +264,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentRemoveAction findNamedRemoveAction(String name) {
+	public @Nullable FluentRemoveAction findNamedRemoveAction(@Nonnull String name) {
 		RemoveAction result = (RemoveAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentRemoveAction(result);
@@ -274,7 +277,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit remove action exists
 	 */
-	public FluentRemoveAction findRemoveAction() {
+	public @Nullable FluentRemoveAction findRemoveAction() {
 		RemoveAction result = (RemoveAction) findImplicitAction(ImplicitActionName.Remove);
 		if (result != null) {
 			return new FluentRemoveAction(result);
@@ -282,11 +285,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addDeleteAction(FluentDeleteAction action) {
+	public @Nonnull FluentActions addDeleteAction(@Nonnull FluentDeleteAction action) {
 		return addAction(action);
 	}
 	
-	public FluentActions addDeleteAction(int index, FluentDeleteAction action) {
+	public @Nonnull FluentActions addDeleteAction(int index, @Nonnull FluentDeleteAction action) {
 		return addAction(index, action);
 	}
 
@@ -297,7 +300,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentDeleteAction findNamedDeleteAction(String name) {
+	public @Nullable FluentDeleteAction findNamedDeleteAction(@Nonnull String name) {
 		DeleteAction result = (DeleteAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentDeleteAction(result);
@@ -310,7 +313,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit delete action exists
 	 */
-	public FluentDeleteAction findDeleteAction() {
+	public @Nullable FluentDeleteAction findDeleteAction() {
 		DeleteAction result = (DeleteAction) findImplicitAction(ImplicitActionName.Delete);
 		if (result != null) {
 			return new FluentDeleteAction(result);
@@ -318,11 +321,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addOKAction(FluentOKAction action) {
+	public @Nonnull FluentActions addOKAction(@Nonnull FluentOKAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addOKAction(int index, FluentOKAction action) {
+	public @Nonnull FluentActions addOKAction(int index, @Nonnull FluentOKAction action) {
 		return addAction(index, action);
 	}
 
@@ -333,7 +336,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentOKAction findNamedOKAction(String name) {
+	public @Nullable FluentOKAction findNamedOKAction(@Nonnull String name) {
 		OKAction result = (OKAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentOKAction(result);
@@ -346,7 +349,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit OK action exists
 	 */
-	public FluentOKAction findOKAction() {
+	public @Nullable FluentOKAction findOKAction() {
 		OKAction result = (OKAction) findImplicitAction(ImplicitActionName.OK);
 		if (result != null) {
 			return new FluentOKAction(result);
@@ -354,11 +357,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addPrintAction(FluentPrintAction action) {
+	public @Nonnull FluentActions addPrintAction(@Nonnull FluentPrintAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addPrintAction(int index, FluentPrintAction action) {
+	public @Nonnull FluentActions addPrintAction(int index, @Nonnull FluentPrintAction action) {
 		return addAction(index, action);
 	}
 
@@ -369,7 +372,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentPrintAction findNamedPrintAction(String name) {
+	public @Nullable FluentPrintAction findNamedPrintAction(@Nonnull String name) {
 		PrintAction result = (PrintAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentPrintAction(result);
@@ -382,7 +385,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit print action exists
 	 */
-	public FluentPrintAction findPrintAction() {
+	public @Nullable FluentPrintAction findPrintAction() {
 		PrintAction result = (PrintAction) findImplicitAction(ImplicitActionName.Print);
 		if (result != null) {
 			return new FluentPrintAction(result);
@@ -390,11 +393,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addSaveAction(FluentSaveAction action) {
+	public @Nonnull FluentActions addSaveAction(@Nonnull FluentSaveAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addSaveAction(int index, FluentSaveAction action) {
+	public @Nonnull FluentActions addSaveAction(int index, @Nonnull FluentSaveAction action) {
 		return addAction(index, action);
 	}
 
@@ -405,7 +408,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentSaveAction findNamedSaveAction(String name) {
+	public @Nullable FluentSaveAction findNamedSaveAction(@Nonnull String name) {
 		SaveAction result = (SaveAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentSaveAction(result);
@@ -418,7 +421,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit save action exists
 	 */
-	public FluentSaveAction findSaveAction() {
+	public @Nullable FluentSaveAction findSaveAction() {
 		SaveAction result = (SaveAction) findImplicitAction(ImplicitActionName.Save);
 		if (result != null) {
 			return new FluentSaveAction(result);
@@ -426,11 +429,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addZoomOutAction(FluentZoomOutAction action) {
+	public @Nonnull FluentActions addZoomOutAction(@Nonnull FluentZoomOutAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addZoomOutAction(int index, FluentZoomOutAction action) {
+	public @Nonnull FluentActions addZoomOutAction(int index, @Nonnull FluentZoomOutAction action) {
 		return addAction(index, action);
 	}
 
@@ -441,7 +444,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentZoomOutAction findNamedZoomOutAction(String name) {
+	public @Nullable FluentZoomOutAction findNamedZoomOutAction(@Nonnull String name) {
 		ZoomOutAction result = (ZoomOutAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentZoomOutAction(result);
@@ -454,7 +457,7 @@ public class FluentActions {
 	 *
 	 * @return a fluent wrapper, or {@code null} when no implicit zoom-out action exists
 	 */
-	public FluentZoomOutAction findZoomOutAction() {
+	public @Nullable FluentZoomOutAction findZoomOutAction() {
 		ZoomOutAction result = (ZoomOutAction) findImplicitAction(ImplicitActionName.Save);
 		if (result != null) {
 			return new FluentZoomOutAction(result);
@@ -462,11 +465,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addBizExportAction(FluentBizExportAction action) {
+	public @Nonnull FluentActions addBizExportAction(@Nonnull FluentBizExportAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addBizExportAction(int index, FluentBizExportAction action) {
+	public @Nonnull FluentActions addBizExportAction(int index, @Nonnull FluentBizExportAction action) {
 		return addAction(index, action);
 	}
 
@@ -477,7 +480,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentBizExportAction findNamedBizExportAction(String name) {
+	public @Nullable FluentBizExportAction findNamedBizExportAction(@Nonnull String name) {
 		BizExportAction result = (BizExportAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentBizExportAction(result);
@@ -492,7 +495,7 @@ public class FluentActions {
 	 *            the class name configured on class-based actions
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentBizExportAction findBizExportAction(String className) {
+	public @Nullable FluentBizExportAction findBizExportAction(@Nonnull String className) {
 		BizExportAction result = (BizExportAction) findClassAction(className);
 		if (result != null) {
 			return new FluentBizExportAction(result);
@@ -500,11 +503,11 @@ public class FluentActions {
 		return null;
 	}
 	
-	public FluentActions addBizImportAction(FluentBizImportAction action) {
+	public @Nonnull FluentActions addBizImportAction(@Nonnull FluentBizImportAction action) {
 		return addAction(action);
 	}
 
-	public FluentActions addBizImportAction(int index, FluentBizImportAction action) {
+	public @Nonnull FluentActions addBizImportAction(int index, @Nonnull FluentBizImportAction action) {
 		return addAction(index, action);
 	}
 
@@ -515,7 +518,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentBizImportAction findNamedBizImportAction(String name) {
+	public @Nullable FluentBizImportAction findNamedBizImportAction(@Nonnull String name) {
 		BizImportAction result = (BizImportAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentBizImportAction(result);
@@ -530,7 +533,7 @@ public class FluentActions {
 	 *            the class name configured on class-based actions
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentBizImportAction findBizImportAction(String className) {
+	public @Nullable FluentBizImportAction findBizImportAction(@Nonnull String className) {
 		BizImportAction result = (BizImportAction) findClassAction(className);
 		if (result != null) {
 			return new FluentBizImportAction(result);
@@ -538,11 +541,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addCustomAction(FluentCustomAction action) {
+	public @Nonnull FluentActions addCustomAction(@Nonnull FluentCustomAction action) {
 		return addAction(action);
 	}
 	
-	public FluentActions addCustomAction(int index, FluentCustomAction action) {
+	public @Nonnull FluentActions addCustomAction(int index, @Nonnull FluentCustomAction action) {
 		return addAction(index, action);
 	}
 
@@ -553,7 +556,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentCustomAction findNamedCustomAction(String name) {
+	public @Nullable FluentCustomAction findNamedCustomAction(@Nonnull String name) {
 		CustomAction result = (CustomAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentCustomAction(result);
@@ -568,7 +571,7 @@ public class FluentActions {
 	 *            the class name configured on class-based actions
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentCustomAction findCustomAction(String className) {
+	public @Nullable FluentCustomAction findCustomAction(@Nonnull String className) {
 		CustomAction result = (CustomAction) findClassAction(className);
 		if (result != null) {
 			return new FluentCustomAction(result);
@@ -576,11 +579,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addDownloadAction(FluentDownloadAction action) {
+	public @Nonnull FluentActions addDownloadAction(@Nonnull FluentDownloadAction action) {
 		return addAction(action);
 	}
 	
-	public FluentActions addDownloadAction(int index, FluentDownloadAction action) {
+	public @Nonnull FluentActions addDownloadAction(int index, @Nonnull FluentDownloadAction action) {
 		return addAction(index, action);
 	}
 	
@@ -591,7 +594,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentDownloadAction findNamedDownloadAction(String name) {
+	public @Nullable FluentDownloadAction findNamedDownloadAction(@Nonnull String name) {
 		DownloadAction result = (DownloadAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentDownloadAction(result);
@@ -606,7 +609,7 @@ public class FluentActions {
 	 *            the class name configured on class-based actions
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentDownloadAction findDownloadAction(String className) {
+	public @Nullable FluentDownloadAction findDownloadAction(@Nonnull String className) {
 		DownloadAction result = (DownloadAction) findClassAction(className);
 		if (result != null) {
 			return new FluentDownloadAction(result);
@@ -614,11 +617,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addUploadAction(FluentUploadAction action) {
+	public @Nonnull FluentActions addUploadAction(@Nonnull FluentUploadAction action) {
 		return addAction(action);
 	}
 	
-	public FluentActions addUploadAction(int index, FluentUploadAction action) {
+	public @Nonnull FluentActions addUploadAction(int index, @Nonnull FluentUploadAction action) {
 		return addAction(index, action);
 	}
 
@@ -629,7 +632,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentUploadAction findNamedUploadAction(String name) {
+	public @Nullable FluentUploadAction findNamedUploadAction(@Nonnull String name) {
 		UploadAction result = (UploadAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentUploadAction(result);
@@ -644,7 +647,7 @@ public class FluentActions {
 	 *            the class name configured on class-based actions
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentUploadAction findUploadAction(String className) {
+	public @Nullable FluentUploadAction findUploadAction(@Nonnull String className) {
 		UploadAction result = (UploadAction) findClassAction(className);
 		if (result != null) {
 			return new FluentUploadAction(result);
@@ -652,11 +655,11 @@ public class FluentActions {
 		return null;
 	}
 
-	public FluentActions addReportAction(FluentReportAction action) {
+	public @Nonnull FluentActions addReportAction(@Nonnull FluentReportAction action) {
 		return addAction(action);
 	}
 	
-	public FluentActions addReportAction(int index, FluentReportAction action) {
+	public @Nonnull FluentActions addReportAction(int index, @Nonnull FluentReportAction action) {
 		return addAction(index, action);
 	}
 
@@ -667,7 +670,7 @@ public class FluentActions {
 	 *            the action metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentReportAction findNamedReportAction(String name) {
+	public @Nullable FluentReportAction findNamedReportAction(@Nonnull String name) {
 		ReportAction result = (ReportAction) findNamedAction(name);
 		if (result != null) {
 			return new FluentReportAction(result);
@@ -682,7 +685,7 @@ public class FluentActions {
 	 *            the report metadata name
 	 * @return a fluent wrapper, or {@code null} when no match exists
 	 */
-	public FluentReportAction findReportAction(String reportName) {
+	public @Nullable FluentReportAction findReportAction(@Nonnull String reportName) {
 		ReportAction result = (ReportAction) actions.getActions().stream().filter(a -> ((a instanceof ReportAction ra) && reportName.equals(ra.getReportName()))).findAny().orElse(null);
 		if (result != null) {
 			return new FluentReportAction(result);
@@ -699,7 +702,7 @@ public class FluentActions {
 	 *            the report metadata name to remove
 	 * @return this builder
 	 */
-	public FluentActions removeReportAction(String reportName) {
+	public @Nonnull FluentActions removeReportAction(@Nonnull String reportName) {
 		actions.getActions().removeIf(a -> ((a instanceof ReportAction ra) && reportName.equals(ra.getReportName())));
 		return this;
 	}
@@ -711,7 +714,7 @@ public class FluentActions {
 	 *            the action metadata name to remove
 	 * @return this builder
 	 */
-	public FluentActions removeNamedAction(String name) {
+	public @Nonnull FluentActions removeNamedAction(@Nonnull String name) {
 		actions.getActions().removeIf(a -> name.equals(a.getName()));
 		return this;
 	}
@@ -723,7 +726,7 @@ public class FluentActions {
 	 *            the implicit action type to remove
 	 * @return this builder
 	 */
-	public FluentActions removeImplicitAction(ImplicitActionName name) {
+	public @Nonnull FluentActions removeImplicitAction(@Nonnull ImplicitActionName name) {
 		actions.getActions().removeIf(a -> name.equals(a.getImplicitName()));
 		return this;
 	}
@@ -735,7 +738,7 @@ public class FluentActions {
 	 *            the class name to remove
 	 * @return this builder
 	 */
-	public FluentActions removeClassAction(String className) {
+	public @Nonnull FluentActions removeClassAction(@Nonnull String className) {
 		actions.getActions().removeIf(a -> ((a instanceof ClassAction ca) && className.equals(ca.getClassName())));
 		return this;
 	}
@@ -747,7 +750,7 @@ public class FluentActions {
 	 *            zero-based index into the action list
 	 * @return this builder
 	 */
-	public FluentActions removeAction(int index) {
+	public @Nonnull FluentActions removeAction(int index) {
 		actions.getActions().remove(index);
 		return this;
 	}
@@ -757,7 +760,7 @@ public class FluentActions {
 	 *
 	 * @return this builder
 	 */
-	public FluentActions clearActions() {
+	public @Nonnull FluentActions clearActions() {
 		actions.getActions().clear();
 		return this;
 	}
@@ -765,7 +768,7 @@ public class FluentActions {
 	/**
 	 * Returns the wrapped mutable action collection.
 	 */
-	public Actions get() {
+	public @Nonnull Actions get() {
 		return actions;
 	}
 }

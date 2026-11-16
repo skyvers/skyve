@@ -2,6 +2,9 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentEnumeratedValue metadata.
  */
@@ -18,7 +21,7 @@ public class FluentEnumeratedValue {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentEnumeratedValue(EnumeratedValue value) {
+	public FluentEnumeratedValue(@Nonnull EnumeratedValue value) {
 		this.value = value;
 	}
 
@@ -26,7 +29,7 @@ public class FluentEnumeratedValue {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentEnumeratedValue from(@SuppressWarnings("hiding") EnumeratedValue value) {
+	public @Nonnull FluentEnumeratedValue from(@SuppressWarnings("hiding") @Nonnull EnumeratedValue value) {
 		name(value.getName());
 		code(value.getCode());
 		description(value.getDescription());
@@ -36,7 +39,7 @@ public class FluentEnumeratedValue {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeratedValue name(String name) {
+	public @Nonnull FluentEnumeratedValue name(@Nullable String name) {
 		value.setName(name);
 		return this;
 	}
@@ -44,7 +47,7 @@ public class FluentEnumeratedValue {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeratedValue code(String code) {
+	public @Nonnull FluentEnumeratedValue code(@Nonnull String code) {
 		value.setCode(code);
 		return this;
 	}
@@ -52,14 +55,14 @@ public class FluentEnumeratedValue {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeratedValue description(String description) {
+	public @Nonnull FluentEnumeratedValue description(@Nullable String description) {
 		value.setDescription(description);
 		return this;
 	}
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
-	public EnumeratedValue get() {
+	public @Nonnull EnumeratedValue get() {
 		return value;
 	}
 }

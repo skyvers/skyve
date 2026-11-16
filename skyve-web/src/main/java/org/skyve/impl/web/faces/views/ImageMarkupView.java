@@ -13,8 +13,8 @@ import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.model.document.field.Content;
-import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.util.ImageUtil;
+import org.skyve.impl.util.SvgMarkupSanitiser;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -34,6 +34,7 @@ import org.skyve.util.Util;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.application.FacesMessage;
@@ -75,7 +76,7 @@ public class ImageMarkupView extends LocalisableView {
 	 * @return base URL
 	 */
 	@SuppressWarnings("static-method")
-	public final String getBaseHref() {
+	public final @Nonnull String getBaseHref() {
 		return Util.getBaseUrl();
 	}
 
@@ -85,7 +86,7 @@ public class ImageMarkupView extends LocalisableView {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				if (! FacesContext.getCurrentInstance().isPostback()) {
 					initialise();
 					process(false);
@@ -109,7 +110,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return conversation context parameter, or {@code null}
 	 */
-	public String getContextParameter() {
+	public @Nullable String getContextParameter() {
 		return contextParameter;
 	}
 
@@ -118,7 +119,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param contextParameter the conversation context key
 	 */
-	public void setContextParameter(String contextParameter) {
+	public void setContextParameter(@Nullable String contextParameter) {
 		this.contextParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contextParameter));
 	}
 
@@ -127,7 +128,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return bean binding parameter, or {@code null}
 	 */
-	public String getBindingParameter() {
+	public @Nullable String getBindingParameter() {
 		return bindingParameter;
 	}
 
@@ -136,7 +137,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param bindingParameter the binding path parameter
 	 */
-	public void setBindingParameter(String bindingParameter) {
+	public void setBindingParameter(@Nullable String bindingParameter) {
 		this.bindingParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(bindingParameter));
 
 	}
@@ -146,7 +147,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return content binding parameter, or {@code null}
 	 */
-	public String getContentBindingParameter() {
+	public @Nullable String getContentBindingParameter() {
 		return contentBindingParameter;
 	}
 
@@ -155,7 +156,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param contentBindingParameter the content binding path
 	 */
-	public void setContentBindingParameter(String contentBindingParameter) {
+	public void setContentBindingParameter(@Nullable String contentBindingParameter) {
 		this.contentBindingParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentBindingParameter));
 	}
 
@@ -164,7 +165,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return content ID parameter, or {@code null}
 	 */
-	public String getContentIdParameter() {
+	public @Nullable String getContentIdParameter() {
 		return contentIdParameter;
 	}
 
@@ -173,7 +174,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param contentIdParameter the content ID parameter
 	 */
-	public void setContentIdParameter(String contentIdParameter) {
+	public void setContentIdParameter(@Nullable String contentIdParameter) {
 		this.contentIdParameter = OWASP.sanitise(Sanitisation.text, UtilImpl.processStringValue(contentIdParameter));
 	}
 
@@ -184,7 +185,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return the module-document identifier for content retrieval
 	 */
-	public String getModuleDocument() {
+	public @Nullable String getModuleDocument() {
 		return moduleDocument;
 	}
 
@@ -215,7 +216,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return the content download URL used as the Excalidraw background
 	 */
-	public String getBackgroundUrl() {
+	public @Nonnull String getBackgroundUrl() {
 		StringBuilder result = new StringBuilder(64);
 		result.append(getBaseHref()).append("content?_nm&_n=").append(contentIdParameter);
 		result.append("&_doc=").append(moduleDocument);
@@ -231,7 +232,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return newly-created content ID, or {@code null}
 	 */
-	public String getNewContentId() {
+	public @Nullable String getNewContentId() {
 		return newContentId;
 	}
 
@@ -240,7 +241,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param newContentId the new persisted content ID
 	 */
-	public void setNewContentId(String newContentId) {
+	public void setNewContentId(@Nullable String newContentId) {
 		this.newContentId = newContentId;
 	}
 
@@ -252,7 +253,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @return SVG payload, or {@code null}
 	 */
-	public String getSvg() {
+	public @Nullable String getSvg() {
 		return svg;
 	}
 
@@ -261,7 +262,7 @@ public class ImageMarkupView extends LocalisableView {
 	 *
 	 * @param svg the SVG markup payload
 	 */
-	public void setSvg(String svg) {
+	public void setSvg(@Nullable String svg) {
 		this.svg = svg;
 	}
 
@@ -327,6 +328,9 @@ public class ImageMarkupView extends LocalisableView {
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBindingParameter);
+			if (unsanitisedContentBinding == null) { // contentBindingParameter was checked above
+				throw new IllegalStateException("contentBindingParameter is null");
+			}
 			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 			
 			// Check document access
@@ -357,7 +361,7 @@ public class ImageMarkupView extends LocalisableView {
 						// Add a new content with the markup in it.
 						// This ensures that if cancel is pressed the old content will remain linked.
 						AttachmentContent newContent = content.cloneNewForPut();
-						newContent.setMarkup(svg);
+						newContent.setMarkup(SvgMarkupSanitiser.sanitise(svg));
 						// Determine whether we should index the new content by looking at the attribute
 						boolean index = false;
 						try {
@@ -368,8 +372,7 @@ public class ImageMarkupView extends LocalisableView {
 							Document contentDocument = contentModule.getDocument(customer, contentBizDocument);
 							Attribute attribute = contentDocument.getAttribute(contentAttributeName);
 							if (attribute instanceof Content contentAttribute) {
-								IndexType indexType = contentAttribute.getIndex();
-								index = (IndexType.textual.equals(indexType) || IndexType.both.equals(indexType));
+								index = Content.isTextuallyIndexed(contentAttribute.getIndex());
 							}
 							else {
 								LOGGER.warn("Could not determine whether to index the new marked up content as the attribute {}.{}.{} is not a content attribute.",
@@ -385,7 +388,7 @@ public class ImageMarkupView extends LocalisableView {
 						newContentId = newContent.getContentId();
 		
 						// only put conversation in cache if we have been successful in executing
-						StateUtil.cacheConversation(webContext);
+						StateUtil.commitAndCacheConversation(webContext);
 				
 						// update the content UUID value on the client and popoff the window on the stack
 						String sanitisedContentBinding = BindUtil.sanitiseBinding(contentBindingParameter);

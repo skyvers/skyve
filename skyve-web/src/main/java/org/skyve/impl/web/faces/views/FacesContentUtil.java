@@ -11,7 +11,6 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.model.document.field.Content;
-import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
@@ -55,7 +54,7 @@ public class FacesContentUtil {
 																@Nonnull String binding)
 	throws Exception {
 		UploadedFile file = event.getFile();
-		return storeFileUpload(file.getFileName(), file.getContent(), file.getContentType(), bean, binding);
+		return storeFileUpload(file.getFileName(), file.getContent(), file.getContentType(), null, bean, binding);
 	}
 	
 	/**
@@ -79,7 +78,7 @@ public class FacesContentUtil {
 																@Nonnull Bean bean,
 																@Nonnull String binding)
 	throws Exception {
-		return storeFileUpload(null, fileContents, contentType, bean, binding);
+		return storeFileUpload(null, fileContents, contentType, null, bean, binding);
 	}
 
 	/**
@@ -102,7 +101,7 @@ public class FacesContentUtil {
 																@Nonnull Bean bean,
 																@Nonnull String binding)
 	throws Exception {
-		return storeFileUpload(filePathOrName, fileContents, null, bean, binding);
+		return storeFileUpload(filePathOrName, fileContents, null, null, bean, binding);
 	}
 	
 	/**
@@ -132,7 +131,37 @@ public class FacesContentUtil {
 																@Nonnull Bean bean,
 																@Nonnull String binding)
 	throws Exception {
-		return storeFileUpload(filePathOrName, fileContents, contentType, bean, binding);
+		return storeFileUpload(filePathOrName, fileContents, contentType, null, bean, binding);
+	}
+
+	/**
+	 * Stores an uploaded image against a bean content binding, with SVG markup drawn over it.
+	 *
+	 * <p>Only the final file-name component of {@code filePathOrName} is retained.
+	 * The markup is stored as given, so callers must sanitise it first
+	 * (see {@link org.skyve.impl.util.SvgMarkupSanitiser}).
+	 *
+	 * <p>Side effects: as {@link #handleFileUpload(String, byte[], String, Bean, String)}.
+	 *
+	 * @param filePathOrName the uploaded file name or path
+	 * @param fileContents the uploaded file bytes
+	 * @param contentType the uploaded content type, or {@code null} to derive it from the file name
+	 * @param markup sanitised SVG markup to store with the image, or {@code null} for none
+	 * @param bean the bean relative to which the content binding is resolved
+	 * @param binding the simple or compound binding of the target content attribute
+	 * @return the stored attachment, including its newly assigned content identifier
+	 * @throws SecurityException if the current user cannot upload content to the resolved attribute
+	 * @throws IllegalStateException if the owner of a compound content binding cannot be resolved
+	 * @throws Exception if metadata resolution or content-repository storage fails
+	 */
+	public static @Nonnull AttachmentContent handleFileUpload(@Nonnull String filePathOrName,
+																@Nonnull byte[] fileContents,
+																@Nullable String contentType,
+																@Nullable String markup,
+																@Nonnull Bean bean,
+																@Nonnull String binding)
+	throws Exception {
+		return storeFileUpload(filePathOrName, fileContents, contentType, markup, bean, binding);
 	}
 
 	/**
@@ -145,6 +174,7 @@ public class FacesContentUtil {
 	 * @param filePathOrName the uploaded file name or path, or {@code null} when unavailable
 	 * @param fileContents the uploaded file bytes
 	 * @param contentType the uploaded content type, or {@code null} when unavailable
+	 * @param markup sanitised SVG markup to store with the content, or {@code null} for none
 	 * @param bean the bean relative to which the content binding is resolved
 	 * @param binding the simple or compound binding of the target content attribute
 	 * @return the stored attachment, including its newly assigned content identifier
@@ -155,6 +185,7 @@ public class FacesContentUtil {
 	private static @Nonnull AttachmentContent storeFileUpload(@Nullable String filePathOrName,
 																@Nonnull byte[] fileContents,
 																@Nullable String contentType,
+																@Nullable String markup,
 																@Nonnull Bean bean,
 																@Nonnull String binding)
 	throws Exception {
@@ -200,6 +231,10 @@ public class FacesContentUtil {
 			throw new SecurityException("upload this content", user.getName());
 		}
 
+		if ((contentOwnerBizCustomer == null) || (contentOwnerBizUserId == null)) { // a new instance has both
+			throw new IllegalStateException("Content owner " + contentOwnerBizModule + '.' + contentOwnerBizDocument + '#' + contentOwnerBizId + " has no bizCustomer or bizUserId");
+		}
+
 		// Always insert a new attachment content node into the content repository on upload.
 		// That way, if the change is discarded (not committed), it'll still point to the original attachment.
 		// Also, browser caching is simple as the URL is changed (as a consequence of the content id change)
@@ -216,6 +251,9 @@ public class FacesContentUtil {
 		else {
 			content.attachment(fileName, contentType, fileContents);
 		}
+		if (markup != null) {
+			content.setMarkup(markup);
+		}
 		try (ContentManager cm = EXT.newContentManager()) {
 			// Determine if we should index the content or not
 			boolean index = true; // default
@@ -225,10 +263,7 @@ public class FacesContentUtil {
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, contentAttributeName);
 			Attribute attribute = target.getAttribute();
 			if (attribute instanceof Content c) {
-				IndexType indexType = c.getIndex();
-				index = ((indexType == null) || 
-							IndexType.textual.equals(indexType) ||
-							IndexType.both.equals(indexType));
+				index = Content.isTextuallyIndexed(c.getIndex());
 			}
 
 			// NB Don't set the content id as we always want a new one

@@ -28,6 +28,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private String description;
 	
@@ -35,7 +38,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private Document drivingDocument;
 	private MetaDataQueryDefinition query;
 
-	public DocumentQueryListModel(MetaDataQueryDefinition query) {
+	public DocumentQueryListModel(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 
@@ -50,12 +53,12 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	 * Used to set the query in postConstruct() of subclasses.
 	 * @param query
 	 */
-	protected void setQuery(MetaDataQueryDefinition query) {
+	protected void setQuery(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		description = query.getDescription();
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);
@@ -93,19 +96,19 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 	
 	@Override
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
 	@Override
-	public Document getDrivingDocument() {
+	public @Nonnull Document getDrivingDocument() {
 		return drivingDocument;
 	}
 
 	private List<MetaDataQueryColumn> columns;
 	
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
@@ -113,7 +116,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private Map<String, String> projections = new TreeMap<>();
 	
 	@Override
-	public Set<String> getProjections() {
+	public @Nonnull Set<String> getProjections() {
 		return projections.keySet();
 	}
 
@@ -122,7 +125,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private DocumentQueryFilter filter;
 	
 	@Override
-	public Filter getFilter() {
+	public @Nonnull Filter getFilter() {
 		if (filter == null) {
 			establishQueries();
 			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter());
@@ -131,20 +134,20 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
-	public Filter newFilter() {
+	public @Nonnull Filter newFilter() {
 		establishQueries();
 		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter());
 	}
 	
 	@Override
-	public void putParameter(String name, Object value) {
+	public void putParameter(@Nonnull String name, @Nullable Object value) {
 		establishQueries();
 		detailQuery.putParameter(name, value);
 		summaryQuery.putParameter(name, value);
 	}
 
 	@Override
-	public Page fetch() throws Exception {
+	public @Nonnull Page fetch() throws Exception {
 		establishQueries();
 		
 		if (getSummary() == null) {
@@ -168,7 +171,14 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		if (sorts != null) {
 			for (SortParameter sort : sorts) {
 				String by = sort.getBy();
+				if (by == null) {
+					throw new IllegalStateException("A sort parameter for query " + query.getName() + " has no binding to sort by");
+				}
+				// No direction means ascending - the query treats anything but descending as ascending
 				SortDirection direction = sort.getDirection();
+				if (direction == null) {
+					direction = SortDirection.ascending;
+				}
 				String expression = projections.get(by);
 				if (expression == null) {
 					detailQuery.insertBoundOrdering(by, direction);
@@ -190,7 +200,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		else {
 			summaryBean = summaryQuery.projectedResult();
 		}
-		Number totalRows = (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
+		// No summary row means no rows were counted
+		Number totalRows = (summaryBean == null) ? null : (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
 		result.setTotalRows((totalRows == null) ? 0L : totalRows.longValue());
 		result.setRows(rows);
 		result.setSummary(summaryBean);
@@ -199,13 +210,13 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
-	public AutoClosingIterable<Bean> iterate() throws Exception {
+	public @Nonnull AutoClosingIterable<Bean> iterate() throws Exception {
 		establishQueries();
 		return detailQuery.projectedIterable();
 	}
 	
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> values) 
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> values) 
 	throws Exception {
 		return update(bizId, 
 						values, 
@@ -214,11 +225,11 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 						getSelectedTagId());
 	}
 
-	public static Bean update(String bizId, 
-								SortedMap<String, Object> properties, 
-								Document drivingDocument,
-								MetaDataQueryDefinition query,
-								String selectedTagId) {
+	public static @Nullable Bean update(@Nonnull String bizId, 
+											@Nonnull SortedMap<String, Object> properties, 
+											@Nonnull Document drivingDocument,
+											@Nonnull MetaDataQueryDefinition query,
+											@Nullable String selectedTagId) {
 		Persistence p = CORE.getPersistence();
 		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
 		BindUtil.populateProperties(p.getUser(), bean, properties, true);
@@ -230,11 +241,11 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 	
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		remove(bizId, drivingDocument);
 	}
 
-	public static void remove(String bizId, Document drivingDocument)
+	public static void remove(@Nonnull String bizId, @Nonnull Document drivingDocument)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
 		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
@@ -258,14 +269,14 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	/**
 	 * For Sub-classes to get hold of the internal detail query being used.
 	 */
-	protected DocumentQuery getDetailQuery() {
+	protected @Nullable DocumentQuery getDetailQuery() {
 		return detailQuery;
 	}
 	
 	/**
 	 * For Sub-classes to get hold of the internal summary query being used.
 	 */
-	protected DocumentQuery getSummaryQuery() {
+	protected @Nullable DocumentQuery getSummaryQuery() {
 		return summaryQuery;
 	}
 }

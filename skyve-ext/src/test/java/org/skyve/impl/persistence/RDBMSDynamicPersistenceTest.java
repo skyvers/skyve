@@ -129,6 +129,7 @@ class RDBMSDynamicPersistenceTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDynamicBeanCreatesBeanAndCachesItWhenNoReferencesExist() throws Exception {
 		try (RDBMSDynamicPersistence dynamicPersistence = new RDBMSDynamicPersistence()) {

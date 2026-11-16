@@ -3,6 +3,9 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.repository.view.actions.PositionableAction;
 import org.skyve.metadata.view.Action.ActionShow;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Adds placement and visibility controls to fluent action builders.
  *
@@ -25,7 +28,7 @@ public abstract class FluentPositionableAction<T extends FluentPositionableActio
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(PositionableAction action) {
+	protected @Nonnull T from(@Nonnull PositionableAction action) {
 		super.fromBase(action);
 		inActionPanel(! Boolean.FALSE.equals(action.getInActionPanel()));
 		show(action.getShow());
@@ -40,7 +43,7 @@ public abstract class FluentPositionableAction<T extends FluentPositionableActio
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T inActionPanel(boolean inActionPanel) {
+	public @Nonnull T inActionPanel(boolean inActionPanel) {
 		get().setInActionPanel(inActionPanel ? Boolean.TRUE : Boolean.FALSE);
 		return (T) this;
 	}
@@ -53,7 +56,7 @@ public abstract class FluentPositionableAction<T extends FluentPositionableActio
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T show(ActionShow show) {
+	public @Nonnull T show(@Nullable ActionShow show) {
 		get().setShow(show);
 		return (T) this;
 	}
@@ -62,5 +65,5 @@ public abstract class FluentPositionableAction<T extends FluentPositionableActio
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public abstract PositionableAction get();
+	public abstract @Nonnull PositionableAction get();
 }

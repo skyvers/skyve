@@ -2,6 +2,8 @@ package org.skyve.impl.domain.number;
 
 import org.skyve.domain.number.NumberGenerator;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Singleton holder for the active {@link NumberGenerator} implementation.
  *
@@ -21,11 +23,11 @@ public class NumberGeneratorStaticSingleton {
 		// nothing to see here
 	}
 	
-	public static NumberGenerator get() {
+	public static @Nonnull NumberGenerator get() {
 		return instance;
 	}
 	
-	public static void set(NumberGenerator instance) {
+	public static void set(@Nonnull NumberGenerator instance) {
 		NumberGeneratorStaticSingleton.instance = instance;
 	}
 	

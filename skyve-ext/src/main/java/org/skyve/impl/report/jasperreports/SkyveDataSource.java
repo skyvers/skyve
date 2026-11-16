@@ -12,6 +12,9 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.user.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * JasperReports data source that exposes Skyve beans and bound values to report fields.
  */
@@ -26,7 +29,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @param user The active reporting user.
 	 * @param list Bean rows to expose to the report.
 	 */
-	public SkyveDataSource(User user, List<? extends Bean> list) {
+	public SkyveDataSource(@Nonnull User user, @Nonnull List<? extends Bean> list) {
 		this(user, list.iterator());
 	}
 
@@ -36,7 +39,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @param user The active reporting user.
 	 * @param iterator Bean iterator used for row traversal.
 	 */
-	public SkyveDataSource(User user, Iterator<? extends Bean> iterator) {
+	public SkyveDataSource(@Nonnull User user, @Nullable Iterator<? extends Bean> iterator) {
 		this.user = user;
 		this.iterator = iterator;
 	}
@@ -47,7 +50,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @param user The active reporting user.
 	 * @param bean The single bean row.
 	 */
-	public SkyveDataSource(User user, Bean bean) {
+	public SkyveDataSource(@Nonnull User user, @Nullable Bean bean) {
 		this(user, createBeanList(bean));
 	}
 	
@@ -57,7 +60,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @param bean The bean to expose as the sole data-source row.
 	 * @return A single-element bean list.
 	 */
-	private static List<? extends Bean> createBeanList(Bean bean) {
+	private static @Nonnull List<? extends Bean> createBeanList(@Nullable Bean bean) {
 		List<Bean> result = new ArrayList<>();
 		result.add(bean);
 		return result;
@@ -98,7 +101,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @throws JRException If binding resolution or formatting fails.
 	 */
 	@Override
-	public Object getFieldValue(JRField field) 
+	public @Nullable Object getFieldValue(@SuppressWarnings("null") @Nonnull JRField field) 
 	throws JRException {
 		Object result = null;
 		try {
@@ -141,7 +144,7 @@ public class SkyveDataSource implements JRDataSource {
 	 * @return The formatted display value.
 	 * @throws JRException If formatting fails.
 	 */
-	public static Object getFormattedValue(User user, Bean currentBean, String binding, Object value) throws JRException {
+	public static @Nonnull Object getFormattedValue(@Nonnull User user, @Nonnull Bean currentBean, @Nonnull String binding, @Nullable Object value) throws JRException {
 		try {
 			return BindUtil.getDisplay(user.getCustomer(), currentBean, binding, value);
 		}

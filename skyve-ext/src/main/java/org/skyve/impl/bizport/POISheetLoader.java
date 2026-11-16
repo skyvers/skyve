@@ -17,6 +17,9 @@ import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.converters.Converter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * {@link AbstractDataFileLoader} implementation that reads data from an
  * Apache POI {@link org.apache.poi.ss.usermodel.Sheet}.
@@ -38,7 +41,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param sheetIndex
 	 * @throws Exception
 	 */
-	public POISheetLoader(InputStream fileInputStream, int sheetIndex, String moduleName, String documentName, UploadException exception)
+	public POISheetLoader(@Nonnull InputStream fileInputStream, int sheetIndex, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull UploadException exception)
 			throws Exception {
 
 		super(LoaderActivityType.CREATE_FIND, exception, moduleName, documentName);
@@ -75,8 +78,8 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param bindings
 	 *            - the specific bindings in corresponding order to the columns/fields being loaded
 	 */
-	public POISheetLoader(LoaderActivityType activityType, InputStream fileInputStream, int sheetIndex, UploadException exception,
-			String moduleName, String documentName) throws Exception {
+	public POISheetLoader(@Nonnull LoaderActivityType activityType, @Nonnull InputStream fileInputStream, int sheetIndex, @Nonnull UploadException exception,
+			@Nonnull String moduleName, @Nonnull String documentName) throws Exception {
 
 		this(fileInputStream, sheetIndex, moduleName, documentName, exception);
 		this.setActivityType(activityType);
@@ -84,17 +87,17 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 
 	@Override
-	public String getStringFieldValue(int index, boolean blankAsNull) {
+	public @Nullable String getStringFieldValue(int index, boolean blankAsNull) {
 		return getStringValueFromCell(index, blankAsNull);
 	}
 
 	@Override
-	public Date getDateFieldValue(int index) {
+	public @Nullable Date getDateFieldValue(int index) {
 		return getDateValueFromCell(index);
 	}
 
 	@Override
-	public Double getNumericFieldValue(int index, boolean emptyAsZero) {
+	public @Nullable Double getNumericFieldValue(int index, boolean emptyAsZero) {
 		return getNumericValueFromCell(index, emptyAsZero);
 	}
 
@@ -122,15 +125,17 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 		boolean foundNonEmpty = false;
 		for (DataFileField field : fields) {
-			if(field.getIndex()==null){
-				field.setIndex(Integer.valueOf(0));
+			Integer index = field.getIndex();
+			if(index==null){
+				index = Integer.valueOf(0);
+				field.setIndex(index);
 			}
-			String val = getStringFieldValue(field.getIndex().intValue(), true);
+			String val = getStringFieldValue(index.intValue(), true);
 			if (val != null && (! val.trim().isEmpty())) {
 				foundNonEmpty = true;
 				break;
 			} else if(debugMode){
-				LOGGER.info("{} No value was found at this location.", getWhere(field.getIndex().intValue()));
+				LOGGER.info("{} No value was found at this location.", getWhere(index.intValue()));
 			}
 		}
 
@@ -138,7 +143,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public String getWhere(int index) {
+	public @Nonnull String getWhere(int index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Sheet ").append(sheet.getSheetName());
 		where.append(" Row ").append((dataIndex + 1));
@@ -154,7 +159,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param col
 	 * @return the numeric value
 	 */
-	private Double getNumericValueFromCell(int col, boolean emptyAsZero) {
+	private @Nullable Double getNumericValueFromCell(int col, boolean emptyAsZero) {
 		Double result = Double.valueOf(0);
 
 		Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
@@ -198,7 +203,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @return The String Value of the cell
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private String getStringValueFromCell(int col, boolean blankAsNull) {
+	private @Nullable String getStringValueFromCell(int col, boolean blankAsNull) {
 		String result = null;
 
 		if (row != null) {
@@ -252,7 +257,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param col
 	 * @return The Date Value of the cell
 	 */
-	private Date getDateValueFromCell(int col) {
+	private @Nullable Date getDateValueFromCell(int col) {
 		Date result = null;
 		Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
 		try {
@@ -267,13 +272,14 @@ public class POISheetLoader extends AbstractDataFileLoader {
 			try {
 				//try again using the default converter
 				raw = getStringFieldValue(col, true);
+				if (raw == null) { // reported as not a valid date below
+					throw new IllegalArgumentException("No value to convert");
+				}
 				result = converter.fromDisplayValue(raw);
 			} catch (@SuppressWarnings("unused") Exception e) {
 				// do nothing
 				problem.append("The value '").append(raw).append("' is not a valid date");
-				if(converter!=null){
-					problem.append(" (using customer default Converter " + converter.getClass().getSimpleName() + ").");
-				}
+				problem.append(" (using customer default Converter " + converter.getClass().getSimpleName() + ").");
 				throw new DomainException(problem.toString());
 			}
 		}
@@ -288,7 +294,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 *            - assumes first column is 0
 	 * @return
 	 */
-	public static String getPOIWorksheetColumnName(int number) {
+	public static @Nonnull String getPOIWorksheetColumnName(int number) {
 		final StringBuilder sb = new StringBuilder();
 
 		int num = number;
@@ -306,7 +312,7 @@ public class POISheetLoader extends AbstractDataFileLoader {
 	 * @param cell
 	 * @return
 	 */
-	private static String getPOICellTypeDescription(Cell cell) {
+	private static @Nonnull String getPOICellTypeDescription(@Nullable Cell cell) {
 		String result = "unknown";
 		if (cell != null) {
 			switch (cell.getCellType()) {

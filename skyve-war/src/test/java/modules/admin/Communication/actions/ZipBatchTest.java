@@ -9,6 +9,7 @@ import modules.admin.Communication.CommunicationExtension;
 @SuppressWarnings("static-method")
 class ZipBatchTest {
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareSetRefreshBatchesToFalse() throws Exception {
 		ZipBatch action = new ZipBatch();

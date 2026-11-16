@@ -51,6 +51,7 @@ class ParameterImplTest {
 		assertNull(p.getValueBinding());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void defaultsAreNull() {
 		ParameterImpl p = new ParameterImpl();

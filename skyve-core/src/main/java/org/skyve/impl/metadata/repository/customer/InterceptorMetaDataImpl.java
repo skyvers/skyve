@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Interceptor;
 import org.skyve.metadata.customer.InterceptorMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -34,10 +35,10 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	/**
 	 * Returns the fully-qualified interceptor implementation class name.
 	 *
-	 * @return interceptor implementation class name, or {@code null}
+	 * @return interceptor implementation class name
 	 */
 	@Override
-	public String getClassName() {
+	public @Nonnull String getClassName() {
 		return className;
 	}
 
@@ -47,7 +48,7 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	 * @param className interceptor implementation class name
 	 */
 	@XmlAttribute(required = true)
-	public void setClassName(String className) {
+	public void setClassName(@Nonnull String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
@@ -61,7 +62,7 @@ public class InterceptorMetaDataImpl implements InterceptorMetaData {
 	 * @throws MetaDataException if the configured class cannot be loaded or instantiated
 	 */
 	@Override
-	public Interceptor getInterceptor() {
+	public @Nonnull Interceptor getInterceptor() {
 		if (interceptor == null) {
 			synchronized (this) {
 				if (interceptor == null) {

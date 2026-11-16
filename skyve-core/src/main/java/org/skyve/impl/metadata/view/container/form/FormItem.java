@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.container.form;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
@@ -38,6 +38,8 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.MetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -86,14 +88,14 @@ public class FormItem implements DecoratedMetaData {
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the configured widget metadata for this form cell.
 	 *
 	 * @return the widget descriptor, or {@code null} when not configured
 	 */
-	public MetaData getWidget() {
+	public @Nullable MetaData getWidget() {
 		return widget;
 	}
 	
@@ -131,7 +133,7 @@ public class FormItem implements DecoratedMetaData {
 						@XmlElementRef(type = TextArea.class),
 						@XmlElementRef(type = TextField.class),
 						@XmlElementRef(type = Inject.class)})
-	public void setWidget(MetaData widget) {
+	public void setWidget(@Nullable MetaData widget) {
 		this.widget = widget;
 	}
 	
@@ -140,7 +142,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return column span, or {@code null} when default spanning is used
 	 */
-	public Integer getColspan() {
+	public @Nullable Integer getColspan() {
 		return colspan;
 	}
 
@@ -150,7 +152,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param colspan  column span value; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setColspan(Integer colspan) {
+	public void setColspan(@Nullable Integer colspan) {
 		this.colspan = colspan;
 	}
 	
@@ -159,7 +161,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return row span, or {@code null} when default spanning is used
 	 */
-	public Integer getRowspan() {
+	public @Nullable Integer getRowspan() {
 		return rowspan;
 	}
 
@@ -169,7 +171,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param rowspan  row span value; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setRowspan(Integer rowspan) {
+	public void setRowspan(@Nullable Integer rowspan) {
 		this.rowspan = rowspan;
 	}
 
@@ -178,7 +180,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return widget-cell alignment, or {@code null} when renderer defaults are used
 	 */
-	public HorizontalAlignment getHorizontalAlignment() {
+	public @Nullable HorizontalAlignment getHorizontalAlignment() {
 		return horizontalAlignment;
 	}
 
@@ -188,7 +190,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param horizontalAlignment  widget-cell alignment to apply; may be {@code null}
 	 */
 	@XmlAttribute(name = "align", required = false)
-	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
+	public void setHorizontalAlignment(@Nullable HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
 	}
 
@@ -198,7 +200,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @return label-cell alignment, or {@code null} when default label alignment is used
 	 */
 	@XmlAttribute(name = "labelAlign", required = false)
-	public HorizontalAlignment getLabelHorizontalAlignment() {
+	public @Nullable HorizontalAlignment getLabelHorizontalAlignment() {
 		return labelHorizontalAlignment;
 	}
 
@@ -208,7 +210,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param labelHorizontalAlignment  label-cell alignment to apply; may be {@code null}
 	 */
 	public void setLabelHorizontalAlignment(
-			HorizontalAlignment labelHorizontalAlignment) {
+			@Nullable HorizontalAlignment labelHorizontalAlignment) {
 		this.labelHorizontalAlignment = labelHorizontalAlignment;
 	}
 
@@ -217,7 +219,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return label override text, or {@code null} when no override is configured
 	 */
-	public String getLabel() {
+	public @Nullable String getLabel() {
 		return label;
 	}
 
@@ -226,7 +228,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return the localised label, or {@code null} when no label override is configured
 	 */
-	public String getLocalisedLabel() {
+	public @Nullable String getLocalisedLabel() {
 		return Util.i18n(label);
 	}
 
@@ -235,7 +237,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeLabel() {
+	public @Nullable Boolean getEscapeLabel() {
 		return escapeLabel;
 	}
 	
@@ -247,7 +249,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param label  label override text; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setLabel(String label) {
+	public void setLabel(@Nullable String label) {
 		this.label = UtilImpl.processStringValue(label);
 	}
 
@@ -257,7 +259,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param escapeLabel {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeLabel(Boolean escapeLabel) {
+	public void setEscapeLabel(@Nullable Boolean escapeLabel) {
 		this.escapeLabel = escapeLabel;
 	}
 
@@ -266,7 +268,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return {@code true} to render the label, {@code false} to hide it, or {@code null} to use defaults
 	 */
-	public Boolean getShowLabel() {
+	public @Nullable Boolean getShowLabel() {
 		return showLabel;
 	}
 
@@ -276,7 +278,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param showLabel  label visibility flag; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setShowLabel(Boolean showLabel) {
+	public void setShowLabel(@Nullable Boolean showLabel) {
 		this.showLabel = showLabel;
 	}
 
@@ -285,7 +287,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return {@code true} to render help, {@code false} to hide it, or {@code null} to use defaults
 	 */
-	public Boolean getShowHelp() {
+	public @Nullable Boolean getShowHelp() {
 		return showHelp;
 	}
 
@@ -295,7 +297,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param showHelp  help visibility flag; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setShowHelp(Boolean showHelp) {
+	public void setShowHelp(@Nullable Boolean showHelp) {
 		this.showHelp = showHelp;
 	}
 	
@@ -304,7 +306,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return help-text override, or {@code null} when no override is configured
 	 */
-	public String getHelp() {
+	public @Nullable String getHelp() {
 		return help;
 	}
 
@@ -313,7 +315,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return the localised help text, or {@code null} when no help override is configured
 	 */
-	public String getLocalisedHelp() {
+	public @Nullable String getLocalisedHelp() {
 		return Util.i18n(help);
 	}
 
@@ -322,7 +324,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeHelp() {
+	public @Nullable Boolean getEscapeHelp() {
 		return escapeHelp;
 	}
 	
@@ -334,7 +336,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param help  help-text override; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setHelp(String help) {
+	public void setHelp(@Nullable String help) {
 		this.help = UtilImpl.processStringValue(help);
 	}
 
@@ -344,7 +346,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param escapeHelp {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeHelp(Boolean escapeHelp) {
+	public void setEscapeHelp(@Nullable Boolean escapeHelp) {
 		this.escapeHelp = escapeHelp;
 	}
 
@@ -353,7 +355,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return {@code true} when required, {@code false} when optional, or {@code null} to inherit defaults
 	 */
-	public Boolean getRequired() {
+	public @Nullable Boolean getRequired() {
 		return required;
 	}
 
@@ -363,7 +365,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param required  required flag; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setRequired(Boolean required) {
+	public void setRequired(@Nullable Boolean required) {
 		this.required = required;
 	}
 
@@ -372,7 +374,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return required-message override text, or {@code null} when no override is configured
 	 */
-	public String getRequiredMessage() {
+	public @Nullable String getRequiredMessage() {
 		return requiredMessage;
 	}
 
@@ -381,7 +383,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return the localised required message, or {@code null} when no override is configured
 	 */
-	public String getLocalisedRequiredMessage() {
+	public @Nullable String getLocalisedRequiredMessage() {
 		return Util.i18n(requiredMessage);
 	}
 
@@ -390,7 +392,7 @@ public class FormItem implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeRequiredMessage() {
+	public @Nullable Boolean getEscapeRequiredMessage() {
 		return escapeRequiredMessage;
 	}
 
@@ -402,7 +404,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param requiredMessage  required-message override text; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setRequiredMessage(String requiredMessage) {
+	public void setRequiredMessage(@Nullable String requiredMessage) {
 		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
 	}
 
@@ -412,7 +414,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @param escapeRequiredMessage {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeRequiredMessage(Boolean escapeRequiredMessage) {
+	public void setEscapeRequiredMessage(@Nullable Boolean escapeRequiredMessage) {
 		this.escapeRequiredMessage = escapeRequiredMessage;
 	}
 
@@ -422,7 +424,7 @@ public class FormItem implements DecoratedMetaData {
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

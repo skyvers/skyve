@@ -13,39 +13,42 @@ import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
 import org.skyve.util.BeanVisitor;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> extends ComparisonModel<T, C> {
 	private Customer customer;
 	private Document document;
 	private C toCompareTo;
 	private String[] excludedBindingPrefixes;
 	
-	public DefaultBindingComparisonModel(Document document,
-											C toCompareTo,
-											String[] excludedBindingPrefixes) {
+	public DefaultBindingComparisonModel(@Nonnull Document document,
+											@Nullable C toCompareTo,
+											@Nullable String[] excludedBindingPrefixes) {
 		this.document = document;
 		this.toCompareTo = toCompareTo;
 		this.excludedBindingPrefixes = excludedBindingPrefixes;
 	}
 	
 	@Override
-	public void postConstruct(@SuppressWarnings("hiding") Customer customer, boolean runtime) {
+	public void postConstruct(@SuppressWarnings("hiding") @Nonnull Customer customer, boolean runtime) {
 		this.customer = customer;
 	}
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public ComparisonComposite getComparisonComposite(C boundBean)
+	public @Nullable ComparisonComposite getComparisonComposite(@Nullable C boundBean)
 	throws Exception {
 		final Map<String, ComparisonComposite> bindingToNodes = new LinkedHashMap<>();
 		
 		// Visit the new bean and add in the model structure
 		new BeanVisitor(false, false) {
 			@Override
-			protected boolean accept(String binding,
-										Document currentDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean)
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document currentDocument,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean)
 			throws Exception {
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
@@ -62,11 +65,11 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		// Visit oldBean and add/modify the resulting model.
 		new BeanVisitor(false, false, false) {
 			@Override
-			protected boolean accept(String binding,
-										Document currentDocument,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean)
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document currentDocument,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean)
 			throws Exception {
 				// stop recursive processing if we have matched an exclusion
 				if (excluded(binding)) {
@@ -109,11 +112,11 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		return result;
 	}
 	
-	private ComparisonComposite createNode(String binding,
-											Relation owningRelation,
-											Document currentDocument,
-											Bean bean,
-											boolean newNode) {
+	private @Nonnull ComparisonComposite createNode(@Nonnull String binding,
+													@Nullable Relation owningRelation,
+													@Nonnull Document currentDocument,
+													@Nonnull Bean bean,
+													boolean newNode) {
 		ComparisonComposite result = new ComparisonComposite();
 		result.setBizId(bean.getBizId());
 		result.setBusinessKeyDescription((bean instanceof PersistentBean persistentBean) ? 
@@ -136,7 +139,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 
 	// fill in the oldValues JSON property for this entry
 	// determine if there are differences between the old and new and indicate these
-	private static void updateNode(Bean bean, ComparisonComposite node) {
+	private static void updateNode(@Nonnull Bean bean, @Nonnull ComparisonComposite node) {
 		boolean nodeDirty = false;
 
 		for (ComparisonProperty property : node.getProperties()) {
@@ -151,11 +154,11 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		node.setMutation(nodeDirty ? Mutation.updated : Mutation.unchanged);
 	}
 
-	private void addProperties(ComparisonComposite node,
-								Document beanDocument,
-								Bean bean,
+	private void addProperties(@Nonnull ComparisonComposite node,
+								@Nonnull Document beanDocument,
+								@Nonnull Bean bean,
 								boolean newEntry,
-								String binding) {
+								@Nonnull String binding) {
 		// Get any inherited attributes here too.
 		for (Attribute attribute : beanDocument.getAllAttributes(customer)) {
 			String fqAttributeBinding = null;
@@ -181,7 +184,7 @@ public class DefaultBindingComparisonModel <T extends Bean, C extends Bean> exte
 		}
 	}
 
-	public boolean excluded(String binding) {
+	public boolean excluded(@Nonnull String binding) {
 		if (excludedBindingPrefixes != null) {
 			String unindexedBinding = binding.replaceAll("\\[[0-9]*\\]", "");
 			for (String excludedBindingPrefix : excludedBindingPrefixes) {

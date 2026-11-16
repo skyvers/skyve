@@ -130,6 +130,7 @@ class FluentDocumentTest {
 
 	// ---- bizKey setters ------------------------------------------------------
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void bizKeyExpressionSetsExpression() {
 		FluentDocument fd = new FluentDocument().bizKeyExpression("{name}");
@@ -137,12 +138,14 @@ class FluentDocumentTest {
 		assertEquals("{name}", fd.get().getBizKey().getExpression());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void bizKeyExpressionCalledTwiceReusesBizKey() {
 		FluentDocument fd = new FluentDocument().bizKeyExpression("first").bizKeyExpression("second");
 		assertEquals("second", fd.get().getBizKey().getExpression());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void bizKeySensitivitySetsSensitivity() {
 		FluentDocument fd = new FluentDocument().bizKeySensitivity(Sensitivity.personal);
@@ -152,6 +155,7 @@ class FluentDocumentTest {
 
 	// ---- extendsDocument ----------------------------------------------------
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void extendsDocumentSetsBaseDocumentName() {
 		FluentDocument fd = new FluentDocument().extendsDocument("BaseDoc");
@@ -723,6 +727,7 @@ class FluentDocumentTest {
 		assertEquals(23, fd.get().getAttributes().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fromWithExtendsAndParentDocumentAndDynamicAndInterfaces() {
 		// Covers the extends, parentDocument, persistent, dynamic, and interfaces paths in from()

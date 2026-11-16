@@ -1,6 +1,8 @@
 package org.skyve.impl.generate.client.react;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,6 +16,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -75,6 +78,22 @@ class ReactListViewTest {
 		assertTrue(content.contains("<Column field=\"displayName\" header=\"Display Name\" />"));
 		assertTrue(content.contains("<Column field=\"code\" header=\"Code\" />"));
 		assertFalse(content.contains("notProjected"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void createWithModelWithoutDrivingDocumentThrows() throws Exception {
+		Path projectDir = Files.createTempDirectory("react-list-no-driving");
+		ReactGenerator generator = new ReactGenerator("desktop", projectDir.toString());
+		generator.srcSkyveViewsPath.mkdirs();
+
+		ReactListView view = new ReactListView(generator, "admin", "NoDrivingList");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(model.getDrivingDocument()).thenReturn(null);
+		view.setModel(mock(Module.class), mock(Document.class), "NoDrivingModel", model);
+
+		MetaDataException e = assertThrows(MetaDataException.class, view::create);
+		assertEquals("List model NoDrivingModel has no driving document.", e.getMessage());
 	}
 
 	@Test

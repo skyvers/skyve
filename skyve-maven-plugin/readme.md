@@ -26,7 +26,7 @@ mvn skyve:assemble -DskyveDir=/path/to/skyve -Dcustomer=skyve
 | `skyve:compileJasperReport` | Compile one or more `.jrxml` reports to `.jasper`. | Prompts for report name. |
 | `skyve:flutter-init` | Generate a baseline Flutter client from a Skyve project. | Prompts for missing `targetDir`, `uxui`, `projectName`, `customer`. Supports `overwrite` and `modocWhitelist`. |
 | `skyve:generateDefaultQueries` | Generate default query definitions for a module/customer. | Uses config or prompts for customer/module. |
-| `skyve:generateDomain` | Validate metadata and generate domain/test code. | Requires `generateDomainConfig` in plugin configuration. |
+| `skyve:generateDomain` | Validate metadata and generate domain/test code. | Requires `generateDomainConfig`. Set its `validate` option to `false` only to bootstrap missing generated classes, then compile and rerun with validation enabled. |
 | `skyve:generateEditView` | Generate scaffolded edit views for a document. | Uses config or prompts for customer/module/document. |
 | `skyve:newAction` | Create a new server-side action class under a document. | Prompts for module/document/action names. |
 | `skyve:newDocument` | Create a new document folder/metadata and register it in module metadata. | Prompts for module/document names. |
@@ -36,3 +36,20 @@ mvn skyve:assemble -DskyveDir=/path/to/skyve -Dcustomer=skyve
 | `skyve:script` | Apply a Skyve script file to generate/update modules/documents. | Requires `-DskyveDir` and `-Dcustomer`. Optional `-DscriptPath` (default `script/skyve.md`). |
 | `skyve:systemDocumentation` | Generate system documentation PDF (`target/system-documentation.pdf`). | Optional `customer` and `excludedModules`. |
 | `skyve:touch` | Touch deployment marker file for local app server redeploy. Useful for using a deployment scanner to point at this applications `deployments` directory when using an IDE which does not support publishing to Wildfly. | Optional `touchFile`; default is `deployments/<artifactId>.war.dodeploy`. |
+
+### Bootstrapping domain generation
+
+Domain generation validates metadata by default. If validation cannot load handwritten metadata
+implementations because their generated domain classes do not exist yet, temporarily set `validate`
+to `false` in the plugin configuration:
+
+```xml
+<generateDomainConfig>
+	<validate>false</validate>
+	<!-- existing generation options -->
+</generateDomainConfig>
+```
+
+Run `mvn skyve:generateDomain`, compile the generated classes, restore `validate` to `true` (or
+remove the option), and rerun `mvn skyve:generateDomain`. Builds and releases should always use the
+default validated mode.

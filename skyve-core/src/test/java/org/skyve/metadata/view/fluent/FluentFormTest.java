@@ -49,66 +49,79 @@ class FluentFormTest {
 		assertThat(new FluentForm().borderTitle("My Form").get().getBorderTitle(), is("My Form"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(300, new FluentForm().pixelWidth(300).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void responsiveWidthSetsValue() {
 		assertEquals(6, new FluentForm().responsiveWidth(6).get().getResponsiveWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void smSetsValue() {
 		assertEquals(2, new FluentForm().sm(2).get().getSm().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mdSetsValue() {
 		assertEquals(4, new FluentForm().md(4).get().getMd().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void lgSetsValue() {
 		assertEquals(6, new FluentForm().lg(6).get().getLg().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void xlSetsValue() {
 		assertEquals(8, new FluentForm().xl(8).get().getXl().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageWidthSetsValue() {
 		assertEquals(50, new FluentForm().percentageWidth(50).get().getPercentageWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelWidthSetsValue() {
 		assertEquals(100, new FluentForm().minPixelWidth(100).get().getMinPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelWidthSetsValue() {
 		assertEquals(800, new FluentForm().maxPixelWidth(800).get().getMaxPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelHeightSetsValue() {
 		assertEquals(200, new FluentForm().pixelHeight(200).get().getPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageHeightSetsValue() {
 		assertEquals(75, new FluentForm().percentageHeight(75).get().getPercentageHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelHeightSetsValue() {
 		assertEquals(50, new FluentForm().minPixelHeight(50).get().getMinPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelHeightSetsValue() {
 		assertEquals(500, new FluentForm().maxPixelHeight(500).get().getMaxPixelHeight().intValue());
@@ -131,13 +144,13 @@ class FluentFormTest {
 	}
 
 	@Test
-	void disabledConditionNameSetsValue() {
-		assertThat(new FluentForm().disabledConditionName("disabled").get().getDisabledConditionName(), is("disabled"));
+	void disabledConditionSetsValue() {
+		assertThat(new FluentForm().disabledCondition("disabled").get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentForm().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentForm().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -245,17 +258,17 @@ class FluentFormTest {
 	}
 
 	@Test
-	void fromCopiesDisabledConditionName() {
+	void fromCopiesDisabledCondition() {
 		Form src = new Form();
-		src.setDisabledConditionName("disabled");
-		assertThat(new FluentForm().from(src).get().getDisabledConditionName(), is("disabled"));
+		src.setXmlDisabledCondition("disabled");
+		assertThat(new FluentForm().from(src).get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test
-	void fromCopiesInvisibleConditionName() {
+	void fromCopiesInvisibleCondition() {
 		Form src = new Form();
-		src.setInvisibleConditionName("invisible");
-		assertThat(new FluentForm().from(src).get().getInvisibleConditionName(), is("invisible"));
+		src.setXmlInvisibleCondition("invisible");
+		assertThat(new FluentForm().from(src).get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -286,6 +299,7 @@ class FluentFormTest {
 		assertNotEquals(Boolean.TRUE, new FluentForm().from(src).get().getBorder());
 	}
 
+        @SuppressWarnings("null") // a null here fails the test
         @Test
         void fromCopiesSizingFields() {
                 Form src = new Form();

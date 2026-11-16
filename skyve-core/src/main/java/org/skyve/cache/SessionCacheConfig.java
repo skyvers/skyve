@@ -2,6 +2,8 @@ package org.skyve.cache;
 
 import java.util.TreeSet;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Configures the web session index cache.
  *
@@ -56,7 +58,7 @@ public class SessionCacheConfig extends EHCacheConfig<String, TreeSet> {
 	 * @return config details in JSON-like form
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("{heapSizeEntries:").append(getHeapSizeEntries());
 		sb.append(",offHeapSizeInMB:").append(getOffHeapSizeInMB());

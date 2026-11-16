@@ -1,5 +1,7 @@
 package org.skyve.metadata.view;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view elements that carry an explicit editable override.
  *
@@ -16,11 +18,11 @@ public interface Editable {
 	 * @return {@code Boolean.TRUE} to force editable, {@code Boolean.FALSE} to force
 	 *         read-only, or {@code null} to inherit
 	 */
-	public Boolean getEditable();
+	public @Nullable Boolean getEditable();
 
 	/**
 	 * Sets the editable.
 	 * @param editable the editable
 	 */
-	public void setEditable(Boolean editable);
+	public void setEditable(@Nullable Boolean editable);
 }

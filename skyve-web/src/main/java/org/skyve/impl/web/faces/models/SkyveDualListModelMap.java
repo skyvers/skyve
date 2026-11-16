@@ -13,12 +13,14 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Relation;
@@ -27,6 +29,8 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 
 /**
@@ -43,7 +47,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	/**
 	 * Creates a dual-list model map backed by the supplied Faces view.
 	 */
-	public SkyveDualListModelMap(FacesView view) {
+	public SkyveDualListModelMap(@Nullable FacesView view) {
 		this.view = view;
 	}
 
@@ -53,7 +57,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 * @param key	The lookup description binding.
 	 */
 	@Override
-	public DualListModel<DomainValue> get(Object key) {
+	public @Nonnull DualListModel<DomainValue> get(@SuppressWarnings("null") @Nonnull Object key) {
 		if (! containsKey(key)) {
 			scatter((String) key);
 		}
@@ -66,7 +70,7 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 	 * 
 	 * @param binding
 	 */
-	private void scatter(String binding) {
+	private void scatter(@Nonnull String binding) {
 		try {
 			if (view == null) {
 				put(binding, new DualListModel<>(Collections.emptyList(), Collections.emptyList()));
@@ -112,14 +116,12 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 				// If the domain value exists in the target collection, 
 				// move it from the source to the target in the DualListModel
 				List<DomainValue> target = new ArrayList<>(10);
-				Iterator<DomainValue> i = source.iterator();
-				while (i.hasNext()) {
-					DomainValue domainValue = i.next();
-					Bean element = Binder.getElementInCollection(bean, binding, domainValue.getCode());
-					if (element != null) {
-						i.remove();
-						target.add(domainValue);
-					}
+				if ((targetAttribute instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered())) {
+					// an ordered membership shows its members in the collection's order
+					moveMembersInOrder(bean, binding, source, target);
+				}
+				else {
+					moveMembers(bean, binding, source, target);
 				}
 
 				// put in the new list model
@@ -131,6 +133,63 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 		}
 		catch (Exception e) {
 			throw new FacesException("Could not scatter list membership " + binding, e);
+		}
+	}
+
+	/**
+	 * Moves the domain values of a collection's members from the source list to the target list, in the domain values'
+	 * order.
+	 *
+	 * @param bean the bean that holds the collection; must not be {@code null}
+	 * @param binding the collection's binding; must not be {@code null}
+	 * @param source the domain values not yet chosen, which loses each member's value; must not be {@code null}
+	 * @param target the chosen domain values, which gains each member's value; must not be {@code null}
+	 */
+	private static void moveMembers(@Nonnull Bean bean,
+									@Nonnull String binding,
+									@Nonnull List<DomainValue> source,
+									@Nonnull List<DomainValue> target) {
+		Iterator<DomainValue> i = source.iterator();
+		while (i.hasNext()) {
+			DomainValue domainValue = i.next();
+			Bean element = Binder.getElementInCollection(bean, binding, domainValue.getCode());
+			if (element != null) {
+				i.remove();
+				target.add(domainValue);
+			}
+		}
+	}
+
+	/**
+	 * Moves the domain values of an ordered collection's members from the source list to the target list, in the
+	 * collection's order.
+	 *
+	 * <p>Complexity: O(e * s), where e is the number of members and s the number of domain values.
+	 *
+	 * @param bean the bean that holds the collection; must not be {@code null}
+	 * @param binding the collection's binding; must not be {@code null}
+	 * @param source the domain values not yet chosen, which loses each member's value; must not be {@code null}
+	 * @param target the chosen domain values, which gains each member's value in order; must not be {@code null}
+	 */
+	private static void moveMembersInOrder(@Nonnull Bean bean,
+											@Nonnull String binding,
+											@Nonnull List<DomainValue> source,
+											@Nonnull List<DomainValue> target) {
+		@SuppressWarnings("unchecked")
+		List<Bean> elements = (List<Bean>) Binder.get(bean, binding);
+		if (elements == null) {
+			return;
+		}
+		for (Bean element : elements) {
+			Iterator<DomainValue> i = source.iterator();
+			while (i.hasNext()) {
+				DomainValue domainValue = i.next();
+				if (domainValue.getCode().equals(element.getBizId())) {
+					i.remove();
+					target.add(domainValue);
+					break;
+				}
+			}
 		}
 	}
 
@@ -182,7 +241,11 @@ public class SkyveDualListModelMap extends TreeMap<String, DualListModel<DomainV
 						String thisBizId = domainValue.getCode();
 						Bean thisBean = BindUtil.getElementInCollection(list, thisBizId);
 						if (thisBean == null) { // DNE in list
-							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p, bean, view.getWebContext());
+							AbstractWebContext webContext = view.getWebContext();
+							if (webContext == null) { // the current bean comes from the web context
+								throw new IllegalStateException("Cannot gather list membership " + binding + " as the FacesView has no web context");
+							}
+							thisBean = WebUtil.findReferencedBean(rd, thisBizId, p, bean, webContext);
 							list.add(newIndex, thisBean);
 						}
 						else { // found in list

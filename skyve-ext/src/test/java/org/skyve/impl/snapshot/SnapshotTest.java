@@ -1,21 +1,21 @@
 package org.skyve.impl.snapshot;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.metadata.SortDirection;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 @SuppressWarnings("static-method")
-public class SnapshotTest {
+class SnapshotTest {
 
 	// ---- getters / setters ----
 
 	@Test
-	public void testDefaultStateIsNull() {
+	void testDefaultStateIsNull() {
 		Snapshot s = new Snapshot();
 		assertNull(s.getAdvanced());
 		assertNull(s.getSummary());
@@ -28,42 +28,42 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testSetAndGetAdvanced() {
+	void testSetAndGetAdvanced() {
 		Snapshot s = new Snapshot();
 		s.setAdvanced(Snapshot.AdvancedSearchType.inline);
 		assertEquals(Snapshot.AdvancedSearchType.inline, s.getAdvanced());
 	}
 
 	@Test
-	public void testSetAndGetSummary() {
+	void testSetAndGetSummary() {
 		Snapshot s = new Snapshot();
 		s.setSummary(AggregateFunction.Count);
 		assertEquals(AggregateFunction.Count, s.getSummary());
 	}
 
 	@Test
-	public void testSetAndGetGroup() {
+	void testSetAndGetGroup() {
 		Snapshot s = new Snapshot();
 		s.setGroup("category");
 		assertEquals("category", s.getGroup());
 	}
 
 	@Test
-	public void testPutSortDefaultAscending() {
+	void testPutSortDefaultAscending() {
 		Snapshot s = new Snapshot();
 		s.putSort("name");
 		assertEquals(SortDirection.ascending, s.getSorts().get("name"));
 	}
 
 	@Test
-	public void testPutSortDescending() {
+	void testPutSortDescending() {
 		Snapshot s = new Snapshot();
 		s.putSort("date", SortDirection.descending);
 		assertEquals(SortDirection.descending, s.getSorts().get("date"));
 	}
 
 	@Test
-	public void testPutColumnWithoutWidth() {
+	void testPutColumnWithoutWidth() {
 		Snapshot s = new Snapshot();
 		s.putColumn("status");
 		assertTrue(s.getColumns().containsKey("status"));
@@ -71,21 +71,21 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testPutColumnWithWidth() {
+	void testPutColumnWithWidth() {
 		Snapshot s = new Snapshot();
 		s.putColumn("name", 150);
 		assertEquals(Integer.valueOf(150), s.getColumns().get("name"));
 	}
 
 	@Test
-	public void testPutColumnWithIntegerWidth() {
+	void testPutColumnWithIntegerWidth() {
 		Snapshot s = new Snapshot();
 		s.putColumn("code", Integer.valueOf(80));
 		assertEquals(Integer.valueOf(80), s.getColumns().get("code"));
 	}
 
 	@Test
-	public void testSetFilter() {
+	void testSetFilter() {
 		Snapshot s = new Snapshot();
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("name");
@@ -98,7 +98,7 @@ public class SnapshotTest {
 	// ---- JSON round-trip ----
 
 	@Test
-	public void testToJSONProducesNonEmptyString() {
+	void testToJSONProducesNonEmptyString() {
 		Snapshot s = new Snapshot();
 		s.putSort("name");
 		s.putColumn("name", 100);
@@ -108,7 +108,7 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testToJSONRoundtripSorts() throws Exception {
+	void testToJSONRoundtripSorts() throws Exception {
 		Snapshot s = new Snapshot();
 		s.putSort("name", SortDirection.ascending);
 		s.putSort("date", SortDirection.descending);
@@ -121,7 +121,7 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testToJSONRoundtripColumns() throws Exception {
+	void testToJSONRoundtripColumns() throws Exception {
 		Snapshot s = new Snapshot();
 		s.putColumn("name", 200);
 		s.putColumn("status");
@@ -133,7 +133,7 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testToJSONRoundtripGroup() throws Exception {
+	void testToJSONRoundtripGroup() throws Exception {
 		Snapshot s = new Snapshot();
 		s.setGroup("category");
 
@@ -144,7 +144,7 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testToJSONRoundtripAdvanced() throws Exception {
+	void testToJSONRoundtripAdvanced() throws Exception {
 		Snapshot s = new Snapshot();
 		s.setAdvanced(Snapshot.AdvancedSearchType.radio);
 
@@ -155,7 +155,7 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testToJSONEmptySnapshotRoundtrip() throws Exception {
+	void testToJSONEmptySnapshotRoundtrip() throws Exception {
 		Snapshot s = new Snapshot();
 		String json = s.toJSON();
 		Snapshot restored = Snapshot.fromJSON(json);
@@ -163,14 +163,14 @@ public class SnapshotTest {
 	}
 
 	@Test
-	public void testFromJSONReturnsNullForNullInput() throws Exception {
+	void testFromJSONReturnsNullForNullInput() throws Exception {
 		// JSON.unmarshall("null") returns null as the value
 		Snapshot result = Snapshot.fromJSON("null");
 		assertNull(result);
 	}
 
         @Test
-        public void testToJSONRoundtripSummary() throws Exception {
+        void testToJSONRoundtripSummary() throws Exception {
                 Snapshot s = new Snapshot();
                 s.setSummary(AggregateFunction.Sum);
 
@@ -181,7 +181,7 @@ public class SnapshotTest {
         }
 
 	@Test
-	public void testFromJSONRoundtripWithFilter() throws Exception {
+	void testFromJSONRoundtripWithFilter() throws Exception {
 		Snapshot s = new Snapshot();
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("status");

@@ -561,7 +561,8 @@ class VueSnapshotAdapterTest {
 
 	private static void bindMockUser() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
-		when(persistence.getUser()).thenReturn(mock(User.class));
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
 		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
 		field.setAccessible(true);
 		@SuppressWarnings("unchecked")

@@ -67,6 +67,7 @@ import org.hibernate.type.Type;
 import org.skyve.EXT;
 import org.skyve.content.BeanContent;
 import org.skyve.content.TextExtractor;
+import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
 import org.skyve.domain.DynamicBean;
@@ -83,6 +84,7 @@ import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -96,7 +98,6 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.dialect.DDLDelegate;
 import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.CascadeDeleteBeanVisitor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.ValidationUtil;
@@ -334,6 +335,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		else {
 			cfg.put(AvailableSettings.DATASOURCE, dataSource);
 		}
+		if (ConnectionCustomiserStaticSingleton.get() != null) {
+			cfg.put(AvailableSettings.CONNECTION_PROVIDER, (dataSource == null) ?
+																CustomisingDriverManagerConnectionProvider.class.getName() :
+																CustomisingDatasourceConnectionProvider.class.getName());
+		}
 		cfg.put(AvailableSettings.DIALECT, UtilImpl.DATA_STORE.getDialectClassName());
 
 		// Query Caching screws up pessimistic locking
@@ -393,14 +399,14 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 			 * Add the JPA Integrator and then the skyve event listeners.
 			 */
 			@Override
-			public Iterable<Integrator> getIntegrators() {
+			public @Nonnull Iterable<Integrator> getIntegrators() {
 				List<Integrator> result = new ArrayList<>(1);
 				
 				result.add(new Integrator() {
 					@Override
-					public void integrate(@SuppressWarnings("hiding") Metadata metadata,
-											SessionFactoryImplementor sessionFactory,
-											SessionFactoryServiceRegistry serviceRegistry) {
+					public void integrate(@SuppressWarnings({"hiding", "null"}) @Nonnull Metadata metadata,
+											@SuppressWarnings("null") @Nonnull SessionFactoryImplementor sessionFactory,
+											@SuppressWarnings("null") @Nonnull SessionFactoryServiceRegistry serviceRegistry) {
 						HibernateListener listener = new HibernateListener();
 						final EventListenerRegistry eventListenerRegistry = serviceRegistry.getService(EventListenerRegistry.class);
 
@@ -424,7 +430,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 					 * {@inheritDoc}
 					 */
 					@Override
-					public void disintegrate(SessionFactoryImplementor sessionFactory, SessionFactoryServiceRegistry serviceRegistry) {
+					public void disintegrate(@SuppressWarnings("null") @Nonnull SessionFactoryImplementor sessionFactory,
+											@SuppressWarnings("null") @Nonnull SessionFactoryServiceRegistry serviceRegistry) {
 						// nothing to clean up here
 					}
 				});
@@ -440,7 +447,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		sources.addAnnotatedClass(AbstractPersistentBean.class);
 		sources.addAnnotatedClass(UniquenessEntity.class);
 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		StringBuilder sb = new StringBuilder(64);
 
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -497,7 +504,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * Validate the configured Hibernate bulk-id strategy to prevent unsafe inline strategies that are vulnerable to CVE-2026-0603.
 	 * @param cfg
 	 */
-	private static void validateBulkIdStrategyConfiguration(Map<String, String> cfg) {
+	private static void validateBulkIdStrategyConfiguration(@Nonnull Map<String, String> cfg) {
 		String configuredStrategy = cfg.get(AvailableSettings.HQL_BULK_ID_STRATEGY);
 		if (configuredStrategy == null) {
 			return;
@@ -577,7 +584,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public final void generateDDL(List<String> dropDDL, List<String> createDDL, List<String> updateDDL) {
+	public final void generateDDL(@Nullable List<String> dropDDL, @Nullable List<String> createDDL, @Nullable List<String> updateDDL) {
 		try {
 			if (dropDDL != null) {
 				new SchemaExport().perform(SchemaExport.Action.DROP, metadata, new ListScriptTargetOutput(dropDDL));
@@ -595,7 +602,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 				ExecutionOptions executionOptions = new ExecutionOptions() {
 					@Override
-					public Map<?, ?> getConfigurationValues() {
+					public @Nonnull Map<?, ?> getConfigurationValues() {
 						return configurationValues;
 					}
 
@@ -605,19 +612,19 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 					}
 
 					@Override
-					public org.hibernate.tool.schema.spi.ExceptionHandler getExceptionHandler() {
+					public @Nonnull org.hibernate.tool.schema.spi.ExceptionHandler getExceptionHandler() {
 						return ExceptionHandlerLoggedImpl.INSTANCE;
 					}
 				};
 
 				TargetDescriptor targetDescriptor = new TargetDescriptor() {
 					@Override
-					public EnumSet<TargetType> getTargetTypes() {
+					public @Nonnull EnumSet<TargetType> getTargetTypes() {
 						return EnumSet.of(TargetType.SCRIPT);
 					}
 
 					@Override
-					public ScriptTargetOutput getScriptTargetOutput() {
+					public @Nonnull ScriptTargetOutput getScriptTargetOutput() {
 						return new ListScriptTargetOutput(updateDDL);
 					}
 				};
@@ -640,7 +647,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final class ListScriptTargetOutput implements ScriptTargetOutput {
 		private final List<String> commands;
 
-		private ListScriptTargetOutput(List<String> commands) {
+		private ListScriptTargetOutput(@Nonnull List<String> commands) {
 			this.commands = commands;
 		}
 
@@ -650,7 +657,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		}
 
 		@Override
-		public void accept(String command) {
+		public void accept(@Nullable String command) {
 			if (command != null) {
 				String sql = command.trim();
 				if (! sql.isEmpty()) {
@@ -676,7 +683,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The Hibernate entity name to use.
 	 */
 	@Override
-	public final String getDocumentEntityName(String moduleName, String documentName) {
+	public final @Nonnull String getDocumentEntityName(@Nonnull String moduleName, @Nonnull String documentName) {
 		String overriddenEntityName = user.getCustomerName() + moduleName + documentName;
 
 		if (sf.getMetamodel().entity(overriddenEntityName) != null) {
@@ -701,7 +708,8 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	}
 
 	/**
-	 * Normalize and rethrow persistence exceptions as Skyve domain exceptions.
+	 * Normalise and rethrow persistence exceptions as Skyve domain exceptions.
+	 * A {@link QuestionException} is rethrown as it is, without being logged.
 	 *
 	 * @param t The throwable to interpret.
 	 * @param operationType The persistence operation being performed.
@@ -711,6 +719,10 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private void treatPersistenceThrowable(@Nonnull Throwable t,
 											@Nonnull OperationType operationType,
 											@Nullable PersistentBean bean) {
+		// A question asked from a Bizlet or interceptor is not an error - let it through as it is
+		if (t instanceof QuestionException question) {
+			throw question;
+		}
 		LOGGER.error(t.getMessage(), t);
 		if (t instanceof jakarta.persistence.OptimisticLockException) {
 			if (bean == null) {
@@ -785,6 +797,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	            // Earlier versions of Hibernate required explicit disconnection and reconnection of a Session. 
 	            // These methods are deprecated, as beginning and ending a transaction has the same effect.
 				et.begin();
+				customiseConnection();
 			}
 		}
 		finally {
@@ -800,9 +813,25 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param user The current user.
 	 */
 	@Override
-	public void setUser(User user) {
+	public void setUser(@Nonnull User user) {
 		super.setUser(user);
 		resetDocumentPermissionScopes();
+		if ((em != null) && em.getTransaction().isActive()) {
+			customiseConnection();
+		}
+	}
+
+	/**
+	 * Customises the connection of the active transaction for this persistence's user, with the
+	 * {@code factories.connectionCustomiserClass} implementation if there is one.
+	 * Called when a transaction begins and when the user is set during one, because a persistence often
+	 * begins its transaction before its user is known.
+	 */
+	@SuppressWarnings("resource") // this method doesn't own this connection
+	private void customiseConnection() {
+		if (ConnectionCustomiserStaticSingleton.get() != null) {
+			ConnectionCustomiserStaticSingleton.customise(getConnection(), getUser(), UtilImpl.DATA_STORE);
+		}
 	}
 
 	/**
@@ -814,7 +843,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The value returned by the function.
 	 */
 	@Override
-	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+	public @Nullable <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Function<Persistence, R> function) {
 		try {
 			setDocumentPermissionScopes(scope);
 			return function.apply(this);
@@ -831,7 +860,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param consumer The work to execute.
 	 */
 	@Override
-	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+	public void withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Consumer<Persistence> consumer) {
 		try {
 			setDocumentPermissionScopes(scope);
 			consumer.accept(this);
@@ -848,7 +877,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	private void setDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -875,7 +904,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	private void resetDocumentPermissionScopes() {
 		Set<String> accessibleModuleNames = user.getAccessibleModuleNames(); 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 
 		// Enable all filters required for this user
 		for (String moduleName : repository.getAllVanillaModuleNames()) {
@@ -904,7 +933,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private void setFilters(@Nonnull Document document, @Nonnull DocumentPermissionScope scope) {
 		Set<String> accessibleModuleNames = ((UserImpl) user).getAccessibleModuleNames(); 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		String userDataGroupId = user.getDataGroupId();
 		Customer customer = user.getCustomer();
 		String moduleName = document.getOwningModuleName();
@@ -1184,7 +1213,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param bean The bean to evict.
 	 */
 	@Override
-	public void evictCached(Bean bean) {
+	public void evictCached(@Nonnull Bean bean) {
 		if (bean instanceof DynamicBean) {
 			dynamicPersistence.evictCached(bean);
 		}
@@ -1200,7 +1229,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return True if cached in the session or dynamic persistence.
 	 */
 	@Override
-	public boolean cached(Bean bean) {
+	public boolean cached(@Nonnull Bean bean) {
 		if (bean instanceof DynamicBean) {
 			return dynamicPersistence.cached(bean);
 		}
@@ -1217,7 +1246,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return True if cached.
 	 */
 	@Override
-	public boolean sharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId) {
+	public boolean sharedCacheCollection(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String collectionName, @Nonnull String ownerBizId) {
 		String role = getCollectionRoleName(moduleName, documentName, collectionName);
 		return sf.getCache().containsCollection(role, ownerBizId);
 	}
@@ -1230,7 +1259,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return True if cached.
 	 */
 	@Override
-	public boolean sharedCacheCollection(Bean owner, String collectionName) {
+	public boolean sharedCacheCollection(@Nonnull Bean owner, @Nonnull String collectionName) {
 		return sharedCacheCollection(owner.getBizModule(), owner.getBizDocument(), collectionName, owner.getBizId());
 	}
 	
@@ -1243,7 +1272,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return True if cached.
 	 */
 	@Override
-	public boolean sharedCacheBean(String moduleName, String documentName, String bizId) {
+	public boolean sharedCacheBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId) {
 		return sf.getCache().containsEntity(getDocumentEntityName(moduleName, documentName), bizId);
 	}
 
@@ -1254,7 +1283,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return True if cached.
 	 */
 	@Override
-	public boolean sharedCacheBean(Bean bean) {
+	public boolean sharedCacheBean(@Nonnull Bean bean) {
 		return sharedCacheBean(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 	
@@ -1282,7 +1311,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param collectionName The collection name.
 	 */
 	@Override
-	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName) {
+	public void evictSharedCacheCollections(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String collectionName) {
 		String role = getCollectionRoleName(moduleName, documentName, collectionName);
 		sf.getCache().evictCollectionData(role);
 	}
@@ -1296,7 +1325,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param ownerBizId The owner bean id.
 	 */
 	@Override
-	public void evictSharedCacheCollection(String moduleName, String documentName, String collectionName, String ownerBizId) {
+	public void evictSharedCacheCollection(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String collectionName, @Nonnull String ownerBizId) {
 		String role = getCollectionRoleName(moduleName, documentName, collectionName);
 		sf.getCache().evictCollectionData(role, ownerBizId);
 	}
@@ -1308,7 +1337,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param collectionName The collection name.
 	 */
 	@Override
-	public void evictSharedCacheCollection(Bean owner, String collectionName) {
+	public void evictSharedCacheCollection(@Nonnull Bean owner, @Nonnull String collectionName) {
 		evictSharedCacheCollection(owner.getBizModule(), owner.getBizDocument(), collectionName, owner.getBizId());
 	}
 	
@@ -1327,7 +1356,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param documentName The document name.
 	 */
 	@Override
-	public void evictSharedCacheBeans(String moduleName, String documentName) {
+	public void evictSharedCacheBeans(@Nonnull String moduleName, @Nonnull String documentName) {
 		sf.getCache().evictEntityData(getDocumentEntityName(moduleName, documentName));
 	}
 	
@@ -1339,7 +1368,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param bizId The bean id.
 	 */
 	@Override
-	public void evictSharedCachedBean(String moduleName, String documentName, String bizId) {
+	public void evictSharedCachedBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId) {
 		sf.getCache().evictEntityData(getDocumentEntityName(moduleName, documentName), bizId);
 	}
 	
@@ -1349,7 +1378,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param bean The bean to evict.
 	 */
 	@Override
-	public void evictSharedCachedBean(Bean bean) {
+	public void evictSharedCachedBean(@Nonnull Bean bean) {
 		evictSharedCachedBean(bean.getBizModule(), bean.getBizDocument(), bean.getBizId());
 	}
 
@@ -1397,11 +1426,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		new BeanVisitor(true, false) {
 			@Override
 			@SuppressWarnings("synthetic-access")
-			protected boolean accept(String binding,
-										@SuppressWarnings("hiding") Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean) 
+			protected boolean accept(@Nonnull String binding,
+										@SuppressWarnings("hiding") @Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
 				if ((owningRelation instanceof Inverse inverse) && 
@@ -1462,7 +1491,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @param beanToSave The bean to save.
 	 */
 	@Override
-	public void preMerge(Document document, PersistentBean beanToSave) {
+	public void preMerge(@Nonnull Document document, @Nonnull PersistentBean beanToSave) {
 		preMerge(document, beanToSave, null);
 	}
 	
@@ -1503,11 +1532,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 											@Nonnull final Bean beanToSave) {
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										@SuppressWarnings("hiding") Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean)
+			protected boolean accept(@Nonnull String binding,
+										@SuppressWarnings("hiding") @Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
 				if ((owningRelation instanceof Inverse inverse) && 
@@ -1568,11 +1597,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 		
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										@SuppressWarnings("hiding") Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean)
+			protected boolean accept(@Nonnull String binding,
+										@SuppressWarnings("hiding") @Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean)
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
 				if ((owningRelation instanceof Inverse inverse) && 
@@ -1670,7 +1699,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The persisted bean instance.
 	 */
 	@Override
-	public final <T extends PersistentBean> T save(Document document, T bean) {
+	public final @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean) {
 		return save(document, bean, true);
 	}
 	
@@ -1683,7 +1712,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The persisted bean instance.
 	 */
 	@Override
-	public final <T extends PersistentBean> T merge(Document document, T bean) {
+	public final @Nonnull <T extends PersistentBean> T merge(@Nonnull Document document, @Nonnull T bean) {
 		return save(document, bean, false);
 	}
 
@@ -1695,7 +1724,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The persisted bean instances.
 	 */
 	@Override
-	public final <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") T... beans) {
+	public final @Nonnull <T extends PersistentBean> List<T> save(@SuppressWarnings("unchecked") @Nonnull T... beans) {
 		return save(Arrays.asList(beans), true);
 	}
 	
@@ -1707,7 +1736,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The persisted bean instances.
 	 */
 	@Override
-	public final <T extends PersistentBean> List<T> save(List<T> beans) {
+	public final @Nonnull <T extends PersistentBean> List<T> save(@Nonnull List<T> beans) {
 		return save(beans, true);
 	}
 
@@ -1719,7 +1748,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The persisted bean instances.
 	 */
 	@Override
-	public final <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") T... beans) {
+	public final @Nonnull <T extends PersistentBean> List<T> merge(@SuppressWarnings("unchecked") @Nonnull T... beans) {
 		return save(Arrays.asList(beans), false);
 	}
 	
@@ -1731,7 +1760,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The persisted bean instances.
 	 */
 	@Override
-	public final <T extends PersistentBean> List<T> merge(List<T> beans) {
+	public final @Nonnull <T extends PersistentBean> List<T> merge(@Nonnull List<T> beans) {
 		return save(beans, false);
 	}
 
@@ -1988,16 +2017,16 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void postMerge(Document document, final PersistentBean beanToSave) {
+	public void postMerge(@Nonnull Document document, final @Nonnull PersistentBean beanToSave) {
 		final Customer customer = user.getCustomer();
 		
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										@SuppressWarnings("hiding") Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean bean) 
+			protected boolean accept(@Nonnull String binding,
+										@SuppressWarnings("hiding") @Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean bean) 
 			throws Exception {
 				// Process an inverse if the inverse is specified as cascading.
 				if ((owningRelation instanceof Inverse inverse) && 
@@ -2054,11 +2083,11 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										@SuppressWarnings("hiding") Document document,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean unmergedPart) {
+			protected boolean accept(@Nonnull String binding,
+										@SuppressWarnings("hiding") @Nonnull Document document,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean unmergedPart) {
 				// Replace any bean that has been persisted by reachability but is the old unpersisted/detached version
 				Bean mergedPart = binding.isEmpty() ? mergedBean : (Bean) BindUtil.get(mergedBean, binding);
 				if (mergedPart == null) { // when a dynamic relation encountered and not persisted
@@ -2349,8 +2378,8 @@ if (document.isDynamic()) return;
 						QUERY_LOGGER.info("TEST CONSTRAINT {}.{}.{} using {}", currentOwningModuleName, currentDocumentName, constraint.getName(), queryString);
 					}
 					
-					// Always use streaming JDBC results to avoid out of memory errors on large result sets
-					query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+					// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+					query.setFetchSize(JDBC_FETCH_SIZE);
 
 					query.setLockMode("bean", LockMode.READ); // take a read lock on all referenced documents
 					
@@ -2444,7 +2473,7 @@ if (document.isDynamic()) return;
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public final <T extends PersistentBean> void delete(Document document, T bean) {
+	public final <T extends PersistentBean> void delete(@Nonnull Document document, @Nonnull T bean) {
 		if (isPersisted(bean)) {
 			try {
 				CustomerImpl internalCustomer = (CustomerImpl) getUser().getCustomer();
@@ -2465,11 +2494,11 @@ if (document.isDynamic()) return;
 					// Find any other static beans referenced by dynamic relations
 					new BeanVisitor(true, false) {
 						@Override
-						protected boolean accept(String binding,
-													Document visitedDocument,
-													Document owningDocument,
-													Relation owningRelation,
-													Bean visitedBean) throws Exception {
+						protected boolean accept(@Nonnull String binding,
+													@Nonnull Document visitedDocument,
+													@Nullable Document owningDocument,
+													@Nullable Relation owningRelation,
+													@Nonnull Bean visitedBean) throws Exception {
 							if ((owningRelation == null) || (owningDocument == null)) { // top level bean or parent
 								return true;
 							}
@@ -2735,8 +2764,8 @@ if (document.isDynamic()) return;
 
 			Query<?> query = session.createQuery(queryString.toString());
 
-			// Always use streaming JDBC results to avoid out of memory errors on large result sets
-			query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+			// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+			query.setFetchSize(JDBC_FETCH_SIZE);
 
 			query.setLockMode("bean", LockMode.READ); // read lock required for referential integrity
 
@@ -2822,8 +2851,8 @@ if (document.isDynamic()) return;
 		
 				NativeQuery<?> query = session.createNativeQuery(queryString.toString());
 
-				// Always use streaming JDBC results to avoid out of memory errors on large result sets
-				query.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
+				// Fetch the scrolled rows in batches to avoid out of memory errors on large result sets
+				query.setFetchSize(JDBC_FETCH_SIZE);
 				
 				// Set timeout if applicable
 				int timeout = UtilImpl.DATA_STORE.getOltpConnectionTimeoutInSeconds();
@@ -2887,7 +2916,7 @@ if (document.isDynamic()) return;
 	 * @return The bean instance, or null if not found.
 	 */
 	@Override
-	public <T extends Bean> T retrieve(Document document, String id) {
+	public @Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id) {
 		return retrieve(document, id, false);
 	}
 	
@@ -2901,7 +2930,7 @@ if (document.isDynamic()) return;
 	 * @throws NoResultsException If no bean is found.
 	 */
 	@Override
-	public <T extends Bean> T retrieveAndLock(Document document, String id) {
+	public @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull Document document, @Nonnull String id) {
 		T result = retrieve(document, id, true);
 		if (result == null) {
 			throw new NoResultsException();
@@ -2971,7 +3000,7 @@ if (document.isDynamic()) return;
 	 * @throws Exception If post-load processing fails.
 	 */
 	@Override
-	public void postLoad(PersistentBean loadedBean)
+	public void postLoad(@Nonnull PersistentBean loadedBean)
 	throws Exception {
 		// Inject any dependencies
 		UtilImpl.inject(loadedBean);
@@ -3058,7 +3087,7 @@ if (document.isDynamic()) return;
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void reindex(PersistentBean beanToReindex)
+	public void reindex(@Nonnull PersistentBean beanToReindex)
 	throws Exception {
 		TextExtractor extractor = null; // lazily instantiated
 		BeanContent content = new BeanContent(beanToReindex);
@@ -3181,7 +3210,7 @@ if (document.isDynamic()) return;
 	// Need the callback because an element removed from a collection will be deleted and only this event will pick it up
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void preRemove(PersistentBean bean)
+	public void preRemove(@Nonnull PersistentBean bean)
 	throws Exception {
 		final Map<String, Set<Bean>> beansToDelete = deleteContext.isEmpty() ? new TreeMap<>() : deleteContext.peek();
 
@@ -3204,12 +3233,12 @@ if (document.isDynamic()) return;
 		// Collect beans to be cascaded
 		new CascadeDeleteBeanVisitor() {
 			@Override
-			public void preDeleteProcessing(Document documentToCascade, Bean beanToCascade) 
+			public void preDeleteProcessing(@Nonnull Document documentToCascade, @Nonnull Bean beanToCascade) 
 			throws Exception {
 				add(documentToCascade, beanToCascade);
 			}
 			
-			private void add(Document documentToCascade, Bean beanToCascade) 
+			private void add(@Nonnull Document documentToCascade, @Nonnull Bean beanToCascade) 
 			throws Exception {
 				String modoc = new StringBuilder(64).append(documentToCascade.getOwningModuleName()).append('.').append(documentToCascade.getName()).toString();
 				Set<Bean> theseBeansToDelete = beansToDelete.get(modoc);
@@ -3262,7 +3291,7 @@ if (document.isDynamic()) return;
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void postRemove(PersistentBean bean)
+	public void postRemove(@Nonnull PersistentBean bean)
 	throws Exception {
 		final Customer customer = user.getCustomer();
 		final Module module = customer.getModule(bean.getBizModule());
@@ -3320,7 +3349,7 @@ if (document.isDynamic()) return;
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void removeInsertedUniqueConstraintState(Customer customer, Document document, Bean bean) {
+	private void removeInsertedUniqueConstraintState(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 // TODO - Work the dynamic something in here - remove the short-circuit on dynamic
 if (document.isDynamic()) return;
 
@@ -3417,7 +3446,7 @@ public void doWorkOnConnection(Session session) {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void upsertBeanTuple(PersistentBean bean) {
+	public void upsertBeanTuple(@Nonnull PersistentBean bean) {
 		CustomerImpl customer = (CustomerImpl) user.getCustomer();
 		Module module = customer.getModule(bean.getBizModule());
 		Document document = module.getDocument(customer, bean.getBizDocument());
@@ -3674,7 +3703,7 @@ public void doWorkOnConnection(Session session) {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName) {
+	public void upsertCollectionTuples(@Nonnull PersistentBean owningBean, @Nonnull String collectionName) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
@@ -3731,7 +3760,7 @@ public void doWorkOnConnection(Session session) {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void insertCollectionTuples(PersistentBean owningBean, String collectionName) {
+	public void insertCollectionTuples(@Nonnull PersistentBean owningBean, @Nonnull String collectionName) {
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(owningBean.getBizModule());
 		Document document = module.getDocument(customer, owningBean.getBizDocument());
@@ -3787,7 +3816,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The SQL wrapper.
 	 */
 	@Override
-	public SQL newSQL(String query) {
+	public @Nonnull SQL newSQL(@Nonnull String query) {
 		return new HibernateSQL(query, this);
 	}
 
@@ -3799,7 +3828,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The SQL wrapper.
 	 */
 	@Override
-	public SQL newNamedSQL(String moduleName, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		SQLDefinition sql = module.getSQL(queryName);
 		HibernateSQL result = new HibernateSQL(sql.getQuery(), this);
@@ -3815,7 +3844,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The BizQL wrapper.
 	 */
 	@Override
-	public SQL newNamedSQL(Module module, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull Module module, @Nonnull String queryName) {
 		SQLDefinition sql = module.getSQL(queryName);
 		HibernateSQL result = new HibernateSQL(sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
@@ -3831,7 +3860,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The SQL wrapper.
 	 */
 	@Override
-	public SQL newSQL(String moduleName, String documentName, String query) {
+	public @Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query) {
 		return new HibernateSQL(moduleName, documentName, query, this);
 	}
 
@@ -3843,7 +3872,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The SQL wrapper.
 	 */
 	@Override
-	public SQL newSQL(Document document, String query) {
+	public @Nonnull SQL newSQL(@Nonnull Document document, @Nonnull String query) {
 		return new HibernateSQL(document, query, this);
 	}
 
@@ -3856,7 +3885,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The SQL wrapper.
 	 */
 	@Override
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		SQLDefinition sql = module.getSQL(queryName);
 		HibernateSQL result = new HibernateSQL(moduleName, documentName, sql.getQuery(), this);
@@ -3872,7 +3901,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The SQL wrapper.
 	 */
 	@Override
-	public SQL newNamedSQL(Document document, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(document.getOwningModuleName());
 		SQLDefinition sql = module.getSQL(queryName);
 		HibernateSQL result = new HibernateSQL(document, sql.getQuery(), this);
@@ -3887,7 +3916,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The BizQL wrapper.
 	 */
 	@Override
-	public BizQL newBizQL(String query) {
+	public @Nonnull BizQL newBizQL(@Nonnull String query) {
 		return new HibernateBizQL(query, this);
 	}
 
@@ -3899,7 +3928,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The BizQL wrapper.
 	 */
 	@Override
-	public BizQL newNamedBizQL(String moduleName, String queryName) {
+	public @Nonnull BizQL newNamedBizQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		BizQLDefinition bizql = module.getBizQL(queryName);
 		HibernateBizQL result = new HibernateBizQL(bizql.getQuery(), this);
@@ -3915,7 +3944,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The BizQL wrapper.
 	 */
 	@Override
-	public BizQL newNamedBizQL(Module module, String queryName) {
+	public @Nonnull BizQL newNamedBizQL(@Nonnull Module module, @Nonnull String queryName) {
 		BizQLDefinition bizql = module.getBizQL(queryName);
 		HibernateBizQL result = new HibernateBizQL(bizql.getQuery(), this);
 		result.setTimeoutInSeconds(bizql.getTimeoutInSeconds());
@@ -3930,7 +3959,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The document query instance.
 	 */
 	@Override
-	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
+	public @Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
 		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
@@ -3944,7 +3973,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The document query instance.
 	 */
 	@Override
-	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
+	public @Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull Module module, @Nonnull String queryName) {
 		MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 		return query.constructDocumentQuery(null, null);
 	}
@@ -3956,7 +3985,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The document query instance.
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Document document) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document) {
 		return new HibernateDocumentQuery(document, this);
 	}
 
@@ -3968,7 +3997,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The document query instance.
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(String moduleName, String documentName) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull String moduleName, @Nonnull String documentName) {
 		return new HibernateDocumentQuery(moduleName, documentName, this);
 	}
 
@@ -3983,7 +4012,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The document query instance.
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Document document, String fromClause, String filterClause, String groupClause, String orderClause) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document, @Nullable String fromClause, @Nullable String filterClause, @Nullable String groupClause, @Nullable String orderClause) {
 		return new HibernateDocumentQuery(document, fromClause, filterClause, groupClause, orderClause, this);
 	}
 
@@ -3994,7 +4023,7 @@ public void doWorkOnConnection(Session session) {
 	 * @return The document query instance.
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Bean queryByExampleBean) {
 		return new HibernateDocumentQuery(queryByExampleBean, this);
 	}
 }

@@ -55,6 +55,11 @@ public class ContentServlet extends AbstractResourceServlet {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentServlet.class);
 
 	/**
+	 * Lets the user's browser, but not a shared cache, keep content for a day - see addResponseHeaders().
+	 */
+	static final String CACHE_CONTROL_VALUE = "private, max-age=86400";
+
+	/**
 	 * {@link AbstractResource} implementation backed by a {@link ContentManager} session
 	 * and an {@link AttachmentContent} handle.
 	 * <p>
@@ -177,11 +182,14 @@ public class ContentServlet extends AbstractResourceServlet {
 	}
 
 	/**
-	 * Adds HTTP response headers that enable inline display and short-term caching of
+	 * Adds HTTP response headers that enable inline display and browser caching of
 	 * the attachment.
 	 * <p>
 	 * Sets {@code Content-Disposition} to {@code inline} with the OWASP-sanitised file
-	 * name and enables one-minute browser caching.
+	 * name, and lets the user's browser (not a shared cache) keep the response for a day.
+	 * Changing an attachment in Skyve gives it a new content id, and so a new URL, so a kept
+	 * response is rarely stale. After a day the browser checks the last modified date, which
+	 * the server answers without making a thumbnail.
 	 * </p>
 	 *
 	 * @param resource the resolved resource
@@ -196,11 +204,9 @@ public class ContentServlet extends AbstractResourceServlet {
 		disposition.append(OWASP.sanitiseFileName(resource.getFileName()));
 		disposition.append('"');
 		response.setHeader("Content-Disposition", disposition.toString());
-		// NOTE - the image is not cached unless there is a content length and the following headers
+		// NOTE - the image is not cached unless there is a content length and the following header
 		// NOTE - THIS MUST BE SET FIRST BEFORE WRITING TO THE STREAM
-		response.setHeader("Cache-Control", "cache");
-		response.setHeader("Pragma", "cache");
-		response.addDateHeader("Expires", System.currentTimeMillis() + 60000); // 1 minute
+		response.setHeader("Cache-Control", CACHE_CONTROL_VALUE);
 	}
 
 	/**
@@ -235,7 +241,7 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * @param binding          the attribute binding from the request
 	 * @param resourceFileName the content UUID
 	 * @param user             the authenticated user, or {@code null} if not logged in
-	 * @param uxui             the UX/UI name for access checking
+	 * @param uxui             the UX/UI name for access checking; must not be {@code null}
 	 * @throws SecurityException if the user is not authorised to access the content
 	 */
 	@Override
@@ -245,7 +251,7 @@ public class ContentServlet extends AbstractResourceServlet {
 									@Nullable String binding,
 									@Nullable String resourceFileName,
 									@Nullable User user,
-									@Nullable String uxui)
+									@Nonnull String uxui)
 	throws SecurityException {
 		ContentResource contentResource = (ContentResource) resource;
 		if (contentResource.content == null) {
@@ -274,8 +280,7 @@ public class ContentServlet extends AbstractResourceServlet {
 		// Check that the user has access - use the full binding here
 		// NB If you can text search you should already be able to see anything you have access to
 		if (! user.canTextSearch()) {
-			String uxuiName = (uxui == null) ? org.skyve.metadata.router.UxUi.DESKTOP_NAME : uxui;
-			EXT.checkAccess(user, UserAccess.content(moduleName, documentName, binding), uxuiName);
+			EXT.checkAccess(user, UserAccess.content(moduleName, documentName, binding), uxui);
 		}
 
 		// Check that user has content access - Use the content module and document and the target attribute name
@@ -302,7 +307,8 @@ public class ContentServlet extends AbstractResourceServlet {
 	 * </p>
 	 * <p>
 	 * If the {@code _nm} (no-markup) query parameter is present, any stored markup on
-	 * the attachment is cleared so that raw SVG content can be edited inline.
+	 * the attachment is cleared so that raw SVG content can be edited inline, and the
+	 * original is served whatever width and height are asked for.
 	 * </p>
 	 *
 	 * @param request the current HTTP request
@@ -334,6 +340,9 @@ public class ContentServlet extends AbstractResourceServlet {
 				// PS The content is never put so the mutation below is OK
 				if ((resource.content != null) && request.getParameterMap().containsKey(AbstractWebContext.NO_MARKUP)) {
 					resource.content.setMarkup(null);
+					// Serve the original - a thumbnail without the markup would be stored where the marked up one belongs
+					resource.imageWidth = 0;
+					resource.imageHeight = 0;
 				}
 			}
 			else {

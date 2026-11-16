@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,13 @@ import org.skyve.metadata.router.UxUi;
 @SuppressWarnings({ "static-method", "java:S1192" }) // Repeated literals are deliberate Facelets structure contracts.
 class ThemeFaceletsStructureTest {
 	private static final String IFRAME_TEMPLATE_PATH = "WEB-INF/pages/templates/iframe/template.xhtml";
-	private static final List<String> FAMILIES = List.of("editorial", "external", "ecuador", "ultima", "diamond");
+	/**
+	 * The growl that shows an upload or import page's messages in the view: bound in the opener, as
+	 * the page is gone when the refresh returns, and with keep, so that it does not remove the growls showing.
+	 */
+	private static final String SHOW_MESSAGES_AFTER_THE_REFRESH = "owner.isc.BizUtil.growl.bind(owner.isc.BizUtil, owner.JSON.parse(args.uploadMessages), null, null, true)";
+	private static final Pattern RAW_TEMPLATE_NAME = Pattern.compile("(skyve|skyvePublic|skyveStartup|adminUnsubscribe)\\.templateName");
+	private static final List<String> FAMILIES = List.of("editorial", "ecuador", "ultima", "diamond");
 	private static final List<String> DYNAMIC_CLIENT_PAGES = List.of("external/home.xhtml",
 			"external/edit.xhtml",
 			"external/list.xhtml",
@@ -28,6 +35,7 @@ class ThemeFaceletsStructureTest {
 			"unsubscribe.xhtml");
 
 	@Test
+	@SuppressWarnings("java:S5961") // one checklist of the popup pages' required markup; splitting it per page would only repeat the reads
 	void popupPagesUseSharedIframeTemplateAndRetainCallbacksAndBodyScripts() throws IOException {
 		String upload = read("upload.xhtml");
 		String bizImport = read("bizImport.xhtml");
@@ -35,12 +43,23 @@ class ThemeFaceletsStructureTest {
 
 		assertSharedIframePage(upload);
 		assertTrue(upload.contains("var owner = SKYVE.Util.findSmartClientWindow();"), upload);
-		assertTrue(upload.contains("oncomplete=\"skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}')\""), upload);
+		assertTrue(upload.contains("oncomplete=\"skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}', args)\""), upload);
+		// Runtime issue P3: a SmartClient action upload that succeeded closes its window
+		assertTrue(upload.contains("var succeeded = args && args.actionUploadSucceeded;"), upload);
+		assertTrue(upload.contains("owner.isc.WindowStack.popoff(false);"), upload);
+		// and shows the page's messages in the view's growl once the refresh has returned, keeping the growls showing
+		assertTrue(upload.contains(SHOW_MESSAGES_AFTER_THE_REFRESH), upload);
+		assertTrue(upload.contains("saveInstance(true, '_PUSH', growl);"), upload);
 		assertFalse(upload.contains("window.parent.isc"), upload);
 
 		assertSharedIframePage(bizImport);
 		assertTrue(bizImport.contains("var owner = SKYVE.Util.findSmartClientWindow();"), bizImport);
-		assertTrue(bizImport.contains("oncomplete=\"skyveAfterBizImport()\""), bizImport);
+		assertTrue(bizImport.contains("oncomplete=\"skyveAfterBizImport(args)\""), bizImport);
+		// Runtime issue P3: an import without problems closes its window, showing the page's messages in the view
+		assertTrue(bizImport.contains("var succeeded = args && args.bizImportSucceeded;"), bizImport);
+		assertTrue(bizImport.contains(SHOW_MESSAGES_AFTER_THE_REFRESH), bizImport);
+		assertTrue(bizImport.contains("saveInstance(true, '_PUSH', growl);"), bizImport);
+		assertTrue(bizImport.contains("owner.isc.WindowStack.popoff(false);"), bizImport);
 		assertFalse(bizImport.contains("window.parent.isc"), bizImport);
 
 		assertSharedIframePage(imageMarkup);
@@ -127,15 +146,31 @@ class ThemeFaceletsStructureTest {
 			assertTrue(template.contains("styleClass=\"skyve-global-messages\""), family + ": " + template);
 			assertTrue(headResources.contains("skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"),
 					family + ": " + headResources);
-			assertFalse(headResources.contains("<c:if"), family + ": " + headResources);
+			// the only c:if is the SAIL recorder's tag, which must add nothing to the page unless the session records
+			assertFalse(headResources.replace(PrimeFacesHeadSailRecorderTest.RECORDER, "").contains("<c:if"), family + ": " + headResources);
 			assertFalse(bodyResources.contains("<c:if"), family + ": " + bodyResources);
+		}
+	}
+
+	@Test
+	void everyFamilyShowsEnvironmentBannersAndLoadsTheVueBundle() throws IOException {
+		for (String family : FAMILIES) {
+			String template = read("WEB-INF/pages/templates/" + family + "/template.xhtml");
+			String view = read("WEB-INF/pages/templates/" + family + "/view.xhtml");
+
+			assertTrue(template.contains("<h:outputText value=\"#{bean.environmentBanners}\" escape=\"false\" />"),
+						family + ": " + template);
+			assertTrue(view.contains("<h:outputScript library=\"skyve\" name=\"vue/skyve.js?v=#{bean.webResourceFileVersion}\" />"),
+						family + ": " + view);
+			assertTrue(view.contains("<h:outputStylesheet library=\"skyve\" name=\"vue/skyve.css?v=#{bean.webResourceFileVersion}\" />"),
+						family + ": " + view);
+			assertFalse(view.contains("skyvevue"), family + ": " + view);
 		}
 	}
 
 	@Test
 	void resolvedPropertiesReplaceFamilyParsingAndFallbacks() throws IOException {
 		String editorialHead = read("WEB-INF/pages/templates/editorial/head-resources.xhtml");
-		String externalHead = read("WEB-INF/pages/templates/external/head-resources.xhtml");
 		String ecuadorBody = read("WEB-INF/pages/templates/ecuador/body-resources.xhtml");
 		String ultima = read("WEB-INF/pages/templates/ultima/template.xhtml");
 		String diamond = read("WEB-INF/pages/templates/diamond/template.xhtml");
@@ -144,8 +179,6 @@ class ThemeFaceletsStructureTest {
 		assertTrue(editorialHead.contains("_skyveTheme.baseColour"), editorialHead);
 		assertTrue(editorialHead.contains("_skyveTheme.forcedDark"), editorialHead);
 		assertTrue(editorialHead.contains("not _skyveTheme.smartClient"), editorialHead);
-		assertTrue(externalHead.contains("_skyveTheme.baseColour"), externalHead);
-		assertTrue(externalHead.contains("not _skyveTheme.smartClient"), externalHead);
 		assertTrue(ecuadorBody.contains("_skyveTheme.baseColour"), ecuadorBody);
 		assertTrue(ultima.contains("_skyveTheme.baseColour"), ultima);
 		assertTrue(ultima.contains("_skyveTheme.layoutStyleClass"), ultima);
@@ -170,7 +203,7 @@ class ThemeFaceletsStructureTest {
 			for (Path file : files.filter(path -> path.toString().endsWith(".xhtml")).toList()) {
 				String page = Files.readString(file);
 				String description = file + ": " + page;
-				assertFalse(page.matches("(?s).*(skyve|skyvePublic|skyveStartup|adminUnsubscribe)\\.templateName.*"), description);
+				assertFalse(RAW_TEMPLATE_NAME.matcher(page).find(), description);
 				assertFalse(page.contains("getThemeColour("), description);
 				assertFalse(page.contains("pfTheme"), description);
 				assertFalse(page.contains(".split('-')"), description);
@@ -221,6 +254,28 @@ class ThemeFaceletsStructureTest {
 			offset += token.length();
 		}
 		return result;
+	}
+
+	/**
+	 * The pages focus their first input only when they are loaded (a GET), never after an ajax response or another
+	 * postback: the one {@code p:focus} is the shared include's, rendered only when not a postback.
+	 */
+	@Test
+	void pagesFocusTheirFirstInputOnlyWhenLoaded() throws IOException {
+		String include = read("WEB-INF/pages/includes/formFocusAndPush.xhtml");
+		assertTrue(include.contains("<p:focus rendered=\"#{not facesContext.postback}\" />"), include);
+		Pattern focus = Pattern.compile("<p:focus", Pattern.LITERAL);
+		try (Stream<Path> files = Files.walk(webappRoot())) {
+			for (Path file : files.filter(path -> path.toString().endsWith(".xhtml")).toList()) {
+				String page = Files.readString(file);
+				int focuses = focus.split(page, -1).length - 1;
+				assertTrue(file.endsWith("formFocusAndPush.xhtml") ? (focuses == 1) : (focuses == 0), file + ": " + page);
+			}
+		}
+		for (String page : List.of("external/home.xhtml", "external/edit.xhtml", "external/list.xhtml", "external/map.xhtml",
+									"external/public.xhtml", "external/selfRegister.xhtml", "external/startup.xhtml")) {
+			assertTrue(read(page).contains("<ui:include src=\"/WEB-INF/pages/includes/formFocusAndPush.xhtml\">"), page);
+		}
 	}
 
 	private static String read(String relativePath) throws IOException {

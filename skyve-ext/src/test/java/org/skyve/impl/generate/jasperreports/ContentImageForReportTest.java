@@ -1,11 +1,15 @@
 package org.skyve.impl.generate.jasperreports;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +21,9 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.MimeType;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.user.User;
 
 /**
  * Tests the ContentImageForReport paths that do not require a real content manager or customer logo file.
@@ -74,6 +81,37 @@ class ContentImageForReportTest {
 		assertTrue(result.getWidth() <= 8);
 		assertTrue(result.getHeight() > 0);
 		assertTrue(result.getHeight() <= 8);
+	}
+
+	@Test
+	void customerLogoWithoutUiResourcesReturnsBlankImage() throws Exception {
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("demo");
+		when(customer.getUiResources()).thenReturn(null);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		ThreadLocal<AbstractPersistence> threadLocal = (ThreadLocal<AbstractPersistence>) field.get(null);
+		AbstractPersistence previous = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			BufferedImage result = ContentImageForReport.customerLogo(50, 50);
+			assertThat(Integer.valueOf(result.getWidth()), is(Integer.valueOf(1)));
+			assertThat(Integer.valueOf(result.getHeight()), is(Integer.valueOf(1)));
+		}
+		finally {
+			if (previous == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(previous);
+			}
+		}
 	}
 
 	private static AttachmentContent pngAttachment() throws Exception {

@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.Iterator;
@@ -27,6 +28,7 @@ import org.skyve.cache.CacheTier;
 import org.skyve.cache.Caching;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SessionEndedException;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.util.IPGeolocation;
@@ -55,16 +57,31 @@ public class StateUtil {
 		return EXT.getCaching().getEHCache(UtilImpl.CONVERSATION_CACHE.getName(), String.class, byte[].class);
 	}
 
-	public static void cacheConversation(@Nonnull WebContext webContext)
-	throws Exception {
+	/**
+	 * Commit an active conversation transaction if it exists without closing its persistence
+	 * context and then cache the conversation.
+	 *
+	 * <p>This low-level operation does not begin a replacement transaction. Public
+	 * continuation APIs such as {@link WebContext#cacheConversationAndCycleTransaction()}
+	 * do that after the serialised checkpoint has been written.
+	 *
+	 * @param webContext the conversation to checkpoint and cache
+	 */
+	public static void commitAndCacheConversation(@Nonnull WebContext webContext) {
+		if (webContext instanceof AbstractWebContext context) {
+			AbstractPersistence persistence = context.getConversation();
+			if (persistence != null) {
+				persistence.commit(false);
+			}
+		}
+
 		// Note that EHCache puts are thread-safe
 		getConversations().put(webContext.getKey(), SerializationHelper.serialize(webContext));
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public static @Nullable AbstractWebContext getCachedConversation(@Nullable String webId,
-																		@Nullable HttpServletRequest request)
-	throws Exception {
+																		@Nullable HttpServletRequest request) {
 		AbstractWebContext result = null;
 
         // Context key here is a UUID with a bizId smashed together
@@ -281,6 +298,39 @@ public class StateUtil {
 		return (values != null) && values.contains(token);
 	}
 
+	/**
+	 * Removes one token from a session's tokens, leaving its other tokens valid.
+	 *
+	 * <p>Side effects: puts the session's token set back in the CSRF token cache.
+	 *
+	 * @param session	the session
+	 * @param token	the token to remove, or {@code null} to do nothing
+	 */
+	public static void removeToken(@Nonnull HttpSession session, @Nullable Integer token) {
+		removeToken(session.getId(), token);
+	}
+
+	/**
+	 * Removes one token from a session's tokens, leaving its other tokens valid.
+	 *
+	 * <p>Side effects: puts the session's token set back in the CSRF token cache.
+	 *
+	 * @param sessionId	the session's id
+	 * @param token	the token to remove, or {@code null} to do nothing
+	 */
+	@SuppressWarnings("rawtypes")
+	public static void removeToken(@Nonnull String sessionId, @Nullable Integer token) {
+		if (token == null) {
+			return;
+		}
+		Cache<String, TreeSet> tokens = getTokens();
+		TreeSet values = tokens.get(sessionId);
+		if ((values != null) && values.remove(token)) {
+			// Note that EHCache puts are thread-safe
+			tokens.put(sessionId, values);
+		}
+	}
+
 	public static void replaceToken(@Nonnull HttpSession session,
 										@Nullable Integer oldToken,
 										@Nonnull Integer newToken) {
@@ -334,6 +384,7 @@ public class StateUtil {
 		FACES_LOGGER.info("********************************************************************************");
 	}
 	
+	@SuppressWarnings("java:S2629") // logging with .toString() is good here
 	private static void logCacheStats(@Nonnull String cacheName, @Nonnull String cacheDescription) {
 		Caching caching = EXT.getCaching();
 		CacheStatistics statistics = caching.getEHCacheStatistics(cacheName);
@@ -392,8 +443,6 @@ public class StateUtil {
 		}
 	}
 	
-	private static final String ZIP_CHARSET = "ISO-8859-1";
-
 	public static @Nonnull String encode64(@Nonnull Serializable obj) 
 	throws IOException {
 		byte[] result = null;
@@ -408,7 +457,7 @@ public class StateUtil {
 		}
 		Base64 base64Codec = new Base64();
 
-		return new String(base64Codec.encode(result), ZIP_CHARSET);
+		return new String(base64Codec.encode(result), StandardCharsets.ISO_8859_1);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -417,7 +466,7 @@ public class StateUtil {
 		T result = null;
 
 		Base64 base64Codec = new Base64();
-		byte[] gzippedoos = base64Codec.decode(encoding.getBytes(ZIP_CHARSET));
+		byte[] gzippedoos = base64Codec.decode(encoding.getBytes(StandardCharsets.ISO_8859_1));
 		try (ByteArrayInputStream bais = new ByteArrayInputStream(gzippedoos)) {
 			try (InputStream zis = new GZIPInputStream(bais)) {
 				// Don't use standard Java serialization as it has issues with hibernate

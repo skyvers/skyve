@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound.tabular;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteWidth;
@@ -10,6 +10,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -37,10 +39,10 @@ public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, De
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -49,13 +51,13 @@ public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, De
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeTitle() {
+	public @Nullable Boolean getEscapeTitle() {
 		return escapeTitle;
 	}
 
 	@Override
 	@XmlAttribute
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -65,34 +67,34 @@ public abstract class DataGridColumn implements TabularColumn, AbsoluteWidth, De
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute
-	public void setEscapeTitle(Boolean escapeTitle) {
+	public void setEscapeTitle(@Nullable Boolean escapeTitle) {
 		this.escapeTitle = escapeTitle;
 	}
 
 	@Override
-	public HorizontalAlignment getAlignment() {
+	public @Nullable HorizontalAlignment getAlignment() {
 		return alignment;
 	}
 
 	@Override
 	@XmlAttribute
-	public void setAlignment(HorizontalAlignment alignment) {
+	public void setAlignment(@Nullable HorizontalAlignment alignment) {
 		this.alignment = alignment;
 	}
 
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
 	@Override
 	@XmlAttribute
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

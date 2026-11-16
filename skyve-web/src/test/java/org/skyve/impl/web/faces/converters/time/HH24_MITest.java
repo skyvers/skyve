@@ -2,33 +2,31 @@ package org.skyve.impl.web.faces.converters.time;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-public class HH24_MITest {
+class HH24_MITest {
 	private HH24_MI formatter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		formatter = new HH24_MI();
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidFormat() {
+	@Test
+	void testGetAsObjectInvalidFormat() {
 		// call the method under test
-		formatter.getAsObject(null, null, "03-01-2020 02:30:05");
-
-		fail("Should throw exception before this line.");
+		assertThrows(ConverterException.class, () -> formatter.getAsObject(null, null, "03-01-2020 02:30:05"));
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatAM() {
+	void testGetAsObjectValidFormatAM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 00);
@@ -38,7 +36,7 @@ public class HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatPM() {
+	void testGetAsObjectValidFormatPM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 00);
@@ -48,7 +46,7 @@ public class HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsStringAM() {
+	void testGetAsStringAM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -58,7 +56,7 @@ public class HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsStringPM() {
+	void testGetAsStringPM() {
 		// setup the test data
 		TimeOnly testDate = new TimeOnly(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -68,12 +66,12 @@ public class HH24_MITest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertNull(formatter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

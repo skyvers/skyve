@@ -1,5 +1,7 @@
 package org.skyve.job;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A job which can be cancelled.
  * If cancelled, and shouldRollbackOnCancel() yields true, the associated transaction is rolled back.
@@ -14,7 +16,7 @@ public abstract class CancellableJob extends Job {
 	 * Cancels the job.
 	 */
 	@Override
-	public String cancel() {
+	public @Nullable String cancel() {
 		cancelled = true;
 		return null;
 	}

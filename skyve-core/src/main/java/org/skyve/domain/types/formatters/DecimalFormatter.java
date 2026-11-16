@@ -2,6 +2,9 @@ package org.skyve.domain.types.formatters;
 
 import org.skyve.CORE;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Format a java.lang.Number into a decimal representation.
  */
@@ -39,7 +42,7 @@ public class DecimalFormatter implements Formatter<Number> {
 	 * @param absolute the absolute
 	 * @param calculatedPercentage the calculatedPercentage
 	 */
-	public DecimalFormatter(String decimalFormatPattern, boolean absolute, Boolean calculatedPercentage) {
+	public DecimalFormatter(@Nonnull String decimalFormatPattern, boolean absolute, @Nullable Boolean calculatedPercentage) {
 		this.decimalFormatPattern = decimalFormatPattern;
 		this.absolute = absolute;
 		this.calculatedPercentage = calculatedPercentage;
@@ -51,7 +54,7 @@ public class DecimalFormatter implements Formatter<Number> {
 	 * @return the result
 	 */
 	@Override
-	public Class<Number> getValueType() {
+	public @Nonnull Class<Number> getValueType() {
 		return Number.class;
 	}
 	
@@ -61,7 +64,7 @@ public class DecimalFormatter implements Formatter<Number> {
 	 * @return the result
 	 */
 	@Override
-	public String toDisplayValue(Number value) {
+	public @Nonnull String toDisplayValue(@Nonnull Number value) {
 		java.text.DecimalFormat df = CORE.getDecimalFormat(decimalFormatPattern);
 		if (absolute) {
 			df.setNegativePrefix("");

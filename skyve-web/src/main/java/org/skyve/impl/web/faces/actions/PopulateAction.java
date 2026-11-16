@@ -13,6 +13,10 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.faces.FacesException;
+
 /**
  * Just set the state of the list bean up - but do not load any data
  */
@@ -26,7 +30,7 @@ public class PopulateAction extends FacesAction<Void> {
 	 *
 	 * @param facesView the current Faces view context
 	 */
-	public PopulateAction(FacesView facesView) {
+	public PopulateAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
@@ -42,19 +46,29 @@ public class PopulateAction extends FacesAction<Void> {
 	 * @throws Exception if metadata resolution fails while loading module, document, or query details
 	 */
 	@Override
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("PopulateAction");
 
 		String bizModule = facesView.getBizModuleParameter();
 		String bizDocument = facesView.getBizDocumentParameter();
 		String queryName = facesView.getQueryNameParameter();
-		if ((bizDocument != null) && queryName != null) {
+		if (bizModule == null) { // HarnessView.initialise() defaults the module
+			throw new IllegalStateException("Cannot populate a list as the FacesView has no module parameter");
+		}
+		if (queryName == null) {
+			throw new FacesException("Malformed URL - a list of module " + bizModule + " requires a query name");
+		}
+		if (bizDocument != null) {
 			Customer c = CORE.getCustomer();
 			Module m = c.getModule(bizModule);
 			Document d = m.getDocument(c, bizDocument);
 			ListModel<Bean> lm = d.getListModel(c, queryName, true);
 			facesView.setTitle(lm.getLocalisedDescription());
-			facesView.setTitleIcon(lm.getDrivingDocument(), null);
+			Document drivingDocument = lm.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new IllegalStateException("List model " + queryName + " of document " + bizModule + '.' + bizDocument + " has no driving document");
+			}
+			facesView.setTitleIcon(drivingDocument, null);
 			facesView.setModelName(queryName);
 			facesView.setQueryNameParameter(null);
 		}

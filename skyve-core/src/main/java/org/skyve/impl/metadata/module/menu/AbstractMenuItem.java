@@ -1,11 +1,13 @@
 package org.skyve.impl.metadata.module.menu;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.metadata.module.menu.MenuItem;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Represents a menu item leaf node that can be used for navigation. 
@@ -23,40 +25,40 @@ public abstract class AbstractMenuItem implements MenuItem {
 
 	private Set<String> uxuis = new TreeSet<>();
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	/**
 	 * From {@link MenuItem}.
 	 */
 	@Override
-	public final String getName() {
+	public final @Nonnull String getName() {
 		return name;
 	}
 
 	/**
 	 * From {@link MenuItem}.
 	 */
-	public final void setName(String name) {
+	public final void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
 	@Override
-	public final Set<String> getRoleNames() {
+	public final @Nonnull Set<String> getRoleNames() {
 		return roleNames;
 	}
 
 	@Override
-	public final Set<String> getUxUis() {
+	public final @Nonnull Set<String> getUxUis() {
 		return uxuis;
 	}
 
 	@Override
-	public boolean isApplicable(String uxui) {
+	public boolean isApplicable(@Nonnull String uxui) {
 		return uxuis.isEmpty() || uxuis.contains(uxui);
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

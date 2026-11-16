@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.model.chart;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
@@ -18,12 +20,12 @@ public class NumericRangeBucket implements Bucket {
 	 * That is ranges of 0,10,20 means ranges -infinity->0,0->10,10->20,20->+infinity
 	 * @param ranges The range breaking points.
 	 */
-	public NumericRangeBucket(int... ranges) {
+	public NumericRangeBucket(@Nonnull int... ranges) {
 		this.ranges = ranges;
 	}
 	
 	@Override
-	public String bizQLExpression(String categoryBinding) {
+	public @Nonnull String bizQLExpression(@Nonnull String categoryBinding) {
 		StringBuilder result = new StringBuilder(256);
 		for (int i = 0, l = ranges.length; i < l; i++) {
 			if (i == 0) {
@@ -43,7 +45,7 @@ public class NumericRangeBucket implements Bucket {
 	}
 	
 	@Override
-	public String label(Object category) {
+	public @Nullable String label(@Nullable Object category) {
 		if (category instanceof Number number) {
 			int index = number.intValue();
 			if (index == 0) {

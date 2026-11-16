@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link TreeGrid} metadata by extending list-grid configuration.
  */
@@ -12,7 +15,7 @@ public class FluentTreeGrid extends FluentListGrid {
 	 * Creates a builder backed by a new {@link TreeGrid}.
 	 */
 	public FluentTreeGrid() {
-		grid = new TreeGrid();
+		this(new TreeGrid());
 	}
 
 	/**
@@ -21,7 +24,8 @@ public class FluentTreeGrid extends FluentListGrid {
 	 * @param grid
 	 *            the metadata instance to mutate
 	 */
-	public FluentTreeGrid(TreeGrid grid) {
+	public FluentTreeGrid(@Nonnull TreeGrid grid) {
+		super(grid);
 		this.grid = grid;
 	}
 
@@ -32,7 +36,7 @@ public class FluentTreeGrid extends FluentListGrid {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentTreeGrid from(@SuppressWarnings("hiding") TreeGrid grid) {
+	public @Nonnull FluentTreeGrid from(@SuppressWarnings("hiding") @Nonnull TreeGrid grid) {
 		super.from(grid);
 		rootIdBinding(grid.getRootIdBinding());
 		return this;
@@ -45,7 +49,7 @@ public class FluentTreeGrid extends FluentListGrid {
 	 *            the root-id binding expression
 	 * @return this builder
 	 */
-	public FluentTreeGrid rootIdBinding(String rootIdBinding) {
+	public @Nonnull FluentTreeGrid rootIdBinding(@Nullable String rootIdBinding) {
 		grid.setRootIdBinding(rootIdBinding);
 		return this;
 	}
@@ -56,7 +60,7 @@ public class FluentTreeGrid extends FluentListGrid {
 	 * @return the wrapped tree-grid metadata
 	 */
 	@Override
-	public TreeGrid get() {
+	public @Nonnull TreeGrid get() {
 		return grid;
 	}
 }

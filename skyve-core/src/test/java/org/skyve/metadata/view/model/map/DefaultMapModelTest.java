@@ -67,6 +67,7 @@ class DefaultMapModelTest {
 	}
 
 	private static class TestDefaultMapModel extends DefaultMapModel<TestBean> {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public MapResult getResult(Geometry mapBounds) {
 			return null;
@@ -103,7 +104,7 @@ class DefaultMapModelTest {
 	}
 
 	@Test
-	void addItemAddsFeatureWhenGeometryIntersectsMapExtents() throws Exception {
+	void addItemAddsFeatureWhenGeometryIntersectsMapExtents() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		when(user.getCustomer()).thenReturn(customer);
@@ -135,7 +136,7 @@ class DefaultMapModelTest {
 	}
 
 	@Test
-	void addItemSkipsWhenGeometryOutsideMapExtents() throws Exception {
+	void addItemSkipsWhenGeometryOutsideMapExtents() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		when(user.getCustomer()).thenReturn(customer);
@@ -162,7 +163,7 @@ class DefaultMapModelTest {
 	}
 
 	@Test
-	void addItemSkipsWhenGeometryNull() throws Exception {
+	void addItemSkipsWhenGeometryNull() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		when(user.getCustomer()).thenReturn(customer);

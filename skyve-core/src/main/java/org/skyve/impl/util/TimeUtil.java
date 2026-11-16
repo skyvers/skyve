@@ -19,6 +19,9 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.util.Time;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Date and time arithmetic utilities for Skyve temporal types.
  *
@@ -42,7 +45,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#clearTimeComponent}
 	 */
-	public static final void clearTimeComponent(Date date) {
+	public static final void clearTimeComponent(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
@@ -56,7 +59,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#clearMillisecondComponent}
 	 */
-	public static final void clearSecondAndMillisecondComponent(Date date) {
+	public static final void clearSecondAndMillisecondComponent(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
@@ -68,7 +71,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#clearMillisecondComponent}
 	 */
-	public static final void clearMillisecondComponent(Date date) {
+	public static final void clearMillisecondComponent(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
@@ -79,7 +82,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#clearDateComponent}
 	 */
-	public static void clearDateComponent(Date date) {
+	public static void clearDateComponent(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
@@ -92,7 +95,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#setTime}
 	 */
-	public static final void setTime(Date date, int hours24, int minutes, int seconds) {
+	public static final void setTime(@Nonnull Date date, int hours24, int minutes, int seconds) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		// NB clear() does not work in JDK 1.3.1
@@ -106,7 +109,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#setTime}
 	 */
-	public static final void setTime(Date date, TimeOnly time) {
+	public static final void setTime(@Nonnull Date date, @Nonnull TimeOnly time) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(time);
 		int hours = calendar.get(Calendar.HOUR_OF_DAY);
@@ -120,7 +123,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#setDate}
 	 */
-	public static final void setDate(Date date, int dayOfMonth, int monthStartingAt1, int year) {
+	public static final void setDate(@Nonnull Date date, int dayOfMonth, int monthStartingAt1, int year) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
@@ -132,7 +135,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#getYear}
 	 */
-	public static final int getYear(Date date) {
+	public static final int getYear(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
@@ -142,7 +145,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#getMonthStartingFrom1}
 	 */
-	public static final int getMonthStartingFrom1(Date date) {
+	public static final int getMonthStartingFrom1(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
@@ -152,7 +155,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#getMonthStartingFrom0}
 	 */
-	public static final int getMonthStartingFrom0(Date date) {
+	public static final int getMonthStartingFrom0(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
@@ -162,7 +165,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#getDay}
 	 */
-	public static final int getDay(Date date) {
+	public static final int getDay(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 
@@ -186,7 +189,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addHours}
 	 */
-	public static final void addHours(Date date, int numberOfHours) {
+	public static final void addHours(@Nonnull Date date, int numberOfHours) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -200,7 +203,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addMinutes}
 	 */
-	public static final void addMinutes(Date date, int numberOfMinutes) {
+	public static final void addMinutes(@Nonnull Date date, int numberOfMinutes) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -214,7 +217,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addSeconds}
 	 */
-	public static final void addSeconds(Date date, int numberOfSeconds) {
+	public static final void addSeconds(@Nonnull Date date, int numberOfSeconds) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -228,7 +231,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addDays}
 	 */
-	public static final void addDays(Date date, int numberOfDays) {
+	public static final void addDays(@Nonnull Date date, int numberOfDays) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -246,7 +249,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addMonths}
 	 */
-	public static final void addMonths(Date date, int numberOfMonths) {
+	public static final void addMonths(@Nonnull Date date, int numberOfMonths) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.setLenient(false);
@@ -264,7 +267,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#getFinancialYear}
 	 */
-	public static final int getFinancialYear(Date date) {
+	public static final int getFinancialYear(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		int year = calendar.get(Calendar.YEAR);
@@ -280,7 +283,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#getFinancialYearString}
 	 */
-	public static final String getFinancialYearString(Date date) {
+	public static final @Nonnull String getFinancialYearString(@Nonnull Date date) {
 		int financialYear = getFinancialYear(date);
 
 		return financialYear + "/" + (financialYear + 1);
@@ -289,7 +292,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#numberOfHoursBetween}
 	 */
-	public static final Decimal5 numberOfHoursBetween(TimeOnly start, TimeOnly end) {
+	public static final @Nonnull Decimal5 numberOfHoursBetween(@Nonnull TimeOnly start, @Nonnull TimeOnly end) {
 		long minutesBetween = (end.getTime() - start.getTime()) / 60000;
 		Decimal5 result = new Decimal5(minutesBetween);
 		result = result.divide(Decimal5.SIXTY);
@@ -299,7 +302,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#numberOfDaysBetween}
 	 */
-	public static final int numberOfDaysBetween(Date startDate, Date endDate) {
+	public static final int numberOfDaysBetween(@Nonnull Date startDate, @Nonnull Date endDate) {
 		Calendar startDateCalendar = Calendar.getInstance();
 		startDateCalendar.setTime(startDate);
 		startDateCalendar.setLenient(false);
@@ -339,7 +342,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#numberOfDaysInRange}
 	 */
-	public static final int numberOfDaysInRange(Date startDate, Date endDate) {
+	public static final int numberOfDaysInRange(@Nonnull Date startDate, @Nonnull Date endDate) {
 		int numberOfDays = numberOfDaysBetween(startDate, endDate);
 		// now add 1 to the absolute value of the days between to give the
 		// total number of days included in the range (because the number
@@ -358,7 +361,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#findNextDayOfWeek}
 	 */
-	public static final Date findNextDayOfWeek(Date date, int dayOfWeek) {
+	public static final @Nonnull Date findNextDayOfWeek(@Nonnull Date date, int dayOfWeek) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		while (calendar.get(Calendar.DAY_OF_WEEK) != dayOfWeek) {
@@ -373,7 +376,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#ensureWorkDay}
 	 */
-	public static final Date ensureWorkDay(Date date) {
+	public static final @Nonnull Date ensureWorkDay(@Nonnull Date date) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -392,7 +395,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#daysBetweenDescription}
 	 */
-	public static final String daysBetweenDescription(Date now, Date agoOrUntil) {
+	public static final @Nonnull String daysBetweenDescription(@Nonnull Date now, @Nonnull Date agoOrUntil) {
 		int daysBetween = numberOfDaysBetween(now, agoOrUntil);
 		
 		if (daysBetween == 0) {
@@ -410,7 +413,7 @@ public class TimeUtil {
 		return result.toString();
 	}
 	
-	public static Date parseISODate(String date) throws ParseException {
+	public static @Nonnull Date parseISODate(@Nonnull String date) throws ParseException {
 		String param = date;
 		int l = date.length();
 		if (l == 23) { // cater for no timezone = UTC/GMT/Zulu
@@ -428,7 +431,7 @@ public class TimeUtil {
 		return DateUtils.parseDate(param, new String[]{ ISO_TIMESTAMP_FORMAT });
 	}
 
-	public static String formatISODate(Date date, boolean inUTC) {
+	public static @Nonnull String formatISODate(@Nonnull Date date, boolean inUTC) {
 		if (inUTC) {
 			return DateFormatUtils.format(date, ISO_TIMESTAMP_FORMAT, TimeZone.getTimeZone("UTC"));
 		}
@@ -438,9 +441,11 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addDaysToNew}
 	 */
-	public static DateOnly addDaysToNew(final Date date, final int numberOfDays) {
+	public static @Nonnull DateOnly addDaysToNew(final @Nonnull Date date, final int numberOfDays) {
 
-		if (date == null) {
+		@SuppressWarnings("null") // public API guard; unit tests assert the exception for a null date
+		boolean dateMissing = (date == null);
+		if (dateMissing) {
 			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
@@ -454,9 +459,11 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addMonthsToNew}
 	 */
-	public static DateOnly addMonthsToNew(final Date date, final int numberOfMonths) {
+	public static @Nonnull DateOnly addMonthsToNew(final @Nonnull Date date, final int numberOfMonths) {
 
-		if (date == null) {
+		@SuppressWarnings("null") // public API guard; unit tests assert the exception for a null date
+		boolean dateMissing = (date == null);
+		if (dateMissing) {
 			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
@@ -470,9 +477,11 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#addYearsToNew}
 	 */
-	public static DateOnly addYearsToNew(final Date date, final int numberOfYears) {
+	public static @Nonnull DateOnly addYearsToNew(final @Nonnull Date date, final int numberOfYears) {
 
-		if (date == null) {
+		@SuppressWarnings("null") // public API guard; unit tests assert the exception for a null date
+		boolean dateMissing = (date == null);
+		if (dateMissing) {
 			throw new IllegalArgumentException(DATE_REQUIRED);
 		}
 
@@ -486,29 +495,29 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#asDateOnly}
 	 */
-	public static DateOnly asDateOnly(LocalDate localDate) {
+	public static @Nonnull DateOnly asDateOnly(@Nonnull LocalDate localDate) {
 		return new DateOnly(Date.from(localDate.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant()));
 	}
 
 	/**
 	 * See {@link Time#asLocalDate}
 	 */
-	public static LocalDate asLocalDate(Date date) {
+	public static @Nonnull LocalDate asLocalDate(@Nonnull Date date) {
 		return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 
 	/**
 	 * See {@link Time#coalesce}
 	 */
-	public static DateOnly coalesce(DateOnly val, DateOnly ifNullValue) {
+	public static @Nullable DateOnly coalesce(@Nullable DateOnly val, @Nullable DateOnly ifNullValue) {
 		return (val == null ? ifNullValue : val);
 	}
 
 	/**
 	 * See {@link Time#min}
 	 */
-	public static DateOnly min(final DateOnly... dates) {
-		if (dates == null || dates.length == 0) {
+	public static @Nonnull DateOnly min(final @Nonnull DateOnly... dates) {
+		if (dates.length == 0) {
 			throw new IllegalArgumentException("At least one date must be supplied");
 		}
 
@@ -519,8 +528,8 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#max}
 	 */
-	public static DateOnly max(final DateOnly... dates) {
-		if (dates == null || dates.length == 0) {
+	public static @Nonnull DateOnly max(final @Nonnull DateOnly... dates) {
+		if (dates.length == 0) {
 			throw new IllegalArgumentException("At least one date must be supplied");
 		}
 
@@ -531,7 +540,7 @@ public class TimeUtil {
 	/**
 	 * See {@link Time#withDate}
 	 */
-	public static DateOnly withDate(int dayOfMonth, int monthStartingAt1, int year) {
+	public static @Nonnull DateOnly withDate(int dayOfMonth, int monthStartingAt1, int year) {
 		DateOnly date = new DateOnly();
 		TimeUtil.setDate(date, dayOfMonth, monthStartingAt1, year);
 		return date;

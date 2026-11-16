@@ -231,6 +231,7 @@ class SQLDataAccessSQLTest {
 	private static final class TestSQLDataAccessImpl extends SQLDataAccessImpl {
 		private final Connection connection;
 
+		@SuppressWarnings("null") // passes null on purpose
 		private TestSQLDataAccessImpl(Connection connection) {
 			super(null);
 			this.connection = connection;
@@ -241,6 +242,7 @@ class SQLDataAccessSQLTest {
 			return connection;
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		SkyveDialect getDialect() {
 			return null;
@@ -250,6 +252,7 @@ class SQLDataAccessSQLTest {
 	private static final class FailingSQLDataAccessImpl extends SQLDataAccessImpl {
 		private final DomainException exception;
 
+		@SuppressWarnings("null") // passes null on purpose
 		private FailingSQLDataAccessImpl(DomainException exception) {
 			super(null);
 			this.exception = exception;

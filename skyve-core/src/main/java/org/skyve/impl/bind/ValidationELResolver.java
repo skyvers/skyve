@@ -24,6 +24,9 @@ import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Extends;
@@ -32,6 +35,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
 import jakarta.el.MethodNotFoundException;
@@ -83,22 +88,16 @@ class ValidationELResolver extends ELResolver {
 		TERMINATING_MOCKS.put(Decimal10.class, new Decimal10(1.0));
 		
 		TERMINATING_MOCKS.put(String.class, "");
-
-		TERMINATING_MOCKS.put(Date.class, new Date());
-		TERMINATING_MOCKS.put(DateOnly.class, new DateOnly());
-		TERMINATING_MOCKS.put(TimeOnly.class, new TimeOnly());
-		TERMINATING_MOCKS.put(DateTime.class, new DateTime());
-		TERMINATING_MOCKS.put(Timestamp.class, new Timestamp());
-		
-		TERMINATING_MOCKS.put(Geometry.class, new GeometryFactory().createPoint());
 	}
 	
-	ValidationELResolver(Customer customer) {
+	ValidationELResolver(@Nullable Customer customer) {
 		this.customer = customer;
 	}
 	
 	@Override
-	public Class<?> getType(ELContext context, Object base, Object property) {
+	public @Nullable Class<?> getType(@SuppressWarnings("null") @Nonnull ELContext context,
+										@Nullable Object base,
+										@SuppressWarnings("null") @Nonnull Object property) {
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			context.setPropertyResolved(true);
@@ -107,7 +106,9 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public Object getValue(ELContext context, Object base, Object property) {
+	public @Nullable Object getValue(@SuppressWarnings("null") @Nonnull ELContext context,
+									@Nullable Object base,
+									@SuppressWarnings("null") @Nonnull Object property) {
 		Object value = getClassOrDocument(base, property);
 		if (value != null) {
 			context.setPropertyResolved(base, property);
@@ -116,7 +117,10 @@ class ValidationELResolver extends ELResolver {
 	}
 	
 	@Override
-	public void setValue(ELContext context, Object base, Object property, Object val) {
+	public void setValue(@SuppressWarnings("null") @Nonnull ELContext context,
+						@Nullable Object base,
+						@SuppressWarnings("null") @Nonnull Object property,
+						@Nullable Object val) {
 		Class<?> type = getType(base, property);
 		if (type != null) {
 			if (val == null) {
@@ -142,6 +146,7 @@ class ValidationELResolver extends ELResolver {
 	/**
 	 * This method returns 
 	 * <ul>
+	 * 	<li>an enum code if given enumeration metadata and a declared value name.</li>
 	 * 	<li>a document if given a document as a base and the property is an association or inverseOne.</li>
 	 * 	<li>a singleton list of document if given a document as a base and the property is a collection or inverseMany.</li>
 	 * 	<li>Object.class if base is Object.class (in non type-safe mode)</li>
@@ -152,12 +157,20 @@ class ValidationELResolver extends ELResolver {
 	 * </ul>
 	 * @param base
 	 * @param property
-	 * @return Document, List or Class
+	 * @return an enum code, document, list, or class
 	 */
 	@SuppressWarnings({"java:S6541", "java:S3776"}) // Not a brain method
-	private Object getClassOrDocument(Object base, Object property) {
+	private @Nullable Object getClassOrDocument(@Nullable Object base, @Nonnull Object property) {
 		Object object = base;
 		final String propertyName = property.toString();
+		if (object instanceof Enumeration enumeration) {
+			for (EnumeratedValue value : enumeration.getValues()) {
+				if (value.toJavaIdentifier().equals(propertyName)) {
+					return value.getCode();
+				}
+			}
+			throw new PropertyNotFoundException("Enumeration value " + propertyName + " does not exist on " + enumeration.toJavaIdentifier());
+		}
 
 		// Possible Collection or InverseMany
 		// If so, return the single element in the list which is the related document
@@ -191,7 +204,18 @@ class ValidationELResolver extends ELResolver {
 						// Associations and InverseOne return the related Document
 						return relationDocument;
 					}
-					// Every other attribute is a scalar type
+					// Generated enum classes may not exist yet during domain generation.
+					if (attribute instanceof Enumeration) {
+						try {
+							return mock(attribute.getImplementingType());
+						}
+						catch (MetaDataException e) {
+							if (! Enumeration.isEnumClassLoadingFailure(e)) {
+								throw e;
+							}
+							return mock(String.class);
+						}
+					}
 					return mock(attribute.getImplementingType());
 				}
 				
@@ -244,12 +268,15 @@ class ValidationELResolver extends ELResolver {
 		return null; // we don't handle it
 	}
 
-	private Class<?> getType(Object base, Object property) {
+	private @Nullable Class<?> getType(@Nullable Object base, @Nonnull Object property) {
 		Class<?> result = null;
 		
 		Object value = getClassOrDocument(base, property);
 		if (value instanceof Class<?> type) {
 			result = type;
+		}
+		else if (value instanceof Enum<?> constant) {
+			result = constant.getDeclaringClass();
 		}
 		else if (value instanceof List<?>) {
 			result = List.class;
@@ -268,7 +295,11 @@ class ValidationELResolver extends ELResolver {
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Cognitive Complexity not too high
-	public Object invoke(ELContext context, Object base, Object method, Class<?>[] paramTypes, Object[] params) {
+	public @Nullable Object invoke(@SuppressWarnings("null") @Nonnull ELContext context,
+									@Nullable Object base,
+									@SuppressWarnings("null") @Nonnull Object method,
+									@Nullable Class<?>[] paramTypes,
+									@Nullable Object[] params) {
 		Class<?> type = null;
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(base, method);
@@ -319,7 +350,9 @@ class ValidationELResolver extends ELResolver {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public boolean isReadOnly(ELContext context, Object base, Object property) {
+	public boolean isReadOnly(@SuppressWarnings("null") @Nonnull ELContext context,
+								@Nullable Object base,
+								@SuppressWarnings("null") @Nonnull Object property) {
 		if (Object.class.equals(base)) { // we are not in type-safe mode
 			context.setPropertyResolved(true);
 			return false;
@@ -365,7 +398,7 @@ class ValidationELResolver extends ELResolver {
 				object = document.getBeanClass(customer);
 			}
 			catch (ClassNotFoundException e) {
-				throw new IllegalStateException("Cannot get bean class for document " + document.getOwningModuleName() + "." + document.getName(), e);
+				throw new IllegalStateException(CANNOT_GET_BEAN_CLASS_FOR_DOCUMENT + document.getOwningModuleName() + "." + document.getName(), e);
 			}
 		}
 		
@@ -396,7 +429,7 @@ class ValidationELResolver extends ELResolver {
 	}
 
 	@Override
-	public Class<?> getCommonPropertyType(ELContext context, Object base) {
+	public @Nullable Class<?> getCommonPropertyType(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base) {
 		if (base instanceof DocumentImpl) {
 			return Object.class;
 		}
@@ -416,13 +449,37 @@ class ValidationELResolver extends ELResolver {
 		return null;
 	}
 	
-	private static Object mock(Class<?> type) {
+	private static @Nonnull Object mock(@Nonnull Class<?> type) {
+		// Validation expressions can invoke methods on these values, so never share mutable mocks.
+		if (Date.class.equals(type)) {
+			return new Date();
+		}
+		if (DateOnly.class.equals(type)) {
+			return new DateOnly();
+		}
+		if (TimeOnly.class.equals(type)) {
+			return new TimeOnly();
+		}
+		if (DateTime.class.equals(type)) {
+			return new DateTime();
+		}
+		if (Timestamp.class.equals(type)) {
+			return new Timestamp();
+		}
+		if (Geometry.class.equals(type)) {
+			return new GeometryFactory().createPoint();
+		}
+		// Enum constants are immutable singletons; EL cannot coerce a Class to an enum in comparisons.
+		if (type.isEnum()) {
+			Object[] constants = type.getEnumConstants();
+			return (constants.length > 0) ? constants[0] : type;
+		}
 		Object mock = TERMINATING_MOCKS.get(type);
 		return (mock == null) ? type : mock;
 	}
 
 	@SuppressWarnings("java:S2201") // we are using this to validate input
-	private static void checkInteger(Object p) {
+	private static void checkInteger(@Nonnull Object p) {
 		if (! (p instanceof Number)) {
 			if (p instanceof String string) {
 				Integer.parseInt(string); // throws NumberFormatException

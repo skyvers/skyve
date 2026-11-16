@@ -14,6 +14,7 @@ import freemarker.template.TemplateScalarModel;
 
 @SuppressWarnings("static-method")
 class ContentDirectiveValidationTest {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsMissingParametersLoopVariablesAndNestedBody() {
 		ContentDirective directive = new ContentDirective();
@@ -27,6 +28,7 @@ class ContentDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], body));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsInvalidParameterTypes() {
 		ContentDirective directive = new ContentDirective();
@@ -42,6 +44,7 @@ class ContentDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, Map.of("other", scalar("value")), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeAcceptsScalarAndNumericDimensionsThenRequiresMissingParameters() {
 		ContentDirective directive = new ContentDirective();
@@ -57,6 +60,7 @@ class ContentDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeReportsMissingRequiredParametersInOrder() {
 		ContentDirective directive = new ContentDirective();

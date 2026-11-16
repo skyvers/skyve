@@ -38,9 +38,9 @@ import jakarta.servlet.http.HttpServletRequest;
 public class FacesThemeView {
 	/** Diamond template family. */
 	private static final String DIAMOND_TEMPLATE = "diamond";
-	/** Editorial template family. */
+	/** Editorial template family and default full-page fallback. */
 	private static final String EDITORIAL_TEMPLATE = "editorial";
-	/** External template family and default full-page fallback. */
+	/** Former copy of the Editorial family, now an alias that resolves to it. */
 	private static final String EXTERNAL_TEMPLATE = "external";
 	/** Ultima template family. */
 	private static final String ULTIMA_TEMPLATE = "ultima";
@@ -50,7 +50,7 @@ public class FacesThemeView {
 	private static final String LIGHT_SCHEME = "light";
 	/** Generic iframe family used when a selected family lacks a complete resource pair. */
 	private static final String DEFAULT_IFRAME_TEMPLATE = "iframe";
-	/** Default palette for Skyve-owned Editorial and External families. */
+	/** Default palette for the Skyve-owned Editorial family. */
 	private static final String DEFAULT_BLUE = "blue";
 	/** Default palette for other template families. */
 	private static final String DEFAULT_INDIGO = "indigo";
@@ -100,7 +100,8 @@ public class FacesThemeView {
 	 *
 	 * <p>Used as {@code _skyveTheme.templateName} by the top-level Faces pages to select
 	 * {@code /WEB-INF/pages/templates/<family>/view.xhtml}.
-	 * A {@code null} configured name resolves to {@code external}.
+	 * A {@code null} configured name, or the former {@code external} copy of the family, resolves
+	 * to {@code editorial}.
 	 *
 	 * @return the effective template family; never {@code null}
 	 */
@@ -125,7 +126,7 @@ public class FacesThemeView {
 	/**
 	 * Returns the effective base colour used by layout resources.
 	 *
-	 * <p>Used as {@code _skyveTheme.baseColour} by the Editorial and External theme
+	 * <p>Used as {@code _skyveTheme.baseColour} by the Editorial theme
 	 * stylesheets, the Ecuador layout stylesheet, and Ultima's browser theme-colour metadata.
 	 * A {@code null} colour uses the selected family's default; Diamond's scheme suffix is removed.
 	 *
@@ -153,7 +154,7 @@ public class FacesThemeView {
 	/**
 	 * Indicates whether the server knows that a dark presentation is forced.
 	 *
-	 * <p>Used as {@code _skyveTheme.forcedDark} by the Editorial and External head resources
+	 * <p>Used as {@code _skyveTheme.forcedDark} by the Editorial head resources
 	 * to suppress the preference-driven dark stylesheet when dark mode is already explicit.
 	 *
 	 * @return {@code true} when the resolved theme explicitly forces dark presentation
@@ -255,9 +256,10 @@ public class FacesThemeView {
 		HttpServletRequest activeRequest = activeRequest();
 		UxUi uxui = UserAgent.getSelection(activeRequest).getUxUi();
 		String configuredTemplate = uxui.getPfTemplateName();
-		String resolvedTemplateName = (configuredTemplate == null) ? EXTERNAL_TEMPLATE : configuredTemplate;
-		boolean skyveFamily = EDITORIAL_TEMPLATE.equals(resolvedTemplateName) ||
-				EXTERNAL_TEMPLATE.equals(resolvedTemplateName);
+		String resolvedTemplateName = ((configuredTemplate == null) || EXTERNAL_TEMPLATE.equals(configuredTemplate)) ?
+											EDITORIAL_TEMPLATE :
+											configuredTemplate;
+		boolean skyveFamily = EDITORIAL_TEMPLATE.equals(resolvedTemplateName);
 		String resolvedBaseColour = uxui.getPfThemeColour();
 		if (resolvedBaseColour == null) {
 			resolvedBaseColour = skyveFamily ? DEFAULT_BLUE : DEFAULT_INDIGO;

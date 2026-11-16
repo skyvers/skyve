@@ -125,6 +125,7 @@ class HttpRangeTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // a named test per malformed header documents each case the parser rejects
 	void invalidHeaderProducesFullResponse() {
 		HttpRange range = HttpRange.parse("items=0-99", 1_000);
 

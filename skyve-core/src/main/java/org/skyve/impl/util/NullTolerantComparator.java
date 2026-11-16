@@ -2,6 +2,8 @@ package org.skyve.impl.util;
 
 import java.util.Comparator;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A generic {@link Comparator} that sorts {@code null} values before any non-null
  * value, then delegates to the element's natural {@link Comparable} order.
@@ -10,7 +12,7 @@ import java.util.Comparator;
  */
 public final class NullTolerantComparator<T extends Comparable<T>> implements Comparator<T> {
 	@Override
-	public int compare(T t1, T t2) {
+	public int compare(@Nullable T t1, @Nullable T t2) {
 		int result = 0;
 
 		if (t1 == null) {

@@ -15,6 +15,7 @@ class GenerateDomainConfigTest {
 		GenerateDomainConfig config = new GenerateDomainConfig();
 		assertFalse(config.isDebug());
 		assertFalse(config.isMultiTenant());
+		assertTrue(config.isValidate());
 		assertEquals("H2", config.getDialect());
 		assertEquals("", config.getExcludedModules());
 		assertNull(config.getCustomisationsClass());
@@ -29,6 +30,9 @@ class GenerateDomainConfigTest {
 
 		config.setMultiTenant(true);
 		assertTrue(config.isMultiTenant());
+
+		config.setValidate(false);
+		assertFalse(config.isValidate());
 
 		config.setDialect("H2_NO_SEQUENCE");
 		assertEquals("H2_NO_SEQUENCE", config.getDialect());

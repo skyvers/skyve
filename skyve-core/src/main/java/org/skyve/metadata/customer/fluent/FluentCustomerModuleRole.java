@@ -2,6 +2,9 @@ package org.skyve.metadata.customer.fluent;
 
 import org.skyve.impl.metadata.repository.customer.CustomerModuleRoleMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds module-scoped role entries nested within a customer role.
  */
@@ -20,7 +23,7 @@ public class FluentCustomerModuleRole {
 	 *
 	 * @param role backing metadata
 	 */
-	public FluentCustomerModuleRole(CustomerModuleRoleMetaData role) {
+	public FluentCustomerModuleRole(@Nonnull CustomerModuleRoleMetaData role) {
 		this.role = role;
 	}
 	
@@ -30,7 +33,7 @@ public class FluentCustomerModuleRole {
 	 * @param role source metadata
 	 * @return this builder
 	 */
-	public FluentCustomerModuleRole from(@SuppressWarnings("hiding") CustomerModuleRoleMetaData role) {
+	public @Nonnull FluentCustomerModuleRole from(@SuppressWarnings("hiding") @Nonnull CustomerModuleRoleMetaData role) {
 		moduleName(role.getModuleName());
 		name(role.getName());
 		return this;
@@ -42,7 +45,7 @@ public class FluentCustomerModuleRole {
 	 * @param moduleName module name
 	 * @return this builder
 	 */
-	public FluentCustomerModuleRole moduleName(String moduleName) {
+	public @Nonnull FluentCustomerModuleRole moduleName(@Nonnull String moduleName) {
 		role.setModuleName(moduleName);
 		return this;
 	}
@@ -53,7 +56,7 @@ public class FluentCustomerModuleRole {
 	 * @param name role name
 	 * @return this builder
 	 */
-	public FluentCustomerModuleRole name(String name) {
+	public @Nonnull FluentCustomerModuleRole name(@Nullable String name) {
 		role.setName(name);
 		return this;
 	}
@@ -63,7 +66,7 @@ public class FluentCustomerModuleRole {
 	 *
 	 * @return backing module-role metadata
 	 */
-	public CustomerModuleRoleMetaData get() {
+	public @Nonnull CustomerModuleRoleMetaData get() {
 		return role;
 	}
 }

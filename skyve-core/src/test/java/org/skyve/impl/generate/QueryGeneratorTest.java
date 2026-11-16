@@ -2,6 +2,7 @@ package org.skyve.impl.generate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -20,6 +23,7 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.SortDirection;
 
 /**
@@ -213,5 +217,21 @@ class QueryGeneratorTest {
 
 		assertTrue(xml.contains("defaultQuery"));
 		assertTrue(! xml.contains("timeoutInSeconds"));
+	}
+
+	// ----- main() -----------------------------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void mainThrowsWhenTheModuleDoesNotExistForTheCustomer() {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		try {
+			MetaDataException e = assertThrows(MetaDataException.class,
+												() -> QueryGenerator.main(new String[] {"noSuchCustomer", "noSuchModule"}));
+			assertEquals("Module noSuchModule does not exist for customer noSuchCustomer", e.getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
 	}
 }

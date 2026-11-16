@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fixed-scale decimal with 10 decimal places and 28 significant digits of precision.
  *
@@ -62,7 +64,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal10(BigDecimal value) {
+	public Decimal10(@Nonnull BigDecimal value) {
 		this.value = value.setScale(10, MC.getRoundingMode());
 	}
 
@@ -70,7 +72,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal10(String value) {
+	public Decimal10(@Nonnull String value) {
 		this.value = new BigDecimal(value, MC).setScale(10, MC.getRoundingMode());
 	}
 
@@ -78,7 +80,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal10(Decimal value) {
+	public Decimal10(@Nonnull Decimal value) {
 		this.value = value.bigDecimalValue().setScale(10, MC.getRoundingMode());
 	}
 
@@ -86,7 +88,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 add(Decimal operand) {
+	public @Nonnull Decimal10 add(@Nonnull Decimal operand) {
 		return new Decimal10(value.add(operand.bigDecimalValue(), MC));
 	}
 
@@ -94,7 +96,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 divide(Decimal operand) {
+	public @Nonnull Decimal10 divide(@Nonnull Decimal operand) {
 		return new Decimal10(value.divide(operand.bigDecimalValue(), MC));
 	}
 
@@ -102,7 +104,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 multiply(Decimal operand) {
+	public @Nonnull Decimal10 multiply(@Nonnull Decimal operand) {
 		return new Decimal10(value.multiply(operand.bigDecimalValue(), MC));
 	}
 
@@ -110,7 +112,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 subtract(Decimal operand) {
+	public @Nonnull Decimal10 subtract(@Nonnull Decimal operand) {
 		return new Decimal10(value.subtract(operand.bigDecimalValue(), MC));
 	}
 
@@ -118,7 +120,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 abs() {
+	public @Nonnull Decimal10 abs() {
 		return new Decimal10(value.abs());
 	}
 
@@ -126,7 +128,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 pow(int power) {
+	public @Nonnull Decimal10 pow(int power) {
 		return new Decimal10(value.pow(power, MC));
 	}
 
@@ -134,7 +136,7 @@ public class Decimal10 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal10 negate() {
+	public @Nonnull Decimal10 negate() {
 		return new Decimal10(value.negate());
 	}
 
@@ -144,7 +146,7 @@ public class Decimal10 extends Decimal {
 	 * @return the result
 	 */
 	@Override
-	public Decimal10 min(Decimal other) {
+	public @Nonnull Decimal10 min(@Nonnull Decimal other) {
 		return new Decimal10(bigDecimalValue().min(other.bigDecimalValue()));
 	}
 
@@ -154,7 +156,7 @@ public class Decimal10 extends Decimal {
 	 * @return the result
 	 */
 	@Override
-	public Decimal10 max(Decimal other) {
+	public @Nonnull Decimal10 max(@Nonnull Decimal other) {
 		return new Decimal10(bigDecimalValue().max(other.bigDecimalValue()));
 	}
 }

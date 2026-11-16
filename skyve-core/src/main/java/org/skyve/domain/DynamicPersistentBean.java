@@ -5,6 +5,9 @@ import java.util.Map;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.persistence.AbstractPersistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A dynamic (schema-less) {@link Bean} that also implements {@link PersistentBean}.
  *
@@ -29,7 +32,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @param bizDocument the bizDocument
 	 * @param properties the properties
 	 */
-	public DynamicPersistentBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public DynamicPersistentBean(@Nonnull String bizModule, @Nonnull String bizDocument, @Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 
@@ -38,7 +41,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @return the result
 	 */
 	@Override
-	public Integer getBizVersion() {
+	public @Nullable Integer getBizVersion() {
 		return (Integer) get(PersistentBean.VERSION_NAME);
 	}
 
@@ -47,7 +50,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @param bizVersion the bizVersion
 	 */
 	@Override
-	public void setBizVersion(Integer bizVersion) {
+	public void setBizVersion(@Nullable Integer bizVersion) {
 		set(PersistentBean.VERSION_NAME, bizVersion);
 	}
 
@@ -56,7 +59,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @return the result
 	 */
 	@Override
-	public OptimisticLock getBizLock() {
+	public @Nullable OptimisticLock getBizLock() {
 		return (OptimisticLock) get(PersistentBean.LOCK_NAME);
 	}
 
@@ -65,7 +68,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @param bizLock the bizLock
 	 */
 	@Override
-	public void setBizLock(OptimisticLock bizLock) {
+	public void setBizLock(@Nullable OptimisticLock bizLock) {
 		set(PersistentBean.LOCK_NAME, bizLock);
 	}
 
@@ -74,7 +77,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @param bizKey the bizKey
 	 */
 	@Override
-	public void setBizKey(String bizKey) {
+	public void setBizKey(@Nullable String bizKey) {
 		set(Bean.BIZ_KEY, bizKey);
 	}
 
@@ -83,7 +86,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @return the result
 	 */
 	@Override
-	public String getBizFlagComment() {
+	public @Nullable String getBizFlagComment() {
 		return (String) get(PersistentBean.FLAG_COMMENT_NAME);
 	}
 
@@ -92,7 +95,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @param bizFlagComment the bizFlagComment
 	 */
 	@Override
-	public void setBizFlagComment(String bizFlagComment) {
+	public void setBizFlagComment(@Nullable String bizFlagComment) {
 		set(PersistentBean.FLAG_COMMENT_NAME, bizFlagComment);
 	}
 
@@ -101,7 +104,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @return the result
 	 */
 	@Override
-	public Boolean getBizTagged() {
+	public @Nullable Boolean getBizTagged() {
 		return (Boolean) get(PersistentBean.TAGGED_NAME);
 	}
 
@@ -110,7 +113,7 @@ public class DynamicPersistentBean extends DynamicBean implements PersistentBean
 	 * @param bizTagged the bizTagged
 	 */
 	@Override
-	public void setBizTagged(Boolean bizTagged) {
+	public void setBizTagged(@Nullable Boolean bizTagged) {
 		set(PersistentBean.TAGGED_NAME, bizTagged);
 	}
 	

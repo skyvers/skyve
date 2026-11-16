@@ -88,7 +88,7 @@ class SortParameterImplTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void setByNullRoundtrip() {
 		SortParameterImpl sp = new SortParameterImpl();
 		sp.setBy("col");

@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -82,8 +82,8 @@ class LockableDynamicRepositoryTest {
 	void getDocumentWithNullCustomerReturnsNullForEmptyCache() {
 		Map<String, Module.DocumentRef> refs = new HashMap<>();
 		refs.put("SomeDocument", new Module.DocumentRef());
-		Mockito.when(mockModule.getDocumentRefs()).thenReturn(refs);
-		Mockito.when(mockModule.getName()).thenReturn("SomeModule");
+		when(mockModule.getDocumentRefs()).thenReturn(refs);
+		when(mockModule.getName()).thenReturn("SomeModule");
 		assertThat(repo.getDocument(null, mockModule, "SomeDocument"), is(nullValue()));
 	}
 

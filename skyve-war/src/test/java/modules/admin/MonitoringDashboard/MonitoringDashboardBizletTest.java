@@ -23,6 +23,7 @@ class MonitoringDashboardBizletTest {
 
 	// ===== preRerender =====
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderRsModuleNameClearsDocumentAndComponent() throws Exception {
 		Object[][] cases = {
@@ -43,6 +44,7 @@ class MonitoringDashboardBizletTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderRsDocumentNameClearsComponent() throws Exception {
 		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
@@ -54,6 +56,7 @@ class MonitoringDashboardBizletTest {
 		assertNull(bean.getRsComponentName());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderRsDocumentNameNoOpWhenComponentNull() throws Exception {
 		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();
@@ -65,6 +68,7 @@ class MonitoringDashboardBizletTest {
 		assertNull(bean.getRsComponentName());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderUnknownSourceDoesNotModifyBean() throws Exception {
 		MonitoringDashboardBizlet bizlet = new MonitoringDashboardBizlet();

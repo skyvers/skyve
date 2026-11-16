@@ -1,6 +1,7 @@
 package org.skyve.impl.content;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
@@ -16,6 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.impl.util.UUIDv7;
 
+/**
+ * Verifies searchable-text extraction from supported attachment formats and markup overlays.
+ *
+ * <p>The SVG coverage ensures visible annotation text is retained while editor metadata and
+ * styling are excluded, without changing extraction of the underlying attachment or non-SVG
+ * markup.
+ */
 @SuppressWarnings("static-method")
 class TikaTextExtractorTest {
 	@Test
@@ -53,6 +62,7 @@ class TikaTextExtractorTest {
 		testContent("test.doc", "REGISTRATION");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private static void testContent(String resourceName, String expected) throws IOException {
 		String resourcePath = "/org/skyve/impl/content/" + resourceName;
 		try (InputStream is = TikaTextExtractorTest.class.getResourceAsStream(resourcePath)) {
@@ -108,6 +118,31 @@ class TikaTextExtractorTest {
 	}
 
 	@Test
+	void testExtractTextFromContentIncludesOnlySvgTextFromMarkup() {
+		String svg = "<svg xmlns=\"http://www.w3.org/2000/svg\">"
+				+ "<metadata>SVG_METADATA_MUST_NOT_BE_INDEXED</metadata>"
+				+ "<defs><style>@font-face { font-family: Virgil; src: url(STYLE_MUST_NOT_BE_INDEXED); }</style></defs>"
+				+ "<path d=\"M 0 0 L 10 10\"/>"
+				+ "<text>Inspection note</text>"
+				+ "<text><tspan>Second</tspan><tspan> annotation</tspan></text>"
+				+ "</svg>";
+		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "", UUIDv7.create().toString(), "image")
+				.attachment("notes.txt", "text/plain", "Original attachment text".getBytes(StandardCharsets.UTF_8))
+				.markup(svg);
+
+		String result = new TikaTextExtractor().extractTextFromContent(content);
+
+		assertNotNull(result);
+		assertTrue(result.contains("Original attachment text"));
+		assertTrue(result.contains("Inspection note"));
+		assertTrue(result.contains("Second annotation"));
+		assertFalse(result.contains("SVG_METADATA_MUST_NOT_BE_INDEXED"));
+		assertFalse(result.contains("STYLE_MUST_NOT_BE_INDEXED"));
+		assertFalse(result.contains("@font-face"));
+		assertFalse(result.contains("Virgil"));
+	}
+
+	@Test
 	void testExtractTextFromContentIncludesDocxMetadata() throws Exception {
 		byte[] docxBytes;
 		try (XWPFDocument document = new XWPFDocument();
@@ -132,6 +167,7 @@ class TikaTextExtractorTest {
 		assertTrue(result.contains("Meta Subject") || result.contains("Meta Author"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testExtractTextFromContentHandlesNullAttachmentGracefully() {
 		assertNull(new TikaTextExtractor().extractTextFromContent(null));

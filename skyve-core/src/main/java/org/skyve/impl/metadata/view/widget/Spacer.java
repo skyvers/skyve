@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -11,9 +11,12 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -27,17 +30,18 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
  */
 @XmlRootElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 @XmlType(namespace = XMLMetaData.VIEW_NAMESPACE,
-			propOrder = {"pixelWidth", "pixelHeight", "invisibleConditionName", "visibleConditionName", "properties"})
+			propOrder = {"pixelWidth", "pixelHeight", "xmlInvisibleCondition", "xmlVisibleCondition", "properties"})
 public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	private static final long serialVersionUID = -3535525299887373582L;
 
 	private Integer pixelWidth;
 	private Integer pixelHeight;
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates that spacer widgets do not render a form label by default.
@@ -55,7 +59,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 * @return the pixel width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -66,7 +70,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 */
 	@Override
 	@XmlAttribute
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -76,7 +80,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 * @return the pixel height, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -87,7 +91,7 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 */
 	@Override
 	@XmlAttribute
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -97,50 +101,68 @@ public class Spacer implements AbsoluteSize, FormItemWidget, Invisible {
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
 	/**
-	 * Returns the invisible condition expression.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return the invisible condition expression, or {@code null} when not set
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible condition expression directly.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition expression
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the visible condition attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; the visible condition is derived from the invisible condition
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName the visible condition expression
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 }

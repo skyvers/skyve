@@ -2,6 +2,9 @@ package org.skyve.impl.tools.javadoc.doctor;
 
 import java.io.PrintStream;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Renders the opening HTML head and body elements for generated documents.
  */
@@ -11,7 +14,7 @@ public class DocHead {
 	 *
 	 * @param title HTML title element value
 	 */
-	public DocHead(String title){
+	public DocHead(@Nonnull String title){
 		super();
 		this.title = title;
 	}
@@ -25,7 +28,7 @@ public class DocHead {
 	 *
 	 * @return stylesheet URL, or {@code null} when unset
 	 */
-	public String getStyleSheet() {
+	public @Nullable String getStyleSheet() {
 		return styleSheet;
 	}
 	
@@ -34,7 +37,7 @@ public class DocHead {
 	 *
 	 * @param styleSheet stylesheet URL
 	 */
-	public void setStyleSheet(String styleSheet) {
+	public void setStyleSheet(@Nullable String styleSheet) {
 		this.styleSheet = styleSheet;
 	}
 
@@ -43,7 +46,7 @@ public class DocHead {
 	 *
 	 * @return page title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -52,7 +55,7 @@ public class DocHead {
 	 *
 	 * @param title page title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 	
@@ -61,7 +64,7 @@ public class DocHead {
 	 *
 	 * @param out destination stream
 	 */
-	public void generateHTML(PrintStream out){
+	public void generateHTML(@Nonnull PrintStream out){
 		out.println("<html>");
 		out.println("<head>");
 		out.println("<META http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");

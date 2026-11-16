@@ -1,13 +1,18 @@
 package org.skyve.impl.web.service.smartclient;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 
+import org.owasp.encoder.Encode;
 import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.domain.Bean;
@@ -144,6 +149,7 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 // Note: We cannot cache the bindings required for each view as it may be different 
 // depending on the security principal
@@ -160,15 +166,47 @@ public class ViewJSONManipulator extends ViewVisitor {
 	// Generate href expressions for references for smart client
 	private class HrefProcessor extends ReferenceProcessor {
 		@Override
-		public void processActionReference(ActionReference reference) {
-			htmlGuts.append("javascript:").append(generateWidgetId());
-			htmlGuts.append("._view.doAction('").append(reference.getActionName()).append("',false,'");
+		public void processActionReference(@Nonnull ActionReference reference) {
+			// Send the action's class name, client validation and confirm as an action button does
+			String actionName = reference.getActionName();
+			boolean clientValidation = false;
+			String confirmationText = null;
+			Action action = obtainAction(actionName);
+			if (action != null) {
+				actionName = action.getResourceName();
+				clientValidation = (! Boolean.FALSE.equals(action.getClientValidation()));
+				confirmationText = action.getLocalisedConfirmationText();
+				if ((confirmationText != null) && ViewRenderer.shouldEscape(action.getEscapeConfirm())) {
+					confirmationText = OWASP.escapeHtml(confirmationText);
+				}
+			}
+
+			htmlGuts.append("javascript:");
+			if (confirmationText != null) {
+				// NB braces are escaped as htmlGuts is formatted for {binding} expressions
+				htmlGuts.append("isc.ask('").append(escapeConfirmationText(confirmationText));
+				htmlGuts.append("',function(b)\\{if(b)\\{");
+			}
+			htmlGuts.append(generateWidgetId());
+			htmlGuts.append("._view.doAction('").append(actionName).append("',").append(clientValidation).append(",'");
 			htmlGuts.append(currentBindings.getBindingPrefix());
 			htmlGuts.append("','{bizModule}','{bizDocument}','{bizId}')");
+			if (confirmationText != null) {
+				htmlGuts.append("\\}\\},\\{title:isc.i18nMessages.editView_Confirm\\})");
+			}
+		}
+
+		/**
+		 * Escapes confirmation text for a JavaScript string in a double-quoted href attribute, as the href
+		 * becomes a format. The attribute encoding keeps quotes and ampersands from ending or changing the
+		 * attribute, and the escaped braces stop the format reading the text as {binding} expressions.
+		 */
+		private @Nonnull String escapeConfirmationText(@Nonnull String confirmationText) {
+			return Encode.forJavaScriptAttribute(confirmationText).replace("{", "\\{").replace("}", "\\}");
 		}
 
 		@Override
-		public void processContentReference(ContentReference reference) {
+		public void processContentReference(@Nonnull ContentReference reference) {
 			String binding = reference.getBinding();
 			
 			htmlGuts.append("content?").append(AbstractWebContext.REPORT_NAME).append("={").append(binding);
@@ -177,12 +215,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		public void processDefaultListViewReference(DefaultListViewReference reference) {
+		public void processDefaultListViewReference(@Nonnull DefaultListViewReference reference) {
 			// TODO implement this sometime
 		}
 
 		@Override
-		public void processEditViewReference(EditViewReference reference) {
+		public void processEditViewReference(@Nonnull EditViewReference reference) {
 			String binding = reference.getBinding();
 			htmlGuts.append(org.skyve.util.Util.getDocumentUrl(reference.getModuleName(),
 																reference.getDocumentName(),
@@ -192,12 +230,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		public void processExternalReference(ExternalReference reference) {
+		public void processExternalReference(@Nonnull ExternalReference reference) {
 			htmlGuts.append(reference.getHref());
 		}
 
 		@Override
-		public void processImplicitActionReference(ImplicitActionReference reference) {
+		public void processImplicitActionReference(@Nonnull ImplicitActionReference reference) {
 			ImplicitActionName implicitAction = reference.getImplicitActionName();
 
 			if (processingDataWidget) {
@@ -209,12 +247,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		public void processQueryListViewReference(QueryListViewReference reference) {
+		public void processQueryListViewReference(@Nonnull QueryListViewReference reference) {
 			// TODO implement this sometime
 		}
 
 		@Override
-		public void processReportReference(ReportReference reference) {
+		public void processReportReference(@Nonnull ReportReference reference) {
 			htmlGuts.append("report.rpt?_format=").append(reference.getFormat()).append("&_id={bizId}");
 			htmlGuts.append("&_n=").append(reference.getReportName());
 			htmlGuts.append("&_doc=").append(reference.getModuleName()).append('.').append(reference.getDocumentName());
@@ -234,13 +272,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 
 		@Override
-		public void processResourceReference(ResourceReference reference) {
+		public void processResourceReference(@Nonnull ResourceReference reference) {
 			htmlGuts.append("resources?").append(AbstractWebContext.DOCUMENT_NAME).append("={bizModule}.{bizDocument}&");
 			htmlGuts.append(AbstractWebContext.REPORT_NAME).append('=').append(reference.getRelativeFile());
 		}
 		
 		@SuppressWarnings("synthetic-access")
-		private String generateWidgetId() {
+		private @Nonnull String generateWidgetId() {
 			StringBuilder id = new StringBuilder(64);
 
 			String name = view.getName();
@@ -273,6 +311,10 @@ public class ViewJSONManipulator extends ViewVisitor {
 	// The current binding getting processed at present
 	// NB This is initially set to the root node until we traverse down through a data grid or comparison.
 	private ViewBindings currentBindings = bindingTree;
+
+	// inline condition expression -> the condition as referenced by the view in each sense
+	// [0] is the expression itself, [1] is its inverse; an element is null when that sense is not referenced
+	private Map<String, String[]> inlineConditions = new TreeMap<>();
 	
 	// This is the value maps required for variant and dynamic domain values
 	private Map<String, LinkedHashMap<String, String>> valueMaps = new TreeMap<>();
@@ -295,9 +337,38 @@ public class ViewJSONManipulator extends ViewVisitor {
 	private int editIdCounter = 0;
 	private int createIdCounter = 0;
 
+	// The action is declared on the row document's edit or create view in a data widget,
+	// as ReferenceProcessor.obtainActionForActionReference() finds it for faces
+	private @Nullable Action obtainAction(@Nonnull String actionName) {
+		Action result = null;
+		if (dataWidgetDocument == null) {
+			result = view.getAction(actionName);
+		}
+		else {
+			for (ViewType viewType : new ViewType[] {ViewType.edit, ViewType.create}) {
+				try {
+					result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
+				}
+				catch (@SuppressWarnings("unused") MetaDataException e) {
+					// No view of this type, try the next
+				}
+				if (result != null) {
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
 	// HrefProcessor - takes a Reference and appends a suitable href in htmlGuts
 	HrefProcessor hrefProcessor = new HrefProcessor();
 	private StringBuilder htmlGuts = new StringBuilder(64);
+
+	/**
+	 * Delimits an invisible condition embedded in data widget markup until it is resolved for each row.
+	 * A control character cannot occur in view metadata, so it cannot be mistaken for authored markup.
+	 */
+	private static final char ROW_CONDITION_DELIMITER = '\u0001';
 
 	/**
 	 * Request-local media-kind cache keyed by managed content id.
@@ -308,13 +379,18 @@ public class ViewJSONManipulator extends ViewVisitor {
 	 */
 	private Map<String, ContentMediaKind> contentMediaKindCache = new TreeMap<>();
 
+	// selected tab index binding -> the most tabs of the tab panes it selects, for the bindings the client may set
+	private Map<String, Integer> tabCounts = new TreeMap<>();
+	// the mutable bindings of the view's widgets, other than tab panes' selected tab index bindings
+	private Set<String> widgetWriters = new TreeSet<>();
+
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	protected ViewJSONManipulator(User user,
-									Module module, 
-									Document document, 
-									View view,
-									String uxui,
-									Bean bean,
+	protected ViewJSONManipulator(@Nonnull User user,
+									@Nonnull Module module, 
+									@Nonnull Document document, 
+									@Nonnull View view,
+									@Nonnull String uxui,
+									@Nonnull Bean bean,
 									int editIdCounter, // the base number which is incremented for view component IDs for uniqueness
 									int createIdCounter, // the base number which is incremented for view component IDs for uniqueness
 									boolean forApply) {
@@ -330,8 +406,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 		this.forApply = forApply;
 	}
 	
-	protected String toJSON(AbstractWebContext webContextToReference,
-								String redirectUrl) // to redirect the browser location when the response is processed
+	protected @Nonnull String toJSON(@Nonnull AbstractWebContext webContextToReference,
+										@Nullable String redirectUrl) // to redirect the browser location when the response is processed
 	throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 
@@ -379,13 +455,14 @@ public class ViewJSONManipulator extends ViewVisitor {
 		return JSON.marshall(user.getCustomer(), result);
 	}
 	
-	protected void constructJSONObjectFromBinding(ViewBindings bindings,
-													Map<String, Object> json,
-													String webId)
+	protected void constructJSONObjectFromBinding(@Nonnull ViewBindings bindings,
+													@Nonnull Map<String, Object> json,
+													@Nonnull String webId)
 	throws Exception {
 		String bindingPrefix = bindings.getBindingPrefix();
 		if (bindingPrefix == null) { // root node (top level)
 			addBindingsAndFormatValues(bindings, bean, json, webId);
+			addInlineConditionValues(json);
 		}
 		else { // reference bindings (sub-bindings)
 			Object value = BindUtil.get(bean, bindingPrefix);
@@ -479,6 +556,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				String format = viewFormat.getFormat();
 				// replace the "{CONTEXT}" placeholder with the current webId
 				format = format.replace("{CONTEXT}", webId);
+				// resolve any invisible conditions in data widget markup against this bean
+				format = resolveRowInvisibleConditions(format, aBean);
 				// now format the message
 				Sanitisation sanitisation = viewFormat.getSanitise();
 				if (viewFormat.isEscape()) {
@@ -491,10 +570,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 											(UnaryOperator<String>) displayValue -> OWASP.sanitise(sanitisation, displayValue),
 											aBean);
 				}
-				// remove the display style if its true
-				format = format.replace("display:true;", "");
-				// change to display none if display style is false
-				format = format.replace("display:false;", "display:none;");
 				// change any null valued image urls to point to blank
 				format = format.replaceAll("src=\\\"content\\?_n=&_doc=.*?\\\"", "src=\"images/blank.gif\"");
 				toAddTo.put(name, format);
@@ -601,21 +676,24 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 */	
-	protected void applyJSON(String json, AbstractPersistence persistence, WebContext webContext) throws Exception {
+	protected void applyJSON(@Nonnull String json, @Nonnull AbstractPersistence persistence, @Nonnull WebContext webContext) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, json);
+		if (values == null) { // the JSON "null"
+			throw new IllegalArgumentException("There are no values to apply");
+		}
 
 //		displayViewBindings(bindingTree);
 		applyJSON(bindingTree, document, values, bean, persistence, webContext);
 	}
 
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	protected void applyJSON(ViewBindings bindings,
-								Document appliedToDoc,
-								Map<String, Object> values,
-								Bean appliedTo,
-								AbstractPersistence persistence,
-								WebContext webContext)
+	protected void applyJSON(@Nonnull ViewBindings bindings,
+								@Nonnull Document appliedToDoc,
+								@Nonnull Map<String, Object> values,
+								@Nonnull Bean appliedTo,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull WebContext webContext)
 	throws Exception {
 //UtilImpl.LOGGER.info("FQ BINDING PREFIX = {}", bindings.getFullyQualifiedBindingPrefix());
 
@@ -675,7 +753,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 				// 1) foo is null
 				// 2) foo.bars yields null and we don't need to apply any processing
 				if (beanList != null) {
-					// process the existing beans applying the changes and ordering from the requestList
+					// process the existing beans applying the changes from the requestList.
+					// An ordered collection takes the requestList's order, which is the order its grid shows (a user may
+					// have dragged its rows). An unordered collection keeps its own order: the requestList's order is only
+					// how its grid was sorted for display, and moving its beans would make Hibernate rewrite the
+					// collection. So its existing beans stay where they are, and its new beans go on the end.
+					boolean ordered = (relation instanceof Collection collection) && Boolean.TRUE.equals(collection.getOrdered());
+					Set<Bean> requested = ordered ? null : Collections.newSetFromMap(new IdentityHashMap<>());
 					int newIndex = 0;
 					for (Object requestListItem : requestList) {
 						String thisBizId = null;
@@ -709,12 +793,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 											persistence,
 											webContext);
 							}
-							BindUtil.addElementToCollection(appliedTo, childBindingPrefix, newIndex, thisBean);
+							BindUtil.addElementToCollection(appliedTo, childBindingPrefix, ordered ? newIndex : beanList.size(), thisBean);
 						}
 						else { // found
 							// Only move the bean in the collection if required
 							// NB We do this conditionally so we don't upset hibernate collection dirtiness
-							if (beanList.indexOf(thisBean) != newIndex) {
+							if (ordered && (beanList.indexOf(thisBean) != newIndex)) {
 								beanList.remove(thisBean);
 								beanList.add(newIndex, thisBean);
 							}
@@ -729,12 +813,24 @@ public class ViewJSONManipulator extends ViewVisitor {
 											webContext);
 							}
 						}
+						if (requested != null) {
+							requested.add(thisBean);
+						}
 						newIndex++;
 					}
 	
 					// delete any left over beans in the list as these were not present in the requestList
-					while (beanList.size() > newIndex) {
-						BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
+					if (requested == null) { // ordered: the requested beans are first, in order
+						while (beanList.size() > newIndex) {
+							BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, newIndex);
+						}
+					}
+					else {
+						for (int i = beanList.size() - 1; i >= 0; i--) {
+							if (! requested.contains(beanList.get(i))) {
+								BindUtil.removeElementFromCollection(appliedTo, childBindingPrefix, i);
+							}
+						}
 					}
 					
 					BindUtil.orderByMetaData(appliedTo, childBindingPrefix);
@@ -771,12 +867,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	protected void applyJSONProperties(ViewBindings bindings,
-										Document documentToApply,
-										Map<String, Object> valuesToApply,
-										Bean beanToApplyTo,
-										AbstractPersistence persistence,
-										WebContext webContext)
+	protected void applyJSONProperties(@Nonnull ViewBindings bindings,
+										@Nonnull Document documentToApply,
+										@Nonnull Map<String, Object> valuesToApply,
+										@Nonnull Bean beanToApplyTo,
+										@Nonnull AbstractPersistence persistence,
+										@Nonnull WebContext webContext)
 	throws Exception {
 		for (String binding : bindings.getBindings()) {
 //UtilImpl.LOGGER.info("{} : {}", currentBindings.getFullyQualifiedBindingPrefix(), binding);
@@ -787,16 +883,57 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
+	/**
+	 * Indicates whether a value sent for a selected tab index binding is the index of one of its tab pane's tabs: a whole
+	 * number, or the text of one, from 0 to one less than the number of tabs.
+	 *
+	 * @param value	the value sent
+	 * @param tabCount	the number of tabs in the tab pane
+	 * @return whether the value is a tab index
+	 */
+	private static boolean isTabIndex(@Nullable Object value, int tabCount) {
+		int index;
+		if (value instanceof Number number) {
+			double d = number.doubleValue();
+			if ((d != Math.rint(d)) || (d < 0) || (d >= tabCount)) {
+				return false;
+			}
+			index = (int) d;
+		}
+		else if (value instanceof String string) {
+			try {
+				index = Integer.parseInt(string.trim());
+			}
+			catch (@SuppressWarnings("unused") NumberFormatException e) {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+		return (index >= 0) && (index < tabCount);
+	}
+
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void applyJSONProperty(Document startingDocument,
-										String binding, 
-										Map<String, Object> values, 
-										Bean targetBean,
-										AbstractPersistence persistence,
-										WebContext webContext) 
+	protected void applyJSONProperty(@Nonnull Document startingDocument,
+										@Nonnull String binding, 
+										@Nonnull Map<String, Object> values, 
+										@Nonnull Bean targetBean,
+										@Nonnull AbstractPersistence persistence,
+										@Nonnull WebContext webContext) 
 	throws Exception {
 		String valueKey = BindUtil.sanitiseBinding(binding);
 		if (! values.containsKey(valueKey)) {
+			return;
+		}
+		// a value for a binding only tab panes set must be a tab index; another widget bound to it sets any value it holds
+		Integer tabCount = tabCounts.get(binding);
+		if ((tabCount != null) && (! widgetWriters.contains(binding)) && (! isTabIndex(values.get(valueKey), tabCount.intValue()))) {
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("Ignored the selected tab index {} for binding {}: not a tab of its tab pane",
+								OWASP.sanitiseLog(String.valueOf(values.get(valueKey))),
+								OWASP.sanitiseLog(binding));
+			}
 			return;
 		}
 		
@@ -853,28 +990,31 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	protected void addBinding(String binding, boolean mutable, boolean escape, Sanitisation sanitise) {
+	protected void addBinding(@Nullable String binding, boolean mutable, boolean escape, @Nullable Sanitisation sanitise) {
 		addBinding(binding, mutable, escape, sanitise, false, false);
 	}
 
 	
-	private void addBinding(String binding,
+	private void addBinding(@Nullable String binding,
 								boolean mutable,
 								boolean escape,
-								Sanitisation sanitise,
+								@Nullable Sanitisation sanitise,
 								boolean instantiate,
 								boolean noPrefix) {
 		if (binding != null) {
 		    ViewBindings bindings = (noPrefix ? bindingTree : currentBindings);
 			bindings.putBinding(binding, mutable, escape, (sanitise == null) ? Sanitisation.relaxed : sanitise, instantiate);
+			if (mutable) {
+				widgetWriters.add(binding);
+			}
 		}
 	}
 
-	protected void addAnonymousFormat(String valueTemplate, boolean escape, Sanitisation sanitise) {
+	protected void addAnonymousFormat(@Nullable String valueTemplate, boolean escape, @Nullable Sanitisation sanitise) {
 		addNamedFormat("_" + formatCounter++, valueTemplate, escape, sanitise);
 	}
 	
-	protected void addNamedFormat(String name, String valueTemplate, boolean escape, Sanitisation sanitise) {
+	protected void addNamedFormat(@Nonnull String name, @Nullable String valueTemplate, boolean escape, @Nullable Sanitisation sanitise) {
 		if (valueTemplate != null) {
 			String currentBindingPrefix = currentBindings.getBindingPrefix();
 			String formatKey = (currentBindingPrefix == null) ? "" : currentBindingPrefix;
@@ -887,9 +1027,50 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 
-	protected void addCondition(String condition) {
+	/**
+	 * Registers a condition the view refers to so that its value is included in the instance data.
+	 *
+	 * <p>A condition name is registered as a top level binding. An inline condition expression, or the
+	 * inverse of one, is recorded for {@link #addInlineConditionValues(Map)}. Boolean literals and
+	 * {@code null} need no value and are ignored.
+	 *
+	 * @param condition	The derived condition of a widget, may be {@code null}.
+	 */
+	protected void addCondition(@Nullable String condition) {
 		if ((condition != null) && (! condition.equals("true")) && (! condition.equals("false"))) {
-			addBinding(condition, false, false, Sanitisation.none, false, true);
+			boolean negatedExpression = BindUtil.isNegatedSkyveExpression(condition);
+			if (negatedExpression || BindUtil.isSkyveExpression(condition)) {
+				// An inline condition expression is not a binding.
+				// Record which senses of it the view references so it can be evaluated once.
+				String expression = negatedExpression ? condition.substring(3) : condition;
+				String[] senses = inlineConditions.computeIfAbsent(expression, k -> new String[2]);
+				senses[negatedExpression ? 1 : 0] = condition;
+			}
+			else {
+				addBinding(condition, false, false, Sanitisation.none, false, true);
+			}
+		}
+	}
+
+	/**
+	 * Evaluates each inline condition expression referenced by the view once against the view's bean
+	 * and adds its value, and/or the complement for the opposite sense, under the identifiers
+	 * that the generated view definition refers to them by.
+	 *
+	 * @param toAddTo	The top level values to add to.
+	 */
+	private void addInlineConditionValues(@Nonnull Map<String, Object> toAddTo) {
+		for (Map.Entry<String, String[]> entry : inlineConditions.entrySet()) {
+			boolean value = BindUtil.evaluateCondition(bean, entry.getKey());
+			String[] senses = entry.getValue();
+			String condition = senses[0];
+			if (condition != null) {
+				toAddTo.put(BindUtil.conditionIdentifier(condition), Boolean.valueOf(value));
+			}
+			condition = senses[1];
+			if (condition != null) {
+				toAddTo.put(BindUtil.conditionIdentifier(condition), Boolean.valueOf(! value));
+			}
 		}
 	}
 	
@@ -900,7 +1081,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	 * @param binding	The binding for the domain values lookup.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void putVariantAndDynamicDomainValuesInValueMaps(String binding) {
+	private void putVariantAndDynamicDomainValuesInValueMaps(@Nonnull String binding) {
 		String safeBinding = BindUtil.sanitiseBinding(binding);
 		if (! valueMaps.containsKey(safeBinding)) {
             TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -910,7 +1091,8 @@ public class ViewJSONManipulator extends ViewVisitor {
             // Keep the domain values ordered with a LinkedHashMap
             LinkedHashMap<String, String> values = new LinkedHashMap<>();
 
-            if (DomainType.variant.equals(domainType)) {
+            // domainType is only set when there is an attribute
+            if ((attribute != null) && DomainType.variant.equals(domainType)) {
             	DocumentImpl targetDocument = (DocumentImpl) target.getDocument();
                 for (DomainValue domainValue : targetDocument.getDomainValues(customer, 
     																			domainType, 
@@ -921,7 +1103,7 @@ public class ViewJSONManipulator extends ViewVisitor {
                 }
                 valueMaps.put(safeBinding, values);
             }
-            else if (DomainType.dynamic.equals(domainType)) {
+            else if ((attribute != null) && DomainType.dynamic.equals(domainType)) {
             	List<DomainValue> domainValues = null;
             	
             	int lastDotIndex = binding.lastIndexOf('.');
@@ -963,20 +1145,20 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	protected boolean visible(Invisible invisible) {
-		return evaluateConditionInOppositeSense(invisible.getInvisibleConditionName());
+	protected boolean visible(@Nonnull Invisible invisible) {
+		return evaluateConditionInOppositeSense(invisible.getInvisibleCondition());
 	}
 
 	@Override
-	protected boolean enabled(Disableable disableable) {
-		return evaluateConditionInOppositeSense(disableable.getDisabledConditionName());
+	protected boolean enabled(@Nonnull Disableable disableable) {
+		return evaluateConditionInOppositeSense(disableable.getDisabledCondition());
 	}
 	
-	private boolean evaluateConditionInOppositeSense(String conditionName) {
+	private boolean evaluateConditionInOppositeSense(@Nullable String condition) {
 		boolean result = true;
 
-		if (conditionName != null) {
-			result = ! bean.evaluateCondition(conditionName);
+		if (condition != null) {
+			result = ! bean.evaluateCondition(condition);
 		}
 		
 		return result;
@@ -990,60 +1172,77 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTabPane(TabPane tabPane,
+	public void visitTabPane(@Nonnull TabPane tabPane,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		addCondition(tabPane.getInvisibleConditionName());
-		addCondition(tabPane.getDisabledConditionName());
-		addBinding(tabPane.getSelectedTabIndexBinding(), false, false, Sanitisation.text);
+		addCondition(tabPane.getInvisibleCondition());
+		addCondition(tabPane.getDisabledCondition());
+		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
+		if (selectedTabIndexBinding != null) {
+			// Mutable when it is a document attribute, which can be set: the client sends the tab the user selected, so that
+			// a later response does not select the old one again. PrimeFaces likewise writes its tab
+			// view's activeIndex unless the binding is read only. A binding to anything else is only read.
+			boolean attribute = false;
+			try {
+				attribute = (BindUtil.getMetaDataForBinding(customer, module, document, selectedTabIndexBinding).getAttribute() != null);
+			}
+			catch (@SuppressWarnings("unused") MetaDataException e) {
+				// not an attribute
+			}
+			// not through addBinding(), which notes the writers of other widgets
+			currentBindings.putBinding(selectedTabIndexBinding, attribute, false, Sanitisation.text, false);
+			if (attribute) {
+				tabCounts.merge(selectedTabIndexBinding, Integer.valueOf(tabPane.getTabs().size()), (a, b) -> (a.intValue() >= b.intValue()) ? a : b);
+			}
+		}
 	}
 
 	@Override
-	public void visitedTabPane(TabPane tabPane,
+	public void visitedTabPane(@Nonnull TabPane tabPane,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitTab(Tab tab,
+	public void visitTab(@Nonnull Tab tab,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		addCondition(tab.getInvisibleConditionName());
-		addCondition(tab.getDisabledConditionName());
+		addCondition(tab.getInvisibleCondition());
+		addCondition(tab.getDisabledCondition());
 	}
 
 	@Override
-	public void visitedTab(Tab tab,
+	public void visitedTab(@Nonnull Tab tab,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitVBox(VBox vbox,
+	public void visitVBox(@Nonnull VBox vbox,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		addCondition(vbox.getInvisibleConditionName());
+		addCondition(vbox.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitHBox(HBox hbox,
+	public void visitHBox(@Nonnull HBox hbox,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		addCondition(hbox.getInvisibleConditionName());
+		addCondition(hbox.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitForm(Form form,
+	public void visitForm(@Nonnull Form form,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		addCondition(form.getDisabledConditionName());
-		addCondition(form.getInvisibleConditionName());
+		addCondition(form.getDisabledCondition());
+		addCondition(form.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedForm(Form form,
+	public void visitedForm(@Nonnull Form form,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// keep this in sync with the generated edit views
@@ -1056,49 +1255,53 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFormColumn(FormColumn column,
+	public void visitFormColumn(@Nonnull FormColumn column,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
-	public void visitFormRow(FormRow row,
+	public void visitFormRow(@Nonnull FormRow row,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
-	public void visitedFormItem(FormItem item,
+	public void visitedFormItem(@Nonnull FormItem item,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
-	public void visitedFormRow(FormRow row,
+	public void visitedFormRow(@Nonnull FormRow row,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// not bound
 	}
 
 	@Override
-	public void visitButton(Button button,
+	public void visitButton(@Nonnull Button button,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		Action action = view.getAction(button.getActionName());
-		addCondition(action.getInvisibleConditionName());
-		addCondition(action.getDisabledConditionName());
+		String actionName = button.getActionName();
+		Action action = view.getAction(actionName);
+		if (action == null) { // a button's action is validated against the view's actions at load
+			throw new MetaDataException("Button action " + actionName + " is not defined in view " + view.getName());
+		}
+		addCondition(action.getInvisibleCondition());
+		addCondition(action.getDisabledCondition());
 	}
 
 	@Override
-	public void visitZoomIn(ZoomIn zoomIn,
+	public void visitZoomIn(@Nonnull ZoomIn zoomIn,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (parentVisible && visible(zoomIn)) {
@@ -1111,12 +1314,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(Binder.createCompoundBinding(binding, Bean.DOCUMENT_KEY), false, false, Sanitisation.none);
 			}
 		}
-		addCondition(zoomIn.getInvisibleConditionName());
-		addCondition(zoomIn.getDisabledConditionName());
+		addCondition(zoomIn.getInvisibleCondition());
+		addCondition(zoomIn.getDisabledCondition());
 	}
 
 	@Override
-	public void visitGeometry(Geometry geometry,
+	public void visitGeometry(@Nonnull Geometry geometry,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1129,19 +1332,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(geometry.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(geometry.getInvisibleConditionName());
-		addCondition(geometry.getDisabledConditionName());
+		addCondition(geometry.getInvisibleCondition());
+		addCondition(geometry.getDisabledCondition());
 	}
 
 	@Override
-	public void visitedGeometry(Geometry geometry,
+	public void visitedGeometry(@Nonnull Geometry geometry,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 	
 	@Override
-	public void visitGeometryMap(GeometryMap geometry,
+	public void visitGeometryMap(@Nonnull GeometryMap geometry,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (parentVisible && visible(geometry)) {
@@ -1150,41 +1353,41 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(geometry.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(geometry.getInvisibleConditionName());
-		addCondition(geometry.getDisabledConditionName());
+		addCondition(geometry.getInvisibleCondition());
+		addCondition(geometry.getDisabledCondition());
 	}
 
 	@Override
-	public void visitedGeometryMap(GeometryMap geometry,
+	public void visitedGeometryMap(@Nonnull GeometryMap geometry,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 	
 	@Override
-	public void visitMap(MapDisplay map,
+	public void visitMap(@Nonnull MapDisplay map,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		addCondition(map.getInvisibleConditionName());
+		addCondition(map.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitChart(Chart chart,
+	public void visitChart(@Nonnull Chart chart,
 							boolean parentVisible,
 							boolean parentEnabled) {
-		addCondition(chart.getInvisibleConditionName());
+		addCondition(chart.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitDialogButton(DialogButton button,
+	public void visitDialogButton(@Nonnull DialogButton button,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		addCondition(button.getInvisibleConditionName());
-		addCondition(button.getDisabledConditionName());
+		addCondition(button.getInvisibleCondition());
+		addCondition(button.getDisabledCondition());
 	}
 
 	@Override
-	public void visitDynamicImage(DynamicImage image,
+	public void visitDynamicImage(@Nonnull DynamicImage image,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1196,7 +1399,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				htmlGuts.append("<img src=\"dynamic.png?_n=").append(image.getName());
 				htmlGuts.append("&_doc={bizModule}.{bizDocument}");
 				
-				Integer pixelWidth = image.getPixelHeight();
+				Integer pixelWidth = image.getPixelWidth();
 				Integer pixelHeight = image.getPixelHeight();
 				Integer initialPixelWidth = image.getImageInitialPixelWidth();
 				Integer initialPixelHeight = image.getImageInitialPixelHeight();
@@ -1217,22 +1420,22 @@ public class ViewJSONManipulator extends ViewVisitor {
 	
 				htmlGuts.append(AbstractWebContext.CONTEXT_NAME).append("={CONTEXT}&");
 				htmlGuts.append(Bean.DOCUMENT_ID).append("={bizId}");
-				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
+				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleCondition());
 				htmlGuts.append("/>");
 			}
 		}
 		else {
-			addCondition(image.getInvisibleConditionName());
+			addCondition(image.getInvisibleCondition());
 		}
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) {
+	public void visitSpacer(@Nonnull Spacer spacer) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitStaticImage(StaticImage image,
+	public void visitStaticImage(@Nonnull StaticImage image,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1242,18 +1445,18 @@ public class ViewJSONManipulator extends ViewVisitor {
 				}
 				htmlGuts.append("<img src=\"resources?_n=").append(image.getRelativeFile());
 				htmlGuts.append("&_doc={bizModule}.{bizDocument}&_b=null\"");
-				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleConditionName());
+				appendHtmlGutsStyle(image.getPixelWidth(), image.getPixelHeight(), null, image.getInvisibleCondition());
 				htmlGuts.append("/>");
 			}
 		}
 		else {
-			addCondition(image.getInvisibleConditionName());
+			addCondition(image.getInvisibleCondition());
 		}
 	}
 
 
 	@Override
-	public void visitContentSignature(ContentSignature signature,
+	public void visitContentSignature(@Nonnull ContentSignature signature,
 										boolean parentVisible, 
 										boolean parentEnabled) {
 		// TODO not implemented for SC yet - use the content-image SmartClient item
@@ -1262,8 +1465,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(signature.getBinding(), true, false, Sanitisation.text);
 			}
 		}
-		addCondition(signature.getInvisibleConditionName());
-		addCondition(signature.getDisabledConditionName());
+		addCondition(signature.getInvisibleCondition());
+		addCondition(signature.getDisabledCondition());
 		addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
@@ -1272,7 +1475,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitBlurb(Blurb blurb,
+	public void visitBlurb(@Nonnull Blurb blurb,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1284,13 +1487,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 				appendHtmlGutsStyle(blurb.getPixelWidth(),
 										blurb.getPixelHeight(),
 										blurb.getTextAlignment(),
-										blurb.getInvisibleConditionName());
+										blurb.getInvisibleCondition());
 				htmlGuts.append('>').append(blurb.getLocalisedMarkup()).append("</div>");
 			}
 		}
 		else {
 			String markup = blurb.getLocalisedMarkup();
-			if (BindUtil.containsSkyveExpressions(markup)) { // has a binding expression
+			if ((markup != null) && BindUtil.containsSkyveExpressions(markup)) { // has a binding expression
 				if (parentVisible && visible(blurb)) {
 					if ((! forApply) || 
 							(forApply && parentEnabled)) {
@@ -1306,13 +1509,13 @@ public class ViewJSONManipulator extends ViewVisitor {
 					formatCounter++;
 				}
 			}
-			addCondition(blurb.getInvisibleConditionName());
+			addCondition(blurb.getInvisibleCondition());
 		}
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitLabel(Label label,
+	public void visitLabel(@Nonnull Label label,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1324,7 +1527,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				appendHtmlGutsStyle(label.getPixelWidth(),
 										label.getPixelHeight(),
 										label.getTextAlignment(),
-										label.getInvisibleConditionName());
+										label.getInvisibleCondition());
 				htmlGuts.append('>');
 				String binding = label.getBinding();
 				if (binding != null) {
@@ -1369,12 +1572,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 					}
 				}
 			}
-			addCondition(label.getInvisibleConditionName());
+			addCondition(label.getInvisibleCondition());
 		}
 	}
 
 	@Override
-	public void visitLink(Link link,
+	public void visitLink(@Nonnull Link link,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (processingDataWidget) {
@@ -1387,7 +1590,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		hrefProcessor.process(link.getReference());
 		htmlGuts.append('"');
 		if (processingDataWidget) {
-			appendHtmlGutsStyle(link.getPixelWidth(), null,  null, link.getInvisibleConditionName());
+			appendHtmlGutsStyle(link.getPixelWidth(), null,  null, link.getInvisibleCondition());
 		}
 		
 		ReferenceTarget target = link.getTarget();
@@ -1415,15 +1618,15 @@ public class ViewJSONManipulator extends ViewVisitor {
 			addAnonymousFormat(htmlGuts.toString(), false, Sanitisation.none);
 			htmlGuts.setLength(0);
 			
-			addCondition(link.getInvisibleConditionName());
+			addCondition(link.getInvisibleCondition());
 		}
 	}
 	
-	private void appendHtmlGutsStyle(Integer pixelWidth,
-										Integer pixelHeight,
-										HorizontalAlignment textAlignment,
-										String invisibleConditionName) {
-		if ((pixelWidth != null) || (pixelHeight != null) || (invisibleConditionName != null)) {
+	private void appendHtmlGutsStyle(@Nullable Integer pixelWidth,
+										@Nullable Integer pixelHeight,
+										@Nullable HorizontalAlignment textAlignment,
+										@Nullable String invisibleCondition) {
+		if ((pixelWidth != null) || (pixelHeight != null) || (invisibleCondition != null)) {
 			htmlGuts.append(" style=\"");
 			if (pixelWidth != null) {
 				htmlGuts.append("width:").append(pixelWidth).append("px;");
@@ -1434,17 +1637,49 @@ public class ViewJSONManipulator extends ViewVisitor {
 			if (textAlignment != null) {
 				htmlGuts.append("text-align:").append(textAlignment.toTextAlignmentString()).append(';');
 			}
-			if (invisibleConditionName != null) {
-				if ("true".equals(invisibleConditionName)) {
+			if (invisibleCondition != null) {
+				if ("true".equals(invisibleCondition)) {
 					htmlGuts.append("display:none;");
 				}
-				else if (! "false".equals(invisibleConditionName)) {
-					// NB - "display:true;" and "display:false;" will be replaced in addBindingsAndFormatValues()
-					htmlGuts.append("display:{").append(invisibleConditionName).append("};");
+				else if (! "false".equals(invisibleCondition)) {
+					// NB - resolved for each row in addBindingsAndFormatValues()
+					htmlGuts.append(ROW_CONDITION_DELIMITER).append(invisibleCondition).append(ROW_CONDITION_DELIMITER);
 				}
 			}
 			htmlGuts.append('"');
 		}
+	}
+
+	/**
+	 * Replaces each invisible condition that {@link #appendHtmlGutsStyle} embedded in data widget
+	 * markup with {@code display:none;} when the condition is true for the row, or nothing when it is not.
+	 *
+	 * <p>The condition is evaluated rather than formatted as a message expression,
+	 * because a formatted boolean is its display value, not a style.
+	 *
+	 * @param format	The row markup, before its message expressions are formatted.
+	 * @param row	The bean of the row the markup is for.
+	 * @return	The markup with its invisible conditions resolved.
+	 * @throws MetaDataException	When a condition does not exist or cannot be evaluated for the row.
+	 */
+	private static @Nonnull String resolveRowInvisibleConditions(@Nonnull String format, @Nonnull Bean row) {
+		int start = format.indexOf(ROW_CONDITION_DELIMITER);
+		if (start < 0) {
+			return format;
+		}
+
+		StringBuilder result = new StringBuilder(format.length());
+		int copied = 0;
+		while (start >= 0) {
+			int end = format.indexOf(ROW_CONDITION_DELIMITER, start + 1);
+			result.append(format, copied, start);
+			if (row.evaluateCondition(format.substring(start + 1, end))) {
+				result.append("display:none;");
+			}
+			copied = end + 1;
+			start = format.indexOf(ROW_CONDITION_DELIMITER, copied);
+		}
+		return result.append(format, copied, format.length()).toString();
 	}
 
 	/**
@@ -1472,8 +1707,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 				}
 			}
 		
-		addCondition(content.getInvisibleConditionName());
-		addCondition(content.getDisabledConditionName());
+		addCondition(content.getInvisibleCondition());
+		addCondition(content.getDisabledCondition());
 		addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
 		addBinding(Bean.DATA_GROUP_ID, false, false, Sanitisation.text);
@@ -1482,7 +1717,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 
 	@Override
-	public void visitParameter(Parameter parameter,
+	public void visitParameter(@Nonnull Parameter parameter,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (parentVisible) {
@@ -1494,7 +1729,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFilterParameter(FilterParameter parameter,
+	public void visitFilterParameter(@Nonnull FilterParameter parameter,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		if (parentVisible) {
@@ -1506,64 +1741,65 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitProgressBar(ProgressBar progressBar,
+	public void visitProgressBar(@Nonnull ProgressBar progressBar,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (parentVisible && visible(progressBar)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addBinding(progressBar.getBinding(), false, false, Sanitisation.none);
+				// escaped as the value is displayed as HTML
+				addBinding(progressBar.getBinding(), false, true, Sanitisation.none);
 			}
 		}
-		addCondition(progressBar.getInvisibleConditionName());
+		addCondition(progressBar.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitListGrid(ListGrid grid,
+	public void visitListGrid(@Nonnull ListGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		addCondition(grid.getDisabledConditionName());
-		addCondition(grid.getInvisibleConditionName());
+		addCondition(grid.getDisabledCondition());
+		addCondition(grid.getInvisibleCondition());
 		if (parentVisible && visible(grid)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addCondition(grid.getDisableAddConditionName());
-				addCondition(grid.getDisableEditConditionName());
-				addCondition(grid.getDisableZoomConditionName());
-				addCondition(grid.getDisableRemoveConditionName());
-				addCondition(grid.getPostRefreshConditionName());
+				addCondition(grid.getDisableAddCondition());
+				addCondition(grid.getDisableEditCondition());
+				addCondition(grid.getDisableZoomCondition());
+				addCondition(grid.getDisableRemoveCondition());
+				addCondition(grid.getPostRefreshCondition());
 				addBinding(grid.getSelectedIdBinding(), true, false, Sanitisation.text);
 			}
 		}
 	}
 
 	@Override
-	public void visitListRepeater(ListRepeater repeater,
+	public void visitListRepeater(@Nonnull ListRepeater repeater,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		addCondition(repeater.getInvisibleConditionName());
+		addCondition(repeater.getInvisibleCondition());
 		if (parentVisible && visible(repeater)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addCondition(repeater.getPostRefreshConditionName());
+				addCondition(repeater.getPostRefreshCondition());
 			}
 		}
 	}
 
 	@Override
-	public void visitTreeGrid(TreeGrid grid,
+	public void visitTreeGrid(@Nonnull TreeGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		addCondition(grid.getDisabledConditionName());
-		addCondition(grid.getInvisibleConditionName());
+		addCondition(grid.getDisabledCondition());
+		addCondition(grid.getInvisibleCondition());
 		if (parentVisible && visible(grid)) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
-				addCondition(grid.getDisableAddConditionName());
-				addCondition(grid.getDisableEditConditionName());
-				addCondition(grid.getDisableZoomConditionName());
-				addCondition(grid.getDisableRemoveConditionName());
-				addCondition(grid.getPostRefreshConditionName());
+				addCondition(grid.getDisableAddCondition());
+				addCondition(grid.getDisableEditCondition());
+				addCondition(grid.getDisableZoomCondition());
+				addCondition(grid.getDisableRemoveCondition());
+				addCondition(grid.getPostRefreshCondition());
 				addBinding(grid.getSelectedIdBinding(), true, false, Sanitisation.text);
 				addBinding(grid.getRootIdBinding(), false, false, Sanitisation.text);
 			}
@@ -1572,10 +1808,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	private boolean visitingDataWidget = false;
 	private boolean processingDataWidget = false;
+	private Document dataWidgetDocument = null; // the row document of the data widget being processed
 	private boolean visitedDataWidgetHasEditableColumns = false;
 
 	@Override
-	public void visitDataGrid(DataGrid grid,
+	public void visitDataGrid(@Nonnull DataGrid grid,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// The grid columns are editable if the grid is editable, and either the edit function is enabled or 
@@ -1583,45 +1820,45 @@ public class ViewJSONManipulator extends ViewVisitor {
 		// NB The zoom operation can be disabled and not affect whether the columns are editable because 
 		// the changed values are posted in the zoomed-in page, not from the grid.
 		boolean dataWidgetHasEditableColumns = (! Boolean.FALSE.equals(grid.getEditable())) &&
-												(evaluateConditionInOppositeSense(grid.getDisableEditConditionName()) ||
+												(evaluateConditionInOppositeSense(grid.getDisableEditCondition()) ||
 													(Boolean.TRUE.equals(grid.getInline()) && 
-														evaluateConditionInOppositeSense(grid.getDisableAddConditionName())));
+														evaluateConditionInOppositeSense(grid.getDisableAddCondition())));
 
 		visitDataWidget(grid, 
 							parentVisible,
 							parentEnabled,
 							enabled(grid),
 							dataWidgetHasEditableColumns,
-							grid.getDisableAddConditionName(),
-							grid.getDisableZoomConditionName(),
-							grid.getDisableEditConditionName(),
-							grid.getDisableRemoveConditionName(),
+							grid.getDisableAddCondition(),
+							grid.getDisableZoomCondition(),
+							grid.getDisableEditCondition(),
+							grid.getDisableRemoveCondition(),
 							grid.getSelectedIdBinding());
-		addCondition(grid.getDisabledConditionName());
+		addCondition(grid.getDisabledCondition());
 	}
 	
 	@Override
-	public void visitDataRepeater(DataRepeater repeater,
+	public void visitDataRepeater(@Nonnull DataRepeater repeater,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		visitDataWidget(repeater, parentVisible, parentEnabled, true, true, null, null, null, null, null);
 	}
 	
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private void visitDataWidget(AbstractDataWidget widget,
+	private void visitDataWidget(@Nonnull AbstractDataWidget widget,
 									boolean parentVisible,
 									boolean parentEnabled,
 									boolean enabled,
 									boolean dataWidgetHasEditableColumns,
-									String disableAddConditionName,
-									String disableZoomConditionName,
-									String disableEditConditionName,
-									String disableRemoveConditionName,
-									String selectedIdBinding) {	
+									@Nullable String disableAddCondition,
+									@Nullable String disableZoomCondition,
+									@Nullable String disableEditCondition,
+									@Nullable String disableRemoveCondition,
+									@Nullable String selectedIdBinding) {	
 		visitingDataWidget = true;
 		htmlGuts.setLength(0);
 
-		addCondition(widget.getInvisibleConditionName());
+		addCondition(widget.getInvisibleCondition());
 
 		// NB Allow bindings in a grid with getEditable() false through as there could be 
 		// links with actions that mutate the grid data client-side ie remove implicit action
@@ -1631,13 +1868,16 @@ public class ViewJSONManipulator extends ViewVisitor {
 				processingDataWidget = true;
 				visitedDataWidgetHasEditableColumns = dataWidgetHasEditableColumns;
 				
-				addCondition(disableAddConditionName);
-				addCondition(disableZoomConditionName);
-				addCondition(disableEditConditionName);
-				addCondition(disableRemoveConditionName);
+				addCondition(disableAddCondition);
+				addCondition(disableZoomCondition);
+				addCondition(disableEditCondition);
+				addCondition(disableRemoveCondition);
 				addBinding(selectedIdBinding, true, false, Sanitisation.text, false, true);
 				
 				String gridBinding = widget.getBinding();
+				if (gridBinding == null) { // a data grid/repeater binding is required
+					throw new MetaDataException("A data grid/repeater in view " + view.getName() + " has no binding");
+				}
 			    TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, gridBinding);
 			    Relation targetRelation = (Relation) target.getAttribute();
 			    if (targetRelation == null) { // should never happen
@@ -1645,7 +1885,8 @@ public class ViewJSONManipulator extends ViewVisitor {
 			    }
 			    Document relatedDocument = module.getDocument(customer, targetRelation.getDocumentName());
 		        currentBindings = currentBindings.putOrGetChild(gridBinding, relatedDocument);
-		        
+		        dataWidgetDocument = relatedDocument;
+
 		        // Add these for polymorphic zooming on data grids
 		        addBinding(Bean.MODULE_KEY, false, false, Sanitisation.text);
 		        addBinding(Bean.DOCUMENT_KEY, false, false, Sanitisation.text);
@@ -1687,28 +1928,28 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 	
 	@Override
-	public void visitedListGrid(ListGrid grid,
+	public void visitedListGrid(@Nonnull ListGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		incrementCounter();
 	}
 
 	@Override
-	public void visitedListRepeater(ListRepeater repeater,
+	public void visitedListRepeater(@Nonnull ListRepeater repeater,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		incrementCounter();
 	}
 
 	@Override
-	public void visitedTreeGrid(TreeGrid grid,
+	public void visitedTreeGrid(@Nonnull TreeGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		incrementCounter();
 	}
 
 	@Override
-	public void visitedDataGrid(DataGrid grid,
+	public void visitedDataGrid(@Nonnull DataGrid grid,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		incrementCounter();
@@ -1716,7 +1957,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedDataRepeater(DataRepeater repeater,
+	public void visitedDataRepeater(@Nonnull DataRepeater repeater,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		incrementCounter();
@@ -1739,11 +1980,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 		processingDataWidget = false;
 		visitingDataWidget = false;
+		dataWidgetDocument = null;
 		htmlGuts.setLength(0);
 	}
 	
 	@Override
-	public void visitDataGridBoundColumn(DataGridBoundColumn column,
+	public void visitDataGridBoundColumn(@Nonnull DataGridBoundColumn column,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		if (parentVisible) {
@@ -1773,28 +2015,28 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
+	public void visitedDataGridBoundColumn(@Nonnull DataGridBoundColumn column,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitDataGridContainerColumn(DataGridContainerColumn column,
+	public void visitDataGridContainerColumn(@Nonnull DataGridContainerColumn column,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		htmlGuts.setLength(0);
 	}
 
 	@Override
-	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
+	public void visitedDataGridContainerColumn(@Nonnull DataGridContainerColumn column,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		addAnonymousFormat(UtilImpl.processStringValue(htmlGuts.toString()), false, Sanitisation.none);
 	}
 
 	@Override
-	public void visitCheckBox(CheckBox checkBox,
+	public void visitCheckBox(@Nonnull CheckBox checkBox,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1807,12 +2049,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(checkBox.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(checkBox.getDisabledConditionName());
-		addCondition(checkBox.getInvisibleConditionName());
+		addCondition(checkBox.getDisabledCondition());
+		addCondition(checkBox.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedCheckBox(CheckBox checkBox,
+	public void visitedCheckBox(@Nonnull CheckBox checkBox,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
@@ -1820,11 +2062,11 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitCheckMembership(CheckMembership membership,
+	public void visitCheckMembership(@Nonnull CheckMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		addCondition(membership.getDisabledConditionName());
-		addCondition(membership.getInvisibleConditionName());
+		addCondition(membership.getDisabledCondition());
+		addCondition(membership.getInvisibleCondition());
 
 		if (parentVisible && visible(membership)) {
 			if ((! forApply) || 
@@ -1851,14 +2093,14 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedCheckMembership(CheckMembership membership,
+	public void visitedCheckMembership(@Nonnull CheckMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitColourPicker(ColourPicker colour,
+	public void visitColourPicker(@Nonnull ColourPicker colour,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1871,12 +2113,12 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(colour.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(colour.getDisabledConditionName());
-		addCondition(colour.getInvisibleConditionName());
+		addCondition(colour.getDisabledCondition());
+		addCondition(colour.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedColourPicker(ColourPicker colour,
+	public void visitedColourPicker(@Nonnull ColourPicker colour,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// do nothing
@@ -1884,7 +2126,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitCombo(Combo combo,
+	public void visitCombo(@Nonnull Combo combo,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1907,22 +2149,25 @@ public class ViewJSONManipulator extends ViewVisitor {
 				String binding = combo.getBinding();
 				addBinding(binding, true, false, Sanitisation.relaxed);
 				
-				putVariantAndDynamicDomainValuesInValueMaps(binding);
+				// As for addBinding(), there is nothing to add without a binding
+				if (binding != null) {
+					putVariantAndDynamicDomainValuesInValueMaps(binding);
+				}
 			}
 		}
-		addCondition(combo.getDisabledConditionName());
-		addCondition(combo.getInvisibleConditionName());
+		addCondition(combo.getDisabledCondition());
+		addCondition(combo.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedCombo(Combo combo,
+	public void visitedCombo(@Nonnull Combo combo,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitRichText(RichText text,
+	public void visitRichText(@Nonnull RichText text,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1935,19 +2180,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(text.getBinding(), true, false, text.getSanitise());
 			}
 		}
-		addCondition(text.getDisabledConditionName());
-		addCondition(text.getInvisibleConditionName());
+		addCondition(text.getDisabledCondition());
+		addCondition(text.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedRichText(RichText richText,
+	public void visitedRichText(@Nonnull RichText richText,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitHTML(HTML html,
+	public void visitHTML(@Nonnull HTML html,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -1959,17 +2204,17 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(html.getBinding(), true, false, html.getSanitise());
 			}
 		}
-		addCondition(html.getDisabledConditionName());
-		addCondition(html.getInvisibleConditionName());
+		addCondition(html.getDisabledCondition());
+		addCondition(html.getInvisibleCondition());
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitListMembership(ListMembership membership,
+	public void visitListMembership(@Nonnull ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
-		addCondition(membership.getDisabledConditionName());
-		addCondition(membership.getInvisibleConditionName());
+		addCondition(membership.getDisabledCondition());
+		addCondition(membership.getInvisibleCondition());
 
 		if (parentVisible && visible(membership)) {
 			if ((! forApply) || 
@@ -1997,34 +2242,43 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedListMembership(ListMembership membership,
+	public void visitedListMembership(@Nonnull ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitComparison(Comparison comparison,
+	public void visitComparison(@Nonnull Comparison comparison,
 									boolean parentVisible,
 									boolean parentEnabled) {
-		addCondition(comparison.getDisabledConditionName());
-		addCondition(comparison.getInvisibleConditionName());
+		addCondition(comparison.getDisabledCondition());
+		addCondition(comparison.getInvisibleCondition());
 
 		if (parentVisible && visible(comparison)) {
 			String referenceName = comparison.getBinding();
-			Reference reference = document.getReferenceByName(referenceName);
+			if (referenceName == null) { // a comparison binding is required
+				throw new MetaDataException("A comparison in view " + view.getName() + " has no binding");
+			}
+			Reference reference = document.getNullSafeReferenceByName(referenceName);
 			Document referenceDocument = module.getDocument(customer, reference.getDocumentName());
 
 			try {
 				String modelName = comparison.getModelName();
+				if (modelName == null) { // a comparison model name is required
+					throw new MetaDataException("The comparison [" + referenceName + "] has no model name");
+				}
 				RequestKey key = RequestKey.model(document, modelName);
-				ProvidedRepository repository = ProvidedRepositoryFactory.get();
+				ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 				ComparisonModel<Bean, Bean> model = repository.getComparisonModel(customer, document, modelName, true);
 				if (model == null) {
 					throw new MetaDataException("Could not resolve comparison model [" + modelName + "]");
 				}
 				model.setBean(bean);
 				ComparisonComposite root = model.getComparisonComposite((Bean) BindUtil.get(bean, referenceName));
+				if (root == null) {
+					throw new MetaDataException("Comparison model [" + modelName + "] produced no comparison");
+				}
 				if (! forApply) {
 					comparisons.put(referenceName, 
 										new ComparisonJSONManipulator(user, customer, root).toJSONStructure());
@@ -2045,21 +2299,29 @@ public class ViewJSONManipulator extends ViewVisitor {
 		}
 	}
 	
-	private void addComparisonBindingsForApply(ComparisonComposite node, Document nodeDocument) {
+	private void addComparisonBindingsForApply(@Nonnull ComparisonComposite node, @Nonnull Document nodeDocument) {
         String nodeReferenceName = node.getReferenceName();
         if (nodeReferenceName != null) {
             currentBindings = currentBindings.putOrGetChild(nodeReferenceName, nodeDocument);
         }
 
         for (ComparisonProperty property : node.getProperties()) {
-            currentBindings.putBinding(property.getName(), true, true, Sanitisation.none, false);
+        	// A property without a name is not a real property, so there is nothing to bind (see ComparisonJSONManipulator)
+        	String propertyName = property.getName();
+        	if (propertyName != null) {
+        		currentBindings.putBinding(propertyName, true, true, Sanitisation.none, false);
+        	}
         }
         
         for (ComparisonComposite child : node.getChildren()) {
-        	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, child.getReferenceName());
+        	String childReferenceName = child.getReferenceName();
+        	if (childReferenceName == null) { // a child is always reached through a relation
+        		throw new MetaDataException("A comparison child of document " + nodeDocument.getName() + " has no reference name");
+        	}
+        	TargetMetaData target = Binder.getMetaDataForBinding(customer, module, nodeDocument, childReferenceName);
         	Relation childRelation = (Relation) target.getAttribute();
 		    if (childRelation == null) { // should never happen
-		    	throw new MetaDataException("No target relation for comparison binding " + child.getReferenceName());
+		    	throw new MetaDataException("No target relation for comparison binding " + childReferenceName);
 		    }
             Document childDocument = module.getDocument(customer, childRelation.getDocumentName());
             addComparisonBindingsForApply(child, childDocument);
@@ -2072,7 +2334,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitLookupDescription(LookupDescription lookup,
+	public void visitLookupDescription(@Nonnull LookupDescription lookup,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -2113,23 +2375,23 @@ public class ViewJSONManipulator extends ViewVisitor {
 			}
 		}
 		
-		addCondition(lookup.getDisabledConditionName());
-		addCondition(lookup.getInvisibleConditionName());
-		addCondition(lookup.getDisablePickConditionName());
-		addCondition(lookup.getDisableEditConditionName());
-		addCondition(lookup.getDisableAddConditionName());
-		addCondition(lookup.getDisableClearConditionName());
+		addCondition(lookup.getDisabledCondition());
+		addCondition(lookup.getInvisibleCondition());
+		addCondition(lookup.getDisablePickCondition());
+		addCondition(lookup.getDisableEditCondition());
+		addCondition(lookup.getDisableAddCondition());
+		addCondition(lookup.getDisableClearCondition());
 	}
 	
 	@Override
-	public void visitedLookupDescription(LookupDescription lookup,
+	public void visitedLookupDescription(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitPassword(Password password, 
+	public void visitPassword(@Nonnull Password password, 
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -2142,19 +2404,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(password.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(password.getDisabledConditionName());
-		addCondition(password.getInvisibleConditionName());
+		addCondition(password.getDisabledCondition());
+		addCondition(password.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedPassword(Password password,
+	public void visitedPassword(@Nonnull Password password,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitRadio(Radio radio,
+	public void visitRadio(@Nonnull Radio radio,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -2166,19 +2428,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(radio.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(radio.getDisabledConditionName());
-		addCondition(radio.getInvisibleConditionName());
+		addCondition(radio.getDisabledCondition());
+		addCondition(radio.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedRadio(Radio radio,
+	public void visitedRadio(@Nonnull Radio radio,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSlider(Slider slider, 
+	public void visitSlider(@Nonnull Slider slider, 
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -2191,19 +2453,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(slider.getBinding(), true, false, Sanitisation.text);
 			}
 		}
-		addCondition(slider.getDisabledConditionName());
-		addCondition(slider.getInvisibleConditionName());
+		addCondition(slider.getDisabledCondition());
+		addCondition(slider.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedSlider(Slider slider,
+	public void visitedSlider(@Nonnull Slider slider,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSpinner(Spinner spinner,
+	public void visitSpinner(@Nonnull Spinner spinner,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -2216,44 +2478,19 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(spinner.getBinding(), true, false, Sanitisation.text);
 			}
 		}
-		addCondition(spinner.getDisabledConditionName());
-		addCondition(spinner.getInvisibleConditionName());
+		addCondition(spinner.getDisabledCondition());
+		addCondition(spinner.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedSpinner(Spinner spinner,
+	public void visitedSpinner(@Nonnull Spinner spinner,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitTextArea(TextArea text,
-								boolean parentVisible,
-								boolean parentEnabled) {
-		if (visitingDataWidget) {
-			return;
-		}
-
-		if (parentVisible && visible(text)) {
-			if ((! forApply) || 
-					(forApply && parentEnabled && enabled(text) && (! Boolean.FALSE.equals(text.getEditable())))) {
-				addBinding(text.getBinding(), true, false, Sanitisation.none);
-			}
-		}
-		addCondition(text.getDisabledConditionName());
-		addCondition(text.getInvisibleConditionName());
-	}
-
-	@Override
-	public void visitedTextArea(TextArea text,
-									boolean parentVisible,
-									boolean parentEnabled) {
-		// do nothing
-	}
-
-	@Override
-	public void visitTextField(TextField text,
+	public void visitTextArea(@Nonnull TextArea text,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		if (visitingDataWidget) {
@@ -2266,19 +2503,44 @@ public class ViewJSONManipulator extends ViewVisitor {
 				addBinding(text.getBinding(), true, false, Sanitisation.none);
 			}
 		}
-		addCondition(text.getDisabledConditionName());
-		addCondition(text.getInvisibleConditionName());
+		addCondition(text.getDisabledCondition());
+		addCondition(text.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedTextField(TextField text,
+	public void visitedTextArea(@Nonnull TextArea text,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextField(@Nonnull TextField text,
+								boolean parentVisible,
+								boolean parentEnabled) {
+		if (visitingDataWidget) {
+			return;
+		}
+
+		if (parentVisible && visible(text)) {
+			if ((! forApply) || 
+					(forApply && parentEnabled && enabled(text) && (! Boolean.FALSE.equals(text.getEditable())))) {
+				addBinding(text.getBinding(), true, false, Sanitisation.none);
+			}
+		}
+		addCondition(text.getDisabledCondition());
+		addCondition(text.getInvisibleCondition());
+	}
+
+	@Override
+	public void visitedTextField(@Nonnull TextField text,
+									boolean parentVisible,
+									boolean parentEnabled) {
+		// do nothing
+	}
+
+	@Override
+	public void visitInject(@Nonnull Inject inject, boolean parentVisible, boolean parentEnabled) {
 		if (parentVisible) {
 			if ((! forApply) || 
 					(forApply && parentEnabled)) {
@@ -2295,262 +2557,262 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedVBox(VBox vbox,
+	public void visitedVBox(@Nonnull VBox vbox,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitedHBox(HBox hbox,
+	public void visitedHBox(@Nonnull HBox hbox,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
-	private void visitActionInternal(Action action) {
-		addCondition(action.getDisabledConditionName());
-		addCondition(action.getInvisibleConditionName());
+	private void visitActionInternal(@Nonnull Action action) {
+		addCondition(action.getDisabledCondition());
+		addCondition(action.getInvisibleCondition());
 	}
 	
 	@Override
-	public void visitCustomAction(ActionImpl action) {
+	public void visitCustomAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitAddAction(ActionImpl action) {
+	public void visitAddAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) {
+	public void visitRemoveAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) {
+	public void visitZoomOutAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) {
+	public void visitNavigateAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) {
+	public void visitOKAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) {
+	public void visitSaveAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) {
+	public void visitCancelAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) {
+	public void visitDeleteAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitReportAction(ActionImpl action) {
+	public void visitReportAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) {
+	public void visitBizExportAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) {
+	public void visitBizImportAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) {
+	public void visitDownloadAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) {
+	public void visitUploadAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) {
+	public void visitNewAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) {
+	public void visitEditAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitPrintAction(ActionImpl action) {
+	public void visitPrintAction(@Nonnull ActionImpl action) {
 		visitActionInternal(action);
 	}
 
 	@Override
-	public void visitOnChangedEventHandler(Changeable changeable,
+	public void visitOnChangedEventHandler(@Nonnull Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable,
+	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnFocusEventHandler(Focusable blurable,
+	public void visitOnFocusEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable,
+	public void visitedOnFocusEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnBlurEventHandler(Focusable blurable,
+	public void visitOnBlurEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable,
+	public void visitedOnBlurEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnAddedEventHandler(Addable addable,
+	public void visitOnAddedEventHandler(@Nonnull Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnAddedEventHandler(Addable addable,
+	public void visitedOnAddedEventHandler(@Nonnull Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnEditedEventHandler(Editable editable,
+	public void visitOnEditedEventHandler(@Nonnull Editable editable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnEditedEventHandler(Editable editable,
+	public void visitedOnEditedEventHandler(@Nonnull Editable editable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnRemovedEventHandler(Removable removable,
+	public void visitOnRemovedEventHandler(@Nonnull Removable removable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnRemovedEventHandler(Removable removable,
+	public void visitedOnRemovedEventHandler(@Nonnull Removable removable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnSelectedEventHandler(Selectable editable,
+	public void visitOnSelectedEventHandler(@Nonnull Selectable editable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnSelectedEventHandler(Selectable editable,
+	public void visitedOnSelectedEventHandler(@Nonnull Selectable editable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(LookupDescription lookup,
+	public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(LookupDescription lookup,
+	public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(LookupDescription lookup,
+	public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(LookupDescription lookup,
+	public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender,
-											EventSource source,
+	public void visitRerenderEventAction(@Nonnull RerenderEventAction rerender,
+											@Nonnull EventSource source,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// no properties here
 	}
 
 	@Override
-	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
+	public void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server,
 													boolean parentVisible,
 													boolean parentEnabled) {
 		// no properties here
 	}
 
 	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
+	public void visitSetDisabledEventAction(@Nonnull SetDisabledEventAction setDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
-		addCondition(setDisabled.getDisabledConditionName());
+		addCondition(setDisabled.getDisabledCondition());
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
 		// NB escape and sanitisation already set from visiting the widget
 		addBinding(setDisabled.getBinding(), true, false, Sanitisation.none);
 	}
 
 	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+	public void visitToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// we add this binding as the widget could be enabled client-side and we'd need to let the value through
@@ -2559,7 +2821,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+	public void visitToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
 													boolean parentEnabled) {
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
@@ -2569,22 +2831,22 @@ public class ViewJSONManipulator extends ViewVisitor {
 
 
 	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
+	public void visitSetInvisibleEventAction(@Nonnull SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
 												boolean parentEnabled) {
-		addCondition(setInvisible.getInvisibleConditionName());
+		addCondition(setInvisible.getInvisibleCondition());
 		// we add this binding as the widget could be visible client-side and we'd need to let the value through
 		// NB escape and sanitisation already set from visiting the widget
 		addBinding(setInvisible.getBinding(), true, false, Sanitisation.none);
 	}
 
 	@Override
-	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		addCondition(sidebar.getInvisibleConditionName());
+	public void visitSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+		addCondition(sidebar.getInvisibleCondition());
 	}
 
 	@Override
-	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+	public void visitedSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		// do nothing
 	}
 }

@@ -35,6 +35,14 @@ import jakarta.annotation.Nullable;
  */
 public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableMetaData {
 	/**
+	 * Returns the name of this customer, which customer conversion requires.
+	 *
+	 * @return the customer name; never {@code null}
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the BCP 47 language tag that governs locale-sensitive behaviour for this customer.
 	 *
 	 * @return a BCP 47 language tag (e.g. {@code "en-AU"}); may be {@code null} if not configured
@@ -105,7 +113,7 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 * @param roleName  the role name to look up
 	 * @return the role, or {@code null} if no role with that name exists
 	 */
-	public @Nullable CustomerRole getRole(String roleName);
+	public @Nullable CustomerRole getRole(@Nonnull String roleName);
 	
 	/**
 	 * Returns whether users of this customer may be assigned module-level roles directly,
@@ -178,10 +186,10 @@ public interface Customer extends NamedMetaData, PersistentMetaData, ReloadableM
 	 * @throws Exception if the Bizlet call fails
 	 */
 	@SuppressWarnings("java:S112") // Allow generic exception to propagate from Bizlet call; Skyve will handle appropriately
-	public @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(Bizlet<T> bizlet,
-																				String moduleName,
-																				String documentName,
-																				Attribute attribute)
+	public @Nonnull <T extends Bean> List<DomainValue> getConstantDomainValues(@Nullable Bizlet<T> bizlet,
+																				@Nonnull String moduleName,
+																				@Nonnull String documentName,
+																				@Nonnull Attribute attribute)
 	throws Exception;
 	
 	/**

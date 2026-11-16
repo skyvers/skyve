@@ -1,39 +1,56 @@
 package org.skyve.impl.bind;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.el.ELClass;
+import jakarta.el.ELContext;
 import jakarta.el.ELManager;
 import jakarta.el.ELProcessor;
+import jakarta.el.ELResolver;
+import jakarta.el.FunctionMapper;
+import jakarta.el.VariableMapper;
 
 /**
  * Evaluates Skyve EL expressions against bean, user, and stash contexts.
@@ -55,8 +72,73 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	public static final String RTEL_PREFIX = "rtel";
 
-    private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class); 
-	private static final String BEAN_VARIABLE = "bean";
+	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ELExpressionEvaluator.class);
+	static final String BEAN_VARIABLE = "bean";
+	static final String USER_VARIABLE = "user";
+	static final String STASH_VARIABLE = "stash";
+
+	private static final Map<String, Method> FIXED_FUNCTIONS = fixedFunctions();
+	private static final BindingELResolver BINDING_RESOLVER = new BindingELResolver();
+
+	/**
+	 * The enumerations an expression evaluated against a bean class can name, keyed by simple name.
+	 * The class's own enumerations are there from the start (see {@link #enumBeans(Class)}).
+	 * The enumerations of related documents are added as expressions name them; only names that
+	 * resolved are kept, so the map is bounded by the enumerations that can be reached.
+	 * ClassValue does not pin redeployed class loaders.
+	 */
+	static final ClassValue<Map<String, ELClass>> ENUM_BEANS = new ClassValue<>() {
+		@Override
+		protected @Nonnull Map<String, ELClass> computeValue(@SuppressWarnings("null") @Nonnull Class<?> type) {
+			return new ConcurrentHashMap<>(enumBeans(type));
+		}
+	};
+
+	/** Keeps evaluation state local while resolving fixed functions from the shared mapper. */
+	private static final class FunctionContext extends ELContext {
+		private final ELResolver resolver;
+		private final VariableMapper variables;
+		private Map<String, Method> localFunctions;
+		private final FunctionMapper functions = new FunctionMapper() {
+			@Override
+			public @Nullable Method resolveFunction(@SuppressWarnings("null") @Nonnull String prefix,
+													@SuppressWarnings("null") @Nonnull String localName) {
+				String key = prefix + ':' + localName;
+				Method result = (localFunctions == null) ? null : localFunctions.get(key);
+				return (result == null) ? FIXED_FUNCTIONS.get(key) : result;
+			}
+
+			@Override
+			public void mapFunction(@SuppressWarnings("null") @Nonnull String prefix,
+									@SuppressWarnings("null") @Nonnull String localName,
+									@Nullable Method method) {
+				if (localFunctions == null) {
+					localFunctions = new HashMap<>();
+				}
+				localFunctions.put(prefix + ':' + localName, method);
+			}
+		};
+
+		private FunctionContext(@Nonnull ELContext original) {
+			resolver = original.getELResolver();
+			variables = original.getVariableMapper();
+		}
+
+		@Override
+		public @Nonnull ELResolver getELResolver() {
+			return resolver;
+		}
+
+		@Override
+		public @Nonnull FunctionMapper getFunctionMapper() {
+			return functions;
+		}
+
+		@Override
+		public @Nonnull VariableMapper getVariableMapper() {
+			return variables;
+		}
+	}
 
 	// Regex expressions to find the start of an EL expression
 	private static final String[] COMMENCING_REGEX_TOKENS = new String[] {BEAN_VARIABLE + "\\s*\\.",
@@ -108,8 +190,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	private static final String[] COMMENCING_COMPLETES = new String[] {"empty",
 																		"concat(",
 																		BEAN_VARIABLE,
-																		"user",
-																		"stash",
+																		USER_VARIABLE,
+																		STASH_VARIABLE,
 																		"newDateOnly()",
 																		"newDateOnlyFromMillis(",
 																		"newDateOnlyFromDate(",
@@ -170,9 +252,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the evaluated value, or {@code null} when the expression resolves to null
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
-		ELProcessor elp = newSkyveEvaluationProcessor(bean);
-		return elp.eval(expression);
+	public @Nullable Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
+		return newSkyveEvaluationProcessor(bean).eval(expression);
 	}
 
 	/**
@@ -183,7 +264,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the display text derived from the evaluated value
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
@@ -200,11 +281,11 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String validateWithoutPrefixOrSuffix(String expression,
-													Class<?> returnType,
-													Customer customer,
-													Module module,
-													Document document) {
+	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		String result = null;
 
 		if (typesafe) {
@@ -215,6 +296,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				if (returnType != null) {
 					Class<?> type = null;
 					if (evaluation instanceof DocumentImpl evaluationDocument) {
+						// Only reachable with a document, which newSkyveValidationProcessor() requires a customer for
+						if (customer == null) {
+							throw new IllegalStateException("Cannot resolve a document bean class without a customer");
+						}
 						type = evaluationDocument.getBeanClass(customer);
 					}
 					else if (evaluation instanceof Class<?> evaluationClass) {
@@ -245,17 +330,17 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * Completes the expression fragment using the current EL context.
 	 *
 	 * @param fragment the partial expression being authored
-	 * @param customer the customer metadata context
+	 * @param customer the customer metadata context; may be {@code null} when no document is resolved
 	 * @param module the module metadata context
 	 * @param document the document metadata context
 	 * @return matching completion candidates in the order they were discovered
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public List<String> completeWithoutPrefixOrSuffix(String fragment,
-														Customer customer,
-														Module module,
-														Document document) {
+	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		List<String> result = new ArrayList<>();
 		
 		String input = (fragment == null) ? "" : fragment;
@@ -278,9 +363,10 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 
 			// If we have an expression currently being authored
 			if ((lastCommencingTokenIndex >= 0) && (lastCommencingTokenIndex < lastDelimiterIndex)) {
-				String lastExpression = (lastDelimiterIndex == lastClosingSquareBraceIndex) ? 
-											input.substring(lastCommencingTokenIndex, lastDelimiterIndex + 1) :
-											input.substring(lastCommencingTokenIndex, lastDelimiterIndex);
+				String lastExpression = input.substring(lastCommencingTokenIndex,
+															(lastDelimiterIndex == lastClosingSquareBraceIndex) ?
+																lastDelimiterIndex + 1 :
+																lastDelimiterIndex);
 				try {
 					// Evaluate the penultimate expression
 					ELProcessor elp = newSkyveValidationProcessor(customer, document);
@@ -315,35 +401,33 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								}
 								
 								// If we have a class from the penultimate expression evaluation
-								if (lastEvaluationClass != null) {
-									// Add any missing bean properties not covered by document attributes and conditions 
-									for (PropertyDescriptor d : PropertyUtils.getPropertyDescriptors(lastEvaluationClass)) {
-										String e = baseExpression + d.getName();
-										if (e.startsWith(input) && (! result.contains(e))) {
+								// Add any missing bean properties not covered by document attributes and conditions 
+								for (PropertyDescriptor d : PropertyUtils.getPropertyDescriptors(lastEvaluationClass)) {
+									String e = baseExpression + d.getName();
+									if (e.startsWith(input) && (! result.contains(e))) {
+										result.add(e);
+									}
+								}
+
+								// Add any methods found - close the round function braces if no arguments are required
+								for (Method m : lastEvaluationClass.getMethods()) {
+									String e = baseExpression + m.getName() + '(';
+									if (m.getParameterTypes().length == 0) {
+										e += ')';
+										if (e.startsWith(input)) {
 											result.add(e);
 										}
 									}
-	
-									// Add any methods found - close the round function braces if no arguments are required
-									for (Method m : lastEvaluationClass.getMethods()) {
-										String e = baseExpression + m.getName() + '(';
-										if (m.getParameterTypes().length == 0) {
-											e += ')';
-											if (e.startsWith(input)) {
-												result.add(e);
+									else {
+										// If we have a completed function with opening brace, complete with commencing EL,
+										if (e.equals(input)) {
+											for (String commencingComplete : COMMENCING_COMPLETES) {
+												result.add(e + commencingComplete);
 											}
 										}
-										else {
-											// If we have a completed function with opening brace, complete with commencing EL,
-											if (e.equals(input)) {
-												for (String commencingComplete : COMMENCING_COMPLETES) {
-													result.add(e + commencingComplete);
-												}
-											}
-											// otherwise complete the function expression
-											else if (e.startsWith(input)) {
-												result.add(e);
-											}
+										// otherwise complete the function expression
+										else if (e.startsWith(input)) {
+											result.add(e);
 										}
 									}
 								}
@@ -369,10 +453,9 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 								result.add(baseExpression + "[9]");
 							}
 							// if a map, start EL map key notation
-							else if (lastEvaluation instanceof Class<?> lastEvaluationType) {
-								if (Map.class.isAssignableFrom(lastEvaluationType)) {
-									result.add(baseExpression + "['");
-								}
+							else if ((lastEvaluation instanceof Class<?> lastEvaluationType) &&
+										Map.class.isAssignableFrom(lastEvaluationType)) {
+								result.add(baseExpression + "['");
 							}
 						}
 						// not continuing an expression - commence a new expression
@@ -402,7 +485,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @param input
 	 * @param completions
 	 */
-	private static void newExpression(String input, List<String> completions) {
+	private static void newExpression(@Nonnull String input, @Nonnull List<String> completions) {
 		int i = input.length();
 		char lastChar = input.isEmpty() ? '\0' : input.charAt(i - 1);
 		if (lastChar != ']' && lastChar != ')') {
@@ -421,39 +504,389 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 	
 	/**
-	 * Prefixes {@code bean} bindings in the expression with the supplied binding path.
+	 * Prefixes every reference to the {@code bean} variable in the expression with the supplied binding path.
+	 *
+	 * <p>The expression is scanned, so only the {@code bean} identifier itself is
+	 * rewritten, whatever follows it: {@code bean.x} becomes {@code bean.binding.x}, {@code bean['x']}
+	 * becomes {@code bean.binding['x']} and a bare {@code bean} becomes {@code bean.binding}.
+	 * String literals are left alone, as are identifiers that merely contain {@code bean},
+	 * a property called {@code bean} ({@code stash.bean}) and a function called {@code bean}.
+	 *
+	 * <p>A lambda parameter called {@code bean} is not recognised and is rewritten like the variable.
 	 *
 	 * @param expression the expression buffer to mutate
-	 * @param binding the binding path to insert before each {@code bean} reference
+	 * @param binding the binding path to insert after each {@code bean} reference
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
-		// Append binding to "bean."
-		int beanIndex = expression.indexOf("bean.");
-		while (beanIndex >= 0) {
-			beanIndex += 5;
-			expression.insert(beanIndex, '.');
-			expression.insert(beanIndex, binding);
-			beanIndex = expression.indexOf("bean.", beanIndex);
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
+		int i = 0;
+		while (i < expression.length()) {
+			char c = expression.charAt(i);
+			if ((c == '\'') || (c == '"')) {
+				i = endOfStringLiteral(expression, i);
+			}
+			else if (Character.isJavaIdentifierPart(c)) {
+				int start = i;
+				do {
+					i++;
+				}
+				while ((i < expression.length()) && Character.isJavaIdentifierPart(expression.charAt(i)));
+				if (isBeanReference(expression, start, i)) {
+					expression.insert(i, binding).insert(i, '.');
+					i += binding.length() + 1;
+				}
+			}
+			else {
+				i++;
+			}
 		}
-		// check if ends with "bean" and append binding
+	}
+
+	/**
+	 * Finds the end of the string literal that opens at the given index.
+	 *
+	 * @param expression the expression being scanned
+	 * @param start the index of the opening quote
+	 * @return the index after the closing quote, or the expression length when the literal is not closed
+	 */
+	private static int endOfStringLiteral(@Nonnull CharSequence expression, int start) {
+		char quote = expression.charAt(start);
 		int length = expression.length();
-		if ((length >= 4) && "bean".equals(expression.substring(length - 4, length))) {
-			expression.append('.').append(binding);
+		int i = start + 1;
+		while (i < length) {
+			char c = expression.charAt(i);
+			if (c == '\\') { // skip the escaped character
+				i += 2;
+			}
+			else if (c == quote) {
+				return i + 1;
+			}
+			else {
+				i++;
+			}
 		}
+		return length;
+	}
+
+	/**
+	 * Determines whether the word between the given indices is a reference to the {@code bean} variable.
+	 *
+	 * @param expression the expression being scanned
+	 * @param start the index of the first character of the word
+	 * @param end the index after the last character of the word
+	 * @return {@code true} if the word is {@code bean}, is not a property of something else and is not a function name
+	 */
+	private static boolean isBeanReference(@Nonnull CharSequence expression, int start, int end) {
+		if (((end - start) != BEAN_VARIABLE.length()) || (! BEAN_VARIABLE.contentEquals(expression.subSequence(start, end)))) {
+			return false;
+		}
+		// a property of something else - x.bean
+		int i = start - 1;
+		while ((i >= 0) && Character.isWhitespace(expression.charAt(i))) {
+			i--;
+		}
+		if ((i >= 0) && (expression.charAt(i) == '.')) {
+			return false;
+		}
+		// a function - bean(...)
+		i = end;
+		int length = expression.length();
+		while ((i < length) && Character.isWhitespace(expression.charAt(i))) {
+			i++;
+		}
+		return (i >= length) || (expression.charAt(i) != '(');
 	}
 	
 	/**
 	 * Creates an EL processor configured for validation against metadata.
 	 *
-	 * @param customer the customer metadata context
+	 * @param customer the customer metadata context; may be {@code null} only when {@code document} is {@code null}
 	 * @param document the document metadata context; may be {@code null}
 	 * @return a configured processor with Skyve EL functions and validation resolvers
+	 * @throws IllegalArgumentException if {@code document} is given without a {@code customer}
 	 */
-	public static ELProcessor newSkyveValidationProcessor(@Nonnull Customer customer, @Nullable Document document) {
-		ELProcessor result = setupProcessor(customer, document, UserImpl.class, Map.class);
-		result.getELManager().addELResolver(new ValidationELResolver(customer));
+	public static @Nonnull ELProcessor newSkyveValidationProcessor(@Nullable Customer customer, @Nullable Document document) {
+		ELProcessor result = new ELProcessor();
+		ELManager manager = result.getELManager();
+		manager.setELContext(new FunctionContext(manager.getELContext()));
+		result.defineBean(USER_VARIABLE, UserImpl.class);
+		result.defineBean(STASH_VARIABLE, Map.class);
+		manager.importClass(Decimal2.class.getCanonicalName());
+		manager.importClass(Decimal5.class.getCanonicalName());
+		manager.importClass(Decimal10.class.getCanonicalName());
+		if (document != null) {
+			if (customer == null) {
+				throw new IllegalArgumentException("A customer is required to validate against a document");
+			}
+			result.defineBean(BEAN_VARIABLE, document);
+			Set<String> localEnumNames = defineEnumBeans(result, customer, document);
+			manager.addELResolver(new ValidationEnumELResolver(localEnumNames, customer, document));
+		}
+		manager.addELResolver(new ValidationELResolver(customer));
 		return result;
+	}
+	
+	/**
+	 * Binds the document's static enumerations by simple name, using the generated enum class when it can be
+	 * loaded and the enumeration metadata otherwise (during domain generation, before the class exists).
+	 * Locally declared enums take precedence over imported enums with the same simple name.
+	 *
+	 * @param processor the validation processor to define the enum beans on
+	 * @param customer the customer metadata context
+	 * @param document the document whose attributes declare the enumerations
+	 * @return the simple names that were bound
+	 */
+	private static @Nonnull Set<String> defineEnumBeans(@Nonnull ELProcessor processor, @Nonnull Customer customer, @Nonnull Document document) {
+		Set<String> boundNames = new HashSet<>();
+		for (Enumeration enumeration : staticEnumerations(customer, document)) {
+			String name = enumeration.toJavaIdentifier();
+			if (boundNames.add(name)) {
+				processor.defineBean(name, enumBean(enumeration));
+			}
+		}
+		return boundNames;
+	}
+
+	/**
+	 * Determines what an enumeration name evaluates to during validation.
+	 *
+	 * @param enumeration the enumeration metadata
+	 * @return the generated enum class when it can be loaded, and the enumeration metadata otherwise
+	 * 			(during domain generation, before the class exists)
+	 */
+	private static @Nonnull Object enumBean(@Nonnull Enumeration enumeration) {
+		Class<?> enumClass = loadEnumClass(enumeration);
+		return (enumClass == null) ? enumeration : new ELClass(enumClass);
+	}
+
+	/**
+	 * Finds the static enumeration with the given simple name that is declared closest to a document,
+	 * amongst the documents it is related to.
+	 *
+	 * <p>The documents are searched breadth first along associations, collections and inverses,
+	 * including inherited ones, so an enumeration one relation away is found before one two relations away.
+	 * The document's own enumerations are not considered; they are bound by name already.
+	 *
+	 * <p>Complexity: visits each reachable document at most once, and stops at the first distance with a match.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document to search from
+	 * @param name the simple name of the enumeration
+	 * @return the enumeration, or {@code null} if no related document declares one of that name
+	 * @throws MetaDataException if different enumerations of that name are declared at the closest distance
+	 */
+	static @Nullable Enumeration relatedEnumeration(@Nonnull Customer customer, @Nonnull Document document, @Nonnull String name) {
+		Set<String> visited = new HashSet<>();
+		visited.add(qualifiedName(document));
+		List<Document> level = relatedDocuments(customer, List.of(document), visited);
+		while (! level.isEmpty()) {
+			Enumeration result = null;
+			String resultDocumentName = null;
+			for (Document related : level) {
+				Enumeration candidate = staticEnumeration(customer, related, name);
+				if (candidate != null) {
+					if (result == null) {
+						result = candidate;
+						resultDocumentName = qualifiedName(related);
+					}
+					else if (! enumClassName(result).equals(enumClassName(candidate))) {
+						throw new MetaDataException("Enumeration " + name + " is ambiguous for document " + qualifiedName(document) +
+														" as it is declared by both " + resultDocumentName + " and " + qualifiedName(related) +
+														", which are equally closely related to it");
+					}
+				}
+			}
+			if (result != null) {
+				return result;
+			}
+			level = relatedDocuments(customer, level, visited);
+		}
+		return null;
+	}
+
+	/**
+	 * Lists the documents that the given documents are related to and that have not been visited yet.
+	 *
+	 * @param customer the customer metadata context
+	 * @param documents the documents whose relations, including inherited ones, are to be followed
+	 * @param visited the qualified names of the documents already visited, which is added to
+	 * @return the related documents, in the order their relations are declared
+	 */
+	private static @Nonnull List<Document> relatedDocuments(@Nonnull Customer customer, @Nonnull List<Document> documents, @Nonnull Set<String> visited) {
+		List<Document> result = new ArrayList<>();
+		for (Document document : documents) {
+			for (Document current = document; current != null; current = baseDocument(customer, current)) {
+				addRelatedDocuments(customer, current, visited, result);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Adds the documents that a document's own relations target and that have not been visited yet.
+	 * A relation names its document within the module of the document that declares it.
+	 */
+	private static void addRelatedDocuments(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Set<String> visited, @Nonnull List<Document> related) {
+		Module module = customer.getModule(document.getOwningModuleName());
+		for (Attribute attribute : document.getAttributes()) {
+			if (attribute instanceof Relation relation) {
+				Document target = module.getDocument(customer, relation.getDocumentName());
+				if (visited.add(qualifiedName(target))) {
+					related.add(target);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns the document that a document extends, or {@code null} when it extends none.
+	 */
+	private static @Nullable Document baseDocument(@Nonnull Customer customer, @Nonnull Document document) {
+		Extends inherits = document.getExtends();
+		return (inherits == null) ? null : customer.getModule(document.getOwningModuleName()).getDocument(customer, inherits.getDocumentName());
+	}
+
+	/**
+	 * Finds the document's static enumeration with the given simple name, preferring a local declaration.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document whose attributes declare the enumerations
+	 * @param name the simple name of the enumeration
+	 * @return the enumeration, or {@code null} if the document has none of that name
+	 */
+	private static @Nullable Enumeration staticEnumeration(@Nonnull Customer customer, @Nonnull Document document, @Nonnull String name) {
+		for (Enumeration enumeration : staticEnumerations(customer, document)) {
+			if (name.equals(enumeration.toJavaIdentifier())) {
+				return enumeration;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Names the enum class that implements an enumeration, without loading it.
+	 *
+	 * @param enumeration the enumeration metadata
+	 * @return the fully qualified name of the hand-coded or generated enum class
+	 */
+	private static @Nonnull String enumClassName(@Nonnull Enumeration enumeration) {
+		String result = enumeration.getImplementingEnumClassName();
+		if (result == null) {
+			result = enumeration.getEncapsulatingClassName() + '$' + enumeration.toJavaIdentifier();
+		}
+		return result;
+	}
+
+	private static @Nonnull String qualifiedName(@Nonnull Document document) {
+		return document.getOwningModuleName() + '.' + document.getName();
+	}
+
+	/**
+	 * Resolves the enumerations of related documents while an expression is validated.
+	 */
+	private static final class ValidationEnumELResolver extends EnumELResolver {
+		private final Customer customer;
+		private final Document document;
+
+		private ValidationEnumELResolver(@Nonnull Set<String> localEnumNames, @Nonnull Customer customer, @Nonnull Document document) {
+			super(localEnumNames);
+			this.customer = customer;
+			this.document = document;
+		}
+
+		@Override
+		@Nullable Object find(@Nonnull String name) {
+			Enumeration enumeration = relatedEnumeration(customer, document, name);
+			return (enumeration == null) ? null : enumBean(enumeration);
+		}
+	}
+
+	/**
+	 * Resolves enumerations while an expression is evaluated against a bean: the bean class's own,
+	 * and those of related documents. A related enumeration that is found is remembered for the
+	 * bean's class, unless that class is one of the framework's dynamic bean classes, which are
+	 * shared by every dynamic document.
+	 */
+	private static final class EvaluationEnumELResolver extends EnumELResolver {
+		private final Bean bean;
+		private final Map<String, ELClass> enumBeans;
+
+		private EvaluationEnumELResolver(@Nonnull Bean bean) {
+			super(Set.of());
+			this.bean = bean;
+			enumBeans = ENUM_BEANS.get(bean.getClass());
+		}
+
+		@Override
+		@Nullable Object remembered(@Nonnull String name) {
+			return enumBeans.get(name);
+		}
+
+		@Override
+		@Nullable Object find(@Nonnull String name) {
+			String moduleName = bean.getBizModule();
+			String documentName = bean.getBizDocument();
+			@SuppressWarnings("null") // EL can evaluate any bean, including ones that name no module or document
+			boolean documentUnnamed = (moduleName == null) || (documentName == null);
+			if (documentUnnamed) {
+				return null;
+			}
+			Customer customer = CORE.getCustomer();
+			Document document = customer.getModule(moduleName).getDocument(customer, documentName);
+			Enumeration enumeration = relatedEnumeration(customer, document, name);
+			Class<?> enumClass = (enumeration == null) ? null : loadEnumClass(enumeration);
+			if (enumClass == null) {
+				return null;
+			}
+			ELClass result = new ELClass(enumClass);
+			if (! DynamicBean.class.getPackageName().equals(bean.getClass().getPackageName())) {
+				enumBeans.putIfAbsent(name, result);
+			}
+			return result;
+		}
+	}
+
+	/**
+	 * Lists the document's static enumerations with locally declared enums ahead of imported ones.
+	 *
+	 * @param customer the customer metadata context
+	 * @param document the document whose attributes declare the enumerations
+	 * @return the static enumerations, local declarations first
+	 */
+	private static @Nonnull List<Enumeration> staticEnumerations(@Nonnull Customer customer, @Nonnull Document document) {
+		List<Enumeration> result = new ArrayList<>();
+		List<Enumeration> importedEnums = new ArrayList<>();
+		for (Attribute attribute : document.getAllAttributes(customer)) {
+			if ((attribute instanceof Enumeration enumeration) && (! enumeration.isDynamic())) {
+				if ((enumeration.getAttributeRef() == null) && (enumeration.getImplementingEnumClassName() == null)) {
+					result.add(enumeration);
+				}
+				else {
+					importedEnums.add(enumeration);
+				}
+			}
+		}
+		// Locally declared enums retain their simple names when imported types collide.
+		result.addAll(importedEnums);
+		return result;
+	}
+
+	/**
+	 * Loads the generated enum class for the enumeration.
+	 *
+	 * @param enumeration the enumeration metadata
+	 * @return the enum class, or {@code null} if it has not been generated yet
+	 */
+	private static @Nullable Class<?> loadEnumClass(@Nonnull Enumeration enumeration) {
+		try {
+			return enumeration.getImplementingType();
+		}
+		catch (MetaDataException e) {
+			if (! Enumeration.isEnumClassLoadingFailure(e)) {
+				throw e;
+			}
+			return null;
+		}
 	}
 	
 	/**
@@ -462,110 +895,116 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * @param bean the bean to expose as {@code bean}; may be {@code null}
 	 * @return a configured processor with Skyve EL functions and runtime binding resolvers
 	 */
-	public static ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
-		ELProcessor result = setupProcessor(null, bean, CORE.getUser(), CORE.getStash());
-		result.getELManager().addELResolver(new BindingELResolver());
+	public static @Nonnull ELProcessor newSkyveEvaluationProcessor(@Nullable Bean bean) {
+		ELProcessor result = new ELProcessor();
+		ELManager manager = result.getELManager();
+		manager.setELContext(new FunctionContext(manager.getELContext()));
+		manager.addELResolver(BINDING_RESOLVER);
+		if (bean != null) {
+			manager.defineBean(BEAN_VARIABLE, bean);
+			manager.addELResolver(new EvaluationEnumELResolver(bean));
+		}
+		manager.defineBean(USER_VARIABLE, CORE.getUser());
+		manager.defineBean(STASH_VARIABLE, CORE.getStash());
+		manager.importClass(Decimal2.class.getCanonicalName());
+		manager.importClass(Decimal5.class.getCanonicalName());
+		manager.importClass(Decimal10.class.getCanonicalName());
 		return result;
 	}
-	
-	private static ELProcessor setupProcessor(@SuppressWarnings("unused") Customer customer, Object bean, Object user, Object stash) {
-		ELProcessor result = new ELProcessor();
-		if (bean != null) {
-		result.defineBean(BEAN_VARIABLE, bean);
+
+	/**
+	 * Collects the declared and imported enum types from a bean class hierarchy, keyed by simple name.
+	 * Declared enum types take precedence over imported instance field types, and subclass declarations
+	 * take precedence over superclass declarations when simple names match.
+	 *
+	 * @param beanClass the bean class whose hierarchy declares enums or has enum-typed instance fields
+	 * @return an immutable map of simple enum names to their EL classes
+	 */
+	static @Nonnull Map<String, ELClass> enumBeans(@Nonnull Class<?> beanClass) {
+		Map<String, ELClass> result = new HashMap<>();
+		for (Class<?> type = beanClass; type != null; type = type.getSuperclass()) {
+			for (Class<?> nested : type.getDeclaredClasses()) {
+				if (nested.isEnum() && Modifier.isPublic(nested.getModifiers())) {
+					result.putIfAbsent(nested.getSimpleName(), new ELClass(nested));
+				}
+			}
 		}
-		result.defineBean("user", user);
-		result.defineBean("stash", stash);
+		for (Class<?> type = beanClass; type != null; type = type.getSuperclass()) {
+			for (Field field : type.getDeclaredFields()) {
+				Class<?> fieldType = field.getType();
+				if ((! Modifier.isStatic(field.getModifiers())) && fieldType.isEnum() && Modifier.isPublic(fieldType.getModifiers())) {
+					result.putIfAbsent(fieldType.getSimpleName(), new ELClass(fieldType));
+				}
+			}
+		}
+		return Map.copyOf(result);
+	}
+	
+	/**
+	 * Builds the fixed Skyve functions, keyed as {@code prefix:localName} with an empty prefix.
+	 * The map is immutable so it can be shared safely by concurrent EL contexts.
+	 */
+	private static @Nonnull Map<String, Method> fixedFunctions() {
+		Map<String, Method> result = new HashMap<>();
 		
 		try {
 			Class<?> functions = ELFunctions.class;
-			result.defineFunction("", "", functions.getMethod("newDateOnly"));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromLocalDate", LocalDate.class));
-			result.defineFunction("", "", functions.getMethod("newDateOnlyFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newDateOnly"));
+			defineFunction(result, functions.getMethod("newDateOnlyFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newDateOnlyFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newDateOnlyFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newDateOnlyFromLocalDate", LocalDate.class));
+			defineFunction(result, functions.getMethod("newDateOnlyFromLocalDateTime", LocalDateTime.class));
 
-			result.defineFunction("", "", functions.getMethod("newDateTime"));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromLocalDate", LocalDate.class));
-			result.defineFunction("", "", functions.getMethod("newDateTimeFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newDateTime"));
+			defineFunction(result, functions.getMethod("newDateTimeFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newDateTimeFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newDateTimeFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newDateTimeFromLocalDate", LocalDate.class));
+			defineFunction(result, functions.getMethod("newDateTimeFromLocalDateTime", LocalDateTime.class));
 
-			result.defineFunction("", "", functions.getMethod("newTimeOnly"));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromComponents", Integer.TYPE, Integer.TYPE, Integer.TYPE));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromLocalTime", LocalTime.class));
-			result.defineFunction("", "", functions.getMethod("newTimeOnlyFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newTimeOnly"));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromComponents", Integer.TYPE, Integer.TYPE, Integer.TYPE));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromLocalTime", LocalTime.class));
+			defineFunction(result, functions.getMethod("newTimeOnlyFromLocalDateTime", LocalDateTime.class));
 			
-			result.defineFunction("", "", functions.getMethod("newTimestamp"));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromMillis", Long.TYPE));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromDate", Date.class));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromSerializedForm", String.class));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromLocalDate", LocalDate.class));
-			result.defineFunction("", "", functions.getMethod("newTimestampFromLocalDateTime", LocalDateTime.class));
+			defineFunction(result, functions.getMethod("newTimestamp"));
+			defineFunction(result, functions.getMethod("newTimestampFromMillis", Long.TYPE));
+			defineFunction(result, functions.getMethod("newTimestampFromDate", Date.class));
+			defineFunction(result, functions.getMethod("newTimestampFromSerializedForm", String.class));
+			defineFunction(result, functions.getMethod("newTimestampFromLocalDate", LocalDate.class));
+			defineFunction(result, functions.getMethod("newTimestampFromLocalDateTime", LocalDateTime.class));
 
-			result.defineFunction("", "", functions.getMethod("newDecimal2", Double.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDecimal2FromBigDecimal", BigDecimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal2FromDecimal", Decimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal2FromString", String.class));
+			defineFunction(result, functions.getMethod("newDecimal2", Double.TYPE));
+			defineFunction(result, functions.getMethod("newDecimal2FromBigDecimal", BigDecimal.class));
+			defineFunction(result, functions.getMethod("newDecimal2FromDecimal", Decimal.class));
+			defineFunction(result, functions.getMethod("newDecimal2FromString", String.class));
 			
-			result.defineFunction("", "", functions.getMethod("newDecimal5", Double.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDecimal5FromBigDecimal", BigDecimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal5FromDecimal", Decimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal5FromString", String.class));
+			defineFunction(result, functions.getMethod("newDecimal5", Double.TYPE));
+			defineFunction(result, functions.getMethod("newDecimal5FromBigDecimal", BigDecimal.class));
+			defineFunction(result, functions.getMethod("newDecimal5FromDecimal", Decimal.class));
+			defineFunction(result, functions.getMethod("newDecimal5FromString", String.class));
 
-			result.defineFunction("", "", functions.getMethod("newDecimal10", Double.TYPE));
-			result.defineFunction("", "", functions.getMethod("newDecimal10FromBigDecimal", BigDecimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal10FromDecimal", Decimal.class));
-			result.defineFunction("", "", functions.getMethod("newDecimal10FromString", String.class));
+			defineFunction(result, functions.getMethod("newDecimal10", Double.TYPE));
+			defineFunction(result, functions.getMethod("newDecimal10FromBigDecimal", BigDecimal.class));
+			defineFunction(result, functions.getMethod("newDecimal10FromDecimal", Decimal.class));
+			defineFunction(result, functions.getMethod("newDecimal10FromString", String.class));
 
-			result.defineFunction("", "", functions.getMethod("newOptimisticLock", String.class, Date.class));
-			result.defineFunction("", "", functions.getMethod("newOptimisticLockFromString", String.class));
-			result.defineFunction("", "", functions.getMethod("newGeometry", String.class));
+			defineFunction(result, functions.getMethod("newOptimisticLock", String.class, Date.class));
+			defineFunction(result, functions.getMethod("newOptimisticLockFromString", String.class));
+			defineFunction(result, functions.getMethod("newGeometry", String.class));
 		}
 		catch (NoSuchMethodException | SecurityException e) {
 			throw new DomainException("Cannot define EL functions", e);
 		}
 		
-		final ELManager elManager = result.getELManager();
-		elManager.importClass(Decimal2.class.getCanonicalName());
-		elManager.importClass(Decimal5.class.getCanonicalName());
-		elManager.importClass(Decimal10.class.getCanonicalName());
+		return Map.copyOf(result);
+	}
 
-/* TODO resolve this inner enum class problem.
-	Cannot import the domain classes here coz its not on the classpath for the maven mojo.
-	And I cant get it to work at runtime for a nested enum class either using $ or . in the class name.
-	We might have to use the normal defaulting for default values and allow built-in EL String coercion for enums in expressions.
-
-		Class<?> classToImport = null;
-		
-		if (bean instanceof DocumentImpl d) { // could be a Document in validation mode
-			if (! d.isDynamic()) {
-				try {
-					classToImport = d.getBeanClass(customer);
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					LOGGER.error(e.getMessage(), e);
-				}
-			}
-		}
-		else if ((bean != null) && (! (bean instanceof DynamicBean))) { // not dynamic
-			classToImport = bean.getClass();
-		}
-
-		if (classToImport != null) {
-			String name = classToImport.getCanonicalName();
-			elManager.importClass(name);
-			for (Class<?> innerClass : classToImport.getDeclaredClasses()) {
-				String innerName = innerClass.getCanonicalName();// name + '$' + innerClass.getSimpleName();
-				elManager.importClass(innerName);
-			}
-			classToImport.getSuperclass();
-		}
-*/		
-		return result;
+	private static void defineFunction(@Nonnull Map<String, Method> functions, @Nonnull Method method) {
+		functions.put(':' + method.getName(), method);
 	}
 }

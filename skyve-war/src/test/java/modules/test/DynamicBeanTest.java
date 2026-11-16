@@ -53,13 +53,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Assertions.assertTrue(contact.isDynamic(ONE), "Is a dynamic property");
 		contact.setDynamic(ONE, THREE);
 		Assertions.assertEquals(THREE, contact.getDynamic(ONE), "Dynamic Property set correctly");
-		try {
-			contact.getDynamic(THREE);
-			Assertions.fail("Not a property");
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing
-		}
+		Assertions.assertThrows(IllegalArgumentException.class, () -> contact.getDynamic(THREE), "Not a property");
 		Assertions.assertFalse(contact.isDynamic(THREE), "Not a property");
 	}
 
@@ -111,6 +105,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Assertions.assertEquals("#000000", Binder.get(bean, AllAttributesPersistent.colourPropertyName), "Colour default value");
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testJSON() throws Exception {
 		Bean bean = Util.constructRandomInstance(u, m, aadpd, 2);
@@ -245,6 +240,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Assertions.assertNotNull(model);
 	}
 	
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testDynamicInverses() throws Exception {
 		// added to inverse collection assigns to other side (dynamic/static)

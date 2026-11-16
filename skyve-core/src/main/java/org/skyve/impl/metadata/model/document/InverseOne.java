@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.model.document;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -29,7 +30,7 @@ public class InverseOne extends AbstractInverse {
 	}
 
 	@Override
-	public InverseCardinality getCardinality() {
+	public @Nonnull InverseCardinality getCardinality() {
 		return InverseCardinality.one;
 	}
 }

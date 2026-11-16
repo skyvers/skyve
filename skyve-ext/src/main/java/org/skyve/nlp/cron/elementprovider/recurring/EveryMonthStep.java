@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Parses stepped month recurrence such as {@code every 2 months}.
  */
@@ -32,7 +34,7 @@ public class EveryMonthStep implements ExpressionElementProvider {
 	 * @return {@code true} when stepped month language is detected.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -58,7 +60,7 @@ public class EveryMonthStep implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -78,7 +80,7 @@ public class EveryMonthStep implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "0";
 	}
 
@@ -98,7 +100,7 @@ public class EveryMonthStep implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nonnull String getDayNumberElement() {
 		return "0";
 	}
 
@@ -118,7 +120,7 @@ public class EveryMonthStep implements ExpressionElementProvider {
 	 * @return A stepped token in slash-step form (for example, star slash 2), or {@code *} when no explicit step is present.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nonnull String getMonthElement() {
 		return segments.size() > 2 ? String.format("*/%s", segments.get(2)) : "*";
 	}
 
@@ -138,7 +140,7 @@ public class EveryMonthStep implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nonnull String getDayOfWeekElement() {
 		return "*";
 	}
 

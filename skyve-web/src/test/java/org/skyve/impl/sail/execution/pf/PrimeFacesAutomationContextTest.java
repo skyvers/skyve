@@ -14,6 +14,7 @@ import org.primefaces.component.commandbutton.CommandButton;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -25,7 +26,7 @@ import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
 import jakarta.faces.context.FacesContext;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "resource"}) // each test's MockFacesContext is the current instance until tearDown()
 class PrimeFacesAutomationContextTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -133,6 +134,65 @@ class PrimeFacesAutomationContextTest {
 	}
 
 	@Test
+	void collectingBuilderRegistersAnEditViewListGridNotTheBorderItIsAddedIn() {
+		FacesContextBridge.setCurrent(new MockFacesContext());
+		PrimeFacesAutomationContext context = new PrimeFacesAutomationContext();
+		ComponentCollectingComponentBuilder builder = new ComponentCollectingComponentBuilder(context, editContext());
+		UIComponent grid = new TestComponent("grid");
+		UIComponent firstColumn = new TestComponent("column");
+		grid.getChildren().add(firstColumn);
+		UIComponent border = new TestComponent("border");
+		border.getChildren().add(grid);
+		ListGrid listGrid = new ListGrid();
+		listGrid.setQueryName("qGrid");
+
+		assertSame(grid, builder.listGrid(grid, "kitchensink", "LookupDescription", "qGrid", "tablet", null, null, listGrid, null, false));
+		// a titled list grid is added to its container inside a border
+		builder.addToContainer(border);
+
+		assertEquals(List.of(grid), context.getFacesComponents("kitchensink.qGrid"));
+		assertEquals(List.of(firstColumn), context.getFacesComponents("kitchensink.qGrid.select"));
+	}
+
+	@Test
+	void collectingBuilderRegistersAnEditViewListGridAddedWithoutABorder() {
+		FacesContextBridge.setCurrent(new MockFacesContext());
+		PrimeFacesAutomationContext context = new PrimeFacesAutomationContext();
+		ComponentCollectingComponentBuilder builder = new ComponentCollectingComponentBuilder(context, editContext());
+		UIComponent grid = new TestComponent("grid");
+		UIComponent firstColumn = new TestComponent("column");
+		grid.getChildren().add(firstColumn);
+		ListGrid listGrid = new ListGrid();
+		listGrid.setQueryName("qGrid");
+
+		builder.listGrid(grid, "kitchensink", "LookupDescription", "qGrid", "tablet", null, null, listGrid, null, false);
+		builder.addToContainer(grid);
+		// later components added to the container are not list grids
+		builder.addToContainer(new TestComponent("other"));
+
+		assertEquals(List.of(grid), context.getFacesComponents("kitchensink.qGrid"));
+		assertEquals(List.of(firstColumn), context.getFacesComponents("kitchensink.qGrid.select"));
+	}
+
+	private static PushEditContext editContext() {
+		PushEditContext result = new PushEditContext();
+		result.setModuleName("kitchensink");
+		result.setDocumentName("ListGridFixture");
+		return result;
+	}
+
+	@Test
+	void collectingBuilderSkipsBoundComponentsWithoutBinding() {
+		FacesContextBridge.setCurrent(new MockFacesContext());
+		PrimeFacesAutomationContext context = new PrimeFacesAutomationContext();
+		ComponentCollectingComponentBuilder builder = new ComponentCollectingComponentBuilder(context, mock(Step.class));
+		UIComponent checkBoxComponent = new TestComponent("checkBox");
+		EventSourceComponent checkBoxWrapper = new EventSourceComponent(checkBoxComponent, (UIComponentBase) checkBoxComponent);
+
+		assertSame(checkBoxWrapper, builder.checkBox(checkBoxWrapper, null, new CheckBox(), null, null, null));
+	}
+
+	@Test
 	void collectingLayoutBuilderRegistersDeferredEditListGridWhenAddedToContainer() {
 		FacesContextBridge.setCurrent(new MockFacesContext());
 		PrimeFacesAutomationContext context = new PrimeFacesAutomationContext();
@@ -159,7 +219,8 @@ class PrimeFacesAutomationContextTest {
 		assertNull(context.getFacesComponents("sales.customers"));
 		assertNull(layoutBuilder.addToContainer(null, null, null, addedListGrid, null, null, null, null, null, null, null, null));
 
-		assertEquals(List.of(addedListGrid), context.getFacesComponents("sales.customers"));
+		// registered once it is added, as the grid that was built: what the layout adds can be a border around it
+		assertEquals(List.of(generatedListGrid), context.getFacesComponents("sales.customers"));
 		assertEquals(List.of("sales.customers"), context.getSkyveWidgets("sales.customers"));
 	}
 

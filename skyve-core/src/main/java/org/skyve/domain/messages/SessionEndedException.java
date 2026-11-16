@@ -30,7 +30,7 @@ public class SessionEndedException extends DomainException implements MessageExc
 	 * Creates a new SessionEndedException instance.
 	 * @param httpRequestLocale the httpRequestLocale
 	 */
-	public SessionEndedException(@NotNull Locale httpRequestLocale) {
+	public SessionEndedException(@NotNull @Nonnull Locale httpRequestLocale) {
 		super(Util.nullSafeI18n(MESSAGE_KEY, httpRequestLocale), false);
 		messages = Collections.singletonList(new Message(getMessage()));
 	}

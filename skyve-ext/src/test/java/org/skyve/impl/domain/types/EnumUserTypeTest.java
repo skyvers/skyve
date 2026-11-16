@@ -1,11 +1,12 @@
 package org.skyve.impl.domain.types;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,17 +16,17 @@ import java.sql.ResultSet;
 import java.sql.Types;
 import java.util.Properties;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.app.admin.ReportDataset.DatasetType;
 
 @SuppressWarnings({"resource", "boxing"})
-public class EnumUserTypeTest {
+class EnumUserTypeTest {
 
 	private EnumUserType type;
 
-	@Before
-	public void setUp() {
+	@BeforeEach
+	void setUp() {
 		type = new EnumUserType();
 		Properties props = new Properties();
 		props.setProperty("enumClass", DatasetType.class.getName());
@@ -33,79 +34,79 @@ public class EnumUserTypeTest {
 	}
 
 	@Test
-	public void testSqlTypes() {
+	void testSqlTypes() {
 		assertArrayEquals(new int[] {Types.VARCHAR}, type.sqlTypes());
 	}
 
 	@Test
-	public void testReturnedClassIsEnumClass() {
+	void testReturnedClassIsEnumClass() {
 		assertEquals(DatasetType.class, type.returnedClass());
 	}
 
 	@Test
-	public void testIsMutableFalse() {
+	void testIsMutableFalse() {
 		assertFalse(type.isMutable());
 	}
 
 	@Test
-	public void testEqualsBothNull() {
+	void testEqualsBothNull() {
 		assertTrue(type.equals(null, null));
 	}
 
 	@Test
-	public void testEqualsSameRef() {
+	void testEqualsSameRef() {
 		DatasetType d = DatasetType.bizQL;
 		assertTrue(type.equals(d, d));
 	}
 
 	@Test
-	public void testEqualsSameValue() {
+	void testEqualsSameValue() {
 		assertTrue(type.equals(DatasetType.SQL, DatasetType.SQL));
 	}
 
 	@Test
-	public void testEqualsXNull() {
+	void testEqualsXNull() {
 		assertFalse(type.equals(null, DatasetType.SQL));
 	}
 
 	@Test
-	public void testEqualsDistinctValues() {
+	void testEqualsDistinctValues() {
 		assertFalse(type.equals(DatasetType.bizQL, DatasetType.SQL));
 	}
 
 	@Test
-	public void testHashCode() {
+	void testHashCode() {
 		DatasetType d = DatasetType.bizQL;
 		assertEquals(d.hashCode(), type.hashCode(d));
 	}
 
 	@Test
-	public void testDeepCopyReturnsIdentity() {
+	void testDeepCopyReturnsIdentity() {
 		DatasetType d = DatasetType.constant;
 		assertSame(d, type.deepCopy(d));
 	}
 
 	@Test
-	public void testDisassemble() {
+	void testDisassemble() {
 		DatasetType d = DatasetType.classValue;
 		assertSame(d, type.disassemble(d));
 	}
 
 	@Test
-	public void testAssemble() {
+	void testAssemble() {
 		DatasetType d = DatasetType.SQL;
 		assertSame(d, type.assemble(d, null));
 	}
 
 	@Test
-	public void testReplace() {
+	void testReplace() {
 		DatasetType original = DatasetType.bizQL;
 		DatasetType target = DatasetType.SQL;
 		assertSame(original, type.replace(original, target, null));
 	}
 
 	@Test
-	public void testNullSafeGetReturnsNullWhenColumnNull() throws Exception {
+	void testNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn(null);
 		when(rs.wasNull()).thenReturn(Boolean.TRUE);
@@ -113,7 +114,7 @@ public class EnumUserTypeTest {
 	}
 
 	@Test
-	public void testNullSafeGetReturnsNullForEmptyString() throws Exception {
+	void testNullSafeGetReturnsNullForEmptyString() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("");
 		when(rs.wasNull()).thenReturn(Boolean.FALSE);
@@ -121,7 +122,7 @@ public class EnumUserTypeTest {
 	}
 
 	@Test
-	public void testNullSafeGetReturnsEnumValueByCode() throws Exception {
+	void testNullSafeGetReturnsEnumValueByCode() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("BizQL");
 		when(rs.wasNull()).thenReturn(Boolean.FALSE);
@@ -130,45 +131,45 @@ public class EnumUserTypeTest {
 	}
 
 	@Test
-	public void testNullSafeSetNull() throws Exception {
+	void testNullSafeSetNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		type.nullSafeSet(ps, null, 1, null);
 		verify(ps).setNull(1, Types.VARCHAR);
 	}
 
 	@Test
-	public void testNullSafeSetStringValue() throws Exception {
+	void testNullSafeSetStringValue() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		type.nullSafeSet(ps, "SQL", 1, null);
 		verify(ps).setString(1, "SQL");
 	}
 
 	@Test
-	public void testNullSafeSetEnumValue() throws Exception {
+	void testNullSafeSetEnumValue() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		type.nullSafeSet(ps, DatasetType.constant, 2, null);
 		verify(ps).setString(2, DatasetType.constant.toCode());
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testSetParameterValuesClassNotFound() {
+	void testSetParameterValuesClassNotFound() {
 		// covers L31-32: ClassNotFoundException catch block
 		EnumUserType newType = new EnumUserType();
 		Properties props = new Properties();
 		props.setProperty("enumClass", "com.nonexistent.DoesNotExist");
-		newType.setParameterValues(props);
+		assertThrows(org.hibernate.HibernateException.class, () -> newType.setParameterValues(props));
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testSetParameterValuesNoToCodeMethod() {
+	void testSetParameterValuesNoToCodeMethod() {
 		// covers L42-43: Exception catch block in readResolve() when toCode method absent
 		// java.lang.Thread$State is a real enum with no toCode() method
 		EnumUserType newType = new EnumUserType();
 		Properties props = new Properties();
 		props.setProperty("enumClass", "java.lang.Thread$State");
-		newType.setParameterValues(props);
+		assertThrows(org.hibernate.HibernateException.class, () -> newType.setParameterValues(props));
 	}
 
 	/**
@@ -182,14 +183,14 @@ public class EnumUserTypeTest {
 		// deliberately no fromCode(String code) method
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testSetParameterValuesNoFromCodeMethodThrows() {
+	void testSetParameterValuesNoFromCodeMethodThrows() {
 		// covers L49-50: fromCode method not found → HibernateException
 		EnumUserType newType = new EnumUserType();
 		Properties props = new Properties();
 		props.setProperty("enumClass", ToCodeOnlyEnum.class.getName());
-		newType.setParameterValues(props);
+		assertThrows(org.hibernate.HibernateException.class, () -> newType.setParameterValues(props));
 	}
 
 	/**
@@ -206,9 +207,9 @@ public class EnumUserTypeTest {
 		}
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testNullSafeGetFromCodeInvocationThrowsHibernateException() throws Exception {
+	void testNullSafeGetFromCodeInvocationThrowsHibernateException() throws Exception {
 		// covers L99-100: fromCode method invocation throws → HibernateException
 		EnumUserType newType = new EnumUserType();
 		Properties props = new Properties();
@@ -216,7 +217,7 @@ public class EnumUserTypeTest {
 		newType.setParameterValues(props);
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString("col")).thenReturn("X");
-		newType.nullSafeGet(rs, new String[]{"col"}, null, null);
+		assertThrows(org.hibernate.HibernateException.class, () -> newType.nullSafeGet(rs, new String[]{"col"}, null, null));
 	}
 
 	/**
@@ -233,9 +234,9 @@ public class EnumUserTypeTest {
 		}
 	}
 
-	@Test(expected = org.hibernate.HibernateException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testNullSafeSetToCodeInvocationThrowsHibernateException() throws Exception {
+	void testNullSafeSetToCodeInvocationThrowsHibernateException() {
 		// covers L120-121: toCode method invocation throws → HibernateException
 		EnumUserType newType = new EnumUserType();
 		Properties props = new Properties();
@@ -243,6 +244,6 @@ public class EnumUserTypeTest {
 		newType.setParameterValues(props);
 		PreparedStatement ps = mock(PreparedStatement.class);
 		// pass a non-String, non-null value so the else-branch invokes toCode()
-		newType.nullSafeSet(ps, ThrowingToCodeEnum.X, 1, null);
+		assertThrows(org.hibernate.HibernateException.class, () -> newType.nullSafeSet(ps, ThrowingToCodeEnum.X, 1, null));
 	}
 }

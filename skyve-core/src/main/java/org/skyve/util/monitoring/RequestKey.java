@@ -5,6 +5,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Encodes a monitorable request operation into a compact key string.
@@ -30,7 +31,7 @@ public class RequestKey {
 	 */
 	public static final RequestKey NONE = new RequestKey(' ', null, null, null);
 
-	private RequestKey(char type, String moduleName, String documentName, String component) {
+	private RequestKey(char type, @Nullable String moduleName, @Nullable String documentName, @Nullable String component) {
 		this.type = type;
 		this.moduleName = moduleName;
 		this.documentName = documentName;
@@ -43,7 +44,7 @@ public class RequestKey {
 	 * @param model	chart model metadata
 	 * @return key encoded as model request type ({@code M})
 	 */
-	public static RequestKey chart(ChartBuilderMetaData model) {
+	public static @Nonnull RequestKey chart(@Nonnull ChartBuilderMetaData model) {
 		String queryName = model.getQueryName();
 		String modelName = model.getModelName();
 		return new RequestKey('M', model.getModuleName(), model.getDocumentName(), (queryName == null) ? modelName : queryName);
@@ -55,7 +56,7 @@ public class RequestKey {
 	 * @param document	document being created
 	 * @return key encoded as create request type ({@code C})
 	 */
-	public static RequestKey create(Document document) {
+	public static @Nonnull RequestKey create(@Nonnull Document document) {
 		return new RequestKey('C', document.getOwningModuleName(), document.getName(), null);
 	}
 
@@ -65,7 +66,7 @@ public class RequestKey {
 	 * @param document	document being edited
 	 * @return key encoded as edit request type ({@code E})
 	 */
-	public static RequestKey edit(Document document) {
+	public static @Nonnull RequestKey edit(@Nonnull Document document) {
 		return new RequestKey('E', document.getOwningModuleName(), document.getName(), null);
 	}
 
@@ -75,7 +76,7 @@ public class RequestKey {
 	 * @param document	document being saved
 	 * @return key encoded as save request type ({@code S})
 	 */
-	public static RequestKey save(Document document) {
+	public static @Nonnull RequestKey save(@Nonnull Document document) {
 		return new RequestKey('S', document.getOwningModuleName(), document.getName(), null);
 	}
 	
@@ -85,7 +86,7 @@ public class RequestKey {
 	 * @param document	document being deleted
 	 * @return key encoded as delete request type ({@code D})
 	 */
-	public static RequestKey delete(Document document) {
+	public static @Nonnull RequestKey delete(@Nonnull Document document) {
 		return new RequestKey('D', document.getOwningModuleName(), document.getName(), null);
 	}
 	
@@ -95,7 +96,7 @@ public class RequestKey {
 	 * @param document	current document context
 	 * @return key encoded as zoom-out request type ({@code Z})
 	 */
-	public static RequestKey zoomOut(Document document) {
+	public static @Nonnull RequestKey zoomOut(@Nonnull Document document) {
 		return new RequestKey('Z', document.getOwningModuleName(), document.getName(), null);
 	}
 
@@ -105,7 +106,7 @@ public class RequestKey {
 	 * @param document	current document context
 	 * @return key encoded as rerender request type ({@code R})
 	 */
-	public static RequestKey rerender(Document document) {
+	public static @Nonnull RequestKey rerender(@Nonnull Document document) {
 		return new RequestKey('R', document.getOwningModuleName(), document.getName(), null);
 	}
 
@@ -116,7 +117,7 @@ public class RequestKey {
 	 * @param actionName	action name
 	 * @return key encoded as action request type ({@code A})
 	 */
-	public static RequestKey action(Document document, String actionName) {
+	public static @Nonnull RequestKey action(@Nonnull Document document, @Nullable String actionName) {
 		return new RequestKey('A', document.getOwningModuleName(), document.getName(), actionName);
 	}
 	
@@ -127,7 +128,7 @@ public class RequestKey {
 	 * @param documentName	document name
 	 * @return key encoded as model request type ({@code M})
 	 */
-	public static RequestKey documentListModel(String moduleName, String documentName) {
+	public static @Nonnull RequestKey documentListModel(@Nonnull String moduleName, @Nullable String documentName) {
 		return new RequestKey('M', moduleName, documentName, null);
 	}
 
@@ -138,7 +139,7 @@ public class RequestKey {
 	 * @param queryName	query name
 	 * @return key encoded as model request type ({@code M})
 	 */
-	public static RequestKey queryListModel(String moduleName, String queryName) {
+	public static @Nonnull RequestKey queryListModel(@Nonnull String moduleName, @Nullable String queryName) {
 		return new RequestKey('M', moduleName, null, queryName);
 	}
 
@@ -149,7 +150,7 @@ public class RequestKey {
 	 * @param modelName	model name
 	 * @return key encoded as model request type ({@code M})
 	 */
-	public static RequestKey model(Document document, String modelName) {
+	public static @Nonnull RequestKey model(@Nonnull Document document, @Nullable String modelName) {
 		return new RequestKey('M', document.getOwningModuleName(), document.getName(), modelName);
 	}
 
@@ -160,7 +161,7 @@ public class RequestKey {
 	 * @param attributeName	attribute name being completed
 	 * @return key encoded as complete request type ({@code O})
 	 */
-	public static RequestKey complete(Document document, String attributeName) {
+	public static @Nonnull RequestKey complete(@Nonnull Document document, @Nullable String attributeName) {
 		return new RequestKey('O', document.getOwningModuleName(), document.getName(), attributeName);
 	}
 
@@ -171,7 +172,7 @@ public class RequestKey {
 	 * @param imageName	dynamic image name
 	 * @return key encoded as dynamic-image request type ({@code I})
 	 */
-	public static RequestKey dynamicImage(Document document, String imageName) {
+	public static @Nonnull RequestKey dynamicImage(@Nonnull Document document, @Nullable String imageName) {
 		return new RequestKey('I', document.getOwningModuleName(), document.getName(), imageName);
 	}
 
@@ -181,7 +182,7 @@ public class RequestKey {
 	 * @return serialised key string, or empty string for {@link #NONE}
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		if (this == NONE) {
 			return "";
 		}
@@ -274,21 +275,21 @@ public class RequestKey {
 	/**
 	 * Returns the module component of the key.
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
 	/**
 	 * Returns the document component of the key, when present.
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
 	/**
 	 * Returns the component suffix (action/query/model/attribute/image), when present.
 	 */
-	public String getComponent() {
+	public @Nullable String getComponent() {
 		return component;
 	}
 	
@@ -297,7 +298,7 @@ public class RequestKey {
 	 *
 	 * @return descriptive label including type, module, and optional document/component
 	 */
-	public String toDescription() {
+	public @Nonnull String toDescription() {
 		StringBuilder result = new StringBuilder(128);
 	
 		switch (type) {

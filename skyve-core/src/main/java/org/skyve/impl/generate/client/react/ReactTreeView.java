@@ -7,6 +7,8 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 
+import jakarta.annotation.Nonnull;
+
 
 /**
  * Renders React tree view component code from Skyve metadata.
@@ -17,12 +19,12 @@ public class ReactTreeView extends ReactComponent {
 	@SuppressWarnings("unused")
 	private MetaDataQueryDefinition query;
 	
-	public ReactTreeView(ReactGenerator generator, String moduleName, String componentName) {
+	public ReactTreeView(@Nonnull ReactGenerator generator, @Nonnull String moduleName, @Nonnull String componentName) {
 		super(generator, moduleName, componentName);
 	}
 
 	@Override
-	protected void create(FileWriter fw) throws IOException {
+	protected void create(@Nonnull FileWriter fw) throws IOException {
 		fw.write("import React from 'react';\n");
 		fw.write("import {View} from '../../View';\n");
 		fw.write("import {DataTable} from 'primereact/datatable';\n");

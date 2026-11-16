@@ -1,12 +1,24 @@
 package org.skyve.impl.metadata.customer;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.mockito.InOrder;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.time.HH24_MI;
@@ -17,29 +29,22 @@ import org.skyve.metadata.controller.Interceptor;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.CustomerRole;
+import org.skyve.metadata.customer.HTMLResources;
 import org.skyve.metadata.customer.InterceptorMetaData;
+import org.skyve.metadata.customer.LoginResources;
 import org.skyve.metadata.customer.ObserverMetaData;
 import org.skyve.metadata.customer.UIResources;
-import org.skyve.metadata.customer.HTMLResources;
-import org.skyve.metadata.customer.LoginResources;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({"static-method", "boxing", "null"})
 class CustomerImplTest {
+	private static final String ADMIN_MODULE_NAME = "admin";
+	private static final String ADMIN_SPECIAL_USER_DOCUMENT = "admin.SpecialUser";
+	private static final String ADMIN_USER_DOCUMENT = "admin.User";
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetName() {
 		CustomerImpl customer = new CustomerImpl();
@@ -398,16 +403,16 @@ class CustomerImplTest {
 
         @Test
         void testPutObserverReturnsTrueFirstTime() {
-                ObserverMetaData observer = Mockito.mock(ObserverMetaData.class);
-                Mockito.when(observer.getClassName()).thenReturn("com.example.MyObserver");
+                ObserverMetaData observer = mock(ObserverMetaData.class);
+                when(observer.getClassName()).thenReturn("com.example.MyObserver");
                 CustomerImpl customer = new CustomerImpl();
                 assertTrue(customer.putObserver(observer));
         }
 
         @Test
         void testPutObserverReturnsFalseForDuplicate() {
-                ObserverMetaData observer = Mockito.mock(ObserverMetaData.class);
-                Mockito.when(observer.getClassName()).thenReturn("com.example.MyObserver");
+                ObserverMetaData observer = mock(ObserverMetaData.class);
+                when(observer.getClassName()).thenReturn("com.example.MyObserver");
                 CustomerImpl customer = new CustomerImpl();
                 customer.putObserver(observer);
                 assertFalse(customer.putObserver(observer));
@@ -415,17 +420,23 @@ class CustomerImplTest {
 
         @Test
         void testGetObserversContainsPutObserver() {
-                ObserverMetaData observer = Mockito.mock(ObserverMetaData.class);
-                Mockito.when(observer.getClassName()).thenReturn("com.example.X");
+                ObserverMetaData observer = mock(ObserverMetaData.class);
+                when(observer.getClassName()).thenReturn("com.example.X");
                 CustomerImpl customer = new CustomerImpl();
                 customer.putObserver(observer);
                 assertTrue(customer.getObservers().contains(observer));
         }
 
         @Test
-        void testNotifyStartupWithNoObserversDoesNotThrow() {
+        void testNotifyServerStartupWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
                 assertDoesNotThrow(customer::notifyStartup);
+        }
+
+        @Test
+        void testNotifyDataStartupWithNoObserversDoesNotThrow() {
+                CustomerImpl customer = new CustomerImpl();
+                assertDoesNotThrow(customer::notifyDataTierReady);
         }
 
         @Test
@@ -496,7 +507,7 @@ class CustomerImplTest {
 
         @Test
         void testSetAndGetUiResources() {
-                UIResources res = Mockito.mock(UIResources.class);
+                UIResources res = mock(UIResources.class);
                 CustomerImpl customer = new CustomerImpl();
                 assertNull(customer.getUiResources());
                 customer.setUiResources(res);
@@ -505,7 +516,7 @@ class CustomerImplTest {
 
         @Test
         void testSetAndGetHtmlResources() {
-                HTMLResources res = Mockito.mock(HTMLResources.class);
+                HTMLResources res = mock(HTMLResources.class);
                 CustomerImpl customer = new CustomerImpl();
                 assertNull(customer.getHtmlResources());
                 customer.setHtmlResources(res);
@@ -514,7 +525,7 @@ class CustomerImplTest {
 
         @Test
         void testSetAndGetLoginResources() {
-                LoginResources res = Mockito.mock(LoginResources.class);
+                LoginResources res = mock(LoginResources.class);
                 CustomerImpl customer = new CustomerImpl();
                 assertNull(customer.getLoginResources());
                 customer.setLoginResources(res);
@@ -540,7 +551,7 @@ class CustomerImplTest {
         @Test
         void testSetHomeModuleName() {
                 CustomerImpl customer = new CustomerImpl();
-                assertDoesNotThrow(() -> customer.setHomeModuleName("admin"));
+		assertDoesNotThrow(() -> customer.setHomeModuleName(ADMIN_MODULE_NAME));
         }
 
         // --- interceptor support ---
@@ -548,16 +559,16 @@ class CustomerImplTest {
         @Test
         void testPutInterceptorReturnsTrueFirstTime() {
                 CustomerImpl customer = new CustomerImpl();
-                InterceptorMetaData interceptor = Mockito.mock(InterceptorMetaData.class);
-                Mockito.when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
+                InterceptorMetaData interceptor = mock(InterceptorMetaData.class);
+                when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
                 assertTrue(customer.putInterceptor(interceptor));
         }
 
         @Test
         void testPutInterceptorReturnsFalseForDuplicate() {
                 CustomerImpl customer = new CustomerImpl();
-                InterceptorMetaData interceptor = Mockito.mock(InterceptorMetaData.class);
-                Mockito.when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
+                InterceptorMetaData interceptor = mock(InterceptorMetaData.class);
+                when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
                 customer.putInterceptor(interceptor);
                 assertFalse(customer.putInterceptor(interceptor));
         }
@@ -565,8 +576,8 @@ class CustomerImplTest {
         @Test
         void testGetInterceptorsContainsPutInterceptor() {
                 CustomerImpl customer = new CustomerImpl();
-                InterceptorMetaData interceptor = Mockito.mock(InterceptorMetaData.class);
-                Mockito.when(interceptor.getClassName()).thenReturn("com.example.X");
+                InterceptorMetaData interceptor = mock(InterceptorMetaData.class);
+                when(interceptor.getClassName()).thenReturn("com.example.X");
                 customer.putInterceptor(interceptor);
                 Collection<InterceptorMetaData> result = customer.getInterceptors();
                 assertNotNull(result);
@@ -577,16 +588,16 @@ class CustomerImplTest {
         @Test
         void testNotifyLoginWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
-                jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
+                org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+                jakarta.servlet.http.HttpSession session = mock(jakarta.servlet.http.HttpSession.class);
                 assertDoesNotThrow(() -> customer.notifyLogin(user, session));
         }
 
         @Test
         void testNotifyLogoutWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
-                jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
+                org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+                jakarta.servlet.http.HttpSession session = mock(jakarta.servlet.http.HttpSession.class);
                 assertDoesNotThrow(() -> customer.notifyLogout(user, session));
         }
 
@@ -641,12 +652,16 @@ class CustomerImplTest {
 	}
 
 	private static CustomerImpl customerWithObserver(Observer impl) {
-		ObserverMetaData omd = mock(ObserverMetaData.class);
-		when(omd.getClassName()).thenReturn("com.example.MockObserver");
-		when(omd.getObserver()).thenReturn(impl);
 		CustomerImpl customer = new CustomerImpl();
-		customer.putObserver(omd);
+		addObserver(customer, "com.example.MockObserver", impl);
 		return customer;
+	}
+
+	private static void addObserver(CustomerImpl customer, String className, Observer impl) {
+		ObserverMetaData omd = mock(ObserverMetaData.class);
+		when(omd.getClassName()).thenReturn(className);
+		when(omd.getObserver()).thenReturn(impl);
+		customer.putObserver(omd);
 	}
 
 	// ---- interceptBeforeNewInstance with interceptor ----
@@ -1198,11 +1213,49 @@ class CustomerImplTest {
 	// ---- observer notify methods with observer ----
 
 	@Test
-	void notifyStartupCallsObserver() {
+	void notifyServerStartupCallsObserver() {
 		Observer observer = mock(Observer.class);
 		CustomerImpl customer = customerWithObserver(observer);
 		customer.notifyStartup();
 		verify(observer).startup(customer);
+	}
+
+	@Test
+	void notifyDataTierReadyCallsObserver() {
+		Observer observer = mock(Observer.class);
+		CustomerImpl customer = customerWithObserver(observer);
+		customer.notifyDataTierReady();
+		verify(observer).dataTierReady(customer);
+	}
+
+	@Test
+	void entryCallbacksNotifyObserversInRegistrationOrder() {
+		Observer first = mock(Observer.class);
+		Observer second = mock(Observer.class);
+		CustomerImpl customer = new CustomerImpl();
+		addObserver(customer, "com.example.FirstObserver", first);
+		addObserver(customer, "com.example.SecondObserver", second);
+
+		customer.notifyStartup();
+
+		InOrder notificationOrder = inOrder(first, second);
+		notificationOrder.verify(first).startup(customer);
+		notificationOrder.verify(second).startup(customer);
+	}
+
+	@Test
+	void exitCallbacksNotifyObserversInReverseRegistrationOrder() {
+		Observer first = mock(Observer.class);
+		Observer second = mock(Observer.class);
+		CustomerImpl customer = new CustomerImpl();
+		addObserver(customer, "com.example.FirstObserver", first);
+		addObserver(customer, "com.example.SecondObserver", second);
+
+		customer.notifyShutdown();
+
+		InOrder notificationOrder = inOrder(second, first);
+		notificationOrder.verify(second).shutdown(customer);
+		notificationOrder.verify(first).shutdown(customer);
 	}
 
 	@Test
@@ -1270,18 +1323,18 @@ class CustomerImplTest {
 	@Test
 	void getBaseDocumentReturnsNullWhenDerivationsMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 		assertNull(customer.getBaseDocument(doc));
 	}
 
 	@Test
 	void getDerivedDocumentsReturnsEmptyListWhenDerivationsMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 		List<String> result = customer.getDerivedDocuments(doc);
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
@@ -1292,17 +1345,17 @@ class CustomerImplTest {
 	void getDerivedDocumentsReturnsMatchingEntriesWhenDerivationsPopulated() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
 		java.lang.reflect.Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
-		derivationsField.setAccessible(true);
+		derivationsField.setAccessible(true); // NOSONAR - the test intentionally inspects private state
 		Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
-		derivations.put("admin.SpecialUser", "admin.User");
+		derivations.put(ADMIN_SPECIAL_USER_DOCUMENT, ADMIN_USER_DOCUMENT);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 
 		List<String> result = customer.getDerivedDocuments(doc);
 		assertEquals(1, result.size());
-		assertEquals("admin.SpecialUser", result.get(0));
+		assertEquals(ADMIN_SPECIAL_USER_DOCUMENT, result.get(0));
 	}
 
 	@Test
@@ -1310,23 +1363,23 @@ class CustomerImplTest {
 	void getBaseDocumentReturnsValueWhenDerivationsContainsKey() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
 		java.lang.reflect.Field derivationsField = CustomerImpl.class.getDeclaredField("derivations");
-		derivationsField.setAccessible(true);
+		derivationsField.setAccessible(true); // NOSONAR - the test intentionally inspects private state
 		Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
-		derivations.put("admin.SpecialUser", "admin.User");
+		derivations.put(ADMIN_SPECIAL_USER_DOCUMENT, ADMIN_USER_DOCUMENT);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("SpecialUser");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("SpecialUser");
 
-		assertEquals("admin.User", customer.getBaseDocument(doc));
+		assertEquals(ADMIN_USER_DOCUMENT, customer.getBaseDocument(doc));
 	}
 
 	@Test
 	void getExportedReferencesReturnsNullWhenMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 		assertNull(customer.getExportedReferences(doc));
 	}
 }

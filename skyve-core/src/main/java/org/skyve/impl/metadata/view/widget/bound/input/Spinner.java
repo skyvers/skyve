@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.view.widget.bound.input;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -28,27 +29,27 @@ public class Spinner extends TextField {
 	private Double max;
 	private Double step;
 
-	public Double getMin() {
+	public @Nullable Double getMin() {
 		return min;
 	}
 	@XmlAttribute(required = false)
-	public void setMin(Double min) {
+	public void setMin(@Nullable Double min) {
 		this.min = min;
 	}
 	
-	public Double getMax() {
+	public @Nullable Double getMax() {
 		return max;
 	}
 	@XmlAttribute(required = false)
-	public void setMax(Double max) {
+	public void setMax(@Nullable Double max) {
 		this.max = max;
 	}
 	
-	public Double getStep() {
+	public @Nullable Double getStep() {
 		return step;
 	}
 	@XmlAttribute(required = false)
-	public void setStep(Double step) {
+	public void setStep(@Nullable Double step) {
 		this.step = step;
 	}
 }

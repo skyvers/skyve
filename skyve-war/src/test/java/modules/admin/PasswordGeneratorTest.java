@@ -3,32 +3,32 @@ package modules.admin;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import util.AbstractH2TestForJUnit4;
+import util.AbstractH2Test;
 
-public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
+class PasswordGeneratorTest extends AbstractH2Test {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateReturnsNonNull() {
+	void testGenerateReturnsNonNull() {
 		String password = PasswordGenerator.generate();
 		assertThat(password, is(notNullValue()));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateReturnsMinimumLength() {
+	void testGenerateReturnsMinimumLength() {
 		String password = PasswordGenerator.generate();
-		assertTrue("Generated password must be at least 6 characters", password.length() >= 6);
+		assertTrue(password.length() >= 6, "Generated password must be at least 6 characters");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsDigit() {
+	void testGenerateContainsDigit() {
 		// Run several times to account for randomness
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
@@ -43,12 +43,12 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 				break;
 			}
 		}
-		assertTrue("Generated password must contain at least one digit across multiple generations", found);
+		assertTrue(found, "Generated password must contain at least one digit across multiple generations");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsUppercase() {
+	void testGenerateContainsUppercase() {
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
 			String password = PasswordGenerator.generate();
@@ -62,12 +62,12 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 				break;
 			}
 		}
-		assertTrue("Generated password must contain at least one uppercase character across multiple generations", found);
+		assertTrue(found, "Generated password must contain at least one uppercase character across multiple generations");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsLowercase() {
+	void testGenerateContainsLowercase() {
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
 			String password = PasswordGenerator.generate();
@@ -81,12 +81,12 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 				break;
 			}
 		}
-		assertTrue("Generated password must contain at least one lowercase character across multiple generations", found);
+		assertTrue(found, "Generated password must contain at least one lowercase character across multiple generations");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateContainsPunctuation() {
+	void testGenerateContainsPunctuation() {
 		boolean found = false;
 		for (int i = 0; i < 20; i++) {
 			String password = PasswordGenerator.generate();
@@ -100,16 +100,16 @@ public class PasswordGeneratorTest extends AbstractH2TestForJUnit4 {
 				break;
 			}
 		}
-		assertTrue("Generated password must contain at least one punctuation character across multiple generations", found);
+		assertTrue(found, "Generated password must contain at least one punctuation character across multiple generations");
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGenerateProducesDifferentPasswords() {
+	void testGenerateProducesDifferentPasswords() {
 		String first = PasswordGenerator.generate();
 		String second = PasswordGenerator.generate();
 		// Two consecutive calls should not deterministically produce the same result
 		// (astronomically unlikely with a real SecureRandom)
-		assertNotEquals("Consecutive generated passwords should differ", first, second);
+		assertNotEquals(first, second, "Consecutive generated passwords should differ");
 	}
 }

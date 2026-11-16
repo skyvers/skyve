@@ -7,6 +7,8 @@ import org.skyve.impl.metadata.repository.document.DynamicClassMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -48,7 +50,7 @@ public class Dynamic implements SerializableMetaData {
 	 * Returns the bizletClassName.
 	 * @return the result
 	 */
-	public String getBizletClassName() {
+	public @Nullable String getBizletClassName() {
 		return bizletClassName;
 	}
 
@@ -57,7 +59,7 @@ public class Dynamic implements SerializableMetaData {
 	 * @param className the className
 	 */
 	@XmlAttribute(required = false)
-	public void setBizletClassName(String className) {
+	public void setBizletClassName(@Nullable String className) {
 		this.bizletClassName = className;
 	}
 
@@ -65,7 +67,7 @@ public class Dynamic implements SerializableMetaData {
 	 * Returns the dataFactoryClassName.
 	 * @return the result
 	 */
-	public String getDataFactoryClassName() {
+	public @Nullable String getDataFactoryClassName() {
 		return dataFactoryClassName;
 	}
 	
@@ -74,7 +76,7 @@ public class Dynamic implements SerializableMetaData {
 	 * @param dataFactoryClassName the dataFactoryClassName
 	 */
 	@XmlAttribute(required = false)
-	public void setDataFactoryClassName(String dataFactoryClassName) {
+	public void setDataFactoryClassName(@Nullable String dataFactoryClassName) {
 		this.dataFactoryClassName = dataFactoryClassName;
 	}
 	
@@ -82,7 +84,7 @@ public class Dynamic implements SerializableMetaData {
 	 * Returns the actions.
 	 * @return the result
 	 */
-	public Map<String, String> getActions() {
+	public @Nonnull Map<String, String> getActions() {
 		return actions;
 	}
 
@@ -90,7 +92,7 @@ public class Dynamic implements SerializableMetaData {
 	 * Returns the images.
 	 * @return the result
 	 */
-	public Map<String, String> getImages() {
+	public @Nonnull Map<String, String> getImages() {
 		return images;
 	}
 	
@@ -98,7 +100,7 @@ public class Dynamic implements SerializableMetaData {
 	 * Returns the models.
 	 * @return the result
 	 */
-	public Map<String, String> getModels() {
+	public @Nonnull Map<String, String> getModels() {
 		return models;
 	}
 }

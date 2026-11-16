@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.model;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
@@ -24,6 +24,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.DomainType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -58,6 +60,13 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 public abstract class AbstractAttribute extends NamedMetaData implements Attribute {
 	private static final long serialVersionUID = -6632233770237276819L;
 
+	// view.xsd requires all four sizes on a richText. These approximate how an unsized one rendered:
+	// the width of a single column form and the 170 pixel minimum height the SmartClient renderer applied.
+	private static final Integer DEFAULT_RICH_TEXT_PIXEL_WIDTH = Integer.valueOf(600);
+	private static final Integer DEFAULT_RICH_TEXT_PIXEL_HEIGHT = Integer.valueOf(170);
+	private static final Integer DEFAULT_RICH_TEXT_MIN_PIXEL_HEIGHT = Integer.valueOf(170);
+	private static final Integer DEFAULT_RICH_TEXT_MAX_PIXEL_HEIGHT = Integer.valueOf(340);
+
 	private String displayName;
 	private AttributeType attributeType;
 	private UsageType usage;
@@ -75,26 +84,32 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	@Override
-	public String getDisplayName() {
+	@SuppressWarnings("null") // conversion rejects a null name
+	public @Nonnull String getName() {
+		return super.getName();
+	}
+
+	@Override
+	public @Nonnull String getDisplayName() {
 		return displayName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nonnull String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
@@ -103,43 +118,43 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	 * Fields and associations have this method overridden.
 	 */
 	@Override
-	public String getRequiredMessage() {
+	public @Nullable String getRequiredMessage() {
 		return null;
 	}
 	
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return attributeType;
 	}
 
 	@XmlTransient
 	// only used by references which don't need this property
-	public void setAttributeType(AttributeType fieldType) {
+	public void setAttributeType(@Nonnull AttributeType fieldType) {
 		this.attributeType = fieldType;
 	}
 
 	@Override
-	public UsageType getUsage() {
+	public @Nullable UsageType getUsage() {
 		return usage;
 	}
 	
 	@XmlAttribute
-	public void setUsage(UsageType usage) {
+	public void setUsage(@Nullable UsageType usage) {
 		this.usage = usage;
 	}
 	
 	@Override
-	public Sensitivity getSensitivity() {
+	public @Nullable Sensitivity getSensitivity() {
 		return sensitivity;
 	}
 	
 	@XmlAttribute
-	public void setSensitivity(Sensitivity sensitivity) {
+	public void setSensitivity(@Nullable Sensitivity sensitivity) {
 		this.sensitivity = sensitivity;
 	}
 	
 	@Override
-	public InputWidget getDefaultInputWidget() {
+	public @Nonnull InputWidget getDefaultInputWidget() {
 		if (defaultInputWidget == null) {
 			if ((domainType != null) || (AttributeType.enumeration.equals(attributeType))) {
 				defaultInputWidget = new Combo();
@@ -161,7 +176,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.markup.equals(attributeType)) {
-				defaultInputWidget = new RichText();
+				RichText richText = new RichText();
+				richText.setPixelWidth(DEFAULT_RICH_TEXT_PIXEL_WIDTH);
+				richText.setPixelHeight(DEFAULT_RICH_TEXT_PIXEL_HEIGHT);
+				richText.setMinPixelHeight(DEFAULT_RICH_TEXT_MIN_PIXEL_HEIGHT);
+				richText.setMaxPixelHeight(DEFAULT_RICH_TEXT_MAX_PIXEL_HEIGHT);
+				defaultInputWidget = richText;
 				defaultInputWidget.setBinding(getName());
 			}
 			else if (AttributeType.colour.equals(attributeType)) {
@@ -192,16 +212,16 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 	}
 
 	@XmlTransient
-	public void setDefaultInputWidget(InputWidget defaultInputWidget) {
+	public void setDefaultInputWidget(@Nonnull InputWidget defaultInputWidget) {
 		this.defaultInputWidget = defaultInputWidget;
 	}
 	
-	public WidgetReference getDefaultWidgetReference() {
+	public @Nullable WidgetReference getDefaultWidgetReference() {
 		return defaultWidgetReference;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name="defaultWidget")
-	public void setDefaultWidgetReference(WidgetReference widgetRef) {
+	public void setDefaultWidgetReference(@Nullable WidgetReference widgetRef) {
 		this.defaultWidgetReference = widgetRef;
 
 		if (widgetRef != null) {
@@ -220,12 +240,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 		this.deprecated = deprecated;
 	}
 
-	public Boolean getDeprecatedBool() {
+	public @Nonnull Boolean getDeprecatedBool() {
 		return Boolean.valueOf(deprecated);
 	}
 
 	@XmlAttribute(name="deprecated", required = false)
-	public void setDeprecatedBool(Boolean deprecated) {
+	public void setDeprecatedBool(@Nonnull Boolean deprecated) {
 		this.deprecated = deprecated.booleanValue();
 	}
 	
@@ -243,12 +263,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 		this.trackChanges = Boolean.valueOf(trackChanges);
 	}
 
-	public Boolean getTrackChangesBool() {
+	public @Nullable Boolean getTrackChangesBool() {
 		return trackChanges;
 	}
 	
 	@XmlAttribute(name="trackChanges", required = false)
-	public void setTrackChangesBool(Boolean trackChanges) {
+	public void setTrackChangesBool(@Nullable Boolean trackChanges) {
 		this.trackChanges = trackChanges;
 	}
 
@@ -262,12 +282,12 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 		this.audited = audited;
 	}
 
-	public Boolean getAuditedBool() {
+	public @Nullable Boolean getAuditedBool() {
 		return auditedBool;
 	}
 	
 	@XmlAttribute(name="audited", required = false)
-	public void setAuditedBool(Boolean audited) {
+	public void setAuditedBool(@Nonnull Boolean audited) {
 		this.auditedBool = audited;
 		this.audited = audited.booleanValue();
 	}
@@ -282,28 +302,28 @@ public abstract class AbstractAttribute extends NamedMetaData implements Attribu
 		tranzient = value;
 	}
 
-	public Boolean getTransientBool() {
+	public @Nonnull Boolean getTransientBool() {
 		return Boolean.valueOf(tranzient);
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name="transient", required = false)
-	public void setTransientBool(Boolean value) {
+	public void setTransientBool(@Nonnull Boolean value) {
 		tranzient = value.booleanValue();
 	}
 
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

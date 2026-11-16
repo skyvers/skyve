@@ -3,6 +3,9 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds query {@link Parameter} metadata used by list/query widgets.
  */
@@ -22,7 +25,7 @@ public class FluentParameter {
 	 * @param parameter
 	 *            the metadata instance to mutate
 	 */
-	public FluentParameter(ParameterImpl parameter) {
+	public FluentParameter(@Nonnull ParameterImpl parameter) {
 		this.parameter = parameter;
 	}
 	
@@ -33,7 +36,7 @@ public class FluentParameter {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentParameter from(@SuppressWarnings("hiding") Parameter parameter) {
+	public @Nonnull FluentParameter from(@SuppressWarnings("hiding") @Nonnull Parameter parameter) {
 		name(parameter.getName());
 		value(parameter.getValue());
 		valueBinding(parameter.getValueBinding());
@@ -47,7 +50,7 @@ public class FluentParameter {
 	 *            the parameter name
 	 * @return this builder
 	 */
-	public FluentParameter name(String name) {
+	public @Nonnull FluentParameter name(@Nonnull String name) {
 		parameter.setName(name);
 		return this;
 	}
@@ -59,7 +62,7 @@ public class FluentParameter {
 	 *            the literal parameter value
 	 * @return this builder
 	 */
-	public FluentParameter value(String value) {
+	public @Nonnull FluentParameter value(@Nullable String value) {
 		parameter.setValue(value);
 		return this;
 	}
@@ -71,7 +74,7 @@ public class FluentParameter {
 	 *            the value-binding expression
 	 * @return this builder
 	 */
-	public FluentParameter valueBinding(String valueBinding) {
+	public @Nonnull FluentParameter valueBinding(@Nullable String valueBinding) {
 		parameter.setValueBinding(valueBinding);
 		return this;
 	}
@@ -81,7 +84,7 @@ public class FluentParameter {
 	 *
 	 * @return the wrapped parameter metadata
 	 */
-	public ParameterImpl get() {
+	public @Nonnull ParameterImpl get() {
 		return parameter;
 	}
 }

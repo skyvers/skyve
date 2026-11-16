@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs that set absolute pixel dimensions on a widget.
  *
@@ -14,5 +16,5 @@ interface FluentAbsoluteSize<T extends FluentAbsoluteSize<T>> extends FluentAbso
 	 *            the absolute height in pixels
 	 * @return the fluent builder
 	 */
-	T pixelHeight(int height);
+	@Nonnull T pixelHeight(int height);
 }

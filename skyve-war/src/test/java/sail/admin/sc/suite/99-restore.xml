@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	SmartClient admin suite, restore bracket part 2: restore the backup that 00-backup.xml made (the newest, so the first
+	listed), which puts back the data as it was before the suite (and before 99-truncate.xml), then delete that backup. SmartClientAdminSuiteSailIT runs this whenever 00-precondition.xml and
+	00-backup.xml passed, even when a later file (99-truncate.xml too) fails.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Restore the backup made before the suite">
+		<method>
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" />
+			<comment>Backups are listed newest first, so the first is the one 00-backup.xml made</comment>
+			<listGridSelect module="admin" query="BackupsModel" row="0" />
+			<comment>Restore options: error on orphaned content, reindex both, delete the existing data first</comment>
+			<dataEnter binding="contentRestoreOption" value="2" />
+			<testValue binding="contentRestoreOption" value="error" />
+			<dataEnter binding="restoreIndexingOption" value="2" />
+			<testValue binding="restoreIndexingOption" value="both" />
+			<dataEnter binding="restorePreProcess" value="8" />
+			<testValue binding="restorePreProcess" value="deleteData" />
+			<action name="Restore" confirm="false" />
+			<action name="Restore" confirm="true" />
+			<testMessage contains="Restore Job has been started" type="info" />
+			<comment>The restore is a job: wait for its row in the completed jobs list (00 cleared the list before the backup, so the restored list has no RestoreJob row until this one finishes)</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="RestoreJob" minRows="1" timeoutMillis="120000" />
+		</method>
+	</interaction>
+	<interaction name="Sign in again after the restore, and delete its backup">
+		<method>
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+			<comment>The marker left after the backup has gone</comment>
+			<navigateMenu module="admin" item="Security Admin/Data Groups" />
+			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" timeoutMillis="30000" />
+			<navigateEdit module="admin" document="DataMaintenance" />
+			<tabSelect path="Backup/Restore" />
+			<comment>The restore keeps the backups, so the first is still the one 00-backup.xml made. Other backups may be listed, so the delete is checked by its deselecting the backup.</comment>
+			<listGridSelect module="admin" query="BackupsModel" row="0" />
+			<action name="DeleteBackup" confirm="true" />
+			<testWidget action="DeleteBackup" enabled="false" />
+		</method>
+	</interaction>
+	<interaction name="Home: Update My Details after the restore">
+		<method>
+			<comment>Runtime issue P4: the restore wrote the tables behind Hibernate's shared cache, so this save failed with an optimistic lock. It runs after the backup's delete, so a failure here leaves no backup behind. It leaves admin's mobile number changed; nothing depends on it.</comment>
+			<navigateEdit module="admin" document="UserDashboard" />
+			<dataEnter binding="currentUser.contact.mobile" value="0400 002 {run}" />
+			<action name="UpdateMyDetails" />
+			<navigateEdit module="admin" document="UserDashboard" />
+			<testValue binding="currentUser.contact.mobile" value="0400 002 {run}" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

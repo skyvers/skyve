@@ -5,8 +5,11 @@ import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +34,7 @@ import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.FileUtil;
 
+import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 import modules.admin.DataMaintenance.DataMaintenanceService;
 import modules.admin.domain.DataMaintenance;
@@ -215,17 +219,31 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 	}
 
 	/**
-	 * Fetch backup zip files (name and size).
+	 * A file with the last modified time read once, to sort by.
+	 */
+	private record TimedFile(@Nonnull File file, long lastModified) {
+		// nothing to add
+	}
+
+	/**
+	 * Fetch backup zip files (name and size), newest first.
 	 *
-	 * @param dirPath
-	 * @param startRow
-	 * @param endRow
-	 * @return
-	 * @throws IOException
+	 * <p>External backups keep the order of {@link ExternalBackup#listBackups()}, which is by modified time
+	 * descending. Local backups are ordered the same way, by last modified time descending, with the name
+	 * descending between backups modified at the same time. Each local backup's time is read once, before the sort.
+	 * Name order alone is not newest first, because scheduled backups have a prefix (such as {@code DAILY_}) and ad
+	 * hoc backups have none.
+	 *
+	 * @param dirPath the directory of the customer's local backups
+	 * @param startRow the first row of the page
+	 * @param endRow the last row of the page
+	 * @return the page of backups
+	 * @throws IOException if the size of a local backup cannot be read
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public static Page fetchBackups(String dirPath, int startRow, int endRow) throws IOException {
-		Map<String, Long> backups = new TreeMap<>();
+		// Insertion order: the listings below are newest first
+		Map<String, Long> backups = new LinkedHashMap<>();
 		if (ExternalBackup.areExternalBackupsEnabled()) {
 			ExternalBackup backupInstance = ExternalBackup.getInstance();
 			for (String s : backupInstance.listBackups()) {
@@ -241,7 +259,18 @@ public class BackupsModel extends ListModel<DataMaintenance> {
 		} else {
 			File[] files = FileUtil.listFiles(new File(dirPath), ".*\\.zip", SortDirection.descending);
 			if (files != null) {
-				for (File file : files) {
+				// Read each file's time once: a backup being written changes its time, and a time that changed
+				// during the sort would break the comparator's contract. A stable sort, so the descending name
+				// order breaks ties.
+				int l = files.length;
+				TimedFile[] timedFiles = new TimedFile[l];
+				for (int i = 0; i < l; i++) {
+					File file = files[i];
+					timedFiles[i] = new TimedFile(file, file.lastModified());
+				}
+				Arrays.sort(timedFiles, Comparator.comparingLong(TimedFile::lastModified).reversed());
+				for (TimedFile timedFile : timedFiles) {
+					File file = timedFile.file();
 					Long fileSize = Long.valueOf(Files.size(file.toPath()));
 					if (fileSize != null) {
 						// Convert to MB for readability

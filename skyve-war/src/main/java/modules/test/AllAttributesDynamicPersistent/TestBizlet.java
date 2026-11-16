@@ -8,6 +8,9 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Exercises the dynamic-persistent Bizlet extension points for integration tests.
  */
@@ -20,7 +23,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if initialisation fails
 	 */
 	@Override
-	public DynamicPersistentBean newInstance(DynamicPersistentBean bean) throws Exception {
+	public @Nonnull DynamicPersistentBean newInstance(@Nonnull DynamicPersistentBean bean) throws Exception {
 		return super.newInstance(bean);
 	}
 
@@ -32,7 +35,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if validation processing fails
 	 */
 	@Override
-	public void validate(DynamicPersistentBean bean, ValidationException e) throws Exception {
+	public void validate(@Nonnull DynamicPersistentBean bean, @Nonnull ValidationException e) throws Exception {
 		super.validate(bean, e);
 	}
 
@@ -44,7 +47,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if lookup fails
 	 */
 	@Override
-	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getConstantDomainValues(@Nonnull String attributeName) throws Exception {
 		return super.getConstantDomainValues(attributeName);
 	}
 
@@ -56,7 +59,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if lookup fails
 	 */
 	@Override
-	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getVariantDomainValues(@Nonnull String attributeName) throws Exception {
 		return super.getVariantDomainValues(attributeName);
 	}
 
@@ -69,7 +72,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if lookup fails
 	 */
 	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, DynamicPersistentBean bean) throws Exception {
+	public @Nullable List<DomainValue> getDynamicDomainValues(@Nonnull String attributeName, @Nonnull DynamicPersistentBean bean) throws Exception {
 		return super.getDynamicDomainValues(attributeName, bean);
 	}
 
@@ -83,7 +86,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if completion resolution fails
 	 */
 	@Override
-	public List<String> complete(String attributeName, String value, DynamicPersistentBean bean) throws Exception {
+	public @Nullable List<String> complete(@Nonnull String attributeName, @Nullable String value, @Nullable DynamicPersistentBean bean) throws Exception {
 		return super.complete(attributeName, value, bean);
 	}
 
@@ -97,7 +100,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if retrieval fails
 	 */
 	@Override
-	public DynamicPersistentBean resolve(String bizId, Bean conversationBean, WebContext webContext) throws Exception {
+	public @Nullable DynamicPersistentBean resolve(@Nonnull String bizId, @Nullable Bean conversationBean, @Nonnull WebContext webContext) throws Exception {
 		return super.resolve(bizId, conversationBean, webContext);
 	}
 
@@ -108,7 +111,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if pre-save logic fails
 	 */
 	@Override
-	public void preSave(DynamicPersistentBean bean) throws Exception {
+	public void preSave(@Nonnull DynamicPersistentBean bean) throws Exception {
 		super.preSave(bean);
 	}
 
@@ -119,7 +122,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if post-save logic fails
 	 */
 	@Override
-	public void postSave(DynamicPersistentBean bean) throws Exception {
+	public void postSave(@Nonnull DynamicPersistentBean bean) throws Exception {
 		super.postSave(bean);
 	}
 
@@ -130,7 +133,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if pre-delete logic fails
 	 */
 	@Override
-	public void preDelete(DynamicPersistentBean bean) throws Exception {
+	public void preDelete(@Nonnull DynamicPersistentBean bean) throws Exception {
 		super.preDelete(bean);
 	}
 
@@ -141,7 +144,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if post-load logic fails
 	 */
 	@Override
-	public void postLoad(DynamicPersistentBean bean) throws Exception {
+	public void postLoad(@Nonnull DynamicPersistentBean bean) throws Exception {
 		super.postLoad(bean);
 	}
 
@@ -156,9 +159,9 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if execution preparation fails
 	 */
 	@Override
-	public DynamicPersistentBean preExecute(ImplicitActionName actionName,
-												DynamicPersistentBean bean, Bean parentBean,
-												WebContext webContext)
+	public @Nonnull DynamicPersistentBean preExecute(@Nonnull ImplicitActionName actionName,
+														@Nonnull DynamicPersistentBean bean, @Nullable Bean parentBean,
+														@Nonnull WebContext webContext)
 	throws Exception {
 		return super.preExecute(actionName, bean, parentBean, webContext);
 	}
@@ -172,7 +175,7 @@ public class TestBizlet extends org.skyve.metadata.model.document.Bizlet<Dynamic
 	 * @throws Exception if rerender preparation fails
 	 */
 	@Override
-	public void preRerender(String source, DynamicPersistentBean bean, WebContext webContext) throws Exception {
+	public void preRerender(@Nonnull String source, @Nonnull DynamicPersistentBean bean, @Nonnull WebContext webContext) throws Exception {
 		super.preRerender(source, bean, webContext);
 	}
 }

@@ -3,6 +3,8 @@ package org.skyve.domain.messages;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Thrown when a Skyve request or operation exceeds its allowed time budget.
  *
@@ -30,7 +32,7 @@ public class TimeoutException extends DomainException implements MessageExceptio
 	 * Creates a new TimeoutException instance.
 	 * @param t the t
 	 */
-	public TimeoutException(Throwable t) {
+	public TimeoutException(@Nonnull Throwable t) {
 		super(MESSAGE_KEY, t);
 		messages = Collections.singletonList(new Message(getMessage()));
 	}
@@ -40,7 +42,7 @@ public class TimeoutException extends DomainException implements MessageExceptio
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

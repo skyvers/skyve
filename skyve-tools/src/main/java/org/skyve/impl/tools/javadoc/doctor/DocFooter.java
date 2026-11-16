@@ -4,6 +4,9 @@ import java.io.PrintStream;
 
 import org.skyve.domain.types.DateOnly;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Renders the closing footer and end tags for generated documents.
  */
@@ -15,7 +18,7 @@ public class DocFooter {
 	 *
 	 * @param id footer element id attribute
 	 */
-	public DocFooter(String id) {
+	public DocFooter(@Nonnull String id) {
 		super();
 		this.id = id;
 	}
@@ -25,7 +28,7 @@ public class DocFooter {
 	 *
 	 * @return footer id
 	 */
-	public String getId() {
+	public @Nullable String getId() {
 		return id;
 	}
 
@@ -34,7 +37,7 @@ public class DocFooter {
 	 *
 	 * @param id footer id
 	 */
-	public void setId(String id) {
+	public void setId(@Nullable String id) {
 		this.id = id;
 	}
 
@@ -45,7 +48,7 @@ public class DocFooter {
 	 *
 	 * @return footer title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -54,7 +57,7 @@ public class DocFooter {
 	 *
 	 * @param title footer title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 	
@@ -63,7 +66,7 @@ public class DocFooter {
 	 *
 	 * @param out destination stream
 	 */
-	public void generateHTML(PrintStream out) {
+	public void generateHTML(@Nonnull PrintStream out) {
 		out.println("<div id=\"" + this.id + "\" class=\"footer\">");
 		out.println(title + "<br/>Biz Hub Australia Pty Ltd, " + new DateOnly());
 		out.println("</div>");

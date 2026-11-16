@@ -112,6 +112,7 @@ class UserActionsH2Test extends AbstractH2Test {
 		assertThat(result, is(notNullValue()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void newActionSeedsContactFromSearchAndAdvancesWizard() throws Exception {
 		userBean.setSearchContactName("New Contact");

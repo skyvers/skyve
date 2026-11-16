@@ -9,6 +9,9 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts geometry values to and from Well-Known Text (WKT).
  */
@@ -18,7 +21,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Geometry> getValueType() {
+	public @Nonnull Class<Geometry> getValueType() {
 		return Geometry.class;
 	}
 	
@@ -28,7 +31,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public Geometry fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Geometry fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			return new WKTReader().read(displayValue);
 		}
@@ -43,7 +46,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Geometry value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Geometry value) throws ConversionException {
 		try {
 			return new WKTWriter().write(value);
 		}
@@ -57,7 +60,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.geometry;
 	}
 
@@ -66,7 +69,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Geometry> getFormat() {
+	public @Nullable Format<Geometry> getFormat() {
 		return null;
 	}
 
@@ -75,7 +78,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Geometry> getValidator() {
+	public @Nullable Validator<Geometry> getValidator() {
 		return null;
 	}
 	
@@ -84,7 +87,7 @@ public class GeometryConverter implements Converter<Geometry> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

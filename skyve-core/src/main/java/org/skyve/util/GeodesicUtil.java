@@ -2,6 +2,8 @@ package org.skyve.util;
 
 import org.locationtech.jts.geom.Point;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Calculates geodesic measurements for longitude/latitude coordinates.
  *
@@ -30,7 +32,7 @@ public class GeodesicUtil {
 	 * @param b the second point; must not be {@code null}
 	 * @return the haversine distance in kilometres
 	 */
-	public static double haversineDistanceKilometres(Point a, Point b) {
+	public static double haversineDistanceKilometres(@Nonnull Point a, @Nonnull Point b) {
 		double latitude1 = Math.toRadians(a.getY());
 		double latitude2 = Math.toRadians(b.getY());
 		double deltaLatitude = Math.toRadians(b.getY() - a.getY());

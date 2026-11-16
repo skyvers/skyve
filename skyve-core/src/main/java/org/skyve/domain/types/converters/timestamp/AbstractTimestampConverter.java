@@ -9,6 +9,7 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base converter for {@link Timestamp} attributes using a configured
@@ -23,7 +24,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * @return the result value
 	 */
 	@Override
-	public final AttributeType getAttributeType() {
+	public final @Nonnull AttributeType getAttributeType() {
 		return AttributeType.timestamp;
 	}
 
@@ -32,7 +33,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * @return the result value
 	 */
 	@Override
-	public Class<Timestamp> getValueType() {
+	public @Nonnull Class<Timestamp> getValueType() {
 		return Timestamp.class;
 	}
 	
@@ -41,7 +42,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * @return the result value
 	 */
 	@Override
-	public Format<Timestamp> getFormat() {
+	public @Nullable Format<Timestamp> getFormat() {
 		return null;
 	}
 
@@ -50,7 +51,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Timestamp> getValidator() {
+	public @Nullable Validator<Timestamp> getValidator() {
 		return null;
 	}
 
@@ -64,7 +65,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * The i18n key used to represent an error in conversion using this converter
 	 * @return	The i18n key.
 	 */
-	protected abstract String getI18nKey();
+	protected abstract @Nonnull String getI18nKey();
 	
 	/**
 	 * Converts a display representation to its domain value.
@@ -72,7 +73,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * @return the result value
 	 */
 	@Override
-	public Timestamp fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Timestamp fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			return new Timestamp(CORE.getDateFormat(getFormatPattern()).parse(displayValue).getTime());
 		}
@@ -87,7 +88,7 @@ public abstract class AbstractTimestampConverter implements Converter<Timestamp>
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Timestamp value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Timestamp value) throws ConversionException {
 		try {
 			return CORE.getDateFormat(getFormatPattern()).format(value);
 		}

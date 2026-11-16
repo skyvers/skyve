@@ -11,6 +11,9 @@ import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Used to convert dynamic enumeration code/display without using Java method invocations.
  */
@@ -22,7 +25,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 *
 	 * @param enumeration the enumeration metadata supplying runtime values
 	 */
-	public DynamicEnumerationConverter(Enumeration enumeration) {
+	public DynamicEnumerationConverter(@Nonnull Enumeration enumeration) {
 		values = enumeration.getTarget().getValues();
 	}
 	
@@ -32,7 +35,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @return {@link String}
 	 */
 	@Override
-	public Class<String> getValueType() {
+	public @Nonnull Class<String> getValueType() {
 		return String.class;
 	}
 	
@@ -45,7 +48,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String toDisplayValue(String value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull String value) throws ConversionException {
 		try {
 			// check code first
 			for (EnumeratedValue enumValue : values) {
@@ -94,7 +97,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @throws ConversionException when the value cannot be resolved
 	 */
 	@Override
-	public String fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull String fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			// check description first
 			for (EnumeratedValue enumValue : values) {
@@ -130,7 +133,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @return {@link AttributeType#enumeration}
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.enumeration;
 	}
 
@@ -140,7 +143,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @return {@code null}, as this converter has no custom format descriptor
 	 */
 	@Override
-	public Format<String> getFormat() {
+	public @Nullable Format<String> getFormat() {
 		return null;
 	}
 
@@ -150,7 +153,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @return {@code null}, as this converter has no custom validator descriptor
 	 */
 	@Override
-	public Validator<String> getValidator() {
+	public @Nullable Validator<String> getValidator() {
 		return null;
 	}
 	
@@ -160,7 +163,7 @@ public class DynamicEnumerationConverter implements Converter<String> {
 	 * @return {@code null}, as this converter does not use a format pattern
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

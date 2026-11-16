@@ -3,15 +3,15 @@ package modules.admin.Configuration;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.util.UtilImpl;
 
@@ -19,24 +19,24 @@ import jakarta.inject.Inject;
 import modules.admin.User.UserService;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Configuration.TwoFactorType;
-import util.AbstractH2TestForJUnit4;
+import util.AbstractH2Test;
 
-public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
+class ConfigurationBizletTest extends AbstractH2Test {
 
 	private ConfigurationBizlet bizlet;
 	private ConfigurationExtension configuration;
 	@Inject
 	private transient UserService userService;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		UtilImpl.SMTP_SENDER = "test@test.com";
 		bizlet = new ConfigurationBizlet();
 		configuration = Configuration.newInstance();
 	}
 
 	@Test
-	public void testNewInstance() throws Exception {
+	void testNewInstance() throws Exception {
 		// validate the test data
 		assertThat(userService.currentAdminUserProxy(), is(notNullValue()));
 
@@ -50,14 +50,14 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	}
 
 	@Test
-	public void testCompleteReturnsEmptyListForUnknownAttribute() throws Exception {
+	void testCompleteReturnsEmptyListForUnknownAttribute() throws Exception {
 		List<String> result = bizlet.complete("unknownAttribute", "val", configuration);
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	public void testCompleteTwoFactorEmailBodyWithNullValueReturnsTfaCode() throws Exception {
+	void testCompleteTwoFactorEmailBodyWithNullValueReturnsTfaCode() throws Exception {
 		List<String> result = bizlet.complete(Configuration.twoFactorEmailBodyPropertyName, null, configuration);
 		assertNotNull(result);
 		assertEquals(1, result.size());
@@ -65,7 +65,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	}
 
 	@Test
-	public void testCompleteTwoFactorEmailBodyWithTfaCodePrefixReturnsTfaCode() throws Exception {
+	void testCompleteTwoFactorEmailBodyWithTfaCodePrefixReturnsTfaCode() throws Exception {
 		List<String> result = bizlet.complete(Configuration.twoFactorEmailBodyPropertyName, "{tfaC", configuration);
 		assertNotNull(result);
 		assertEquals(1, result.size());
@@ -73,27 +73,27 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	}
 
 	@Test
-	public void testCompleteTwoFactorEmailBodyWithNonMatchingValueReturnsEmpty() throws Exception {
+	void testCompleteTwoFactorEmailBodyWithNonMatchingValueReturnsEmpty() throws Exception {
 		List<String> result = bizlet.complete(Configuration.twoFactorEmailBodyPropertyName, "hello", configuration);
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
 	}
 
 	@Test
-	public void testCompletePasswordResetEmailSubjectReturnsNotNull() throws Exception {
+	void testCompletePasswordResetEmailSubjectReturnsNotNull() throws Exception {
 		List<String> result = bizlet.complete(Configuration.passwordResetEmailSubjectPropertyName, null, configuration);
 		assertNotNull(result);
 	}
 
 	@Test
-	public void testCompletePasswordResetEmailBodyReturnsResetUrl() throws Exception {
+	void testCompletePasswordResetEmailBodyReturnsResetUrl() throws Exception {
 		List<String> result = bizlet.complete(Configuration.passwordResetEmailBodyPropertyName, null, configuration);
 		assertNotNull(result);
 		assertTrue(result.contains("{#resetPasswordUrl}"));
 	}
 
 	@Test
-	public void testValidateWithNullFieldsProducesNoErrors() throws Exception {
+	void testValidateWithNullFieldsProducesNoErrors() throws Exception {
 		configuration.setPasswordResetEmailSubject(null);
 		configuration.setPasswordResetEmailBody(null);
 		configuration.setTwoFactorEmailBody(null);
@@ -103,7 +103,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	}
 
 	@Test
-	public void testValidateWithValidPasswordResetSubjectProducesNoErrors() throws Exception {
+	void testValidateWithValidPasswordResetSubjectProducesNoErrors() throws Exception {
 		configuration.setPasswordResetEmailSubject("Reset your password");
 		ValidationException e = new ValidationException();
 		bizlet.validate(configuration, e);
@@ -111,7 +111,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	}
 
 	@Test
-	public void testValidateWithTfaCodeOnlyInBodyProducesNoErrors() throws Exception {
+	void testValidateWithTfaCodeOnlyInBodyProducesNoErrors() throws Exception {
 		configuration.setTwoFactorEmailBody("Your code is: {tfaCode}");
 		ValidationException e = new ValidationException();
 		bizlet.validate(configuration, e);
@@ -119,7 +119,7 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 	}
 
 	@Test
-	public void testValidateWithInvalidSkyveExpressionInTfaBodyProducesError() throws Exception {
+	void testValidateWithInvalidSkyveExpressionInTfaBodyProducesError() throws Exception {
 		configuration.setTwoFactorEmailBody("{currentUser.name}");
 		ValidationException e = new ValidationException();
 		bizlet.validate(configuration, e);
@@ -128,8 +128,9 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 
 	// ===== preRerender() — twoFactorType/email branch (no H2 needed for bean modifications) =====
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void testPreRerenderTwoFactorTypeEmailSetsDefaultsWhenNull() throws Exception {
+	void testPreRerenderTwoFactorTypeEmailSetsDefaultsWhenNull() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.email);
 		configuration.setTwoFactorEmailBody(null);
 		configuration.setTwoFactorEmailSubject(null);
@@ -143,8 +144,9 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertEquals(Integer.valueOf(5 * 60), configuration.getTwofactorPushCodeTimeOutSeconds());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void testPreRerenderTwoFactorTypeEmailDoesNotOverwriteExistingBody() throws Exception {
+	void testPreRerenderTwoFactorTypeEmailDoesNotOverwriteExistingBody() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.email);
 		configuration.setTwoFactorEmailBody("Custom body");
 		configuration.setTwoFactorEmailSubject("Custom subject");
@@ -157,8 +159,9 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertEquals(Integer.valueOf(120), configuration.getTwofactorPushCodeTimeOutSeconds());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void testPreRerenderTwoFactorTypeOffDoesNotSetDefaults() throws Exception {
+	void testPreRerenderTwoFactorTypeOffDoesNotSetDefaults() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.off);
 		configuration.setTwoFactorEmailBody(null);
 
@@ -167,8 +170,9 @@ public class ConfigurationBizletTest extends AbstractH2TestForJUnit4 {
 		assertNull(configuration.getTwoFactorEmailBody());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void testPreRerenderUnknownSourceDoesNotModifyBean() throws Exception {
+	void testPreRerenderUnknownSourceDoesNotModifyBean() throws Exception {
 		configuration.setTwoFactorType(TwoFactorType.email);
 		configuration.setTwoFactorEmailBody("existing body");
 

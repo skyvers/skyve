@@ -12,7 +12,7 @@ public interface GeoIPService {
 	 * Geo-locates details for the specified IP address.
 	 * 
 	 * @param ipAddress The ip address to look up the country for
-	 * @return The 2-letter country-code, or null if one could not be returned
+	 * @return The geolocation details (including the 2-letter country-code), or {@link IPGeolocation#EMPTY} if they could not be determined
 	 */
 	@Nonnull IPGeolocation geolocate(@Nonnull String ipAddress);
 	

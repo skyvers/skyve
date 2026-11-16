@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
@@ -25,7 +27,7 @@ public class DynamicClassMapAdapter extends XmlAdapter<DynamicClassMapType, Map<
 	 * @return a map keyed by entry name with class names as values
 	 */
 	@Override
-	public Map<String, String> unmarshal(DynamicClassMapType v) throws Exception {
+	public @Nonnull Map<String, String> unmarshal(@SuppressWarnings("null") @Nonnull DynamicClassMapType v) throws Exception {
 		Map<String, String> result = new TreeMap<>();
 		for (DynamicClassMapEntryType entry : v.classes) {
 			result.put(entry.name, entry.className);
@@ -40,7 +42,7 @@ public class DynamicClassMapAdapter extends XmlAdapter<DynamicClassMapType, Map<
 	 * @return JAXB wrapper, or {@code null} when the map is empty
 	 */
 	@Override
-	public DynamicClassMapType marshal(Map<String, String> v) throws Exception {
+	public @Nullable DynamicClassMapType marshal(@SuppressWarnings("null") @Nonnull Map<String, String> v) throws Exception {
 		DynamicClassMapType result = null;
 		if (! v.isEmpty()) {
 			result = new DynamicClassMapType();

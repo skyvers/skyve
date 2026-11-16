@@ -57,20 +57,20 @@ public interface Enumeration extends SerializableMetaData {
 	 * The code is persisted in the data stores.
 	 * @return	the code of the enumerated value.
 	 */
-	public String toCode();
+	public @Nonnull String toCode();
 	
 	/**
 	 * The description of the enumerated value.
 	 * The description is displayed in UIs.
 	 * @return	the description of the enumerated value.
 	 */
-	public String toLocalisedDescription();
+	public @Nonnull String toLocalisedDescription();
 	
 	/**
 	 * Return a domain value representation of this enumerated value.
 	 * @return	The enumerated value as a domain value.
 	 */
-	public DomainValue toDomainValue();
+	public @Nonnull DomainValue toDomainValue();
 	
 	/**
 	 * Comparator that orders {@link org.skyve.metadata.model.document.Bizlet.DomainValue}
@@ -84,7 +84,7 @@ public interface Enumeration extends SerializableMetaData {
 		 * @return the result
 		 */
 		@Override
-		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
+		public int compare(@SuppressWarnings("null") @Nonnull DomainValue d1, @SuppressWarnings("null") @Nonnull DomainValue d2) {
 			return d1.getCode().compareTo(d2.getCode());
 		}
 	}
@@ -101,7 +101,7 @@ public interface Enumeration extends SerializableMetaData {
 		 * @return the result
 		 */
 		@Override
-		public int compare(@Nonnull DomainValue d1, @Nonnull DomainValue d2) {
+		public int compare(@SuppressWarnings("null") @Nonnull DomainValue d1, @SuppressWarnings("null") @Nonnull DomainValue d2) {
 			return d1.getLocalisedDescription().compareTo(d2.getLocalisedDescription());
 		}
 	}

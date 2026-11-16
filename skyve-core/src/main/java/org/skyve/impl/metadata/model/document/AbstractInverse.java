@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -51,39 +53,39 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	private Boolean cascade;
 
 	@Override
-	public DomainType getDomainType() {
+	public @Nullable DomainType getDomainType() {
 		return domainType;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "domain", required = false)
-	public void setDomainType(DomainType domainType) {
+	public void setDomainType(@Nullable DomainType domainType) {
 		this.domainType = domainType;
 	}
 
 	@Override
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
 	@Override
-	public String getReferenceName() {
+	public @Nonnull String getReferenceName() {
 		return referenceName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setReferenceName(String referenceName) {
+	public void setReferenceName(@Nonnull String referenceName) {
 		this.referenceName = UtilImpl.processStringValue(referenceName);
 	}
 
 	/**
 	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
 	 */
-	public InverseRelationship getRelationship() {
+	public @Nullable InverseRelationship getRelationship() {
 		return relationship;
 	}
 
@@ -91,12 +93,12 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	 * This is only used during domain generation - tests at runtime use the cardinality attribute.
 	 */
 	@XmlTransient
-	public void setRelationship(InverseRelationship relationship) {
+	public void setRelationship(@Nonnull InverseRelationship relationship) {
 		this.relationship = relationship;
 	}
 
 	@Override
-	public Boolean getCascade() {
+	public @Nullable Boolean getCascade() {
 		return cascade;
 	}
 
@@ -104,7 +106,7 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	 * If this inverse is cascading, trackChanges will be used, unless it's explicitly set off
 	 */
 	@XmlAttribute
-	public void setCascade(Boolean cascade) {
+	public void setCascade(@Nullable Boolean cascade) {
 		this.cascade = cascade;
 	}
 

@@ -46,6 +46,7 @@ class FieldModelTest {
 		assertThat(text.getValidator(), is(validator));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void textSetAndGetFormat() {
 		Text text = new Text();
@@ -141,6 +142,15 @@ class FieldModelTest {
 		Text field = new Text();
 		field.setIndex(IndexType.database);
 		assertThat(field.getIndex(), is(IndexType.database));
+	}
+
+	@Test
+	void contentTextualIndexingUsesContentDefaultAndExplicitIndexTypes() {
+		assertTrue(Content.isTextuallyIndexed(null));
+		assertTrue(Content.isTextuallyIndexed(IndexType.textual));
+		assertTrue(Content.isTextuallyIndexed(IndexType.both));
+		assertFalse(Content.isTextuallyIndexed(IndexType.database));
+		assertFalse(Content.isTextuallyIndexed(IndexType.none));
 	}
 
 	@Test
@@ -265,4 +275,3 @@ class FieldModelTest {
 		assertThat(new Id().getDomainType(), nullValue());
 	}
 }
-

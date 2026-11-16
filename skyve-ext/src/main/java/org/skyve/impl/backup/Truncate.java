@@ -20,6 +20,9 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class for emptying all Skyve customer tables in the correct order
  * (observing foreign-key constraints) prior to a restore operation.
@@ -29,15 +32,39 @@ public class Truncate {
 
     private static final String DELETE_FROM = "delete from ";
 
-	public static void truncate(String schemaName, boolean database, boolean content) 
+	/**
+	 * Deletes the current customer's rows from every table in the schema, and empties its content index. When the
+	 * rows are deleted, Hibernate's shared (second-level) cache is evicted afterwards, whether the truncate succeeds
+	 * or fails.
+	 *
+	 * @param schemaName the schema to truncate, or null to find the tables in every schema
+	 * @param database whether to delete the rows
+	 * @param content whether to empty the content index
+	 * @throws Exception if the truncate fails
+	 */
+	public static void truncate(@Nullable String schemaName, boolean database, boolean content)
 	throws Exception {
+		String customerName = CORE.getUser().getCustomerName();
+		if (customerName == null) { // truncation is scoped to the customer
+			throw new IllegalStateException("Cannot truncate as the user has no customer");
+		}
 		Collection<Table> tables = getTables(schemaName);
-		truncate(tables, CORE.getUser().getCustomerName(), database, content);
+		try {
+			truncate(tables, customerName, database, content);
+		}
+		finally {
+			if (database) {
+				// The rows are deleted with SQL, committing table by table, so Hibernate's shared (second-level)
+				// cache still holds the beans from before the truncate, even when it fails partway. A retrieve
+				// would return a deleted bean, and a save of one would fail as its row is gone.
+				CORE.getPersistence().evictAllSharedCache();
+			}
+		}
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void truncate(Collection<Table> tables, 
-									String customerName, 
+	private static void truncate(@Nonnull Collection<Table> tables, 
+									@Nonnull String customerName, 
 									boolean database,
 									boolean content)
 	throws Exception {
@@ -127,7 +154,7 @@ public class Truncate {
 	private static final String[] TABLE_TYPES = new String[] {"TABLE"};
 	
 	@SuppressWarnings({"resource", "java:S3776"}) // Complexity OK
-	private static Collection<Table> getTables(String schema)
+	private static @Nonnull Collection<Table> getTables(@Nullable String schema)
 	throws SQLException {
 		Collection<Table> result = new ArrayList<>();
 
@@ -239,7 +266,7 @@ public class Truncate {
 		return result;
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		if (args.length != 9) {
 			System.err.println("args are <customerName> <content directory> <content file storage?> <DB dialect> <DB driver> <DB URL> <DB username> <DB password> <DB schema>");
 			System.exit(1);

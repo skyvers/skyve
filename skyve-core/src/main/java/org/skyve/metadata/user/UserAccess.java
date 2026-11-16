@@ -10,6 +10,9 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * An immutable value object that identifies a specific type of access being requested
  * to a Skyve resource, used by the router and security layer to determine whether the
@@ -45,7 +48,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	private String documentName;
 	private String component;
 	
-	private UserAccess(char type, String moduleName, String documentName, String component) {
+	private UserAccess(char type, @Nonnull String moduleName, @Nullable String documentName, @Nullable String component) {
 		this.type = type;
 		this.moduleName = moduleName;
 		this.documentName = documentName;
@@ -59,7 +62,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param documentName  the document name; must not be {@code null}
 	 * @return a new singular {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess singular(String moduleName, String documentName) {
+	public static @Nonnull UserAccess singular(@Nonnull String moduleName, @Nonnull String documentName) {
 		return new UserAccess('S', moduleName, documentName, null);
 	}
 	
@@ -70,7 +73,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param documentName  the document name used as the aggregate target; must not be {@code null}
 	 * @return a new document-aggregate {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess documentAggregate(String moduleName, String documentName) {
+	public static @Nonnull UserAccess documentAggregate(@Nonnull String moduleName, @Nonnull String documentName) {
 		return new UserAccess('D', moduleName, null, documentName);
 	}
 
@@ -81,7 +84,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param queryName   the query name; must not be {@code null}
 	 * @return a new query-aggregate {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess queryAggregate(String moduleName, String queryName) {
+	public static @Nonnull UserAccess queryAggregate(@Nonnull String moduleName, @Nonnull String queryName) {
 		return new UserAccess('Q', moduleName, null, queryName);
 	}
 
@@ -93,7 +96,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param modelName     the model name; must not be {@code null}
 	 * @return a new model-aggregate {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess modelAggregate(String moduleName, String documentName, String modelName) {
+	public static @Nonnull UserAccess modelAggregate(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String modelName) {
 		return new UserAccess('M', moduleName, documentName, modelName);
 	}
 
@@ -105,7 +108,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param binding       the binding path; must not be {@code null}
 	 * @return a new previous-complete {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess previousComplete(String moduleName, String documentName, String binding) {
+	public static @Nonnull UserAccess previousComplete(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String binding) {
 		return new UserAccess('P', moduleName, documentName, binding);
 	}
 
@@ -117,7 +120,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param reportName    the report name; must not be {@code null}
 	 * @return a new report {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess report(String moduleName, String documentName, String reportName) {
+	public static @Nonnull UserAccess report(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String reportName) {
 		return new UserAccess('R', moduleName, documentName, reportName);
 	}
 
@@ -129,7 +132,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param dynamicImageName    the dynamic image name; must not be {@code null}
 	 * @return a new dynamic-image {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess dynamicImage(String moduleName, String documentName, String dynamicImageName) {
+	public static @Nonnull UserAccess dynamicImage(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String dynamicImageName) {
 		return new UserAccess('I', moduleName, documentName, dynamicImageName);
 	}
 
@@ -141,7 +144,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @param binding       the attribute binding of the content field; must not be {@code null}
 	 * @return a new content {@code UserAccess}; never {@code null}
 	 */
-	public static UserAccess content(String moduleName, String documentName, String binding) {
+	public static @Nonnull UserAccess content(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String binding) {
 		return new UserAccess('C', moduleName, documentName, binding);
 	}
 
@@ -190,7 +193,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 *
 	 * @return the module name; never {@code null}
 	 */
-	public String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -200,7 +203,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 *
 	 * @return the document name, or {@code null}
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 	
@@ -210,7 +213,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 *
 	 * @return the component name, or {@code null}
 	 */
-	public String getComponent() {
+	public @Nullable String getComponent() {
 		return component;
 	}
 	
@@ -222,7 +225,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 *
 	 * @return a singular access for the base document, or {@code null} if none
 	 */
-	public UserAccess determineSingularBaseDocument() {
+	public @Nullable UserAccess determineSingularBaseDocument() {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
@@ -241,7 +244,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @return the result
 	 */
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(@Nullable Object other) {
 		if (other == null) {
 			return false;
 		}
@@ -262,7 +265,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @return the result
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(64);
 		result.append(type);
 		result.append(moduleName);
@@ -283,7 +286,7 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 * @return the result
 	 */
 	@Override
-	public int compareTo(UserAccess other) {
+	public int compareTo(@SuppressWarnings("null") @Nonnull UserAccess other) {
 		return toString().compareTo(other.toString());
 	}
 }

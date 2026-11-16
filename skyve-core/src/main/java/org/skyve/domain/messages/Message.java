@@ -48,7 +48,7 @@ public class Message implements Serializable {
 	/**
 	 * Formatted message constructor.
 	 */
-	public Message(@Nonnull String text, Bean... beans) {
+	public Message(@Nonnull String text, @Nonnull Bean... beans) {
 		this.text = Binder.formatMessage(Util.nullSafeI18n(text), beans);
 	}
 
@@ -66,7 +66,7 @@ public class Message implements Serializable {
 	/**
 	 * Formatted message convenience constructor for 1 binding.
 	 */
-	public Message(@Nonnull String binding, @Nonnull String text, Bean... beans) {
+	public Message(@Nonnull String binding, @Nonnull String text, @Nonnull Bean... beans) {
 		this.text = Binder.formatMessage(Util.nullSafeI18n(text), beans);
 		bindings.add(binding);
 	}
@@ -87,7 +87,7 @@ public class Message implements Serializable {
 	/**
 	 * Multiple binding formatted message constructor.
 	 */
-	public Message(@Nonnull String[] bindings, @Nonnull String text, Bean... beans) {
+	public Message(@Nonnull String[] bindings, @Nonnull String text, @Nonnull Bean... beans) {
 		this.text = Binder.formatMessage(Util.nullSafeI18n(text), beans);
 
 		for (String binding : bindings) {

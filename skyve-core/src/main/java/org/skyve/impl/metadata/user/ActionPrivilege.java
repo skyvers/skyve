@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.user;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A privilege granting the right to invoke a named action on a specific document
  * within a role.
@@ -12,11 +14,11 @@ public class ActionPrivilege extends Privilege {
 
 	private String documentName;
 
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = documentName;
 	}
 }

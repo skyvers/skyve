@@ -1,7 +1,12 @@
 package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -9,16 +14,26 @@ import static org.mockito.Mockito.when;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Locale;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebContext;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,7 +55,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -50,7 +66,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doPost(request, response));
 	}
@@ -60,7 +77,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser(null);
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -70,7 +88,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
@@ -81,7 +100,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("X");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
@@ -92,7 +112,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("X");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doPost(request, response));
@@ -103,7 +124,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
@@ -114,7 +136,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doPost(request, response));
@@ -150,6 +173,42 @@ class SmartClientTagServletTest {
 		writer.flush();
 
 		assertTrue(sink.toString().contains("The tag operation was unsuccessful."));
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void iteratingAModelWithoutADrivingDocumentIsAnInvariantFailure() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class); // getDrivingDocument() returns null
+		when(user.canAccess(any(UserAccess.class), anyString())).thenReturn(true);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getListModel(customer, "Model", true)).thenReturn(model);
+		Method iterate = SmartClientTagServlet.class.getDeclaredMethod("iterate",
+																		String.class,
+																		String.class,
+																		String.class,
+																		Bean.class,
+																		User.class,
+																		Customer.class,
+																		UxUi.class);
+		iterate.setAccessible(true);
+
+		InvocationTargetException e = assertThrows(InvocationTargetException.class,
+													() -> iterate.invoke(null,
+																			"tag-1",
+																			"mod_Doc__Model",
+																			"{}",
+																			null,
+																			user,
+																			customer,
+																			UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
+
+		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, e.getCause());
+		assertEquals("List model Model in document Doc has no driving document", cause.getMessage());
 	}
 
 	private static HttpServletRequest newRequestWithoutUser(String action) {

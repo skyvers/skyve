@@ -3,6 +3,7 @@ package org.skyve.impl.generate.sail;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -28,6 +29,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
@@ -50,6 +52,7 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
@@ -68,6 +71,7 @@ class GeneratorTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addLoginAndOutCreatesBeforeAndAfterProcedures() throws Exception {
 		User user = mock(User.class);
@@ -87,6 +91,7 @@ class GeneratorTest {
 		assertThat(automation.getAfter().getSteps().get(0), instanceOf(Logout.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addLoginAndOutPrependsLoginToExistingBeforeAndAppendsLogoutToExistingAfter() throws Exception {
 		User user = mock(User.class);
@@ -111,14 +116,51 @@ class GeneratorTest {
 		assertThat(automation.getAfter().getSteps().get(1), instanceOf(Logout.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void visitModuleSkipsAbstractChildInaccessibleAndForeignDocumentRefs() throws Exception {
+	void addLoginAndOutSwitchesModeAfterLoginForDesktop() throws Exception {
+		User user = mock(User.class);
+		when(user.getName()).thenReturn("admin");
+		Automation automation = new Automation();
+		automation.setUxui("desktop");
+		Procedure before = new Procedure();
+		Comment existingBefore = new Comment();
+		before.getSteps().add(existingBefore);
+		automation.setBefore(before);
+
+		invokeAddLoginAndOut(automation, user, null, "secret");
+
+		List<Step> steps = automation.getBefore().getSteps();
+		assertThat(steps.size(), is(3));
+		assertThat(steps.get(0), instanceOf(Login.class));
+		assertThat(steps.get(1), instanceOf(SwitchMode.class));
+		assertThat(steps.get(2), is(existingBefore));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void addLoginAndOutDoesNotSwitchModeForOtherUxUis() throws Exception {
+		User user = mock(User.class);
+		when(user.getName()).thenReturn("admin");
+		Automation automation = new Automation();
+		automation.setUxui("external");
+
+		invokeAddLoginAndOut(automation, user, null, "secret");
+
+		assertThat(automation.getBefore().getSteps().size(), is(1));
+		assertThat(automation.getBefore().getSteps().get(0), instanceOf(Login.class));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void visitModuleSkipsAbstractChildInaccessibleAndForeignDocumentRefs() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document abstractDocument = mock(Document.class);
 		Document childDocument = mock(Document.class);
 		Document inaccessibleDocument = mock(Document.class);
+		when(user.getName()).thenReturn("admin");
 		when(user.getCustomer()).thenReturn(customer);
 		when(user.canAccessDocument(abstractDocument)).thenReturn(true);
 		when(user.canAccessDocument(childDocument)).thenReturn(true);
@@ -147,6 +189,7 @@ class GeneratorTest {
 		assertThat(result.getUserAgentType(), is(UserAgentType.desktop));
 		assertThat(result.getTestStrategy(), is(TestStrategy.Assert));
 		assertThat(result.getBefore().getSteps().get(0), instanceOf(Login.class));
+		assertThat(result.getBefore().getSteps().get(1), instanceOf(SwitchMode.class));
 		assertThat(result.getAfter().getSteps().get(0), instanceOf(Logout.class));
 		verify(module, never()).getDocument(customer, "ForeignDoc");
 	}
@@ -171,7 +214,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenusOverloadsOmitModulesWithEmptyMenus() throws Exception {
+	void visitMenusOverloadsOmitModulesWithEmptyMenus() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -191,8 +234,9 @@ class GeneratorTest {
 		verify(repository, times(2)).resetMenus(user);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void visitMenusPasswordOverloadAddsLoginForNonEmptyMenuAutomation() throws Exception {
+	void visitMenusPasswordOverloadAddsLoginForNonEmptyMenuAutomation() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -250,6 +294,7 @@ class GeneratorTest {
 		assertThat(navigate.getDocumentName(), is("Invoice"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitModulesPasswordOverloadKeepsNonEmptyAutomation() throws Exception {
 		User user = mock(User.class);
@@ -280,6 +325,7 @@ class GeneratorTest {
 		assertThat(automation.getAfter().getSteps().get(0), instanceOf(Logout.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void visitModulePasswordOverloadAddsLoginForNonEmptyModule() throws Exception {
 		User user = mock(User.class);
@@ -407,7 +453,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuCreatesGroupedListInteraction() throws Exception {
+	void visitMenuCreatesGroupedListInteraction() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -441,7 +487,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithNamedQuerySetsQueryName() throws Exception {
+	void visitMenuListItemWithNamedQuerySetsQueryName() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -478,7 +524,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithDefaultQueryUsesDocumentName() throws Exception {
+	void visitMenuListItemWithDefaultQueryUsesDocumentName() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -515,7 +561,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithModelNameUsesDrivingDocumentForCreateAccess() throws Exception {
+	void visitMenuListItemWithModelNameUsesDrivingDocumentForCreateAccess() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -553,7 +599,82 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuEditItemCreatesNavigateEditInteraction() throws Exception {
+	void visitMenuListItemWithModelWithoutDrivingDocumentThrows() {
+		UserImpl user = mock(UserImpl.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document listDocument = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		MenuImpl menu = new MenuImpl();
+		ListItem item = new ListItem();
+		item.setName("Invoice model");
+		item.setDocumentName("Invoice");
+		item.setModelName("overdue");
+		menu.getItems().add(item);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getModuleMenu("sales")).thenReturn(menu);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocument(customer, "Invoice")).thenReturn(listDocument);
+		when(listDocument.getListModel(customer, "overdue", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(null);
+		ProvidedRepositoryFactory.set(repository);
+
+		assertThrows(MetaDataException.class, () -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.Assert));
+	}
+
+	@Test
+	void visitMenuListItemWithoutQueryOrDocumentThrows() {
+		ListItem item = new ListItem();
+		item.setName("Nothing");
+		UserImpl user = userWithMenuItem(item);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.None));
+		assertThat(e.getMessage(), is("List menu item Nothing in module sales has no query or document"));
+	}
+
+	@Test
+	void visitMenuEditItemWithoutDocumentThrows() {
+		EditItem item = new EditItem();
+		item.setName("Nothing");
+		UserImpl user = userWithMenuItem(item);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.None));
+		assertThat(e.getMessage(), is("Edit menu item Nothing in module sales has no document"));
+	}
+
+	@Test
+	void visitMenuThrowsWhenTheUserHasNoMenuForTheModule() {
+		UserImpl user = mock(UserImpl.class);
+		CustomerImpl customer = new CustomerImpl();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(user.getName()).thenReturn("admin");
+		when(user.getCustomer()).thenReturn(customer);
+		when(repository.getModule(customer, "sales")).thenReturn(module("sales"));
+		ProvidedRepositoryFactory.set(repository);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> Generator.visitMenu(user, "sales", "desktop", UserAgentType.desktop, TestStrategy.None));
+		assertThat(e.getMessage(), is("User admin has no menu for module sales"));
+	}
+
+	@Test
+	void addLoginAndOutThrowsWhenTheUserHasNoName() {
+		Automation automation = new Automation();
+		User user = mock(User.class);
+
+		java.lang.reflect.InvocationTargetException e = assertThrows(java.lang.reflect.InvocationTargetException.class,
+																		() -> invokeAddLoginAndOut(automation, user, "demo", "secret"));
+		assertThat(e.getCause(), instanceOf(IllegalStateException.class));
+		assertThat(e.getCause().getMessage(), is("Cannot log in to the automation as the user has no name"));
+		assertThat(automation.getBefore(), is((Procedure) null));
+	}
+
+	@Test
+	void visitMenuEditItemCreatesNavigateEditInteraction() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -587,7 +708,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuEditItemAddsSaveStepsForPersistentDocumentActions() throws Exception {
+	void visitMenuEditItemAddsSaveStepsForPersistentDocumentActions() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -622,8 +743,9 @@ class GeneratorTest {
 		assertThat(steps.get(5), instanceOf(Save.class));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void visitMenuPasswordOverloadAddsLoginAndLogout() throws Exception {
+	void visitMenuPasswordOverloadAddsLoginAndLogout() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -653,6 +775,22 @@ class GeneratorTest {
 		Method method = Generator.class.getDeclaredMethod("addLoginAndOut", Automation.class, User.class, String.class, String.class);
 		method.setAccessible(true);
 		method.invoke(null, automation, user, customer, password);
+	}
+
+	/**
+	 * Returns a user whose sales module menu has the given single item.
+	 */
+	private static UserImpl userWithMenuItem(org.skyve.metadata.module.menu.MenuItem item) {
+		UserImpl user = mock(UserImpl.class);
+		CustomerImpl customer = new CustomerImpl();
+		MenuImpl menu = new MenuImpl();
+		menu.getItems().add(item);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getModuleMenu("sales")).thenReturn(menu);
+		when(repository.getModule(customer, "sales")).thenReturn(module("sales"));
+		ProvidedRepositoryFactory.set(repository);
+		return user;
 	}
 
 	private static DocumentRef documentRef(String owningModuleName) {

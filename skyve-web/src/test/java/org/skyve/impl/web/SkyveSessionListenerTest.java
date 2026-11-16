@@ -2,6 +2,7 @@ package org.skyve.impl.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,6 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 
+import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
 
@@ -136,5 +138,25 @@ class SkyveSessionListenerTest {
 
 		assertEquals(0, StateUtil.getSessionCount());
 		verify(customer).notifyLogout(user, session);
+	}
+
+	// Never try to notify of logouts on customers when the server is shutting down
+	@Test
+	void sessionDestroyedDuringShutdownSkipsCustomerLogout() {
+		StateUtil.incrementSessionCount();
+		SkyveSessionListener listener = new SkyveSessionListener();
+		User user = mock(User.class);
+		HttpSession session = mock(HttpSession.class);
+		ServletContext servletContext = mock(ServletContext.class);
+		when(user.getId()).thenReturn(USER_ID);
+		when(session.getAttribute(org.skyve.web.WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
+		when(session.getServletContext()).thenReturn(servletContext);
+		when(servletContext.getAttribute(SkyveContextListener.SHUTTING_DOWN_ATTRIBUTE_NAME)).thenReturn(Boolean.TRUE);
+		HttpSessionEvent event = new HttpSessionEvent(session);
+
+		listener.sessionDestroyed(event);
+
+		assertEquals(0, StateUtil.getSessionCount());
+		verify(user, never()).getCustomer();
 	}
 }

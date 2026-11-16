@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -27,7 +28,7 @@ public class CustomerRolesMetaData {
 	private boolean allowModuleRoles = true;
 	
 	@XmlElement(namespace = XMLMetaData.CUSTOMER_NAMESPACE, name = "role", required = true)
-	public List<CustomerRoleMetaData> getRoles() {
+	public @Nonnull List<CustomerRoleMetaData> getRoles() {
 		return roles;
 	}
 	

@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.customer.LoginResources;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -26,22 +27,22 @@ public class LoginResourcesMetaData implements LoginResources {
 	private String loggedOutPageURL;
 
 	@Override
-	public String getLoginPageURL() {
+	public @Nullable String getLoginPageURL() {
 		return loginPageURL;
 	}
 	
 	@XmlAttribute(name = "loginPage")
-	public void setLoginPageURL(String loginPageURL) {
+	public void setLoginPageURL(@Nullable String loginPageURL) {
 		this.loginPageURL = UtilImpl.processStringValue(loginPageURL);
 	}
 	
 	@Override
-	public String getLoggedOutPageURL() {
+	public @Nullable String getLoggedOutPageURL() {
 		return loggedOutPageURL;
 	}
 	
 	@XmlAttribute(name = "loggedOutPage")
-	public void setLoggedOutPageURL(String loggedOutPageURL) {
+	public void setLoggedOutPageURL(@Nullable String loggedOutPageURL) {
 		this.loggedOutPageURL = UtilImpl.processStringValue(loggedOutPageURL);
 	}
 }

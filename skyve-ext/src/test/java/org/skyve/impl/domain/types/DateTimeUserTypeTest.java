@@ -1,12 +1,12 @@
 package org.skyve.impl.domain.types;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,13 +18,13 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.TimeOnly;
 
 @SuppressWarnings({"resource", "boxing"})
-public class DateTimeUserTypeTest {
+class DateTimeUserTypeTest {
 
 	// A fixed epoch value for tests — 2024-06-15 10:30:45.123 UTC
 	private static final long EPOCH = 1718447445123L;
@@ -34,50 +34,50 @@ public class DateTimeUserTypeTest {
 	private final TimeOnlyUserType timeType = new TimeOnlyUserType();
 
 	@Test
-	public void testTimeOnlySqlTypes() {
+	void testTimeOnlySqlTypes() {
 		assertArrayEquals(new int[] {Types.TIME}, timeType.sqlTypes());
 	}
 
 	@Test
-	public void testTimeOnlyReturnedClass() {
+	void testTimeOnlyReturnedClass() {
 		assertEquals(TimeOnly.class, timeType.returnedClass());
 	}
 
 	@Test
-	public void testTimeOnlyIsMutable() {
+	void testTimeOnlyIsMutable() {
 		assertTrue(timeType.isMutable());
 	}
 
 	@Test
-	public void testTimeOnlyEqualsBothNull() {
+	void testTimeOnlyEqualsBothNull() {
 		// x == y (both null → same ref)
 		assertTrue(timeType.equals(null, null));
 	}
 
 	@Test
-	public void testTimeOnlyEqualsXNull() {
+	void testTimeOnlyEqualsXNull() {
 		assertFalse(timeType.equals(null, new TimeOnly(EPOCH)));
 	}
 
 	@Test
-	public void testTimeOnlyEqualsYNull() {
+	void testTimeOnlyEqualsYNull() {
 		assertFalse(timeType.equals(new TimeOnly(EPOCH), null));
 	}
 
 	@Test
-	public void testTimeOnlyEqualsSameEpoch() {
+	void testTimeOnlyEqualsSameEpoch() {
 		assertTrue(timeType.equals(new TimeOnly(EPOCH), new TimeOnly(EPOCH)));
 	}
 
 	@Test
-	public void testTimeOnlyEqualsDistinctTimesDiffer() {
+	void testTimeOnlyEqualsDistinctTimesDiffer() {
 		// Different millis = different time-of-day
 		long later = EPOCH + 3600000L; // +1 hour
 		assertFalse(timeType.equals(new TimeOnly(EPOCH), new TimeOnly(later)));
 	}
 
 	@Test
-	public void testTimeOnlyEqualsSameHourDifferentMinute() {
+	void testTimeOnlyEqualsSameHourDifferentMinute() {
 		// covers L54: HOUR_OF_DAY equal but MINUTE different
 		// TimeOnly(h,m,s) constructor sets time to Jan 1 1970 h:m:s, getTime() differs
 		TimeOnly t1 = new TimeOnly(10, 30, 45);
@@ -86,7 +86,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimeOnlyEqualsSameHourMinuteDifferentSecond() {
+	void testTimeOnlyEqualsSameHourMinuteDifferentSecond() {
 		// covers L55: HOUR_OF_DAY and MINUTE equal but SECOND different
 		TimeOnly t1 = new TimeOnly(10, 30, 45);
 		TimeOnly t2 = new TimeOnly(10, 30, 46);
@@ -94,7 +94,7 @@ public class DateTimeUserTypeTest {
 	}
 
         @Test
-        public void testTimeOnlyEqualsSameHMSDifferentMillis() {
+        void testTimeOnlyEqualsSameHMSDifferentMillis() {
                 // covers L55 true branch and L56 false branch: HH:MM:SS equal but MILLISECOND differs
                 TimeOnly t1 = new TimeOnly(10, 30, 45);
                 t1.setTime(t1.getTime() + 100); // add 100ms → MILLISECOND=100
@@ -104,7 +104,7 @@ public class DateTimeUserTypeTest {
         }
 
         @Test
-        public void testTimeOnlyEqualsSameHMSAndMillis() {
+        void testTimeOnlyEqualsSameHMSAndMillis() {
                 // covers L56 true branch: HH:MM:SS:MS all equal
                 TimeOnly t1 = new TimeOnly(10, 30, 45);
                 t1.setTime(t1.getTime() + 100);
@@ -114,45 +114,46 @@ public class DateTimeUserTypeTest {
         }
 
 	@Test
-	public void testTimeOnlyDeepCopyNull() {
+	void testTimeOnlyDeepCopyNull() {
 		assertNull(timeType.deepCopy(null));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void testTimeOnlyDeepCopyNonNull() {
+	void testTimeOnlyDeepCopyNonNull() {
 		TimeOnly t = new TimeOnly(EPOCH);
 		Object copy = timeType.deepCopy(t);
 		// TimeOnly strips date-component and millis, compare via its own getTime()
 		assertEquals(t.getTime(), ((java.util.Date) copy).getTime());
-		assertNotSame("deep copy must not be same reference", t, copy);
+		assertNotSame(t, copy, "deep copy must not be same reference");
 	}
 
 	@Test
-	public void testTimeOnlyDisassemble() {
+	void testTimeOnlyDisassemble() {
 		TimeOnly t = new TimeOnly(EPOCH);
 		assertSame(t, timeType.disassemble(t));
 	}
 
 	@Test
-	public void testTimeOnlyAssemble() {
+	void testTimeOnlyAssemble() {
 		TimeOnly t = new TimeOnly(EPOCH);
 		assertSame(t, timeType.assemble(t, null));
 	}
 
 	@Test
-	public void testTimeOnlyReplace() {
+	void testTimeOnlyReplace() {
 		TimeOnly original = new TimeOnly(EPOCH);
 		TimeOnly target = new TimeOnly(EPOCH + 1000L);
 		assertSame(original, timeType.replace(original, target, null));
 	}
 
 	@Test
-	public void testTimeOnlyObjectToSQLStringNull() throws Exception {
+	void testTimeOnlyObjectToSQLStringNull() throws Exception {
 		assertEquals("NULL", timeType.objectToSQLString(null, null));
 	}
 
 	@Test
-	public void testTimeOnlyObjectToSQLStringNonNull() throws Exception {
+	void testTimeOnlyObjectToSQLStringNonNull() throws Exception {
 		java.util.Date d = new TimeOnly(EPOCH);
 		String result = timeType.objectToSQLString(d, null);
 		assertTrue(result.startsWith("'"));
@@ -160,7 +161,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimeOnlyNullSafeGetReturnsNullWhenColumnNull() throws Exception {
+	void testTimeOnlyNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTime("col")).thenReturn(null);
 		when(rs.wasNull()).thenReturn(Boolean.TRUE);
@@ -168,7 +169,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimeOnlyNullSafeGetReturnsTimeOnlyWhenNotNull() throws Exception {
+	void testTimeOnlyNullSafeGetReturnsTimeOnlyWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		Time t = new Time(EPOCH);
 		when(rs.getTime("col")).thenReturn(t);
@@ -180,14 +181,14 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimeOnlyNullSafeSetNull() throws Exception {
+	void testTimeOnlyNullSafeSetNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		timeType.nullSafeSet(ps, null, 1, null);
 		verify(ps).setNull(1, Types.TIME);
 	}
 
 	@Test
-	public void testTimeOnlyNullSafeSetNonNull() throws Exception {
+	void testTimeOnlyNullSafeSetNonNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		TimeOnly t = new TimeOnly(EPOCH);
 		timeType.nullSafeSet(ps, t, 2, null);
@@ -200,94 +201,94 @@ public class DateTimeUserTypeTest {
 	private final DateOnlyUserType dateType = new DateOnlyUserType();
 
 	@Test
-	public void testDateOnlySqlTypes() {
+	void testDateOnlySqlTypes() {
 		assertArrayEquals(new int[] {Types.DATE}, dateType.sqlTypes());
 	}
 
 	@Test
-	public void testDateOnlyReturnedClass() {
+	void testDateOnlyReturnedClass() {
 		assertEquals(DateOnly.class, dateType.returnedClass());
 	}
 
 	@Test
-	public void testDateOnlyIsMutable() {
+	void testDateOnlyIsMutable() {
 		assertTrue(dateType.isMutable());
 	}
 
 	@Test
-	public void testDateOnlyEqualsBothNull() {
+	void testDateOnlyEqualsBothNull() {
 		assertTrue(dateType.equals(null, null));
 	}
 
 	@Test
-	public void testDateOnlyEqualsXNull() {
+	void testDateOnlyEqualsXNull() {
 		assertFalse(dateType.equals(null, new DateOnly(EPOCH)));
 	}
 
 	@Test
-	public void testDateOnlyEqualsYNull() {
+	void testDateOnlyEqualsYNull() {
 		assertFalse(dateType.equals(new DateOnly(EPOCH), null));
 	}
 
 	@Test
-	public void testDateOnlyEqualsSameEpoch() {
+	void testDateOnlyEqualsSameEpoch() {
 		assertTrue(dateType.equals(new DateOnly(EPOCH), new DateOnly(EPOCH)));
 	}
 
 	@Test
-	public void testDateOnlyEqualsDistinctDatesDiffer() {
+	void testDateOnlyEqualsDistinctDatesDiffer() {
 		long tomorrow = EPOCH + 86400000L;
 		assertFalse(dateType.equals(new DateOnly(EPOCH), new DateOnly(tomorrow)));
 	}
 
 	@Test
-	public void testDateOnlyHashCodeConsistent() {
+	void testDateOnlyHashCodeConsistent() {
 		DateOnly d1 = new DateOnly(EPOCH);
 		DateOnly d2 = new DateOnly(EPOCH);
 		assertEquals(dateType.hashCode(d1), dateType.hashCode(d2));
 	}
 
 	@Test
-	public void testDateOnlyDeepCopyNull() {
+	void testDateOnlyDeepCopyNull() {
 		assertNull(dateType.deepCopy(null));
 	}
 
 	@Test
-	public void testDateOnlyDeepCopyNonNull() {
+	void testDateOnlyDeepCopyNonNull() {
 		DateOnly d = new DateOnly(EPOCH);
 		Object copy = dateType.deepCopy(d);
 		assertTrue(copy instanceof DateOnly);
 		// DateOnly strips time component, compare via the domain object's own getTime()
 		assertEquals(d.getTime(), ((java.util.Date) copy).getTime());
-		assertNotSame("deep copy must not be same reference", d, copy);
+		assertNotSame(d, copy, "deep copy must not be same reference");
 	}
 
 	@Test
-	public void testDateOnlyDisassemble() {
+	void testDateOnlyDisassemble() {
 		DateOnly d = new DateOnly(EPOCH);
 		assertSame(d, dateType.disassemble(d));
 	}
 
 	@Test
-	public void testDateOnlyAssemble() {
+	void testDateOnlyAssemble() {
 		DateOnly d = new DateOnly(EPOCH);
 		assertSame(d, dateType.assemble(d, null));
 	}
 
 	@Test
-	public void testDateOnlyReplace() {
+	void testDateOnlyReplace() {
 		DateOnly original = new DateOnly(EPOCH);
 		DateOnly target = new DateOnly(EPOCH + 86400000L);
 		assertSame(original, dateType.replace(original, target, null));
 	}
 
 	@Test
-	public void testDateOnlyObjectToSQLStringNull() throws Exception {
+	void testDateOnlyObjectToSQLStringNull() throws Exception {
 		assertEquals("NULL", dateType.objectToSQLString(null, null));
 	}
 
 	@Test
-	public void testDateOnlyObjectToSQLStringNonNull() throws Exception {
+	void testDateOnlyObjectToSQLStringNonNull() throws Exception {
 		Date d = new Date(EPOCH);
 		String result = dateType.objectToSQLString(d, null);
 		assertTrue(result.startsWith("'"));
@@ -295,7 +296,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testDateOnlyNullSafeGetReturnsNullWhenColumnNull() throws Exception {
+	void testDateOnlyNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getDate("col")).thenReturn(null);
 		when(rs.wasNull()).thenReturn(Boolean.TRUE);
@@ -303,7 +304,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testDateOnlyNullSafeGetReturnsDateOnlyWhenNotNull() throws Exception {
+	void testDateOnlyNullSafeGetReturnsDateOnlyWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		Date d = new Date(EPOCH);
 		when(rs.getDate("col")).thenReturn(d);
@@ -315,14 +316,14 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testDateOnlyNullSafeSetNull() throws Exception {
+	void testDateOnlyNullSafeSetNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		dateType.nullSafeSet(ps, null, 1, null);
 		verify(ps).setNull(1, Types.DATE);
 	}
 
 	@Test
-	public void testDateOnlyNullSafeSetNonNull() throws Exception {
+	void testDateOnlyNullSafeSetNonNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		DateOnly d = new DateOnly(EPOCH);
 		dateType.nullSafeSet(ps, d, 2, null);
@@ -335,47 +336,47 @@ public class DateTimeUserTypeTest {
 	private final DateTimeUserType dtType = new DateTimeUserType();
 
 	@Test
-	public void testDateTimeSqlTypes() {
+	void testDateTimeSqlTypes() {
 		assertArrayEquals(new int[] {Types.TIMESTAMP}, dtType.sqlTypes());
 	}
 
 	@Test
-	public void testDateTimeReturnedClass() {
+	void testDateTimeReturnedClass() {
 		assertEquals(DateTime.class, dtType.returnedClass());
 	}
 
 	@Test
-	public void testDateTimeIsMutable() {
+	void testDateTimeIsMutable() {
 		assertTrue(dtType.isMutable());
 	}
 
 	@Test
-	public void testDateTimeEqualsBothNull() {
+	void testDateTimeEqualsBothNull() {
 		assertTrue(dtType.equals(null, null));
 	}
 
 	@Test
-	public void testDateTimeEqualsSameEpoch() {
+	void testDateTimeEqualsSameEpoch() {
 		assertTrue(dtType.equals(new DateTime(EPOCH), new DateTime(EPOCH)));
 	}
 
 	@Test
-	public void testDateTimeEqualsXNull() {
+	void testDateTimeEqualsXNull() {
 		assertFalse(dtType.equals(null, new DateTime(EPOCH)));
 	}
 
 	@Test
-	public void testDateTimeEqualsYNull() {
+	void testDateTimeEqualsYNull() {
 		assertFalse(dtType.equals(new DateTime(EPOCH), null));
 	}
 
 	@Test
-	public void testDateTimeDifferentEpochNotEqual() {
+	void testDateTimeDifferentEpochNotEqual() {
 		assertFalse(dtType.equals(new DateTime(EPOCH), new DateTime(EPOCH + 1000L)));
 	}
 
 	@Test
-	public void testDateTimeEqualsSqlTimestampsWithSameNanos() {
+	void testDateTimeEqualsSqlTimestampsWithSameNanos() {
 		// Both java.sql.Timestamp instances with same getTime() → exercises L50-54
 		// Setting nanos to same sub-milli fraction: millis part of nanos = EPOCH % 1000 = 123,
 		// so setNanos(123_000_050) keeps getTime() the same and gives xn = yn = 50 → equal
@@ -387,7 +388,7 @@ public class DateTimeUserTypeTest {
 	}
 
         @Test
-        public void testDateTimeEqualsSqlTimestampsWithDifferentNanos() {
+        void testDateTimeEqualsSqlTimestampsWithDifferentNanos() {
                 // Both Timestamps with same getTime() but different sub-milli nanos → exercises L54 false branch
                 Timestamp ts1 = new Timestamp(EPOCH);
                 ts1.setNanos(123000050);
@@ -397,41 +398,41 @@ public class DateTimeUserTypeTest {
         }
 
 	@Test
-	public void testDateTimeDeepCopyNonNull() {
+	void testDateTimeDeepCopyNonNull() {
 		DateTime d = new DateTime(EPOCH);
 		Object copy = dtType.deepCopy(d);
 		assertTrue(copy instanceof DateTime);
 		// DateTime strips millis, compare via domain object's own getTime()
 		assertEquals(d.getTime(), ((java.util.Date) copy).getTime());
-		assertNotSame("deep copy must not be same reference", d, copy);
+		assertNotSame(d, copy, "deep copy must not be same reference");
 	}
 
 	@Test
-	public void testDateTimeDisassemble() {
+	void testDateTimeDisassemble() {
 		DateTime d = new DateTime(EPOCH);
 		assertSame(d, dtType.disassemble(d));
 	}
 
 	@Test
-	public void testDateTimeAssemble() {
+	void testDateTimeAssemble() {
 		DateTime d = new DateTime(EPOCH);
 		assertSame(d, dtType.assemble(d, null));
 	}
 
 	@Test
-	public void testDateTimeReplace() {
+	void testDateTimeReplace() {
 		DateTime original = new DateTime(EPOCH);
 		DateTime target = new DateTime(EPOCH + 1000L);
 		assertSame(original, dtType.replace(original, target, null));
 	}
 
 	@Test
-	public void testDateTimeObjectToSQLStringNull() throws Exception {
+	void testDateTimeObjectToSQLStringNull() throws Exception {
 		assertEquals("NULL", dtType.objectToSQLString(null, null));
 	}
 
 	@Test
-	public void testDateTimeObjectToSQLStringNonNull() throws Exception {
+	void testDateTimeObjectToSQLStringNonNull() throws Exception {
 		java.util.Date d = new DateTime(EPOCH);
 		String result = dtType.objectToSQLString(d, null);
 		assertTrue(result.startsWith("'"));
@@ -439,7 +440,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testDateTimeNullSafeGetReturnsNullWhenColumnNull() throws Exception {
+	void testDateTimeNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(null);
 		when(rs.wasNull()).thenReturn(Boolean.TRUE);
@@ -447,7 +448,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testDateTimeNullSafeGetReturnsDateTimeWhenNotNull() throws Exception {
+	void testDateTimeNullSafeGetReturnsDateTimeWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(new Timestamp(EPOCH));
 		when(rs.wasNull()).thenReturn(Boolean.FALSE);
@@ -458,14 +459,14 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testDateTimeNullSafeSetNull() throws Exception {
+	void testDateTimeNullSafeSetNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		dtType.nullSafeSet(ps, null, 1, null);
 		verify(ps).setNull(1, Types.TIMESTAMP);
 	}
 
 	@Test
-	public void testDateTimeNullSafeSetNonNull() throws Exception {
+	void testDateTimeNullSafeSetNonNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		DateTime d = new DateTime(EPOCH);
 		dtType.nullSafeSet(ps, d, 2, null);
@@ -478,33 +479,33 @@ public class DateTimeUserTypeTest {
 	private final TimestampUserType tsType = new TimestampUserType();
 
 	@Test
-	public void testTimestampSqlTypes() {
+	void testTimestampSqlTypes() {
 		assertArrayEquals(new int[] {Types.TIMESTAMP}, tsType.sqlTypes());
 	}
 
 	@Test
-	public void testTimestampReturnedClass() {
+	void testTimestampReturnedClass() {
 		assertEquals(org.skyve.domain.types.Timestamp.class, tsType.returnedClass());
 	}
 
 	@Test
-	public void testTimestampIsMutable() {
+	void testTimestampIsMutable() {
 		assertTrue(tsType.isMutable());
 	}
 
 	@Test
-	public void testTimestampEqualsBothNull() {
+	void testTimestampEqualsBothNull() {
 		assertTrue(tsType.equals(null, null));
 	}
 
 	@Test
-	public void testTimestampEqualsSameEpoch() {
+	void testTimestampEqualsSameEpoch() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertTrue(tsType.equals(t, new org.skyve.domain.types.Timestamp(EPOCH)));
 	}
 
 	@Test
-	public void testTimestampEqualsDifferentEpochNotEqual() {
+	void testTimestampEqualsDifferentEpochNotEqual() {
 		org.skyve.domain.types.Timestamp t1 = new org.skyve.domain.types.Timestamp(EPOCH);
 		// add 2 seconds so the difference survives the millis-clear in the constructor
 		org.skyve.domain.types.Timestamp t2 = new org.skyve.domain.types.Timestamp(EPOCH + 2000L);
@@ -512,22 +513,22 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampDeepCopyNull() {
+	void testTimestampDeepCopyNull() {
 		assertNull(tsType.deepCopy(null));
 	}
 
 	@Test
-	public void testTimestampDeepCopyNonNull() {
+	void testTimestampDeepCopyNonNull() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		Object copy = tsType.deepCopy(t);
 		assertTrue(copy instanceof org.skyve.domain.types.Timestamp);
 		// Timestamp strips millis, compare via domain object's own getTime()
 		assertEquals(t.getTime(), ((java.util.Date) copy).getTime());
-		assertNotSame("deep copy must not be same reference", t, copy);
+		assertNotSame(t, copy, "deep copy must not be same reference");
 	}
 
 	@Test
-	public void testTimestampNullSafeGetReturnsNullWhenColumnNull() throws Exception {
+	void testTimestampNullSafeGetReturnsNullWhenColumnNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(null);
 		when(rs.wasNull()).thenReturn(Boolean.TRUE);
@@ -535,7 +536,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampNullSafeGetReturnsTimestampWhenNotNull() throws Exception {
+	void testTimestampNullSafeGetReturnsTimestampWhenNotNull() throws Exception {
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getTimestamp("col")).thenReturn(new Timestamp(EPOCH));
 		when(rs.wasNull()).thenReturn(Boolean.FALSE);
@@ -546,14 +547,14 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampNullSafeSetNull() throws Exception {
+	void testTimestampNullSafeSetNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		tsType.nullSafeSet(ps, null, 1, null);
 		verify(ps).setNull(1, Types.TIMESTAMP);
 	}
 
 	@Test
-	public void testTimestampNullSafeSetNonNull() throws Exception {
+	void testTimestampNullSafeSetNonNull() throws Exception {
 		PreparedStatement ps = mock(PreparedStatement.class);
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		tsType.nullSafeSet(ps, t, 2, null);
@@ -562,12 +563,12 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampObjectToSQLStringNull() throws Exception {
+	void testTimestampObjectToSQLStringNull() throws Exception {
 		assertEquals("NULL", tsType.objectToSQLString(null, null));
 	}
 
 	@Test
-	public void testTimestampObjectToSQLStringNonNull() throws Exception {
+	void testTimestampObjectToSQLStringNonNull() throws Exception {
 		java.util.Date d = new org.skyve.domain.types.Timestamp(EPOCH);
 		String result = tsType.objectToSQLString(d, null);
 		assertTrue(result.startsWith("'"));
@@ -575,20 +576,20 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampEqualsOneNull() {
+	void testTimestampEqualsOneNull() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertFalse(tsType.equals(null, t));
 		assertFalse(tsType.equals(t, null));
 	}
 
 	@Test
-	public void testTimestampEqualsSameRef() {
+	void testTimestampEqualsSameRef() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertTrue(tsType.equals(t, t));
 	}
 
 	@Test
-	public void testTimestampEqualsJavaSqlTimestampSameNanos() {
+	void testTimestampEqualsJavaSqlTimestampSameNanos() {
 		// Use a base time rounded to a full second so setNanos(sub-ms value)
 		// does not change the ms component returned by getTime().
 		long baseTime = (EPOCH / 1000L) * 1000L;
@@ -600,7 +601,7 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampEqualsJavaSqlTimestampDifferentNanos() {
+	void testTimestampEqualsJavaSqlTimestampDifferentNanos() {
 		long baseTime = (EPOCH / 1000L) * 1000L;
 		Timestamp ts1 = new Timestamp(baseTime);
 		ts1.setNanos(100); // 100 ns
@@ -610,37 +611,37 @@ public class DateTimeUserTypeTest {
 	}
 
 	@Test
-	public void testTimestampDisassembleReturnsValue() {
+	void testTimestampDisassembleReturnsValue() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertSame(t, tsType.disassemble(t));
 	}
 
 	@Test
-	public void testTimestampAssembleReturnsCached() {
+	void testTimestampAssembleReturnsCached() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertSame(t, tsType.assemble(t, null));
 	}
 
 	@Test
-	public void testTimestampReplaceReturnsOriginal() {
+	void testTimestampReplaceReturnsOriginal() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertSame(t, tsType.replace(t, null, null));
 	}
 
 	@Test
-	public void testTimestampHashCode() {
+	void testTimestampHashCode() {
 		org.skyve.domain.types.Timestamp t = new org.skyve.domain.types.Timestamp(EPOCH);
 		assertEquals(Long.valueOf(t.getTime() / 1000).hashCode(), tsType.hashCode(t));
 	}
 
         @Test
-        public void testDateTimeHashCode() {
+        void testDateTimeHashCode() {
                 DateTime d = new DateTime(EPOCH);
                 assertEquals(Long.valueOf(d.getTime() / 1000).hashCode(), dtType.hashCode(d));
         }
 
         @Test
-        public void testDateTimeDeepCopyNull() {
+        void testDateTimeDeepCopyNull() {
                 assertNull(dtType.deepCopy(null));
         }
 }

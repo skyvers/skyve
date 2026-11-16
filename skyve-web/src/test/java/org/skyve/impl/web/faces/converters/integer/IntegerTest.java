@@ -2,31 +2,30 @@ package org.skyve.impl.web.faces.converters.integer;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import jakarta.faces.convert.ConverterException;
-public class IntegerTest {
+class IntegerTest {
 	private IntegerConverter converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new IntegerConverter();
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidStringValue() {
+	@Test
+	void testGetAsObjectInvalidStringValue() {
 		// call the method under test
-		converter.getAsObject(null, null, "not an integer");
-
-		fail("Should throw exception before this line.");
+		assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not an integer"));
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooLargeValue() {
+	void testGetAsObjectInvalidTooLargeValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "99999999999");
@@ -39,7 +38,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooLargePositiveValue() {
+	void testGetAsObjectInvalidTooLargePositiveValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "+99999999999");
@@ -52,7 +51,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectInvalidTooSmallValue() {
+	void testGetAsObjectInvalidTooSmallValue() {
 		// call the method under test
 		try {
 			converter.getAsObject(null, null, "-99999999999");
@@ -65,7 +64,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidValue() {
+	void testGetAsObjectValidValue() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf(1000);
 
@@ -74,7 +73,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidLargeValue() {
+	void testGetAsObjectValidLargeValue() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf("999999999");
 
@@ -83,7 +82,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidSmallValue() {
+	void testGetAsObjectValidSmallValue() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf("-999999999");
 
@@ -92,7 +91,7 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsString() {
+	void testGetAsString() {
 		// setup the test data
 		java.lang.Integer testValue = java.lang.Integer.valueOf(1000);
 
@@ -101,12 +100,12 @@ public class IntegerTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(converter.getAsString(null, null, null), is(""));
 	}
 }

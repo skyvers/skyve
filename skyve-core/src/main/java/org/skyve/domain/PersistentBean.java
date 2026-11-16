@@ -2,6 +2,8 @@ package org.skyve.domain;
 
 import org.skyve.domain.types.OptimisticLock;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Extends {@link Bean} with the properties required for database persistence.
  *
@@ -70,14 +72,14 @@ public interface PersistentBean extends Bean {
 	 *
 	 * @return the current version, or {@code null} if the bean has never been persisted
 	 */
-	public Integer getBizVersion();
+	public @Nullable Integer getBizVersion();
 	
 	/**
 	 * Sets the Hibernate version counter. Normally only called by the persistence layer.
 	 *
 	 * @param bizVersion the version value
 	 */
-	public void setBizVersion(Integer bizVersion);
+	public void setBizVersion(@Nullable Integer bizVersion);
 
 	/**
 	 * Returns the optimistic lock for this bean, recording who last saved it and when.
@@ -88,7 +90,7 @@ public interface PersistentBean extends Bean {
 	 *
 	 * @return the current optimistic lock, or {@code null} if never persisted
 	 */
-	public OptimisticLock getBizLock();
+	public @Nullable OptimisticLock getBizLock();
 	
 	/**
 	 * Sets the optimistic lock. Normally only called by the persistence layer after a
@@ -96,7 +98,7 @@ public interface PersistentBean extends Bean {
 	 *
 	 * @param bizLock the new lock value
 	 */
-	public void setBizLock(OptimisticLock bizLock);
+	public void setBizLock(@Nullable OptimisticLock bizLock);
 
 	/**
 	 * Sets the human-readable display key for this persistent bean.
@@ -106,21 +108,21 @@ public interface PersistentBean extends Bean {
 	 *
 	 * @param bizKey the display key; may be {@code null}
 	 */
-	public void setBizKey(String bizKey);
+	public void setBizKey(@Nullable String bizKey);
 	
 	/**
 	 * Returns the operator flag comment attached to this bean.
 	 *
 	 * @return the flag comment, or {@code null} if none has been set
 	 */
-	public String getBizFlagComment();
+	public @Nullable String getBizFlagComment();
 	
 	/**
 	 * Sets the operator flag comment on this bean.
 	 *
 	 * @param bizFlagComment the comment text, or {@code null} to clear the flag
 	 */
-	public void setBizFlagComment(String bizFlagComment);
+	public void setBizFlagComment(@Nullable String bizFlagComment);
 	
 	/**
 	 * Returns whether this bean is currently included in the active tag set.
@@ -130,7 +132,7 @@ public interface PersistentBean extends Bean {
 	 *
 	 * @return {@code Boolean.TRUE} if tagged, {@code Boolean.FALSE} or {@code null} otherwise
 	 */
-	public Boolean getBizTagged();
+	public @Nullable Boolean getBizTagged();
 
 	/**
 	 * Sets the transient tagged flag. Called by the framework during list query population
@@ -138,5 +140,5 @@ public interface PersistentBean extends Bean {
 	 *
 	 * @param bizTagged {@code Boolean.TRUE} if this bean should be marked as tagged
 	 */
-	public void setBizTagged(Boolean bizTagged);
+	public void setBizTagged(@Nullable Boolean bizTagged);
 }

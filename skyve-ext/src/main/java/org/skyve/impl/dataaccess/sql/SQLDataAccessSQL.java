@@ -47,7 +47,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		if (document == null) {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}
@@ -66,7 +66,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		if (document == null) {
 			throw new DomainException("The document must be set to create beans from SQL");
 		}
@@ -78,7 +78,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
+	public @Nonnull <T> List<T> scalarResults(@Nonnull Class<T> type) {
 		List<T> results = new ArrayList<>(100);
 		try (SQLIterable<T> iterable = new SQLIterable<>(null, dataAccess, this, type)) {
 			for (T result : iterable) {
@@ -93,7 +93,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+	public @Nonnull <T> AutoClosingIterable<T> scalarIterable(@Nonnull Class<T> type) {
 		return new SQLIterable<>(null, dataAccess, this, type);
 	}
 
@@ -101,7 +101,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<Object[]> tupleResults() {
+	public @Nonnull List<Object[]> tupleResults() {
 		List<Object[]> results = new ArrayList<>(100);
 		try (SQLIterable<Object[]> iterable = new SQLIterable<>(null, dataAccess, this, null)) {
 			for (Object[] result : iterable) {
@@ -116,7 +116,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public AutoClosingIterable<Object[]> tupleIterable() {
+	public @Nonnull AutoClosingIterable<Object[]> tupleIterable() {
 		return new SQLIterable<>(null, dataAccess, this, null);
 	}
 
@@ -124,7 +124,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<DynaBean> dynaResults() {
+	public @Nonnull List<DynaBean> dynaResults() {
 		try {
 			try (NamedParameterPreparedStatement ps = new NamedParameterPreparedStatement(dataAccess.getConnection(), toQueryString())) {
 				prepareStatement(ps, dataAccess.dataStore, dataAccess.getDialect());
@@ -146,7 +146,7 @@ class SQLDataAccessSQL extends AbstractSQL {
 	/**
 	 * Performs dynaIterable.
 	 */
-	public AutoClosingIterable<DynaBean> dynaIterable() {
+	public @Nonnull AutoClosingIterable<DynaBean> dynaIterable() {
 		try {
 			return new DynaIterable(dataAccess.getConnection(), this, dataAccess.dataStore, dataAccess.getDialect());
 		}

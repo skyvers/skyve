@@ -7,6 +7,8 @@ import org.skyve.metadata.model.document.Interface;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 
@@ -28,13 +30,13 @@ public class InterfaceImpl implements Interface {
 
     private String name;
 
-    public void setInterfaceName(String name) {
+    public void setInterfaceName(@Nullable String name) {
         this.name = name;
     }
 
     @XmlValue
     @Override
-    public String getInterfaceName() {
+    public @Nullable String getInterfaceName() {
         return name;
     }
 
@@ -45,7 +47,7 @@ public class InterfaceImpl implements Interface {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
 
         if (obj instanceof Interface other) {
             return Objects.equals(this.getInterfaceName(), other.getInterfaceName());
@@ -55,7 +57,7 @@ public class InterfaceImpl implements Interface {
     }
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
 
         return MoreObjects.toStringHelper(this)
                           .add("name", name)

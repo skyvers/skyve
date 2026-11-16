@@ -3,10 +3,10 @@ package org.skyve.impl.domain.number;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.number.NumberGenerator;
-import org.mockito.Mockito;
 
 /** Unit tests for {@link AbstractDocumentNumberGenerator#incrementAlpha} logic and {@link NumberGeneratorStaticSingleton}. */
 @SuppressWarnings("static-method")
@@ -82,7 +82,7 @@ class AbstractDocumentNumberGeneratorTest {
 		// We can only verify the API is callable without error
 		NumberGenerator original = NumberGeneratorStaticSingleton.get();
 		// set a mock generator
-		NumberGenerator mockGenerator = Mockito.mock(NumberGenerator.class);
+		NumberGenerator mockGenerator = mock(NumberGenerator.class);
 		NumberGeneratorStaticSingleton.set(mockGenerator);
 		assertThat(NumberGeneratorStaticSingleton.get(), is(mockGenerator));
 		// restore

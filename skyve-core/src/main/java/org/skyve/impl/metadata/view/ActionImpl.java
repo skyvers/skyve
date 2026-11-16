@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.view.actions.ActionMetaData;
@@ -25,6 +25,7 @@ import org.skyve.impl.metadata.repository.view.actions.SaveAction;
 import org.skyve.impl.metadata.repository.view.actions.UploadAction;
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.controller.ServerSideAction;
@@ -33,6 +34,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.Action;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of the {@link Action} metadata interface.
@@ -63,10 +67,13 @@ public class ActionImpl implements Action {
 	private Boolean escapeConfirm;
 	private Boolean inActionPanel = Boolean.TRUE;
 	private ActionShow show = ActionShow.both;
-	private String disabledConditionName;
-	private String invisibleConditionName;
+	// Each condition pair is stored as authored; at most one field of a pair is non-null.
+	private String disabledCondition;
+	private String enabledCondition;
+	private String invisibleCondition;
+	private String visibleCondition;
 	private List<Parameter> parameters = new ArrayList<>();
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the mutable parameter list supplied to parameterizable actions.
@@ -74,7 +81,7 @@ public class ActionImpl implements Action {
 	 * <p>The returned list is live and never {@code null}.
 	 */
 	@Override
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -87,7 +94,7 @@ public class ActionImpl implements Action {
 	 * @return the effective action name; never {@code null} for a valid action definition
 	 */
 	@Override
-	public String getName() {
+	public @Nonnull String getName() {
 		String result = name;
 		if (result == null) {
 			result = resourceName;
@@ -104,7 +111,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param name the action name; may be {@code null} to fall back to resource or implicit naming
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -114,7 +121,7 @@ public class ActionImpl implements Action {
 	 * @return the implicit action name, or {@code null} for custom actions
 	 */
 	@Override
-	public ImplicitActionName getImplicitName() {
+	public @Nullable ImplicitActionName getImplicitName() {
 		return implicitName;
 	}
 
@@ -123,7 +130,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param implicitName the implicit action identifier, or {@code null} for custom actions
 	 */
-	public void setImplicitName(ImplicitActionName implicitName) {
+	public void setImplicitName(@Nullable ImplicitActionName implicitName) {
 		this.implicitName = implicitName;
 	}
 
@@ -133,7 +140,7 @@ public class ActionImpl implements Action {
 	 * @return the resource name, or {@code null} for implicit actions
 	 */
 	@Override
-	public String getResourceName() {
+	public @Nullable String getResourceName() {
 		return resourceName;
 	}
 
@@ -142,7 +149,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param resourceName the resource name used to resolve class/report/server-side action resources
 	 */
-	public void setResourceName(String resourceName) {
+	public void setResourceName(@Nullable String resourceName) {
 		this.resourceName = resourceName;
 	}
 
@@ -152,7 +159,7 @@ public class ActionImpl implements Action {
 	 * @return {@code true} by default, or the configured validation flag
 	 */
 	@Override
-	public Boolean getClientValidation() {
+	public @Nullable Boolean getClientValidation() {
 		return clientValidation;
 	}
 
@@ -161,7 +168,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param clientValidation the client-side validation flag
 	 */
-	public void setClientValidation(Boolean clientValidation) {
+	public void setClientValidation(@Nullable Boolean clientValidation) {
 		this.clientValidation = clientValidation;
 	}
 
@@ -171,7 +178,7 @@ public class ActionImpl implements Action {
 	 * @return the display name, or {@code null} when default rendering is used
 	 */
 	@Override
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -181,7 +188,7 @@ public class ActionImpl implements Action {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 
@@ -190,7 +197,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param displayName the user-facing action label
 	 */
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -199,7 +206,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -209,7 +216,7 @@ public class ActionImpl implements Action {
 	 * @return the relative icon file name, or {@code null}
 	 */
 	@Override
-	public String getRelativeIconFileName() {
+	public @Nullable String getRelativeIconFileName() {
 		return relativeIconFileName;
 	}
 
@@ -218,7 +225,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param relativeIconFileName the icon file path relative to action resource roots
 	 */
-	public void setRelativeIconFileName(String relativeIconFileName) {
+	public void setRelativeIconFileName(@Nullable String relativeIconFileName) {
 		this.relativeIconFileName = relativeIconFileName;
 	}
 
@@ -228,7 +235,7 @@ public class ActionImpl implements Action {
 	 * @return the icon style class, or {@code null}
 	 */
 	@Override
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -237,7 +244,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param iconStyleClass the icon style class name
 	 */
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = iconStyleClass;
 	}
 
@@ -247,7 +254,7 @@ public class ActionImpl implements Action {
 	 * @return the confirmation text, or {@code null} if no confirmation is required
 	 */
 	@Override
-	public String getConfirmationText() {
+	public @Nullable String getConfirmationText() {
 		return confirmationText;
 	}
 
@@ -257,7 +264,7 @@ public class ActionImpl implements Action {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeConfirm() {
+	public @Nullable Boolean getEscapeConfirm() {
 		return escapeConfirm;
 	}
 
@@ -266,7 +273,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param confirmationText the confirmation text
 	 */
-	public void setConfirmationText(String confirmationText) {
+	public void setConfirmationText(@Nullable String confirmationText) {
 		this.confirmationText = confirmationText;
 	}
 
@@ -275,7 +282,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeConfirm(Boolean escapeConfirm) {
+	public void setEscapeConfirm(@Nullable Boolean escapeConfirm) {
 		this.escapeConfirm = escapeConfirm;
 	}
 
@@ -285,7 +292,7 @@ public class ActionImpl implements Action {
 	 * @return the tooltip text, or {@code null}
 	 */
 	@Override
-	public String getToolTip() {
+	public @Nullable String getToolTip() {
 		return toolTip;
 	}
 
@@ -295,7 +302,7 @@ public class ActionImpl implements Action {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeToolTip() {
+	public @Nullable Boolean getEscapeToolTip() {
 		return escapeToolTip;
 	}
 
@@ -304,7 +311,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param toolTip the tooltip text
 	 */
-	public void setToolTip(String toolTip) {
+	public void setToolTip(@Nullable String toolTip) {
 		this.toolTip = toolTip;
 	}
 
@@ -313,7 +320,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeToolTip(Boolean escapeToolTip) {
+	public void setEscapeToolTip(@Nullable Boolean escapeToolTip) {
 		this.escapeToolTip = escapeToolTip;
 	}
 
@@ -323,7 +330,7 @@ public class ActionImpl implements Action {
 	 * @return {@code true} by default; {@code false} to render outside the panel where supported
 	 */
 	@Override
-	public Boolean getInActionPanel() {
+	public @Nullable Boolean getInActionPanel() {
 		return inActionPanel;
 	}
 
@@ -332,7 +339,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param inActionPanel panel-rendering flag
 	 */
-	public void setInActionPanel(Boolean inActionPanel) {
+	public void setInActionPanel(@Nullable Boolean inActionPanel) {
 		this.inActionPanel = inActionPanel;
 	}
 
@@ -342,7 +349,7 @@ public class ActionImpl implements Action {
 	 * @return the action visibility target
 	 */
 	@Override
-	public ActionShow getShow() {
+	public @Nullable ActionShow getShow() {
 		return show;
 	}
 
@@ -351,7 +358,7 @@ public class ActionImpl implements Action {
 	 *
 	 * @param show the action visibility target
 	 */
-	public void setShow(ActionShow show) {
+	public void setShow(@Nullable ActionShow show) {
 		this.show = show;
 	}
 
@@ -368,7 +375,7 @@ public class ActionImpl implements Action {
 	 * @throws IllegalStateException if this action is implicit and has no resource name
 	 */
 	@Override
-	public ServerSideAction<?> getServerSideAction(Customer customer, Document document) {
+	public @Nonnull ServerSideAction<?> getServerSideAction(@Nonnull Customer customer, @Nonnull Document document) {
 		if (resourceName == null) {
 			throw new IllegalStateException("The ActionConfig " + getName() + " is an implicit action.");
 		}
@@ -377,79 +384,119 @@ public class ActionImpl implements Action {
 	}
 
 	/**
-	 * Returns the condition that hides this action when it evaluates to true.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible condition name, or {@code null}
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the condition that hides this action when it evaluates to true.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition name
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
 	@Override
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = invisibleConditionName;
-	}
-
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Stores a visible-condition expression by translating it to the internal invisible-condition form.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * <p>Side effects: updates {@link #invisibleConditionName} with the negated expression.
+	 * <p>Side effects: clears any authored {@code visible} attribute.
 	 *
-	 * @param visibleConditionName the condition that enables visibility semantics
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(visibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * Returns the condition that disables this action when it evaluates to true.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @return disabled condition name, or {@code null}
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
 	}
 
 	/**
-	 * Sets the condition that disables this action when it evaluates to true.
+	 * Sets the {@code visible} attribute as authored.
 	 *
-	 * @param disabledConditionName the disabled condition name
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = disabledConditionName;
-	}
-
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
-	 * Stores an enabled-condition expression by translating it to the internal disabled-condition form.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * <p>Side effects: updates {@link #disabledConditionName} with the negated expression.
-	 *
-	 * @param enabledConditionName the condition that enables action interactivity
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(enabledConditionName);
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
+	}
+
+	/**
+	 * Returns the {@code disabled} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
+	}
+
+	/**
+	 * Sets the {@code disabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
+	 */
+	@Override
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
+	}
+
+	/**
+	 * Returns the {@code enabled} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
+	 */
+	@Override
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
@@ -463,7 +510,7 @@ public class ActionImpl implements Action {
 	 * @throws IllegalStateException if the implicit action name is unsupported
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public ActionMetaData toRepositoryAction() {
+	public @Nonnull ActionMetaData toRepositoryAction() {
 		ActionMetaData result = null;
 		if (implicitName == null) { // custom action
 			result = new CustomAction();
@@ -507,11 +554,17 @@ public class ActionImpl implements Action {
 				report.setReportName(reportName);
 				for (Parameter parameter : getParameters()) {
 					String parameterName = parameter.getName();
+					// A parameter without a value (one with a value binding) does not name the report's module or document
+					String parameterValue = parameter.getValue();
 					if (AbstractWebContext.MODULE_NAME.equals(parameterName)) {
-						report.setModuleName(parameter.getValue());
+						if (parameterValue != null) {
+							report.setModuleName(parameterValue);
+						}
 					}
 					else if (AbstractWebContext.DOCUMENT_NAME.equals(parameterName)) {
-						report.setDocumentName(parameter.getValue());
+						if (parameterValue != null) {
+							report.setDocumentName(parameterValue);
+						}
 					}
 					else if (AbstractWebContext.REPORT_FORMAT.equals(parameterName)) {
 						report.setReportFormat(ReportFormat.valueOf(parameter.getValue()));
@@ -540,10 +593,10 @@ public class ActionImpl implements Action {
 
 		result.setConfirmationText(getConfirmationText());
 		result.setEscapeConfirm(getEscapeConfirm());
-		result.setDisabledConditionName(getDisabledConditionName());
+		BindUtil.copyAuthoredCondition(getXmlDisabledCondition(), getXmlEnabledCondition(), result::setXmlDisabledCondition, result::setXmlEnabledCondition);
 		result.setDisplayName(getDisplayName());
 		result.setEscapeDisplayName(getEscapeDisplayName());
-		result.setInvisibleConditionName(getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(getXmlInvisibleCondition(), getXmlVisibleCondition(), result::setXmlInvisibleCondition, result::setXmlVisibleCondition);
 		result.setRelativeIconFileName(getRelativeIconFileName());
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());
@@ -570,7 +623,7 @@ public class ActionImpl implements Action {
 	 * <p>Side effects: subsequent callers of {@link #getProperties()} observe the same
 	 * map instance supplied here.
 	 */
-	public void setProperties(Map<String, String> properties) {
+	public void setProperties(@Nonnull Map<String, String> properties) {
 		this.properties = properties;
 	}
 
@@ -578,7 +631,7 @@ public class ActionImpl implements Action {
 	 * Returns the mutable property map for metadata decorators.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -6,6 +6,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.persistence.AutoClosingIterable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Manages persistent user-defined tags applied to beans.
  *
@@ -36,7 +39,7 @@ public interface TagManager {
 	 *            The bean to be tagged.
 	 * @throws Exception
 	 */
-	void tag(String tagId, Bean bean) throws Exception;
+	void tag(@Nonnull String tagId, @Nonnull Bean bean) throws Exception;
 
 	/**
 	 * Tag 1 bean.
@@ -51,10 +54,10 @@ public interface TagManager {
 	 *            The bizId of the bean to be tagged.
 	 * @throws Exception
 	 */
-	void tag(String tagId,
-				String taggedModuleName,
-				String taggedDocumentName,
-				String taggedBizId)
+	void tag(@Nonnull String tagId,
+				@Nonnull String taggedModuleName,
+				@Nonnull String taggedDocumentName,
+				@Nonnull String taggedBizId)
 	throws Exception;
 
 	/**
@@ -66,7 +69,7 @@ public interface TagManager {
 	 *            The bean to untag.
 	 * @throws Exception
 	 */
-	void untag(String tagId, Bean bean) throws Exception;
+	void untag(@Nonnull String tagId, @Nonnull Bean bean) throws Exception;
 
 	/**
 	 * Remove the bean from this tag.
@@ -81,10 +84,10 @@ public interface TagManager {
 	 *            The bizId of the bean to be untagged.
 	 * @throws Exception
 	 */
-	void untag(String tagId,
-				String taggedModuleName,
-				String taggedDocumentName,
-				String taggedBizId)
+	void untag(@Nonnull String tagId,
+				@Nonnull String taggedModuleName,
+				@Nonnull String taggedDocumentName,
+				@Nonnull String taggedBizId)
 	throws Exception;
 
 	/**
@@ -97,7 +100,7 @@ public interface TagManager {
 	 * @return The tagId of the created tag.
 	 * @throws Exception
 	 */
-	String create(String tagName, boolean visible) throws Exception;
+	@Nonnull String create(@Nonnull String tagName, boolean visible) throws Exception;
 
 	/**
 	 * Retrieve the tagId of the named tag.
@@ -107,7 +110,7 @@ public interface TagManager {
 	 * @return The corresponding tagId
 	 * @throws Exception
 	 */
-	String getTagId(String tagName) throws Exception;
+	@Nullable String getTagId(@Nonnull String tagName) throws Exception;
 
 	/**
 	 * Returns all available tags as domain values for UI selection controls.
@@ -115,7 +118,7 @@ public interface TagManager {
 	 * @return Tag values where code is tag ID and description is display name
 	 * @throws Exception If tag retrieval fails
 	 */
-	List<DomainValue> getTags() throws Exception;
+	@Nonnull List<DomainValue> getTags() throws Exception;
 
 	/**
 	 * Delete a tag.
@@ -124,7 +127,7 @@ public interface TagManager {
 	 *            The tagId of the tag to delete.
 	 * @throws Exception
 	 */
-	void delete(String tagId) throws Exception;
+	void delete(@Nonnull String tagId) throws Exception;
 
 	/**
 	 * Tag a bunch of beans.
@@ -135,7 +138,7 @@ public interface TagManager {
 	 *            The beans to tag.
 	 * @throws Exception
 	 */
-	void tag(String tagId, Iterable<Bean> beans) throws Exception;
+	void tag(@Nonnull String tagId, @Nonnull Iterable<Bean> beans) throws Exception;
 
 	/**
 	 * Untag (remove) a bunch of beans.
@@ -146,7 +149,7 @@ public interface TagManager {
 	 *            The beans to untag.
 	 * @throws Exception
 	 */
-	void untag(String tagId, Iterable<Bean> beans) throws Exception;
+	void untag(@Nonnull String tagId, @Nonnull Iterable<Bean> beans) throws Exception;
 
 	/**
 	 * Clear any beans related to the given tag.
@@ -155,7 +158,7 @@ public interface TagManager {
 	 *            the given tag
 	 * @throws Exception
 	 */
-	void clear(String tagId) throws Exception;
+	void clear(@Nonnull String tagId) throws Exception;
 
 	/**
 	 * Iterate over the tagged beans.
@@ -166,5 +169,5 @@ public interface TagManager {
 	 *         cache so beware.
 	 * @throws Exception
 	 */
-	AutoClosingIterable<Bean> iterate(String tagId) throws Exception;
+	@Nonnull AutoClosingIterable<Bean> iterate(@Nonnull String tagId) throws Exception;
 }

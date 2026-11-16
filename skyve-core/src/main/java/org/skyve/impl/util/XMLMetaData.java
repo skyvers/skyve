@@ -10,11 +10,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
@@ -24,7 +28,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
 
 import org.dom4j.Attribute;
-import org.dom4j.CDATA;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
@@ -33,6 +36,9 @@ import org.dom4j.Node;
 import org.dom4j.QName;
 import org.dom4j.Visitor;
 import org.dom4j.VisitorSupport;
+import org.dom4j.io.DocumentResult;
+import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
@@ -42,11 +48,13 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Workflow;
 import org.skyve.util.Util;
-import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -113,6 +121,8 @@ public class XMLMetaData {
 
 	private static final JAXBContext SAIL_CONTEXT;
 	private static final Schema SAIL_SCHEMA;
+	/** Knows both SAIL roots: a workflow, and an automation on its own. */
+	private static final JAXBContext SAIL_WORKFLOW_CONTEXT;
 
 	static {
 		try {
@@ -136,6 +146,7 @@ public class XMLMetaData {
 			BEHAVIOUR_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/behaviour.xsd");
 
 			SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
+			SAIL_WORKFLOW_CONTEXT = JAXBContext.newInstance(Workflow.class, Automation.class);
 			SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
 		}
 		catch (Exception e) {
@@ -147,10 +158,10 @@ public class XMLMetaData {
 		// prevent construction
 	}
 
-	public static String marshalRouter(Router router) {
+	public static @Nonnull String marshalRouter(@Nonnull Router router) {
 		try {
 			Marshaller marshaller = ROUTER_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									ROUTER_NAMESPACE + " ../schemas/router.xsd");
 			StringWriter sos = new StringWriter(1024);
@@ -159,14 +170,14 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(ROUTER_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal router", e);
 		}
 	}
 
-	public static Router unmarshalRouterFile(String file) {
+	public static @Nonnull Router unmarshalRouterFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -188,7 +199,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Router unmarshalRouterString(String xml) {
+	public static @Nonnull Router unmarshalRouterString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = ROUTER_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(ROUTER_SCHEMA);
@@ -199,10 +210,10 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalCustomer(CustomerMetaData customer) {
+	public static @Nonnull String marshalCustomer(@Nonnull CustomerMetaData customer) {
 		try {
 			Marshaller marshaller = CUSTOMER_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									CUSTOMER_NAMESPACE + " ../../schemas/customer.xsd");
 			StringWriter sos = new StringWriter(1024);
@@ -212,7 +223,7 @@ public class XMLMetaData {
 			Visitor visitor = new JAXBFixingVisitor(CUSTOMER_NAMESPACE);
 			document.accept(visitor);
 
-			return cleanup(document.asXML());
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal customer " + customer.getName(), e);
@@ -227,7 +238,7 @@ public class XMLMetaData {
 	 * @param customer The customer to output to a file
 	 * @param sourceDirectory The root source directory, e.g. <code>src/main/java</code>
 	 */
-	public static void marshalCustomer(CustomerMetaData customer, String sourceDirectory) {
+	public static void marshalCustomer(@Nonnull CustomerMetaData customer, @Nonnull String sourceDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -258,7 +269,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static CustomerMetaData unmarshalCustomerFile(String file) {
+	public static @Nonnull CustomerMetaData unmarshalCustomerFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -280,7 +291,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static CustomerMetaData unmarshalCustomerString(String xml) {
+	public static @Nonnull CustomerMetaData unmarshalCustomerString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = CUSTOMER_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(CUSTOMER_SCHEMA);
@@ -291,10 +302,10 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalModule(ModuleMetaData module, boolean overridden) {
+	public static @Nonnull String marshalModule(@Nonnull ModuleMetaData module, boolean overridden) {
 		try {
 			Marshaller marshaller = MODULE_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									(overridden ? 
 										MODULE_NAMESPACE + " ../../../schemas/module.xsd" :
@@ -306,7 +317,7 @@ public class XMLMetaData {
 			Visitor visitor = new JAXBFixingVisitor(MODULE_NAMESPACE);
 			document.accept(visitor);
 			
-			return cleanup(document.asXML());
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal module " + module.getName(), e);
@@ -326,7 +337,7 @@ public class XMLMetaData {
 	 * @param overridden Should be true if this module is a customer override, false otherwise
 	 * @param modulesDirectory The root source modules directory, e.g. <code>src/main/java/modules</code>
 	 */
-	public static void marshalModule(ModuleMetaData module, boolean overridden, String modulesDirectory) {
+	public static void marshalModule(@Nonnull ModuleMetaData module, boolean overridden, @Nonnull String modulesDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -357,7 +368,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ModuleMetaData unmarshalModuleFile(String file) {
+	public static @Nonnull ModuleMetaData unmarshalModuleFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -379,7 +390,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ModuleMetaData unmarshalModuleString(String xml) {
+	public static @Nonnull ModuleMetaData unmarshalModuleString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = MODULE_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(MODULE_SCHEMA);
@@ -390,10 +401,10 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalDocument(DocumentMetaData document, boolean overridden) {
+	public static @Nonnull String marshalDocument(@Nonnull DocumentMetaData document, boolean overridden) {
 		try {
 			Marshaller marshaller = DOCUMENT_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 					(overridden ? DOCUMENT_NAMESPACE + " ../../../../schemas/document.xsd"
 							: DOCUMENT_NAMESPACE + " ../../../schemas/document.xsd"));
@@ -404,7 +415,7 @@ public class XMLMetaData {
 			Visitor visitor = new JAXBFixingVisitor(DOCUMENT_NAMESPACE);
 			doc.accept(visitor);
 
-			return cleanup(doc.asXML());
+			return format(doc);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal document " + document.getName(), e);
@@ -424,7 +435,7 @@ public class XMLMetaData {
 	 * @param overridden Should be true if this document is a customer override, false otherwise
 	 * @param documentModuleDirectory The path to the module this document belongs to
 	 */
-	public static void marshalDocument(DocumentMetaData document, boolean overridden, String documentModuleDirectory) {
+	public static void marshalDocument(@Nonnull DocumentMetaData document, boolean overridden, @Nonnull String documentModuleDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -455,7 +466,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static DocumentMetaData unmarshalDocumentFile(String file) {
+	public static @Nonnull DocumentMetaData unmarshalDocumentFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -477,7 +488,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static DocumentMetaData unmarshalDocumentString(String xml) {
+	public static @Nonnull DocumentMetaData unmarshalDocumentString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = DOCUMENT_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(DOCUMENT_SCHEMA);
@@ -488,10 +499,10 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalBizlet(BizletMetaData bizlet, boolean customerOverridden) {
+	public static @Nonnull String marshalBizlet(@Nonnull BizletMetaData bizlet, boolean customerOverridden) {
 		try {
 			Marshaller marshaller = BIZLET_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			StringBuilder location = new StringBuilder(64);
 			location.append(BEHAVIOUR_NAMESPACE).append(' ');
 			if (customerOverridden) {
@@ -505,7 +516,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(BEHAVIOUR_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal bizlet", e);
@@ -522,7 +533,7 @@ public class XMLMetaData {
 	 * @param customerOverridden Should be true if this bizlet is a customer override, false otherwise
 	 * @param bizletDocumentDirectory The path to the document this bizlet belongs to
 	 */
-	public static void marshalBizlet(BizletMetaData bizlet, boolean customerOverridden, String bizletDocumentDirectory) {
+	public static void marshalBizlet(@Nonnull BizletMetaData bizlet, boolean customerOverridden, @Nonnull String bizletDocumentDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -552,7 +563,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static BizletMetaData unmarshalBizletFile(String file) {
+	public static @Nonnull BizletMetaData unmarshalBizletFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -574,7 +585,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static BizletMetaData unmarshalBizletString(String xml) {
+	public static @Nonnull BizletMetaData unmarshalBizletString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = BIZLET_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
@@ -585,10 +596,10 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalAction(ActionMetaData action, boolean customerOverridden) {
+	public static @Nonnull String marshalAction(@Nonnull ActionMetaData action, boolean customerOverridden) {
 		try {
 			Marshaller marshaller = ACTION_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			StringBuilder location = new StringBuilder(64);
 			location.append(BEHAVIOUR_NAMESPACE).append(' ');
 			if (customerOverridden) {
@@ -602,7 +613,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(BEHAVIOUR_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal " + action.getName() + " action", e);
@@ -622,7 +633,7 @@ public class XMLMetaData {
 	 * @param customerOverridden Should be true if this action is a customer override, false otherwise
 	 * @param actionDocumentDirectory The path to the document this action belongs to
 	 */
-	public static void marshalAction(ActionMetaData action, boolean customerOverridden, String actionDocumentDirectory) {
+	public static void marshalAction(@Nonnull ActionMetaData action, boolean customerOverridden, @Nonnull String actionDocumentDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -653,7 +664,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static ActionMetaData unmarshalActionFile(String file) {
+	public static @Nonnull ActionMetaData unmarshalActionFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -675,7 +686,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ActionMetaData unmarshalActionString(String xml) {
+	public static @Nonnull ActionMetaData unmarshalActionString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = ACTION_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(BEHAVIOUR_SCHEMA);
@@ -686,10 +697,10 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
+	public static @Nonnull String marshalView(@Nonnull ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden) {
 		try {
 			Marshaller marshaller = VIEW_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			StringBuilder location = new StringBuilder(64);
 			location.append(VIEW_NAMESPACE).append(' ');
 			if (customerOverridden) {
@@ -706,7 +717,7 @@ public class XMLMetaData {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
 			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			return format(document);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal " + view.getName() + " view", e);
@@ -727,7 +738,7 @@ public class XMLMetaData {
 	 * @param uxuiOverridden Should be true if this view is an Ux/UI override, false otherwise
 	 * @param viewDocumentDirectory The path to the document this view belongs to
 	 */
-	public static void marshalView(ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden, String viewDocumentDirectory) {
+	public static void marshalView(@Nonnull ViewMetaData view, boolean customerOverridden, boolean uxuiOverridden, @Nonnull String viewDocumentDirectory) {
 		// NB Cannot use FileWriter in here as it doesn't work with UTF-8 properly on Linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		StringBuilder filePath = new StringBuilder(64);
@@ -758,7 +769,7 @@ public class XMLMetaData {
 		}
 	}
 	
-	public static ViewMetaData unmarshalViewFile(String file) {
+	public static @Nonnull ViewMetaData unmarshalViewFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		File f = new File(file);
@@ -780,7 +791,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static ViewMetaData unmarshalViewString(String xml) {
+	public static @Nonnull ViewMetaData unmarshalViewString(@Nonnull String xml) {
 		try (StringReader sr = new StringReader(xml)) {
 			Unmarshaller unmarshaller = VIEW_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(VIEW_SCHEMA);
@@ -791,27 +802,30 @@ public class XMLMetaData {
 		}
 	}
 
-	public static String marshalSAIL(Automation automation) {
+	public static @Nonnull String marshalSAIL(@Nonnull Automation automation) {
 		try {
 			Marshaller marshaller = SAIL_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
 			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
 									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
 			marshaller.setSchema(SAIL_SCHEMA);
-			StringWriter sos = new StringWriter(1024);
-			marshaller.marshal(automation, sos);
+			// Marshal straight into dom4j (as SAX events), not through text: JAXB writes a tab in an attribute value as
+			// is, which re-parsing the text would turn into a space
+			DocumentResult dom4j = new DocumentResult();
+			marshaller.marshal(automation, dom4j);
 
-			Document document = SecureDom4j.newSAXReader().read(new StringReader(sos.toString()));
+			Document document = dom4j.getDocument();
 			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
 			document.accept(visitor);
-			return document.asXML();
+			// A step's value can hold new lines (a text area's lines), which must survive being read back
+			return format(document, true);
 		}
 		catch (Exception e) {
 			throw new MetaDataException("Could not marshal SAIL", e);
 		}
 	}
 
-	public static Automation unmarshalSAILFile(String file) {
+	public static @Nonnull Automation unmarshalSAILFile(@Nonnull String file) {
 		// NB Cannot use FileReader in here as it doesn't work with UTF-8 properly on linux.
 		// We need to specifically mention UTF-8 to get this to happen in the adapter abomination below
 		try (FileInputStream fis = new FileInputStream(file)) {
@@ -830,7 +844,7 @@ public class XMLMetaData {
 		}
 	}
 
-	public static Automation unmarshalSAILString(String sail) {
+	public static @Nonnull Automation unmarshalSAILString(@Nonnull String sail) {
 		try (StringReader sr = new StringReader(sail)) {
 			Unmarshaller unmarshaller = SAIL_CONTEXT.createUnmarshaller();
 			unmarshaller.setSchema(SAIL_SCHEMA);
@@ -842,20 +856,359 @@ public class XMLMetaData {
 	}
 
 	/**
-	 * Cleans the XML string by removing any empty lines left by removing
-	 * nodes during the {@link JAXBFixingVisitor}.
-	 * 
-	 * @param xml The xml to clean
-	 * @return The cleansed string
+	 * Marshals a SAIL workflow (several automations in one {@code <workflow>} document).
+	 *
+	 * @param workflow	the workflow
+	 * @return the XML
+	 * @throws MetaDataException	if the workflow cannot be marshalled, or is not valid against sail.xsd
 	 */
-	private static String cleanup(String xml) {
-		return xml != null ? xml.replaceAll("\n\\s{4,}\n", "\n") : null;
+	public static @Nonnull String marshalSAILWorkflow(@Nonnull Workflow workflow) {
+		try {
+			Marshaller marshaller = SAIL_WORKFLOW_CONTEXT.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
+			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
+									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
+			marshaller.setSchema(SAIL_SCHEMA);
+			// As marshalSAIL: straight into dom4j, so that tabs in attribute values survive
+			DocumentResult dom4j = new DocumentResult();
+			marshaller.marshal(workflow, dom4j);
+
+			Document document = dom4j.getDocument();
+			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
+			document.accept(visitor);
+			return format(document, true);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal SAIL workflow", e);
+		}
+	}
+
+	/**
+	 * Unmarshals a SAIL file whose root is a {@code <workflow>} (several automations) or a single {@code <automation>},
+	 * which is returned as a workflow of one.
+	 *
+	 * @param file	the file's path
+	 * @return the workflow
+	 * @throws MetaDataException	if the file cannot be read, or is not valid against sail.xsd
+	 */
+	public static @Nonnull Workflow unmarshalSAILWorkflowFile(@Nonnull String file) {
+		// As unmarshalSAILFile: read as UTF-8 explicitly
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, StandardCharsets.UTF_8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						return workflow(unmarshalSAILWorkflow(br));
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL at " + file, e);
+		}
+	}
+
+	/**
+	 * Unmarshals SAIL whose root is a {@code <workflow>} (several automations) or a single {@code <automation>},
+	 * which is returned as a workflow of one.
+	 *
+	 * @param sail	the XML
+	 * @return the workflow
+	 * @throws MetaDataException	if the XML is not valid against sail.xsd
+	 */
+	public static @Nonnull Workflow unmarshalSAILWorkflowString(@Nonnull String sail) {
+		try (StringReader sr = new StringReader(sail)) {
+			return workflow(unmarshalSAILWorkflow(sr));
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL " + sail, e);
+		}
+	}
+
+	private static @Nonnull Object unmarshalSAILWorkflow(@Nonnull Reader reader) throws JAXBException {
+		Unmarshaller unmarshaller = SAIL_WORKFLOW_CONTEXT.createUnmarshaller();
+		unmarshaller.setSchema(SAIL_SCHEMA);
+		return unmarshaller.unmarshal(reader);
+	}
+
+	private static @Nonnull Workflow workflow(@Nonnull Object root) {
+		if (root instanceof Workflow workflow) {
+			return workflow;
+		}
+		Workflow result = new Workflow();
+		result.getAutomations().add((Automation) root);
+		return result;
+	}
+
+	/**
+	 * Preferred XML attribute order, sampled from the admin module and completed with
+	 * other bundled metadata. Edit one entry to reorder an element; unlisted
+	 * attributes and elements follow alphabetic order. Namespace declarations and
+	 * schema locations keep their existing root placement.
+	 */
+	@SuppressWarnings("java:S1192") // Attribute names intentionally repeat across element-specific order lists.
+	private static final Map<String, List<String>> ATTRIBUTE_ORDER = Map.<String, List<String>>ofEntries(
+			Map.entry("behaviour:action", List.of("name")),
+			Map.entry("behaviour:set", List.of("binding", "expression")),
+			Map.entry("common:property", List.of("key")),
+			Map.entry("document:association", List.of("name", "type", "embeddedColumnsPrefix", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:bizKey", List.of("expression", "sensitivity")),
+			Map.entry("document:boolean", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:class", List.of("name", "className")),
+			Map.entry("document:collection", List.of("name", "type", "ordered", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:colour", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:condition", List.of("name", "usage")),
+			Map.entry("document:constraint", List.of("name", "scope", "description")),
+			Map.entry("document:content", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:date", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:dateTime", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:decimal10", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:decimal2", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:decimal5", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:document", List.of("name")),
+			Map.entry("document:dynamic", List.of("bizletClassName", "dataFactoryClassName")),
+			Map.entry("document:enum", List.of("name", "required", "documentRef", "attributeRef", "moduleRef", "typeName", "implementingEnumClassName", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:extends", List.of("document")),
+			Map.entry("document:format", List.of("mask", "case")),
+			Map.entry("document:geometry", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:id", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:image", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:integer", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:inverseMany", List.of("name", "cascade", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:inverseOne", List.of("name", "cascade", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:longInteger", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:markup", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:memo", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:order", List.of("by", "sort")),
+			Map.entry("document:parentDocument", List.of("databaseIndex")),
+			Map.entry("document:persistent", List.of("name", "schema", "catalog", "strategy", "discriminator")),
+			Map.entry("document:text", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:time", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:timestamp", List.of("name", "required", "persistent", "sensitivity", "trackChanges", "audited", "usage", "deprecated")),
+			Map.entry("document:unique", List.of("name", "description")),
+			Map.entry("document:validator", List.of("type", "min", "max", "precision", "regularExpression", "validationMessage")),
+			Map.entry("document:value", List.of("name", "code", "description")),
+			Map.entry("module:action", List.of("name")),
+			Map.entry("module:bizQL", List.of("name", "timeoutInSeconds")),
+			Map.entry("module:bizQLImport", List.of("name", "moduleRef", "ref")),
+			Map.entry("module:calendar", List.of("name", "document", "query", "model", "startBinding", "endBinding")),
+			Map.entry("module:column", List.of("binding", "displayName", "sortOrder", "pixelWidth", "hidden", "escape", "sanitise", "sortable", "filterable", "editable", "alignment", "formatter", "customFormatter")),
+			Map.entry("module:content", List.of("binding", "displayName", "display", "emptyThumbnailRelativeFile", "sortOrder", "pixelWidth", "pixelHeight", "hidden", "alignment")),
+			Map.entry("module:contentAccess", List.of("document", "binding")),
+			Map.entry("module:contentPermission", List.of("attribute")),
+			Map.entry("module:document", List.of("name", "moduleRef", "ref", "defaultQueryName", "permission")),
+			Map.entry("module:documentAggregateAccess", List.of("document")),
+			Map.entry("module:dynamicImageAccess", List.of("document", "image")),
+			Map.entry("module:edit", List.of("name", "document")),
+			Map.entry("module:group", List.of("name")),
+			Map.entry("module:job", List.of("name", "displayName", "description", "className")),
+			Map.entry("module:link", List.of("name", "href")),
+			Map.entry("module:list", List.of("name", "document", "query", "model", "autoPopulate")),
+			Map.entry("module:map", List.of("name", "document", "query", "model", "geometryBinding", "refreshTimeInSeconds", "showRefreshControls")),
+			Map.entry("module:modelAggregateAccess", List.of("document", "model")),
+			Map.entry("module:module", List.of("name", "title", "formLabelLayout", "prototype")),
+			Map.entry("module:previousCompleteAccess", List.of("document", "binding")),
+			Map.entry("module:query", List.of("name", "documentName", "aggregate", "timeoutInSeconds", "polymorphic")),
+			Map.entry("module:queryAggregateAccess", List.of("query")),
+			Map.entry("module:queryImport", List.of("name", "moduleRef", "ref")),
+			Map.entry("module:reportAccess", List.of("module", "document", "report")),
+			Map.entry("module:role", List.of("name")),
+			Map.entry("module:singularAccess", List.of("document")),
+			Map.entry("module:sql", List.of("name", "timeoutInSeconds")),
+			Map.entry("module:sqlImport", List.of("name", "moduleRef", "ref")),
+			Map.entry("module:tree", List.of("name", "document", "query", "model", "autoPopulate")),
+			Map.entry("module:uxui", List.of("name")),
+			Map.entry("router:criteria", List.of("webAction", "module", "document")),
+			Map.entry("router:route", List.of("outcome")),
+			Map.entry("router:uxui", List.of("name")),
+			Map.entry("view:action", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:actionReference", List.of("action")),
+			Map.entry("view:actions", List.of("widgetId")),
+			Map.entry("view:blurb", List.of("textAlignment", "escape", "sanitise", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:boundColumn", List.of("binding", "title", "escapeTitle", "alignment", "escape", "sanitise", "editable", "formatter", "customFormatter", "pixelWidth")),
+			Map.entry("view:button", List.of("action", "show", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:cancel", List.of("name", "displayName", "escapeDisplayName", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:chart", List.of("type", "modelName", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:checkBox", List.of("binding", "triState", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:column", List.of("filterable", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth")),
+			Map.entry("view:combo", List.of("binding", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:comparison", List.of("binding", "modelName", "editable", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:component", List.of("name", "binding", "module", "document", "widgetId", "invisible", "visible")),
+			Map.entry("view:containerColumn", List.of("title", "escapeTitle", "alignment", "pixelWidth")),
+			Map.entry("view:content", List.of("binding", "display", "capture", "editable", "showMarkup", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:contentSignature", List.of("binding", "rgbHexBackgroundColour", "rgbHexForegroundColour", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:dataGrid", List.of("binding", "title", "escapeTitle", "selectedIdBinding", "inline", "editable", "wrap", "disabled", "enabled", "invisible", "visible", "disableAdd", "enableAdd", "disableZoom", "enableZoom", "disableEdit", "enableEdit", "disableRemove", "enableRemove", "showAdd", "showZoom", "showEdit", "showRemove", "showDeselect", "widgetId", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:dataRepeater", List.of("binding", "title", "escapeTitle", "showColumnHeaders", "showGrid", "widgetId", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:default", List.of("binding")),
+			Map.entry("view:delete", List.of("name", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:dialogButton", List.of("dialogName", "command", "displayName", "escapeDisplayName", "modalDialog", "disabled", "enabled", "invisible", "visible", "dialogWidth", "dialogHeight")),
+			Map.entry("view:download", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:export", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:filterParameter", List.of("filterBinding", "operator", "value", "valueBinding")),
+			Map.entry("view:form", List.of("defaultLabelAlign", "labelLayout", "border", "borderTitle", "escapeBorderTitle", "collapsible", "widgetId", "disabled", "enabled", "invisible", "visible", "pixelWidth", "percentageWidth", "responsiveWidth", "sm", "md", "lg", "xl", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:geometry", List.of("binding", "type", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:geometryMap", List.of("binding", "type", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:hbox", List.of( "verticalAlignment", "horizontalAlignment", "shrinkWrap", "pixelPadding", "pixelMemberPadding",  "widgetId", "collapsible", "border", "borderTitle", "escapeBorderTitle", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:html", List.of("binding", "mentionMarkers", "sanitise", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight")),
+			Map.entry("view:import", List.of("name", "className", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:item", List.of("colspan", "rowspan", "align", "required", "requiredMessage", "escapeRequiredMessage", "label", "escapeLabel", "showLabel", "labelAlign", "help", "escapeHelp", "showHelp")),
+			Map.entry("view:label", List.of("binding", "value", "for", "formatted", "textAlignment", "escape", "sanitise", "pixelWidth", "pixelHeight", "invisible", "visible")),
+			Map.entry("view:link", List.of("value", "escapeValue", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:listGrid", List.of("query", "model", "title", "escapeTitle", "continueConversation", "selectedIdBinding", "autoPopulate", "disableAdd", "enableAdd", "disableZoom", "enableZoom", "disableEdit", "enableEdit", "disableRemove", "enableRemove", "showAdd", "showZoom", "showEdit", "showRemove", "showDeselect", "showExport", "showChart", "showFilter", "showSummary", "showSnap", "showTag", "showFlag", "postRefresh", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:listMembership", List.of("binding", "candidatesHeading", "escapeCandidatesHeading", "membersHeading", "escapeMembersHeading", "disabled", "enabled", "invisible", "visible", "pixelWidth", "minPixelHeight")),
+			Map.entry("view:listRepeater", List.of("query", "model", "title", "escapeTitle", "showColumnHeaders", "showGrid", "postRefresh", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:lookupDescription", List.of("binding", "descriptionBinding", "query", "model", "editable", "disableEdit", "enableEdit", "disableAdd", "enableAdd", "disableClear", "enableClear", "disablePick", "enablePick", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:map", List.of("modelName", "loading", "refreshTimeInSeconds", "showRefreshControls", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:name", List.of("fromComponent", "mappedTo")),
+			Map.entry("view:ok", List.of("name", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:parameter", List.of("name", "value", "valueBinding", "fromBinding", "boundTo")),
+			Map.entry("view:password", List.of("binding", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:radio", List.of("binding", "vertical", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:rerender", List.of("clientValidation")),
+			Map.entry("view:resourceReference", List.of("relativeFile")),
+			Map.entry("view:richText", List.of("binding", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight", "sanitise")),
+			Map.entry("view:save", List.of("name", "displayName", "escapeDisplayName", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible", "inActionPanel", "show", "clientValidation")),
+			Map.entry("view:server", List.of("action")),
+			Map.entry("view:sidebar", List.of("floatingPixelWidth", "floatingPixelWidthBreakpoint", "widgetId", "invisible", "visible", "pixelWidth", "percentageWidth", "responsiveWidth")),
+			Map.entry("view:slider", List.of("binding", "vertical", "min", "max", "numberOfDiscreteValues", "roundingPrecision", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:spacer", List.of("pixelWidth", "pixelHeight", "invisible", "visible")),
+			Map.entry("view:spinner", List.of("binding", "min", "max", "step", "editable", "keyboardType", "complete", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:staticImage", List.of("relativeFile", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:tab", List.of("title", "escapeTitle", "icon16x16RelativeFileName", "iconStyleClass", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:tabPane", List.of("selectedTabIndexBinding", "disabled", "enabled", "invisible", "visible", "widgetId", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:textArea", List.of("binding", "wrap", "editable", "keyboardType", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight")),
+			Map.entry("view:textField", List.of("binding", "editable", "keyboardType", "complete", "disabled", "enabled", "invisible", "visible", "pixelWidth")),
+			Map.entry("view:treeGrid", List.of("query", "model", "title", "escapeTitle", "rootIdBinding", "continueConversation", "autoPopulate", "selectedIdBinding", "postRefresh", "disableAdd", "enableAdd", "disableZoom", "enableZoom", "disableEdit", "enableEdit", "disableRemove", "enableRemove", "showAdd", "showZoom", "showEdit", "showRemove", "showDeselect", "showExport", "showChart", "showFilter", "showSummary", "showSnap", "showTag", "showFlag", "disabled", "enabled", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:upload", List.of("name", "className", "displayName", "escapeDisplayName", "capture", "clientValidation", "inActionPanel", "show", "toolTip", "escapeToolTip", "relativeIconFileName", "iconStyleClass", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible")),
+			Map.entry("view:vbox", List.of("border", "borderTitle", "escapeBorderTitle", "pixelPadding", "pixelMemberPadding", "horizontalAlignment", "verticalAlignment", "shrinkWrap", "collapsible", "widgetId", "invisible", "visible", "pixelWidth", "responsiveWidth", "sm", "md", "lg", "xl", "percentageWidth", "minPixelWidth", "maxPixelWidth", "pixelHeight", "percentageHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:view", List.of("name", "title", "escapeTitle", "iconStyleClass", "icon32x32RelativeFileName", "helpRelativeFileName", "helpURL", "refreshTimeInSeconds", "refreshIf", "refreshAction")),
+			Map.entry("view:zoomIn", List.of("binding", "displayName", "escapeDisplayName", "relativeIconFileName", "iconStyleClass", "show", "toolTip", "escapeToolTip", "disabled", "enabled", "invisible", "visible", "pixelWidth", "pixelHeight", "minPixelHeight", "maxPixelHeight")),
+			Map.entry("view:zoomOut", List.of("name", "displayName", "escapeDisplayName", "clientValidation", "inActionPanel", "show", "relativeIconFileName", "iconStyleClass", "toolTip", "escapeToolTip", "confirm", "escapeConfirm", "disabled", "enabled", "invisible", "visible"))
+	);
+	private static final Map<String, Map<String, Integer>> ATTRIBUTE_RANKS;
+	static {
+		Map<String, Map<String, Integer>> ranksByElement = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry : ATTRIBUTE_ORDER.entrySet()) {
+			Map<String, Integer> ranks = new HashMap<>();
+			for (String attribute : entry.getValue()) {
+				if (ranks.putIfAbsent(attribute, Integer.valueOf(ranks.size())) != null) {
+					throw new IllegalStateException("Duplicate XML attribute order: " + entry.getKey() + '.' + attribute);
+				}
+			}
+			ranksByElement.put(entry.getKey(), ranks);
+		}
+		ATTRIBUTE_RANKS = ranksByElement;
+	}
+
+	/**
+	 * Formats XML after metadata cleanup, writing attribute values' whitespace as dom4j does: see
+	 * {@link #format(Document, boolean)}.
+	 *
+	 * @param document the cleaned metadata document
+	 * @return XML with tab indentation
+	 * @throws IOException if writing the XML fails
+	 */
+	private static @Nonnull String format(@Nonnull Document document) throws IOException {
+		return format(document, false);
+	}
+
+	/**
+	 * Formats XML after metadata cleanup so removed elements leave no blank lines.
+	 * Text content retains its whitespace; CDATA blocks have a trimmed value and an indented boundary.
+	 *
+	 * <p>
+	 * dom4j writes a tab, new line or carriage return in an attribute value as is, and an XML parser then reads each as
+	 * a space (attribute-value normalisation). With {@code attributeWhitespaceAsReferences}, they are written as the
+	 * character references {@code &#9;}, {@code &#10;} and {@code &#13;} instead, so that the value reads back as it was.
+	 * Only SAIL asks for this: other metadata keeps its existing output, and its values read back as before.
+	 *
+	 * @param document the cleaned metadata document
+	 * @param attributeWhitespaceAsReferences true to write tabs, new lines and carriage returns in attribute values as
+	 * 											character references
+	 * @return XML with tab indentation
+	 * @throws IOException if writing the XML fails
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private static @Nonnull String format(@Nonnull Document document, boolean attributeWhitespaceAsReferences) throws IOException {
+		// Keep this ordering next to the writer: JAXB property order does not define XML attribute order.
+		document.accept(new VisitorSupport() {
+			@Override
+			public void visit(@SuppressWarnings("null") @Nonnull Element element) {
+				List<Attribute> attributes = new ArrayList<>(element.attributes());
+				if (attributes.size() < 2) {
+					return;
+				}
+				String namespace = element.getNamespaceURI();
+				String policyKey = namespace.substring(namespace.lastIndexOf('/') + 1) + ':' + element.getName();
+				Map<String, Integer> ranks = ATTRIBUTE_RANKS.getOrDefault(policyKey, Map.of());
+				attributes.sort(Comparator.comparingInt((Attribute attribute) -> {
+					Integer rank = ranks.get(attribute.getName());
+					return (rank == null) ? Integer.MAX_VALUE : rank.intValue();
+				}).thenComparing(attribute -> attribute.getQName().getQualifiedName()));
+				element.setAttributes(attributes);
+			}
+		});
+
+		OutputFormat format = new OutputFormat("\t", true, StandardCharsets.UTF_8.name());
+		format.setTrimText(false);
+		format.setNewLineAfterDeclaration(false);
+		StringWriter result = new StringWriter();
+		XMLWriter writer = new XMLWriter(result, format) {
+			private final List<Namespace> rootNamespaces = new ArrayList<>();
+			private boolean rootAttributesPending = true;
+
+			@Override
+			protected String escapeAttributeEntities(@SuppressWarnings("null") @Nonnull String text) {
+				String result = super.escapeAttributeEntities(text);
+				if (attributeWhitespaceAsReferences) {
+					// dom4j leaves these as is, and the escaped text has no others
+					result = result.replace("\t", "&#9;").replace("\n", "&#10;").replace("\r", "&#13;");
+				}
+				return result;
+			}
+
+			@Override
+			protected void writeNamespace(@SuppressWarnings("null") @Nonnull Namespace namespace) throws IOException {
+				if (rootAttributesPending) {
+					rootNamespaces.add(namespace);
+				}
+				else {
+					super.writeNamespace(namespace);
+				}
+			}
+
+			@Override
+			protected void writeAttributes(@SuppressWarnings("null") @Nonnull Element element) throws IOException {
+				if (!rootAttributesPending) {
+					super.writeAttributes(element);
+					return;
+				}
+				// Let dom4j retain namespace tracking and escaping while moving root declarations
+				// after ordinary metadata attributes, ahead of schema-location attributes.
+				Element namespacedAttributes = DocumentHelper.createElement(element.getQName());
+				for (Attribute attribute : element.attributes()) {
+					if (attribute.getNamespaceURI().isEmpty()) {
+						super.writeAttribute(attribute);
+					}
+					else {
+						namespacedAttributes.add((Attribute) attribute.clone());
+					}
+				}
+				rootAttributesPending = false;
+				for (Namespace namespace : rootNamespaces) {
+					super.writeNamespace(namespace);
+				}
+				super.writeAttributes(namespacedAttributes);
+			}
+		};
+		writer.write(document);
+		writer.flush();
+		return result.toString();
 	}
 
 	/*
 	 * returns a JAXP 1.3 schema by parsing the specified resource.
 	 */
-	private static Schema getSchema(String schemaFileName) 
+	private static @Nonnull Schema getSchema(@Nonnull String schemaFileName) 
 	throws JAXBException {
 		try {
 			return SecureDom4j.newSchemaFactory().newSchema(new File(schemaFileName));
@@ -871,6 +1224,9 @@ public class XMLMetaData {
 	 * and optional attributes set to their default value.
 	 */
 	private static class JAXBFixingVisitor extends VisitorSupport {
+		private static final String ROLES_ELEMENT = "roles";
+		private static final String PRIVILEGES_ELEMENT = "privileges";
+
 		private static final Namespace COMMON = Namespace.get("c", COMMON_NAMESPACE);
 		private static final Namespace MODULE = Namespace.get("m", MODULE_NAMESPACE);
 		private static final Namespace DOCUMENT = Namespace.get("d", DOCUMENT_NAMESPACE);
@@ -879,14 +1235,14 @@ public class XMLMetaData {
 		private Namespace target;
 		private String targetUri;
 
-		JAXBFixingVisitor(String targetNamespaceUri) {
+		JAXBFixingVisitor(@Nonnull String targetNamespaceUri) {
 			target = Namespace.get("", targetNamespaceUri);
 			targetUri = targetNamespaceUri;
 		}
 
 		@Override
 		@SuppressWarnings("java:S3776") // Complexity OK
-		public void visit(Element node) {
+		public void visit(@SuppressWarnings("null") @Nonnull Element node) {
 			Namespace ns = node.getNamespace();
 
 			String uri = ns.getURI();
@@ -924,10 +1280,13 @@ public class XMLMetaData {
 			if (uri.equals(MODULE_NAMESPACE)) {
 				Element parent = node.getParent();
 				if (parent == null) {
-					removeEmptyChildElements(node, new String[] { "jobs", "queries", "privileges" });
+					removeEmptyChildElements(node, new String[] { "jobs", "queries", PRIVILEGES_ELEMENT, "documents", ROLES_ELEMENT });
 				}
-				else if (parent.getName().equals("roles")) {
-					removeEmptyChildElements(node, new String[] { "privileges", "accesses" });
+				else if (node.getName().equals("query")) {
+					removeEmptyChildElements(node, new String[] { "columns" });
+				}
+				else if (parent.getName().equals(ROLES_ELEMENT)) {
+					removeEmptyChildElements(node, new String[] { PRIVILEGES_ELEMENT, "accesses" });
 				}
 			}
 
@@ -936,6 +1295,17 @@ public class XMLMetaData {
 				Element parent = node.getParent();
 				if (parent == null) {
 					removeEmptyChildElements(node, new String[] { "conditions", "implements", "uniqueConstraints" });
+				}
+
+				if (node.getName().equals("collection") || node.getName().equals("inverseMany")) {
+					removeEmptyChildElements(node, new String[] { "ordering" });
+				}
+
+				if (node.getName().equals("enum")) {
+					removeEmptyChildElements(node, new String[] { "values" });
+				}
+				if (node.getName().equals("constraint") || node.getName().equals("unique")) {
+					removeEmptyChildElements(node, new String[] { "fieldReferences" });
 				}
 
 				if (parent != null && parent.getName().equals("attributes")) {
@@ -954,26 +1324,50 @@ public class XMLMetaData {
 						String name = child.getName();
 						String text = child.getText();
 						// remove transient element from attributes where transient is false
-						if ("transient".equals(name) && "false".equals(text)) {
+						if ("transient".equals(name) && Boolean.FALSE.toString().equals(text)) {
 							childNodes.remove();
 						}
 						// remove dynamic element from attributes where dynamic is false
-						if ("dynamic".equals(name) && "false".equals(text)) {
+						if ("dynamic".equals(name) && Boolean.FALSE.toString().equals(text)) {
 							childNodes.remove();
 						}
 					}
 				}
 			}
 			
-			// detect any empty view elements which require children
+			// These optional view wrappers represent lists; an absent wrapper is an empty list.
 			if (uri.equals(VIEW_NAMESPACE)) {
-				Element parent = node.getParent();
-				if (parent == null) { // view element
-					removeEmptyChildElements(node, new String[] { "newParameters" });
+				removeEmptyChildElements(node, new String[] { "onFocusHandlers",
+																"onBlurHandlers",
+																"onChangedHandlers",
+																"onAddedHandlers",
+																"onEditedHandlers",
+																"onRemovedHandlers", "onDeletedHandlers",
+																"onSelectedHandlers",
+																"onPickedHandlers",
+																"onClearedHandlers" });
+				switch (node.getName()) {
+					case "view":
+						removeEmptyChildElements(node, new String[] { "newParameters" });
+						break;
+					case "dialogButton", "dynamicImage", "reportReference":
+						removeEmptyChildElements(node, new String[] { "parameters" });
+						break;
+					case "component":
+						removeEmptyChildElements(node, new String[] { "actions", "conditions" });
+						break;
+					case "lookupDescription":
+						removeEmptyChildElements(node, new String[] { "dropDown" });
+						break;
+					default:
+						break;
 				}
-				else if (node.getName().equals("listGrid")) {
-					removeEmptyChildElements(node, new String[] { "onEditedHandlers", "onDeletedHandlers", "onSelectedHandlers" });
-				}
+			}
+			if (uri.equals(BEHAVIOUR_NAMESPACE) && node.getName().equals("if")) {
+				removeEmptyChildElements(node, new String[] { "else" });
+			}
+			if (uri.equals(CUSTOMER_NAMESPACE) && node.getName().equals("role")) {
+				removeEmptyChildElements(node, new String[] { ROLES_ELEMENT });
 			}
 
 			ListIterator<?> namespaces = node.additionalNamespaces().listIterator();
@@ -994,6 +1388,18 @@ public class XMLMetaData {
 				}
 			}
 
+			// Declare imported namespaces once on the root so descendants reuse their prefixes.
+			Namespace namespace = node.getNamespace();
+			if (COMMON.equals(namespace) || 
+					MODULE.equals(namespace) ||
+					DOCUMENT.equals(namespace) ||
+					VIEW.equals(namespace)) {
+				Element root = node.getDocument().getRootElement();
+				if (! namespace.equals(root.getNamespaceForPrefix(namespace.getPrefix()))) {
+					root.add(namespace);
+				}
+			}
+
 			// Replace escaped characters within CDATA tags
 			String text = Util.processStringValue(node.getText());
 			if ((text != null) && 
@@ -1004,13 +1410,26 @@ public class XMLMetaData {
 							.replace("&quot;", "\"")
 							.replace("&lt;", "<")
 							.replace("&gt;", ">");
-				CDATA cdata = DocumentHelper.createCDATA(text);
 				node.clearContent();
-				node.add(cdata);
+				// Keep CDATA only where it avoids escaping XML markup or ampersands.
+				if (text.indexOf('<') >= 0 || text.indexOf('&') >= 0) {
+					int depth = 0;
+					for (Element parent = node.getParent(); parent != null; parent = parent.getParent()) {
+						depth++;
+					}
+					String indent = "\t".repeat(depth);
+					// Readers trim the boundary whitespace; preserve all internal line breaks and spacing.
+					node.addText("\n" + indent + "\t");
+					node.addCDATA("\n" + indent + "\t\t" + text.trim() + "\n" + indent + "\t");
+					node.addText("\n" + indent);
+				}
+				else {
+					node.addText(text);
+				}
 			}
 		}
 		
-		private static void removeDefaultAttributes(Element node, Map<String, Boolean> attributesToRemove) {
+		private static void removeDefaultAttributes(@Nonnull Element node, @Nonnull Map<String, Boolean> attributesToRemove) {
 			Iterator<?> attributes = node.attributes().iterator();
 			while (attributes.hasNext()) {
 				Attribute a = (Attribute) attributes.next();
@@ -1022,34 +1441,43 @@ public class XMLMetaData {
 			}
 		}
 
-		private static void removeEmptyChildElements(Element parent, String[] nodesToRemove) {
+		@SuppressWarnings("java:S3776") // complexity OK
+		private static void removeEmptyChildElements(@Nonnull Element parent, @Nonnull String[] nodesToRemove) {
 			Set<String> nodesToRemoveSet = Set.of(nodesToRemove);
-			
+			boolean removed = false;
 			ListIterator<Element> childNodes = parent.elements().listIterator();
 			while (childNodes.hasNext()) {
 				Element child = childNodes.next();
-
-				if (nodesToRemoveSet.contains(child.getName()) && 
-						child.isTextOnly() &&
-						child.elements().isEmpty()) {
+				// remove blank child text nodes (with only text nodes below)
+				if (nodesToRemoveSet.contains(child.getName()) &&
+						parent.getNamespaceURI().equals(child.getNamespaceURI()) &&
+						(child.attributeCount() == 0) &&
+						child.getText().isBlank() &&
+						child.content().stream().allMatch(n -> n.getNodeType() == Node.TEXT_NODE)) {
 					childNodes.remove();
+					removed = true;
 				}
 			}
-
-	        // If this element has no child elements, remove all text nodes
-	        if (parent.elements().isEmpty()) {
-				for (Iterator<Node> it = parent.nodeIterator(); it.hasNext();) {
-					Node node = it.next();
-					if (node.getNodeType() == Node.TEXT_NODE) {
-						it.remove();
+			if (removed && parent.content().stream().allMatch(n -> n.getNodeType() == Node.NAMESPACE_NODE || (n.getNodeType() == Node.TEXT_NODE && n.getText().isBlank()))) {
+				// Honour the nearest xml:space declaration, including inherited preservation.
+				for (Element ancestor = parent; ancestor != null; ancestor = ancestor.getParent()) {
+					String space = ancestor.attributeValue(QName.get("space", Namespace.XML_NAMESPACE));
+					if ("preserve".equals(space)) {
+						return;
+					}
+					if ("default".equals(space)) {
+						break;
 					}
 				}
-	        }
+				// Leftover indentation is content to XMLWriter and prevents a self-closing tag.
+				parent.content().removeIf(n -> n.getNodeType() == Node.TEXT_NODE);
+			}
 		}
+
 	}
 	
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		JAXBContext jaxbContext = JAXBContext.newInstance(CustomerMetaData.class, 
 															ModuleMetaData.class,
 															DocumentMetaData.class,
@@ -1057,10 +1485,12 @@ public class XMLMetaData {
 															BizletMetaData.class,
 															ViewMetaData.class,
 															Router.class,
-															Automation.class);
+															Automation.class,
+															Workflow.class);
 		jaxbContext.generateSchema(new SchemaOutputResolver() {
 			@Override
-			public Result createOutput(String namespaceUri, String suggestedFileName) throws IOException {
+			public @Nonnull Result createOutput(@SuppressWarnings("null") @Nonnull String namespaceUri,
+												@SuppressWarnings("null") @Nonnull String suggestedFileName) throws IOException {
 				File file = null;
 				if (namespaceUri.endsWith("/common")) {
 					file = new File("common.xsd");

@@ -8,6 +8,7 @@ import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -32,18 +33,18 @@ public abstract class FieldValidator<T extends Object> extends Validator<T> impl
 
 	private String validationMessage;
 	
-	public String getValidationMessage() {
+	public @Nullable String getValidationMessage() {
 		return validationMessage;
 	}
 	
-	public String getLocalisedValidationMessage() {
+	public @Nullable String getLocalisedValidationMessage() {
 		return Util.i18n(validationMessage);
 	}
 	
 	@XmlAttribute
-	public void setValidationMessage(String validationMessage) {
+	public void setValidationMessage(@Nullable String validationMessage) {
 		this.validationMessage = UtilImpl.processStringValue(validationMessage);
 	}
 	
-	public abstract String constructMessage(User user, String localisedDisplayName, Converter<T> converter);
+	public abstract @Nullable String constructMessage(@Nullable User user, @Nullable String localisedDisplayName, @Nullable Converter<T> converter);
 }

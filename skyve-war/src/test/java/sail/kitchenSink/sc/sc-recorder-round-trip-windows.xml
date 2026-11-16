@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The window workflow that SmartClientRecorderRoundTripSailIT records and replays: the List Grid Fixture's links that
+	open a new window (a lookup value made there, and a PDF), a nested window opened by its URL, the list grid toolbar's
+	Refresh and Deselect, and the browser's Back and Reload. It has no login: it runs in a session that is already signed
+	in and recording. The lookup value it makes sorts first ("0 ...") and is deleted again at the end.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+	xmlns="http://www.skyve.org/xml/sail"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="New windows, list grid tools, back and refresh">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>A lookup value made in a new window, and the List Grid Fixture opened by its URL in a window nested in it</comment>
+			<navigateLink text="Open a new lookup value in a new window" window="new" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="0 SAIL window {run}" />
+			<save />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ListGridFixture" window="new" />
+			<pushEditContext module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL window {run}" minRows="1" maxRows="1" />
+			<closeWindow />
+			<closeWindow />
+			<comment>Back in the first window: the list grid shows the new value once refreshed; select it, then deselect it</comment>
+			<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="refresh" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL window {run}" minRows="1" maxRows="1" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL window {run}" />
+			<listGridTool module="kitchensink" query="qListGridFixtureVue" tool="clearSelection" />
+			<testValue binding="selectedVueId" value="" />
+			<comment>A PDF in a new window, which records nothing: it is closed when the next step is in this window</comment>
+			<navigateLink text="Open a PDF in a new window" window="new" />
+			<closeWindow />
+			<comment>Back and Reload</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" />
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<navigateBack />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL not saved {run}" />
+			<refresh />
+			<testValue binding="description" value="" />
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL window {run}" />
+			<delete />
+		</method>
+	</interaction>
+</automation>

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.OKAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link OKAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentOKAction extends FluentValidatableAction<FluentOKAction> {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentOKAction(OKAction action) {
+	public FluentOKAction(@Nonnull OKAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentOKAction extends FluentValidatableAction<FluentOKAction> {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentOKAction from(@SuppressWarnings("hiding") OKAction action) {
+	public @Nonnull FluentOKAction from(@SuppressWarnings("hiding") @Nonnull OKAction action) {
 		super.fromBase(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentOKAction extends FluentValidatableAction<FluentOKAction> {
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public OKAction get() {
+	public @Nonnull OKAction get() {
 		return action;
 	}
 }

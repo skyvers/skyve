@@ -22,6 +22,7 @@ class SnapshotsBizletTest {
 		assertNull(bizlet.getDynamicDomainValues("unknownAttribute", new Snapshots()));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithModuleNameSourceClearsQueryName() throws Exception {
 		Snapshots bean = new Snapshots();
@@ -30,6 +31,7 @@ class SnapshotsBizletTest {
 		assertNull(bean.getQueryName());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithUnknownSourceDoesNothing() throws Exception {
 		Snapshots bean = Assertions.assertDoesNotThrow(Snapshots::new);

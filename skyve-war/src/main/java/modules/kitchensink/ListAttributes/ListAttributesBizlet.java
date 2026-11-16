@@ -7,6 +7,9 @@ import org.skyve.metadata.model.document.Bizlet;
 
 import modules.kitchensink.domain.ListAttributes;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Supplies static demonstration domain values for list-attribute examples.
  */
@@ -27,7 +30,7 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 	 * @throws Exception if domain value resolution fails
 	 */
 	@Override
-	public List<DomainValue> getConstantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getConstantDomainValues(@Nonnull String attributeName) throws Exception {
 		if (ListAttributes.constantDomainPropertyName.equals(attributeName)) {
 			return dvs;
 		}
@@ -42,7 +45,7 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 	 * @throws Exception if domain value resolution fails
 	 */
 	@Override
-	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
+	public @Nullable List<DomainValue> getVariantDomainValues(@Nonnull String attributeName) throws Exception {
 		if (ListAttributes.variantDomainPropertyName.equals(attributeName)) {
 			return dvs;
 		}
@@ -58,7 +61,7 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 	 * @throws Exception if domain value resolution fails
 	 */
 	@Override
-	public List<DomainValue> getDynamicDomainValues(String attributeName, ListAttributes bean) throws Exception {
+	public @Nullable List<DomainValue> getDynamicDomainValues(@Nonnull String attributeName, @Nonnull ListAttributes bean) throws Exception {
 		if (ListAttributes.dynamicDomainPropertyName.equals(attributeName)) {
 			return dvs;
 		}

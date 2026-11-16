@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -33,7 +34,7 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	 *
 	 * @return the target query name
 	 */
-	public String getQueryName() {
+	public @Nonnull String getQueryName() {
 		return queryName;
 	}
 
@@ -46,7 +47,7 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	 * @param queryName the target query name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "query", required = true)
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nonnull String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 	
@@ -59,7 +60,7 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	 * @throws MetaDataException if {@code query} is missing or does not resolve in {@code module}
 	 */
 	@Override
-	public void validate(String metaDataName, String roleName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull String roleName, @Nonnull Module module) {
 		if (queryName == null) {
 			throw new MetaDataException(metaDataName + " : [query] is required for all queryAggregate user accesses defined in module role " + roleName);
 		}
@@ -75,7 +76,7 @@ public class ModuleRoleQueryAggregateUserAccessMetaData extends ModuleRoleUserAc
 	 * @return the runtime query-aggregate user access
 	 */
 	@Override
-	public UserAccess toUserAccess(String moduleName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName) {
 		return UserAccess.queryAggregate(moduleName, queryName);
 	}
 }

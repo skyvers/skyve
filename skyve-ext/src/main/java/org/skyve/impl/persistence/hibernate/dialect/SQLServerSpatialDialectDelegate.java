@@ -15,6 +15,9 @@ import org.hibernate.spatial.dialect.sqlserver.SqlServer2008GeometryTypeDescript
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	private static final long serialVersionUID = 880936968913130868L;
 
@@ -27,7 +30,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 *
 	 * @param actualDialect the concrete Hibernate dialect that will own the generated SQL
 	 */
-	public SQLServerSpatialDialectDelegate(Dialect actualDialect) {
+	public SQLServerSpatialDialectDelegate(@Nonnull Dialect actualDialect) {
 		uniqueDelegate = new SQLServer2008NullTolerantUniqueDelegate(actualDialect);
 	}
 	
@@ -43,7 +46,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * Returns the Hibernate geometry type descriptor used by this delegate.
 	 */
 	@Override
-	public JTSGeometryType getGeometryType() {
+	public @Nonnull JTSGeometryType getGeometryType() {
 		return geometryType;
 	}
 
@@ -52,7 +55,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * Converts a JTS geometry into the persisted SQL Server geometry representation.
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nonnull Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		return Encoders.encode(JTS.from(geometry));
 	}
 
@@ -61,7 +64,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * Converts a persisted SQL Server geometry value back into a JTS geometry.
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nonnull Geometry convertFromPersistedValue(@Nonnull Object geometry) {
 		byte[] result = null;
 		if (geometry instanceof byte[] bytes) {
 			result = bytes;
@@ -84,7 +87,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * Determines whether a column definition difference requires ALTER COLUMN DDL.
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		return DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 	
@@ -92,7 +95,7 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * Returns the SQL Server column-modification clause used in ALTER TABLE statements.
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return "alter column";
 	}
 	
@@ -100,11 +103,11 @@ class SQLServerSpatialDialectDelegate implements SkyveDialect, Serializable {
 	 * Returns the RDBMS identifier for this delegate.
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return RDBMS.sqlserver;
 	}
 
-	UniqueDelegate getUniqueDelegate() {
+	@Nonnull UniqueDelegate getUniqueDelegate() {
 		return uniqueDelegate;
 	}
 }

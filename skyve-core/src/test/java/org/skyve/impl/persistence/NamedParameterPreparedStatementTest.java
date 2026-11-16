@@ -19,10 +19,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("resource")
@@ -36,7 +38,7 @@ class NamedParameterPreparedStatementTest {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		Mockito.when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
+		when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
 	}
 
 	@Test
@@ -57,7 +59,7 @@ class NamedParameterPreparedStatementTest {
 	void setObjectCallsDelegatePreparedStatement() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "INSERT INTO t VALUES(:val)")) {
 			npps.setObject("val", "hello");
-			Mockito.verify(preparedStatement).setObject(1, "hello");
+			verify(preparedStatement).setObject(1, "hello");
 		}
 	}
 
@@ -65,7 +67,7 @@ class NamedParameterPreparedStatementTest {
 	void setStringCallsDelegatePreparedStatement() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE name=:name")) {
 			npps.setString("name", "bob");
-			Mockito.verify(preparedStatement).setString(1, "bob");
+			verify(preparedStatement).setString(1, "bob");
 		}
 	}
 
@@ -73,7 +75,7 @@ class NamedParameterPreparedStatementTest {
 	void setBooleanCallsDelegate() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE active=:active")) {
 			npps.setBoolean("active", true);
-			Mockito.verify(preparedStatement).setBoolean(1, true);
+			verify(preparedStatement).setBoolean(1, true);
 		}
 	}
 
@@ -81,7 +83,7 @@ class NamedParameterPreparedStatementTest {
 	void setIntCallsDelegate() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE age=:age")) {
 			npps.setInt("age", 42);
-			Mockito.verify(preparedStatement).setInt(1, 42);
+			verify(preparedStatement).setInt(1, 42);
 		}
 	}
 
@@ -89,7 +91,7 @@ class NamedParameterPreparedStatementTest {
 	void setLongCallsDelegate() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE id=:id")) {
 			npps.setLong("id", 12345L);
-			Mockito.verify(preparedStatement).setLong(1, 12345L);
+			verify(preparedStatement).setLong(1, 12345L);
 		}
 	}
 
@@ -98,7 +100,7 @@ class NamedParameterPreparedStatementTest {
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE ts=:ts")) {
 			npps.setTimestamp("ts", ts);
-			Mockito.verify(preparedStatement).setTimestamp(1, ts);
+			verify(preparedStatement).setTimestamp(1, ts);
 		}
 	}
 
@@ -107,7 +109,7 @@ class NamedParameterPreparedStatementTest {
 		Date d = new Date(System.currentTimeMillis());
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE d=:d")) {
 			npps.setDate("d", d);
-			Mockito.verify(preparedStatement).setDate(1, d);
+			verify(preparedStatement).setDate(1, d);
 		}
 	}
 
@@ -116,7 +118,7 @@ class NamedParameterPreparedStatementTest {
 		Time t = new Time(System.currentTimeMillis());
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE t=:t")) {
 			npps.setTime("t", t);
-			Mockito.verify(preparedStatement).setTime(1, t);
+			verify(preparedStatement).setTime(1, t);
 		}
 	}
 
@@ -125,7 +127,7 @@ class NamedParameterPreparedStatementTest {
 		BigDecimal bd = new BigDecimal("3.14");
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE price=:price")) {
 			npps.setBigDecimal("price", bd);
-			Mockito.verify(preparedStatement).setBigDecimal(1, bd);
+			verify(preparedStatement).setBigDecimal(1, bd);
 		}
 	}
 
@@ -134,7 +136,7 @@ class NamedParameterPreparedStatementTest {
 		byte[] bytes = new byte[] {1, 2, 3};
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE data=:data")) {
 			npps.setBytes("data", bytes);
-			Mockito.verify(preparedStatement).setBytes(1, bytes);
+			verify(preparedStatement).setBytes(1, bytes);
 		}
 	}
 
@@ -142,14 +144,14 @@ class NamedParameterPreparedStatementTest {
 	void setNullCallsDelegate() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE val=:val")) {
 			npps.setNull("val", java.sql.Types.VARCHAR);
-			Mockito.verify(preparedStatement).setNull(1, java.sql.Types.VARCHAR);
+			verify(preparedStatement).setNull(1, java.sql.Types.VARCHAR);
 		}
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	void executeCallsDelegate() throws Exception {
-		Mockito.when(preparedStatement.execute()).thenReturn(Boolean.FALSE);
+		when(preparedStatement.execute()).thenReturn(Boolean.FALSE);
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
 			assertFalse(npps.execute());
 		}
@@ -157,8 +159,8 @@ class NamedParameterPreparedStatementTest {
 
 	@Test
 	void executeQueryCallsDelegate() throws Exception {
-		ResultSet rs = Mockito.mock(ResultSet.class);
-		Mockito.when(preparedStatement.executeQuery()).thenReturn(rs);
+		ResultSet rs = mock(ResultSet.class);
+		when(preparedStatement.executeQuery()).thenReturn(rs);
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
 			assertSame(rs, npps.executeQuery());
 		}
@@ -167,7 +169,7 @@ class NamedParameterPreparedStatementTest {
 	@Test
 	@SuppressWarnings("boxing")
 	void executeUpdateCallsDelegate() throws Exception {
-		Mockito.when(preparedStatement.executeUpdate()).thenReturn(Integer.valueOf(3));
+		when(preparedStatement.executeUpdate()).thenReturn(Integer.valueOf(3));
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "UPDATE t SET x=1")) {
 			assertEquals(3, npps.executeUpdate());
 		}
@@ -177,13 +179,13 @@ class NamedParameterPreparedStatementTest {
 	void addBatchCallsDelegate() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
 			npps.addBatch();
-			Mockito.verify(preparedStatement).addBatch();
+			verify(preparedStatement).addBatch();
 		}
 	}
 
 	@Test
 	void executeBatchCallsDelegate() throws Exception {
-		Mockito.when(preparedStatement.executeBatch()).thenReturn(new int[] {1});
+		when(preparedStatement.executeBatch()).thenReturn(new int[] {1});
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
 			int[] counts = npps.executeBatch();
 			assertEquals(1, counts[0]);
@@ -194,14 +196,22 @@ class NamedParameterPreparedStatementTest {
 	void setQueryTimeoutCallsDelegate() throws Exception {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
 			npps.setQueryTimeout(30);
-			Mockito.verify(preparedStatement).setQueryTimeout(30);
+			verify(preparedStatement).setQueryTimeout(30);
+		}
+	}
+
+	@Test
+	void setFetchSizeCallsDelegate() throws Exception {
+		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
+			npps.setFetchSize(500);
+			verify(preparedStatement).setFetchSize(500);
 		}
 	}
 
 	@Test
 	@SuppressWarnings("boxing")
 	void isClosedCallsDelegate() throws Exception {
-		Mockito.when(preparedStatement.isClosed()).thenReturn(Boolean.TRUE);
+		when(preparedStatement.isClosed()).thenReturn(Boolean.TRUE);
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT 1")) {
 			assertTrue(npps.isClosed());
 		}
@@ -219,8 +229,8 @@ class NamedParameterPreparedStatementTest {
 		try (NamedParameterPreparedStatement npps = new NamedParameterPreparedStatement(connection, "SELECT * FROM t WHERE a=:a AND b=:b")) {
 			npps.setString("a", "x");
 			npps.setString("b", "y");
-			Mockito.verify(preparedStatement).setString(1, "x");
-			Mockito.verify(preparedStatement).setString(2, "y");
+			verify(preparedStatement).setString(1, "x");
+			verify(preparedStatement).setString(2, "y");
 		}
 	}
 

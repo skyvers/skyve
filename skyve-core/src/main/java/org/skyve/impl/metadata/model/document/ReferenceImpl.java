@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -37,32 +39,32 @@ public abstract class ReferenceImpl extends AbstractAttribute implements Referen
 	private String queryName;
 
 	@Override
-	public DomainType getDomainType() {
+	public @Nullable DomainType getDomainType() {
 		return domainType;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "domain", required = false)
-	public void setDomainType(DomainType domainType) {
+	public void setDomainType(@Nullable DomainType domainType) {
 		this.domainType = domainType;
 	}
 
 	@Override
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
 	@Override
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 	
@@ -76,12 +78,12 @@ public abstract class ReferenceImpl extends AbstractAttribute implements Referen
 		this.persistent = persistent;
 	}
 
-	public Boolean getPersistentBool() {
+	public @Nonnull Boolean getPersistentBool() {
 		return Boolean.valueOf(persistent);
 	}
 
 	@XmlAttribute(name="persistent", required = false)
-	public void setPersistentBool(Boolean persistent) {
+	public void setPersistentBool(@Nonnull Boolean persistent) {
 		this.persistent = persistent.booleanValue();
 	}
 }

@@ -1,5 +1,8 @@
 package org.skyve.impl.generate.jasperreports;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Descriptor for a JasperReports variable (aggregate expression) used during
  * programmatic {@code .jrxml} generation.
@@ -27,7 +30,7 @@ public class ReportVariable {
 	 *
 	 * @return The variable name.
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -36,7 +39,7 @@ public class ReportVariable {
 	 *
 	 * @param name The variable name.
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -45,7 +48,7 @@ public class ReportVariable {
 	 *
 	 * @return The variable type class name.
 	 */
-	public String getTypeClass() {
+	public @Nullable String getTypeClass() {
 		return typeClass;
 	}
 
@@ -54,7 +57,7 @@ public class ReportVariable {
 	 *
 	 * @param typeClass The variable type class name.
 	 */
-	public void setTypeClass(String typeClass) {
+	public void setTypeClass(@Nullable String typeClass) {
 		this.typeClass = typeClass;
 	}
 
@@ -63,7 +66,7 @@ public class ReportVariable {
 	 *
 	 * @return The variable value expression.
 	 */
-	public String getValue() {
+	public @Nullable String getValue() {
 		return value;
 	}
 
@@ -72,7 +75,7 @@ public class ReportVariable {
 	 *
 	 * @param value The variable value expression.
 	 */
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = value;
 	}
 
@@ -81,7 +84,7 @@ public class ReportVariable {
 	 *
 	 * @return JRXML for this variable.
 	 */
-	public String getJrxml() {
+	public @Nonnull String getJrxml() {
 		return Renderer.renderVariable(this);
 	}
 
@@ -90,7 +93,7 @@ public class ReportVariable {
 	 *
 	 * @return The parent design specification.
 	 */
-	public DesignSpecification getParent() {
+	public @Nullable DesignSpecification getParent() {
 		return parent;
 	}
 	
@@ -99,7 +102,7 @@ public class ReportVariable {
 	 *
 	 * @param parent The parent design specification.
 	 */
-	public void setParent(DesignSpecification parent) {
+	public void setParent(@Nullable DesignSpecification parent) {
 		this.parent = parent;
 	}
 }

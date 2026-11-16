@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs for minimum and maximum size constraints.
  *
@@ -14,7 +16,7 @@ interface FluentConstrainableSize<T extends FluentConstrainableSize<T>> extends 
 	 *            the minimum allowed width in pixels
 	 * @return the fluent builder
 	 */
-	T minPixelWidth(int minPixelWidth);
+	@Nonnull T minPixelWidth(int minPixelWidth);
 
 	/**
 	 * Sets the maximum widget width in pixels.
@@ -23,5 +25,5 @@ interface FluentConstrainableSize<T extends FluentConstrainableSize<T>> extends 
 	 *            the maximum allowed width in pixels
 	 * @return the fluent builder
 	 */
-	T maxPixelWidth(int maxPixelWidth);
+	@Nonnull T maxPixelWidth(int maxPixelWidth);
 }

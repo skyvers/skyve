@@ -2,6 +2,7 @@ package org.skyve.impl.sail.execution;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Map;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
@@ -15,15 +16,21 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.UserAgentType;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base class for executors that maintain and manage a stack of {@link AutomationContext} instances
@@ -38,8 +45,29 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	private TestStrategy testStrategy = null;
 
 	private Deque<T> contextStack = new ArrayDeque<>(8);
+	/**
+	 * The context stacks of the windows that opened the windows the automation is in, the most recent opener first;
+	 * empty in the window the automation started in. See {@link #openWindowContexts()}.
+	 */
+	private final Deque<Deque<T>> openerContextStacks = new ArrayDeque<>(4);
 
-	protected final void push(T context) {
+	/**
+	 * The token that SAIL authors write in value-like attributes to make values unique to a run.
+	 */
+	public static final String RUN_TOKEN = "{run}";
+
+	/**
+	 * The start of a variable token, {@code {var:name}}, that SAIL authors write in value-like attributes
+	 * to use a value captured earlier in the run.
+	 */
+	public static final String VARIABLE_TOKEN_START = "{var:";
+
+	/** The run token and the variables of this run, or null before the first automation or token. */
+	private RunState run = null;
+	/** True when the run was given by {@link #shareRun(RunState)}, so that a new automation keeps it. */
+	private boolean runShared = false;
+
+	protected final void push(@Nonnull T context) {
 		String uxui = context.getUxui();
 		if (uxui == null) {
 			context.setUxui(currentUxUi);
@@ -57,7 +85,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		contextStack.push(context);
 	}
 
-	protected final T pop() {
+	protected final @Nonnull T pop() {
 		T result = contextStack.pop();
 
 		T current = contextStack.peek();
@@ -76,7 +104,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		return result;
 	}
 	
-	protected final T peek() {
+	protected final @Nullable T peek() {
 		return contextStack.peek();
 	}
 	
@@ -85,14 +113,94 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	}
 
 	/**
+	 * Sets the current window's contexts aside, untouched, for a new window that a step has just opened, which starts
+	 * with no contexts. {@link #closeWindowContexts()} puts them back.
+	 *
+	 * <p>Side effects: the context stack is empty until the new window's steps push contexts.
+	 *
+	 * <p>Complexity: O(1).
+	 */
+	protected final void openWindowContexts() {
+		openerContextStacks.push(contextStack);
+		contextStack = new ArrayDeque<>(8);
+	}
+
+	/**
+	 * Drops the contexts of the window being closed and puts back those of the window that opened it, as they were when
+	 * it opened the window.
+	 *
+	 * <p>Complexity: O(1).
+	 *
+	 * @throws MetaDataException	if no window was opened (the automation is in the window it started in)
+	 */
+	protected final void closeWindowContexts() {
+		Deque<T> opener = openerContextStacks.poll();
+		if (opener == null) {
+			throw new MetaDataException("<closeWindow /> has no window to close: the automation is in the window it started in");
+		}
+		contextStack = opener;
+	}
+
+	/**
+	 * Forgets every window opened and not closed, and their openers' contexts, leaving the current window's contexts as
+	 * they are. Executors that drive a browser call it once they have closed those windows themselves.
+	 */
+	protected final void forgetOpenWindows() {
+		openerContextStacks.clear();
+	}
+
+	/**
 	 * Do nothing but populate the current automation context.
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeAutomation(Automation automation) {
+	public void executeAutomation(@Nonnull Automation automation) {
+		initialiseAutomation(automation);
+	}
+
+	/**
+	 * Sets the automation-wide defaults (UX/UI, user agent type and test strategy) from the automation.
+	 * Executors that drive the automation themselves, instead of calling {@link #executeAutomation(Automation)}
+	 * on this class, call this first.
+	 *
+	 * @param automation	the automation being executed
+	 */
+	protected final void initialiseAutomation(@Nonnull Automation automation) {
+		openerContextStacks.clear(); // an automation starts in one window
 		currentUxUi = automation.getUxui();
 		currentUserAgentType = automation.getUserAgentType();
 		testStrategy = automation.getTestStrategy();
+		if (! runShared) {
+			run = new RunState();
+		}
+	}
+
+	/**
+	 * Shares a run with other automations, which may be executed by other executors: this executor's automations
+	 * use the run's token for {@value #RUN_TOKEN} and read and set its variables, instead of starting a run of their own.
+	 * Call it before the automation is executed. A workflow runner gives every executor it uses the same run.
+	 *
+	 * <p>Side effects: replaces this executor's run, and keeps it for every later automation.
+	 *
+	 * @param shared	the run to share
+	 */
+	public final void shareRun(@Nonnull RunState shared) {
+		run = shared;
+		runShared = true;
+	}
+
+	/**
+	 * Returns this executor's run: its token and variables.
+	 *
+	 * @return the run, made on first use if no automation has started one
+	 */
+	public final @Nonnull RunState getRun() {
+		RunState result = run;
+		if (result == null) {
+			result = new RunState();
+			run = result;
+		}
+		return result;
 	}
 	
 	/**
@@ -100,8 +208,11 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateList(NavigateList list) {
+	public void executeNavigateList(@Nonnull NavigateList list) {
 		T context = peek();
+		if (context == null) {
+			throw new MetaDataException("<" + list.getClass().getSimpleName() + " /> has no context to navigate in");
+		}
 		context.setViewType(ViewType.list);
 		
 		Customer c = CORE.getUser().getCustomer();
@@ -112,7 +223,12 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 
 		Document drivingDocument = null;
 		if (queryName != null) {
-			drivingDocument = m.getDocument(c, m.getNullSafeMetaDataQuery(queryName).getDocumentName());
+			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
+			if (q == null) {
+				// As the list grid does, an undefined query name is the name of a document to use the default query of
+				q = m.getDocumentDefaultQuery(c, queryName);
+			}
+			drivingDocument = m.getDocument(c, q.getDocumentName());
 		} else if (documentName != null) {
 			drivingDocument = m.getDocument(c, documentName);
 			if (modelName != null) {
@@ -132,8 +248,11 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateEdit(NavigateEdit edit) {
+	public void executeNavigateEdit(@Nonnull NavigateEdit edit) {
 		T context = peek();
+		if (context == null) {
+			throw new MetaDataException("<NavigateEdit /> has no context to navigate in");
+		}
 		context.setViewType(ViewType.edit);
 		context.setModuleName(edit.getModuleName());
 		context.setDocumentName(edit.getDocumentName());
@@ -144,7 +263,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateTree(NavigateTree tree) {
+	public void executeNavigateTree(@Nonnull NavigateTree tree) {
 		executeNavigateList(tree);
 	}
 
@@ -153,7 +272,7 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateMap(NavigateMap map) {
+	public void executeNavigateMap(@Nonnull NavigateMap map) {
 		executeNavigateList(map);
 	}
 
@@ -162,26 +281,89 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateCalendar(NavigateCalendar calendar) {
+	public void executeNavigateCalendar(@Nonnull NavigateCalendar calendar) {
 		executeNavigateList(calendar);
 	}
 	
 	/**
-	 * Do nothing but clear the automation context.
+	 * Do nothing but clear the automation context, or, for {@code window="new"}, set the contexts aside for the new
+	 * window (see {@link #openWindowContexts()}).
+	 * This is intended to be called by sub-classes.
+	 *
+	 * @throws MetaDataException	if there is no context, unless the link opens a new window
+	 */
+	@Override
+	public void executeNavigateLink(@Nonnull NavigateLink link) {
+		if (NavigateLink.Window.newWindow == link.getWindow()) {
+			openWindowContexts();
+			return;
+		}
+		T context = peek();
+		if (context == null) {
+			throw new MetaDataException("<NavigateLink /> has no context to navigate in");
+		}
+		forgetView(context);
+	}
+
+	/**
+	 * Do nothing but clear the top automation context, if any, as the page that back leads to is unknown.
 	 * This is intended to be called by sub-classes.
 	 */
 	@Override
-	public void executeNavigateLink(NavigateLink link) {
+	public void executeNavigateBack(@Nonnull NavigateBack back) {
 		T context = peek();
+		if (context != null) {
+			forgetView(context);
+		}
+	}
+
+	/**
+	 * Do nothing: the reloaded page has the same URL, so the contexts are unchanged.
+	 * This is intended to be called by sub-classes.
+	 */
+	@Override
+	public void executeRefresh(@Nonnull Refresh refresh) {
+		// the contexts are unchanged
+	}
+
+	/**
+	 * Do nothing but put back the contexts of the window that opened the one being closed
+	 * (see {@link #closeWindowContexts()}).
+	 * This is intended to be called by sub-classes.
+	 *
+	 * @throws MetaDataException	if no window was opened
+	 */
+	@Override
+	public void executeCloseWindow(@Nonnull CloseWindow close) {
+		closeWindowContexts();
+	}
+
+	/**
+	 * Makes a context name no document, view type or list, for a page the executor cannot know, as after a link or a
+	 * back. Executors that implement those steps themselves call it.
+	 *
+	 * @param context	the context
+	 */
+	protected static final void forgetView(@Nonnull AutomationContext<?, ?> context) {
 		context.setDocumentName(null);
 		context.setViewType(null);
+		context.setList(null);
 	}
 	
-	public TestStrategy getTestStrategy() {
+	/**
+	 * Returns the UX/UI the automation (or the latest context that names one) runs in.
+	 *
+	 * @return the UX/UI name, or null before the automation starts
+	 */
+	public @Nullable String getCurrentUxUi() {
+		return currentUxUi;
+	}
+
+	public @Nullable TestStrategy getTestStrategy() {
 		return testStrategy;
 	}
 	
-	public T newContext(PushListContext push, T newContext) {
+	public @Nonnull T newContext(@Nonnull PushListContext push, @Nonnull T newContext) {
 		String moduleName = push.getModuleName();
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(moduleName);
@@ -193,7 +375,8 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		if (queryName != null) {
 			MetaDataQueryDefinition q = m.getMetaDataQuery(queryName);
 			if (q == null) {
-				q = m.getDocumentDefaultQuery(c, documentName);
+				// As the list grid does, an undefined query name is the name of a document to use the default query of
+				q = m.getDocumentDefaultQuery(c, queryName);
 			}
 
 			m = q.getOwningModule();
@@ -202,7 +385,12 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		} else if (documentName != null) {
 			Document d = m.getDocument(c, documentName);
 			if (modelName != null) {
-				d = d.getListModel(c, modelName, false).getDrivingDocument();
+				Document drivingDocument = d.getListModel(c, modelName, false).getDrivingDocument();
+				if (drivingDocument == null) {
+					throw new IllegalStateException("List model " + modelName + " of document " + moduleName + '.' + documentName +
+														" has no driving document");
+				}
+				d = drivingDocument;
 			} else {
 				push.setQueryName(documentName);
 			}
@@ -214,13 +402,14 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		}
 
 		newContext.setViewType(ViewType.list);
+		newContext.setList(push);
 		newContext.setUxui(push.getUxui());
 		newContext.setUserAgentType(push.getUserAgentType());
 		
 		return newContext;
 	}
 	
-	public T newContext(PushEditContext push, T newContext) {
+	public @Nonnull T newContext(@Nonnull PushEditContext push, @Nonnull T newContext) {
 		newContext.setModuleName(push.getModuleName());
 		newContext.setDocumentName(push.getDocumentName());
 
@@ -234,5 +423,103 @@ public abstract class ContextualExecutor<T extends AutomationContext> implements
 		newContext.setUserAgentType(push.getUserAgentType());
 
 		return newContext;
+	}
+
+	/**
+	 * Returns the token that replaces {@value #RUN_TOKEN} in this run's values.
+	 *
+	 * <p>A new token is made by each {@link #executeAutomation(Automation)} (unless the run is shared, see
+	 * {@link #shareRun(RunState)}), and on first use if steps are executed without one. It is 8 or more lower-case
+	 * letters and digits, derived from the current time, so reruns against the same database do not clash on unique
+	 * keys such as user and group names.
+	 *
+	 * @return the run token
+	 */
+	public final @Nonnull String getRunToken() {
+		return getRun().getRunToken();
+	}
+
+	/**
+	 * Returns {@code value} with every {@value #RUN_TOKEN} replaced by {@link #getRunToken()}, and every
+	 * {@code {var:name}} replaced by the value of the variable {@code name}; see {@link #putVariable(String, String)}.
+	 *
+	 * <p>Executors must call this on every value-like attribute before using it; the
+	 * attributes are listed on {@link Executor}. Generator executors that emit code
+	 * for a later run would freeze the token into the generated code.
+	 *
+	 * <p>The value is scanned once, left to right, so a substituted value is not itself substituted.
+	 *
+	 * <p>Complexity: O(n) in the length of {@code value}.
+	 *
+	 * @param value the attribute value as written in the script
+	 * @return the value with the tokens substituted; {@code value} itself when it has no token
+	 * @throws MetaDataException if a {@code {var:name}} names a variable that has not been captured in this run,
+	 * 			or a variable token has no closing brace
+	 */
+	public final @Nonnull String substituteTokens(@Nonnull String value) {
+		int brace = value.indexOf('{');
+		if (brace < 0) {
+			return value;
+		}
+		StringBuilder result = null;
+		int copied = 0;
+		while (brace >= 0) {
+			String replacement = null;
+			int end = brace;
+			if (value.startsWith(RUN_TOKEN, brace)) {
+				replacement = getRunToken();
+				end = brace + RUN_TOKEN.length();
+			}
+			else if (value.startsWith(VARIABLE_TOKEN_START, brace)) {
+				int close = value.indexOf('}', brace);
+				if (close < 0) {
+					throw new MetaDataException("'" + value + "' has a " + VARIABLE_TOKEN_START + " with no closing }");
+				}
+				String name = value.substring(brace + VARIABLE_TOKEN_START.length(), close);
+				Map<String, String> variables = getRun().variables();
+				replacement = variables.get(name);
+				if (replacement == null) {
+					throw new MetaDataException(VARIABLE_TOKEN_START + name + "} is not defined: capture it first with <captureValue variable=\"" +
+													name + "\" />" + (variables.isEmpty() ? "; no variables are defined" : "; the variables defined are " + variables.keySet()));
+				}
+				end = close + 1;
+			}
+			if (replacement != null) {
+				if (result == null) {
+					result = new StringBuilder(value.length() + 32);
+				}
+				result.append(value, copied, brace).append(replacement);
+				copied = end;
+			}
+			brace = value.indexOf('{', Math.max(end, brace + 1));
+		}
+		if (result == null) {
+			return value;
+		}
+		return result.append(value, copied, value.length()).toString();
+	}
+
+	/**
+	 * Sets the variable {@code name} to {@code value} for the rest of this run, replacing any earlier value.
+	 * Each {@link #executeAutomation(Automation)} starts with no variables, unless the run is shared
+	 * (see {@link #shareRun(RunState)}).
+	 *
+	 * <p>Side effects: later {@link #substituteTokens(String)} calls replace {@code {var:name}} with {@code value}.
+	 *
+	 * @param name the variable name
+	 * @param value the value
+	 */
+	public final void putVariable(@Nonnull String name, @Nonnull String value) {
+		getRun().putVariable(name, value);
+	}
+
+	/**
+	 * Returns the value of the variable {@code name}.
+	 *
+	 * @param name the variable name
+	 * @return the value, or {@code null} if the variable has not been captured in this run
+	 */
+	public final @Nullable String getVariable(@Nonnull String name) {
+		return getRun().getVariable(name);
 	}
 }

@@ -5,6 +5,8 @@ import java.util.List;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for view elements that accept declarative binding parameters.
  *
@@ -20,5 +22,5 @@ public interface Parameterizable extends SerializableMetaData {
 	 *
 	 * @return a non-{@code null} list of parameters; may be empty
 	 */
-	public List<Parameter> getParameters();
+	public @Nonnull List<Parameter> getParameters();
 }

@@ -1,6 +1,7 @@
 package util;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.BlockJUnit4ClassRunner;
@@ -12,17 +13,17 @@ import org.junit.runners.model.Statement;
  * Runs each test on a separate thread in parallel and waits for them to complete.
  */
 public class JUnitMultiThreadedRunner extends BlockJUnit4ClassRunner {
-	private AtomicInteger threadCount;
+	private final List<Thread> threads = new CopyOnWriteArrayList<>();
 
 	public JUnitMultiThreadedRunner(Class<?> klass) throws InitializationError {
 		super(klass);
-		threadCount = new AtomicInteger(0);
 	}
 
 	@Override
 	protected void runChild(final FrameworkMethod method, final RunNotifier notifier) {
-		threadCount.incrementAndGet();
-		new Thread(new Test(method, notifier)).start();
+		Thread thread = new Thread(new Test(method, notifier));
+		threads.add(thread);
+		thread.start();
 	}
 
 	@Override
@@ -33,8 +34,8 @@ public class JUnitMultiThreadedRunner extends BlockJUnit4ClassRunner {
 			public void evaluate() throws Throwable {
 				JUnitMultiThreadedRunner.super.childrenInvoker(notifier).evaluate();
 				// wait for all threads to complete
-				while (threadCount.get() > 0) {
-					Thread.sleep(100);
+				for (Thread thread : threads) {
+					thread.join();
 				}
 			}
 		};
@@ -53,7 +54,6 @@ public class JUnitMultiThreadedRunner extends BlockJUnit4ClassRunner {
 		@SuppressWarnings("synthetic-access")
 		public void run() {
 			JUnitMultiThreadedRunner.super.runChild(method, notifier);
-			threadCount.decrementAndGet();
 		}
 	}
 }

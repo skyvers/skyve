@@ -13,6 +13,8 @@ import org.skyve.impl.metadata.view.component.Component;
 import org.skyve.impl.metadata.view.component.ComponentViewVisitor;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A Thread-Safe (reentrant) Weak Referenced Map of other views' components to the fragments they point to.
  * 
@@ -21,7 +23,7 @@ import org.skyve.impl.util.UtilImpl;
 class ComponentFragments {
 	private ViewImpl owner = null;
 	
-	public ComponentFragments(ViewImpl owner) {
+	public ComponentFragments(@Nonnull ViewImpl owner) {
 		this.owner = owner;
 	}
 	
@@ -51,7 +53,7 @@ class ComponentFragments {
 	 * @param generate	Whether to generate the access control list for the fragment
 	 * @return	The fragment (as a view)
 	 */
-	ViewImpl get(CustomerImpl c, ModuleImpl m, DocumentImpl d, String uxui, Component component, boolean generate) {
+	@Nonnull ViewImpl get(@Nonnull CustomerImpl c, @Nonnull ModuleImpl m, @Nonnull DocumentImpl d, @Nonnull String uxui, @Nonnull Component component, boolean generate) {
 		ViewImpl result = null;
 
 		read.lock(); // take read lock
@@ -72,14 +74,14 @@ class ComponentFragments {
 						if (widgetId == null) { // full view clone
 							view.resolve(uxui, c, m, d, generate);
 							result = view;
-							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, result, uxui, component.getBinding(), component.getNames(), widgetId);
+							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, result, uxui, component.getBinding(), component.getActions(), component.getConditions(), widgetId);
 							visitor.visit();
 						}
 						else { // partial vie clone for a widget Id
 							// Create a new temp view and add the relevant part as a child
 							result = new ViewImpl();
 							// Note that visit without resolving first works
-							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, view, uxui, component.getBinding(), component.getNames(), widgetId);
+							ComponentViewVisitor visitor = new ComponentViewVisitor(c, m, d, view, uxui, component.getBinding(), component.getActions(), component.getConditions(), widgetId);
 							visitor.visit();
 							result.getContained().addAll(visitor.getContained());
 							// Now resolve the new view

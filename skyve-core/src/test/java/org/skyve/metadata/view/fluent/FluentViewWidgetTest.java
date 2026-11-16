@@ -40,12 +40,12 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentTabDisabledConditionSetsValue() {
-		assertEquals("notReady", new FluentTab().disabledConditionName("notReady").get().getDisabledConditionName());
+		assertEquals("notReady", new FluentTab().disabledCondition("notReady").get().getDisabledCondition());
 	}
 
 	@Test
 	void fluentTabInvisibleConditionSetsValue() {
-		assertEquals("hidden", new FluentTab().invisibleConditionName("hidden").get().getInvisibleConditionName());
+		assertEquals("hidden", new FluentTab().invisibleCondition("hidden").get().getInvisibleCondition());
 	}
 
 	// ---- FluentLabel --------------------------------------------------------
@@ -67,7 +67,7 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentLabelInvisibleConditionSetsValue() {
-		assertEquals("cond", new FluentLabel().invisibleConditionName("cond").get().getInvisibleConditionName());
+		assertEquals("cond", new FluentLabel().invisibleCondition("cond").get().getInvisibleCondition());
 	}
 
 	@Test
@@ -108,21 +108,25 @@ class FluentViewWidgetTest {
 		assertEquals("Save", new FluentButton().actionName("Save").get().getActionName());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentButtonPixelWidthSetsValue() {
 		assertEquals(120, new FluentButton().pixelWidth(120).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentButtonPixelHeightSetsValue() {
 		assertEquals(40, new FluentButton().pixelHeight(40).get().getPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentButtonMinPixelHeightSetsValue() {
 		assertEquals(20, new FluentButton().minPixelHeight(20).get().getMinPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentButtonMaxPixelHeightSetsValue() {
 		assertEquals(60, new FluentButton().maxPixelHeight(60).get().getMaxPixelHeight().intValue());
@@ -160,6 +164,7 @@ class FluentViewWidgetTest {
 		assertEquals(CompleteType.previous, new FluentTextField().complete(CompleteType.previous).get().getComplete());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentTextFieldPixelWidthSetsValue() {
 		assertEquals(200, new FluentTextField().pixelWidth(200).get().getPixelWidth().intValue());
@@ -207,14 +212,15 @@ class FluentViewWidgetTest {
 		assertEquals("https://example.com/help", new FluentView().helpURL("https://example.com/help").get().getHelpURL());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fluentViewRefreshTimeInSecondsSetsValue() {
 		assertEquals(30, new FluentView().refreshTimeInSeconds(30).get().getRefreshTimeInSeconds().intValue());
 	}
 
 	@Test
-	void fluentViewRefreshConditionNameSetsValue() {
-		assertEquals("needsRefresh", new FluentView().refreshConditionName("needsRefresh").get().getRefreshConditionName());
+	void fluentViewRefreshIfConditionSetsValue() {
+		assertEquals("needsRefresh", new FluentView().refreshIfCondition("needsRefresh").get().getRefreshIfCondition());
 	}
 
 	@Test
@@ -231,7 +237,7 @@ class FluentViewWidgetTest {
 
 	@Test
 	void fluentSpacerInvisibleConditionSetsValue() {
-		assertEquals("hidden", new FluentSpacer().invisibleConditionName("hidden").get().getInvisibleConditionName());
+		assertEquals("hidden", new FluentSpacer().invisibleCondition("hidden").get().getInvisibleCondition());
 	}
 
 	// ---- FluentTabPane -------------------------------------------------------

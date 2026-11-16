@@ -34,7 +34,7 @@ public class UserProxyExtension extends UserProxy {
 				result.clearAllPermissionsAndMenus();
 				@SuppressWarnings("resource")
 				Connection connection = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
-				ProvidedRepositoryFactory.get().populateUser(result, connection);
+				ProvidedRepositoryFactory.getNullSafe().populateUser(result, connection);
 			}
 		}
 

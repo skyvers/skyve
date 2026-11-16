@@ -126,7 +126,6 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		def.name = "amount";
 		def.title = "Amount";
 		def.type = "integer";
-		def.defaultValueJavascriptExpression = "10";
 		def.editorType = "spinner";
 		def.required = true;
 		def.requiredMessage = "Need amount";
@@ -140,7 +139,6 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 
 		String js = def.toJavascript();
 		assertTrue(js.contains("name:'amount'"));
-		assertTrue(js.contains("defaultValue:10"));
 		assertTrue(js.contains("editorType:'spinner'"));
 		assertTrue(js.contains("bizRequired:true,requiredMessage:'Need amount'"));
 		assertTrue(js.contains("valueMap:{"));
@@ -152,7 +150,7 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 	}
 
 	@Test
-	void dataGridToJavascriptEscapesStringDefaultValueAsJavascriptLiteral() {
+	void dataGridToJavascriptOmitsDefaultValueAsServerCreatesNewRows() {
 		DocumentImpl document = new DocumentImpl();
 		document.setName("Fixture");
 		document.setOwningModuleName("test");
@@ -170,21 +168,24 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		CustomisationsStaticSingleton.set(customisations);
 
 		try {
+			@SuppressWarnings("null") // passes null on purpose
 			SmartClientDataGridFieldDefinition def = new SmartClientDataGridFieldDefinition(null,
-					new CustomerImpl(),
-					null,
-					document,
-					widget,
-					null,
-					false,
-					false,
-					false,
-					"desktop");
+																								new CustomerImpl(),
+																								null,
+																								document,
+																								document,
+																								widget,
+																								null,
+																								false,
+																								false,
+																								false,
+																								"desktop");
 
 			String js = def.toJavascript();
 
-			assertTrue(js.contains("defaultValue:'Test {el:newGeometry(\\'POINT(0 0)\\')}'"), js);
-			assertFalse(js.contains("defaultValue:'Test {el:newGeometry('POINT(0 0)')}'"), js);
+			// A default value expression can't be evaluated on the client, so none is rendered
+			assertTrue(js.contains("name:'memo'"), js);
+			assertFalse(js.contains("defaultValue"), js);
 		}
 		finally {
 			CustomisationsStaticSingleton.set(previousCustomisations);
@@ -299,9 +300,9 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		def.type = "image";
 		def.pixelWidth = Integer.valueOf(32);
 		String imageJs = def.toJavascript();
-		assertTrue(imageJs.contains("formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'"));
+		assertTrue(imageJs.contains("formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(32,32);if(v){var u='content?_n='+v+'"));
 		assertFalse(imageJs.contains("emulationAwareUrl"));
-		assertTrue(imageJs.contains("&_w=32&_h=32"));
+		assertTrue(imageJs.contains("&_w='+s+'&_h='+s+'"));
 
 		def.type = "link";
 		String linkJs = def.toJavascript();

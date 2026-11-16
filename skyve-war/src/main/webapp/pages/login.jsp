@@ -1,4 +1,5 @@
 <%@ page session="false" language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.security.Principal"%>
 <%@ page import="java.util.Locale"%>
 <%@ page import="org.skyve.CORE"%>
 <%@ page import="org.skyve.metadata.customer.Customer"%>
@@ -21,6 +22,9 @@
 
 	String basePath = Util.getSkyveContextUrl() + "/";
 	String customer = WebUtil.determineCustomerWithoutSession(request);
+
+	Principal principal = request.getUserPrincipal();
+	boolean alreadyLoggedIn = (principal != null);
 	
 	// Check if this was a login error
 	boolean loginError = (request.getParameter("error") != null);
@@ -204,6 +208,7 @@
 				</script>
 		</head>
 			<body onload="<%=initialFocusScript%>">
+		<%@include file="fragments/environmentBanners.jsp" %>
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
@@ -252,8 +257,8 @@
 		        <form name="loginForm" method="post" onsubmit="return testMandatoryFields(this)" class="ui large form">
 		            <div class="ui segment">
 		            	<div class="ui header">
-		            		<% if (request.getUserPrincipal() != null) { %>
-								<%=Util.i18n("page.login.alreadyLoggedIn", locale, request.getUserPrincipal().getName())%>
+							<% if (alreadyLoggedIn) { %>
+								<%=Util.i18n("page.login.alreadyLoggedIn", locale, principal.getName())%>
 							<% } else { %>
 								<%=loginBanner%>
 							<% } %>
@@ -319,6 +324,11 @@
 		    					</div>
     					</div>
 						<input type="submit" value="<%=Util.i18n("page.login.submit.label", locale)%>" class="ui fluid large blue submit button" />
+						<% if ((! show2FA) && (loginError || tfaExpired || alreadyLoggedIn)) { %>
+							<div style="margin-top: 5px;">
+								<a href="<%=Util.getBaseUrl()%>" onclick="return window.SKYVE ? SKYVE.Util.retryFromErrorPage(this.href) : true;" class="ui fluid basic large button"><%=Util.i18n("page.phone.home", locale)%></a>
+							</div>
+						<% } %>
 						<% if (show2FA) { %>
 							<div style="margin-top: 5px;">
 								<input type="button"

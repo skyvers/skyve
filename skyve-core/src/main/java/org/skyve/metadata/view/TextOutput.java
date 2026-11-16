@@ -2,6 +2,7 @@ package org.skyve.metadata.view;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -23,7 +24,7 @@ public interface TextOutput {
 	 * @return {@code Boolean.TRUE} to escape, {@code Boolean.FALSE} to render raw HTML,
 	 *         or {@code null} to use the widget-type default
 	 */
-	Boolean getEscape();
+	@Nullable Boolean getEscape();
 
 	/**
 	 * Defines the HTML sanitisation policy applied to a rich-text value before rendering.
@@ -49,5 +50,5 @@ public interface TextOutput {
 		text
 	}
 	
-	Sanitisation getSanitise();
+	@Nullable Sanitisation getSanitise();
 }

@@ -17,6 +17,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -35,7 +37,7 @@ public class SetTitleAction extends FacesAction<Void> {
 	 *
 	 * @param facesView Faces view receiving the raw resolved title; must not be {@code null}
 	 */
-	public SetTitleAction(FacesView facesView) {
+	public SetTitleAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 
@@ -48,13 +50,16 @@ public class SetTitleAction extends FacesAction<Void> {
 	 * page-title output boundary.
 	 */
 	@Override
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("SetTitleAction");
 
 		if (facesView.getBean() != null) {
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
 			Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
+			if (targetBean == null) { // ActionUtil has logged the view binding that yields null
+				return null;
+			}
 	    	Module targetModule = customer.getModule(targetBean.getBizModule());
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();

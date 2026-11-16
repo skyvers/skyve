@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Singleton repository of per-file {@link java.util.concurrent.locks.ReentrantReadWriteLock}
  * instances that serialises concurrent read and write access to archive files.
@@ -28,11 +30,11 @@ public class FileLockRepo {
     private FileLockRepo() {
     }
 
-    public static FileLockRepo getInstance() {
+    public static @Nonnull FileLockRepo getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
-    public synchronized ReentrantReadWriteLock getLockFor(File file) throws IOException {
+    public synchronized @Nonnull ReentrantReadWriteLock getLockFor(@Nonnull File file) throws IOException {
 
         return locks.computeIfAbsent(file.getCanonicalPath(), (k) -> new ReentrantReadWriteLock());
     }

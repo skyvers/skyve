@@ -23,6 +23,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provide a depth-first traversal of references as defined in the skyve metadata.
  * More specifically, it visits all the following references which target a given bean.
@@ -46,23 +48,23 @@ public abstract class ExportedReferenceVisitor {
 	private static final String WHERE_SQL = " where ";
 	private static final String PARAMETER_EQUALS_SQL = " = :";
 
-	public void visit(Bean bean) {
+	public void visit(@Nonnull Bean bean) {
 		CustomerImpl c = (CustomerImpl) CORE.getUser().getCustomer();
 		visit(c, c.getModule(bean.getBizModule()).getDocument(c, bean.getBizDocument()), bean);
 	}
 	
-	public void visit(Document document, Bean bean) {
+	public void visit(@Nonnull Document document, @Nonnull Bean bean) {
 		CustomerImpl c = (CustomerImpl) CORE.getUser().getCustomer();
 		visit(c, document, bean);
 	}
 
-	private void visit(final CustomerImpl customer, Document document, Bean bean) {
+	private void visit(final @Nonnull CustomerImpl customer, @Nonnull Document document, @Nonnull Bean bean) {
 		final Set<String> bizIdsVisited = new TreeSet<>();
 		
 		new CascadeDeleteBeanVisitor() {
 			@Override
-			public void preDeleteProcessing(Document documentToCascade,
-												Bean beanToCascade)
+			public void preDeleteProcessing(@Nonnull Document documentToCascade,
+												@Nonnull Bean beanToCascade)
 			throws Exception {
 				Set<String> documentsVisited = new TreeSet<>();
 				visitBean(customer, documentToCascade, beanToCascade.getBizId(), documentsVisited, bizIdsVisited);
@@ -70,11 +72,11 @@ public abstract class ExportedReferenceVisitor {
 		}.visit(document, bean, customer);
 	}
 	
-	private void visitBean(CustomerImpl customer, 
-							Document document, 
-							String bizId, 
-							Set<String> documentsVisited,
-							Set<String> bizIdsVisited) {
+	private void visitBean(@Nonnull CustomerImpl customer, 
+							@Nonnull Document document, 
+							@Nonnull String bizId, 
+							@Nonnull Set<String> documentsVisited,
+							@Nonnull Set<String> bizIdsVisited) {
 		if (bizIdsVisited.contains(bizId)) {
 			return;
 		}
@@ -122,11 +124,11 @@ public abstract class ExportedReferenceVisitor {
 		}
 	}
 
-	private void visitReference(CustomerImpl customer,
-									Document document,
-									String bizId,
-									ExportedReference ref,
-									Document referenceDocument) {
+	private void visitReference(@Nonnull CustomerImpl customer,
+									@Nonnull Document document,
+									@Nonnull String bizId,
+									@Nonnull ExportedReference ref,
+									@Nonnull Document referenceDocument) {
 		Persistent referencePersistent = referenceDocument.getPersistent();
 		if ((referencePersistent != null) && referencePersistent.isPolymorphicallyMapped()) {
 			// Find all implementations below the mapped and check these instead
@@ -141,9 +143,9 @@ public abstract class ExportedReferenceVisitor {
 		}
 	}
 
-	private void populateImmediateMapImplementingDerivations(CustomerImpl customer,
-																Document document,
-																Set<Document> result) {
+	private void populateImmediateMapImplementingDerivations(@Nonnull CustomerImpl customer,
+																@Nonnull Document document,
+																@Nonnull Set<Document> result) {
 		for (String derivedDocumentName : customer.getDerivedDocuments(document)) {
 			int dotIndex = derivedDocumentName.indexOf('.');
 			Module derivedModule = customer.getModule(derivedDocumentName.substring(0, dotIndex));
@@ -167,10 +169,10 @@ public abstract class ExportedReferenceVisitor {
 	 * @param referenceDocument	The document that has this reference in it (is pointing to)
 	 * @throws Exception
 	 */
-	protected abstract void acceptReference(Document document,
-												String bizId,
-												ExportedReference exportedReference,
-												Document referenceDocument);
+	protected abstract void acceptReference(@Nonnull Document document,
+												@Nonnull String bizId,
+												@Nonnull ExportedReference exportedReference,
+												@Nonnull Document referenceDocument);
 
 	/**
 	 * Process the parent reference.
@@ -180,9 +182,9 @@ public abstract class ExportedReferenceVisitor {
 	 * @param parentDocument	The document that has the parent reference in it (is pointing to)
 	 * @throws Exception
 	 */
-	protected abstract void acceptParent(Document document,
-											String bizId,
-											Document parentDocument);
+	protected abstract void acceptParent(@Nonnull Document document,
+											@Nonnull String bizId,
+											@Nonnull Document parentDocument);
 	
 	public static final class Dereferencer extends ExportedReferenceVisitor {
 		
@@ -203,7 +205,7 @@ public abstract class ExportedReferenceVisitor {
 		 * @param newBizId	The value to set instead of null.
 		 * @return	The Dereferencer for method chaining.
 		 */
-		public Dereferencer putDefault(Document document, String newBizId) {
+		public @Nonnull Dereferencer putDefault(@Nonnull Document document, @Nonnull String newBizId) {
 			return putDefault(document.getOwningModuleName(), document.getName(), newBizId);
 		}
 		
@@ -215,17 +217,17 @@ public abstract class ExportedReferenceVisitor {
 		 * @param newBizId	The value to set instead of null.
 		 * @return	The Dereferencer for method chaining.
 		 */
-		public Dereferencer putDefault(String moduleName, String documentName, String newBizId) {
+		public @Nonnull Dereferencer putDefault(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String newBizId) {
 			newBizIds.put(moduleName + '.' + documentName, newBizId);
 			return this;
 		}
 
 		@Override
 		@SuppressWarnings("java:S3776") // Complexity OK
-		protected void acceptReference(Document document,
-										String bizId,
-										ExportedReference exportedReference, 
-										Document referenceDocument) {
+		protected void acceptReference(@Nonnull Document document,
+										@Nonnull String bizId,
+										@Nonnull ExportedReference exportedReference, 
+										@Nonnull Document referenceDocument) {
 			// This thing processes aggregated and composed associations
 			// It doesn't really matter if we unlink the object graph we are traversing
 			// as hibernate just issues the SQL based on the object in memory.
@@ -287,9 +289,9 @@ public abstract class ExportedReferenceVisitor {
 		}
 
 		@Override
-		protected void acceptParent(Document document,
-										String bizId,
-										Document parentDocument) {
+		protected void acceptParent(@Nonnull Document document,
+										@Nonnull String bizId,
+										@Nonnull Document parentDocument) {
 			if (document.equals(parentDocument)) { // hierarchical
 				String newBizId = newBizIds.get(parentDocument.getOwningModuleName() + '.' + parentDocument.getName());
 

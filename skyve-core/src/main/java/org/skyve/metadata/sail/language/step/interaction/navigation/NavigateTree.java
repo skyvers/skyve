@@ -3,6 +3,7 @@ package org.skyve.metadata.sail.language.step.interaction.navigation;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -22,7 +23,7 @@ public class NavigateTree extends NavigateList {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeNavigateTree(this);
 	}
 }

@@ -17,6 +17,19 @@
 		<document ref="UploadFixture" />
 		<document ref="UploadFixtureGridRow" />
 		<document ref="LookupDescription" />
+		<document ref="ModelLookupFixture" />
+		<document ref="ModelLookupRow" />
+		<document ref="ConditionsFixture" />
+		<document ref="ConditionsFixtureRow" />
+		<document ref="ConditionsFixtureNode" />
+		<document ref="DialogsFixture" />
+		<document ref="DialogsFixtureRow" />
+		<document ref="ActionsFixture" />
+		<document ref="ActionsFixtureRow" />
+		<document ref="ListGridFixture" />
+		<document ref="OrderedGridFixture" />
+		<document ref="OrderedGridFixtureRow" />
+		<document ref="OrderedGridFixtureLine" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -64,6 +77,59 @@
 					<contentPermission attribute="containerColumnContent" />
 				</document>
 				<document name="LookupDescription" permission="CRUDD" />
+				<document name="ModelLookupFixture" permission="CRUDD" />
+				<document name="ModelLookupRow" permission="CRUDD" />
+				<document name="ConditionsFixture" permission="CRUDD">
+					<action name="ConditionsAction1" />
+					<action name="ConditionsAction2" />
+					<action name="ConditionsAction3" />
+					<action name="ConditionsAction4" />
+					<action name="ConditionsExport" />
+					<action name="ConditionsImport" />
+					<action name="ConditionsDownload" />
+					<action name="ConditionsUpload" />
+					<contentPermission attribute="content1" />
+					<contentPermission attribute="content2" />
+					<contentPermission attribute="content3" />
+					<contentPermission attribute="content4" />
+					<contentPermission attribute="contentSignature1" />
+					<contentPermission attribute="contentSignature2" />
+					<contentPermission attribute="contentSignature3" />
+					<contentPermission attribute="contentSignature4" />
+				</document>
+				<document name="ConditionsFixtureRow" permission="CRUDD">
+					<contentPermission attribute="content" />
+				</document>
+				<document name="ConditionsFixtureNode" permission="CRUDD" />
+				<document name="DialogsFixture" permission="CRUDD">
+					<action name="AskOnce" />
+					<action name="AskTwice" />
+					<action name="AskYesNo" />
+					<action name="AskEveryRun" />
+					<action name="SaveThenAsk" />
+					<action name="AskWrapped" />
+				</document>
+				<document name="DialogsFixtureRow" permission="CRUDD" />
+				<document name="ActionsFixture" permission="CRUDD">
+					<action name="RunFromToolbar" />
+					<action name="RunFromEvent" />
+					<action name="RunWithoutTrigger" />
+					<action name="RunFromFormButton" />
+					<action name="RunFromTabButton" />
+					<action name="RunShared" />
+					<action name="DownloadOnce" />
+					<action name="ActionsExport" />
+					<action name="ActionsImport" />
+					<action name="ActionsUpload" />
+				</document>
+				<document name="ActionsFixtureRow" permission="CRUDD">
+					<action name="RunFromRow" />
+					<action name="ExportFromRow" />
+				</document>
+				<document name="ListGridFixture" permission="CRUDD" />
+				<document name="OrderedGridFixture" permission="CRUDD" />
+				<document name="OrderedGridFixtureRow" permission="CRUDD" />
+				<document name="OrderedGridFixtureLine" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -86,16 +152,114 @@
 		<link href="#" name="Map">
 			<role name="dev" />
 		</link>
+		<!-- for SAIL's navigateMap; high in the menu, so that the PrimeFaces recorder's bar (bottom left) does not cover it -->
+		<map name="List Attribute Map" document="ListAttributes" geometryBinding="geometry">
+			<role name="dev" />
+		</map>
 		<link href="#" name="Tree">
 			<role name="dev" />
 		</link>
 		<list name="Lookup values" document="LookupDescription">
 			<role name="dev" />
 		</list>
+		<edit name="Model Lookup Fixture" document="ModelLookupFixture">
+			<role name="dev" />
+		</edit>
+		<edit name="Conditions Fixture" document="ConditionsFixture">
+			<role name="dev" />
+		</edit>
+		<edit name="Dialogs Fixture" document="DialogsFixture">
+			<role name="dev" />
+		</edit>
+		<edit name="Actions Fixture" document="ActionsFixture">
+			<role name="dev" />
+		</edit>
+		<edit name="List Grid Fixture" document="ListGridFixture">
+			<role name="dev" />
+		</edit>
+		<list name="Ordered Grid Fixtures" document="OrderedGridFixture">
+			<role name="dev" />
+		</list>
+		<!-- A tree and a calendar menu item, for SAIL's navigateTree and navigateCalendar (SmartClient only: PrimeFaces has
+			 no tree or calendar page) -->
+		<tree name="Condition Node Tree" query="qConditionsFixtureNodes">
+			<uxui name="desktop" />
+			<role name="dev" />
+		</tree>
+		<calendar name="List Attribute Calendar" document="ListAttributes" startBinding="dateTime" endBinding="dateTime">
+			<uxui name="desktop" />
+			<role name="dev" />
+		</calendar>
 	</menu>
 	<queries>
 		<query name="qEscapingFixture" documentName="ListAttributes">
 			<description>Small query used by the Kitchen Sink escaping fixture view.</description>
+			<columns>
+				<column binding="text" displayName="Text" />
+			</columns>
+		</query>
+		<query name="qModelLookupValues" documentName="LookupDescription">
+			<description>Model lookup values</description>
+			<columns>
+				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
+				<column binding="bizId" displayName="Record ID" />
+			</columns>
+		</query>
+		<query name="qModelLookupFixtures" documentName="ModelLookupFixture">
+			<description>Saved model lookup selections</description>
+			<columns>
+				<column binding="name" />
+				<column binding="selection" displayName="Selected Lookup" />
+				<column binding="selection.description" displayName="Selected Description" />
+				<column binding="singleSelection.description" displayName="Single-column Selection" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureVue" documentName="LookupDescription">
+			<description>Lookup values listed by the List Grid Fixture's Vue list grid.</description>
+			<columns>
+				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureFaces" documentName="LookupDescription">
+			<description>Lookup values listed by the List Grid Fixture's PrimeFaces data table.</description>
+			<columns>
+				<column binding="description" displayName="Lookup Description" sortOrder="ascending" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureVueAttributes" documentName="ListAttributes">
+			<description>List attributes listed by the List Grid Fixture's Vue list grid, for filters on each column type.</description>
+			<columns>
+				<column binding="text" displayName="Text" sortOrder="ascending" />
+				<column binding="constantEnum" displayName="Constant Enum" />
+				<column binding="constantDomain" displayName="Constant Domain" />
+				<column binding="booleanFlag" displayName="Boolean Flag" />
+				<column binding="date" displayName="Date" />
+				<column binding="dateTime" displayName="Date Time" />
+				<column binding="time" displayName="Time" />
+				<column binding="timestamp" displayName="Timestamp" />
+			</columns>
+		</query>
+		<query name="qListGridFixtureFacesAttributes" documentName="ListAttributes">
+			<description>List attributes listed by the List Grid Fixture's PrimeFaces data table, for filters on each column type.</description>
+			<columns>
+				<column binding="text" displayName="Text" sortOrder="ascending" />
+				<column binding="constantEnum" displayName="Constant Enum" />
+				<column binding="constantDomain" displayName="Constant Domain" />
+				<column binding="booleanFlag" displayName="Boolean Flag" />
+				<column binding="date" displayName="Date" />
+				<column binding="dateTime" displayName="Date Time" />
+				<column binding="time" displayName="Time" />
+				<column binding="timestamp" displayName="Timestamp" />
+			</columns>
+		</query>
+		<query name="qConditionsFixtureListAttributes" documentName="ListAttributes">
+			<description>List attributes listed by the list grids and list repeaters of the Kitchen Sink conditions fixture view.</description>
+			<columns>
+				<column binding="text" displayName="Text" />
+			</columns>
+		</query>
+		<query name="qConditionsFixtureNodes" documentName="ConditionsFixtureNode">
+			<description>Nodes listed by the tree grids of the Kitchen Sink conditions fixture view.</description>
 			<columns>
 				<column binding="text" displayName="Text" />
 			</columns>

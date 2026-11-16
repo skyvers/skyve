@@ -32,6 +32,8 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationFa
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -77,13 +79,15 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 *
 	 * @param userDetailsManager user-details manager used for challenge state retrieval and updates
 	 */
-	public TwoFactorAuthPushFilter(UserDetailsManager userDetailsManager) {
+	public TwoFactorAuthPushFilter(@Nonnull UserDetailsManager userDetailsManager) {
 		setRequiresAuthenticationRequestMatcher(DEFAULT_LOGIN_ATTEMPT_PATH_REQUEST_MATCHER);
 		this.userDetailsManager = userDetailsManager;
 	}
 	
 	@Override
-	public void doFilter(ServletRequest iRequest, ServletResponse iResponse, FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest iRequest,
+						@SuppressWarnings("null") @Nonnull ServletResponse iResponse,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest request = (HttpServletRequest) iRequest;
 		HttpServletResponse response = (HttpServletResponse) iResponse;
@@ -103,7 +107,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param response outbound login response
 	 * @return true when this filter should be skipped
 	 */
-	protected boolean skipPushFilter(HttpServletRequest request, HttpServletResponse response) {
+	protected boolean skipPushFilter(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
 		// No two factor customers defined
 		if (UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS == null) {
 			return true;
@@ -130,7 +134,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return (! isTwoFactorEnabled(config));
 	}
 
-	private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) 
+	private void doFilter(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, @Nonnull FilterChain chain) 
 	throws IOException, ServletException{
 		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
 		if (twoFactorToken != null) {
@@ -161,9 +165,9 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		chain.doFilter(request, response);
 	}
 
-	private void doUnsupportedPushConfigurationProcess(HttpServletRequest request,
-														HttpServletResponse response,
-														TwoFactorAuthCustomerConfiguration config)
+	private void doUnsupportedPushConfigurationProcess(@Nonnull HttpServletRequest request,
+														@Nonnull HttpServletResponse response,
+														@Nonnull TwoFactorAuthCustomerConfiguration config)
 	throws IOException, ServletException {
 		LOGGER.warn("No MFA push filter supports the configured type [{}]", config.getTfaType());
 		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_ERROR_PATH);
@@ -171,7 +175,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	}
 
 	@SuppressWarnings("static-method")
-	protected boolean isTwoFactorEnabled(TwoFactorAuthCustomerConfiguration config) {
+	protected boolean isTwoFactorEnabled(@Nullable TwoFactorAuthCustomerConfiguration config) {
 		return (config != null) && (! config.isTfaOff());
 	}
 	
@@ -188,7 +192,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private boolean doPushNotificationProcess(HttpServletRequest request, HttpServletResponse response) 
+	private boolean doPushNotificationProcess(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
 	throws IOException, ServletException {
 		String userName = obtainUsername(request);
 		String customerName = obtainCustomer(request);
@@ -243,7 +247,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	private boolean doTFACodeCheckProcess(HttpServletRequest request, HttpServletResponse response) 
+	private boolean doTFACodeCheckProcess(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) 
 	throws IOException, ServletException {
 		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
 		String username = obtainUsername(request);
@@ -297,7 +301,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return false;
 	}
 
-	private boolean doResendProcess(HttpServletRequest request, HttpServletResponse response)
+	private boolean doResendProcess(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws IOException, ServletException {
 		String username = obtainUsername(request);
 		String twoFactorToken = UtilImpl.processStringValue(request.getParameter(TWO_FACTOR_TOKEN_ATTRIBUTE));
@@ -348,22 +352,22 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return forwardToTwoFactorPage(request, response, user, rememberMe, false);
 	}
 
-	private static void redirectToLogin(HttpServletRequest request, HttpServletResponse response)
+	private static void redirectToLogin(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws IOException, ServletException {
 		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler(LOGIN_PATH);
 		handler.onAuthenticationFailure(request, response, new AuthenticationServiceException("Invalid TFA resend request"));
 	}
 
-	private static boolean forwardToTwoFactorPage(HttpServletRequest request,
-													HttpServletResponse response,
-													TwoFactorAuthUser user)
+	private static boolean forwardToTwoFactorPage(@Nonnull HttpServletRequest request,
+													@Nonnull HttpServletResponse response,
+													@Nonnull TwoFactorAuthUser user)
 	throws IOException, ServletException {
 		return forwardToTwoFactorPage(request, response, user, false, true);
 	}
 
-	private static boolean forwardToTwoFactorPage(HttpServletRequest request,
-													HttpServletResponse response,
-													TwoFactorAuthUser user,
+	private static boolean forwardToTwoFactorPage(@Nonnull HttpServletRequest request,
+													@Nonnull HttpServletResponse response,
+													@Nonnull TwoFactorAuthUser user,
 													boolean rememberMe,
 													boolean invalidCode)
 	throws IOException, ServletException {
@@ -376,7 +380,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return true;
 	}
 	
-	private void clearTFADetails(TwoFactorAuthUser user) {
+	private void clearTFADetails(@Nonnull TwoFactorAuthUser user) {
 		boolean edited = false;
 		
 		if (user.getTfaCodeGeneratedTimestamp() != null) {
@@ -400,7 +404,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	}
 	
 	@Override
-	protected String obtainUsername(HttpServletRequest request) {
+	protected @Nullable String obtainUsername(@SuppressWarnings("null") @Nonnull HttpServletRequest request) {
 		return UtilImpl.processStringValue(super.obtainUsername(request));
 	}
 	
@@ -410,7 +414,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param request inbound login request
 	 * @return resolved customer name
 	 */
-	static String obtainCustomer(HttpServletRequest request) {
+	static @Nullable String obtainCustomer(@Nonnull HttpServletRequest request) {
 		String customerName = UtilImpl.processStringValue(request.getParameter(SKYVE_SECURITY_FORM_CUSTOMER_KEY));
 		if (customerName == null) {
 			customerName = UtilImpl.CUSTOMER;
@@ -419,19 +423,19 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return customerName;
 	}
 
-	static boolean isValidTwoFactorCode(String twoFactorCode) {
+	static boolean isValidTwoFactorCode(@Nullable String twoFactorCode) {
 		return (twoFactorCode != null) && SIX_DIGIT_TFA_CODE_PATTERN.matcher(twoFactorCode).matches();
 	}
 	
 	/**
 	 * Determine if this filter supports the configured MFA factor.
 	 */
-	protected abstract boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config);
+	protected abstract boolean supportsPushConfiguration(@Nullable TwoFactorAuthCustomerConfiguration config);
 
 	/**
 	 * send the push notification
 	 */
-	protected abstract void pushNotification(TwoFactorAuthUser user, String code);
+	protected abstract void pushNotification(@Nonnull TwoFactorAuthUser user, @Nonnull String code);
 	
 	/**
 	 * Loads two-factor user details for the supplied customer-qualified username.
@@ -439,7 +443,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param username customer/username value
 	 * @return two-factor user details, or null when no user can be loaded
 	 */
-	protected TwoFactorAuthUser getUserDB(String username) {
+	protected @Nullable TwoFactorAuthUser getUserDB(@Nonnull String username) {
 		UserDetails userDetails;
 		try {
 			userDetails = userDetailsManager.loadUserByUsername(username);
@@ -460,7 +464,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 *
 	 * @param user two-factor user with updated challenge state
 	 */
-	protected void updateUserTFADetails(TwoFactorAuthUser user) {
+	protected void updateUserTFADetails(@Nonnull TwoFactorAuthUser user) {
 		userDetailsManager.updateUser(user);
 	}
 	
@@ -471,7 +475,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return generated challenge token
 	 */
 	@SuppressWarnings("static-method")
-	protected String generateTFAPushId(Timestamp generatedTS) {
+	protected @Nonnull String generateTFAPushId(@Nonnull Timestamp generatedTS) {
 		return UUID.randomUUID().toString() + "-" + Long.toString(generatedTS.getTime());
 	}
 
@@ -489,7 +493,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return six-digit challenge code
 	 */
 	@SuppressWarnings("static-method")
-	protected String generateTFACode() {
+	protected @Nonnull String generateTFACode() {
 		return new DecimalFormat("000000").format(RANDOM.nextDouble() * 1000000d);
 	}
 	
@@ -500,7 +504,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param user loaded two-factor user record
 	 * @return true when credentials are valid for challenge dispatch
 	 */
-	protected boolean canAuthenticateWithPassword(HttpServletRequest request, TwoFactorAuthUser user) {
+	protected boolean canAuthenticateWithPassword(@Nonnull HttpServletRequest request, @Nonnull TwoFactorAuthUser user) {
 		if ((! user.isEnabled()) ||
 				(! user.isAccountNonExpired()) ||
 				(! user.isCredentialsNonExpired()) ||
@@ -522,7 +526,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return true when token is invalid or expired
 	 */
 	@SuppressWarnings("static-method")
-	protected boolean tfaCodeExpired(String customer, String twoFactorCode) {
+	protected boolean tfaCodeExpired(@Nonnull String customer, @Nonnull String twoFactorCode) {
 		long generatedTime;
 		try {
 			String [] splitParts = twoFactorCode.split("-");
@@ -541,7 +545,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return currentTime > (generatedTime + expiryMillis);
 	}
 
-	private boolean isNowLockedAfterBadCredentials(String username, TwoFactorAuthUser refreshedUser) {
+	private boolean isNowLockedAfterBadCredentials(@Nullable String username, @Nullable TwoFactorAuthUser refreshedUser) {
 		if ((refreshedUser != null) && (! refreshedUser.isAccountNonLocked())) {
 			return true;
 		}
@@ -560,7 +564,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 													currentTimeMillis());
 	}
 
-	private static LockoutState loadLockoutState(String fullUsername) {
+	private static @Nullable LockoutState loadLockoutState(@Nullable String fullUsername) {
 		if (UtilImpl.DATA_STORE == null) {
 			return null;
 		}
@@ -622,7 +626,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		}
 	}
 	
-	private static long getTwoFactorTimeoutMillis(String customer) {
+	private static long getTwoFactorTimeoutMillis(@Nonnull String customer) {
 		TwoFactorAuthCustomerConfiguration config = TwoFactorAuthConfigurationSingleton.getInstance().getConfig(customer);
 		int timeoutSeconds = config.getTfaTimeOutSeconds();
 		return timeoutSeconds * 1000L;
@@ -635,7 +639,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @return true when challenge fields are populated
 	 */
 	@SuppressWarnings("static-method")
-	protected boolean tfaCodesPopulated(TwoFactorAuthUser user) {
+	protected boolean tfaCodesPopulated(@Nonnull TwoFactorAuthUser user) {
 		return ((user.getTfaCode() != null) &&
 				(user.getTfaToken() != null) &&
 				(user.getTfaCodeGeneratedTimestamp() != null));
@@ -647,7 +651,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 * @param user two-factor user record
 	 * @return true when resend should be blocked due to cooldown
 	 */
-	protected boolean isResendOnCooldown(TwoFactorAuthUser user) {
+	protected boolean isResendOnCooldown(@Nonnull TwoFactorAuthUser user) {
 		Timestamp generatedTimestamp = user.getTfaCodeGeneratedTimestamp();
 		if (generatedTimestamp == null) {
 			return false;

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.reference;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -23,12 +24,12 @@ public class ActionReference implements Reference {
 
 	private String actionName;
 
-	public String getActionName() {
+	public @Nonnull String getActionName() {
 		return actionName;
 	}
 
 	@XmlAttribute(name = "action", required = true)
-	public void setActionName(String actionName) {
+	public void setActionName(@Nonnull String actionName) {
 		this.actionName = UtilImpl.processStringValue(actionName);
 	}
 }

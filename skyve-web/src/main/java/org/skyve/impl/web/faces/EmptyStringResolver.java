@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
 
@@ -23,7 +25,7 @@ public class EmptyStringResolver extends ELResolver {
 	 * @return {@link String} to indicate this resolver only targets string conversion scenarios
 	 */
 	@Override
-	public Class<?> getCommonPropertyType(ELContext context, Object base) {
+	public @Nonnull Class<?> getCommonPropertyType(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base) {
 		return String.class;
 	}
 
@@ -36,7 +38,7 @@ public class EmptyStringResolver extends ELResolver {
 	 * @return {@code null} because this resolver only participates in conversion
 	 */
 	@Override
-	public Class<?> getType(ELContext context, Object base, Object property) {
+	public @Nullable Class<?> getType(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		return null;
 	}
 
@@ -49,7 +51,7 @@ public class EmptyStringResolver extends ELResolver {
 	 * @return {@code null} because value resolution is delegated to other resolvers
 	 */
 	@Override
-	public Object getValue(ELContext context, Object base, Object property) {
+	public @Nullable Object getValue(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		return null;
 	}
 
@@ -62,7 +64,7 @@ public class EmptyStringResolver extends ELResolver {
 	 * @return {@code true} because this resolver never writes target properties
 	 */
 	@Override
-	public boolean isReadOnly(ELContext context, Object base, Object property) {
+	public boolean isReadOnly(@SuppressWarnings("null") @Nonnull ELContext context, @Nullable Object base, @Nullable Object property) {
 		return true;
 	}
 
@@ -75,7 +77,10 @@ public class EmptyStringResolver extends ELResolver {
 	 * @param value the value being assigned
 	 */
 	@Override
-	public void setValue(ELContext context, Object base, Object property, Object value) {
+	public void setValue(@SuppressWarnings("null") @Nonnull ELContext context,
+						@Nullable Object base,
+						@Nullable Object property,
+						@Nullable Object value) {
 		// it's read only
 	}
 
@@ -90,7 +95,9 @@ public class EmptyStringResolver extends ELResolver {
 	 *         so that downstream resolvers can continue handling conversion
 	 */
 	@Override
-	public <T extends Object> T convertToType(ELContext context, Object obj, Class<T> targetType) {
+	public @Nullable <T extends Object> T convertToType(@SuppressWarnings("null") @Nonnull ELContext context,
+														@Nullable Object obj,
+														@SuppressWarnings("null") @Nonnull Class<T> targetType) {
 		if ((obj == null) && String.class.equals(targetType)) {
 			context.setPropertyResolved(true);
 		}

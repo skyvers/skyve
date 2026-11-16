@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.ShrinkWrap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines fluent APIs shared by box-style containers.
  *
@@ -16,7 +19,7 @@ interface FluentBox<T extends FluentBox<T>> extends FluentRelativeSize<T> {
 	 *            the shrink-wrap mode
 	 * @return the fluent builder
 	 */
-	T shrinkWrap(ShrinkWrap shrinkWrap);
+	@Nonnull T shrinkWrap(@Nullable ShrinkWrap shrinkWrap);
 
 	/**
 	 * Sets the container padding in pixels.
@@ -25,7 +28,7 @@ interface FluentBox<T extends FluentBox<T>> extends FluentRelativeSize<T> {
 	 *            the padding applied around the box content
 	 * @return the fluent builder
 	 */
-	T pixelPadding(int pixelPadding);
+	@Nonnull T pixelPadding(int pixelPadding);
 
 	/**
 	 * Sets the spacing between members in pixels.
@@ -34,5 +37,5 @@ interface FluentBox<T extends FluentBox<T>> extends FluentRelativeSize<T> {
 	 *            the member gap in pixels
 	 * @return the fluent builder
 	 */
-	T pixelMemberPadding(int pixelMemberPadding);
+	@Nonnull T pixelMemberPadding(int pixelMemberPadding);
 }

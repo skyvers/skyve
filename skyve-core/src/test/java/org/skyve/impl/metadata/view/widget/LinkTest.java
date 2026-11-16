@@ -19,8 +19,8 @@ class LinkTest {
         }
 
         @Test
-        void jaxbHelperGetVisibleConditionNameReturnsNull() {
-                assertNull(new Link().getVisibleConditionName());
+        void xmlVisibleConditionIsNullByDefault() {
+                assertNull(new Link().getXmlVisibleCondition());
         }
 
         @Test
@@ -29,10 +29,10 @@ class LinkTest {
         }
 
         @Test
-        void setVisibleConditionNameStoresNegatedCondition() {
+        void setVisibleConditionDerivesNegatedCondition() {
                 Link link = new Link();
-                link.setVisibleConditionName("active");
-                assertNotNull(link.getInvisibleConditionName());
+                link.setXmlVisibleCondition("active");
+                assertEquals("notActive", link.getInvisibleCondition());
         }
 
         @Test

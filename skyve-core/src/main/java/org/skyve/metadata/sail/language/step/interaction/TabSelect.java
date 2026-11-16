@@ -6,6 +6,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -29,7 +30,7 @@ public class TabSelect implements Step {
 	 * Returns the tabPath.
 	 * @return the result
 	 */
-	public String getTabPath() {
+	public @Nonnull String getTabPath() {
 		return tabPath;
 	}
 
@@ -38,7 +39,7 @@ public class TabSelect implements Step {
 	 * @param tabPath the tabPath
 	 */
 	@XmlAttribute(name = "path", required = true)
-	public void setTabPath(String tabPath) {
+	public void setTabPath(@Nonnull String tabPath) {
 		this.tabPath = UtilImpl.processStringValue(tabPath);
 	}
 
@@ -47,7 +48,7 @@ public class TabSelect implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeTabSelect(this);
 	}
 	
@@ -57,7 +58,7 @@ public class TabSelect implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return tabPath + " Tab";
 	}
 }

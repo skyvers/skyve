@@ -3,13 +3,19 @@ package org.skyve.impl.web.service.smartclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,9 +25,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
@@ -47,6 +55,7 @@ import org.skyve.impl.metadata.view.widget.bound.ProgressBar;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
@@ -59,23 +68,33 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Persistent;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.comparison.ComparisonComposite;
+import org.skyve.metadata.view.model.comparison.ComparisonModel;
+import org.skyve.metadata.view.model.comparison.ComparisonProperty;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.web.BackgroundTask;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S3011", "java:S112", "java:S3398"})
 class ViewJSONManipulatorCoreTest {
 	@Test
 	void visitViewAddsCoreConditionBindings() throws Exception {
@@ -93,8 +112,8 @@ class ViewJSONManipulatorCoreTest {
 	void visitTabPaneAddsConditionsAndSelectedIndexBinding() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
 		TabPane tabPane = new TabPane();
-		tabPane.setInvisibleConditionName("invisibleWhen");
-		tabPane.setDisabledConditionName("disabledWhen");
+		tabPane.setXmlInvisibleCondition("invisibleWhen");
+		tabPane.setXmlDisabledCondition("disabledWhen");
 		tabPane.setSelectedTabIndexBinding("selectedTab");
 
 		manipulator.visitTabPane(tabPane, true, true);
@@ -103,6 +122,23 @@ class ViewJSONManipulatorCoreTest {
 		assertTrue(bindingTree.getBindings().contains("invisibleWhen"));
 		assertTrue(bindingTree.getBindings().contains("disabledWhen"));
 		assertTrue(bindingTree.getBindings().contains("selectedTab"));
+	}
+
+	/**
+	 * A selected tab index binding that is not a document attribute (such as a getter in an extension class) is only
+	 * read: the client cannot set it.
+	 */
+	@Test
+	void visitTabPaneLeavesASelectedIndexBindingThatIsNotAnAttributeReadOnly() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
+		TabPane tabPane = new TabPane();
+		tabPane.setSelectedTabIndexBinding("selectedTab");
+
+		manipulator.visitTabPane(tabPane, true, true);
+
+		ViewBinding binding = bindingTree(manipulator).getBinding("selectedTab");
+		assertNotNull(binding);
+		assertFalse(binding.isMutable());
 	}
 
 	@Test
@@ -128,11 +164,11 @@ class ViewJSONManipulatorCoreTest {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), bean, 0, 0);
 
 		Invisible invisible = mock(Invisible.class);
-		when(invisible.getInvisibleConditionName()).thenReturn("hideWhen");
+		when(invisible.getInvisibleCondition()).thenReturn("hideWhen");
 		assertFalse(manipulator.visible(invisible));
 
 		Disableable disableable = mock(Disableable.class);
-		when(disableable.getDisabledConditionName()).thenReturn("disableWhen");
+		when(disableable.getDisabledCondition()).thenReturn("disableWhen");
 		assertTrue(manipulator.enabled(disableable));
 	}
 
@@ -149,6 +185,55 @@ class ViewJSONManipulatorCoreTest {
 		assertFalse(bindingTree.getBindings().contains("true"));
 		assertFalse(bindingTree.getBindings().contains("false"));
 		assertTrue(bindingTree.getBindings().contains("showWhen"));
+	}
+
+	@Test
+	void addConditionDoesNotTreatAnInlineExpressionOrItsInverseAsABinding() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
+
+		manipulator.addCondition("{el:true}");
+		manipulator.addCondition("not{el:false}");
+
+		ViewBindings bindingTree = bindingTree(manipulator);
+		assertFalse(bindingTree.getBindings().contains("{el:true}"));
+		assertFalse(bindingTree.getBindings().contains("not{el:false}"));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void toJSONIncludesInlineConditionValuesUnderTheirIdentifiersForEachSenseReferenced() throws Exception {
+		PersistentBean constructorBean = mock(PersistentBean.class);
+		when(constructorBean.getBizId()).thenReturn("biz-1");
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), constructorBean, 0, 0);
+
+		// both senses of one expression, and only the inverse of another
+		manipulator.addCondition("{role:admin.Manager}");
+		manipulator.addCondition("not{role:admin.Manager}");
+		manipulator.addCondition("not{role:admin.Clerk}");
+		// and only the expression itself of a third
+		manipulator.addCondition("{role:admin.Auditor}");
+
+		String json;
+		bindPersistenceForUserInRole("admin", "Manager");
+		try {
+			json = manipulator.toJSON(new TestWebContext("ctx-1"), null);
+		}
+		finally {
+			clearThreadPersistence();
+		}
+		@SuppressWarnings("unchecked")
+		Map<String, Object> result = (Map<String, Object>) JSON.unmarshall(json);
+
+		String managerIdentifier = BindUtil.conditionIdentifier("{role:admin.Manager}");
+		String clerkIdentifier = BindUtil.conditionIdentifier("{role:admin.Clerk}");
+		assertEquals(Boolean.TRUE, result.get(managerIdentifier));
+		assertEquals(Boolean.FALSE, result.get("not" + managerIdentifier));
+		assertEquals(Boolean.TRUE, result.get("not" + clerkIdentifier));
+		assertFalse(result.containsKey(clerkIdentifier));
+		String auditorIdentifier = BindUtil.conditionIdentifier("{role:admin.Auditor}");
+		assertEquals(Boolean.FALSE, result.get(auditorIdentifier));
+		assertFalse(result.containsKey("not" + auditorIdentifier));
+		assertFalse(json.contains("{role:"), json);
 	}
 
 	@Test
@@ -181,28 +266,28 @@ class ViewJSONManipulatorCoreTest {
 
 		CheckBox checkBox = new CheckBox();
 		checkBox.setBinding("active");
-		checkBox.setDisabledConditionName("activeDisabled");
-		checkBox.setInvisibleConditionName("activeHidden");
+		checkBox.setXmlDisabledCondition("activeDisabled");
+		checkBox.setXmlInvisibleCondition("activeHidden");
 		manipulator.visitCheckBox(checkBox, true, true);
 
 		ColourPicker colour = new ColourPicker();
 		colour.setBinding("colour");
-		colour.setDisabledConditionName("colourDisabled");
-		colour.setInvisibleConditionName("colourHidden");
+		colour.setXmlDisabledCondition("colourDisabled");
+		colour.setXmlInvisibleCondition("colourHidden");
 		manipulator.visitColourPicker(colour, true, true);
 
 		RichText richText = new RichText();
 		richText.setBinding("description");
 		richText.setSanitise(Sanitisation.relaxed);
-		richText.setDisabledConditionName("descriptionDisabled");
-		richText.setInvisibleConditionName("descriptionHidden");
+		richText.setXmlDisabledCondition("descriptionDisabled");
+		richText.setXmlInvisibleCondition("descriptionHidden");
 		manipulator.visitRichText(richText, true, true);
 
 		HTML html = new HTML();
 		html.setBinding("markup");
 		html.setSanitise(Sanitisation.none);
-		html.setDisabledConditionName("markupDisabled");
-		html.setInvisibleConditionName("markupHidden");
+		html.setXmlDisabledCondition("markupDisabled");
+		html.setXmlInvisibleCondition("markupHidden");
 		manipulator.visitHTML(html, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -263,14 +348,14 @@ class ViewJSONManipulatorCoreTest {
 
 		ContentSignature signature = new ContentSignature();
 		signature.setBinding("signature");
-		signature.setDisabledConditionName("signatureDisabled");
-		signature.setInvisibleConditionName("signatureHidden");
+		signature.setXmlDisabledCondition("signatureDisabled");
+		signature.setXmlInvisibleCondition("signatureHidden");
 		manipulator.visitContentSignature(signature, true, true);
 
 		ContentUpload content = new ContentUpload();
 		content.setBinding("media");
-		content.setDisabledConditionName("mediaDisabled");
-		content.setInvisibleConditionName("mediaHidden");
+		content.setXmlDisabledCondition("mediaDisabled");
+		content.setXmlInvisibleCondition("mediaHidden");
 		manipulator.visitContent(content, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -339,15 +424,15 @@ class ViewJSONManipulatorCoreTest {
 		TextField readOnlyText = new TextField();
 		readOnlyText.setBinding("name");
 		readOnlyText.setEditable(Boolean.FALSE);
-		readOnlyText.setDisabledConditionName("nameDisabled");
-		readOnlyText.setInvisibleConditionName("nameHidden");
+		readOnlyText.setXmlDisabledCondition("nameDisabled");
+		readOnlyText.setXmlInvisibleCondition("nameHidden");
 		manipulator.visitTextField(readOnlyText, true, true);
 
 		ContentUpload attachment = new ContentUpload();
 		attachment.setBinding("attachment");
 		attachment.setEditable(Boolean.FALSE);
-		attachment.setDisabledConditionName("attachmentDisabled");
-		attachment.setInvisibleConditionName("attachmentHidden");
+		attachment.setXmlDisabledCondition("attachmentDisabled");
+		attachment.setXmlInvisibleCondition("attachmentHidden");
 		manipulator.visitContent(attachment, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -364,13 +449,13 @@ class ViewJSONManipulatorCoreTest {
 
 		ZoomIn zoomIn = new ZoomIn();
 		zoomIn.setBinding("contact");
-		zoomIn.setDisabledConditionName("contactDisabled");
-		zoomIn.setInvisibleConditionName("contactHidden");
+		zoomIn.setXmlDisabledCondition("contactDisabled");
+		zoomIn.setXmlInvisibleCondition("contactHidden");
 		manipulator.visitZoomIn(zoomIn, true, true);
 
 		ProgressBar progressBar = new ProgressBar();
 		progressBar.setBinding("completion");
-		progressBar.setInvisibleConditionName("completionHidden");
+		progressBar.setXmlInvisibleCondition("completionHidden");
 		manipulator.visitProgressBar(progressBar, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -388,19 +473,19 @@ class ViewJSONManipulatorCoreTest {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 
 		ListGrid listGrid = new ListGrid();
-		listGrid.setDisabledConditionName("listDisabled");
-		listGrid.setInvisibleConditionName("listHidden");
-		listGrid.setDisableAddConditionName("listAddDisabled");
-		listGrid.setDisableEditConditionName("listEditDisabled");
-		listGrid.setDisableZoomConditionName("listZoomDisabled");
-		listGrid.setDisableRemoveConditionName("listRemoveDisabled");
-		listGrid.setPostRefreshConditionName("listPostRefresh");
+		listGrid.setXmlDisabledCondition("listDisabled");
+		listGrid.setXmlInvisibleCondition("listHidden");
+		listGrid.setXmlDisableAddCondition("listAddDisabled");
+		listGrid.setXmlDisableEditCondition("listEditDisabled");
+		listGrid.setXmlDisableZoomCondition("listZoomDisabled");
+		listGrid.setXmlDisableRemoveCondition("listRemoveDisabled");
+		listGrid.setPostRefreshCondition("listPostRefresh");
 		listGrid.setSelectedIdBinding("selectedListId");
 		manipulator.visitListGrid(listGrid, true, true);
 
 		ListRepeater repeater = new ListRepeater();
-		repeater.setInvisibleConditionName("repeaterHidden");
-		repeater.setPostRefreshConditionName("repeaterPostRefresh");
+		repeater.setXmlInvisibleCondition("repeaterHidden");
+		repeater.setPostRefreshCondition("repeaterPostRefresh");
 		manipulator.visitListRepeater(repeater, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -421,13 +506,13 @@ class ViewJSONManipulatorCoreTest {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 
 		TreeGrid treeGrid = new TreeGrid();
-		treeGrid.setDisabledConditionName("treeDisabled");
-		treeGrid.setInvisibleConditionName("treeHidden");
-		treeGrid.setDisableAddConditionName("treeAddDisabled");
-		treeGrid.setDisableEditConditionName("treeEditDisabled");
-		treeGrid.setDisableZoomConditionName("treeZoomDisabled");
-		treeGrid.setDisableRemoveConditionName("treeRemoveDisabled");
-		treeGrid.setPostRefreshConditionName("treePostRefresh");
+		treeGrid.setXmlDisabledCondition("treeDisabled");
+		treeGrid.setXmlInvisibleCondition("treeHidden");
+		treeGrid.setXmlDisableAddCondition("treeAddDisabled");
+		treeGrid.setXmlDisableEditCondition("treeEditDisabled");
+		treeGrid.setXmlDisableZoomCondition("treeZoomDisabled");
+		treeGrid.setXmlDisableRemoveCondition("treeRemoveDisabled");
+		treeGrid.setPostRefreshCondition("treePostRefresh");
 		treeGrid.setSelectedIdBinding("selectedTreeId");
 		treeGrid.setRootIdBinding("rootTreeId");
 		manipulator.visitTreeGrid(treeGrid, true, true);
@@ -449,34 +534,34 @@ class ViewJSONManipulatorCoreTest {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 
 		Tab tab = new Tab();
-		tab.setInvisibleConditionName("tabHidden");
-		tab.setDisabledConditionName("tabDisabled");
+		tab.setXmlInvisibleCondition("tabHidden");
+		tab.setXmlDisabledCondition("tabDisabled");
 		manipulator.visitTab(tab, true, true);
 
 		VBox vbox = new VBox();
-		vbox.setInvisibleConditionName("vboxHidden");
+		vbox.setXmlInvisibleCondition("vboxHidden");
 		manipulator.visitVBox(vbox, true, true);
 
 		HBox hbox = new HBox();
-		hbox.setInvisibleConditionName("hboxHidden");
+		hbox.setXmlInvisibleCondition("hboxHidden");
 		manipulator.visitHBox(hbox, true, true);
 
 		Form form = new Form();
-		form.setInvisibleConditionName("formHidden");
-		form.setDisabledConditionName("formDisabled");
+		form.setXmlInvisibleCondition("formHidden");
+		form.setXmlDisabledCondition("formDisabled");
 		manipulator.visitForm(form, true, true);
 
 		MapDisplay map = new MapDisplay();
-		map.setInvisibleConditionName("mapHidden");
+		map.setXmlInvisibleCondition("mapHidden");
 		manipulator.visitMap(map, true, true);
 
 		Chart chart = new Chart();
-		chart.setInvisibleConditionName("chartHidden");
+		chart.setXmlInvisibleCondition("chartHidden");
 		manipulator.visitChart(chart, true, true);
 
 		DialogButton dialogButton = new DialogButton();
-		dialogButton.setInvisibleConditionName("dialogHidden");
-		dialogButton.setDisabledConditionName("dialogDisabled");
+		dialogButton.setXmlInvisibleCondition("dialogHidden");
+		dialogButton.setXmlDisabledCondition("dialogDisabled");
 		manipulator.visitDialogButton(dialogButton, true, true);
 
 		Parameter parameter = mock(Parameter.class);
@@ -508,8 +593,8 @@ class ViewJSONManipulatorCoreTest {
 		ViewImpl view = (ViewImpl) objectField(manipulator, "view");
 		ActionImpl action = new ActionImpl();
 		action.setName("approve");
-		action.setInvisibleConditionName("approveHidden");
-		action.setDisabledConditionName("approveDisabled");
+		action.setXmlInvisibleCondition("approveHidden");
+		action.setXmlDisabledCondition("approveDisabled");
 		view.putAction(action);
 
 		Button button = new Button();
@@ -522,19 +607,117 @@ class ViewJSONManipulatorCoreTest {
 	}
 
 	@Test
+	void visitButtonForAnActionNotInTheViewIsAMetaDataError() {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
+		Button button = new Button();
+		button.setActionName("missing");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitButton(button, true, true));
+
+		assertEquals("Button action missing is not defined in view edit", e.getMessage());
+	}
+
+	@Test
+	void visitDataRepeaterWithoutABindingIsAMetaDataError() {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
+		DataRepeater repeater = new DataRepeater(); // no binding
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitDataRepeater(repeater, true, true));
+
+		assertEquals("A data grid/repeater in view edit has no binding", e.getMessage());
+	}
+
+	@Test
+	void visitComparisonWithoutABindingIsAMetaDataError() {
+		ViewJSONManipulator manipulator = comparisonManipulator(false);
+		Comparison comparison = new Comparison();
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(comparison, true, true));
+
+		assertEquals("A comparison in view edit has no binding", e.getMessage());
+	}
+
+	@Test
+	void visitComparisonWithoutAModelNameIsAMetaDataError() {
+		ViewJSONManipulator manipulator = comparisonManipulator(false);
+		Comparison comparison = new Comparison();
+		comparison.setBinding("association");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(comparison, true, true));
+
+		assertEquals("Could not populate the comparison editor [association]", e.getMessage());
+		assertEquals("The comparison [association] has no model name", e.getCause().getMessage());
+	}
+
+	@Test
+	void visitComparisonOfAModelThatProducesNoComparisonIsAMetaDataError() {
+		ViewJSONManipulator manipulator = comparisonManipulator(false);
+		Comparison comparison = new Comparison();
+		comparison.setBinding("association");
+		comparison.setModelName("CompareModel");
+		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		ComparisonModel<Bean, Bean> model = mock(ComparisonModel.class); // getComparisonComposite() returns null
+		doReturn(model).when(repository).getComparisonModel(any(), any(), eq("CompareModel"), eq(true));
+		ProvidedRepositoryFactory.set(repository);
+		try {
+			MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(comparison, true, true));
+
+			assertEquals("Could not populate the comparison editor [association]", e.getMessage());
+			assertEquals("Comparison model [CompareModel] produced no comparison", e.getCause().getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
+	}
+
+	@Test
+	void comparisonBindingsForApplyBindNamedPropertiesAndRejectAChildWithoutAReferenceName() throws Exception {
+		ViewJSONManipulator manipulator = comparisonManipulator(true);
+		ComparisonComposite root = new ComparisonComposite();
+		ComparisonProperty named = new ComparisonProperty();
+		named.setName("text");
+		root.getProperties().add(named);
+		root.getProperties().add(new ComparisonProperty()); // no name, so nothing to bind
+		root.getChildren().add(new ComparisonComposite()); // no reference name
+		DocumentImpl nodeDocument = mock(DocumentImpl.class);
+		when(nodeDocument.getName()).thenReturn("NodeDoc");
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> invokeAddComparisonBindingsForApply(manipulator, root, nodeDocument));
+
+		assertEquals("A comparison child of document NodeDoc has no reference name", e.getMessage());
+		assertMutableBinding(bindingTree(manipulator), "text", Sanitisation.none);
+	}
+
+	@Test
+	void comparisonBindingsForApplyRejectAChildReachedThroughANonRelation() {
+		ViewJSONManipulator manipulator = comparisonManipulator(true);
+		ComparisonComposite root = new ComparisonComposite();
+		ComparisonComposite child = new ComparisonComposite();
+		child.setReferenceName(Bean.BIZ_KEY); // an implicit attribute, not a relation
+		root.getChildren().add(child);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> invokeAddComparisonBindingsForApply(manipulator, root, mock(DocumentImpl.class)));
+
+		assertEquals("No target relation for comparison binding " + Bean.BIZ_KEY, e.getMessage());
+	}
+
+	@Test
 	void visitGeometryWidgetsHonoursDataWidgetAndApplyGuards() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 
 		Geometry geometry = new Geometry();
 		geometry.setBinding("shape");
-		geometry.setInvisibleConditionName("shapeHidden");
-		geometry.setDisabledConditionName("shapeDisabled");
+		geometry.setXmlInvisibleCondition("shapeHidden");
+		geometry.setXmlDisabledCondition("shapeDisabled");
 		manipulator.visitGeometry(geometry, true, true);
 
 		GeometryMap geometryMap = new GeometryMap();
 		geometryMap.setBinding("location");
-		geometryMap.setInvisibleConditionName("locationHidden");
-		geometryMap.setDisabledConditionName("locationDisabled");
+		geometryMap.setXmlInvisibleCondition("locationHidden");
+		geometryMap.setXmlDisabledCondition("locationDisabled");
 		manipulator.visitGeometryMap(geometryMap, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -567,7 +750,7 @@ class ViewJSONManipulatorCoreTest {
 		dynamicImage.setPixelHeight(Integer.valueOf(44));
 		dynamicImage.setImageInitialPixelWidth(Integer.valueOf(22));
 		dynamicImage.setImageInitialPixelHeight(Integer.valueOf(33));
-		dynamicImage.setInvisibleConditionName("avatarHidden");
+		dynamicImage.setXmlInvisibleCondition("avatarHidden");
 		manipulator.visitDynamicImage(dynamicImage, true, true);
 
 		DynamicImage initialSizeImage = new DynamicImage();
@@ -580,23 +763,23 @@ class ViewJSONManipulatorCoreTest {
 		staticImage.setRelativeFile("icons/static.png");
 		staticImage.setPixelWidth(Integer.valueOf(16));
 		staticImage.setPixelHeight(Integer.valueOf(17));
-		staticImage.setInvisibleConditionName("staticHidden");
+		staticImage.setXmlInvisibleCondition("staticHidden");
 		manipulator.visitStaticImage(staticImage, true, true);
 
 		Blurb blurb = new Blurb();
 		blurb.setMarkup("Hello");
 		blurb.setTextAlignment(HorizontalAlignment.right);
-		blurb.setInvisibleConditionName("blurbHidden");
+		blurb.setXmlInvisibleCondition("blurbHidden");
 		manipulator.visitBlurb(blurb, true, true);
 
 		Label bindingLabel = new Label();
 		bindingLabel.setBinding("status");
-		bindingLabel.setInvisibleConditionName("statusHidden");
+		bindingLabel.setXmlInvisibleCondition("statusHidden");
 		manipulator.visitLabel(bindingLabel, true, true);
 
 		Label valueLabel = new Label();
 		valueLabel.setValue("Ready");
-		valueLabel.setInvisibleConditionName("true");
+		valueLabel.setXmlInvisibleCondition("true");
 		manipulator.visitLabel(valueLabel, true, true);
 
 		Label forLabel = new Label();
@@ -608,11 +791,13 @@ class ViewJSONManipulatorCoreTest {
 		Link link = new Link();
 		link.setReference(reference);
 		link.setValue("Details");
-		link.setInvisibleConditionName("detailsHidden");
+		link.setXmlInvisibleCondition("detailsHidden");
 		manipulator.visitLink(link, true, true);
 
 		String html = objectField(manipulator, "htmlGuts").toString();
 		assertTrue(html.contains("dynamic.png?_n=avatar"), html);
+		// The width falls back to the initial width, not the pixel height, so the image keeps its shape
+		assertTrue(html.contains("dynamic.png?_n=avatar&_doc={bizModule}.{bizDocument}&_w=22&_h=44&"), html);
 		assertTrue(html.contains("dynamic.png?_n=avatarInitial"), html);
 		assertTrue(html.contains("_w=28"), html);
 		assertTrue(html.contains("_h=29"), html);
@@ -633,11 +818,11 @@ class ViewJSONManipulatorCoreTest {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 
 		DynamicImage dynamicImage = new DynamicImage();
-		dynamicImage.setInvisibleConditionName("dynamicHidden");
+		dynamicImage.setXmlInvisibleCondition("dynamicHidden");
 		manipulator.visitDynamicImage(dynamicImage, true, true);
 
 		StaticImage staticImage = new StaticImage();
-		staticImage.setInvisibleConditionName("staticHidden");
+		staticImage.setXmlInvisibleCondition("staticHidden");
 		manipulator.visitStaticImage(staticImage, true, true);
 
 		ViewBindings bindingTree = bindingTree(manipulator);
@@ -670,8 +855,8 @@ class ViewJSONManipulatorCoreTest {
 	void visitActionsAddsCommonActionConditions() throws Exception {
 		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), null, 0, 0);
 		ActionImpl action = new ActionImpl();
-		action.setDisabledConditionName("actionDisabled");
-		action.setInvisibleConditionName("actionHidden");
+		action.setXmlDisabledCondition("actionDisabled");
+		action.setXmlInvisibleCondition("actionHidden");
 
 		manipulator.visitCustomAction(action);
 
@@ -687,7 +872,7 @@ class ViewJSONManipulatorCoreTest {
 		blurb.setMarkup("Hello {name}");
 		blurb.setEscape(Boolean.FALSE);
 		blurb.setSanitise(Sanitisation.none);
-		blurb.setInvisibleConditionName("blurbHidden");
+		blurb.setXmlInvisibleCondition("blurbHidden");
 
 		manipulator.visitBlurb(blurb, true, true);
 
@@ -704,7 +889,7 @@ class ViewJSONManipulatorCoreTest {
 		ViewJSONManipulator hiddenManipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
 		Blurb hiddenBlurb = new Blurb();
 		hiddenBlurb.setMarkup("Hidden {text}");
-		hiddenBlurb.setInvisibleConditionName("hiddenWhen");
+		hiddenBlurb.setXmlInvisibleCondition("hiddenWhen");
 		hiddenManipulator.visitBlurb(hiddenBlurb, false, true);
 		assertEquals(1, intField(hiddenManipulator, "formatCounter"));
 		assertFalse(formats(hiddenManipulator).containsKey(""));
@@ -724,14 +909,14 @@ class ViewJSONManipulatorCoreTest {
 		expressionLabel.setValue("Hi {name}");
 		expressionLabel.setEscape(Boolean.TRUE);
 		expressionLabel.setSanitise(Sanitisation.text);
-		expressionLabel.setInvisibleConditionName("expressionHidden");
+		expressionLabel.setXmlInvisibleCondition("expressionHidden");
 		manipulator.visitLabel(expressionLabel, true, true);
 
 		Label bindingLabel = new Label();
 		bindingLabel.setBinding("status");
 		bindingLabel.setEscape(Boolean.FALSE);
 		bindingLabel.setSanitise(Sanitisation.none);
-		bindingLabel.setInvisibleConditionName("statusHidden");
+		bindingLabel.setXmlInvisibleCondition("statusHidden");
 		manipulator.visitLabel(bindingLabel, true, true);
 
 		ViewFormat format = formats(manipulator).get("").get("_0");
@@ -754,7 +939,7 @@ class ViewJSONManipulatorCoreTest {
 		Link link = new Link();
 		link.setReference(reference);
 		link.setValue("Help");
-		link.setInvisibleConditionName("helpHidden");
+		link.setXmlInvisibleCondition("helpHidden");
 
 		manipulator.visitLink(link, true, true);
 
@@ -814,7 +999,7 @@ class ViewJSONManipulatorCoreTest {
 		rootBindings.putBinding("text", false, true, Sanitisation.none, false);
 		rootBindings.putBinding("association", false, false, Sanitisation.none, false);
 		manipulator.addNamedFormat("summary",
-				"display:false;{CONTEXT};src=\"content?_n=&_doc=test\"",
+				"{CONTEXT};src=\"content?_n=&_doc=test\"",
 				false,
 				Sanitisation.none);
 
@@ -823,9 +1008,48 @@ class ViewJSONManipulatorCoreTest {
 
 		assertEquals("&lt;b&gt;Alpha&lt;/b&gt;", values.get("text"));
 		assertEquals("related-1", values.get("association"));
-		assertEquals("display:none;ctx-9;src=\"images/blank.gif\"", values.get("summary"));
+		assertEquals("ctx-9;src=\"images/blank.gif\"", values.get("summary"));
 	}
 
+	@Test
+	void dataWidgetMarkupResolvesInvisibleConditionsForEachRow() throws Exception {
+		ViewJSONManipulator manipulator = newManipulator(ViewType.edit.toString(), visibleBean(), 0, 0);
+		setField(manipulator, "visitingDataWidget", Boolean.TRUE);
+		setField(manipulator, "processingDataWidget", Boolean.TRUE);
+		setField(manipulator, "htmlGuts", new StringBuilder());
+
+		Label named = new Label();
+		named.setValue("Named");
+		named.setXmlInvisibleCondition("hidden");
+		manipulator.visitLabel(named, true, true);
+		Label inline = new Label();
+		inline.setValue("Inline");
+		inline.setPixelWidth(Integer.valueOf(10));
+		inline.setXmlVisibleCondition("{el:bean.active}");
+		manipulator.visitLabel(inline, true, true);
+		manipulator.addNamedFormat("markup", objectField(manipulator, "htmlGuts").toString(), false, Sanitisation.none);
+		// bindings of a document that is not persistent, so that a row only needs an ID
+		ViewBindings rowBindings = new ViewBindings(mock(DocumentImpl.class));
+
+		// a row that satisfies both invisible conditions
+		Bean hiddenRow = mock(Bean.class);
+		doReturn(Boolean.TRUE).when(hiddenRow).evaluateCondition("hidden");
+		doReturn(Boolean.TRUE).when(hiddenRow).evaluateCondition("not{el:bean.active}");
+		Map<String, Object> values = new LinkedHashMap<>();
+		manipulator.addBindingsAndFormatValues(rowBindings, hiddenRow, values, "ctx");
+		assertEquals("<span style=\"display:none;\">Named</span>&nbsp;<span style=\"width:10px;display:none;\">Inline</span>",
+						values.get("markup"));
+
+		// a row that satisfies neither
+		Bean shownRow = mock(Bean.class);
+		doReturn(Boolean.FALSE).when(shownRow).evaluateCondition("hidden");
+		doReturn(Boolean.FALSE).when(shownRow).evaluateCondition("not{el:bean.active}");
+		values = new LinkedHashMap<>();
+		manipulator.addBindingsAndFormatValues(rowBindings, shownRow, values, "ctx");
+		assertEquals("<span style=\"\">Named</span>&nbsp;<span style=\"width:10px;\">Inline</span>", values.get("markup"));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONIncludesContextRedirectDirtyFlagAndMessages() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -851,6 +1075,7 @@ class ViewJSONManipulatorCoreTest {
 		assertTrue(result.containsKey("_messages"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONEscapesViewTitleByDefault() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -865,6 +1090,7 @@ class ViewJSONManipulatorCoreTest {
 		assertEquals("Escaped &lt;b&gt;view title&lt;/b&gt;", result.get("_title"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONLeavesTrustedViewTitleRaw() throws Exception {
 		PersistentBean constructorBean = mock(PersistentBean.class);
@@ -881,6 +1107,7 @@ class ViewJSONManipulatorCoreTest {
 		assertEquals("Trusted <b>view title</b>", result.get("_title"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void toJSONIncludesChildBindingsValueMapsAndComparisons() throws Exception {
 		TestOwnerBean owner = new TestOwnerBean();
@@ -971,7 +1198,7 @@ class ViewJSONManipulatorCoreTest {
 		}
 
 		@Override
-		public void cacheConversation() {
+		public void cacheConversationAndCycleTransaction() {
 			// no-op for focused unit tests
 		}
 
@@ -1118,6 +1345,42 @@ class ViewJSONManipulatorCoreTest {
 		}
 	}
 
+	/**
+	 * A manipulator of an edit view whose document has an "association" reference, for the owner bean.
+	 */
+	private static ViewJSONManipulator comparisonManipulator(boolean forApply) {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		ModuleImpl module = mock(ModuleImpl.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		Reference reference = mock(Reference.class);
+		when(reference.getDocumentName()).thenReturn("RelatedDoc");
+		when(document.getNullSafeReferenceByName("association")).thenReturn(reference);
+		DocumentImpl relatedDocument = mock(DocumentImpl.class);
+		when(module.getDocument(customer, "RelatedDoc")).thenReturn(relatedDocument);
+		TestOwnerBean owner = new TestOwnerBean();
+		owner.setBizId("owner-1");
+		return new ViewJSONManipulator(user, module, document, testView(ViewType.edit.toString()), "external", owner, 0, 0, forApply);
+	}
+
+	private static void invokeAddComparisonBindingsForApply(ViewJSONManipulator manipulator,
+																ComparisonComposite node,
+																Document nodeDocument)
+	throws Exception {
+		Method method = ViewJSONManipulator.class.getDeclaredMethod("addComparisonBindingsForApply", ComparisonComposite.class, Document.class);
+		method.setAccessible(true);
+		try {
+			method.invoke(manipulator, node, nodeDocument);
+		}
+		catch (InvocationTargetException e) {
+			if (e.getCause() instanceof Exception cause) {
+				throw cause;
+			}
+			throw e;
+		}
+	}
+
 	private static User mockUser() {
 		User user = mock(User.class);
 		when(user.getCustomer()).thenReturn(new CustomerImpl());
@@ -1135,6 +1398,26 @@ class ViewJSONManipulatorCoreTest {
 		document.setName("TestDoc");
 		document.setPersistent(new Persistent());
 		return document;
+	}
+
+	/**
+	 * Binds a persistence to the thread whose user is in the given role, for role expressions.
+	 */
+	private static void bindPersistenceForUserInRole(String moduleName, String roleName) {
+		User roleUser = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(roleUser.getCustomer()).thenReturn(customer);
+		when(Boolean.valueOf(roleUser.isInRole(moduleName, roleName))).thenReturn(Boolean.TRUE);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(roleUser);
+		persistence.setForThread();
+	}
+
+	@SuppressWarnings({"unchecked", "java:S3011"}) // Reflection clears the persistence this test bound to the thread.
+	private static void clearThreadPersistence() throws ReflectiveOperationException {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
 	}
 
 	private static ViewImpl testView(String viewName) {

@@ -3,6 +3,9 @@ package org.skyve.impl.backup;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.Sensitivity;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a length field in the backup process, storing metadata about an attribute's type, sensitivity level and maximum length.
  * 
@@ -19,13 +22,13 @@ public class BackupLengthField extends BackupField {
 	 * @param sensitivity - the sensitivity level of the attribute.
 	 * @param maxLength - the maximum length of the attribute.
 	 */
-	public BackupLengthField(AttributeType attributeType, Sensitivity sensitivity, Integer maxLength) {
+	public BackupLengthField(@Nonnull AttributeType attributeType, @Nullable Sensitivity sensitivity, @Nullable Integer maxLength) {
 		super(attributeType, sensitivity);
 
 		this.maxLength = maxLength;
 	}
 
-	public Integer getMaxLength() {
+	public @Nullable Integer getMaxLength() {
 		return maxLength;
 	}
 }

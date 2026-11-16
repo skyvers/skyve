@@ -7,6 +7,9 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses recurring minute phrases such as {@code every minute} and {@code every 5 minute}.
  */
@@ -34,7 +37,7 @@ public class EveryMinute implements ExpressionElementProvider {
 	 * @return {@code true} when recurring-minute syntax is detected.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -62,7 +65,7 @@ public class EveryMinute implements ExpressionElementProvider {
 	 * @return {@code *} or a stepped minute token like {@code * / n} (without spaces), or {@code null} when unsupported.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nullable String getMinuteElement() {
 		if (canProvideMinute()) {
 			return segments.size() > 3 ? String.format("*/%s", segments.get(3)) : "*";
 		}
@@ -85,7 +88,7 @@ public class EveryMinute implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "*";
 	}
 
@@ -105,7 +108,7 @@ public class EveryMinute implements ExpressionElementProvider {
 	 * @return {@code null}, as day-of-month values are not provided.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nullable String getDayNumberElement() {
 		return null;
 	}
 
@@ -125,7 +128,7 @@ public class EveryMinute implements ExpressionElementProvider {
 	 * @return {@code null}, as month values are not provided.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nullable String getMonthElement() {
 		return null;
 	}
 
@@ -145,7 +148,7 @@ public class EveryMinute implements ExpressionElementProvider {
 	 * @return {@code null}, as day-of-week values are not provided.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nullable String getDayOfWeekElement() {
 		return null;
 	}
 

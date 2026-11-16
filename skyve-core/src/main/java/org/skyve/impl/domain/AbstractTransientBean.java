@@ -3,6 +3,8 @@ package org.skyve.impl.domain;
 import org.skyve.domain.TransientBean;
 import org.skyve.impl.util.UUIDv7;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
@@ -34,44 +36,44 @@ public abstract class AbstractTransientBean extends AbstractBean implements Tran
 	private String bizUserId;
 
 	@Override
-	public String getBizId() {
+	public @Nonnull String getBizId() {
 		return bizId;
 	}
 
-	public void setBizId(String bizId) {
+	public void setBizId(@Nonnull String bizId) {
 		this.bizId = bizId;
 	}
 
 	@Override
-	public String getBizCustomer() {
+	public @Nullable String getBizCustomer() {
 		return bizCustomer;
 	}
 
 	@Override
 	@XmlTransient
-	public void setBizCustomer(String bizCustomer) {
+	public void setBizCustomer(@Nonnull String bizCustomer) {
 		this.bizCustomer = bizCustomer;
 	}
 
 	@Override
-	public String getBizDataGroupId() {
+	public @Nullable String getBizDataGroupId() {
 		return bizDataGroupId;
 	}
 
 	@Override
 	@XmlElement
-	public void setBizDataGroupId(String bizDataGroupId) {
+	public void setBizDataGroupId(@Nullable String bizDataGroupId) {
 		this.bizDataGroupId = bizDataGroupId;
 	}
 
 	@Override
-	public String getBizUserId() {
+	public @Nullable String getBizUserId() {
 		return bizUserId;
 	}
 
 	@Override
 	@XmlElement
-	public void setBizUserId(String bizUserId) {
+	public void setBizUserId(@Nonnull String bizUserId) {
 		this.bizUserId = bizUserId;
 	}
 	

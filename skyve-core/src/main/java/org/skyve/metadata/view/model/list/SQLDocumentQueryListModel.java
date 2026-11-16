@@ -5,19 +5,21 @@ import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Nonnull;
+
 public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryListModel<T> {
 	private SQL inputSQL;
 	private SQL detailSQL;
 	private SQL summarySQL;
 	private SQLFilter filter;
 	
-	protected SQLDocumentQueryListModel(SQL sql) {
-		super(null); // this is wrong
+	protected SQLDocumentQueryListModel(@Nonnull SQL sql) {
+		super(); // this is wrong - there is no query
 		this.inputSQL = sql;
 	}
 
 	@Override
-	public Filter getFilter() {
+	public @Nonnull Filter getFilter() {
 		if (filter == null) {
 			establishQueries();
 			filter = new SQLFilter(detailSQL, summarySQL);
@@ -26,13 +28,13 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 	}
 
 	@Override
-	public Filter newFilter() {
+	public @Nonnull Filter newFilter() {
 		establishQueries();
 		return new SQLFilter(detailSQL, summarySQL);
 	}
 
 	@Override
-	public Page fetch() throws Exception {
+	public @Nonnull Page fetch() throws Exception {
 		establishQueries();
 /*		
 		if (getSummary() == null) {
@@ -73,14 +75,14 @@ public class SQLDocumentQueryListModel <T extends Bean> extends DocumentQueryLis
 		
 		return result;
 */
-		return null;
+		throw new UnsupportedOperationException("SQLDocumentQueryListModel.fetch() is not implemented");
 	}
 
 	@Override
-	public AutoClosingIterable<Bean> iterate() throws Exception {
+	public @Nonnull AutoClosingIterable<Bean> iterate() throws Exception {
 		establishQueries();
 //		return detailQuery.projectedIterable();
-		return null;
+		throw new UnsupportedOperationException("SQLDocumentQueryListModel.iterate() is not implemented");
 	}
 	
 	/**

@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that support the shrink-wrap layout mode.
  *
@@ -7,5 +9,5 @@ package org.skyve.impl.metadata.view;
  * widget to size itself to its content rather than filling its container.
  */
 public interface ShrinkWrapper extends RelativeSize {
-	public ShrinkWrap getShrinkWrap();
+	public @Nullable ShrinkWrap getShrinkWrap();
 }

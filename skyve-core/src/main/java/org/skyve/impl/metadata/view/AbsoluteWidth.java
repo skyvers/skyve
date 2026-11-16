@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that declare an absolute pixel width.
  *
@@ -10,6 +12,6 @@ import org.skyve.metadata.SerializableMetaData;
  * {@link RelativeWidth} (adds responsive column width).
  */
 public interface AbsoluteWidth extends SerializableMetaData {
-	public Integer getPixelWidth();
-	public void setPixelWidth(Integer pixelWidth);
+	public @Nullable Integer getPixelWidth();
+	public void setPixelWidth(@Nullable Integer pixelWidth);
 }

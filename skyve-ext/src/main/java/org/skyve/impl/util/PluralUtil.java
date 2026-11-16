@@ -13,6 +13,9 @@ import org.skyve.impl.util.ArticleNode.Data;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Pluarlise function converted and enhanced Java implementation of
  * https://github.com/rhroyston/pluralizer-js/blob/master/pluralizer.js.
@@ -228,12 +231,9 @@ public class PluralUtil {
 	 * @param word The word to query the corect article for, e.g. honest
 	 * @return The article, either <em>a</em> or <em>an</em>
 	 */
-	public static String article(String word) {
+	public static @Nullable String article(@Nonnull String word) {
 		Data result = articleResults(word);
-		if (result != null) {
-			return result.getArticle();
-		}
-		return "a";
+		return result.getArticle();
 	}
 
 	/**
@@ -244,7 +244,7 @@ public class PluralUtil {
 	 * @return The {@link Data} for the matching article, which contains the smallest matching prefix,
 	 *         and the number of times a and and appeared before the word, as well as the recommended article
 	 */
-	public static Data articleResults(String word) {
+	public static @Nonnull Data articleResults(@Nonnull String word) {
 		return query(word);
 	}
 
@@ -264,7 +264,7 @@ public class PluralUtil {
 	 * @param phrase The phrase to check
 	 * @return true if all the words are lowercase, false otherwise
 	 */
-	public static boolean isLowerCase(final String phrase) {
+	public static boolean isLowerCase(final @Nullable String phrase) {
 		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(LOWERCASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
@@ -295,7 +295,7 @@ public class PluralUtil {
 	 * @param phrase The phrase to check
 	 * @return true if all the words are title case, false otherwise
 	 */
-	public static boolean isTitleCase(final String phrase) {
+	public static boolean isTitleCase(final @Nullable String phrase) {
 		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(TITLECASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
@@ -326,7 +326,7 @@ public class PluralUtil {
 	 * @param phrase The phrase to check
 	 * @return true if all the words are uppercase, false otherwise
 	 */
-	public static boolean isUpperCase(final String phrase) {
+	public static boolean isUpperCase(final @Nullable String phrase) {
 		if (phrase != null && (! phrase.isEmpty())) {
 			Pattern p = Pattern.compile(UPPERCASE_PATTERN);
 			String[] tokens = phrase.split("\\s");
@@ -349,7 +349,7 @@ public class PluralUtil {
 	 * @return The plural of the singular word
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String pluralise(final String singular) {
+	public static @Nullable String pluralise(final @Nullable String singular) {
 		if (singular != null && (! singular.isEmpty())) {
 			String str = singular.toLowerCase();
 
@@ -545,7 +545,7 @@ public class PluralUtil {
 	 * @param phrase The string to convert
 	 * @return A title case identifier. First letter upper case words with spaces between.
 	 */
-	public static String toTitleCase(String phrase) {
+	public static @Nullable String toTitleCase(@Nullable String phrase) {
 		if (phrase != null && (! phrase.isEmpty())) {
 			StringBuilder out = new StringBuilder();
 			String[] tokens = phrase.split("\\s");
@@ -568,7 +568,7 @@ public class PluralUtil {
 	 * @return The replacement string, with the matching case of the original if possible
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	static String replaceWithMatchingCase(final String original, final String replacement) {
+	static @Nullable String replaceWithMatchingCase(final @Nonnull String original, final @Nonnull String replacement) {
 		if (isUpperCase(original)) {
 			return replacement.toUpperCase();
 		} else if (isLowerCase(original)) {
@@ -620,7 +620,7 @@ public class PluralUtil {
 	 * Recursive method used to unpack and decode the article dictionary results.
 	 */
 	@SuppressWarnings("boxing")
-	private static String fill(final String prefix, final ArticleNode node, final String dict) {
+	private static @Nonnull String fill(final @Nonnull String prefix, final @Nonnull ArticleNode node, final @Nonnull String dict) {
 		String[] a = dict.split(";", 4);
 		if (a.length > 3) {
 			a = Arrays.copyOf(a, 3);
@@ -658,7 +658,7 @@ public class PluralUtil {
 	 * @param word The word to query for
 	 * @return the {@link Data} which contains the result
 	 */
-	private static Data query(final String word) {
+	private static @Nonnull Data query(final @Nonnull String word) {
 		ArticleNode node = ArticleRootSingleton.articleRoot;
 		int sI = 0;
 		char c;

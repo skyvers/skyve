@@ -68,9 +68,7 @@ public enum AdminQuery implements ModuleQuery {
 	/** The "qSecurityLogs" query. */
 	Q_SECURITY_LOGS("qSecurityLogs"),
 	/** The "qMailLogs" query. */
-	Q_MAIL_LOGS("qMailLogs"),
-	/** The "qMySecurityLogs" query. */
-	Q_MY_SECURITY_LOGS("qMySecurityLogs");
+	Q_MAIL_LOGS("qMailLogs");
 
 	private final String name;
 

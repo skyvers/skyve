@@ -2,15 +2,15 @@ package org.skyve.util;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.DateOnly;
 
-public class TimeTest {
+class TimeTest {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCoalesce() {
+	void testCoalesce() {
 		// setup test data
 		DateOnly today = new DateOnly();
 		DateOnly tomorrow = Time.addDaysToNew(today, 1);
@@ -24,18 +24,16 @@ public class TimeTest {
 		assertThat(result2, is(tomorrow));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testMaxNoArgsThrowsException() {
+	void testMaxNoArgsThrowsException() {
 		// call the method under test
-		Time.max();
-
-		fail("Should throw error before this line");
+		assertThrows(IllegalArgumentException.class, Time::max);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMax() {
+	void testMax() {
 		// setup test data
 		DateOnly today = new DateOnly();
 		DateOnly tomorrow = Time.addDaysToNew(today, 1);
@@ -48,18 +46,16 @@ public class TimeTest {
 		assertThat(result, is(tomorrow));
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testMinNoArgsThrowsException() {
+	void testMinNoArgsThrowsException() {
 		// call the method under test
-		Time.min();
-
-		fail("Should throw error before this line");
+		assertThrows(IllegalArgumentException.class, Time::min);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMin() {
+	void testMin() {
 		// setup test data
 		DateOnly today = new DateOnly();
 		DateOnly tomorrow = Time.addDaysToNew(today, 1);

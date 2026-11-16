@@ -9,6 +9,8 @@ import java.util.Date;
 import org.skyve.CORE;
 import org.skyve.impl.util.TimeUtil;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A {@link java.util.Date} that carries only a calendar date — the time component is
  * always zeroed to midnight in the JVM's default time zone.
@@ -41,7 +43,7 @@ public class DateOnly extends Date {
 	 *
 	 * @param date the source date; must not be {@code null}
 	 */
-	public DateOnly(Date date) {
+	public DateOnly(@Nonnull Date date) {
 		this(date.getTime());
 	}
 	
@@ -63,7 +65,7 @@ public class DateOnly extends Date {
 	 * @param serializedForm the date string; must not be {@code null}
 	 * @throws java.text.ParseException if {@code serializedForm} does not match the format
 	 */
-	public DateOnly(String serializedForm) throws ParseException {
+	public DateOnly(@Nonnull String serializedForm) throws ParseException {
 		this(CORE.getSerializableDateFormat().parse(serializedForm).getTime());
 	}
 
@@ -73,7 +75,7 @@ public class DateOnly extends Date {
 	 *
 	 * @param date the local date; must not be {@code null}
 	 */
-	public DateOnly(LocalDate date) {
+	public DateOnly(@Nonnull LocalDate date) {
 		this(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 	}
 	
@@ -83,7 +85,7 @@ public class DateOnly extends Date {
 	 *
 	 * @param date the local date-time; must not be {@code null}
 	 */
-	public DateOnly(LocalDateTime date) {
+	public DateOnly(@Nonnull LocalDateTime date) {
 		this(date.toLocalDate().atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 	}
 	
@@ -94,7 +96,7 @@ public class DateOnly extends Date {
 	 * @return the formatted date string; never {@code null}
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return CORE.getSerializableDateFormat().format(this);
 	}
 	
@@ -103,7 +105,7 @@ public class DateOnly extends Date {
 	 *
 	 * @return the equivalent {@code LocalDate}; never {@code null}
 	 */
-	public LocalDate toLocalDate() {
+	public @Nonnull LocalDate toLocalDate() {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 
@@ -113,7 +115,7 @@ public class DateOnly extends Date {
 	 *
 	 * @return the equivalent {@code LocalDateTime}; never {@code null}
 	 */
-	public LocalDateTime toLocalDateTime() {
+	public @Nonnull LocalDateTime toLocalDateTime() {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 }

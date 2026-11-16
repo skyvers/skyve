@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.DialogButton;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link DialogButton} metadata for opening configured dialogs.
@@ -21,7 +25,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @param button
 	 *            the metadata instance to mutate
 	 */
-	public FluentDialogButton(DialogButton button) {
+	public FluentDialogButton(@Nonnull DialogButton button) {
 		this.button = button;
 	}
 
@@ -32,7 +36,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentDialogButton from(@SuppressWarnings("hiding") DialogButton button) {
+	public @Nonnull FluentDialogButton from(@SuppressWarnings("hiding") @Nonnull DialogButton button) {
 
 		displayName(button.getDisplayName());
 		escapeDisplayName(button.getEscapeDisplayName());
@@ -50,10 +54,11 @@ public class FluentDialogButton extends FluentWidget {
 		if (b != null) {
 			modalDialog(b.booleanValue());
 		}
-		invisibleConditionName(button.getInvisibleConditionName());
-		disabledConditionName(button.getDisabledConditionName());
+		BindUtil.copyAuthoredCondition(button.getXmlInvisibleCondition(), button.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
+		BindUtil.copyAuthoredCondition(button.getXmlDisabledCondition(), button.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
 
 		button.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
+		button.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -65,7 +70,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the button label
 	 * @return this builder
 	 */
-	public FluentDialogButton displayName(String displayName) {
+	public @Nonnull FluentDialogButton displayName(@Nonnull String displayName) {
 		button.setDisplayName(displayName);
 		return this;
 	}
@@ -76,7 +81,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @param escapeDisplayName {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentDialogButton escapeDisplayName(boolean escapeDisplayName) {
+	public @Nonnull FluentDialogButton escapeDisplayName(boolean escapeDisplayName) {
 		return escapeDisplayName(escapeDisplayName ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -86,7 +91,7 @@ public class FluentDialogButton extends FluentWidget {
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentDialogButton escapeDisplayName(Boolean escapeDisplayName) {
+	public @Nonnull FluentDialogButton escapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		button.setEscapeDisplayName(escapeDisplayName);
 		return this;
 	}
@@ -98,7 +103,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the dialog identifier
 	 * @return this builder
 	 */
-	public FluentDialogButton dialogName(String dialogName) {
+	public @Nonnull FluentDialogButton dialogName(@Nullable String dialogName) {
 		button.setDialogName(dialogName);
 		return this;
 	}
@@ -110,7 +115,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the command identifier
 	 * @return this builder
 	 */
-	public FluentDialogButton command(String command) {
+	public @Nonnull FluentDialogButton command(@Nullable String command) {
 		button.setCommand(command);
 		return this;
 	}
@@ -123,7 +128,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the dialog width
 	 * @return this builder
 	 */
-	public FluentDialogButton dialogWidth(int dialogWidth) {
+	public @Nonnull FluentDialogButton dialogWidth(int dialogWidth) {
 		button.setDialogWidth(Integer.valueOf(dialogWidth));
 		return this;
 	}
@@ -136,7 +141,7 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the dialog height
 	 * @return this builder
 	 */
-	public FluentDialogButton dialogHeight(int dialogHeight) {
+	public @Nonnull FluentDialogButton dialogHeight(int dialogHeight) {
 		button.setDialogHeight(Integer.valueOf(dialogHeight));
 		return this;
 	}
@@ -148,32 +153,56 @@ public class FluentDialogButton extends FluentWidget {
 	 *            {@code true} to require modal interaction
 	 * @return this builder
 	 */
-	public FluentDialogButton modalDialog(boolean modalDialog) {
+	public @Nonnull FluentDialogButton modalDialog(boolean modalDialog) {
 		button.setModalDialog(modalDialog ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name controlling button visibility.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the visibility condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDialogButton invisibleConditionName(String invisibleConditionName) {
-		button.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentDialogButton invisibleCondition(@Nullable String invisibleCondition) {
+		button.setXmlInvisibleCondition(invisibleCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name controlling button enabled state.
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the disable condition name
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDialogButton disabledConditionName(String disabledConditionName) {
-		button.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentDialogButton visibleCondition(@Nullable String visibleCondition) {
+		button.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
+	 *
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDialogButton disabledCondition(@Nullable String disabledCondition) {
+		button.setXmlDisabledCondition(disabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
+	 *
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDialogButton enabledCondition(@Nullable String enabledCondition) {
+		button.setXmlEnabledCondition(enabledCondition);
 		return this;
 	}
 
@@ -184,18 +213,31 @@ public class FluentDialogButton extends FluentWidget {
 	 *            the parameter builder whose metadata is appended
 	 * @return this builder
 	 */
-	public FluentDialogButton addParameter(FluentParameter parameter) {
+	public @Nonnull FluentDialogButton addParameter(@Nonnull FluentParameter parameter) {
 		button.getParameters().add(parameter.get());
 		return this;
 	}
 	
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDialogButton putProperty(@Nonnull String k, @Nonnull String v) {
+		button.getProperties().put(k, v);
+		return this;
+	}
+
 	/**
 	 * Returns the underlying mutable metadata.
 	 *
 	 * @return the wrapped dialog-button metadata
 	 */
 	@Override
-	public DialogButton get() {
+	public @Nonnull DialogButton get() {
 		return button;
 	}
 }

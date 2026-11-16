@@ -11,6 +11,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.ExpressionEvaluator;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -34,25 +35,25 @@ public class InvokeStatement extends StatementMetaData {
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE, name = "argument")
 	private List<MethodArgument> arguments = new ArrayList<>();
 
-	public String getMethodName() {
+	public @Nonnull String getMethodName() {
 		return methodName;
 	}
 	
 	@XmlAttribute(name="method", required = true)
-	public void setMethodName(String methodName) {
+	public void setMethodName(@Nonnull String methodName) {
 		this.methodName = UtilImpl.processStringValue(methodName);
 	}
 
-	public List<MethodArgument> getArguments() {
+	public @Nonnull List<MethodArgument> getArguments() {
 		return arguments;
 	}
 
 	@Override
-	public void execute(Bean bean) {
+	public void execute(@Nonnull Bean bean) {
 		execute(bean.getClass(), bean);
 	}
 	
-	protected void execute(Class<?> type, Bean bean) {
+	protected void execute(@Nonnull Class<?> type, @Nonnull Bean bean) {
 		int numberOfArguments = arguments.size();
 		Class<?>[] argumentTypes = new Class[numberOfArguments];
 		Object[] argumentValues = new Object[numberOfArguments];

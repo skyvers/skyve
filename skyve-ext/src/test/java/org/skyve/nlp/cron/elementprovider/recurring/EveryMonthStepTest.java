@@ -2,22 +2,22 @@ package org.skyve.nlp.cron.elementprovider.recurring;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class EveryMonthStepTest {
+class EveryMonthStepTest {
 
 	@Test
-	public void testCanProvideMonthReturnsFalseWithNoSegments() {
+	void testCanProvideMonthReturnsFalseWithNoSegments() {
 		// no matches() called → segments empty → size != 3 → returns false
 		EveryMonthStep provider = new EveryMonthStep();
 		assertFalse(provider.canProvideMonth());
 	}
 
 	@Test
-	public void testGetMonthElementReturnsStarWithNoSegments() {
+	void testGetMonthElementReturnsStarWithNoSegments() {
 		// no matches() called → segments empty → size <= 2 → returns "*"
 		EveryMonthStep provider = new EveryMonthStep();
 		assertThat(provider.getMonthElement(), is("*"));

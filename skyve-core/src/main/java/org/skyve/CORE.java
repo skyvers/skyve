@@ -158,9 +158,10 @@ public class CORE {
 	 * <p>The repository is a long-lived singleton that is safe to use from any thread.
 	 *
 	 * @return the application {@link Repository}; never {@code null}
+	 * @throws IllegalStateException if Skyve has not been bootstrapped (or has been shut down)
 	 */
 	public static @Nonnull Repository getRepository() {
-		return ProvidedRepositoryFactory.get();
+		return ProvidedRepositoryFactory.getNullSafe();
 	}
 	
 	/**

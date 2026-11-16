@@ -6,6 +6,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -16,6 +17,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Both {@code binding} and {@code value} are required. The executor compares the
  * widget's current display value against {@code value} as a string and fails the
  * automation run if they do not match.
+ *
+ * <p>{@code {run}} and {@code {var:name}} in {@code value} are replaced by the run token and the captured variables.
  *
  * @see org.skyve.metadata.sail.execution.Executor#executeTestValue
  */
@@ -30,7 +33,7 @@ public class TestValue implements Step {
 	 * Returns the binding.
 	 * @return the result
 	 */
-	public String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 
@@ -39,7 +42,7 @@ public class TestValue implements Step {
 	 * @param binding the binding
 	 */
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
@@ -47,7 +50,7 @@ public class TestValue implements Step {
 	 * Returns the value.
 	 * @return the result
 	 */
-	public String getValue() {
+	public @Nonnull String getValue() {
 		return value;
 	}
 
@@ -56,7 +59,7 @@ public class TestValue implements Step {
 	 * @param value the value
 	 */
 	@XmlAttribute(name = "value", required = true)
-	public void setValue(String value) {
+	public void setValue(@Nonnull String value) {
 		this.value = UtilImpl.processStringValue(value);
 	}
 
@@ -65,7 +68,7 @@ public class TestValue implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeTestValue(this);
 	}
 	
@@ -75,7 +78,7 @@ public class TestValue implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return binding;
 	}
 }

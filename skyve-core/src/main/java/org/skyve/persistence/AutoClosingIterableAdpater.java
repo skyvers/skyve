@@ -4,6 +4,8 @@ import java.util.Iterator;
 
 import org.skyve.impl.util.LoggingIteratorAdapter;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Adapts any {@link Iterable} (such as a {@link java.util.Collection}) to the
  * {@link AutoClosingIterable} contract.
@@ -23,7 +25,7 @@ public class AutoClosingIterableAdpater<T> implements AutoClosingIterable<T> {
 	 * Creates a new AutoClosingIterableAdpater instance.
 	 * @param adapted the adapted
 	 */
-	public AutoClosingIterableAdpater(Iterable<T> adapted) {
+	public AutoClosingIterableAdpater(@Nonnull Iterable<T> adapted) {
 		iterable = adapted;
 	}
 	
@@ -32,7 +34,7 @@ public class AutoClosingIterableAdpater<T> implements AutoClosingIterable<T> {
 	 * @return the result
 	 */
 	@Override
-	public Iterator<T> iterator() {
+	public @Nonnull Iterator<T> iterator() {
 		return new LoggingIteratorAdapter<>(iterable.iterator());
 	}
 

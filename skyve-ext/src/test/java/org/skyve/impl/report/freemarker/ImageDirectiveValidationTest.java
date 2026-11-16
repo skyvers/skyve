@@ -46,6 +46,7 @@ class ImageDirectiveValidationTest {
 	@TempDir
 	Path tempDir;
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void dynamicImageRejectsDirectiveShapeProblems() {
 		DynamicImageDirective directive = new DynamicImageDirective();
@@ -56,6 +57,7 @@ class ImageDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], mock(TemplateDirectiveBody.class)));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void dynamicImageRejectsUnsupportedOrWronglyTypedParameters() {
 		DynamicImageDirective directive = new DynamicImageDirective();
@@ -71,6 +73,7 @@ class ImageDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params("width", scalar("abc")), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void dynamicImageRejectsMissingRequiredParametersAfterParsingOptionalNumbers() {
 		DynamicImageDirective directive = new DynamicImageDirective();
@@ -90,6 +93,7 @@ class ImageDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void contentRejectsDirectiveShapeProblems() {
 		ContentDirective directive = new ContentDirective();
@@ -100,6 +104,7 @@ class ImageDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], mock(TemplateDirectiveBody.class)));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void contentRejectsUnsupportedOrWronglyTypedParameters() {
 		ContentDirective directive = new ContentDirective();
@@ -115,6 +120,7 @@ class ImageDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params("style", raw()), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void contentRejectsMissingRequiredParametersAfterParsingOptionalValues() {
 		ContentDirective directive = new ContentDirective();
@@ -165,6 +171,7 @@ class ImageDirectiveValidationTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void imageRejectsDirectiveShapeProblems() {
 		ImageDirective directive = new ImageDirective();
@@ -175,6 +182,7 @@ class ImageDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], mock(TemplateDirectiveBody.class)));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void imageRejectsUnsupportedOrWronglyTypedParameters() {
 		ImageDirective directive = new ImageDirective();

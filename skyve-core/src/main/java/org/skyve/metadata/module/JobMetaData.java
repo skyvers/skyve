@@ -4,6 +4,9 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Metadata descriptor for a background job declared in a module.
  *
@@ -16,20 +19,28 @@ import org.skyve.util.Util;
  * @see org.skyve.metadata.module.Module#getJobs()
  */
 public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
+		/**
+	 * Returns the name of this job, which module conversion requires.
+	 *
+	 * @return The job name
+	 */
+	@Override
+	@Nonnull String getName();
+
 	/**
 	 * Returns the i18n resource key (or literal string) for the human-readable job name.
 	 *
 	 * @return the display name key; never {@code null}
 	 * @see #getLocalisedDisplayName()
 	 */
-	public String getDisplayName();
+	public @Nonnull String getDisplayName();
 
 	/**
 	 * Returns the localised human-readable job name, resolved via the i18n resource bundle.
 	 *
 	 * @return the localised display name; never {@code null}
 	 */
-	public default String getLocalisedDisplayName() {
+	public default @Nullable String getLocalisedDisplayName() {
 		return Util.i18n(getDisplayName());
 	}
 
@@ -41,7 +52,7 @@ public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the class name; never {@code null}
 	 */
-	public String getClassName();
+	public @Nonnull String getClassName();
 
 	/**
 	 * Returns the i18n resource key (or literal string) for a longer description of this job.
@@ -49,14 +60,14 @@ public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
 	 * @return the description key; may be {@code null}
 	 * @see #getLocalisedDescription()
 	 */
-	public String getDescription();
+	public @Nullable String getDescription();
 
 	/**
 	 * Returns the localised description, resolved via the i18n resource bundle.
 	 *
 	 * @return the localised description; may be {@code null} if no description is defined
 	 */
-	public default String getLocalisedDescription() {
+	public default @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 
@@ -67,5 +78,5 @@ public interface JobMetaData extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the owning module name; never {@code null}
 	 */
-	public String getOwningModuleName();
+	public @Nullable String getOwningModuleName();
 }

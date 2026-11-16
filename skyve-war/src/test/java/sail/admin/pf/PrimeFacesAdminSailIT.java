@@ -1,7 +1,6 @@
 package sail.admin.pf;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
@@ -11,19 +10,22 @@ import util.sail.Devices;
 /**
  * Runs automated SAIL tests for the admin module (PrimeFaces).
  * <p>
- * Note: Replace the path in the {@code sailFile} parameter with the location of the test file you wish to run.
+ * Runs against the server named by {@code -Dsail.baseUrl} (required),
+ * headless unless {@code -Dsail.headless=false}.
+ * The script's test strategy decides how failures are reported; the test fails with an {@link AssertionError}
+ * naming each failed interaction and step.
  */
 class PrimeFacesAdminSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	public PrimeFacesAdminSailIT() {
 		super(new BrowserConfiguration()
 				.browser(Browsers.chrome)
-				.baseUrl("http://localhost:8080/skyve/")
 				.userAgentString(Devices.ipad.userAgentString));
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void test() {
-		Assertions.assertDoesNotThrow(() -> sailFile("/Users/simeonsolomou/git/skyve/skyve-war/src/test/java/sail/admin/pf/pf-admin-sail.xml"));
+		sailResource("sail/admin/pf/pf-admin-sail.xml");
 	}
 }

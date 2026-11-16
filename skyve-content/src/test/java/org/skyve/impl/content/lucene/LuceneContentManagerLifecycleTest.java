@@ -1,5 +1,6 @@
 package org.skyve.impl.content.lucene;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,12 +20,22 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.DocValuesType;
+import org.apache.lucene.index.FieldInfo;
+import org.apache.lucene.index.FieldInfos;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.store.Directory;
 import org.junit.jupiter.api.AfterEach;
@@ -45,8 +56,25 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.user.User;
 
+/**
+ * Verifies the Lucene content manager lifecycle for bean content and attachments.
+ *
+ * <p>The suite covers exact identifier indexing and lookup, legacy-index compatibility behaviour,
+ * replacement and deletion, attachment file storage, result enumeration, malformed or missing
+ * content, concurrent access, lifecycle transitions and failure cleanup. Assertions inspect both
+ * the public content-manager contract and the resulting Lucene field schema where the schema is
+ * itself part of the compatibility guarantee.
+ */
 @SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
 class LuceneContentManagerLifecycleTest {
+	private static final FieldType CONTENT_ID_FIELD_TYPE;
+
+	static {
+		CONTENT_ID_FIELD_TYPE = new FieldType(StringField.TYPE_STORED);
+		CONTENT_ID_FIELD_TYPE.setOmitNorms(false);
+		CONTENT_ID_FIELD_TYPE.freeze();
+	}
+
 	private final String originalContentDirectory = UtilImpl.CONTENT_DIRECTORY;
 	private final boolean originalContentFileStorage = UtilImpl.CONTENT_FILE_STORAGE;
 	private final boolean originalContentTrace = UtilImpl.CONTENT_TRACE;
@@ -71,6 +99,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms that startup rejects a content path that cannot serve as a Lucene directory. */
 	@Test
 	void testStartupThrowsForInvalidContentDirectory() throws Exception {
 		UtilImpl.CONTENT_DIRECTORY = "/dev/null";
@@ -80,6 +109,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms that failures while closing the Lucene directory are surfaced during shutdown. */
 	@Test
 	@SuppressWarnings("resource")
 	void testShutdownWrapsDirectoryCloseFailure() throws Exception {
@@ -94,6 +124,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms indexing across data-group, tracing and filesystem-storage configuration branches. */
 	@Test
 	void testIndexingCoversDataGroupTraceAndFileStorageBranches() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-datagroup-");
@@ -130,6 +161,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms that repeated close operations are safe after pending content has been flushed. */
 	@Test
 	void testCloseIsIdempotentAfterContentFlush() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-close-");
@@ -150,8 +182,9 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms exact UUID attachment lookup, replacement, enumeration and removal in one lifecycle. */
 	@Test
-	void testAttachmentLifecycleWithInlineStorage() throws Exception {
+	void testAttachmentLifecycleSupportsUuidContentId() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-inline-");
 		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();
 		UtilImpl.CONTENT_FILE_STORAGE = false;
@@ -159,6 +192,7 @@ class LuceneContentManagerLifecycleTest {
 		try (LuceneContentManager manager = new LuceneContentManager()) {
 			manager.startup();
 
+			byte[] originalBytes = "first payload".getBytes();
 			AttachmentContent attachment = new AttachmentContent("demo",
 													"admin",
 													"Contact",
@@ -166,12 +200,13 @@ class LuceneContentManagerLifecycleTest {
 													"",
 													"biz-attach-1",
 													"image")
-													.attachment("sample.txt", "text/plain", "first payload".getBytes())
+													.attachment("sample.txt", "text/plain", originalBytes)
 													.markup("m1");
-			attachment.setContentId("cidattach001");
+			attachment.setContentId("691a3e3c-b84c-4483-9374-7dd3727f2e06");
 
 			manager.put(attachment, true);
 			manager.close();
+			assertContentIdFieldShape();
 
 			String contentId = attachment.getContentId();
 			assertNotNull(contentId);
@@ -180,8 +215,10 @@ class LuceneContentManagerLifecycleTest {
 			assertNotNull(loaded);
 			assertEquals("sample.txt", loaded.getFileName());
 			assertEquals("m1", loaded.getMarkup());
+			assertArrayEquals(originalBytes, loaded.getContentBytes());
+			assertEquals(1L, countHits(manager));
 
-			attachment.attachment("sample.txt", "text/plain", "second payload".getBytes());
+			attachment.attachment("renamed.txt", "text/plain", "replacement payload".getBytes());
 			attachment.setContentId(contentId);
 			manager.update(attachment);
 			manager.close();
@@ -189,9 +226,13 @@ class LuceneContentManagerLifecycleTest {
 			AttachmentContent updated = manager.getAttachment(contentId);
 			assertNotNull(updated);
 			assertEquals(contentId, updated.getContentId());
+			assertEquals("renamed.txt", updated.getFileName());
+			assertArrayEquals(originalBytes, updated.getContentBytes());
+			assertEquals(1L, countHits(manager));
 
 			manager.reindex(attachment, false);
 			manager.close();
+			assertEquals(1L, countHits(manager));
 
 			manager.removeAttachment(contentId);
 			manager.close();
@@ -201,6 +242,210 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms that attachment bytes and metadata survive restart when filesystem storage is enabled. */
+	@Test
+	void testAttachmentLifecycleWithFileSystemStorageAndRestart() throws Exception {
+		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-file-system-");
+		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();
+		UtilImpl.CONTENT_FILE_STORAGE = true;
+		byte[] originalBytes = "file system payload".getBytes();
+		String contentId = "be0bc5dc-a7c7-448a-adb3-d8b220ce95d5";
+
+		try (LuceneContentManager manager = new LuceneContentManager()) {
+			manager.startup();
+			AttachmentContent attachment = new AttachmentContent("demo",
+													"admin",
+													"Contact",
+													null,
+													"",
+													"biz-file-system",
+													"image")
+													.attachment("stored.txt", "text/plain", originalBytes)
+													.markup("before");
+			attachment.setContentId(contentId);
+
+			manager.put(attachment, false);
+			manager.close();
+			AttachmentContent stored = manager.getAttachment(contentId);
+			assertNotNull(stored);
+			assertArrayEquals(originalBytes, stored.getContentBytes());
+			assertEquals("before", stored.getMarkup());
+
+			attachment.attachment("renamed.txt", "text/plain", "replacement payload".getBytes());
+			attachment.markup("after");
+			manager.update(attachment);
+			manager.close();
+			AttachmentContent updated = manager.getAttachment(contentId);
+			assertNotNull(updated);
+			assertEquals("renamed.txt", updated.getFileName());
+			assertEquals("after", updated.getMarkup());
+			assertArrayEquals(originalBytes, updated.getContentBytes());
+			assertEquals(1L, countHits(manager));
+
+			manager.reindex(attachment, false);
+			manager.close();
+			assertEquals(1L, countHits(manager));
+			manager.shutdown();
+		}
+
+		try (LuceneContentManager restarted = new LuceneContentManager()) {
+			restarted.startup();
+			AttachmentContent restored = restarted.getAttachment(contentId);
+			assertNotNull(restored);
+			assertArrayEquals(originalBytes, restored.getContentBytes());
+			assertEquals(1L, countHits(restarted));
+
+			restarted.removeAttachment(contentId);
+			restarted.close();
+			assertNull(restarted.getAttachment(contentId));
+			assertEquals(0L, countHits(restarted));
+			restarted.shutdown();
+		}
+	}
+
+	/** Confirms that the incompatible tokenised legacy identifier schema is rejected before rebuilding. */
+	@Test
+	void testLegacyContentIdSchemaRequiresDropBeforeRebuild() throws Exception {
+		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-legacy-schema-");
+		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();
+		UtilImpl.CONTENT_FILE_STORAGE = false;
+		String contentId = "65c726c3-2005-42bc-961d-fd5cc088351a";
+
+		try (LuceneContentManager legacy = new LuceneContentManager()) {
+			legacy.startup();
+			addRawDocument(rawLegacyAttachmentDoc(contentId, "legacy-biz-id"));
+			legacy.close();
+			legacy.shutdown();
+		}
+
+		try (LuceneContentManager manager = new LuceneContentManager()) {
+			manager.startup();
+			assertNull(manager.getAttachment(contentId));
+
+			AttachmentContent replacement = new AttachmentContent("demo",
+													"admin",
+													"Contact",
+													null,
+													"",
+													"replacement-biz-id",
+													"image")
+													.attachment("replacement.txt", "text/plain", new byte[] {7});
+			replacement.setContentId(contentId);
+			assertThrows(IllegalArgumentException.class, () -> manager.put(replacement, false));
+
+			manager.dropIndexing();
+			manager.put(replacement, false);
+			manager.close();
+			assertNotNull(manager.getAttachment(contentId));
+			assertEquals(1L, countHits(manager));
+			manager.shutdown();
+		}
+	}
+
+	/** Confirms that rolled-back attachment changes do not reappear after the manager restarts. */
+	@Test
+	void testUncommittedAttachmentDoesNotSurviveRollbackAndRestart() throws Exception {
+		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-rollback-");
+		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();
+		UtilImpl.CONTENT_FILE_STORAGE = false;
+		String contentId = "41beb3ae-2d4b-41a2-b19b-fb0519c24dc8";
+
+		try (LuceneContentManager manager = new LuceneContentManager()) {
+			manager.startup();
+			manager.close();
+			AttachmentContent attachment = new AttachmentContent("demo",
+													"admin",
+													"Contact",
+													null,
+													"",
+													"rollback-biz-id",
+													"image")
+													.attachment("rollback.txt", "text/plain", new byte[] {8});
+			attachment.setContentId(contentId);
+			manager.put(attachment, false);
+			rollbackIndexWriter();
+			manager.shutdown();
+		}
+
+		try (LuceneContentManager restarted = new LuceneContentManager()) {
+			restarted.startup();
+			assertNull(restarted.getAttachment(contentId));
+			assertEquals(0L, countHits(restarted));
+			restarted.shutdown();
+		}
+	}
+
+	/** Confirms that concurrent replacements leave exactly one Lucene document for a content ID. */
+	@Test
+	void testConcurrentUpdatesPreserveSingleContentIdDocument() throws Exception {
+		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-concurrent-update-");
+		UtilImpl.CONTENT_DIRECTORY = tempContentDirectory.toString();
+		UtilImpl.CONTENT_FILE_STORAGE = false;
+		String contentId = "f10921c5-da7f-4e1c-949a-8af3bfb23955";
+		byte[] originalBytes = new byte[] {1, 2, 3};
+
+		try (LuceneContentManager manager = new LuceneContentManager()) {
+			manager.startup();
+			AttachmentContent original = new AttachmentContent("demo",
+												"admin",
+												"Contact",
+												null,
+												"",
+												"concurrent-biz-id",
+												"image")
+												.attachment("original.txt", "text/plain", originalBytes);
+			original.setContentId(contentId);
+			manager.put(original, false);
+			manager.close();
+
+			AttachmentContent first = new AttachmentContent("demo",
+											"admin",
+											"Contact",
+											null,
+											"",
+											"concurrent-biz-id",
+											"image")
+											.attachment("first.txt", "text/plain", new byte[] {4});
+			first.setContentId(contentId);
+			AttachmentContent second = new AttachmentContent("demo",
+											 "admin",
+											 "Contact",
+											 null,
+											 "",
+											 "concurrent-biz-id",
+											 "image")
+											 .attachment("second.txt", "text/plain", new byte[] {5});
+			second.setContentId(contentId);
+
+			ExecutorService executor = Executors.newFixedThreadPool(2);
+			try {
+				List<Future<Void>> updates = executor.invokeAll(List.of(() -> {
+					manager.update(first);
+					return null;
+				}, () -> {
+					manager.update(second);
+					return null;
+				}));
+				for (Future<Void> update : updates) {
+					update.get();
+				}
+			}
+			finally {
+				executor.shutdownNow();
+			}
+
+			manager.close();
+			assertEquals(1L, countHits(manager));
+			AttachmentContent updated = manager.getAttachment(contentId);
+			assertNotNull(updated);
+			assertTrue("first.txt".equals(updated.getFileName()) || "second.txt".equals(updated.getFileName()));
+			assertArrayEquals(originalBytes, updated.getContentBytes());
+			manager.shutdown();
+		}
+	}
+
+	/** Confirms that truncate clears indexed content and drop removes the index for clean recreation. */
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testTruncateAndDropIndexing() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-truncate-");
@@ -258,6 +503,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms that update and retrieval failures follow the content manager's documented exceptions. */
 	@Test
 	void testUpdateAndGetAttachmentExceptionBranches() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-branches-");
@@ -303,6 +549,8 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms bean-content search results and enforcement of requested and maximum result limits. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGoogleSearchFindsBeanContentAndHonoursLimits() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-google-");
@@ -344,6 +592,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms full-text search returns matching attachment metadata and content identifiers. */
 	@Test
 	void testGoogleSearchFindsAttachmentContent() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-google-attachment-");
@@ -383,6 +632,7 @@ class LuceneContentManagerLifecycleTest {
 		}
 	}
 
+	/** Confirms search excludes results whose documents are not accessible to the current user. */
 	@Test
 	@SuppressWarnings("boxing")
 	void testGoogleSearchFiltersInaccessibleContent() throws Exception {
@@ -417,11 +667,20 @@ class LuceneContentManagerLifecycleTest {
 		d.add(new StringField(Bean.DOCUMENT_KEY, "Contact", Store.YES));
 		d.add(new StringField(Bean.DOCUMENT_ID, bizId, Store.YES));
 		d.add(new StoredField(AbstractContentManager.LAST_MODIFIED, TimeUtil.formatISODate(new Date(), true)));
-		d.add(new TextField(AbstractContentManager.CONTENT_ID, contentId, Store.YES));
+		d.add(new org.apache.lucene.document.Field(AbstractContentManager.CONTENT_ID,
+														contentId,
+														CONTENT_ID_FIELD_TYPE));
 		if (includeAttachment) {
 			d.add(new StoredField("attachment", new byte[] {9, 9}));
 		}
 		return d;
+	}
+
+	private static Document rawLegacyAttachmentDoc(String contentId, String bizId) {
+		Document document = rawAttachmentDoc(contentId, bizId, true);
+		document.removeField(AbstractContentManager.CONTENT_ID);
+		document.add(new TextField(AbstractContentManager.CONTENT_ID, contentId, Store.YES));
+		return document;
 	}
 
 	private static void addRawDocument(Document document) throws Exception {
@@ -429,6 +688,26 @@ class LuceneContentManagerLifecycleTest {
 		writerField.setAccessible(true);
 		IndexWriter indexWriter = (IndexWriter) writerField.get(null);
 		indexWriter.addDocument(document);
+	}
+
+	private static void rollbackIndexWriter() throws Exception {
+		Field writerField = LuceneContentManager.class.getDeclaredField("writer");
+		writerField.setAccessible(true);
+		IndexWriter indexWriter = (IndexWriter) writerField.get(null);
+		indexWriter.rollback();
+	}
+
+	private static void assertContentIdFieldShape() throws Exception {
+		Field directoryField = LuceneContentManager.class.getDeclaredField("directory");
+		directoryField.setAccessible(true);
+		Directory indexDirectory = (Directory) directoryField.get(null);
+		try (DirectoryReader reader = DirectoryReader.open(indexDirectory)) {
+			FieldInfo contentId = FieldInfos.getMergedFieldInfos(reader).fieldInfo(AbstractContentManager.CONTENT_ID);
+			assertNotNull(contentId);
+			assertEquals(IndexOptions.DOCS, contentId.getIndexOptions());
+			assertEquals(DocValuesType.NONE, contentId.getDocValuesType());
+			assertTrue(contentId.hasNorms());
+		}
 	}
 
 	private static long countHits(LuceneContentManager manager) throws Exception {
@@ -459,6 +738,7 @@ class LuceneContentManagerLifecycleTest {
 		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
 	}
 
+	/** Confirms bean content can be indexed, replaced, retrieved, enumerated and removed by business ID. */
 	@Test
 	void testBeanIndexLifecycle() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-");

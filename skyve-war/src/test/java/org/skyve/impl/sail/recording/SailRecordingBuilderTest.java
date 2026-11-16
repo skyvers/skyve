@@ -1,0 +1,591 @@
+package org.skyve.impl.sail.recording;
+
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
+import org.skyve.metadata.sail.language.step.interaction.TabSelect;
+import org.skyve.metadata.sail.language.step.interaction.actions.Action;
+import org.skyve.metadata.sail.language.step.interaction.actions.Cancel;
+import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
+import org.skyve.metadata.sail.language.step.interaction.actions.Ok;
+import org.skyve.metadata.sail.language.step.interaction.actions.Remove;
+import org.skyve.metadata.sail.language.step.interaction.actions.Save;
+import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.session.Login;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter.FilterOperator;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
+import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.web.UserAgentType;
+
+/**
+ * Tests that recorded steps become the SAIL steps they stand for, that gestures which are not steps become comments,
+ * and that the XML is readable and reads back.
+ */
+@SuppressWarnings("static-method")
+class SailRecordingBuilderTest {
+	private static final long STARTED = 1_762_390_800_000L;
+	private static final long STOPPED = STARTED + 15 * 60_000L;
+
+	private static Map<String, String> step(String... keysAndValues) {
+		Map<String, String> result = new LinkedHashMap<>();
+		for (int i = 0; i < keysAndValues.length; i += 2) {
+			result.put(keysAndValues[i], keysAndValues[i + 1]);
+		}
+		return result;
+	}
+
+	private static SailRecordingBuilder.Result build(List<Map<String, String>> steps) {
+		return new SailRecordingBuilder(null, "admin", STARTED, STOPPED).build(steps);
+	}
+
+	private static List<Step> method(SailRecordingBuilder.Result result) {
+		return result.automation().getInteractions().get(0).getSteps();
+	}
+
+	@Test
+	void signsInAsTheRecordingUserWithThePasswordVariableThenSwitchesToSmartClient() {
+		Automation automation = new SailRecordingBuilder("demo", "tester", STARTED, STOPPED).build(List.of()).automation();
+		List<Step> before = java.util.Objects.requireNonNull(automation.getBefore()).getSteps();
+		Login login = (Login) before.get(0);
+		assertAll(() -> assertEquals("desktop", automation.getUxui()),
+					() -> assertEquals("desktop", automation.getUserAgentType().name()),
+					() -> assertNull(automation.getTestStrategy()),
+					() -> assertEquals("demo", login.getCustomer()),
+					() -> assertEquals("tester", login.getUser()),
+					() -> assertEquals("{var:password}", login.getPassword()),
+					() -> assertInstanceOf(SwitchMode.class, before.get(1)),
+					() -> assertEquals(2, before.size()));
+	}
+
+	@Test
+	void eachRecordedGestureBecomesItsStep() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "view", ""),
+				step("op", "listGridNew", "view", "list"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "view", "admin.Contact"),
+				step("op", "dataEnter", "binding", "contactType", "value", "Person", "match", "code"),
+				step("op", "tabSelect", "path", "Details::Address"),
+				step("op", "action", "name", "Check", "confirm", "false"),
+				step("op", "save"),
+				step("op", "ok", "confirm", "false"),
+				step("op", "listGridZoom", "rowContaining", "Fred"),
+				step("op", "listGridZoom", "module", "admin", "query", "qContacts", "row", "3"),
+				step("op", "listGridNew", "module", "admin", "document", "Contact", "model", "MyModel"),
+				step("op", "cancel"),
+				step("op", "delete"),
+				step("op", "zoomOut"),
+				step("op", "remove"),
+				step("op", "navigateEdit", "module", "admin", "document", "Contact", "bizId", "123"),
+				step("op", "navigateList", "module", "admin", "query", "qContacts"));
+		List<Step> method = method(build(steps));
+		NavigateMenu menu = (NavigateMenu) method.get(0);
+		ListGridNew listNew = (ListGridNew) method.get(1);
+		DataEnter text = (DataEnter) method.get(2);
+		DataEnter code = (DataEnter) method.get(3);
+		Action action = (Action) method.get(5);
+		assertAll(() -> assertEquals(17, method.size()),
+					() -> assertEquals("admin", menu.getModuleName()),
+					() -> assertEquals("Contacts", menu.getItemName()),
+					() -> assertNull(listNew.getModuleName()),
+					() -> assertEquals("name", text.getBinding()),
+					() -> assertEquals("Fred", text.getValue()),
+					() -> assertNull(text.getMatch()),
+					() -> assertEquals(Match.code, code.getMatch()),
+					() -> assertEquals("Details::Address", ((TabSelect) method.get(4)).getTabPath()),
+					() -> assertEquals("Check", action.getActionName()),
+					() -> assertEquals(Boolean.FALSE, action.getConfirm()),
+					() -> assertInstanceOf(Save.class, method.get(6)),
+					() -> assertNull(((Save) method.get(6)).getConfirm()));
+	}
+
+	@Test
+	void eachRecordedGestureBecomesItsStepContinued() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "view", ""),
+				step("op", "listGridNew", "view", "list"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "view", "admin.Contact"),
+				step("op", "dataEnter", "binding", "contactType", "value", "Person", "match", "code"),
+				step("op", "tabSelect", "path", "Details::Address"),
+				step("op", "action", "name", "Check", "confirm", "false"),
+				step("op", "save"),
+				step("op", "ok", "confirm", "false"),
+				step("op", "listGridZoom", "rowContaining", "Fred"),
+				step("op", "listGridZoom", "module", "admin", "query", "qContacts", "row", "3"),
+				step("op", "listGridNew", "module", "admin", "document", "Contact", "model", "MyModel"),
+				step("op", "cancel"),
+				step("op", "delete"),
+				step("op", "zoomOut"),
+				step("op", "remove"),
+				step("op", "navigateEdit", "module", "admin", "document", "Contact", "bizId", "123"),
+				step("op", "navigateList", "module", "admin", "query", "qContacts"));
+		List<Step> method = method(build(steps));
+		Ok ok = (Ok) method.get(7);
+		ListGridZoom byText = (ListGridZoom) method.get(8);
+		ListGridZoom byRow = (ListGridZoom) method.get(9);
+		ListGridNew modelNew = (ListGridNew) method.get(10);
+		NavigateEdit edit = (NavigateEdit) method.get(15);
+		NavigateList list = (NavigateList) method.get(16);
+		assertAll(() -> assertEquals(Boolean.FALSE, ok.getConfirm()),
+					() -> assertEquals("Fred", byText.getRowContaining()),
+					() -> assertNull(byText.getRow()),
+					() -> assertEquals("qContacts", byRow.getQueryName()),
+					() -> assertEquals(Integer.valueOf(3), byRow.getRow()),
+					() -> assertEquals("Contact", modelNew.getDocumentName()),
+					() -> assertEquals("MyModel", modelNew.getModelName()),
+					() -> assertInstanceOf(Cancel.class, method.get(11)),
+					() -> assertInstanceOf(Delete.class, method.get(12)),
+					() -> assertInstanceOf(ZoomOut.class, method.get(13)),
+					() -> assertInstanceOf(Remove.class, method.get(14)),
+					() -> assertEquals("123", edit.getBizId()),
+					() -> assertEquals("qContacts", list.getQueryName()));
+	}
+
+
+	/**
+	 * Phase 5's gestures become their steps: data grids, lookups, uploads, list filters and sorting, list selections,
+	 * and trees, maps and calendars.
+	 */
+	@Test
+	void gridsLookupsUploadsAndListsBecomeTheirSteps() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "dataGridNew", "binding", "rows"),
+				step("op", "dataGridZoom", "binding", "rows", "rowContaining", "Fred", "rowTexts", "Fred | 3"),
+				step("op", "dataGridEdit", "binding", "rows", "row", "2"),
+				step("op", "dataGridRemove", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridSelect", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridMove", "binding", "rows", "rowContaining", "Fred", "to", "0"),
+				step("op", "dataGridLink", "binding", "rows", "rowContaining", "Fred", "text", "Revoke", "confirm", "false"),
+				step("op", "lookupDescriptionPick", "binding", "contact", "rowContaining", "Fred Smith"),
+				step("op", "lookupDescriptionAutoComplete", "binding", "contact", "search", "Fre", "pick", "Fred Smith"),
+				step("op", "lookupDescriptionNew", "binding", "contact"),
+				step("op", "lookupDescriptionEdit", "binding", "contact"),
+				step("op", "upload", "action", "Import", "file", "C:\\fakepath\\people.csv"),
+				step("op", "listGridFilter", "column", "name", "value", "Fred"),
+				step("op", "listGridFilter", "module", "admin", "query", "qContacts", "column", "number", "value", "7", "operator", "equals"),
+				step("op", "listGridFilter", "column", "name"),
+				step("op", "listGridClearFilter"),
+				step("op", "listGridSort", "column", "name", "descending", "true"),
+				step("op", "listGridSelect", "rowContaining", "Fred"),
+				step("op", "navigateTree", "module", "whosin", "query", "qStaff"),
+				step("op", "navigateMap", "module", "whosin", "query", "qStaff", "geometryBinding", "location"),
+				step("op", "navigateCalendar", "module", "admin", "document", "Job"),
+				step("op", "dataEnter", "binding", "date", "value", "07-Nov-2025", "grid", "rows"));
+		List<Step> method = method(build(steps));
+		DataGridMove move = (DataGridMove) method.get(5);
+		DataGridLink link = (DataGridLink) method.get(6);
+		LookupDescriptionAutoComplete auto = (LookupDescriptionAutoComplete) method.get(8);
+		assertAll(() -> assertEquals(22, method.size()),
+					() -> assertEquals("rows", ((DataGridNew) method.get(0)).getBinding()),
+					() -> assertEquals("Fred", ((DataGridZoom) method.get(1)).getRowContaining()),
+					() -> assertEquals(Integer.valueOf(2), ((DataGridEdit) method.get(2)).getRow()),
+					() -> assertInstanceOf(DataGridRemove.class, method.get(3)),
+					() -> assertInstanceOf(DataGridSelect.class, method.get(4)),
+					() -> assertEquals(Integer.valueOf(0), move.getTo()),
+					() -> assertEquals("Revoke", link.getText()),
+					() -> assertEquals(Boolean.FALSE, link.getConfirm()),
+					() -> assertEquals("Fred Smith", ((LookupDescriptionPick) method.get(7)).getRowContaining()),
+					() -> assertEquals("Fre", auto.getSearch()),
+					() -> assertEquals("Fred Smith", auto.getPick()),
+					() -> assertInstanceOf(LookupDescriptionNew.class, method.get(9)),
+					() -> assertInstanceOf(LookupDescriptionEdit.class, method.get(10)));
+	}
+
+	@Test
+	void gridsLookupsUploadsAndListsBecomeTheirStepsContinued() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "dataGridNew", "binding", "rows"),
+				step("op", "dataGridZoom", "binding", "rows", "rowContaining", "Fred", "rowTexts", "Fred | 3"),
+				step("op", "dataGridEdit", "binding", "rows", "row", "2"),
+				step("op", "dataGridRemove", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridSelect", "binding", "rows", "rowContaining", "Fred"),
+				step("op", "dataGridMove", "binding", "rows", "rowContaining", "Fred", "to", "0"),
+				step("op", "dataGridLink", "binding", "rows", "rowContaining", "Fred", "text", "Revoke", "confirm", "false"),
+				step("op", "lookupDescriptionPick", "binding", "contact", "rowContaining", "Fred Smith"),
+				step("op", "lookupDescriptionAutoComplete", "binding", "contact", "search", "Fre", "pick", "Fred Smith"),
+				step("op", "lookupDescriptionNew", "binding", "contact"),
+				step("op", "lookupDescriptionEdit", "binding", "contact"),
+				step("op", "upload", "action", "Import", "file", "C:\\fakepath\\people.csv"),
+				step("op", "listGridFilter", "column", "name", "value", "Fred"),
+				step("op", "listGridFilter", "module", "admin", "query", "qContacts", "column", "number", "value", "7", "operator", "equals"),
+				step("op", "listGridFilter", "column", "name"),
+				step("op", "listGridClearFilter"),
+				step("op", "listGridSort", "column", "name", "descending", "true"),
+				step("op", "listGridSelect", "rowContaining", "Fred"),
+				step("op", "navigateTree", "module", "whosin", "query", "qStaff"),
+				step("op", "navigateMap", "module", "whosin", "query", "qStaff", "geometryBinding", "location"),
+				step("op", "navigateCalendar", "module", "admin", "document", "Job"),
+				step("op", "dataEnter", "binding", "date", "value", "07-Nov-2025", "grid", "rows"));
+		List<Step> method = method(build(steps));
+		Upload upload = (Upload) method.get(11);
+		ListGridFilter contains = (ListGridFilter) method.get(12);
+		ListGridFilter equals = (ListGridFilter) method.get(13);
+		ListGridFilter cleared = (ListGridFilter) method.get(14);
+		NavigateMap map = (NavigateMap) method.get(19);
+		assertAll(() -> assertEquals("Import", upload.getActionName()),
+					() -> assertEquals("sail/files/people.csv", upload.getFile()),
+					() -> assertNull(contains.getOperator()),
+					() -> assertEquals("Fred", contains.getValue()),
+					() -> assertEquals(FilterOperator.equals, equals.getOperator()),
+					() -> assertEquals("qContacts", equals.getQueryName()),
+					() -> assertNull(cleared.getValue()),
+					() -> assertInstanceOf(ListGridClearFilter.class, method.get(15)),
+					() -> assertEquals(Boolean.TRUE, ((ListGridSort) method.get(16)).getDescending()),
+					() -> assertEquals("Fred", ((ListGridSelect) method.get(17)).getRowContaining()),
+					() -> assertInstanceOf(NavigateTree.class, method.get(18)),
+					() -> assertEquals("location", map.getGeometryBinding()),
+					() -> assertInstanceOf(NavigateCalendar.class, method.get(20)),
+					() -> assertEquals("date", ((DataEnter) method.get(21)).getBinding()));
+	}
+
+	/**
+	 * A list membership's members are a dataEnter, and a drag of a member a listMembershipMove, named by its
+	 * description or by its position.
+	 */
+	@Test
+	void listMembershipMovesBecomeTheirSteps() {
+		List<Step> method = method(build(List.of(
+				step("op", "dataEnter", "binding", "members", "value", "Second|First", "label", "Members", "before", "First"),
+				step("op", "listMembershipMove", "binding", "members", "rowContaining", "Second", "rowTexts", "Second", "to", "0"),
+				step("op", "listMembershipMove", "binding", "members", "row", "1", "to", "0"),
+				step("op", "listMembershipMove", "binding", "members", "row", "1"))));
+		ListMembershipMove byText = (ListMembershipMove) method.get(1);
+		ListMembershipMove byRow = (ListMembershipMove) method.get(2);
+		assertAll(() -> assertEquals(3, method.size(), "a move with no position is not a step"),
+					() -> assertEquals("Second|First", ((DataEnter) method.get(0)).getValue()),
+					() -> assertEquals("members", byText.getBinding()),
+					() -> assertEquals("Second", byText.getRowContaining()),
+					() -> assertNull(byText.getRow()),
+					() -> assertEquals(Integer.valueOf(0), byText.getTo()),
+					() -> assertEquals(Integer.valueOf(1), byRow.getRow()),
+					() -> assertNull(byRow.getRowContaining()),
+					() -> assertEquals(Integer.valueOf(0), byRow.getTo()));
+	}
+
+
+	/**
+	 * An upload the page refused, and a server-side question the user declined, set the step's testSuccess and
+	 * confirm; the upload says where its file goes.
+	 */
+	@Test
+	void refusedUploadsAndDeclinedQuestions() {
+		SailRecordingBuilder.Result result = build(List.of(
+				step("op", "upload", "binding", "photo", "file", "me.png"),
+				step("op", "context", "text", "shown: upload refused \"too big\"", "errors", "true"),
+				step("op", "action", "name", "AskYesNo"),
+				step("op", "context", "text", "answered \"No\" to \"Sure?\"", "declined", "true"),
+				step("op", "dataGridLink", "binding", "rows", "row", "0", "text", "Run"),
+				step("op", "context", "errors", "true")));
+		List<Step> method = method(result);
+		String xml = SailRecordingBuilder.toXml(result);
+		assertAll(() -> assertEquals(Boolean.FALSE, ((Upload) method.get(0)).getTestSuccess()),
+					() -> assertEquals(Boolean.FALSE, ((Action) method.get(1)).getConfirm()),
+					() -> assertEquals(Boolean.FALSE, ((DataGridLink) method.get(2)).getTestSuccess()),
+					() -> assertTrue(xml.contains("<!-- upload: the file me.png was chosen; put a file of that name in sail/files"), xml),
+					() -> assertTrue(xml.contains("<upload binding=\"photo\" file=\"sail/files/me.png\" testSuccess=\"false\"/>"), xml));
+	}
+
+	/**
+	 * A stored step the builder cannot take (a match SAIL has not) is a comment in the script and the panel's preview;
+	 * it never breaks the build of the steps around it.
+	 */
+	@Test
+	void aStepThatCannotBeBuiltIsAComment() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "dataEnter", "binding", "status", "value", "Active", "match", "bogus"),
+				step("op", "save"));
+		SailRecordingBuilder.Result result = build(steps);
+		String xml = SailRecordingBuilder.toXml(result);
+		List<List<String>> preview = new SailRecordingBuilder(null, "admin", STARTED, STOPPED).preview(steps, 0, 10);
+		assertAll(() -> assertEquals(1, method(result).size()),
+					() -> assertInstanceOf(Save.class, method(result).get(0)),
+					() -> assertTrue(xml.contains("<!-- unmapped: dataEnter "), xml),
+					() -> assertTrue(preview.get(0).get(0).startsWith("<!-- unmapped: dataEnter "), preview.toString()),
+					() -> assertEquals(List.of("<save/>"), preview.get(1)));
+	}
+
+	/** A range as large as an int can be is clamped to the steps, without overflow. */
+	@Test
+	void aPreviewOfAHugeRangeIsClamped() {
+		List<Map<String, String>> steps = List.of(step("op", "save"), step("op", "ok"));
+		SailRecordingBuilder builder = new SailRecordingBuilder(null, "admin", STARTED, STOPPED);
+		assertAll(() -> assertEquals(1, builder.preview(steps, 1, Integer.MAX_VALUE).size()),
+					() -> assertEquals(2, builder.preview(steps, 0, Integer.MAX_VALUE).size()));
+	}
+
+	/**
+	 * A gesture is never dropped: an unmapped gesture, an unknown op-code and an incomplete step each become a comment
+	 * before the next step, and those after the last step go at the end of the method.
+	 */
+	@Test
+	void gesturesThatAreNotStepsBecomeComments() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts"),
+				step("op", "unmapped", "text", "click on ToolStripButton #isc_1 \"Export\""),
+				step("op", "dataEnter", "binding", "name", "value", "  "),
+				step("op", "listGridZoom", "row", "1", "rowContaining", "Fred"),
+				step("op", "frobnicate", "x", "1", "id", "p-1", "view", "list"),
+				step("op", "save"),
+				step("op", "unmapped", "text", "click on link \"Help\""));
+		SailRecordingBuilder.Result result = build(steps);
+		List<Step> method = method(result);
+		List<String> beforeSave = result.commentsFor(method.get(1));
+		assertAll(() -> assertEquals(2, method.size()),
+					() -> assertEquals(List.of("unmapped: click on ToolStripButton #isc_1 \"Export\"",
+												"unmapped: dataEnter binding=\"name\" value=\"  \"",
+												"unmapped: listGridZoom row=\"1\" rowContaining=\"Fred\"",
+												"unmapped: frobnicate x=\"1\""), beforeSave),
+					() -> assertEquals(List.of("unmapped: click on link \"Help\""),
+										result.commentsFor(result.automation().getInteractions().get(0))));
+	}
+
+	/**
+	 * Going back to the Control Panel to stop is not part of the workflow, unless something was done after it.
+	 */
+	@Test
+	void stepsThatGoBackToTheControlPanelToStopAreLeftOut() {
+		Map<String, String> work = step("op", "navigateMenu", "module", "admin", "item", "Contacts");
+		Map<String, String> back = step("op", "navigateMenu", "module", "admin", "item", "DevOps/Control Panel",
+											"target", "admin.ControlPanel", "view", "admin.Contact");
+		Map<String, String> tab = step("op", "tabSelect", "path", "SAIL", "view", "admin.ControlPanel");
+		Map<String, String> elsewhere = step("op", "tabSelect", "path", "Details", "view", "admin.Contact");
+		assertAll(() -> assertEquals(1, method(build(List.of(work, back, tab))).size()),
+					() -> assertEquals(1, method(build(List.of(work, back))).size()),
+					() -> assertEquals(4, method(build(List.of(work, back, tab, elsewhere))).size()));
+	}
+
+	@Test
+	void aRecordingThatDoesNotStartWithANavigationSaysWhere() {
+		SailRecordingBuilder.Result result = build(List.of(step("op", "save")));
+		String comment = result.commentsFor(method(result).get(0)).get(0);
+		assertTrue(comment.startsWith("The recording started in the Control Panel."), comment);
+	}
+
+	/**
+	 * The script is for people to read and edit: the SAIL default namespace, one step per line, attributes in a
+	 * fixed order, comments as XML comments, and new lines kept as character references.
+	 */
+	@Test
+	void theScriptIsReadableXml() {
+		List<Map<String, String>> steps = new ArrayList<>();
+		steps.add(step("op", "navigateMenu", "item", "Contacts", "module", "admin"));
+		steps.add(step("op", "listGridZoom", "rowContaining", "Fred", "query", "qContacts", "module", "admin"));
+		steps.add(step("op", "unmapped", "text", "a -- b-"));
+		steps.add(step("op", "dataEnter", "value", "a\nb", "binding", "description"));
+		steps.add(step("op", "action", "confirm", "false", "name", "Check"));
+		String xml = SailRecordingBuilder.toXml(build(steps));
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		String expected = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+							"<automation uxui=\"desktop\" userAgentType=\"desktop\" xmlns=\"http://www.skyve.org/xml/sail\">\n" +
+							"\t<!-- Recorded in SmartClient by admin from " + format.format(new Date(STARTED)) + " to " +
+								format.format(new Date(STOPPED)) + " (5 recorded gestures). -->\n" +
+							"\t<!-- The password is never recorded: define the variable \"password\" before running this script, or replace {var:password}. -->\n" +
+							"\t<before>\n" +
+							"\t\t<login user=\"admin\" password=\"{var:password}\"/>\n" +
+							"\t\t<switchMode/>\n" +
+							"\t</before>\n" +
+							"\t<interaction name=\"Recording\">\n" +
+							"\t\t<method>\n" +
+							"\t\t\t<navigateMenu module=\"admin\" item=\"Contacts\"/>\n" +
+							"\t\t\t<listGridZoom module=\"admin\" query=\"qContacts\" rowContaining=\"Fred\"/>\n" +
+							"\t\t\t<!-- unmapped: a - - b- -->\n" +
+							"\t\t\t<dataEnter binding=\"description\" value=\"a&#10;b\"/>\n" +
+							"\t\t\t<action name=\"Check\" confirm=\"false\"/>\n" +
+							"\t\t</method>\n" +
+							"\t</interaction>\n" +
+							"</automation>\n";
+		assertEquals(expected, xml);
+
+		Automation read = XMLMetaData.unmarshalSAILString(xml);
+		List<Step> method = read.getInteractions().get(0).getSteps();
+		assertAll(() -> assertEquals(4, method.size()),
+					() -> assertEquals("a\nb", ((DataEnter) method.get(2)).getValue()),
+					() -> assertFalse(xml.contains("ns2:")));
+	}
+
+	/**
+	 * Context for whoever edits the script: a heading per screen, a data entry's label and earlier value, a zoomed
+	 * row's bizKey and values, and what responses showed and changed, each before the step it belongs with.
+	 */
+	@Test
+	void contextIsWrittenAsComments() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "screen", "admin.ControlPanel (Control Panel), edit view, SmartClient"),
+				step("op", "listGridZoom", "rowContaining", "Fred", "rowBizKey", "Fred Smith", "rowTexts", "Fred Smith | Person",
+						"screen", "list admin_qContacts, SmartClient"),
+				step("op", "dataEnter", "binding", "mobile", "value", "0400", "label", "Mobile", "before", "",
+						"screen", "admin.Contact (Contact), edit view, SmartClient"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "label", "Name", "before", "Frederick",
+						"screen", "admin.Contact (Contact), edit view, SmartClient"),
+				step("op", "save", "screen", "admin.Contact (Contact), edit view, SmartClient"),
+				step("op", "context", "text", "changed on screen: email1 \"\" -> \"a@b\""),
+				step("op", "context", "text", "shown: info growl \"Saved\""),
+				step("op", "ok", "screen", "admin.Contact (Contact), edit view, SmartClient"));
+		SailRecordingBuilder.Result result = build(steps);
+		List<Step> method = method(result);
+		assertAll(() -> assertEquals(6, method.size()),
+					() -> assertEquals(List.of("screen: admin.ControlPanel (Control Panel), edit view, SmartClient"), result.commentsFor(method.get(0))),
+					() -> assertEquals(List.of("screen: list admin_qContacts, SmartClient",
+												"row: bizKey \"Fred Smith\", showing Fred Smith | Person"), result.commentsFor(method.get(1))),
+					() -> assertEquals(List.of("screen: admin.Contact (Contact), edit view, SmartClient", "\"Mobile\" was empty"),
+										result.commentsFor(method.get(2))),
+					() -> assertEquals(List.of("\"Name\" was \"Frederick\""), result.commentsFor(method.get(3))),
+					() -> assertEquals(List.of(), result.commentsFor(method.get(4))),
+					() -> assertEquals(List.of("changed on screen: email1 \"\" -> \"a@b\"", "shown: info growl \"Saved\""),
+										result.commentsFor(method.get(5))));
+	}
+
+	/**
+	 * A step the check cannot confirm, or a row named by text it did not show, becomes a comment saying why; it is
+	 * never dropped.
+	 */
+	@Test
+	void unconfirmedStepsBecomeCommentsSayingWhy() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts"),
+				step("op", "listGridZoom", "rowContaining", "Fred", "rowTexts", "Jane | Person"),
+				step("op", "dataEnter", "binding", "nope", "value", "x", "view", "admin.Contact"),
+				step("op", "save"));
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "admin", STARTED, STOPPED)
+				.check(recorded -> "nope".equals(recorded.get("binding")) ? "the admin.Contact view has no a widget for the binding nope" : null)
+				.build(steps);
+		List<Step> method = method(result);
+		assertAll(() -> assertEquals(2, method.size()),
+					() -> assertEquals(List.of("unconfirmed: listGridZoom rowContaining=\"Fred\" - the row did not show \"Fred\"",
+												"unconfirmed: dataEnter binding=\"nope\" value=\"x\" - the admin.Contact view has no a widget for the binding nope"),
+										result.commentsFor(method.get(1))));
+	}
+
+	@Test
+	void theHeaderHasTheRolesReadyForViewRolesAndTheUxUi() {
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED)
+				.roles(List.of("admin.AppUser", "admin.BasicUser"))
+				.uxui("desktop")
+				.build(List.of());
+		List<String> header = result.commentsFor(result.automation());
+		assertAll(() -> assertEquals("The recorded user's roles, for the test: viewRoles(\"jane\", \"admin.AppUser\", \"admin.BasicUser\");", header.get(2)),
+					() -> assertEquals("The recorded user got the UX/UI desktop.", header.get(3)));
+	}
+
+	/**
+	 * A recording made in PrimeFaces targets the UX/UI and user agent type the user got, and its header says so.
+	 */
+	@Test
+	void aPrimeFacesRecordingTargetsItsUxUiAndUserAgentType() {
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED)
+				.targeting("tablet", UserAgentType.tablet)
+				.build(List.of());
+		Automation automation = result.automation();
+		List<String> header = result.commentsFor(automation);
+		assertAll(() -> assertEquals("tablet", automation.getUxui()),
+					() -> assertEquals(UserAgentType.tablet, automation.getUserAgentType()),
+					() -> assertTrue(header.get(0).startsWith("Recorded in PrimeFaces (tablet) by jane from "), header.get(0)),
+					() -> assertTrue(xml(result).startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<automation uxui=\"tablet\" userAgentType=\"tablet\""),
+										xml(result)));
+	}
+
+	@Test
+	void aSmartClientRecordingTargetsDesktop() {
+		SailRecordingBuilder.Result result = new SailRecordingBuilder(null, "jane", STARTED, STOPPED).uxui("desktop").build(List.of());
+		assertAll(() -> assertEquals("desktop", result.automation().getUxui()),
+					() -> assertEquals(UserAgentType.desktop, result.automation().getUserAgentType()),
+					() -> assertTrue(result.commentsFor(result.automation()).get(0).startsWith("Recorded in SmartClient by jane from ")));
+	}
+
+	private static String xml(SailRecordingBuilder.Result result) {
+		return SailRecordingBuilder.toXml(result);
+	}
+
+	/**
+	 * Checks and notes added through the panel become their steps; an action whose response showed errors gets
+	 * testSuccess="false", so that its replay does not expect success.
+	 */
+	@Test
+	void checksNotesAndFailedActions() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts"),
+				step("op", "save"),
+				step("op", "context", "text", "shown: name error \"required\"", "errors", "true"),
+				step("op", "testMessage", "contains", "required"),
+				step("op", "testValue", "binding", "name", "value", "Fred"),
+				step("op", "testGridRows", "rowContaining", "Fred", "minRows", "1"),
+				step("op", "testGridRows", "module", "admin", "query", "qContacts", "minRows", "3", "maxRows", "3"),
+				step("op", "comment", "text", "a note"),
+				step("op", "save"),
+				step("op", "context", "text", "shown: info growl \"Saved\""));
+		List<Step> method = method(build(steps));
+		org.skyve.metadata.sail.language.step.TestGridRows row = (org.skyve.metadata.sail.language.step.TestGridRows) method.get(4);
+		org.skyve.metadata.sail.language.step.TestGridRows count = (org.skyve.metadata.sail.language.step.TestGridRows) method.get(5);
+		assertAll(() -> assertEquals(8, method.size()),
+					() -> assertEquals(Boolean.FALSE, ((Save) method.get(1)).getTestSuccess()),
+					() -> assertEquals("required", ((org.skyve.metadata.sail.language.step.TestMessage) method.get(2)).getContains()),
+					() -> assertEquals("Fred", ((org.skyve.metadata.sail.language.step.TestValue) method.get(3)).getValue()),
+					() -> assertEquals("Fred", row.getRowContaining()),
+					() -> assertEquals(Integer.valueOf(1), row.getMinRows()),
+					() -> assertNull(row.getMaxRows()),
+					() -> assertEquals("qContacts", count.getQueryName()),
+					() -> assertEquals(Integer.valueOf(3), count.getMaxRows()),
+					() -> assertEquals("a note", ((org.skyve.metadata.sail.language.step.Comment) method.get(6)).getComment()),
+					() -> assertNull(((Save) method.get(7)).getTestSuccess(), "an info growl is not an error"));
+	}
+
+	/**
+	 * The panel shows each entry as the script writes it: its comments, then its step.
+	 */
+	@Test
+	void thePreviewShowsEachEntrysLines() {
+		List<Map<String, String>> steps = List.of(
+				step("op", "navigateMenu", "module", "admin", "item", "Contacts", "screen", "list x"),
+				step("op", "dataEnter", "binding", "name", "value", "Fred", "label", "Name", "screen", "edit y"),
+				step("op", "context", "text", "shown: info growl \"Saved\""));
+		List<List<String>> preview = new SailRecordingBuilder(null, "admin", STARTED, STOPPED).preview(steps, 1, 5);
+		assertAll(() -> assertEquals(2, preview.size()),
+					() -> assertEquals(List.of("<!-- screen: edit y -->", "<!-- \"Name\" -->", "<dataEnter binding=\"name\" value=\"Fred\"/>"), preview.get(0)),
+					() -> assertEquals(List.of("<!-- shown: info growl \"Saved\" -->"), preview.get(1)));
+	}
+
+	@Test
+	void commentTextCannotCloseTheComment() {
+		assertEquals(" a - - - b - ", SailRecordingBuilder.commentText("a --- b -"));
+	}
+}

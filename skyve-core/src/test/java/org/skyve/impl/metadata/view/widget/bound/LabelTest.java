@@ -65,24 +65,24 @@ class LabelTest {
 	}
 
 	@Test
-	void invisibleConditionNameRoundTrip() {
+	void invisibleConditionRoundTrip() {
 		Label l = new Label();
-		l.setInvisibleConditionName("hidden");
-		assertEquals("hidden", l.getInvisibleConditionName());
+		l.setXmlInvisibleCondition("hidden");
+		assertEquals("hidden", l.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameNegated() {
+	void visibleConditionNegated() {
 		Label l = new Label();
-		l.setVisibleConditionName("visible");
-		assertEquals("notVisible", l.getInvisibleConditionName());
+		l.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", l.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameBlankBecomesNullInvisible() {
+	void visibleConditionBlankBecomesNullInvisible() {
 		Label l = new Label();
-		l.setVisibleConditionName("  ");
-		assertNull(l.getInvisibleConditionName());
+		l.setXmlVisibleCondition("  ");
+		assertNull(l.getInvisibleCondition());
 	}
 
 	@Test
@@ -129,7 +129,7 @@ class LabelTest {
 	}
 
 	@Test
-	void visibleConditionNameJaxbGetterReturnsNull() {
-		assertNull(new Label().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new Label().getXmlVisibleCondition());
 	}
 }

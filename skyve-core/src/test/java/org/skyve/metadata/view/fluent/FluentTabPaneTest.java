@@ -27,79 +27,92 @@ class FluentTabPaneTest {
 		assertThat(new FluentTabPane().widgetId("wid").get().getWidgetId(), is("wid"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(400, new FluentTabPane().pixelWidth(400).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void responsiveWidthSetsValue() {
 		assertEquals(6, new FluentTabPane().responsiveWidth(6).get().getResponsiveWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void smSetsValue() {
 		assertEquals(3, new FluentTabPane().sm(3).get().getSm().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mdSetsValue() {
 		assertEquals(6, new FluentTabPane().md(6).get().getMd().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void lgSetsValue() {
 		assertEquals(9, new FluentTabPane().lg(9).get().getLg().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void xlSetsValue() {
 		assertEquals(12, new FluentTabPane().xl(12).get().getXl().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageWidthSetsValue() {
 		assertEquals(50, new FluentTabPane().percentageWidth(50).get().getPercentageWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelWidthSetsValue() {
 		assertEquals(100, new FluentTabPane().minPixelWidth(100).get().getMinPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelWidthSetsValue() {
 		assertEquals(800, new FluentTabPane().maxPixelWidth(800).get().getMaxPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelHeightSetsValue() {
 		assertEquals(300, new FluentTabPane().pixelHeight(300).get().getPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageHeightSetsValue() {
 		assertEquals(75, new FluentTabPane().percentageHeight(75).get().getPercentageHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelHeightSetsValue() {
 		assertEquals(50, new FluentTabPane().minPixelHeight(50).get().getMinPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelHeightSetsValue() {
 		assertEquals(600, new FluentTabPane().maxPixelHeight(600).get().getMaxPixelHeight().intValue());
 	}
 
 	@Test
-	void disabledConditionNameSetsValue() {
-		assertThat(new FluentTabPane().disabledConditionName("disabled").get().getDisabledConditionName(), is("disabled"));
+	void disabledConditionSetsValue() {
+		assertThat(new FluentTabPane().disabledCondition("disabled").get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentTabPane().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentTabPane().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -150,10 +163,10 @@ class FluentTabPaneTest {
 	}
 
 	@Test
-	void fromCopiesDisabledConditionName() {
+	void fromCopiesDisabledCondition() {
 		TabPane src = new TabPane();
-		src.setDisabledConditionName("disabled");
-		assertThat(new FluentTabPane().from(src).get().getDisabledConditionName(), is("disabled"));
+		src.setXmlDisabledCondition("disabled");
+		assertThat(new FluentTabPane().from(src).get().getDisabledCondition(), is("disabled"));
 	}
 
 	@Test

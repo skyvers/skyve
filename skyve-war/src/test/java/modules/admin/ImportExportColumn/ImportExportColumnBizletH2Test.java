@@ -46,6 +46,7 @@ class ImportExportColumnBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: bindingName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForBindingNameWithParentSetReturnsAttributes() throws Exception {
 		List<DomainValue> result = bizlet.getDynamicDomainValues(ImportExportColumn.bindingNamePropertyName, columnBean);
@@ -70,6 +71,7 @@ class ImportExportColumnBizletH2Test extends AbstractH2Test {
 
 	// ---- complete: bindingName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void completeForBindingNameWithParentSetReturnsAttributeNames() throws Exception {
 		List<String> result = bizlet.complete(ImportExportColumn.bindingNamePropertyName, "", columnBean);

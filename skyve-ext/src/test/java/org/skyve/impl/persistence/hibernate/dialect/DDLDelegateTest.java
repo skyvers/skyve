@@ -1,8 +1,8 @@
 package org.skyve.impl.persistence.hibernate.dialect;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,12 +20,12 @@ import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Table;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.hibernate.tool.schema.extract.spi.TableInformation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class DDLDelegateTest {
+class DDLDelegateTest {
 	@Test
-	public void isCharRecognisesAllJdbcCharacterTypes() {
+	void isCharRecognisesAllJdbcCharacterTypes() {
 		assertTrue(DDLDelegate.isChar(Types.CHAR));
 		assertTrue(DDLDelegate.isChar(Types.VARCHAR));
 		assertTrue(DDLDelegate.isChar(Types.LONGVARCHAR));
@@ -38,14 +38,14 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void missingColumnDoesNotRequireAlterColumn() {
+	void missingColumnDoesNotRequireAlterColumn() {
 		Column column = new Column("name");
 
 		assertFalse(DDLDelegate.isAlterTableColumnChangeRequired(column, null));
 	}
 
 	@Test
-	public void changedCharacterLengthRequiresAlterColumn() {
+	void changedCharacterLengthRequiresAlterColumn() {
 		Column column = new Column("name");
 		column.setLength(64);
 
@@ -53,7 +53,7 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void sameCharacterLengthDoesNotRequireAlterColumn() {
+	void sameCharacterLengthDoesNotRequireAlterColumn() {
 		Column column = new Column("name");
 		column.setLength(64);
 
@@ -61,7 +61,7 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void changedNumericPrecisionOrScaleRequiresAlterColumn() {
+	void changedNumericPrecisionOrScaleRequiresAlterColumn() {
 		Column column = new Column("amount");
 		column.setPrecision(12);
 		column.setScale(2);
@@ -74,7 +74,7 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void sameNumericPrecisionAndScaleDoesNotRequireAlterColumn() {
+	void sameNumericPrecisionAndScaleDoesNotRequireAlterColumn() {
 		Column column = new Column("amount");
 		column.setPrecision(12);
 		column.setScale(2);
@@ -83,7 +83,7 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void longTextFalsePositiveDoesNotRequireAlterColumn() {
+	void longTextFalsePositiveDoesNotRequireAlterColumn() {
 		Column column = new Column("description");
 
 		assertFalse(DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo(Types.VARCHAR, Integer.MAX_VALUE, 0)));
@@ -91,7 +91,7 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void sqlAlterTableDDLBuildsAlterStatementForChangedColumn() throws Exception {
+	void sqlAlterTableDDLBuildsAlterStatementForChangedColumn() throws Exception {
 		Table table = new Table("Customer");
 		Column column = new Column("name");
 		column.setLength(64);
@@ -116,7 +116,7 @@ public class DDLDelegateTest {
 	}
 
 	@Test
-	public void sqlAlterTableDDLBuildsPostgreSQLTypeAlterForNullableColumn() throws Exception {
+	void sqlAlterTableDDLBuildsPostgreSQLTypeAlterForNullableColumn() throws Exception {
 		Table table = new Table("Customer");
 		Column column = new Column("name");
 		column.setLength(128);

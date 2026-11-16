@@ -7,6 +7,8 @@ import java.math.RoundingMode;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal5;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Format any org.skyve.domain.types.Decimal into a time duration (hours:minutes) representation
  */
@@ -18,7 +20,7 @@ public class TimeDurationFormatter implements Formatter<Decimal> {
 	 * @return the result
 	 */
 	@Override
-	public Class<Decimal> getValueType() {
+	public @Nonnull Class<Decimal> getValueType() {
 		return Decimal.class;
 	}
 	
@@ -28,7 +30,7 @@ public class TimeDurationFormatter implements Formatter<Decimal> {
 	 * @return the result
 	 */
 	@Override
-	public String toDisplayValue(Decimal value) {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal value) {
 		BigDecimal decimalValue = value.bigDecimalValue();
 		int hours = decimalValue.round(new MathContext(0, RoundingMode.DOWN)).intValue();
 

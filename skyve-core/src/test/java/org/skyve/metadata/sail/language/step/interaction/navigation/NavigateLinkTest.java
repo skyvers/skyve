@@ -5,10 +5,13 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.sail.execution.AutomationContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
 
 class NavigateLinkTest {
@@ -46,8 +49,42 @@ class NavigateLinkTest {
 	@Test
 	void executeCallsExecutor() {
 		Executor executor = mock(Executor.class);
+		step.setHref("someHref");
 		step.execute(executor);
 		verify(executor).executeNavigateLink(step);
+	}
+
+	@Test
+	void executeByTextCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		step.setText("Open");
+		step.execute(executor);
+		verify(executor).executeNavigateLink(step);
+	}
+
+	@Test
+	void executeNeedsExactlyOneOfHrefAndText() {
+		Executor executor = mock(Executor.class);
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+		step.setHref("someHref");
+		step.setText("Open");
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+		verifyNoInteractions(executor);
+	}
+
+	@Test
+	void setTextTrimsAndBlankBecomesNull() {
+		step.setText("  Open  ");
+		assertThat(step.getText(), is("Open"));
+		step.setText("   ");
+		assertThat(step.getText(), is(nullValue()));
+	}
+
+	@Test
+	void getIdentifierReturnsTextWithoutHref() {
+		step.setText("Open");
+		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
+		assertThat(step.getIdentifier(ctx), is("Open"));
 	}
 
 	@Test
@@ -55,5 +92,53 @@ class NavigateLinkTest {
 		step.setHref("someHref");
 		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
 		assertThat(step.getIdentifier(ctx), is("someHref"));
+	}
+
+	@Test
+	void exactDefaultsToNullAndRoundtrips() {
+		assertThat(step.getExact(), is(nullValue()));
+		step.setExact(Boolean.TRUE);
+		assertThat(step.getExact(), is(Boolean.TRUE));
+	}
+
+	@Test
+	void executeByExactTextCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		step.setText("Open");
+		step.setExact(Boolean.TRUE);
+		step.execute(executor);
+		verify(executor).executeNavigateLink(step);
+	}
+
+	@Test
+	void windowDefaultsToNullAndRoundtrips() {
+		assertThat(step.getWindow(), is(nullValue()));
+		step.setWindow(NavigateLink.Window.newWindow);
+		assertThat(step.getWindow(), is(NavigateLink.Window.newWindow));
+		assertThat(String.valueOf(step.getWindow()), is("new"));
+	}
+
+	@Test
+	void executeIntoANewWindowByTextOrHrefCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		step.setText("Print");
+		step.setExact(Boolean.TRUE);
+		step.setWindow(NavigateLink.Window.newWindow);
+		step.execute(executor);
+		NavigateLink byHref = new NavigateLink();
+		byHref.setHref("?a=e&m=admin&d=Contact");
+		byHref.setWindow(NavigateLink.Window.newWindow);
+		byHref.execute(executor);
+		verify(executor).executeNavigateLink(step);
+		verify(executor).executeNavigateLink(byHref);
+	}
+
+	@Test
+	void exactWithHrefThrows() {
+		Executor executor = mock(Executor.class);
+		step.setHref("?a=l");
+		step.setExact(Boolean.FALSE);
+		assertThrows(MetaDataException.class, () -> step.execute(executor));
+		verifyNoInteractions(executor);
 	}
 }

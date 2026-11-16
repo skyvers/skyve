@@ -11,6 +11,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A class to extend to make a quick model based on a collection or an association within the edited bean.
  * The referenceBinding can be compound.
@@ -29,7 +32,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param drivingDocument	The reference's document
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
 	 */
-	protected ReferenceListModel(Module module, Document drivingDocument, String referenceBinding) {
+	protected ReferenceListModel(@Nonnull Module module, @Nonnull Document drivingDocument, @Nonnull String referenceBinding) {
 		super(module, drivingDocument);
 		this.referenceBinding = referenceBinding;
 	}
@@ -42,7 +45,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param drivingDocument	The reference's document
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
 	 */
-	protected ReferenceListModel(Document drivingDocument, String referenceBinding) {
+	protected ReferenceListModel(@Nonnull Document drivingDocument, @Nonnull String referenceBinding) {
 		this.moduleName = drivingDocument.getOwningModuleName();
 		this.drivingDocumentName = drivingDocument.getName();
 		this.referenceBinding = referenceBinding;
@@ -54,14 +57,14 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * @param drivingDocumentName	The reference's document name
 	 * @param referenceBinding	The binding to the reference with respect to the edited bean - can be compound.
 	 */
-	protected ReferenceListModel(String moduleName, String drivingDocumentName, String referenceBinding) {
+	protected ReferenceListModel(@Nonnull String moduleName, @Nonnull String drivingDocumentName, @Nonnull String referenceBinding) {
 		this.moduleName = moduleName;
 		this.drivingDocumentName = drivingDocumentName;
 		this.referenceBinding = referenceBinding;
 	}
 	
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		// resolve driving document if required (for convenience constructor usage)
 		if ((moduleName != null) && (drivingDocumentName != null)) {
 			Module m = customer.getModule(moduleName);
@@ -76,7 +79,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * Return 1 association row or all collection rows.
 	 */
 	@Override
-	public List<Bean> getRows() throws Exception {
+	public @Nonnull List<Bean> getRows() throws Exception {
 		T bean = getBean();
 		if (bean != null) {
 			Object value = Binder.get(bean, referenceBinding);
@@ -102,7 +105,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * Not implemented.
 	 */
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties) throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 
@@ -110,7 +113,7 @@ public abstract class ReferenceListModel<T extends Bean> extends InMemoryListMod
 	 * Not implemented.
 	 */
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 }

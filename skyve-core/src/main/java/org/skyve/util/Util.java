@@ -108,7 +108,11 @@ public class Util {
 	 * @return the resolved proxy or possibleProxy
 	 */
 	public static @Nonnull <T> T deproxy(@Nonnull T possibleProxy) throws ClassCastException {
-		return UtilImpl.deproxy(possibleProxy);
+		T result = UtilImpl.deproxy(possibleProxy);
+		if (result == null) {
+			throw new IllegalStateException("Proxy of " + possibleProxy.getClass().getName() + " has no implementation");
+		}
+		return result;
 	}
 
 	/**
@@ -124,7 +128,7 @@ public class Util {
 	/**
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
-	public static @Nonnull String nullSafeI18n(@Nonnull String key, String... values) {
+	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable String... values) {
 		// NB Don't attempt to get a user unless persistence has been initialised
 		User u = (AbstractPersistence.IMPLEMENTATION_CLASS == null) ? null : CORE.getUser();
 		return nullSafeI18n(key, (u == null) ? null : u.getLocale(), values);
@@ -134,7 +138,7 @@ public class Util {
 	 * Internationalises a string for the user's locale and performs message formatting on tokens like {0}, {1} etc.
 	 * Only returns null if the key is null.
 	 */
-	public static @Nullable String i18n(@Nullable String key, String... values) {
+	public static @Nullable String i18n(@Nullable String key, @Nullable String... values) {
 		if (key == null) {
 			return null;
 		}
@@ -153,7 +157,7 @@ public class Util {
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable Locale locale, String... values) {
+	public static @Nonnull String nullSafeI18n(@Nonnull String key, @Nullable Locale locale, @Nullable String... values) {
 		String result = null;
 
 		try {
@@ -205,7 +209,7 @@ public class Util {
 	 * Internationalises a string for a particular locale and performs message formatting on tokens like {0}, {1} etc.
 	 * Only returns null if the key is null.
 	 */
-	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, String... values) {
+	public static @Nullable String i18n(@Nullable String key, @Nullable Locale locale, @Nullable String... values) {
 		if (key == null) {
 			return null;
 		}
@@ -338,19 +342,19 @@ public class Util {
 		return (UtilImpl.THUMBNAIL_DIRECTORY == null) ? (UtilImpl.CONTENT_DIRECTORY + "SKYVE_THUMBNAILS/") : UtilImpl.THUMBNAIL_DIRECTORY;
 	}
 
-    public static ArchiveConfig getArchiveConfig() {
+    public static @Nonnull ArchiveConfig getArchiveConfig() {
         return UtilImpl.ARCHIVE_CONFIG;
     }
 
-	public static String getModuleDirectory() {
+	public static @Nullable String getModuleDirectory() {
 		return UtilImpl.MODULE_DIRECTORY;
 	}
 
-	public static String getPasswordHashingAlgorithm() {
+	public static @Nonnull String getPasswordHashingAlgorithm() {
 		return UtilImpl.PASSWORD_HASHING_ALGORITHM;
 	}
 	
-	public static String getSupportEmailAddress() {
+	public static @Nonnull String getSupportEmailAddress() {
 		return ((UtilImpl.SUPPORT_EMAIL_ADDRESS == null) ? "" : UtilImpl.SUPPORT_EMAIL_ADDRESS);
 	}
 
@@ -368,23 +372,23 @@ public class Util {
 		return secureUrl.booleanValue();
 	}
 	
-	public static String getServerUrl() {
+	public static @Nullable String getServerUrl() {
 		return UtilImpl.SERVER_URL;
 	}
 
-	public static String getSkyveContext() {
+	public static @Nullable String getSkyveContext() {
 		return UtilImpl.SKYVE_CONTEXT;
 	}
 
-	public static String getSkyveContextRealPath() {
+	public static @Nullable String getSkyveContextRealPath() {
 		return UtilImpl.SKYVE_CONTEXT_REAL_PATH;
 	}
 
-	public static String getHomeUri() {
+	public static @Nullable String getHomeUri() {
 		return UtilImpl.HOME_URI;
 	}
 
-	public static String getSkyveContextUrl() {
+	public static @Nonnull String getSkyveContextUrl() {
 		return UtilImpl.SERVER_URL + UtilImpl.SKYVE_CONTEXT;
 	}
 
@@ -527,6 +531,8 @@ public class Util {
     /**
      * Constructs a HTML image URL for the given content item
      * (If the content item is not an image type, the content servlet returns a file type thumbnail)
+     * The image is shown at the given width and height, keeping its shape, as the thumbnail the
+     * content servlet sends can be bigger or smaller than asked for.
      * 
 	 * @param bizModule - the module of the document containing the content
 	 * @param bizDocument - the document containing the content
@@ -548,7 +554,9 @@ public class Util {
     	result.append(getContentUrl(bizModule, bizDocument, binding, contentId));
     	result.append("&_w=").append(width);
     	result.append("&_h=").append(height);
-    	result.append("\"/>");
+    	result.append("\" width=\"").append(width);
+    	result.append("\" height=\"").append(height);
+    	result.append("\" style=\"object-fit:contain\"/>");
         
     	return result.toString();
     }
@@ -617,7 +625,7 @@ public class Util {
 	 * @param colour	The colour
 	 * @return	The colour code.
 	 */
-	public static @Nonnull String htmlColourCode(Color colour) {
+	public static @Nonnull String htmlColourCode(@Nonnull Color colour) {
 		return '#' + StringUtils.leftPad(Integer.toHexString(colour.getRGB() & 0x00ffffff), 6, "0");
 	}
 	
@@ -626,7 +634,7 @@ public class Util {
 	 * @param activity	The scope
 	 * @return	The colour
 	 */
-	public static @Nonnull Color htmlColour(String colourCode) {
+	public static @Nonnull Color htmlColour(@Nonnull String colourCode) {
 		return Color.decode(colourCode);
 	}
 	
@@ -639,7 +647,7 @@ public class Util {
 	 * @param writer	The writer to copy to
 	 * @throws IOException
 	 */
-	public static void chunkCharsToWriter(CharSequence chars, Writer writer)
+	public static void chunkCharsToWriter(@Nonnull CharSequence chars, @Nonnull Writer writer)
 	throws IOException {
 		for (int i = 0, l = chars.length(); i < l; i += 1024) {
 			int end = Math.min(i + 1024, l);
@@ -655,7 +663,7 @@ public class Util {
 	 * @param stream	The stream to copy to
 	 * @throws IOException
 	 */
-	public static void chunkBytesToOutputStream(byte[] bytes, OutputStream stream)
+	public static void chunkBytesToOutputStream(@Nonnull byte[] bytes, @Nonnull OutputStream stream)
 	throws IOException {
 		int length = bytes.length;
 		int offset = 0;
@@ -674,7 +682,7 @@ public class Util {
 	 * @param ifNullValue the fallback value to return if val is null
 	 * @return val if it is not null, otherwise ifNullValue
 	 */
-	public static <T> T coalesceNull(T val, T ifNullValue) {
+	public static @Nullable <T> T coalesceNull(@Nullable T val, @Nullable T ifNullValue) {
 		return (val == null ? ifNullValue : val);
 	}
 	
@@ -688,7 +696,7 @@ public class Util {
 	 * @return A list of distinct String values matching the prefix, ordered alphabetically
 	 * @throws Exception
 	 */
-	public static List<String> getCompleteSuggestions(String moduleName, String documentName, String attributeName, String value) {
+	public static @Nonnull List<String> getCompleteSuggestions(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String attributeName, @Nullable String value) {
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(moduleName, documentName);
 		if (value != null) {
 			q.getFilter().addLike(attributeName, value + "%");

@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.view;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that support a visible border.
  *
@@ -18,7 +20,7 @@ public interface Bordered extends SerializableMetaData {
 	 *         {@code Boolean.FALSE} when explicitly disabled, or {@code null}
 	 *         when the renderer default applies
 	 */
-	public Boolean getBorder();
+	public @Nullable Boolean getBorder();
 
 	/**
 	 * Sets whether a border is rendered around this metadata element.
@@ -27,21 +29,21 @@ public interface Bordered extends SerializableMetaData {
 	 *        {@code Boolean.FALSE} to disable it, or {@code null} to use the
 	 *        renderer default
 	 */
-	public void setBorder(Boolean border);
+	public void setBorder(@Nullable Boolean border);
 
 	/**
 	 * Returns the raw border title text.
 	 *
 	 * @return border title text, or {@code null} when no title is configured
 	 */
-	public String getBorderTitle();
+	public @Nullable String getBorderTitle();
 
 	/**
 	 * Returns the border title translated for the current locale.
 	 *
 	 * @return localised border title text, or {@code null} when no title is configured
 	 */
-	public default String getLocalisedBorderTitle() {
+	public default @Nullable String getLocalisedBorderTitle() {
 		return Util.i18n(getBorderTitle());
 	}
 
@@ -50,7 +52,7 @@ public interface Bordered extends SerializableMetaData {
 	 *
 	 * @param borderTitle border title text; may be {@code null}
 	 */
-	public void setBorderTitle(String borderTitle);
+	public void setBorderTitle(@Nullable String borderTitle);
 
 	/**
 	 * Returns whether the border title text should be escaped before rendering.
@@ -58,7 +60,7 @@ public interface Bordered extends SerializableMetaData {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or
 	 *         {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeBorderTitle();
+	public @Nullable Boolean getEscapeBorderTitle();
 
 	/**
 	 * Sets whether the border title text should be escaped before rendering.
@@ -66,5 +68,5 @@ public interface Bordered extends SerializableMetaData {
 	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup;
 	 *        {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public void setEscapeBorderTitle(Boolean escapeBorderTitle);
+	public void setEscapeBorderTitle(@Nullable Boolean escapeBorderTitle);
 }

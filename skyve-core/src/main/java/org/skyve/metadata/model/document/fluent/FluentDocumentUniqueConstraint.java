@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.repository.document.FieldReference;
 import org.skyve.impl.metadata.repository.document.UniqueConstraint;
 import org.skyve.metadata.model.document.UniqueConstraint.DocumentScope;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentDocumentUniqueConstraint metadata.
  */
@@ -20,7 +23,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentDocumentUniqueConstraint(UniqueConstraint constraint) {
+	public FluentDocumentUniqueConstraint(@Nonnull UniqueConstraint constraint) {
 		this.constraint = constraint;
 	}
 
@@ -28,19 +31,21 @@ public class FluentDocumentUniqueConstraint {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentDocumentUniqueConstraint from(@SuppressWarnings("hiding") org.skyve.metadata.model.document.UniqueConstraint constraint) {
+	public @Nonnull FluentDocumentUniqueConstraint from(@SuppressWarnings("hiding") @Nonnull org.skyve.metadata.model.document.UniqueConstraint constraint) {
 		name(constraint.getName());
 		description(constraint.getDescription());
 		scope(constraint.getScope());
 		message(constraint.getMessage());
 		constraint.getFieldNames().forEach(this::addFieldName);
+		constraint.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
-	
+
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocumentUniqueConstraint name(String name) {
+	public @Nonnull FluentDocumentUniqueConstraint name(@Nullable String name) {
 		constraint.setName(name);
 		return this;
 	}
@@ -48,7 +53,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocumentUniqueConstraint description(String description) {
+	public @Nonnull FluentDocumentUniqueConstraint description(@Nullable String description) {
 		constraint.setDescription(description);
 		return this;
 	}
@@ -56,7 +61,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocumentUniqueConstraint scope(DocumentScope scope) {
+	public @Nonnull FluentDocumentUniqueConstraint scope(@Nonnull DocumentScope scope) {
 		constraint.setScope(scope);
 		return this;
 	}
@@ -64,7 +69,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocumentUniqueConstraint message(String message) {
+	public @Nonnull FluentDocumentUniqueConstraint message(@Nonnull String message) {
 		constraint.setMessage(message);
 		return this;
 	}
@@ -72,7 +77,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Appends a constrained field reference by attribute name.
 	 */
-	public FluentDocumentUniqueConstraint addFieldName(String fieldName) {
+	public @Nonnull FluentDocumentUniqueConstraint addFieldName(@Nonnull String fieldName) {
 		FieldReference ref = new FieldReference();
 		ref.setRef(fieldName);
 		constraint.getFieldReferences().add(ref);
@@ -82,7 +87,7 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Removes constrained field references with the supplied name.
 	 */
-	public FluentDocumentUniqueConstraint removeFieldName(String name) {
+	public @Nonnull FluentDocumentUniqueConstraint removeFieldName(@Nonnull String name) {
 		constraint.getFieldReferences().removeIf(f -> name.equals(f.getRef()));
 		return this;
 	}
@@ -90,15 +95,28 @@ public class FluentDocumentUniqueConstraint {
 	/**
 	 * Clears all constrained field references.
 	 */
-	public FluentDocumentUniqueConstraint clearFieldNames() {
+	public @Nonnull FluentDocumentUniqueConstraint clearFieldNames() {
 		constraint.getFieldReferences().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDocumentUniqueConstraint putProperty(@Nonnull String k, @Nonnull String v) {
+		constraint.getProperties().put(k, v);
 		return this;
 	}
 
 	/**
 	 * Returns the mutable document unique-constraint metadata being built.
 	 */
-	public UniqueConstraint get() {
+	public @Nonnull UniqueConstraint get() {
 		return constraint;
 	}
 }

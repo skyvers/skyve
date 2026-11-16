@@ -10,6 +10,8 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
@@ -41,7 +43,7 @@ public interface Communication extends PersistentBean {
 		/** @hidden */
 		private static List<DomainValue> domainValues = Stream.of(values()).map(FormatType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
-		private FormatType(String code, String description) {
+		private FormatType(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -53,7 +55,7 @@ public interface Communication extends PersistentBean {
 		 * @return the persisted format code
 		 */
 		@Override
-		public String toCode() {
+		public @Nonnull String toCode() {
 			return code;
 		}
 
@@ -63,7 +65,7 @@ public interface Communication extends PersistentBean {
 		 * @return the localised description
 		 */
 		@Override
-		public String toLocalisedDescription() {
+		public @Nonnull String toLocalisedDescription() {
 			return Util.i18n(description);
 		}
 
@@ -73,7 +75,7 @@ public interface Communication extends PersistentBean {
 		 * @return the corresponding domain value
 		 */
 		@Override
-		public DomainValue toDomainValue() {
+		public @Nonnull DomainValue toDomainValue() {
 			return domainValue;
 		}
 
@@ -83,7 +85,7 @@ public interface Communication extends PersistentBean {
 		 * @param code the persisted code to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static FormatType fromCode(String code) {
+		public static @Nullable FormatType fromCode(@Nullable String code) {
 			FormatType result = null;
 
 			for (FormatType value : values()) {
@@ -102,7 +104,7 @@ public interface Communication extends PersistentBean {
 		 * @param description the localised description to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static FormatType fromLocalisedDescription(String description) {
+		public static @Nullable FormatType fromLocalisedDescription(@Nullable String description) {
 			FormatType result = null;
 
 			for (FormatType value : values()) {
@@ -120,7 +122,7 @@ public interface Communication extends PersistentBean {
 		 *
 		 * @return immutable domain values for this enum
 		 */
-		public static List<DomainValue> toDomainValues() {
+		public static @Nonnull List<DomainValue> toDomainValues() {
 			return domainValues;
 		}
 	}
@@ -153,7 +155,7 @@ public interface Communication extends PersistentBean {
 		/** @hidden */
 		private static List<DomainValue> domainValues = Stream.of(values()).map(ActionType::toDomainValue).collect(Collectors.toUnmodifiableList());
 
-		private ActionType(String code, String description) {
+		private ActionType(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -165,7 +167,7 @@ public interface Communication extends PersistentBean {
 		 * @return the persisted action code
 		 */
 		@Override
-		public String toCode() {
+		public @Nonnull String toCode() {
 			return code;
 		}
 
@@ -175,7 +177,7 @@ public interface Communication extends PersistentBean {
 		 * @return the localised description
 		 */
 		@Override
-		public String toLocalisedDescription() {
+		public @Nonnull String toLocalisedDescription() {
 			return Util.i18n(description);
 		}
 
@@ -185,7 +187,7 @@ public interface Communication extends PersistentBean {
 		 * @return the corresponding domain value
 		 */
 		@Override
-		public DomainValue toDomainValue() {
+		public @Nonnull DomainValue toDomainValue() {
 			return domainValue;
 		}
 
@@ -195,7 +197,7 @@ public interface Communication extends PersistentBean {
 		 * @param code the persisted code to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static ActionType fromCode(String code) {
+		public static @Nullable ActionType fromCode(@Nullable String code) {
 			ActionType result = null;
 
 			for (ActionType value : values()) {
@@ -214,7 +216,7 @@ public interface Communication extends PersistentBean {
 		 * @param description the localised description to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static ActionType fromLocalisedDescription(String description) {
+		public static @Nullable ActionType fromLocalisedDescription(@Nullable String description) {
 			ActionType result = null;
 
 			for (ActionType value : values()) {
@@ -232,7 +234,7 @@ public interface Communication extends PersistentBean {
 		 *
 		 * @return immutable domain values for this enum
 		 */
-		public static List<DomainValue> toDomainValues() {
+		public static @Nonnull List<DomainValue> toDomainValues() {
 			return domainValues;
 		}
 	}
@@ -242,369 +244,369 @@ public interface Communication extends PersistentBean {
 	 *
 	 * @return the sender address expression
 	 */
-	String getSendFrom();
+	@Nullable String getSendFrom();
 
 	/**
 	 * Returns the primary recipient address expression.
 	 *
 	 * @return the recipient address expression
 	 */
-	String getSendTo();
+	@Nullable String getSendTo();
 
 	/**
 	 * Returns an optional override recipient address.
 	 *
 	 * @return the override recipient address, or {@code null}
 	 */
-	String getSendToOverride();
+	@Nullable String getSendToOverride();
 
 	/**
 	 * Returns the CC recipient address expression.
 	 *
 	 * @return the CC recipient address expression
 	 */
-	String getCcTo();
+	@Nullable String getCcTo();
 
 	/**
 	 * Returns an optional override CC recipient address.
 	 *
 	 * @return the override CC recipient address, or {@code null}
 	 */
-	String getCcToOverride();
+	@Nullable String getCcToOverride();
 
 	/**
 	 * Returns whether monitor BCC recipients should be included.
 	 *
 	 * @return {@code true} when monitor BCC should be included
 	 */
-	Boolean getMonitorBcc();
+	@Nullable Boolean getMonitorBcc();
 
 	/**
 	 * Returns the communication subject expression.
 	 *
 	 * @return the communication subject expression
 	 */
-	String getSubject();
+	@Nullable String getSubject();
 
 	/**
 	 * Returns the communication body template.
 	 *
 	 * @return the communication body template
 	 */
-	String getBody();
+	@Nullable String getBody();
 
 	/**
 	 * Returns the template used to build the communication.
 	 *
 	 * @return the communication template, or {@code null}
 	 */
-	CommunicationTemplate getTemplate();
+	@Nullable CommunicationTemplate getTemplate();
 
 	/**
 	 * Returns whether a calendar attachment should be generated.
 	 *
 	 * @return {@code true} when a calendar attachment should be included
 	 */
-	Boolean getIncludeCalendar();
+	@Nullable Boolean getIncludeCalendar();
 
 	/**
 	 * Returns the base path used when resolving attachments and links.
 	 *
 	 * @return the base path
 	 */
-	String getBasePath();
+	@Nonnull String getBasePath();
 
 	/**
 	 * Returns the first attachment binding/expression.
 	 *
 	 * @return the first attachment binding/expression
 	 */
-	String getAttachment1();
+	@Nullable String getAttachment1();
 
 	/**
 	 * Returns the first attachment file name expression.
 	 *
 	 * @return the first attachment file name expression
 	 */
-	String getAttachmentFileName1();
+	@Nullable String getAttachmentFileName1();
 
 	/**
 	 * Returns the second attachment binding/expression.
 	 *
 	 * @return the second attachment binding/expression
 	 */
-	String getAttachment2();
+	@Nullable String getAttachment2();
 
 	/**
 	 * Returns the second attachment file name expression.
 	 *
 	 * @return the second attachment file name expression
 	 */
-	String getAttachmentFileName2();
+	@Nullable String getAttachmentFileName2();
 
 	/**
 	 * Returns the third attachment binding/expression.
 	 *
 	 * @return the third attachment binding/expression
 	 */
-	String getAttachment3();
+	@Nullable String getAttachment3();
 
 	/**
 	 * Returns the third attachment file name expression.
 	 *
 	 * @return the third attachment file name expression
 	 */
-	String getAttachmentFileName3();
+	@Nullable String getAttachmentFileName3();
 
 	/**
 	 * Returns the calendar title expression.
 	 *
 	 * @return the calendar title expression
 	 */
-	String getCalendarTitleExpression();
+	@Nullable String getCalendarTitleExpression();
 
 	/**
 	 * Returns the calendar description expression.
 	 *
 	 * @return the calendar description expression
 	 */
-	String getCalendarDescriptionExpression();
+	@Nullable String getCalendarDescriptionExpression();
 
 	/**
 	 * Returns the calendar event start time.
 	 *
 	 * @return the calendar event start time
 	 */
-	DateTime getCalendarStartTime();
+	@Nullable DateTime getCalendarStartTime();
 
 	/**
 	 * Returns the calendar event end time.
 	 *
 	 * @return the calendar event end time
 	 */
-	DateTime getCalendarEndTime();
+	@Nullable DateTime getCalendarEndTime();
 
 	/**
 	 * Returns the communication batch identifier.
 	 *
 	 * @return the communication batch identifier
 	 */
-	String getBatch();
+	@Nonnull String getBatch();
 
 	/**
 	 * Returns the communication format type.
 	 *
 	 * @return the communication format type
 	 */
-	FormatType getFormatType();
+	@Nullable FormatType getFormatType();
 
 	/**
 	 * Returns the target module name.
 	 *
 	 * @return the target module name
 	 */
-	String getModuleName();
+	@Nullable String getModuleName();
 
 	/**
 	 * Returns the target document name.
 	 *
 	 * @return the target document name
 	 */
-	String getDocumentName();
+	@Nullable String getDocumentName();
 
 	/**
 	 * Returns the tag used to categorise this communication.
 	 *
 	 * @return the communication tag, or {@code null}
 	 */
-	Tag getTag();
+	@Nullable Tag getTag();
 
 	/**
 	 * Returns the action type to apply when processing this communication.
 	 *
 	 * @return the action type
 	 */
-	ActionType getActionType();
+	@Nullable ActionType getActionType();
 
 	/**
 	 * Sets the action type for processing this communication.
 	 *
 	 * @param actionType the action type to set
 	 */
-	void setActionType(ActionType actionType);
+	void setActionType(@Nullable ActionType actionType);
 
 	/**
 	 * Sets the communication description.
 	 *
 	 * @param description the description to set
 	 */
-	void setDescription(String description);
+	void setDescription(@Nullable String description);
 
 	/**
 	 * Sets the communication format type.
 	 *
 	 * @param formatType the format type to set
 	 */
-	void setFormatType(FormatType formatType);
+	void setFormatType(@Nullable FormatType formatType);
 
 	/**
 	 * Sets whether this communication is for system use.
 	 *
 	 * @param systemUse {@code true} when system use is enabled
 	 */
-	void setSystemUse(Boolean systemUse);
+	void setSystemUse(@Nullable Boolean systemUse);
 
 	/**
 	 * Sets the sender address expression.
 	 *
 	 * @param sendFrom the sender address expression
 	 */
-	void setSendFrom(String sendFrom);
+	void setSendFrom(@Nullable String sendFrom);
 
 	/**
 	 * Sets the recipient address expression.
 	 *
 	 * @param sendTo the recipient address expression
 	 */
-	void setSendTo(String sendTo);
+	void setSendTo(@Nullable String sendTo);
 
 	/**
 	 * Sets the override recipient address.
 	 *
 	 * @param sendToOverride the override recipient address
 	 */
-	void setSendToOverride(String sendToOverride);
+	void setSendToOverride(@Nullable String sendToOverride);
 
 	/**
 	 * Sets the CC recipient address expression.
 	 *
 	 * @param ccTo the CC recipient address expression
 	 */
-	void setCcTo(String ccTo);
+	void setCcTo(@Nullable String ccTo);
 
 	/**
 	 * Sets the override CC recipient address.
 	 *
 	 * @param ccToOverride the override CC recipient address
 	 */
-	void setCcToOverride(String ccToOverride);
+	void setCcToOverride(@Nullable String ccToOverride);
 
 	/**
 	 * Sets whether monitor BCC recipients should be included.
 	 *
 	 * @param monitorBcc {@code true} to include monitor BCC recipients
 	 */
-	void setMonitorBcc(Boolean monitorBcc);
+	void setMonitorBcc(@Nullable Boolean monitorBcc);
 
 	/**
 	 * Sets the communication subject expression.
 	 *
 	 * @param subject the communication subject expression
 	 */
-	void setSubject(String subject);
+	void setSubject(@Nullable String subject);
 
 	/**
 	 * Sets the communication body template.
 	 *
 	 * @param body the communication body template
 	 */
-	void setBody(String body);
+	void setBody(@Nullable String body);
 
 	/**
 	 * Sets execution results text for this communication.
 	 *
 	 * @param results the execution results text
 	 */
-	void setResults(String results);
+	void setResults(@Nullable String results);
 
 	/**
 	 * Sets the first attachment binding/expression.
 	 *
 	 * @param attachment1 the first attachment binding/expression
 	 */
-	void setAttachment1(String attachment1);
+	void setAttachment1(@Nullable String attachment1);
 
 	/**
 	 * Sets the first attachment file name expression.
 	 *
 	 * @param attachmentFileName1 the first attachment file name expression
 	 */
-	void setAttachmentFileName1(String attachmentFileName1);
+	void setAttachmentFileName1(@Nullable String attachmentFileName1);
 
 	/**
 	 * Sets the second attachment binding/expression.
 	 *
 	 * @param attachment2 the second attachment binding/expression
 	 */
-	void setAttachment2(String attachment2);
+	void setAttachment2(@Nullable String attachment2);
 
 	/**
 	 * Sets the second attachment file name expression.
 	 *
 	 * @param attachmentFileName2 the second attachment file name expression
 	 */
-	void setAttachmentFileName2(String attachmentFileName2);
+	void setAttachmentFileName2(@Nullable String attachmentFileName2);
 
 	/**
 	 * Sets the third attachment binding/expression.
 	 *
 	 * @param attachment3 the third attachment binding/expression
 	 */
-	void setAttachment3(String attachment3);
+	void setAttachment3(@Nullable String attachment3);
 
 	/**
 	 * Sets the third attachment file name expression.
 	 *
 	 * @param attachmentFileName3 the third attachment file name expression
 	 */
-	void setAttachmentFileName3(String attachmentFileName3);
+	void setAttachmentFileName3(@Nullable String attachmentFileName3);
 
 	/**
 	 * Sets the unsubscribe URL expression.
 	 *
 	 * @param unsubscribeUrl the unsubscribe URL expression
 	 */
-	void setUnsubscribeUrl(String unsubscribeUrl);
+	void setUnsubscribeUrl(@Nullable String unsubscribeUrl);
 
 	/**
 	 * Sets whether a calendar attachment should be generated.
 	 *
 	 * @param includeCalendar {@code true} to include a calendar attachment
 	 */
-	void setIncludeCalendar(Boolean includeCalendar);
+	void setIncludeCalendar(@Nullable Boolean includeCalendar);
 
 	/**
 	 * Sets the calendar title expression.
 	 *
 	 * @param calendarTitleExpression the calendar title expression
 	 */
-	void setCalendarTitleExpression(String calendarTitleExpression);
+	void setCalendarTitleExpression(@Nullable String calendarTitleExpression);
 
 	/**
 	 * Sets the calendar event start time.
 	 *
 	 * @param calendarStartTime the calendar event start time
 	 */
-	void setCalendarStartTime(DateTime calendarStartTime);
+	void setCalendarStartTime(@Nullable DateTime calendarStartTime);
 
 	/**
 	 * Sets the calendar event end time.
 	 *
 	 * @param calendarEndTime the calendar event end time
 	 */
-	void setCalendarEndTime(DateTime calendarEndTime);
+	void setCalendarEndTime(@Nullable DateTime calendarEndTime);
 
 	/**
 	 * Sets the calendar description expression.
 	 *
 	 * @param calendarDescriptionExpression the calendar description expression
 	 */
-	void setCalendarDescriptionExpression(String calendarDescriptionExpression);
+	void setCalendarDescriptionExpression(@Nullable String calendarDescriptionExpression);
 
 	/**
 	 * Sets the template used to build this communication.
 	 *
 	 * @param communicationTemplate the template to set
 	 */
-	void setTemplate(CommunicationTemplate communicationTemplate);
+	void setTemplate(@Nullable CommunicationTemplate communicationTemplate);
 }

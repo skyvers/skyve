@@ -9,6 +9,8 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.ViewWebContext;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -33,7 +35,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 	 * @param key web conversation key
 	 * @param request inbound HTTP request
 	 */
-	public SmartClientWebContext(String key, HttpServletRequest request) {
+	public SmartClientWebContext(@Nonnull String key, @Nonnull HttpServletRequest request) {
 		super(key, request);
 	}
 	
@@ -44,7 +46,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 	 * @param message localized message text
 	 */
 	@Override
-	public void growl(MessageSeverity severity, String message) {
+	public void growl(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		if (growls == null) {
 			growls = new ArrayList<>();
 		}
@@ -61,7 +63,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 	 * @param message localized message text
 	 */
 	@Override
-	public void message(MessageSeverity severity, String message) {
+	public void message(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		if (messages == null) {
 			messages = new ArrayList<>();
 		}
@@ -79,7 +81,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 	 * @return growl message payloads, or {@code null}
 	 */
 	@Override
-	public List<Map<String, String>> getGrowls() {
+	public @Nullable List<Map<String, String>> getGrowls() {
 		return growls;
 	}
 	
@@ -91,7 +93,7 @@ public final class SmartClientWebContext extends ViewWebContext {
 	 * @return message payloads, or {@code null}
 	 */
 	@Override
-	public List<Map<String, String>> getMessages() {
+	public @Nullable List<Map<String, String>> getMessages() {
 		return messages;
 	}
 }

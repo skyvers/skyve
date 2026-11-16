@@ -3,6 +3,9 @@ package org.skyve.impl.util;
 import org.apache.commons.beanutils.BeanComparator;
 import org.skyve.impl.bind.BindUtil;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A {@link org.apache.commons.beanutils.BeanComparator} that tolerates {@code null}
  * property values during in-memory collection sorting.
@@ -23,12 +26,12 @@ public class NullTolerantBeanComparator extends BeanComparator {
 	private static final NullTolerantComparator<? extends Comparable<?>> NULL_TOLERANT_COMPARATOR = new NullTolerantComparator();
 
 	@SuppressWarnings("unchecked")
-	public NullTolerantBeanComparator(String property) {
+	public NullTolerantBeanComparator(@Nullable String property) {
 		super(property, NULL_TOLERANT_COMPARATOR);
 	}
 
 	@Override
-	public int compare(Object o1, Object o2) {
+	public int compare(@SuppressWarnings("null") @Nonnull Object o1, @SuppressWarnings("null") @Nonnull Object o2) {
 		String property = getProperty();
 		if (property == null) {
 			return getComparator().compare(o1, o2);

@@ -5,6 +5,9 @@ import java.util.Set;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines the row/column cursor contract for a BizPort import/export sheet.
  *
@@ -25,7 +28,7 @@ public interface BizPortSheet {
 	 * @param column	The column metadata.
 	 * @return	The column metadata added, or the previous metadata for the same binding if replaced.
 	 */
-	public BizPortColumn addColumn(String columnBinding, BizPortColumn column);
+	public @Nullable BizPortColumn addColumn(@Nonnull String columnBinding, @Nonnull BizPortColumn column);
 	
 	/**
 	 * Remove a column definition from this sheet.
@@ -33,7 +36,7 @@ public interface BizPortSheet {
 	 * @param columnBinding	The column binding (the key to the column metadata).
 	 * @return	The column metadata removed, or {@code null} if the binding was not present.
 	 */
-	public BizPortColumn removeColumn(String columnBinding);
+	public @Nullable BizPortColumn removeColumn(@Nonnull String columnBinding);
 
 	/**
 	 * Get the column metadata by the binding.
@@ -41,14 +44,14 @@ public interface BizPortSheet {
 	 * @param columnBinding	The binding.
 	 * @return	The column metadata, or {@code null} if no column exists for the binding.
 	 */
-	public BizPortColumn getColumn(String columnBinding);
+	public @Nullable BizPortColumn getColumn(@Nonnull String columnBinding);
 	
 	/**
 	 * Get a set of the column bindings defined in this sheet.
 	 * 
 	 * @return	The current set of column bindings.
 	 */
-	public Set<String> getColumnBindings();
+	public @Nonnull Set<String> getColumnBindings();
 	
 	/**
 	 * Move to a row in this sheet identified by rowKey.
@@ -57,7 +60,7 @@ public interface BizPortSheet {
 	 * @param rowKey	The components that make up the key of the row, in key-column order.
 	 * @return true if a row with the given rowKey exists.
 	 */
-	public boolean moveToRow(Object... rowKey);
+	public boolean moveToRow(@Nonnull Object... rowKey);
 	
 	/**
 	 * Add a new row to this sheet identified by rowKey.
@@ -65,7 +68,7 @@ public interface BizPortSheet {
 	 *
 	 * @param rowKey	The components that make up the key of the row, in key-column order.
 	 */
-	public void addRow(Object... rowKey);
+	public void addRow(@Nonnull Object... rowKey);
 	
 	/**
 	 * Move the cursor to the next row in the sheet.
@@ -91,9 +94,9 @@ public interface BizPortSheet {
 	 * @return	The coerced cell value from the current cursor position and column, or {@code null}
 	 * 			if the source cell is blank or cannot be represented.
 	 */
-	public <T> T getValue(String columnBinding, 
-							AttributeType attributeType,
-							UploadException problems);
+	public @Nullable <T> T getValue(@Nonnull String columnBinding, 
+										@Nullable AttributeType attributeType,
+										@Nonnull UploadException problems);
 	
 	/**
 	 * Set the value in the Excel sheet in the column 
@@ -102,21 +105,21 @@ public interface BizPortSheet {
 	 * @param columnBinding	The column binding.
 	 * @param value	The value to place in the cell; {@code null} clears the cell.
 	 */
-	public void setValue(String columnBinding, Object value);
+	public void setValue(@Nonnull String columnBinding, @Nullable Object value);
 
 	/**
 	 * Returns the title displayed in the workbook tab.
 	 *
 	 * @return	The unique sheet title.
 	 */
-	public String getTitle();
+	public @Nonnull String getTitle();
 
 	/**
 	 * Title must be unique.
 	 *
 	 * @param title	The title to set in the backing Excel sheet.
 	 */
-	public void setTitle(String title);
+	public void setTitle(@Nonnull String title);
 	
 	/**
 	 * Adds a row-level validation error for the current cursor position.
@@ -125,9 +128,9 @@ public interface BizPortSheet {
 	 * @param column	The column the problem relates to.
 	 * @param message	Human-readable error detail.
 	 */
-	public void addErrorAtCurrentRow(UploadException problems, 
-										BizPortColumn column, 
-										String message);
+	public void addErrorAtCurrentRow(@Nonnull UploadException problems, 
+										@Nullable BizPortColumn column, 
+										@Nonnull String message);
 
 	/**
 	 * Adds a row-level validation warning for the current cursor position.
@@ -136,7 +139,7 @@ public interface BizPortSheet {
 	 * @param column	The column the warning relates to.
 	 * @param message	Human-readable warning detail.
 	 */
-	public void addWarningAtCurrentRow(UploadException problems, 
-										BizPortColumn column, 
-										String message);
+	public void addWarningAtCurrentRow(@Nonnull UploadException problems, 
+										@Nullable BizPortColumn column, 
+										@Nonnull String message);
 }

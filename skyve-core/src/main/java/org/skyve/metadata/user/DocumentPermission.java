@@ -2,6 +2,7 @@ package org.skyve.metadata.user;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -86,7 +87,7 @@ public enum DocumentPermission {
 								boolean canRead, 
 								boolean canUpdate, 
 								boolean canDelete, 
-								DocumentPermissionScope scope) {
+								@Nonnull DocumentPermissionScope scope) {
 		this.canCreate = canCreate;
 		this.canRead = canRead;
 		this.canUpdate = canUpdate;
@@ -104,7 +105,7 @@ public enum DocumentPermission {
 	 * @param anotherPermission  the permission to merge with; must not be {@code null}
 	 * @return the merged permission constant; never {@code null}
 	 */
-	public DocumentPermission mergePermission(DocumentPermission anotherPermission) {
+	public @Nonnull DocumentPermission mergePermission(@Nonnull DocumentPermission anotherPermission) {
 		char[] permissions = {'_', '_', '_', '_', scope.charValue()};
 		if (canCreate || anotherPermission.canCreate) {
 			permissions[0] = 'C';
@@ -172,7 +173,7 @@ public enum DocumentPermission {
 	 *
 	 * @return the scope; never {@code null}
 	 */
-	public DocumentPermissionScope getScope() {
+	public @Nonnull DocumentPermissionScope getScope() {
 		return scope;
 	}
 }

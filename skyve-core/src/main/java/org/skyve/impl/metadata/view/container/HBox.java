@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.container;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
@@ -14,9 +14,12 @@ import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -66,11 +69,12 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	private Integer pixelMemberPadding;
 	private ShrinkWrap shrinkWrap;
 	
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the widget identifier for this container.
@@ -78,7 +82,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return widget identifier, or {@code null} when not configured
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -90,7 +94,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @param widgetId  widget identifier; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -100,7 +104,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return {@code true} when a border is requested, {@code false} when disabled, or {@code null} when unspecified
 	 */
 	@Override
-	public Boolean getBorder() {
+	public @Nullable Boolean getBorder() {
 		return border;
 	}
 
@@ -111,7 +115,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "border", required = false)
-	public void setBorder(Boolean border) {
+	public void setBorder(@Nullable Boolean border) {
 		this.border = border;
 	}
 
@@ -121,7 +125,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return border title, or {@code null} when not configured
 	 */
 	@Override
-	public String getBorderTitle() {
+	public @Nullable String getBorderTitle() {
 		return borderTitle;
 	}
 
@@ -131,7 +135,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@Override
-	public Boolean getEscapeBorderTitle() {
+	public @Nullable Boolean getEscapeBorderTitle() {
 		return escapeBorderTitle;
 	}
 
@@ -142,7 +146,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "borderTitle", required = false)
-	public void setBorderTitle(String borderTitle) {
+	public void setBorderTitle(@Nullable String borderTitle) {
 		this.borderTitle = borderTitle;
 	}
 
@@ -153,7 +157,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "escapeBorderTitle", required = false)
-	public void setEscapeBorderTitle(Boolean escapeBorderTitle) {
+	public void setEscapeBorderTitle(@Nullable Boolean escapeBorderTitle) {
 		this.escapeBorderTitle = escapeBorderTitle;
 	}
 
@@ -163,7 +167,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return percentage height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -174,7 +178,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "percentageHeight", required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -184,7 +188,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return percentage width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -195,7 +199,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "percentageWidth", required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -205,7 +209,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -216,7 +220,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "pixelHeight", required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -226,7 +230,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return minimum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -237,7 +241,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -247,7 +251,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return maximum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -258,7 +262,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
@@ -268,7 +272,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -279,7 +283,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "pixelWidth", required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -289,7 +293,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return responsive width value, or {@code null} when unset
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -300,7 +304,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -310,7 +314,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return small-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -321,7 +325,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -331,7 +335,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return medium-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -342,7 +346,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -352,7 +356,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -363,7 +367,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -373,7 +377,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return extra-large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -384,7 +388,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -394,7 +398,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return minimum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -405,7 +409,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -415,7 +419,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return maximum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -426,7 +430,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -436,7 +440,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return pixel padding, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelPadding() {
+	public @Nullable Integer getPixelPadding() {
 		return pixelPadding;
 	}
 
@@ -447,7 +451,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "pixelPadding", required = false)
-	public void setPixelPadding(Integer pixelPadding) {
+	public void setPixelPadding(@Nullable Integer pixelPadding) {
 		this.pixelPadding = pixelPadding;
 	}
 
@@ -457,7 +461,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return member padding in pixels, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelMemberPadding() {
+	public @Nullable Integer getPixelMemberPadding() {
 		return pixelMemberPadding;
 	}
 
@@ -468,7 +472,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 */
 	@Override
 	@XmlAttribute(name = "pixelMemberPadding", required = false)
-	public void setPixelMemberPadding(Integer pixelMemberPadding) {
+	public void setPixelMemberPadding(@Nullable Integer pixelMemberPadding) {
 		this.pixelMemberPadding = pixelMemberPadding;
 	}
 
@@ -477,7 +481,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 *
 	 * @return vertical alignment, or {@code null} when renderer defaults are used
 	 */
-	public VerticalAlignment getVerticalAlignment() {
+	public @Nullable VerticalAlignment getVerticalAlignment() {
 		return verticalAlignment;
 	}
 
@@ -487,7 +491,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @param verticalAlignment  vertical alignment to apply; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setVerticalAlignment(VerticalAlignment verticalAlignment) {
+	public void setVerticalAlignment(@Nullable VerticalAlignment verticalAlignment) {
 		this.verticalAlignment = verticalAlignment;
 	}
 
@@ -496,7 +500,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 *
 	 * @return horizontal alignment, or {@code null} when renderer defaults are used
 	 */
-	public HorizontalAlignment getHorizontalAlignment() {
+	public @Nullable HorizontalAlignment getHorizontalAlignment() {
 		return horizontalAlignment;
 	}
 
@@ -506,7 +510,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @param horizontalAlignment  horizontal alignment to apply; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setHorizontalAlignment(HorizontalAlignment horizontalAlignment) {
+	public void setHorizontalAlignment(@Nullable HorizontalAlignment horizontalAlignment) {
 		this.horizontalAlignment = horizontalAlignment;
 	}
 
@@ -516,7 +520,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return collapse mode, or {@code null} when collapsibility is not configured
 	 */
 	@Override
-	public Collapsible getCollapsible() {
+	public @Nullable Collapsible getCollapsible() {
 		return collapsible;
 	}
 
@@ -526,7 +530,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @param collapsible  collapse mode to apply; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setCollapsible(Collapsible collapsible) {
+	public void setCollapsible(@Nullable Collapsible collapsible) {
 		this.collapsible = collapsible;
 	}
 
@@ -536,7 +540,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return shrink-wrap mode, or {@code null} when not configured
 	 */
 	@Override
-	public ShrinkWrap getShrinkWrap() {
+	public @Nullable ShrinkWrap getShrinkWrap() {
 		return shrinkWrap;
 	}
 
@@ -546,53 +550,69 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @param shrinkWrap  shrink-wrap mode to apply; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setShrinkWrap(ShrinkWrap shrinkWrap) {
+	public void setShrinkWrap(@Nullable ShrinkWrap shrinkWrap) {
 		this.shrinkWrap = shrinkWrap;
 	}
 
 	/**
-	 * Returns the invisible-condition expression for this container.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible-condition expression, or {@code null} when not configured
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible-condition expression for this container.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName  invisible-condition expression; may be {@code null}
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = invisibleConditionName;
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
 	/**
-	 * Placeholder getter used only for JAXB compatibility of the synthetic visible attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Applies a positive visibility expression by storing its negated form.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * <p>Side effects: overwrites the value returned by {@link #getInvisibleConditionName()}.
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName  the visibility expression from metadata; may be {@code null}
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 	
 	/**
@@ -601,7 +621,7 @@ public class HBox extends Container implements Box, Identifiable, Bordered {
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

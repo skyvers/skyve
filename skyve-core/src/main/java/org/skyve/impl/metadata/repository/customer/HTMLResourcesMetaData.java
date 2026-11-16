@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.customer.HTMLResources;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -25,12 +26,12 @@ public class HTMLResourcesMetaData implements HTMLResources {
 	private String cssRelativeFileName;
 	
 	@Override
-	public String getCssRelativeFileName() {
+	public @Nullable String getCssRelativeFileName() {
 		return cssRelativeFileName;
 	}
 
 	@XmlAttribute(name = "css")
-	public void setCssRelativeFileName(String cssRelativeFileName) {
+	public void setCssRelativeFileName(@Nullable String cssRelativeFileName) {
 		this.cssRelativeFileName = UtilImpl.processStringValue(cssRelativeFileName);
 	}
 }

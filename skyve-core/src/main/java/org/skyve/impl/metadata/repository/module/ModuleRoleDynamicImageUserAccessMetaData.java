@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -34,7 +35,7 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 	 *
 	 * @return the dynamic-image name
 	 */
-	public String getImageName() {
+	public @Nonnull String getImageName() {
 		return imageName;
 	}
 
@@ -47,7 +48,7 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 	 * @param imageName the dynamic-image name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "image", required = true)
-	public void setImageName(String imageName) {
+	public void setImageName(@Nonnull String imageName) {
 		this.imageName = UtilImpl.processStringValue(imageName);
 	}
 	
@@ -63,7 +64,7 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 	 * @throws MetaDataException if required attributes are missing
 	 */
 	@Override
-	public void validate(String metaDataName, String roleName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull String roleName, @Nonnull Module module) {
 		super.validate(metaDataName, roleName, module);
 		if (imageName == null) {
 			throw new MetaDataException(metaDataName + " : [image] is required for all dynamicImage user accesses defined in module role " + roleName);
@@ -78,7 +79,7 @@ public class ModuleRoleDynamicImageUserAccessMetaData extends ModuleRoleDocument
 	 * @return the runtime dynamic-image user access
 	 */
 	@Override
-	public UserAccess toUserAccess(String moduleName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName) {
 		return UserAccess.dynamicImage(moduleName, getDocumentName(), imageName);
 	}
 }

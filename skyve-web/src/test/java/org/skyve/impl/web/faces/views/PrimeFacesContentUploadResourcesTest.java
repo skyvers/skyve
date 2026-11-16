@@ -20,4 +20,22 @@ class PrimeFacesContentUploadResourcesTest {
 		assertTrue(css.contains("#upload .ui-fileupload-buttonbar {\n\tflex: 0 0 auto;\n}"), css);
 		assertTrue(css.contains("#upload .ui-fileupload-content {\n\tflex: 1 1 auto;\n\tmin-height: 0;\n\toverflow: auto;\n}"), css);
 	}
+
+	@Test
+	void selectedImagePreviewSharesTheUploadRowWithFileDetails() throws IOException {
+		String css = Files.readString(UPLOAD_CSS);
+
+		assertTrue(css.contains("grid-template-columns: auto minmax(0, 1fr) auto;"), css);
+		assertTrue(css.contains("""
+				#upload .ui-fileupload-row > .ui-fileupload-preview {
+					align-self: center;
+					grid-column: 1;
+					grid-row: 1 / 4;
+				}"""), css);
+		assertTrue(css.contains("#upload .ui-fileupload-row > .ui-fileupload-filename {\n\tgrid-column: 2;"), css);
+		assertTrue(css.contains("""
+				#upload .ui-fileupload-row > div:last-child {
+					align-self: center;
+					grid-column: 3;"""), css);
+	}
 }

@@ -17,6 +17,8 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 class FlutterListView extends FlutterView {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterListView.class);
 
@@ -24,25 +26,25 @@ class FlutterListView extends FlutterView {
 	private ListModel<Bean> model;
 	private MetaDataQueryDefinition query;
 
-	public FlutterListView(FlutterGenerator generator, String moduleName, String viewName) {
+	public FlutterListView(@Nonnull FlutterGenerator generator, @Nonnull String moduleName, @Nonnull String viewName) {
 		super(generator, moduleName, viewName);
 	}
 
-	void setModel(@SuppressWarnings("unused") Module module,
-					Document document,
-					@SuppressWarnings("unused") String name,
-					ListModel<Bean> model) {
+	void setModel(@SuppressWarnings("unused") @Nonnull Module module,
+					@Nonnull Document document,
+					@SuppressWarnings("unused") @Nonnull String name,
+					@Nonnull ListModel<Bean> model) {
 		this.document = document;
 		this.model = model;
 	}
 
-	void setQuery(@SuppressWarnings("unused") Module module, Document document, MetaDataQueryDefinition query) {
+	void setQuery(@SuppressWarnings("unused") @Nonnull Module module, @Nonnull Document document, @Nonnull MetaDataQueryDefinition query) {
 		this.document = document;
 		this.query = query;
 	}
 
 	@Override
-	protected void create(FileWriter fw) throws IOException {
+	protected void create(@Nonnull FileWriter fw) throws IOException {
 
 		String documentName = document.getName();
 		Map<String, String> subs = new TreeMap<>();
@@ -61,7 +63,7 @@ class FlutterListView extends FlutterView {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void addQuerySubstitutes(Map<String, String> subs) {
+	private void addQuerySubstitutes(@Nonnull Map<String, String> subs) {
 		String description = "";
 		String column1 = null;
 		String column2 = null;

@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link LookupDescriptionColumn} metadata using a fluent API.
  */
@@ -20,7 +23,7 @@ public class FluentLookupDescriptionColumn {
 	 *
 	 * @param column the metadata instance to mutate
 	 */
-	public FluentLookupDescriptionColumn(LookupDescriptionColumn column) {
+	public FluentLookupDescriptionColumn(@Nonnull LookupDescriptionColumn column) {
 		this.column = column;
 	}
 
@@ -31,7 +34,7 @@ public class FluentLookupDescriptionColumn {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentLookupDescriptionColumn from(@SuppressWarnings("hiding") LookupDescriptionColumn column) {
+	public @Nonnull FluentLookupDescriptionColumn from(@SuppressWarnings("hiding") @Nonnull LookupDescriptionColumn column) {
 		name(column.getName());
 		Boolean b = column.getFilterable();
 		if (b != null) {
@@ -46,7 +49,7 @@ public class FluentLookupDescriptionColumn {
 	 * @param filterable {@code true} to enable filtering
 	 * @return this builder
 	 */
-	public FluentLookupDescriptionColumn filterable(boolean filterable) {
+	public @Nonnull FluentLookupDescriptionColumn filterable(boolean filterable) {
 		column.setFilterable(filterable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -57,7 +60,7 @@ public class FluentLookupDescriptionColumn {
 	 * @param name the binding name
 	 * @return this builder
 	 */
-	public FluentLookupDescriptionColumn name(String name) {
+	public @Nonnull FluentLookupDescriptionColumn name(@Nullable String name) {
 		column.setName(name);
 		return this;
 
@@ -68,7 +71,7 @@ public class FluentLookupDescriptionColumn {
 	 *
 	 * @return the mutable lookup-description column metadata being configured
 	 */
-	public LookupDescriptionColumn get() {
+	public @Nonnull LookupDescriptionColumn get() {
 		return column;
 	}
 }

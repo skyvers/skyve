@@ -6,17 +6,17 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Mail;
 
 @SuppressWarnings("deprecation")
-public class MailTest {
+class MailTest {
 	public static final String EMAIL1 = "email1@skyve.org";
 	public static final String EMAIL2 = "email2@skyve.org";
 	public static final String EMAIL3 = "email3@skyve.org";
@@ -32,8 +32,8 @@ public class MailTest {
 	private static boolean bogusSend = false;
 	private static String testRecipient = null;
 
-	@BeforeClass
-	public static void beforeClass() {
+	@BeforeAll
+	static void beforeClass() {
 		MailServiceStaticSingleton.setDefault();
 		UtilImpl.SMTP = "localhost";
 		UtilImpl.SMTP_PORT = 25;
@@ -46,8 +46,8 @@ public class MailTest {
 		UtilImpl.SMTP_HEADERS.put("X-PM-Message-Stream", "outbound");
 	}
 
-	@AfterClass
-	public static void afterClass() {
+	@AfterAll
+	static void afterClass() {
 		UtilImpl.SMTP_TEST_BOGUS_SEND = bogusSend;
 		UtilImpl.SMTP_TEST_RECIPIENT = testRecipient;
 		UtilImpl.SMTP_HEADERS = null;
@@ -55,40 +55,40 @@ public class MailTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testSimple() throws Exception {
+	void testSimple() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY), baos);
 			String email = baos.toString(StandardCharsets.UTF_8);
-			Assert.assertTrue("No from", email.contains(EMAIL1));
-			Assert.assertTrue("No To", email.contains(EMAIL2));
-			Assert.assertTrue("No Subject", email.contains(SUBJECT));
-			Assert.assertTrue("No Body", email.contains(BODY));
+			Assertions.assertTrue(email.contains(EMAIL1), "No from");
+			Assertions.assertTrue(email.contains(EMAIL2), "No To");
+			Assertions.assertTrue(email.contains(SUBJECT), "No Subject");
+			Assertions.assertTrue(email.contains(BODY), "No Body");
 		}
 	}
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUnsentHeader() throws Exception {
+	void testUnsentHeader() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY).unsent(), baos);
 			String email = baos.toString(StandardCharsets.UTF_8);
-			Assert.assertTrue("No unsent header", email.contains("X-Unsent"));
+			Assertions.assertTrue(email.contains("X-Unsent"), "No unsent header");
 		}
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testJSONHeader() throws Exception {
+	void testJSONHeader() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1).addTo(EMAIL2).subject(SUBJECT).body(BODY), baos);
 			String email = baos.toString(StandardCharsets.UTF_8);
-			Assert.assertTrue("No postmark header", email.contains(POSTMARK_HEADER_NAME));
-			Assert.assertTrue("No postmark header", email.contains(POSTMARK_HEADER_VALUE));
+			Assertions.assertTrue(email.contains(POSTMARK_HEADER_NAME), "No postmark header");
+			Assertions.assertTrue(email.contains(POSTMARK_HEADER_VALUE), "No postmark header");
 		}
 	}
 
 	@Test
-	public void testMultiple() throws Exception {
+	void testMultiple() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1)
 										.addTo(EMAIL2).addTo(EMAIL3)
@@ -101,7 +101,7 @@ public class MailTest {
 	}
 
 	@Test
-	public void testCollections() throws Exception {
+	void testCollections() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			Set<String> to = new TreeSet<>();
 			to.add(EMAIL2);
@@ -124,7 +124,7 @@ public class MailTest {
 	}
 
 	@Test
-	public void testEllipsis() throws Exception {
+	void testEllipsis() throws Exception {
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream(2048)) {
 			EXT.writeMail(new Mail().from(EMAIL1)
 										.addTo(EMAIL2, EMAIL3)
@@ -138,11 +138,11 @@ public class MailTest {
 
 	@SuppressWarnings("static-method")
 	private void assertRecipients(String email) {
-		Assert.assertTrue("No To", email.contains(EMAIL2));
-		Assert.assertTrue("No To", email.contains(EMAIL3));
-		Assert.assertTrue("No CC", email.contains(EMAIL4));
-		Assert.assertTrue("No CC", email.contains(EMAIL5));
-		Assert.assertTrue("No BCC", email.contains(EMAIL6));
-		Assert.assertTrue("No BCC", email.contains(EMAIL7));
+		Assertions.assertTrue(email.contains(EMAIL2), "No To");
+		Assertions.assertTrue(email.contains(EMAIL3), "No To");
+		Assertions.assertTrue(email.contains(EMAIL4), "No CC");
+		Assertions.assertTrue(email.contains(EMAIL5), "No CC");
+		Assertions.assertTrue(email.contains(EMAIL6), "No BCC");
+		Assertions.assertTrue(email.contains(EMAIL7), "No BCC");
 	}
 }

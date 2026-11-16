@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.module;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -41,6 +42,9 @@ import org.skyve.metadata.user.Role;
 import org.skyve.metadata.view.View.ViewType;
 
 import com.google.common.base.MoreObjects;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of the {@link Module} contract, populated from a
@@ -95,14 +99,14 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 
 	private String documentation;
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
@@ -126,11 +130,11 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
-	public String getTitle() {
+	public @Nonnull String getTitle() {
 		return title;
 	}
 
-	public void setTitle(String title) {
+	public void setTitle(@Nonnull String title) {
 		this.title = title;
 	}
 
@@ -144,26 +148,26 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@Override
-	public FormLabelLayout getFormLabelLayout() {
+	public @Nullable FormLabelLayout getFormLabelLayout() {
 		return formLabelLayout;
 	}
 
-	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+	public void setFormLabelLayout(@Nullable FormLabelLayout formLabelLayout) {
 		this.formLabelLayout = formLabelLayout;
 	}
 
 	@Override
-	public Map<String, DocumentRef> getDocumentRefs() {
+	public @Nonnull Map<String, DocumentRef> getDocumentRefs() {
 		return documentRefs;
 	}
 
 	@Override
-	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName) {
+	public @Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName) {
 		return getDocumentDefaultQuery(customer, documentName, isPrototype());
 	}
 
 	@Override
-	public MetaDataQueryDefinition getDocumentDefaultQuery(Customer customer, String documentName, boolean includeAssociationBizKeys) {
+	public @Nonnull MetaDataQueryDefinition getDocumentDefaultQuery(@Nullable Customer customer, @Nonnull String documentName, boolean includeAssociationBizKeys) {
 		MetaDataQueryDefinition result = null;
 
 		DocumentRef documentRef = documentRefs.get(documentName);
@@ -207,12 +211,12 @@ public class ModuleImpl extends AbstractMetaDataMap implements Module {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void processColumns(Customer customer,
-									Document document,
-									List<MetaDataQueryColumn> columns,
+	private void processColumns(@Nullable Customer customer,
+									@Nonnull Document document,
+									@Nonnull List<MetaDataQueryColumn> columns,
 									boolean includeAssociationBizKeys,
-									MutableBoolean orderNotApplied,
-									MutableInt columnIndex) {
+									@Nonnull MutableBoolean orderNotApplied,
+									@Nonnull MutableInt columnIndex) {
 		// NB We have to manually traverse the document inheritance hierarchy with the given customer
 		// as we cannot use document.getAllAttributes() as this method is called from 
 		// the domain generator and there is no Persistence set in there.
@@ -300,8 +304,8 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	 * @return
 	 */
 	@Override
-	public Document getDocument(Customer customer, String documentName) {
-		Document result = ProvidedRepositoryFactory.get().getDocument(customer, this, documentName);
+	public @Nonnull Document getDocument(@Nullable Customer customer, @Nonnull String documentName) {
+		Document result = ProvidedRepositoryFactory.getNullSafe().getDocument(customer, this, documentName);
 		if (result == null) {
 			throw new MetaDataException("Document " + documentName + " does not exist in module " + getName());
 		}
@@ -310,7 +314,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 	
 	@Override
-	public JobMetaData getJob(String jobName) {
+	public @Nonnull JobMetaData getJob(@Nonnull String jobName) {
 		JobMetaData result = (JobMetaData) getMetaData(jobName);
 		if (result == null) { // no job defined
 			throw new MetaDataException("Job " + getName() + "." + jobName + " is not defined in the skyve metadata.");
@@ -318,103 +322,103 @@ ie Link from an external module to admin.User and domain generation will moan ab
 		return result;
 	}
 
-	public void putJob(JobMetaData job) {
+	public void putJob(@Nonnull JobMetaData job) {
 		putMetaData(job.getName(), job);
 		jobs.add(job);
 	}
 	
 	@Override
-	public List<JobMetaData> getJobs() {
+	public @Nonnull List<JobMetaData> getJobs() {
 		return Collections.unmodifiableList(jobs);
 	}
 	
 	@Override
-	public MetaDataQueryDefinition getMetaDataQuery(String queryName) {
+	public @Nullable MetaDataQueryDefinition getMetaDataQuery(@Nonnull String queryName) {
 		// NB Cannot throw if null as QueryCommand tests it
 		return (MetaDataQueryDefinition) getMetaData(queryName);
 	}
 
 	@Override
-	public SQLDefinition getSQL(String queryName) {
+	public @Nonnull SQLDefinition getSQL(@Nonnull String queryName) {
 		// NB Cannot throw if null as QueryCommand tests it
 		return (SQLDefinition) getMetaData(queryName);
 	}
 
 	@Override
-	public BizQLDefinition getBizQL(String queryName) {
+	public @Nonnull BizQLDefinition getBizQL(@Nonnull String queryName) {
 		// NB Cannot throw if null as QueryCommand tests it
 		return (BizQLDefinition) getMetaData(queryName);
 	}
 
-	public void putQuery(QueryDefinition query) {
+	public void putQuery(@Nonnull QueryDefinition query) {
 		putMetaData(query.getName(), query);
 		queries.add(query);
 	}
 
 	@Override
-	public List<QueryDefinition> getMetadataQueries() {
+	public @Nonnull List<QueryDefinition> getMetadataQueries() {
 		return Collections.unmodifiableList(queries);
 	}
 
 	@Override
-	public Role getRole(String roleName) {
+	public @Nullable Role getRole(@Nonnull String roleName) {
 		return (Role) getMetaData(roleName);
 	}
 
-	public void putRole(Role role) {
+	public void putRole(@Nonnull Role role) {
 		((RoleImpl) role).setOwningModule(this);
 		putMetaData(role.getName(), role);
 		roles.add(role);
 	}
 
 	@Override
-	public List<Role> getRoles() {
+	public @Nonnull List<Role> getRoles() {
 		return Collections.unmodifiableList(roles);
 	}
 
 	@Override
-	public ViewType getHomeRef() {
+	public @Nullable ViewType getHomeRef() {
 		return homeRef;
 	}
 
-	public void setHomeRef(ViewType homeRef) {
+	public void setHomeRef(@Nullable ViewType homeRef) {
 		this.homeRef = homeRef;
 	}
 
 	@Override
-	public String getHomeDocumentName() {
+	public @Nonnull String getHomeDocumentName() {
 		return homeDocumentName;
 	}
 
-	public void setHomeDocumentName(String homeDocumentName) {
+	public void setHomeDocumentName(@Nonnull String homeDocumentName) {
 		this.homeDocumentName = homeDocumentName;
 	}
 
 	@Override
-	public Menu getMenu() {
+	public @Nonnull Menu getMenu() {
 		return menu;
 	}
 
-	public void setMenu(Menu menu) {
+	public void setMenu(@Nonnull Menu menu) {
 		this.menu = menu;
 	}
 
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = documentation;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
 
         return MoreObjects.toStringHelper(this)
                           .add("name", name)

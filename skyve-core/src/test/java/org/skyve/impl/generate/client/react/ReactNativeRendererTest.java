@@ -33,7 +33,7 @@ import org.skyve.metadata.view.Action;
 
 class ReactNativeRendererTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void componentRendererCoversPrimaryBranches() {
 		Map<String, String> imports = new HashMap<>();
 		ReactNativeComponentRenderer renderer = new ReactNativeComponentRenderer(imports, "\t\t");
@@ -110,7 +110,7 @@ class ReactNativeRendererTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test; passes null on purpose
 	void layoutRendererCoversContainerMethods() {
 		Map<String, String> imports = new HashMap<>();
 		ReactNativeLayoutRenderer renderer = new ReactNativeLayoutRenderer(imports);

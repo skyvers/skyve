@@ -4,7 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -12,16 +18,66 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.user.DocumentPermissionScope;
 
 class UserImplTest {
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getCustomerThrowsWhenUserHasNoCustomerName() {
+		UserImpl user = new UserImpl();
+		user.setName("fred");
+
+		MetaDataException e = assertThrows(MetaDataException.class, user::getCustomer);
+		assertEquals("User fred has no customer", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getCustomerThrowsWhenCustomerDoesNotExist() {
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+		try {
+			UserImpl user = new UserImpl();
+			user.setName("fred");
+			user.setCustomerName("nowhere");
+
+			MetaDataException e = assertThrows(MetaDataException.class, user::getCustomer);
+			assertEquals("Customer nowhere for user fred does not exist", e.getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getCustomerReturnsTheRepositoryCustomer() {
+		Customer customer = mock(Customer.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(repository.getCustomer("acme")).thenReturn(customer);
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repository);
+		try {
+			UserImpl user = new UserImpl();
+			user.setCustomerName("acme");
+
+			assertSame(customer, user.getCustomer());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
 	@Test
 	@SuppressWarnings("static-method")
 	void testSetLanguageTag() {
@@ -167,6 +223,26 @@ class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void testSetAndGetLegacyId() {
+		UserImpl user = new UserImpl();
+		assertNull(user.getLegacyId());
+		user.setLegacyId("BHM-42");
+		assertEquals("BHM-42", user.getLegacyId());
+		user.setLegacyId(null);
+		assertNull(user.getLegacyId());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testLegacyIdSurvivesSerialization() {
+		UserImpl user = new UserImpl();
+		user.setLegacyId("BHM-42");
+		user = UtilImpl.cloneBySerialization(user);
+		assertEquals("BHM-42", user.getLegacyId());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void testGetAttributesReturnsEmptyMapByDefault() {
 		UserImpl user = new UserImpl();
 		Map<String, Object> attributes = user.getAttributes();
@@ -250,10 +326,10 @@ class UserImplTest {
 	@SuppressWarnings("static-method")
 	void testPutAndGetModuleMenu() {
 		UserImpl user = new UserImpl();
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
-		Menu menu = Mockito.mock(Menu.class);
-		Mockito.when(menu.getItems()).thenReturn(new ArrayList<>());
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
+		Menu menu = mock(Menu.class);
+		when(menu.getItems()).thenReturn(new ArrayList<>());
 		user.putModuleMenu(module, menu);
 		assertEquals(menu, user.getModuleMenu("admin"));
 	}
@@ -262,9 +338,9 @@ class UserImplTest {
 	@SuppressWarnings("static-method")
 	void testClearModuleMenus() {
 		UserImpl user = new UserImpl();
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
-		Menu menu = Mockito.mock(Menu.class);
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
+		Menu menu = mock(Menu.class);
 		user.putModuleMenu(module, menu);
 		user.clearModuleMenus();
 		assertNull(user.getModuleMenu("admin"));
@@ -283,13 +359,13 @@ class UserImplTest {
 	@SuppressWarnings("static-method")
 	void testGetAccessibleModuleNamesIncludesModulesWithMenuItems() {
 		UserImpl user = new UserImpl();
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
-		Menu menu = Mockito.mock(Menu.class);
-		MenuItem item = Mockito.mock(MenuItem.class);
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
+		Menu menu = mock(Menu.class);
+		MenuItem item = mock(MenuItem.class);
 		java.util.List<MenuItem> items = new ArrayList<>();
 		items.add(item);
-		Mockito.when(menu.getItems()).thenReturn(items);
+		when(menu.getItems()).thenReturn(items);
 		user.putModuleMenu(module, menu);
 		Set<String> accessible = user.getAccessibleModuleNames();
 		assertTrue(accessible.contains("admin"));
@@ -319,8 +395,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testAddRoleAddsRoleName() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "BasicUser", "User", DocumentPermission._R__G);
 
@@ -332,8 +408,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testAddRoleIdempotent() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "BasicUser", "User", DocumentPermission._R__G);
 
@@ -354,8 +430,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testGetScopeReflectsAddedRole() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("myModule");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("myModule");
 
 		RoleImpl role = buildRole(module, "Editor", "MyDoc", DocumentPermission.CRUDC);
 		UserImpl user = new UserImpl();
@@ -366,16 +442,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanAccessDocumentAfterAddRole() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Viewer", "Report", DocumentPermission._R__G);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("Report");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("admin");
+		when(doc.getName()).thenReturn("Report");
 
 		assertTrue(user.canAccessDocument(doc));
 	}
@@ -385,9 +461,9 @@ class UserImplTest {
 	void testCanAccessDocumentReturnsFalseWhenNoPermission() {
 		UserImpl user = new UserImpl();
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("Report");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("admin");
+		when(doc.getName()).thenReturn("Report");
 
 		assertFalse(user.canAccessDocument(doc));
 	}
@@ -395,16 +471,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanCreateDocumentWithCRUDG() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "Config", DocumentPermission.CRUDG);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("Config");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("admin");
+		when(doc.getName()).thenReturn("Config");
 
 		assertTrue(user.canCreateDocument(doc));
 	}
@@ -412,16 +488,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanCreateDocumentReturnsFalseForReadOnly() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "ReadOnly", "Config", DocumentPermission._R__G);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("Config");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("admin");
+		when(doc.getName()).thenReturn("Config");
 
 		assertFalse(user.canCreateDocument(doc));
 	}
@@ -429,16 +505,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadDocument() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("mod");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("mod");
 
 		RoleImpl role = buildRole(module, "Role1", "Doc1", DocumentPermission._R__U);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("mod");
-		Mockito.when(doc.getName()).thenReturn("Doc1");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("mod");
+		when(doc.getName()).thenReturn("Doc1");
 
 		assertTrue(user.canReadDocument(doc));
 	}
@@ -446,16 +522,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanUpdateDocument() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("mod");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("mod");
 
 		RoleImpl role = buildRole(module, "Updater", "Doc1", DocumentPermission.CRU_G);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("mod");
-		Mockito.when(doc.getName()).thenReturn("Doc1");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("mod");
+		when(doc.getName()).thenReturn("Doc1");
 
 		assertTrue(user.canUpdateDocument(doc));
 	}
@@ -463,16 +539,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanDeleteDocument() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("mod");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("mod");
 
 		RoleImpl role = buildRole(module, "Deleter", "Doc2", DocumentPermission.CRUDD);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("mod");
-		Mockito.when(doc.getName()).thenReturn("Doc2");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("mod");
+		when(doc.getName()).thenReturn("Doc2");
 
 		assertTrue(user.canDeleteDocument(doc));
 	}
@@ -484,8 +560,8 @@ class UserImplTest {
 		actionPriv.setDocumentName("Task");
 		actionPriv.setName("Execute");
 
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("tasks");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("tasks");
 
 		RoleImpl role = new RoleImpl();
 		role.setOwningModule(module);
@@ -495,9 +571,9 @@ class UserImplTest {
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("tasks");
-		Mockito.when(doc.getName()).thenReturn("Task");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("tasks");
+		when(doc.getName()).thenReturn("Task");
 
 		assertTrue(user.canExecuteAction(doc, "Execute"));
 		assertFalse(user.canExecuteAction(doc, "Other"));
@@ -506,8 +582,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testClearAllPermissionsAndMenus() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission.CRUDG);
 		UserImpl user = new UserImpl();
@@ -524,8 +600,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadBeanGlobalScope() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission._R__G);
 		UserImpl user = new UserImpl();
@@ -538,8 +614,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadBeanCustomerScope() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission._R__C);
 		UserImpl user = new UserImpl();
@@ -553,8 +629,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadBeanDataGroupScope() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission._R__D);
 		UserImpl user = new UserImpl();
@@ -573,8 +649,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadBeanDataGroupScopeWithNullDataGroup() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission._R__D);
 		UserImpl user = new UserImpl();
@@ -589,8 +665,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadBeanUserScope() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission._R__U);
 		UserImpl user = new UserImpl();
@@ -610,8 +686,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanReadBeanNoReadPermission() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		// _____: no permissions at all (no read)
 		RoleImpl role = buildRole(module, "Admin", "User", DocumentPermission._____);
@@ -638,16 +714,16 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanAccessDocumentReturnsTrueWhenPermissionSet() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("myModule");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("myModule");
 
 		RoleImpl role = buildRole(module, "MyRole", "MyDoc", DocumentPermission._R__G);
 		UserImpl user = new UserImpl();
 		user.addRole(role);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("myModule");
-		Mockito.when(doc.getName()).thenReturn("MyDoc");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("myModule");
+		when(doc.getName()).thenReturn("MyDoc");
 
 		assertTrue(user.canAccessDocument(doc));
 	}
@@ -657,9 +733,9 @@ class UserImplTest {
 	void testCanAccessDocumentReturnsFalseWhenNoPermissionSet() {
 		UserImpl user = new UserImpl();
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("myModule");
-		Mockito.when(doc.getName()).thenReturn("MyDoc");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("myModule");
+		when(doc.getName()).thenReturn("MyDoc");
 
 		assertFalse(user.canAccessDocument(doc));
 	}
@@ -683,8 +759,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testCanAccessContentReturnsTrueWhenExplicitlyPermitted() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("myModule");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("myModule");
 
 		// Give the user permission to read the document
 		RoleImpl role = buildRole(module, "MyRole", "Contact", DocumentPermission._R__G);
@@ -753,8 +829,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleDataAdminGrantedToSecurityAdminWithNullDataGroupId() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = new RoleImpl();
 		role.setOwningModule(module);
@@ -769,8 +845,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleDataAdminNotGrantedToSecurityAdminWhenDataGroupIdSet() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		RoleImpl role = new RoleImpl();
 		role.setOwningModule(module);
@@ -787,8 +863,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testAddRoleWithContentRestrictionAddsRestrictionToUser() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		org.skyve.impl.metadata.repository.module.ContentRestriction restriction =
 				new org.skyve.impl.metadata.repository.module.ContentRestriction();
@@ -809,8 +885,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testAddRoleWithContentPermissionAddsPermissionToUser() {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn("admin");
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("admin");
 
 		org.skyve.impl.metadata.repository.module.ContentPermission permission =
 				new org.skyve.impl.metadata.repository.module.ContentPermission();
@@ -843,11 +919,11 @@ class UserImplTest {
 
 	/** Builds a mock metadata Role owned by a mock module, for the isInRole(Role) default method. */
 	private static org.skyve.metadata.user.Role metadataRole(String moduleName, String roleName) {
-		Module module = Mockito.mock(Module.class);
-		Mockito.when(module.getName()).thenReturn(moduleName);
-		org.skyve.metadata.user.Role role = Mockito.mock(org.skyve.metadata.user.Role.class);
-		Mockito.when(role.getOwningModule()).thenReturn(module);
-		Mockito.when(role.getName()).thenReturn(roleName);
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn(moduleName);
+		org.skyve.metadata.user.Role role = mock(org.skyve.metadata.user.Role.class);
+		when(role.getOwningModule()).thenReturn(module);
+		when(role.getName()).thenReturn(roleName);
 		return role;
 	}
 
@@ -856,8 +932,8 @@ class UserImplTest {
 	void testIsInRoleWithRoleDelegatesToOwningModuleAndRoleNames() {
 		// The User.isInRole(Role) default method must delegate to isInRole(String, String)
 		// with the role's owning module name and role name
-		UserImpl user = Mockito.spy(new UserImpl());
-		Mockito.doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
+		UserImpl user = spy(new UserImpl());
+		doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
 
 		assertTrue(user.isInRole(metadataRole("admin", "AuditManager")));
 		// a role the user does not hold must not resolve through the same delegation
@@ -868,8 +944,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleWithRoleReturnsFalseWhenRoleNotHeld() {
-		UserImpl user = Mockito.spy(new UserImpl());
-		Mockito.doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
+		UserImpl user = spy(new UserImpl());
+		doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
 
 		assertFalse(user.isInRole(metadataRole("admin", "AuditManager")));
 	}
@@ -904,8 +980,8 @@ class UserImplTest {
 	void testIsInRoleWithModuleRoleDelegatesToModuleAndRoleNames() {
 		// The User.isInRole(ModuleRole) default method must delegate to isInRole(String, String)
 		// with the enum constant's module name and role name
-		UserImpl user = Mockito.spy(new UserImpl());
-		Mockito.doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
+		UserImpl user = spy(new UserImpl());
+		doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
 
 		assertTrue(user.isInRole(TestModuleRole.AUDIT_MANAGER));
 		// a role the user does not hold must not resolve through the same delegation
@@ -916,8 +992,8 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleWithModuleRoleReturnsFalseWhenRoleNotHeld() {
-		UserImpl user = Mockito.spy(new UserImpl());
-		Mockito.doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
+		UserImpl user = spy(new UserImpl());
+		doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
 
 		assertFalse(user.isInRole(TestModuleRole.AUDIT_MANAGER));
 	}

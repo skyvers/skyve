@@ -3,6 +3,9 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link RichText} widget metadata using a fluent API.
  */
@@ -23,7 +26,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 *
 	 * @param text the metadata instance to mutate
 	 */
-	public FluentRichText(RichText text) {
+	public FluentRichText(@Nonnull RichText text) {
 		this.text = text;
 	}
 
@@ -34,15 +37,13 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentRichText from(@SuppressWarnings("hiding") RichText text) {
-
+	public @Nonnull FluentRichText from(@SuppressWarnings("hiding") @Nonnull RichText text) {
 		sanitise(text.getSanitise());
-
 		absoluteSize(text, this);
-
 		constrainableHeight(text, this);
-
 		super.from(text);
+		text.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -52,7 +53,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 * @param sanitise the sanitisation policy to apply
 	 * @return this builder
 	 */
-	public FluentRichText sanitise(Sanitisation sanitise) {
+	public @Nonnull FluentRichText sanitise(@Nullable Sanitisation sanitise) {
 		text.setSanitise(sanitise);
 		return this;
 	}
@@ -64,7 +65,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 * @return this builder
 	 */
 	@Override
-	public FluentRichText pixelWidth(int width) {
+	public @Nonnull FluentRichText pixelWidth(int width) {
 		text.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -76,7 +77,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 * @return this builder
 	 */
 	@Override
-	public FluentRichText pixelHeight(int height) {
+	public @Nonnull FluentRichText pixelHeight(int height) {
 		text.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -88,7 +89,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 * @return this builder
 	 */
 	@Override
-	public FluentRichText minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentRichText minPixelHeight(int minPixelHeight) {
 		text.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -100,8 +101,21 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 * @return this builder
 	 */
 	@Override
-	public FluentRichText maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentRichText maxPixelHeight(int maxPixelHeight) {
 		text.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentRichText putProperty(@Nonnull String k, @Nonnull String v) {
+		text.getProperties().put(k, v);
 		return this;
 	}
 
@@ -111,7 +125,7 @@ public class FluentRichText extends FluentChangeableInputWidget<FluentRichText>
 	 * @return the mutable rich-text metadata being configured
 	 */
 	@Override
-	public RichText get() {
+	public @Nonnull RichText get() {
 		return text;
 	}
 }

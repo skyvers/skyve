@@ -6,6 +6,9 @@ import java.util.List;
 
 import org.skyve.impl.persistence.AbstractPersistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class for executing DDL (DROP/CREATE) SQL scripts against the
  * database as part of a backup restore operation.
@@ -15,7 +18,7 @@ public class DDL {
 		// nothing to see here
 	}
 
-	public static List<String> drop(File dropScript, boolean execute)
+	public static @Nonnull List<String> drop(@Nullable File dropScript, boolean execute)
 	throws Exception {
 		List<String> drops = null;
 		if (dropScript == null) {
@@ -32,7 +35,7 @@ public class DDL {
 		return drops;
 	}
 	
-	public static List<String> create(File createScript, boolean execute)
+	public static @Nonnull List<String> create(@Nullable File createScript, boolean execute)
 	throws Exception {
 		List<String> creates = null;
 		if (createScript == null) {
@@ -49,7 +52,7 @@ public class DDL {
 		return creates;
 	}
 
-	public static List<String> sync(boolean execute)
+	public static @Nonnull List<String> sync(boolean execute)
 	throws Exception {
 		List<String> updates = null;
 		updates = new ArrayList<>();

@@ -8,6 +8,7 @@ import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponentBase;
 import jakarta.faces.context.FacesContext;
@@ -22,12 +23,12 @@ public class Conversation extends UIComponentBase {
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	@Override
-	public String getFamily() {
+	public @Nonnull String getFamily() {
 		return "conversation";
 	}
 
 	@Override
-	public void encodeBegin(FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 		final String managedBeanName = (String) attributes.get("managedBean");
 

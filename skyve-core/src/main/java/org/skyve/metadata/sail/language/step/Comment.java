@@ -7,6 +7,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
@@ -30,7 +32,7 @@ public class Comment implements Step {
 	 * Returns the comment.
 	 * @return the result
 	 */
-	public String getComment() {
+	public @Nullable String getComment() {
 		return comment;
 	}
 
@@ -40,7 +42,7 @@ public class Comment implements Step {
 	 */
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setComment(String comment) {
+	public void setComment(@Nullable String comment) {
 		this.comment = UtilImpl.processStringValue(comment);
 	}
 
@@ -49,7 +51,7 @@ public class Comment implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeComment(this);
 	}
 	
@@ -59,7 +61,7 @@ public class Comment implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return "Comment " + comment;
 	}
 }

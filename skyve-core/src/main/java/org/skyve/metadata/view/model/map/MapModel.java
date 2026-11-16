@@ -5,6 +5,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.ViewModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for custom map view models that supply geographic features to Skyve map widgets.
  *
@@ -34,17 +37,17 @@ import org.skyve.metadata.view.model.ViewModel;
  */
 public abstract class MapModel<T extends Bean> implements ViewModel {
 	private T bean;
-	public T getBean() {
+	public @Nullable T getBean() {
 		return bean;
 	}
-	public void setBean(T bean) {
+	public void setBean(@Nonnull T bean) {
 		this.bean = bean;
 	}
 	
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		// nothing to see here
 	}
 	
-	public abstract MapResult getResult(Geometry mapBounds) throws Exception;
+	public abstract @Nonnull MapResult getResult(@Nonnull Geometry mapBounds) throws Exception;
 }

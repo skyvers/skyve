@@ -1,17 +1,17 @@
 package org.skyve.impl.snapshot;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.LinkedHashMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class SnapshotCriterionTest {
+class SnapshotCriterionTest {
 
 	@Test
-	public void testDefaultStateIsNull() {
+	void testDefaultStateIsNull() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		assertNull(c.getColumn());
 		assertNull(c.getOperator());
@@ -21,42 +21,42 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testSetAndGetColumn() {
+	void testSetAndGetColumn() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("myColumn");
 		assertEquals("myColumn", c.getColumn());
 	}
 
 	@Test
-	public void testSetAndGetOperator() {
+	void testSetAndGetOperator() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setOperator(SmartClientFilterOperator.equals);
 		assertEquals(SmartClientFilterOperator.equals, c.getOperator());
 	}
 
 	@Test
-	public void testSetAndGetValue() {
+	void testSetAndGetValue() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setValue("hello");
 		assertEquals("hello", c.getValue());
 	}
 
 	@Test
-	public void testSetAndGetStart() {
+	void testSetAndGetStart() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setStart("2024-01-01");
 		assertEquals("2024-01-01", c.getStart());
 	}
 
 	@Test
-	public void testSetAndGetEnd() {
+	void testSetAndGetEnd() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setEnd("2024-12-31");
 		assertEquals("2024-12-31", c.getEnd());
 	}
 
 	@Test
-	public void testToMapWithValueOnly() {
+	void testToMapWithValueOnly() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("name");
 		c.setOperator(SmartClientFilterOperator.contains);
@@ -71,7 +71,7 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testToMapWithStartAndEnd() {
+	void testToMapWithStartAndEnd() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("date");
 		c.setOperator(SmartClientFilterOperator.greaterThan);
@@ -86,7 +86,7 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testToMapWithNullValueStartEnd() {
+	void testToMapWithNullValueStartEnd() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("status");
 		c.setOperator(SmartClientFilterOperator.notEqual);
@@ -99,7 +99,7 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testToMapStartWithoutEndExcludesRange() {
+	void testToMapStartWithoutEndExcludesRange() {
 		SnapshotCriterion c = new SnapshotCriterion();
 		c.setColumn("col");
 		c.setOperator(SmartClientFilterOperator.lessThan);
@@ -113,7 +113,7 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testPopulateFromMap() {
+	void testPopulateFromMap() {
 		java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
 		map.put("column", "age");
 		map.put("operator", "greaterOrEqual");
@@ -128,7 +128,7 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testPopulateFromMapWithStartAndEnd() {
+	void testPopulateFromMapWithStartAndEnd() {
 		java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
 		map.put("column", "score");
 		map.put("operator", "iBetween");
@@ -144,7 +144,7 @@ public class SnapshotCriterionTest {
 	}
 
 	@Test
-	public void testPopulateIgnoresMissingKeys() {
+	void testPopulateIgnoresMissingKeys() {
 		java.util.LinkedHashMap<String, Object> map = new java.util.LinkedHashMap<>();
 		map.put("column", "active");
 

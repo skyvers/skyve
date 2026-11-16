@@ -1,9 +1,10 @@
 package org.skyve.impl.bizport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
@@ -48,7 +49,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 
 @SuppressWarnings("static-method")
-public class StandardLoaderTest {
+class StandardLoaderTest {
 
 	private static BizPortWorkbook mockWorkbook() {
 		BizPortWorkbook wb = mock(BizPortWorkbook.class);
@@ -57,7 +58,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void constructorSetsWorkbookAndProblems() {
+	void constructorSetsWorkbookAndProblems() {
 		BizPortWorkbook wb = mockWorkbook();
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(wb, problems);
@@ -65,7 +66,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanKeysEmptyAfterConstruction() {
+	void getBeanKeysEmptyAfterConstruction() {
 		StandardLoader loader = new StandardLoader(mockWorkbook(), new UploadException());
 		Set<String> keys = new HashSet<>();
 		loader.getBeanKeys().forEach(keys::add);
@@ -73,13 +74,13 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanReturnsNullForUnknownKey() {
+	void getBeanReturnsNullForUnknownKey() {
 		StandardLoader loader = new StandardLoader(mockWorkbook(), new UploadException());
 		assertNull(loader.getBean("unknown.key"));
 	}
 
 	@Test
-	public void putBeanAndGetBeanRoundTrips() {
+	void putBeanAndGetBeanRoundTrips() {
 		StandardLoader loader = new StandardLoader(mockWorkbook(), new UploadException());
 		Bean bean = mock(Bean.class);
 		loader.putBean("test.module.doc.1", bean);
@@ -87,7 +88,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void putMultipleBeansAndGetEach() {
+	void putMultipleBeansAndGetEach() {
 		StandardLoader loader = new StandardLoader(mockWorkbook(), new UploadException());
 		Bean bean1 = mock(Bean.class);
 		Bean bean2 = mock(Bean.class);
@@ -98,7 +99,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanKeysReflectsAddedBeans() {
+	void getBeanKeysReflectsAddedBeans() {
 		StandardLoader loader = new StandardLoader(mockWorkbook(), new UploadException());
 		Bean bean = mock(Bean.class);
 		loader.putBean("module.doc.id", bean);
@@ -108,13 +109,13 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getSheetRowIdFromBizIdReturnsNullForUnknown() {
+	void getSheetRowIdFromBizIdReturnsNullForUnknown() {
 		StandardLoader loader = new StandardLoader(mockWorkbook(), new UploadException());
 		assertNull(loader.getSheetRowIdFromBizId("nonexistent-bizid"));
 	}
 
 	@Test
-	public void createSheetKeyFormatsAsModuleDocumentSheetId() {
+	void createSheetKeyFormatsAsModuleDocumentSheetId() {
 		Document doc = mock(Document.class);
 		when(doc.getOwningModuleName()).thenReturn("testModule");
 		when(doc.getName()).thenReturn("TestDocument");
@@ -123,7 +124,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void createSheetKeyWithIntegerSheetId() {
+	void createSheetKeyWithIntegerSheetId() {
 		Document doc = mock(Document.class);
 		when(doc.getOwningModuleName()).thenReturn("admin");
 		when(doc.getName()).thenReturn("User");
@@ -132,7 +133,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void createSheetKeyWithEmptyModuleAndDocument() {
+	void createSheetKeyWithEmptyModuleAndDocument() {
 		Document doc = mock(Document.class);
 		when(doc.getOwningModuleName()).thenReturn("");
 		when(doc.getName()).thenReturn("");
@@ -141,7 +142,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanForRowCreatesNewBeanWhenIdColumnIsMissing() throws Exception {
+	void getBeanForRowCreatesNewBeanWhenIdColumnIsMissing() throws Exception {
 		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), new UploadException());
 		Persistence persistence = mock(Persistence.class);
 		User user = mock(User.class);
@@ -155,7 +156,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanForRowReturnsNullForEmptyRowWithIdColumn() throws Exception {
+	void getBeanForRowReturnsNullForEmptyRowWithIdColumn() throws Exception {
 		UploadException problems = new UploadException();
 		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = mock(BizPortSheet.class);
@@ -166,7 +167,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanForRowReturnsRetrievedBeanWhenFound() throws Exception {
+	void getBeanForRowReturnsRetrievedBeanWhenFound() throws Exception {
 		UploadException problems = new UploadException();
 		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), problems);
 		Persistence persistence = mock(Persistence.class);
@@ -182,7 +183,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void getBeanForRowCreatesNewBeanWhenRetrieveMisses() throws Exception {
+	void getBeanForRowCreatesNewBeanWhenRetrieveMisses() throws Exception {
 		UploadException problems = new UploadException();
 		ExposedStandardLoader loader = new ExposedStandardLoader(mockWorkbook(), problems);
 		Persistence persistence = mock(Persistence.class);
@@ -200,7 +201,7 @@ public class StandardLoaderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void populateBeansFromSheetMapsRowBeansAndResetsSheet() throws Exception {
+	void populateBeansFromSheetMapsRowBeansAndResetsSheet() throws Exception {
 		UploadException problems = new UploadException();
 		DynamicBean bean = dynamicBean("sales", "Order", "B1", Map.of());
 		FixedRowLoader loader = new FixedRowLoader(mockWorkbook(), problems, bean);
@@ -224,7 +225,7 @@ public class StandardLoaderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void populateBeansFromSheetSkipsSystemBindings() throws Exception {
+	void populateBeansFromSheetSkipsSystemBindings() throws Exception {
 		UploadException problems = new UploadException();
 		DynamicBean bean = dynamicBean("sales", "Order", "B2", Map.of());
 		FixedRowLoader loader = new FixedRowLoader(mockWorkbook(), problems, bean);
@@ -247,7 +248,7 @@ public class StandardLoaderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void populateBeansFromSheetWarnsWhenAttributeColumnIsMissing() throws Exception {
+	void populateBeansFromSheetWarnsWhenAttributeColumnIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		Map<String, Object> properties = new HashMap<>();
 		properties.put("name", null);
@@ -272,7 +273,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void populateReturnsBeansFromFirstDocumentSheetAndMapsLaterDocumentSheets() throws Exception {
+	void populateReturnsBeansFromFirstDocumentSheetAndMapsLaterDocumentSheets() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
 		SheetKey orderKey = new SheetKey("sales", "Order");
@@ -310,7 +311,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void populateCollectionFromRowAddsErrorWhenOwnerIsEmptyButElementExists() throws Exception {
+	void populateCollectionFromRowAddsErrorWhenOwnerIsEmptyButElementExists() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = mock(BizPortSheet.class);
@@ -327,7 +328,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void populateCollectionFromRowAddsErrorWhenElementIsEmpty() throws Exception {
+	void populateCollectionFromRowAddsErrorWhenElementIsEmpty() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = mock(BizPortSheet.class);
@@ -343,8 +344,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(elementColumn), contains("element cell is empty"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void populateCollectionFromRowAddsErrorWhenOwnerReferencedSheetIsMissing() throws Exception {
+	void populateCollectionFromRowAddsErrorWhenOwnerReferencedSheetIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -359,8 +361,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(ownerColumn), contains("referenced sheet for owner_id does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void populateCollectionFromRowWarnsWhenElementReferencedSheetIsMissing() throws Exception {
+	void populateCollectionFromRowWarnsWhenElementReferencedSheetIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -383,8 +386,9 @@ public class StandardLoaderTest {
 		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(elementColumn), contains("referenced sheet for element_id does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void populateCollectionFromRowAddsErrorWhenOwnerRowIsMissing() throws Exception {
+	void populateCollectionFromRowAddsErrorWhenOwnerRowIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -406,8 +410,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(ownerColumn), contains("collection owner does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void populateCollectionFromRowAddsErrorWhenElementRowIsMissing() throws Exception {
+	void populateCollectionFromRowAddsErrorWhenElementRowIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -432,8 +437,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(elementColumn), contains("collection element does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void populateCollectionFromRowAddsElementToLastBindingSegment() throws Exception {
+	void populateCollectionFromRowAddsElementToLastBindingSegment() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -446,8 +452,10 @@ public class StandardLoaderTest {
 		SheetKey elementKey = new SheetKey("sales", "Line");
 		ownerColumn.setReferencedSheet(ownerKey);
 		elementColumn.setReferencedSheet(elementKey);
-		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
-		when(workbook.getSheet(elementKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+		BizPortSheet elementSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(elementKey)).thenReturn(elementSheet);
 		DynamicBean element = dynamicBean("sales", "Line", "E1", Map.of());
 		DynamicBean owner = dynamicBean("sales", "Order", "O1", Map.of("lines", new ArrayList<Bean>(List.of(element))));
 		putMappedBean(loader, ownerDocument, "O1", owner);
@@ -459,8 +467,8 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void populateCollectionFromSheetProcessesEachRow() throws Exception {
+	@SuppressWarnings({"boxing", "null"}) // a null here fails the test
+	void populateCollectionFromSheetProcessesEachRow() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -474,8 +482,10 @@ public class StandardLoaderTest {
 		ownerColumn.setReferencedSheet(ownerKey);
 		elementColumn.setReferencedSheet(elementKey);
 		when(sheet.nextRow()).thenReturn(true, true, false);
-		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
-		when(workbook.getSheet(elementKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+		BizPortSheet elementSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(elementKey)).thenReturn(elementSheet);
 		DynamicBean element = dynamicBean("sales", "Line", "E1", Map.of());
 		DynamicBean owner = dynamicBean("sales", "Order", "O1", Map.of("lines", new ArrayList<Bean>(List.of(element))));
 		putMappedBean(loader, ownerDocument, "O1", owner);
@@ -487,7 +497,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkParentFromRowIgnoresEmptyRows() throws Exception {
+	void linkParentFromRowIgnoresEmptyRows() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = parentLinkSheet(problems, null, null);
@@ -499,7 +509,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkParentFromRowAddsErrorWhenParentIdMissing() throws Exception {
+	void linkParentFromRowAddsErrorWhenParentIdMissing() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = parentLinkSheet(problems, null, "C1");
@@ -511,7 +521,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkParentFromRowAddsErrorWhenChildIdMissing() throws Exception {
+	void linkParentFromRowAddsErrorWhenChildIdMissing() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = parentLinkSheet(problems, "P1", null);
@@ -522,8 +532,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(childColumn), contains("No child ID value"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkParentFromRowWarnsWhenReferencedParentSheetMissing() throws Exception {
+	void linkParentFromRowWarnsWhenReferencedParentSheetMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -538,8 +549,9 @@ public class StandardLoaderTest {
 		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(parentColumn), contains("parent sheet does not exist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkParentFromRowAddsErrorWhenParentRowMissing() throws Exception {
+	void linkParentFromRowAddsErrorWhenParentRowMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -547,7 +559,8 @@ public class StandardLoaderTest {
 		BizPortColumn parentColumn = sheet.getColumn(ChildBean.PARENT_NAME);
 		SheetKey parentKey = new SheetKey("sales", "Order");
 		parentColumn.setReferencedSheet(parentKey);
-		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet parentSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(parentKey)).thenReturn(parentSheet);
 		Customer customer = mock(Customer.class);
 		Document childDocument = document("sales", "Line");
 		Document parentDocument = document("sales", "Order");
@@ -558,8 +571,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(parentColumn), contains("parent ID P1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkParentFromRowAddsErrorWhenChildRowMissing() throws Exception {
+	void linkParentFromRowAddsErrorWhenChildRowMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -568,7 +582,8 @@ public class StandardLoaderTest {
 		BizPortColumn childColumn = sheet.getColumn(Bean.DOCUMENT_ID);
 		SheetKey parentKey = new SheetKey("sales", "Order");
 		parentColumn.setReferencedSheet(parentKey);
-		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet parentSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(parentKey)).thenReturn(parentSheet);
 		Customer customer = mock(Customer.class);
 		Document childDocument = document("sales", "Line");
 		Document parentDocument = document("sales", "Order");
@@ -580,8 +595,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(childColumn), contains("child ID C1"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkParentFromRowAddsChildToParentCollection() throws Exception {
+	void linkParentFromRowAddsChildToParentCollection() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -589,7 +605,8 @@ public class StandardLoaderTest {
 		BizPortColumn parentColumn = sheet.getColumn(ChildBean.PARENT_NAME);
 		SheetKey parentKey = new SheetKey("sales", "Order");
 		parentColumn.setReferencedSheet(parentKey);
-		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet parentSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(parentKey)).thenReturn(parentSheet);
 		Customer customer = mock(Customer.class);
 		Document childDocument = document("sales", "Line");
 		Document parentDocument = document("sales", "Order");
@@ -605,7 +622,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkHierarchyFromRowAddsErrorWhenCurrentIdMissing() throws Exception {
+	void linkHierarchyFromRowAddsErrorWhenCurrentIdMissing() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = hierarchySheet(problems, "P1", null);
@@ -617,7 +634,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkHierarchyFromRowAddsErrorWhenCurrentRowMissing() throws Exception {
+	void linkHierarchyFromRowAddsErrorWhenCurrentRowMissing() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = hierarchySheet(problems, "P1", "C1");
@@ -629,7 +646,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkHierarchyFromRowSetsParentIdWhenBeanExists() throws Exception {
+	void linkHierarchyFromRowSetsParentIdWhenBeanExists() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = hierarchySheet(problems, "P1", "C1");
@@ -644,7 +661,7 @@ public class StandardLoaderTest {
 
 	@Test
 	@SuppressWarnings("boxing")
-	public void linkAssociationsFromSheetDispatchesHierarchyRows() throws Exception {
+	void linkAssociationsFromSheetDispatchesHierarchyRows() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		BizPortSheet sheet = hierarchySheet(problems, "P1", "C1");
@@ -662,7 +679,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkAssociationsFromRowClearsNullAssociationValue() throws Exception {
+	void linkAssociationsFromRowClearsNullAssociationValue() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		DynamicBean master = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
@@ -675,7 +692,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void linkAssociationsFromRowSkipsColumnsWithoutReferencedSheet() throws Exception {
+	void linkAssociationsFromRowSkipsColumnsWithoutReferencedSheet() throws Exception {
 		UploadException problems = new UploadException();
 		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
 		DynamicBean master = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
@@ -687,8 +704,9 @@ public class StandardLoaderTest {
 		assertNotNull(BindUtil.get(master, "customer"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkAssociationsFromRowWarnsWhenReferencedSheetMissing() throws Exception {
+	void linkAssociationsFromRowWarnsWhenReferencedSheetMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -704,8 +722,9 @@ public class StandardLoaderTest {
 		verify(sheet).addWarningAtCurrentRow(eq(problems), eq(column), contains("referenced sheet for customer"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkAssociationsFromRowAddsErrorWhenReferencedRowMissing() throws Exception {
+	void linkAssociationsFromRowAddsErrorWhenReferencedRowMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -727,8 +746,9 @@ public class StandardLoaderTest {
 		verify(sheet).addErrorAtCurrentRow(eq(problems), eq(column), contains("referencedRowDoesNotExist"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	public void linkAssociationsFromRowSetsReferencedBeanWhenFound() throws Exception {
+	void linkAssociationsFromRowSetsReferencedBeanWhenFound() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -737,7 +757,8 @@ public class StandardLoaderTest {
 		BizPortColumn column = sheet.getColumn("customer");
 		SheetKey customerKey = new SheetKey("sales", "Customer");
 		column.setReferencedSheet(customerKey);
-		when(workbook.getSheet(customerKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet customerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(customerKey)).thenReturn(customerSheet);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document customerDocument = document("sales", "Customer");
@@ -752,8 +773,8 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
-	public void linkAssociationsFromSheetLinksAssociationColumns() throws Exception {
+	@SuppressWarnings({"boxing", "null"}) // a null here fails the test
+	void linkAssociationsFromSheetLinksAssociationColumns() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -770,7 +791,8 @@ public class StandardLoaderTest {
 		when(sheet.nextRow()).thenReturn(true, false);
 		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("O1");
 		doReturn(List.<Attribute>of(association)).when(orderDocument).getAllAttributes(customer);
-		when(workbook.getSheet(customerKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet customerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(customerKey)).thenReturn(customerSheet);
 		when(module.getDocument(customer, "Customer")).thenReturn(customerDocument);
 		DynamicBean order = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
 		DynamicBean customerBean = dynamicBean("sales", "Customer", "C1", Map.of());
@@ -783,7 +805,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void addErrorMapsPlainExceptionToOriginalSheetRow() throws Exception {
+	void addErrorMapsPlainExceptionToOriginalSheetRow() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -809,7 +831,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void addErrorMapsSimpleMessageBindingToMatchingColumn() throws Exception {
+	void addErrorMapsSimpleMessageBindingToMatchingColumn() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -839,7 +861,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void addErrorFallsBackToIdColumnWhenMessageHasNoBindings() throws Exception {
+	void addErrorFallsBackToIdColumnWhenMessageHasNoBindings() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -867,7 +889,7 @@ public class StandardLoaderTest {
 	}
 
 	@Test
-	public void addErrorFallsBackToIdColumnWhenSimpleBindingColumnIsMissing() throws Exception {
+	void addErrorFallsBackToIdColumnWhenSimpleBindingColumnIsMissing() throws Exception {
 		UploadException problems = new UploadException();
 		BizPortWorkbook workbook = mockWorkbook();
 		StandardLoader loader = new StandardLoader(workbook, problems);
@@ -893,6 +915,100 @@ public class StandardLoaderTest {
 
 		verify(sheet).moveToRow("row-4");
 		verify(sheet).addErrorAtCurrentRow(problems, idColumn, "Missing column");
+	}
+
+	@Test
+	void populateThrowsWhenTheWorkbookHasNoSheetForOneOfItsKeys() {
+		BizPortWorkbook workbook = mock(BizPortWorkbook.class);
+		SheetKey orderKey = new SheetKey("sales", "Order");
+		when(workbook.getSheetKeys()).thenReturn(new LinkedHashSet<>(List.of(orderKey)));
+		when(workbook.getSheet(orderKey)).thenReturn(null);
+		StandardLoader loader = new StandardLoader(workbook, new UploadException());
+		Persistence persistence = mock(Persistence.class);
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> loader.populate(persistence));
+
+		assertTrue(e.getMessage().startsWith("The workbook has no sheet for "));
+	}
+
+	@Test
+	void linkParentFromRowThrowsWhenTheSheetHasNoParentColumn() {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = parentLinkSheet(problems, "P1", "C1");
+		when(sheet.getColumn(ChildBean.PARENT_NAME)).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Lines");
+
+		Throwable cause = invocationFailure(() -> invokeLinkParentFromRow(loader, sheet, mock(Customer.class), document("sales", "Line"), "lines"));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Lines has no " + ChildBean.PARENT_NAME + " column", cause.getMessage());
+	}
+
+	@Test
+	void linkAssociationsFromRowThrowsWhenTheSheetHasNoColumnForAFilledAssociation() {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = associationSheet(problems, "customer", "C1");
+		when(sheet.getColumn("customer")).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Orders");
+		Association association = association("customer", "Customer");
+
+		Throwable cause = invocationFailure(() -> invokeLinkAssociationsFromRow(loader, sheet, mock(Customer.class), mock(Module.class), mock(Bean.class), List.of(association)));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Orders has no customer column", cause.getMessage());
+	}
+
+	@Test
+	void populateCollectionFromRowThrowsWhenTheSheetHasNoOwnerColumn() {
+		UploadException problems = new UploadException();
+		StandardLoader loader = new StandardLoader(mockWorkbook(), problems);
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		when(sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME)).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Items");
+
+		Throwable cause = invocationFailure(() -> invokePopulateCollectionFromRow(loader, "items", document("sales", "Order"), document("sales", "Line"), sheet));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Items has no " + PersistentBean.OWNER_COLUMN_NAME + " column", cause.getMessage());
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void populateCollectionFromRowThrowsWhenTheSheetHasNoElementColumn() throws Exception {
+		UploadException problems = new UploadException();
+		BizPortWorkbook workbook = mockWorkbook();
+		StandardLoader loader = new StandardLoader(workbook, problems);
+		Document ownerDocument = document("sales", "Order");
+		BizPortSheet sheet = collectionSheet(problems, "O1", "E1");
+		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
+		SheetKey ownerKey = new SheetKey("sales", "Order");
+		ownerColumn.setReferencedSheet(ownerKey);
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+		when(sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME)).thenReturn(null);
+		when(sheet.getTitle()).thenReturn("Items");
+		putMappedBean(loader, ownerDocument, "O1", mock(Bean.class));
+
+		Throwable cause = invocationFailure(() -> invokePopulateCollectionFromRow(loader, "items", ownerDocument, document("sales", "Line"), sheet));
+
+		assertTrue(cause instanceof IllegalStateException);
+		assertEquals("Sheet Items has no " + PersistentBean.ELEMENT_COLUMN_NAME + " column", cause.getMessage());
+	}
+
+	/**
+	 * Runs a reflective invocation of a private StandardLoader method that is expected to fail.
+	 *
+	 * @return	The exception thrown by the invoked method.
+	 */
+	private static Throwable invocationFailure(org.junit.jupiter.api.function.Executable invocation) {
+		java.lang.reflect.InvocationTargetException e = assertThrows(java.lang.reflect.InvocationTargetException.class, invocation);
+		return e.getCause();
 	}
 
 	private static Document document(String moduleName, String documentName) {

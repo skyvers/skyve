@@ -15,6 +15,8 @@ import org.skyve.persistence.Persistence;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.Staff.Status;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Produces map markers for all staff members within the current viewport.
  */
@@ -27,7 +29,7 @@ public class AllStaffMap extends MapModel<Staff> {
 	 * @throws Exception if data retrieval fails
 	 */
 	@Override
-	public MapResult getResult(Geometry mapBounds) throws Exception {
+	public @Nonnull MapResult getResult(@Nonnull Geometry mapBounds) throws Exception {
 		List<MapItem> items = new ArrayList<>();
 
 		for (Staff member : staffForMap()) {
@@ -60,7 +62,7 @@ public class AllStaffMap extends MapModel<Staff> {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	protected List<Staff> staffForMap() {
+	protected @Nonnull List<Staff> staffForMap() {
 		Persistence p = CORE.getPersistence();
 		DocumentQuery q = p.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 		return q.beanResults();

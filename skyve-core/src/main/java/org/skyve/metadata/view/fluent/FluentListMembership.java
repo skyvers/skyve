@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link ListMembership} input widget metadata.
  */
@@ -21,7 +24,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param list
 	 *            the metadata instance to mutate
 	 */
-	public FluentListMembership(ListMembership list) {
+	public FluentListMembership(@Nonnull ListMembership list) {
 		this.list = list;
 	}
 
@@ -32,7 +35,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentListMembership from(@SuppressWarnings("hiding") ListMembership list) {
+	public @Nonnull FluentListMembership from(@SuppressWarnings("hiding") @Nonnull ListMembership list) {
 		candidatesHeading(list.getCandidatesHeading());
 		escapeCandidatesHeading(list.getEscapeCandidatesHeading());
 		membersHeading(list.getMembersHeading());
@@ -41,6 +44,9 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 		list.getChangedActions().forEach(c -> addChangedAction(FluentEventAction.from(c)));
 
 		super.from(list);
+		
+		list.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -50,7 +56,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param candidatesHeading heading text
 	 * @return this builder
 	 */
-	public FluentListMembership candidatesHeading(String candidatesHeading) {
+	public @Nonnull FluentListMembership candidatesHeading(@Nullable String candidatesHeading) {
 		list.setCandidatesHeading(candidatesHeading);
 		return this;
 	}
@@ -61,7 +67,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param escapeCandidatesHeading {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListMembership escapeCandidatesHeading(boolean escapeCandidatesHeading) {
+	public @Nonnull FluentListMembership escapeCandidatesHeading(boolean escapeCandidatesHeading) {
 		return escapeCandidatesHeading(escapeCandidatesHeading ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -71,7 +77,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param escapeCandidatesHeading {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListMembership escapeCandidatesHeading(Boolean escapeCandidatesHeading) {
+	public @Nonnull FluentListMembership escapeCandidatesHeading(@Nullable Boolean escapeCandidatesHeading) {
 		list.setEscapeCandidatesHeading(escapeCandidatesHeading);
 		return this;
 	}
@@ -82,7 +88,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param membersHeading heading text
 	 * @return this builder
 	 */
-	public FluentListMembership membersHeading(String membersHeading) {
+	public @Nonnull FluentListMembership membersHeading(@Nullable String membersHeading) {
 		list.setMembersHeading(membersHeading);
 		return this;
 	}
@@ -93,7 +99,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param escapeMembersHeading {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListMembership escapeMembersHeading(boolean escapeMembersHeading) {
+	public @Nonnull FluentListMembership escapeMembersHeading(boolean escapeMembersHeading) {
 		return escapeMembersHeading(escapeMembersHeading ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -103,7 +109,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @param escapeMembersHeading {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListMembership escapeMembersHeading(Boolean escapeMembersHeading) {
+	public @Nonnull FluentListMembership escapeMembersHeading(@Nullable Boolean escapeMembersHeading) {
 		list.setEscapeMembersHeading(escapeMembersHeading);
 		return this;
 	}
@@ -115,8 +121,21 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 *            the action metadata to append
 	 * @return this builder
 	 */
-	public FluentListMembership addChangedAction(FluentEventAction action) {
+	public @Nonnull FluentListMembership addChangedAction(@Nonnull FluentEventAction action) {
 		list.getChangedActions().add(action.get());
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListMembership putProperty(@Nonnull String k, @Nonnull String v) {
+		list.getProperties().put(k, v);
 		return this;
 	}
 
@@ -126,7 +145,7 @@ public class FluentListMembership extends FluentInputWidget<FluentListMembership
 	 * @return the wrapped list-membership metadata
 	 */
 	@Override
-	public ListMembership get() {
+	public @Nonnull ListMembership get() {
 		return list;
 	}
 }

@@ -1,8 +1,8 @@
 package org.skyve.impl.archive.support;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,15 +16,15 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-public class FileLockRepoTest {
+class FileLockRepoTest {
 
     private FileLockRepo repo = FileLockRepo.getInstance();
 
 	@Test
-    public void testBasics() throws IOException {
+    void testBasics() throws IOException {
 
         File f = new File("a");
         ReentrantReadWriteLock rrwl = repo.getLockFor(f);
@@ -43,7 +43,7 @@ public class FileLockRepoTest {
      * Ensure that different (but equivalent) path representations receive the same lock.
      */
     @Test
-    public void testCanonicalPath() throws IOException {
+    void testCanonicalPath() throws IOException {
 
         File f1 = new File("b");
         ReentrantReadWriteLock rrwl1 = repo.getLockFor(f1);
@@ -60,8 +60,8 @@ public class FileLockRepoTest {
      * (try to) acquire the locks in threads on those.
      */
     @Test
-    @Ignore("Works but is slow, and might be flaky")
-    public void testLockConflict() throws InterruptedException, IOException, ExecutionException {
+    @Disabled("Works but is slow, and might be flaky")
+    void testLockConflict() throws InterruptedException, IOException, ExecutionException {
 
         ExecutorService pool1 = Executors.newSingleThreadExecutor();
         ExecutorService pool2 = Executors.newSingleThreadExecutor();

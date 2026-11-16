@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -23,7 +25,6 @@ import org.skyve.impl.generate.DialectOptions;
 import org.skyve.toolchain.config.GenerateDefaultQueriesConfig;
 import org.skyve.toolchain.config.GenerateDomainConfig;
 import org.skyve.toolchain.config.GenerateEditViewConfig;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @SuppressWarnings("static-method")
@@ -38,6 +39,7 @@ class MojoExecutionSuccessTest {
 		GenerateDomainConfig config = new GenerateDomainConfig();
 		config.setDebug(true);
 		config.setMultiTenant(true);
+		config.setValidate(false);
 		config.setDialect("POSTGRESQL");
 		config.setExcludedModules("admin,test");
 		config.setCustomisationsClass("com.example.Customisations");
@@ -54,6 +56,7 @@ class MojoExecutionSuccessTest {
 		assertEquals("com.example.Customisations", mojo.customisationsClassName);
 		assertTrue(mojo.debug);
 		assertTrue(mojo.multiTenant);
+		assertFalse(mojo.validate);
 		assertEquals(DialectOptions.POSTGRESQL, mojo.dialect);
 		assertEquals("src", mojo.sourceDirectory);
 		assertEquals("generated", mojo.generatedDirectory);
@@ -142,8 +145,8 @@ class MojoExecutionSuccessTest {
 	@Test
 	void compileJasperReportCompilesEachMatchingReport() throws Exception {
 		RecordingCompileJasperReportMojo mojo = new RecordingCompileJasperReportMojo();
-		Prompter prompter = Mockito.mock(Prompter.class);
-		Mockito.when(prompter.prompt(anyString())).thenReturn("users");
+		Prompter prompter = mock(Prompter.class);
+		when(prompter.prompt(anyString())).thenReturn("users");
 		ReflectionTestUtils.setField(mojo, "prompter", prompter);
 		Path report = tempDir.resolve("users.jrxml");
 		Files.writeString(report, "<jasperReport/>");
@@ -159,8 +162,8 @@ class MojoExecutionSuccessTest {
 	@Test
 	void compileJasperReportFailsWhenNoReportsMatch() throws Exception {
 		RecordingCompileJasperReportMojo mojo = new RecordingCompileJasperReportMojo();
-		Prompter prompter = Mockito.mock(Prompter.class);
-		Mockito.when(prompter.prompt(anyString())).thenReturn("users");
+		Prompter prompter = mock(Prompter.class);
+		when(prompter.prompt(anyString())).thenReturn("users");
 		ReflectionTestUtils.setField(mojo, "prompter", prompter);
 		mojo.reports = java.util.List.of();
 
@@ -254,6 +257,7 @@ class MojoExecutionSuccessTest {
 		private String customisationsClassName;
 		private boolean debug;
 		private boolean multiTenant;
+		private boolean validate;
 		private DialectOptions dialect;
 		private String sourceDirectory;
 		private String generatedDirectory;
@@ -273,7 +277,8 @@ class MojoExecutionSuccessTest {
 		}
 
 		@Override
-		void generateDomain(boolean debugValue,
+		void generateDomain(boolean validateValue,
+								boolean debugValue,
 								boolean multiTenantValue,
 								DialectOptions dialectValue,
 								String sourceDirectoryValue,
@@ -281,6 +286,7 @@ class MojoExecutionSuccessTest {
 								String testDirectoryValue,
 								String generatedTestDirectoryValue,
 								String[] excludedModulesValue) {
+			this.validate = validateValue;
 			this.debug = debugValue;
 			this.multiTenant = multiTenantValue;
 			this.dialect = dialectValue;
@@ -390,6 +396,7 @@ class MojoExecutionSuccessTest {
 			return new RecordingCreator(this);
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		MavenSkyveProject initialise(MavenSkyveProjectCreator creator) {
 			return null;

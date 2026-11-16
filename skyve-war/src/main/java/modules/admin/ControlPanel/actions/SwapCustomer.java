@@ -37,7 +37,7 @@ public class SwapCustomer implements ServerSideAction<ControlPanelExtension> {
 			UserImpl user = (UserImpl) CORE.getPersistence().getUser();
 			user.setCustomerName(customer);
 			user.clearModuleMenus();
-			ProvidedRepositoryFactory.get().resetMenus(user);
+			ProvidedRepositoryFactory.getNullSafe().resetMenus(user);
 		}
 		catch (Exception e) {
 			bean.trapException(e);

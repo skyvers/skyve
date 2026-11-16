@@ -11,7 +11,10 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -43,8 +46,8 @@ import jakarta.xml.bind.annotation.XmlType;
 							"percentageHeight",
 							"minPixelHeight", 
 							"maxPixelHeight", 
-							"invisibleConditionName",
-							"visibleConditionName"})
+							"xmlInvisibleCondition",
+							"xmlVisibleCondition"})
 public abstract class AbstractDataWidget extends AbstractBound implements RelativeSize, Invisible, Identifiable {
 	private static final long serialVersionUID = 8143928198512212919L;
 
@@ -67,7 +70,8 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
 	
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	/**
 	 * Returns the ordered column definitions rendered for each collection element.
@@ -76,7 +80,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return ordered mutable column metadata
 	 */
-	public abstract List<? extends TabularColumn> getColumns();
+	public abstract @Nonnull List<? extends TabularColumn> getColumns();
 
 	/**
 	 * Returns the optional widget identifier used for client-side targeting.
@@ -84,7 +88,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return the widget identifier, or {@code null} when not set
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -94,7 +98,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @param widgetId the widget identifier
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -103,7 +107,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return the configured title text
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 	
@@ -112,7 +116,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return the localised title text
 	 */
-	public String getLocalisedTitle() {
+	public @Nullable String getLocalisedTitle() {
 		return Util.i18n(title);
 	}
 
@@ -121,7 +125,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeTitle() {
+	public @Nullable Boolean getEscapeTitle() {
 		return escapeTitle;
 	}
 
@@ -131,7 +135,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @param title the title text to set
 	 */
 	@XmlAttribute(required = false)
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -141,7 +145,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeTitle(Boolean escapeTitle) {
+	public void setEscapeTitle(@Nullable Boolean escapeTitle) {
 		this.escapeTitle = escapeTitle;
 	}
 
@@ -151,7 +155,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return configured pixel width
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -162,7 +166,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -172,7 +176,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return responsive width units
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -183,7 +187,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -193,7 +197,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return small-breakpoint width units
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -204,7 +208,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -214,7 +218,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return medium-breakpoint width units
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -225,7 +229,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -235,7 +239,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return large-breakpoint width units
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -246,7 +250,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -256,7 +260,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return extra-large-breakpoint width units
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -267,7 +271,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -277,7 +281,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return width percentage
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -288,7 +292,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -298,7 +302,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return minimum width in pixels
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -309,7 +313,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -319,7 +323,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return maximum width in pixels
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -330,7 +334,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -340,7 +344,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return configured pixel height
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -351,7 +355,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -361,7 +365,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return height percentage
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -372,7 +376,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -382,7 +386,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return minimum height in pixels
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -393,7 +397,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -403,7 +407,7 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 * @return maximum height in pixels
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -414,50 +418,68 @@ public abstract class AbstractDataWidget extends AbstractBound implements Relati
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
 	/**
-	 * Returns the internal invisible condition expression.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible condition expression
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible condition expression directly.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName invisible condition expression
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB-only placeholder for {@code visible}; value is derived via {@link #setVisibleConditionName(String)}.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; JAXB writes via {@code setVisibleConditionName}
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName a condition expression that enables visibility
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 }

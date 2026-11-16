@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Timestamp;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentTimestamp metadata.
  */
@@ -19,7 +22,7 @@ public class FluentTimestamp extends FluentConvertibleField<FluentTimestamp> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentTimestamp(Timestamp timestamp) {
+	public FluentTimestamp(@Nonnull Timestamp timestamp) {
 		this.timestamp = timestamp;
 	}
 
@@ -27,7 +30,7 @@ public class FluentTimestamp extends FluentConvertibleField<FluentTimestamp> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentTimestamp from(@SuppressWarnings("hiding") Timestamp timestamp) {
+	public @Nonnull FluentTimestamp from(@SuppressWarnings("hiding") @Nonnull Timestamp timestamp) {
 		super.from(timestamp);
 		validator(timestamp.getValidator());
 		return this;
@@ -35,7 +38,7 @@ public class FluentTimestamp extends FluentConvertibleField<FluentTimestamp> {
 	/**
 	 * Sets validation metadata used by this field definition.
 	 */
-	public FluentTimestamp validator(DateValidator validator) {
+	public @Nonnull FluentTimestamp validator(@Nullable DateValidator validator) {
 		timestamp.setValidator(validator);
 		return this;
 	}
@@ -44,7 +47,7 @@ public class FluentTimestamp extends FluentConvertibleField<FluentTimestamp> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Timestamp get() {
+	public @Nonnull Timestamp get() {
 		return timestamp;
 	}
 }

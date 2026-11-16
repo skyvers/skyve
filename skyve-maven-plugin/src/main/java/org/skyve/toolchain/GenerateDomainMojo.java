@@ -12,6 +12,9 @@ import org.skyve.toolchain.config.GenerateDomainConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates Skyve domain and generated-test sources from the repository metadata.
  *
@@ -63,7 +66,8 @@ public class GenerateDomainMojo extends AbstractSkyveMojo {
 		try {
 			configureClasspath(srcDir);
 				registerCustomisations(generateDomainConfig.getCustomisationsClass());
-				generateDomain(generateDomainConfig.isDebug(),
+				generateDomain(generateDomainConfig.isValidate(),
+								generateDomainConfig.isDebug(),
 								generateDomainConfig.isMultiTenant(),
 								DialectOptions.valueOf(generateDomainConfig.getDialect()),
 								srcDir,
@@ -79,21 +83,23 @@ public class GenerateDomainMojo extends AbstractSkyveMojo {
 		}
 
 	@SuppressWarnings("static-method") // test seam
-	void registerCustomisations(String customisationsClassName) throws Exception {
+	void registerCustomisations(@Nullable String customisationsClassName) throws Exception {
 		DomainGenerator.registerCustomisations(customisationsClassName);
 	}
 
 	@SuppressWarnings({"static-method", "java:S107"}) // test seam
-	void generateDomain(boolean debug,
+	void generateDomain(boolean validate,
+							boolean debug,
 							boolean multiTenant,
-							DialectOptions dialect,
-							String sourceDirectory,
-							String generatedDirectory,
-							String testDirectory,
-							String generatedTestDirectory,
-							String[] excludedModules)
+							@Nonnull DialectOptions dialect,
+							@Nonnull String sourceDirectory,
+							@Nonnull String generatedDirectory,
+							@Nonnull String testDirectory,
+							@Nonnull String generatedTestDirectory,
+							@Nullable String[] excludedModules)
 	throws Exception {
-		DomainGenerator.generate(debug,
+		DomainGenerator.generate(validate,
+									debug,
 									multiTenant,
 									dialect,
 									sourceDirectory,

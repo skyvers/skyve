@@ -10,13 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -30,7 +34,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
+import org.skyve.cache.SessionCacheConfig;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.impl.cache.DefaultCaching;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.service.sse.SseClientHandler;
@@ -42,6 +49,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.ClientRequestFilter;
@@ -76,26 +84,68 @@ class SseClientHandlerTest extends JerseyTest {
 
 	private static final String TEST_USER_ID = "dead-beef";
 
+	private boolean originalForceNonPersistentCaching;
+	private String originalCacheDirectory;
+	private SessionCacheConfig originalSessionCache;
+	private Path cacheDirectory;
+
 	/**
 	 * Ensure RECEIVERS is empty and no reaper is running before each test so
-	 * that static state from one test cannot affect another.
+	 * that static state from one test cannot affect another, and start the caches.
 	 */
 	@BeforeEach
-	@SuppressWarnings("static-method")
-	void clearReceiversBeforeTest() {
+	void clearReceiversBeforeTest() throws IOException {
 		org.skyve.util.PushMessage.stopReaper();
 		org.skyve.util.PushMessage.RECEIVERS.clear();
+		startCaching();
+	}
+
+	/**
+	 * Starts the caches so that {@link SessionInjectionServletFilter} can register
+	 * its session, which the endpoint checks before accepting the session user.
+	 */
+	private void startCaching() throws IOException {
+		originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+		originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		originalSessionCache = UtilImpl.SESSION_CACHE;
+
+		cacheDirectory = Files.createTempDirectory("sse-client-handler-cache");
+		UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+		UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+		UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
+
+		DefaultCaching.get().shutdown();
+		DefaultCaching.get().startup();
 	}
 
 	/**
 	 * Defensive teardown: stop the reaper and clear RECEIVERS after each test
-	 * in case a test threw before reaching its own finally block.
+	 * in case a test threw before reaching its own finally block, and stop the caches.
 	 */
 	@AfterEach
-	@SuppressWarnings("static-method")
-	void clearReceiversAfterTest() {
+	void clearReceiversAfterTest() throws IOException {
 		org.skyve.util.PushMessage.stopReaper();
 		org.skyve.util.PushMessage.RECEIVERS.clear();
+		stopCaching();
+	}
+
+	/**
+	 * Stops the caches and restores the cache configuration.
+	 */
+	private void stopCaching() throws IOException {
+		StateUtil.removeSessions(TEST_USER_ID);
+		DefaultCaching.get().shutdown();
+		UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+		UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+		UtilImpl.SESSION_CACHE = originalSessionCache;
+
+		if (cacheDirectory != null) {
+			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
+				paths.sorted((a, b) -> b.compareTo(a))
+					.map(Path::toFile)
+					.forEach(File::delete);
+			}
+		}
 	}
 
 	/**
@@ -691,7 +741,9 @@ class SseClientHandlerTest extends JerseyTest {
 			u.setName("test-user");
 
 			HttpServletRequest hsr = (HttpServletRequest) request;
-			hsr.getSession().setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
+			HttpSession session = hsr.getSession();
+			session.setAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME, u);
+			StateUtil.addSession(TEST_USER_ID, session);
 
 			chain.doFilter(request, response);
 		}

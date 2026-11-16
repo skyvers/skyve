@@ -1,7 +1,12 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,17 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.EXT;
+import org.skyve.dialog.Question;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.ServletConstants;
+import org.skyve.impl.web.WebContainer;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.user.User;
@@ -37,11 +48,14 @@ import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.WebContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import modules.kitchensink.domain.KitchenSink;
 import modules.test.AbstractSkyveTest;
 import modules.test.domain.AllAttributesPersistent;
 
@@ -123,6 +137,76 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void aCachedConversationWithoutPersistenceIsAnUnexpectedError() throws Exception {
+		RequestBuilder request = newRequest(u);
+		String webId = request.cacheConversation(AllAttributesPersistent.newInstance(), null);
+
+		CapturedResponse response = service(request
+				.param("_operationType", Operation.fetch.toString())
+				.param(AbstractWebContext.CONTEXT_NAME, webId)
+				.param(AbstractWebContext.MODULE_NAME, AllAttributesPersistent.MODULE_NAME)
+				.param(AbstractWebContext.DOCUMENT_NAME, AllAttributesPersistent.DOCUMENT_NAME)).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void aFormBindingWithoutAConversationIsMalformed() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.fetch.toString())
+				.param(AbstractWebContext.BINDING_NAME, AllAttributesPersistent.aggregatedAssociationPropertyName)
+				.param(AbstractWebContext.MODULE_NAME, AllAttributesPersistent.MODULE_NAME)
+				.param(AbstractWebContext.DOCUMENT_NAME, AllAttributesPersistent.DOCUMENT_NAME)).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void aRequestWithoutAModuleAndDocumentIsMalformed() throws Exception {
+		CapturedResponse response = service(newRequest(u)
+				.param("_operationType", Operation.fetch.toString())).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void aGridBindingWithoutARowBizIdIsMalformed() throws Exception {
+		RequestBuilder request = newRequest(u);
+		String webId = request.cacheConversation(AllAttributesPersistent.newInstance(), AbstractPersistence.get());
+
+		CapturedResponse response = service(request
+				.param("_operationType", Operation.fetch.toString())
+				.param(AbstractWebContext.CONTEXT_NAME, webId)
+				.param(AbstractWebContext.GRID_BINDING_NAME, AllAttributesPersistent.inverseAggregatedAssociationPropertyName)
+				.param(AbstractWebContext.MODULE_NAME, AllAttributesPersistent.MODULE_NAME)
+				.param(AbstractWebContext.DOCUMENT_NAME, AllAttributesPersistent.DOCUMENT_NAME)).doGet();
+
+		assertUnexpectedFetchError(response.body());
+	}
+
+	@Test
+	void fetchOfASubFormWithoutAContextBeanIsAnInvariantFailure() {
+		String formBinding = AllAttributesPersistent.aggregatedAssociationPropertyName;
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> invokeSubFormFetch(null, formBinding, null));
+
+		assertEquals("No context bean for the sub form with binding " + formBinding, e.getMessage());
+	}
+
+	@Test
+	void fetchOfAnExistingSubFormBeanThatIsNotThereIsAnError() {
+		AllAttributesPersistent contextBean = AllAttributesPersistent.newInstance(); // no aggregated association
+
+		ServletException e = assertThrows(ServletException.class,
+											() -> invokeSubFormFetch(contextBean,
+																		AllAttributesPersistent.aggregatedAssociationPropertyName,
+																		"missing-bizId"));
+
+		assertEquals("processBean is null", e.getMessage());
+	}
+
+	@Test
 	void removeDeletesPersistedTopLevelBeanAndWritesSuccessPayload() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
 				.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
@@ -191,6 +275,50 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void postRenderCannotAskAQuestion() throws Exception {
+		DialogsStaticSingleton.setDefault();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setAttribute(DialogsProtocol.ASKABLE_ATTRIBUTE_NAME, Boolean.TRUE);
+		WebContainer.setHttpServletRequestResponse(request, new MockHttpServletResponse());
+		try (PrintWriter writer = new PrintWriter(new StringWriter())) {
+			Bizlet<Bean> bizlet = mock(Bizlet.class);
+			doAnswer(invocation -> EXT.getDialogs().ask(Question.okCancel("postRender", "Post render", "Can postRender ask?")))
+					.when(bizlet).postRender(any(), any());
+			AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
+			AbstractWebContext webContext = mockWebContext();
+			webContext.setConversation((AbstractPersistence) p);
+			webContext.setCurrentBean(bean);
+			View view = aapd.getView(UXUI, c, ViewType.create.toString());
+			Method pumpOutResponse = SmartClientEditServlet.class.getDeclaredMethod("pumpOutResponse",
+					AbstractWebContext.class,
+					org.skyve.metadata.user.User.class,
+					CustomerImpl.class,
+					org.skyve.metadata.module.Module.class,
+					org.skyve.metadata.model.document.Document.class,
+					View.class,
+					String.class,
+					Bean.class,
+					Bizlet.class,
+					int.class,
+					int.class,
+					String.class,
+					PrintWriter.class);
+			pumpOutResponse.setAccessible(true);
+
+			InvocationTargetException e = assertThrows(InvocationTargetException.class,
+					() -> pumpOutResponse.invoke(null, webContext, u, c, m, aapd, view, UXUI, bean, bizlet,
+													Integer.valueOf(0), Integer.valueOf(0), null, writer));
+
+			IllegalStateException cause = assertInstanceOf(IllegalStateException.class, e.getCause());
+			assertTrue(cause.getMessage().contains("postRender"), cause.getMessage());
+			assertNull(request.getAttribute(DialogsProtocol.ASKABLE_ATTRIBUTE_NAME));
+		}
+		finally {
+			WebContainer.clear();
+		}
+	}
+
+	@Test
 	void applyPushActionSkipsJsonApplyAndRendersResponse() throws Exception {
 		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
 		bean.setText("edit-push-" + System.nanoTime());
@@ -256,6 +384,80 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		assertTrue(body.contains("\"data\":"), body);
 	}
 
+	@Test
+	void addRendersTheFormWithTheNewInlineRow() throws Exception {
+		KitchenSink kitchenSink = KitchenSink.newInstance();
+		kitchenSink.setText("edit-add-" + System.nanoTime());
+
+		String body = invokeAdd(kitchenSink, KitchenSink.inlineGridPropertyName);
+
+		assertTrue(body.contains("\"status\":0"), body);
+		assertEquals(1, kitchenSink.getInlineGrid().size());
+		assertTrue(body.contains(kitchenSink.getInlineGrid().get(0).getBizId()), body);
+	}
+
+	@Test
+	void addToAnInverseManyAddsTheElement() throws Exception {
+		AllAttributesPersistent bean = AllAttributesPersistent.newInstance();
+		bean.setText("edit-add-inverse-" + System.nanoTime());
+
+		String body = invokeAdd(bean, AllAttributesPersistent.inverseAggregatedAssociationPropertyName);
+
+		assertTrue(body.contains("\"status\":0"), body);
+		assertEquals(1, bean.getInverseAggregatedAssociation().size());
+	}
+
+	private String invokeAdd(Bean formBean, String gridBinding) throws Exception {
+		AbstractWebContext webContext = mockWebContext();
+		webContext.setConversation((AbstractPersistence) p);
+		webContext.setCurrentBean(formBean);
+		org.skyve.metadata.module.Module formModule = c.getModule(formBean.getBizModule());
+		org.skyve.metadata.model.document.Document formDocument = formModule.getDocument(c, formBean.getBizDocument());
+		SortedMap<String, Object> parameters = new TreeMap<>();
+		parameters.put("bean", "{}");
+		StringWriter sink = new StringWriter();
+		try (PrintWriter writer = new PrintWriter(sink, true)) {
+			Method add = SmartClientEditServlet.class.getDeclaredMethod("add",
+					AbstractWebContext.class,
+					org.skyve.metadata.user.User.class,
+					org.skyve.metadata.customer.Customer.class,
+					org.skyve.metadata.module.Module.class,
+					org.skyve.metadata.model.document.Document.class,
+					Bean.class,
+					String.class,
+					int.class,
+					int.class,
+					SortedMap.class,
+					AbstractPersistence.class,
+					String.class,
+					PrintWriter.class);
+			add.setAccessible(true);
+			try {
+				add.invoke(null,
+						webContext,
+						u,
+						c,
+						formModule,
+						formDocument,
+						formBean,
+						gridBinding,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						parameters,
+						p,
+						UXUI,
+						writer);
+			} catch (InvocationTargetException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof Exception exception) {
+					throw exception;
+				}
+				throw e;
+			}
+		}
+		return sink.toString();
+	}
+
 	private String invokeFetch(String bizId,
 			String source,
 			ImplicitActionName action,
@@ -312,6 +514,59 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		return sink.toString();
 	}
 
+	/**
+	 * Fetches the aggregated association of a context bean, as a zoom in from its form does.
+	 */
+	private void invokeSubFormFetch(Bean contextBean, String formBinding, String bizId) throws Exception {
+		AbstractWebContext webContext = mockWebContext();
+		webContext.setConversation((AbstractPersistence) p);
+		try (PrintWriter writer = new PrintWriter(new StringWriter(), true)) {
+			Method fetch = SmartClientEditServlet.class.getDeclaredMethod("fetch",
+					AbstractWebContext.class,
+					org.skyve.metadata.user.User.class,
+					org.skyve.metadata.customer.Customer.class,
+					Bean.class,
+					org.skyve.metadata.module.Module.class,
+					org.skyve.metadata.model.document.Document.class,
+					String.class,
+					String.class,
+					String.class,
+					int.class,
+					int.class,
+					ImplicitActionName.class,
+					SortedMap.class,
+					AbstractPersistence.class,
+					String.class,
+					PrintWriter.class);
+			fetch.setAccessible(true);
+			try {
+				fetch.invoke(null,
+						webContext,
+						u,
+						c,
+						contextBean,
+						m,
+						aapd,
+						formBinding,
+						null,
+						bizId,
+						Integer.valueOf(0),
+						Integer.valueOf(0),
+						null,
+						new TreeMap<>(),
+						p,
+						UXUI,
+						writer);
+			} catch (InvocationTargetException e) {
+				Throwable cause = e.getCause();
+				if (cause instanceof Exception exception) {
+					throw exception;
+				}
+				throw e;
+			}
+		}
+	}
+
 	private String invokeRemove(PersistentBean beanToDelete) throws Exception {
 		AbstractWebContext webContext = mockWebContext();
 		webContext.setConversation((AbstractPersistence) p);
@@ -323,7 +578,7 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 					org.skyve.metadata.user.User.class,
 					org.skyve.metadata.customer.Customer.class,
 					org.skyve.metadata.model.document.Document.class,
-					PersistentBean.class,
+					Bean.class,
 					Bizlet.class,
 					AbstractPersistence.class,
 					PrintWriter.class);
@@ -347,6 +602,15 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 			}
 		}
 		return sink.toString();
+	}
+
+	/**
+	 * Asserts the fetch failed unexpectedly, so the response shows the generic message with a support reference.
+	 */
+	private static void assertUnexpectedFetchError(String body) {
+		assertTrue(body.contains("\"status\":-1"), body);
+		assertTrue(body.contains("\"totalRows\":0"), body);
+		assertTrue(body.contains(" Reference: "), body);
 	}
 
 	private static void assertSuccessfulEditFetch(String body) {
@@ -412,6 +676,21 @@ class SmartClientEditServletH2Test extends AbstractSkyveTest {
 		private RequestBuilder param(String name, String value) {
 			parameters.put(name, new String[] { value });
 			return this;
+		}
+
+		/**
+		 * Caches a conversation in this request's session on a bean, as a previous request leaves it.
+		 *
+		 * @return	The conversation's web id, which the client sends with the request.
+		 */
+		private String cacheConversation(Bean bean, AbstractPersistence conversation) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getSession(false)).thenReturn(session);
+			SmartClientWebContext webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
+			webContext.setConversation(conversation);
+			webContext.setCurrentBean(bean);
+			webContext.cacheConversationAndCycleTransaction();
+			return webContext.getWebId();
 		}
 
 		private HttpServletRequest build() {

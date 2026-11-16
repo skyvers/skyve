@@ -10,6 +10,8 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.web.BackgroundTask;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a minimal {@link org.skyve.web.WebContext} implementation for SAIL test execution.
  *
@@ -30,7 +32,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Ignores severity messages in test mode.
 	 */
 	@Override
-	public void message(MessageSeverity severity, String message) {
+	public void message(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		// do nothing
 	}
 
@@ -38,7 +40,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Ignores growl notifications in test mode.
 	 */
 	@Override
-	public void growl(MessageSeverity severity, String message) {
+	public void growl(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		// do nothing
 	}
 
@@ -46,7 +48,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Skips conversation caching for mock execution.
 	 */
 	@Override
-	public void cacheConversation() throws Exception {
+	public void cacheConversationAndCycleTransaction() {
 		// do nothing
 	}
 
@@ -54,7 +56,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Skips background scheduling for mock execution.
 	 */
 	@Override
-	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) throws Exception {
+	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
 		// do nothing
 	}
 
@@ -62,8 +64,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Skips uncached background scheduling for mock execution.
 	 */
 	@Override
-	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass)
-	throws Exception {
+	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
 		// do nothing
 	}
 
@@ -71,7 +72,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Returns an empty growl collection for tests.
 	 */
 	@Override
-	public List<Map<String, String>> getGrowls() {
+	public @Nonnull List<Map<String, String>> getGrowls() {
 		return Collections.emptyList();
 	}
 
@@ -79,7 +80,7 @@ public final class MockWebContext extends AbstractWebContext {
 	 * Returns an empty message collection for tests.
 	 */
 	@Override
-	public List<Map<String, String>> getMessages() {
+	public @Nonnull List<Map<String, String>> getMessages() {
 		return Collections.emptyList();
 	}
 }

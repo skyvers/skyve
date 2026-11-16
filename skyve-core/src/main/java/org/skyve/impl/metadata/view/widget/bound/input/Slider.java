@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
@@ -9,6 +9,8 @@ import org.skyve.impl.metadata.view.ConstrainableHeight;
 import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -51,95 +53,95 @@ public class Slider extends ChangeableInputWidget implements AbsoluteSize, Const
 	
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
 		return true;
 	}
 	
-	public Double getMin() {
+	public @Nullable Double getMin() {
 		return min;
 	}
 	@XmlAttribute(required = false)
-	public void setMin(Double min) {
+	public void setMin(@Nullable Double min) {
 		this.min = min;
 	}
 	
-	public Double getMax() {
+	public @Nullable Double getMax() {
 		return max;
 	}
 	@XmlAttribute(required = false)
-	public void setMax(Double max) {
+	public void setMax(@Nullable Double max) {
 		this.max = max;
 	}
 	
-	public Integer getNumberOfDiscreteValues() {
+	public @Nullable Integer getNumberOfDiscreteValues() {
 		return numberOfDiscreteValues;
 	}
 	@XmlAttribute(required = false)
-	public void setNumberOfDiscreteValues(Integer numberOfDiscreteValues) {
+	public void setNumberOfDiscreteValues(@Nullable Integer numberOfDiscreteValues) {
 		this.numberOfDiscreteValues = numberOfDiscreteValues;
 	}
 	
-	public Integer getRoundingPrecision() {
+	public @Nullable Integer getRoundingPrecision() {
 		return roundingPrecision;
 	}
 	@XmlAttribute(required = false)
-	public void setRoundingPrecision(Integer roundingPrecision) {
+	public void setRoundingPrecision(@Nullable Integer roundingPrecision) {
 		this.roundingPrecision = roundingPrecision;
 	}
 
-	public Boolean getVertical() {
+	public @Nullable Boolean getVertical() {
 		return vertical;
 	}
 	@XmlAttribute(required = false)
-	public void setVertical(Boolean vertical) {
+	public void setVertical(@Nullable Boolean vertical) {
 		this.vertical = vertical;
 	}
 
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

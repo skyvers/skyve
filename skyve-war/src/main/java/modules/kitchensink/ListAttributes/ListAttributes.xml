@@ -59,12 +59,10 @@
 			<displayName>Decimal 5</displayName>
 			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
 		</decimal5>
-<!-- 
 		<geometry name="geometry">
 			<displayName>Geometry</displayName>
 			<defaultValue>{el:newGeometry('POINT(0 0)')}</defaultValue>
 		</geometry>
--->
 		<id name="id">
 			<displayName>Id</displayName>
 		</id>

@@ -201,6 +201,7 @@ class FluentBehaviourTest {
 		assertNotNull(result);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void statementFromNullThrowsIllegalStateException() {
 		org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, () -> FluentStatement.from(null));

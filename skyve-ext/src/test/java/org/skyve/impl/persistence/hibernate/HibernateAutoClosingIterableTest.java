@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.messages.DomainException;
 
-@SuppressWarnings({"static-method", "resource"})
+@SuppressWarnings({ "static-method", "resource" })
 class HibernateAutoClosingIterableTest {
 
 	@Test
@@ -23,7 +23,7 @@ class HibernateAutoClosingIterableTest {
 	void testIteratorYieldsScalarThenClosesResults() {
 		ScrollableResults results = mock(ScrollableResults.class);
 		when(results.next()).thenReturn(true, false);
-		when(results.get()).thenReturn(new Object[] {"first"});
+		when(results.get()).thenReturn(new Object[] { "first" });
 
 		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, true, false);
 		var iterator = iterable.iterator();
@@ -38,15 +38,10 @@ class HibernateAutoClosingIterableTest {
 	void testIteratorProjectedYieldsDynamicBean() {
 		ScrollableResults results = mock(ScrollableResults.class);
 		when(results.next()).thenReturn(true, false);
-		when(results.get()).thenReturn(new Object[] {"Bob", "ACTIVE"});
+		when(results.get()).thenReturn(new Object[] { "Bob", "ACTIVE" });
 
-		HibernateAutoClosingIterable<Object> iterable = new HibernateAutoClosingIterable<>(
-				"admin",
-				"Contact",
-				results,
-				new String[] {"name", "status"},
-				false,
-				false);
+		HibernateAutoClosingIterable<Object> iterable = new HibernateAutoClosingIterable<>("admin", "Contact", results,
+				new String[] { "name", "status" }, false, false);
 		var iterator = iterable.iterator();
 		assertTrue(iterator.hasNext());
 		Object value = iterator.next();
@@ -64,12 +59,42 @@ class HibernateAutoClosingIterableTest {
 	void testIteratorThrowsWhenAssertSingleFails() {
 		ScrollableResults results = mock(ScrollableResults.class);
 		when(results.next()).thenReturn(Boolean.TRUE);
-		when(results.get()).thenReturn(new Object[] {"one", "two"});
+		when(results.get()).thenReturn(new Object[] { "one", "two" });
 
 		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, true, false);
 		var iterator = iterable.iterator();
 		assertTrue(iterator.hasNext());
 		assertThrows(IllegalStateException.class, iterator::next);
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testCloseAfterPartialIterationClosesResults() {
+		ScrollableResults results = mock(ScrollableResults.class);
+		when(results.next()).thenReturn(true, true, false);
+		when(results.get()).thenReturn(new Object[] { "first" });
+
+		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, true, false);
+		var iterator = iterable.iterator();
+		assertTrue(iterator.hasNext());
+		assertEquals("first", iterator.next());
+
+		// Iteration abandoned (eg an exception in the loop body) - close() must release
+		// the scroll
+		iterable.close();
+		verify(results).close();
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testCloseAfterExhaustionDoesNotCloseResultsAgain() {
+		ScrollableResults results = mock(ScrollableResults.class);
+		when(results.next()).thenReturn(Boolean.FALSE);
+
+		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, true, false);
+		assertFalse(iterable.iterator().hasNext());
+		iterable.close();
+		verify(results).close();
 	}
 
 	@Test
@@ -83,42 +108,43 @@ class HibernateAutoClosingIterableTest {
 		assertEquals("Could not close the iterator.", thrown.getMessage());
 	}
 
-        @Test
-        void testIteratorRemoveThrowsUnsupportedOperation() {
-                ScrollableResults results = mock(ScrollableResults.class);
-                HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, false, false);
-                var iterator = iterable.iterator();
-                assertThrows(UnsupportedOperationException.class, iterator::remove);
-        }
+	@Test
+	void testIteratorRemoveThrowsUnsupportedOperation() {
+		ScrollableResults results = mock(ScrollableResults.class);
+		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, false, false);
+		var iterator = iterable.iterator();
+		assertThrows(UnsupportedOperationException.class, iterator::remove);
+	}
 
-        @Test
-        @SuppressWarnings("boxing")
-        void testIteratorThrowsWhenAssertMultipleFails() {
-                ScrollableResults results = mock(ScrollableResults.class);
-                when(results.next()).thenReturn(Boolean.TRUE);
-                when(results.get()).thenReturn(new Object[] {"only-one"});
+	@Test
+	@SuppressWarnings("boxing")
+	void testIteratorThrowsWhenAssertMultipleFails() {
+		ScrollableResults results = mock(ScrollableResults.class);
+		when(results.next()).thenReturn(Boolean.TRUE);
+		when(results.get()).thenReturn(new Object[] { "only-one" });
 
-                // assertSingle=false, assertMultiple=true
-                HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, false, true);
-                var iterator = iterable.iterator();
-                assertTrue(iterator.hasNext());
-                assertThrows(IllegalStateException.class, iterator::next);
-        }
+		// assertSingle=false, assertMultiple=true
+		HibernateAutoClosingIterable<String> iterable = new HibernateAutoClosingIterable<>(results, false, true);
+		var iterator = iterable.iterator();
+		assertTrue(iterator.hasNext());
+		assertThrows(IllegalStateException.class, iterator::next);
+	}
 
-        @Test
-        @SuppressWarnings("boxing")
-        void testIteratorYieldsTupleAsArrayWhenMultipleColumns() {
-                ScrollableResults results = mock(ScrollableResults.class);
-                when(results.next()).thenReturn(true, false);
-                when(results.get()).thenReturn(new Object[] {"val1", "val2"});
+	@Test
+	@SuppressWarnings("boxing")
+	void testIteratorYieldsTupleAsArrayWhenMultipleColumns() {
+		ScrollableResults results = mock(ScrollableResults.class);
+		when(results.next()).thenReturn(true, false);
+		when(results.get()).thenReturn(new Object[] { "val1", "val2" });
 
-                // No module name, no assertSingle, no assertMultiple — tuple returned as Object[]
-                HibernateAutoClosingIterable<Object[]> iterable = new HibernateAutoClosingIterable<>(results, false, false);
-                var iterator = iterable.iterator();
-                assertTrue(iterator.hasNext());
-                Object[] tuple = iterator.next();
-                assertEquals(2, tuple.length);
-                assertEquals("val1", tuple[0]);
-                assertEquals("val2", tuple[1]);
-        }
+		// No module name, no assertSingle, no assertMultiple — tuple returned as
+		// Object[]
+		HibernateAutoClosingIterable<Object[]> iterable = new HibernateAutoClosingIterable<>(results, false, false);
+		var iterator = iterable.iterator();
+		assertTrue(iterator.hasNext());
+		Object[] tuple = iterator.next();
+		assertEquals(2, tuple.length);
+		assertEquals("val1", tuple[0]);
+		assertEquals("val2", tuple[1]);
+	}
 }

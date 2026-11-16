@@ -5,8 +5,28 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
@@ -39,6 +59,7 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
 @SuppressWarnings("static-method")
 class SailExecutorTest {
@@ -88,6 +109,91 @@ class SailExecutorTest {
 		assertThat(script, containsString("<!-- hello -->"));
 		assertThat(script, not(containsString("250")));
 		assertThat(script, containsString("</table>"));
+	}
+
+	/**
+	 * The generated code cannot follow a new window, so a link into one says so, in both generators; a link in the same
+	 * window says nothing.
+	 */
+	@Test
+	void bothGeneratorsCommentThatTheyDoNotFollowANewWindow() {
+		TestWebDriverExecutor webDriver = new TestWebDriverExecutor();
+		webDriver.open("Windows");
+		NavigateLink newWindow = new NavigateLink();
+		newWindow.setHref("?a=e&m=admin&d=Contact");
+		newWindow.setWindow(NavigateLink.Window.newWindow);
+		webDriver.executeNavigateLink(newWindow);
+		webDriver.close();
+		TestSeleneseExecutor selenese = new TestSeleneseExecutor();
+		selenese.open("Windows");
+		selenese.executeNavigateLink(newWindow);
+		selenese.close();
+
+		assertThat(webDriver.toString(), containsString("trace(\"" + NEW_WINDOW_NOT_FOLLOWED + "\");"));
+		assertThat(selenese.toString(), containsString("<!-- " + NEW_WINDOW_NOT_FOLLOWED + " -->"));
+	}
+
+	private static final String NEW_WINDOW_NOT_FOLLOWED = "<navigateLink window=new/> not supported by this generator: " +
+															"the generated code does not follow the new window";
+
+	@Test
+	void webDriverExecutorCommentsTheStepsItCannotGenerate() {
+		TestWebDriverExecutor executor = new TestWebDriverExecutor();
+
+		executor.open("Unsupported");
+		executeUnsupportedSteps(executor);
+		executor.close();
+
+		String script = executor.toString();
+		for (String element : UNSUPPORTED) {
+			assertThat(script, containsString("trace(\"<" + element + "/> not supported by this generator\");"));
+		}
+	}
+
+	@Test
+	void seleneseExecutorCommentsTheStepsItCannotGenerate() {
+		TestSeleneseExecutor executor = new TestSeleneseExecutor();
+
+		executor.open("Unsupported");
+		executeUnsupportedSteps(executor);
+		executor.close();
+
+		String script = executor.toString();
+		for (String element : UNSUPPORTED) {
+			assertThat(script, containsString("<!-- <" + element + "/> not supported by this generator -->"));
+		}
+	}
+
+	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu", "switchMode",
+													"listGridFilter", "listGridClearFilter", "listGridSort", "captureValue",
+													"captureCell", "captureTitle", "dataGridLink", "dataGridMove", "listMembershipMove",
+													"navigateBack", "refresh", "closeWindow", "listGridTool"};
+
+	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
+		executor.executeUpload(new Upload());
+		executor.executeTestMessage(new TestMessage());
+		executor.executeTestGridRows(new TestGridRows());
+		executor.executeTestWidget(new TestWidget());
+		executor.executeNavigateMenu(new NavigateMenu());
+		executor.executeTestMenu(new TestMenu());
+		executor.executeSwitchMode(new SwitchMode());
+		executor.executeListGridFilter(new ListGridFilter());
+		executor.executeListGridClearFilter(new ListGridClearFilter());
+		executor.executeListGridSort(new ListGridSort());
+		executor.executeCaptureValue(new CaptureValue());
+		executor.executeCaptureCell(new CaptureCell());
+		executor.executeCaptureTitle(new CaptureTitle());
+		executor.executeDataGridLink(new DataGridLink());
+		executor.executeDataGridMove(new DataGridMove());
+		executor.executeListMembershipMove(new ListMembershipMove());
+		executor.executeNavigateBack(new NavigateBack());
+		executor.executeRefresh(new Refresh());
+		NavigateLink link = new NavigateLink();
+		link.setHref("?a=e&m=admin&d=Contact");
+		link.setWindow(NavigateLink.Window.newWindow);
+		executor.executeNavigateLink(link); // opens a window for closeWindow to close
+		executor.executeCloseWindow(new CloseWindow());
+		executor.executeListGridTool(new ListGridTool());
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

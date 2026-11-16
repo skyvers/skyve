@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -34,7 +35,7 @@ public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocume
 	 *
 	 * @return the aggregate model name
 	 */
-	public String getModelName() {
+	public @Nonnull String getModelName() {
 		return modelName;
 	}
 
@@ -47,7 +48,7 @@ public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocume
 	 * @param modelName the aggregate model name; blank values become {@code null}
 	 */
 	@XmlAttribute(name = "model", required = true)
-	public void setModelName(String modelName) {
+	public void setModelName(@Nonnull String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 	
@@ -63,7 +64,7 @@ public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocume
 	 * @throws MetaDataException if required attributes are missing
 	 */
 	@Override
-	public void validate(String metaDataName, String roleName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull String roleName, @Nonnull Module module) {
 		super.validate(metaDataName, roleName, module);
 		if (modelName == null) {
 			throw new MetaDataException(metaDataName + " : [model] is required for all modelAggregate user accesses defined in module role " + roleName);
@@ -78,7 +79,7 @@ public class ModuleRoleModelAggregateUserAccessMetaData extends ModuleRoleDocume
 	 * @return the runtime model-aggregate user access
 	 */
 	@Override
-	public UserAccess toUserAccess(String moduleName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName) {
 		return UserAccess.modelAggregate(moduleName, getDocumentName(), modelName);
 	}
 }

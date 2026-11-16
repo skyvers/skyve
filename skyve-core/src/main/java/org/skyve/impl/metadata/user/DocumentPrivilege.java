@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.user;
 
 import org.skyve.metadata.user.DocumentPermission;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A privilege granting a specific CRUD permission for a document within a role.
  *
@@ -15,11 +17,11 @@ public class DocumentPrivilege extends Privilege {
 
 	private DocumentPermission permission;
 
-	public DocumentPermission getPermission() {
+	public @Nonnull DocumentPermission getPermission() {
 		return permission;
 	}
 
-	public void setPermission(DocumentPermission permission) {
+	public void setPermission(@Nonnull DocumentPermission permission) {
 		this.permission = permission;
 	}
 }

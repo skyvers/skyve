@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 
 class DataEnterTest {
 
@@ -83,5 +84,20 @@ class DataEnterTest {
 		step.setBinding("myField");
 		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
 		assertThat(step.getIdentifier(ctx), is("myField"));
+	}
+
+	@Test
+	void defaultMatchIsNullAndEffectivelyIndex() {
+		assertThat(step.getMatch(), is(nullValue()));
+		assertThat(step.getEffectiveMatch(), is(Match.index));
+	}
+
+	@Test
+	void setMatchRoundtrip() {
+		step.setMatch(Match.code);
+		assertThat(step.getMatch(), is(Match.code));
+		assertThat(step.getEffectiveMatch(), is(Match.code));
+		step.setMatch(Match.label);
+		assertThat(step.getEffectiveMatch(), is(Match.label));
 	}
 }

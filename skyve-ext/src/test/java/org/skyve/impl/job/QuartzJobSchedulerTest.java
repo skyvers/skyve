@@ -3,9 +3,10 @@ package org.skyve.impl.job;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -20,12 +21,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatcher;
 import org.quartz.CronScheduleBuilder;
+import org.quartz.CronTrigger;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -58,26 +60,32 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 
+/**
+ * Verifies Quartz job construction, validation and scheduling through Skyve's scheduler facade.
+ *
+ * <p>Content garbage-collection coverage confirms both an immediate manual trigger and registration
+ * of the internal cron job with its stable job identity and configured cron expression.
+ */
 @SuppressWarnings({"static-method", "boxing"})
-public class QuartzJobSchedulerTest {
+class QuartzJobSchedulerTest {
 	private Scheduler originalScheduler;
 	private Scheduler scheduler;
 
-	@Before
-	public void setUp() throws Exception {
+	@BeforeEach
+	void setUp() throws Exception {
 		originalScheduler = getScheduler();
 		scheduler = mock(Scheduler.class);
 		setScheduler(scheduler);
 	}
 
-	@After
-	public void tearDown() throws Exception {
+	@AfterEach
+	void tearDown() throws Exception {
 		setScheduler(originalScheduler);
 		unbindPersistenceFromThread();
 	}
 
 	@Test
-	public void runOneShotJobSchedulesTriggerWithJobData() throws Exception {
+	void runOneShotJobSchedulesTriggerWithJobData() throws Exception {
 		JobMetaData job = job("mod", "job", "Display");
 		Bean bean = mock(Bean.class);
 		User user = user("customer");
@@ -95,7 +103,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void runOneShotJobWrapsSchedulerException() throws Exception {
+	void runOneShotJobWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(Trigger.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 		JobMetaData metaData = job("mod", "job", "Display");
@@ -108,7 +116,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void runOneShotJobConvertsDuplicateTriggerToValidationException() throws Exception {
+	void runOneShotJobConvertsDuplicateTriggerToValidationException() throws Exception {
 		doThrow(new ObjectAlreadyExistsException("duplicate")).when(scheduler).scheduleJob(any(Trigger.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 		JobMetaData metaData = job("mod", "job", "Display");
@@ -119,7 +127,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void scheduleOneShotJobUsesRequestedStartTime() throws Exception {
+	void scheduleOneShotJobUsesRequestedStartTime() throws Exception {
 		Date start = new Date(System.currentTimeMillis() + 60_000L);
 		JobMetaData job = job("mod", "job", "Display");
 
@@ -131,7 +139,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void scheduleJobParsesModuleJobNameAndBuildsCronTrigger() throws Exception {
+	void scheduleJobParsesModuleJobNameAndBuildsCronTrigger() throws Exception {
 		JobSchedule schedule = new JobSchedule();
 		schedule.setUuid("schedule-id");
 		schedule.setJobName("mod.job");
@@ -154,7 +162,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void runBackgroundTaskSchedulesQuartzJobWithUserAndWebId() throws Exception {
+	void runBackgroundTaskSchedulesQuartzJobWithUserAndWebId() throws Exception {
 		User user = user("customer");
 
 		new QuartzJobScheduler().runBackgroundTask(TestBackgroundTask.class, user, "web-1");
@@ -168,7 +176,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void runBackgroundTaskWrapsSchedulerException() throws Exception {
+	void runBackgroundTaskWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(org.quartz.JobDetail.class), any(Trigger.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 		User currentUser = user("customer");
@@ -177,8 +185,9 @@ public class QuartzJobSchedulerTest {
 				() -> quartzJobScheduler.runBackgroundTask(TestBackgroundTask.class, currentUser, "web-1"));
 	}
 
+	/** Confirms that a manual collection request schedules the production garbage-collection job. */
 	@Test
-	public void runContentGarbageCollectorSchedulesInternalJob() throws Exception {
+	void runContentGarbageCollectorSchedulesInternalJob() throws Exception {
 		new QuartzJobScheduler().runContentGarbageCollector();
 
 		ArgumentCaptor<org.quartz.JobDetail> detail = ArgumentCaptor.forClass(org.quartz.JobDetail.class);
@@ -188,16 +197,41 @@ public class QuartzJobSchedulerTest {
 		assertThat(trigger.getValue().getKey().getGroup(), is("INTERNAL"));
 	}
 
+	/** Confirms that Quartz failures from a manual collection request are exposed as domain failures. */
 	@Test
-	public void runContentGarbageCollectorWrapsSchedulerException() throws Exception {
+	void runContentGarbageCollectorWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(org.quartz.JobDetail.class), any(Trigger.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 
 		assertThrows(DomainException.class, quartzJobScheduler::runContentGarbageCollector);
 	}
 
+	/** Confirms that startup registers garbage collection with the configured internal cron trigger. */
 	@Test
-	public void scheduleJobSkipsWhenEndTimeHasPassed() throws Exception {
+	void scheduleInternalJobsRegistersContentGarbageCollectorCronTrigger() throws Exception {
+		Method method = QuartzJobScheduler.class.getDeclaredMethod("scheduleInternalJobs");
+		method.setAccessible(true);
+
+		method.invoke(null);
+
+		ArgumentCaptor<JobDetail> details = ArgumentCaptor.forClass(JobDetail.class);
+		ArgumentCaptor<Trigger> triggers = ArgumentCaptor.forClass(Trigger.class);
+		verify(scheduler, atLeast(3)).scheduleJob(details.capture(), triggers.capture());
+		for (int i = 0; i < details.getAllValues().size(); i++) {
+			JobDetail detail = details.getAllValues().get(i);
+			if (ContentGarbageCollectionJob.class.equals(detail.getJobClass())) {
+				Trigger trigger = triggers.getAllValues().get(i);
+				assertThat(detail.getKey(), is(new JobKey("CMS Garbage Collection", "INTERNAL")));
+				assertThat(trigger.getKey(), is(new TriggerKey("CMS Garbage Collection Trigger", "INTERNAL")));
+				assertThat(((CronTrigger) trigger).getCronExpression(), is(UtilImpl.CONTENT_GC_CRON));
+				return;
+			}
+		}
+		throw new AssertionError("Content garbage collection job was not scheduled");
+	}
+
+	@Test
+	void scheduleJobSkipsWhenEndTimeHasPassed() throws Exception {
 		JobSchedule schedule = new JobSchedule();
 		schedule.setUuid("schedule-id");
 		schedule.setJobName("mod.job");
@@ -216,14 +250,14 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void unscheduleJobDelegatesToQuartz() throws Exception {
+	void unscheduleJobDelegatesToQuartz() throws Exception {
 		new QuartzJobScheduler().unscheduleJob("uuid", "customer");
 
 		verify(scheduler).unscheduleJob(new TriggerKey("uuid", "customer"));
 	}
 
 	@Test
-	public void unscheduleJobWrapsSchedulerException() throws Exception {
+	void unscheduleJobWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).unscheduleJob(any(TriggerKey.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 
@@ -231,7 +265,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void unscheduleReportDoesNothingWhenSchedulerIsNull() throws Exception {
+	void unscheduleReportDoesNothingWhenSchedulerIsNull() throws Exception {
 		setScheduler(null);
 
 		new QuartzJobScheduler().unscheduleReport("uuid", "customer");
@@ -240,14 +274,14 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void unscheduleReportDelegatesToQuartz() throws Exception {
+	void unscheduleReportDelegatesToQuartz() throws Exception {
 		new QuartzJobScheduler().unscheduleReport("uuid", "customer");
 
 		verify(scheduler).unscheduleJob(new TriggerKey("uuid", "customer"));
 	}
 
 	@Test
-	public void unscheduleReportWrapsSchedulerException() throws Exception {
+	void unscheduleReportWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).unscheduleJob(any(TriggerKey.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 
@@ -255,14 +289,14 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void cancelJobDelegatesToQuartzInterrupt() throws Exception {
+	void cancelJobDelegatesToQuartzInterrupt() throws Exception {
 		when(scheduler.interrupt("instance")).thenReturn(true);
 
 		assertThat(new QuartzJobScheduler().cancelJob("instance"), is(true));
 	}
 
 	@Test
-	public void cancelJobWrapsUnableToInterruptException() throws Exception {
+	void cancelJobWrapsUnableToInterruptException() throws Exception {
 		doThrow(new UnableToInterruptJobException("nope")).when(scheduler).interrupt("instance");
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 
@@ -270,7 +304,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void validateMetaDataSchedulesInternalJob() throws Exception {
+	void validateMetaDataSchedulesInternalJob() throws Exception {
 		new QuartzJobScheduler().validateMetaData();
 
 		ArgumentCaptor<org.quartz.JobDetail> detail = ArgumentCaptor.forClass(org.quartz.JobDetail.class);
@@ -281,7 +315,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void validateMetaDataWrapsSchedulerException() throws Exception {
+	void validateMetaDataWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(org.quartz.JobDetail.class), any(Trigger.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 
@@ -289,7 +323,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void shutdownCancelsRunningSkyveJobsAndStopsScheduler() throws Exception {
+	void shutdownCancelsRunningSkyveJobsAndStopsScheduler() throws Exception {
 		JobExecutionContext context = mock(JobExecutionContext.class);
 		TestQuartzJob job = new TestQuartzJob();
 		when(context.getJobInstance()).thenReturn(job);
@@ -304,7 +338,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void shutdownStillStopsSchedulerWhenRunningJobsCannotBeRead() throws Exception {
+	void shutdownStillStopsSchedulerWhenRunningJobsCannotBeRead() throws Exception {
 		when(scheduler.getCurrentlyExecutingJobs()).thenThrow(new SchedulerException("boom"));
 
 		new QuartzJobScheduler().shutdown();
@@ -313,7 +347,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void getCustomerRunningJobsReturnsOnlySkyveJobsForCurrentCustomer() throws Exception {
+	void getCustomerRunningJobsReturnsOnlySkyveJobsForCurrentCustomer() throws Exception {
 		User currentUser = user("customer");
 		bindPersistenceWithUser(currentUser);
 		TestQuartzJob customerJob = new TestQuartzJob();
@@ -323,7 +357,8 @@ public class QuartzJobSchedulerTest {
 		JobExecutionContext matchingContext = context(customerJob, "customer", "fire-1", currentUser);
 		JobExecutionContext otherCustomerContext = context(new TestQuartzJob(), "other", "fire-2", currentUser);
 		JobExecutionContext nonSkyveContext = mock(JobExecutionContext.class);
-		when(nonSkyveContext.getJobInstance()).thenReturn(mock(org.quartz.Job.class));
+		org.quartz.Job nonSkyveJob = mock(org.quartz.Job.class);
+		when(nonSkyveContext.getJobInstance()).thenReturn(nonSkyveJob);
 		when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of(matchingContext, otherCustomerContext, nonSkyveContext));
 
 		List<JobDescription> result = new QuartzJobScheduler().getCustomerRunningJobs();
@@ -338,7 +373,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void getCustomerRunningJobsWrapsSchedulerException() throws Exception {
+	void getCustomerRunningJobsWrapsSchedulerException() throws Exception {
 		bindPersistenceWithUser(user("customer"));
 		when(scheduler.getCurrentlyExecutingJobs()).thenThrow(new SchedulerException("boom"));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
@@ -347,7 +382,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void preRestorePausesInternalJobsAndUnschedulesCustomerTriggers() throws Exception {
+	void preRestorePausesInternalJobsAndUnschedulesCustomerTriggers() throws Exception {
 		boolean originalJobScheduler = UtilImpl.JOB_SCHEDULER;
 		try {
 			UtilImpl.JOB_SCHEDULER = true;
@@ -367,7 +402,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void preRestoreThrowsValidationExceptionWhenCustomerOrInternalJobIsRunning() throws Exception {
+	void preRestoreThrowsValidationExceptionWhenCustomerOrInternalJobIsRunning() throws Exception {
 		User user = user("customer");
 		bindPersistenceWithUser(user);
 		JobExecutionContext context = context(new TestQuartzJob(), "INTERNAL", "fire-1", user);
@@ -378,7 +413,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void preRestoreWrapsSchedulerException() throws Exception {
+	void preRestoreWrapsSchedulerException() throws Exception {
 		bindPersistenceWithUser(user("customer"));
 		when(scheduler.getCurrentlyExecutingJobs()).thenThrow(new SchedulerException("boom"));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
@@ -387,7 +422,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void runRestoreJobSchedulesRestoreJobWithCurrentUserAndOptions() throws Exception {
+	void runRestoreJobSchedulesRestoreJobWithCurrentUserAndOptions() throws Exception {
 		User user = user("customer");
 		bindPersistenceWithUser(user);
 		Bean options = mock(Bean.class);
@@ -406,7 +441,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void runRestoreJobWrapsSchedulerException() throws Exception {
+	void runRestoreJobWrapsSchedulerException() throws Exception {
 		bindPersistenceWithUser(user("customer"));
 		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(org.quartz.JobDetail.class), any(Trigger.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
@@ -416,7 +451,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void scheduleReportAddsUserAndDynamicReportBeanToTriggerData() throws Exception {
+	void scheduleReportAddsUserAndDynamicReportBeanToTriggerData() throws Exception {
 		User user = user("customer");
 		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
 		Trigger trigger = reportTrigger(detail, "report-id", "customer");
@@ -437,7 +472,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void scheduleReportSkipsExpiredTriggerButStillPopulatesJobData() throws Exception {
+	void scheduleReportSkipsExpiredTriggerButStillPopulatesJobData() throws Exception {
 		User user = user("customer");
 		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
 		Trigger expired = TriggerBuilder.newTrigger()
@@ -456,7 +491,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void scheduleReportConvertsDuplicateTriggerToValidationException() throws Exception {
+	void scheduleReportConvertsDuplicateTriggerToValidationException() throws Exception {
 		doThrow(new ObjectAlreadyExistsException("duplicate")).when(scheduler).scheduleJob(any(JobDetail.class), any(Trigger.class));
 		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
 		User currentUser = user("customer");
@@ -467,7 +502,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void scheduleReportWrapsSchedulerException() throws Exception {
+	void scheduleReportWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).scheduleJob(any(JobDetail.class), any(Trigger.class));
 		JobDetail detail = reportDetail("report-id", "customer", "Report Sales");
 		User currentUser = user("customer");
@@ -478,7 +513,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void postRestoreAlwaysResumesInternalJobs() throws Exception {
+	void postRestoreAlwaysResumesInternalJobs() throws Exception {
 		boolean originalJobScheduler = UtilImpl.JOB_SCHEDULER;
 		try {
 			UtilImpl.JOB_SCHEDULER = false;
@@ -493,7 +528,7 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void postRestoreRefreshesScheduledJobsAndReportsWhenRestoreSucceeded() throws Exception {
+	void postRestoreRefreshesScheduledJobsAndReportsWhenRestoreSucceeded() throws Exception {
 		boolean originalJobScheduler = UtilImpl.JOB_SCHEDULER;
 		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -516,11 +551,42 @@ public class QuartzJobSchedulerTest {
 	}
 
 	@Test
-	public void postRestoreWrapsSchedulerException() throws Exception {
+	void postRestoreWrapsSchedulerException() throws Exception {
 		doThrow(new SchedulerException("boom")).when(scheduler).resumeJobs(any(GroupMatcher.class));
 		QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
 
 		assertThrows(DomainException.class, () -> quartzJobScheduler.postRestore(false));
+	}
+
+	@Test
+	void startupAddsTheRepositoryModuleJobsAndFailsWhenAJobClassCannotBeLoaded() throws Exception {
+		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Module module = mock(Module.class);
+		JobMetaData job = job("mod", "missing", "Missing");
+		when(job.getClassName()).thenReturn("org.skyve.impl.job.NoSuchJob");
+		when(repository.getAllVanillaModuleNames()).thenReturn(List.of("mod"));
+		when(repository.getModule(null, "mod")).thenReturn(module);
+		when(module.getJobs()).thenReturn(List.of(job));
+		try {
+			ProvidedRepositoryFactory.set(repository);
+
+			// the unloadable job class stops startup before any internal jobs are scheduled
+			QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
+			IllegalStateException e = assertThrows(IllegalStateException.class, quartzJobScheduler::startup);
+
+			assertThat(e.getMessage(), is("Could not schedule jobs"));
+			assertThat(e.getCause() instanceof ClassNotFoundException, is(true));
+			verify(repository).getModule(null, "mod");
+		}
+		finally {
+			// startup() started a real scheduler before it failed
+			Scheduler started = getScheduler();
+			if ((started != null) && (started != scheduler)) {
+				started.shutdown();
+			}
+			ProvidedRepositoryFactory.set(originalRepository);
+		}
 	}
 
 	private static Trigger scheduledTrigger() throws Exception {

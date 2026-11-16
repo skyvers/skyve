@@ -5,6 +5,8 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.types.jaxb.OptimisticLockMapper;
 import org.skyve.impl.util.UUIDv7;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -56,99 +58,99 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	private String bizUserId;
 
 	@Override
-	public String getBizId() {
+	public @Nonnull String getBizId() {
 		return bizId;
 	}
 
 	@XmlAttribute
-	public void setBizId(String bizId) {
+	public void setBizId(@Nonnull String bizId) {
 		this.bizId = bizId;
 	}
 
 	@Override
-	public Integer getBizVersion() {
+	public @Nullable Integer getBizVersion() {
 		return bizVersion;
 	}
 
 	@Override
 	@XmlAttribute
-	public void setBizVersion(Integer bizVersion) {
+	public void setBizVersion(@Nullable Integer bizVersion) {
 		this.bizVersion = bizVersion;
 	}
 
 	@Override
-	public OptimisticLock getBizLock() {
+	public @Nullable OptimisticLock getBizLock() {
 		return bizLock;
 	}
 
 	@Override
 	@XmlAttribute
 	@XmlJavaTypeAdapter(OptimisticLockMapper.class)
-	public void setBizLock(OptimisticLock bizLock) {
+	public void setBizLock(@Nullable OptimisticLock bizLock) {
 		this.bizLock = bizLock;
 	}
 
 	@Override
-	public abstract String getBizKey();
+	public abstract @Nullable String getBizKey();
 
 	@Override
 	@XmlTransient
-	public void setBizKey(String bizKey) {
+	public void setBizKey(@Nullable String bizKey) {
 		this.bizKey = bizKey;
 	}
 	
 	@Override
-	public String getBizCustomer() {
+	public @Nullable String getBizCustomer() {
 		return bizCustomer;
 	}
 
 	@Override
 	@XmlTransient
-	public void setBizCustomer(String bizCustomer) {
+	public void setBizCustomer(@Nonnull String bizCustomer) {
 		this.bizCustomer = bizCustomer;
 	}
 
 	@Override
-	public String getBizFlagComment() {
+	public @Nullable String getBizFlagComment() {
 		return bizFlagComment;
 	}
 
 	@Override
 	@XmlElement
-	public void setBizFlagComment(String bizFlagComment) {
+	public void setBizFlagComment(@Nullable String bizFlagComment) {
 		this.bizFlagComment = bizFlagComment;
 	}
 
 	@Override
-	public Boolean getBizTagged() {
+	public @Nullable Boolean getBizTagged() {
 		return bizTagged;
 	}
 
 	@Override
 	@XmlTransient
-	public void setBizTagged(Boolean bizTagged) {
+	public void setBizTagged(@Nullable Boolean bizTagged) {
 		this.bizTagged = bizTagged;
 	}
 
 	@Override
-	public String getBizDataGroupId() {
+	public @Nullable String getBizDataGroupId() {
 		return bizDataGroupId;
 	}
 
 	@Override
 	@XmlElement
-	public void setBizDataGroupId(String bizDataGroupId) {
+	public void setBizDataGroupId(@Nullable String bizDataGroupId) {
 		this.bizDataGroupId = bizDataGroupId;
 	}
 
 	@Override
-	public String getBizUserId() {
+	public @Nullable String getBizUserId() {
 		return bizUserId;
 	}
 
 	@Override
 	@XmlElement
-	public void setBizUserId(String bizUserId) {
+	public void setBizUserId(@Nonnull String bizUserId) {
 		this.bizUserId = bizUserId;
 	}
 
@@ -158,7 +160,7 @@ public abstract class AbstractPersistentBean extends AbstractBean implements Per
 	 *
 	 * @return A string containing the bizKey and the bizId of the record.
 	 */
-	public String getBizKeyBizIdString() {
+	public @Nonnull String getBizKeyBizIdString() {
 		StringBuilder result = new StringBuilder(bizKey.length() + 39);
 		result.append(bizKey).append(" (").append(bizId).append(')');
 		return result.toString();

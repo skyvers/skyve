@@ -3,6 +3,7 @@ package org.skyve.metadata.sail.language.step.interaction.actions;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -30,7 +31,7 @@ public abstract class AbstractAction implements Step {
 	 * Returns the testSuccess.
 	 * @return the result
 	 */
-	public Boolean getTestSuccess() {
+	public @Nullable Boolean getTestSuccess() {
 		return testSuccess;
 	}
 	
@@ -39,7 +40,7 @@ public abstract class AbstractAction implements Step {
 	 * @param testSuccess the testSuccess
 	 */
 	@XmlAttribute(name = "testSuccess")
-	public void setTestSuccess(Boolean testSuccess) {
+	public void setTestSuccess(@Nullable Boolean testSuccess) {
 		this.testSuccess = testSuccess;
 	}
 }

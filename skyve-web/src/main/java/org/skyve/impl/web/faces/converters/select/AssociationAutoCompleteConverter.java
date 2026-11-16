@@ -13,6 +13,8 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.FacesContext;
@@ -32,14 +34,16 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 	 */
     @Override
     @SuppressWarnings("java:S3776") // Complexity OK
-    public Object getAsObject(FacesContext context, UIComponent component, String value) {
+    public @Nullable Object getAsObject(@SuppressWarnings("null") @Nonnull FacesContext context,
+										@Nullable UIComponent component,
+										@Nullable String value) {
     	Bean result = null;
     	
     	final String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
             result = new FacesAction<Bean>() {
 				@Override
-				public Bean callback() throws Exception {
+				public @Nullable Bean callback() throws Exception {
 		            int pos = processedValue.indexOf('.');
 		            String moduleName = processedValue.substring(0, pos);
 		            String documentName = processedValue.substring(pos + 1);
@@ -52,19 +56,20 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 						String managedBeanName = (String) root.getAttributes().get(FacesUtil.MANAGED_BEAN_NAME_KEY);
 						if (managedBeanName != null) {
 							FacesView view = (FacesView) FacesUtil.getNamed(managedBeanName);
-							if (view != null) {
-								BeanMapAdapter adapter = view.getCurrentBean();
-								Bean bean = null;
-								if (adapter != null) {
-									bean = adapter.getBean();
-								}
-								
-								WebContext webContext = view.getWebContext();
-					            Customer c = CORE.getCustomer();
-					            Module m  = c.getModule(moduleName);
-					            Document d = m.getDocument(c, documentName);
-					        	return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
+							BeanMapAdapter adapter = view.getCurrentBean();
+							Bean bean = null;
+							if (adapter != null) {
+								bean = adapter.getBean();
 							}
+
+							WebContext webContext = view.getWebContext();
+							if (webContext == null) { // the view has a conversation
+								throw new IllegalStateException("Cannot convert " + processedValue + " as FacesView " + managedBeanName + " has no web context");
+							}
+							Customer c = CORE.getCustomer();
+							Module m  = c.getModule(moduleName);
+							Document d = m.getDocument(c, documentName);
+							return WebUtil.findReferencedBean(d, bizId, CORE.getPersistence(), bean, webContext);
 						}
 					}
 					return null;
@@ -84,7 +89,7 @@ public class AssociationAutoCompleteConverter implements Converter<Object> {
 	 * @return the encoded association token, or an empty string when no bean is supplied
 	 */
     @Override
-    public String getAsString(FacesContext context, UIComponent component, Object value) {
+    public @Nonnull String getAsString(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable Object value) {
     	String result = "";
     	
     	Bean bean = null;

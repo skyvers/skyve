@@ -12,6 +12,7 @@ import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.sail.execution.GenerateEditContext;
 import org.skyve.impl.sail.execution.GenerateListContext;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 
 class NavigateListTest {
 
@@ -108,6 +109,39 @@ class NavigateListTest {
 	void getIdentifierFallsBackToContext() {
 		AutomationContext<GenerateListContext, GenerateEditContext> ctx = newContext("admin", "Contact");
 		// no module/document set — falls back to context
+		assertThat(step.getIdentifier(ctx), is("admin.Contact"));
+	}
+
+	@Test
+	void getIdentifierDefaultsToTheContextsQueryList() {
+		AutomationContext<GenerateListContext, GenerateEditContext> ctx = newContext("admin", "UserLoginRecord");
+		PushListContext list = new PushListContext();
+		list.setModuleName("admin");
+		list.setQueryName("qLoginHistory");
+		ctx.setList(list);
+		// a step that names no list means the query list the context shows, not the default query of its document
+		assertThat(step.getIdentifier(ctx), is("admin.qLoginHistory"));
+	}
+
+	@Test
+	void getIdentifierDefaultsToTheContextsModelList() {
+		AutomationContext<GenerateListContext, GenerateEditContext> ctx = newContext("admin", "Contact");
+		PushListContext list = new PushListContext();
+		list.setModuleName("admin");
+		list.setDocumentName("Group");
+		list.setModelName("myModel");
+		ctx.setList(list);
+		assertThat(step.getIdentifier(ctx), is("admin.Group.myModel"));
+	}
+
+	@Test
+	void getIdentifierThatNamesAListIgnoresTheContextsList() {
+		AutomationContext<GenerateListContext, GenerateEditContext> ctx = newContext("admin", "UserLoginRecord");
+		PushListContext list = new PushListContext();
+		list.setModuleName("admin");
+		list.setQueryName("qLoginHistory");
+		ctx.setList(list);
+		step.setDocumentName("Contact");
 		assertThat(step.getIdentifier(ctx), is("admin.Contact"));
 	}
 

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The kitchen sink workflow that PrimeFacesRecorderRoundTripSailIT records and replays in PrimeFaces (tablet). It uses
+	only the gestures the PrimeFaces recorder maps (menus, URLs, data entry, tabs, actions and list grids), and has no
+	login: it runs in a session that is already signed in and recording. A PrimeFaces list grid shows its first page of
+	rows only, so the lookup value it makes sorts first ("0 ...") and is deleted again.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+	xmlns="http://www.skyve.org/xml/sail"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<interaction name="Lookup values">
+		<method>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="0 SAIL Recorded {run}" />
+			<save />
+			<ok />
+		</method>
+	</interaction>
+	<interaction name="List Grid Fixture: a Vue list grid and a PrimeFaces data table">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="0 SAIL Recorded {run}" />
+			<testValue binding="description" value="0 SAIL Recorded {run}" />
+			<cancel />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="0 SAIL Recorded {run}" />
+			<testValue binding="description" value="0 SAIL Recorded {run}" />
+			<cancel />
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="0 SAIL Recorded {run}" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Widgets">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<tabSelect path="Widgets" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="combo" value="1" />
+			<dataEnter binding="radio" value="2" />
+			<dataEnter binding="normalInteger" value="1" />
+			<dataEnter binding="text" value="Sample text {run}" />
+			<dataEnter binding="memo" value="First line&#10;Second line" />
+			<testValue binding="combo" value="one" />
+			<testValue binding="text" value="Sample text {run}" />
+			<comment>A menu click is the next gesture, so the entries above are recorded before it</comment>
+			<navigateMenu module="kitchensink" item="Kitchen Sink" />
+		</method>
+	</interaction>
+	<interaction name="Actions and tabs">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<action name="RunFromFormButton" />
+			<comment>Tab button is the first tab: select another first, as selecting the shown tab does nothing</comment>
+			<tabSelect path="Rows" />
+			<tabSelect path="Tab button" />
+			<action name="RunFromTabButton" />
+			<testValue binding="outcome" value="Run From Tab Button ran" />
+		</method>
+	</interaction>
+</automation>

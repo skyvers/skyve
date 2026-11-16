@@ -1,5 +1,8 @@
 package org.skyve.impl.backup;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Configuration contract for the restore operation, specifying how existing
  * database schema and content should be handled before data is restored.
@@ -32,8 +35,8 @@ public interface RestoreOptions {
 		none;
 	}
 	
-	public PreProcess getPreProcess();
-	public String getSelectedBackupName();
-	public ContentOption getContentOption();
-	public IndexingOption getIndexingOption();
+	public @Nonnull PreProcess getPreProcess();
+	public @Nullable String getSelectedBackupName();
+	public @Nonnull ContentOption getContentOption();
+	public @Nonnull IndexingOption getIndexingOption();
 }

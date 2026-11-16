@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class HBoxTest {
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new HBox().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new HBox().getXmlVisibleCondition());
 	}
 }

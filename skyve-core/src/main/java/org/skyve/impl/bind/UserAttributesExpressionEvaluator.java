@@ -10,6 +10,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves {@code {user:...}} expressions against the current user's attribute map.
  */
@@ -31,7 +34,7 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the attribute value, or {@code null} when absent
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nullable Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return CORE.getUser().getAttributes().get(expression);
 	}
 
@@ -43,7 +46,7 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the display representation of the resolved value
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return BindUtil.toDisplay(CORE.getCustomer(), evaluateWithoutPrefixOrSuffix(expression, bean));
 	}
 	
@@ -58,11 +61,11 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 	 * @return always {@code null} because any key is syntactically valid
 	 */
 	@Override
-	public String validateWithoutPrefixOrSuffix(String expression,
-													Class<?> returnType,
-													Customer customer,
-													Module module,
-													Document document) {
+	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		return null; // any key is valid
 	}
 	
@@ -76,10 +79,10 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 	 * @return an empty list because attributes are dynamic at runtime
 	 */
 	@Override
-	public List<String> completeWithoutPrefixOrSuffix(String fragment,
-														Customer customer, 
-														Module module,
-														Document document) {
+	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
+																@Nonnull Customer customer, 
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		return Collections.emptyList(); // any key is valid
 	}
 	
@@ -90,7 +93,7 @@ public class UserAttributesExpressionEvaluator extends ExpressionEvaluator {
 	 * @param binding ignored for user expressions
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
 		// nothing to do here as user uses keys
 	}
 }

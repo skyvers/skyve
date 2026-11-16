@@ -1,10 +1,10 @@
 package org.skyve.impl.metadata.repository.document;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.types.Decimal;
@@ -70,9 +70,12 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Interface;
+import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -132,7 +135,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	private static final String VALIDATOR_MUST_DEFINE_MIN_OR_MAX = " : The validator on field ";
 	private static final String MUST_DEFINE_EITHER_MIN_OR_MAX = " must define either a min or max.";
 
-	private static boolean isAsciiJavaIdentifierPath(String value) {
+	private static boolean isAsciiJavaIdentifierPath(@Nonnull String value) {
 		boolean expectingIdentifierStart = true;
 		boolean foundIdentifierPart = false;
 		for (int i = 0, l = value.length(); i < l; i++) {
@@ -191,14 +194,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the document inheritance mode.
 	 *
 	 * @return inheritance strategy, or {@code null}
 	 */
-	public Extends getExtends() {
+	public @Nullable Extends getExtends() {
 		return inherits;
 	}
 
@@ -208,7 +211,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param inherits inheritance strategy
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setExtends(Extends inherits) {
+	public void setExtends(@Nullable Extends inherits) {
 		this.inherits = inherits;
 	}
 
@@ -217,7 +220,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return {@code true} when abstract, otherwise {@code false} or {@code null}
 	 */
-	public java.lang.Boolean getAbstract() {
+	public @Nullable java.lang.Boolean getAbstract() {
 		return abstractClass;
 	}
 
@@ -227,7 +230,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param abstractClass abstract flag
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setAbstract(java.lang.Boolean abstractClass) {
+	public void setAbstract(@Nullable java.lang.Boolean abstractClass) {
 		this.abstractClass = abstractClass;
 	}
 
@@ -236,7 +239,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return persistence metadata, or {@code null} for transient documents
 	 */
-	public Persistent getPersistent() {
+	public @Nullable Persistent getPersistent() {
 		return persistent;
 	}
 
@@ -246,7 +249,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param persistent persistence metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = false)
-	public void setPersistent(Persistent persistent) {
+	public void setPersistent(@Nullable Persistent persistent) {
 		this.persistent = persistent;
 	}
 
@@ -255,7 +258,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return dynamic metadata, or {@code null}
 	 */
-	public Dynamic getDynamic() {
+	public @Nullable Dynamic getDynamic() {
 		return dynamic;
 	}
 
@@ -265,7 +268,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param dynamic dynamic metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setDynamic(Dynamic dynamic) {
+	public void setDynamic(@Nullable Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 
@@ -274,7 +277,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return singular alias
 	 */
-	public String getSingularAlias() {
+	public @Nonnull String getSingularAlias() {
 		return singularAlias;
 	}
 
@@ -284,7 +287,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param singularAlias singular alias value
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setSingularAlias(String singularAlias) {
+	public void setSingularAlias(@Nonnull String singularAlias) {
 		this.singularAlias = UtilImpl.processStringValue(singularAlias);
 	}
 
@@ -293,7 +296,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return plural alias
 	 */
-	public String getPluralAlias() {
+	public @Nonnull String getPluralAlias() {
 		return pluralAlias;
 	}
 
@@ -303,7 +306,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param pluralAlias plural alias value
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
-	public void setPluralAlias(String pluralAlias) {
+	public void setPluralAlias(@Nonnull String pluralAlias) {
 		this.pluralAlias = UtilImpl.processStringValue(pluralAlias);
 	}
 
@@ -312,7 +315,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return 16x16 icon path, or {@code null}
 	 */
-	public String getIcon16x16RelativeFilePath() {
+	public @Nullable String getIcon16x16RelativeFilePath() {
 		return icon16x16RelativeFilePath;
 	}
 
@@ -322,7 +325,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param icon16x16RelativeFilePath 16x16 icon path
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIcon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
+	public void setIcon16x16RelativeFilePath(@Nullable String icon16x16RelativeFilePath) {
 		this.icon16x16RelativeFilePath = UtilImpl.processStringValue(icon16x16RelativeFilePath);
 	}
 
@@ -331,7 +334,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return icon style class, or {@code null}
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -341,7 +344,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param iconStyleClass icon style class
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -350,7 +353,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return 32x32 icon path, or {@code null}
 	 */
-	public String getIcon32x32RelativeFilePath() {
+	public @Nullable String getIcon32x32RelativeFilePath() {
 		return icon32x32RelativeFilePath;
 	}
 
@@ -360,7 +363,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param icon32x32RelativeFilePath 32x32 icon path
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIcon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
+	public void setIcon32x32RelativeFilePath(@Nullable String icon32x32RelativeFilePath) {
 		this.icon32x32RelativeFilePath = UtilImpl.processStringValue(icon32x32RelativeFilePath);
 	}
 
@@ -369,7 +372,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return audit flag, or {@code null} to use defaults
 	 */
-	public java.lang.Boolean getAudited() {
+	public @Nullable java.lang.Boolean getAudited() {
 		return audited;
 	}
 
@@ -379,7 +382,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param audited audit flag
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setAudited(java.lang.Boolean audited) {
+	public void setAudited(@Nullable java.lang.Boolean audited) {
 		this.audited = audited;
 	}
 
@@ -388,7 +391,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return document description, or {@code null}
 	 */
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
@@ -399,7 +402,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
@@ -408,7 +411,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return parent document metadata, or {@code null}
 	 */
-	public ParentDocument getParentDocument() {
+	public @Nullable ParentDocument getParentDocument() {
 		return parentDocument;
 	}
 
@@ -418,7 +421,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param parentDocument parent document metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setParentDocument(ParentDocument parentDocument) {
+	public void setParentDocument(@Nullable ParentDocument parentDocument) {
 		this.parentDocument = parentDocument;
 	}
 
@@ -427,7 +430,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return business-key metadata, or {@code null}
 	 */
-	public BizKey getBizKey() {
+	public @Nullable BizKey getBizKey() {
 		return bizKey;
 	}
 
@@ -437,7 +440,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @param bizKey business-key metadata
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setBizKey(BizKey bizKey) {
+	public void setBizKey(@Nullable BizKey bizKey) {
 		this.bizKey = bizKey;
 	}
 
@@ -450,7 +453,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE,
 			name = "interface",
 			type = InterfaceImpl.class)
-	public List<Interface> getImplements() {
+	public @Nonnull List<Interface> getImplements() {
 		return interfaces;
 	}
 
@@ -485,7 +488,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						@XmlElementRef(type = InverseMany.class),
 						@XmlElementRef(type = Geometry.class),
 						@XmlElementRef(type = Id.class)})
-	public List<Attribute> getAttributes() {
+	public @Nonnull List<Attribute> getAttributes() {
 		return attributes;
 	}
 
@@ -496,7 +499,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "conditions")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "condition", required = true)
-	public List<ConditionMetaData> getConditions() {
+	public @Nonnull List<ConditionMetaData> getConditions() {
 		return conditions;
 	}
 
@@ -507,7 +510,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "uniqueConstraints")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "constraint", required = false)
-	public List<UniqueConstraint> getUniqueConstraints() {
+	public @Nonnull List<UniqueConstraint> getUniqueConstraints() {
 		return uniqueConstraints;
 	}
 
@@ -516,7 +519,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 *
 	 * @return documentation text, or {@code null}
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -527,7 +530,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -537,7 +540,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 * @return mutable document property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -574,7 +577,7 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Document convert(String metaDataName) {
+	public @Nonnull Document convert(@Nonnull String metaDataName) {
 		DocumentImpl result = new DocumentImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
@@ -584,18 +587,27 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 			throw new MetaDataException(metaDataName + " : The document [name] is required");
 		}
 		result.setName(value);
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean extendsDocumentMissing = (inherits != null) && (inherits.getDocumentName() == null);
+		if (extendsDocumentMissing) {
+			throw new MetaDataException(metaDataName + " : The extends [document] is required");
+		}
 		result.setExtends(getExtends());
 		result.setAbstract(java.lang.Boolean.TRUE.equals(getAbstract()));
 		result.setPersistent(getPersistent());
 		Dynamic resultDynamic = getDynamic();
 		result.setDynamism(resultDynamic);
 		value = getSingularAlias();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean singularAliasMissing = (value == null);
+		if (singularAliasMissing) {
 			throw new MetaDataException(metaDataName + " : The document [singularAlias] is required");
 		}
 		result.setSingularAlias(value);
 		value = getPluralAlias();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean pluralAliasMissing = (value == null);
+		if (pluralAliasMissing) {
 			throw new MetaDataException(metaDataName + " : The document [pluralAlias] is required");
 		}
 		result.setPluralAlias(value);
@@ -720,7 +732,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 		if (attributes != null) {
 			for (Attribute attribute : getAttributes()) {
 				value = attribute.getName();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean nameMissing = (value == null);
+				if (nameMissing) {
 					throw new MetaDataException(metaDataName + " : The attribute [name] is required");
 				}
 				if (BindUtil.isImplicit(value)) {
@@ -742,7 +756,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				}
 
 				value = attribute.getDisplayName();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean displayNameMissing = (value == null);
+				if (displayNameMissing) {
 					throw new MetaDataException(metaDataName + " : The attribute [displayName] is required for attribute " + attribute.getName());
 				}
 
@@ -1014,6 +1030,14 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 								}
 							}
 						}
+						for (EnumeratedValue enumeratedValue : values) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean codeMissing = (enumeratedValue.getCode() == null);
+							if (codeMissing) {
+								throw new MetaDataException(metaDataName + ENUMERATION_PREFIX + attribute.getName() +
+																" has a value with no [code] defined.");
+							}
+						}
 						enumeration.setOwningDocument(result);
 
 						// check to see if there is an overridden domain type set,
@@ -1027,8 +1051,17 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				}
 				else if (attribute instanceof Relation relation) {
 					value = relation.getDocumentName();
-					if (value == null) {
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean documentNameMissing = (value == null);
+					if (documentNameMissing) {
 						throw new MetaDataException(metaDataName + " : The relation [documentName] is required for relation " + relation.getName());
+					}
+					if (relation instanceof Inverse inverseRelation) {
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean referenceNameMissing = (inverseRelation.getReferenceName() == null);
+						if (referenceNameMissing) {
+							throw new MetaDataException(metaDataName + " : The inverse [referenceName] is required for inverse " + relation.getName());
+						}
 					}
 
 					if (relation instanceof AssociationImpl association) {
@@ -1036,7 +1069,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							association.setPersistent(false);
 						}
-						if (association.getType() == null) {
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean typeMissing = (association.getType() == null);
+						if (typeMissing) {
 							throw new MetaDataException(metaDataName + " : The association [type] is required for association " +
 															relation.getName());
 						}
@@ -1050,12 +1085,44 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 						if (resultPersistent == null) {
 							collection.setPersistent(false);
 						}
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean typeMissing = (collection.getType() == null);
+						if (typeMissing) {
+							throw new MetaDataException(metaDataName + " : The collection [type] is required for collection " +
+															relation.getName());
+						}
 
 						// Ordered and Ordering are mutually exclusive
 						List<Ordering> orderings = collection.getOrdering();
 						if (java.lang.Boolean.TRUE.equals(collection.getOrdered()) && (! orderings.isEmpty())) {
 							throw new MetaDataException(metaDataName + " : The collection [ordered] and [orderings] are mutually exclusive for collection " +
 															relation.getName());
+						}
+						for (Ordering ordering : orderings) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean byMissing = (ordering.getBy() == null);
+							if (byMissing) {
+								throw new MetaDataException(metaDataName + " : The collection ordering [by] is required for collection " +
+																relation.getName());
+							}
+							if (ordering.getSort() == null) {
+								throw new MetaDataException(metaDataName + " : The collection ordering [sort] is required for collection " +
+																relation.getName());
+							}
+						}
+						for (org.skyve.metadata.model.document.UniqueConstraint unique : collection.getUniqueConstraints()) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean uniqueNameMissing = (unique.getName() == null);
+							if (uniqueNameMissing) {
+								throw new MetaDataException(metaDataName + " : The collection unique constraint [name] is required for collection " +
+																relation.getName());
+							}
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean messageMissing = (unique.getMessage() == null);
+							if (messageMissing) {
+								throw new MetaDataException(metaDataName + " : The collection unique constraint [message] is required for constraint " +
+																unique.getName() + " in collection " + relation.getName());
+							}
 						}
 
 						java.lang.Boolean ownerDatabaseIndex = collection.getOwnerDatabaseIndex();
@@ -1099,6 +1166,18 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					else if (relation instanceof InverseMany inverse) {
 						List<Ordering> orderings = inverse.getOrdering();
 						for (Ordering ordering : orderings) {
+							@SuppressWarnings("null") // metadata built in code bypasses the XSD
+							boolean byMissing = (ordering.getBy() == null);
+							if (byMissing) {
+								throw new MetaDataException(metaDataName + " : The inverse ordering [by] is required for inverse " +
+																relation.getName());
+							}
+							if (ordering.getSort() == null) {
+								throw new MetaDataException(metaDataName + " : The inverse ordering [sort] is required for inverse " +
+																relation.getName());
+							}
+						}
+						for (Ordering ordering : orderings) {
 							String by = ordering.getBy();
 							if (by.indexOf('.') >= 0) {
 								inverse.setComplexOrdering(true);
@@ -1133,7 +1212,9 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 				}
 
 				String conditionExpression = conditionMetaData.getExpression();
-				if (conditionExpression == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean conditionExpressionMissing = (conditionExpression == null);
+				if (conditionExpressionMissing) {
 					throw new MetaDataException(metaDataName + " : A condition [expression] is required.");
 				}
 
@@ -1170,10 +1251,18 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 					throw new MetaDataException(metaDataName + " : Duplicate unique constraint named " + value);
 				}
 				constraint.setName(value);
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean scopeMissing = (constraintMetaData.getScope() == null);
+				if (scopeMissing) {
+					throw new MetaDataException(metaDataName + " : The unique constraint [scope] is required for constraint " +
+													constraint.getName());
+				}
 				constraint.setScope(constraintMetaData.getScope());
 				constraint.setDescription(constraintMetaData.getDescription());
 				value = constraintMetaData.getMessage();
-				if (value == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean messageMissing = (value == null);
+				if (messageMissing) {
 					throw new MetaDataException(metaDataName + " : The unique constraint [message] is required for constraint " +
 													constraint.getName());
 				}
@@ -1181,19 +1270,17 @@ public class DocumentMetaData extends NamedMetaData implements ConvertibleMetaDa
 
 				Set<String> refNames = new TreeSet<>();
 				List<FieldReference> fieldReferences = constraintMetaData.getFieldReferences();
-				if (fieldReferences != null) {
-					for (FieldReference ref : fieldReferences) {
-						value = ref.getRef();
-						if (value == null) {
-							throw new MetaDataException(metaDataName + " : The unique constraint field reference [ref] is required for constraint " +
-															constraint.getName());
-						}
-						if ( !refNames.add(value)) {
-							throw new MetaDataException(metaDataName + " : Duplicate unique constraint reference [ref] of " +
-															value + " in constraint " + constraint.getName());
-						}
-						constraint.getFieldNames().add(value);
+				for (FieldReference ref : fieldReferences) {
+					value = ref.getRef();
+					if (value == null) {
+						throw new MetaDataException(metaDataName + " : The unique constraint field reference [ref] is required for constraint " +
+														constraint.getName());
 					}
+					if ( !refNames.add(value)) {
+						throw new MetaDataException(metaDataName + " : Duplicate unique constraint reference [ref] of " +
+														value + " in constraint " + constraint.getName());
+					}
+					constraint.getFieldNames().add(value);
 				}
 
 				constraint.getProperties().putAll(constraintMetaData.getProperties());

@@ -4,6 +4,8 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.UUID;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generate a UUID v7 value.
  * 
@@ -52,7 +54,7 @@ public class UUIDv7 {
 	 * 
 	 * @return a time base UUID
 	 */
-	public static UUID create() {
+	public static @Nonnull UUID create() {
 		final long millis = System.currentTimeMillis();
 		final long msb = (millis << 16) | (random.nextLong() & 0x0fffL) | 0x7000L;
 		final long lsb = (random.nextLong() & 0x3fffffffffffffffL) | 0x8000000000000000L;
@@ -65,7 +67,7 @@ public class UUIDv7 {
 	 * 
 	 * @return a time base UUID
 	 */
-	public static UUID create(Instant instant) {
+	public static @Nonnull UUID create(@Nonnull Instant instant) {
 		final long time = instant.toEpochMilli();
 		final long msb = (time << 16) | (random.nextLong() & 0x0fffL) | 0x7000L;
 		final long lsb = (random.nextLong() & 0x3fffffffffffffffL) | 0x8000000000000000L;
@@ -79,7 +81,7 @@ public class UUIDv7 {
 	 * @param uuid The UUID to convert
 	 * @return the instant the provided UUID was created.
 	 */
-	public static Instant toInstant(UUID uuid) {
+	public static @Nonnull Instant toInstant(@Nonnull UUID uuid) {
 		long msb = uuid.getMostSignificantBits();
 		// Get the 48 bits of the timestamp, masking out any extra bits
 		long time = (msb >> 16) & 0x0000ffffffffffffl;

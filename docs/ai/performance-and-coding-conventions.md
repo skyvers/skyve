@@ -41,7 +41,7 @@ Skyve must be performant. Apply these rules to all production Java code; they ar
 - Do not generate near-identical private helpers in multiple classes, hand-code a weaker version of an existing utility, or add a dependency merely to obtain a trivial helper.
 - Verify semantic fit rather than choosing a utility by name alone. Null handling, mutation, escaping, locale, ordering, and exception behaviour must match the calling contract.
 - When a generally useful capability is missing, identify it as a Skyve utility gap. In this repository, add or propose a single well-named utility in the module that owns the concern, with focused tests and a documented contract. In downstream applications, explicitly suggest contributing the capability to Skyve instead of allowing application-local copies to proliferate.
-- Keep a private helper when the logic is domain-specific, used only locally, or would make a shared utility less cohesive. Shared utility APIs must represent a stable reusable concept, not merely reduce a few lines at one call site.
+- When a new helper has received the approval required by the [change-restraint rules](project-agent-guide.md#change-restraint), keep it private if the logic is domain-specific, used only locally, or would make a shared utility less cohesive. Shared utility APIs must represent a stable reusable concept, not merely reduce a few lines at one call site.
 
 ## String Input Normalisation
 
@@ -109,4 +109,4 @@ Skyve framework classes must not depend on a specific injection container (CDI, 
 - Write classes so that all collaborators can be supplied via constructor or setter without a container. This keeps the class testable in plain JUnit without a full application context.
 - Where existing code uses CDI or Spring annotations, leave them in place; do not gratuitously remove working wiring, but do not add new hard dependencies on a particular container API.
 - If a collaborator is optional or environment-specific, guard access behind an interface or factory rather than an `@Inject` field.
-- Introduce an explicit test seam (package-private setter or constructor overload) when a class must be instantiated directly in tests.
+- Follow the [test-restraint rules](project-agent-guide.md#test-restraint). Do not introduce a package-private setter, constructor overload, or other production test seam without explicit human approval.

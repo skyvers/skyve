@@ -3,6 +3,9 @@ package org.skyve.impl.util;
 import java.io.Serializable;
 import java.util.Locale;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Immutable customer-level two-factor-authentication configuration payload.
  */
@@ -26,7 +29,7 @@ public class TwoFactorAuthCustomerConfiguration implements Serializable {
 		 * @param code Persisted mode code
 		 * @return Matching type, or {@link #UNSUPPORTED}
 		 */
-		static TfaType fromCode(String code) {
+		static @Nonnull TfaType fromCode(@Nullable String code) {
 			if (code == null) {
 				return UNSUPPORTED;
 			}
@@ -53,10 +56,10 @@ public class TwoFactorAuthCustomerConfiguration implements Serializable {
 	 * @param twoFactorEmailSubject Email subject template
 	 * @param twoFactorEmailBody Email body template
 	 */
-	public TwoFactorAuthCustomerConfiguration(String tfaType,
+	public TwoFactorAuthCustomerConfiguration(@Nullable String tfaType,
 											int tfaTimeOutSeconds,
-											String twoFactorEmailSubject,
-											String twoFactorEmailBody) {
+											@Nonnull String twoFactorEmailSubject,
+											@Nonnull String twoFactorEmailBody) {
 		this.tfaType = tfaType;
 		this.parsedTfaType = TfaType.fromCode(tfaType);
 		this.tfaTimeOutSeconds = tfaTimeOutSeconds;
@@ -67,14 +70,14 @@ public class TwoFactorAuthCustomerConfiguration implements Serializable {
 	/**
 	 * Returns the raw persisted TFA mode code.
 	 */
-	public String getTfaType() {
+	public @Nullable String getTfaType() {
 		return tfaType;
 	}
 
 	/**
 	 * Returns the parsed enum representation of {@link #getTfaType()}.
 	 */
-	public TfaType getParsedTfaType() {
+	public @Nonnull TfaType getParsedTfaType() {
 		return parsedTfaType;
 	}
 
@@ -88,14 +91,14 @@ public class TwoFactorAuthCustomerConfiguration implements Serializable {
 	/**
 	 * Returns the email subject template for two-factor challenges.
 	 */
-	public String getTwoFactorEmailSubject() {
+	public @Nonnull String getTwoFactorEmailSubject() {
 		return twoFactorEmailSubject;
 	}
 
 	/**
 	 * Returns the email body template for two-factor challenges.
 	 */
-	public String getTwoFactorEmailBody() {
+	public @Nonnull String getTwoFactorEmailBody() {
 		return twoFactorEmailBody;
 	}
 

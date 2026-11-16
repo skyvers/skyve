@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Kitchen sink workflow, leg 3 of 3: back in PrimeFaces (tablet), find the change that leg 2 made in SmartClient, then
+	delete the lookup value.
+-->
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Find the change and delete the lookup value">
+		<method>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:number}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL workflow {run} seen in SmartClient" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL workflow {run}" />
+			<testValue binding="description" value="SAIL workflow {run} seen in SmartClient" />
+			<delete />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL workflow {run}" maxRows="0" />
+			<listGridClearFilter module="kitchensink" document="LookupDescription" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

@@ -9,6 +9,8 @@ package org.skyve.metadata.view.model.chart.colours.rainbow;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * The Rainbow class by default maps the range 0 to 100 (inclusive) to the colours of the rainbow
  * (i.e., a gradient transitioning from red to yellow to lime to blue)
@@ -38,7 +40,7 @@ public class Rainbow {
 	 * @param number The number for which you want to find the corresponding colour
 	 * @return The corresponding colour represented as a HTML RGB hexidecimal String
 	 */
-	public String colourAt(double number) {
+	public @Nonnull String colourAt(double number) {
 		if (colourGradients.size() == 1) {
 			return colourGradients.get(0).colourAt(number);
 		}
@@ -62,7 +64,7 @@ public class Rainbow {
 	 * @throws RainbowException if there is less than two arguments or if one of the arguments
 	 *         is an invalid colour
 	 */
-	public void setSpectrum(String... spectrum) throws RainbowException {
+	public void setSpectrum(@Nonnull String... spectrum) throws RainbowException {
 		try {
 			if (spectrum.length < 2) {
 				throw new RainbowException("Rainbow must have two or more colours.");
@@ -111,7 +113,7 @@ public class Rainbow {
 	/**
 	 * Same as colourAt(double number)
 	 */
-	public String colorAt(double number) {
+	public @Nonnull String colorAt(double number) {
 		return colourAt(number);
 	}
 }
@@ -147,7 +149,7 @@ class ColourGradient {
 			htmlColors.put("white", new int[]{0xff, 0xff, 0xff});				
 	}
 
-	public String colourAt(double number) {
+	public @Nonnull String colourAt(double number) {
 		return 	formatHex(calcHex(number, startColour[0], endColour[0]))
 			+	formatHex(calcHex(number, startColour[1], endColour[1]))
 			+	formatHex(calcHex(number, startColour[2], endColour[2]));
@@ -166,7 +168,7 @@ class ColourGradient {
 		return (int) Math.round(cPerUnit * (num - minNum) + channelStart);
 	}
 	
-	private static String formatHex(int val) {
+	private static @Nonnull String formatHex(int val) {
 		String hex = Integer.toHexString(val);
 		if (hex.length() == 1) {
 			return '0' + hex;
@@ -184,12 +186,12 @@ class ColourGradient {
 		}
 	}
 	
-	public void setGradient(String colourStart, String colourEnd) throws RainbowException {
+	public void setGradient(@Nonnull String colourStart, @Nonnull String colourEnd) throws RainbowException {
 		startColour = getHexColour(colourStart);
 		endColour = getHexColour(colourEnd);		
 	}
 	
-	private static int[] getHexColour(String s) throws RainbowException {
+	private static @Nonnull int[] getHexColour(@Nonnull String s) throws RainbowException {
 		if (s.matches("^#?[0-9a-fA-F]{6}$")){
 			return rgbStringToArray(s.replace("#", ""));
 		}
@@ -200,7 +202,7 @@ class ColourGradient {
 		return rgbArray;
 	}
 	
-	private static int[] rgbStringToArray(String s) {
+	private static @Nonnull int[] rgbStringToArray(@Nonnull String s) {
 		int red = Integer.parseInt(s.substring(0,2), 16);
 		int green = Integer.parseInt(s.substring(2,4), 16);
 		int blue = Integer.parseInt(s.substring(4,6), 16);

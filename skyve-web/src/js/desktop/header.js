@@ -36,7 +36,7 @@ isc.BizHeader.addMethods({
 		const userDisplay = isc.BizUtil.userContactName;
 
 		const avatar64 = userImg
-			? `<img src="${userImg}" style="width:64px;height:64px;border-radius:50%;margin-bottom:6px"/>`
+			? `<img src="${userImg}" style="width:64px;height:64px;object-fit:cover;border-radius:50%;margin-bottom:6px"/>`
 			: `<div style="width:64px;height:64px;border-radius:50%;background:#6c757d;color:#fff;
                  display:flex;align-items:center;justify-content:center;margin-bottom:6px">
                    ${userInitials}
@@ -102,13 +102,20 @@ isc.BizHeader.addMethods({
                 display:flex;align-items:center;justify-content:center">${userInitials}</div>`;
 
 		// Badge placeholder
-		const avatarHtml = `
+/* This is what the badge will look like in SC - uncomment this when its time in cockpit.
+			const avatarHtml = `
             <div style="position:relative;cursor:pointer;display:inline-block;padding-top:10px">
                 ${avatar32}
                 <span style="position:absolute;top:2px;right:-5px;background:red;color:white;font-size:12px;
                              padding:2px 6px;border-radius:50%;">4</span>
             </div>
         `;
+*/
+		const avatarHtml = `
+		    <div style="position:relative;cursor:pointer;display:inline-block;padding-top:10px">
+		        ${avatar32}
+		    </div>
+		`;
 
 		// User menu button
 		this.addMember(

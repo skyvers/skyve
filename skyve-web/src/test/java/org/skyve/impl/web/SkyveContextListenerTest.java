@@ -19,18 +19,25 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.cache.CacheConfig;
 import org.skyve.cache.EHCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
+import org.skyve.dataaccess.sql.ConnectionCustomiser;
+import org.skyve.dialog.Dialogs;
+import org.skyve.dialog.Question;
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
+import org.skyve.impl.dialog.DefaultDialogs;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
@@ -45,6 +52,7 @@ import org.skyve.impl.web.filter.ResponseHeaderFilter;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 import org.skyve.persistence.DataStore;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.report.ReportFormat;
@@ -58,7 +66,7 @@ import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 
-public class SkyveContextListenerTest {
+class SkyveContextListenerTest {
 	private final MailService originalMailService = defaultMailService();
 	private final String originalMailServiceClass = UtilImpl.SKYVE_MAIL_SERVICE_CLASS;
 	private final String originalSmtp = UtilImpl.SMTP;
@@ -70,20 +78,25 @@ public class SkyveContextListenerTest {
 	private final String originalSmtpSender = UtilImpl.SMTP_SENDER;
 	private final String originalSmtpTestRecipient = UtilImpl.SMTP_TEST_RECIPIENT;
 	private final boolean originalSmtpTestBogusSend = UtilImpl.SMTP_TEST_BOGUS_SEND;
+	private final boolean originalSmtpLogBodyExcerpt = UtilImpl.SMTP_LOG_BODY_EXCERPT;
+	private final boolean originalSmtpLogAttachments = UtilImpl.SMTP_LOG_ATTACHMENTS;
+	private final long originalSmtpLogAttachmentsMaxBytes = UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 	private final UtilImpl.ArchiveConfig originalArchiveConfig = UtilImpl.ARCHIVE_CONFIG;
 	private final String originalCustomer = UtilImpl.CUSTOMER;
 	private final String originalSkyveContextRealPath = UtilImpl.SKYVE_CONTEXT_REAL_PATH;
 	private final String originalPropertiesFilePath = UtilImpl.PROPERTIES_FILE_PATH;
 	private final String originalArchiveName = UtilImpl.ARCHIVE_NAME;
 	private final boolean originalDevLoginFilterUsed = UtilImpl.DEV_LOGIN_FILTER_USED;
+	private final int originalAccountLockoutThreshold = UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD;
+	private final int originalAccountLockoutDurationMultipleInSeconds = UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS;
 
 	private static MailService defaultMailService() {
 		MailServiceStaticSingleton.setDefault();
 		return MailServiceStaticSingleton.get();
 	}
 
-	@After
-	public void after() {
+	@AfterEach
+	void after() {
 		MailServiceStaticSingleton.set(originalMailService);
 		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = originalMailServiceClass;
 		UtilImpl.SMTP = originalSmtp;
@@ -95,17 +108,22 @@ public class SkyveContextListenerTest {
 		UtilImpl.SMTP_SENDER = originalSmtpSender;
 		UtilImpl.SMTP_TEST_RECIPIENT = originalSmtpTestRecipient;
 		UtilImpl.SMTP_TEST_BOGUS_SEND = originalSmtpTestBogusSend;
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = originalSmtpLogBodyExcerpt;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = originalSmtpLogAttachments;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = originalSmtpLogAttachmentsMaxBytes;
 		UtilImpl.ARCHIVE_CONFIG = originalArchiveConfig;
 		UtilImpl.CUSTOMER = originalCustomer;
 		UtilImpl.SKYVE_CONTEXT_REAL_PATH = originalSkyveContextRealPath;
 		UtilImpl.PROPERTIES_FILE_PATH = originalPropertiesFilePath;
 		UtilImpl.ARCHIVE_NAME = originalArchiveName;
 		UtilImpl.DEV_LOGIN_FILTER_USED = originalDevLoginFilterUsed;
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = originalAccountLockoutThreshold;
+		UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = originalAccountLockoutDurationMultipleInSeconds;
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testContextInitializedRequiresSecurityHeadersFilter() {
+	void testContextInitializedRequiresSecurityHeadersFilter() {
 		ServletContextEvent event = mock(ServletContextEvent.class);
 		ServletContext context = mock(ServletContext.class);
 		when(event.getServletContext()).thenReturn(context);
@@ -123,7 +141,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupContentDirectoryHandlesEmptyStrings() {
+	void testCleanupContentDirectoryHandlesEmptyStrings() {
 		// setup the test data
 		final String test1 = null, test2 = "";
 
@@ -138,7 +156,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupContentDirectoryAppendsSlash() {
+	void testCleanupContentDirectoryAppendsSlash() {
 		// setup the test data
 		final String test1 = "C:/workspace/content",
 				test2 = "C:/workspace/content/",
@@ -161,7 +179,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryHandlesEmptyStrings() {
+	void testCleanupModuleDirectoryHandlesEmptyStrings() {
 		// setup the test data
 		final String test1 = null, test2 = "";
 
@@ -176,7 +194,7 @@ public class SkyveContextListenerTest {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryAppendsModules() {
+	void testCleanupModuleDirectoryAppendsModules() {
 		// setup the test data
 		final String test1 = "/src/main/java/",
 				test2 = "/src/main/java",
@@ -198,7 +216,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupModuleDirectoryWithModulesAppendsSlash() {
+	void testCleanupModuleDirectoryWithModulesAppendsSlash() {
 		// setup the test data
 		final String test1 = "/src/main/java/modules",
 				test2 = "/src/main/java/modules/",
@@ -220,7 +238,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureMailServiceAndSmtpAllowsMissingSmtpForNonSMTPMailService() {
+	void testConfigureMailServiceAndSmtpAllowsMissingSmtpForNonSMTPMailService() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> factories = new HashMap<>();
 		factories.put("mailServiceClass", TestMailService.class.getName());
@@ -255,7 +273,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureMailServiceAndSmtpRequiresSmtpForDefaultSMTPService() {
+	void testConfigureMailServiceAndSmtpRequiresSmtpForDefaultSMTPService() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> factories = new HashMap<>();
 
@@ -264,7 +282,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureMailServiceAndSmtpReadsConfiguredSmtp() {
+	void testConfigureMailServiceAndSmtpReadsConfiguredSmtp() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> smtp = new HashMap<>();
 		smtp.put("server", "localhost");
@@ -276,16 +294,85 @@ public class SkyveContextListenerTest {
 		Map<String, Object> factories = new HashMap<>();
 		factories.put("mailServiceClass", NoOpMailService.class.getName());
 
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = true;
+		UtilImpl.SMTP_LOG_ATTACHMENTS = true;
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = 1L;
+
 		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
 
 		assertThat(UtilImpl.SMTP, is("localhost"));
 		assertEquals(25, UtilImpl.SMTP_PORT);
 		assertThat(UtilImpl.SMTP_SENDER, is("mailer@skyve.org"));
+		assertFalse(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+		assertFalse(UtilImpl.SMTP_LOG_ATTACHMENTS);
+		assertEquals(UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureMailServiceAndSmtpReadsConfiguredHeaders() {
+	void testConfigureMailServiceAndSmtpReadsLogBodyExcerpt() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logBodyExcerpt", Boolean.TRUE);
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_BODY_EXCERPT);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureMailServiceAndSmtpClampsNegativeLogAttachmentsMaxBytes() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(-1));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertEquals(0L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureMailServiceAndSmtpReadsLogAttachments() {
+		Map<String, Object> properties = new HashMap<>();
+		Map<String, Object> smtp = new HashMap<>();
+		smtp.put("server", "localhost");
+		smtp.put("port", Integer.valueOf(25));
+		smtp.put("sender", "mailer@skyve.org");
+		smtp.put("testBogusSend", Boolean.FALSE);
+		smtp.put("logAttachments", Boolean.TRUE);
+		smtp.put("logAttachmentsMaxBytes", Integer.valueOf(1024));
+		properties.put("smtp", smtp);
+
+		Map<String, Object> factories = new HashMap<>();
+		factories.put("mailServiceClass", NoOpMailService.class.getName());
+
+		SkyveContextListener.configureMailServiceAndSmtp(properties, factories);
+
+		assertTrue(UtilImpl.SMTP_LOG_ATTACHMENTS);
+		assertEquals(1024L, UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureMailServiceAndSmtpReadsConfiguredHeaders() {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> smtp = new HashMap<>();
 		smtp.put("server", "localhost");
@@ -305,7 +392,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureArchivePropertiesReadsMailLogConfig() throws Exception {
+	void testConfigureArchivePropertiesReadsMailLogConfig() throws Exception {
 		Map<String, Object> properties = new HashMap<>();
 		Map<String, Object> archive = new HashMap<>();
 		archive.put("exportRuntimeSec", Integer.valueOf(300));
@@ -372,6 +459,11 @@ public class SkyveContextListenerTest {
 		}
 
 		@Override
+		public Integer determineDefaultEditableColumnWidth(String widgetType, AttributeType attributeType) {
+			return null;
+		}
+
+		@Override
 		public void registerCustomExpressions() {
 			// no-op
 		}
@@ -394,6 +486,25 @@ public class SkyveContextListenerTest {
 		}
 	}
 
+	public static class TestConnectionCustomiser implements ConnectionCustomiser {
+		@Override
+		public void customise(Connection connection, User user, DataStore dataStore) {
+			// nothing to customise
+		}
+	}
+
+	public static class TestDialogs implements Dialogs {
+		@Override
+		public String ask(Question question) {
+			return question.getButtons().get(0).name();
+		}
+
+		@Override
+		public boolean canAsk() {
+			return true;
+		}
+	}
+
 	public static class TestSMSService implements SMSService {
 		@Override
 		public boolean text(String phoneNumber, String message) {
@@ -408,7 +519,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsConcurrentSessionSettingsWhenPresent() throws Exception {
+	void testPopulateUtilImplReadsConcurrentSessionSettingsWhenPresent() throws Exception {
 		boolean originalWarnings = UtilImpl.CONCURRENT_SESSION_WARNINGS;
 		boolean originalNotifications = UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
@@ -446,7 +557,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplDetectsDevLoginFilter() throws Exception {
+	void testPopulateUtilImplDetectsDevLoginFilter() throws Exception {
 		boolean savedDevLoginFilterUsed = UtilImpl.DEV_LOGIN_FILTER_USED;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
@@ -478,7 +589,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplLeavesConcurrentSessionSettingsWhenMissing() throws Exception {
+	void testPopulateUtilImplLeavesConcurrentSessionSettingsWhenMissing() throws Exception {
 		boolean originalWarnings = UtilImpl.CONCURRENT_SESSION_WARNINGS;
 		boolean originalNotifications = UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
@@ -516,7 +627,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsBackupStanza() throws Exception {
+	void testPopulateUtilImplReadsBackupStanza() throws Exception {
 		String originalBackupExternalClass = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
@@ -547,7 +658,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsBackupRestoreLimits() throws Exception {
+	void testPopulateUtilImplReadsBackupRestoreLimits() throws Exception {
 		int originalMaxEntries = UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES;
 		int originalMaxSizeMB = UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
@@ -581,7 +692,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsUploadsStanza() throws Exception {
+	void testPopulateUtilImplReadsUploadsStanza() throws Exception {
 		int originalFileSizeMb = UtilImpl.UPLOADS_FILE_MAXIMUM_SIZE_IN_MB;
 		int originalContentSizeMb = UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB;
 		int originalImageSizeMb = UtilImpl.UPLOADS_IMAGE_MAXIMUM_SIZE_IN_MB;
@@ -621,7 +732,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsPushStanza() throws Exception {
+	void testPopulateUtilImplReadsPushStanza() throws Exception {
 		int originalKeepAlive = UtilImpl.PUSH_KEEP_ALIVE_TIME_IN_SECONDS;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
@@ -652,14 +763,15 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsThumbnailStanza() throws Exception {
+	void testPopulateUtilImplReadsThumbnailStanza() throws Exception {
 		int originalThreads = UtilImpl.THUMBNAIL_CONCURRENT_THREADS;
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
 		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
 		Path tempDir = Files.createTempDirectory("skyve-context-listener-thumbnail");
 		try {
-			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"fileStorage\":false}";
+			String extraStanza = "\"thumbnail\":{\"concurrentThreads\":8,\"subsamplingMinimumTargetSize\":50,\"maximumDimension\":1000,\"fileStorage\":false}";
 			Path configFile = writeConfigurationWithExtra(tempDir, extraStanza);
 			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
 			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
@@ -671,19 +783,21 @@ public class SkyveContextListenerTest {
 				ProvidedRepositoryFactory.set(originalRepository);
 			}
 			assertEquals(8, UtilImpl.THUMBNAIL_CONCURRENT_THREADS);
+			assertEquals(1000, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
 		}
 		finally {
 			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
 			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
 			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
 			UtilImpl.THUMBNAIL_CONCURRENT_THREADS = originalThreads;
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
 			deleteTree(tempDir);
 		}
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsHealthStanza() throws Exception {
+	void testPopulateUtilImplReadsHealthStanza() throws Exception {
 		boolean originalHealthCheck = UtilImpl.HEALTH_CHECK;
 		int originalCacheTime = UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
@@ -717,7 +831,57 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsBootstrapStanza() throws Exception {
+	void testPopulateUtilImplReadsSailRecording() throws Exception {
+		assertTrue(populateSailRecording("\"sail\":{\"recording\":true}", false));
+	}
+
+	/**
+	 * Recording is off unless the configuration turns it on: an absent sail section or setting means false.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void testPopulateUtilImplSailRecordingDefaultsToFalse() throws Exception {
+		assertFalse(populateSailRecording("\"sail\":{}", true));
+		assertFalse(populateSailRecording("\"sail\":{\"recording\":false}", true));
+		assertFalse(populateSailRecording(null, true));
+	}
+
+	/**
+	 * Populates UtilImpl from a configuration with the extra stanza, or none, and returns {@link UtilImpl#SAIL_RECORDING}.
+	 * The setting starts as {@code initial}, the opposite of what is expected, so that the result proves it was read.
+	 */
+	private static boolean populateSailRecording(String extraStanza, boolean initial) throws Exception {
+		boolean originalSailRecording = UtilImpl.SAIL_RECORDING;
+		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
+		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
+		Class<? extends DynamicPersistence> originalDynamicPersistenceImplementation = AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS;
+		Path tempDir = Files.createTempDirectory("skyve-context-listener-sail");
+		try {
+			UtilImpl.SAIL_RECORDING = initial;
+			Path configFile = (extraStanza == null) ? writeConfiguration(tempDir, false) : writeConfigurationWithExtra(tempDir, extraStanza);
+			System.setProperty("PROPERTIES_FILE_PATH", configFile.toString());
+			ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+			try {
+				invokePopulateUtilImpl(configFile, tempDir);
+			}
+			finally {
+				ProvidedRepositoryFactory.set(originalRepository);
+			}
+			return UtilImpl.SAIL_RECORDING;
+		}
+		finally {
+			restoreProperty("PROPERTIES_FILE_PATH", savedPropertiesFilePath);
+			AbstractPersistence.IMPLEMENTATION_CLASS = originalPersistenceImplementation;
+			AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = originalDynamicPersistenceImplementation;
+			UtilImpl.SAIL_RECORDING = originalSailRecording;
+			deleteTree(tempDir);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testPopulateUtilImplReadsBootstrapStanza() throws Exception {
 		String originalBootstrapCustomer = UtilImpl.BOOTSTRAP_CUSTOMER;
 		String originalUser = UtilImpl.BOOTSTRAP_USER;
 		String originalEmail = UtilImpl.BOOTSTRAP_EMAIL;
@@ -872,7 +1036,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsApiStanzaWithValues() throws Exception {
+	void testPopulateUtilImplReadsApiStanzaWithValues() throws Exception {
 		String originalMapsKey = UtilImpl.GOOGLE_MAPS_V3_API_KEY;
 		boolean originalBreachedPwd = UtilImpl.CHECK_FOR_BREACHED_PASSWORD;
 		boolean originalGeoIPWhitelist = UtilImpl.GEO_IP_WHITELIST;
@@ -918,7 +1082,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPopulateUtilImplReadsAddinsStanza() throws Exception {
+	void testPopulateUtilImplReadsAddinsStanza() throws Exception {
 		String originalAddinsDirectory = UtilImpl.ADDINS_DIRECTORY;
 		String savedPropertiesFilePath = System.getProperty("PROPERTIES_FILE_PATH");
 		Class<? extends AbstractPersistence> originalPersistenceImplementation = AbstractPersistence.IMPLEMENTATION_CLASS;
@@ -950,7 +1114,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMergeOverridesCompatibleNestedValues() throws Exception {
+	void testMergeOverridesCompatibleNestedValues() throws Exception {
 		Map<String, Object> originalNested = new HashMap<>();
 		originalNested.put("enabled", Boolean.TRUE);
 		originalNested.put("max", Integer.valueOf(5));
@@ -978,7 +1142,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMergeRejectsIncompatibleOverrideType() {
+	void testMergeRejectsIncompatibleOverrideType() {
 		Map<String, Object> original = new HashMap<>();
 		original.put("nested", Map.of("value", "ok"));
 
@@ -994,7 +1158,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetHelpersReturnTypedValues() throws Exception {
+	void testGetHelpersReturnTypedValues() throws Exception {
 		Map<String, Object> nested = new HashMap<>();
 		nested.put("sub", "value");
 
@@ -1015,32 +1179,26 @@ public class SkyveContextListenerTest {
 				"limits",
 				"number",
 				properties);
-		String name = (String) invokePrivateStatic("getString",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+		String name = (String) invokePrivateStatic("getRequiredString",
+				new Class<?>[] {String.class, String.class, Map.class},
 				"environment",
 				"name",
-				properties,
-				Boolean.TRUE);
-		Number optionalMissingNumber = (Number) invokePrivateStatic("getNumber",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
-				null,
+				properties);
+		Number optionalMissingNumber = (Number) invokePrivateStatic("getOptionalNumber",
+				new Class<?>[] {String.class, Map.class},
 				"missing",
-				properties,
-				Boolean.FALSE);
+				properties);
 		@SuppressWarnings("unchecked")
-		Map<String, Object> object = (Map<String, Object>) invokePrivateStatic("getObject",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+		Map<String, Object> object = (Map<String, Object>) invokePrivateStatic("getRequiredObject",
+				new Class<?>[] {String.class, String.class, Map.class},
 				"api",
 				"object",
-				properties,
-				Boolean.TRUE);
+				properties);
 		@SuppressWarnings("unchecked")
-		List<String> items = (List<String>) invokePrivateStatic("getList",
-				new Class<?>[] {String.class, String.class, Map.class, boolean.class},
-				"api",
+		List<String> items = (List<String>) invokePrivateStatic("getOptionalList",
+				new Class<?>[] {String.class, Map.class},
 				"items",
-				properties,
-				Boolean.TRUE);
+				properties);
 
 		assertTrue(flag.booleanValue());
 		assertEquals(Integer.valueOf(7), number);
@@ -1052,33 +1210,73 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testGetThrowsWhenRequiredValueMissing() {
+	void testGetThrowsWhenRequiredValueMissing() {
 		Map<String, Object> properties = new HashMap<>();
 
 		InvocationTargetException withPrefix = assertThrows(InvocationTargetException.class,
-				() -> invokePrivateStatic("get",
-						new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				() -> invokePrivateStatic("getRequired",
+						new Class<?>[] {String.class, String.class, Map.class},
 						"security",
 						"missing",
-						properties,
-						Boolean.TRUE));
+						properties));
 		assertThat(withPrefix.getCause(), instanceOf(IllegalStateException.class));
 		assertEquals("Property security.missing does not exist in the JSON configuration.", withPrefix.getCause().getMessage());
 
 		InvocationTargetException withoutPrefix = assertThrows(InvocationTargetException.class,
-				() -> invokePrivateStatic("get",
-						new Class<?>[] {String.class, String.class, Map.class, boolean.class},
+				() -> invokePrivateStatic("getRequired",
+						new Class<?>[] {String.class, String.class, Map.class},
 						null,
 						"missing",
-						properties,
-						Boolean.TRUE));
+						properties));
 		assertThat(withoutPrefix.getCause(), instanceOf(IllegalStateException.class));
 		assertEquals("Property missing does not exist in the JSON configuration.", withoutPrefix.getCause().getMessage());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIsMultiTenantReturnsTrueWhenCustomerNull() throws Exception {
+	void testTypedRequiredGettersThrowWhenValueMissing() {
+		Map<String, Object> properties = new HashMap<>();
+
+		for (String methodName : List.of("getRequiredNumber", "getRequiredString", "getRequiredObject")) {
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic(methodName,
+							new Class<?>[] {String.class, String.class, Map.class},
+							"api",
+							"missing",
+							properties),
+					methodName);
+			assertThat(methodName, thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertEquals("Property api.missing does not exist in the JSON configuration.", thrown.getCause().getMessage(), methodName);
+		}
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "unchecked"})
+	void testOptionalGettersReturnValueOrNull() throws Exception {
+		Map<String, Object> nested = new HashMap<>();
+		nested.put("sub", "value");
+
+		Map<String, Object> properties = new HashMap<>();
+		properties.put("number", Integer.valueOf(7));
+		properties.put("name", "demo");
+		properties.put("object", nested);
+		properties.put("items", List.of("a", "b"));
+		properties.put("raw", Boolean.TRUE);
+
+		assertEquals(Integer.valueOf(7), invokePrivateStatic("getOptionalNumber", new Class<?>[] {String.class, Map.class}, "number", properties));
+		assertEquals("demo", invokePrivateStatic("getOptionalString", new Class<?>[] {String.class, Map.class}, "name", properties));
+		assertEquals("value", ((Map<String, Object>) invokePrivateStatic("getOptionalObject", new Class<?>[] {String.class, Map.class}, "object", properties)).get("sub"));
+		assertEquals(List.of("a", "b"), invokePrivateStatic("getOptionalList", new Class<?>[] {String.class, Map.class}, "items", properties));
+		assertEquals(Boolean.TRUE, invokePrivateStatic("getOptional", new Class<?>[] {String.class, Map.class}, "raw", properties));
+
+		for (String methodName : List.of("getOptional", "getOptionalNumber", "getOptionalString", "getOptionalObject", "getOptionalList")) {
+			assertNull(invokePrivateStatic(methodName, new Class<?>[] {String.class, Map.class}, "missing", properties), methodName);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsMultiTenantReturnsTrueWhenCustomerNull() throws Exception {
 		String savedCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = null;
@@ -1092,7 +1290,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIsMultiTenantReturnsFalseWhenCustomerSet() throws Exception {
+	void testIsMultiTenantReturnsFalseWhenCustomerSet() throws Exception {
 		String savedCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = "demo";
@@ -1106,7 +1304,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToStringMapReturnsEmptyForNull() throws Exception {
+	void testToStringMapReturnsEmptyForNull() throws Exception {
 		@SuppressWarnings("unchecked")
 		java.util.TreeMap<String, String> result = (java.util.TreeMap<String, String>)
 			invokePrivateStatic("toStringMap", new Class<?>[] {Map.class}, (Object) null);
@@ -1116,7 +1314,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToStringMapConvertsValues() throws Exception {
+	void testToStringMapConvertsValues() throws Exception {
 		Map<String, Object> input = new HashMap<>();
 		input.put("key1", "value1");
 		input.put("key2", Integer.valueOf(42));
@@ -1135,14 +1333,14 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testValidateRegexAcceptsValidPattern() throws Exception {
+	void testValidateRegexAcceptsValidPattern() throws Exception {
 		Object result = invokePrivateStatic("validateRegex", new Class<?>[] {String.class, String.class}, "test", "[a-z]+");
 		assertNull(result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testValidateRegexRejectsInvalidPattern() {
+	void testValidateRegexRejectsInvalidPattern() {
 		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
 				() -> invokePrivateStatic("validateRegex", new Class<?>[] {String.class, String.class}, "test", "[unclosed"));
 		assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
@@ -1151,21 +1349,21 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupDirectoryRemovesTrailingBackslash() {
+	void testCleanupDirectoryRemovesTrailingBackslash() {
 		String result = SkyveContextListener.cleanupDirectory("C:\\workspace\\content\\");
 		assertEquals("C:/workspace/content/", result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testCleanupDirectoryHandlesMixedSeparators() {
+	void testCleanupDirectoryHandlesMixedSeparators() {
 		String result = SkyveContextListener.cleanupDirectory("C:\\workspace/content\\");
 		assertEquals("C:/workspace/content/", result);
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testIsMultiTenantReflectsConfiguredCustomer() throws Exception {
+	void testIsMultiTenantReflectsConfiguredCustomer() throws Exception {
 		String originalCustomerValue = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = null;
@@ -1183,7 +1381,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTestWritableDirectoryThrowsForMissingDirectory() {
+	void testTestWritableDirectoryThrowsForMissingDirectory() {
 		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
 				() -> invokePrivateStatic("testWritableDirectory",
 						new Class<?>[] {String.class, String.class},
@@ -1196,7 +1394,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTestWritableDirectoryThrowsWhenPathIsAFile() throws Exception {
+	void testTestWritableDirectoryThrowsWhenPathIsAFile() throws Exception {
 		Path tempFile = Files.createTempFile("skyve-context-listener", ".txt");
 		try {
 			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
@@ -1215,7 +1413,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testTestWritableDirectoryAcceptsWritableDirectory() throws Exception {
+	void testTestWritableDirectoryAcceptsWritableDirectory() throws Exception {
 		Path tempDirectory = Files.createTempDirectory("skyve-context-listener-writable");
 		try {
 			Object result = invokePrivateStatic("testWritableDirectory",
@@ -1231,7 +1429,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testReadExpandedConfigurationThrowsForMissingFile() {
+	void testReadExpandedConfigurationThrowsForMissingFile() {
 		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
 				() -> invokePrivateStatic("readExpandedConfiguration",
 						new Class<?>[] {java.io.File.class},
@@ -1243,7 +1441,28 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureApplicationCachesAddsJCacheAndEhcache() throws Exception {
+	void testReadExpandedConfigurationThrowsForJsonNull() throws Exception {
+		Path file = Files.createTempFile("skyve-context-listener-null", ".json");
+		try {
+			Files.writeString(file, "null");
+
+			InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+					() -> invokePrivateStatic("readExpandedConfiguration",
+							new Class<?>[] {java.io.File.class},
+							file.toFile()));
+
+			assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+			assertTrue(thrown.getCause().getMessage().contains("Cannot open or read"));
+			assertTrue(thrown.getCause().getCause().getMessage().contains("does not contain a JSON object"));
+		}
+		finally {
+			Files.deleteIfExists(file);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureApplicationCachesAddsJCacheAndEhcache() throws Exception {
 		List<CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable>> originalCaches = UtilImpl.APP_CACHES;
 		try {
 			UtilImpl.APP_CACHES = new java.util.ArrayList<>();
@@ -1293,7 +1512,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureApplicationCachesRejectsUnknownType() {
+	void testConfigureApplicationCachesRejectsUnknownType() {
 		List<CacheConfig<? extends java.io.Serializable, ? extends java.io.Serializable>> originalCaches = UtilImpl.APP_CACHES;
 		try {
 			UtilImpl.APP_CACHES = new java.util.ArrayList<>();
@@ -1317,7 +1536,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureDataStoresReadsJdbcAndHibernateCaches() throws Exception {
+	void testConfigureDataStoresReadsJdbcAndHibernateCaches() throws Exception {
 		Map<String, DataStore> originalDataStores = UtilImpl.DATA_STORES;
 		DataStore originalDataStore = UtilImpl.DATA_STORE;
 		List<HibernateCacheConfig> originalHibernateCaches = UtilImpl.HIBERNATE_CACHES;
@@ -1367,7 +1586,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureHibernateSettingsRejectsMissingDataStore() {
+	void testConfigureHibernateSettingsRejectsMissingDataStore() {
 		Map<String, DataStore> originalDataStores = UtilImpl.DATA_STORES;
 		DataStore originalDataStore = UtilImpl.DATA_STORE;
 		try {
@@ -1391,7 +1610,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureArchivePropertiesReadsCacheAndSchedule() throws Exception {
+	void testConfigureArchivePropertiesReadsCacheAndSchedule() throws Exception {
 		UtilImpl.ArchiveConfig originalConfig = UtilImpl.ARCHIVE_CONFIG;
 		String savedCustomer = UtilImpl.CUSTOMER;
 		try {
@@ -1426,7 +1645,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureArchivePropertiesRejectsMultiTenantArchive() {
+	void testConfigureArchivePropertiesRejectsMultiTenantArchive() {
 		String savedCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = null;
@@ -1448,7 +1667,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureUploadsSettingsReadsRegexesAndSizes() throws Exception {
+	void testConfigureUploadsSettingsReadsRegexesAndSizes() throws Exception {
 		String originalFileRegex = UtilImpl.UPLOADS_FILE_WHITELIST_REGEX;
 		String originalContentRegex = UtilImpl.UPLOADS_CONTENT_WHITELIST_REGEX;
 		String originalImageRegex = UtilImpl.UPLOADS_IMAGE_WHITELIST_REGEX;
@@ -1497,7 +1716,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testUploadDefaultsIncludeVideoButNoMediaOrAudioCategory() {
+	void testUploadDefaultsIncludeVideoButNoMediaOrAudioCategory() {
 		assertEquals("^.+\\.(MP4|WEBM|MOV|M4V|OGV|AVI)$", UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX);
 		assertEquals(100, UtilImpl.UPLOADS_VIDEO_MAXIMUM_SIZE_IN_MB);
 		assertNoUtilImplUploadField("UPLOADS_MEDIA_WHITELIST_REGEX");
@@ -1508,7 +1727,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigurePushSettingsRejectsInvalidLimits() {
+	void testConfigurePushSettingsRejectsInvalidLimits() {
 		assertInvalidPrivateConfiguration("configurePushSettings",
 				Map.of("push", Map.of("keepAliveTimeInSeconds", Integer.valueOf(0))),
 				"push.keepAliveTimeInSeconds");
@@ -1528,7 +1747,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureAccountSettingsReadsOptionalPolicyAndTfaCustomers() throws Exception {
+	void testConfigureAccountSettingsReadsOptionalPolicyAndTfaCustomers() throws Exception {
 		java.util.Set<String> originalCustomers = UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS;
 		int originalResendCooldown = UtilImpl.TWO_FACTOR_AUTH_RESEND_COOLDOWN_SECONDS;
 		try {
@@ -1561,7 +1780,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureEnvironmentSettingsRejectsDevLoginFilterWithoutEnvironmentIdentifier() {
+	void testConfigureEnvironmentSettingsRejectsDevLoginFilterWithoutEnvironmentIdentifier() {
 		boolean originalDevLogin = UtilImpl.DEV_LOGIN_FILTER_USED;
 		try {
 			UtilImpl.DEV_LOGIN_FILTER_USED = true;
@@ -1585,7 +1804,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureEnvironmentSettingsValidatesModuleDirectory() throws Exception {
+	void testConfigureEnvironmentSettingsValidatesModuleDirectory() throws Exception {
 		String originalModuleDirectory = UtilImpl.MODULE_DIRECTORY;
 		Path tempDirectory = Files.createTempDirectory("skyve-context-listener-modules");
 		try {
@@ -1609,7 +1828,62 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureDirectoryBackedSettingsValidateWritableDirectories() throws Exception {
+	void testConfigureThumbnailSettingsRejectsAMaximumDimensionThatIsNotAPositiveInt() {
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			// 1e10 would overflow an int and leave no effective cap
+			for (Number maximumDimension : new Number[] {Integer.valueOf(0), Integer.valueOf(-1), Double.valueOf(1000.5), Long.valueOf(10_000_000_000L)}) {
+				InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
+						() -> configureThumbnailSettings(maximumDimension),
+						maximumDimension::toString);
+
+				assertThat(thrown.getCause(), instanceOf(IllegalStateException.class));
+				assertEquals("thumbnail.maximumDimension must be a whole number greater than 0",
+								thrown.getCause().getMessage(),
+								maximumDimension::toString);
+			}
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureThumbnailSettingsKeepsTheMaximumDimensionWhenTheKeyIsMissing() throws Exception {
+		int originalMaximumDimension = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 2048;
+			configureThumbnailSettings(null);
+			assertEquals(2048, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+
+			configureThumbnailSettings(Integer.valueOf(1));
+			assertEquals(1, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximumDimension;
+		}
+	}
+
+	/**
+	 * Runs the listener's thumbnail configuration with a minimal stanza.
+	 *
+	 * @param maximumDimension the maximumDimension value, or {@code null} to leave the key out
+	 */
+	private static void configureThumbnailSettings(Number maximumDimension) throws Exception {
+		Map<String, Object> thumbnail = new HashMap<>();
+		thumbnail.put("concurrentThreads", Integer.valueOf(2));
+		thumbnail.put("subsamplingMinimumTargetSize", Integer.valueOf(20));
+		thumbnail.put("fileStorage", Boolean.FALSE);
+		if (maximumDimension != null) {
+			thumbnail.put("maximumDimension", maximumDimension);
+		}
+		invokePrivateStatic("configureThumbnailSettings", new Class<?>[] {Map.class}, Map.of("thumbnail", thumbnail));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureDirectoryBackedSettingsValidateWritableDirectories() throws Exception {
 		String originalBackupDirectory = UtilImpl.BACKUP_DIRECTORY;
 		String originalThumbnailDirectory = UtilImpl.THUMBNAIL_DIRECTORY;
 		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
@@ -1653,7 +1927,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureContentMapBootstrapAndPrimeFlexOptionalValues() throws Exception {
+	void testConfigureContentMapBootstrapAndPrimeFlexOptionalValues() throws Exception {
 		int originalGcEligibleAge = UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES;
 		int originalMapZoom = UtilImpl.MAP_ZOOM;
 		String originalBootstrapEmail = UtilImpl.BOOTSTRAP_EMAIL;
@@ -1698,7 +1972,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureMailServiceRejectsUnknownConfiguredClass() {
+	void testConfigureMailServiceRejectsUnknownConfiguredClass() {
 		Map<String, Object> factories = Map.of("mailServiceClass", "does.not.Exist");
 
 		InvocationTargetException thrown = assertThrows(InvocationTargetException.class,
@@ -1713,7 +1987,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testLoadAndInstantiateFactoryErrors() {
+	void testLoadAndInstantiateFactoryErrors() {
 		InvocationTargetException missing = assertThrows(InvocationTargetException.class,
 				() -> invokePrivateStatic("loadFactoryClass",
 						new Class<?>[] {String.class, String.class},
@@ -1733,8 +2007,8 @@ public class SkyveContextListenerTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testConfigureCustomSingletonAndServiceFactories() throws Exception {
+	@SuppressWarnings({"static-method", "null"}) // checks values the annotations say are non-null
+	void testConfigureCustomSingletonAndServiceFactories() throws Exception {
 		NumberGenerator originalNumberGenerator = NumberGeneratorStaticSingleton.get();
 		Customisations originalCustomisations = CustomisationsStaticSingleton.get();
 		GeoIPService originalGeoIpService = GeoIPServiceStaticSingleton.get();
@@ -1744,7 +2018,9 @@ public class SkyveContextListenerTest {
 					"numberGeneratorClass", TestNumberGenerator.class.getName(),
 					"customisationsClass", TestCustomisations.class.getName(),
 					"geoIPServiceClass", TestGeoIPService.class.getName(),
-					"smsServiceClass", TestSMSService.class.getName());
+					"smsServiceClass", TestSMSService.class.getName(),
+					"dialogsClass", TestDialogs.class.getName(),
+					"connectionCustomiserClass", TestConnectionCustomiser.class.getName());
 
 			invokePrivateStatic("configureSingletonFactories", new Class<?>[] {Map.class}, factories);
 			invokePrivateStatic("configureServiceFactories", new Class<?>[] {Map.class}, factories);
@@ -1753,6 +2029,8 @@ public class SkyveContextListenerTest {
 			assertThat(CustomisationsStaticSingleton.get(), instanceOf(TestCustomisations.class));
 			assertThat(GeoIPServiceStaticSingleton.get(), instanceOf(TestGeoIPService.class));
 			assertThat(SMSServiceStaticSingleton.get(), instanceOf(TestSMSService.class));
+			assertThat(DialogsStaticSingleton.get(), instanceOf(TestDialogs.class));
+			assertThat(ConnectionCustomiserStaticSingleton.get(), instanceOf(TestConnectionCustomiser.class));
 		}
 		finally {
 			if (originalNumberGenerator == null) {
@@ -1769,12 +2047,52 @@ public class SkyveContextListenerTest {
 			}
 			GeoIPServiceStaticSingleton.set(originalGeoIpService);
 			SMSServiceStaticSingleton.set(originalSmsService);
+			DialogsStaticSingleton.setDefault();
+			ConnectionCustomiserStaticSingleton.set(null);
+			UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS = null;
 		}
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConfigureOptionalBranchesThatReturnEarlyOrRejectValues() {
+	void testConfigureSingletonFactoriesInstallsNoConnectionCustomiserWhenNoneIsConfigured() throws Exception {
+		Customisations originalCustomisations = CustomisationsStaticSingleton.get();
+		NumberGenerator originalNumberGenerator = NumberGeneratorStaticSingleton.get();
+		ConnectionCustomiserStaticSingleton.set(new TestConnectionCustomiser());
+		try {
+			invokePrivateStatic("configureSingletonFactories", new Class<?>[] {Map.class}, Map.of());
+
+			assertNull(ConnectionCustomiserStaticSingleton.get());
+			assertNull(UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS);
+		}
+		finally {
+			CustomisationsStaticSingleton.set(originalCustomisations);
+			NumberGeneratorStaticSingleton.set(originalNumberGenerator);
+			ConnectionCustomiserStaticSingleton.set(null);
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureServiceFactoriesInstallsDefaultsWhenNoClassesAreConfigured() throws Exception {
+		GeoIPService originalGeoIpService = GeoIPServiceStaticSingleton.get();
+		SMSService originalSmsService = SMSServiceStaticSingleton.get();
+		try {
+			invokePrivateStatic("configureServiceFactories", new Class<?>[] {Map.class}, Map.of());
+
+			assertThat(DialogsStaticSingleton.get(), instanceOf(DefaultDialogs.class));
+			assertNull(UtilImpl.SKYVE_DIALOGS_CLASS);
+		}
+		finally {
+			GeoIPServiceStaticSingleton.set(originalGeoIpService);
+			SMSServiceStaticSingleton.set(originalSmsService);
+			DialogsStaticSingleton.setDefault();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testConfigureOptionalBranchesThatReturnEarlyOrRejectValues() {
 		assertInvalidPrivateConfiguration("configureAccountSettings",
 				Map.of("account", Map.of(
 						"passwordHashingAlgorithm", "argon2",
@@ -1793,7 +2111,7 @@ public class SkyveContextListenerTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testMergeAppliesNullOverrideValues() throws Exception {
+	void testMergeAppliesNullOverrideValues() throws Exception {
 		Map<String, Object> original = new HashMap<>();
 		original.put("name", "demo");
 		original.put("enabled", Boolean.TRUE);

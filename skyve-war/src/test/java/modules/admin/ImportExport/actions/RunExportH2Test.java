@@ -17,6 +17,7 @@ import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
 class RunExportH2Test extends AbstractH2Test {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareDoesNotMutateBean() throws Exception {
 		ImportExportExtension bean = new ImportExportExtension();

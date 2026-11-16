@@ -30,6 +30,14 @@ import jakarta.annotation.Nullable;
  */
 public interface Model extends NamedMetaData {
 	/**
+	 * Returns the name of this model, which document conversion requires.
+	 *
+	 * @return the model name; never {@code null}
+	 */
+	@Override
+	@Nonnull String getName();
+
+	/**
 	 * Returns the name of the module that owns this model.
 	 *
 	 * @return the owning module name; never {@code null}
@@ -78,25 +86,25 @@ public interface Model extends NamedMetaData {
 	/**
 	 * Returns the i18n resource key (or literal string) for the plural display name of this model.
 	 *
-	 * @return the plural alias; may be {@code null}
+	 * @return the plural alias
 	 * @see #getLocalisedPluralAlias()
 	 */
-	String getPluralAlias();
+	@Nonnull String getPluralAlias();
 
-	default String getLocalisedPluralAlias() {
-		return Util.i18n(getPluralAlias());
+	default @Nonnull String getLocalisedPluralAlias() {
+		return Util.nullSafeI18n(getPluralAlias());
 	}
 	
 	/**
 	 * Returns the i18n resource key (or literal string) for the singular display name of this model.
 	 *
-	 * @return the singular alias; may be {@code null}
+	 * @return the singular alias
 	 * @see #getLocalisedSingularAlias()
 	 */
-	String getSingularAlias();
+	@Nonnull String getSingularAlias();
 
-	default String getLocalisedSingularAlias() {
-		return Util.i18n(getSingularAlias());
+	default @Nonnull String getLocalisedSingularAlias() {
+		return Util.nullSafeI18n(getSingularAlias());
 	}
 	
 	/**
@@ -105,9 +113,9 @@ public interface Model extends NamedMetaData {
 	 * @return the description; may be {@code null}
 	 * @see #getLocalisedDescription()
 	 */
-	String getDescription();
+	@Nullable String getDescription();
 	
-	default String getLocalisedDescription() {
+	default @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 	
@@ -146,14 +154,14 @@ public interface Model extends NamedMetaData {
 	 *
 	 * @return the dynamic settings, or {@code null} if not configured
 	 */
-	Dynamic getDynamism();
+	@Nullable Dynamic getDynamism();
 	
 	/**
 	 * Returns the parent document descriptor when this model uses document inheritance.
 	 *
 	 * @return the extends descriptor, or {@code null} if this model has no parent
 	 */
-	Extends getExtends();
+	@Nullable Extends getExtends();
 
 	/**
 	 * Returns whether the generated domain class for this model should be declared abstract.
@@ -169,9 +177,9 @@ public interface Model extends NamedMetaData {
 	 */
 	boolean isAudited();;
 	
-	String getIcon16x16RelativeFileName();
+	@Nullable String getIcon16x16RelativeFileName();
 
-	String getIcon32x32RelativeFileName();
+	@Nullable String getIcon32x32RelativeFileName();
 
-	String getIconStyleClass();
+	@Nullable String getIconStyleClass();
 }

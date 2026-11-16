@@ -1,9 +1,13 @@
 package org.skyve.impl.web.faces.actions;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -11,9 +15,12 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
@@ -52,6 +59,31 @@ class RerenderActionTest {
 		RerenderAction action = new RerenderAction(facesView, "source", false);
 
 		assertThrows(ClassCastException.class, action::callback);
+	}
+
+	@Test
+	void callbackRefusesATargetBeanWithNoWebContext() throws Exception {
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		bindPersistenceForUser(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+
+		Bean bean = mock(Bean.class);
+		when(bean.getBizModule()).thenReturn("admin");
+		when(bean.getBizDocument()).thenReturn("Contact");
+
+		FacesView facesView = mock(FacesView.class);
+		when(facesView.getBean()).thenReturn(bean);
+
+		RerenderAction action = new RerenderAction(facesView, "source", false);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, action::callback);
+		assertEquals("Cannot rerender from source as the FacesView has no web context", e.getMessage());
+		verify(customer, never()).interceptBeforePreRerender(any(), any(), any());
 	}
 
 	private static void bindPersistenceForUser(User user) {

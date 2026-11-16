@@ -118,7 +118,7 @@ public class UserExtension extends User {
 				// Use the current persistence connection, so do not close
 				@SuppressWarnings("resource")
 				Connection c = ((AbstractHibernatePersistence) CORE.getPersistence()).getConnection();
-				ProvidedRepositoryFactory.get().populateUser(result, c);
+				ProvidedRepositoryFactory.getNullSafe().populateUser(result, c);
 			}
 		}
 

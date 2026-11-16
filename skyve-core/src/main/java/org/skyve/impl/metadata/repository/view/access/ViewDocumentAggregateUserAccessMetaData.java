@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -26,17 +27,17 @@ public class ViewDocumentAggregateUserAccessMetaData extends ViewUserAccessMetaD
 
 	private String documentName;
 
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 	
 	@Override
-	public void validate(String metaDataName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull Module module) {
 		if (documentName == null) {
 			throw new MetaDataException(metaDataName + " : [document] is required for all documentAggregate, modelAggregate & singular user accesses.");
 		}
@@ -47,7 +48,7 @@ public class ViewDocumentAggregateUserAccessMetaData extends ViewUserAccessMetaD
 	}
 
 	@Override
-	public UserAccess toUserAccess(String moduleName, String unusedDocumentName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName, @Nonnull String unusedDocumentName) {
 		return UserAccess.documentAggregate(moduleName, documentName);
 	}
 }

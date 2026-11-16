@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Slider} widget metadata using a fluent API.
  */
@@ -22,7 +24,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 *
 	 * @param slider the metadata instance to mutate
 	 */
-	public FluentSlider(Slider slider) {
+	public FluentSlider(@Nonnull Slider slider) {
 		this.slider = slider;
 	}
 
@@ -33,7 +35,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentSlider from(@SuppressWarnings("hiding") Slider slider) {
+	public @Nonnull FluentSlider from(@SuppressWarnings("hiding") @Nonnull Slider slider) {
 		Double d = slider.getMin();
 		if (d != null) {
 			min(d.doubleValue());
@@ -56,10 +58,12 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 		}
 
 		absoluteSize(slider, this);
-
 		constrainableHeight(slider, this);
 
 		super.from(slider);
+
+		slider.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -69,7 +73,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @param min the minimum value
 	 * @return this builder
 	 */
-	public FluentSlider min(double min) {
+	public @Nonnull FluentSlider min(double min) {
 		slider.setMin(Double.valueOf(min));
 		return this;
 	}
@@ -80,7 +84,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @param max the maximum value
 	 * @return this builder
 	 */
-	public FluentSlider max(double max) {
+	public @Nonnull FluentSlider max(double max) {
 		slider.setMax(Double.valueOf(max));
 		return this;
 	}
@@ -91,7 +95,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @param numberOfDiscreteValues the number of discrete steps
 	 * @return this builder
 	 */
-	public FluentSlider numberOfDiscreteValues(int numberOfDiscreteValues) {
+	public @Nonnull FluentSlider numberOfDiscreteValues(int numberOfDiscreteValues) {
 		slider.setNumberOfDiscreteValues(Integer.valueOf(numberOfDiscreteValues));
 		return this;
 	}
@@ -102,7 +106,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @param roundingPrecision the number of decimal places
 	 * @return this builder
 	 */
-	public FluentSlider roundingPrecision(int roundingPrecision) {
+	public @Nonnull FluentSlider roundingPrecision(int roundingPrecision) {
 		slider.setRoundingPrecision(Integer.valueOf(roundingPrecision));
 		return this;
 	}
@@ -113,7 +117,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @param vertical {@code true} to display the slider vertically
 	 * @return this builder
 	 */
-	public FluentSlider vertical(boolean vertical) {
+	public @Nonnull FluentSlider vertical(boolean vertical) {
 		slider.setVertical(vertical ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -125,7 +129,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @return this builder
 	 */
 	@Override
-	public FluentSlider pixelWidth(int width) {
+	public @Nonnull FluentSlider pixelWidth(int width) {
 		slider.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -137,7 +141,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @return this builder
 	 */
 	@Override
-	public FluentSlider pixelHeight(int height) {
+	public @Nonnull FluentSlider pixelHeight(int height) {
 		slider.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -149,7 +153,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @return this builder
 	 */
 	@Override
-	public FluentSlider minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentSlider minPixelHeight(int minPixelHeight) {
 		slider.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -161,8 +165,21 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @return this builder
 	 */
 	@Override
-	public FluentSlider maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentSlider maxPixelHeight(int maxPixelHeight) {
 		slider.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSlider putProperty(@Nonnull String k, @Nonnull String v) {
+		slider.getProperties().put(k, v);
 		return this;
 	}
 
@@ -172,7 +189,7 @@ public class FluentSlider extends FluentChangeableInputWidget<FluentSlider>
 	 * @return the wrapped slider metadata
 	 */
 	@Override
-	public Slider get() {
+	public @Nonnull Slider get() {
 		return slider;
 	}
 }

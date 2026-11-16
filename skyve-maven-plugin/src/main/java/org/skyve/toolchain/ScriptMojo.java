@@ -13,6 +13,8 @@ import org.skyve.impl.create.MavenSkyveProject;
 import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 import org.skyve.impl.create.SkyveProjectCreationException;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Applies a Skyve script to an existing project.
  *
@@ -66,17 +68,17 @@ public class ScriptMojo extends AbstractSkyveMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	MavenSkyveProjectCreator newProjectCreator() {
+	@Nonnull MavenSkyveProjectCreator newProjectCreator() {
 		return new MavenSkyveProjectCreator();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	String readScript(String resolvedScriptPath) throws IOException {
+	@Nonnull String readScript(@Nonnull String resolvedScriptPath) throws IOException {
 		return new String(Files.readAllBytes(Paths.get(resolvedScriptPath)));
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void applyScript(MavenSkyveProject p, String script) throws SkyveProjectCreationException {
+	void applyScript(@Nonnull MavenSkyveProject p, @Nonnull String script) throws SkyveProjectCreationException {
 		p.applyScript(script, false);
 	}
 }

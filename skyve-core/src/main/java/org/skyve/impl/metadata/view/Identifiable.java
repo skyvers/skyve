@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view elements that carry an optional widget identifier.
  *
@@ -10,5 +12,5 @@ import org.skyve.metadata.SerializableMetaData;
  * identification in the rendered view.
  */
 public interface Identifiable extends SerializableMetaData {
-	String getWidgetId();
+	@Nullable String getWidgetId();
 }

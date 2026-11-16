@@ -63,6 +63,9 @@ import org.skyve.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates the Skyve system documentation report and exports it as a PDF.
  *
@@ -183,7 +186,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @return the generated PDF file on disk
 	 * @throws Exception if report rendering fails
 	 */
-	public File pdf() throws Exception {
+	public @Nonnull File pdf() throws Exception {
 		Map<String, Object> parameters = prepareParameters();
 		return EXT.getReporting().createFreemarkerReportPDF(REPORT_FILENAME, parameters, "system-documentation");
 	}
@@ -195,7 +198,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @throws IOException if report assets cannot be loaded
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private Map<String, Object> prepareParameters() throws IOException {
+	private @Nonnull Map<String, Object> prepareParameters() throws IOException {
 		Map<String, Object> result = new HashMap<>();
 		Customer c = getCustomer();
 
@@ -279,7 +282,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 				List<Map<String, Object>> references = new ArrayList<>();
 				for (String referenceName : document.getReferenceNames()) {
 					Map<String, Object> referenceData = new HashMap<>();
-					Reference reference = document.getReferenceByName(referenceName);
+					Reference reference = document.getNullSafeReferenceByName(referenceName);
 					referenceData.put("name", referenceName);
 					referenceData.put("type", reference.getType());
 					referenceData.put("document", reference.getDocumentName());
@@ -413,32 +416,32 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	Customer getCustomer() {
+	@Nonnull Customer getCustomer() {
 		return CORE.getCustomer();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	Customer getCustomer(String customerName) {
-		return ProvidedRepositoryFactory.get().getCustomer(customerName);
+	@Nullable Customer getCustomer(@Nonnull String customerName) {
+		return ProvidedRepositoryFactory.getNullSafe().getCustomer(customerName);
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	ProvidedRepository newRepository() {
+	@Nonnull ProvidedRepository newRepository() {
 		return new DefaultRepository();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	AbstractPersistence getPersistence() {
+	@Nonnull AbstractPersistence getPersistence() {
 		return AbstractPersistence.get();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void copy(File source, File destination) throws IOException {
+	void copy(@Nonnull File source, @Nonnull File destination) throws IOException {
 		FileUtil.copy(source, destination);
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void delete(File file) throws IOException {
+	void delete(@Nonnull File file) throws IOException {
 		FileUtil.delete(file);
 	}
 	
@@ -450,7 +453,7 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @return the generated PlantUML markup, or {@code null} when no relationships are present
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	private static String generateDiagram(final Document document, final Customer customer) {
+	private static @Nullable String generateDiagram(final @Nonnull Document document, final @Nonnull Customer customer) {
 		boolean noDiagram = true; // determines whether to return a diagram or null
 
 		String documentName = "\"" + document.getName() + "\"";
@@ -543,10 +546,10 @@ public class SystemDocumentationMojo extends AbstractSkyveMojo {
 	 * @param relations the relation statements to append
 	 * @return the full PlantUML diagram text
 	 */
-	private static String outputDiagram(Document document,
-											boolean child,
-											Set<String> relatedNames,
-											String relations) {
+	private static @Nonnull String outputDiagram(@Nonnull Document document,
+													boolean child,
+													@Nonnull Set<String> relatedNames,
+													@Nonnull String relations) {
 		StringBuilder result = new StringBuilder(512);
 
 		result.append("!pragma layout smetana\n");

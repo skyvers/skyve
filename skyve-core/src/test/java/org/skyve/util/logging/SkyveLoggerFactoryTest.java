@@ -282,7 +282,7 @@ class SkyveLoggerFactoryTest {
 			return "recording";
 		}
 
-		protected void record(int level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
+		protected void capture(int level, Marker marker, String msg, Object[] arguments, Throwable throwable) {
 			this.lastLevel = level;
 			this.lastMarker = marker;
 			this.lastMsg = msg;
@@ -292,68 +292,68 @@ class SkyveLoggerFactoryTest {
 
 		@Override public boolean isTraceEnabled() { return true; }
 		@Override public boolean isTraceEnabled(Marker marker) { return true; }
-		@Override public void trace(String msg) { record(TRACE, null, msg, null, null); }
-		@Override public void trace(String format, Object arg) { record(TRACE, null, format, new Object[] {arg}, null); }
-		@Override public void trace(String format, Object arg1, Object arg2) { record(TRACE, null, format, new Object[] {arg1, arg2}, null); }
-		@Override public void trace(String format, Object... arguments) { record(TRACE, null, format, arguments, null); }
-		@Override public void trace(String msg, Throwable t) { record(TRACE, null, msg, null, t); }
-		@Override public void trace(Marker marker, String msg) { record(TRACE, marker, msg, null, null); }
-		@Override public void trace(Marker marker, String format, Object arg) { record(TRACE, marker, format, new Object[] {arg}, null); }
-		@Override public void trace(Marker marker, String format, Object arg1, Object arg2) { record(TRACE, marker, format, new Object[] {arg1, arg2}, null); }
-		@Override public void trace(Marker marker, String format, Object... argArray) { record(TRACE, marker, format, argArray, null); }
-		@Override public void trace(Marker marker, String msg, Throwable t) { record(TRACE, marker, msg, null, t); }
+		@Override public void trace(String msg) { capture(TRACE, null, msg, null, null); }
+		@Override public void trace(String format, Object arg) { capture(TRACE, null, format, new Object[] {arg}, null); }
+		@Override public void trace(String format, Object arg1, Object arg2) { capture(TRACE, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void trace(String format, Object... arguments) { capture(TRACE, null, format, arguments, null); }
+		@Override public void trace(String msg, Throwable t) { capture(TRACE, null, msg, null, t); }
+		@Override public void trace(Marker marker, String msg) { capture(TRACE, marker, msg, null, null); }
+		@Override public void trace(Marker marker, String format, Object arg) { capture(TRACE, marker, format, new Object[] {arg}, null); }
+		@Override public void trace(Marker marker, String format, Object arg1, Object arg2) { capture(TRACE, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void trace(Marker marker, String format, Object... argArray) { capture(TRACE, marker, format, argArray, null); }
+		@Override public void trace(Marker marker, String msg, Throwable t) { capture(TRACE, marker, msg, null, t); }
 
 		@Override public boolean isDebugEnabled() { return true; }
 		@Override public boolean isDebugEnabled(Marker marker) { return true; }
-		@Override public void debug(String msg) { record(DEBUG, null, msg, null, null); }
-		@Override public void debug(String format, Object arg) { record(DEBUG, null, format, new Object[] {arg}, null); }
-		@Override public void debug(String format, Object arg1, Object arg2) { record(DEBUG, null, format, new Object[] {arg1, arg2}, null); }
-		@Override public void debug(String format, Object... arguments) { record(DEBUG, null, format, arguments, null); }
-		@Override public void debug(String msg, Throwable t) { record(DEBUG, null, msg, null, t); }
-		@Override public void debug(Marker marker, String msg) { record(DEBUG, marker, msg, null, null); }
-		@Override public void debug(Marker marker, String format, Object arg) { record(DEBUG, marker, format, new Object[] {arg}, null); }
-		@Override public void debug(Marker marker, String format, Object arg1, Object arg2) { record(DEBUG, marker, format, new Object[] {arg1, arg2}, null); }
-		@Override public void debug(Marker marker, String format, Object... arguments) { record(DEBUG, marker, format, arguments, null); }
-		@Override public void debug(Marker marker, String msg, Throwable t) { record(DEBUG, marker, msg, null, t); }
+		@Override public void debug(String msg) { capture(DEBUG, null, msg, null, null); }
+		@Override public void debug(String format, Object arg) { capture(DEBUG, null, format, new Object[] {arg}, null); }
+		@Override public void debug(String format, Object arg1, Object arg2) { capture(DEBUG, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void debug(String format, Object... arguments) { capture(DEBUG, null, format, arguments, null); }
+		@Override public void debug(String msg, Throwable t) { capture(DEBUG, null, msg, null, t); }
+		@Override public void debug(Marker marker, String msg) { capture(DEBUG, marker, msg, null, null); }
+		@Override public void debug(Marker marker, String format, Object arg) { capture(DEBUG, marker, format, new Object[] {arg}, null); }
+		@Override public void debug(Marker marker, String format, Object arg1, Object arg2) { capture(DEBUG, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void debug(Marker marker, String format, Object... arguments) { capture(DEBUG, marker, format, arguments, null); }
+		@Override public void debug(Marker marker, String msg, Throwable t) { capture(DEBUG, marker, msg, null, t); }
 
 		@Override public boolean isInfoEnabled() { return true; }
 		@Override public boolean isInfoEnabled(Marker marker) { return true; }
-		@Override public void info(String msg) { record(INFO, null, msg, null, null); }
-		@Override public void info(String format, Object arg) { record(INFO, null, format, new Object[] {arg}, null); }
-		@Override public void info(String format, Object arg1, Object arg2) { record(INFO, null, format, new Object[] {arg1, arg2}, null); }
-		@Override public void info(String format, Object... arguments) { record(INFO, null, format, arguments, null); }
-		@Override public void info(String msg, Throwable t) { record(INFO, null, msg, null, t); }
-		@Override public void info(Marker marker, String msg) { record(INFO, marker, msg, null, null); }
-		@Override public void info(Marker marker, String format, Object arg) { record(INFO, marker, format, new Object[] {arg}, null); }
-		@Override public void info(Marker marker, String format, Object arg1, Object arg2) { record(INFO, marker, format, new Object[] {arg1, arg2}, null); }
-		@Override public void info(Marker marker, String format, Object... arguments) { record(INFO, marker, format, arguments, null); }
-		@Override public void info(Marker marker, String msg, Throwable t) { record(INFO, marker, msg, null, t); }
+		@Override public void info(String msg) { capture(INFO, null, msg, null, null); }
+		@Override public void info(String format, Object arg) { capture(INFO, null, format, new Object[] {arg}, null); }
+		@Override public void info(String format, Object arg1, Object arg2) { capture(INFO, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void info(String format, Object... arguments) { capture(INFO, null, format, arguments, null); }
+		@Override public void info(String msg, Throwable t) { capture(INFO, null, msg, null, t); }
+		@Override public void info(Marker marker, String msg) { capture(INFO, marker, msg, null, null); }
+		@Override public void info(Marker marker, String format, Object arg) { capture(INFO, marker, format, new Object[] {arg}, null); }
+		@Override public void info(Marker marker, String format, Object arg1, Object arg2) { capture(INFO, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void info(Marker marker, String format, Object... arguments) { capture(INFO, marker, format, arguments, null); }
+		@Override public void info(Marker marker, String msg, Throwable t) { capture(INFO, marker, msg, null, t); }
 
 		@Override public boolean isWarnEnabled() { return true; }
 		@Override public boolean isWarnEnabled(Marker marker) { return true; }
-		@Override public void warn(String msg) { record(WARN, null, msg, null, null); }
-		@Override public void warn(String format, Object arg) { record(WARN, null, format, new Object[] {arg}, null); }
-		@Override public void warn(String format, Object... arguments) { record(WARN, null, format, arguments, null); }
-		@Override public void warn(String format, Object arg1, Object arg2) { record(WARN, null, format, new Object[] {arg1, arg2}, null); }
-		@Override public void warn(String msg, Throwable t) { record(WARN, null, msg, null, t); }
-		@Override public void warn(Marker marker, String msg) { record(WARN, marker, msg, null, null); }
-		@Override public void warn(Marker marker, String format, Object arg) { record(WARN, marker, format, new Object[] {arg}, null); }
-		@Override public void warn(Marker marker, String format, Object arg1, Object arg2) { record(WARN, marker, format, new Object[] {arg1, arg2}, null); }
-		@Override public void warn(Marker marker, String format, Object... arguments) { record(WARN, marker, format, arguments, null); }
-		@Override public void warn(Marker marker, String msg, Throwable t) { record(WARN, marker, msg, null, t); }
+		@Override public void warn(String msg) { capture(WARN, null, msg, null, null); }
+		@Override public void warn(String format, Object arg) { capture(WARN, null, format, new Object[] {arg}, null); }
+		@Override public void warn(String format, Object... arguments) { capture(WARN, null, format, arguments, null); }
+		@Override public void warn(String format, Object arg1, Object arg2) { capture(WARN, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void warn(String msg, Throwable t) { capture(WARN, null, msg, null, t); }
+		@Override public void warn(Marker marker, String msg) { capture(WARN, marker, msg, null, null); }
+		@Override public void warn(Marker marker, String format, Object arg) { capture(WARN, marker, format, new Object[] {arg}, null); }
+		@Override public void warn(Marker marker, String format, Object arg1, Object arg2) { capture(WARN, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void warn(Marker marker, String format, Object... arguments) { capture(WARN, marker, format, arguments, null); }
+		@Override public void warn(Marker marker, String msg, Throwable t) { capture(WARN, marker, msg, null, t); }
 
 		@Override public boolean isErrorEnabled() { return true; }
 		@Override public boolean isErrorEnabled(Marker marker) { return true; }
-		@Override public void error(String msg) { record(ERROR, null, msg, null, null); }
-		@Override public void error(String format, Object arg) { record(ERROR, null, format, new Object[] {arg}, null); }
-		@Override public void error(String format, Object arg1, Object arg2) { record(ERROR, null, format, new Object[] {arg1, arg2}, null); }
-		@Override public void error(String format, Object... arguments) { record(ERROR, null, format, arguments, null); }
-		@Override public void error(String msg, Throwable t) { record(ERROR, null, msg, null, t); }
-		@Override public void error(Marker marker, String msg) { record(ERROR, marker, msg, null, null); }
-		@Override public void error(Marker marker, String format, Object arg) { record(ERROR, marker, format, new Object[] {arg}, null); }
-		@Override public void error(Marker marker, String format, Object arg1, Object arg2) { record(ERROR, marker, format, new Object[] {arg1, arg2}, null); }
-		@Override public void error(Marker marker, String format, Object... arguments) { record(ERROR, marker, format, arguments, null); }
-		@Override public void error(Marker marker, String msg, Throwable t) { record(ERROR, marker, msg, null, t); }
+		@Override public void error(String msg) { capture(ERROR, null, msg, null, null); }
+		@Override public void error(String format, Object arg) { capture(ERROR, null, format, new Object[] {arg}, null); }
+		@Override public void error(String format, Object arg1, Object arg2) { capture(ERROR, null, format, new Object[] {arg1, arg2}, null); }
+		@Override public void error(String format, Object... arguments) { capture(ERROR, null, format, arguments, null); }
+		@Override public void error(String msg, Throwable t) { capture(ERROR, null, msg, null, t); }
+		@Override public void error(Marker marker, String msg) { capture(ERROR, marker, msg, null, null); }
+		@Override public void error(Marker marker, String format, Object arg) { capture(ERROR, marker, format, new Object[] {arg}, null); }
+		@Override public void error(Marker marker, String format, Object arg1, Object arg2) { capture(ERROR, marker, format, new Object[] {arg1, arg2}, null); }
+		@Override public void error(Marker marker, String format, Object... arguments) { capture(ERROR, marker, format, arguments, null); }
+		@Override public void error(Marker marker, String msg, Throwable t) { capture(ERROR, marker, msg, null, t); }
 	}
 
 	private static final class LocationAwareRecordingLogger extends RecordingLogger implements LocationAwareLogger {

@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses day-based recurrence phrases such as {@code daily} and weekday names.
  */
@@ -55,7 +58,7 @@ public class EveryDay implements ExpressionElementProvider {
 	 * @return {@code true} when a supported day pattern is found.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = dayOfWeekPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -81,7 +84,7 @@ public class EveryDay implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -101,7 +104,7 @@ public class EveryDay implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "0";
 	}
 
@@ -121,7 +124,7 @@ public class EveryDay implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nonnull String getDayNumberElement() {
 		return "*";
 	}
 
@@ -141,7 +144,7 @@ public class EveryDay implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nonnull String getMonthElement() {
 		return "*";
 	}
 
@@ -161,7 +164,7 @@ public class EveryDay implements ExpressionElementProvider {
 	 * @return {@code *} for daily, a numeric day-of-week token, or {@code null} when unmatched.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nullable String getDayOfWeekElement() {
 		if ((!segments.isEmpty() && "daily".equalsIgnoreCase(segments.get(0)))
 				|| (segments.size() > 3 && "day".equalsIgnoreCase(segments.get(3)))) {
 			return "*";

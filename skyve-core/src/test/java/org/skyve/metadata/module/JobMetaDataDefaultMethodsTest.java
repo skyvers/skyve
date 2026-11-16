@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.module.JobMetaDataImpl;
 @SuppressWarnings("static-method")
 class JobMetaDataDefaultMethodsTest {
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getLocalisedDisplayNameReturnsNullForNullDisplayName() {
 		JobMetaDataImpl mockJob = new JobMetaDataImpl();

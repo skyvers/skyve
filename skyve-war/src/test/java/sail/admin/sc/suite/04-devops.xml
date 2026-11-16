@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	SmartClient admin suite: DevOps. Control Panel, Data Maintenance, Document Creator and Monitoring Dashboard, with their
+	safe actions. The destructive ones run in 98-destructive.xml.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Control Panel: every tab, a query, cache statistics and generated SAIL">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Control Panel" />
+			<tabSelect path="Design" />
+			<dataEnter binding="query" value="select bean from {admin.Contact} as bean" />
+			<action name="ExecuteQuery" />
+			<tabSelect path="Design" />
+			<action name="CacheStats" />
+			<tabSelect path="SAIL" />
+			<lookupDescriptionAutoComplete binding="sailUser" search="admin" />
+			<action name="GenerateMenuSAIL" testSuccess="false" />
+			<tabSelect path="Results" />
+			<tabSelect path="Instrumentation" />
+			<comment>A server-wide trace flag: switch it on and back off</comment>
+			<testWidget binding="queryTrace" enabled="true" />
+			<dataEnter binding="queryTrace" value="true" />
+			<testValue binding="queryTrace" value="true" />
+			<comment>GenerateMenuSAIL set the view's selected tab to Results: the check box's rerender keeps the tab the user selected</comment>
+			<testWidget binding="queryTrace" visible="true" />
+			<dataEnter binding="queryTrace" value="false" />
+			<testValue binding="queryTrace" value="false" />
+			<tabSelect path="User Remember-Me Tokens" />
+			<tabSelect path="Design" />
+		</method>
+	</interaction>
+	<interaction name="Data Maintenance: every tab, the backup list and import/export">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Import/Export" />
+			<tabSelect path="Backup/Restore" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" />
+			<comment>Delete, Download and Restore need a backup selected</comment>
+			<testWidget action="DeleteBackup" enabled="false" />
+			<listGridSelect module="admin" query="BackupsModel" row="0" />
+			<testWidget action="DeleteBackup" enabled="true" />
+			<testWidget action="Restore" enabled="true" />
+			<tabSelect path="Data Refresh" />
+			<testGridRows binding="refreshDocuments" minRows="1" />
+			<comment>SmartClient only: the Data tab's DDL actions only show the DDL; Truncate runs in 99-restore.xml</comment>
+			<tabSelect path="Data" />
+			<action name="Create" />
+			<action name="Drop" />
+			<action name="Sync" />
+			<testWidget action="Truncate" enabled="true" />
+			<tabSelect path="Content" />
+			<testWidget action="DropIndexing" enabled="true" />
+			<tabSelect path="Manage Audits" />
+			<action name="CheckAuditMatches" />
+			<tabSelect path="Import/Export" />
+			<listGridNew module="admin" query="qImportExport" />
+			<testWidget binding="mode" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Document Creator: write a script and preview it">
+		<method>
+			<navigateMenu module="admin" item="DevOps/DocumentCreator" />
+			<tabSelect path="Input" />
+			<dataEnter binding="script" value="# SAIL{run}" />
+			<tabSelect path="Markdown Preview" />
+			<tabSelect path="Document Preview" />
+			<tabSelect path="Help" />
+			<tabSelect path="Input" />
+			<testValue binding="script" value="# SAIL{run}" />
+		</method>
+	</interaction>
+	<interaction name="Monitoring Dashboard: charts and requests">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Charts" />
+			<!--
+				LANGUAGE GAP: in SmartClient every Refresh button is in a collapsible box that starts closed, and no op-code
+				expands a collapsible. Check that they are hidden; refreshing moves to a future expand step.
+			<action name="Refresh" />
+			-->
+			<testWidget action="Refresh" visible="false" />
+			<tabSelect path="Requests" />
+			<testGridRows module="admin" query="RequestListModel" minRows="1" />
+		</method>
+	</interaction>
+	<interaction name="User Hits (SmartClient only)">
+		<method>
+			<navigateMenu module="admin" item="DevOps/User Hits" />
+			<testGridRows module="admin" document="UserMonthlyHits" minRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Heap Dumps (SmartClient only)">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Heap Dumps" />
+			<testWidget action="DownloadHeapDump" enabled="false" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

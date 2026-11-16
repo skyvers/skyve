@@ -13,6 +13,7 @@ class SelfRegistrationActivationBizletTest {
 	@Test
 	void preExecuteEditReturnsBean() throws Exception {
 		SelfRegistrationActivationExtension bean = new SelfRegistrationActivationExtension();
+		@SuppressWarnings("null") // passes null on purpose
 		SelfRegistrationActivationExtension result = bizlet.preExecute(ImplicitActionName.Edit, bean, null, null);
 		assertNotNull(result);
 	}
@@ -20,6 +21,7 @@ class SelfRegistrationActivationBizletTest {
 	@Test
 	void preExecuteSaveReturnsBean() throws Exception {
 		SelfRegistrationActivationExtension bean = new SelfRegistrationActivationExtension();
+		@SuppressWarnings("null") // passes null on purpose
 		SelfRegistrationActivationExtension result = bizlet.preExecute(ImplicitActionName.Save, bean, null, null);
 		assertNotNull(result);
 	}

@@ -39,6 +39,9 @@ import org.w3c.dom.NodeList;
  */
 @SuppressWarnings("static-method")
 class ScriptMojoTest {
+	@SuppressWarnings("java:S8786") // only matched against the ScriptMojo source, whose annotations are short, so backtracking stays bounded
+	private static final Pattern SCRIPT_PATH_PARAMETER = Pattern.compile("@Parameter\\s*\\([^)]*required\\s*=\\s*true[^)]*defaultValue\\s*=\\s*\\\"script/skyve\\.md\\\"[^)]*property\\s*=\\s*\\\"scriptPath\\\"[^)]*\\)");
+
 	@Test
 	void testScriptMojoParameterPropertyConfiguration() throws Exception {
         Document plugin = loadPluginDescriptor();
@@ -97,14 +100,12 @@ class ScriptMojoTest {
                 } else {
                     // Fall back to source parsing
                     String source = loadMojoSource();
-                    Pattern scriptPathPattern = Pattern.compile("@Parameter\\s*\\([^)]*required\\s*=\\s*true[^)]*defaultValue\\s*=\\s*\\\"script/skyve\\.md\\\"[^)]*property\\s*=\\s*\\\"scriptPath\\\"[^)]*\\)");
-                    assertTrue(scriptPathPattern.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
+                    assertTrue(SCRIPT_PATH_PARAMETER.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
                 }
             } else {
                 // Fall back to source parsing
                 String source = loadMojoSource();
-                Pattern scriptPathPattern = Pattern.compile("@Parameter\\s*\\([^)]*required\\s*=\\s*true[^)]*defaultValue\\s*=\\s*\\\"script/skyve\\.md\\\"[^)]*property\\s*=\\s*\\\"scriptPath\\\"[^)]*\\)");
-                assertTrue(scriptPathPattern.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
+                assertTrue(SCRIPT_PATH_PARAMETER.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
             }
         } else {
             // Fallback to source parsing when plugin.xml is not generated
@@ -120,8 +121,7 @@ class ScriptMojoTest {
             assertTrue(customerPattern.matcher(source).find(), "customer should be @Parameter(required=true, property=\"customer\")");
 
             // Verify scriptPath annotation has property="scriptPath", required=true, and defaultValue
-            Pattern scriptPathPattern = Pattern.compile("@Parameter\\s*\\([^)]*required\\s*=\\s*true[^)]*defaultValue\\s*=\\s*\\\"script/skyve\\.md\\\"[^)]*property\\s*=\\s*\\\"scriptPath\\\"[^)]*\\)");
-            assertTrue(scriptPathPattern.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
+            assertTrue(SCRIPT_PATH_PARAMETER.matcher(source).find(), "scriptPath should be @Parameter(required=true, defaultValue=\"script/skyve.md\", property=\"scriptPath\")");
         }
     }
 
@@ -210,6 +210,7 @@ class ScriptMojoTest {
 			return this;
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public MavenSkyveProject initialise() {
 			return null;

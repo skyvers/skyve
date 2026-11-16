@@ -10,6 +10,7 @@ import org.skyve.metadata.view.Action;
 import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder {
@@ -17,7 +18,7 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 * No spacers rendered for phones.
 	 */
 	@Override
-	public UIComponent spacer(UIComponent component, org.skyve.impl.metadata.view.widget.Spacer spacer) {
+	public @Nullable UIComponent spacer(@Nullable UIComponent component, @Nonnull org.skyve.impl.metadata.view.widget.Spacer spacer) {
 		if (component != null) {
 			return component;
 		}
@@ -38,23 +39,23 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 * component title property.
 	 */
 	@Override
-	protected CommandButton actionButton(EscapableText title,
-											String iconStyleClass,
-											String tooltip, 
-											ImplicitActionName implicitActionName,
-											String actionName, 
-											boolean inline, 
-											String dataWidgetBinding, 
-											String dataWidgetVar,
-											Integer pixelWidth, 
-											Integer pixelHeight,
-											EscapableText confirmationText,
-											String disabled, 
-											String formDisabled,
-											String invisible,
-											String processOverride,
-											String updateOverride,
-											boolean canDelete) {
+	protected @Nonnull CommandButton actionButton(@Nullable EscapableText title,
+													@Nullable String iconStyleClass,
+													@Nullable String tooltip, 
+													@Nullable ImplicitActionName implicitActionName,
+													@Nullable String actionName, 
+													boolean inline, 
+													@Nullable String dataWidgetBinding, 
+													@Nullable String dataWidgetVar,
+													@Nullable Integer pixelWidth, 
+													@Nullable Integer pixelHeight,
+													@Nullable EscapableText confirmationText,
+													@Nullable String disabled, 
+													@Nullable String formDisabled,
+													@Nullable String invisible,
+													@Nullable String processOverride,
+													@Nullable String updateOverride,
+													boolean canDelete) {
 		if (UserAgentType.phone.equals(userAgentType)) {
 			return super.actionButton(title, 
 										iconStyleClass,
@@ -102,12 +103,12 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 * assigned raw to the component title property.
 	 */
 	@Override
-	public UIComponent upload(UIComponent component, 
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action) {
+	public @Nonnull UIComponent upload(@Nullable UIComponent component, 
+										@Nullable String label,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -121,9 +122,9 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								null,
 								action.getClientValidation(),
 								EscapableText.of(confirmationText, ViewRenderer.shouldEscape(action.getEscapeConfirm())),
-								action.getDisabledConditionName(),
+								action.getDisabledCondition(),
 								null,
-								action.getInvisibleConditionName(),
+								action.getInvisibleCondition(),
 								capture,
 								UserAgentType.phone.equals(userAgentType) || useActionUploadDialog(capture));
 	}
@@ -136,14 +137,14 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 	 * assigned raw to the component title property.
 	 */
 	@Override
-	public UIComponent uploadButton(UIComponent component,
-									String label, 
-									String iconStyleClass, 
-									String toolTip,
-									String confirmationText, 
-									Button button, 
-									String formDisabledConditionName, 
-									Action action) {
+	public @Nonnull UIComponent uploadButton(@Nullable UIComponent component,
+											@Nullable String label, 
+											@Nullable String iconStyleClass, 
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Button button, 
+											@Nullable String formDisabledCondition, 
+											@Nonnull Action action) {
 		if (component != null) {
 			return component;
 		}
@@ -157,9 +158,9 @@ public class DeviceResponsiveComponentBuilder extends ResponsiveComponentBuilder
 								button.getPixelHeight(),
 								action.getClientValidation(),
 								EscapableText.of(confirmationText, ViewRenderer.shouldEscape(action.getEscapeConfirm())),
-								action.getDisabledConditionName(),
-								formDisabledConditionName,
-								action.getInvisibleConditionName(),
+								action.getDisabledCondition(),
+								formDisabledCondition,
+								action.getInvisibleCondition(),
 								capture,
 								UserAgentType.phone.equals(userAgentType) || useActionUploadDialog(capture));
 	}

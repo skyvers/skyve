@@ -1,12 +1,18 @@
 package org.skyve.impl.bind;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -56,6 +62,148 @@ class BindUtilStringTest {
 	@Test
 	void negateConditionMultiWordWithNotPrefix() {
 		assertThat(BindUtil.negateCondition("notSomeCondition"), is("someCondition"));
+	}
+
+	@Test
+	void negateConditionInlineExpressionPrefixesNot() {
+		assertThat(BindUtil.negateCondition("{el:bean.active}"), is("not{el:bean.active}"));
+	}
+
+	@Test
+	void negateConditionInverseOfInlineExpressionRemovesNot() {
+		assertThat(BindUtil.negateCondition("not{el:bean.active}"), is("{el:bean.active}"));
+	}
+
+	@Test
+	void negateConditionInlineExpressionKeepsLeadingCaseOfExpression() {
+		// an expression is not a name, so nothing is capitalised or decapitalised
+		assertThat(BindUtil.negateCondition(BindUtil.negateCondition("{URL}")), is("{URL}"));
+	}
+
+	// --- isNegatedSkyveExpression ---
+
+	@Test
+	void isNegatedSkyveExpressionInverseOfExpressionReturnsTrue() {
+		assertTrue(BindUtil.isNegatedSkyveExpression("not{el:bean.active}"));
+	}
+
+	@Test
+	void isNegatedSkyveExpressionExpressionReturnsFalse() {
+		assertFalse(BindUtil.isNegatedSkyveExpression("{el:bean.active}"));
+	}
+
+	@Test
+	void isNegatedSkyveExpressionNegatedConditionNameReturnsFalse() {
+		assertFalse(BindUtil.isNegatedSkyveExpression("notActive"));
+	}
+
+	@Test
+	void isNegatedSkyveExpressionUnclosedReturnsFalse() {
+		assertFalse(BindUtil.isNegatedSkyveExpression("not{el:bean.active"));
+	}
+
+	@Test
+	void isNegatedSkyveExpressionTooShortReturnsFalse() {
+		assertFalse(BindUtil.isNegatedSkyveExpression("not{"));
+	}
+
+	// --- identifier ---
+
+	@Test
+	@SuppressWarnings("java:S9142") // regex compilation cost is irrelevant in a test
+	void identifierIsLetterFirstAlphanumericOfFixedLength() {
+		for (String text : new String[] {"", "a", "{el:bean.active}", "{\"moduleName\":\"admin\"}", "multi\nline \u00e9\u4e2d"}) {
+			assertTrue(BindUtil.identifier(text).matches("[A-Za-z][0-9A-Za-z]{26}"), text);
+		}
+	}
+
+	@Test
+	void identifierIsTheWholeSHA1DigestInBase62() throws Exception {
+		for (String text : new String[] {"", "a", "not an expression", "{\"moduleName\":\"admin\"}", "multi\nline \u00e9\u4e2d"}) {
+			assertThat(BindUtil.identifier(text), is(base62OfSHA1(text)));
+		}
+	}
+
+	@Test
+	void identifierIsStableAndDiffersForDifferentText() {
+		assertThat(BindUtil.identifier("some text"), is(BindUtil.identifier("some text")));
+		assertNotEquals(BindUtil.identifier("some text "), BindUtil.identifier("some text"));
+	}
+
+	@Test
+	void identifierOfAnExpressionIsItsConditionIdentifier() {
+		assertThat(BindUtil.conditionIdentifier("{el:bean.active}"), is(BindUtil.identifier("{el:bean.active}")));
+		assertThat(BindUtil.conditionIdentifier("not{el:bean.active}"), is("not" + BindUtil.identifier("{el:bean.active}")));
+	}
+
+	@Test
+	void identifierDoesNotTreatConditionNamesOrLiteralsSpecially() {
+		// unlike conditionIdentifier(), which passes these through
+		for (String text : new String[] {"true", "active", "notActive"}) {
+			assertNotEquals(text, BindUtil.identifier(text));
+			assertThat(BindUtil.identifier(text), is(not(BindUtil.conditionIdentifier(text))));
+		}
+	}
+
+	// --- conditionIdentifier ---
+
+	@Test
+	void conditionIdentifierBooleanLiteralsUnchanged() {
+		assertThat(BindUtil.conditionIdentifier("true"), is("true"));
+		assertThat(BindUtil.conditionIdentifier("false"), is("false"));
+	}
+
+	@Test
+	void conditionIdentifierConditionNamesUnchanged() {
+		assertThat(BindUtil.conditionIdentifier("active"), is("active"));
+		assertThat(BindUtil.conditionIdentifier("notActive"), is("notActive"));
+	}
+
+	@Test
+	void conditionIdentifierInlineExpressionIsLetterFirstAlphanumericOfFixedLength() {
+		String identifier = BindUtil.conditionIdentifier("{el:bean.active}");
+		assertTrue(identifier.matches("[A-Za-z][0-9A-Za-z]{26}"));
+	}
+
+	@Test
+	void conditionIdentifierIsTheWholeSHA1DigestInBase62() throws Exception {
+		for (String expression : new String[] {"{el:bean.active}", "{role:admin.BasicUser}", "{el:bean.text eq 'it''s' and bean.number > 1}", "{}"}) {
+			assertThat(BindUtil.conditionIdentifier(expression), is(base62OfSHA1(expression)));
+		}
+	}
+
+	@Test
+	void conditionIdentifierIsStable() {
+		assertThat(BindUtil.conditionIdentifier("{el:bean.active}"), is(BindUtil.conditionIdentifier("{el:bean.active}")));
+	}
+
+	@Test
+	void conditionIdentifierDiffersForDifferentExpressions() {
+		assertNotEquals(BindUtil.conditionIdentifier("{el:bean.inactive}"), BindUtil.conditionIdentifier("{el:bean.active}"));
+	}
+
+	@Test
+	void conditionIdentifierInverseIsNotFollowedByTheIdentifierVerbatim() {
+		assertThat(BindUtil.conditionIdentifier("not{el:bean.active}"), is("not" + BindUtil.conditionIdentifier("{el:bean.active}")));
+	}
+
+	/**
+	 * Independent rendering of a SHA-1 digest as a letter (radix 52) followed by 26 base 62 digits.
+	 */
+	@SuppressWarnings("java:S4790") // SHA-1 is the fingerprint under test, not used for security
+	private static String base62OfSHA1(String text) throws NoSuchAlgorithmException {
+		final String letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		final String alphanumerics = "0123456789" + letters;
+		BigInteger value = new BigInteger(1, MessageDigest.getInstance("SHA-1").digest(text.getBytes(StandardCharsets.UTF_8)));
+		BigInteger sixtyTwo = BigInteger.valueOf(62);
+		StringBuilder result = new StringBuilder(27);
+		for (int i = 0; i < 26; i++) {
+			BigInteger[] quotientAndRemainder = value.divideAndRemainder(sixtyTwo);
+			result.append(alphanumerics.charAt(quotientAndRemainder[1].intValue()));
+			value = quotientAndRemainder[0];
+		}
+		result.append(letters.charAt(value.intValueExact()));
+		return result.reverse().toString();
 	}
 
 	// --- toJavaTypeIdentifier ---

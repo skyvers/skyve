@@ -4,6 +4,9 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.ViewModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for view models that compare two bean instances side-by-side.
  *
@@ -18,15 +21,15 @@ import org.skyve.metadata.view.model.ViewModel;
  */
 public abstract class ComparisonModel<T extends Bean, C extends Bean> implements ViewModel {
 	private T bean;
-	public T getBean() {
+	public @Nullable T getBean() {
 		return bean;
 	}
-	public void setBean(T bean) {
+	public void setBean(@Nonnull T bean) {
 		this.bean = bean;
 	}
 
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		// nothing to see here
 	}
 
@@ -38,5 +41,5 @@ public abstract class ComparisonModel<T extends Bean, C extends Bean> implements
 	 *                    a prior version, a template bean, or a peer record
 	 * @throws Exception if the comparison cannot be constructed
 	 */
-	public abstract ComparisonComposite getComparisonComposite(C toCompareTo) throws Exception;
+	public abstract @Nullable ComparisonComposite getComparisonComposite(@Nullable C toCompareTo) throws Exception;
 }

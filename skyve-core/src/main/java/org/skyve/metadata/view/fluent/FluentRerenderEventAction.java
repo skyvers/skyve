@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link RerenderEventAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentRerenderEventAction(RerenderEventAction action) {
+	public FluentRerenderEventAction(@Nonnull RerenderEventAction action) {
 		this.action = action;
 	}
 
@@ -32,8 +34,10 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentRerenderEventAction from(@SuppressWarnings("hiding") RerenderEventAction action) {
+	public @Nonnull FluentRerenderEventAction from(@SuppressWarnings("hiding") @Nonnull RerenderEventAction action) {
 		clientValidation(! Boolean.FALSE.equals(action.getClientValidation()));
+		action.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -44,8 +48,21 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 *            whether client validation is required
 	 * @return this builder
 	 */
-	public FluentRerenderEventAction clientValidation(boolean clientValidation) {
+	public @Nonnull FluentRerenderEventAction clientValidation(boolean clientValidation) {
 		action.setClientValidation(clientValidation ? Boolean.TRUE : Boolean.FALSE);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentRerenderEventAction putProperty(@Nonnull String k, @Nonnull String v) {
+		action.getProperties().put(k, v);
 		return this;
 	}
 
@@ -53,7 +70,7 @@ public class FluentRerenderEventAction extends FluentEventAction {
 	 * Returns the wrapped event action instance.
 	 */
 	@Override
-	public RerenderEventAction get() {
+	public @Nonnull RerenderEventAction get() {
 		return action;
 	}
 }

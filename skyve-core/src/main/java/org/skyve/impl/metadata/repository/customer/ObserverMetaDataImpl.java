@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.ObserverMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -34,10 +35,10 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	/**
 	 * Returns the fully-qualified observer implementation class name.
 	 *
-	 * @return observer implementation class name, or {@code null}
+	 * @return observer implementation class name
 	 */
 	@Override
-	public String getClassName() {
+	public @Nonnull String getClassName() {
 		return className;
 	}
 
@@ -47,7 +48,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	 * @param className observer implementation class name
 	 */
 	@XmlAttribute(required = true)
-	public void setClassName(String className) {
+	public void setClassName(@Nonnull String className) {
 		this.className = UtilImpl.processStringValue(className);
 	}
 
@@ -61,7 +62,7 @@ public class ObserverMetaDataImpl implements ObserverMetaData {
 	 * @throws MetaDataException if the configured class cannot be loaded or instantiated
 	 */
 	@Override
-	public Observer getObserver() {
+	public @Nonnull Observer getObserver() {
 		if (observer == null) {
 			synchronized (this) {
 				if (observer == null) {

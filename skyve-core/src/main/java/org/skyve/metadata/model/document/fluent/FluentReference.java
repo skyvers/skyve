@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.model.document.ReferenceImpl;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Reference;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentReference metadata.
  */
@@ -19,7 +22,7 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 	 * Copies reference metadata, including target document/query configuration.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(Reference reference) {
+	protected @Nonnull T from(@Nonnull Reference reference) {
 		super.from(reference);
 		persistent(reference.isPersistent());
 		domainType(reference.getDomainType());
@@ -32,7 +35,7 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T persistent(boolean persistent) {
+	public @Nonnull T persistent(boolean persistent) {
 		get().setPersistent(persistent);
 		return (T) this;
 	}
@@ -41,7 +44,7 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T domainType(DomainType domainType) {
+	public @Nonnull T domainType(@Nullable DomainType domainType) {
 		get().setDomainType(domainType);
 		return (T) this;
 	}
@@ -50,7 +53,7 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T documentName(String documentName) {
+	public @Nonnull T documentName(@Nonnull String documentName) {
 		get().setDocumentName(documentName);
 		return (T) this;
 	}
@@ -59,11 +62,11 @@ public abstract class FluentReference<T extends FluentReference<T>> extends Flue
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T queryName(String queryName) {
+	public @Nonnull T queryName(@Nullable String queryName) {
 		get().setQueryName(queryName);
 		return (T) this;
 	}
 
 	@Override
-	public abstract ReferenceImpl get();
+	public abstract @Nonnull ReferenceImpl get();
 }

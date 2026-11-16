@@ -6,21 +6,27 @@ import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
+import java.util.Objects;
 
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.content.MimeType;
+import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,12 +52,20 @@ public class BizportExportServlet extends HttpServlet {
 	 * resolves the authenticated user, checks export-action permissions, executes pre/post interception hooks,
 	 * serializes the generated workbook, and writes the appropriate attachment response headers.
 	 *
+	 * <p>The export is refused unless the view of the bean's own document, for the request's UX/UI, offers a reachable
+	 * trigger for it in the bean's current state (see {@link ActionAvailability}). The bean is the conversation bean, or
+	 * the bean that the request's form binding ({@code _b}) zooms in on from it. The form binding is used only for the
+	 * check: the export action runs against the conversation as before. SmartClient saves the form before it requests
+	 * the export, so a saved edit that changes the action's conditions decides the check.
+	 *
 	 * <p>Side effects: mutates servlet response headers, may recache the conversation after successful export,
-	 * and writes a minimal HTML error response if export generation fails unexpectedly.
+	 * and writes a minimal HTML error response if export generation fails unexpectedly. A refusal's
+	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a warning, rolled back, and written as
+	 * the same HTML error response showing the refusal's localised message.
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	public void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request, @SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		try (OutputStream out = response.getOutputStream()) {
 			try {
@@ -62,6 +76,9 @@ public class BizportExportServlet extends HttpServlet {
 	        	}
 	
 	    		AbstractPersistence persistence = webContext.getConversation();
+	    		if (persistence == null) {
+	    			throw new IllegalStateException("Cached conversation " + contextKey + " has no persistence");
+	    		}
 	    		persistence.setForThread();
 				try {
 					try {
@@ -86,6 +103,21 @@ public class BizportExportServlet extends HttpServlet {
 						if (! user.canExecuteAction(document, resourceName)) {
 							throw new SecurityException(resourceName, user.getName());
 						}
+						// Check against the view of the bean the client is on (zoomed in through _b), using the bean's own document,
+						// as _doc is not checked against the bean.
+						Bean bean = Objects.requireNonNull(WebUtil.getConversationBeanFromRequest(webContext, request), "bean");
+						Document beanDocument = customer.getModule(bean.getBizModule()).getDocument(customer, bean.getBizDocument());
+						String uxui = UserAgent.getSelection(request).getUxUi().getName();
+						ActionAvailability.check(user,
+													beanDocument,
+													beanDocument.getView(uxui,
+																			customer,
+																			bean.isCreated() ?
+																				ViewType.edit.toString() :
+																				ViewType.create.toString()),
+													uxui,
+													bean,
+													resourceName);
 	
 						BizExportAction bizPortAction = document.getBizExportAction(customer, resourceName, true);
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -95,7 +127,9 @@ public class BizportExportServlet extends HttpServlet {
 						if (! vetoed) {
 							result = bizPortAction.bizExport(webContext);
 							customer.interceptAfterBizExportAction(document, resourceName, result, webContext);
-							if (result != null) {
+							@SuppressWarnings("null") // the export action is application code
+							boolean resultPresent = (result != null);
+							if (resultPresent) {
 								result.write(baos);
 							}
 						}
@@ -129,7 +163,7 @@ public class BizportExportServlet extends HttpServlet {
 
 						// lastly put the conversation in the cache, after the response is sent
 						// and all lazy loading of domain objects has been realised
-						StateUtil.cacheConversation(webContext);
+						StateUtil.commitAndCacheConversation(webContext);
 					}
 					catch (InvocationTargetException e) {
 						throw e.getTargetException();
@@ -142,6 +176,12 @@ public class BizportExportServlet extends HttpServlet {
 				finally {
 					persistence.commit(true);
 				}
+			}
+			catch (ActionUnavailableException e) {
+				// Logged as a warning when refused, so show the user the refusal's message rather than the generic one
+				response.setContentType(MimeType.html.toString());
+				response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+				out.write(("<html><head/><body><h3>" + OWASP.escapeHtml(e.getMessages().get(0).getText()) + "</h3></body></html>").getBytes(StandardCharsets.UTF_8));
 			}
 			catch (Throwable t) {
 				LOGGER.error("Problem generating the export", t);

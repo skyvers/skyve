@@ -6,6 +6,8 @@ import java.util.Optional;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.CancellableJob;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Run the three component jobs of the archival process.
  * 
@@ -52,7 +54,7 @@ public class ArchiveJob extends CancellableJob {
     }
 
     @Override
-    public String cancel() {
+    public @Nullable String cancel() {
 
         super.cancel();
 

@@ -19,6 +19,8 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import util.sail.BrowserConfiguration.Browsers;
 
 abstract class CrossBrowserSelenium {
@@ -53,6 +55,28 @@ abstract class CrossBrowserSelenium {
 		actions = new Actions(driver);
 	}
 	
+	/**
+	 * Drives the browser that another instance started, instead of starting one: for example a SmartClient executor's
+	 * gestures in the browser that a PrimeFaces script used, when a workflow moves to SmartClient on the same device.
+	 * The browser stays the other instance's too; whichever is used last stops it.
+	 *
+	 * @param other	the instance whose browser to drive
+	 */
+	public void useBrowserOf(@Nonnull CrossBrowserSelenium other) {
+		this.configuration = other.configuration;
+		this.driver = other.driver;
+		this.actions = other.actions;
+	}
+
+	/**
+	 * Returns the configuration the browser was started with.
+	 *
+	 * @return the configuration, or null before the browser starts
+	 */
+	public @Nullable BrowserConfiguration getConfiguration() {
+		return configuration;
+	}
+
 	public void stopBrowser() {
 		if (driver != null) {
 			driver.quit();
@@ -65,15 +89,23 @@ abstract class CrossBrowserSelenium {
 	 * @throws Exception
 	 */
 	private void setupChrome(BrowserConfiguration config) {
-		List<String> arguments = new ArrayList<>(2);
+		List<String> arguments = new ArrayList<>(6);
+		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
+		arguments.add("--disable-backgrounding-occluded-windows");
+		arguments.add("--disable-renderer-backgrounding");
+		arguments.add("--disable-background-timer-throttling");
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
 		if (config.isHeadless()) {
 			arguments.add("--headless");
+			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
+			if (config.getResolution() == null) {
+				arguments.add("--window-size=1920,1080");
+			}
 		}
-		
+
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(arguments);
 		driver = new ChromeDriver(options);

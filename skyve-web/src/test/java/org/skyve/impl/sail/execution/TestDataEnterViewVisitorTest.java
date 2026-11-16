@@ -15,6 +15,7 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
@@ -87,8 +88,8 @@ class TestDataEnterViewVisitorTest {
 																				true));
 		CheckBox checkBox = new CheckBox();
 		checkBox.setBinding("active");
-		checkBox.setInvisibleConditionName("hideActive");
-		checkBox.setDisabledConditionName("disableActive");
+		checkBox.setXmlInvisibleCondition("hideActive");
+		checkBox.setXmlDisabledCondition("disableActive");
 
 		visitor.visitCheckBox(checkBox, true, true);
 
@@ -126,5 +127,30 @@ class TestDataEnterViewVisitorTest {
 		ViewImpl view = new ViewImpl();
 
 		return new TestDataEnterViewVisitor(customer, module, document, view, "desktop", bean);
+	}
+
+	@Test
+	void sliderValuesAreMovedIntoTheSlidersRange() {
+		Slider slider = new Slider();
+		assertEquals("42", TestDataEnterViewVisitor.sliderValue(slider, "42"));
+		assertEquals("51", TestDataEnterViewVisitor.sliderValue(slider, "3589"));
+		assertEquals("51", TestDataEnterViewVisitor.sliderValue(slider, "-3"));
+
+		slider.setMin(Double.valueOf(0));
+		slider.setMax(Double.valueOf(10));
+		assertEquals("3", TestDataEnterViewVisitor.sliderValue(slider, "2.5"), "onto the default step of 1");
+		assertEquals("5", TestDataEnterViewVisitor.sliderValue(slider, "1,234"));
+		assertEquals("abc", TestDataEnterViewVisitor.sliderValue(slider, "abc"));
+	}
+
+	@Test
+	void sliderValuesStayInAFractionalRangeAndOnItsSteps() {
+		Slider slider = new Slider();
+		slider.setMin(Double.valueOf(0.1));
+		slider.setMax(Double.valueOf(0.5));
+		assertEquals("0.1", TestDataEnterViewVisitor.sliderValue(slider, "7"), "the midpoint 0.3, onto the step of 1 from 0.1");
+		slider.setNumberOfDiscreteValues(Integer.valueOf(4));
+		assertEquals("0.3", TestDataEnterViewVisitor.sliderValue(slider, "7"), "the midpoint, on a step of 0.1");
+		assertEquals("0.2", TestDataEnterViewVisitor.sliderValue(slider, "0.21"), "onto the nearest step");
 	}
 }

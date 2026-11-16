@@ -1,0 +1,71 @@
+package org.skyve.impl.web.faces.converters.decimal;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.text.DecimalFormatSymbols;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.ConversionException;
+import org.skyve.util.Util;
+
+import jakarta.faces.convert.ConverterException;
+
+class Decimal10OneDecimalPlaceTest {
+	private static final String EXPECTED_MESSAGE = Util.nullSafeI18n(ConversionException.DECIMAL_10_ONE_DECIMAL_PLACE_KEY);
+
+	private Decimal10OneDecimalPlace converter;
+
+	@BeforeEach
+	void before() {
+		converter = new Decimal10OneDecimalPlace();
+	}
+
+	@Test
+	void testGetAsObjectNullValue() {
+		assertThat(converter.getAsObject(null, null, null), nullValue());
+	}
+
+	@Test
+	void testGetAsObjectEmptyValue() {
+		assertThat(converter.getAsObject(null, null, ""), nullValue());
+	}
+
+	@Test
+	void testGetAsObjectInvalidValue() {
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, "not a decimal"));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
+	}
+
+	@Test
+	void testGetAsObjectValidValue() {
+		org.skyve.domain.types.Decimal10 expected = new org.skyve.domain.types.Decimal10("3.1");
+		assertThat(converter.getAsObject(null, null, "3.1"), is(expected));
+	}
+
+	@Test
+	void testGetAsStringNullValue() {
+		assertThat(converter.getAsString(null, null, null), is(""));
+	}
+
+	@Test
+	void testGetAsStringValidValue() {
+		org.skyve.domain.types.Decimal10 value = org.skyve.domain.types.Decimal10.ONE_HUNDRED;
+		assertThat(converter.getAsString(null, null, value), is("100.0"));
+	}
+
+	@Test
+	void testGetAsObjectNotANumber() {
+		String nan = DecimalFormatSymbols.getInstance().getNaN();
+		ConverterException e = assertThrows(ConverterException.class, () -> converter.getAsObject(null, null, nan));
+		assertThat(e.getFacesMessage().getSummary(), is(EXPECTED_MESSAGE));
+	}
+
+	@Test
+	void testGetAsObjectKeepsTenDecimalPlaces() {
+		assertThat(converter.getAsObject(null, null, "1.23456789012"), is(new org.skyve.domain.types.Decimal10("1.2345678901")));
+	}
+}

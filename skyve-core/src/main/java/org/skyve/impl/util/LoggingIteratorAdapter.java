@@ -5,6 +5,9 @@ import java.util.Iterator;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * An iterator adapter that logs a diagnostic message when iteration completes after
  * at least 1 000 elements, helping to identify unexpectedly large result sets.
@@ -18,7 +21,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 	private Iterator<T> adapted;
 	private int iterated = 0;
 
-	public LoggingIteratorAdapter(final Iterator<T> adapted) {
+	public LoggingIteratorAdapter(final @Nonnull Iterator<T> adapted) {
 		this.adapted = adapted;
 	}
 
@@ -32,7 +35,7 @@ public class LoggingIteratorAdapter<T> implements Iterator<T> {
 	}
 
 	@Override
-	public T next() {
+	public @Nullable T next() {
 		T result = adapted.next();
 		iterated++;
 		if (iterated % 1000 == 0) {

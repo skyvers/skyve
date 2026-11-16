@@ -1,10 +1,11 @@
 package org.skyve.metadata.view.fluent;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 
 class FluentTextAreaTest {
@@ -42,22 +43,33 @@ class FluentTextAreaTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void minPixelHeightDoesNotThrow() {
-		// FluentTextArea.minPixelHeight() returns null (unimplemented) - just verify it doesn't throw
-		assertDoesNotThrow(() -> new FluentTextArea().minPixelHeight(50));
+	void minPixelHeightReturnsSelfAndSetsMetadata() {
+		FluentTextArea ta = new FluentTextArea();
+		assertSame(ta, ta.minPixelHeight(50));
+		assertEquals(Integer.valueOf(50), ta.get().getMinPixelHeight());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void pixelWidthDoesNotThrow() {
-		// FluentTextArea.pixelWidth() returns null (unimplemented) - just verify it doesn't throw
-		assertDoesNotThrow(() -> new FluentTextArea().pixelWidth(400));
+	void keyboardTypeReturnsSelfAndSetsMetadata() {
+		FluentTextArea ta = new FluentTextArea();
+		assertSame(ta, ta.keyboardType(KeyboardType.email));
+		assertEquals(KeyboardType.email, ta.get().getKeyboardType());
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void pixelHeightDoesNotThrow() {
-		// FluentTextArea.pixelHeight() returns null (unimplemented) - just verify it doesn't throw
-		assertDoesNotThrow(() -> new FluentTextArea().pixelHeight(150));
+	void pixelWidthReturnsSelfAndSetsMetadata() {
+		FluentTextArea ta = new FluentTextArea();
+		assertSame(ta, ta.pixelWidth(400));
+		assertEquals(Integer.valueOf(400), ta.get().getPixelWidth());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void pixelHeightReturnsSelfAndSetsMetadata() {
+		FluentTextArea ta = new FluentTextArea();
+		assertSame(ta, ta.pixelHeight(150));
+		assertEquals(Integer.valueOf(150), ta.get().getPixelHeight());
 	}
 }

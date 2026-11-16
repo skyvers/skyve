@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs that set an absolute pixel width on a widget.
  *
@@ -14,5 +16,5 @@ interface FluentAbsoluteWidth<T extends FluentAbsoluteWidth<T>> {
 	 *            the absolute width in pixels
 	 * @return the fluent builder
 	 */
-	T pixelWidth(int width);
+	@Nonnull T pixelWidth(int width);
 }

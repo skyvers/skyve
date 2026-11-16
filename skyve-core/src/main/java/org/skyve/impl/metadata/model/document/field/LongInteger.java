@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,12 +32,12 @@ public class LongInteger extends ConvertibleField {
 		setAttributeType(AttributeType.longInteger);
 	}
 	
-	public LongValidator getValidator() {
+	public @Nullable LongValidator getValidator() {
 		return validator;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setValidator(LongValidator validator) {
+	public void setValidator(@Nullable LongValidator validator) {
 		this.validator = validator;
 	}
 }

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.customer;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -25,12 +26,12 @@ public class UIResources implements org.skyve.metadata.customer.UIResources {
 	private String logoRelativeFileName;
 	
 	@Override
-	public String getLogoRelativeFileName() {
+	public @Nullable String getLogoRelativeFileName() {
 		return logoRelativeFileName;
 	}
 
 	@XmlAttribute(name = "logo")
-	public void setLogoRelativeFileName(String logoRelativeFileName) {
+	public void setLogoRelativeFileName(@Nullable String logoRelativeFileName) {
 		this.logoRelativeFileName = UtilImpl.processStringValue(logoRelativeFileName);
 	}
 }

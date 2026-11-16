@@ -5,6 +5,8 @@ import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Edit context generation in a PrimeFaces UI.
  * <p>
@@ -15,7 +17,7 @@ import org.skyve.metadata.sail.language.step.context.PushEditContext;
  * @param layoutBuilder the layout builder for this view
  */
 public record PrimeFacesGenerateEditContext(
-		PushEditContext pushEditContext,
-		ComponentBuilder componentBuilder,
-		LayoutBuilder layoutBuilder) implements GenerateEditContext {
+		@Nonnull PushEditContext pushEditContext,
+		@Nonnull ComponentBuilder componentBuilder,
+		@Nonnull LayoutBuilder layoutBuilder) implements GenerateEditContext {
 }

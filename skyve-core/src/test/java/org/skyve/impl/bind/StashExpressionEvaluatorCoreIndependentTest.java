@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.SortedMap;
@@ -13,7 +15,6 @@ import java.util.TreeMap;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -65,8 +66,8 @@ class StashExpressionEvaluatorCoreIndependentTest {
 		stash.put("a", "b");
 		stash.put("nullValue", null);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getStash()).thenReturn(stash);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getStash()).thenReturn(stash);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			StashExpressionEvaluator evaluator = new StashExpressionEvaluator();
@@ -85,12 +86,12 @@ class StashExpressionEvaluatorCoreIndependentTest {
 		stash.put("n", Integer.valueOf(5));
 		stash.put("nullValue", null);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getStash()).thenReturn(stash);
-		Customer c = Mockito.mock(Customer.class);
-		org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
-		Mockito.when(user.getCustomer()).thenReturn(c);
-		Mockito.when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getStash()).thenReturn(stash);
+		Customer c = mock(Customer.class);
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		when(user.getCustomer()).thenReturn(c);
+		when(persistence.getUser()).thenReturn(user);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			StashExpressionEvaluator evaluator = new StashExpressionEvaluator();

@@ -1,11 +1,11 @@
 package org.skyve.impl.metadata.repository.module;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.domain.types.formatters.Formatter;
@@ -49,6 +49,8 @@ import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -118,14 +120,14 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the module display title.
 	 *
 	 * @return the module title
 	 */
-	public String getTitle() {
+	public @Nonnull String getTitle() {
 		return title;
 	}
 
@@ -138,7 +140,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param title the module title; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
-	public void setTitle(String title) {
+	public void setTitle(@Nonnull String title) {
 		this.title = UtilImpl.processStringValue(title);
 	}
 
@@ -147,7 +149,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return {@code Boolean.TRUE} when prototype-mode is enabled, otherwise {@code null} or {@code Boolean.FALSE}
 	 */
-	public Boolean getPrototype() {
+	public @Nullable Boolean getPrototype() {
 		return prototype;
 	}
 
@@ -157,7 +159,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param prototype the prototype flag
 	 */
 	@XmlAttribute
-	public void setPrototype(Boolean prototype) {
+	public void setPrototype(@Nullable Boolean prototype) {
 		this.prototype = prototype;
 	}
 
@@ -166,7 +168,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the home document name
 	 */
-	public String getHomeDocument() {
+	public @Nonnull String getHomeDocument() {
 		return homeDocument;
 	}
 
@@ -176,7 +178,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param formLabelLayout the form label layout strategy
 	 */
 	@XmlAttribute
-	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+	public void setFormLabelLayout(@Nullable FormLabelLayout formLabelLayout) {
 		this.formLabelLayout = formLabelLayout;
 	}
 
@@ -185,7 +187,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the configured form label layout, or {@code null} when unspecified
 	 */
-	public FormLabelLayout getFormLabelLayout() {
+	public @Nullable FormLabelLayout getFormLabelLayout() {
 		return formLabelLayout;
 	}
 
@@ -198,7 +200,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param homeDocument the home document name; blank values become {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setHomeDocument(String homeDocument) {
+	public void setHomeDocument(@Nonnull String homeDocument) {
 		this.homeDocument = UtilImpl.processStringValue(homeDocument);
 	}
 
@@ -207,7 +209,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the configured home view type, or {@code null} to default to list view during conversion
 	 */
-	public ViewType getHomeRef() {
+	public @Nullable ViewType getHomeRef() {
 		return homeRef;
 	}
 
@@ -217,7 +219,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param homeRef the home view type
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setHomeRef(ViewType homeRef) {
+	public void setHomeRef(@Nullable ViewType homeRef) {
 		this.homeRef = homeRef;
 	}
 
@@ -230,7 +232,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "jobs")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "job", required = true)
-	public List<JobMetaDataImpl> getJobs() {
+	public @Nonnull List<JobMetaDataImpl> getJobs() {
 		return jobs;
 	}
 
@@ -243,7 +245,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "documents")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
-	public List<ModuleDocumentMetaData> getDocuments() {
+	public @Nonnull List<ModuleDocumentMetaData> getDocuments() {
 		return documents;
 	}
 
@@ -261,7 +263,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 						@XmlElementRef(type = MetaDataQueryReferenceMetaData.class),
 						@XmlElementRef(type = SQLReferenceMetaData.class),
 						@XmlElementRef(type = BizQLReferenceMetaData.class)})
-	public List<QueryMetaData> getQueries() {
+	public @Nonnull List<QueryMetaData> getQueries() {
 		return queries;
 	}
 
@@ -274,7 +276,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "roles")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
-	public List<ModuleRoleMetaData> getRoles() {
+	public @Nonnull List<ModuleRoleMetaData> getRoles() {
 		return roles;
 	}
 
@@ -283,7 +285,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return the menu descriptor
 	 */
-	public MenuMetaData getMenu() {
+	public @Nonnull MenuMetaData getMenu() {
 		return menu;
 	}
 
@@ -293,7 +295,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param menu the menu descriptor
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
-	public void setMenu(MenuMetaData menu) {
+	public void setMenu(@Nonnull MenuMetaData menu) {
 		this.menu = menu;
 	}
 
@@ -302,7 +304,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 *
 	 * @return documentation text, or {@code null}
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -316,7 +318,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -348,7 +350,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @return the mutable module property map, never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -371,7 +373,7 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Module convert(String metaDataName) {
+	public @Nonnull Module convert(@Nonnull String metaDataName) {
 		ModuleImpl result = new ModuleImpl();
 		result.setLastModifiedMillis(getLastModifiedMillis());
 
@@ -382,7 +384,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		result.setName(moduleName);
 
 		String value = getTitle();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean titleMissing = (value == null);
+		if (titleMissing) {
 			throw new MetaDataException(metaDataName + " : The module [title] is required");
 		}
 		result.setTitle(value);
@@ -396,7 +400,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		result.getProperties().putAll(properties);
 
 		value = getHomeDocument();
-		if (value == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean homeDocumentMissing = (value == null);
+		if (homeDocumentMissing) {
 			throw new MetaDataException(metaDataName + " : The module [homeDocument] is required");
 		}
 		result.setHomeDocumentName(value);
@@ -411,32 +417,32 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 		List<ModuleDocumentMetaData> repositoryDocuments = getDocuments();
 		Set<String> documentNames = new TreeSet<>();
-		if (repositoryDocuments != null) {
-			for (ModuleDocumentMetaData document : repositoryDocuments) {
-				DocumentRef documentRef = new DocumentRef();
-				documentRef.setDefaultQueryName(document.getDefaultQueryName());
-				value = document.getRef();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The module document [ref] is required");
-				}
-				if (! documentNames.add(value)) {
-					throw new MetaDataException(metaDataName + " : Duplicate document reference named " + value);
-				}
-
-				String referencedModuleName = document.getModuleRef();
-				if (referencedModuleName != null) {
-					documentRef.setReferencedModuleName(referencedModuleName);
-					documentRef.setOwningModuleName(referencedModuleName);
-				}
-				else {
-					documentRef.setOwningModuleName(getName());
-				}
-
-				documentRef.getProperties().putAll(document.getProperties());
-
-				// TODO expand on document ref when add further modules documentRef.setRelatedTo();
-				result.getDocumentRefs().put(document.getRef(), documentRef);
+		for (ModuleDocumentMetaData document : repositoryDocuments) {
+			DocumentRef documentRef = new DocumentRef();
+			documentRef.setDefaultQueryName(document.getDefaultQueryName());
+			value = document.getRef();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean refMissing = (value == null);
+			if (refMissing) {
+				throw new MetaDataException(metaDataName + " : The module document [ref] is required");
 			}
+			if (! documentNames.add(value)) {
+				throw new MetaDataException(metaDataName + " : Duplicate document reference named " + value);
+			}
+
+			String referencedModuleName = document.getModuleRef();
+			if (referencedModuleName != null) {
+				documentRef.setReferencedModuleName(referencedModuleName);
+				documentRef.setOwningModuleName(referencedModuleName);
+			}
+			else {
+				documentRef.setOwningModuleName(getName());
+			}
+
+			documentRef.getProperties().putAll(document.getProperties());
+
+			// TODO expand on document ref when add further modules documentRef.setRelatedTo();
+			result.getDocumentRefs().put(document.getRef(), documentRef);
 		}
 		if (! documentNames.contains(result.getHomeDocumentName())) {
 			throw new MetaDataException(metaDataName + " : The module [homeDocument] " +
@@ -446,274 +452,330 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		// Populate Jobs
 
 		List<JobMetaDataImpl> repositoryJobs = getJobs();
-		if (repositoryJobs != null) {
-			Set<String> jobNames = new TreeSet<>();
-			for (JobMetaDataImpl job : repositoryJobs) {
-				value = job.getName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a job is required");
-				}
-				if (! jobNames.add(value)) {
-					throw new MetaDataException(metaDataName + " : Duplicate job named " + value);
-				}
-				if (documentNames.contains(value)) {
-					throw new MetaDataException(metaDataName + " : The job named " + value + IS_A_MODULE_DOCUMENT_NAME);
-				}
-
-				value = job.getDisplayName();
-				if (value == null) {
-					throw new MetaDataException(metaDataName + " : The [displayName] for job " + job.getName() + IS_REQUIRED);
-				}
-				job.setOwningModuleName(result.getName());
-				result.putJob(job);
+		Set<String> jobNames = new TreeSet<>();
+		for (JobMetaDataImpl job : repositoryJobs) {
+			value = job.getName();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean nameMissing = (value == null);
+			if (nameMissing) {
+				throw new MetaDataException(metaDataName + " : The [name] for a job is required");
 			}
+			if (! jobNames.add(value)) {
+				throw new MetaDataException(metaDataName + " : Duplicate job named " + value);
+			}
+			if (documentNames.contains(value)) {
+				throw new MetaDataException(metaDataName + " : The job named " + value + IS_A_MODULE_DOCUMENT_NAME);
+			}
+
+			value = job.getDisplayName();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean displayNameMissing = (value == null);
+			if (displayNameMissing) {
+				throw new MetaDataException(metaDataName + " : The [displayName] for job " + job.getName() + IS_REQUIRED);
+			}
+
+			value = job.getClassName();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean classNameMissing = (value == null);
+			if (classNameMissing) {
+				throw new MetaDataException(metaDataName + " : The [className] for job " + job.getName() + IS_REQUIRED);
+			}
+			job.setOwningModuleName(result.getName());
+			result.putJob(job);
 		}
 
 		// Populate queries
 
 		List<QueryMetaData> repositoryQueries = getQueries();
-		if (repositoryQueries != null) {
-			Set<String> queryNames = new TreeSet<>();
-			for (QueryMetaData queryMetaData : repositoryQueries) {
-				QueryDefinition query = null;
-				if (queryMetaData instanceof MetaDataQueryMetaData documentQueryMetaData) {
-					MetaDataQueryDefinitionImpl defn = new MetaDataQueryDefinitionImpl();
-					populateQueryProperties(documentQueryMetaData,
-												defn,
-												metaDataName,
-												queryNames,
-												documentNames);
-					defn.setOwningModule(result);
+		Set<String> queryNames = new TreeSet<>();
+		for (QueryMetaData queryMetaData : repositoryQueries) {
+			QueryDefinition query = null;
+			if (queryMetaData instanceof MetaDataQueryMetaData documentQueryMetaData) {
+				MetaDataQueryDefinitionImpl defn = new MetaDataQueryDefinitionImpl();
+				populateQueryProperties(documentQueryMetaData,
+											defn,
+											metaDataName,
+											queryNames,
+											documentNames);
+				defn.setOwningModule(result);
 
-					value = documentQueryMetaData.getDocumentName();
-					if (value == null) {
-						throw new MetaDataException(metaDataName + " : The [documentName] for query " +
-														defn.getName() + IS_REQUIRED);
+				value = documentQueryMetaData.getDocumentName();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean documentNameMissing = (value == null);
+				if (documentNameMissing) {
+					throw new MetaDataException(metaDataName + " : The [documentName] for query " +
+													defn.getName() + IS_REQUIRED);
+				}
+				if (! documentNames.contains(value)) {
+					throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
+													defn.getName() + " is not a module document");
+				}
+				defn.setDocumentName(value);
+				defn.setPolymorphic(documentQueryMetaData.getPolymorphic());
+				defn.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
+				defn.setFromClause(documentQueryMetaData.getFrom());
+				defn.setFilterClause(documentQueryMetaData.getFilter());
+				defn.setGroupClause(documentQueryMetaData.getGrouping());
+				defn.setOrderClause(documentQueryMetaData.getOrdering());
+
+				List<MetaDataQueryColumnMetaData> repositoryQueryColumns = documentQueryMetaData.getColumns();
+				for (MetaDataQueryColumnMetaData repositoryColumn : repositoryQueryColumns) {
+					MetaDataQueryProjectedColumnMetaData projectedRepositoryColumn = null;
+					MetaDataQueryContentColumnMetaData contentRepositoryColumn = null;
+					AbstractMetaDataQueryColumn column = null;
+					MetaDataQueryProjectedColumnImpl projectedColumn = null;
+					MetaDataQueryContentColumnImpl contentColumn = null;
+					if (repositoryColumn instanceof MetaDataQueryProjectedColumnMetaData pcmd) {
+						projectedRepositoryColumn = pcmd;
+						projectedColumn = new MetaDataQueryProjectedColumnImpl();
+						column = projectedColumn;
 					}
-					if (! documentNames.contains(value)) {
-						throw new MetaDataException(metaDataName + " : The [documentName] of " + value + " for query " +
-														defn.getName() + " is not a module document");
+					else {
+						contentRepositoryColumn = (MetaDataQueryContentColumnMetaData) repositoryColumn;
+						contentColumn = new MetaDataQueryContentColumnImpl();
+						column = contentColumn;
 					}
-					defn.setDocumentName(value);
-					defn.setPolymorphic(documentQueryMetaData.getPolymorphic());
-					defn.setAggregate(Boolean.TRUE.equals(documentQueryMetaData.getAggregate()));
-					defn.setFromClause(documentQueryMetaData.getFrom());
-					defn.setFilterClause(documentQueryMetaData.getFilter());
-					defn.setGroupClause(documentQueryMetaData.getGrouping());
-					defn.setOrderClause(documentQueryMetaData.getOrdering());
 
-					List<MetaDataQueryColumnMetaData> repositoryQueryColumns = documentQueryMetaData.getColumns();
-					if (repositoryQueryColumns != null) {
-						for (MetaDataQueryColumnMetaData repositoryColumn : repositoryQueryColumns) {
-							MetaDataQueryProjectedColumnMetaData projectedRepositoryColumn = null;
-							MetaDataQueryContentColumnMetaData contentRepositoryColumn = null;
-							AbstractMetaDataQueryColumn column = null;
-							MetaDataQueryProjectedColumnImpl projectedColumn = null;
-							MetaDataQueryContentColumnImpl contentColumn = null;
-							if (repositoryColumn instanceof MetaDataQueryProjectedColumnMetaData pcmd) {
-								projectedRepositoryColumn = pcmd;
-								projectedColumn = new MetaDataQueryProjectedColumnImpl();
-								column = projectedColumn;
-							}
-							else {
-								contentRepositoryColumn = (MetaDataQueryContentColumnMetaData) repositoryColumn;
-								contentColumn = new MetaDataQueryContentColumnImpl();
-								column = contentColumn;
-							}
-
-							column.setName(repositoryColumn.getName());
-							String binding = repositoryColumn.getBinding();
-							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
-								String expression = projectedRepositoryColumn.getExpression();
-								if ((binding == null) && (expression == null)) {
-									throw new MetaDataException(metaDataName +
-																	" : The [binding] and [expression] for a query column is missing in query " +
-																	defn.getName());
-								}
-								if ((binding != null) && (expression != null)) {
-									throw new MetaDataException(metaDataName +
-																	" : Both the [binding] and [expression] for a query column are entered in query " +
-																	defn.getName());
-								}
-								if ((expression != null) && (column.getName() == null)) {
-									throw new MetaDataException(metaDataName +
-																	" : An [expression] query column requires the [name] to be entered in query " +
-																	defn.getName());
-								}
-								projectedColumn.setExpression(expression);
-							}
-							else if (contentColumn != null) {
-								if (binding == null) {
-									throw new MetaDataException(metaDataName +
-																	" : The [binding] for a content query column is missing in query " +
-																	defn.getName());
-								}
-							}
-							column.setBinding(binding);
-							column.setDisplayName(repositoryColumn.getDisplayName());
-							column.getProperties().putAll(repositoryColumn.getProperties());
-
-							FilterOperator filterOperator = repositoryColumn.getFilterOperator();
-							String filterExpression = repositoryColumn.getFilterExpression();
-							if ((filterOperator != null) &&
-									(! filterOperator.equals(FilterOperator.isNull)) &&
-									(! filterOperator.equals(FilterOperator.notNull)) &&
-									(filterExpression == null)) {
-								throw new MetaDataException(metaDataName + " : Operator " + filterOperator +
-																" in column " + column.getBinding() +
-																IN_QUERY + defn.getName() +
-																" requires an [expression].");
-							}
-							if (((filterOperator == null) ||
-									filterOperator.equals(FilterOperator.isNull) ||
-									filterOperator.equals(FilterOperator.notNull)) &&
-									(filterExpression != null)) {
-								throw new MetaDataException(metaDataName + " : Operator " + filterOperator +
-																" in column " + column.getBinding() +
-																IN_QUERY + defn.getName() +
-																" does not require an [expression].");
-							}
-							column.setFilterOperator(filterOperator);
-							column.setFilterExpression(filterExpression);
-							column.setSortOrder(repositoryColumn.getSortOrder());
-							Boolean hidden = repositoryColumn.getHidden();
-							if (hidden != null) {
-								column.setHidden(hidden.booleanValue());
-							}
-							column.setPixelWidth(repositoryColumn.getPixelWidth());
-							column.setAlignment(repositoryColumn.getAlignment());
-
-							if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
-								Boolean projected = projectedRepositoryColumn.getProjected();
-								if (projected != null) {
-									projectedColumn.setSelected(projected.booleanValue());
-								}
-								Boolean sortable = projectedRepositoryColumn.getSortable();
-								if (sortable != null) {
-									projectedColumn.setSortable(sortable.booleanValue());
-								}
-								Boolean filterable = projectedRepositoryColumn.getFilterable();
-								if (filterable != null) {
-									projectedColumn.setFilterable(filterable.booleanValue());
-								}
-								Boolean editable = projectedRepositoryColumn.getEditable();
-								if (editable != null) {
-									projectedColumn.setEditable(editable.booleanValue());
-								}
-								Boolean escape = projectedRepositoryColumn.getEscape();
-								if (escape != null) {
-									projectedColumn.setEscape(escape.booleanValue());
-								}
-								Sanitisation sanitise = projectedRepositoryColumn.getSanitise();
-								if (sanitise != null) {
-									projectedColumn.setSanitise(sanitise);
-								}
-								FormatterName formatterName = projectedRepositoryColumn.getFormatterName();
-								String customFormatterName = projectedRepositoryColumn.getCustomFormatterName();
-								if ((formatterName != null) && (customFormatterName != null)) {
-									throw new MetaDataException(metaDataName + " : formatter and customFormatter cannot both be defined in column " +
-																	column.getBinding() +  IN_QUERY + defn.getName());
-								}
-								else if (formatterName != null) {
-									projectedColumn.setFormatterName(formatterName);
-								}
-								else if (customFormatterName != null) {
-									Formatter<?> customFormatter = Formatters.get(customFormatterName);
-									if (customFormatter == null) {
-										throw new MetaDataException(metaDataName + " : customFormatter " + customFormatterName + " is not defined");
-									}
-									projectedColumn.setCustomFormatterName(customFormatterName);
-								}
-							}
-							else if ((contentColumn != null) && (contentRepositoryColumn != null)) {
-								DisplayType display = contentRepositoryColumn.getDisplay();
-								contentColumn.setDisplay(display);
-								contentColumn.setPixelHeight(contentRepositoryColumn.getPixelHeight());
-								String emptyThumbnailRelativeFile = contentRepositoryColumn.getEmptyThumbnailRelativeFile();
-								if ((emptyThumbnailRelativeFile != null) &&
-										(! DisplayType.thumbnail.equals(display))) {
-									throw new MetaDataException(metaDataName + " : An [emptyThumbnailRelativeFile] should not be defined on content column " +
-																	column.getBinding() + IN_QUERY + defn.getName() +
-																	" as it is not a thumbnail content column");
-								}
-								contentColumn.setEmptyThumbnailRelativeFile(emptyThumbnailRelativeFile);
-							}
-
-							defn.getColumns().add(column);
+					column.setName(repositoryColumn.getName());
+					String binding = repositoryColumn.getBinding();
+					if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
+						String expression = projectedRepositoryColumn.getExpression();
+						if ((binding == null) && (expression == null)) {
+							throw new MetaDataException(metaDataName +
+															" : The [binding] and [expression] for a query column is missing in query " +
+															defn.getName());
+						}
+						if ((binding != null) && (expression != null)) {
+							throw new MetaDataException(metaDataName +
+															" : Both the [binding] and [expression] for a query column are entered in query " +
+															defn.getName());
+						}
+						if ((expression != null) && (column.getName() == null)) {
+							throw new MetaDataException(metaDataName +
+															" : An [expression] query column requires the [name] to be entered in query " +
+															defn.getName());
+						}
+						projectedColumn.setExpression(expression);
+					}
+					else if (contentColumn != null) {
+						if (binding == null) {
+							throw new MetaDataException(metaDataName +
+															" : The [binding] for a content query column is missing in query " +
+															defn.getName());
 						}
 					}
-					query = defn;
-				}
-				else if (queryMetaData instanceof SQLMetaData sqlMetaData) {
-					SQLDefinitionImpl defn = new SQLDefinitionImpl();
-					populateQueryProperties(sqlMetaData,
-												defn,
-												metaDataName,
-												queryNames,
-												documentNames);
-					defn.setQuery(sqlMetaData.getQuery());
-					defn.setOwningModule(result);
-					query = defn;
-				}
-				else if (queryMetaData instanceof BizQLMetaData bizQLMetaData) {
-					BizQLDefinitionImpl defn = new BizQLDefinitionImpl();
-					populateQueryProperties(bizQLMetaData,
-												defn,
-												metaDataName,
-												queryNames,
-												documentNames);
-					defn.setQuery(bizQLMetaData.getQuery());
-					defn.setOwningModule(result);
-					query = defn;
-				}
-				else if (queryMetaData instanceof MetaDataQueryReferenceMetaData documentQueryReferenceMetaData) {
-					String name = documentQueryReferenceMetaData.getName();
-					String ref = documentQueryReferenceMetaData.getRef();
-					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+					column.setBinding(binding);
+					column.setDisplayName(repositoryColumn.getDisplayName());
+					column.getProperties().putAll(repositoryColumn.getProperties());
 
-					MetaDataQueryReferenceImpl reference = new MetaDataQueryReferenceImpl(name,
-																							documentQueryReferenceMetaData.getModuleRef(),
-																							ref);
-					reference.setOwningModule(result);
-					query = reference;
-				}
-				else if (queryMetaData instanceof SQLReferenceMetaData sqlReferenceMetaData) {
-					String name = sqlReferenceMetaData.getName();
-					String ref = sqlReferenceMetaData.getRef();
-					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+					FilterOperator filterOperator = repositoryColumn.getFilterOperator();
+					String filterExpression = repositoryColumn.getFilterExpression();
+					if ((filterOperator != null) &&
+							(! filterOperator.equals(FilterOperator.isNull)) &&
+							(! filterOperator.equals(FilterOperator.notNull)) &&
+							(filterExpression == null)) {
+						throw new MetaDataException(metaDataName + " : Operator " + filterOperator +
+														" in column " + column.getBinding() +
+														IN_QUERY + defn.getName() +
+														" requires an [expression].");
+					}
+					if (((filterOperator == null) ||
+							filterOperator.equals(FilterOperator.isNull) ||
+							filterOperator.equals(FilterOperator.notNull)) &&
+							(filterExpression != null)) {
+						throw new MetaDataException(metaDataName + " : Operator " + filterOperator +
+														" in column " + column.getBinding() +
+														IN_QUERY + defn.getName() +
+														" does not require an [expression].");
+					}
+					column.setFilterOperator(filterOperator);
+					column.setFilterExpression(filterExpression);
+					column.setSortOrder(repositoryColumn.getSortOrder());
+					Boolean hidden = repositoryColumn.getHidden();
+					if (hidden != null) {
+						column.setHidden(hidden.booleanValue());
+					}
+					column.setPixelWidth(repositoryColumn.getPixelWidth());
+					column.setAlignment(repositoryColumn.getAlignment());
 
-					SQLReferenceImpl reference = new SQLReferenceImpl(sqlReferenceMetaData.getName(),
-																		sqlReferenceMetaData.getModuleRef(),
-																		sqlReferenceMetaData.getRef());
-					reference.setOwningModule(result);
-					query = reference;
-				}
-				else if (queryMetaData instanceof BizQLReferenceMetaData bizQLReferenceMetaData) {
-					String name = bizQLReferenceMetaData.getName();
-					String ref = bizQLReferenceMetaData.getRef();
-					validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+					if ((projectedColumn != null) && (projectedRepositoryColumn != null)) {
+						Boolean projected = projectedRepositoryColumn.getProjected();
+						if (projected != null) {
+							projectedColumn.setSelected(projected.booleanValue());
+						}
+						Boolean sortable = projectedRepositoryColumn.getSortable();
+						if (sortable != null) {
+							projectedColumn.setSortable(sortable.booleanValue());
+						}
+						Boolean filterable = projectedRepositoryColumn.getFilterable();
+						if (filterable != null) {
+							projectedColumn.setFilterable(filterable.booleanValue());
+						}
+						Boolean editable = projectedRepositoryColumn.getEditable();
+						if (editable != null) {
+							projectedColumn.setEditable(editable.booleanValue());
+						}
+						Boolean escape = projectedRepositoryColumn.getEscape();
+						if (escape != null) {
+							projectedColumn.setEscape(escape.booleanValue());
+						}
+						Sanitisation sanitise = projectedRepositoryColumn.getSanitise();
+						if (sanitise != null) {
+							projectedColumn.setSanitise(sanitise);
+						}
+						FormatterName formatterName = projectedRepositoryColumn.getFormatterName();
+						String customFormatterName = projectedRepositoryColumn.getCustomFormatterName();
+						if ((formatterName != null) && (customFormatterName != null)) {
+							throw new MetaDataException(metaDataName + " : formatter and customFormatter cannot both be defined in column " +
+															column.getBinding() +  IN_QUERY + defn.getName());
+						}
+						else if (formatterName != null) {
+							projectedColumn.setFormatterName(formatterName);
+						}
+						else if (customFormatterName != null) {
+							Formatter<?> customFormatter = Formatters.get(customFormatterName);
+							if (customFormatter == null) {
+								throw new MetaDataException(metaDataName + " : customFormatter " + customFormatterName + " is not defined");
+							}
+							projectedColumn.setCustomFormatterName(customFormatterName);
+						}
+					}
+					else if ((contentColumn != null) && (contentRepositoryColumn != null)) {
+						DisplayType display = contentRepositoryColumn.getDisplay();
+						@SuppressWarnings("null") // metadata built in code bypasses the XSD
+						boolean displayMissing = (display == null);
+						if (displayMissing) {
+							throw new MetaDataException(metaDataName +
+															" : The [display] for a content query column is missing in query " +
+															defn.getName());
+						}
+						contentColumn.setDisplay(display);
+						contentColumn.setPixelHeight(contentRepositoryColumn.getPixelHeight());
+						String emptyThumbnailRelativeFile = contentRepositoryColumn.getEmptyThumbnailRelativeFile();
+						if ((emptyThumbnailRelativeFile != null) &&
+								(! DisplayType.thumbnail.equals(display))) {
+							throw new MetaDataException(metaDataName + " : An [emptyThumbnailRelativeFile] should not be defined on content column " +
+															column.getBinding() + IN_QUERY + defn.getName() +
+															" as it is not a thumbnail content column");
+						}
+						contentColumn.setEmptyThumbnailRelativeFile(emptyThumbnailRelativeFile);
+					}
 
-					BizQLReferenceImpl reference = new BizQLReferenceImpl(bizQLReferenceMetaData.getName(),
-																			bizQLReferenceMetaData.getModuleRef(),
-																			bizQLReferenceMetaData.getRef());
-					reference.setOwningModule(result);
-					query = reference;
+					defn.getColumns().add(column);
 				}
-				else {
-					throw new MetaDataException(metaDataName + " : Unrecognised query type " +
-													queryMetaData.getClass().getName());
+				query = defn;
+			}
+			else if (queryMetaData instanceof SQLMetaData sqlMetaData) {
+				SQLDefinitionImpl defn = new SQLDefinitionImpl();
+				populateQueryProperties(sqlMetaData,
+											defn,
+											metaDataName,
+											queryNames,
+											documentNames);
+				value = sqlMetaData.getQuery();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean queryMissing = (value == null);
+				if (queryMissing) {
+					throw new MetaDataException(metaDataName + " : The [query] for SQL query " + defn.getName() + IS_REQUIRED);
 				}
+				defn.setQuery(value);
+				defn.setOwningModule(result);
+				query = defn;
+			}
+			else if (queryMetaData instanceof BizQLMetaData bizQLMetaData) {
+				BizQLDefinitionImpl defn = new BizQLDefinitionImpl();
+				populateQueryProperties(bizQLMetaData,
+											defn,
+											metaDataName,
+											queryNames,
+											documentNames);
+				value = bizQLMetaData.getQuery();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean queryMissing = (value == null);
+				if (queryMissing) {
+					throw new MetaDataException(metaDataName + " : The [query] for BizQL query " + defn.getName() + IS_REQUIRED);
+				}
+				defn.setQuery(value);
+				defn.setOwningModule(result);
+				query = defn;
+			}
+			else if (queryMetaData instanceof MetaDataQueryReferenceMetaData documentQueryReferenceMetaData) {
+				String name = documentQueryReferenceMetaData.getName();
+				String ref = documentQueryReferenceMetaData.getRef();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean refMissing = (ref == null);
+				if (refMissing) {
+					throw new MetaDataException(metaDataName + " : The [ref] for a query import is required");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean moduleRefMissing = (documentQueryReferenceMetaData.getModuleRef() == null);
+				if (moduleRefMissing) {
+					throw new MetaDataException(metaDataName + " : The [moduleRef] for query import " + ref + IS_REQUIRED);
+				}
+				validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
 
-				result.putQuery(query);
+				MetaDataQueryReferenceImpl reference = new MetaDataQueryReferenceImpl(name,
+																						documentQueryReferenceMetaData.getModuleRef(),
+																						ref);
+				reference.setOwningModule(result);
+				query = reference;
+			}
+			else if (queryMetaData instanceof SQLReferenceMetaData sqlReferenceMetaData) {
+				String name = sqlReferenceMetaData.getName();
+				String ref = sqlReferenceMetaData.getRef();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean refMissing = (ref == null);
+				if (refMissing) {
+					throw new MetaDataException(metaDataName + " : The [ref] for an SQL import is required");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean moduleRefMissing = (sqlReferenceMetaData.getModuleRef() == null);
+				if (moduleRefMissing) {
+					throw new MetaDataException(metaDataName + " : The [moduleRef] for SQL import " + ref + IS_REQUIRED);
+				}
+				validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+				SQLReferenceImpl reference = new SQLReferenceImpl(sqlReferenceMetaData.getName(),
+																	sqlReferenceMetaData.getModuleRef(),
+																	sqlReferenceMetaData.getRef());
+				reference.setOwningModule(result);
+				query = reference;
+			}
+			else if (queryMetaData instanceof BizQLReferenceMetaData bizQLReferenceMetaData) {
+				String name = bizQLReferenceMetaData.getName();
+				String ref = bizQLReferenceMetaData.getRef();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean refMissing = (ref == null);
+				if (refMissing) {
+					throw new MetaDataException(metaDataName + " : The [ref] for a BizQL import is required");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean moduleRefMissing = (bizQLReferenceMetaData.getModuleRef() == null);
+				if (moduleRefMissing) {
+					throw new MetaDataException(metaDataName + " : The [moduleRef] for BizQL import " + ref + IS_REQUIRED);
+				}
+				validateQueryName((name != null) ? name : ref, metaDataName, queryNames, documentNames);
+
+				BizQLReferenceImpl reference = new BizQLReferenceImpl(bizQLReferenceMetaData.getName(),
+																		bizQLReferenceMetaData.getModuleRef(),
+																		bizQLReferenceMetaData.getRef());
+				reference.setOwningModule(result);
+				query = reference;
+			}
+			else {
+				throw new MetaDataException(metaDataName + " : Unrecognised query type " +
+												queryMetaData.getClass().getName());
 			}
 
-			// Check default query names exist as queries
-			for (Entry<String, DocumentRef> ref : result.getDocumentRefs().entrySet()) {
-				String defaultQueryName = ref.getValue().getDefaultQueryName();
-				if ((defaultQueryName != null) && (! queryNames.contains(defaultQueryName))) {
-					throw new MetaDataException(metaDataName + " : The default query of " + defaultQueryName +
-													" does not exist for document " + ref.getKey());
-				}
+			result.putQuery(query);
+		}
+
+		// Check default query names exist as queries
+		for (Entry<String, DocumentRef> ref : result.getDocumentRefs().entrySet()) {
+			String defaultQueryName = ref.getValue().getDefaultQueryName();
+			if ((defaultQueryName != null) && (! queryNames.contains(defaultQueryName))) {
+				throw new MetaDataException(metaDataName + " : The default query of " + defaultQueryName +
+												" does not exist for document " + ref.getKey());
 			}
 		}
 
@@ -721,150 +783,157 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 
 		Set<String> roleNames = new TreeSet<>();
 		List<ModuleRoleMetaData> repositoryRoles = getRoles();
-		if (repositoryRoles != null) {
-			for (ModuleRoleMetaData roleMetaData : repositoryRoles) {
-				RoleImpl role = new RoleImpl();
-				String roleName = roleMetaData.getName();
-				if (roleName == null) {
-					throw new MetaDataException(metaDataName + " : The [name] for a role is required");
-				}
-				if (! roleNames.add(roleName)) {
-					throw new MetaDataException(metaDataName + " : Duplicate role named " + roleName);
-				}
-				if (documentNames.contains(roleName)) {
-					throw new MetaDataException(metaDataName + " : The role named " + roleName + IS_A_MODULE_DOCUMENT_NAME);
-				}
-				role.setName(roleName);
-				role.setDescription(roleMetaData.getDescription());
-				role.setDocumentation(roleMetaData.getDocumentation());
-				role.getProperties().putAll(roleMetaData.getProperties());
-
-				// Populate privileges
-				Set<String> docPrivNames = new TreeSet<>();
-				List<DocumentPrivilegeMetaData> repositoryDocPrivileges = roleMetaData.getPrivileges();
-				if (repositoryDocPrivileges != null) {
-					for (DocumentPrivilegeMetaData documentPrivilegeMetaData : repositoryDocPrivileges) {
-						org.skyve.impl.metadata.user.DocumentPrivilege documentPrivilege = new org.skyve.impl.metadata.user.DocumentPrivilege();
-						value = documentPrivilegeMetaData.getDocumentName();
-						if (value == null) {
-							throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + roleName);
-						}
-						if (! docPrivNames.add(value)) {
-							throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value + IN_ROLE + roleName);
-						}
-						if (! documentNames.contains(value)) {
-							String message = String.format("%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. " +
-																"Expected %2$s to be defined in the <documents> section of %4$s.xml",
-															metaDataName, value, roleName, result.getName());
-							throw new MetaDataException(message);
-						}
-						if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
-							throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
-															IN_ROLE + roleName +
-															" cannot be for a document referenced from another module.  Document Privileges are to be made on the owning module only.");
-						}
-
-						documentPrivilege.setName(value);
-						DocumentPermission docPermission = documentPrivilegeMetaData.getPermission();
-						if (docPermission == null) {
-							throw new MetaDataException(metaDataName + " : Document permission is required for document " +
-															documentPrivilege.getName() + IN_ROLE + roleName);
-						}
-						documentPrivilege.setPermission(docPermission);
-						documentPrivilege.getProperties().putAll(documentPrivilegeMetaData.getProperties());
-
-						role.getPrivileges().add(documentPrivilege);
-
-						// Add the action privileges also
-						List<ActionPrivilegeMetaData> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
-						if (repositoryActionPrivileges != null) {
-							for (ActionPrivilegeMetaData actionPrivilegeMetaData : repositoryActionPrivileges) {
-								ActionPrivilege actionPrivilege = new ActionPrivilege();
-								value = actionPrivilegeMetaData.getActionName();
-								if (value == null) {
-									throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
-																	documentPrivilege.getName() + IN_ROLE + roleName);
-								}
-								actionPrivilege.setName(value);
-								actionPrivilege.setDocumentName(documentPrivilege.getName());
-								actionPrivilege.getProperties().putAll(actionPrivilegeMetaData.getProperties());
-
-								role.getPrivileges().add(actionPrivilege);
-							}
-						}
-
-						// Add the content restrictions
-						List<ContentRestriction> contentRestrictions = documentPrivilegeMetaData.getContentRestrictions();
-						if (contentRestrictions != null) {
-							for (ContentRestriction contentRestriction : contentRestrictions) {
-								value = contentRestriction.getAttributeName();
-								if (value == null) {
-									throw new MetaDataException(metaDataName + " : The [attribute] for a content restriction is required for document " +
-																	documentPrivilege.getName() + IN_ROLE + roleName);
-								}
-								contentRestriction.setDocumentName(documentPrivilege.getName());
-
-								role.getContentRestrictions().add(contentRestriction);
-							}
-						}
-
-						// Add the content permissions
-						List<ContentPermission> contentPermissions = documentPrivilegeMetaData.getContentPermissions();
-						if (contentPermissions != null) {
-							for (ContentPermission contentPermission : contentPermissions) {
-								value = contentPermission.getAttributeName();
-								if (value == null) {
-									throw new MetaDataException(metaDataName + " : The [attribute] for a content permission is required for document " +
-																	documentPrivilege.getName() + IN_ROLE + roleName);
-								}
-								contentPermission.setDocumentName(documentPrivilege.getName());
-
-								role.getContentPermissions().add(contentPermission);
-							}
-						}
-					}
-				}
-
-				// Populate User Accesses
-				List<ModuleRoleUserAccessMetaData> repositoryAccesses = roleMetaData.getAccesses();
-				if (repositoryAccesses != null) {
-					Map<UserAccess, Set<String>> accesses = role.getAccesses();
-					for (ModuleRoleUserAccessMetaData accessMetaData : repositoryAccesses) {
-						// Validate access metadata
-						accessMetaData.validate(metaDataName, roleName, result);
-
-						// Validate and add ux/uis
-						Set<String> uxuis = null;
-						List<ModuleRoleUserAccessUxUiMetadata> uxuisMetaData = accessMetaData.getUxuis();
-						if (uxuisMetaData.isEmpty()) {
-							uxuis = UserAccess.ALL_UX_UIS;
-						}
-						else {
-							uxuis = new TreeSet<>();
-							for (ModuleRoleUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
-								String uxuiName = uxuiMetaData.getName();
-								if (uxuiName == null) {
-									throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
-								}
-								if (! uxuis.add(uxuiMetaData.getName())) {
-									throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
-								}
-							}
-						}
-
-						// Put into accesses
-						if (accesses.put(accessMetaData.toUserAccess(moduleName), uxuis) != null) {
-							throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
-						}
-					}
-				}
-
-				result.putRole(role);
+		for (ModuleRoleMetaData roleMetaData : repositoryRoles) {
+			RoleImpl role = new RoleImpl();
+			String roleName = roleMetaData.getName();
+			if (roleName == null) {
+				throw new MetaDataException(metaDataName + " : The [name] for a role is required");
 			}
+			if (! roleNames.add(roleName)) {
+				throw new MetaDataException(metaDataName + " : Duplicate role named " + roleName);
+			}
+			if (documentNames.contains(roleName)) {
+				throw new MetaDataException(metaDataName + " : The role named " + roleName + IS_A_MODULE_DOCUMENT_NAME);
+			}
+			role.setName(roleName);
+			value = roleMetaData.getDescription();
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean descriptionMissing = (value == null);
+			if (descriptionMissing) {
+				throw new MetaDataException(metaDataName + " : The [description] for role " + roleName + IS_REQUIRED);
+			}
+			role.setDescription(value);
+			role.setDocumentation(roleMetaData.getDocumentation());
+			role.getProperties().putAll(roleMetaData.getProperties());
+
+			// Populate privileges
+			Set<String> docPrivNames = new TreeSet<>();
+			List<DocumentPrivilegeMetaData> repositoryDocPrivileges = roleMetaData.getPrivileges();
+			for (DocumentPrivilegeMetaData documentPrivilegeMetaData : repositoryDocPrivileges) {
+				org.skyve.impl.metadata.user.DocumentPrivilege documentPrivilege = new org.skyve.impl.metadata.user.DocumentPrivilege();
+				value = documentPrivilegeMetaData.getDocumentName();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean documentNameMissing = (value == null);
+				if (documentNameMissing) {
+					throw new MetaDataException(metaDataName + " : The [documentName] for a privilege is required for role " + roleName);
+				}
+				if (! docPrivNames.add(value)) {
+					throw new MetaDataException(metaDataName + " : Duplicate document privilege for document " + value + IN_ROLE + roleName);
+				}
+				if (! documentNames.contains(value)) {
+					String message = String.format("%1$s : The privilege [documentName] value of %2$s in role %3$s is not a module document. " +
+														"Expected %2$s to be defined in the <documents> section of %4$s.xml",
+													metaDataName, value, roleName, result.getName());
+					throw new MetaDataException(message);
+				}
+				if (result.getDocumentRefs().get(value).getReferencedModuleName() != null) {
+					throw new MetaDataException(metaDataName + " : The privilege [documentName] value of " + value +
+													IN_ROLE + roleName +
+													" cannot be for a document referenced from another module.  Document Privileges are to be made on the owning module only.");
+				}
+
+				documentPrivilege.setName(value);
+				DocumentPermission docPermission = documentPrivilegeMetaData.getPermission();
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean docPermissionMissing = (docPermission == null);
+				if (docPermissionMissing) {
+					throw new MetaDataException(metaDataName + " : Document permission is required for document " +
+													documentPrivilege.getName() + IN_ROLE + roleName);
+				}
+				documentPrivilege.setPermission(docPermission);
+				documentPrivilege.getProperties().putAll(documentPrivilegeMetaData.getProperties());
+
+				role.getPrivileges().add(documentPrivilege);
+
+				// Add the action privileges also
+				List<ActionPrivilegeMetaData> repositoryActionPrivileges = documentPrivilegeMetaData.getActions();
+				for (ActionPrivilegeMetaData actionPrivilegeMetaData : repositoryActionPrivileges) {
+					ActionPrivilege actionPrivilege = new ActionPrivilege();
+					value = actionPrivilegeMetaData.getActionName();
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean actionNameMissing = (value == null);
+					if (actionNameMissing) {
+						throw new MetaDataException(metaDataName + " : The [actionName] for a privilege is required for document " +
+														documentPrivilege.getName() + IN_ROLE + roleName);
+					}
+					actionPrivilege.setName(value);
+					actionPrivilege.setDocumentName(documentPrivilege.getName());
+					actionPrivilege.getProperties().putAll(actionPrivilegeMetaData.getProperties());
+
+					role.getPrivileges().add(actionPrivilege);
+				}
+
+				// Add the content restrictions
+				List<ContentRestriction> contentRestrictions = documentPrivilegeMetaData.getContentRestrictions();
+				for (ContentRestriction contentRestriction : contentRestrictions) {
+					value = contentRestriction.getAttributeName();
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean attributeNameMissing = (value == null);
+					if (attributeNameMissing) {
+						throw new MetaDataException(metaDataName + " : The [attribute] for a content restriction is required for document " +
+														documentPrivilege.getName() + IN_ROLE + roleName);
+					}
+					contentRestriction.setDocumentName(documentPrivilege.getName());
+
+					role.getContentRestrictions().add(contentRestriction);
+				}
+
+				// Add the content permissions
+				List<ContentPermission> contentPermissions = documentPrivilegeMetaData.getContentPermissions();
+				for (ContentPermission contentPermission : contentPermissions) {
+					value = contentPermission.getAttributeName();
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean attributeNameMissing = (value == null);
+					if (attributeNameMissing) {
+						throw new MetaDataException(metaDataName + " : The [attribute] for a content permission is required for document " +
+														documentPrivilege.getName() + IN_ROLE + roleName);
+					}
+					contentPermission.setDocumentName(documentPrivilege.getName());
+
+					role.getContentPermissions().add(contentPermission);
+				}
+			}
+
+			// Populate User Accesses
+			List<ModuleRoleUserAccessMetaData> repositoryAccesses = roleMetaData.getAccesses();
+			Map<UserAccess, Set<String>> accesses = role.getAccesses();
+			for (ModuleRoleUserAccessMetaData accessMetaData : repositoryAccesses) {
+				// Validate access metadata
+				accessMetaData.validate(metaDataName, roleName, result);
+
+				// Validate and add ux/uis
+				Set<String> uxuis = null;
+				List<ModuleRoleUserAccessUxUiMetadata> uxuisMetaData = accessMetaData.getUxuis();
+				if (uxuisMetaData.isEmpty()) {
+					uxuis = UserAccess.ALL_UX_UIS;
+				}
+				else {
+					uxuis = new TreeSet<>();
+					for (ModuleRoleUserAccessUxUiMetadata uxuiMetaData : uxuisMetaData) {
+						String uxuiName = uxuiMetaData.getName();
+						if (uxuiName == null) {
+							throw new MetaDataException(metaDataName + " : [name] is required for UX/UI in user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
+						}
+						if (! uxuis.add(uxuiMetaData.getName())) {
+							throw new MetaDataException(metaDataName + " : Duplicate UX/UI of " + uxuiMetaData.getName() + " in user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
+						}
+					}
+				}
+
+				// Put into accesses
+				if (accesses.put(accessMetaData.toUserAccess(moduleName), uxuis) != null) {
+					throw new MetaDataException(metaDataName + " : Duplicate user access " + accessMetaData.toUserAccess(moduleName).toString() + IN_ROLE + roleName);
+				}
+			}
+
+			result.putRole(role);
 		}
 
 		// Populate the menu
 
+		if (menu == null) {
+			throw new MetaDataException(metaDataName + " : The module [menu] is required");
+		}
 		MenuImpl resultMenu = new MenuImpl();
 		resultMenu.getProperties().putAll(menu.getProperties());
 
@@ -887,10 +956,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @throws MetaDataException if required action attributes are missing or inconsistent
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void populateModuleMenu(String metaDataName,
-										List<MenuItem> items,
-										List<ActionMetaData> actions,
-										Set<String> validRoleNames) {
+	private void populateModuleMenu(@Nonnull String metaDataName,
+										@Nonnull List<MenuItem> items,
+										@Nonnull List<ActionMetaData> actions,
+										@Nonnull Set<String> validRoleNames) {
 		for (ActionMetaData action : actions) {
 			if (action instanceof GroupMetaData group) {
 				String value = action.getName();
@@ -916,9 +985,18 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				String endBinding = item.getEndBinding();
 
 				if (documentName != null) {
-					if ((queryName != null) ||
-							(startBinding == null) ||
-							(endBinding == null)) {
+					if (modelName != null) {
+						// a model supplies its own events so it doesn't need the bindings
+						if ((queryName != null) ||
+								(startBinding != null) ||
+								(endBinding != null)) {
+							throw new MetaDataException(metaDataName + " : If [model] is present, then [query], " +
+															"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
+						}
+					}
+					else if ((queryName != null) ||
+								(startBinding == null) ||
+								(endBinding == null)) {
 						throw new MetaDataException(metaDataName + MENU_DOCUMENT_QUERY_EXCLUSIVITY +
 														"and [startBinding] and [endBinding] are required for menu item " + item.getName());
 					}
@@ -932,10 +1010,8 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 					}
 				}
 				else if (modelName != null) {
-					if ((startBinding != null) || (endBinding != null)) {
-						throw new MetaDataException(metaDataName + " : If [model] is present, then [document] is required and [query], " +
-														"[startBinding] and [endBinding] should be absent for menu item " + item.getName());
-					}
+					throw new MetaDataException(metaDataName + MENU_MODEL_DOCUMENT_REQUIRED +
+													FOR_MENU_ITEM + item.getName());
 				}
 				else {
 					throw new MetaDataException(metaDataName + MENU_TARGET_REQUIRED +
@@ -955,7 +1031,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				populateItem(metaDataName, validRoleNames, result, item);
 
 				String href = item.getHref();
-				if (href == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean hrefMissing = (href == null);
+				if (hrefMissing) {
 					throw new MetaDataException(metaDataName + " : [href] is required for menu item " + item.getName());
 				}
 				result.setHref(href);
@@ -967,7 +1045,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 				populateItem(metaDataName, validRoleNames, result, item);
 
 				String documentName = item.getDocumentName();
-				if (documentName == null) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean documentNameMissing = (documentName == null);
+				if (documentNameMissing) {
 					throw new MetaDataException(metaDataName + " : [document] is required for menu item " + item.getName());
 				}
 				result.setDocumentName(documentName);
@@ -1111,10 +1191,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param metadata the source item metadata
 	 * @throws MetaDataException if required name/grant attributes are missing, duplicated, or invalid
 	 */
-	private void populateItem(String metaDataName,
-								Set<String> validRoleNames,
-								AbstractMenuItem result,
-								ItemMetaData metadata) {
+	private void populateItem(@Nonnull String metaDataName,
+								@Nonnull Set<String> validRoleNames,
+								@Nonnull AbstractMenuItem result,
+								@Nonnull ItemMetaData metadata) {
 		String value = metadata.getName();
 		if (value == null) {
 			throw new MetaDataException(metaDataName + " : The [name] for a menu item is required");
@@ -1129,7 +1209,9 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 		}
 		for (GrantedTo grant : grants) {
 			value = grant.getRoleName();
-			if (value == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean roleNameMissing = (value == null);
+			if (roleNameMissing) {
 				throw new MetaDataException(metaDataName + " : The [roleName] is required for a grant for menu item " +
 												result.getName());
 			}
@@ -1159,11 +1241,11 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param documentNames document names used to prevent query/document naming collisions
 	 * @throws MetaDataException if required fields are missing or naming rules are violated
 	 */
-	private static void populateQueryProperties(QueryDefinitionMetaData queryMetaData,
-													QueryDefinitionImpl query,
-													String metaDataName,
-													Set<String> queryNames,
-													Set<String> documentNames) {
+	private static void populateQueryProperties(@Nonnull QueryDefinitionMetaData queryMetaData,
+													@Nonnull QueryDefinitionImpl query,
+													@Nonnull String metaDataName,
+													@Nonnull Set<String> queryNames,
+													@Nonnull Set<String> documentNames) {
 		String value = queryMetaData.getName();
 
 		if (value == null) {
@@ -1196,10 +1278,10 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param documentNames document names used to prevent query/document naming collisions
 	 * @throws MetaDataException if the query name is duplicated or conflicts with a document name
 	 */
-	private static void validateQueryName(String name,
-											String metaDataName,
-											Set<String> queryNames,
-											Set<String> documentNames) {
+	private static void validateQueryName(@Nonnull String name,
+											@Nonnull String metaDataName,
+											@Nonnull Set<String> queryNames,
+											@Nonnull Set<String> documentNames) {
 		if (! queryNames.add(name)) {
 			throw new MetaDataException(metaDataName + " : Duplicate query named " + name);
 		}
@@ -1219,14 +1301,16 @@ public class ModuleMetaData extends NamedMetaData implements ConvertibleMetaData
 	 * @param uxuisToAddTo destination set receiving validated UX/UI names
 	 * @throws MetaDataException if a UX/UI name is missing or duplicated
 	 */
-	private static void populateUxuis(String metaDataName,
-										String itemName,
-										List<ApplicableTo> uxuis,
-										Set<String> uxuisToAddTo) {
+	private static void populateUxuis(@Nonnull String metaDataName,
+										@Nonnull String itemName,
+										@Nonnull List<ApplicableTo> uxuis,
+										@Nonnull Set<String> uxuisToAddTo) {
 		Set<String> applicableUxuis = new TreeSet<>();
 		for (ApplicableTo uxui : uxuis) {
 			String value = uxui.getUxUi();
-			if (value == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean uxUiMissing = (value == null);
+			if (uxUiMissing) {
 				throw new MetaDataException(metaDataName + " : The [name] is required for a uxui for menu item " +
 												itemName);
 			}

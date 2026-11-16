@@ -12,6 +12,8 @@ import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.query.JRQueryExecuter;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Jasper query executer that builds a synthetic Skyve bean and exposes it as a data source.
  */
@@ -26,7 +28,7 @@ public class SkyveDocumentExecuter implements JRQueryExecuter {
 	 *
 	 * @param moduleDotDocument The module and document identifier in module.document form.
 	 */
-	public SkyveDocumentExecuter(String moduleDotDocument) {
+	public SkyveDocumentExecuter(@Nonnull String moduleDotDocument) {
 		this.moduleDotDocument = moduleDotDocument;
 	}
 	
@@ -58,7 +60,7 @@ public class SkyveDocumentExecuter implements JRQueryExecuter {
 	 * @throws JRException If the module/document cannot be resolved or data source creation fails.
 	 */
 	@Override
-	public JRDataSource createDatasource() 
+	public @Nonnull JRDataSource createDatasource() 
 	throws JRException {
 		try {
 			User user = SkyveDocumentExecuterFactory.getUser();

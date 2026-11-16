@@ -1,55 +1,55 @@
 package org.skyve.impl.bizport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 
 @SuppressWarnings("static-method")
-public class DataFileFieldTest {
+class DataFileFieldTest {
 
 	// ---- LoadAction enum ----
 
 	@Test
-	public void loadActionValuesContainsFiveValues() {
+	void loadActionValuesContainsFiveValues() {
 		LoadAction[] values = LoadAction.values();
 		assertNotNull(values);
 		assertEquals(5, values.length);
 	}
 
 	@Test
-	public void loadActionValueOfSetValue() {
+	void loadActionValueOfSetValue() {
 		assertEquals(LoadAction.SET_VALUE, LoadAction.valueOf("SET_VALUE"));
 	}
 
 	@Test
-	public void loadActionValueOfLookupEquals() {
+	void loadActionValueOfLookupEquals() {
 		assertEquals(LoadAction.LOOKUP_EQUALS, LoadAction.valueOf("LOOKUP_EQUALS"));
 	}
 
 	@Test
-	public void loadActionValueOfLookupLike() {
+	void loadActionValueOfLookupLike() {
 		assertEquals(LoadAction.LOOKUP_LIKE, LoadAction.valueOf("LOOKUP_LIKE"));
 	}
 
 	@Test
-	public void loadActionValueOfLookupContains() {
+	void loadActionValueOfLookupContains() {
 		assertEquals(LoadAction.LOOKUP_CONTAINS, LoadAction.valueOf("LOOKUP_CONTAINS"));
 	}
 
 	@Test
-	public void loadActionValueOfConfirmValue() {
+	void loadActionValueOfConfirmValue() {
 		assertEquals(LoadAction.CONFIRM_VALUE, LoadAction.valueOf("CONFIRM_VALUE"));
 	}
 
 	// ---- DataFileField constructors ----
 
 	@Test
-	public void bindingConstructorSetsBindingAndDefaults() {
+	void bindingConstructorSetsBindingAndDefaults() {
 		DataFileField f = new DataFileField("name");
 		assertEquals("name", f.getBinding());
 		assertEquals(LoadAction.SET_VALUE, f.getLoadAction());
@@ -58,7 +58,7 @@ public class DataFileFieldTest {
 	}
 
 	@Test
-	public void bindingIndexConstructorSetsIndex() {
+	void bindingIndexConstructorSetsIndex() {
 		DataFileField f = new DataFileField("code", 3);
 		assertEquals("code", f.getBinding());
 		assertEquals(Integer.valueOf(3), f.getIndex());
@@ -67,7 +67,7 @@ public class DataFileFieldTest {
 	}
 
 	@Test
-	public void fourArgConstructorSetsFields() {
+	void fourArgConstructorSetsFields() {
 		DataFileField f = new DataFileField("field", LoadAction.LOOKUP_EQUALS, true, 2);
 		assertEquals("field", f.getBinding());
 		assertEquals(LoadAction.LOOKUP_EQUALS, f.getLoadAction());
@@ -75,7 +75,7 @@ public class DataFileFieldTest {
 	}
 
 	@Test
-	public void fiveArgConstructorSetsConverterField() {
+	void fiveArgConstructorSetsConverterField() {
 		DataFileField f = new DataFileField("field", LoadAction.LOOKUP_LIKE, false, 1, null);
 		assertEquals("field", f.getBinding());
 		assertEquals(LoadAction.LOOKUP_LIKE, f.getLoadAction());
@@ -85,49 +85,49 @@ public class DataFileFieldTest {
 	// ---- Getters/Setters ----
 
 	@Test
-	public void setBindingRoundtrip() {
+	void setBindingRoundtrip() {
 		DataFileField f = new DataFileField("original");
 		f.setBinding("updated");
 		assertEquals("updated", f.getBinding());
 	}
 
 	@Test
-	public void setLoadActionRoundtrip() {
+	void setLoadActionRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		f.setLoadAction(LoadAction.CONFIRM_VALUE);
 		assertEquals(LoadAction.CONFIRM_VALUE, f.getLoadAction());
 	}
 
 	@Test
-	public void setRequiredRoundtrip() {
+	void setRequiredRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		f.setRequired(true);
 		assertTrue(f.isRequired());
 	}
 
 	@Test
-	public void setIndexIntRoundtrip() {
+	void setIndexIntRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		f.setIndex(7);
 		assertEquals(Integer.valueOf(7), f.getIndex());
 	}
 
 	@Test
-	public void setIndexIntegerRoundtrip() {
+	void setIndexIntegerRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		f.setIndex(Integer.valueOf(5));
 		assertEquals(Integer.valueOf(5), f.getIndex());
 	}
 
 	@Test
-	public void setTreatEmptyNumericAsZeroRoundtrip() {
+	void setTreatEmptyNumericAsZeroRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		f.setTreatEmptyNumericAsZero(true);
 		assertTrue(f.isTreatEmptyNumericAsZero());
 	}
 
 	@Test
-	public void setAttributeRoundtrip() {
+	void setAttributeRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		assertNull(f.getAttribute());
 		// Setting null is valid
@@ -136,7 +136,7 @@ public class DataFileFieldTest {
 	}
 
 	@Test
-	public void setConverterRoundtrip() {
+	void setConverterRoundtrip() {
 		DataFileField f = new DataFileField("x");
 		assertNull(f.getConverter());
 		f.setConverter(null);

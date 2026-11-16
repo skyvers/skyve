@@ -70,7 +70,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 		return owningModuleName;
 	}
 
-	public void setOwningModuleName(String owningModuleName) {
+	public void setOwningModuleName(@Nonnull String owningModuleName) {
 		this.owningModuleName = owningModuleName;
 	}
 
@@ -79,17 +79,17 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 		return (Attribute) getMetaData(name);
 	}
 
-	public void putAttribute(Attribute attribute) {
+	public void putAttribute(@Nonnull Attribute attribute) {
 		putMetaData(attribute.getName(), attribute);
 		attributes.add(attribute);
 	}
 
-	public void putInterface(Interface i) {
+	public void putInterface(@Nonnull Interface i) {
 		interfaces.add(i);
 	}
 
 	@Override
-	public List<Interface> getInterfaces() {
+	public @Nonnull List<Interface> getInterfaces() {
 		return Collections.unmodifiableList(interfaces);
 	}
 
@@ -99,7 +99,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@Override
-	public @Nonnull List<? extends Attribute> getAllAttributes(Customer customer) {
+	public @Nonnull List<? extends Attribute> getAllAttributes(@Nonnull Customer customer) {
 		List<Attribute> result = new ArrayList<>(attributes);
 		Extends currentInherits = inherits;
 		if (currentInherits != null) {
@@ -132,47 +132,47 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@Override
-	public String getPluralAlias() {
+	public @Nonnull String getPluralAlias() {
 		return pluralAlias;
 	}
 
-	public void setPluralAlias(String pluralAlias) {
+	public void setPluralAlias(@Nonnull String pluralAlias) {
 		this.pluralAlias = pluralAlias;
 	}
 
 	@Override
-	public String getSingularAlias() {
+	public @Nonnull String getSingularAlias() {
 		return singularAlias;
 	}
 
-	public void setSingularAlias(String singularAlias) {
+	public void setSingularAlias(@Nonnull String singularAlias) {
 		this.singularAlias = singularAlias;
 	}
 
 	@Override
-	public String getIcon16x16RelativeFileName() {
+	public @Nullable String getIcon16x16RelativeFileName() {
 		return icon16x16RelativeFileName;
 	}
 
-	public void setIcon16x16RelativeFileName(String icon16x16RelativeFileName) {
+	public void setIcon16x16RelativeFileName(@Nullable String icon16x16RelativeFileName) {
 		this.icon16x16RelativeFileName = icon16x16RelativeFileName;
 	}
 
 	@Override
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = iconStyleClass;
 	}
 
 	@Override
-	public String getIcon32x32RelativeFileName() {
+	public @Nullable String getIcon32x32RelativeFileName() {
 		return icon32x32RelativeFileName;
 	}
 
-	public void setIcon32x32RelativeFileName(String icon32x32RelativeFileName) {
+	public void setIcon32x32RelativeFileName(@Nullable String icon32x32RelativeFileName) {
 		this.icon32x32RelativeFileName = icon32x32RelativeFileName;
 	}
 
@@ -182,11 +182,11 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 
 	@Override
-	public Dynamic getDynamism() {
+	public @Nullable Dynamic getDynamism() {
 		return dynamic;
 	}
 	
-	public void setDynamism(Dynamic dynamic) {
+	public void setDynamism(@Nullable Dynamic dynamic) {
 		this.dynamic = dynamic;
 	}
 	
@@ -204,7 +204,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void determineHasDynamic(Set<String> modoc) {
+	private void determineHasDynamic(@Nonnull Set<String> modoc) {
 		Customer c = CORE.getCustomer();
 		String omn = getOwningModuleName();
 		modoc.add(omn + "." + getName());
@@ -248,38 +248,38 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 
 	@Override
-	public String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = description;
 	}
 
 	@Override
-	public Persistent getPersistent() {
+	public @Nullable Persistent getPersistent() {
 		return persistent;
 	}
 
-	public void setPersistent(Persistent persistent) {
+	public void setPersistent(@Nullable Persistent persistent) {
 		this.persistent = persistent;
 	}
 
 	@Override
-	public Extends getExtends() {
+	public @Nullable Extends getExtends() {
 		return inherits;
 	}
 
-	public void setExtends(Extends inherits) {
+	public void setExtends(@Nullable Extends inherits) {
 		this.inherits = inherits;
 	}
 
@@ -293,7 +293,7 @@ public abstract class ModelImpl extends AbstractMetaDataMap implements Model {
 	}
 	
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
 
         return MoreObjects.toStringHelper(this)
                           .add("name", name)

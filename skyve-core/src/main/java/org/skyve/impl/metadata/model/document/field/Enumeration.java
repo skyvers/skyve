@@ -58,34 +58,34 @@ public class Enumeration extends ConstrainableField {
 		private String code;
 		private String description;
 
-		public String getName() {
+		public @Nullable String getName() {
 			return name;
 		}
 		
 		@XmlAttribute
-		public void setName(String name) {
+		public void setName(@Nullable String name) {
 			this.name = UtilImpl.processStringValue(name);
 		}
 
-		public String getCode() {
+		public @Nonnull String getCode() {
 			return code;
 		}
 		
 		@XmlAttribute(required = true)
-		public void setCode(String code) {
+		public void setCode(@Nonnull String code) {
 			this.code = UtilImpl.processStringValue(code);
 		}
 
-		public String getDescription() {
+		public @Nullable String getDescription() {
 			return description;
 		}
 
 		@XmlAttribute
-		public void setDescription(String description) {
+		public void setDescription(@Nullable String description) {
 			this.description = UtilImpl.processStringValue(description);
 		}
 		
-		public String toJavaIdentifier() {
+		public @Nonnull String toJavaIdentifier() {
 			String result = name;
 
 			if (result == null) {
@@ -114,81 +114,81 @@ public class Enumeration extends ConstrainableField {
 	private Document owningDocument;
 	
 	@XmlTransient
-	public String getTypeName() {
+	public @Nullable String getTypeName() {
 		return getTarget().typeName;
 	}
 
-	public String getXmlTypeName() {
+	public @Nullable String getXmlTypeName() {
 		return typeName;
 	}
 	
 	@XmlAttribute(name = "typeName")
-	public void setXmlTypeName(String typeName) {
+	public void setXmlTypeName(@Nullable String typeName) {
 		this.typeName = UtilImpl.processStringValue(typeName);
 	}
 	
 	@XmlTransient
-	public String getImplementingEnumClassName() {
+	public @Nullable String getImplementingEnumClassName() {
 		return getTarget().implementingEnumClassName;
 	}
 
-	public String getXmlImplementingEnumClassName() {
+	public @Nullable String getXmlImplementingEnumClassName() {
 		return implementingEnumClassName;
 	}
 	
 	@XmlAttribute(name = "implementingEnumClassName")
-	public void setXmlImplementingEnumClassName(String implementingEnumClassName) {
+	public void setXmlImplementingEnumClassName(@Nullable String implementingEnumClassName) {
 		this.implementingEnumClassName = UtilImpl.processStringValue(implementingEnumClassName);
 	}
 
-	public Document getOwningDocument() {
+	public @Nullable Document getOwningDocument() {
 		return owningDocument;
 	}
 
 	@XmlTransient
-	public void setOwningDocument(Document owningDocument) {
+	public void setOwningDocument(@Nonnull Document owningDocument) {
 		this.owningDocument = owningDocument;
 	}
 
-	public String getModuleRef() {
+	public @Nullable String getModuleRef() {
 		return moduleRef;
 	}
 
 	@XmlAttribute
-	public void setModuleRef(String moduleRef) {
+	public void setModuleRef(@Nullable String moduleRef) {
 		this.moduleRef = UtilImpl.processStringValue(moduleRef);
 	}
 
-	public String getDocumentRef() {
+	public @Nullable String getDocumentRef() {
 		return documentRef;
 	}
 
 	@XmlAttribute
-	public void setDocumentRef(String documentRef) {
+	public void setDocumentRef(@Nullable String documentRef) {
 		this.documentRef = UtilImpl.processStringValue(documentRef);
 	}
 
-	public String getAttributeRef() {
+	public @Nullable String getAttributeRef() {
 		return attributeRef;
 	}
 
 	@XmlAttribute
-	public void setAttributeRef(String attributeRef) {
+	public void setAttributeRef(@Nullable String attributeRef) {
 		this.attributeRef = UtilImpl.processStringValue(attributeRef);
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "values")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "value")
-	public List<EnumeratedValue> getXmlValues() {
+	public @Nonnull List<EnumeratedValue> getXmlValues() {
 		return values;
 	}
 
 	@XmlTransient
-	public List<EnumeratedValue> getValues() {
+	public @Nonnull List<EnumeratedValue> getValues() {
 		return getTarget().values;
 	}
 	
-	public String toJavaIdentifier() {
+	public @Nonnull String toJavaIdentifier() {
 		String result = getTypeName();
 
 		if (result == null) {
@@ -202,7 +202,7 @@ public class Enumeration extends ConstrainableField {
 	 * Get the target - it is either another enumeration or itself.
 	 * @return
 	 */
-	public Enumeration getTarget() {
+	public @Nonnull Enumeration getTarget() {
 		Enumeration result = this;
 		
 		// This is a reference to another enumeration
@@ -215,7 +215,7 @@ public class Enumeration extends ConstrainableField {
 			Document referencedDocument = owningDocument;
 			
 			if ((moduleRef != null) || (documentRef != null)) {
-				Module referencedModule = ProvidedRepositoryFactory.get().getModule(null, referencedModuleName);
+				Module referencedModule = ProvidedRepositoryFactory.getNullSafe().getModule(null, referencedModuleName);
 				referencedDocument = referencedModule.getDocument(null, referencedDocumentName);
 			}
 			
@@ -232,7 +232,7 @@ public class Enumeration extends ConstrainableField {
 	}
 	
 	@Override
-	public Class<?> getImplementingType() {
+	public @Nonnull Class<?> getImplementingType() {
 		Enumeration e = getTarget();
 		if (e.isDynamic()) {
 			return String.class;
@@ -272,7 +272,7 @@ public class Enumeration extends ConstrainableField {
 		return null;
 	}
 	
-	public String getEncapsulatingClassName() {
+	public @Nonnull String getEncapsulatingClassName() {
 		StringBuilder result = new StringBuilder(64);
 		
 		result.append(ProvidedRepository.MODULES_NAME).append('.');

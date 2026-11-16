@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds one UX/UI variant and its route list within router metadata.
  */
@@ -23,7 +26,7 @@ public class FluentUxUi {
 	 *
 	 * @param uxui backing metadata
 	 */
-	public FluentUxUi(UxUiMetadata uxui) {
+	public FluentUxUi(@Nonnull UxUiMetadata uxui) {
 		this.uxui = uxui;
 	}
 
@@ -33,9 +36,11 @@ public class FluentUxUi {
 	 * @param uxui source UX/UI metadata
 	 * @return this builder
 	 */
-	public FluentUxUi from(@SuppressWarnings("hiding") UxUiMetadata uxui) {
+	public @Nonnull FluentUxUi from(@SuppressWarnings("hiding") @Nonnull UxUiMetadata uxui) {
 		name(uxui.getName());
 		uxui.getRoutes().forEach(r -> addRoute(new FluentRoute().from(r)));
+		uxui.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -45,7 +50,7 @@ public class FluentUxUi {
 	 * @param name UX/UI name
 	 * @return this builder
 	 */
-	public FluentUxUi name(String name) {
+	public @Nonnull FluentUxUi name(@Nullable String name) {
 		uxui.setName(name);
 		return this;
 	}
@@ -56,7 +61,7 @@ public class FluentUxUi {
 	 * @param route route wrapper
 	 * @return this builder
 	 */
-	public FluentUxUi addRoute(FluentRoute route) {
+	public @Nonnull FluentUxUi addRoute(@Nonnull FluentRoute route) {
 		uxui.getRoutes().add(route.get());
 		return this;
 	}
@@ -67,7 +72,7 @@ public class FluentUxUi {
 	 * @param outcomeUrl outcome URL to remove
 	 * @return this builder
 	 */
-	public FluentUxUi removeRoutes(String outcomeUrl) {
+	public @Nonnull FluentUxUi removeRoutes(@Nonnull String outcomeUrl) {
 		uxui.getRoutes().removeIf(r -> outcomeUrl.equals(r.getOutcomeUrl()));
 		return this;
 	}
@@ -78,7 +83,7 @@ public class FluentUxUi {
 	 * @param outcomeUrl route outcome URL
 	 * @return matching routes, possibly empty
 	 */
-	public List<FluentRoute> findRoutes(String outcomeUrl) {
+	public @Nonnull List<FluentRoute> findRoutes(@Nonnull String outcomeUrl) {
 		List<FluentRoute> result = new ArrayList<>(10);
 		uxui.getRoutes().stream()
 						.filter(r -> outcomeUrl.equals(r.getOutcomeUrl()))
@@ -91,8 +96,21 @@ public class FluentUxUi {
 	 *
 	 * @return this builder
 	 */
-	public FluentUxUi clearRoutes() {
+	public @Nonnull FluentUxUi clearRoutes() {
 		uxui.getRoutes().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentUxUi putProperty(@Nonnull String k, @Nonnull String v) {
+		uxui.getProperties().put(k, v);
 		return this;
 	}
 
@@ -101,7 +119,7 @@ public class FluentUxUi {
 	 *
 	 * @return backing UX/UI metadata
 	 */
-	public UxUiMetadata get() {
+	public @Nonnull UxUiMetadata get() {
 		return uxui;
 	}
 }

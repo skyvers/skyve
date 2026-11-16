@@ -2,6 +2,8 @@ package org.skyve.metadata.view.widget.bound;
 
 import org.skyve.impl.metadata.view.event.EventSource;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that are bound to a document attribute.
  *
@@ -20,12 +22,12 @@ public interface Bound extends EventSource {
 	 *
 	 * @return the binding path; may be {@code null} for unbound widgets
 	 */
-	public String getBinding();
+	public @Nullable String getBinding();
 	
 	/**
 	 * Sets the Skyve binding expression for this widget.
 	 *
 	 * @param binding  the binding path to set; may be {@code null}
 	 */
-	public void setBinding(String binding);
+	public void setBinding(@Nullable String binding);
 }

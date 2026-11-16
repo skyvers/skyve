@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Encapsulates the calculated responsive column style calcs
  * that enable the layout of skyve <form/> edit view definitions 
@@ -46,7 +48,7 @@ public class ResponsiveFormGrid implements Serializable {
 		 * @param other	Other style
 		 * @return	A new ResponsiveGridStyle that adds the various columns together.
 		 */
-		public ResponsiveGridStyle add(ResponsiveGridStyle other) {
+		public @Nonnull ResponsiveGridStyle add(@Nonnull ResponsiveGridStyle other) {
 			int small = Math.min(smallCols + other.smallCols, 12);
 			int medium = Math.min(mediumCols + other.mediumCols, 12);
 			int large = Math.min(largeCols + other.largeCols, 12);
@@ -58,7 +60,7 @@ public class ResponsiveFormGrid implements Serializable {
 		 * Return the style css required.
 		 */
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			StringBuilder result = new StringBuilder(34);
 			if (UtilImpl.PRIMEFLEX) {
 				result.append("p-col-").append(smallCols);
@@ -98,7 +100,7 @@ public class ResponsiveFormGrid implements Serializable {
 	 *
 	 * @param columnStyles the per-column responsive style definitions
 	 */
-	public ResponsiveFormGrid(ResponsiveGridStyle[] columnStyles) {
+	public ResponsiveFormGrid(@Nonnull ResponsiveGridStyle[] columnStyles) {
 		this.columnStyles = columnStyles;
 	}
 	
@@ -106,7 +108,7 @@ public class ResponsiveFormGrid implements Serializable {
 	 * Get the next style.
 	 * @param colspan	The colspan required to produce the next style.
 	 */
-	public String getStyle(int colspan) {
+	public @Nonnull String getStyle(int colspan) {
 		// reset the current column index if it will be out of bounds
 		if (currentColumn > (columnStyles.length - 1)) {
 			currentColumn = 0;

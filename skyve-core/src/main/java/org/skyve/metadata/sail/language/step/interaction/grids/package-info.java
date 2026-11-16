@@ -15,6 +15,10 @@
  *           a row, opening it in a modal or new edit view.
  *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove} — removes
  *           the row at the specified index.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove} — drags a row
+ *           of an ordered data grid to another position.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove} — drags a
+ *           member of an ordered list membership to another position in its member list.
  *     </ul>
  *   <li><b>List-grid steps</b> — operate on module-level list views:
  *     <ul>
@@ -24,8 +28,19 @@
  *           a row by its zero-based index, e.g. for tag/untag operations.
  *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom} — zooms into
  *           a row by its zero-based index.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter} — filters
+ *           one column, or clears that column's filter.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter} — clears
+ *           every column filter.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort} — sorts by
+ *           one column.
+ *       <li>{@link org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool} — presses a
+ *           toolbar tool, such as Refresh or Deselect.
  *     </ul>
  * </ul>
+ *
+ * <p>The row steps implement {@link org.skyve.metadata.sail.language.step.interaction.grids.GridRowStep},
+ * so a row can be located by index ({@code row}) or by the text of one of its cells ({@code rowContaining}).
  *
  * @see org.skyve.metadata.sail.language.step.interaction
  */

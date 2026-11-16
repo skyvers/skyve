@@ -5,10 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,6 +56,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.FacesException;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIViewRoot;
@@ -59,12 +64,13 @@ import jakarta.faces.component.UIViewRoot;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Tests for FacesView utility methods and state management that do not require a live CDI container.
  * Tests use plain instantiation to exercise getters, setters, and sanitisation logic.
  */
-@SuppressWarnings({ "static-method", "boxing", "java:S1192" }) // Repeated literals are deliberate Faces compatibility fixtures.
+@SuppressWarnings({ "static-method", "boxing", "java:S1192", "java:S5960" }) // Repeated literals are deliberate fixtures; assertions are test-only.
 class FacesViewTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {
@@ -241,6 +247,7 @@ class FacesViewTest {
 		assertEquals("parent.child.property", view.getBindingParameter());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBindingParameterStripsScriptTags() {
 		FacesView view = new FacesView();
@@ -287,6 +294,7 @@ class FacesViewTest {
 
 	// ----- HarnessView parameter setters (OWASP-sanitised) -----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBizModuleParameterStripsHtmlTags() {
 		FacesView view = new FacesView();
@@ -367,6 +375,63 @@ class FacesViewTest {
 	void getApiScriptIsNullByDefault() {
 		FacesView view = new FacesView();
 		assertNull(view.getApiScript());
+	}
+
+	/**
+	 * The PrimeFaces recorder's client-id maps and inline state are built only while the session records: a page whose
+	 * session is not recording builds nothing. {@code PrimeFacesRecordingMapH2Test} tests the maps themselves.
+	 */
+	@Test
+	void sailRecordingMapsAreNullUnlessRecording() {
+		FacesView view = new FacesView();
+		view.setBizModuleParameter("kitchensink");
+		view.setBizDocumentParameter("ActionsFixture");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(facesContext);
+		try {
+			assertNull(view.getSailRecordingEditMap());
+			assertNull(view.getSailRecordingListMap());
+			assertNull(view.getSailRecordingState());
+			verify(request, never()).getSession();
+		}
+		finally {
+			FacesContextBridge.setCurrent(null);
+		}
+	}
+
+	/**
+	 * A map that cannot be built never breaks the page: the getters log and return no map.
+	 */
+	@Test
+	void sailRecordingMapsThatCannotBeBuiltAreNull() {
+		FacesView view = new FacesView() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public boolean isSailRecording() {
+				return true;
+			}
+		};
+		view.setBizModuleParameter("noSuchModule");
+		view.setBizDocumentParameter("NoSuchDocument");
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+		FacesContextBridge.setCurrent(facesContext);
+		try {
+			assertNull(view.getSailRecordingEditMap());
+			assertNull(view.getSailRecordingListMap());
+			assertNull(view.getSailRecordingState());
+		}
+		finally {
+			FacesContextBridge.setCurrent(null);
+		}
 	}
 
 	@Test
@@ -523,8 +588,8 @@ class FacesViewTest {
 	void contentUrlHelpersRequireCurrentBean() {
 		FacesView view = new FacesView();
 
-		assertThrows(NullPointerException.class, () -> view.getContentUrl("attachment", true));
-		assertThrows(NullPointerException.class, () -> view.getContentFileName("attachment"));
+		assertThrows(IllegalStateException.class, () -> view.getContentUrl("attachment", true));
+		assertThrows(IllegalStateException.class, () -> view.getContentFileName("attachment"));
 	}
 
 	@Test
@@ -742,6 +807,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void getCsrfTokenReturnsExistingValueWhenFacesTraceEnabled() throws Exception {
 		FacesView view = new FacesView();
 		setPrivateField(view, "csrfToken", "existing-token");
@@ -814,6 +880,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void setCsrfTokenWithFacesTraceEnabledStillMarksChecked() throws Exception {
 		FacesView view = new FacesView();
 		FacesContext facesContext = mock(FacesContext.class);
@@ -1204,6 +1271,44 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings({ "java:S1143", "java:S1163" }) // Cleanup failure must fail this thread-local isolation test.
+	void selectGridRowStringWithoutBizIdClearsTheSelectedIdBinding() {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("selectedId", "biz-100");
+		DynamicBean root = new DynamicBean("test", "RootDoc", values);
+		try {
+			setPrivateField(view, "currentBean", new BeanMapAdapter(root, null));
+			bindPersistenceToThread(mock(AbstractPersistence.class));
+			FacesContext facesContext = mock(FacesContext.class);
+			PartialViewContext partialViewContext = mock(PartialViewContext.class);
+			when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+			when(partialViewContext.getRenderIds()).thenReturn(new ArrayList<>());
+			FacesContextBridge.setCurrent(facesContext);
+			// an unselected row sends no bizId (or a blank one)
+			invokeIgnoringThrowable(() -> view.selectGridRow(null, "selectedId", null, null));
+			assertNull(values.get("selectedId"));
+			values.put("selectedId", "biz-200");
+			invokeIgnoringThrowable(() -> view.selectGridRow(" ", "selectedId", null, null));
+			assertNull(values.get("selectedId"));
+			invokeIgnoringThrowable(() -> view.selectGridRow("biz-300", "selectedId", null, null));
+			assertEquals("biz-300", values.get("selectedId"));
+		}
+		catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		finally {
+			try {
+				FacesContextBridge.setCurrent(null);
+				unbindPersistenceFromThread();
+			}
+			catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+
+	@Test
 	void selectGridRowEventStripsHashSuffixFromBizIdBeforeBindingSet() throws Exception {
 		FacesView view = new FacesView();
 		Map<String, Object> values = new HashMap<>();
@@ -1281,6 +1386,71 @@ class FacesViewTest {
 
 		assertNotNull(first);
 		assertSame(first, second);
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void getLazyDataModelRejectsMissingModuleAndDocumentKeys() {
+		FacesView view = new FacesView();
+
+		assertThrows(NullPointerException.class,
+				() -> view.getLazyDataModel(null, "document", "query", "model", null));
+		assertThrows(NullPointerException.class,
+				() -> view.getLazyDataModel(null, null, null, null, null));
+		assertThrows(NullPointerException.class,
+				() -> view.getLazyDataModel("module", null, null, null, null));
+		assertNotNull(view.getLazyDataModel("module", "document", null, null, null));
+	}
+
+	@Test
+	void getLazyDataModelKeepsDistinctKeysSeparate() {
+		FacesView view = new FacesView();
+		List<SkyveLazyDataModel> models = List.of(
+				view.getLazyDataModel("sales", "Order", "Orders", null, null),
+				view.getLazyDataModel("sales", "Order", "OpenOrders", null, null),
+				view.getLazyDataModel("admin", "Order", "Orders", null, null),
+				view.getLazyDataModel("sales", "Order", null, null, null),
+				view.getLazyDataModel("sales", "Contact", null, null, null),
+				view.getLazyDataModel("sales", "Order", null, "Recent", null),
+				view.getLazyDataModel("sales", "Order", null, "Archived", null));
+
+		for (int i = 0; i < models.size(); i++) {
+			for (int j = i + 1; j < models.size(); j++) {
+				assertNotSame(models.get(i), models.get(j));
+			}
+		}
+		assertSame(models.get(3), view.getLazyDataModel("sales", "Order", null, null, null));
+		assertSame(models.get(5), view.getLazyDataModel("sales", "Order", null, "Recent", null));
+	}
+
+	@Test
+	void getLazyDataModelQueryKeyTakesPrecedenceOverDocumentAndModel() {
+		FacesView view = new FacesView();
+		SkyveLazyDataModel first = view.getLazyDataModel("sales", "Order", "Orders", "Recent", null);
+
+		assertSame(first, view.getLazyDataModel("sales", "Contact", "Orders", "Archived", null));
+	}
+
+	@Test
+	void getLazyDataModelCacheHitDoesNotParseReplacementCriteria() {
+		FacesView view = new FacesView();
+		SkyveLazyDataModel first = view.getLazyDataModel("sales", "Order", "Orders", null,
+				List.of(List.of("name", "equal", "Alice")));
+		List<List<String>> invalidCriteria = List.of(List.of("name", "notAnOperator", "Bob"));
+
+		assertSame(first, view.getLazyDataModel("sales", "Order", "Orders", null, invalidCriteria));
+	}
+
+	@Test
+	void getLazyDataModelFailedCreationDoesNotPopulateCache() {
+		FacesView view = new FacesView();
+		List<List<String>> invalidCriteria = List.of(List.of("name", "notAnOperator", "Alice"));
+
+		assertThrows(IllegalArgumentException.class,
+				() -> view.getLazyDataModel("sales", "Order", "Orders", null, invalidCriteria));
+		SkyveLazyDataModel model = view.getLazyDataModel("sales", "Order", "Orders", null, List.of());
+		assertNotNull(model);
+		assertSame(model, view.getLazyDataModel("sales", "Order", "Orders", null, null));
 	}
 
 	@Test
@@ -1402,7 +1572,7 @@ class FacesViewTest {
 	@Test
 	void getContentUrlThrowsWhenCurrentBeanUnavailable() {
 		FacesView view = new FacesView();
-		assertThrows(NullPointerException.class, () -> view.getContentUrl("img", true));
+		assertThrows(IllegalStateException.class, () -> view.getContentUrl("img", true));
 	}
 
 	@Test
@@ -1426,7 +1596,7 @@ class FacesViewTest {
 	@Test
 	void getContentFileNameThrowsWhenCurrentBeanUnavailable() {
 		FacesView view = new FacesView();
-		assertThrows(NullPointerException.class, () -> view.getContentFileName("file"));
+		assertThrows(IllegalStateException.class, () -> view.getContentFileName("file"));
 	}
 
 	@Test
@@ -1451,6 +1621,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void getSelectItemsWithFacesTraceEnabledStillRequiresPersistenceSetup() {
 		FacesView view = new FacesView();
 		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
@@ -1512,6 +1683,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void navigationAndAddInlineWithFacesTraceEnabledExecuteMethodBodiesInHeadlessMode() {
 		FacesView view = new FacesView();
 		boolean originalFacesTrace = UtilImpl.FACES_TRACE;
@@ -1829,6 +2001,54 @@ class FacesViewTest {
 		assertSame(bean, view.getPostRenderBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
+	@Test
+	void postRenderStateAcceptsSubtypeSpecificBizlet() {
+		FacesView view = new FacesView();
+		java.util.concurrent.atomic.AtomicReference<DynamicBean> renderedBean = new java.util.concurrent.atomic.AtomicReference<>();
+		java.util.concurrent.atomic.AtomicReference<WebContext> renderedContext = new java.util.concurrent.atomic.AtomicReference<>();
+		Bizlet<DynamicBean> bizlet = new Bizlet<>() {
+			@Override
+			public void postRender(DynamicBean bean, WebContext webContext) {
+				renderedBean.set(bean);
+				renderedContext.set(webContext);
+			}
+		};
+		DynamicBean bean = mock(DynamicBean.class);
+		WebContext context = mock(WebContext.class);
+		view.setPostRender(bizlet, bean);
+
+		// Preserve the state through the getter/setter round trip used on redirects.
+		view.setPostRender(view.getPostRenderBizlet(), view.getPostRenderBean());
+		assertSame(bizlet, view.getPostRenderBizlet());
+		assertSame(bean, view.getPostRenderBean());
+		// Match the phase listener's invocation through the Bean-level contract.
+		@SuppressWarnings("unchecked")
+		Bizlet<Bean> callback = (Bizlet<Bean>) view.getPostRenderBizlet();
+		callback.postRender(view.getPostRenderBean(), context);
+		assertSame(bean, renderedBean.get());
+		assertSame(context, renderedContext.get());
+	}
+
+	@Test
+	void postRenderStateSupportsAbsentBizletAndClearing() {
+		FacesView view = new FacesView();
+		assertNull(view.getPostRenderBizlet());
+		assertNull(view.getPostRenderBean());
+		Bean bean = mock(Bean.class);
+		Bizlet<Bean> bizlet = new Bizlet<>();
+		view.setPostRender(bizlet, bean);
+
+		view.setPostRender(null, bean);
+		assertNull(view.getPostRenderBizlet());
+		assertSame(bean, view.getPostRenderBean());
+
+		view.setPostRender(null, null);
+		assertNull(view.getPostRenderBizlet());
+		assertNull(view.getPostRenderBean());
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBeanWithWebContextInitialisesCurrentBeanAdapter() {
 		FacesView view = new FacesView();
@@ -1844,6 +2064,7 @@ class FacesViewTest {
 		assertSame(bean, view.getCurrentBean().getBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void setBeanWithoutWebContextExecutesNullWebContextBranch() {
 		FacesView view = new FacesView();
@@ -1878,6 +2099,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void dehydrateWithFacesTraceEnabledStillCapturesWebId() {
 		FacesView view = new FacesView();
 		MockWebContext webContext = new MockWebContext();
@@ -1908,6 +2130,7 @@ class FacesViewTest {
 		assertSame(bean, view.getBean());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void hydrateRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
@@ -1930,6 +2153,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings({"java:S2696", "null"}) // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void hydrateWithFacesTraceEnabledRestoresWebContextAndClearsDehydratedWebId() {
 		FacesView view = new FacesView();
 		MockWebContext initialContext = new MockWebContext();
@@ -2006,6 +2230,7 @@ class FacesViewTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2696") // JUnit instance test temporarily changes static configuration and restores it in finally.
 	void resetResponsiveFormStyleReturnsPrimeFlexClassWhenEnabled() {
 		FacesView view = new FacesView();
 		ResponsiveFormGrid grid = new ResponsiveFormGrid(new ResponsiveFormGrid.ResponsiveGridStyle[] {
@@ -2114,6 +2339,234 @@ class FacesViewTest {
 		catch (Throwable ignored) {
 			ignored.getClass();
 			// Headless unit scope intentionally triggers framework-dependent exceptions.
+		}
+	}
+
+	// ----- null and invariant paths -----
+
+	/**
+	 * Installs a mocked Faces context that can record messages and clear partial render ids,
+	 * as a failing {@code FacesAction} does, and binds a mocked persistence to the thread.
+	 */
+	private static FacesContext installActionContext() throws Exception {
+		FacesContext facesContext = mock(FacesContext.class);
+		PartialViewContext partialViewContext = mock(PartialViewContext.class);
+		when(facesContext.getPartialViewContext()).thenReturn(partialViewContext);
+		when(partialViewContext.getRenderIds()).thenReturn(new ArrayList<>());
+		FacesContextBridge.setCurrent(facesContext);
+		bindPersistenceToThread(mock(AbstractPersistence.class));
+		return facesContext;
+	}
+
+	@Test
+	void saveThrowsWhenTheFacesViewHasNoBeanAfterSaving() throws Exception {
+		Bean bean = mock(Bean.class);
+		// The bean is there before the save and gone after it
+		FacesView view = new FacesView() {
+			private static final long serialVersionUID = 1L;
+			private boolean beanGiven = false;
+
+			@Override
+			public @Nullable Bean getBean() {
+				if (beanGiven) {
+					return null;
+				}
+				beanGiven = true;
+				return bean;
+			}
+		};
+		try {
+			FacesContext facesContext = installActionContext();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class, view::save);
+
+			assertEquals("The FacesView has no bean after saving", e.getMessage());
+			verify(facesContext).addMessage(isNull(), argThat(m -> "Saved".equals(m.getSummary())));
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	void navigateSelectEventThrowsWhenTheSelectedRowHasNoBean() {
+		FacesView view = new FacesView();
+		SelectEvent event = mock(SelectEvent.class);
+		when(event.getObject()).thenReturn(new BeanMapAdapter(null, null));
+
+		FacesException e = assertThrows(FacesException.class, () -> view.navigate(event));
+
+		assertEquals("Cannot zoom in on data grid row selection as there is no row bean", e.getMessage());
+	}
+
+	@Test
+	void selectGridRowEventSetsTheSelectedRowBizIdOnTheCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("selectedId", null);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(new DynamicBean("test", "RootDoc", values), null));
+		try {
+			FacesContext facesContext = installActionContext();
+
+			view.selectGridRow(selectEvent("biz-200#Contact.admin"));
+
+			assertEquals("biz-200", values.get("selectedId"));
+			verify(facesContext, never()).addMessage(any(), any());
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void selectGridRowEventReportsAnErrorWhenTheFacesViewHasNoCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		try {
+			FacesContext facesContext = installActionContext();
+
+			view.selectGridRow(selectEvent("biz-200"));
+
+			verify(facesContext).addMessage(isNull(), any());
+			verify(AbstractPersistence.get()).setRollbackOnly();
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	/**
+	 * A grid row selection event of a row with the given bizId, from a grid that sets {@code selectedId} and has no action.
+	 */
+	private static SelectEvent<BeanMapAdapter> selectEvent(String bizId) {
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put("selectedIdBinding", "selectedId");
+		when(component.getAttributes()).thenReturn(attributes);
+		Bean selectedBean = mock(Bean.class);
+		when(selectedBean.getBizId()).thenReturn(bizId);
+		SelectEvent<BeanMapAdapter> result = mock(SelectEvent.class);
+		when(result.getComponent()).thenReturn(component);
+		when(result.getObject()).thenReturn(new BeanMapAdapter(selectedBean, null));
+		return result;
+	}
+
+	@Test
+	void selectGridRowStringReportsAnErrorWhenTheFacesViewHasNoCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		try {
+			FacesContext facesContext = installActionContext();
+
+			view.selectGridRow("biz-100", "selectedId", null, null);
+
+			verify(facesContext).addMessage(isNull(), any());
+			verify(AbstractPersistence.get()).setRollbackOnly();
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void onRowReorderThrowsWhenTheFacesViewHasNoCurrentBean() {
+		FacesView view = new FacesView();
+		ReorderEvent event = mock(ReorderEvent.class);
+		UIComponent component = mock(UIComponent.class);
+		Map<String, Object> attributes = new HashMap<>();
+		attributes.put(ComponentBuilder.COLLECTION_BINDING_ATTRIBUTE_KEY, "items");
+		when(event.getComponent()).thenReturn(component);
+		when(component.getAttributes()).thenReturn(attributes);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> view.onRowReorder(event));
+
+		assertEquals("Cannot reorder items as the FacesView has no current bean", e.getMessage());
+	}
+
+	@Test
+	void contentUrlAndFileNameOfTheCurrentBeanDefaultWhenNoContentIsBound() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("content", null);
+		setPrivateField(view, "currentBean", new BeanMapAdapter(new DynamicBean("test", "RootDoc", values), null));
+		try {
+			installActionContext();
+
+			assertEquals("images/blank.gif", view.getContentUrl("content", true));
+			assertEquals("javascript:void(0)", view.getContentUrl("content", false));
+			assertEquals("&lt;Empty&gt;", view.getContentFileName("content"));
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void contentUrlOfARowAdapterResolvesTheAdaptedBean() throws Exception {
+		FacesView view = new FacesView();
+		Map<String, Object> values = new HashMap<>();
+		values.put("content", "content-1");
+		BeanMapAdapter row = new BeanMapAdapter(new DynamicBean("test", "RowDoc", values), null);
+		try {
+			installActionContext();
+
+			assertEquals("content?_n=content-1&_doc=test.RowDoc&_b=content", view.getContentUrl(row, "content", false));
+		}
+		finally {
+			unbindPersistenceFromThread();
+		}
+	}
+
+	@Test
+	void contentUrlOfARowAdapterThrowsWhenTheAdapterHasNoBean() {
+		FacesView view = new FacesView();
+		BeanMapAdapter row = new BeanMapAdapter(null, null);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> view.getContentUrl(row, "content", true));
+
+		assertEquals("Cannot resolve content for a bean map adapter with no bean", e.getMessage());
+	}
+
+	@Test
+	void getDynamicImageUrlThrowsWhenTheFacesViewHasNoWebContext() {
+		FacesView view = new FacesView();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> view.getDynamicImageUrl("testImage", "test", "ImageDoc", null, null, null, null));
+
+		assertEquals("Cannot make an image URL as the FacesView has no web context", e.getMessage());
+	}
+
+	@Test
+	void getMapScriptForAModelThrowsWhenTheFacesViewHasNoWebContext() throws Exception {
+		FacesView view = new FacesView();
+		setPrivateField(view, "currentBean", new BeanMapAdapter(mock(Bean.class), null));
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> view.getMapScript("mapEl", null, null, null, "mapModel", "loading", null, null, null, false, false));
+
+		assertEquals("Cannot make a map script for model mapModel as the FacesView has no web context or current bean", e.getMessage());
+	}
+
+	@Test
+	void signReportsAnErrorWhenTheFacesViewHasNoCurrentBean() throws Exception {
+		FacesView view = new FacesView();
+		try {
+			FacesContext facesContext = installActionContext();
+			ExternalContext externalContext = mock(ExternalContext.class);
+			when(facesContext.getExternalContext()).thenReturn(externalContext);
+			Map<String, String> requestParameters = new HashMap<>();
+			requestParameters.put("sig_signature_value", "[[{\"x\":1,\"y\":1}]]");
+			when(externalContext.getRequestParameterMap()).thenReturn(requestParameters);
+
+			view.sign("sig", "signature", 100, 40, "#fff", "#000");
+
+			// a generic error, not the validation message for a missing signature (which needs the view root)
+			verify(facesContext).addMessage(isNull(), any());
+			verify(facesContext, never()).getViewRoot();
+			verify(AbstractPersistence.get()).setRollbackOnly();
+		}
+		finally {
+			unbindPersistenceFromThread();
 		}
 	}
 }

@@ -11,6 +11,8 @@ import org.apache.maven.project.MavenProject;
 import org.skyve.impl.create.MavenSkyveProject;
 import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Assembles a deployable Skyve project from an existing Skyve installation or a template project.
  *
@@ -89,22 +91,22 @@ public class AssembleMojo extends AbstractMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	MavenSkyveProjectCreator newProjectCreator() {
+	@Nonnull MavenSkyveProjectCreator newProjectCreator() {
 		return new MavenSkyveProjectCreator();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	MavenSkyveProject initialise(MavenSkyveProjectCreator creator) {
+	@Nonnull MavenSkyveProject initialise(@Nonnull MavenSkyveProjectCreator creator) {
 		return creator.initialise();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void clearBeforeAssemble(MavenSkyveProject projectToAssemble) {
+	void clearBeforeAssemble(@Nonnull MavenSkyveProject projectToAssemble) {
 		projectToAssemble.clearBeforeAssemble();
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void assemble(MavenSkyveProject projectToAssemble) throws IOException {
+	void assemble(@Nonnull MavenSkyveProject projectToAssemble) throws IOException {
 		projectToAssemble.assemble();
 	}
 }

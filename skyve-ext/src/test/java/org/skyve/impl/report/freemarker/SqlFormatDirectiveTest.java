@@ -43,6 +43,7 @@ class SqlFormatDirectiveTest {
 		unbindPersistenceFromThread();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsMissingParameters() {
 		SqlFormatDirective directive = new SqlFormatDirective();
@@ -50,6 +51,7 @@ class SqlFormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, Map.of(), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsLoopVariables() {
 		SqlFormatDirective directive = new SqlFormatDirective();
@@ -59,6 +61,7 @@ class SqlFormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[] { scalar("x") }, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNestedBody() {
 		SqlFormatDirective directive = new SqlFormatDirective();
@@ -69,6 +72,7 @@ class SqlFormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], body));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsUnsupportedParameter() {
 		SqlFormatDirective directive = new SqlFormatDirective();

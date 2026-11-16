@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository.document;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
@@ -11,6 +11,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.Attribute.UsageType;
 import org.skyve.metadata.model.document.Condition;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -40,53 +42,53 @@ public class ConditionMetaData extends NamedMetaData implements Condition {
 	
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
 	@Override
-	public String getDescription() {
+	public @Nullable String getDescription() {
 		return description;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nullable String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 	
 	@Override
-	public String getExpression() {
+	public @Nonnull String getExpression() {
 		return expression;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setExpression(String expression) {
+	public void setExpression(@Nonnull String expression) {
 		this.expression = UtilImpl.processStringValue(expression);
 	}
 
 	@Override
-	public UsageType getUsage() {
+	public @Nullable UsageType getUsage() {
 		return usage;
 	}
 
 	@XmlAttribute
-	public void setUsage(UsageType usage) {
+	public void setUsage(@Nullable UsageType usage) {
 		this.usage = usage;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

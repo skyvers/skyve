@@ -26,7 +26,7 @@ public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T
 	 * @param bean
 	 */
 	@Override
-	public T newInstance(T bean) throws Exception {
+	public @Nonnull T newInstance(@Nonnull T bean) throws Exception {
 		return monomorphicNewInstance(bean);
 	}
 	

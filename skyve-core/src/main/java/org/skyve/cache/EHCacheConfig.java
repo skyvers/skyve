@@ -2,6 +2,8 @@ package org.skyve.cache;
 
 import java.io.Serializable;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Configures an Ehcache-backed cache region.
  *
@@ -31,13 +33,13 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param diskSizeInMB disk tier size in megabytes
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB) {
 		super(name, heapSizeEntries, offHeapSizeInMB, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 		this.diskSizeInMB = diskSizeInMB;
@@ -57,13 +59,13 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param persistent whether disk storage is persistent across restarts
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB,
 							boolean persistent) {
 		this(name, heapSizeEntries, offHeapSizeInMB, expiryPolicy, expiryInMinutes, keyClass, valueClass, diskSizeInMB);
@@ -82,13 +84,13 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, offHeapSizeInMB, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 	}
 
@@ -102,12 +104,12 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 	}
 
@@ -122,12 +124,12 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param valueClass value type
 	 * @param diskSizeInMB disk tier size in megabytes
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB) {
 		super(name, heapSizeEntries, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 		this.diskSizeInMB = diskSizeInMB;
@@ -146,12 +148,12 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param persistent whether disk storage is persistent across restarts
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB,
 							boolean persistent) {
 		this(name, heapSizeEntries, expiryPolicy, expiryInMinutes, keyClass, valueClass, diskSizeInMB);
@@ -166,10 +168,10 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, keyClass, valueClass);
 	}
 
@@ -182,10 +184,10 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param valueClass value type
 	 * @param diskSizeInMB disk tier size in megabytes
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB) {
 		super(name, heapSizeEntries, keyClass, valueClass);
 		this.diskSizeInMB = diskSizeInMB;
@@ -201,10 +203,10 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param diskSizeInMB disk tier size in megabytes
 	 * @param persistent whether disk storage is persistent across restarts
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB,
 							boolean persistent) {
 		this(name, heapSizeEntries, keyClass, valueClass, diskSizeInMB);
@@ -220,11 +222,11 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param keyClass key type
 	 * @param valueClass value type
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		super(name, heapSizeEntries, offHeapSizeInMB, keyClass, valueClass);
 	}
 
@@ -238,11 +240,11 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param valueClass value type
 	 * @param diskSizeInMB disk tier size in megabytes
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB) {
 		super(name, heapSizeEntries, offHeapSizeInMB, keyClass, valueClass);
 		this.diskSizeInMB = diskSizeInMB;
@@ -259,11 +261,11 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @param diskSizeInMB disk tier size in megabytes
 	 * @param persistent whether disk storage is persistent across restarts
 	 */
-	public EHCacheConfig(String name,
+	public EHCacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							Class<K> keyClass,
-							Class<V> valueClass,
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass,
 							long diskSizeInMB,
 							boolean persistent) {
 		this(name, heapSizeEntries, offHeapSizeInMB, keyClass, valueClass, diskSizeInMB);
@@ -294,7 +296,7 @@ public class EHCacheConfig<K extends Serializable, V extends Serializable> exten
 	 * @return config details in JSON-like form
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("{name:\"").append(getName());
 		sb.append("\",type:\"ehcache");

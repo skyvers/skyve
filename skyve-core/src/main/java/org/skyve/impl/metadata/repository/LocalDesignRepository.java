@@ -156,7 +156,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public UserImpl retrieveUser(String userPrincipal) {
+	public @Nullable UserImpl retrieveUser(@Nonnull String userPrincipal) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -168,7 +168,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public boolean populatePermissions(User user) {
+	public boolean populatePermissions(@Nonnull User user) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -179,7 +179,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public void resetUserPermissions(User user) {
+	public void resetUserPermissions(@Nonnull User user) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -192,7 +192,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public boolean populateUser(User user, Connection connection) {
+	public boolean populateUser(@Nonnull User user, @Nonnull Connection connection) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -203,7 +203,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -214,7 +214,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		throw new UnsupportedOperationException();
 	}
 
@@ -226,7 +226,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @throws UnsupportedOperationException always
 	 */
 	@Override
-	public String retrievePublicUserName(String customerName) {
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -236,7 +236,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param user the user whose module menus are recalculated
 	 */
 	@Override
-	public final void resetMenus(User user) {
+	public final void resetMenus(@Nonnull User user) {
 		UserImpl internalUser = (UserImpl) user;
 		for (Module module : user.getCustomer().getModules()) {
 			Menu menu = UtilImpl.cloneBySerialization(module.getMenu());
@@ -272,15 +272,21 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 			}
 			else { // we are dealing with menu items (not a group)
+				// Only menu groups have no role names
+				Set<String> roleNames = menuItem.getRoleNames();
+				if (roleNames == null) {
+					throw new IllegalStateException("Menu item " + menuItem.getName() + " in module " + moduleName + " has no role names");
+				}
+
 				// item is secured by at least 1 role
-				boolean secureMenuItem = (! menuItem.getRoleNames().isEmpty());
+				boolean secureMenuItem = (! roleNames.isEmpty());
 
 				// if not a secured item then it is automatically accessible
 				boolean accessibleMenuItem = (! secureMenuItem);
 
 				if (! accessibleMenuItem) {
 					// check for a role name in the menu item that the user has permissions to.
-					for (String roleName : menuItem.getRoleNames()) {
+					for (String roleName : roleNames) {
 						if (user.isInRole(moduleName, roleName)) {
 							accessibleMenuItem = true;
 							break;
@@ -307,7 +313,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validateCustomerForGenerateDomain(Customer customer) {
+	public void validateCustomerForGenerateDomain(@Nonnull Customer customer) {
 		try {
 			Module homeModule = customer.getHomeModule();
 			if (homeModule == null) {
@@ -352,8 +358,9 @@ public class LocalDesignRepository extends FileSystemRepository {
 		for (CustomerRole role : customer.getRoles()) {
 			for (CustomerModuleRoleMetaData moduleRole : ((CustomerRoleMetaData) role).getRoles()) {
 				String moduleName = moduleRole.getModuleName();
-				Module module = getModule(customer, moduleName);
-				if (module.getRole(moduleRole.getName()) == null) {
+				Module module = getNullSafeModule(customer, moduleName);
+				String moduleRoleName = moduleRole.getName();
+				if ((moduleRoleName == null) || (module.getRole(moduleRoleName) == null)) {
 					throw new MetaDataException("Module role " + moduleRole.getName() +
 													" for module " + moduleName +
 													" for customer role " + role.getName() +
@@ -388,17 +395,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void validateModuleForGenerateDomain(Customer customer, Module module) {
+	public void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module) {
 		// if home document is transient then home ref had better be edit
 		String homeDocumentName = module.getHomeDocumentName();
-		if (homeDocumentName != null) {
-			Document homeDocument = module.getDocument(customer, homeDocumentName);
-			if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
-				throw new MetaDataException("Home document " + homeDocumentName +
-												FOR_CUSTOMER + customer.getName() +
-												IN_MODULE + module.getName() +
-												" is transient and therefore the module requires a homeRef of 'edit'.");
-			}
+		Document homeDocument = module.getDocument(customer, homeDocumentName);
+		if ((homeDocument.getPersistent() == null) && (! ViewType.edit.equals(module.getHomeRef()))) { // is transient but not edit
+			throw new MetaDataException("Home document " + homeDocumentName +
+											FOR_CUSTOMER + customer.getName() +
+											IN_MODULE + module.getName() +
+											" is transient and therefore the module requires a homeRef of 'edit'.");
 		}
 
 		// check query columns and query references
@@ -618,34 +623,36 @@ public class LocalDesignRepository extends FileSystemRepository {
 			// Check modelAggregate and previousComplete UserAccesses
 			for (UserAccess access : roleImpl.getAccesses().keySet()) {
 				if (access.isModelAggregate()) {
-					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					Document accessDocument = module.getDocument(customer, getAccessDocumentName(access));
+					String modelName = getAccessComponent(access);
 					try {
-						getModel(customer, accessDocument, access.getComponent(), false);
+						getModel(customer, accessDocument, modelName, false);
 					}
 					catch (Exception e) {
 						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
 														USER_ACCESS_MODULE_SUFFIX + module.getName() +
-														IS_FOR_MODEL + access.getComponent() +
+														IS_FOR_MODEL + modelName +
 														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
 				else if (access.isDynamicImage()) {
-					Document accessDocument = module.getDocument(customer, access.getDocumentName());
+					Document accessDocument = module.getDocument(customer, getAccessDocumentName(access));
+					String imageName = getAccessComponent(access);
 					try {
-						getDynamicImage(customer, accessDocument, access.getComponent(), false);
+						getDynamicImage(customer, accessDocument, imageName, false);
 					}
 					catch (Exception e) {
 						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
 														USER_ACCESS_MODULE_SUFFIX + module.getName() +
-														" is for dynamic image " + access.getComponent() +
+														" is for dynamic image " + imageName +
 														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
 				else if (access.isPreviousComplete() || access.isContent()) {
-					Document accessDocument = module.getDocument(customer, access.getDocumentName());
-					String binding = access.getComponent();
+					Document accessDocument = module.getDocument(customer, getAccessDocumentName(access));
+					String binding = getAccessComponent(access);
 					try {
 						BindUtil.getMetaDataForBinding(customer, module, accessDocument, binding);
 					}
@@ -658,8 +665,8 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 				else if (access.isReport()) {
 					String reportModuleName = access.getModuleName();
-					String reportDocumentName = access.getDocumentName();
-					String reportName = access.getComponent();
+					String reportDocumentName = getAccessDocumentName(access);
+					String reportName = getAccessComponent(access);
 					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
 						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
@@ -738,6 +745,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 						String modelName = dataItem.getModelName();
 						if (modelName != null) {
+							// NB model menu items require a document when the module metadata is converted
+							if (document == null) {
+								throw new MetaDataException(MENU_PREFIX + item.getName() +
+																USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																IS_FOR_MODEL + modelName +
+																" but has no document.");
+							}
 							try {
 								if (item instanceof ListItem) { // includes TreeItem
 									ListModel<Bean> model = getListModel(customer, document, modelName, false);
@@ -771,7 +785,13 @@ public class LocalDesignRepository extends FileSystemRepository {
 						else if (item instanceof MapItem mapItem) {
 							if (document != null) {
 								// Check binding is valid
+								// NB the geometry binding is required when the module metadata is converted
 								String binding = mapItem.getGeometryBinding();
+								if (binding == null) {
+									throw new MetaDataException(MAP_MENU_PREFIX + item.getName() +
+																	USER_ACCESS_MODULE_SUFFIX + module.getName() +
+																	" has no geometryBinding.");
+								}
 								try {
 									TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
 									Attribute attribute = target.getAttribute();
@@ -828,14 +848,17 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
+	public void validateDocumentForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document) {
 		String documentIdentifier = document.getOwningModuleName() + '.' + document.getName();
-		Module module = getModule(customer, document.getOwningModuleName());
+		Module module = getNullSafeModule(customer, document.getOwningModuleName());
 
 		// Check conditions
 		for (String conditionName : document.getConditionNames()) {
 			// Check expression conditions
 			Condition condition = document.getCondition(conditionName);
+			if (condition == null) {
+				throw new IllegalStateException("Condition " + conditionName + IN_DOCUMENT + documentIdentifier + " is named but not defined");
+			}
 			String expression = condition.getExpression();
 			if (BindUtil.isSkyveExpression(expression)) {
 				String error = ExpressionEvaluator.validate(expression,
@@ -938,12 +961,6 @@ public class LocalDesignRepository extends FileSystemRepository {
 													documentIdentifier + " is not a valid document reference in this module.");
 				}
 				Document targetDocument = module.getDocument(customer, targetDocumentName);
-				if (targetDocument == null) {
-					throw new MetaDataException(TARGET_DOCUMENT_NAME_OF +
-													targetDocumentName + IN_REFERENCE +
-													reference.getName() + IN_DOCUMENT +
-													documentIdentifier + " cannot be found.");
-				}
 
 				// Check the query (if defined) points to a query of the required document type
 				String queryName = reference.getQueryName();
@@ -968,7 +985,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 
 				// Check collection order by bindings are valid
 				if (reference instanceof Collection collection) {
-					Module targetModule = getModule(customer, targetDocument.getOwningModuleName());
+					Module targetModule = getNullSafeModule(customer, targetDocument.getOwningModuleName());
 					for (Ordering ordering : collection.getOrdering()) {
 						String by = ordering.getBy();
 						TargetMetaData target = null;
@@ -1017,9 +1034,15 @@ public class LocalDesignRepository extends FileSystemRepository {
 				Module targetModule = module;
 				String targetModuleName = inverseDocumentRef.getReferencedModuleName();
 				if (targetModuleName != null) {
-					targetModule = getModule(customer, targetModuleName);
+					targetModule = getNullSafeModule(customer, targetModuleName);
 				}
 				Document targetDocument = getDocument(customer, targetModule, targetDocumentName);
+				if (targetDocument == null) {
+					throw new MetaDataException(TARGET_DOCUMENT_NAME_OF +
+													targetDocumentName + IN_INVERSE +
+													inverse.getName() + IN_DOCUMENT +
+													documentIdentifier + " cannot be found.");
+				}
 
 				String targetReferenceName = inverse.getReferenceName();
 				Reference targetReference = targetDocument.getReferenceByName(targetReferenceName);
@@ -1082,7 +1105,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
+	public void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui) {
 		CustomerImpl customerImpl = (CustomerImpl) customer;
 		ViewImpl viewImpl = (ViewImpl) view;
 		new ViewValidator(viewImpl, this, customerImpl, (DocumentImpl) document, uxui).visit();
@@ -1092,34 +1115,36 @@ public class LocalDesignRepository extends FileSystemRepository {
 		if (accesses != null) { // can be null if access control is turned off
 			for (UserAccess access : accesses) {
 				if (access.isModelAggregate()) {
+					String modelName = getAccessComponent(access);
 					try {
-						getModel(customer, document, access.getComponent(), false);
+						getModel(customer, document, modelName, false);
 					}
 					catch (Exception e) {
 						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
 														IN_MODULE_DOCUMENT + document.getOwningModuleName() + '.' + document.getName() +
 														IN_VIEW + view.getName() +
-														IS_FOR_MODEL + access.getComponent() +
+														IS_FOR_MODEL + modelName +
 														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
 				else if (access.isDynamicImage()) {
+					String imageName = getAccessComponent(access);
 					try {
-						getDynamicImage(customer, document, access.getComponent(), false);
+						getDynamicImage(customer, document, imageName, false);
 					}
 					catch (Exception e) {
 						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
 														IN_MODULE_DOCUMENT + document.getOwningModuleName() + '.' + document.getName() +
 														IN_VIEW + view.getName() +
-														" is for dynamic image " + access.getComponent() +
+														" is for dynamic image " + imageName +
 														WHICH_DOES_NOT_EXIST,
 														e);
 					}
 				}
 				else if (access.isPreviousComplete() || access.isContent()) {
-					final Module module = getModule(customer, document.getOwningModuleName());
-					final String binding = access.getComponent();
+					final Module module = getNullSafeModule(customer, document.getOwningModuleName());
+					final String binding = getAccessComponent(access);
 					try {
 						BindUtil.getMetaDataForBinding(customer, module, document, binding);
 					}
@@ -1133,11 +1158,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 				}
 				else if (access.isReport()) {
 					String reportModuleName = access.getModuleName();
-					String reportDocumentName = access.getDocumentName();
-					String reportName = access.getComponent();
+					String reportDocumentName = getAccessDocumentName(access);
+					String reportName = getAccessComponent(access);
 					Document reportDocument = customer.getModule(reportModuleName).getDocument(customer, reportDocumentName);
 					if (getReportFileName(customer, reportDocument, reportName) == null) { // not found
-						final Module module = getModule(customer, document.getOwningModuleName());
+						final Module module = getNullSafeModule(customer, document.getOwningModuleName());
 						throw new MetaDataException(USER_ACCESS_PREFIX + access.toString() +
 														IN_MODULE_DOCUMENT + module.getName() + '.' + document.getName() +
 														IN_VIEW + view.getName() +
@@ -1164,7 +1189,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param attribute the attribute whose implementing type is required
 	 * @return the implementing type, or {@code null} when enum class loading is not yet possible
 	 */
-	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(Attribute attribute) {
+	static @Nullable Class<?> getImplementingTypeForGenerateDomainValidation(@Nonnull Attribute attribute) {
 		try {
 			return attribute.getImplementingType();
 		}
@@ -1185,11 +1210,11 @@ public class LocalDesignRepository extends FileSystemRepository {
 	 * @param customer the owning customer context
 	 * @param featureRoles module-qualified role names to validate
 	 */
-	private void validateFeatureRoles(Customer customer, Set<String> featureRoles) {
+	private void validateFeatureRoles(@Nonnull Customer customer, @Nonnull Set<String> featureRoles) {
 		for (String textSearchModuleRole : featureRoles) {
 			String[] moduleAndRoleName = textSearchModuleRole.split("\\.");
 			String moduleName = moduleAndRoleName[0];
-			Module module = getModule(customer, moduleName);
+			Module module = getNullSafeModule(customer, moduleName);
 			String roleName = moduleAndRoleName[1];
 			if (module.getRole(roleName) == null) {
 				throw new MetaDataException("Module role " + roleName +
@@ -1197,5 +1222,54 @@ public class LocalDesignRepository extends FileSystemRepository {
 						" does not reference a valid module role");
 			}
 		}
+	}
+
+	/**
+	 * Resolves a module that is known to exist for the customer, such as a document's owning module
+	 * or a module that has already been validated as a customer module entry.
+	 *
+	 * @param customer the customer context
+	 * @param moduleName the module name
+	 * @return the module; never {@code null}
+	 * @throws MetaDataException when the repository cannot resolve the module
+	 */
+	private @Nonnull Module getNullSafeModule(@Nonnull Customer customer, @Nonnull String moduleName) {
+		Module result = getModule(customer, moduleName);
+		if (result == null) {
+			throw new MetaDataException("Repository returned null for module " + moduleName + FOR_CUSTOMER + customer.getName());
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the document name of a user access that is always created with one
+	 * (model aggregate, dynamic image, previous complete, content and report accesses).
+	 *
+	 * @param access the user access
+	 * @return the document name; never {@code null}
+	 * @throws IllegalStateException when the access has no document name
+	 */
+	private static @Nonnull String getAccessDocumentName(@Nonnull UserAccess access) {
+		String result = access.getDocumentName();
+		if (result == null) {
+			throw new IllegalStateException(USER_ACCESS_PREFIX + access + "] has no document name");
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the component (model, image, binding or report name) of a user access that is always
+	 * created with one (every access type except singular).
+	 *
+	 * @param access the user access
+	 * @return the component; never {@code null}
+	 * @throws IllegalStateException when the access has no component
+	 */
+	private static @Nonnull String getAccessComponent(@Nonnull UserAccess access) {
+		String result = access.getComponent();
+		if (result == null) {
+			throw new IllegalStateException(USER_ACCESS_PREFIX + access + "] has no component");
+		}
+		return result;
 	}
 }

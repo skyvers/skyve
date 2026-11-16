@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -14,6 +15,8 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
+
+import jakarta.annotation.Nonnull;
 
 
 class ReactListView extends ReactComponent {
@@ -25,25 +28,25 @@ class ReactListView extends ReactComponent {
 	private ListModel<Bean> model;
 	private MetaDataQueryDefinition query;
 	
-	public ReactListView(ReactGenerator generator, String moduleName, String componentName) {
+	public ReactListView(@Nonnull ReactGenerator generator, @Nonnull String moduleName, @Nonnull String componentName) {
 		super(generator, moduleName, componentName);
 	}
 
-	void setModel(Module module, Document document, String name, ListModel<Bean> model) {
+	void setModel(@Nonnull Module module, @Nonnull Document document, @Nonnull String name, @Nonnull ListModel<Bean> model) {
 		this.module = module;
 		this.document = document;
 		this.modelName = name;
 		this.model = model;
 	}
 
-	void setQuery(Module module, Document document, MetaDataQueryDefinition query) {
+	void setQuery(@Nonnull Module module, @Nonnull Document document, @Nonnull MetaDataQueryDefinition query) {
 		this.module = module;
 		this.document = document;
 		this.query = query;
 	}
 
 	@Override
-	protected void create(FileWriter fw) throws IOException {
+	protected void create(@Nonnull FileWriter fw) throws IOException {
 		fw.write("import React from 'react';\n");
 		fw.write("import {View} from '../../View';\n");
 		fw.write("import {DataTable} from 'primereact/datatable';\n");
@@ -70,11 +73,15 @@ class ReactListView extends ReactComponent {
 		fw.write("}\n");
 	}
 
-	private void renderComponentDidMount(FileWriter fw) throws IOException {
+	private void renderComponentDidMount(@Nonnull FileWriter fw) throws IOException {
 		fw.write("\tcomponentDidMount() {\n");
 		if (model != null) {
+			Document drivingDocument = model.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new MetaDataException("List model " + modelName + " has no driving document.");
+			}
 			fw.write("\t\tthis.fetchModel('");
-			fw.write(model.getDrivingDocument().getOwningModuleName());
+			fw.write(drivingDocument.getOwningModuleName());
 			fw.write("', '");
 			fw.write(modelName);
 			fw.write("', 0, 75).then(data => this.setState({data: data}));\n");
@@ -90,7 +97,7 @@ class ReactListView extends ReactComponent {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void renderDataTable(FileWriter fw) throws IOException {
+	private void renderDataTable(@Nonnull FileWriter fw) throws IOException {
 		fw.write("\t\t\t<DataTable value={this.state.data}\n");
 		fw.write("\t\t\t\t\t\tselectionMode=\"single\"\n");
 		fw.write("\t\t\t\t\t\tonSelectionChange={e => this.props.history.push('/' + e.data.bizModule + '/' + e.data.bizDocument + '/' + e.data.bizId)}>\n");

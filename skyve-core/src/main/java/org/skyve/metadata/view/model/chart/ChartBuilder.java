@@ -25,6 +25,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.Binder;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Generate the ChartData based on a simple declarative method call chain.
@@ -58,7 +59,7 @@ public class ChartBuilder {
 	 * @param moduleName
 	 * @param documentName
 	 */
-	public ChartBuilder with(String moduleName, String documentName) {
+	public @Nonnull ChartBuilder with(@Nonnull String moduleName, @Nonnull String documentName) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
 		return with(m.getDocument(c, documentName));
@@ -68,7 +69,7 @@ public class ChartBuilder {
 	 * Document Builder
 	 * @param document
 	 */
-	public ChartBuilder with(@SuppressWarnings("hiding") Document document) {
+	public @Nonnull ChartBuilder with(@SuppressWarnings("hiding") @Nonnull Document document) {
 		this.document = document;
 		this.query = CORE.getPersistence().newDocumentQuery(document);
 		return this;
@@ -79,7 +80,7 @@ public class ChartBuilder {
 	 * This will clear the projections, orderings and groupings from this query.
 	 * @param query
 	 */
-	public ChartBuilder with(@SuppressWarnings("hiding") DocumentQuery query) {
+	public @Nonnull ChartBuilder with(@SuppressWarnings("hiding") @Nonnull DocumentQuery query) {
 		this.query = query;
 		this.document = query.getDrivingDocument();
 
@@ -97,7 +98,7 @@ public class ChartBuilder {
 	 * @param moduleName
 	 * @param queryName
 	 */
-	public ChartBuilder withQuery(String moduleName, String queryName) {
+	public @Nonnull ChartBuilder withQuery(@Nonnull String moduleName, @Nonnull String queryName) {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
 		return with(m.getNullSafeMetaDataQuery(queryName));
@@ -124,7 +125,7 @@ public class ChartBuilder {
 	 * Set the category data field
 	 * @param binding
 	 */
-	public ChartBuilder category(String binding) {
+	public @Nonnull ChartBuilder category(@Nonnull String binding) {
 		categoryBinding = binding;
 		return this;
 	}
@@ -134,7 +135,7 @@ public class ChartBuilder {
 	 * @param binding
 	 * @param bucket
 	 */
-	public ChartBuilder category(String binding, Bucket bucket) {
+	public @Nonnull ChartBuilder category(@Nonnull String binding, @Nullable Bucket bucket) {
 		categoryBinding = binding;
 		categoryBucket = bucket;
 		return this;
@@ -144,7 +145,7 @@ public class ChartBuilder {
 	 * Set the value data field.
 	 * @param binding
 	 */
-	public ChartBuilder value(String binding) {
+	public @Nonnull ChartBuilder value(@Nonnull String binding) {
 		valueBinding = binding;
 		return this;
 	}
@@ -154,7 +155,7 @@ public class ChartBuilder {
 	 * @param binding
 	 * @param function
 	 */
-	public ChartBuilder value(String binding, AggregateFunction function) {
+	public @Nonnull ChartBuilder value(@Nonnull String binding, @Nullable AggregateFunction function) {
 		valueBinding = binding;
 		valueFunction = function;
 		return this;
@@ -166,7 +167,7 @@ public class ChartBuilder {
 	 * @param orderBy
 	 * @param sort
 	 */
-	public ChartBuilder orderBy(@SuppressWarnings("hiding") OrderBy orderBy, SortDirection sort) {
+	public @Nonnull ChartBuilder orderBy(@SuppressWarnings("hiding") @Nonnull OrderBy orderBy, @Nullable SortDirection sort) {
 		this.orderBy = orderBy;
 		orderBySort = sort;
 		return this;
@@ -180,10 +181,10 @@ public class ChartBuilder {
 	 * @param sort
 	 * @param includeOthers
 	 */
-	public ChartBuilder top(@SuppressWarnings("hiding") int top,
-								@SuppressWarnings("hiding") OrderBy orderBy,
-								SortDirection sort,
-								boolean includeOthers) {
+	public @Nonnull ChartBuilder top(@SuppressWarnings("hiding") int top,
+										@SuppressWarnings("hiding") @Nonnull OrderBy orderBy,
+										@Nonnull SortDirection sort,
+										boolean includeOthers) {
 		this.top = top;
 		topOrderBy = orderBy;
 		topSort = sort;
@@ -195,7 +196,7 @@ public class ChartBuilder {
 	 * Add a JFreeChart post processor to this chart.
 	 * @param fullyQualifiedJFreeChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public ChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedJFreeChartPostProcessorClassName) {
+	public @Nonnull ChartBuilder jFreeChartPostProcessorClassName(@SuppressWarnings("hiding") @Nullable String fullyQualifiedJFreeChartPostProcessorClassName) {
 		this.fullyQualifiedJFreeChartPostProcessorClassName = fullyQualifiedJFreeChartPostProcessorClassName;
 		return this;
 	}
@@ -204,7 +205,7 @@ public class ChartBuilder {
 	 * Add a PrimeFaces Chart post processor to this chart.
 	 * @param fullyQualifiedPrimeFacesChartPostProcessorClassName	The postProcessor to add.
 	 */
-	public ChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
+	public @Nonnull ChartBuilder primeFacesChartPostProcessorClassName(@SuppressWarnings("hiding") @Nullable String fullyQualifiedPrimeFacesChartPostProcessorClassName) {
 		this.fullyQualifiedPrimeFacesChartPostProcessorClassName = fullyQualifiedPrimeFacesChartPostProcessorClassName;
 		return this;
 	}
@@ -214,7 +215,7 @@ public class ChartBuilder {
 	 * @param label	The data set label.
 	 * @return	The ChartData.
 	 */
-	public ChartData build(String label) {
+	public @Nonnull ChartData build(@Nullable String label) {
 		return build(null, label);
 	}
 
@@ -224,7 +225,7 @@ public class ChartBuilder {
 	 * @param label	The data set label.
 	 * @return	The ChartData.
 	 */
-	public ChartData build(String title, String label) {
+	public @Nonnull ChartData build(@Nullable String title, @Nullable String label) {
 		return build(new RainbowColourSeries(), new RainbowColourSeries(), title, label);
 	}
 	
@@ -235,9 +236,9 @@ public class ChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours,
-							ColourSeries borderColours,
-							String label) {
+	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
+									@Nonnull ColourSeries borderColours,
+									@Nullable String label) {
 		return build(backgroundColours, borderColours, null, label);
 	}
 	
@@ -249,10 +250,10 @@ public class ChartBuilder {
 	 * @param label
 	 * @return	The ChartData.
 	 */
-	public ChartData build(ColourSeries backgroundColours,
-							ColourSeries borderColours,
-							String title,
-							String label) {
+	public @Nonnull ChartData build(@Nonnull ColourSeries backgroundColours,
+									@Nonnull ColourSeries borderColours,
+									@Nullable String title,
+									@Nullable String label) {
 		List<Bean> data = query();
 		backgroundColours.setSize(data.size());
 		borderColours.setSize(data.size());
@@ -275,7 +276,7 @@ public class ChartBuilder {
 		return result;
 	}
 	
-	static String label(String value) {
+	static @Nonnull String label(@Nullable String value) {
 		if ((value == null) || value.isEmpty()) {
 			return "Others";
 		}
@@ -283,7 +284,7 @@ public class ChartBuilder {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private List<Bean> query() {
+	private @Nonnull List<Bean> query() {
 		String categoryExpression = null;
 		String categoryAlias = CATEGORY_ALIAS;
 		String valueExpression = (valueFunction == null) ? 
@@ -358,7 +359,7 @@ public class ChartBuilder {
 		return result;
 	}
 	
-	private static Number sum(List<Bean> best, List<Bean> beans, boolean avg) {
+	private static @Nonnull Number sum(@Nonnull List<Bean> best, @Nonnull List<Bean> beans, boolean avg) {
 		double result = 0.0;
 		
 		Class<?> numberType = null;
@@ -401,7 +402,7 @@ public class ChartBuilder {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Number minMax(List<Bean> beans, boolean min) {
+	private static @Nullable Number minMax(@Nonnull List<Bean> beans, boolean min) {
 		Number result = null;
 		
 		for (Bean bean : beans) {

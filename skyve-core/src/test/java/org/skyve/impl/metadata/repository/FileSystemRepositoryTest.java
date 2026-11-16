@@ -7,10 +7,13 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -38,6 +41,8 @@ import org.skyve.web.WebContext;
 
 import java.awt.image.BufferedImage;
 import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
@@ -217,6 +222,32 @@ class FileSystemRepositoryTest {
 		// The document key is "modules/myModule/MyDoc" (just directory name, no .xml suffix)
 		String key = repo.vtable(null, "modules/myModule/MyDoc");
 		assertNotNull(key, "Document key should be registered");
+	}
+
+	@Test
+	void unnamedCustomerModuleReferenceIsSkippedWhenPopulatingKeys() throws Exception {
+		Path customerDir = tempDir.resolve("customers/acme");
+		Files.createDirectories(customerDir);
+		Files.writeString(customerDir.resolve("acme.xml"),
+				"<customer xmlns='http://www.skyve.org/xml/customer' name='acme'>"
+				+ "<defaultDateConverter>DD_MMM_YYYY</defaultDateConverter>"
+				+ "<defaultTimeConverter>HH24_MI</defaultTimeConverter>"
+				+ "<defaultDateTimeConverter>DD_MMM_YYYY_HH24_MI</defaultDateTimeConverter>"
+				+ "<defaultTimestampConverter>DD_MMM_YYYY_HH24_MI_SS</defaultTimestampConverter>"
+				+ "<modules homeModule='test'><module/><module name='test'/></modules>"
+				+ "</customer>");
+		Path namedModuleDir = customerDir.resolve("modules/test");
+		Files.createDirectories(namedModuleDir);
+		Files.createFile(namedModuleDir.resolve("test.xml"));
+		// A module literally named "null" must not be picked up for the unnamed reference
+		Path nullModuleDir = customerDir.resolve("modules/null");
+		Files.createDirectories(nullModuleDir);
+		Files.createFile(nullModuleDir.resolve("null.xml"));
+
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+
+		assertEquals("customers/acme/modules/test", repo.vtable("acme", "modules/test"));
+		assertNull(repo.vtable("acme", "modules/null"));
 	}
 
 	// ---- getUseScaffoldedViews ----
@@ -1252,6 +1283,7 @@ class FileSystemRepositoryTest {
 	}
 
 	static final class TestChartModel extends ChartModel<org.skyve.domain.Bean> {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public ChartData getChartData() {
 			return null;
@@ -1299,11 +1331,13 @@ class FileSystemRepositoryTest {
 			// no-op
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public Page fetch() {
 			return null;
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public org.skyve.persistence.AutoClosingIterable<org.skyve.domain.Bean> iterate() {
 			return null;
@@ -1328,6 +1362,7 @@ class FileSystemRepositoryTest {
 	}
 
 	static final class TestBizExportAction extends BizExportAction {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public org.skyve.bizport.BizPortWorkbook bizExport(WebContext webContext) {
 			return null;
@@ -1342,12 +1377,48 @@ class FileSystemRepositoryTest {
 		}
 	}
 
+	@Test
+	void getUploadActionThrowsWhenTheClassActionIsNotResolved() {
+		LocalDesignRepository repo = spy(new LocalDesignRepository(basePath));
+		Document document = mock(Document.class);
+		when(document.getName()).thenReturn("MyDoc");
+		doReturn(null).when(repo).getClassAction(null, document, "upload", true, false);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> repo.getUploadAction(null, document, "upload", false));
+		assertEquals("Upload action upload was not resolved for document MyDoc", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultConstructorThrowsWhenTheAbsoluteBasePathCannotBeDetermined() throws Exception {
+		Field absoluteBasePathField = UtilImpl.class.getDeclaredField("absoluteBasePath");
+		absoluteBasePathField.setAccessible(true);
+		Object absoluteBasePath = absoluteBasePathField.get(null);
+		String appsJarDirectory = UtilImpl.APPS_JAR_DIRECTORY;
+		Thread thread = Thread.currentThread();
+		ClassLoader contextClassLoader = thread.getContextClassLoader();
+		try (URLClassLoader emptyClassLoader = new URLClassLoader(new URL[0], null)) { // cannot find schemas/common.xsd
+			absoluteBasePathField.set(null, null);
+			UtilImpl.APPS_JAR_DIRECTORY = null;
+			thread.setContextClassLoader(emptyClassLoader);
+
+			MetaDataException e = assertThrows(MetaDataException.class, LocalDesignRepository::new);
+			assertEquals("Cannot determine absolute base path. Where is schemas/common.xsd?", e.getMessage());
+		}
+		finally {
+			thread.setContextClassLoader(contextClassLoader);
+			UtilImpl.APPS_JAR_DIRECTORY = appsJarDirectory;
+			absoluteBasePathField.set(null, absoluteBasePath);
+		}
+	}
+
 	static final class TestDownloadAction extends DownloadAction<org.skyve.domain.Bean> {
 		@Override
 		public void prepare(org.skyve.domain.Bean bean, WebContext webContext) {
 			// no-op
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public Download download(org.skyve.domain.Bean bean, WebContext webContext) {
 			return null;

@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
@@ -10,6 +10,8 @@ import org.skyve.impl.metadata.view.FormItemWidget;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -41,7 +43,7 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -49,60 +51,60 @@ public class RichText extends ChangeableInputWidget implements AbsoluteSize, Con
 	}
 	
 	@Override
-	public Integer getPixelWidth() {
+	public @Nonnull Integer getPixelWidth() {
 		return pixelWidth;
 	}
 	
 	@Override
 	@XmlAttribute(required = true)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 	
 	@Override
-	public Integer getPixelHeight() {
+	public @Nonnull Integer getPixelHeight() {
 		return pixelHeight;
 	}
 	
 	@Override
 	@XmlAttribute(required = true)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nonnull Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
 	@Override
 	@XmlAttribute(required = true)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nonnull Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
 	@Override
 	@XmlAttribute(required = true)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
 	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

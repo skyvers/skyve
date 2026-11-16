@@ -130,7 +130,7 @@ public interface JobScheduler extends SystemObserver {
 	 * @param instanceId the unique identifier of the executing job instance
 	 * @return {@code true} if the cancellation was successful, {@code false} otherwise
 	 */
-	boolean cancelJob(String instanceId);
+	boolean cancelJob(@Nonnull String instanceId);
 
 	/**
 	 * Prepares the scheduler for a restore operation.
@@ -158,7 +158,7 @@ public interface JobScheduler extends SystemObserver {
 	 * 
 	 * @param restoreOptions the bean implementing RestoreOptions that configures the restore operation
 	 */
-	void runRestoreJob(Bean restoreOptions);
+	void runRestoreJob(@Nonnull Bean restoreOptions);
 	
 	/**
 	 * Performs a complete restore operation with proper scheduler management.
@@ -174,16 +174,16 @@ public interface JobScheduler extends SystemObserver {
 	 * 
 	 * @param restoreOptions the bean implementing RestoreOptions that configures the restore operation
 	 */
-	default void restore(Bean restoreOptions) {
+	default void restore(@Nonnull Bean restoreOptions) {
 		preRestore();
 		runRestoreJob(restoreOptions);
 	}
 
 	/**
 	 * Validates all Skyve meta-data for all customers asynchronously.
-	 * This is called by Skyve at startup, after all customer Observer.startup() callbacks
+	 * This is called by Skyve at startup, after all customer {@link org.skyve.metadata.controller.Observer#serverStartup} callbacks
 	 * to enable adjustment of repository configuration to occur before complete meta-data validation.
-	 * Any validation errors are logged but do no abort Skyve application deployment. 
+	 * Any validation errors are logged but do not abort Skyve application deployment.
 	 */
 	void validateMetaData();
 

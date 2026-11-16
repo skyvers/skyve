@@ -3,6 +3,8 @@ package org.skyve.impl.web.faces.pipeline.component;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
 import org.primefaces.component.outputlabel.OutputLabel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.application.Application;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
@@ -30,7 +32,7 @@ final class EscapableComponentSupport {
 	 * @param text raw metadata text and nullable escape flag; must not be {@code null}
 	 * @return configured output-text component; never {@code null}
 	 */
-	static HtmlOutputText outputText(Application application, EscapableText text) {
+	static @Nonnull HtmlOutputText outputText(@Nonnull Application application, @Nonnull EscapableText text) {
 		HtmlOutputText result = (HtmlOutputText) application.createComponent(HtmlOutputText.COMPONENT_TYPE);
 		result.setValue(text.getValue());
 		result.setEscape(text.shouldEscape());
@@ -48,7 +50,7 @@ final class EscapableComponentSupport {
 	 * @param forId optional ID of the labelled component
 	 * @return configured output-label component; never {@code null}
 	 */
-	static OutputLabel outputLabel(Application application, EscapableText text, String forId) {
+	static @Nonnull OutputLabel outputLabel(@Nonnull Application application, @Nonnull EscapableText text, @Nullable String forId) {
 		OutputLabel result = (OutputLabel) application.createComponent(OutputLabel.COMPONENT_TYPE);
 		result.setValue(text.getValue());
 		result.setEscape(text.shouldEscape());
@@ -68,7 +70,7 @@ final class EscapableComponentSupport {
 	 * @param text raw metadata text and nullable escape flag; may be {@code null}
 	 * @return the added output-text facet, or {@code null} when no text value is present
 	 */
-	static HtmlOutputText putOutputTextFacet(Application application, UIComponent component, String facetName, EscapableText text) {
+	static @Nullable HtmlOutputText putOutputTextFacet(@Nonnull Application application, @Nonnull UIComponent component, @Nonnull String facetName, @Nullable EscapableText text) {
 		if ((text == null) || (text.getValue() == null)) {
 			return null;
 		}
@@ -88,7 +90,7 @@ final class EscapableComponentSupport {
 	 * @param confirmation raw confirmation text and nullable escape flag; may be {@code null}
 	 * @return configured confirmation behaviour, or {@code null} when no message value is present
 	 */
-	static ConfirmBehavior confirmBehavior(Application application, EscapableText confirmation) {
+	static @Nullable ConfirmBehavior confirmBehavior(@Nonnull Application application, @Nullable EscapableText confirmation) {
 		if ((confirmation == null) || (confirmation.getValue() == null)) {
 			return null;
 		}
@@ -110,7 +112,7 @@ final class EscapableComponentSupport {
 	 * @param component component receiving the behaviour; must not be {@code null}
 	 * @param confirmation raw confirmation text and nullable escape flag; may be {@code null}
 	 */
-	static void addConfirmBehavior(Application application, UIComponentBase component, EscapableText confirmation) {
+	static void addConfirmBehavior(@Nonnull Application application, @Nonnull UIComponentBase component, @Nullable EscapableText confirmation) {
 		ConfirmBehavior behavior = confirmBehavior(application, confirmation);
 		if (behavior != null) {
 			component.addClientBehavior("click", behavior);

@@ -4,6 +4,9 @@ import java.io.Serializable;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a UX/UI variant configuration in Skyve, combining a named presentation
  * tier with its associated SmartClient or PrimeFaces theme settings.
@@ -26,60 +29,66 @@ public final class UxUi implements Serializable {
 	private static final long serialVersionUID = 6408014926938963507L;
 
 	/** The conventional name for the standard desktop UX/UI variant. */
-	public static final String DESKTOP_NAME = "desktop";
+	public static final @Nonnull String DESKTOP_NAME = "desktop";
 
-	private String name;
-	private String scSkin;
-	private String pfTemplateName;
-	private String pfThemeName;
-	private String pfThemeColour;
+	private @Nonnull String name;
+	private @Nullable String scSkin;
+	private @Nullable String pfTemplateName;
+	private @Nullable String pfThemeName;
+	private @Nullable String pfThemeColour;
 	
-	private UxUi(String name) {
+	private UxUi(@Nonnull String name) {
 		this.name = name;
 	}
 
 	/**
-	 * Returns the name.
-	 * @return the result
+	 * Returns the UX/UI variant name.
+	 *
+	 * @return the variant name; never {@code null}
 	 */
-	public String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 	/**
-	 * Sets the name.
-	 * @param name the name
+	 * Sets the UX/UI variant name.
+	 *
+	 * @param name the variant name; must not be {@code null}
 	 */
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
 	/**
-	 * Returns the scSkin.
-	 * @return the result
+	 * Returns the SmartClient skin name.
+	 *
+	 * @return the skin name, or {@code null} for a PrimeFaces-backed variant
 	 */
-	public String getScSkin() {
+	public @Nullable String getScSkin() {
 		return scSkin;
 	}
 	/**
-	 * Sets the scSkin.
-	 * @param scSkin the scSkin
+	 * Sets the optional SmartClient skin name.
+	 *
+	 * @param scSkin the skin name, or {@code null} for a PrimeFaces-backed variant
 	 */
-	public void setScSkin(String scSkin) {
+	public void setScSkin(@Nullable String scSkin) {
 		this.scSkin = scSkin;
 	}
 
 	/**
-	 * Returns the pfTemplateName.
-	 * @return the result
+	 * Returns the optional PrimeFaces layout template name.
+	 *
+	 * @return the template name, or {@code null} when the default template applies
 	 */
-	public String getPfTemplateName() {
+	public @Nullable String getPfTemplateName() {
 		return pfTemplateName;
 	}
 	/**
-	 * Sets the pfTemplateName.
-	 * @param pfTemplateName the pfTemplateName
+	 * Sets the optional PrimeFaces layout template name.
+	 *
+	 * @param pfTemplateName the template name, or {@code null} to use the default template
 	 */
-	public void setPfTemplateName(String pfTemplateName) {
+	public void setPfTemplateName(@Nullable String pfTemplateName) {
 		this.pfTemplateName = pfTemplateName;
 	}
 
@@ -88,15 +97,15 @@ public final class UxUi implements Serializable {
 	 *
 	 * @return the PrimeFaces theme name, or {@code null} when none is configured
 	 */
-	public String getPfThemeName() {
+	public @Nullable String getPfThemeName() {
 		return pfThemeName;
 	}
 	/**
 	 * Sets the PrimeFaces theme name.
 	 *
-	 * @param pfThemeName the PrimeFaces theme name
+	 * @param pfThemeName the PrimeFaces theme name, or {@code null} when none is configured
 	 */
-	public void setPfThemeName(String pfThemeName) {
+	public void setPfThemeName(@Nullable String pfThemeName) {
 		this.pfThemeName = pfThemeName;
 	}
 
@@ -105,15 +114,15 @@ public final class UxUi implements Serializable {
 	 *
 	 * @return the PrimeFaces theme colour, or {@code null} when none is configured
 	 */
-	public String getPfThemeColour() {
+	public @Nullable String getPfThemeColour() {
 		return pfThemeColour;
 	}
 	/**
 	 * Sets the colour palette used by the template and PrimeFaces widget overrides.
 	 *
-	 * @param pfThemeColour the PrimeFaces theme colour
+	 * @param pfThemeColour the PrimeFaces theme colour, or {@code null} to use the template default
 	 */
-	public void setPfThemeColour(String pfThemeColour) {
+	public void setPfThemeColour(@Nullable String pfThemeColour) {
 		this.pfThemeColour = pfThemeColour;
 	}
 
@@ -123,9 +132,11 @@ public final class UxUi implements Serializable {
 	 * @param name             the variant name (e.g. {@code "desktop"}); must not be {@code null}
 	 * @param pfTemplateName   the PrimeFaces layout template name; must not be {@code null}
 	 * @param pfThemeName      the exact PrimeFaces theme identifier; must not be {@code null}
-	 * @return a new {@code UxUi} configured for PrimeFaces
+	 * @return a new {@code UxUi} configured for PrimeFaces; never {@code null}
 	 */
-	public static UxUi newPrimeFaces(String name, String pfTemplateName, String pfThemeName) {
+	public static @Nonnull UxUi newPrimeFaces(@Nonnull String name,
+												@Nonnull String pfTemplateName,
+												@Nonnull String pfThemeName) {
 		UxUi result = new UxUi(name);
 		result.setPfTemplateName(pfTemplateName);
 		result.setPfThemeName(pfThemeName);
@@ -140,9 +151,12 @@ public final class UxUi implements Serializable {
 	 * @param pfThemeName      the exact PrimeFaces theme identifier; must not be {@code null}
 	 * @param pfThemeColour    the colour used by the template and PrimeFaces widget overrides;
 	 *                         must not be {@code null}
-	 * @return a new {@code UxUi} configured for PrimeFaces with a colour palette
+	 * @return a new {@code UxUi} configured for PrimeFaces with a colour palette; never {@code null}
 	 */
-	public static UxUi newPrimeFaces(String name, String pfTemplateName, String pfThemeName, String pfThemeColour) {
+	public static @Nonnull UxUi newPrimeFaces(@Nonnull String name,
+												@Nonnull String pfTemplateName,
+												@Nonnull String pfThemeName,
+												@Nonnull String pfThemeColour) {
 		UxUi result = newPrimeFaces(name, pfTemplateName, pfThemeName);
 		result.setPfThemeColour(pfThemeColour);
 		return result;
@@ -155,9 +169,11 @@ public final class UxUi implements Serializable {
 	 * @param scSkin       the SmartClient skin name; must not be {@code null}
 	 * @param pfThemeName  a PrimeFaces theme identifier used for components rendered outside
 	 *                     the SmartClient layer; must not be {@code null}
-	 * @return a new {@code UxUi} configured for SmartClient
+	 * @return a new {@code UxUi} configured for SmartClient; never {@code null}
 	 */
-	public static UxUi newSmartClient(String name, String scSkin, String pfThemeName) {
+	public static @Nonnull UxUi newSmartClient(@Nonnull String name,
+												@Nonnull String scSkin,
+												@Nonnull String pfThemeName) {
 		UxUi result = new UxUi(name);
 		result.setScSkin(scSkin);
 		result.setPfThemeName(pfThemeName);
@@ -172,9 +188,12 @@ public final class UxUi implements Serializable {
 	 * @param pfThemeName   the exact PrimeFaces theme identifier; must not be {@code null}
 	 * @param pfThemeColour the colour used by the template and PrimeFaces widget overrides;
 	 *                      must not be {@code null}
-	 * @return a new {@code UxUi} configured for SmartClient with a PrimeFaces colour palette
+	 * @return a new {@code UxUi} configured for SmartClient with a PrimeFaces colour palette; never {@code null}
 	 */
-	public static UxUi newSmartClient(String name, String scSkin, String pfThemeName, String pfThemeColour) {
+	public static @Nonnull UxUi newSmartClient(@Nonnull String name,
+												@Nonnull String scSkin,
+												@Nonnull String pfThemeName,
+												@Nonnull String pfThemeColour) {
 		UxUi result = newSmartClient(name, scSkin, pfThemeName);
 		result.setPfThemeColour(pfThemeColour);
 		return result;
@@ -182,10 +201,11 @@ public final class UxUi implements Serializable {
 
 	/**
 	 * Returns a string representation of this instance.
-	 * @return the result
+	 *
+	 * @return the string representation; never {@code null}
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this)
 							.add("name", name)
 							.add("scSkin", scSkin)

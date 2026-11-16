@@ -4,6 +4,8 @@ import org.skyve.impl.metadata.behaviour.IfStatement;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.behaviour.statement.StatementMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base fluent wrapper for behaviour statements.
  *
@@ -30,7 +32,7 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 	 * @return this fluent statement
 	 */
 	@SuppressWarnings("unchecked")
-	protected T fromBase(StatementMetaData statement) {
+	protected @Nonnull T fromBase(@Nonnull StatementMetaData statement) {
 		statement.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 		return (T) this;
 	}
@@ -44,7 +46,7 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 	 * @throws IllegalStateException if the statement type is unsupported
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T extends FluentStatement<T>> T from(StatementMetaData statement) {
+	public static @Nonnull <T extends FluentStatement<T>> T from(@Nonnull StatementMetaData statement) {
 		if (statement instanceof IfStatement ifStatement) {
 			return (T) new FluentIfStatement().from(ifStatement);
 		}
@@ -56,13 +58,14 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 
 	/**
 	 * Adds or replaces an implementation-specific statement property.
+	 * Properties keep the order in which they were first added.
 	 *
 	 * @param k property key
 	 * @param v property value
 	 * @return this fluent statement
 	 */
 	@SuppressWarnings("unchecked")
-	public T putProperty(String k, String v) {
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
 		get().getProperties().put(k, v);
 		return (T) this;
 	}
@@ -72,5 +75,5 @@ public abstract class FluentStatement<T extends FluentStatement<T>> {
 	 *
 	 * @return backing statement metadata
 	 */
-	public abstract StatementMetaData get();
+	public abstract @Nonnull StatementMetaData get();
 }

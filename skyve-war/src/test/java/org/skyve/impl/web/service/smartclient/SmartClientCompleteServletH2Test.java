@@ -154,13 +154,13 @@ class SmartClientCompleteServletH2Test extends AbstractSkyveTest {
 			StateUtil.addSession(user.getId(), session);
 		}
 
-		private RequestBuilder withConversation(AllAttributesPersistent bean) throws Exception {
+		private RequestBuilder withConversation(AllAttributesPersistent bean) {
 			HttpServletRequest request = mock(HttpServletRequest.class);
 			when(request.getSession(false)).thenReturn(session);
 			when(request.getLocale()).thenReturn(java.util.Locale.ENGLISH);
 			SmartClientWebContext webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
 			webContext.setCurrentBean(bean);
-			StateUtil.cacheConversation(webContext);
+			StateUtil.commitAndCacheConversation(webContext);
 			webId = webContext.getWebId();
 			return this;
 		}

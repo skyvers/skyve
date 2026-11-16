@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -62,6 +63,7 @@ import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 final class BackupUtil {
@@ -71,21 +73,24 @@ final class BackupUtil {
 
     private static final String TABLE_DEFINITION_CREATED = "Table definition created for {}";
 	private static final String PERSISTENT_METADATA_MISSING = " is persistable but has no persistent metadata.";
+	private static final String PERSISTENT_NAME_MISSING = " has persistent metadata with no table name.";
 	private static final String WHERE_SQL = " where ";
+	/** What {@link #redactSegment(String, Integer)} makes of a value with no asterisks. */
+	private static final Pattern REDACTED_SEGMENT = Pattern.compile("[^*]{0,2}\\*{4,10}[^*]{0,2}");
 
 	private BackupUtil() {
 		// nothing to see here
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	static void initialise(String customerName,
-							String contentDirectory,
-							String contentFileStorage,
-							String databaseDialect,
-							String databaseJdbcDriver,
-							String databaseConnectionUrl,
-							String databaseUsername,
-							String databasePassword) 
+	static void initialise(@Nonnull String customerName,
+							@Nonnull String contentDirectory,
+							@Nonnull String contentFileStorage,
+							@Nonnull String databaseDialect,
+							@Nonnull String databaseJdbcDriver,
+							@Nonnull String databaseConnectionUrl,
+							@Nullable String databaseUsername,
+							@Nullable String databasePassword) 
 	throws Exception {
 		AbstractPersistence.IMPLEMENTATION_CLASS = HibernateContentPersistence.class;
 		AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS = RDBMSDynamicPersistence.class;
@@ -121,7 +126,7 @@ final class BackupUtil {
 		p.disposeAllPersistenceInstances();
 	}
 	
-	static Collection<Table> getTables() {
+	static @Nonnull Collection<Table> getTables() {
 		// A case insensitive keyed map of tables
 		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 		Customer customer = AbstractPersistence.get().getUser().getCustomer();
@@ -140,10 +145,10 @@ final class BackupUtil {
 		return result.values();
 	}
 
-	static Collection<Table> getTablesForAllCustomers() throws Exception {
+	static @Nonnull Collection<Table> getTablesForAllCustomers() throws Exception {
 		// A case insensitive keyed map of tables
 		Map<String, Table> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		for (String customerName : repository.getAllCustomerNames()) {
 			Customer customer = repository.getCustomer(customerName);
 			if (customer == null) {
@@ -165,7 +170,7 @@ final class BackupUtil {
 		return result.values();
 	}
 	
-	static void writeTables(Collection<Table> tables, File toWriteTo) throws Exception {
+	static void writeTables(@Nonnull Collection<Table> tables, @Nonnull File toWriteTo) throws Exception {
 		try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(toWriteTo), UTF_8)) {
 			try (BufferedWriter bw = new BufferedWriter(out)) {
 				for (Table table : tables) {
@@ -176,7 +181,7 @@ final class BackupUtil {
 		}
 	}
 	
-	static Collection<Table> readTables(File toReadFrom) throws Exception {
+	static @Nonnull Collection<Table> readTables(@Nonnull File toReadFrom) throws Exception {
 		Collection<Table> result = new ArrayList<>();
 		try (InputStreamReader in = new InputStreamReader(new FileInputStream(toReadFrom), UTF_8)) {
 			try (BufferedReader br = new BufferedReader(in)) {
@@ -190,7 +195,7 @@ final class BackupUtil {
 		return result;
 	}
 	
-	static void writeScript(List<String> commands, File toWriteTo) throws Exception {
+	static void writeScript(@Nonnull List<String> commands, @Nonnull File toWriteTo) throws Exception {
 		try (OutputStreamWriter out = new OutputStreamWriter(new FileOutputStream(toWriteTo), UTF_8)) {
 			try (BufferedWriter bw = new BufferedWriter(out)) {
 				for (String command : commands) {
@@ -202,7 +207,7 @@ final class BackupUtil {
 		}
 	}
 
-	static List<String> readScript(File toReadFrom) throws Exception {
+	static @Nonnull List<String> readScript(@Nonnull File toReadFrom) throws Exception {
 		List<String> result = new ArrayList<>();
 		try (InputStreamReader in = new InputStreamReader(new FileInputStream(toReadFrom), UTF_8)) {
 			try (BufferedReader br = new BufferedReader(in)) {
@@ -220,7 +225,7 @@ final class BackupUtil {
 		return result;
 	}
 	
-	static void executeScript(List<String> script) 
+	static void executeScript(@Nonnull List<String> script) 
 	throws Exception {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		try {
@@ -243,7 +248,7 @@ final class BackupUtil {
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void addOrUpdate(Map<String, Table> tables, Customer customer, Document document) {
+	private static void addOrUpdate(@Nonnull Map<String, Table> tables, @Nonnull Customer customer, @Nonnull Document document) {
 		Persistent persistent = document.getPersistent();
 		if ((! document.isDynamic()) && document.isPersistable()) { // static persistent document
 			if (persistent == null) {
@@ -251,6 +256,9 @@ final class BackupUtil {
 			}
 			String persistentIdentifier = persistent.getPersistentIdentifier();
 			String agnosticIdentifier = persistent.getAgnosticIdentifier();
+			if ((persistentIdentifier == null) || (agnosticIdentifier == null)) { // persistable means the persistent has a name
+				throw new MetaDataException(document.getName() + PERSISTENT_NAME_MISSING);
+			}
 			Table table = tables.get(agnosticIdentifier);
 			if (table == null) {
 				table = new Table(agnosticIdentifier, persistentIdentifier);
@@ -266,13 +274,22 @@ final class BackupUtil {
 				for (ExportedReference reference : references) {
 					Persistent referencePersistent = reference.getPersistent();
 					if (referencePersistent != null) {
-						Document referencedDocument = customer.getModule(reference.getModuleName()).getDocument(customer, reference.getDocumentName());
+						// CustomerImpl populates every exported reference from the referencing document and its reference
+						String referenceModuleName = reference.getModuleName();
+						String referenceDocumentName = reference.getDocumentName();
+						if ((referenceModuleName == null) || (referenceDocumentName == null)) {
+							throw new IllegalStateException("An exported reference to " + document.getName() + " has no module or document name");
+						}
+						Document referencedDocument = customer.getModule(referenceModuleName).getDocument(customer, referenceDocumentName);
 						// Add joining table for collections pointing to static documents
 						if (reference.isCollection() && (! referencedDocument.isDynamic())) {
 							// child collections have no joining table
 							if (! CollectionType.child.equals(reference.getType())) {
 								String referenceFieldName = reference.getReferenceFieldName();
-								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getReferenceByName(referenceFieldName);
+								if (referenceFieldName == null) {
+									throw new IllegalStateException("The exported reference from " + referenceModuleName + '.' + referenceDocumentName + " to " + document.getName() + " has no reference field name");
+								}
+								org.skyve.metadata.model.document.Collection collection = (org.skyve.metadata.model.document.Collection) referencedDocument.getNullSafeReferenceByName(referenceFieldName);
 								if (collection.isPersistent()) {
 									String ownerAgnosticIdentifier = referencePersistent.getAgnosticIdentifier();
 									String ownerPersistentIdentifier = referencePersistent.getPersistentIdentifier();
@@ -295,6 +312,9 @@ final class BackupUtil {
 												String ai = derivedPersistent.getAgnosticIdentifier();
 												ownerAgnosticIdentifier = ai;
 												ownerPersistentIdentifier = derivedPersistent.getPersistentIdentifier();
+												if ((ownerAgnosticIdentifier == null) || (ownerPersistentIdentifier == null)) { // persistable means the persistent has a name
+													throw new MetaDataException(derivedDocument.getName() + PERSISTENT_NAME_MISSING);
+												}
 												String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
 												String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
 												if (! tables.containsKey(joinAgnosticIdentifier)) {
@@ -342,6 +362,9 @@ final class BackupUtil {
 										String ai = ultimatePersistent.getAgnosticIdentifier();
 										ownerAgnosticIdentifier = ai;
 										ownerPersistentIdentifier = ultimatePersistent.getPersistentIdentifier();
+										if ((ownerAgnosticIdentifier == null) || (ownerPersistentIdentifier == null)) {
+											throw new MetaDataException(ultimateDocument.getName() + PERSISTENT_NAME_MISSING);
+										}
 										Persistent referencedPersistent = referencedDocument.getPersistent();
 										if (referencedPersistent == null) {
 											throw new MetaDataException(referencedDocument.getName() + PERSISTENT_METADATA_MISSING);
@@ -355,6 +378,10 @@ final class BackupUtil {
 										}
 									}
 									else {
+										// only a polymorphically mapped persistent has no name
+										if ((ownerAgnosticIdentifier == null) || (ownerPersistentIdentifier == null)) {
+											throw new MetaDataException(referenceDocumentName + PERSISTENT_NAME_MISSING);
+										}
 										String joinAgnosticIdentifier = ownerAgnosticIdentifier + '_' + referenceFieldName;
 										String joinPersistentIdentifier = ownerPersistentIdentifier + '_' + referenceFieldName;
 										if (! tables.containsKey(joinAgnosticIdentifier)) {
@@ -372,7 +399,7 @@ final class BackupUtil {
 		}
 	}
 
-	static boolean hasBizCustomer(Table table) {
+	static boolean hasBizCustomer(@Nonnull Table table) {
 		boolean result = false;
 		for (String fieldName : table.fields.keySet()) {
 			if (Bean.CUSTOMER_NAME.equalsIgnoreCase(fieldName)) {
@@ -383,7 +410,7 @@ final class BackupUtil {
 		return result;
 	}
 	
-	static void secureSQL(StringBuilder sql, Table table, String customerName) {
+	static void secureSQL(@Nonnull StringBuilder sql, @Nonnull Table table, @Nonnull String customerName) {
 		if (table instanceof JoinTable joinTable) {
 			sql.append(WHERE_SQL).append(PersistentBean.OWNER_COLUMN_NAME);
 			sql.append(" in (select ").append(Bean.DOCUMENT_ID).append(" from ").append(joinTable.ownerPersistentIdentifier);
@@ -408,7 +435,7 @@ final class BackupUtil {
 	 * @return the redacted {@link Object}.
 	 * @author simeonsolomou
 	 */
-	static Object redactData(AttributeType attributeType, Object value) {
+	static @Nullable Object redactData(@Nonnull AttributeType attributeType, @Nullable Object value) {
 		return redactData(attributeType, value, null);
 	}
 
@@ -422,7 +449,7 @@ final class BackupUtil {
 	 * @return the redacted {@link Object}.
 	 * @author simeonsolomou
 	 */
-	static Object redactData(AttributeType attributeType, Object value, @Nullable Integer maxLength) {
+	static @Nullable Object redactData(@Nonnull AttributeType attributeType, @Nullable Object value, @Nullable Integer maxLength) {
 		if (value != null) {
 			switch (attributeType) {
 			case association:
@@ -493,7 +520,7 @@ final class BackupUtil {
 	 * @return the redacted {@link String}.
 	 * @author Ben Petito
 	 */
-	private static String redactString(String data, @Nullable Integer maxLength) {
+	private static @Nullable String redactString(@Nullable String data, @Nullable Integer maxLength) {
 		if (data == null) {
 			return null;
 		}
@@ -510,6 +537,39 @@ final class BackupUtil {
 	}
 	
 	/**
+	 * Returns whether a value has the form {@link #redactString(String, Integer)} gives a value with no asterisks and
+	 * no {@code @}, such as a password hash: up to two characters, four to ten asterisks, and up to two characters.
+	 *
+	 * <p>A value of this form cannot be a password hash, which never holds an asterisk, so a restore uses this to
+	 * find the passwords a backup redacted. It is not a test for any value, as a value can have this form by chance.
+	 *
+	 * @param value the value restored from a backup
+	 * @return {@code true} if the value has the redacted form
+	 */
+	static boolean isRedactedString(@Nonnull String value) {
+		return REDACTED_SEGMENT.matcher(value).matches();
+	}
+
+	/**
+	 * Returns whether a user name has the form {@link #redactString(String, Integer)} gives: the form
+	 * {@link #isRedactedString(String)} checks, or, for a user name that is an email address, that form on each side
+	 * of the {@code @}.
+	 *
+	 * <p>A restore uses this to find the user names a backup redacted. As with {@link #isRedactedString(String)}, a
+	 * value can have this form by chance, but a user name seldom holds four or more asterisks in a row.
+	 *
+	 * @param value the user name restored from a backup
+	 * @return {@code true} if the user name has the redacted form
+	 */
+	static boolean isRedactedUserName(@Nonnull String value) {
+		int atIndex = value.indexOf('@');
+		if (atIndex < 0) {
+			return isRedactedString(value);
+		}
+		return isRedactedString(value.substring(0, atIndex)) && isRedactedString(value.substring(atIndex + 1));
+	}
+
+	/**
 	 * Redacts a segment of a string, only displaying a fixed number of chars at beginning & end.
 	 * 
 	 * @param data - the segment to be redacted.
@@ -517,7 +577,7 @@ final class BackupUtil {
 	 * @return the redacted segment.
 	 * @author Ben Petito
 	 */
-	private static String redactSegment(String data, @Nullable Integer maxLength) {
+	private static @Nonnull String redactSegment(@Nonnull String data, @Nullable Integer maxLength) {
 		// define the number of characters to keep at the beginning and end based on data length.
 		int charsToShowAtStart = 2;
 		int charsToShowAtEnd = 2;
@@ -572,7 +632,7 @@ final class BackupUtil {
 	 * @return The redacted numeric.
 	 * @author simeonsolomou
 	 */
-	private static <T extends Number> T redactNumeric(T data) {
+	private static @Nullable <T extends Number> T redactNumeric(@Nullable T data) {
 		if (data == null) {
 			return null;
 		}
@@ -609,7 +669,7 @@ final class BackupUtil {
 	 * @return the redacted date.
 	 * @author simeonsolomou
 	 */
-	private static Date redactDate(Date data) {
+	static @Nonnull Date redactDate(@Nonnull Date data) {
 		return Date.valueOf(data.toLocalDate().withDayOfMonth(1));
 	}
 	
@@ -620,7 +680,7 @@ final class BackupUtil {
 	 * @return the redacted time.
 	 * @author simeonsolomou
 	 */
-	private static Time redactTime(Time data) {
+	static @Nonnull Time redactTime(@Nonnull Time data) {
 		return Time.valueOf(data.toLocalTime().withMinute(0).withSecond(0).withNano(0));
 	}
 	
@@ -631,7 +691,7 @@ final class BackupUtil {
 	 * @return The redacted date-time.
 	 * @author simeonsolomou
 	 */
-	private static java.sql.Timestamp redactTimestamp(java.sql.Timestamp data) {
+	static @Nonnull java.sql.Timestamp redactTimestamp(@Nonnull java.sql.Timestamp data) {
 		return java.sql.Timestamp.valueOf(data.toLocalDateTime()
 				.withDayOfMonth(1).withHour(0).withMinute(0));
 	}
@@ -643,7 +703,7 @@ final class BackupUtil {
 	 * @return the redacted geometry.
 	 * @author simeonsolomou
 	 */
-	private static Geometry redactGeometry(Geometry data) {
+	private static @Nonnull Geometry redactGeometry(@Nonnull Geometry data) {
 		Coordinate[] existingCoordinates = data.getCoordinates();
 		
 		Coordinate[] modifiedCoordinates = new Coordinate[existingCoordinates.length];
@@ -676,7 +736,7 @@ final class BackupUtil {
 	 * @throws {@link IllegalArgumentException}
 	 * @author simeonsolomou
 	 */
-	public static File validateSkyveBackup(String extractDirName) {
+	public static @Nonnull File validateSkyveBackup(@Nonnull String extractDirName) {
 		String customerName = CORE.getUser().getCustomerName();
 		String backupDirectoryPath = Util.getBackupDirectory() +
 										"backup_" + customerName +
@@ -690,7 +750,7 @@ final class BackupUtil {
 		// Validate that there is at least one CSV file in root
 		boolean hasCsvFile = backupDirectory.listFiles(new FilenameFilter() {
 			@Override
-			public boolean accept(File dir, String name) {
+			public boolean accept(@SuppressWarnings("null") @Nonnull File dir, @SuppressWarnings("null") @Nonnull String name) {
 				return name.toLowerCase().endsWith(".csv");
 			}
 		}).length > 0;

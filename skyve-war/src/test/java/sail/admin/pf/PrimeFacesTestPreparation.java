@@ -14,7 +14,6 @@ public class PrimeFacesTestPreparation extends PrimeFacesSelenium {
 	public void setup() {
 		startBrowser(new BrowserConfiguration()
 							.browser(Browsers.chrome)
-							.baseUrl("http://localhost:8080/skyve/")
 							.userAgentString(Devices.ipad.userAgentString));
 	}
 	

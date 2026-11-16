@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view.container;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -15,9 +15,12 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Disableable;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -48,10 +51,10 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"percentageHeight",
 							"minPixelHeight", 
 							"maxPixelHeight", 
-							"disabledConditionName", 
-							"enabledConditionName",
-							"invisibleConditionName", 
-							"visibleConditionName",
+							"xmlDisabledCondition", 
+							"xmlEnabledCondition",
+							"xmlInvisibleCondition", 
+							"xmlVisibleCondition",
 							"selectedTabIndexBinding",
 							"tabs",
 							"properties"})
@@ -75,14 +78,16 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
 	
-	private String disabledConditionName;
-	private String invisibleConditionName;
+	private String disabledCondition;
+	private String enabledCondition;
+	private String invisibleCondition;
+	private String visibleCondition;
 	private String selectedTabIndexBinding;
 	private List<Tab> tabs = new ArrayList<>();
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the widget identifier for this tab pane.
@@ -90,7 +95,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return widget identifier, or {@code null} when not configured
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -102,7 +107,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @param widgetId  widget identifier; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -114,7 +119,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return a mutable tab list; never {@code null}
 	 */
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "tab", required = true)
-	public List<Tab> getTabs() {
+	public @Nonnull List<Tab> getTabs() {
 		return tabs;
 	}
 
@@ -124,7 +129,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -135,7 +140,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -145,7 +150,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return responsive width value, or {@code null} when unset
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -156,7 +161,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -166,7 +171,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return small-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -177,7 +182,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -187,7 +192,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return medium-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -198,7 +203,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -208,7 +213,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -219,7 +224,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -229,7 +234,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return extra-large-breakpoint width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -240,7 +245,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -250,7 +255,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return percentage width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -261,7 +266,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -271,7 +276,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return minimum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -282,7 +287,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -292,7 +297,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return maximum pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -303,7 +308,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -313,7 +318,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -324,7 +329,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -334,7 +339,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return percentage height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -345,7 +350,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -355,7 +360,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return minimum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -366,7 +371,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -376,7 +381,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return maximum pixel height, or {@code null} when unset
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -387,98 +392,130 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
 	/**
-	 * Returns the disabled-condition expression for this tab pane.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return disabled-condition expression, or {@code null} when not configured
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the disabled-condition expression for this tab pane.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName  disabled-condition expression; may be {@code null}
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = disabledConditionName;
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * Placeholder getter used only for JAXB compatibility of the synthetic enabled attribute.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * @return always {@code null}
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
 	}
 
 	/**
-	 * Applies a positive enabled expression by storing its negated disabled form.
+	 * Returns the {@code enabled} attribute as authored.
 	 *
-	 * <p>Side effects: overwrites the value returned by {@link #getDisabledConditionName()}.
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
 	 *
-	 * @param enabledConditionName  the enabled expression from metadata; may be {@code null}
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
-	 * Returns the invisible-condition expression for this tab pane.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible-condition expression, or {@code null} when not configured
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible-condition expression for this tab pane.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName  invisible-condition expression; may be {@code null}
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = invisibleConditionName;
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * Placeholder getter used only for JAXB compatibility of the synthetic visible attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Applies a positive visibility expression by storing its negated invisible form.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * <p>Side effects: overwrites the value returned by {@link #getInvisibleConditionName()}.
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName  the visibility expression from metadata; may be {@code null}
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
@@ -486,7 +523,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 *
 	 * @return a binding expression, or {@code null} when no selection binding is configured
 	 */
-	public String getSelectedTabIndexBinding() {
+	public @Nullable String getSelectedTabIndexBinding() {
 		return selectedTabIndexBinding;
 	}
 
@@ -498,7 +535,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @param selectedTabIndexBinding  binding expression to store; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setSelectedTabIndexBinding(String selectedTabIndexBinding) {
+	public void setSelectedTabIndexBinding(@Nullable String selectedTabIndexBinding) {
 		this.selectedTabIndexBinding = UtilImpl.processStringValue(selectedTabIndexBinding);
 	}
 
@@ -508,7 +545,7 @@ public final class TabPane implements DecoratedMetaData, Identifiable, RelativeS
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

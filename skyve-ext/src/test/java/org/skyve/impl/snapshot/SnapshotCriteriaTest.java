@@ -1,50 +1,50 @@
 package org.skyve.impl.snapshot;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class SnapshotCriteriaTest {
+class SnapshotCriteriaTest {
 
 	@Test
-	public void testDefaultOperatorIsAnd() {
+	void testDefaultOperatorIsAnd() {
 		SnapshotCriteria c = new SnapshotCriteria();
 		assertEquals(CompoundFilterOperator.and, c.getOperator());
 	}
 
 	@Test
-	public void testDefaultFiltersIsEmpty() {
+	void testDefaultFiltersIsEmpty() {
 		SnapshotCriteria c = new SnapshotCriteria();
 		assertNotNull(c.getFilters());
 		assertTrue(c.getFilters().isEmpty());
 	}
 
 	@Test
-	public void testSetOperator() {
+	void testSetOperator() {
 		SnapshotCriteria c = new SnapshotCriteria();
 		c.setOperator(CompoundFilterOperator.or);
 		assertEquals(CompoundFilterOperator.or, c.getOperator());
 	}
 
 	@Test
-	public void testToMapEmptyFilters() {
+	void testToMapEmptyFilters() {
 		SnapshotCriteria c = new SnapshotCriteria();
 		LinkedHashMap<String, Object> map = c.toMap();
 		assertEquals(CompoundFilterOperator.and, map.get("operator"));
-		assertFalse("no filters key for empty list", map.containsKey("filters"));
+		assertFalse(map.containsKey("filters"), "no filters key for empty list");
 	}
 
 	@Test
-	public void testToMapWithCriterion() {
+	void testToMapWithCriterion() {
 		SnapshotCriteria c = new SnapshotCriteria();
 		c.setOperator(CompoundFilterOperator.or);
 
@@ -56,7 +56,7 @@ public class SnapshotCriteriaTest {
 
 		LinkedHashMap<String, Object> map = c.toMap();
 		assertEquals(CompoundFilterOperator.or, map.get("operator"));
-		assertTrue("filters key should be present", map.containsKey("filters"));
+		assertTrue(map.containsKey("filters"), "filters key should be present");
 
 		@SuppressWarnings("unchecked")
 		List<LinkedHashMap<String, Object>> filters = (List<LinkedHashMap<String, Object>>) map.get("filters");
@@ -65,7 +65,7 @@ public class SnapshotCriteriaTest {
 	}
 
 	@Test
-	public void testPopulateFromMapSetsOperator() {
+	void testPopulateFromMapSetsOperator() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("operator", "or");
 
@@ -76,7 +76,7 @@ public class SnapshotCriteriaTest {
 	}
 
 	@Test
-	public void testPopulateFromMapWithCriterionFilter() {
+	void testPopulateFromMapWithCriterionFilter() {
 		// Build a criterion-shaped inner map
 		Map<String, Object> criterionMap = new LinkedHashMap<>();
 		criterionMap.put("column", "status");
@@ -102,7 +102,7 @@ public class SnapshotCriteriaTest {
 	}
 
 	@Test
-	public void testPopulateIgnoresNonMapFilterElements() {
+	void testPopulateIgnoresNonMapFilterElements() {
 		List<Object> filterList = new ArrayList<>();
 		filterList.add("notAMap"); // should be ignored
 
@@ -113,11 +113,11 @@ public class SnapshotCriteriaTest {
 		SnapshotCriteria c = new SnapshotCriteria();
 		c.populate(map);
 
-		assertTrue("non-map elements should be skipped", c.getFilters().isEmpty());
+		assertTrue(c.getFilters().isEmpty(), "non-map elements should be skipped");
 	}
 
 	@Test
-	public void testPopulateIgnoresNonListFiltersValue() {
+	void testPopulateIgnoresNonListFiltersValue() {
 		Map<String, Object> map = new LinkedHashMap<>();
 		map.put("operator", "and");
 		map.put("filters", "notAList");
@@ -125,6 +125,6 @@ public class SnapshotCriteriaTest {
 		SnapshotCriteria c = new SnapshotCriteria();
 		c.populate(map);
 
-		assertTrue("non-list filters value should be ignored", c.getFilters().isEmpty());
+		assertTrue(c.getFilters().isEmpty(), "non-list filters value should be ignored");
 	}
 }

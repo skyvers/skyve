@@ -1,6 +1,7 @@
 package org.skyve.metadata.sail.language.step.interaction.actions;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -31,5 +32,16 @@ class OkTest {
 	void getIdentifierReturnsImplicitActionName() {
 		AutomationContext<?, ?> ctx = mock(AutomationContext.class);
 		assertThat(step.getIdentifier(ctx), is(ImplicitActionName.OK.toString()));
+	}
+
+	@Test
+	void defaultConfirmIsNull() {
+		assertThat(step.getConfirm(), is(nullValue()));
+	}
+
+	@Test
+	void setConfirmFalseRoundtrip() {
+		step.setConfirm(Boolean.FALSE);
+		assertThat(step.getConfirm(), is(Boolean.FALSE));
 	}
 }

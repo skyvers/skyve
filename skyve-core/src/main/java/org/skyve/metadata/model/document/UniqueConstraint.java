@@ -8,6 +8,8 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -50,7 +52,7 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 		/**
 		 * @param scope
 		 */
-		private DocumentScope(DocumentPermissionScope scope) {
+		private DocumentScope(@Nonnull DocumentPermissionScope scope) {
 			this.scope = scope;
 		}
 
@@ -59,44 +61,52 @@ public interface UniqueConstraint extends NamedMetaData, DecoratedMetaData {
 		 *
 		 * @return the corresponding permission scope; never {@code null}
 		 */
-		public DocumentPermissionScope toDocumentPermissionScope() {
+		public @Nonnull DocumentPermissionScope toDocumentPermissionScope() {
 			return scope;
 		}
 	}
+
+	/**
+	 * Returns the name of this constraint.
+	 *
+	 * @return the constraint name; never {@code null}
+	 */
+	@Override
+	@Nonnull String getName();
 
 	/**
 	 * Returns the tenancy scope within which this constraint enforces uniqueness.
 	 *
 	 * @return the document scope; never {@code null}
 	 */
-	public DocumentScope getScope();
+	public @Nullable DocumentScope getScope();
 	
 	/**
 	 * Returns a human-readable description of this constraint.
 	 *
 	 * @return the description; may be {@code null}
 	 */
-	public String getDescription();
+	public @Nullable String getDescription();
 	
 	/**
 	 * Returns the localisedDescription.
 	 * @return the result
 	 */
-	public default String getLocalisedDescription() {
+	public default @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 	
 	/**
 	 * Returns the user-facing message displayed when this constraint is violated.
 	 *
-	 * @return the validation message; may be {@code null}
+	 * @return the validation message
 	 */
-	public String getMessage();
+	public @Nonnull String getMessage();
 	
 	/**
 	 * Returns the ordered list of document attribute names that together form the unique key.
 	 *
 	 * @return the field names; never {@code null}
 	 */
-	public List<String> getFieldNames();
+	public @Nonnull List<String> getFieldNames();
 }

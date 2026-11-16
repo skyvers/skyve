@@ -1,5 +1,7 @@
 package org.skyve.impl.web.faces.converters.select;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
@@ -17,7 +19,7 @@ public class TriStateCheckboxBooleanConverter implements Converter<Boolean> {
 	 * @return the resolved domain value or identifier object
 	 */
 	@Override
-	public Boolean getAsObject(FacesContext context, UIComponent component, String value) {
+	public @Nullable Boolean getAsObject(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable String value) {
 		if ("1".equals(value)) {
 			return Boolean.TRUE;
 		}
@@ -37,7 +39,7 @@ public class TriStateCheckboxBooleanConverter implements Converter<Boolean> {
 	 * @return the display or identifier string for the supplied value
 	 */
 	@Override
-	public String getAsString(FacesContext context, UIComponent component, Boolean value) {
+	public @Nonnull String getAsString(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable Boolean value) {
 		if (Boolean.TRUE.equals(value)) {
 			return "1";
 		}

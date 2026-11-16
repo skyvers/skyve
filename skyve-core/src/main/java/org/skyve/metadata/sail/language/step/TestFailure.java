@@ -6,6 +6,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -17,6 +19,11 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Fails the automation run if <em>no</em> error is visible, or if a specific
  * {@code message} is provided and no displayed error matches it. Use this to verify
  * that the application correctly rejects invalid input.
+ *
+ * <p>Directly after a {@link org.skyve.metadata.sail.language.step.interaction.session.Login},
+ * it asserts that the login was rejected instead.
+ *
+ * <p>{@code {run}} and {@code {var:name}} in {@code message} are replaced by the run token and the captured variables.
  *
  * @see TestSuccess
  * @see org.skyve.metadata.sail.execution.Executor#executeTestFailure
@@ -31,7 +38,7 @@ public class TestFailure implements Step {
 	 * Returns the message.
 	 * @return the result
 	 */
-	public String getMessage() {
+	public @Nullable String getMessage() {
 		return message;
 	}
 
@@ -40,7 +47,7 @@ public class TestFailure implements Step {
 	 * @param message the message
 	 */
 	@XmlAttribute(name = "message")
-	public void setMessage(String message) {
+	public void setMessage(@Nullable String message) {
 		this.message = UtilImpl.processStringValue(message);
 	}
 
@@ -49,7 +56,7 @@ public class TestFailure implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeTestFailure(this);
 	}
 	
@@ -59,7 +66,7 @@ public class TestFailure implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return "Failure";
 	}
 }

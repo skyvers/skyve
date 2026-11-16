@@ -80,7 +80,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 *
 	 * @param cache map used for metadata key-to-object storage
 	 */
-	protected MutableCachedRepository(Map<String, Optional<MetaData>> cache) {
+	protected MutableCachedRepository(@Nonnull Map<String, Optional<MetaData>> cache) {
 		this.cache = cache;
 	}
 	
@@ -95,7 +95,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void evictCachedMetaData(Customer customer) {
+	public void evictCachedMetaData(@Nullable Customer customer) {
 		// Clear the lot
 		if (customer == null) {
 			cache.clear();
@@ -137,7 +137,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 */
 	@Override
 	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
-	public Router getRouter() {
+	public @Nullable Router getRouter() {
 		Optional<MetaData> result = cache.get(ROUTER_KEY);
 		if (result != null) { // key is present
 			// Load if empty
@@ -180,7 +180,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted router instance
 	 */
 	@Override
-	public Router setRouter(Router router) {
+	public @Nonnull Router setRouter(@Nonnull Router router) {
 		Router result = router.convert(ROUTER_NAME);
 		// Ignore dev mode flag here as we need to seed the cache in this method.
 		cache.put(ROUTER_KEY, Optional.of(result));
@@ -198,7 +198,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 */
 	@Override
 	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
-	public Customer getCustomer(String customerName) {
+	public @Nullable Customer getCustomer(@Nonnull String customerName) {
 		String customerKey = CUSTOMERS_NAMESPACE + customerName;
 		Optional<MetaData> result = cache.get(customerKey);
 		if (result != null) { // key is present
@@ -244,8 +244,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted customer
 	 */
 	@Override
-	public Customer putCustomer(CustomerMetaData customer) {
+	public @Nonnull Customer putCustomer(@Nonnull CustomerMetaData customer) {
 		String customerName = customer.getName();
+		if (customerName == null) {
+			throw new MetaDataException("The customer [name] is required");
+		}
 		Customer result = customer.convert(customerName);
 		cache.put(CUSTOMERS_NAMESPACE + customerName, Optional.of(result));
 		return result;
@@ -261,7 +264,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved module, or {@code null} when not found in this repository
 	 */
 	@Override
-	public Module getModule(Customer customer, String moduleName) {
+	public @Nullable Module getModule(@Nullable Customer customer, @Nonnull String moduleName) {
 		Module result = null;
 		if (customer != null) {
 			if (! ((CustomerImpl) customer).getModuleEntries().containsKey(moduleName)) {
@@ -342,9 +345,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted module
 	 */
 	@Override
-	public Module putModule(Customer customer, ModuleMetaData module) {
+	public @Nonnull Module putModule(@Nonnull Customer customer, @Nonnull ModuleMetaData module) {
 		String customerName = customer.getName();
-		String moduleName = module.getName();
+		String moduleName = requireModuleName(module);
 		Module result = convertModule(customerName, moduleName, module);
 		
 		StringBuilder moduleKey = new StringBuilder(64);
@@ -361,8 +364,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted module
 	 */
 	@Override
-	public Module putModule(ModuleMetaData module) {
-		String moduleName = module.getName();
+	public @Nonnull Module putModule(@Nonnull ModuleMetaData module) {
+		String moduleName = requireModuleName(module);
 
 		Module result = convertModule(null, moduleName, module);
 		cache.put(MODULES_NAMESPACE + moduleName, Optional.of(result));
@@ -379,7 +382,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved document, or {@code null} when not found in this repository
 	 */
 	@Override
-	public Document getDocument(Customer customer, Module module, String documentName) {
+	public @Nullable Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		Document result = null;
 		if (customer != null) {
 			// get customer overridden
@@ -407,7 +410,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		}
 		else {
 			documentModuleName = referencedModuleName;
-			documentModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, documentModuleName), documentModuleName);
+			documentModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(customer, documentModuleName), documentModuleName);
 		}
 
 		final String customerName = (customer == null) ? null : customer.getName();
@@ -471,7 +474,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 
 		// check each document reference query name links to a module query
 		for (String referenceName : result.getReferenceNames()) {
-			String queryName = result.getReferenceByName(referenceName).getQueryName();
+			String queryName = result.getNullSafeReferenceByName(referenceName).getQueryName();
 			if ((queryName != null) && (module.getMetaDataQuery(queryName) == null)) {
 				StringBuilder mde = new StringBuilder(documentName);
 				mde.append(" : The reference ");
@@ -502,6 +505,22 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 
+	private static @Nonnull String requireModuleName(@Nonnull ModuleMetaData module) {
+		String result = module.getName();
+		if (result == null) {
+			throw new MetaDataException("The module [name] is required");
+		}
+		return result;
+	}
+
+	private static @Nonnull String requireDocumentName(@Nonnull String moduleName, @Nonnull DocumentMetaData document) {
+		String result = document.getName();
+		if (result == null) {
+			throw new MetaDataException("The document [name] is required in module " + moduleName);
+		}
+		return result;
+	}
+
 	private static @Nonnull Module requireModule(@Nullable Module module, @Nonnull String moduleName) {
 		if (module == null) {
 			throw new MetaDataException("Module " + moduleName + " does not exist.");
@@ -518,10 +537,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted document
 	 */
 	@Override
-	public Document putDocument(Customer customer, Module module, DocumentMetaData document) {
+	public @Nonnull Document putDocument(@Nonnull Customer customer, @Nonnull Module module, @Nonnull DocumentMetaData document) {
 		String customerName = customer.getName();
 		String moduleName = module.getName();
-		String documentName = document.getName();
+		String documentName = requireDocumentName(moduleName, document);
 		Document result = convertDocument(customerName, moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
@@ -539,9 +558,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted document
 	 */
 	@Override
-	public Document putDocument(Module module, DocumentMetaData document) {
+	public @Nonnull Document putDocument(@Nonnull Module module, @Nonnull DocumentMetaData document) {
 		String moduleName = module.getName();
-		String documentName = document.getName();
+		String documentName = requireDocumentName(moduleName, document);
 		Document result = convertDocument(null, moduleName, module, documentName, document);
 		
 		StringBuilder documentKey = new StringBuilder(64);
@@ -566,13 +585,13 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 */
 	@Override
 	@SuppressWarnings({"java:S2789", "java:S3776"}) // Complexity OK
-	public View getView(String uxui,
-							Customer customer, 
-							Document document, 
-							String name) {
+	public @Nullable View getView(@Nullable String uxui,
+										@Nullable Customer customer, 
+										@Nonnull Document document, 
+										@Nonnull String name) {
 		View result = null;
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(customer, owningModuleName), owningModuleName);
 		if (customer != null) {
 			String searchCustomerName = customer.getName();
 			// get customer overridden
@@ -715,14 +734,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		return result;
 	}
 	
-	private View scaffoldView(@Nullable Customer customer,
-								@Nonnull Module module,
-								@Nonnull Document document,
-								@Nonnull String viewName,
-								@Nullable String uxui) {
+	private @Nullable View scaffoldView(@Nullable Customer customer,
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull String viewName,
+											@Nullable String uxui) {
 		if (ViewType.edit.toString().equals(viewName) || 
 				ViewType.pick.toString().equals(viewName) || 
 				ViewType.params.toString().equals(viewName)) {
+			if (customer == null) {
+				throw new MetaDataException("Cannot scaffold view " + viewName + " for document " +
+												module.getName() + '.' + document.getName() + " without a customer");
+			}
 			ViewImpl result = new ViewGenerator(this).generate(customer, document, viewName);
 			result.resolve(uxui, customer, module, document, true);
 			return result;
@@ -740,11 +763,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted view
 	 */
 	@Override
-	public View putView(Customer customer, String uxui, Document document, ViewMetaData view) {
+	public @Nonnull View putView(@Nonnull Customer customer, @Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view) {
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(customerName, uxui, customer, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -766,10 +789,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted view
 	 */
 	@Override
-	public View putView(String uxui, Document document, ViewMetaData view) {
+	public @Nonnull View putView(@Nonnull String uxui, @Nonnull Document document, @Nonnull ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(null, uxui, null, owningModuleName, owningModule, documentName, document, uxui, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -790,11 +813,11 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted view
 	 */
 	@Override
-	public View putView(Customer customer, Document document, ViewMetaData view) {
+	public @Nonnull View putView(@Nonnull Customer customer, @Nonnull Document document, @Nonnull ViewMetaData view) {
 		String customerName = customer.getName();
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(customer, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(customer, owningModuleName), owningModuleName);
 		View result = convertView(customerName, null, customer, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -815,10 +838,10 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted view
 	 */
 	@Override
-	public View putView(Document document, ViewMetaData view) {
+	public @Nonnull View putView(@Nonnull Document document, @Nonnull ViewMetaData view) {
 		String documentName = document.getName();
 		String owningModuleName = document.getOwningModuleName();
-		Module owningModule = requireModule(ProvidedRepositoryFactory.get().getModule(null, owningModuleName), owningModuleName);
+		Module owningModule = requireModule(ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName), owningModuleName);
 		View result = convertView(null, null, null, owningModuleName, owningModule, documentName, document, null, view);
 		
 		StringBuilder viewKey = new StringBuilder(128);
@@ -839,7 +862,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved action metadata, or {@code null} when not found
 	 */
 	@Override
-	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+	public @Nullable ActionMetaData getMetaDataAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName) {
 		ActionMetaData result = null;
 		if (customer != null) {
 			// get customer overridden
@@ -928,7 +951,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted action metadata
 	 */
 	@Override
-	public ActionMetaData putMetaDataAction(Customer customer, Document document, ActionMetaData action) {
+	public @Nonnull ActionMetaData putMetaDataAction(@Nonnull Customer customer, @Nonnull Document document, @Nonnull ActionMetaData action) {
 		String customerName = customer.getName();
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
@@ -952,7 +975,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted action metadata
 	 */
 	@Override
-	public ActionMetaData putMetaDataAction(Document document, ActionMetaData action) {
+	public @Nonnull ActionMetaData putMetaDataAction(@Nonnull Document document, @Nonnull ActionMetaData action) {
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		ActionMetaData result = convertMetaDataAction(null, moduleName, documentName, action);
@@ -974,7 +997,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the resolved Bizlet metadata, or {@code null} when not found
 	 */
 	@Override
-	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+	public @Nullable BizletMetaData getMetaDataBizlet(@Nullable Customer customer, @Nonnull Document document) {
 		BizletMetaData result = null;
 		if (customer != null) {
 			// get customer overridden
@@ -1061,7 +1084,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted Bizlet metadata
 	 */
 	@Override
-	public BizletMetaData putMetaDataBizlet(Customer customer, Document document, BizletMetaData bizlet) {
+	public @Nonnull BizletMetaData putMetaDataBizlet(@Nonnull Customer customer, @Nonnull Document document, @Nonnull BizletMetaData bizlet) {
 		String customerName = customer.getName();
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
@@ -1085,7 +1108,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @return the converted Bizlet metadata
 	 */
 	@Override
-	public BizletMetaData putMetaDataBizlet(Document document, BizletMetaData bizlet) {
+	public @Nonnull BizletMetaData putMetaDataBizlet(@Nonnull Document document, @Nonnull BizletMetaData bizlet) {
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
 		BizletMetaData result = convertMetaDataBizlet(null, moduleName, documentName, bizlet);

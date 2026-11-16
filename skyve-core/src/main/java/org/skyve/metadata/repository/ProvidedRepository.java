@@ -3,12 +3,15 @@ package org.skyve.metadata.repository;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.job.UserJobSchedule;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.BizExportAction;
@@ -481,5 +484,33 @@ public interface ProvidedRepository extends CachedRepository {
 		}
 
 		return ! ExtensionStrategy.mapped.equals(persistent.getStrategy());
+	}
+	
+	/**
+	 * Notify the configured customer, or every customer when no default customer is configured.
+	 *
+	 * @param notifier The customer notification to invoke.
+	 */
+	static void notifyAllCustomersObservers(@Nonnull Consumer<Customer> notifier) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
+		if (UtilImpl.CUSTOMER != null) {
+			notifyObserver(repository, UtilImpl.CUSTOMER, "UtilImpl.CUSTOMER ", notifier);
+		}
+		else {
+			for (String customerName : repository.getAllCustomerNames()) {
+				notifyObserver(repository, customerName, "Customer ", notifier);
+			}
+		}
+	}
+
+	private static void notifyObserver(@Nonnull ProvidedRepository repository,
+										@Nonnull String customerName,
+										@Nonnull String errorPrefix,
+										@Nonnull Consumer<Customer> notifier) {
+		Customer customer = repository.getCustomer(customerName);
+		if (customer == null) {
+			throw new IllegalStateException(errorPrefix + customerName + " does not exist.");
+		}
+		notifier.accept(customer);
 	}
 }

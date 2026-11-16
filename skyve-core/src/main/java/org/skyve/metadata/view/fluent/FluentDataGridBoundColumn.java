@@ -21,6 +21,7 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds bound-column {@link DataGridBoundColumn} metadata.
@@ -41,7 +42,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 * @param column
 	 *            the metadata instance to mutate
 	 */
-	public FluentDataGridBoundColumn(DataGridBoundColumn column) {
+	public FluentDataGridBoundColumn(@Nonnull DataGridBoundColumn column) {
 		this.column = column;
 	}
 
@@ -58,7 +59,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *             if an unsupported input widget type is encountered
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public FluentDataGridBoundColumn from(@SuppressWarnings("hiding") DataGridBoundColumn column) {
+	public @Nonnull FluentDataGridBoundColumn from(@SuppressWarnings("hiding") @Nonnull DataGridBoundColumn column) {
 		super.from(column);
 
 		Boolean b = column.getEditable();
@@ -133,7 +134,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the binding expression
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn binding(String binding) {
+	public @Nonnull FluentDataGridBoundColumn binding(@Nullable String binding) {
 		column.setBinding(binding);
 		return this;
 	}
@@ -145,7 +146,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            {@code true} to allow inline editing
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn editable(boolean editable) {
+	public @Nonnull FluentDataGridBoundColumn editable(boolean editable) {
 		column.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -157,7 +158,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            {@code true} to escape HTML characters
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn escape(boolean escape) {
+	public @Nonnull FluentDataGridBoundColumn escape(boolean escape) {
 		column.setEscape(escape ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -169,7 +170,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the sanitisation policy
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn sanitise(Sanitisation sanitise) {
+	public @Nonnull FluentDataGridBoundColumn sanitise(@Nullable Sanitisation sanitise) {
 		column.setSanitise(sanitise);
 		return this;
 	}
@@ -181,7 +182,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the formatter name
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn formatter(FormatterName formatterName) {
+	public @Nonnull FluentDataGridBoundColumn formatter(@Nullable FormatterName formatterName) {
 		column.setFormatterName(formatterName);
 		return this;
 	}
@@ -193,7 +194,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the custom formatter name
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn customFormatter(String customFormatterName) {
+	public @Nonnull FluentDataGridBoundColumn customFormatter(@Nullable String customFormatterName) {
 		column.setCustomFormatterName(customFormatterName);
 		return this;
 	}
@@ -215,7 +216,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the check-box widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentCheckBox check) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentCheckBox check) {
 		return inputWidgetReference(check);
 	}
 
@@ -226,7 +227,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the colour-picker widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentColourPicker colour) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentColourPicker colour) {
 		return inputWidgetReference(colour);
 	}
 
@@ -237,7 +238,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the combo widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentCombo combo) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentCombo combo) {
 		return inputWidgetReference(combo);
 	}
 
@@ -248,7 +249,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the geometry widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentGeometry geometry) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentGeometry geometry) {
 		return inputWidgetReference(geometry);
 	}
 
@@ -259,7 +260,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the HTML widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentHTML html) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentHTML html) {
 		return inputWidgetReference(html);
 	}
 
@@ -270,7 +271,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the lookup-description widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentLookupDescription lookup) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentLookupDescription lookup) {
 		return inputWidgetReference(lookup);
 	}
 
@@ -281,7 +282,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the password widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentPassword password) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentPassword password) {
 		return inputWidgetReference(password);
 	}
 
@@ -292,7 +293,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the radio widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentRadio radio) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentRadio radio) {
 		return inputWidgetReference(radio);
 	}
 
@@ -303,7 +304,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the rich-text widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentRichText richText) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentRichText richText) {
 		return inputWidgetReference(richText);
 	}
 
@@ -314,7 +315,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the slider widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentSlider slider) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentSlider slider) {
 		return inputWidgetReference(slider);
 	}
 
@@ -325,7 +326,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the spinner widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentSpinner spinner) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentSpinner spinner) {
 		return inputWidgetReference(spinner);
 	}
 
@@ -336,7 +337,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the text-area widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentTextArea textArea) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentTextArea textArea) {
 		return inputWidgetReference(textArea);
 	}
 
@@ -347,7 +348,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the text-field widget builder
 	 * @return this builder
 	 */
-	public FluentDataGridBoundColumn inputWidget(FluentTextField textField) {
+	public @Nonnull FluentDataGridBoundColumn inputWidget(@Nonnull FluentTextField textField) {
 		return inputWidgetReference(textField);
 	}
 
@@ -358,7 +359,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 *            the fluent input widget to reference, or {@code null} to clear the reference
 	 * @return this builder
 	 */
-	private FluentDataGridBoundColumn inputWidgetReference(FluentInputWidget<?> widget) {
+	private @Nonnull FluentDataGridBoundColumn inputWidgetReference(@Nullable FluentInputWidget<?> widget) {
 		WidgetReference reference = null;
 		if (widget != null) {
 			reference = new WidgetReference();
@@ -374,7 +375,7 @@ public class FluentDataGridBoundColumn extends FluentDataGridColumn<FluentDataGr
 	 * @return the wrapped bound column metadata
 	 */
 	@Override
-	public DataGridBoundColumn get() {
+	public @Nonnull DataGridBoundColumn get() {
 		return column;
 	}
 }

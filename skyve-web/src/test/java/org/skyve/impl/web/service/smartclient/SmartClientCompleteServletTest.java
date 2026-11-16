@@ -102,7 +102,8 @@ class SmartClientCompleteServletTest {
 		SmartClientCompleteServlet servlet = new SmartClientCompleteServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter("_attr")).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn("ctx-1");
 		when(request.getParameter(AbstractWebContext.ACTION_NAME)).thenReturn("previous");
@@ -115,7 +116,8 @@ class SmartClientCompleteServletTest {
 		SmartClientCompleteServlet servlet = new SmartClientCompleteServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter("_attr")).thenReturn("name");
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.ACTION_NAME)).thenReturn("previous");
@@ -128,7 +130,8 @@ class SmartClientCompleteServletTest {
 		SmartClientCompleteServlet servlet = new SmartClientCompleteServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter("_attr")).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn("ctx-1");
 		when(request.getParameter(AbstractWebContext.ACTION_NAME)).thenReturn("previous");
@@ -141,7 +144,8 @@ class SmartClientCompleteServletTest {
 		SmartClientCompleteServlet servlet = new SmartClientCompleteServlet();
 		HttpServletRequest request = newRequestWithoutUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter("_attr")).thenReturn("name");
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn("ctx-1");
 		when(request.getParameter(AbstractWebContext.ACTION_NAME)).thenReturn("previous");
@@ -154,7 +158,8 @@ class SmartClientCompleteServletTest {
 		SmartClientCompleteServlet servlet = new SmartClientCompleteServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter("_attr")).thenReturn("name");
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn("ctx-1");
 		when(request.getParameter(AbstractWebContext.ACTION_NAME)).thenReturn("notACompleteType");
@@ -167,7 +172,8 @@ class SmartClientCompleteServletTest {
 		SmartClientCompleteServlet servlet = new SmartClientCompleteServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter("_attr")).thenReturn("name");
 		when(request.getParameter(AbstractWebContext.CONTEXT_NAME)).thenReturn("ctx-missing");
 		when(request.getParameter(AbstractWebContext.ACTION_NAME)).thenReturn("previous");
@@ -243,7 +249,7 @@ class SmartClientCompleteServletTest {
 		return new DynamicBean("test", "Thing", properties);
 	}
 
-	private static HttpServletRequest requestWithCachedConversation(UserImpl user, Bean bean) throws Exception {
+	private static HttpServletRequest requestWithCachedConversation(UserImpl user, Bean bean) {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
 		when(request.getSession(false)).thenReturn(session);
@@ -255,7 +261,7 @@ class SmartClientCompleteServletTest {
 
 		SmartClientWebContext webContext = new SmartClientWebContext(CONVERSATION_KEY, request);
 		webContext.setCurrentBean(bean);
-		StateUtil.cacheConversation(webContext);
+		StateUtil.commitAndCacheConversation(webContext);
 		return request;
 	}
 

@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.repository.module;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.NamedMetaData;
@@ -12,6 +12,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
@@ -42,31 +44,31 @@ public class ModuleRoleMetaData extends NamedMetaData implements DecoratedMetaDa
 	
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDescription(String description) {
+	public void setDescription(@Nonnull String description) {
 		this.description = UtilImpl.processStringValue(description);
 	}
 
 	@XmlElementWrapper(namespace = XMLMetaData.MODULE_NAMESPACE, name = "privileges")
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "document", required = true)
-	public List<DocumentPrivilegeMetaData> getPrivileges() {
+	public @Nonnull List<DocumentPrivilegeMetaData> getPrivileges() {
 		return privileges;
 	}
 
@@ -79,12 +81,12 @@ public class ModuleRoleMetaData extends NamedMetaData implements DecoratedMetaDa
 						@XmlElementRef(type = ModuleRoleReportUserAccessMetaData.class),
 						@XmlElementRef(type = ModuleRoleDynamicImageUserAccessMetaData.class),
 						@XmlElementRef(type = ModuleRoleContentUserAccessMetaData.class)})
-	public List<ModuleRoleUserAccessMetaData> getAccesses() {
+	public @Nonnull List<ModuleRoleUserAccessMetaData> getAccesses() {
 		return accesses;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

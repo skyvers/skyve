@@ -56,6 +56,7 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
@@ -88,7 +89,7 @@ public class ReportServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	public void doPost(HttpServletRequest request, HttpServletResponse response)
+	public void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request, @SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		doGet(request, response);
 	}
@@ -101,7 +102,7 @@ public class ReportServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	public void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request, @SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		try {
@@ -164,7 +165,7 @@ public class ReportServlet extends HttpServlet {
 	 * executes JasperReports rendering, and writes either report bytes or a generic HTML error response.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void doReport(HttpServletRequest request, HttpServletResponse response) {
+	private static void doReport(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response) {
 		try {
 			String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 			if (moduleName == null) {
@@ -207,6 +208,7 @@ public class ReportServlet extends HttpServlet {
 				designSpecification.setName("EditView");
 				designSpecification.setModuleName(moduleName);
 				designSpecification.setDocumentName(documentName);
+				designSpecification.setUxui(uxui.getName());
 
 				final ReportDesignGenerator generator = ReportDesignGeneratorFactory.getGeneratorForDesign(designSpecification);
 				generator.populateDesign(designSpecification);
@@ -327,7 +329,7 @@ public class ReportServlet extends HttpServlet {
 	 * reports stores the {@link JasperPrint} in the session for JasperReports viewer integration.
 	 */
 	private static void pumpOutReportFormat(@Nonnull byte[] bytes,
-												@Nonnull JasperPrint jasperPrint,
+												@Nullable JasperPrint jasperPrint,
 												@Nonnull ReportFormat format,
 												@Nonnull String fileNameNoSuffix,
 												@Nonnull HttpSession session,
@@ -435,15 +437,15 @@ public class ReportServlet extends HttpServlet {
 					final String log = OWASP.sanitiseLog(valuesParam);
 					HTTP_LOGGER.info(log);
 				}
-				if (valuesParam == null) {
+				// A "null" JSON value carries no report parameters either
+				@SuppressWarnings("unchecked")
+				Map<String, Object> values = (valuesParam == null) ? null : (Map<String, Object>) JSON.unmarshall(user, valuesParam);
+				if (values == null) {
 					response.setContentType(MimeType.html.toString());
 					response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 					out.write("<html><head><title>Missing Report Parameters</head><body><h1>There are no report parameters in this request</h1></body></html>".getBytes(StandardCharsets.UTF_8));
 					return;
 				}
-
-				@SuppressWarnings("unchecked")
-				Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(user, valuesParam);
 				String module_QueryOrModel = (String) values.get("ds");
 				int _Index = module_QueryOrModel.indexOf('_');
 				String moduleName = module_QueryOrModel.substring(0, _Index);
@@ -469,6 +471,9 @@ public class ReportServlet extends HttpServlet {
 					model.setBean(WebUtil.getConversationBeanFromRequest(webContext, request));
 
 					drivingDocument = model.getDrivingDocument();
+					if (drivingDocument == null) {
+						throw new IllegalStateException("List model " + modelName + " in document " + documentName + " has no driving document");
+					}
 				}
 				else {
 					MetaDataQueryDefinition query = module.getMetaDataQuery(documentOrQueryOrModelName);
@@ -532,10 +537,7 @@ public class ReportServlet extends HttpServlet {
 					designParams.setPretty(Boolean.TRUE.equals(values.get("isPretty")));
 					designParams.setShowSummary(Boolean.TRUE.equals(values.get("showSummary")));
 
-					designParams.setTopMargin(((Number) values.get("top")).intValue());
-					designParams.setLeftMargin(((Number) values.get("bottom")).intValue());
-					designParams.setBottomMargin(((Number) values.get("left")).intValue());
-					designParams.setRightMargin(((Number) values.get("right")).intValue());
+					applyMargins(designParams, values);
 
 					@SuppressWarnings("unchecked")
 					List<Map<String, Object>> columns = (List<Map<String, Object>>) values.get("columns");
@@ -571,8 +573,8 @@ public class ReportServlet extends HttpServlet {
 						else {
 							reportColumn.setAlignment(ColumnAlignment.left);
 						}
-						if ((drivingDocument != null) && (reportColumn.getName() != null)) {
-							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, reportColumn.getName());
+						if (reportColumn.getName() != null) {
+							final Attribute attribute = drivingDocument.getPolymorphicAttribute(customer, binding);
 							if (attribute != null) {
 								reportColumn.setAttributeType(attribute.getAttributeType());
 								if (attribute instanceof ConvertibleField convertibleField) {
@@ -616,5 +618,18 @@ public class ReportServlet extends HttpServlet {
 				writeReportError(response, out, reference);
 			}
 		}
+	}
+
+	/**
+	 * Sets the page margins of an export from the export dialog's values.
+	 *
+	 * @param designParams the export design to set
+	 * @param values the export dialog values, with numeric "top", "left", "bottom" and "right" entries
+	 */
+	static void applyMargins(@Nonnull ReportDesignParameters designParams, @Nonnull Map<String, Object> values) {
+		designParams.setTopMargin(((Number) values.get("top")).intValue());
+		designParams.setLeftMargin(((Number) values.get("left")).intValue());
+		designParams.setBottomMargin(((Number) values.get("bottom")).intValue());
+		designParams.setRightMargin(((Number) values.get("right")).intValue());
 	}
 }

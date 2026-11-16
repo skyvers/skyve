@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleContentUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleContentUserAccessMetaData} metadata.
  * 
@@ -21,16 +23,16 @@ public class FluentModuleRoleContentAccess extends
 	/**
 	 * Creates a new FluentModuleRoleContentAccess from the specified ModuleRoleContentUserAccessMetaData.
 	 */
-	public FluentModuleRoleContentAccess(ModuleRoleContentUserAccessMetaData access) {
+	public FluentModuleRoleContentAccess(@Nonnull ModuleRoleContentUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleContentAccess from a runtime metadata.
 	 */
-	protected FluentModuleRoleContentAccess from(String documentName,
-													String binding,
-													Set<String> uxuis) {
+	protected @Nonnull FluentModuleRoleContentAccess from(@Nonnull String documentName,
+															@Nonnull String binding,
+															@Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		binding(binding);
 		uxuis.forEach(u -> addUxUi(u));
@@ -40,7 +42,7 @@ public class FluentModuleRoleContentAccess extends
 	/**
 	 * Specifies the document name for this FluentModuleRoleContentAccess.
 	 */
-	public FluentModuleRoleContentAccess documentName(final String documentName) {
+	public @Nonnull FluentModuleRoleContentAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -48,7 +50,7 @@ public class FluentModuleRoleContentAccess extends
 	/**
 	 * Specifies the binding for this FluentModuleRoleContentAccess.
 	 */
-	public FluentModuleRoleContentAccess binding(final String binding) {
+	public @Nonnull FluentModuleRoleContentAccess binding(final @Nonnull String binding) {
 		access.setBinding(binding);
 		return this;
 	}
@@ -57,7 +59,7 @@ public class FluentModuleRoleContentAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleContentUserAccessMetaData get() {
+	public @Nonnull ModuleRoleContentUserAccessMetaData get() {
 		return access;
 	}
 }

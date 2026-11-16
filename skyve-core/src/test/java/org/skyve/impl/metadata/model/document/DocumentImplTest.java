@@ -332,6 +332,22 @@ class DocumentImplTest {
 	}
 
 	@Test
+	void getNullSafeReferenceByNameReturnsReference() {
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("contact");
+		doc.putRelation(assoc);
+		assertThat(doc.getNullSafeReferenceByName("contact"), is(assoc));
+	}
+
+	@Test
+	void getNullSafeReferenceByNameThrowsForUnknown() {
+		doc.setOwningModuleName("admin");
+		doc.setName("Contact");
+		MetaDataException e = assertThrows(MetaDataException.class, () -> doc.getNullSafeReferenceByName("unknown"));
+		assertEquals("Reference unknown does not exist in document admin.Contact", e.getMessage());
+	}
+
+	@Test
 	void getRelatedDocumentThrowsWhenRelationMissing() {
 		assertThrows(IllegalStateException.class, () -> doc.getRelatedDocument(mock(Customer.class), "missing"));
 	}
@@ -482,6 +498,33 @@ class DocumentImplTest {
 		AssociationImpl assoc = new AssociationImpl();
 		assoc.setRequiredBool(Boolean.TRUE);
 		assertTrue(assoc.isRequired());
+	}
+
+	// ---- getParentDocument without a customer ----
+
+	@Test
+	void getParentDocumentWithoutCustomerResolvesThroughTheRepositoryModule() {
+		doc.setOwningModuleName("admin");
+		doc.setParentDocumentName("Parent");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		Module module = mock(Module.class);
+		Document parent = mock(Document.class);
+		when(repository.getModule(null, "admin")).thenReturn(module);
+		when(module.getDocument(null, "Parent")).thenReturn(parent);
+
+		withRepository(repository, () -> assertThat(doc.getParentDocument(null), is(parent)));
+	}
+
+	@Test
+	void getParentDocumentWithoutCustomerThrowsWhenOwningModuleIsMissing() {
+		doc.setOwningModuleName("admin");
+		doc.setParentDocumentName("Parent");
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+
+		withRepository(repository, () -> {
+			MetaDataException e = assertThrows(MetaDataException.class, () -> doc.getParentDocument(null));
+			assertThat(e.getMessage(), is("Owning module admin not found in repository"));
+		});
 	}
 
 	private void makeDynamicDocument(String name) {

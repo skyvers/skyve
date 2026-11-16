@@ -5,6 +5,8 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.ConverterName;
 import org.skyve.metadata.customer.Customer;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
@@ -29,26 +31,26 @@ public class ConvertibleField extends ConstrainableField {
 	private ConverterName converterName;
 	private Converter<?> converter;
 	
-	public ConverterName getConverterName() {
+	public @Nullable ConverterName getConverterName() {
 		return converterName;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setConverterName(ConverterName converterName) {
+	public void setConverterName(@Nullable ConverterName converterName) {
 		this.converterName = converterName;
 	}
 
-	public Converter<?> getConverter() {
+	public @Nullable Converter<?> getConverter() {
 		return converter;
 	}
 
 	@XmlTransient
-	public void setConverter(Converter<?> converter) {
+	public void setConverter(@Nonnull Converter<?> converter) {
 		this.converter = converter;
 	}
 
 	
-	public Converter<?> getConverterForCustomer(Customer customer) {
+	public @Nullable Converter<?> getConverterForCustomer(@Nonnull Customer customer) {
 		Converter<?> result = converter;
 		
 		if (result == null) {

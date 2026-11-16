@@ -15,6 +15,9 @@ import modules.admin.domain.Contact;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Loads demonstration records for the Who's In module.
  */
@@ -29,7 +32,7 @@ public class LoadDemonstrationDataJob extends Job {
 	 * @return {@code null} because this job has no custom cancellation message
 	 */
 	@Override
-	public String cancel() {
+	public @Nullable String cancel() {
 		cancelled = true;
 		return null;
 	}
@@ -244,7 +247,7 @@ public class LoadDemonstrationDataJob extends Job {
 
 	}
 */
-	private void clearPreviousData(Persistence persistence) throws Exception {
+	private void clearPreviousData(@Nonnull Persistence persistence) throws Exception {
 
 		// try to delete all staff (some may fail if users have been created)
 		DocumentQuery qStaff = persistence.newDocumentQuery(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);

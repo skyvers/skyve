@@ -77,7 +77,7 @@ class OptimisticLockTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S3415"}) // the object under test goes first so that its equals() is the one called
 	void equalsReturnsFalseForNonOptimisticLock() {
 		OptimisticLock lock = new OptimisticLock("user", new Date());
 		assertNotEquals(lock, "notALock");
@@ -102,7 +102,7 @@ class OptimisticLockTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void constructorWithNullStringThrowsDomainException() {
 		assertThrows(DomainException.class, () -> new OptimisticLock((String) null));
 	}

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fixed-scale decimal with 5 decimal places and 23 significant digits of precision.
  *
@@ -51,7 +53,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal5(BigDecimal value) {
+	public Decimal5(@Nonnull BigDecimal value) {
 		this.value = value.setScale(5, MC.getRoundingMode());
 	}
 
@@ -59,7 +61,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal5(String value) {
+	public Decimal5(@Nonnull String value) {
 		this.value = new BigDecimal(value, MC).setScale(5, MC.getRoundingMode());
 	}
 
@@ -67,7 +69,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal5(Decimal value) {
+	public Decimal5(@Nonnull Decimal value) {
 		this.value = value.bigDecimalValue().setScale(5, MC.getRoundingMode());
 	}
 
@@ -75,7 +77,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 add(Decimal operand) {
+	public @Nonnull Decimal5 add(@Nonnull Decimal operand) {
 		return new Decimal5(value.add(operand.bigDecimalValue(), MC));
 	}
 
@@ -83,7 +85,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 divide(Decimal operand) {
+	public @Nonnull Decimal5 divide(@Nonnull Decimal operand) {
 		return new Decimal5(value.divide(operand.bigDecimalValue(), MC));
 	}
 
@@ -91,7 +93,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 multiply(Decimal operand) {
+	public @Nonnull Decimal5 multiply(@Nonnull Decimal operand) {
 		return new Decimal5(value.multiply(operand.bigDecimalValue(), MC));
 	}
 
@@ -99,7 +101,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 subtract(Decimal operand) {
+	public @Nonnull Decimal5 subtract(@Nonnull Decimal operand) {
 		return new Decimal5(value.subtract(operand.bigDecimalValue(), MC));
 	}
 
@@ -107,7 +109,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 abs() {
+	public @Nonnull Decimal5 abs() {
 		return new Decimal5(value.abs());
 	}
 
@@ -115,7 +117,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 pow(int power) {
+	public @Nonnull Decimal5 pow(int power) {
 		return new Decimal5(value.pow(power, MC));
 	}
 
@@ -123,7 +125,7 @@ public class Decimal5 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal5 negate() {
+	public @Nonnull Decimal5 negate() {
 		return new Decimal5(value.negate());
 	}
 	
@@ -133,7 +135,7 @@ public class Decimal5 extends Decimal {
 	 * @return the result
 	 */
 	@Override
-	public Decimal5 min(Decimal other) {
+	public @Nonnull Decimal5 min(@Nonnull Decimal other) {
 		return new Decimal5(bigDecimalValue().min(other.bigDecimalValue()));
 	}
 
@@ -143,7 +145,7 @@ public class Decimal5 extends Decimal {
 	 * @return the result
 	 */
 	@Override
-	public Decimal5 max(Decimal other) {
+	public @Nonnull Decimal5 max(@Nonnull Decimal other) {
 		return new Decimal5(bigDecimalValue().max(other.bigDecimalValue()));
 	}
 }

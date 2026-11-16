@@ -12,7 +12,9 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
@@ -60,6 +62,9 @@ import org.skyve.util.FileUtil;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 // If we want to use multiple indices for beans and attachments like elastic we will need 
 // 2 dirs underneath CONTENT/SKYVE_CONTENT/ and 2 writer instances
 // Use a MultiReader instance to read from 2 indexes at once
@@ -76,17 +81,29 @@ import org.slf4j.Logger;
  */
 public class LuceneContentManager extends FileSystemContentManager {
 	static final char BEAN_CONTENT_SUFFIX = '~';
-	
-    private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
+	private static final FieldType CONTENT_ID_FIELD_TYPE;
 
+	static {
+		CONTENT_ID_FIELD_TYPE = new FieldType(StringField.TYPE_STORED);
+		// FieldExistsQuery uses norms to distinguish attachments from bean content.
+		CONTENT_ID_FIELD_TYPE.setOmitNorms(false);
+		CONTENT_ID_FIELD_TYPE.freeze();
+	}
+
+	private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
+
+	@SuppressWarnings("resource") // Closed by shutdown(); shared with each manager instance.
 	private static Directory directory;
+	@SuppressWarnings("resource") // Closed by shutdown(); shared with each manager instance.
 	private static Analyzer analyzer;
+	@SuppressWarnings("resource") // Closed by shutdown(); shared with each manager instance.
 	private static IndexWriter writer;
 	
 	/**
 	 * Opens Lucene index resources and prepares an index writer.
 	 */
 	@Override
+	@SuppressWarnings({"resource", "java:S2696"}) // Ownership is transferred to the lifecycle-managed static fields.
 	public void startup() {
 		try {
 			directory = FSDirectory.open(Paths.get(UtilImpl.CONTENT_DIRECTORY, CLUSTER_NAME));
@@ -107,6 +124,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws IllegalStateException if Lucene resources cannot be closed cleanly
 	 */
 	@Override
+	@SuppressWarnings("java:S2696") // Ownership is transferred to the lifecycle-managed static fields.
 	public void shutdown() {
 		try {
 			try {
@@ -157,7 +175,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if indexing fails
 	 */
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		String bizContentId = content.getBizId() + BEAN_CONTENT_SUFFIX;
 		
 		StringBuilder text = new StringBuilder(256);
@@ -190,13 +208,9 @@ public class LuceneContentManager extends FileSystemContentManager {
 			document.add(new StringField(Bean.USER_ID, bizUserId, Store.YES));
 		}
 		String bizModule = content.getBizModule();
-		if (bizModule != null) {
-			document.add(new StringField(Bean.MODULE_KEY, bizModule, Store.YES));
-		}
+		document.add(new StringField(Bean.MODULE_KEY, bizModule, Store.YES));
 		String bizDocument = content.getBizDocument();
-		if (bizDocument != null) {
-			document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
-		}
+		document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
 		document.add(new StringField(Bean.DOCUMENT_ID, bizContentId, Store.YES));
 
 		// Last modified
@@ -218,7 +232,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if storage or indexing fails
 	 */
 	@Override
-	public void put(AttachmentContent attachment, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		// NB Call super first coz this sets the content ID and last modified date.
 		super.put(attachment, index);
 		putIndex(attachment, index);
@@ -231,7 +245,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if retrieval or update fails
 	 */
 	@Override
-	public void update(AttachmentContent attachment) throws Exception {
+	public void update(@Nonnull AttachmentContent attachment) throws Exception {
 		// NB Call super first coz this sets the last modified date.
 		super.update(attachment);
 
@@ -272,7 +286,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @param index whether textual extraction should be performed
 	 * @throws Exception if indexing fails
 	 */
-	private static void putIndex(AttachmentContent attachment, boolean index) throws Exception {
+	private static void putIndex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		Document document = new Document();
 		if (index) {
 			TextExtractor extractor = new TikaTextExtractor();
@@ -285,9 +299,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		// Doc as binary attachment, inlined
 		if (! UtilImpl.CONTENT_FILE_STORAGE) {
 			byte[] bytes = attachment.getContentBytes();
-			if (bytes != null) {
-				document.add(new StoredField(ATTACHMENT, bytes));
-			}
+			document.add(new StoredField(ATTACHMENT, bytes));
 			String markup = attachment.getMarkup();
 			if (markup != null) {
 				document.add(new StoredField(MARKUP, markup));
@@ -304,7 +316,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @param attachment the source attachment metadata
 	 * @throws Exception if Lucene write fails
 	 */
-	private static void putIndex(Document document, AttachmentContent attachment) throws Exception {
+	private static void putIndex(@Nonnull Document document, @Nonnull AttachmentContent attachment) throws Exception {
 		String bizId = attachment.getBizId();
 
 		// Add meta-data
@@ -321,18 +333,20 @@ public class LuceneContentManager extends FileSystemContentManager {
 			document.add(new StringField(Bean.USER_ID, bizUserId, Store.YES));
 		}
 		String bizModule = attachment.getBizModule();
-		if (bizModule != null) {
+		@SuppressWarnings("null") // attachment metadata read back from stored JSON or the index can lack it
+		boolean bizModulePresent = (bizModule != null);
+		if (bizModulePresent) {
 			document.add(new StringField(Bean.MODULE_KEY, bizModule, Store.YES));
 		}
 		String bizDocument = attachment.getBizDocument();
-		if (bizDocument != null) {
+		@SuppressWarnings("null") // attachment metadata read back from stored JSON or the index can lack it
+		boolean bizDocumentPresent = (bizDocument != null);
+		if (bizDocumentPresent) {
 			document.add(new StringField(Bean.DOCUMENT_KEY, bizDocument, Store.YES));
 		}
 		document.add(new StringField(Bean.DOCUMENT_ID, bizId, Store.YES));
 		String attributeName = attachment.getAttributeName();
-		if (attributeName != null) {
-			document.add(new StoredField(ATTRIBUTE_NAME, attributeName));
-		}
+		document.add(new StoredField(ATTRIBUTE_NAME, attributeName));
 
 		// Add file attributes
 		String fileName = attachment.getFileName();
@@ -344,7 +358,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 		if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("LuceneContentManager.put(): {}", bizId);
 		String contentId = attachment.getContentId();
 		// Even if existing, add the content ID to the document as it could be a re-index
-		document.add(new TextField(CONTENT_ID, contentId, Store.YES));
+		document.add(new Field(CONTENT_ID, contentId, CONTENT_ID_FIELD_TYPE));
 		// delete if exists and re-add
 		writer.updateDocument(new Term(CONTENT_ID, contentId), document);
 	}
@@ -357,7 +371,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if reading from index or storage fails
 	 */
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			return super.getAttachment(contentId);
 		}
@@ -420,7 +434,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		writer.deleteDocuments(new Term(Bean.DOCUMENT_ID, bizId + BEAN_CONTENT_SUFFIX));
 	}
 	
@@ -431,7 +445,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if removal fails
 	 */
 	@Override
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		writer.deleteDocuments(new Term(CONTENT_ID, contentId));
 		super.removeAttachment(contentId);
 	}
@@ -443,7 +457,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if iterable creation fails
 	 */
 	@Override
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		return new LuceneContentIterable(directory);
 	}
 	
@@ -460,7 +474,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		SearchResults results = new SearchResults();
 		
 		String term = UtilImpl.processStringValue(search);
@@ -581,7 +595,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		writer.deleteDocuments(new Term(Bean.CUSTOMER_NAME, customerName));
 	}
 	
@@ -592,7 +606,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
 										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST)
@@ -606,7 +620,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if Lucene delete fails
 	 */
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		writer.deleteDocuments(new BooleanQuery.Builder()
 										.add(new TermQuery(new Term(Bean.CUSTOMER_NAME, customerName)), Occur.MUST)
 										.add(new FieldExistsQuery(CONTENT_ID), Occur.MUST_NOT)
@@ -621,7 +635,7 @@ public class LuceneContentManager extends FileSystemContentManager {
 	 * @throws Exception if indexing fails
 	 */
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		putIndex(attachment, index);
 	}
 }

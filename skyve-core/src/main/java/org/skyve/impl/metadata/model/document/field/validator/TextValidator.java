@@ -18,6 +18,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -65,21 +67,21 @@ public class TextValidator extends FieldValidator<String> {
 	private String regularExpression;
 	private ValidatorType type;
 
-	public String getRegularExpression() {
+	public @Nullable String getRegularExpression() {
 		return regularExpression;
 	}
 
 	@XmlAttribute
-	public void setRegularExpression(String regularExpression) {
+	public void setRegularExpression(@Nullable String regularExpression) {
 		this.regularExpression = UtilImpl.processStringValue(regularExpression);
 	}
 
-	public ValidatorType getType() {
+	public @Nullable ValidatorType getType() {
 		return type;
 	}
 
 	@XmlAttribute
-	public void setType(ValidatorType type) {
+	public void setType(@Nullable ValidatorType type) {
 		this.type = type;
 		
 		// for client-side (if applicable)
@@ -98,12 +100,12 @@ public class TextValidator extends FieldValidator<String> {
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validate(User user,
-							String value,
-							String binding,
-							String localisedDisplayName,
-							Converter<String> converter,
-							ValidationException e) {
+	public void validate(@Nonnull User user,
+							@Nullable String value,
+							@Nonnull String binding,
+							@Nullable String localisedDisplayName,
+							@Nullable Converter<String> converter,
+							@Nonnull ValidationException e) {
 		if (value != null) {
 			boolean valid = true;
 			if (regularExpression != null) {
@@ -167,7 +169,7 @@ public class TextValidator extends FieldValidator<String> {
 	}
 
 	@Override
-	public String constructMessage(User user, String localisedDisplayName, Converter<String> converter) {
+	public @Nonnull String constructMessage(@Nullable User user, @Nullable String localisedDisplayName, @Nullable Converter<String> converter) {
 		String message = getLocalisedValidationMessage();
 		if (message != null) {
 			return message;

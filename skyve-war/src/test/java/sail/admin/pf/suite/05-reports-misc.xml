@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- PrimeFaces admin suite: Reports, Audits, System Dashboard, Document Numbers and Jobs. -->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Reports: the enabled reports list">
+		<method>
+			<navigateMenu module="admin" item="Reports/Reports" />
+			<comment>The demo data has no reports (report templates are made in the desktop Report Manager)</comment>
+			<testGridRows module="admin" query="qEnabledReports" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Audits: the saves made by the suite are audited">
+		<method>
+			<navigateMenu module="admin" item="Audits" />
+			<testWidget tab="Audits" />
+			<tabSelect path="Audits" />
+			<testGridRows module="admin" query="qAudits" minRows="1" />
+			<listGridZoom module="admin" query="qAudits" row="0" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="System Dashboard">
+		<method>
+			<navigateMenu module="admin" item="System Dashboard" />
+			<testGridRows binding="status" minRows="1" />
+			<testGridRows module="admin" query="qDashboardJobs" minRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Document Numbers: create, find and delete">
+		<method>
+			<navigateMenu module="admin" item="Document Numbers" />
+			<listGridNew module="admin" document="DocumentNumber" />
+			<dataEnter binding="moduleName" value="sail" />
+			<dataEnter binding="documentName" value="SAIL{run}" />
+			<dataEnter binding="sequenceName" value="number" />
+			<dataEnter binding="documentNumber" value="1000" />
+			<save />
+			<testValue binding="documentName" value="SAIL{run}" />
+			<ok />
+			<testGridRows module="admin" document="DocumentNumber" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" document="DocumentNumber" rowContaining="SAIL{run}" />
+			<dataEnter binding="documentNumber" value="1001" />
+			<save />
+			<testValue binding="documentNumber" value="1001" />
+			<delete />
+			<testGridRows module="admin" document="DocumentNumber" rowContaining="SAIL{run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Jobs: the backup job has completed">
+		<method>
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<action name="Refresh" />
+			<comment>00-backup.xml (always run first, even with -Dsail.suite.only) cleared the list then backed up</comment>
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Backup" />
+			<cancel />
+			<tabSelect path="Schedule" />
+			<comment>The schedule is read only: the test server runs without the job scheduler</comment>
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

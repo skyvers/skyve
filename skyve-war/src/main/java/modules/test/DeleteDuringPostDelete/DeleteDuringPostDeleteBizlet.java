@@ -5,6 +5,8 @@ import org.skyve.metadata.model.document.Bizlet;
 
 import modules.test.domain.DeleteDuringPostDelete;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Demonstrates post-delete lifecycle behaviour that removes an aggregated association.
  */
@@ -16,7 +18,7 @@ public class DeleteDuringPostDeleteBizlet extends Bizlet<DeleteDuringPostDelete>
 	 * @throws Exception if cleanup fails
 	 */
 	@Override
-	public void postDelete(DeleteDuringPostDelete bean) throws Exception {
+	public void postDelete(@Nonnull DeleteDuringPostDelete bean) throws Exception {
 		CORE.getPersistence().delete(bean.getAggregatedAssociation());
 	}
 }

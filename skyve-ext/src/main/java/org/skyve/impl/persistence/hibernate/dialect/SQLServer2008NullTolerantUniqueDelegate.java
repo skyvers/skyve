@@ -11,6 +11,8 @@ import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.UniqueKey;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Emits filtered SQL Server unique indexes so nullable columns behave with null-tolerant uniqueness.
  * 
@@ -24,7 +26,7 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 *
 	 * @param dialect the owning Hibernate dialect
 	 */
-	public SQLServer2008NullTolerantUniqueDelegate(Dialect dialect) {
+	public SQLServer2008NullTolerantUniqueDelegate(@Nonnull Dialect dialect) {
 		super(dialect);
 	}
 	
@@ -37,7 +39,8 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 */
 	@Override
 	@Deprecated // Because Hibernate has deprecated
-	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+	public @Nonnull String getAlterTableToAddUniqueKeyCommand(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey,
+																@SuppressWarnings("null") @Nonnull Metadata metadata) {
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
 		final QualifiedObjectNameFormatter formatter = jdbcEnvironment.getQualifiedObjectNameFormatter();
 		final String tableName = formatter.format(uniqueKey.getTable().getQualifiedTableName(), dialect);
@@ -81,9 +84,9 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 * @return SQL that creates the filtered unique index
 	 */
 	@Override
-	public String getAlterTableToAddUniqueKeyCommand(UniqueKey uniqueKey,
-														Metadata metadata,
-														SqlStringGenerationContext context) {
+	public @Nonnull String getAlterTableToAddUniqueKeyCommand(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey,
+																@SuppressWarnings("null") @Nonnull Metadata metadata,
+																@SuppressWarnings("null") @Nonnull SqlStringGenerationContext context) {
 		return getAlterTableToAddUniqueKeyCommand(uniqueKey, metadata);
 	}
 	
@@ -96,7 +99,8 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 */
 	@Override
 	@Deprecated // Because Hibernate has deprecated
-	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey, Metadata metadata) {
+	public @Nonnull String getAlterTableToDropUniqueKeyCommand(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey,
+																@SuppressWarnings("null") @Nonnull Metadata metadata) {
 		StringBuilder result = new StringBuilder(64);
 
 		final JdbcEnvironment jdbcEnvironment = metadata.getDatabase().getJdbcEnvironment();
@@ -117,9 +121,9 @@ public class SQLServer2008NullTolerantUniqueDelegate extends DefaultUniqueDelega
 	 * @return SQL that drops the filtered unique index
 	 */
 	@Override
-	public String getAlterTableToDropUniqueKeyCommand(UniqueKey uniqueKey,
-														Metadata metadata,
-														SqlStringGenerationContext context) {
+	public @Nonnull String getAlterTableToDropUniqueKeyCommand(@SuppressWarnings("null") @Nonnull UniqueKey uniqueKey,
+																@SuppressWarnings("null") @Nonnull Metadata metadata,
+																@SuppressWarnings("null") @Nonnull SqlStringGenerationContext context) {
 		return getAlterTableToDropUniqueKeyCommand(uniqueKey, metadata);
 	}
 }

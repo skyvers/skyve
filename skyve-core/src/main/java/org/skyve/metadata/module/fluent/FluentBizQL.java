@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.BizQLMetaData;
 import org.skyve.metadata.module.query.BizQLDefinition;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link BizQLMetaData} query definitions.
  */
@@ -21,7 +23,7 @@ public class FluentBizQL extends FluentQueryDefinition<FluentBizQL> {
 	 *
 	 * @param bizql The metadata to mutate.
 	 */
-	public FluentBizQL(BizQLMetaData bizql) {
+	public FluentBizQL(@Nonnull BizQLMetaData bizql) {
 		this.bizql = bizql;
 	}
 	
@@ -31,7 +33,7 @@ public class FluentBizQL extends FluentQueryDefinition<FluentBizQL> {
 	 * @param bizql The source definition.
 	 * @return this fluent instance.
 	 */
-	public FluentBizQL from(@SuppressWarnings("hiding") BizQLDefinition bizql) {
+	public @Nonnull FluentBizQL from(@SuppressWarnings("hiding") @Nonnull BizQLDefinition bizql) {
 		super.from(bizql);
 		query(bizql.getQuery());
 		return this;
@@ -43,7 +45,7 @@ public class FluentBizQL extends FluentQueryDefinition<FluentBizQL> {
 	 * @param query The BizQL statement.
 	 * @return this fluent instance.
 	 */
-	public FluentBizQL query(String query) {
+	public @Nonnull FluentBizQL query(@Nonnull String query) {
 		bizql.setQuery(query);
 		return this;
 	}
@@ -54,7 +56,7 @@ public class FluentBizQL extends FluentQueryDefinition<FluentBizQL> {
 	 * @return The BizQL metadata instance.
 	 */
 	@Override
-	public BizQLMetaData get() {
+	public @Nonnull BizQLMetaData get() {
 		return bizql;
 	}
 }

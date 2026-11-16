@@ -24,7 +24,7 @@ public class SQLDefinitionImpl extends QueryDefinitionImpl implements SQLDefinit
 	private String query;
 
 	@Override
-	public String getQuery() {
+	public @Nonnull String getQuery() {
 		return query;
 	}
 

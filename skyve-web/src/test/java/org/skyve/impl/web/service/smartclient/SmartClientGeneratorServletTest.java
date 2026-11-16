@@ -5,9 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.RETURNS_SELF;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
@@ -204,7 +205,8 @@ class SmartClientGeneratorServletTest {
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn(null);
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
 
@@ -216,7 +218,8 @@ class SmartClientGeneratorServletTest {
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn(null);
 
@@ -228,7 +231,8 @@ class SmartClientGeneratorServletTest {
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("   ");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
 
@@ -240,7 +244,8 @@ class SmartClientGeneratorServletTest {
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("   ");
 
@@ -252,7 +257,8 @@ class SmartClientGeneratorServletTest {
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletRequest request = newRequestWithoutUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
 
@@ -275,7 +281,8 @@ class SmartClientGeneratorServletTest {
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletRequest request = newRequestWithSessionUser();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(AbstractWebContext.MODULE_NAME)).thenReturn("admin");
 		when(request.getParameter(AbstractWebContext.DOCUMENT_NAME)).thenReturn("Contact");
 
@@ -293,7 +300,7 @@ class SmartClientGeneratorServletTest {
 
 		when(user.getName()).thenReturn("apiUser");
 		when(user.getCustomer()).thenReturn(customer);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
+		doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
 		when(repository.retrieveUser("apiUser")).thenReturn(user);
 		ProvidedRepositoryFactory.set(repository);
 
@@ -323,7 +330,8 @@ class SmartClientGeneratorServletTest {
 
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -340,7 +348,7 @@ class SmartClientGeneratorServletTest {
 
 		when(user.getName()).thenReturn("apiUser");
 		when(user.getCustomer()).thenReturn(customer);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
+		doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
 		when(repository.retrieveUser("apiUser")).thenReturn(user);
 		ProvidedRepositoryFactory.set(repository);
 
@@ -370,7 +378,8 @@ class SmartClientGeneratorServletTest {
 
 		SmartClientGeneratorServlet servlet = new SmartClientGeneratorServlet();
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -393,7 +402,7 @@ class SmartClientGeneratorServletTest {
 		when(user.getId()).thenReturn(USER_ID);
 		when(user.getName()).thenReturn("apiUser");
 		when(user.getCustomer()).thenReturn(customer);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
+		doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
@@ -454,7 +463,7 @@ class SmartClientGeneratorServletTest {
 		when(user.getId()).thenReturn(USER_ID);
 		when(user.getName()).thenReturn("apiUser");
 		when(user.getCustomer()).thenReturn(customer);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
+		doReturn(Boolean.TRUE).when(user).canAccess(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyString());
 
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
@@ -548,6 +557,7 @@ class SmartClientGeneratorServletTest {
 	}
 
 	public static final class BadCtorRenderer extends SmartClientViewRenderer {
+		@SuppressWarnings("null") // passes null on purpose
 		public BadCtorRenderer() {
 			super(null, new ModuleImpl(), new DocumentImpl(), new ViewImpl(), "desktop", false);
 		}

@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentReme
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Persists Spring remember-me tokens in Skyve admin token storage tables.
@@ -55,7 +56,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param token The token to persist.
 	 */
 	@Override
-	public void createNewToken(PersistentRememberMeToken token) {
+	public void createNewToken(@SuppressWarnings("null") @Nonnull PersistentRememberMeToken token) {
 		String series = token.getSeries();
 		String customerAndUserName = token.getUsername();
 		String userName = customerAndUserName;
@@ -94,7 +95,9 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param lastUsed The timestamp of token usage.
 	 */
 	@Override
-	public void updateToken(String series, String tokenValue, Date lastUsed) {
+	public void updateToken(@SuppressWarnings("null") @Nonnull String series,
+							@SuppressWarnings("null") @Nonnull String tokenValue,
+							@SuppressWarnings("null") @Nonnull Date lastUsed) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
 			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
@@ -108,7 +111,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * should just be a failed persistent login).
 	 */
 	@Override
-	public PersistentRememberMeToken getTokenForSeries(String seriesId) {
+	public @Nullable PersistentRememberMeToken getTokenForSeries(@SuppressWarnings("null") @Nonnull String seriesId) {
 		try {
 			JdbcTemplate t = getJdbcTemplate();
 			if (t == null) {
@@ -126,7 +129,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 							 * @throws SQLException If reading the row fails.
 							 */
 							@Override
-							public PersistentRememberMeToken mapRow(ResultSet rs, int rowNum)
+							public @Nonnull PersistentRememberMeToken mapRow(@SuppressWarnings("null") @Nonnull ResultSet rs, int rowNum)
 							throws SQLException {
 								return new PersistentRememberMeToken(rs.getString(1),
 																		rs.getString(2),
@@ -155,7 +158,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param username The principal name to purge token rows for.
 	 */
 	@Override
-	public void removeUserTokens(String username) {
+	public void removeUserTokens(@SuppressWarnings("null") @Nonnull String username) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
 			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
@@ -181,7 +184,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token lookup SQL.
 	 */
-	public String getGetTokenForSeriesSql() {
+	public @Nonnull String getGetTokenForSeriesSql() {
 		return getTokenForSeriesSql;
 	}
 
@@ -190,7 +193,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param getTokenForSeriesSql The token lookup SQL.
 	 */
-	public void setGetTokenForSeriesSql(String getTokenForSeriesSql) {
+	public void setGetTokenForSeriesSql(@Nonnull String getTokenForSeriesSql) {
 		this.getTokenForSeriesSql = getTokenForSeriesSql;
 	}
 
@@ -199,7 +202,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token insert SQL.
 	 */
-	public String getCreateNewTokenSql() {
+	public @Nonnull String getCreateNewTokenSql() {
 		return createNewTokenSql;
 	}
 
@@ -208,7 +211,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param createNewTokenSql The token insert SQL.
 	 */
-	public void setCreateNewTokenSql(String createNewTokenSql) {
+	public void setCreateNewTokenSql(@Nonnull String createNewTokenSql) {
 		this.createNewTokenSql = createNewTokenSql;
 	}
 
@@ -217,7 +220,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token update SQL.
 	 */
-	public String getUpdateTokenSql() {
+	public @Nonnull String getUpdateTokenSql() {
 		return updateTokenSql;
 	}
 
@@ -226,7 +229,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param updateTokenSql The token update SQL.
 	 */
-	public void setUpdateTokenSql(String updateTokenSql) {
+	public void setUpdateTokenSql(@Nonnull String updateTokenSql) {
 		this.updateTokenSql = updateTokenSql;
 	}
 
@@ -235,7 +238,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token removal SQL.
 	 */
-	public String getRemoveUserTokensSql() {
+	public @Nonnull String getRemoveUserTokensSql() {
 		return removeUserTokensSql;
 	}
 
@@ -244,7 +247,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param removeUserTokensSql The token removal SQL.
 	 */
-	public void setRemoveUserTokensSql(String removeUserTokensSql) {
+	public void setRemoveUserTokensSql(@Nonnull String removeUserTokensSql) {
 		this.removeUserTokensSql = removeUserTokensSql;
 	}
 }

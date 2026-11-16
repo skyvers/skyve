@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.InverseOne;
+import org.skyve.impl.metadata.model.document.field.Markup;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
@@ -30,6 +32,17 @@ import org.skyve.metadata.model.Attribute.UsageType;
  * Tests AbstractAttribute via the concrete Text subclass (which inherits from Field -> ConvertibleField -> AbstractAttribute).
  */
 class AbstractAttributeTest {
+
+	// ---- name ----
+
+	@Test
+	@SuppressWarnings({"static-method", "unused"}) // asserts null where the annotations say non-null
+	void getNameReturnsSetName() {
+		Text attr = new Text();
+		assertNull(attr.getName());
+		attr.setName("myField");
+		assertThat(attr.getName(), is("myField"));
+	}
 
 	// ---- displayName ----
 
@@ -340,10 +353,10 @@ class AbstractAttributeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void getLocalisedDisplayNameNullWhenDisplayNameNull() {
+	void getLocalisedDisplayNameThrowsWhenDisplayNameNull() {
 		Text attr = new Text();
-		// getDisplayName() is null → i18n(null) returns null
-		assertNull(attr.getLocalisedDisplayName());
+		// a display name is required metadata; the localised display name is non-null
+		assertThrows(NullPointerException.class, attr::getLocalisedDisplayName);
 	}
 
 	@Test
@@ -393,6 +406,19 @@ class AbstractAttributeTest {
 		attr.setAttributeType(AttributeType.markup);
 		assertTrue(attr.getDefaultInputWidget() instanceof RichText);
 		assertEquals("myMarkup", attr.getDefaultInputWidget().getBinding());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void defaultInputWidgetForMarkupHasAllRequiredSizes() {
+		Markup attr = new Markup();
+		attr.setName("myMarkup");
+		RichText richText = (RichText) attr.getDefaultInputWidget();
+		assertEquals("myMarkup", richText.getBinding());
+		assertEquals(Integer.valueOf(600), richText.getPixelWidth());
+		assertEquals(Integer.valueOf(170), richText.getPixelHeight());
+		assertEquals(Integer.valueOf(170), richText.getMinPixelHeight());
+		assertEquals(Integer.valueOf(340), richText.getMaxPixelHeight());
 	}
 
 	@Test

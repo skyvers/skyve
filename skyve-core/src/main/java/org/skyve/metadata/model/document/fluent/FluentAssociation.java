@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Association.AssociationType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentAssociation metadata.
  */
@@ -20,7 +23,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentAssociation(AssociationImpl association) {
+	public FluentAssociation(@Nonnull AssociationImpl association) {
 		this.association = association;
 	}
 
@@ -28,7 +31,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentAssociation from(@SuppressWarnings("hiding") Association association) {
+	public @Nonnull FluentAssociation from(@SuppressWarnings("hiding") @Nonnull Association association) {
 		super.from(association);
 		required(association.isRequired());
 		requiredMessage(association.getRequiredMessage());
@@ -44,7 +47,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentAssociation required(boolean required) {
+	public @Nonnull FluentAssociation required(boolean required) {
 		association.setRequired(required);
 		return this;
 	}
@@ -52,7 +55,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentAssociation requiredMessage(String requiredMessage) {
+	public @Nonnull FluentAssociation requiredMessage(@Nullable String requiredMessage) {
 		association.setRequiredMessage(requiredMessage);
 		return this;
 	}
@@ -60,7 +63,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentAssociation type(AssociationType type) {
+	public @Nonnull FluentAssociation type(@Nonnull AssociationType type) {
 		association.setType(type);
 		return this;
 	}
@@ -68,7 +71,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentAssociation embeddedColumnsPrefix(String embeddedColumnsPrefix) {
+	public @Nonnull FluentAssociation embeddedColumnsPrefix(@Nullable String embeddedColumnsPrefix) {
 		association.setEmbeddedColumnsPrefix(embeddedColumnsPrefix);
 		return this;
 	}
@@ -76,7 +79,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentAssociation databaseIndex(boolean databaseIndex) {
+	public @Nonnull FluentAssociation databaseIndex(boolean databaseIndex) {
 		association.setDatabaseIndex(databaseIndex ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -85,7 +88,7 @@ public class FluentAssociation extends FluentReference<FluentAssociation> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public AssociationImpl get() {
+	public @Nonnull AssociationImpl get() {
 		return association;
 	}
 }

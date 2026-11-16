@@ -7,6 +7,8 @@ import org.skyve.domain.Bean;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.ListModel;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Renders Flutter tree view scaffolding from Skyve metadata.
  */
@@ -16,12 +18,12 @@ public class FlutterTreeView extends FlutterView {
 	@SuppressWarnings("unused")
 	private MetaDataQueryDefinition query;
 	
-	public FlutterTreeView(FlutterGenerator generator, String moduleName, String viewName) {
+	public FlutterTreeView(@Nonnull FlutterGenerator generator, @Nonnull String moduleName, @Nonnull String viewName) {
 		super(generator, moduleName, viewName);
 	}
 
 	@Override
-	protected void create(FileWriter fw) throws IOException {
+	protected void create(@Nonnull FileWriter fw) throws IOException {
 		// TODO implement
 	}
 }

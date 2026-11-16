@@ -9,6 +9,9 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses month-based recurrence phrases such as {@code monthly} and named months.
  */
@@ -58,7 +61,7 @@ public class EveryMonth implements ExpressionElementProvider {
 	 * @return {@code true} when a supported monthly pattern is found.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -84,7 +87,7 @@ public class EveryMonth implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -104,7 +107,7 @@ public class EveryMonth implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "0";
 	}
 
@@ -124,7 +127,7 @@ public class EveryMonth implements ExpressionElementProvider {
 	 * @return {@code "1"}.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nonnull String getDayNumberElement() {
 		return "1";
 	}
 
@@ -144,7 +147,7 @@ public class EveryMonth implements ExpressionElementProvider {
 	 * @return {@code *} for generic monthly schedules, a numeric month token, or {@code null}.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nullable String getMonthElement() {
 		if ((!segments.isEmpty() && "monthly".equalsIgnoreCase(segments.get(0)))
 				|| (segments.size() > 3 && "month".equalsIgnoreCase(segments.get(3)))) {
 			return "*";
@@ -170,7 +173,7 @@ public class EveryMonth implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nonnull String getDayOfWeekElement() {
 			return "*";
 	}
 

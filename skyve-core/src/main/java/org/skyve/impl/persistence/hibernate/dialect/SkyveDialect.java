@@ -5,6 +5,9 @@ import org.hibernate.spatial.JTSGeometryType;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Skyve extension contract for Hibernate SQL dialects, adding spatial geometry
  * support and DDL introspection for schema management.
@@ -45,15 +48,15 @@ public interface SkyveDialect {
 	 *
 	 * @return the geometry type descriptor for this dialect
 	 */
-	public JTSGeometryType getGeometryType();
+	public @Nonnull JTSGeometryType getGeometryType();
 
 	/**
 	 * Converts a JTS geometry into the database-specific value expected by Hibernate.
 	 *
-	 * @param geometry the geometry to persist; may be {@code null} when the caller is binding a nullable column
+	 * @param geometry the geometry to persist
 	 * @return the dialect-specific persisted representation
 	 */
-	public Object convertToPersistedValue(Geometry geometry);
+	public @Nullable Object convertToPersistedValue(@Nonnull Geometry geometry);
 
 	/**
 	 * Converts a database geometry payload back into a JTS geometry instance.
@@ -61,7 +64,7 @@ public interface SkyveDialect {
 	 * @param geometry the database value returned by JDBC or Hibernate
 	 * @return the decoded geometry, or {@code null} when the database value is {@code null}
 	 */
-	public Geometry convertFromPersistedValue(Object geometry);
+	public @Nullable Geometry convertFromPersistedValue(@Nonnull Object geometry);
 	
 	/**
 	 * Determines whether schema migration should emit an alter-column statement for the supplied column.
@@ -70,19 +73,19 @@ public interface SkyveDialect {
 	 * @param columnInfo the live database metadata for the column; may be {@code null} when the column does not yet exist
 	 * @return {@code true} when the existing database column must be modified to match the mapping
 	 */
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo);
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo);
 	
 	/**
 	 * Returns the vendor-specific SQL fragment used after {@code ALTER TABLE} when modifying a column definition.
 	 *
 	 * @return the dialect-specific column-modification fragment
 	 */
-	public String getModifyColumnString();
+	public @Nonnull String getModifyColumnString();
 	
 	/**
 	 * Identifies the underlying relational database family for this dialect.
 	 *
 	 * @return the owning {@link RDBMS}
 	 */
-	public RDBMS getRDBMS();
+	public @Nonnull RDBMS getRDBMS();
 }

@@ -20,6 +20,7 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base implementation of {@link NumberGenerator} that reads and increments sequence
@@ -41,12 +42,12 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	private static final String NUMERIC_PATTERN = "^\\d+$";
 
 	@SuppressWarnings({"static-method", "java:S3776"}) // Complexity OK
-	protected String getNextNumber(Persistence pers,
-									String prefix,
-									String moduleName,
-									String documentName,
-									String fieldName,
-									int numberLength) {
+	protected @Nonnull String getNextNumber(@Nonnull Persistence pers,
+											@Nullable String prefix,
+											@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String fieldName,
+											int numberLength) {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
@@ -136,7 +137,7 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 *
 	 * @return - the next number
 	 */
-	protected static String incrementAlpha(String suppliedPrefix, String lastNumber, int numberLength) {
+	protected static @Nonnull String incrementAlpha(@Nullable String suppliedPrefix, @Nullable String lastNumber, int numberLength) {
 		String newNumber = "";
 		String nonNumeric = lastNumber;
 		Integer value = Integer.valueOf(1);

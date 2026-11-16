@@ -1,5 +1,7 @@
 package org.skyve.impl.generate;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Enumerates supported SQL/JPA dialect generation options.
  *
@@ -25,7 +27,7 @@ public enum DialectOptions {
 	private final int dataStoreIdentifierCharacterLimit;
 	private final int dataStoreBizKeyLength;
 
-	DialectOptions(final String description,
+	DialectOptions(final @Nonnull String description,
 					final boolean dataStoreIndexForeignKeys,
 					final boolean dataStoreIndexNamesInGlobalNamespace,
 					final int dataStoreIdentifierCharacterLimit,
@@ -45,7 +47,7 @@ public enum DialectOptions {
 		return dataStoreIdentifierCharacterLimit;
 	}
 
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 

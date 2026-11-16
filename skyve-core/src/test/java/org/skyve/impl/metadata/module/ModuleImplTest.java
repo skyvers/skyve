@@ -335,6 +335,28 @@ class ModuleImplTest {
 	}
 
 	@Test
+	void jobMetaDataImplGetNameReturnsSetName() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		assertThat(job.getName(), is(nullValue()));
+		job.setName("myJob");
+		assertEquals("myJob", job.getName());
+	}
+
+	@Test
+	void jobMetaDataImplDisplayNameBlankBecomesNull() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setDisplayName("   ");
+		assertThat(job.getDisplayName(), is(nullValue()));
+	}
+
+	@Test
+	void jobMetaDataImplDisplayNamePaddedValueIsTrimmed() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setDisplayName("  My Job  ");
+		assertEquals("My Job", job.getDisplayName());
+	}
+
+	@Test
 	void jobMetaDataImplToStringContainsName() {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		job.setName("myJob");

@@ -23,6 +23,8 @@ import java.io.PrintWriter;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletResponseWrapper;
@@ -47,7 +49,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      * wrapping the given response object.
      */
 
-    public CompressionServletResponseWrapper(HttpServletResponse response) {
+    public CompressionServletResponseWrapper(@Nonnull HttpServletResponse response) {
         super(response);
         origResponse = response;
         if (debug > 1) {
@@ -109,7 +111,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      * Set content type
      */
     @Override
-	public void setContentType(String contentType) {
+	public void setContentType(@Nullable String contentType) {
         if (debug > 1) {
         	LOGGER.info("setContentType to {}", contentType);
         }
@@ -144,7 +146,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      * @exception IOException if an input/output error occurs
      */
     @SuppressWarnings("resource")
-    public ServletOutputStream createOutputStream() throws IOException {
+    public @Nonnull ServletOutputStream createOutputStream() throws IOException {
         if (debug > 1) {
         	LOGGER.info("createOutputStream gets called");
         }
@@ -201,7 +203,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      */
     @Override
     @SuppressWarnings("resource")
-	public ServletOutputStream getOutputStream() throws IOException {
+	public @Nonnull ServletOutputStream getOutputStream() throws IOException {
 
         if (writer != null)
             throw new IllegalStateException("getWriter() has already been called for this response");
@@ -225,7 +227,7 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      */
     @Override
     @SuppressWarnings("resource")
-	public PrintWriter getWriter() throws IOException {
+	public @Nonnull PrintWriter getWriter() throws IOException {
 
         if (writer != null)
             return (writer);

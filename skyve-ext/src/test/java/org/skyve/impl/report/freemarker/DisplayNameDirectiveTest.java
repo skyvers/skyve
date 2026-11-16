@@ -35,6 +35,7 @@ class DisplayNameDirectiveTest {
 		unbindPersistenceFromThread();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsMissingParametersLoopVariablesAndNestedBody() {
 		DisplayNameDirective directive = new DisplayNameDirective();
@@ -48,6 +49,7 @@ class DisplayNameDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], body));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsInvalidParameterTypes() {
 		DisplayNameDirective directive = new DisplayNameDirective();
@@ -57,6 +59,7 @@ class DisplayNameDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, Map.of("other", scalar("value")), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeAcceptsBindingBeforeRequiringEnvironment() {
 		DisplayNameDirective directive = new DisplayNameDirective();

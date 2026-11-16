@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -56,6 +58,46 @@ class RestoreJobTest {
 		job.execute();
 
 		assertEquals("Kick off the job with the appropriate options from the Data Maintenance page.", job.getLog().get(0));
+	}
+
+	@Test
+	void executeWithoutSelectedBackupLogsDataMaintenanceInstruction() throws Exception {
+		RestoreJob job = new RestoreJob();
+		Bean options = mock(Bean.class, withSettings().extraInterfaces(RestoreOptions.class));
+		when(((RestoreOptions) options).getSelectedBackupName()).thenReturn(null);
+		job.setBean(options);
+
+		job.execute();
+
+		assertEquals(List.of("Kick off the job with the appropriate options from the Data Maintenance page."), job.getLog());
+	}
+
+	@Test
+	void redactedWarningSaysWhatTheBackupRedacted() {
+		assertEquals("WARNING: This backup was made with a data sensitivity above none, so it redacted the passwords of 2 " +
+						"user(s). They cannot sign in until their passwords are reset: reset them before you sign out.",
+						RestoreJob.redactedWarning(2, 0));
+		assertEquals("WARNING: This backup was made with a data sensitivity above none, so it redacted the user names of 3 " +
+						"user(s). They cannot sign in by name until their user names are set again: set them before you " +
+						"sign out.",
+						RestoreJob.redactedWarning(0, 3));
+		assertEquals("WARNING: This backup was made with a data sensitivity above none, so it redacted the passwords of 2 " +
+						"user(s) and the user names of 3 user(s). They cannot sign in until their passwords are reset and " +
+						"their user names are set again: do this before you sign out.",
+						RestoreJob.redactedWarning(2, 3));
+	}
+
+	@Test
+	void redactedGrowlSaysWhatTheBackupRedacted() {
+		assertEquals("System Restore complete, but the backup redacted the passwords of 2 user(s), which must be reset: " +
+						"see the restore job's log.",
+						RestoreJob.redactedGrowl(2, 0));
+		assertEquals("System Restore complete, but the backup redacted the user names of 3 user(s), which must be set " +
+						"again: see the restore job's log.",
+						RestoreJob.redactedGrowl(0, 3));
+		assertEquals("System Restore complete, but the backup redacted the passwords of 2 user(s) and the user names of 3 " +
+						"user(s), which must be set again: see the restore job's log.",
+						RestoreJob.redactedGrowl(2, 3));
 	}
 
 	@Test
@@ -382,7 +424,7 @@ class RestoreJobTest {
 		verify(statement).setObject(1, null);
 		verify(statement).setString(2, "bean-1");
 		verify(statement).setString(2, "bean-2");
-		verify(statement, org.mockito.Mockito.times(2)).executeUpdate();
+		verify(statement, times(2)).executeUpdate();
 		verify(connection).commit();
 		assertEquals("    restored foreign keys for table demo with 2 rows.", job.getLog().get(job.getLog().size() - 1));
 	}

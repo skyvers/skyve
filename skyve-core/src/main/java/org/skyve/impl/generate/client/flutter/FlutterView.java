@@ -14,6 +14,9 @@ import org.skyve.impl.generate.client.flutter.FlutterGenerator.GeneratorConfig;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 abstract class FlutterView implements Comparable<FlutterView> {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(FlutterView.class);
 
@@ -23,7 +26,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
     protected String className;
     protected String fileName;
 
-	FlutterView(FlutterGenerator generator, String moduleName, String viewName) {
+	FlutterView(@Nonnull FlutterGenerator generator, @Nonnull String moduleName, @Nonnull String viewName) {
 		this.generator = generator;
 		this.moduleName = moduleName;
 		this.viewName = viewName; 
@@ -32,7 +35,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
 	}
 
     @Override
-    public int compareTo(FlutterView o) {
+    public int compareTo(@SuppressWarnings("null") @Nonnull FlutterView o) {
         return className.compareTo(o.className);
     }
 
@@ -52,7 +55,7 @@ abstract class FlutterView implements Comparable<FlutterView> {
         }
     }
 
-    protected String substitute(String resourcePath, Map<String, String> substitutions) throws IOException {
+    protected @Nonnull String substitute(@Nonnull String resourcePath, @Nullable Map<String, String> substitutions) throws IOException {
         String result = null;
 
         try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
@@ -68,9 +71,9 @@ abstract class FlutterView implements Comparable<FlutterView> {
         return result;
     }
 
-    protected GeneratorConfig getConfig() {
+    protected @Nonnull GeneratorConfig getConfig() {
         return generator.getConfig();
     }
 
-    protected abstract void create(FileWriter fw) throws IOException;
+    protected abstract void create(@Nonnull FileWriter fw) throws IOException;
 }

@@ -2,6 +2,9 @@ package org.skyve.web;
 
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines a short-lived asynchronous unit of work initiated from a web
  * conversation context.
@@ -23,16 +26,17 @@ public interface BackgroundTask<T extends Bean> {
 	 *
 	 * @return the task bean, never {@code null}
 	 */
-	T getBean();
+	@Nullable T getBean();
 
 	/**
-	 * Persists or places the backing conversation into the conversation cache.
+	 * Commits any active persistence transaction and places the backing conversation
+	 * into the conversation cache.
 	 *
-	 * <p>Side effects: may write conversation state to cache/storage.
-	 *
-	 * @throws Exception if caching fails
+	 * <p>A replacement transaction is begun before this method returns so background
+	 * work can continue. Later failure can roll back only work performed after this
+	 * checkpoint.
 	 */
-	void cacheConversation() throws Exception;
+	void cacheConversationAndCycleTransaction();
 
 	/**
 	 * Executes task-specific background work.
@@ -43,5 +47,6 @@ public interface BackgroundTask<T extends Bean> {
 	 * @param bean the task bean/context
 	 * @throws Exception if execution fails
 	 */
-	void execute(T bean) throws Exception;
+	@SuppressWarnings("java:S112") // throwing Exception is part of the convenience API
+	void execute(@Nonnull T bean) throws Exception;
 }

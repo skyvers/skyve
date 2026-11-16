@@ -153,9 +153,9 @@ class FluentHBoxTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentHBox box = new FluentHBox();
-		FluentHBox result = box.invisibleConditionName("hiddenCond");
+		FluentHBox result = box.invisibleCondition("hiddenCond");
 		assertSame(box, result);
 	}
 }

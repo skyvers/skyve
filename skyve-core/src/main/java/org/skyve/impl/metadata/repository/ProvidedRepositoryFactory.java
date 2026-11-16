@@ -36,10 +36,27 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	/**
 	 * Get the default repository or the session repository if set.
 	 *
-	 * @return the configured repository instance; never {@code null} after bootstrap
+	 * <p>There is no repository before bootstrap installs one or after shutdown clears it.
+	 * Code that runs while the application is up uses {@link #getNullSafe()} instead.
+	 *
+	 * @return the configured repository instance, or {@code null} if none is installed
 	 */
-	public static @Nonnull ProvidedRepository get() {
+	public static @Nullable ProvidedRepository get() {
 		return repository;
+	}
+
+	/**
+	 * Get the default repository or the session repository if set, failing if there is none.
+	 *
+	 * @return the configured repository instance
+	 * @throws IllegalStateException if Skyve has not been bootstrapped (or has been shut down)
+	 */
+	public static @Nonnull ProvidedRepository getNullSafe() {
+		ProvidedRepository result = repository;
+		if (result == null) {
+			throw new IllegalStateException("There is no Skyve repository - Skyve has not been bootstrapped or has been shut down");
+		}
+		return result;
 	}
     
 	/**
@@ -57,9 +74,9 @@ public abstract class ProvidedRepositoryFactory implements ProvidedRepository {
 	 * <p>Side effects: replaces the process-wide repository reference read by
 	 * {@link #get()} and by repository-dependent static helpers.
 	 *
-	 * @param repository the repository implementation to expose globally
+	 * @param repository the repository implementation to expose globally, or {@code null} to clear it
 	 */
-	public static void set(@Nonnull ProvidedRepository repository) {
+	public static void set(@Nullable ProvidedRepository repository) {
 		ProvidedRepositoryFactory.repository = repository;
 	}
 	

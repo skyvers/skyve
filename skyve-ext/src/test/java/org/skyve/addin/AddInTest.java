@@ -2,17 +2,17 @@ package org.skyve.addin;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.Test;
 import org.pf4j.PluginWrapper;
 
 @SuppressWarnings("static-method")
-public class AddInTest {
+class AddInTest {
 
 	@Test
-	public void testConstructorWithMockedWrapper() {
-		PluginWrapper wrapper = Mockito.mock(PluginWrapper.class);
+	void testConstructorWithMockedWrapper() {
+		PluginWrapper wrapper = mock(PluginWrapper.class);
 		AddIn addIn = new AddIn(wrapper) {
 			// anonymous concrete subclass for testing
 		};

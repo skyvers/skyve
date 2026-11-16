@@ -8,14 +8,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
+import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
+import org.skyve.domain.types.formatters.Formatters;
+import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.DocumentPermission;
 import org.skyve.metadata.view.View.ViewType;
 
 @SuppressWarnings("static-method")
 class ModuleMetaDataTest {
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetTitle() {
 		ModuleMetaData module = new ModuleMetaData();
@@ -32,6 +38,7 @@ class ModuleMetaDataTest {
 		assertEquals(Boolean.TRUE, module.getPrototype());
 	}
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void testSetAndGetHomeDocument() {
 		ModuleMetaData module = new ModuleMetaData();
@@ -80,6 +87,7 @@ class ModuleMetaDataTest {
 	void testSetAndGetMenu() {
 		ModuleMetaData module = new ModuleMetaData();
 		assertNull(module.getMenu());
+		@SuppressWarnings("unused") // asserts null where the annotations say non-null
 		MenuMetaData menu = new MenuMetaData();
 		module.setMenu(menu);
 		assertEquals(menu, module.getMenu());
@@ -139,6 +147,7 @@ class ModuleMetaDataTest {
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenTitleIsNull() {
 		ModuleMetaData module = createMinimalModuleMetaData();
@@ -146,6 +155,7 @@ class ModuleMetaDataTest {
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void convertThrowsWhenHomeDocumentIsNull() {
 		ModuleMetaData module = createMinimalModuleMetaData();
@@ -209,6 +219,7 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		// name is null
 		job.setDisplayName("My Job");
+		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -219,6 +230,18 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		job.setName("myJob");
 		// displayName is null
+		job.setClassName("modules.testModule.jobs.TestJob");
+		module.getJobs().add(job);
+		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	@Test
+	void convertThrowsWhenJobDisplayNameIsBlank() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("myJob");
+		job.setDisplayName("   ");
+		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -229,9 +252,11 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job1 = new JobMetaDataImpl();
 		job1.setName("myJob");
 		job1.setDisplayName("My Job");
+		job1.setClassName("modules.testModule.jobs.TestJob");
 		JobMetaDataImpl job2 = new JobMetaDataImpl();
 		job2.setName("myJob");
 		job2.setDisplayName("My Job Again");
+		job2.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job1);
 		module.getJobs().add(job2);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
@@ -251,8 +276,10 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role1 = new ModuleRoleMetaData();
 		role1.setName("viewer");
+		role1.setDescription("Can view test documents");
 		ModuleRoleMetaData role2 = new ModuleRoleMetaData();
 		role2.setName("viewer");
+		role2.setDescription("Can view test documents");
 		module.getRoles().add(role1);
 		module.getRoles().add(role2);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
@@ -263,6 +290,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("TestDocument"); // clashes with the document ref
+		role.setDescription("Role named after a module document");
 		module.getRoles().add(role);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -273,6 +301,7 @@ class ModuleMetaDataTest {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		job.setName("TestDocument"); // clashes with the document ref
 		job.setDisplayName("Test Document Job");
+		job.setClassName("modules.testModule.jobs.TestJob");
 		module.getJobs().add(job);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
 	}
@@ -282,6 +311,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		// documentName is null
 		privilege.setPermission(DocumentPermission.CRUDG);
@@ -295,6 +325,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege1 = new DocumentPrivilegeMetaData();
 		privilege1.setDocumentName("TestDocument");
 		privilege1.setPermission(DocumentPermission.CRUDG);
@@ -312,6 +343,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("NonExistentDocument");
 		privilege.setPermission(DocumentPermission.CRUDG);
@@ -325,6 +357,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		// permission is null
@@ -338,6 +371,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission.CRUDG);
@@ -354,6 +388,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -533,6 +568,7 @@ class ModuleMetaDataTest {
 		MetaDataQueryReferenceMetaData ref = new MetaDataQueryReferenceMetaData();
 		ref.setName("queryRef");
 		ref.setRef("sourceQuery");
+		ref.setModuleRef("testModule");
 		module.getQueries().add(ref);
 		assertNotNull(module.convert("test"));
 	}
@@ -544,6 +580,7 @@ class ModuleMetaDataTest {
 		SQLReferenceMetaData ref = new SQLReferenceMetaData();
 		ref.setName("sqlRef");
 		ref.setRef("baseSQL");
+		ref.setModuleRef("testModule");
 		module.getQueries().add(ref);
 		assertNotNull(module.convert("test"));
 	}
@@ -555,6 +592,7 @@ class ModuleMetaDataTest {
 		BizQLReferenceMetaData ref = new BizQLReferenceMetaData();
 		ref.setName("bizqlRef");
 		ref.setRef("baseBizQL");
+		ref.setModuleRef("testModule");
 		module.getQueries().add(ref);
 		assertNotNull(module.convert("test"));
 	}
@@ -566,6 +604,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		module.getRoles().add(role);
 		return module;
 	}
@@ -697,6 +736,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -713,6 +753,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -729,6 +770,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -745,6 +787,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -761,6 +804,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("TestDocument");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -782,6 +826,7 @@ class ModuleMetaDataTest {
 
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		DocumentPrivilegeMetaData privilege = new DocumentPrivilegeMetaData();
 		privilege.setDocumentName("CrossDoc");
 		privilege.setPermission(DocumentPermission._R__G);
@@ -1034,6 +1079,107 @@ class ModuleMetaDataTest {
 	}
 
 	@Test
+	void convertThrowsWhenCalendarItemDocumentPresentWithoutEndBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarNoEnd");
+		item.setDocumentName("TestDocument");
+		item.setStartBinding("startDate");
+		// missing endBinding
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] are required"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemQueryPresentWithoutStartBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByQueryNoStart");
+		item.setQueryName("myQuery");
+		// missing startBinding
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] are required"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemQueryPresentWithoutEndBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		module.getQueries().add(createMetaDataQuery("myQuery", "TestDocument"));
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByQueryNoEnd");
+		item.setQueryName("myQuery");
+		item.setStartBinding("startDate");
+		// missing endBinding
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] are required"), e.getMessage());
+	}
+
+	@Test
+	void convertSucceedsWithCalendarMenuItemWithDocumentModelAndNoBindings() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModel");
+		item.setDocumentName("TestDocument");
+		item.setModelName("CalendarModel");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		Module result = module.convert("test");
+		CalendarItem converted = (CalendarItem) result.getMenu().getItems().get(0);
+		assertEquals("TestDocument", converted.getDocumentName());
+		assertEquals("CalendarModel", converted.getModelName());
+		assertNull(converted.getStartBinding());
+		assertNull(converted.getEndBinding());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemModelPresentWithStartBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModelWithStart");
+		item.setDocumentName("TestDocument");
+		item.setModelName("CalendarModel");
+		item.setStartBinding("startDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] should be absent"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemModelPresentWithEndBinding() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModelWithEnd");
+		item.setDocumentName("TestDocument");
+		item.setModelName("CalendarModel");
+		item.setEndBinding("endDate");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("[startBinding] and [endBinding] should be absent"), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenCalendarItemModelPresentWithoutDocument() {
+		ModuleMetaData module = createModuleWithRole();
+		CalendarItemMetaData item = new CalendarItemMetaData();
+		item.setName("calendarByModelOnly");
+		item.setModelName("CalendarModel");
+		item.getRoles().add(grantedTo("viewer"));
+		module.getMenu().getActions().add(item);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains("If [model] is present, then [document] is required"), e.getMessage());
+	}
+
+	@Test
 	void convertThrowsWhenCalendarItemNoneOfDocumentQueryOrModel() {
 		ModuleMetaData module = createModuleWithRole();
 		CalendarItemMetaData item = new CalendarItemMetaData();
@@ -1114,6 +1260,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		role.getAccesses().add(access);
@@ -1126,6 +1273,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
@@ -1141,6 +1289,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		ModuleRoleUserAccessUxUiMetadata uxui = new ModuleRoleUserAccessUxUiMetadata();
@@ -1156,6 +1305,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access.setDocumentName("TestDocument");
 		ModuleRoleUserAccessUxUiMetadata uxui1 = new ModuleRoleUserAccessUxUiMetadata();
@@ -1174,6 +1324,7 @@ class ModuleMetaDataTest {
 		ModuleMetaData module = createMinimalModuleMetaData();
 		ModuleRoleMetaData role = new ModuleRoleMetaData();
 		role.setName("viewer");
+		role.setDescription("Can view test documents");
 		ModuleRoleDocumentAggregateUserAccessMetaData access1 = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		access1.setDocumentName("TestDocument");
 		ModuleRoleDocumentAggregateUserAccessMetaData access2 = new ModuleRoleDocumentAggregateUserAccessMetaData();
@@ -1182,5 +1333,196 @@ class ModuleMetaDataTest {
 		role.getAccesses().add(access2);
 		module.getRoles().add(role);
 		assertThrows(MetaDataException.class, () -> module.convert("test"));
+	}
+
+	// ── Required values that metadata built in code can omit ─────────────────
+
+	private static void assertConvertFails(ModuleMetaData module, String expectedMessagePart) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> module.convert("test"));
+		assertTrue(e.getMessage().contains(expectedMessagePart), e.getMessage());
+	}
+
+	@Test
+	void convertThrowsWhenJobClassNameIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("myJob");
+		job.setDisplayName("My Job");
+		// className is null
+		module.getJobs().add(job);
+		assertConvertFails(module, "The [className] for job myJob is required");
+	}
+
+	private static MetaDataQueryProjectedColumnMetaData addProjectedNameColumn(ModuleMetaData module) {
+		MetaDataQueryMetaData q = createMetaDataQuery("myQuery", "TestDocument");
+		MetaDataQueryProjectedColumnMetaData col = new MetaDataQueryProjectedColumnMetaData();
+		col.setBinding("name");
+		q.getColumns().add(col);
+		module.getQueries().add(q);
+		return col;
+	}
+
+	@Test
+	void convertThrowsWhenProjectedColumnHasFormatterAndCustomFormatter() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		col.setFormatterName(FormatterName.values()[0]);
+		col.setCustomFormatterName("myFormatter");
+		assertConvertFails(module, "formatter and customFormatter cannot both be defined in column name in query myQuery");
+	}
+
+	@Test
+	void convertSetsFormatterNameOnProjectedColumn() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		FormatterName formatterName = FormatterName.values()[0];
+		col.setFormatterName(formatterName);
+		Module result = module.convert("test");
+		MetaDataQueryProjectedColumn column = (MetaDataQueryProjectedColumn) result.getNullSafeMetaDataQuery("myQuery").getColumns().get(0);
+		assertEquals(formatterName, column.getFormatterName());
+		assertNull(column.getCustomFormatterName());
+	}
+
+	@Test
+	void convertSetsCustomFormatterNameOnProjectedColumn() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		String customFormatterName = Formatters.getNames().iterator().next();
+		col.setCustomFormatterName(customFormatterName);
+		Module result = module.convert("test");
+		MetaDataQueryProjectedColumn column = (MetaDataQueryProjectedColumn) result.getNullSafeMetaDataQuery("myQuery").getColumns().get(0);
+		assertEquals(customFormatterName, column.getCustomFormatterName());
+		assertNull(column.getFormatterName());
+	}
+
+	@Test
+	void convertThrowsWhenProjectedColumnCustomFormatterIsNotDefined() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryProjectedColumnMetaData col = addProjectedNameColumn(module);
+		col.setCustomFormatterName("noSuchFormatter");
+		assertConvertFails(module, "customFormatter noSuchFormatter is not defined");
+	}
+
+	@Test
+	void convertThrowsWhenContentColumnDisplayIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryMetaData q = createMetaDataQuery("myQuery", "TestDocument");
+		MetaDataQueryContentColumnMetaData col = new MetaDataQueryContentColumnMetaData();
+		col.setBinding("photo");
+		// display is null
+		q.getColumns().add(col);
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [display] for a content query column is missing in query myQuery");
+	}
+
+	@Test
+	void convertThrowsWhenSQLQueryIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		SQLMetaData q = new SQLMetaData();
+		q.setName("mySQL");
+		q.setDescription("desc");
+		// query is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [query] for SQL query mySQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenBizQLQueryIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		BizQLMetaData q = new BizQLMetaData();
+		q.setName("myBizQL");
+		q.setDescription("desc");
+		// query is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [query] for BizQL query myBizQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenQueryImportRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryReferenceMetaData q = new MetaDataQueryReferenceMetaData();
+		q.setModuleRef("otherModule");
+		// ref is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [ref] for a query import is required");
+	}
+
+	@Test
+	void convertThrowsWhenQueryImportModuleRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		MetaDataQueryReferenceMetaData q = new MetaDataQueryReferenceMetaData();
+		q.setRef("otherQuery");
+		// moduleRef is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [moduleRef] for query import otherQuery is required");
+	}
+
+	@Test
+	void convertThrowsWhenSQLImportRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		SQLReferenceMetaData q = new SQLReferenceMetaData();
+		q.setModuleRef("otherModule");
+		// ref is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [ref] for an SQL import is required");
+	}
+
+	@Test
+	void convertThrowsWhenSQLImportModuleRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		SQLReferenceMetaData q = new SQLReferenceMetaData();
+		q.setRef("otherSQL");
+		// moduleRef is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [moduleRef] for SQL import otherSQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenBizQLImportRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		BizQLReferenceMetaData q = new BizQLReferenceMetaData();
+		q.setModuleRef("otherModule");
+		// ref is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [ref] for a BizQL import is required");
+	}
+
+	@Test
+	void convertThrowsWhenBizQLImportModuleRefIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		BizQLReferenceMetaData q = new BizQLReferenceMetaData();
+		q.setRef("otherBizQL");
+		// moduleRef is null
+		module.getQueries().add(q);
+		assertConvertFails(module, "The [moduleRef] for BizQL import otherBizQL is required");
+	}
+
+	@Test
+	void convertThrowsWhenQueryTypeIsUnrecognised() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		QueryMetaData q = new QueryMetaData() {
+			private static final long serialVersionUID = 1L;
+		};
+		q.setName("strange");
+		module.getQueries().add(q);
+		assertConvertFails(module, "Unrecognised query type " + q.getClass().getName());
+	}
+
+	@Test
+	void convertThrowsWhenRoleDescriptionIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		ModuleRoleMetaData role = new ModuleRoleMetaData();
+		role.setName("viewer");
+		// description is null
+		module.getRoles().add(role);
+		assertConvertFails(module, "The [description] for role viewer is required");
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void convertThrowsWhenMenuIsNull() {
+		ModuleMetaData module = createMinimalModuleMetaData();
+		module.setMenu(null);
+		assertConvertFails(module, "The module [menu] is required");
 	}
 }

@@ -22,6 +22,7 @@ class AddImageH2Test extends AbstractH2Test {
 	void uploadSetsBodyWhenBodyIsEmpty() throws Exception {
 		Communication communication = Communication.newInstance();
 
+		@SuppressWarnings("null") // passes null on purpose
 		Communication result = new AddImage().upload(communication, upload("image-bytes"), new UploadException(), null);
 
 		assertThat(result, is(communication));
@@ -29,6 +30,7 @@ class AddImageH2Test extends AbstractH2Test {
 		assertThat(result.getBody(), containsString("aW1hZ2UtYnl0ZXM="));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void uploadAppendsImageWhenBodyAlreadyExists() throws Exception {
 		Communication communication = Communication.newInstance();

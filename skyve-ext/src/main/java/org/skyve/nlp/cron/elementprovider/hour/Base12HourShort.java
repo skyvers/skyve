@@ -3,6 +3,9 @@ package org.skyve.nlp.cron.elementprovider.hour;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses compact 12-hour values such as {@code 8pm} and normalizes them for cron fields.
  */
@@ -24,7 +27,7 @@ public class Base12HourShort extends Base12Hour {
 	 * @return {@code true} when a compact time token is found.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -52,7 +55,7 @@ public class Base12HourShort extends Base12Hour {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -62,7 +65,7 @@ public class Base12HourShort extends Base12Hour {
 	 * @return The hour field token, or {@code null} when no hour was captured.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nullable String getHourElement() {
 		if (segments.size() > 2) {
 			if ("pm".equalsIgnoreCase(segments.get(2)) && Integer.parseInt(segments.get(1)) < 12) {
 				return String.valueOf(Integer.parseInt(segments.get(1)) + 12);

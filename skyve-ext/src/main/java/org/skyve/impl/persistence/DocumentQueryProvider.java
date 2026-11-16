@@ -12,6 +12,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 
 /**
@@ -29,7 +31,7 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 * @param moduleName the owning module name; must resolve for the current customer
 	 * @param documentName the document name within {@code moduleName}
 	 */
-	protected DocumentQueryProvider(String moduleName, String documentName) {
+	protected DocumentQueryProvider(@Nonnull String moduleName, @Nonnull String documentName) {
 		final Customer c = CORE.getUser().getCustomer();
 		final Module m = c.getModule(moduleName);
 		document = m.getDocument(c, documentName);
@@ -41,7 +43,7 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 * @param document the document this provider queries; must not be {@code null}
 	 */
 	@Inject
-	protected DocumentQueryProvider(Document document) {
+	protected DocumentQueryProvider(@Nonnull Document document) {
 		this.document = document;
 	}
 
@@ -50,13 +52,13 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 *
 	 * @return the active persistence context
 	 */
-	protected abstract Persistence getPersistence();
+	protected abstract @Nonnull Persistence getPersistence();
 
 	/**
 	 * @param bizId The bizId of the bean to retrieve.
 	 * @return The bean with the given bizId.
 	 */
-	public T get(String bizId) {
+	public @Nullable T get(@Nonnull String bizId) {
 		final DocumentQuery query = getDocumentQuery();
 		query.getFilter().addEquals(Bean.DOCUMENT_ID, bizId);
 		return query.beanResult();
@@ -66,7 +68,7 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 * @param maxResults The maximum number of results to retrieve.
 	 * @return A collection of the first maxResults records.
 	 */
-	public Collection<T> getAll(int maxResults) {
+	public @Nonnull Collection<T> getAll(int maxResults) {
 		final DocumentQuery query = getDocumentQuery();
 		query.setMaxResults(maxResults);
 		return query.beanResults();
@@ -75,7 +77,7 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	/**
 	 * @return All records.
 	 */
-	public Collection<T> getAll() {
+	public @Nonnull Collection<T> getAll() {
 		return getDocumentQuery().beanResults();
 	}
 
@@ -93,14 +95,14 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 * @param bizId The bizId of the bean to check.
 	 * @return True if a bean with the specified bizId exists, otherwise false.
 	 */
-	public boolean exists(String bizId) {
+	public boolean exists(@Nonnull String bizId) {
 		return get(bizId) != null;
 	}
 
 	/**
 	 * @param bizId The bizId of the bean to delete.
 	 */
-	public void delete(String bizId) {
+	public void delete(@Nonnull String bizId) {
 		final T bean = get(bizId);
 		if (bean != null) {
 			getPersistence().delete(bean);
@@ -112,7 +114,7 @@ public abstract class DocumentQueryProvider<T extends PersistentBean> {
 	 *
 	 * @return a mutable {@link DocumentQuery} scoped to this provider's document
 	 */
-	public DocumentQuery getDocumentQuery() {
+	public @Nonnull DocumentQuery getDocumentQuery() {
 		return getPersistence().newDocumentQuery(document);
 	}
 }

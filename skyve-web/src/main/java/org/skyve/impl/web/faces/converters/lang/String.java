@@ -2,6 +2,7 @@ package org.skyve.impl.web.faces.converters.lang;
 
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
@@ -20,7 +21,7 @@ public class String implements Converter<java.lang.String> {
      * @return the normalised string value
      */
     @Override
-    public java.lang.String getAsObject(FacesContext context, UIComponent component, java.lang.String value) {
+    public @Nullable java.lang.String getAsObject(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable java.lang.String value) {
     	return UtilImpl.processStringValue(value);
     }
 
@@ -33,7 +34,7 @@ public class String implements Converter<java.lang.String> {
      * @return the rendered string value
      */
     @Override
-    public java.lang.String getAsString(FacesContext context, UIComponent component, java.lang.String value) {
+    public @Nullable java.lang.String getAsString(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable java.lang.String value) {
     	return value;
     }
 }

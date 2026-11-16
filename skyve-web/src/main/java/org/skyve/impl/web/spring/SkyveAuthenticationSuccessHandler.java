@@ -14,6 +14,8 @@ import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
 import org.springframework.security.web.savedrequest.RequestCache;
 import org.springframework.security.web.savedrequest.SavedRequest;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +36,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	/**
 	 * Creates the authentication success handler with optional user-details management support.
 	 */
-	public SkyveAuthenticationSuccessHandler(UserDetailsManager userDetailsManager) {
+	public SkyveAuthenticationSuccessHandler(@Nullable UserDetailsManager userDetailsManager) {
 		this.userDetailsManager = userDetailsManager;
 	}
 	
@@ -43,9 +45,9 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void onAuthenticationSuccess(HttpServletRequest request,
-										HttpServletResponse response,
-										Authentication authentication)
+	public void onAuthenticationSuccess(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+										@SuppressWarnings("null") @Nonnull HttpServletResponse response,
+										@SuppressWarnings("null") @Nonnull Authentication authentication)
 	throws ServletException, IOException {
 		String redirectUrl = null;
 		RequestCache requestCache = new HttpSessionRequestCache();
@@ -104,7 +106,7 @@ public class SkyveAuthenticationSuccessHandler extends SavedRequestAwareAuthenti
 		getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 	}
 	
-	private void cleanupTFACodes(TwoFactorAuthUser principal) {
+	private void cleanupTFACodes(@Nonnull TwoFactorAuthUser principal) {
 		principal.setTfaCodeGeneratedTimestamp(null);
 		principal.setTfaCode(null);
 		principal.setTfaToken(null);

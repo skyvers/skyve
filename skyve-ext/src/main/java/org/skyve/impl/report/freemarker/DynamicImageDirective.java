@@ -28,6 +28,9 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * FreeMarker user-defined directive that loads a specified Skyve {@link DynamicImage}.
  *
@@ -68,7 +71,10 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@SuppressWarnings("null") @Nonnull Environment env,
+						@SuppressWarnings("null") @Nonnull Map params,
+						@SuppressWarnings("null") @Nonnull TemplateModel[] loopVars,
+						@Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");
@@ -185,14 +191,7 @@ public class DynamicImageDirective implements TemplateDirectiveModel {
 		// get the Skyve Document for the image
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(moduleParam);
-
-		if (module == null) {
-			throw new TemplateModelException("Module '" + moduleParam + "' could not be found. Please check the spelling and update the markup.");
-		}
 		Document document = module.getDocument(customer, documentParam);
-		if (document == null) {
-			throw new TemplateModelException("Document '" + documentParam + "' could not be found. Please check the spelling and update the markup.");
-		}
 
 		DynamicImage<Bean> dynamicImage = document.getDynamicImage(customer, imageParam);
 		try {

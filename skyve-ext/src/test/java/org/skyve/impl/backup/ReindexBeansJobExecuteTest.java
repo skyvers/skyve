@@ -1,7 +1,7 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -32,9 +32,9 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 
 @SuppressWarnings({"static-method", "resource"})
-public class ReindexBeansJobExecuteTest {
+class ReindexBeansJobExecuteTest {
 	@Test
-	public void executeSkipsDocumentWithoutIndexableFields() throws Exception {
+	void executeSkipsDocumentWithoutIndexableFields() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -69,7 +69,7 @@ public class ReindexBeansJobExecuteTest {
 	}
 
 	@Test
-	public void executeReindexesDynamicDocumentAndEvictsPerBizId() throws Exception {
+	void executeReindexesDynamicDocumentAndEvictsPerBizId() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -112,7 +112,7 @@ public class ReindexBeansJobExecuteTest {
 	}
 
 	@Test
-	public void executeReindexesStaticDocumentViaDocumentQuery() throws Exception {
+	void executeReindexesStaticDocumentViaDocumentQuery() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -151,7 +151,7 @@ public class ReindexBeansJobExecuteTest {
 	}
 
 	@Test
-	public void executeIgnoresDocumentRefOwnedByDifferentModule() throws Exception {
+	void executeIgnoresDocumentRefOwnedByDifferentModule() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);

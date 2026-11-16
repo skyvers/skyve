@@ -5,6 +5,8 @@ import org.skyve.domain.types.converters.Format.TextCase;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -34,24 +36,24 @@ public class TextFormat {
 	private String mask;
 	private TextCase textCase;
 	
-	public String getMask() {
+	public @Nullable String getMask() {
 		return mask;
 	}
 	@XmlAttribute
-	public void setMask(String mask) {
+	public void setMask(@Nullable String mask) {
 		this.mask = UtilImpl.processStringValue(mask);
 	}
 	
-	public TextCase getCase() {
+	public @Nullable TextCase getCase() {
 		return textCase;
 	}
 	@XmlAttribute
-	public void setCase(TextCase textCase) {
+	public void setCase(@Nullable TextCase textCase) {
 		this.textCase = textCase;
 	}
 
 	@XmlTransient
-	public Format<String> getFormat() {
+	public @Nonnull Format<String> getFormat() {
 		if (format == null) {
 			format = new Format<>(mask, textCase);
 		}

@@ -5,6 +5,8 @@ import java.io.Serializable;
 import org.skyve.EXT;
 import org.skyve.addin.AddInManager;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -42,7 +44,7 @@ public class AddInManagerInjectable implements AddInManager, Serializable {
 	 * @return the resolved extension instance, or {@code null} when none is registered.
 	 */
 	@Override
-	public <T extends Object> T getExtension(Class<T> type) {
+	public @Nullable <T extends Object> T getExtension(@Nonnull Class<T> type) {
 		return EXT.getAddInManager().getExtension(type);
 	}
 }

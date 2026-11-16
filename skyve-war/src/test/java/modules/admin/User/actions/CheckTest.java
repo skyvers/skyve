@@ -21,6 +21,7 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import org.skyve.web.WebContext;
 
 import modules.admin.domain.Contact.ContactType;
+import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
@@ -31,14 +32,17 @@ class CheckTest extends AbstractH2Test {
 	private Check action;
 	private String searchToken;
 
+	@SuppressWarnings("null") // a null here fails the test
 	@BeforeEach
 	void setup() {
 		db = new DataBuilder().fixture(FixtureType.crud);
 		searchToken = "check" + UUID.randomUUID().toString().replace("-", "");
 
 		user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(user1, searchToken + "1", "Check 1");
 		user1.getContact().setEmail1(searchToken + "1@check.com");
 		user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(user2, searchToken + "2", "Check 2");
 		user2.getContact().setEmail1(searchToken + "2@check.com");
 
 		user1 = CORE.getPersistence().save(user1);
@@ -93,6 +97,7 @@ class CheckTest extends AbstractH2Test {
 		assertThat(result.getBean().getCandidateContacts().get(0).getContact(), is(user2.getContact()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteEmailSearchExactMatch() throws Exception {
 		// create the test data
@@ -133,6 +138,7 @@ class CheckTest extends AbstractH2Test {
 		assertEquals(2, result.getBean().getCandidateContacts().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteEmailOnlyNoMatchesSeedsContactAndReportsInfo() throws Exception {
 		UserExtension searchUser = User.newInstance();
@@ -147,5 +153,21 @@ class CheckTest extends AbstractH2Test {
 		assertEquals(email, result.getBean().getContact().getEmail1());
 		assertEquals(ContactType.person, result.getBean().getContact().getContactType());
 		verify(webContext).growl(MessageSeverity.info, "admin.user.actions.check.noResults");
+	}
+
+	/**
+	 * Names a built user and its groups. DataBuilder names both with random lorem text and both names are unique,
+	 * so two users built in one test sometimes share a user name or a group name.
+	 * @param user	The user to name.
+	 * @param userName	A user name that no other user in the test has.
+	 * @param groupLabel	A label that no other user in the test has, short enough for "{groupLabel} group N" to fit
+	 * 						the 30 character group name.
+	 */
+	private static void nameUniquely(User user, String userName, String groupLabel) {
+		user.setUserName(userName);
+		int groupNumber = 0;
+		for (GroupExtension group : user.getGroups()) {
+			group.setName(groupLabel + " group " + (++groupNumber));
+		}
 	}
 }

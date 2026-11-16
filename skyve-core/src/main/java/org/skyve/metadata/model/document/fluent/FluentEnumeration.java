@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentEnumeration metadata.
  */
@@ -19,14 +22,14 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentEnumeration(Enumeration enumeration) {
+	public FluentEnumeration(@Nonnull Enumeration enumeration) {
 		this.enumeration = enumeration;
 	}
 
 	/**
 	 * Copies enumeration metadata, including all configured values and reference links.
 	 */
-	public FluentEnumeration from(@SuppressWarnings("hiding") Enumeration enumeration) {
+	public @Nonnull FluentEnumeration from(@SuppressWarnings("hiding") @Nonnull Enumeration enumeration) {
 		super.from(enumeration);
 		typeName(enumeration.getTypeName());
 		implementingEnumClassName(enumeration.getImplementingEnumClassName());
@@ -44,7 +47,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeration typeName(String typeName) {
+	public @Nonnull FluentEnumeration typeName(@Nullable String typeName) {
 		enumeration.setXmlTypeName(typeName);
 		return this;
 	}
@@ -52,7 +55,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeration implementingEnumClassName(String implementingEnumClassName) {
+	public @Nonnull FluentEnumeration implementingEnumClassName(@Nullable String implementingEnumClassName) {
 		enumeration.setXmlImplementingEnumClassName(implementingEnumClassName);
 		return this;
 	}
@@ -60,7 +63,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Appends an enumerated value.
 	 */
-	public FluentEnumeration addValue(FluentEnumeratedValue value) {
+	public @Nonnull FluentEnumeration addValue(@Nonnull FluentEnumeratedValue value) {
 		enumeration.getXmlValues().add(value.get());
 		return this;
 	}
@@ -68,7 +71,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Removes values that match {@code name}.
 	 */
-	public FluentEnumeration removeValueByName(String name) {
+	public @Nonnull FluentEnumeration removeValueByName(@Nonnull String name) {
 		enumeration.getXmlValues().removeIf(v -> name.equals(v.getName()));
 		return this;
 	}
@@ -78,7 +81,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	 *
 	 * @return a fluent wrapper around the matching value, or {@code null} when absent
 	 */
-	public FluentEnumeratedValue findValueByName(String name) {
+	public @Nullable FluentEnumeratedValue findValueByName(@Nonnull String name) {
 		EnumeratedValue result = enumeration.getXmlValues().stream().filter(v -> name.equals(v.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentEnumeratedValue(result);
@@ -88,7 +91,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Removes values that match {@code code}.
 	 */
-	public FluentEnumeration removeValueByCode(String code) {
+	public @Nonnull FluentEnumeration removeValueByCode(@Nonnull String code) {
 		enumeration.getXmlValues().removeIf(v -> code.equals(v.getCode()));
 		return this;
 	}
@@ -98,7 +101,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	 *
 	 * @return a fluent wrapper around the matching value, or {@code null} when absent
 	 */
-	public FluentEnumeratedValue findValueByCode(String code) {
+	public @Nullable FluentEnumeratedValue findValueByCode(@Nonnull String code) {
 		EnumeratedValue result = enumeration.getXmlValues().stream().filter(v -> code.equals(v.getCode())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentEnumeratedValue(result);
@@ -108,7 +111,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Removes values that match {@code description}.
 	 */
-	public FluentEnumeration removeValueByDescription(String description) {
+	public @Nonnull FluentEnumeration removeValueByDescription(@Nonnull String description) {
 		enumeration.getXmlValues().removeIf(v -> description.equals(v.getDescription()));
 		return this;
 	}
@@ -118,7 +121,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	 *
 	 * @return a fluent wrapper around the matching value, or {@code null} when absent
 	 */
-	public FluentEnumeratedValue findValueByDescription(String description) {
+	public @Nullable FluentEnumeratedValue findValueByDescription(@Nonnull String description) {
 		EnumeratedValue result = enumeration.getXmlValues().stream().filter(v -> description.equals(v.getDescription())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentEnumeratedValue(result);
@@ -128,7 +131,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Removes all enumerated values.
 	 */
-	public FluentEnumeration clearValues() {
+	public @Nonnull FluentEnumeration clearValues() {
 		enumeration.getXmlValues().clear();
 		return this;
 	}
@@ -136,7 +139,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeration moduleRef(String moduleRef) {
+	public @Nonnull FluentEnumeration moduleRef(@Nullable String moduleRef) {
 		enumeration.setModuleRef(moduleRef);
 		return this;
 	}
@@ -144,7 +147,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeration documentRef(String documentRef) {
+	public @Nonnull FluentEnumeration documentRef(@Nullable String documentRef) {
 		enumeration.setDocumentRef(documentRef);
 		return this;
 	}
@@ -152,7 +155,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentEnumeration attributeRef(String attributeRef) {
+	public @Nonnull FluentEnumeration attributeRef(@Nullable String attributeRef) {
 		enumeration.setAttributeRef(attributeRef);
 		return this;
 	}
@@ -164,7 +167,7 @@ public class FluentEnumeration extends FluentConstrainableField<FluentEnumeratio
 	 * Returns the mutable enumeration metadata instance being built.
 	 */
 	@Override
-	public Enumeration get() {
+	public @Nonnull Enumeration get() {
 		return enumeration;
 	}
 }

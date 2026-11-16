@@ -16,6 +16,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.persistence.EntityManager;
 
@@ -32,7 +34,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public User getUser() {
+	public @Nonnull User getUser() {
 		return CORE.getPersistence().getUser();
 	}
 
@@ -40,7 +42,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean isPersisted(Bean bean) {
+	public boolean isPersisted(@Nonnull Bean bean) {
 		return CORE.getPersistence().isPersisted(bean);
 	}
 
@@ -88,7 +90,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void evictCached(Bean bean) {
+	public void evictCached(@Nonnull Bean bean) {
 		CORE.getPersistence().evictCached(bean);
 	}
 
@@ -96,15 +98,15 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean cached(Bean bean) {
+	public boolean cached(@Nonnull Bean bean) {
 		return CORE.getPersistence().cached(bean);
 	}
 
 	@Override
-	public boolean sharedCacheCollection(String moduleName,
-											String documentName,
-											String collectionName,
-											String ownerBizId) {
+	public boolean sharedCacheCollection(@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String collectionName,
+											@Nonnull String ownerBizId) {
 		return CORE.getPersistence().sharedCacheCollection(moduleName, documentName, collectionName, ownerBizId);
 	}
 
@@ -112,7 +114,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean sharedCacheCollection(Bean owner, String collectionName) {
+	public boolean sharedCacheCollection(@Nonnull Bean owner, @Nonnull String collectionName) {
 		return CORE.getPersistence().sharedCacheCollection(owner, collectionName);
 	}
 
@@ -120,7 +122,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean sharedCacheBean(String moduleName, String documentName, String bizId) {
+	public boolean sharedCacheBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId) {
 		return CORE.getPersistence().sharedCacheBean(moduleName, documentName, bizId);
 	}
 
@@ -128,7 +130,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean sharedCacheBean(Bean bean) {
+	public boolean sharedCacheBean(@Nonnull Bean bean) {
 		return CORE.getPersistence().sharedCacheBean(bean);
 	}
 
@@ -152,15 +154,15 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void evictSharedCacheCollections(String moduleName, String documentName, String collectionName) {
+	public void evictSharedCacheCollections(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String collectionName) {
 		CORE.getPersistence().evictSharedCacheCollections(moduleName, documentName, collectionName);
 	}
 
 	@Override
-	public void evictSharedCacheCollection(String moduleName,
-											String documentName,
-											String collectionName,
-											String ownerBizId) {
+	public void evictSharedCacheCollection(@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String collectionName,
+											@Nonnull String ownerBizId) {
 		CORE.getPersistence().evictSharedCacheCollection(moduleName, documentName, collectionName, ownerBizId);
 	}
 
@@ -168,7 +170,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void evictSharedCacheCollection(Bean owner, String collectionName) {
+	public void evictSharedCacheCollection(@Nonnull Bean owner, @Nonnull String collectionName) {
 		CORE.getPersistence().evictSharedCacheCollection(owner, collectionName);
 	}
 
@@ -184,7 +186,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void evictSharedCacheBeans(String moduleName, String documentName) {
+	public void evictSharedCacheBeans(@Nonnull String moduleName, @Nonnull String documentName) {
 		CORE.getPersistence().evictSharedCacheBeans(moduleName, documentName);
 	}
 
@@ -192,7 +194,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void evictSharedCachedBean(String moduleName, String documentName, String bizId) {
+	public void evictSharedCachedBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId) {
 		CORE.getPersistence().evictSharedCachedBean(moduleName, documentName, bizId);
 	}
 
@@ -200,7 +202,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void evictSharedCachedBean(Bean bean) {
+	public void evictSharedCachedBean(@Nonnull Bean bean) {
 		CORE.getPersistence().evictSharedCachedBean(bean);
 	}
 
@@ -208,7 +210,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void preMerge(Document document, PersistentBean beanToSave) {
+	public void preMerge(@Nonnull Document document, @Nonnull PersistentBean beanToSave) {
 		CORE.getPersistence().preMerge(document, beanToSave);
 	}
 
@@ -216,7 +218,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> T save(Document document, T bean) {
+	public @Nonnull <T extends PersistentBean> T save(@Nonnull Document document, @Nonnull T bean) {
 		return CORE.getPersistence().save(document, bean);
 	}
 
@@ -224,7 +226,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> T save(T bean) {
+	public @Nonnull <T extends PersistentBean> T save(@Nonnull T bean) {
 		return CORE.getPersistence().save(bean);
 	}
 
@@ -232,7 +234,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> List<T> save(List<T> beans) {
+	public @Nonnull <T extends PersistentBean> List<T> save(@Nonnull List<T> beans) {
 		return CORE.getPersistence().save(beans);
 	}
 
@@ -241,7 +243,7 @@ public class PersistenceInjectable implements Persistence {
 	/**
 	 * Performs save.
 	 */
-	public <T extends PersistentBean> List<T> save(T... beans) {
+	public @Nonnull <T extends PersistentBean> List<T> save(@Nonnull T... beans) {
 		return CORE.getPersistence().save(beans);
 	}
 
@@ -249,7 +251,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> T merge(Document document, T bean) {
+	public @Nonnull <T extends PersistentBean> T merge(@Nonnull Document document, @Nonnull T bean) {
 		return CORE.getPersistence().merge(document, bean);
 	}
 
@@ -257,7 +259,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> T merge(T bean) {
+	public @Nonnull <T extends PersistentBean> T merge(@Nonnull T bean) {
 		return CORE.getPersistence().merge(bean);
 	}
 
@@ -265,7 +267,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> List<T> merge(List<T> beans) {
+	public @Nonnull <T extends PersistentBean> List<T> merge(@Nonnull List<T> beans) {
 		return CORE.getPersistence().merge(beans);
 	}
 
@@ -274,7 +276,7 @@ public class PersistenceInjectable implements Persistence {
 	/**
 	 * Performs merge.
 	 */
-	public <T extends PersistentBean> List<T> merge(T... beans) {
+	public @Nonnull <T extends PersistentBean> List<T> merge(@Nonnull T... beans) {
 		return CORE.getPersistence().merge(beans);
 	}
 
@@ -282,7 +284,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void postMerge(Document document, PersistentBean beanToSave) {
+	public void postMerge(@Nonnull Document document, @Nonnull PersistentBean beanToSave) {
 		CORE.getPersistence().postMerge(document, beanToSave);
 	}
 
@@ -298,7 +300,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> void delete(Document document, T bean) {
+	public <T extends PersistentBean> void delete(@Nonnull Document document, @Nonnull T bean) {
 		CORE.getPersistence().delete(document, bean);
 	}
 
@@ -306,7 +308,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends PersistentBean> void delete(T bean) {
+	public <T extends PersistentBean> void delete(@Nonnull T bean) {
 		CORE.getPersistence().delete(bean);
 	}
 
@@ -314,7 +316,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void upsertBeanTuple(PersistentBean bean) {
+	public void upsertBeanTuple(@Nonnull PersistentBean bean) {
 		CORE.getPersistence().upsertBeanTuple(bean);
 	}
 
@@ -322,7 +324,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void upsertCollectionTuples(PersistentBean owningBean, String collectionName) {
+	public void upsertCollectionTuples(@Nonnull PersistentBean owningBean, @Nonnull String collectionName) {
 		CORE.getPersistence().upsertCollectionTuples(owningBean, collectionName);
 	}
 
@@ -330,7 +332,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void insertCollectionTuples(PersistentBean owningBean, String collectionName) {
+	public void insertCollectionTuples(@Nonnull PersistentBean owningBean, @Nonnull String collectionName) {
 		CORE.getPersistence().insertCollectionTuples(owningBean, collectionName);
 	}
 
@@ -338,7 +340,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> T retrieve(Document document, String id) {
+	public @Nullable <T extends Bean> T retrieve(@Nonnull Document document, @Nonnull String id) {
 		return CORE.getPersistence().retrieve(document, id);
 	}
 
@@ -346,7 +348,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> T retrieveAndLock(Document document, String id) {
+	public @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull Document document, @Nonnull String id) {
 		return CORE.getPersistence().retrieveAndLock(document, id);
 	}
 
@@ -354,7 +356,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> T retrieve(String moduleName, String documentName, String id) {
+	public @Nullable <T extends Bean> T retrieve(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String id) {
 		return CORE.getPersistence().retrieve(moduleName, documentName, id);
 	}
 
@@ -362,7 +364,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> T retrieveAndLock(String moduleName, String documentName, String id) {
+	public @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String id) {
 		return CORE.getPersistence().retrieveAndLock(moduleName, documentName, id);
 	}
 
@@ -370,7 +372,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void reindex(PersistentBean beanToReindex) throws Exception {
+	public void reindex(@Nonnull PersistentBean beanToReindex) throws Exception {
 		CORE.getPersistence().reindex(beanToReindex);
 	}
 
@@ -378,7 +380,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <R> R withDocumentPermissionScopes(DocumentPermissionScope scope, Function<Persistence, R> function) {
+	public @Nullable <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Function<Persistence, R> function) {
 		return CORE.getPersistence().withDocumentPermissionScopes(scope, function);
 	}
 
@@ -386,7 +388,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void withDocumentPermissionScopes(DocumentPermissionScope scope, Consumer<Persistence> consumer) {
+	public void withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Consumer<Persistence> consumer) {
 		CORE.getPersistence().withDocumentPermissionScopes(scope, consumer);
 	}
 	
@@ -394,7 +396,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newSQL(String query) {
+	public @Nonnull SQL newSQL(@Nonnull String query) {
 		return CORE.getPersistence().newSQL(query);
 	}
 
@@ -402,7 +404,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newNamedSQL(String moduleName, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedSQL(moduleName, queryName);
 	}
 
@@ -410,7 +412,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newNamedSQL(Module module, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull Module module, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedSQL(module, queryName);
 	}
 
@@ -418,7 +420,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newSQL(String moduleName, String documentName, String query) {
+	public @Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query) {
 		return CORE.getPersistence().newSQL(moduleName, documentName, query);
 	}
 
@@ -426,7 +428,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedSQL(moduleName, documentName, queryName);
 	}
 
@@ -434,7 +436,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newSQL(Document document, String query) {
+	public @Nonnull SQL newSQL(@Nonnull Document document, @Nonnull String query) {
 		return CORE.getPersistence().newSQL(document, query);
 	}
 
@@ -442,7 +444,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public SQL newNamedSQL(Document document, String queryName) {
+	public @Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedSQL(document, queryName);
 	}
 
@@ -450,7 +452,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BizQL newBizQL(String query) {
+	public @Nonnull BizQL newBizQL(@Nonnull String query) {
 		return CORE.getPersistence().newBizQL(query);
 	}
 
@@ -458,7 +460,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BizQL newNamedBizQL(String moduleName, String queryName) {
+	public @Nonnull BizQL newNamedBizQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedBizQL(moduleName, queryName);
 	}
 
@@ -466,7 +468,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BizQL newNamedBizQL(Module module, String queryName) {
+	public @Nonnull BizQL newNamedBizQL(@Nonnull Module module, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedBizQL(module, queryName);
 	}
 
@@ -474,7 +476,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DocumentQuery newNamedDocumentQuery(String moduleName, String queryName) {
+	public @Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull String moduleName, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedDocumentQuery(moduleName, queryName);
 	}
 
@@ -482,7 +484,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DocumentQuery newNamedDocumentQuery(Module module, String queryName) {
+	public @Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull Module module, @Nonnull String queryName) {
 		return CORE.getPersistence().newNamedDocumentQuery(module, queryName);
 	}
 
@@ -490,7 +492,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Document document) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document) {
 		return CORE.getPersistence().newDocumentQuery(document);
 	}
 
@@ -498,16 +500,16 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(String moduleName, String documentName) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull String moduleName, @Nonnull String documentName) {
 		return CORE.getPersistence().newDocumentQuery(moduleName, documentName);
 	}
 
 	@Override
-	public DocumentQuery newDocumentQuery(Document document,
-											String fromClause,
-											String filterClause,
-											String groupClause,
-											String orderClause) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Document document,
+													@Nullable String fromClause,
+													@Nullable String filterClause,
+													@Nullable String groupClause,
+													@Nullable String orderClause) {
 		return CORE.getPersistence().newDocumentQuery(document, fromClause, filterClause, groupClause, orderClause);
 	}
 
@@ -515,7 +517,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public DocumentQuery newDocumentQuery(Bean queryByExampleBean) {
+	public @Nonnull DocumentQuery newDocumentQuery(@Nonnull Bean queryByExampleBean) {
 		return CORE.getPersistence().newDocumentQuery(queryByExampleBean);
 	}
 	
@@ -523,7 +525,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public EntityManager getEntityManager() {
+	public @Nonnull EntityManager getEntityManager() {
 		return CORE.getPersistence().getEntityManager();
 	}
 }

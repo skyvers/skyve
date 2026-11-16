@@ -39,34 +39,34 @@ public abstract class QueryReferenceImpl implements QueryDefinition {
 	}
 	
 	@Override
-	public Module getOwningModule() {
+	public @Nonnull Module getOwningModule() {
 		return owningModule;
 	}
 
-	public void setOwningModule(Module owningModule) {
+	public void setOwningModule(@Nonnull Module owningModule) {
 		this.owningModule = owningModule;
 	}
 
-	public String getModuleRef() {
+	public @Nonnull String getModuleRef() {
 		return moduleRef;
 	}
 	
-	public String getRef() {
+	public @Nonnull String getRef() {
 		return ref;
 	}
 	
 	@Override
-	public String getName() {
+	public @Nonnull String getName() {
 		return (name == null) ? ref : name;
 	}
 
 	@Override
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return getTarget().getDescription();
 	}
 	
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return getTarget().getDocumentation();
 	}
 
@@ -76,14 +76,14 @@ public abstract class QueryReferenceImpl implements QueryDefinition {
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return getTarget().getProperties();
 	}
 	
 	protected abstract @Nonnull <T extends QueryDefinition> T getTarget();
 	
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this)
 							.add("name", name)
 							.add("moduleRef", moduleRef)

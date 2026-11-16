@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.pipeline.component;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
@@ -18,7 +19,10 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.MethodExpression;
+import jakarta.el.ValueExpression;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.html.HtmlPanelGroup;
@@ -26,21 +30,24 @@ import jakarta.faces.component.html.HtmlPanelGroup;
 public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UIComponent listGrid(UIComponent component,
-									String moduleName,
-									String documentName,
-									String modelName,
-									String uxui,
-									ListModel<Bean> model,
-									Document owningDocument,
-									ListGrid grid,
-									String stickyHeaderAnchorSelector,
-									boolean aggregateQuery) {
+	public @Nonnull UIComponent listGrid(@Nullable UIComponent component,
+											@Nonnull String moduleName,
+											@Nullable String documentName,
+											@Nullable String modelName,
+											@Nonnull String uxui,
+											@Nonnull ListModel<Bean> model,
+											@Nullable Document owningDocument,
+											@Nonnull ListGrid grid,
+											@Nullable String stickyHeaderAnchorSelector,
+											boolean aggregateQuery) {
 		if (component != null) {
 			return component;
 		}
 
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		String drivingModuleName = drivingDocument.getOwningModuleName();
 		String drivingDocumentName = drivingDocument.getName();
 
@@ -72,21 +79,15 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 
 			String actionName = null;
 			List<EventAction> selectedActions = grid.getSelectedActions();
-			if (selectedActions != null) {
-				ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
-				if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
-					selectedCommand.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
-					selectedCommand.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
-				}
-				else {
-					actionName = actionAttributes.actionName;
-					selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
-					selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
-				}
+			ActionFacesAttributes actionAttributes = determineActionFacesAttributes(selectedActions);
+			if (actionAttributes.actionName == null) { // when no selected action defined (collection is empty)
+				selectedCommand.setProcess((actionAttributes.process == null) ? "@this" : actionAttributes.process);
+				selectedCommand.setUpdate((actionAttributes.update == null) ? "@none" : actionAttributes.update);
 			}
 			else {
-				selectedCommand.setProcess("@this");
-				selectedCommand.setUpdate("@none");
+				actionName = actionAttributes.actionName;
+				selectedCommand.setProcess((actionAttributes.process == null) ? process : actionAttributes.process);
+				selectedCommand.setUpdate((actionAttributes.update == null) ? update : actionAttributes.update);
 			}
 
 			MethodExpression expr = createSelectedExpression(selectedIdBinding, actionName, modelName);
@@ -122,6 +123,36 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 															showSnap,
 															selectedRemoteCommand,
 															stickyHeaderAnchorSelector);
+		// Embedded list grids need the view's current state (bean, conversation, view binding) when rendered
+		script.setManagedBeanName(managedBeanName);
+		script.setParameters(grid.getFilterParameters(), grid.getParameters());
+		script.setUxUiName(uxui);
+		// As per FacesViewRenderer.renderListGrid(), no context menu for conversation grids
+		script.setShowContextMenu(showZoom && (! grid.getContinueConversation()));
+
+		// Disable conditions are evaluated against the current bean each time the grid is rendered
+		// The same as TabularComponentBuilder.listGrid()
+		String disableAddCondition = grid.getDisableAddCondition();
+		String disabledCondition = grid.getDisabledCondition();
+		List<String> addConditions = new ArrayList<>(2);
+		if (disableAddCondition != null) {
+			addConditions.add(disableAddCondition);
+		}
+		if (disabledCondition != null) {
+			addConditions.add(disabledCondition);
+		}
+		if (! addConditions.isEmpty()) {
+			ValueExpression disableAdd = createOredValueExpressionFromConditions(addConditions.toArray(new String[addConditions.size()]));
+			if (disableAdd != null) {
+				script.setValueExpression(VueListGridScript.DISABLE_ADD_VALUE_EXPRESSION, disableAdd);
+			}
+		}
+		String disableZoomCondition = grid.getDisableZoomCondition();
+		if (disableZoomCondition != null) {
+			script.setValueExpression(VueListGridScript.DISABLE_ZOOM_VALUE_EXPRESSION,
+										createValueExpressionFromCondition(disableZoomCondition, null));
+		}
+
 		children.add(script);
 
 		return result;
@@ -134,7 +165,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	 * @param modelName
 	 * @return	The method expression
 	 */
-	private MethodExpression createSelectedExpression(String selectedIdBinding, String actionName, String modelName) {
+	private @Nonnull MethodExpression createSelectedExpression(@Nonnull String selectedIdBinding, @Nullable String actionName, @Nullable String modelName) {
 		// Note source should only be defined when this is a rerender
 		String source = null;
 		if (TRUE.toString().equals(actionName) || FALSE.toString().equals(actionName)) {
@@ -154,7 +185,7 @@ public class VueListGridComponentBuilder extends NoOpComponentBuilder {
 	}
 
 	@Override
-	public UIComponent listGridContextMenu(UIComponent component, String listGridId, ListGrid listGrid) {
+	public @Nonnull UIComponent listGridContextMenu(@Nullable UIComponent component, @Nonnull String listGridId, @Nonnull ListGrid listGrid) {
 
 		UIOutput empty = new UIOutput();
 		empty.setValue("");

@@ -14,22 +14,40 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.skyve.cache.ConversationCacheConfig;
+import org.skyve.cache.SessionCacheConfig;
+import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.impl.cache.DefaultCaching;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.RequestUxUiSelection;
 import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.faces.SkyveFacesPhaseListener.FacesViewSelectionMarker;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.web.UserAgentType;
 
+import jakarta.el.ELContext;
+import jakarta.el.ELResolver;
 import jakarta.faces.FacesException;
 import jakarta.faces.application.ViewExpiredException;
 import jakarta.faces.component.UIViewRoot;
@@ -40,14 +58,22 @@ import jakarta.faces.event.PhaseEvent;
 import jakarta.faces.event.PhaseId;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @SuppressWarnings({ "static-method", "boxing", "java:S1192" }) // Repeated literals document lifecycle event contracts.
 class SkyveFacesPhaseListenerTest {
 	private static final String SELECTION_MARKER_KEY = FacesViewSelectionMarker.class.getName();
 
+	private abstract static class FacesContextBridge extends FacesContext {
+		static void setCurrent(FacesContext context) {
+			setCurrentInstance(context);
+		}
+	}
+
 	@AfterEach
 	void clearPersistence() throws Exception {
 		persistenceThreadLocal().remove();
+		FacesContextBridge.setCurrent(null);
 	}
 
 	@Test
@@ -142,6 +168,7 @@ class SkyveFacesPhaseListenerTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5778") // the side-effect mocks run after afterPhase in the lambda to prove expiry throws before any of them
 	void selectionMarkerFreePreUpgradePostbackExpiresBeforeEveryRestoreSideEffect() throws Exception {
 		LifecycleRequest postback = lifecycleRequest(
 				UxUi.newPrimeFaces("tablet", "external", "casablanca", "blue"),
@@ -154,9 +181,10 @@ class SkyveFacesPhaseListenerTest {
 		Runnable modelMutation = mock(Runnable.class);
 		Runnable accessCheck = mock(Runnable.class);
 		Runnable action = mock(Runnable.class);
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
 		FacesException exception = assertThrows(FacesException.class, () -> {
-			new SkyveFacesPhaseListener().afterPhase(postback.event);
+			listener.afterPhase(postback.event);
 			modelMutation.run();
 			accessCheck.run();
 			action.run();
@@ -218,6 +246,168 @@ class SkyveFacesPhaseListenerTest {
 		org.junit.jupiter.api.Assertions.assertNotSame(oldMarker, newViewMap.get(SELECTION_MARKER_KEY));
 	}
 
+	@Test
+	void restoringASessionViewWhoseCachedConversationHasNoPersistenceThrows() throws Throwable {
+		withConversationCache(() -> {
+			MockWebContext webContext = cachedConversationWithNoPersistence();
+			FacesView view = mock(FacesView.class);
+			when(view.getDehydratedWebId()).thenReturn(webContext.getWebId());
+			Map<String, Object> sessionMap = new HashMap<>();
+			sessionMap.put(FacesUtil.MANAGED_BEAN_NAME_KEY, view);
+			PhaseEvent event = restoreViewEvent(webContext, sessionMap, Map.of());
+			SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
+
+			FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
+
+			assertCachedConversationHasNoPersistence(exception, webContext.getWebId());
+			verify(view).hydrate(any());
+		});
+	}
+
+	@Test
+	void restoringAConversationParameterWhoseCachedConversationHasNoPersistenceThrows() throws Throwable {
+		withConversationCache(() -> {
+			MockWebContext webContext = cachedConversationWithNoPersistence();
+			PhaseEvent event = restoreViewEvent(webContext,
+												new HashMap<>(),
+												Map.of(AbstractWebContext.CONTEXT_NAME, webContext.getWebId()));
+			SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
+
+			FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
+
+			assertCachedConversationHasNoPersistence(exception, webContext.getWebId());
+		});
+	}
+
+	@Test
+	void postRenderingAViewWithNoWebContextThrowsAndStillCommits() throws Exception {
+		FacesView view = mock(FacesView.class);
+		Bean postRenderBean = mock(Bean.class);
+		when(view.getPostRenderBean()).thenReturn(postRenderBean);
+		PhaseEvent event = renderResponseEvent(view);
+		AbstractPersistence persistence = bindPersistence();
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
+
+		FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
+
+		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, exception.getCause());
+		assertEquals("Cannot post render as FacesView skyve has no web context", cause.getMessage());
+		verify(persistence).commit(true);
+		verify(view, never()).dehydrate();
+	}
+
+	@Test
+	void cachingTheConversationOfAViewWithNoWebContextThrowsAndStillCommits() throws Exception {
+		FacesView view = mock(FacesView.class);
+		PhaseEvent event = renderResponseEvent(view);
+		AbstractPersistence persistence = bindPersistence();
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
+
+		FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
+
+		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, exception.getCause());
+		assertEquals("Cannot cache the conversation as FacesView skyve has no web context", cause.getMessage());
+		verify(persistence).commit(true);
+		verify(view, never()).dehydrate();
+	}
+
+	/**
+	 * Caches a conversation that has a current bean but no persistence.
+	 */
+	private static MockWebContext cachedConversationWithNoPersistence() {
+		MockWebContext result = new MockWebContext();
+		HashMap<String, Object> values = new HashMap<>();
+		values.put(Bean.DOCUMENT_ID, "bean-1");
+		result.setCurrentBean(new DynamicBean("test", "Doc", values));
+		StateUtil.commitAndCacheConversation(result);
+		return result;
+	}
+
+	private static void assertCachedConversationHasNoPersistence(FacesException exception, String webId) {
+		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, exception.getCause());
+		assertEquals("Cached conversation " + webId + " has no persistence", cause.getMessage());
+	}
+
+	/**
+	 * A fresh (non-postback) RESTORE_VIEW event with no view root, from a request in the session of the given conversation.
+	 */
+	private static PhaseEvent restoreViewEvent(MockWebContext webContext,
+												Map<String, Object> sessionMap,
+												Map<String, String> requestParameters) {
+		HttpSession session = mock(HttpSession.class);
+		when(session.getId()).thenReturn(webContext.getSessionId());
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when(request.getSession(false)).thenReturn(session);
+
+		ExternalContext externalContext = mock(ExternalContext.class);
+		when(externalContext.getRequest()).thenReturn(request);
+		when(externalContext.getSessionMap()).thenReturn(sessionMap);
+		when(externalContext.getRequestParameterMap()).thenReturn(requestParameters);
+
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getExternalContext()).thenReturn(externalContext);
+
+		PhaseEvent result = mock(PhaseEvent.class);
+		when(result.getPhaseId()).thenReturn(PhaseId.RESTORE_VIEW);
+		when(result.getFacesContext()).thenReturn(facesContext);
+		return result;
+	}
+
+	/**
+	 * A RENDER_RESPONSE event for a view root whose managed bean "skyve" resolves to the given view.
+	 */
+	private static PhaseEvent renderResponseEvent(FacesView view) {
+		UIViewRoot viewRoot = mock(UIViewRoot.class);
+		when(viewRoot.getAttributes()).thenReturn(Map.of(FacesUtil.MANAGED_BEAN_NAME_KEY, "skyve"));
+
+		ELContext elContext = mock(ELContext.class);
+		ELResolver resolver = mock(ELResolver.class);
+		when(elContext.getELResolver()).thenReturn(resolver);
+		when(resolver.getValue(elContext, null, "skyve")).thenReturn(view);
+
+		FacesContext facesContext = mock(FacesContext.class);
+		when(facesContext.getViewRoot()).thenReturn(viewRoot);
+		when(facesContext.getELContext()).thenReturn(elContext);
+		FacesContextBridge.setCurrent(facesContext);
+
+		PhaseEvent result = mock(PhaseEvent.class);
+		when(result.getPhaseId()).thenReturn(PhaseId.RENDER_RESPONSE);
+		when(result.getFacesContext()).thenReturn(facesContext);
+		return result;
+	}
+
+	/**
+	 * Runs the body with a fresh, non-persistent conversation cache, restoring the cache configuration afterwards.
+	 */
+	private static void withConversationCache(Executable body) throws Throwable {
+		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
+		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
+		Path cacheDirectory = Files.createTempDirectory("phase-listener-cache");
+		try {
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+			UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+			UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
+			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
+			DefaultCaching.get().shutdown();
+			DefaultCaching.get().startup();
+			body.execute();
+		}
+		finally {
+			DefaultCaching.get().shutdown();
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+			UtilImpl.SESSION_CACHE = originalSessionCache;
+			UtilImpl.CONVERSATION_CACHE = originalConversationCache;
+			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
+				paths.sorted(Comparator.reverseOrder())
+						.map(Path::toFile)
+						.forEach(File::delete);
+			}
+		}
+	}
+
 	private static Map<String, Object> markedViewMap(UxUi uxui,
 													UserAgentType type,
 													boolean emulated) throws Exception {
@@ -236,9 +426,9 @@ class SkyveFacesPhaseListenerTest {
 										boolean ajax) throws Exception {
 		LifecycleRequest postback = lifecycleRequest(uxui, type, emulated, true, ajax, viewMap);
 		AbstractPersistence persistence = bindPersistence();
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
-		FacesException exception = assertThrows(FacesException.class,
-				() -> new SkyveFacesPhaseListener().afterPhase(postback.event));
+		FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(postback.event));
 
 		assertInstanceOf(ViewExpiredException.class, exception.getCause());
 		verifyNoInteractions(persistence);

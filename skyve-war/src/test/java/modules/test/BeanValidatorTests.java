@@ -66,6 +66,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		assertTrue(ve.getMessages().size() > 0);
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testValidateBeanPropertyAgainstAttributeSuccess() throws Exception {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
@@ -77,6 +78,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		Assertions.assertEquals(0, ve.getMessages().size(), "No validation error should occur");
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testValidateBeanPropertyAgainstAttributeFail() throws Exception {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
@@ -89,6 +91,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		Assertions.assertEquals(1, ve.getMessages().size(), "No validation error should occur");
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testValidateBeanPropertyAgainstAttributeWithoutCustomerSuccess() throws Exception {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);
@@ -99,6 +102,7 @@ class BeanValidatorTests extends AbstractSkyveTest {
 		Assertions.assertEquals(0, ve.getMessages().size(), "No validation error should occur");
 	}
 
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testValidateBeanPropertyAgainstAttributeWithoutCustomerFail() throws Exception {
 		AllAttributesRequiredPersistent test = Util.constructRandomInstance(u, m, aarpd, 2);

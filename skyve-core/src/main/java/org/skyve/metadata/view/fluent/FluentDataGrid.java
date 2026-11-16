@@ -1,9 +1,13 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds tabular {@link DataGrid} metadata for bound-data views.
@@ -24,7 +28,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param grid
 	 *            the metadata instance to mutate
 	 */
-	public FluentDataGrid(DataGrid grid) {
+	public FluentDataGrid(@Nonnull DataGrid grid) {
 		this.grid = grid;
 	}
 
@@ -35,13 +39,13 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentDataGrid from(@SuppressWarnings("hiding") DataGrid grid) {
+	public @Nonnull FluentDataGrid from(@SuppressWarnings("hiding") @Nonnull DataGrid grid) {
 
-		disabledConditionName(grid.getDisabledConditionName());
-		disableAddConditionName(grid.getDisableAddConditionName());
-		disableZoomConditionName(grid.getDisableZoomConditionName());
-		disableEditConditionName(grid.getDisableEditConditionName());
-		disableRemoveConditionName(grid.getDisableRemoveConditionName());
+		BindUtil.copyAuthoredCondition(grid.getXmlDisabledCondition(), grid.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableAddCondition(), grid.getXmlEnableAddCondition(), this::disableAddCondition, this::enableAddCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableZoomCondition(), grid.getXmlEnableZoomCondition(), this::disableZoomCondition, this::enableZoomCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableEditCondition(), grid.getXmlEnableEditCondition(), this::disableEditCondition, this::enableEditCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), this::disableRemoveCondition, this::enableRemoveCondition);
 		Boolean b = grid.getShowAdd();
 		if (b != null) {
 			showAdd(b.booleanValue());
@@ -94,61 +98,129 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
 
 		super.from(grid);
+		
+		grid.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables this data grid.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName the condition name
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDataGrid disabledConditionName(String disabledConditionName) {
-		grid.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentDataGrid disabledCondition(@Nullable String disabledCondition) {
+		grid.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the add action on this data grid.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param disableAddConditionName the condition name
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDataGrid disableAddConditionName(String disableAddConditionName) {
-		grid.setDisableAddConditionName(disableAddConditionName);
+	public @Nonnull FluentDataGrid enabledCondition(@Nullable String enabledCondition) {
+		grid.setXmlEnabledCondition(enabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the zoom action on this data grid.
+	 * Sets the {@code disableAdd} condition as authored; the opposite sense of {@link #enableAddCondition(String)}.
 	 *
-	 * @param disableZoomConditionName the condition name
+	 * @param disableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDataGrid disableZoomConditionName(String disableZoomConditionName) {
-		grid.setDisableZoomConditionName(disableZoomConditionName);
+	public @Nonnull FluentDataGrid disableAddCondition(@Nullable String disableAddCondition) {
+		grid.setXmlDisableAddCondition(disableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the edit action on this data grid.
+	 * Sets the {@code enableAdd} condition as authored; the opposite sense of {@link #disableAddCondition(String)}.
 	 *
-	 * @param disableEditConditionName the condition name
+	 * @param enableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDataGrid disableEditConditionName(String disableEditConditionName) {
-		grid.setDisableEditConditionName(disableEditConditionName);
+	public @Nonnull FluentDataGrid enableAddCondition(@Nullable String enableAddCondition) {
+		grid.setXmlEnableAddCondition(enableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the remove action on this data grid.
+	 * Sets the {@code disableZoom} condition as authored; the opposite sense of {@link #enableZoomCondition(String)}.
 	 *
-	 * @param disableRemoveConditionName the condition name
+	 * @param disableZoomCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentDataGrid disableRemoveConditionName(String disableRemoveConditionName) {
-		grid.setDisableRemoveConditionName(disableRemoveConditionName);
+	public @Nonnull FluentDataGrid disableZoomCondition(@Nullable String disableZoomCondition) {
+		grid.setXmlDisableZoomCondition(disableZoomCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableZoom} condition as authored; the opposite sense of {@link #disableZoomCondition(String)}.
+	 *
+	 * @param enableZoomCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid enableZoomCondition(@Nullable String enableZoomCondition) {
+		grid.setXmlEnableZoomCondition(enableZoomCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableEdit} condition as authored; the opposite sense of {@link #enableEditCondition(String)}.
+	 *
+	 * @param disableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid disableEditCondition(@Nullable String disableEditCondition) {
+		grid.setXmlDisableEditCondition(disableEditCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableEdit} condition as authored; the opposite sense of {@link #disableEditCondition(String)}.
+	 *
+	 * @param enableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid enableEditCondition(@Nullable String enableEditCondition) {
+		grid.setXmlEnableEditCondition(enableEditCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableRemove} condition as authored; the opposite sense of {@link #enableRemoveCondition(String)}.
+	 *
+	 * @param disableRemoveCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid disableRemoveCondition(@Nullable String disableRemoveCondition) {
+		grid.setXmlDisableRemoveCondition(disableRemoveCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableRemove} condition as authored; the opposite sense of {@link #disableRemoveCondition(String)}.
+	 *
+	 * @param enableRemoveCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid enableRemoveCondition(@Nullable String enableRemoveCondition) {
+		grid.setXmlEnableRemoveCondition(enableRemoveCondition);
 		return this;
 	}
 
@@ -158,7 +230,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showAdd {@code true} to show the add button
 	 * @return this builder
 	 */
-	public FluentDataGrid showAdd(boolean showAdd) {
+	public @Nonnull FluentDataGrid showAdd(boolean showAdd) {
 		grid.setShowAdd(showAdd ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -169,7 +241,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showZoom {@code true} to show the zoom button
 	 * @return this builder
 	 */
-	public FluentDataGrid showZoom(boolean showZoom) {
+	public @Nonnull FluentDataGrid showZoom(boolean showZoom) {
 		grid.setShowZoom(showZoom ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -180,7 +252,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showEdit {@code true} to show the edit button
 	 * @return this builder
 	 */
-	public FluentDataGrid showEdit(boolean showEdit) {
+	public @Nonnull FluentDataGrid showEdit(boolean showEdit) {
 		grid.setShowEdit(showEdit ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -191,7 +263,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showRemove {@code true} to show the remove button
 	 * @return this builder
 	 */
-	public FluentDataGrid showRemove(boolean showRemove) {
+	public @Nonnull FluentDataGrid showRemove(boolean showRemove) {
 		grid.setShowRemove(showRemove ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -202,7 +274,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param showDeselect {@code true} to show the deselect button
 	 * @return this builder
 	 */
-	public FluentDataGrid showDeselect(boolean showDeselect) {
+	public @Nonnull FluentDataGrid showDeselect(boolean showDeselect) {
 		grid.setShowDeselect(showDeselect ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -213,7 +285,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param selectedIdBinding the binding expression
 	 * @return this builder
 	 */
-	public FluentDataGrid selectedIdBinding(String selectedIdBinding) {
+	public @Nonnull FluentDataGrid selectedIdBinding(@Nullable String selectedIdBinding) {
 		grid.setSelectedIdBinding(selectedIdBinding);
 		return this;
 	}
@@ -224,7 +296,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param inline {@code true} to enable inline editing
 	 * @return this builder
 	 */
-	public FluentDataGrid inline(boolean inline) {
+	public @Nonnull FluentDataGrid inline(boolean inline) {
 		grid.setInline(inline ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -235,7 +307,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param editable {@code true} to allow editing
 	 * @return this builder
 	 */
-	public FluentDataGrid editable(boolean editable) {
+	public @Nonnull FluentDataGrid editable(boolean editable) {
 		grid.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -246,7 +318,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param wordWrap {@code true} to enable word wrap
 	 * @return this builder
 	 */
-	public FluentDataGrid wordWrap(boolean wordWrap) {
+	public @Nonnull FluentDataGrid wordWrap(boolean wordWrap) {
 		grid.setWordWrap(wordWrap ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -258,7 +330,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the bound column to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addBoundColumn(FluentDataGridBoundColumn column) {
+	public @Nonnull FluentDataGrid addBoundColumn(@Nonnull FluentDataGridBoundColumn column) {
 		grid.getColumns().add(column.get());
 		return this;
 	}
@@ -272,7 +344,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the bound column to insert
 	 * @return this builder
 	 */
-	public FluentDataGrid addBoundColumn(int index, FluentDataGridBoundColumn column) {
+	public @Nonnull FluentDataGrid addBoundColumn(int index, @Nonnull FluentDataGridBoundColumn column) {
 		grid.getColumns().add(index, column.get());
 		return this;
 	}
@@ -284,7 +356,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the column position
 	 * @return a fluent wrapper around the bound column
 	 */
-	public FluentDataGridBoundColumn getBoundColumn(int index) {
+	public @Nonnull FluentDataGridBoundColumn getBoundColumn(int index) {
 		return new FluentDataGridBoundColumn((DataGridBoundColumn) grid.getColumns().get(index));
 	}
 	
@@ -295,7 +367,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the container column to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addContainerColumn(FluentDataGridContainerColumn column) {
+	public @Nonnull FluentDataGrid addContainerColumn(@Nonnull FluentDataGridContainerColumn column) {
 		grid.getColumns().add(column.get());
 		return this;
 	}
@@ -309,7 +381,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the container column to insert
 	 * @return this builder
 	 */
-	public FluentDataGrid addContainerColumn(int index, FluentDataGridContainerColumn column) {
+	public @Nonnull FluentDataGrid addContainerColumn(int index, @Nonnull FluentDataGridContainerColumn column) {
 		grid.getColumns().add(index, column.get());
 		return this;
 	}
@@ -321,7 +393,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the column position
 	 * @return a fluent wrapper around the container column
 	 */
-	public FluentDataGridContainerColumn getContainerColumn(int index) {
+	public @Nonnull FluentDataGridContainerColumn getContainerColumn(int index) {
 		return new FluentDataGridContainerColumn((DataGridContainerColumn) grid.getColumns().get(index));
 	}
 
@@ -332,7 +404,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the column position to remove
 	 * @return this builder
 	 */
-	public FluentDataGrid removeColumn(int index) {
+	public @Nonnull FluentDataGrid removeColumn(int index) {
 		grid.getColumns().remove(index);
 		return this;
 	}
@@ -342,7 +414,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearColumns() {
+	public @Nonnull FluentDataGrid clearColumns() {
 		grid.getColumns().clear();
 		return this;
 	}
@@ -354,7 +426,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *            the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addAddedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addAddedAction(@Nonnull FluentEventAction action) {
 		grid.getAddedActions().add(action.get());
 		return this;
 	}
@@ -364,7 +436,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearAddedActions() {
+	public @Nonnull FluentDataGrid clearAddedActions() {
 		grid.getAddedActions().clear();
 		return this;
 	}
@@ -375,7 +447,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param action the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addEditedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addEditedAction(@Nonnull FluentEventAction action) {
 		grid.getEditedActions().add(action.get());
 		return this;
 	}
@@ -385,7 +457,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearEditedActions() {
+	public @Nonnull FluentDataGrid clearEditedActions() {
 		grid.getEditedActions().clear();
 		return this;
 	}
@@ -396,7 +468,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param action the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addRemovedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addRemovedAction(@Nonnull FluentEventAction action) {
 		grid.getRemovedActions().add(action.get());
 		return this;
 	}
@@ -406,7 +478,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearRemovedActions() {
+	public @Nonnull FluentDataGrid clearRemovedActions() {
 		grid.getRemovedActions().clear();
 		return this;
 	}
@@ -417,7 +489,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @param action the action to append
 	 * @return this builder
 	 */
-	public FluentDataGrid addSelectedAction(FluentEventAction action) {
+	public @Nonnull FluentDataGrid addSelectedAction(@Nonnull FluentEventAction action) {
 		grid.getSelectedActions().add(action.get());
 		return this;
 	}
@@ -427,8 +499,21 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 *
 	 * @return this builder
 	 */
-	public FluentDataGrid clearSelectedActions() {
+	public @Nonnull FluentDataGrid clearSelectedActions() {
 		grid.getSelectedActions().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDataGrid putProperty(@Nonnull String k, @Nonnull String v) {
+		grid.getProperties().put(k, v);
 		return this;
 	}
 
@@ -438,7 +523,7 @@ public class FluentDataGrid extends FluentDataWidget<FluentDataGrid> {
 	 * @return the wrapped data-grid metadata
 	 */
 	@Override
-	public DataGrid get() {
+	public @Nonnull DataGrid get() {
 		return grid;
 	}
 }

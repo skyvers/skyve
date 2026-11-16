@@ -2,6 +2,9 @@ package org.skyve.impl.util;
 
 import java.util.HashMap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class for holding {@link PluralUtil#articleResults(String)} results.
  */
@@ -24,49 +27,49 @@ public class ArticleNode extends HashMap<Character, ArticleNode> {
 		/**
 		 * The number of times "a" was seen for this prefix, e.g. 9682
 		 */
-		public Integer getaCount() {
+		public @Nonnull Integer getaCount() {
 			return aCount;
 		}
 
-		public void setaCount(Integer aCount) {
+		public void setaCount(@Nonnull Integer aCount) {
 			this.aCount = aCount;
 		}
 
 		/**
 		 * The number of times "an" was seen for this prefix, e.g. 1028246
 		 */
-		public Integer getAnCount() {
+		public @Nonnull Integer getAnCount() {
 			return anCount;
 		}
 
-		public void setAnCount(Integer anCount) {
+		public void setAnCount(@Nonnull Integer anCount) {
 			this.anCount = anCount;
 		}
 
 		/**
 		 * The prefix sufficient to determine the article, e.g. "e"
 		 */
-		public String getPrefix() {
+		public @Nullable String getPrefix() {
 			return prefix;
 		}
 
-		public void setPrefix(String prefix) {
+		public void setPrefix(@Nonnull String prefix) {
 			this.prefix = prefix;
 		}
 
 		/**
 		 * The most common article for the prefix, a or an. E.g. "an"
 		 */
-		public String getArticle() {
+		public @Nullable String getArticle() {
 			return article;
 		}
 
-		public void setArticle(String article) {
+		public void setArticle(@Nonnull String article) {
 			this.article = article;
 		}
 
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			return String.format("Matching prefix: %s\nCorrect article: %s\na count: %d\nan count: %d",
 					prefix,
 					article,

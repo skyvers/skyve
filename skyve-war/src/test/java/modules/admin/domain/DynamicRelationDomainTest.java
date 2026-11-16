@@ -14,8 +14,8 @@ class DynamicRelationDomainTest {
 
 	@BeforeEach
 	void setUp() {
-		relation = new DynamicRelation() { /* test stub */ };
-		entity = new DynamicEntity() { /* test stub */ };
+		relation = new DynamicRelation() { private static final long serialVersionUID = 1L; };
+		entity = new DynamicEntity() { private static final long serialVersionUID = 1L; };
 	}
 
 	@Test

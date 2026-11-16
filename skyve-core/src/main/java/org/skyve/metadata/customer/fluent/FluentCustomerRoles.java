@@ -6,6 +6,9 @@ import org.skyve.impl.metadata.repository.customer.CustomerRoleMetaData;
 import org.skyve.impl.metadata.repository.customer.CustomerRolesMetaData;
 import org.skyve.metadata.customer.CustomerRole;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds the customer role collection metadata.
  */
@@ -24,7 +27,7 @@ public class FluentCustomerRoles {
 	 *
 	 * @param roles backing metadata
 	 */
-	public FluentCustomerRoles(CustomerRolesMetaData roles) {
+	public FluentCustomerRoles(@Nonnull CustomerRolesMetaData roles) {
 		this.roles = roles;
 	}
 
@@ -35,8 +38,8 @@ public class FluentCustomerRoles {
 	 * @param allowModuleRoles whether module roles are enabled
 	 * @return this builder
 	 */
-	public FluentCustomerRoles from(@SuppressWarnings("hiding") Collection<CustomerRole> roles,
-										boolean allowModuleRoles) {
+	public @Nonnull FluentCustomerRoles from(@SuppressWarnings("hiding") @Nonnull Collection<CustomerRole> roles,
+												boolean allowModuleRoles) {
 		allowModuleRoles(allowModuleRoles);
 		for (CustomerRole role : roles) {
 			addRole(new FluentCustomerRole().from(role));
@@ -50,7 +53,7 @@ public class FluentCustomerRoles {
 	 * @param allow whether module roles are allowed
 	 * @return this builder
 	 */
-	public FluentCustomerRoles allowModuleRoles(boolean allow) {
+	public @Nonnull FluentCustomerRoles allowModuleRoles(boolean allow) {
 		roles.setAllowModuleRoles(allow);
 		return this;
 	}
@@ -61,7 +64,7 @@ public class FluentCustomerRoles {
 	 * @param role role wrapper to add
 	 * @return this builder
 	 */
-	public FluentCustomerRoles addRole(FluentCustomerRole role) {
+	public @Nonnull FluentCustomerRoles addRole(@Nonnull FluentCustomerRole role) {
 		roles.getRoles().add(role.get());
 		return this;
 	}
@@ -72,7 +75,7 @@ public class FluentCustomerRoles {
 	 * @param name role name
 	 * @return this builder
 	 */
-	public FluentCustomerRoles removeRole(String name) {
+	public @Nonnull FluentCustomerRoles removeRole(@Nonnull String name) {
 		roles.getRoles().removeIf(r -> name.equals(r.getName()));
 		return this;
 	}
@@ -82,7 +85,7 @@ public class FluentCustomerRoles {
 	 *
 	 * @return this builder
 	 */
-	public FluentCustomerRoles clearRoles() {
+	public @Nonnull FluentCustomerRoles clearRoles() {
 		roles.getRoles().clear();
 		return this;
 	}
@@ -93,7 +96,7 @@ public class FluentCustomerRoles {
 	 * @param name role name
 	 * @return a fluent wrapper when found, otherwise {@code null}
 	 */
-	public FluentCustomerRole findRole(String name) {
+	public @Nullable FluentCustomerRole findRole(@Nonnull String name) {
 		CustomerRoleMetaData result = roles.getRoles().stream().filter(r -> name.equals(r.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentCustomerRole(result);
@@ -106,7 +109,7 @@ public class FluentCustomerRoles {
 	 *
 	 * @return backing roles metadata
 	 */
-	public CustomerRolesMetaData get() {
+	public @Nonnull CustomerRolesMetaData get() {
 		return roles;
 	}
 }

@@ -284,7 +284,8 @@ class MetaDataExpressionEvaluatorTest {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
-		when(document.getCondition("myCondition")).thenReturn(mock(Condition.class));
+		Condition condition = mock(Condition.class);
+		when(document.getCondition("myCondition")).thenReturn(condition);
 
 		String result = evaluator.validateWithoutPrefixOrSuffix("myCondition", String.class, customer, module, document);
 

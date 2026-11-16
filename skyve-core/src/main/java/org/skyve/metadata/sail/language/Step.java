@@ -2,6 +2,8 @@ package org.skyve.metadata.sail.language;
 
 import org.skyve.impl.sail.execution.AutomationContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlTransient;
 
 /**
@@ -30,5 +32,5 @@ public interface Step extends Executable {
 	 * @param context the context
 	 * @return the result
 	 */
-	public String getIdentifier(AutomationContext context);
+	public @Nullable String getIdentifier(@Nonnull AutomationContext context);
 }

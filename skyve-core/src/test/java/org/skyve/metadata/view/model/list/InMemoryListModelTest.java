@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -121,6 +122,7 @@ class InMemoryListModelTest {
 		assertEquals(0, page.getTotalRows());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsEmptyRowsWhenNoData() throws Exception {
 		TestListModel model = new TestListModel(mockModule, mockDocument, Collections.emptyList());
@@ -131,6 +133,7 @@ class InMemoryListModelTest {
 		assertEquals(0, page.getRows().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsAllRowsWhenFewRows() throws Exception {
 		List<Bean> beans = new ArrayList<>();
@@ -144,6 +147,7 @@ class InMemoryListModelTest {
 		assertEquals(2, page.getRows().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsSubsetWhenPaged() throws Exception {
 		List<Bean> beans = new ArrayList<>();
@@ -158,6 +162,7 @@ class InMemoryListModelTest {
 		assertEquals(2, page.getRows().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fetchReturnsEmptyWhenStartRowExceedsTotal() throws Exception {
 		List<Bean> beans = new ArrayList<>();
@@ -281,6 +286,7 @@ class InMemoryListModelTest {
 		assertNotNull(page.getSummary());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void sortAscendingOrdersRows() throws Exception {
 		// Create beans with distinct bizId values to verify sort order changes
@@ -300,6 +306,7 @@ class InMemoryListModelTest {
 		assertEquals("aaa", page.getRows().get(0).getBizKey());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void sortDescendingOrdersRows() throws Exception {
 		StubBean b1 = new StubBeanWithKey("aaa");
@@ -551,6 +558,47 @@ class InMemoryListModelTest {
 		Bean summary = page.getSummary();
 		assertNotNull(summary);
 		assertEquals(Double.valueOf(5.0), summary.getDynamic("numericField"));
+	}
+
+	@Test
+	void fetchSummariesSkipColumnsWithoutBinding() throws Exception {
+		MetaDataQueryColumn unbound = columnWithBinding(null);
+		MetaDataQueryColumn bound = columnWithBinding(Bean.BIZ_KEY);
+		for (AggregateFunction function : AggregateFunction.values()) {
+			List<Bean> beans = new ArrayList<>(Arrays.asList(
+					new StubBeanWithBizKey("a"),
+					new StubBeanWithBizKey("b")));
+			TestListModelWithColumns model = new TestListModelWithColumns(beans, Arrays.asList(unbound, bound));
+			model.setSummary(function);
+			model.setStartRow(0);
+			model.setEndRow(10);
+			Page page = model.fetch();
+			Bean summary = page.getSummary();
+			assertNotNull(summary, function.toString());
+			assertEquals(Long.valueOf(2), summary.getDynamic(Bean.DOCUMENT_ID), function.toString());
+		}
+	}
+
+	@Test
+	void fetchCountSummarySkipsColumnsWithoutBindingWhenThereAreNoRows() throws Exception {
+		MetaDataQueryColumn unbound = columnWithBinding(null);
+		TestListModelWithColumns model = new TestListModelWithColumns(Collections.emptyList(), Arrays.asList(unbound));
+		model.setSummary(AggregateFunction.Count);
+		model.setStartRow(0);
+		model.setEndRow(10);
+		Page page = model.fetch();
+		Bean summary = page.getSummary();
+		assertNotNull(summary);
+		assertEquals(Long.valueOf(0), summary.getDynamic(Bean.DOCUMENT_ID));
+	}
+
+	@Test
+	void sortWithoutBindingThrows() {
+		TestListModel model = new TestListModel(mockModule, mockDocument, Collections.emptyList());
+		model.setSortParameters(new SortParameterImpl[] {new SortParameterImpl()});
+		model.setStartRow(0);
+		model.setEndRow(10);
+		assertThrows(IllegalStateException.class, model::fetch);
 	}
 
 	@Test

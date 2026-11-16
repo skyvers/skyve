@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.TreeMap;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * RequestMeasurements collects and aggregates performance metrics for requests
  * over multiple time windows (seconds, minutes, hours, days, and weeks).
@@ -95,7 +97,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return second-indexed millisecond values; never {@code null}
 	 */
-	public Map<Integer, Integer> getSecondsMillis() {
+	public @Nonnull Map<Integer, Integer> getSecondsMillis() {
 		return getMap(secondsMillis);
 	}
 
@@ -104,7 +106,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return minute-indexed millisecond values; never {@code null}
 	 */
-	public Map<Integer, Integer> getMinutesMillis() {
+	public @Nonnull Map<Integer, Integer> getMinutesMillis() {
 		return getMap(minutesMillis);
 	}
 
@@ -113,7 +115,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return hour-indexed millisecond values; never {@code null}
 	 */
-	public Map<Integer, Integer> getHoursMillis() {
+	public @Nonnull Map<Integer, Integer> getHoursMillis() {
 		return getMap(hoursMillis);
 	}
 
@@ -122,7 +124,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return day-indexed millisecond values; never {@code null}
 	 */
-	public Map<Integer, Integer> getDaysMillis() {
+	public @Nonnull Map<Integer, Integer> getDaysMillis() {
 		return getMap(daysMillis);
 	}
 
@@ -131,11 +133,11 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return week-indexed millisecond values; never {@code null}
 	 */
-	public Map<Integer, Integer> getWeeksMillis() {
+	public @Nonnull Map<Integer, Integer> getWeeksMillis() {
 		return getMap(weeksMillis);
 	}
 
-	private static Map<Integer, Integer> getMap(int[] array) {
+	private static @Nonnull Map<Integer, Integer> getMap(@Nonnull int[] array) {
 		TreeMap<Integer, Integer> result = new TreeMap<>();
 		for (int i = 0, l = array.length; i < l; i++) {
 			int value = array[i];
@@ -152,7 +154,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return second-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getSecondsCpuUtilisation() {
+	public @Nonnull Map<Integer, Float> getSecondsCpuUtilisation() {
 		return getMap(secondsCpuUtilisation);
 	}
 
@@ -161,7 +163,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return minute-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getMinutesCpuUtilisation() {
+	public @Nonnull Map<Integer, Float> getMinutesCpuUtilisation() {
 		return getMap(minutesCpuUtilisation);
 	}
 
@@ -170,7 +172,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return hour-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getHoursCpuUtilisation() {
+	public @Nonnull Map<Integer, Float> getHoursCpuUtilisation() {
 		return getMap(hoursCpuUtilisation);
 	}
 
@@ -179,7 +181,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return day-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getDaysCpuUtilisation() {
+	public @Nonnull Map<Integer, Float> getDaysCpuUtilisation() {
 		return getMap(daysCpuUtilisation);
 	}
 
@@ -188,7 +190,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return week-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getWeeksCpuUtilisation() {
+	public @Nonnull Map<Integer, Float> getWeeksCpuUtilisation() {
 		return getMap(weeksCpuUtilisation);
 	}
 
@@ -197,7 +199,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return second-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getSecondsHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getSecondsHeapRamUsage() {
 		return getMap(secondsHeapRamUsage);
 	}
 
@@ -206,7 +208,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return minute-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getMinutesHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getMinutesHeapRamUsage() {
 		return getMap(minutesHeapRamUsage);
 	}
 
@@ -215,7 +217,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return hour-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getHoursHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getHoursHeapRamUsage() {
 		return getMap(hoursHeapRamUsage);
 	}
 
@@ -224,7 +226,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return day-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getDaysHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getDaysHeapRamUsage() {
 		return getMap(daysHeapRamUsage);
 	}
 
@@ -233,7 +235,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return week-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getWeeksHeapRamUsage() {
+	public @Nonnull Map<Integer, Float> getWeeksHeapRamUsage() {
 		return getMap(weeksHeapRamUsage);
 	}
 
@@ -242,7 +244,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return second-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getSecondsSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getSecondsSystemCpuUsage() {
 		return getMap(secondsSystemCpuUsage);
 	}
 
@@ -251,7 +253,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return minute-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getMinutesSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getMinutesSystemCpuUsage() {
 		return getMap(minutesSystemCpuUsage);
 	}
 
@@ -260,7 +262,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return hour-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getHoursSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getHoursSystemCpuUsage() {
 		return getMap(hoursSystemCpuUsage);
 	}
 
@@ -269,7 +271,7 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return day-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getDaysSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getDaysSystemCpuUsage() {
 		return getMap(daysSystemCpuUsage);
 	}
 
@@ -278,11 +280,11 @@ public class RequestMeasurements implements Serializable {
 	 *
 	 * @return week-indexed fractional percentages; never {@code null}
 	 */
-	public Map<Integer, Float> getWeeksSystemCpuUsage() {
+	public @Nonnull Map<Integer, Float> getWeeksSystemCpuUsage() {
 		return getMap(weeksSystemCpuUsage);
 	}
 
-	private static Map<Integer, Float> getMap(short[] array) {
+	private static @Nonnull Map<Integer, Float> getMap(@Nonnull short[] array) {
 		TreeMap<Integer, Float> result = new TreeMap<>();
 		for (int i = 0, l = array.length; i < l; i++) {
 			short value = array[i];
@@ -401,7 +403,7 @@ public class RequestMeasurements implements Serializable {
 		return second;
 	}
 
-	private static void rollup(int[] source, int[] target, int targetIndex) {
+	private static void rollup(@Nonnull int[] source, @Nonnull int[] target, int targetIndex) {
 		int sum = 0;
 		int count = 0;
 		
@@ -414,7 +416,7 @@ public class RequestMeasurements implements Serializable {
 		target[targetIndex] = (count > 0) ? (sum / count) : Integer.MIN_VALUE;
 	}
 
-	private static void rollup(short[] source, short[] target, int targetIndex) {
+	private static void rollup(@Nonnull short[] source, @Nonnull short[] target, int targetIndex) {
 		int sum = 0;
 		int count = 0;
 		for (short v : source) {
@@ -426,7 +428,7 @@ public class RequestMeasurements implements Serializable {
 		target[targetIndex] = (count > 0) ? (short) (sum / count) : Short.MIN_VALUE;
 	}
 	
-	private static void clear(int[] millis, short[] cpu, short[] systemCpu, short[] heapRam) {
+	private static void clear(@Nonnull int[] millis, @Nonnull short[] cpu, @Nonnull short[] systemCpu, @Nonnull short[] heapRam) {
 		Arrays.fill(millis, Integer.MIN_VALUE);
 		Arrays.fill(cpu, Short.MIN_VALUE);
 		Arrays.fill(systemCpu, Short.MIN_VALUE);
@@ -434,7 +436,7 @@ public class RequestMeasurements implements Serializable {
 	}
 	
 	@Override
-	public synchronized String toString() {
+	public synchronized @Nonnull String toString() {
 		StringBuilder result = new StringBuilder(256);
 		result.append("RequestMeasurements:\n");
 
@@ -469,7 +471,7 @@ public class RequestMeasurements implements Serializable {
 		return result.toString();
 	}
 
-	private static void prettyPrint(StringBuilder sb, String label, int[] values) {
+	private static void prettyPrint(@Nonnull StringBuilder sb, @Nonnull String label, @Nonnull int[] values) {
 		sb.append(label).append(": ");
 		boolean any = false;
 		for (int i = 0; i < values.length; i++) {
@@ -484,7 +486,7 @@ public class RequestMeasurements implements Serializable {
 		sb.append("\n");
 	}
 
-	private static void prettyPrint(StringBuilder sb, String label, short[] values) {
+	private static void prettyPrint(@Nonnull StringBuilder sb, @Nonnull String label, @Nonnull short[] values) {
 		sb.append(label).append(": ");
 		boolean any = false;
 		for (int i = 0; i < values.length; i++) {

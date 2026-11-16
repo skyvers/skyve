@@ -13,6 +13,7 @@ import freemarker.template.TemplateScalarModel;
 
 @SuppressWarnings("static-method")
 class ResourceDirectiveValidationTest {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsMissingParametersLoopVariablesAndNestedBody() {
 		ResourceDirective directive = new ResourceDirective();
@@ -26,6 +27,7 @@ class ResourceDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], body));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsInvalidParameterTypesAndUnsupportedParameters() {
 		ResourceDirective directive = new ResourceDirective();
@@ -35,6 +37,7 @@ class ResourceDirectiveValidationTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, Map.of("other", scalar("value")), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeParsesScalarParametersBeforeNeedingEnvironment() {
 		ResourceDirective directive = new ResourceDirective();

@@ -8,6 +8,8 @@ import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.impl.web.ViewWebContext;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.application.FacesMessage.Severity;
 import jakarta.faces.context.FacesContext;
@@ -34,7 +36,7 @@ public class FacesWebContext extends ViewWebContext {
 	 * @param message the message text key or literal
 	 */
 	@Override
-	public void growl(MessageSeverity severity, String message) {
+	public void growl(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		message(severity, message);
 	}
 
@@ -45,7 +47,7 @@ public class FacesWebContext extends ViewWebContext {
 	 * @param message the message text key or literal
 	 */
 	@Override
-	public void message(MessageSeverity severity, String message) {
+	public void message(@Nonnull MessageSeverity severity, @Nonnull String message) {
 		String i18n = Util.nullSafeI18n(message);
 		FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(determineFacesSeverity(severity), i18n, i18n));
 	}
@@ -56,7 +58,7 @@ public class FacesWebContext extends ViewWebContext {
 	 * @param severity the Skyve message severity to map
 	 * @return the corresponding JSF message severity
 	 */
-	private static Severity determineFacesSeverity(MessageSeverity severity) {
+	public static @Nullable Severity determineFacesSeverity(@Nonnull MessageSeverity severity) {
 		Severity result = null;
 		switch (severity) {
 			case info:
@@ -82,7 +84,7 @@ public class FacesWebContext extends ViewWebContext {
 	 * @return always {@code null}
 	 */
 	@Override
-	public List<Map<String, String>> getGrowls() {
+	public @Nullable List<Map<String, String>> getGrowls() {
 		return null;
 	}
 	
@@ -92,7 +94,7 @@ public class FacesWebContext extends ViewWebContext {
 	 * @return always {@code null}
 	 */
 	@Override
-	public List<Map<String, String>> getMessages() {
+	public @Nullable List<Map<String, String>> getMessages() {
 		return null;
 	}
 }

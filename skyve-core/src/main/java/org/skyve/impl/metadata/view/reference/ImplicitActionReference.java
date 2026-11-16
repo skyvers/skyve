@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.reference;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -22,12 +23,12 @@ public class ImplicitActionReference implements Reference {
 
 	private ImplicitActionName implicitActionName;
 
-	public ImplicitActionName getImplicitActionName() {
+	public @Nonnull ImplicitActionName getImplicitActionName() {
 		return implicitActionName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setImplicitActionName(ImplicitActionName implicitActionName) {
+	public void setImplicitActionName(@Nonnull ImplicitActionName implicitActionName) {
 		this.implicitActionName = implicitActionName;
 	}
 }

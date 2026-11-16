@@ -32,7 +32,7 @@ import org.skyve.persistence.SQL;
 
 import jakarta.persistence.EntityManager;
 
-@SuppressWarnings({ "static-method", "unchecked", "boxing", "resource", "java:S1220" })
+@SuppressWarnings({ "static-method", "unchecked", "boxing", "java:S1220" })
 class PersistenceInjectableTest {
 	@Test
 	void delegatesCorePersistenceLifecycleAndCrudOperations() throws Exception {

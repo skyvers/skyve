@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that declare a minimum pixel height.
  *
@@ -9,6 +11,6 @@ import org.skyve.metadata.SerializableMetaData;
  * attribute.  Extended by {@link ConstrainableHeight} (adds maximum height).
  */
 public interface MinimumHeight extends SerializableMetaData {
-	public Integer getMinPixelHeight();
-	public void setMinPixelHeight(Integer minPixelHeight);
+	public @Nullable Integer getMinPixelHeight();
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight);
 }

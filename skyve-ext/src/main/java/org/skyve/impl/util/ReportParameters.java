@@ -5,6 +5,9 @@ import java.util.Map;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.model.document.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Bundles one report execution request for batch report rendering APIs.
  *
@@ -24,7 +27,7 @@ public class ReportParameters {
 	 * @param reportName Report template name
 	 * @param parameters Named report parameters
 	 */
-	public ReportParameters(Document document, String reportName, Map<String, Object> parameters) {
+	public ReportParameters(@Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters) {
 		this(document, reportName, parameters, null);
 	}
 
@@ -36,7 +39,7 @@ public class ReportParameters {
 	 * @param parameters Named report parameters
 	 * @param bean Optional bean context for bean-backed reports
 	 */
-	public ReportParameters(Document document, String reportName, Map<String, Object> parameters, Bean bean) {
+	public ReportParameters(@Nonnull Document document, @Nonnull String reportName, @Nonnull Map<String, Object> parameters, @Nullable Bean bean) {
 		this.document = document;
 		this.reportName = reportName;
 		this.parameters = parameters;
@@ -46,28 +49,28 @@ public class ReportParameters {
 	/**
 	 * Returns report-owning document metadata.
 	 */
-	public Document getDocument() {
+	public @Nonnull Document getDocument() {
 		return document;
 	}
 
 	/**
 	 * Returns report template name.
 	 */
-	public String getReportName() {
+	public @Nonnull String getReportName() {
 		return reportName;
 	}
 
 	/**
 	 * Returns named report parameters.
 	 */
-	public Map<String, Object> getParameters() {
+	public @Nonnull Map<String, Object> getParameters() {
 		return parameters;
 	}
 
 	/**
 	 * Returns optional bean context.
 	 */
-	public Bean getBean() {
+	public @Nullable Bean getBean() {
 		return bean;
 	}
 }

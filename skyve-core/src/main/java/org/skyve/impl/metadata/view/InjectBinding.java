@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view;
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -24,12 +25,12 @@ public class InjectBinding extends AbstractBound {
 
 	private Boolean readOnly;
 	
-	public Boolean getReadOnly() {
+	public @Nullable Boolean getReadOnly() {
 		return readOnly;
 	}
 
 	@XmlAttribute(required = false)
-	public void setReadOnly(Boolean readOnly) {
+	public void setReadOnly(@Nullable Boolean readOnly) {
 		this.readOnly = readOnly;
 	}
 }

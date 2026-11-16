@@ -154,7 +154,8 @@ class TwoFactorAuthPushFilterTest {
 
 		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
 		filter.setAuthenticationManager(authenticationManager);
-		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(mock(Authentication.class));
+		Authentication authentication = mock(Authentication.class);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
 
 		HttpServletRequest request = loginRequest(CUSTOMER);
 		when(request.getParameter("username")).thenReturn(USERNAME);
@@ -556,6 +557,7 @@ class TwoFactorAuthPushFilterTest {
 		verify(chain, never()).doFilter(any(), any());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testResendInvalidatesOldCode() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
@@ -663,6 +665,7 @@ class TwoFactorAuthPushFilterTest {
 
 	@Test
 	void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0; // not a lockout test (restored after each test)
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("abc");
 		HttpServletResponse response = responseWithForward(request);
@@ -679,6 +682,7 @@ class TwoFactorAuthPushFilterTest {
 
 	@Test
 	void testBadTwoFactorCodeStaysOnTwoFactorPage() throws Exception {
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0; // not a lockout test (restored after each test)
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("123456");
 		HttpServletResponse response = responseWithForward(request);

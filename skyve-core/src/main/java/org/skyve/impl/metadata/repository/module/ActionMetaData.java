@@ -1,15 +1,16 @@
 package org.skyve.impl.metadata.repository.module;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -34,15 +35,15 @@ public class ActionMetaData extends NamedMetaData implements DecoratedMetaData {
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "uxui", required = false)
-	public List<ApplicableTo> getUxuis() {
+	public @Nonnull List<ApplicableTo> getUxuis() {
 		return uxuis;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

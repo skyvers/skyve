@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fixed-scale decimal with 2 decimal places and 20 significant digits of precision.
  *
@@ -54,7 +56,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal2(BigDecimal value) {
+	public Decimal2(@Nonnull BigDecimal value) {
 		this.value = value.setScale(2, MC.getRoundingMode());
 	}
 
@@ -62,7 +64,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal2(String value) {
+	public Decimal2(@Nonnull String value) {
 		this.value = new BigDecimal(value, MC).setScale(2, MC.getRoundingMode());
 	}
 
@@ -70,7 +72,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 * @param value
 	 */
-	public Decimal2(Decimal value) {
+	public Decimal2(@Nonnull Decimal value) {
 		this.value = value.bigDecimalValue().setScale(2, MC.getRoundingMode());
 	}
 
@@ -78,7 +80,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal2 add(Decimal operand) {
+	public @Nonnull Decimal2 add(@Nonnull Decimal operand) {
 		return new Decimal2(value.add(operand.bigDecimalValue(), MC));
 	}
 
@@ -86,7 +88,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal2 divide(Decimal operand) {
+	public @Nonnull Decimal2 divide(@Nonnull Decimal operand) {
 		return new Decimal2(value.divide(operand.bigDecimalValue(), MC));
 	}
 
@@ -94,7 +96,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal2 multiply(Decimal operand) {
+	public @Nonnull Decimal2 multiply(@Nonnull Decimal operand) {
 		return new Decimal2(value.multiply(operand.bigDecimalValue(), MC));
 	}
 
@@ -102,7 +104,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal2 subtract(Decimal operand) {
+	public @Nonnull Decimal2 subtract(@Nonnull Decimal operand) {
 		return new Decimal2(value.subtract(operand.bigDecimalValue(), MC));
 	}
 
@@ -110,7 +112,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal2 abs() {
+	public @Nonnull Decimal2 abs() {
 		return new Decimal2(value.abs());
 	}
 
@@ -118,7 +120,7 @@ public class Decimal2 extends Decimal {
 	 * 
 	 */
 	@Override
-	public Decimal2 pow(int power) {
+	public @Nonnull Decimal2 pow(int power) {
 		return new Decimal2(value.pow(power, MC));
 	}
 
@@ -126,7 +128,7 @@ public class Decimal2 extends Decimal {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Decimal2 negate() {
+	public @Nonnull Decimal2 negate() {
 		return new Decimal2(value.negate());
 	}
 
@@ -136,7 +138,7 @@ public class Decimal2 extends Decimal {
 	 * @return the result
 	 */
 	@Override
-	public Decimal2 min(Decimal other) {
+	public @Nonnull Decimal2 min(@Nonnull Decimal other) {
 		return new Decimal2(bigDecimalValue().min(other.bigDecimalValue()));
 	}
 
@@ -146,7 +148,7 @@ public class Decimal2 extends Decimal {
 	 * @return the result
 	 */
 	@Override
-	public Decimal2 max(Decimal other) {
+	public @Nonnull Decimal2 max(@Nonnull Decimal other) {
 		return new Decimal2(bigDecimalValue().max(other.bigDecimalValue()));
 	}
 }

@@ -3,6 +3,9 @@ package org.skyve.impl.content.elastic;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides iteration over content records stored in the legacy Elasticsearch repository.
  *
@@ -108,7 +111,7 @@ return false;
 		 * @return {@code null} in the current placeholder implementation
 		 */
 		@Override
-		public SearchResult next() {
+		public @Nullable SearchResult next() {
 /*
 			SearchHit searchHit = i.next();
 
@@ -183,7 +186,7 @@ return null;
 	 * @return iterator over indexed content records
 	 */
 	@Override
-	public ContentIterator iterator() {
+	public @Nonnull ContentIterator iterator() {
 		return new ESIterator();
 	}
 }

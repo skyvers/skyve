@@ -19,6 +19,7 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -156,16 +157,24 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 		secret
 	}
 	
+		/**
+	 * Returns the name of this attribute, which document conversion requires.
+	 *
+	 * @return The attribute name
+	 */
+	@Override
+	@Nonnull String getName();
+
 	/**
 	 * Returns the i18n resource key (or literal string) for the human-readable attribute label.
 	 *
-	 * @return the display name key; may be {@code null}
+	 * @return the display name key
 	 * @see #getLocalisedDisplayName()
 	 */
-	String getDisplayName();
+	@Nonnull String getDisplayName();
 	
-	default String getLocalisedDisplayName() {
-		return Util.i18n(getDisplayName());
+	default @Nonnull String getLocalisedDisplayName() {
+		return Util.nullSafeI18n(getDisplayName());
 	}
 	
 	/**
@@ -174,9 +183,9 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 * @return the description key; may be {@code null}
 	 * @see #getLocalisedDescription()
 	 */
-	String getDescription();
+	@Nullable String getDescription();
 	
-	default String getLocalisedDescription() {
+	default @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 
@@ -185,7 +194,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the attribute type; never {@code null}
 	 */
-	AttributeType getAttributeType();
+	@Nonnull AttributeType getAttributeType();
 	
 	/**
 	 * This is mapped through the attribute type except for enumerations which have a Java enum generated
@@ -207,13 +216,13 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 * Informs the Skyve framework when to include and exclude the attributes.
 	 * @return	the usage.
 	 */
-	UsageType getUsage();
+	@Nullable UsageType getUsage();
 	
 	/**
 	 * Informs the Skyve framework when to redact information when performing backups.
 	 * @return	the data sensitivity.
 	 */
-	Sensitivity getSensitivity();
+	@Nullable Sensitivity getSensitivity();
 	
 	/**
 	 * Returns whether this attribute is persisted to the database.
@@ -231,9 +240,9 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 */
 	boolean isRequired();
 	
-	String getRequiredMessage();
+	@Nullable String getRequiredMessage();
 	
-	default String getLocalisedRequiredMessage() {
+	default @Nullable String getLocalisedRequiredMessage() {
 		return Util.i18n(getRequiredMessage());
 	}
 	
@@ -242,7 +251,7 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the domain type, or {@code null} if there are no domain value constraints
 	 */
-	DomainType getDomainType();
+	@Nullable DomainType getDomainType();
 
 	/**
 	 * Returns whether this attribute is marked as deprecated.
@@ -279,14 +288,14 @@ public interface Attribute extends NamedMetaData, DecoratedMetaData {
 	/**
 	 * Returns the default widget to use when this attribute is rendered in a generated view.
 	 *
-	 * @return the default input widget; may be {@code null} if not configured
+	 * @return the default input widget, derived from the attribute type if not configured
 	 */
-	InputWidget getDefaultInputWidget();
+	@Nonnull InputWidget getDefaultInputWidget();
 	
 	/**
 	 * Returns extended documentation for this attribute (HTML or plain text).
 	 *
 	 * @return the documentation; may be {@code null}
 	 */
-	String getDocumentation();
+	@Nullable String getDocumentation();
 }

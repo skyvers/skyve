@@ -14,15 +14,21 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UUIDv7;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.util.OWASP;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.authentication.event.AbstractAuthenticationFailureEvent;
 import org.springframework.security.authentication.event.AuthenticationSuccessEvent;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Handles Spring Security authentication success/failure events to maintain Skyve login-failure lockout state.
@@ -43,18 +49,29 @@ public class SecurityListener {
 	 */
 	@EventListener
 	@SuppressWarnings("static-method")
-	public void onAuthenticationFailure(AbstractAuthenticationFailureEvent evt) {
+	public void onAuthenticationFailure(@Nonnull AbstractAuthenticationFailureEvent evt) {
 		AuthenticationException exception = evt.getException();
-		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
+		Authentication authentication = evt.getAuthentication();
+		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
+		String ipAddress = UNKNOWN;
+		Object details = authentication.getDetails();
+		if (details instanceof WebAuthenticationDetails webDetails) {
+			String remoteAddress = UtilImpl.processStringValue(webDetails.getRemoteAddress());
+			if (remoteAddress != null) {
+				ipAddress = remoteAddress;
+			}
+		}
+		String logIpAddress = OWASP.sanitiseLog(ipAddress);
 		if (! countsTowardLockout(exception)) {
-			LOGGER.warn("Login Attempt failed for user {} with {} and was not recorded as a lockout failure",
+			LOGGER.warn("Login Attempt failed for user {} from IP Address {} with {} and was not recorded as a lockout failure",
 							userName,
+							logIpAddress,
 							exception.getClass().getSimpleName());
 			return;
 		}
-		LOGGER.warn("Login Attempt failed for user {}", userName);
+		LOGGER.warn("Login Attempt failed for user {} from IP Address {}", userName, logIpAddress);
 		if (userName != null) {
-			recordLoginFailure(userName);
+			recordLoginFailure(userName, ipAddress);
 		}
 	}
 
@@ -64,7 +81,7 @@ public class SecurityListener {
 	 * @param exception The authentication exception.
 	 * @return True when the failure should be counted toward lockout.
 	 */
-	static boolean countsTowardLockout(AuthenticationException exception) {
+	static boolean countsTowardLockout(@Nonnull AuthenticationException exception) {
 		return (exception instanceof BadCredentialsException) || (exception instanceof LockedException);
 	}
 	
@@ -75,7 +92,7 @@ public class SecurityListener {
 	 */
 	@EventListener
 	@SuppressWarnings("static-method")
-	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
+	public void onAuthenticationSuccess(@Nonnull AuthenticationSuccessEvent evt) {
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
 		if (userName == null) {
 			LOGGER.warn("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
@@ -90,10 +107,11 @@ public class SecurityListener {
 	 * Persists a failed login attempt for the specified user and updates lockout counters.
 	 *
 	 * @param username The username to record.
+	 * @param ipAddress The source IP address supplied by Spring Security, or {@value #UNKNOWN} when unavailable.
 	 * @throws MetaDataException If the failure record cannot be persisted.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void recordLoginFailure(String username) {
+	private static void recordLoginFailure(@Nonnull String username, @Nonnull String ipAddress) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
 		String sql = null;
@@ -129,7 +147,7 @@ public class SecurityListener {
 				}
 			}
 			
-			sql = "insert into ADM_UserLoginRecord (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, loginDateTime, failed) values (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			sql = "insert into ADM_UserLoginRecord (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, loginDateTime, failed, ipAddress) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			try (PreparedStatement ps = c.prepareStatement(sql)) {
 				String bizCustomer = UtilImpl.CUSTOMER;
 				String userName = username;
@@ -156,6 +174,7 @@ public class SecurityListener {
 				ps.setString(7, userName);
 				ps.setTimestamp(8, new java.sql.Timestamp(System.currentTimeMillis()));
 				ps.setBoolean(9, true);
+				ps.setString(10, ipAddress);
 				ps.executeUpdate();
 			}
 			catch (Exception e) {
@@ -176,7 +195,7 @@ public class SecurityListener {
 	 * @param username The username to reset.
 	 * @throws MetaDataException If the reset cannot be persisted.
 	 */
-	private static void resetLoginFailure(String username) {
+	private static void resetLoginFailure(@Nonnull String username) {
 		String sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizId = ?";
 
 		// NB select and then update by bizId to ensure row lock across all databases.
@@ -209,7 +228,7 @@ public class SecurityListener {
 	 * @throws SQLException If the lookup query fails.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static String getBizId(String fullUsername, Connection c, boolean forReset) throws SQLException {
+	private static @Nullable String getBizId(@Nullable String fullUsername, @Nonnull Connection c, boolean forReset) throws SQLException {
 		String result = null;
 		
 		String bizCustomer = null;

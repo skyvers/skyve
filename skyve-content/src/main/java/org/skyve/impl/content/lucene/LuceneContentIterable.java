@@ -16,6 +16,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.TimeUtil;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Iterates over all records in the Lucene content index.
  *
@@ -32,7 +35,7 @@ public class LuceneContentIterable implements ContentIterable {
 	 *
 	 * @param directory the Lucene directory containing content records
 	 */
-	public LuceneContentIterable(Directory directory) {
+	public LuceneContentIterable(@Nonnull Directory directory) {
 		this.directory = directory;
 	}
 	
@@ -69,7 +72,7 @@ public class LuceneContentIterable implements ContentIterable {
 		 */
 		@Override
 		@SuppressWarnings("java:S2272") // NoSuchElement exception not required as this should be in a for loop
-		public SearchResult next() {
+		public @Nullable SearchResult next() {
 			if ((scoreDocs == null) || (scoreDocs.length <= index)) {
 				return null;
 			}
@@ -171,7 +174,7 @@ public class LuceneContentIterable implements ContentIterable {
 	 * @return a new Lucene content iterator
 	 */
 	@Override
-	public ContentIterator iterator() {
+	public @Nonnull ContentIterator iterator() {
 		return new LuceneContentIterator();
 	}
 }

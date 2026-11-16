@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -13,19 +14,18 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.same;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.mockito.ArgumentCaptor;
-
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,62 +36,79 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.primefaces.behavior.ajax.AjaxBehavior;
 import org.primefaces.behavior.confirm.ConfirmBehavior;
-import org.primefaces.component.column.Column;
+import org.primefaces.component.autocomplete.AutoComplete;
+import org.primefaces.component.barchart.BarChart;
 import org.primefaces.component.colorpicker.ColorPicker;
+import org.primefaces.component.column.Column;
 import org.primefaces.component.commandbutton.CommandButton;
 import org.primefaces.component.commandlink.CommandLink;
 import org.primefaces.component.contextmenu.ContextMenu;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.component.dialog.Dialog;
+import org.primefaces.component.donutchart.DonutChart;
 import org.primefaces.component.graphicimage.GraphicImage;
 import org.primefaces.component.inputmask.InputMask;
 import org.primefaces.component.inputtext.InputText;
 import org.primefaces.component.inputtextarea.InputTextarea;
+import org.primefaces.component.linechart.LineChart;
 import org.primefaces.component.menubutton.MenuButton;
-import org.primefaces.component.message.Message;
 import org.primefaces.component.menuitem.UIMenuItem;
+import org.primefaces.component.message.Message;
 import org.primefaces.component.outputlabel.OutputLabel;
+import org.primefaces.component.overlaypanel.OverlayPanel;
 import org.primefaces.component.panel.Panel;
-import org.primefaces.component.picklist.PickList;
 import org.primefaces.component.password.Password;
+import org.primefaces.component.picklist.PickList;
+import org.primefaces.component.piechart.PieChart;
+import org.primefaces.component.polarareachart.PolarAreaChart;
+import org.primefaces.component.radarchart.RadarChart;
 import org.primefaces.component.remotecommand.RemoteCommand;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.signature.Signature;
+import org.primefaces.component.spacer.Spacer;
 import org.primefaces.component.spinner.Spinner;
 import org.primefaces.component.tabview.Tab;
 import org.primefaces.component.tabview.TabView;
 import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.toolbar.Toolbar;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
-import org.primefaces.component.autocomplete.AutoComplete;
-import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
+import org.primefaces.model.charts.ChartModel;
 import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
+import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
+import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.DialogButton;
+import org.skyve.impl.metadata.view.widget.DynamicImage;
 import org.skyve.impl.metadata.view.widget.Link;
+import org.skyve.impl.metadata.view.widget.MapDisplay;
+import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
-import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
-import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
-import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
+import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
+import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.KeyboardType;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.RichText;
@@ -102,15 +119,16 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
-import org.skyve.impl.web.AbstractWebContext;
-import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
-import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
-import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
+import org.skyve.impl.web.faces.views.FacesView;
 import org.skyve.metadata.FormatterName;
-import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.controller.Customisations;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.query.MetaDataQueryContentColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.module.query.QueryDefinition;
@@ -119,7 +137,6 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Parameter;
-import org.skyve.impl.metadata.repository.module.MetaDataQueryContentColumnMetaData.DisplayType;
 
 import jakarta.el.ELContext;
 import jakarta.el.ExpressionFactory;
@@ -134,30 +151,16 @@ import jakarta.faces.component.UIOutput;
 import jakarta.faces.component.UISelectItems;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
 import jakarta.faces.component.html.HtmlPanelGroup;
-import jakarta.faces.convert.Converter;
 import jakarta.faces.context.FacesContext;
-import org.primefaces.component.barchart.BarChart;
-import org.primefaces.component.donutchart.DonutChart;
-import org.primefaces.component.linechart.LineChart;
-import org.primefaces.component.piechart.PieChart;
-import org.primefaces.component.polarareachart.PolarAreaChart;
-import org.primefaces.component.radarchart.RadarChart;
-import org.primefaces.model.charts.ChartModel;
-import org.primefaces.component.spacer.Spacer;
-import org.skyve.impl.metadata.view.widget.Chart;
-import org.skyve.impl.metadata.view.widget.Chart.ChartType;
-import org.primefaces.component.overlaypanel.OverlayPanel;
-import org.skyve.impl.metadata.view.widget.DynamicImage;
-import org.skyve.impl.metadata.view.widget.StaticImage;
-import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
-import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
+import jakarta.faces.convert.Converter;
 
 // Repeated values specify builder contracts; reflection is required for isolated private-helper coverage.
-@SuppressWarnings({ "java:S112", "java:S1192", "java:S3011", "java:S5960" }) // Reflection and assertions are test-only.
+@SuppressWarnings({ "static-method", "java:S112", "java:S1192", "java:S3011", "java:S5960" }) // Reflection and assertions are test-only.
 class TabularComponentBuilderTest {
 
 	private static ExpressionFactory mockExpressionFactory;
@@ -185,6 +188,10 @@ class TabularComponentBuilderTest {
 
 		void invokeSetValueOrValueExpressionForTest(String value, java.util.function.Consumer<String> valueSetter, String valueExpressionName, UIComponent component) {
 			setValueOrValueExpression(value, valueSetter, valueExpressionName, component);
+		}
+
+		void invokeSetDisabledForTest(UIComponent component, String disabledCondition, String parentDisabledCondition) {
+			setDisabled(component, disabledCondition, parentDisabledCondition);
 		}
 
 		UIComponent invokeCreateSpecialColumnFilterFacetComponentForTest(Document modelDrivingDocument,
@@ -436,7 +443,7 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected UIComponent createListGridZoomButton(String zoomDisabledConditionName, Map<String, String> properties) {
+		protected UIComponent createListGridZoomButton(String zoomDisabledCondition, Map<String, String> properties) {
 			return zoomButton;
 		}
 	}
@@ -576,7 +583,10 @@ class TabularComponentBuilderTest {
 													List<org.skyve.metadata.view.widget.FilterParameter> filterParameters,
 													List<org.skyve.metadata.view.widget.bound.Parameter> parameters,
 													Integer pixelWidth,
-													boolean dontDisplay) {
+													boolean dontDisplay,
+													Document owningDocument,
+													String modelName,
+													List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns) {
 			this.lookupDataWidgetVar = dataWidgetVar;
 			this.lookupBinding = binding;
 			this.lookupTitle = title;
@@ -732,7 +742,7 @@ class TabularComponentBuilderTest {
 		String[] actionCreateDisabled;
 		String actionCreateUrlParams;
 		boolean actionZoomRendered;
-		String actionZoomDisabledConditionName;
+		String actionZoomDisabledCondition;
 		boolean actionShowFilter;
 		String actionParentId;
 		Map<String, String> actionProperties;
@@ -764,10 +774,10 @@ class TabularComponentBuilderTest {
 															String documentName,
 															boolean canCreateDocument,
 															boolean createRendered,
-															String[] createDisabledConditionNames,
+															String[] createDisabledConditions,
 															String createUrlParams,
 															boolean zoomRendered,
-															String zoomDisabledConditionName,
+															String zoomDisabledCondition,
 															boolean showFilter,
 															String parentId,
 															Map<String, String> properties) {
@@ -776,10 +786,10 @@ class TabularComponentBuilderTest {
 			this.actionDocumentName = documentName;
 			this.actionCanCreateDocument = canCreateDocument;
 			this.actionCreateRendered = createRendered;
-			this.actionCreateDisabled = createDisabledConditionNames;
+			this.actionCreateDisabled = createDisabledConditions;
 			this.actionCreateUrlParams = createUrlParams;
 			this.actionZoomRendered = zoomRendered;
-			this.actionZoomDisabledConditionName = zoomDisabledConditionName;
+			this.actionZoomDisabledCondition = zoomDisabledCondition;
 			this.actionShowFilter = showFilter;
 			this.actionParentId = parentId;
 			this.actionProperties = properties;
@@ -840,8 +850,8 @@ class TabularComponentBuilderTest {
 		return invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition("disableGrid");
 			grid.getProperties().put("process", "@this");
 		});
 	}
@@ -854,6 +864,13 @@ class TabularComponentBuilderTest {
 	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
 											java.util.function.Consumer<ListGrid> gridConfigurer,
 											String stickyHeaderAnchorSelector) {
+		return invokeListGrid(canCreateDocument, gridConfigurer, stickyHeaderAnchorSelector, null);
+	}
+
+	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
+											java.util.function.Consumer<ListGrid> gridConfigurer,
+											String stickyHeaderAnchorSelector,
+											Document owningDocument) {
 		CapturingListGridBuilder builder = new CapturingListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
 		UIOutput emptyMessage = mock(UIOutput.class);
@@ -888,10 +905,10 @@ class TabularComponentBuilderTest {
 		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
 		AbstractPersistence previousPersistence = currentPersistenceIfPresent();
 		if (canCreateDocument) {
-			org.mockito.Mockito.doReturn(Boolean.TRUE).when(user).canCreateDocument(drivingDocument);
+			doReturn(Boolean.TRUE).when(user).canCreateDocument(drivingDocument);
 		}
 		else {
-			org.mockito.Mockito.doReturn(Boolean.FALSE).when(user).canCreateDocument(drivingDocument);
+			doReturn(Boolean.FALSE).when(user).canCreateDocument(drivingDocument);
 		}
 		when(user.getCustomer()).thenReturn(customer);
 		when(customer.getModule("sales")).thenReturn(module);
@@ -911,7 +928,7 @@ class TabularComponentBuilderTest {
 											"recentOrders",
 											"desktop",
 											model,
-											null,
+											owningDocument,
 											grid,
 											stickyHeaderAnchorSelector,
 											false);
@@ -941,8 +958,48 @@ class TabularComponentBuilderTest {
 		FacesContextBridge.setCurrent(null);
 	}
 
-	@SuppressWarnings({ "static-method", "java:S135", "java:S3776" }) // Reflection deliberately covers every public method shape.
 	@Test
+	void contentPreviewSizeRoundsTheLargerSideUpToAFewFixedSteps() {
+		assertAll(
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(0), Integer.valueOf(-5)), "no usable size"),
+			() -> assertEquals(64, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(24), null), "smallest step"),
+			() -> assertEquals(128, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(65), null), "small box"),
+			() -> assertEquals(256, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(256), Integer.valueOf(100)), "exactly a step"),
+			() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(200), Integer.valueOf(257)), "taller than wide"),
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, Integer.valueOf(600)), "height only"),
+			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(1025), Integer.valueOf(10)), "large box"),
+			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), Integer.valueOf(4000)), "capped"));
+	}
+
+	@Test
+	void contentPreviewSizeEndsAtTheThumbnailMaximumDimension() {
+		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 1000;
+			assertAll(
+				() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(300), null), "below the maximum"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(600), null), "the maximum is the last step"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), null), "above the maximum"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"));
+
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 4096;
+			assertAll(
+				() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(2000), null), "the default steps still apply"),
+				() -> assertEquals(4096, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(3000), null), "a larger maximum adds a step"),
+				() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
+				() -> assertEquals(4096, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(Integer.MAX_VALUE), null), "no overflow"));
+
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 50;
+			assertEquals(50, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(24), null), "a maximum below the first step");
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
+		}
+	}
+
+	@Test
+	@SuppressWarnings({ "java:S135", "java:S3776" }) // Reflection deliberately covers every public method shape.
 	void testShortCircuitMethodsReturnExistingComponent() throws Exception {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		UIComponent existingComponent = new HtmlPanelGroup();
@@ -1002,7 +1059,6 @@ class TabularComponentBuilderTest {
 		assertTrue(exercisedMethods >= 50, "Expected to exercise many short-circuit methods");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSidebarScriptDefaultWidthBreakpointAndFloating() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1015,7 +1071,6 @@ class TabularComponentBuilderTest {
 		assertTrue(script.contains("SKYVE.PF.sidebar('sb1','360px',1280,360,'Create')"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testToolbarsCreatesToolbarWhenComponentsNull() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1031,7 +1086,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ComponentBuilder.ACTION_BAR_STYLE_CLASS, toolbar.getStyleClass());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testToolbarsCreatesToolbarWithGeneratedIdWhenWidgetIdNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1050,7 +1104,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ComponentBuilder.ACTION_BAR_STYLE_CLASS, toolbar.getStyleClass());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabPaneCreatesHiddenTabViewWhenNoSelectedTabBinding() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1065,7 +1118,6 @@ class TabularComponentBuilderTest {
 		assertNotNull(result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabPaneUsesGeneratedIdWhenWidgetIdNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1082,7 +1134,6 @@ class TabularComponentBuilderTest {
 		assertEquals("generatedTabPaneId", result.getId());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabPaneSetsOnTabChangeScriptWithModuleDocumentAndId() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1099,7 +1150,6 @@ class TabularComponentBuilderTest {
 		verify(tabView).setOnTabChange("SKYVE.PF.tabChange('admin','User','tpScript',index)");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabPaneSetsActiveIndexAndStyleExpressionsWhenSelectedTabBindingPresent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1123,7 +1173,6 @@ class TabularComponentBuilderTest {
 		verify(tabView, never()).setStyle("display:none");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabCreatesTabComponentWhenNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1145,7 +1194,6 @@ class TabularComponentBuilderTest {
 		verify(tabComponent).setId("generatedTabId");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testLabelCreatesOutputLabelWhenNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1161,7 +1209,6 @@ class TabularComponentBuilderTest {
 		assertEquals("generatedLabelId", result.getId());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testBlurbUsesOutputTextValuePathWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1182,7 +1229,6 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testBoundLabelUsesBindingExpressionAndEscapesQuotes() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1210,7 +1256,6 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testBoundLabelBindingWithoutDataWidgetVarUsesCurrentBeanPath() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1236,7 +1281,6 @@ class TabularComponentBuilderTest {
 		verify(outputText).setValueExpression("value", valueExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testPanelWithCollapsibleClosedAddsToggleBehavior() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1269,7 +1313,6 @@ class TabularComponentBuilderTest {
 		verify(panel).addClientBehavior("toggle", ajax);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testPanelEscapesHeaderByDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1290,7 +1333,6 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(true);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testPanelAllowsTrustedHeaderWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1312,7 +1354,6 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabEscapesTitleByDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1334,7 +1375,6 @@ class TabularComponentBuilderTest {
 		verify(tabComponent, never()).setTitle(anyString());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabAllowsTrustedTitleWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1358,7 +1398,6 @@ class TabularComponentBuilderTest {
 		verify(tabComponent, never()).setTitle(anyString());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testZoomInActionExpressionSetsNavigateMethodExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1372,7 +1411,6 @@ class TabularComponentBuilderTest {
 		verify(command).setActionExpression(methodExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSetValueOrValueExpressionLiteralUsesSetter() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1385,7 +1423,6 @@ class TabularComponentBuilderTest {
 		verify(component, never()).setValueExpression(anyString(), any(ValueExpression.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSetValueOrValueExpressionBindingUsesValueExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1399,7 +1436,6 @@ class TabularComponentBuilderTest {
 		verify(component).setValueExpression("header", valueExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSetConfirmationAddsConfirmBehavior() throws Exception {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1416,7 +1452,6 @@ class TabularComponentBuilderTest {
 		verify(component).addClientBehavior("click", confirm);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testZoomInCreatesButtonWithDefaultProcessAndUpdate() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1444,7 +1479,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setActionExpression(actionExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testZoomInEscapesLabelAndTooltipByDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1472,7 +1506,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setTitle("Open \"contact\"");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testZoomInAllowsTrustedLabelButStripsTooltipWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1497,7 +1530,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setTitle("Open");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDialogButtonAllowsTrustedDisplayNameWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1522,7 +1554,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setType("button");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testZoomInUsesProcessAndUpdateOverrides() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1548,14 +1579,13 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setActionExpression(actionExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCheckBoxDelegatesNonShortcutPath() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		CheckBox checkBox = new CheckBox();
 		checkBox.setBinding("active");
 		checkBox.setTriState(Boolean.TRUE);
-		checkBox.setDisabledConditionName("checkDisabled");
+		checkBox.setXmlDisabledCondition("checkDisabled");
 
 		EventSourceComponent result = builder.checkBox(null, "row", checkBox, "formDisabled", "Active", "Required");
 
@@ -1570,14 +1600,27 @@ class TabularComponentBuilderTest {
 		assertTrue(builder.checkBoxTriState);
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testInheritedGridConditionRendersAsDisabledExpression() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		UIComponent component = mock(UIComponent.class);
+		ValueExpression disabledExpression = mock(ValueExpression.class);
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class),
+														eq("#{skyve.currentBean['gridLocked']}"),
+														eq(Boolean.class))).thenReturn(disabledExpression);
+
+		builder.invokeSetDisabledForTest(component, null, "gridLocked");
+
+		verify(component).setValueExpression("disabled", disabledExpression);
+	}
+
 	@Test
 	void testColourPickerDelegatesNonShortcutPath() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		ColourPicker colourPicker = new ColourPicker();
 		colourPicker.setBinding("themeColour");
 		colourPicker.setPixelWidth(Integer.valueOf(160));
-		colourPicker.setDisabledConditionName("colourDisabled");
+		colourPicker.setXmlDisabledCondition("colourDisabled");
 
 		EventSourceComponent result = builder.colourPicker(null,
 															"row",
@@ -1599,7 +1642,6 @@ class TabularComponentBuilderTest {
 		assertEquals(Integer.valueOf(160), builder.colourPickerPixelWidth);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testComboNonShortcutPathAddsSelectItemsChild() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -1624,7 +1666,6 @@ class TabularComponentBuilderTest {
 		assertSame(selectItems, children.get(0));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testContentUploadLinkModeRendersLinkLikeOutput() {
 		clearInvocations(mockExpressionFactory);
@@ -1665,7 +1706,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressions.getAllValues().contains("#{(empty row['doc.attachment']) ? '&lt;Empty&gt;' : 'Content'}"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testContentUploadVideoModeRendersVideoWithFormDefaults() {
 		clearInvocations(mockExpressionFactory);
@@ -1704,7 +1744,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressions.getValue().contains(" ? '' : '<video"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testContentUploadVideoModeUsesFluidDimensionsOutsideFormWhenUnsized() {
 		clearInvocations(mockExpressionFactory);
@@ -1735,7 +1774,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressions.getValue().contains("class=\"#{(empty row['doc.video']) ? 'skyveContentPreview skyveContentResponsiveVideo skyveContentEmpty skyveContentVideoEmpty' : 'skyveContentPreview skyveContentResponsiveVideo'}\" style=\"border:1px solid #d6dee8;position:relative;overflow:hidden;\""));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testContentUploadAutoModeUsesMediaKindHooks() {
 		clearInvocations(mockExpressionFactory);
@@ -1795,7 +1833,6 @@ class TabularComponentBuilderTest {
 		assertTrue(styleClassExpressions.getAllValues().contains("#{skyve.getContentMediaKind(row,'doc.attachment') eq 'video' ? '' : 'skyveContentHidden'}"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testEditableAutoContentUploadAddsNonSubmittedCompanionHiddenField() {
 		clearInvocations(mockExpressionFactory);
@@ -1868,7 +1905,7 @@ class TabularComponentBuilderTest {
 		content.setBinding("doc.attachment");
 		content.setDisplay(ContentDisplay.auto);
 		content.setEditable(Boolean.TRUE);
-		content.setDisabledConditionName("attachmentDisabled");
+		content.setXmlDisabledCondition("attachmentDisabled");
 		content.setShowMarkup(Boolean.FALSE);
 		UIComponent result = builder.content(null, "row", content, "formDisabled", "Attachment", null, HorizontalAlignment.left, true, false);
 
@@ -1896,7 +1933,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressions.getAllValues().contains("#{(empty row['doc.attachment']) ? ((skyve.currentBean['attachmentDisabled'] or skyve.currentBean['formDisabled']) ? 'return false' : \"PF('contentGrid_doc_attachmentOverlay').show();return false\") : null}"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testEditableAutoContentUploadCanUseImageUploadRoute() {
 		clearInvocations(mockExpressionFactory);
@@ -1987,8 +2023,8 @@ class TabularComponentBuilderTest {
 		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("getContentUploadUrl('doc_image','auto','none','doc_image_media','row',row['bizId'])")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
+	@SuppressWarnings("java:S5961")
 	void testContentUploadWithCameraCaptureUsesImageLabelsAndFullDialog() {
 		clearInvocations(mockExpressionFactory);
 
@@ -2045,7 +2081,7 @@ class TabularComponentBuilderTest {
 		content.setDisplay(ContentDisplay.link);
 		content.setCapture(ContentCapture.camera);
 		content.setEditable(Boolean.TRUE);
-		content.setDisabledConditionName("attachmentDisabled");
+		content.setXmlDisabledCondition("attachmentDisabled");
 		content.setShowMarkup(Boolean.FALSE);
 		UIComponent result = builder.content(null, "row", content, "formDisabled", "Attachment", null, HorizontalAlignment.left, true, false);
 
@@ -2066,7 +2102,7 @@ class TabularComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',true,true)");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',false,true)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		verify(uploadItem, never()).setOnclick(anyString());
 		verify(iframe).setValue("<iframe id=\"contentGrid_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
@@ -2080,7 +2116,6 @@ class TabularComponentBuilderTest {
 		assertFalse(expressions.getAllValues().stream().anyMatch(value -> value.contains("toggleMaximize()")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testContentUploadWithVideoModeUsesVideoMenuLabels() {
 		clearInvocations(mockExpressionFactory);
@@ -2150,7 +2185,6 @@ class TabularComponentBuilderTest {
 																			value.contains("onclick=\"#{(empty row['doc.video']) ? \"PF('contentGrid_doc_videoOverlay').show();return false\" : null}\"")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testLinkContentUploadShowsMarkupActionForStoredImageContent() {
 		clearInvocations(mockExpressionFactory);
@@ -2245,7 +2279,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressions.getAllValues().stream().anyMatch(value -> value.contains("SKYVE.PF.lockPageScroll();SKYVE.PF.contentMarkupOnShow(\\'contentGrid\\',\\'doc_attachment\\'")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testLinkContentUploadRendersHiddenMarkupActionForFutureImageContent() {
 		clearInvocations(mockExpressionFactory);
@@ -2319,7 +2352,6 @@ class TabularComponentBuilderTest {
 		verify(markupItem).setContainerStyleClass("skyveContentMarkupAction skyveContentMarkupAction-contentGrid_doc_attachment skyveContentHidden");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testHtmlNonShortcutPathConfiguresEditor() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2339,16 +2371,16 @@ class TabularComponentBuilderTest {
 		verify(textEditor).setSecure(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testLookupDescriptionDelegatesNonShortcutPath() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		LookupDescription lookup = new LookupDescription();
 		lookup.setBinding("customer");
 		lookup.setPixelWidth(Integer.valueOf(280));
-		lookup.setDisabledConditionName("lookupDisabled");
+		lookup.setXmlDisabledCondition("lookupDisabled");
 		QueryDefinition query = mock(QueryDefinition.class);
 
+		@SuppressWarnings("null") // passes null on purpose
 		EventSourceComponent result = builder.lookupDescription(null,
 																	"row",
 																	lookup,
@@ -2357,7 +2389,7 @@ class TabularComponentBuilderTest {
 																	"Required",
 																	HorizontalAlignment.left,
 																	"name",
-																	query);
+																	query, null);
 
 		assertSame(builder.delegatedLookupDescriptionResult, result.getComponent());
 		assertSame(builder.delegatedLookupDescriptionResult, result.getEventSource());
@@ -2373,14 +2405,13 @@ class TabularComponentBuilderTest {
 		assertEquals(Integer.valueOf(280), builder.lookupPixelWidth);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testPasswordDelegatesNonShortcutPathAndSetsRedisplay() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		org.skyve.impl.metadata.view.widget.bound.input.Password password = new org.skyve.impl.metadata.view.widget.bound.input.Password();
 		password.setBinding("secret");
 		password.setPixelWidth(Integer.valueOf(220));
-		password.setDisabledConditionName("passwordDisabled");
+		password.setXmlDisabledCondition("passwordDisabled");
 
 		EventSourceComponent result = builder.password(null,
 														"row",
@@ -2403,7 +2434,6 @@ class TabularComponentBuilderTest {
 		verify(builder.delegatedPasswordResult).setRedisplay(true);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testRadioNonShortcutPathAddsSelectItemsAndBindingAttribute() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2432,7 +2462,6 @@ class TabularComponentBuilderTest {
 		assertEquals("status", attributes.get("binding"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testRichTextNonShortcutPathConfiguresEditor() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2458,7 +2487,6 @@ class TabularComponentBuilderTest {
 		verify(textEditor).setAllowStyles(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSpinnerNonShortcutPathConfiguresPrimeSpinner() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2480,7 +2508,7 @@ class TabularComponentBuilderTest {
 		spinner.setMax(Double.valueOf(5.0));
 		spinner.setStep(Double.valueOf(0.5));
 		spinner.setPixelWidth(Integer.valueOf(120));
-		spinner.setDisabledConditionName("spinnerDisabled");
+		spinner.setXmlDisabledCondition("spinnerDisabled");
 		Converter<?> facesConverter = mock(Converter.class);
 
 		EventSourceComponent result = builder.spinner(null,
@@ -2502,7 +2530,6 @@ class TabularComponentBuilderTest {
 		assertEquals("numeric", passThroughAttributes.get("inputmode"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSliderNonShortcutPathConfiguresHorizontalSlider() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2554,7 +2581,6 @@ class TabularComponentBuilderTest {
 		assertSame(display, children.get(2));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextAreaDelegatesNonShortcutPathAndSetsInputMode() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
@@ -2565,7 +2591,7 @@ class TabularComponentBuilderTest {
 		textArea.setBinding("notes");
 		textArea.setEditable(Boolean.FALSE);
 		textArea.setKeyboardType(KeyboardType.tel);
-		textArea.setDisabledConditionName("textAreaDisabled");
+		textArea.setXmlDisabledCondition("textAreaDisabled");
 		textArea.setPixelWidth(Integer.valueOf(300));
 		textArea.setPixelHeight(Integer.valueOf(80));
 
@@ -2594,7 +2620,6 @@ class TabularComponentBuilderTest {
 		assertEquals("tel", passThroughAttributes.get("inputmode"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextAreaUsesBaseTextAreaBuilder() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2631,24 +2656,31 @@ class TabularComponentBuilderTest {
 		assertEquals("tel", passThroughAttributes.get("inputmode"));
 	}
 
-	@SuppressWarnings("static-method")
-	@Test
-	void testLookupDescriptionUsesBaseLookupDescriptionBuilder() {
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+	void lookupWithoutDropdownColumnsHasNoHeading(boolean modelBacked) {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
-		AutoComplete autoComplete = mock(AutoComplete.class);
-		Map<String, Object> attributes = new HashMap<>();
-		when(autoComplete.getAttributes()).thenReturn(attributes);
+		AutoComplete autoComplete = new AutoComplete();
+		Map<String, Object> attributes = autoComplete.getAttributes();
 
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("lookupBaseId");
 		builder.setManagedBeanForTest(managedBean);
 
 		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autoComplete);
-		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), eq(List.class), any(Class[].class))).thenReturn(mock(MethodExpression.class));
+		MethodExpression methodExpression = mock(MethodExpression.class);
+		when(mockExpressionFactory.createMethodExpression(any(ELContext.class), anyString(), eq(List.class), any(Class[].class))).thenReturn(methodExpression);
 
 		LookupDescription lookupDescription = new LookupDescription();
 		lookupDescription.setBinding("customer");
 		lookupDescription.setPixelWidth(Integer.valueOf(240));
+		if (modelBacked) {
+			lookupDescription.setModelName("CustomersModel");
+		}
+
+		Document owningDocument = mock(Document.class);
+		when(owningDocument.getOwningModuleName()).thenReturn("sales");
+		when(owningDocument.getName()).thenReturn("Order");
 
 		QueryDefinition query = mock(QueryDefinition.class);
 		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
@@ -2664,16 +2696,125 @@ class TabularComponentBuilderTest {
 													null,
 													HorizontalAlignment.left,
 													"name",
-													query);
+													query, owningDocument);
 
 		assertSame(autoComplete, result.getComponent());
 		assertSame(autoComplete, result.getEventSource());
 		assertEquals("sales", attributes.get("module"));
-		assertEquals("CustomerLookup", attributes.get("query"));
+		assertEquals(modelBacked ? "Order" : null, attributes.get("document"));
+		assertEquals(modelBacked ? "CustomersModel" : null, attributes.get("model"));
+		assertEquals(modelBacked ? null : "CustomerLookup", attributes.get("query"));
 		assertEquals("name", attributes.get("display"));
+		// PrimeFaces renders suggestions as a plain list when there are no Column children.
+		assertTrue(autoComplete.getColums().isEmpty());
+		assertTrue(autoComplete.getFacets().isEmpty());
+		assertFalse(attributes.containsKey("filterFields"));
 	}
 
-	@SuppressWarnings("static-method")
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+	@SuppressWarnings("boxing")
+	void lookupBuildsColumnsAndHonoursFilterability(boolean queryBacked) {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autocomplete = new AutoComplete();
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autocomplete);
+		Map<String, Object> attributes = autocomplete.getAttributes();
+		List<UIComponent> children = autocomplete.getChildren();
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenAnswer(invocation -> new HtmlOutputText());
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class)))
+				.thenAnswer(invocation -> {
+					ValueExpression expression = mock(ValueExpression.class);
+					when(expression.getExpressionString()).thenReturn(invocation.getArgument(1));
+					return expression;
+				});
+		FacesView faces = mock(FacesView.class);
+		builder.setManagedBeanForTest(faces);
+		java.util.concurrent.atomic.AtomicInteger ids = new java.util.concurrent.atomic.AtomicInteger();
+		when(faces.nextId()).thenAnswer(invocation -> "column" + ids.incrementAndGet());
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		when(document.getListModel(customer, "Contacts", true)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("customer");
+		lookup.setModelName("Contacts");
+		List<org.skyve.metadata.module.query.MetaDataQueryColumn> columns = new ArrayList<>();
+		String[] names = {"name", "email", "disabled", "count", "forced", "variant", "dynamic", "unprojected"};
+		for (String name : names) {
+			MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+			when(column.getBinding()).thenReturn(name);
+			when(column.isProjected()).thenReturn(Boolean.valueOf(! "unprojected".equals(name)));
+			when(column.isFilterable()).thenReturn(Boolean.TRUE);
+			when(column.isEscape()).thenReturn(Boolean.TRUE);
+			when(model.determineColumnTitle(column)).thenReturn(name);
+			columns.add(column);
+			org.skyve.metadata.model.Attribute attribute = mock(org.skyve.metadata.model.Attribute.class);
+			when(attribute.getAttributeType()).thenReturn("count".equals(name) ? org.skyve.metadata.model.Attribute.AttributeType.integer : org.skyve.metadata.model.Attribute.AttributeType.text);
+			if ("variant".equals(name) || "dynamic".equals(name)) {
+				when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.valueOf(name));
+			}
+			doReturn(String.class).when(attribute).getImplementingType();
+			when(document.getAttribute(name)).thenReturn(attribute);
+			org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropdown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
+			dropdown.setName(name);
+			if ("disabled".equals(name)) {
+				dropdown.setFilterable(Boolean.FALSE);
+			}
+			if ("forced".equals(name)) {
+				dropdown.setFilterable(Boolean.TRUE);
+				when(column.isFilterable()).thenReturn(Boolean.FALSE);
+				when(column.getBinding()).thenReturn(null);
+				when(column.getName()).thenReturn(name);
+			}
+			lookup.getDropDownColumns().add(dropdown);
+		}
+		MetaDataQueryProjectedColumn formatted = (MetaDataQueryProjectedColumn) columns.get(0);
+		when(formatted.getCustomFormatterName()).thenReturn("customName");
+		when(formatted.getPixelWidth()).thenReturn(Integer.valueOf(140));
+		when(formatted.getAlignment()).thenReturn(HorizontalAlignment.right);
+		when(model.getColumns()).thenReturn(columns);
+		org.skyve.metadata.module.query.MetaDataQueryDefinition query = null;
+		if (queryBacked) {
+			lookup.setModelName(null);
+			query = mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
+			when(query.getOwningModule()).thenReturn(module);
+			when(module.getName()).thenReturn("sales");
+			when(query.getName()).thenReturn("Contacts");
+			when(query.getDocumentModule(customer)).thenReturn(module);
+			when(query.getDocumentName()).thenReturn("Order");
+			when(query.getColumns()).thenReturn(columns);
+		}
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		when(persistence.getUser()).thenReturn(user);
+		try {
+			persistence.setForThread();
+			builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
+					"bizKey", query, lookup.getFilterParameters(), lookup.getParameters(), null, false,
+					document, lookup.getModelName(), lookup.getDropDownColumns());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+		assertEquals(List.of("name", "email", "forced", "variant"), attributes.get("filterFields"));
+		assertEquals(7, children.size());
+		Column first = (Column) children.get(0);
+		assertEquals("width:140px;text-align:right;", first.getStyle());
+		HtmlOutputText text = (HtmlOutputText) first.getChildren().get(0);
+		assertTrue(text.isEscape());
+		assertEquals("#{customerRow['{name|customName}']}", text.getValueExpression("value").getExpressionString());
+		assertEquals("bizKey", attributes.get("display"));
+	}
+
 	@Test
 	void testPasswordUsesBasePasswordBuilder() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2711,13 +2852,12 @@ class TabularComponentBuilderTest {
 		assertEquals("none", passThroughAttributes.get("autocorrect"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextDelegatesToTextFieldWhenNoConverterOrComplete() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		TextField textField = new TextField();
 		textField.setBinding("name");
-		textField.setDisabledConditionName("textDisabled");
+		textField.setXmlDisabledCondition("textDisabled");
 		textField.setKeyboardType(KeyboardType.search);
 		textField.setPixelWidth(Integer.valueOf(180));
 		Converter<?> facesConverter = mock(Converter.class);
@@ -2750,7 +2890,6 @@ class TabularComponentBuilderTest {
 		assertEquals(Integer.valueOf(180), builder.textFieldPixelWidth);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testInputTitleStripsMarkupAndAppendsRequiredMarker() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2783,7 +2922,6 @@ class TabularComponentBuilderTest {
 															eq(String.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testInputTitleStripsMarkupWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2817,7 +2955,6 @@ class TabularComponentBuilderTest {
 															eq(String.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextDelegatesToCompleteWhenCompleteConfigured() {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
@@ -2826,7 +2963,7 @@ class TabularComponentBuilderTest {
 		textField.setComplete(CompleteType.suggest);
 		textField.setKeyboardType(KeyboardType.search);
 		textField.setPixelWidth(Integer.valueOf(220));
-		textField.setDisabledConditionName("completeDisabled");
+		textField.setXmlDisabledCondition("completeDisabled");
 
 		EventSourceComponent result = builder.text(null,
 													"row",
@@ -2854,7 +2991,6 @@ class TabularComponentBuilderTest {
 		assertEquals(Integer.valueOf(220), builder.completePixelWidth);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextUsesMaskFieldWhenFormatHasMask() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -2896,7 +3032,6 @@ class TabularComponentBuilderTest {
 		assertEquals("numeric", passThroughAttributes.get("inputmode"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDetermineMaskEscapesPrimeFacesCharacters() throws Exception {
 		Format<Object> format = new Format<>("A#L9a*?", TextCase.upper);
@@ -2909,7 +3044,6 @@ class TabularComponentBuilderTest {
 		assertNull(method.invoke(null, (Object) null));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionLinkDelegatesToActionLinkWhenNotDownload() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -2923,8 +3057,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("saveAction");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("linkDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("linkInvisible");
+		when(action.getDisabledCondition()).thenReturn("linkDisabled");
+		when(action.getInvisibleCondition()).thenReturn("linkInvisible");
 
 		UIComponent result = builder.actionLink(null,
 													"orders",
@@ -2955,7 +3089,6 @@ class TabularComponentBuilderTest {
 		assertEquals("@none", builder.linkUpdateOverride);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionLinkDelegatesToDownloadLinkWhenImplicitDownload() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -2968,8 +3101,8 @@ class TabularComponentBuilderTest {
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("downloadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("downloadInvisible");
+		when(action.getDisabledCondition()).thenReturn("downloadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("downloadInvisible");
 
 		UIComponent result = builder.actionLink(null,
 													"orders",
@@ -2997,7 +3130,6 @@ class TabularComponentBuilderTest {
 		assertEquals("@(form)", builder.downloadLinkUpdateOverride);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionLinkEscapesValueTooltipAndConfirmByDefault() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -3027,7 +3159,6 @@ class TabularComponentBuilderTest {
 		assertEquals(Boolean.TRUE, builder.linkConfirmationEscape);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionLinkAllowsTrustedValueAndConfirmButStripsTooltipWhenEscapeFalse() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -3058,7 +3189,6 @@ class TabularComponentBuilderTest {
 		assertEquals(Boolean.FALSE, builder.linkConfirmationEscape);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionLinkImplicitDownloadUsesBaseDownloadLink() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3083,8 +3213,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.actionLink(null,
 												"orders",
@@ -3100,12 +3230,13 @@ class TabularComponentBuilderTest {
 		assertTrue(commandLinkChildren.contains(outputText));
 		assertEquals("Download", outputText.getValue());
 		assertTrue(outputText.isEscape());
+		// the text's span must not select its data table row when clicked (PrimeFaces skips span.ui-c)
+		assertEquals("ui-c", outputText.getStyleClass());
 		verify(commandLink).setProcess("@form");
 		verify(commandLink).setUpdate("@(form)");
 		verify(commandLink).setActionExpression(actionExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDownloadNonShortcutPathUsesOverridesFromActionProperties() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3120,8 +3251,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadInvoice");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -3142,7 +3273,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setActionExpression(actionExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadDelegatesNonShortcutPath() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -3153,8 +3283,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
+		when(action.getDisabledCondition()).thenReturn("uploadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("uploadInvisible");
 
 		UIComponent result = builder.upload(null, "Upload", "pi pi-upload", "Upload file", "Proceed?", action);
 
@@ -3175,7 +3305,6 @@ class TabularComponentBuilderTest {
 		assertFalse(builder.uploadUseDialog);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testRemoveDelegatesNonShortcutPath() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -3185,8 +3314,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("removeLine");
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("removeDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("removeInvisible");
+		when(action.getDisabledCondition()).thenReturn("removeDisabled");
+		when(action.getInvisibleCondition()).thenReturn("removeInvisible");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -3216,7 +3345,6 @@ class TabularComponentBuilderTest {
 		assertTrue(builder.actionCanDelete);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionDelegatesNonShortcutPath() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -3224,8 +3352,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("approve");
-		when(action.getDisabledConditionName()).thenReturn("approveDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("approveInvisible");
+		when(action.getDisabledCondition()).thenReturn("approveDisabled");
+		when(action.getInvisibleCondition()).thenReturn("approveInvisible");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@form");
 		properties.put("update", "@(form)");
@@ -3261,7 +3389,6 @@ class TabularComponentBuilderTest {
 		assertFalse(builder.actionCanDelete);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonEscapesValueTitleAndConfirmByDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3305,7 +3432,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).addClientBehavior("click", confirm);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonAllowsTrustedValueAndConfirmButStripsTitleWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3347,7 +3473,6 @@ class TabularComponentBuilderTest {
 		verify(confirm).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testReportNonShortcutPathBuildsReportHref() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3378,8 +3503,8 @@ class TabularComponentBuilderTest {
 		when(action.getParameters()).thenReturn(parameters);
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.report(null, "Run Report", null, "Open report", null, action);
 
@@ -3391,7 +3516,6 @@ class TabularComponentBuilderTest {
 		verify(reportButton).setTitle("Open report");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListRepeaterNonShortcutPathConfiguresDataTable() {
 		CapturingListBuilder builder = new CapturingListBuilder();
@@ -3443,7 +3567,6 @@ class TabularComponentBuilderTest {
 		verify(dataTable).setValueExpression("value", modelExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridNonShortcutPathConfiguresDataTableComponent() {
 		ListGridCallResult r = invokeListGrid();
@@ -3459,7 +3582,6 @@ class TabularComponentBuilderTest {
 		verify(r.emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_CAN_ADD_MESSAGE);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridConfiguresStickyHeaderFromBuilderSelector() {
 		ListGridCallResult r = invokeListGrid(true, grid -> grid.setShowZoom(Boolean.FALSE), "#header");
@@ -3468,7 +3590,6 @@ class TabularComponentBuilderTest {
 		verify(r.dataTable).setStickyTopAt("#header");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridNonShortcutPathDelegatesColumnsAndActionColumn() {
 		ListGridCallResult r = invokeListGrid();
@@ -3489,20 +3610,19 @@ class TabularComponentBuilderTest {
 		assertEquals("disableGrid", r.builder.actionCreateDisabled[1]);
 		assertNull(r.builder.actionCreateUrlParams);
 		assertFalse(r.builder.actionZoomRendered);
-		assertNull(r.builder.actionZoomDisabledConditionName);
+		assertNull(r.builder.actionZoomDisabledCondition);
 		assertTrue(r.builder.actionShowFilter);
 		assertEquals("listGridId", r.builder.actionParentId);
 		assertSame(r.grid.getProperties(), r.builder.actionProperties);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridCreateDisabledUsesOnlyDisabledConditionWhenDisableAddMissing() {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName(null);
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition(null);
+			grid.setXmlDisabledCondition("disableGrid");
 		});
 
 		assertNotNull(r.builder.actionCreateDisabled);
@@ -3510,14 +3630,13 @@ class TabularComponentBuilderTest {
 		assertEquals("disableGrid", r.builder.actionCreateDisabled[0]);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridCreateDisabledUsesOnlyDisableAddConditionWhenFormDisabledMissing() {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName(null);
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition(null);
 		});
 
 		assertNotNull(r.builder.actionCreateDisabled);
@@ -3525,7 +3644,6 @@ class TabularComponentBuilderTest {
 		assertEquals("disableAdd", r.builder.actionCreateDisabled[0]);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridSelectedBindingDelegatesToDataTableSelection() {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
@@ -3541,27 +3659,25 @@ class TabularComponentBuilderTest {
 		assertTrue(r.builder.selectionRowKeyFromModel);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridUsesDefaultEmptyMessageWhenUserCannotCreate() {
 		ListGridCallResult r = invokeListGrid(false, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition("disableGrid");
 		});
 
 		verify(r.emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_MESSAGE);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridZoomWithDisableConditionUsesSelectionExpressionAndRowSelectBehavior() {
 		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(new AjaxBehavior());
 
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.TRUE);
-			grid.setDisableZoomConditionName("disableZoom");
+			grid.setXmlDisableZoomCondition("disableZoom");
 			grid.setShowFilter(Boolean.TRUE);
 			grid.setSelectedIdBinding(null);
 		});
@@ -3571,14 +3687,13 @@ class TabularComponentBuilderTest {
 		verify(r.dataTable).addClientBehavior(eq("rowSelect"), any(AjaxBehavior.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridZoomWithoutDisableConditionUsesSingleSelectionAndRowSelectBehavior() {
 		when(mockApplication.createBehavior(AjaxBehavior.BEHAVIOR_ID)).thenReturn(new AjaxBehavior());
 
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.TRUE);
-			grid.setDisableZoomConditionName(null);
+			grid.setXmlDisableZoomCondition(null);
 			grid.setShowFilter(Boolean.TRUE);
 			grid.setSelectedIdBinding(null);
 		});
@@ -3587,7 +3702,6 @@ class TabularComponentBuilderTest {
 		verify(r.dataTable).addClientBehavior(eq("rowSelect"), any(AjaxBehavior.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridBuildsCreateUrlParamsFromFilterAndParameterDefinitions() {
 		FilterParameter bindingFilter = mock(FilterParameter.class);
@@ -3630,7 +3744,195 @@ class TabularComponentBuilderTest {
 		assertTrue(r.builder.actionCreateUrlParams.contains("limit=25"));
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testListGridCreateUrlParamsUseTheBizIdOfAnAssociationAndIgnoreANonAttributeBinding() {
+		FilterParameter associationFilter = mock(FilterParameter.class);
+		when(associationFilter.getFilterBinding()).thenReturn("account");
+		when(associationFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(associationFilter.getValueBinding()).thenReturn("account");
+
+		FilterParameter expressionFilter = mock(FilterParameter.class);
+		when(expressionFilter.getFilterBinding()).thenReturn("status");
+		when(expressionFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(expressionFilter.getValueBinding()).thenReturn("notAnAttribute");
+
+		Document owningDocument = mock(Document.class);
+		when(owningDocument.getOwningModuleName()).thenReturn("sales");
+		when(owningDocument.getName()).thenReturn("Order");
+		org.skyve.metadata.model.document.Association association = mock(org.skyve.metadata.model.document.Association.class);
+		when(association.getDocumentName()).thenReturn("Account");
+		when(owningDocument.getAttribute("account")).thenReturn(association);
+
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.getFilterParameters().add(associationFilter);
+			grid.getFilterParameters().add(expressionFilter);
+		}, null, owningDocument);
+
+		String createUrlParams = r.builder.actionCreateUrlParams;
+		assertNotNull(createUrlParams);
+		// an association is passed as its bizId
+		assertTrue(createUrlParams.contains("&account=#{skyve.currentBean['account.bizId']}"), createUrlParams);
+		// a binding that is not an attribute of the owning document is passed as a binding expression
+		assertTrue(createUrlParams.contains("&status=#{skyve.currentBean['{notAnAttribute}']}"), createUrlParams);
+	}
+
+	@Test
+	void testListGridThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		ListGrid grid = new ListGrid();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, null, false));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	void testListRepeaterThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listRepeater(null, "Order", "recent", "desktop", model, null, null, true, true));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	void testAddListGridDataColumnsThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		List<UIComponent> children = new ArrayList<>();
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		try {
+			persistence.setForThread();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> builder.addListGridDataColumns(model, children, false, "rows", "desktop"));
+
+			assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+			assertTrue(children.isEmpty());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+	}
+
+	@Test
+	void testLookupDropDownColumnsThrowWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		AutoComplete autoComplete = new AutoComplete();
+		List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of();
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.addLookupDropDownColumns(autoComplete, dropDownColumns, model, customer));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testLookupDropDownColumnsThrowForAProjectedColumnWithNoNameOrBinding() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(model.getDrivingDocument()).thenReturn(document);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.isProjected()).thenReturn(Boolean.TRUE);
+		when(column.getName()).thenReturn(null);
+		when(column.getBinding()).thenReturn(null);
+		when(model.getColumns()).thenReturn(List.of(column));
+		AutoComplete autoComplete = new AutoComplete();
+		List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of();
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.addLookupDropDownColumns(autoComplete, dropDownColumns, model, customer));
+
+		assertEquals("A query column of list model " + model.getClass().getName() + " has no name or binding", e.getMessage());
+	}
+
+	@Test
+	void testLookupDescriptionWithDropDownColumnsThrowsWithNeitherAModelNorAQuery() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autoComplete = new AutoComplete();
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autoComplete);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("lookupId");
+		builder.setManagedBeanForTest(managedBean);
+		Document owningDocument = mock(Document.class);
+		org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropDown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
+		dropDown.setName("name");
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		try {
+			persistence.setForThread();
+			List<FilterParameter> filterParameters = List.of();
+			List<Parameter> parameters = List.of();
+			List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of(dropDown);
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
+																					"bizKey", null, filterParameters, parameters, null, false,
+																					owningDocument, null, dropDownColumns));
+
+			assertEquals("A lookup description of customer has neither a model nor a query", e.getMessage());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+	}
+
+	@Test
+	void testUnboundWidgetsAreRejected() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("unboundId");
+		builder.setManagedBeanForTest(managedBean);
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		when(panelGrid.getChildren()).thenReturn(new ArrayList<>());
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		Blurb blurb = new Blurb();
+		DataGrid grid = new DataGrid();
+		DataRepeater repeater = new DataRepeater();
+		ContentUpload content = new ContentUpload();
+		UIComponent layout = new HtmlPanelGroup();
+		ContentSignature signature = new ContentSignature();
+
+		assertAll(
+			() -> assertEquals("An output text needs a value or a binding",
+								assertThrows(IllegalStateException.class, () -> builder.blurb(null, null, null, null, blurb)).getMessage(),
+								"blurb"),
+			() -> assertEquals("A data grid has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class, () -> builder.dataGrid(null, "row", false, grid)).getMessage(),
+								"data grid"),
+			() -> assertEquals("A data repeater has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class, () -> builder.dataRepeater(null, "row", repeater)).getMessage(),
+								"data repeater"),
+			() -> assertEquals("A content widget has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class,
+												() -> builder.content(null, null, content, null, null, null, null, true, false)).getMessage(),
+								"content"),
+			() -> assertEquals("A content signature has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class,
+												() -> builder.addContentSignature(null, layout, signature, null, null, null)).getMessage(),
+								"content signature"));
+	}
+
 	@Test
 	void testListMembershipNonShortcutPathSetsDefaultFacetHeadings() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3662,7 +3964,39 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	void testListMembershipShowsTargetControlsOnlyForAnOrderedCollection() {
+		assertAll(() -> assertEquals(Boolean.TRUE, lastShowTargetControls(true), "an ordered membership's members can be reordered"),
+					() -> assertEquals(Boolean.FALSE, lastShowTargetControls(false), "an unordered membership is unchanged"));
+	}
+
+	/**
+	 * Builds a list membership's pick-list through the ordered overload and returns the last value its
+	 * {@code showTargetControls} was set to.
+	 */
+	private Boolean lastShowTargetControls(boolean ordered) {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		PickList pickList = mock(PickList.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("pickListId", "sourceCaptionId", "targetCaptionId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(PickList.COMPONENT_TYPE)).thenReturn(pickList);
+		HtmlOutputText sourceCaption = mock(HtmlOutputText.class);
+		HtmlOutputText targetCaption = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(sourceCaption, targetCaption);
+		when(pickList.getFacets()).thenReturn(new HashMap<>());
+		ListMembership membership = new ListMembership();
+		membership.setBinding("roles");
+
+		EventSourceComponent result = builder.listMembership(null, null, null, membership, ordered);
+
+		assertSame(pickList, result.getComponent());
+		org.mockito.ArgumentCaptor<Boolean> shown = org.mockito.ArgumentCaptor.forClass(Boolean.class);
+		verify(pickList, atLeastOnce()).setShowTargetControls(shown.capture().booleanValue());
+		List<Boolean> values = shown.getAllValues();
+		return values.get(values.size() - 1);
+	}
+
+	@Test
 	void testListMembershipEscapesFacetHeadingsByDefaultAndWhenExplicitTrue() {
 		ListMembership membership = new ListMembership();
 		membership.setBinding("roles");
@@ -3691,7 +4025,6 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
 	void testListMembershipAllowsTrustedFacetHeadingsWhenEscapingFalse() {
 		ListMembership membership = new ListMembership();
 		membership.setBinding("roles");
@@ -3709,7 +4042,6 @@ class TabularComponentBuilderTest {
 		verify(context.targetCaption).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateListGridZoomButtonAppliesDisabledConditionAndOnclick() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3733,7 +4065,6 @@ class TabularComponentBuilderTest {
 		verify(button).setValueExpression("onclick", onclickExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListGridContextMenuAddsZoomItemsWithDisabledExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3749,7 +4080,7 @@ class TabularComponentBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(disabledExpression);
 
 		ListGrid grid = new ListGrid();
-		grid.setDisableZoomConditionName("disableZoom");
+		grid.setXmlDisableZoomCondition("disableZoom");
 
 		UIComponent result = builder.listGridContextMenu(null, "listGrid1", grid);
 
@@ -3763,7 +4094,6 @@ class TabularComponentBuilderTest {
 		verify(popoutItem).setOnclick(argThat(value -> value.contains("window.open('?a=")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddContentSignatureNonShortcutPathBuildsSignatureAndButtons() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3825,7 +4155,6 @@ class TabularComponentBuilderTest {
 		verify(signButton).setUpdate("sigLayout");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateListGridActionColumnAddsFilterCreateAndZoomControls() {
 		ListGridActionColumnBuilder builder = new ListGridActionColumnBuilder(mock(UIComponent.class), mock(UIComponent.class));
@@ -3872,7 +4201,6 @@ class TabularComponentBuilderTest {
 		verify(createButton).setValueExpression("onclick", stringExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateListGridActionColumnSetsBlankHeaderWhenCreateNotRendered() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3906,7 +4234,6 @@ class TabularComponentBuilderTest {
 		verify(actionColumn).setHeaderText("");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateListGridActionColumnUsesOnclickWhenCreateUrlParamsMissing() {
 		ListGridActionColumnBuilder builder = new ListGridActionColumnBuilder(null, null);
@@ -3946,7 +4273,6 @@ class TabularComponentBuilderTest {
 		verify(createButton).setOnclick("SKYVE.PF.pushHistory('./?a=e&m=sales&d=Order');return false");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateListGridZoomButtonWithNullConditionOmitsDisabledExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -3968,8 +4294,8 @@ class TabularComponentBuilderTest {
 		verify(button).setValueExpression("onclick", onclickExpression);
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
 	@Test
+	@SuppressWarnings("boxing")
 	void testAddListGridDataColumnsAddsProjectedColumnWithoutMetadataBindingLookup() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
@@ -4041,8 +4367,8 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
 	@Test
+	@SuppressWarnings("boxing")
 	void testAddListGridDataColumnsUsesFormatterNameWhenPresent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
@@ -4108,8 +4434,8 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
 	@Test
+	@SuppressWarnings("boxing")
 	void testAddListGridDataColumnsUsesCustomFormatterNameWhenPresent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
@@ -4172,8 +4498,8 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
 	@Test
+	@SuppressWarnings("boxing")
 	void testAddListGridDataColumnsAddsThumbnailContentColumnWithPaddingAndCalculatedWidth() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
@@ -4247,8 +4573,8 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings({ "static-method", "boxing" })
 	@Test
+	@SuppressWarnings("boxing")
 	void testAddListGridDataColumnsAddsLinkContentColumnWithExplicitWidthAndAlignment() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		Column column = mock(Column.class);
@@ -4320,7 +4646,6 @@ class TabularComponentBuilderTest {
 		verify(outputText).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonDelegatesNonShortcutPath() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -4335,8 +4660,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.OK);
 		when(action.getName()).thenReturn("saveAction");
-		when(action.getDisabledConditionName()).thenReturn("disabledExpr");
-		when(action.getInvisibleConditionName()).thenReturn("invisibleExpr");
+		when(action.getDisabledCondition()).thenReturn("disabledExpr");
+		when(action.getInvisibleCondition()).thenReturn("invisibleExpr");
 
 		UIComponent result = builder.actionButton(null,
 													"orders",
@@ -4369,7 +4694,6 @@ class TabularComponentBuilderTest {
 		assertFalse(builder.actionCanDelete);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadButtonDelegatesNonShortcutPath() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
@@ -4382,8 +4706,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadContent");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
-		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
+		when(action.getDisabledCondition()).thenReturn("uploadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("uploadInvisible");
 
 		UIComponent result = builder.uploadButton(null,
 													"Upload",
@@ -4409,7 +4733,6 @@ class TabularComponentBuilderTest {
 		assertFalse(builder.uploadUseDialog);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadUsesBaseUploadButtonWithOverlay() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4447,8 +4770,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 
 		UIComponent result = builder.upload(null,
@@ -4466,6 +4789,11 @@ class TabularComponentBuilderTest {
 		verify(uploadButton).setValue("Upload");
 		verify(uploadButton).setEscape(true);
 		verify(uploadButton).setType("button");
+		// appended to the body so a fixed or scrolling action bar cannot clip it
+		verify(overlayPanel).setFor("uploadButtonId");
+		verify(overlayPanel).setAppendTo("@(body)");
+		// closing it refreshes the view only after its upload action has run
+		verify(overlayPanel).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadOverlayId');if(SKYVE.PF.actionUploadRan('uploadOverlayId'))uploadRefreshId()");
 		assertEquals(1, overlayChildren.size());
 		assertSame(iframe, overlayChildren.get(0));
 		ArgumentCaptor<String> iframeMarkupCaptor = ArgumentCaptor.forClass(String.class);
@@ -4475,7 +4803,6 @@ class TabularComponentBuilderTest {
 						iframeMarkupCaptor.getValue());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadCameraActionUsesFullDialog() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4513,8 +4840,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "camera"));
 
 		UIComponent result = builder.upload(null,
@@ -4528,7 +4855,7 @@ class TabularComponentBuilderTest {
 		assertEquals(3, wrapperChildren.size());
 		assertSame(dialog, wrapperChildren.get(2));
 		assertSame(iframe, dialogChildren.get(0));
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);uploadRefreshId()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);if(SKYVE.PF.actionUploadRan('uploadDialogId'))uploadRefreshId()");
 		verify(uploadButton).setOnclick("PF('uploadDialogIdDialog').show()");
 		verify(iframe).setValue("<iframe id=\"uploadDialogId_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
@@ -4537,7 +4864,6 @@ class TabularComponentBuilderTest {
 																			value.contains(".concat('\\',true)')}")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadButtonAllCaptureActionUsesFullDialog() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4576,8 +4902,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "all"));
 
 		UIComponent result = builder.uploadButton(null,
@@ -4599,7 +4925,6 @@ class TabularComponentBuilderTest {
 																			value.contains(".concat('\\',true)')}")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadButtonFullDialogUsesResponsiveViewportIframe() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4660,7 +4985,7 @@ class TabularComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);uploadRefreshId()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);if(SKYVE.PF.actionUploadRan('uploadDialogId'))uploadRefreshId()");
 		verify(uploadButton).setOnclick("PF('uploadDialogIdDialog').show()");
 		verify(iframe).setValue("<iframe id=\"uploadDialogId_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
@@ -4669,7 +4994,6 @@ class TabularComponentBuilderTest {
 																			value.contains(".concat('\\',true)')}")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDownloadButtonNonShortcutPathUsesDefaultProcessAndUpdate() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4686,8 +5010,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("downloadCsv");
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		when(action.getProperties()).thenReturn(properties);
 
@@ -4716,7 +5040,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setActionExpression(actionExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDownloadButtonNonShortcutPathUsesOverridesFromActionProperties() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4731,8 +5054,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadPdf");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -4757,7 +5080,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setActionExpression(actionExpression);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDataGridUsesCanAddEmptyMessageWhenEditableAndShowAddAreNotFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4782,10 +5104,10 @@ class TabularComponentBuilderTest {
 
 		assertSame(dataTable, result);
 		assertSame(emptyMessage, facets.get("emptyMessage"));
+		verify(dataTable).setStyleClass("skyve-card-grid");
 		verify(emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_CAN_ADD_MESSAGE);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDataGridUsesDefaultEmptyMessageWhenNotEditable() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4812,7 +5134,6 @@ class TabularComponentBuilderTest {
 		verify(emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_MESSAGE);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDataRepeaterNonShortcutPathSetsExpectedDataTableOptions() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4836,7 +5157,6 @@ class TabularComponentBuilderTest {
 		verify(dataTable).setReflow(true);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridBoundColumnNonShortcutPathAddsColumnWhenInlineEditable() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4876,9 +5196,150 @@ class TabularComponentBuilderTest {
 		assertSame(header, facets.get("header"));
 		verify(header).setValue("Name");
 		verify(header).setEscape(true);
+		verify(createdColumn).setResponsivePriority(0);
+		verify(createdColumn).setStyleClass("skyve-card-cell");
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testDataGridPixelWidthRemainsFixedInCardLayout() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("fixedCardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(new HashMap<>());
+		when(createdColumn.getStyle()).thenReturn("width:170px;");
+		UIComponent current = mock(UIComponent.class);
+		when(current.getChildren()).thenReturn(new ArrayList<>());
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setPixelWidth(Integer.valueOf(170));
+
+		builder.addDataGridBoundColumn(null, current, new DataGrid(), column, "row", "Media", "mediaPreview",
+				new StringBuilder(), null, Integer.valueOf(170));
+
+		verify(createdColumn).setStyle("width:170px;--skyve-card-width:170px;");
+		verify(createdColumn).setStyleClass("skyve-card-cell skyve-card-fixed");
+	}
+
+	@Test
+	void testDataGridDefaultPixelWidthRemainsFixedInCardLayout() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("defaultFixedCardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		Column createdColumn = mock(Column.class);
+		HtmlOutputText header = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenReturn(createdColumn);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(header);
+		when(createdColumn.getFacets()).thenReturn(new HashMap<>());
+		when(createdColumn.getStyle()).thenReturn("width:110px;");
+		UIComponent current = mock(UIComponent.class);
+		when(current.getChildren()).thenReturn(new ArrayList<>());
+		DataGridBoundColumn column = new DataGridBoundColumn();
+
+		builder.addDataGridBoundColumn(null, current, new DataGrid(), column, "row", "Date", "date",
+				new StringBuilder(), null, Integer.valueOf(110));
+
+		verify(createdColumn).setStyle("width:110px;--skyve-card-width:110px;");
+		verify(createdColumn).setStyleClass("skyve-card-cell skyve-card-fixed");
+	}
+
+	@Test
+	void testDataGridCardLabelCopiesResolvedHeader() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		Column column = new Column();
+		column.setStyleClass("skyve-card-cell");
+		HtmlOutputText header = new HtmlOutputText();
+		header.setValue("Notes");
+		column.getFacets().put("header", header);
+		HtmlOutputText label = new HtmlOutputText();
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(label);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardLabelId");
+		builder.setManagedBeanForTest(managedBean);
+
+		builder.addedDataGridBoundColumn(null, column, HorizontalAlignment.left);
+
+		assertSame(label, column.getChildren().get(0));
+		assertEquals("Notes", label.getValue());
+		assertEquals("skyve-card-cell-label", label.getStyleClass());
+	}
+
+	@Test
+	void testEditableDataGridCardLabelTargetsInput() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardInputId");
+		builder.setManagedBeanForTest(managedBean);
+		Message message = new Message();
+		HtmlPanelGroup panelGroup = new HtmlPanelGroup();
+		HtmlOutputLabel outputLabel = new HtmlOutputLabel();
+		when(mockApplication.createComponent(Message.COMPONENT_TYPE)).thenReturn(message);
+		when(mockApplication.createComponent(HtmlPanelGroup.COMPONENT_TYPE)).thenReturn(panelGroup);
+		when(mockApplication.createComponent(HtmlOutputLabel.COMPONENT_TYPE)).thenReturn(outputLabel);
+		Column column = new Column();
+		column.setStyleClass("skyve-card-cell");
+		HtmlOutputText header = new HtmlOutputText();
+		header.setValue("Description");
+		column.getFacets().put("header", header);
+		InputText input = new InputText();
+		input.setId("description");
+		column.getChildren().add(input);
+
+		builder.addedDataGridBoundColumn(null, column, HorizontalAlignment.left);
+
+		HtmlOutputLabel label = (HtmlOutputLabel) column.getChildren().get(0);
+		assertEquals("description", label.getFor());
+		assertEquals("Description", label.getValue());
+	}
+
+	@Test
+	void testDataGridColumnBreakpointHasNoMobileFloor() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		DataTable table = new DataTable();
+		DataGrid grid = new DataGrid();
+		grid.setInline(Boolean.TRUE);
+		grid.setEditable(Boolean.FALSE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setEditable(Boolean.TRUE);
+		builder.addDataGridBoundColumn(null, table, grid, column, "row", null, "name",
+				new StringBuilder(), null, Integer.valueOf(170));
+
+		builder.addDataGridActionColumn(null, table, grid, "row", "{name}", "Item", false, false, false);
+
+		assertEquals("--skyve-card-breakpoint:226px", table.getStyle());
+	}
+
+	@Test
+	void testDataGridCalculatesMultiColumnBreakpoint() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("cardColumnId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		DataTable table = new DataTable();
+		DataGrid grid = new DataGrid();
+		grid.setInline(Boolean.TRUE);
+		grid.setEditable(Boolean.FALSE);
+		DataGridBoundColumn column = new DataGridBoundColumn();
+		column.setEditable(Boolean.TRUE);
+		for (int i = 0; i < 3; i++) {
+			builder.addDataGridBoundColumn(null, table, grid, column, "row", null, "name",
+					new StringBuilder(), null, Integer.valueOf(170));
+		}
+
+		builder.addDataGridActionColumn(null, table, grid, "row", "{name}", "Item", false, false, false);
+
+		assertEquals("--skyve-card-breakpoint:614px", table.getStyle());
+	}
+
 	@Test
 	void testAddDataGridBoundColumnEscapesHeaderByDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4915,7 +5376,6 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(true);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridBoundColumnAllowsTrustedHeaderWhenEscapeFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4953,7 +5413,6 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddedDataGridBoundColumnNonShortcutPathReturnsParentWhenNoChildren() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4962,12 +5421,12 @@ class TabularComponentBuilderTest {
 		when(current.getChildren()).thenReturn(new ArrayList<>());
 		when(current.getParent()).thenReturn(parent);
 
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.addedDataGridBoundColumn(null, current, null);
 
 		assertSame(parent, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddedDataGridBoundColumnNonShortcutPathPrependsMessageForNonInputContent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -4997,7 +5456,6 @@ class TabularComponentBuilderTest {
 		assertEquals("float:left", message.getStyle());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddedDataGridBoundColumnNonShortcutPathWrapsInputContentWithMessage() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5035,7 +5493,6 @@ class TabularComponentBuilderTest {
 		assertEquals("float:left", message.getStyle());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddedDataGridBoundColumnNonShortcutPathJustifiesCheckboxContent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5070,7 +5527,6 @@ class TabularComponentBuilderTest {
 		assertEquals("float:left", message.getStyle());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridContainerColumnNonShortcutPathAddsColumn() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5105,7 +5561,6 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(true);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddedDataGridContainerColumnNonShortcutPathReturnsParent() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5118,7 +5573,6 @@ class TabularComponentBuilderTest {
 		assertSame(parent, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridActionColumnNonShortcutPathReturnsCurrentWhenGridNotEditable() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5131,7 +5585,6 @@ class TabularComponentBuilderTest {
 		assertSame(current, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSidebarScriptPixelWidthAndDerivedFloatingWidth() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5146,7 +5599,6 @@ class TabularComponentBuilderTest {
 		assertTrue(script.contains("SKYVE.PF.sidebar('sb2','480px',900,480,'Edit')"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSidebarScriptResponsiveAndPercentageWidths() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5167,7 +5619,6 @@ class TabularComponentBuilderTest {
 		assertTrue(percentageScript.contains("SKYVE.PF.sidebar('sb4','75%',1280,360,'Create')"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSidebarScriptUsesExplicitFloatingWidthWhenProvided() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5182,7 +5633,6 @@ class TabularComponentBuilderTest {
 		assertTrue(script.contains("SKYVE.PF.sidebar('sb5','480px',1280,300,'Edit')"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabPaneScriptWithoutSelectedTabBinding() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5196,7 +5646,6 @@ class TabularComponentBuilderTest {
 		assertTrue(script.contains("t.select("));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTabPaneScriptSetsRenderedExpressionWhenSelectedTabBindingPresent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5241,7 +5690,6 @@ class TabularComponentBuilderTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesBarChartForBarType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5267,7 +5715,6 @@ class TabularComponentBuilderTest {
 		verify(barChart).setValueExpression("model", modelExpr);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesBarChartForHorizontalBarType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5291,7 +5738,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.horizontalBar, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesDonutChartForDoughnutType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5314,7 +5760,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.doughnut, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesLineChartForLineType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5337,7 +5782,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.line, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesLineChartForLineAreaType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5360,7 +5804,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.lineArea, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesPieChartForPieType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5383,7 +5826,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.pie, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesPolarAreaChartForPolarAreaType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5406,7 +5848,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.polarArea, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartCreatesRadarChartForRadarType() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5429,7 +5870,6 @@ class TabularComponentBuilderTest {
 		assertEquals(ChartType.radar, attributes.get("skyveType"));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testChartUsesModelObjectWhenModelNameNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5453,7 +5893,6 @@ class TabularComponentBuilderTest {
 		assertNotNull(result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testBorderDelegatesToPanelWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5475,7 +5914,6 @@ class TabularComponentBuilderTest {
 		verify(header).setEscape(true);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testBorderWithCollapsibleAddsToggleBehavior() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5500,7 +5938,6 @@ class TabularComponentBuilderTest {
 		verify(panel).setCollapsed(false);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testViewCreatesHtmlPanelGroupWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5518,7 +5955,6 @@ class TabularComponentBuilderTest {
 		verify(panelGroup).setValueExpression(eq("rendered"), any(ValueExpression.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testViewUsesNotCreatedBindingWhenCreateViewFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5539,7 +5975,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressionCaptor.getAllValues().stream().anyMatch(v -> v.contains("notCreated")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testViewCreatesHtmlPanelGroupWithCreateViewTrue() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5556,7 +5991,6 @@ class TabularComponentBuilderTest {
 		assertSame(panelGroup, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testViewUsesCreatedBindingWhenCreateViewTrue() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5577,7 +6011,6 @@ class TabularComponentBuilderTest {
 		assertTrue(expressionCaptor.getAllValues().stream().anyMatch(v -> v.contains("created")));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSpacerReturnsExistingComponentWhenNotNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5589,7 +6022,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSpacerCreatesSpacerComponentWithSizeWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5612,7 +6044,6 @@ class TabularComponentBuilderTest {
 		verify(spacerComponent).setId("spacer1");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testStaticImageReturnsExistingComponentWhenNotNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5624,7 +6055,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testStaticImageCreatesGraphicImageWithUrlWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5648,7 +6078,6 @@ class TabularComponentBuilderTest {
 		verify(graphicImage).setId("img1");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testStaticImageWithInvisibleConditionSetsRenderedExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5664,7 +6093,7 @@ class TabularComponentBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpr);
 
 		StaticImage imageWidget = new StaticImage();
-		imageWidget.setInvisibleConditionName("condition");
+		imageWidget.setXmlInvisibleCondition("condition");
 
 		UIComponent result = builder.staticImage(null, "test.png", imageWidget);
 
@@ -5672,7 +6101,6 @@ class TabularComponentBuilderTest {
 		verify(graphicImage).setValueExpression(eq("rendered"), any(ValueExpression.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDynamicImageReturnsExistingComponentWhenNotNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5684,7 +6112,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDynamicImageCreatesGraphicImageWithExpressionWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5709,7 +6136,6 @@ class TabularComponentBuilderTest {
 		verify(graphicImage).setId("dimg1");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDynamicImageWithNullDimensionsUsesNullLiterals() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5732,7 +6158,6 @@ class TabularComponentBuilderTest {
 		assertSame(graphicImage, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testMapWithQueryReturnsExistingComponentWhenNotNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5744,7 +6169,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testMapWithQueryCreatesMapDivAndScriptWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5776,7 +6200,6 @@ class TabularComponentBuilderTest {
 		assertSame(outerGroup, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testMapWithModelNameReturnsExistingComponentWhenNotNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5788,7 +6211,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testMapWithModelNameCreatesMapDivAndScriptWhenComponentNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5819,7 +6241,6 @@ class TabularComponentBuilderTest {
 		assertSame(outerGroup, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridActionColumnReturnsExistingComponentWhenNotNull() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5831,7 +6252,6 @@ class TabularComponentBuilderTest {
 		assertSame(component, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridActionColumnWithEditableGridAndZoomOnlyAddsColumn() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5869,9 +6289,10 @@ class TabularComponentBuilderTest {
 		assertSame(col, currentChildren.get(0));
 		assertEquals(1, colChildren.size());
 		assertSame(zoomBtn, colChildren.get(0));
+		verify(col).setResponsivePriority(0);
+		verify(col).setStyleClass("skyve-card-actions");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddDataGridActionColumnWithAllButtonsAddsAddZoomRemoveButtons() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5921,9 +6342,9 @@ class TabularComponentBuilderTest {
 		// add button in header
 		assertEquals(1, headerChildren.size());
 		assertSame(addBtn, headerChildren.get(0));
+		verify(col).setStyleClass("skyve-card-actions skyve-card-toolbar");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDataTableFilterToggleReturnsButtonWithClickScript() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5941,7 +6362,6 @@ class TabularComponentBuilderTest {
 		verify(button).setOnclick("SKYVE.PF.toggleFilters('myTable'); return false;");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testReportButtonPublicOverloadReturnsExistingComponentWhenNotNull() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5968,7 +6388,6 @@ class TabularComponentBuilderTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDataGridAddButtonInlineSetsNamingcontainerUpdate() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -5987,7 +6406,6 @@ class TabularComponentBuilderTest {
 		verify(addBtn).setUpdate("@namingcontainer");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDataGridAddButtonWithDisableAddConditionSetsDisabledExpression() {
 		DisableConditionTestBuilder builder = new DisableConditionTestBuilder();
@@ -5999,14 +6417,13 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableAddConditionName("disableAdd");
+		grid.setXmlDisableAddCondition("disableAdd");
 
 		builder.createDataGridAddButton(grid, "row", "Item", false, "items", null);
 
 		verify(addBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDataGridRemoveButtonWithDisableRemoveConditionSetsDisabledExpression() {
 		DisableConditionTestBuilder builder = new DisableConditionTestBuilder();
@@ -6018,14 +6435,13 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableRemoveConditionName("disableRemove");
+		grid.setXmlDisableRemoveCondition("disableRemove");
 
 		builder.createDataGridRemoveButton(grid, "row", "Item", "items", null);
 
 		verify(removeBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateDataGridZoomButtonWithDisableZoomConditionSetsDisabledExpression() {
 		DisableConditionTestBuilder builder = new DisableConditionTestBuilder();
@@ -6037,14 +6453,13 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableZoomConditionName("disableZoom");
+		grid.setXmlDisableZoomCondition("disableZoom");
 
 		builder.createDataGridZoomButton(grid, "row", "Item", false, "items", null);
 
 		verify(zoomBtn).setValueExpression(eq("disabled"), same(builder.fakeExpression));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGeometryNonShortcutPathCreatesGridWithTextFieldAndMap() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6094,7 +6509,6 @@ class TabularComponentBuilderTest {
 		assertSame(overlay, gridChildren.get(2));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGeometryMapNonShortcutPathCreatesMapDivWithHiddenAndScript() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6132,7 +6546,6 @@ class TabularComponentBuilderTest {
 		assertSame(script, outerChildren.get(2));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGeometryShortCircuitReturnsExistingComponent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6146,7 +6559,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGeometryMapShortCircuitReturnsExistingComponent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6160,7 +6572,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateSpecialColumnFilterFacetComponentForConstantDomainCreatesSelectOneMenu() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6191,7 +6602,6 @@ class TabularComponentBuilderTest {
 		assertSame(items, children.get(0));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateSpecialColumnFilterFacetComponentForBooleanCreatesTriStateCheckbox() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6212,7 +6622,6 @@ class TabularComponentBuilderTest {
 		verify(checkbox).setOnchange("PF('tableWidget').filter()");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCreateSpecialColumnFilterFacetComponentForNonSpecialTypeReturnsNull() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6226,7 +6635,6 @@ class TabularComponentBuilderTest {
 		assertNull(result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testReportShortCircuitReturnsExistingComponent() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6235,7 +6643,6 @@ class TabularComponentBuilderTest {
 		assertSame(component, builder.report(component, "label", "icon", "tip", null, action));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDownloadShortCircuitReturnsExistingComponent() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6244,7 +6651,6 @@ class TabularComponentBuilderTest {
 		assertSame(component, builder.download(component, null, null, "label", "icon", "tip", null, action));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadShortCircuitReturnsExistingComponent() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6253,7 +6659,6 @@ class TabularComponentBuilderTest {
 		assertSame(component, builder.upload(component, "label", "icon", "tip", null, action));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testRemoveShortCircuitReturnsExistingComponent() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6262,7 +6667,6 @@ class TabularComponentBuilderTest {
 		assertSame(component, builder.remove(component, "label", "icon", "tip", null, action, false));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionShortCircuitReturnsExistingComponent() {
 		TabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6271,22 +6675,20 @@ class TabularComponentBuilderTest {
 		assertSame(component, builder.action(component, null, null, "label", "icon", "tip", null, null, action));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testUploadDelegatesToUploadButton() {
 		CapturingDelegationBuilder builder = new CapturingDelegationBuilder();
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("doUpload");
 		when(action.getClientValidation()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.upload(null, "UploadLabel", "icon", "tip", null, action);
 		assertSame(builder.delegatedUploadButtonResult, result);
 		assertEquals("doUpload", builder.uploadActionName);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextWithDateConverterUsesDatePicker() {
 		// Test that the datePicker branch is triggered for all date/time converter types.
@@ -6350,7 +6752,6 @@ class TabularComponentBuilderTest {
 		}
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testTextWithUnknownDateConverterThrowsIllegalState() {
 		// When a date converter is used but has no matching if-branch, datePicker throws IllegalStateException.
@@ -6378,7 +6779,24 @@ class TabularComponentBuilderTest {
 						skyveDateConverter, null, unknownFacesConverter));
 	}
 
-	@SuppressWarnings("static-method")
+	@Test
+	void testTextWithDateConverterAndNoFacesConverterThrowsIllegalState() {
+		// A date converter with no equivalent faces converter cannot determine a date picker pattern.
+		org.skyve.domain.types.converters.Converter<?> skyveDateConverter =
+				mock(org.skyve.domain.types.converters.Converter.class);
+		when(skyveDateConverter.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.date);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		builder.setManagedBeanForTest(mock(FacesView.class));
+
+		TextField textField = new TextField();
+		textField.setBinding("dateField3");
+
+		assertThrows(IllegalStateException.class, () ->
+				builder.text(null, "row", textField, null, "Date", null, null, null,
+						skyveDateConverter, null, null));
+	}
+
 	@Test
 	void testDetermineActionFacesAttributesEmptyList() {
 		ComponentBuilder.ActionFacesAttributes result =
@@ -6388,7 +6806,6 @@ class TabularComponentBuilderTest {
 		assertNull(result.update);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDetermineActionFacesAttributesWithServerSideAction() {
 		org.skyve.impl.metadata.view.event.ServerSideActionEventAction serverAction =
@@ -6401,7 +6818,6 @@ class TabularComponentBuilderTest {
 		assertEquals("MyAction", result.actionName);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDetermineActionFacesAttributesWithRerenderValidateTrue() {
 		org.skyve.impl.metadata.view.event.RerenderEventAction rerender =
@@ -6414,7 +6830,6 @@ class TabularComponentBuilderTest {
 		assertEquals("true", result.actionName);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDetermineActionFacesAttributesWithRerenderValidateFalse() {
 		org.skyve.impl.metadata.view.event.RerenderEventAction rerender =
@@ -6427,7 +6842,6 @@ class TabularComponentBuilderTest {
 		assertEquals("false", result.actionName);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDetermineActionFacesAttributesWithProcessAndUpdateOverrides() {
 		org.skyve.impl.metadata.view.event.ServerSideActionEventAction serverAction =
@@ -6444,7 +6858,6 @@ class TabularComponentBuilderTest {
 		assertEquals("@form", result.update);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddAjaxBehaviorWithRerenderActionValidateTrue() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6467,7 +6880,6 @@ class TabularComponentBuilderTest {
 		verify(component).addClientBehavior(eq("change"), same(ajax));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddAjaxBehaviorWithRerenderActionValidateFalse() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6490,7 +6902,6 @@ class TabularComponentBuilderTest {
 		verify(component).addClientBehavior(eq("change"), same(ajax));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAddAjaxBehaviorWithServerSideAction() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6513,7 +6924,6 @@ class TabularComponentBuilderTest {
 		verify(component).addClientBehavior(eq("change"), same(ajax));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testOutputLinkWithNullDataWidgetVarAndNullTarget() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6526,7 +6936,6 @@ class TabularComponentBuilderTest {
 		assertSame(link, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testOutputLinkWithDataWidgetVarAddsValueExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6540,7 +6949,6 @@ class TabularComponentBuilderTest {
 		verify(link).setValueExpression(eq("value"), any());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testOutputLinkWithValueAddsChildText() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6562,7 +6970,6 @@ class TabularComponentBuilderTest {
 		assertFalse(outputText.isEscape());
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testOutputLinkWithBlankFrameTarget() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6580,7 +6987,6 @@ class TabularComponentBuilderTest {
 		verify(link).setTarget("_blank");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testOutputLinkWithNamedFrameTarget() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6599,7 +7005,6 @@ class TabularComponentBuilderTest {
 		verify(link).setTarget("myFrame");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testColourPickerShortcutReturnsExistingComponent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6609,7 +7014,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testPasswordShortcutReturnsExistingComponent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6620,7 +7024,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testDataListCreatesAndConfigures() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6637,7 +7040,6 @@ class TabularComponentBuilderTest {
 		verify(dataListComponent).setVar("row");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testAccordionPanelCreatesComponent() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6653,7 +7055,6 @@ class TabularComponentBuilderTest {
 		assertSame(accordionComponent, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSliderVerticalConfiguresVerticalSlider() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6692,7 +7093,6 @@ class TabularComponentBuilderTest {
 		assertTrue(children.contains(spacer));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSliderNoDiscreteValuesUsesStepOfOne() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6724,7 +7124,6 @@ class TabularComponentBuilderTest {
 		verify(sliderComponent).setStep(1.0);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonWithDeleteAndNoConfirmationUsesDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6752,7 +7151,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setValue(null);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonWithCancelSetsModeAndOnclick() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6777,7 +7175,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setOnclick("SKYVE.PF.popHistory(true)");
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonWithRemoveAndNoConfirmationUsesDefault() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6803,7 +7200,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setValue(null);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonWithZoomOutAndInvisibleSetsInvisible() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6827,7 +7223,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setValue(null);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testActionButtonWithSaveAndNullInvisibleSetsRenderedExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6851,7 +7246,6 @@ class TabularComponentBuilderTest {
 		verify(commandButton).setValueExpression(eq("rendered"), any(ValueExpression.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSetValueOrValueExpressionWithNullDoesNothing() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6861,7 +7255,6 @@ class TabularComponentBuilderTest {
 		assertFalse(called[0]);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSetValueOrValueExpressionWithSimpleValueCallsSetter() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6871,7 +7264,6 @@ class TabularComponentBuilderTest {
 		assertEquals("hello", captured[0]);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testSetValueOrValueExpressionWithBindingExpressionSetsValueExpression() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6883,7 +7275,6 @@ class TabularComponentBuilderTest {
 		verify(component).setValueExpression(eq("title"), any(ValueExpression.class));
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testCheckboxShortcutReturnsExisting() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6893,17 +7284,16 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testMapShortcutReturnsExisting() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		UIComponent existing = mock(UIComponent.class);
 		MapDisplay mapDisplay = new MapDisplay();
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.map(existing, mapDisplay, null, "widgets", null);
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testBlurbShortcutReturnsExisting() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6913,7 +7303,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testLabelBindingShortcutReturnsExisting() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6923,7 +7312,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testGeometryShortcutReturnsExisting() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
@@ -6933,7 +7321,6 @@ class TabularComponentBuilderTest {
 		assertSame(existing, result);
 	}
 
-	@SuppressWarnings("static-method")
 	@Test
 	void testListMembershipShortcutReturnsExisting() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();

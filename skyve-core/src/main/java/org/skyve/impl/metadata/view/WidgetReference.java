@@ -18,6 +18,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlType;
@@ -36,7 +37,7 @@ public class WidgetReference implements SerializableMetaData {
 
 	private InputWidget widget;
 	
-	public InputWidget getWidget() {
+	public @Nullable InputWidget getWidget() {
 		return widget;
 	}
 
@@ -54,7 +55,7 @@ public class WidgetReference implements SerializableMetaData {
 						@XmlElementRef(type = Spinner.class),
 						@XmlElementRef(type = TextArea.class),
 						@XmlElementRef(type = TextField.class)})
-	public void setWidget(InputWidget widget) {
+	public void setWidget(@Nullable InputWidget widget) {
 		this.widget = widget;
 	}
 }

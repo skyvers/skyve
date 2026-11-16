@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="List Grid Fixture"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:c="http://www.skyve.org/xml/common"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<listGrid query="qListGridFixtureVue"
+				title="Vue list grid"
+				continueConversation="false"
+				selectedIdBinding="selectedVueId">
+		<properties>
+			<c:property key="componentBuilderClass">vue</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qListGridFixtureFaces"
+				title="PrimeFaces data table"
+				continueConversation="false"
+				selectedIdBinding="selectedFacesId">
+		<onSelectedHandlers>
+			<rerender clientValidation="false" />
+		</onSelectedHandlers>
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<form>
+		<column />
+		<row>
+			<item>
+				<textField binding="selectedFacesId" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<blurb escape="false"><![CDATA[<a href="./?a=e&m=kitchensink&d=LookupDescription&i={selectedFacesId}">Open the selected lookup value</a>]]></blurb>
+			</item>
+		</row>
+		<!-- The Vue list grid's selected id, for SAIL's listGridTool clearSelection, and two links that open a new
+			window (target _blank), for navigateLink window="new": a new lookup value, and a PDF (the kitchensink module's
+			resource sail-new-window.pdf) -->
+		<row>
+			<item>
+				<textField binding="selectedVueId" disabled="true" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<blurb escape="false"><![CDATA[<a href="./?a=e&m=kitchensink&d=LookupDescription" target="_blank">Open a new lookup value in a new window</a>]]></blurb>
+			</item>
+		</row>
+		<row>
+			<item>
+				<blurb escape="false"><![CDATA[<a href="resources?_doc=kitchensink.ListGridFixture&_n=sail-new-window.pdf" target="_blank">Open a PDF in a new window</a>]]></blurb>
+			</item>
+		</row>
+	</form>
+	<dataGrid binding="rows" title="Data grid with a selected id" selectedIdBinding="selectedRowId">
+		<boundColumn binding="description" />
+	</dataGrid>
+	<listGrid query="qListGridFixtureVueAttributes"
+				title="Vue list grid of column types"
+				continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">vue</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qListGridFixtureFacesAttributes"
+				title="PrimeFaces data table of column types"
+				continueConversation="false">
+		<filterParameter filterBinding="text" operator="notNull" />
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<actions>
+		<defaults />
+	</actions>
+</view>

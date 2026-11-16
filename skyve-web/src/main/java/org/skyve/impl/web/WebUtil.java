@@ -13,7 +13,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,7 @@ import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -40,9 +40,13 @@ import org.skyve.impl.util.TimeUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.WebStatsUtil;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
+import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.repository.Repository;
@@ -51,6 +55,7 @@ import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.IPGeolocation;
 import org.skyve.util.JSON;
@@ -58,6 +63,7 @@ import org.skyve.util.Mail;
 import org.skyve.util.OWASP;
 import org.skyve.util.SecurityUtil;
 import org.skyve.util.Util;
+import org.skyve.util.logging.Category;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
@@ -75,6 +81,7 @@ import jakarta.servlet.http.HttpSession;
  */
 public class WebUtil {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(WebUtil.class);
+    private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
 	private static final String CONCURRENT_SESSION_EVENT_TYPE = "Concurrent Session";
 
 	private WebUtil() {
@@ -82,15 +89,17 @@ public class WebUtil {
 	}
 	
 	/**
-	 * Resolves and binds the active user for a request from session, principal, or basic-auth fallback.
+	 * Resolves and binds the active user for a request from the session or the principal.
+	 * An {@code Authorization} header is never consulted; REST Basic authentication is handled by
+	 * {@link org.skyve.impl.web.filter.rest.BasicAuthFilter}, which validates the password.
 	 *
 	 * @param request active HTTP request
 	 * @param userPrincipal optional authenticated principal name
 	 * @return resolved user, or {@code null} when no authenticated user is available
 	 */
 	@SuppressWarnings({"java:S3776", "java:S1871"}) // complexity OK
-	public static User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
-														@Nullable String userPrincipal) {
+	public static @Nullable User processUserPrincipalForRequest(@Nonnull HttpServletRequest request,
+																	@Nullable String userPrincipal) {
 		HttpSession session = request.getSession(false);
 		UserImpl user = null;
 		if (session != null) {
@@ -106,21 +115,14 @@ public class WebUtil {
 		
 		// If the user in the session is not the same as the security's user principal
 		// then the session user needs to be reset.
-		if ((user != null) && (userPrincipal != null)) {
-			UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
-			if (principalUser == null) {
-				user = null;
-			}
-			else if (! (user.getCustomerName().equals(principalUser.getCustomerName()) &&
-							user.getName().equals(principalUser.getName()))) {
-				user = null;
-			}
+		if ((user != null) && (userPrincipal != null) && (! isPrincipalUser(user, userPrincipal))) {
+			user = null;
 		}
 		
 		if (user == null) {
 			// This can happen using SSO when the session expires as the servlets are not protected by normal Java EE security
 			if (userPrincipal != null) {
-				user = ProvidedRepositoryFactory.get().retrieveUser(userPrincipal);
+				user = ProvidedRepositoryFactory.getNullSafe().retrieveUser(userPrincipal);
 				if (user == null) {
 					throw new IllegalStateException("WebUtil: Cannot get the user " + userPrincipal);
 				}
@@ -141,26 +143,6 @@ public class WebUtil {
 					c.notifyLogin(user, session);
 				}
 			}
-			// TODO hack!
-			else { // check basic auth
-				final String authorization = request.getHeader("Authorization");
-				if ((authorization != null) && authorization.startsWith("Basic")) {
-					// Authorization: Basic base64credentials
-					final String base64Credentials = authorization.substring("Basic".length()).trim();
-					String credentials = new String(Base64.getMimeDecoder().decode(base64Credentials), StandardCharsets.UTF_8);
-	
-					// credentials = username:password or customer/username:password
-					final String[] values = credentials.split(":", 2);
-					final String username = UtilImpl.processStringValue(values[0]);
-//					final String password = UtilImpl.processStringValue(values[1]);
-					// TODO check password...
-					user = ProvidedRepositoryFactory.get().retrieveUser(username);
-					if (user != null) {
-						setSessionId(user, request);
-						AbstractPersistence.get().setUser(user);
-					}
-				}				
-			}
 		}
 		else {
 			AbstractPersistence.get().setUser(user);
@@ -168,10 +150,65 @@ public class WebUtil {
 		if (user != null) {
 			user.setWebLocale(request.getLocale());
 		}
-		
+
 		return user;
 	}
-	
+
+	/**
+	 * Returns the user in the request's session if that session is still valid for them.
+	 *
+	 * <p>This is the check {@link #processUserPrincipalForRequest(HttpServletRequest, String)} makes,
+	 * for callers that cannot have its side effects. A session that is no longer registered for its user
+	 * (for example, after the user's password changed) is invalidated and {@code null} is returned.
+	 * {@code null} is also returned when the session user is not the request's principal.
+	 * Otherwise this never creates a session, never establishes a user from the principal,
+	 * never records a login and never binds the persistence user.
+	 *
+	 * @param request active HTTP request
+	 * @return the validated session user, or {@code null} when there is none
+	 */
+	public static @Nullable UserImpl getValidatedSessionUser(@Nonnull HttpServletRequest request) {
+		HttpSession session = request.getSession(false);
+		if (session == null) {
+			return null;
+		}
+		UserImpl user = (UserImpl) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		if (user == null) {
+			return null;
+		}
+		if (! StateUtil.checkSession(user.getId(), session)) {
+			session.invalidate();
+			return null;
+		}
+		Principal principal = request.getUserPrincipal();
+		if ((principal != null) && (! isPrincipalUser(user, principal.getName()))) {
+			return null;
+		}
+		return user;
+	}
+
+	/**
+	 * Determines whether a session user is the user named by a security principal.
+	 *
+	 * @param user the session user
+	 * @param userPrincipal the principal name, as {@code customer/user} or {@code user}
+	 * @return {@code true} when the customer and user names match
+	 */
+	private static boolean isPrincipalUser(@Nonnull UserImpl user, @Nonnull String userPrincipal) {
+		UserImpl principalUser = ProvidedRepositoryFactory.setCustomerAndUserFromPrincipal(userPrincipal);
+		if (principalUser == null) {
+			return false;
+		}
+		// A session user is always retrieved by its customer and user name
+		String customerName = user.getCustomerName();
+		String userName = user.getName();
+		if ((customerName == null) || (userName == null)) {
+			throw new IllegalStateException("Session user " + user.getId() + " has no customer name or user name");
+		}
+		return customerName.equals(principalUser.getCustomerName()) &&
+				userName.equals(principalUser.getName());
+	}
+
 	/**
 	 * Resolves the conversation bean targeted by the request binding and optional row identifier.
 	 *
@@ -327,7 +364,7 @@ public class WebUtil {
 	 * @return {@code true} when the session should be considered for concurrent-session warnings.
 	 */
 	public static boolean isConcurrentSessionWarningEligible(@Nonnull User user, @Nonnull HttpServletRequest request) {
-		return isConcurrentSessionWarningEligible(user, request.getUserPrincipal(), ProvidedRepositoryFactory.get());
+		return isConcurrentSessionWarningEligible(user, request.getUserPrincipal(), ProvidedRepositoryFactory.getNullSafe());
 	}
 
 	/**
@@ -634,18 +671,7 @@ public class WebUtil {
 		result.append(targetModuleName).append('.').append(targetDocumentName);
 		result.append('&').append(AbstractWebContext.CONTEXT_NAME).append('=').append(webId);
 		
-		String binding = null;
-		if (viewBinding != null) {
-			if (dataWidgetBinding != null) {
-				binding = BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
-			}
-			else {
-				binding = viewBinding;
-			}
-		}
-		else if (dataWidgetBinding != null) {
-			binding = dataWidgetBinding;
-		}
+		String binding = getDownloadBinding(viewBinding, dataWidgetBinding);
 		if (binding != null) {
 			result.append('&').append(AbstractWebContext.BINDING_NAME).append('=').append(binding);
 		}
@@ -656,6 +682,13 @@ public class WebUtil {
 		result.append('&').append(AbstractWebContext.CURRENT_TIME_IN_MILLIS).append('=').append(System.currentTimeMillis());
 
 		return result.toString();
+	}
+
+	static @Nullable String getDownloadBinding(@Nullable String viewBinding, @Nullable String dataWidgetBinding) {
+		if (viewBinding == null) {
+			return dataWidgetBinding;
+		}
+		return (dataWidgetBinding == null) ? viewBinding : BindUtil.createCompoundBinding(viewBinding, dataWidgetBinding);
 	}
 	
 	/**
@@ -726,7 +759,7 @@ public class WebUtil {
 								}
 								if (! expired) {
 									Repository r = CORE.getRepository();
-									org.skyve.metadata.user.User u = r.retrieveUser(String.format("%s/%s", customerName, userName));
+									org.skyve.metadata.user.User u = r.retrieveUser(customerName + '/' + userName);
 									// // don't allow credential existence to leak
 									if (u == null) {
 										return Util.nullSafeI18n("exception.passwordResetTokenExpired");
@@ -802,7 +835,82 @@ public class WebUtil {
 		
 		return result;
 	}
-	
+
+	/**
+	 * Creates a new element for the collection or inverse at a binding and adds it there, as a data grid's New does.
+	 *
+	 * <p>The element is created with {@link Document#newInstance(User)}, so its default values and its bizlet's
+	 * {@code newInstance()} run. An ordered child collection gives it the next {@link Bean#ORDINAL_NAME}. The
+	 * interceptors and the element bizlet's {@code preExecute(Add)} then run with {@code parentBean} as the parent,
+	 * and the element is added unless an interceptor vetoes it. The PrimeFaces and SmartClient data grids both add
+	 * through this method.
+	 *
+	 * <p>Side effects: runs application code (bizlet and interceptors) and adds the element to the bean graph;
+	 * nothing is persisted.
+	 *
+	 * @param user the user adding the element; must not be {@code null}
+	 * @param bean the bean that {@code binding} is relative to; must not be {@code null}
+	 * @param binding the binding of the collection or inverse, relative to {@code bean}; must not be {@code null}
+	 * @param parentBean the bean of the view the element is added from, passed to the interceptors and
+	 *        {@code preExecute(Add)} as the parent; may be {@code null}, as their contracts allow
+	 * @param webContext the conversation's web context; must not be {@code null}
+	 * @return the added element, or {@code null} when an interceptor vetoed the add, in which case nothing was added
+	 * @throws IllegalStateException if {@code binding} does not resolve to a relation
+	 * @throws SecurityException if the relation and its document are persistent and the user cannot create that document
+	 * @throws Exception if the bizlet or an interceptor throws
+	 */
+	public static @Nullable Bean addNewElement(@Nonnull User user,
+												@Nonnull Bean bean,
+												@Nonnull String binding,
+												@Nullable Bean parentBean,
+												@Nonnull WebContext webContext)
+	throws Exception {
+		Customer customer = user.getCustomer();
+		Module module = customer.getModule(bean.getBizModule());
+		Document document = module.getDocument(customer, bean.getBizDocument());
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		if (! (target.getAttribute() instanceof Relation relation)) {
+			throw new IllegalStateException(binding + " doesn't resolve to a relation.");
+		}
+		Document elementDocument = target.getDocument().getRelatedDocument(customer, relation.getName());
+
+		// check for create privilege if the relation is persistent and its document is persistent
+		if (relation.isPersistent() &&
+				elementDocument.isPersistable() &&
+				(! user.canCreateDocument(elementDocument))) {
+			throw new SecurityException("create this data", user.getName());
+		}
+
+		Bean element = elementDocument.newInstance(user);
+
+		// set bizOrdinal if this is an ordered child collection
+		if ((relation instanceof Collection collection) &&
+				Boolean.TRUE.equals(collection.getOrdered()) &&
+				CollectionType.child.equals(collection.getType())) {
+			@SuppressWarnings("unchecked")
+			List<Bean> elements = (List<Bean>) BindUtil.get(bean, binding);
+			if (elements != null) {
+				BindUtil.set(element, Bean.ORDINAL_NAME, Integer.valueOf(elements.size() + 1));
+			}
+		}
+
+		CustomerImpl internalCustomer = (CustomerImpl) customer;
+		if (internalCustomer.interceptBeforePreExecute(ImplicitActionName.Add, element, parentBean, webContext)) {
+			return null;
+		}
+		Bizlet<Bean> bizlet = ((DocumentImpl) elementDocument).getBizlet(customer);
+		if (bizlet != null) {
+			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Entering {}.preExecute: {}, {}, {}, {}", bizlet.getClass().getName(), ImplicitActionName.Add, element, parentBean, webContext);
+			element = bizlet.preExecute(ImplicitActionName.Add, element, parentBean, webContext);
+			if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.preExecute: {}", bizlet.getClass().getName(), element);
+		}
+		internalCustomer.interceptAfterPreExecute(ImplicitActionName.Add, element, parentBean, webContext);
+
+		// add the new element after preExecute
+		BindUtil.addElementToCollection(bean, binding, element);
+		return element;
+	}
+
 	/**
 	 * Returns a sanitized same-origin Referer header value, or {@code null} when absent/invalid.
 	 *
@@ -958,7 +1066,7 @@ public class WebUtil {
 			
 							@SuppressWarnings("unchecked")
 							Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(result.toString());
-							valid = Boolean.TRUE.equals(json.get("success"));
+							valid = (json != null) && Boolean.TRUE.equals(json.get("success"));
 						}
 					}
 				}
@@ -970,5 +1078,31 @@ public class WebUtil {
 		}
 		
 		return valid;
+	}
+
+	/**
+	 * Builds the thin top and bottom environment banners, shown whenever an environment identifier is set.
+	 *
+	 * <p>This is the single source of the banner markup for JSPs, Facelets templates and the SmartClient desktop.
+	 * The identifier is HTML-escaped here, so callers write the result unescaped into HTML (and escape it again
+	 * only for another context, such as a JavaScript string).
+	 * The styles come from {@code src/css/env-banner.css}. The build bundles it into {@code basic-min.css} and
+	 * {@code prime-min.css} and also minifies it to {@code env-banner-min.css} for the JSPs, so the page must load
+	 * one of those.
+	 *
+	 * <p>Side effects: none. Threading: reads {@link UtilImpl#ENVIRONMENT_IDENTIFIER}, which is set at startup.
+	 *
+	 * @return the banner markup, or {@code null} when the environment identifier is {@code null} or blank
+	 */
+	public static @Nullable String getEnvironmentBannersHtml() {
+		String identifier = OWASP.escapeHtml(UtilImpl.ENVIRONMENT_IDENTIFIER);
+		if ((identifier == null) || identifier.isBlank()) {
+			return null;
+		}
+
+		StringBuilder result = new StringBuilder(128);
+		result.append("<div class=\"skyveEnvBanner skyveTopEnvBanner\">").append(identifier).append("</div>");
+		result.append("<div class=\"skyveEnvBanner skyveBottomEnvBanner\">").append(identifier).append("</div>");
+		return result.toString();
 	}
 }

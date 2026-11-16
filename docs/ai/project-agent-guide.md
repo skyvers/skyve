@@ -74,13 +74,34 @@ All applicable rows must be satisfied before handoff.
 - Fail fast if incoming data omits claims still referenced by dependents.
 - When introducing new dependent types, follow a consistent extension pattern: add service methods for detection and update, inject into the orchestration job, and add targeted tests for both no-dependents and failure paths.
 
+## Change Restraint
+
+- Implement only the behaviour explicitly requested by the human.
+- Make the smallest direct change that satisfies the request and preserves existing behaviour.
+- Follow the nearest established implementation pattern. Do not introduce a new pattern when an existing one is adequate.
+- Do not generalise the implementation for hypothetical reuse or future requirements.
+- Do not introduce a new abstraction, wrapper, helper, extension point, configuration option, or dependency unless it is necessary to implement the requested behaviour.
+- Before introducing any such construct, stop, explain why the existing code cannot support the change cleanly, describe the smallest alternative, and obtain explicit human approval.
+- Do not introduce an abstraction that has only one production use unless the human explicitly approves it after seeing the justification.
+- When several implementations are valid, choose the one that adds the fewest new concepts, types, methods, state transitions, and public API changes.
+- Do not widen the scope or visibility of existing production code unless the requested behaviour requires it.
+- Do not treat maintainability, consistency, elegance, or possible future reuse as independent authority to expand the change.
+- Before handoff, review the diff and remove every addition that is not necessary for the requested behaviour.
+
+### Test Restraint
+
+- Tests must exercise production code through existing production interfaces and lifecycle boundaries wherever possible.
+- Do not change production code solely to make it easier to test.
+- Do not add or expose test seams in production code without explicit human approval.
+- In particular, do not widen method or constructor visibility or introduce a `Supplier`, provider, factory, setter, hook, wrapper, alternate constructor, or dependency-injection seam solely for tests.
+- Do not weaken encapsulation, validation, lifecycle behaviour, or runtime contracts for test convenience.
+- If the requested behaviour cannot be tested adequately without changing production design, stop and present the constraint and available alternatives before editing production code.
+
 ## Codebase Style
 
-- Keep changes simple, explicit, and minimal. Reduce concept count before adding helpers, but do not duplicate logic when a clean shared abstraction already exists.
 - Prefer documenting invariants and contracts over writing commentary about obvious mechanics. Follow [javadoc-standards.md](javadoc-standards.md).
 - Name side-effecting methods so the mutation or external effect is obvious.
 - When the framework already has a pattern for a concern, follow the pattern. In Skyve this often means changing metadata, generator inputs, extension points, or service abstractions instead of inserting special cases.
-- Avoid introducing new dependencies or frameworks unless the existing stack is demonstrably insufficient.
 - Preserve existing test style within the area you are touching. This repository currently contains both JUnit 4 and JUnit 5 tests.
 - Do not delete seemingly-unused code until you understand whether it participates in generation, reflection, metadata lookup, CDI/Spring wiring, or customer override behaviour.
 

@@ -2,6 +2,8 @@ package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.LinkItemMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds external link menu item metadata.
  */
@@ -20,7 +22,7 @@ public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
 	 *
 	 * @param item The metadata to mutate.
 	 */
-	public FluentLinkItem(LinkItemMetaData item) {
+	public FluentLinkItem(@Nonnull LinkItemMetaData item) {
 		this.item = item;
 	}
 
@@ -30,7 +32,7 @@ public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
 	 * @param item The source link menu item.
 	 * @return this fluent instance.
 	 */
-	public FluentLinkItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.LinkItem item) {
+	public @Nonnull FluentLinkItem from(@SuppressWarnings("hiding") @Nonnull org.skyve.impl.metadata.module.menu.LinkItem item) {
 		super.from(item);
 		href(item.getHref());
 		return this;
@@ -42,7 +44,7 @@ public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
 	 * @param href The URL or relative link target.
 	 * @return this fluent instance.
 	 */
-	public FluentLinkItem href(String href) {
+	public @Nonnull FluentLinkItem href(@Nonnull String href) {
 		item.setHref(href);
 		return this;
 	}
@@ -53,7 +55,7 @@ public class FluentLinkItem extends FluentMenuItem<FluentLinkItem> {
 	 * @return The link item metadata instance.
 	 */
 	@Override
-	public LinkItemMetaData get() {
+	public @Nonnull LinkItemMetaData get() {
 		return item;
 	}
 }

@@ -51,7 +51,7 @@ public interface WebContext extends Serializable {
 	 *
 	 * @param bizId the {@link org.skyve.domain.Bean#getBizId() bizId} to look up
 	 */
-	public @Nullable Bean getBean(String bizId);
+	public @Nullable Bean getBean(@Nonnull String bizId);
 	
 	/**
 	 * Return the bean currently under view or edit within this context.
@@ -113,22 +113,26 @@ public interface WebContext extends Serializable {
 	public void growl(@Nonnull MessageSeverity severity, @Nonnull String message);
 	
 	/**
-	 * Put this conversation into the conversation cache.
-	 * @throws Exception
+	 * Commit any active persistence transaction, cache this conversation
+	 * and begin a new transaction.
+	 *
+	 * <p>The implementation begins a replacement transaction before returning so
+	 * action code can continue using persistence. Work performed after this method
+	 * is therefore in a new transaction and cannot roll back the cached checkpoint.
 	 */
-	public void cacheConversation() throws Exception;
+	public void cacheConversationAndCycleTransaction();
 	
 	/**
 	 * Kick off a new background task backed by this conversation.
+	 * This calls {{@link #cacheConversationAndCycleTransaction()} first.
 	 * @param taskClass	The class of the task to execute.
-	 * @throws Exception
 	 */
-	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass) throws Exception;
+	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass);
 	
 	/**
 	 * Kick off a new background task backed by this conversation without caching the conversation first.
 	 * @param taskClass	The class of the task to execute.
 	 * @throws Exception
 	 */
-	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass) throws Exception;
+	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass);
 }

@@ -21,6 +21,7 @@ class ResendActivationTest {
 	void executeWithNullBeanReturnsNullBean() throws Exception {
 		ResendActivation action = new ResendActivation();
 		// bean == null → skips block, returns ServerSideActionResult with null bean
+		@SuppressWarnings("null") // passes null on purpose
 		ServerSideActionResult<UserExtension> result = action.execute(null, null);
 		assertNotNull(result);
 		assertNull(result.getBean());

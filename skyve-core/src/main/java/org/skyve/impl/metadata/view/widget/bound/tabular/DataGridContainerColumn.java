@@ -12,6 +12,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -41,7 +42,7 @@ public class DataGridContainerColumn extends DataGridColumn {
 						@XmlElementRef(type = DynamicImage.class),
 						@XmlElementRef(type = Blurb.class),
 						@XmlElementRef(type = Label.class)})
-	public List<MetaData> getWidgets() {
+	public @Nonnull List<MetaData> getWidgets() {
 		return widgets;
 	}
 }

@@ -324,7 +324,7 @@ isc.BizUtil.addClassMethods({
 	},
 
 	/**
-	 * Converts filter criteria by renaming `_display_*` fields.
+	 * Converts filter criteria by renaming `_display_*` fields, and by keeping time values as times.
 	 * @param {Object} criteria - the criteria to convert.
 	 */
 	convertFilterCriteria: function (criteria) {
@@ -333,7 +333,17 @@ isc.BizUtil.addClassMethods({
 				criteria.criteria.forEach((criterion) =>
 					isc.BizUtil.convertFilterCriteria(criterion),
 				);
-			} else if (
+				return;
+			}
+			// SmartClient's FilterBuilder flags every Date in a clause as a logical date unless its field is a datetime,
+			// so a time clause's value is sent as a date (1970-01-01). A Date flagged as both is a time: send it as one.
+			["value", "start", "end"].forEach((name) => {
+				const value = criteria[name];
+				if (isc.isA.Date(value) && value.logicalTime && value.logicalDate) {
+					delete value.logicalDate;
+				}
+			});
+			if (
 				criteria.fieldName &&
 				criteria.fieldName.startsWith("_display_")
 			) {
@@ -518,7 +528,7 @@ isc.BizUtil.addClassMethods({
 	},
 
 	createContentUploadUrl: function (contentFormItem, image) {
-		const instance = contentFormItem.form._view.gather(false);
+		const instance = contentFormItem.form._view.gather(false, true);
 		const display = contentFormItem.display || (image ? "image" : "link");
 		const capture = contentFormItem.capture || "none";
 		let url = `upload.xhtml?_u=boundContent&_n=${SKYVE.Util.unsanitiseBinding(
@@ -674,7 +684,7 @@ isc.BizUtil.addClassMethods({
 						return;
 					}
 					isc.BizUtil._registerContentFormItem(contentFormItem);
-					const instance = contentFormItem.form._view.gather(false);
+					const instance = contentFormItem.form._view.gather(false, true);
 					let url = `imageMarkup.xhtml?_n=${SKYVE.Util.unsanitiseBinding(
 						contentFormItem.name,
 					)}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
@@ -846,22 +856,30 @@ isc.BizUtil.addClassMethods({
 
 	/**
 	 * Displays growl notifications.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the growls shown: keep its arguments.
+	 * The page has one PrimeFaces Growl, which removes the messages it shows when it shows new ones, unless told to keep
+	 * them.
 	 * @param {Array} msgs - the messages to display.
 	 * @param {number} life - the duration of the notification.
 	 * @param {boolean} sticky - whether the notification is sticky.
+	 * @param {boolean} [keep] - whether to keep the messages already showing, rather than replace them.
 	 */
-	growl: function (msgs, life, sticky) {
+	growl: function (msgs, life, sticky, keep) {
 		PrimeFaces.cw("Growl", "growl", {
 			id: "growl",
 			widgetVar: "growl",
 			life: life || 6000,
 			sticky: sticky || false,
+			keepAlive: keep || false,
 			msgs,
 		});
 	},
 
 	/**
 	 * Handles push messages.
+	 * A pushed growl is added to the growls showing: it arrives on its own schedule, such as a job's when it finishes, and
+	 * must not remove a growl the user has not read yet, such as the "started" growl of the action that started the job.
+	 * PrimeFaces pages show pushed growls in a growl of their own for the same reason.
 	 * @param {Array} pushMessage - the push messages to handle.
 	 */
 	onPushMessage: function (pushMessage) {
@@ -883,7 +901,7 @@ isc.BizUtil.addClassMethods({
 			}
 		});
 
-		if (growls.length > 0) isc.BizUtil.growl(growls);
+		if (growls.length > 0) isc.BizUtil.growl(growls, null, null, true);
 		if (messages.length > 0) {
 			const markup =
 				messages.length > 1

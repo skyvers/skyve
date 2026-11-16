@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Collects errors and warnings encountered during a Skyve data-import or file-upload operation.
  *
@@ -58,7 +61,7 @@ public class UploadException extends SkyveException {
 	 * Executes addErrors.
 	 * @param problems the problems
 	 */
-	public void addErrors(List<Problem> problems) {
+	public void addErrors(@Nonnull List<Problem> problems) {
 		for (Problem problem : problems) {
 			addError(problem);
 		}
@@ -71,7 +74,7 @@ public class UploadException extends SkyveException {
 	 * 
 	 * @param problem The problem to add to the list of errors.
 	 */
-	public void addError(Problem problem) {
+	public void addError(@Nonnull Problem problem) {
 		// this will replace any previous problem
 		// Hopefully the last problem encountered is the most pertinent
         problem.error = true;
@@ -86,7 +89,7 @@ public class UploadException extends SkyveException {
 	 * 
 	 * @param problem The problem to add to the list of warnings.
 	 */
-	public void addWarning(Problem problem) {
+	public void addWarning(@Nonnull Problem problem) {
 		if (warnings.size() < 50) {
 			warnings.add(problem);
 		}
@@ -97,7 +100,7 @@ public class UploadException extends SkyveException {
 	 * 
 	 * @return An Iterable of error Problems
 	 */
-	public Iterable<Problem> getErrors() {
+	public @Nonnull Iterable<Problem> getErrors() {
 		return errors.values();
 	}
 
@@ -106,7 +109,7 @@ public class UploadException extends SkyveException {
 	 * 
 	 * @return An Iterable of warning Problems
 	 */
-	public Iterable<Problem> getWarnings() {
+	public @Nonnull Iterable<Problem> getWarnings() {
 		return warnings;
 	}
 
@@ -127,7 +130,7 @@ public class UploadException extends SkyveException {
 		 * @param what Description of the problem
 		 * @param where Where the problem occurred, e.g. which line of the file
 		 */
-		public Problem(String what, String where) {
+		public Problem(@Nonnull String what, @Nullable String where) {
 			this.what = what;
 			this.where = (where == null) ? "" : where;
 		}
@@ -137,7 +140,7 @@ public class UploadException extends SkyveException {
 		 * 
 		 * @return The what describing the problem detected
 		 */
-		public String getWhat() {
+		public @Nonnull String getWhat() {
 			return what;
 		}
 
@@ -146,7 +149,7 @@ public class UploadException extends SkyveException {
 		 *
 		 * @return Where the problem was detected
 		 */
-		public String getWhere() {
+		public @Nonnull String getWhere() {
 			return where;
 		}
 		/**
@@ -164,7 +167,7 @@ public class UploadException extends SkyveException {
 		 * @return the result
 		 */
 		@Override
-		public int compareTo(Problem o) {
+		public int compareTo(@Nullable Problem o) {
 			if (o == null) {
 				return 1;
 			}
@@ -178,7 +181,7 @@ public class UploadException extends SkyveException {
 		 * @return the result
 		 */
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(@Nullable Object o) {
 			if (o instanceof Problem p) {
 				return (compareTo(p) == 0);
 			}
@@ -200,7 +203,7 @@ public class UploadException extends SkyveException {
 		 * @return the result
 		 */
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			if (string == null) {
 				string = new StringBuilder(128).append(error ? "Error " : "Warning ").append(what).append(" : ").append(where).toString();
 			}

@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.ParameterizableAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Adds parameter-list behaviour to fluent action builders.
  *
@@ -24,7 +26,7 @@ public abstract class FluentParameterizableAction<T extends FluentParameterizabl
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(ParameterizableAction action) {
+	protected @Nonnull T from(@Nonnull ParameterizableAction action) {
 		super.from(action);
 		action.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
 		return (T) this;
@@ -38,7 +40,7 @@ public abstract class FluentParameterizableAction<T extends FluentParameterizabl
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addParameter(FluentParameter parameter) {
+	public @Nonnull T addParameter(@Nonnull FluentParameter parameter) {
 		get().getParameters().add(parameter.get());
 		return (T) this;
 	}
@@ -47,5 +49,5 @@ public abstract class FluentParameterizableAction<T extends FluentParameterizabl
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public abstract ParameterizableAction get();
+	public abstract @Nonnull ParameterizableAction get();
 }

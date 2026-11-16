@@ -2,6 +2,8 @@ package org.skyve.domain.types.converters.datetime;
 
 import org.skyve.domain.messages.ConversionException;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Converts {@link DateTime} values using this class's configured
  * month-name date-only pattern.
@@ -15,7 +17,7 @@ public class MMM_DD_YYYY extends AbstractDateTimeConverter {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nonnull String getFormatPattern() {
 		return PATTERN;
 	}
 
@@ -24,7 +26,7 @@ public class MMM_DD_YYYY extends AbstractDateTimeConverter {
 	 * @return the result value
 	 */
 	@Override
-	protected String getI18nKey() {
+	protected @Nonnull String getI18nKey() {
 		return ConversionException.MMM_DD_YYYY_DATETIME_KEY;
 	}
 }

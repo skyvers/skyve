@@ -3233,6 +3233,8 @@ isc.BizContentImageItem.addMethods({
 		// Ensure the image is updated only if the canvas is initialized and the value is not user-set
 		if (this.canvas != null && !this.userSetValue) {
 			if (newValue) {
+				// A thumbnail sized to the box (-20 for the border), rounded up so few sizes are cached
+				const size = SKYVE.Util.contentPreviewSize(this._img.getWidth() - 20, this._img.getHeight() - 20);
 				// Construct the URL with required query parameters
 				const url =
 					SKYVE.Util.CONTEXT_URL +
@@ -3245,9 +3247,9 @@ isc.BizContentImageItem.addMethods({
 					"&_b=" +
 					SKYVE.Util.unsanitiseBinding(this.name) +
 					"&_w=" +
-					(this._img.getWidth() - 20) + // -20 for the border
+					size +
 					"&_h=" +
-					(this._img.getHeight() - 20); // -20 for the border
+					size;
 				// Update the image source
 				this._img.setSrc(url);
 			} else {
@@ -3534,13 +3536,9 @@ isc.BizContentItem.addMethods({
 				const kind = this._resolveMediaKind();
 				this._currentMediaKind = kind;
 				if (kind === "image") {
-					let imageUrl = url;
-					if (typeof this._previewWidth === "number") {
-						imageUrl += "&_w=" + this._previewWidth;
-					}
-					if (typeof this._previewHeight === "number") {
-						imageUrl += "&_h=" + this._previewHeight;
-					}
+					// A thumbnail sized to the box, rounded up so few sizes are cached; the link opens the original
+					const size = SKYVE.Util.contentPreviewSize(this._previewWidth, this._previewHeight);
+					const imageUrl = url + "&_w=" + size + "&_h=" + size;
 					this._preview.setContents(
 						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;${this._previewMediaStyle("1 / 1")}object-fit:contain"/></a>`,
 					);
@@ -3695,6 +3693,34 @@ isc.BizLookupDescriptionItem.addMethods({
 					optionDataSource._drop = true;
 				}
 				this.Super("showPicker");
+			},
+
+			/**
+			 * Sets the value map without refetching a hidden pick list.
+			 * SmartClient's setValueMap() sets an existing pick list up again, which fetches from the
+			 * server even while the pick list is hidden. The edit view sets the value map on every
+			 * response, and showing the pick list (by the picker or by typing) sets it up and filters
+			 * again, so that fetch is wasted. Instead the hidden pick list's rows are dropped, so the
+			 * next filter fetches rather than reusing rows from before the response.
+			 * A visible pick list keeps SmartClient's behaviour.
+			 *
+			 * @override
+			 * @returns {void}
+			 */
+			setValueMap: function () {
+				const pickList = this.pickList;
+				if (pickList && !pickList.isVisible()) {
+					pickList.setData([]);
+					delete pickList.formItem; // set up again when next shown, as SmartClient does
+					this.pickList = null;
+					try {
+						this.Super("setValueMap", arguments);
+					} finally {
+						this.pickList = pickList;
+					}
+				} else {
+					this.Super("setValueMap", arguments);
+				}
 			},
 
 			/**
@@ -3957,7 +3983,7 @@ isc.BizLookupDescriptionItem.addMethods({
 					this.setRequired(false);
 				}
 
-				const instance = this._view.gather(true);
+				const instance = this._view.gather(true, true);
 				if (instance) {
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {
@@ -3979,7 +4005,7 @@ isc.BizLookupDescriptionItem.addMethods({
 				}
 			} else {
 				// Handle case for zooming into an existing record
-				const instance = this._view.gather(true);
+				const instance = this._view.gather(true, true);
 				if (instance) {
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {

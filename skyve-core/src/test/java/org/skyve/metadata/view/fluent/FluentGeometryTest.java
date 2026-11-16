@@ -28,6 +28,7 @@ class FluentGeometryTest {
 		assertThat(new FluentGeometry().type(GeometryInputType.point).get().getType(), is(GeometryInputType.point));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(300, new FluentGeometry().pixelWidth(300).get().getPixelWidth().intValue());

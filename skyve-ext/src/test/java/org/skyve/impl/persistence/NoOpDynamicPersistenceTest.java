@@ -1,83 +1,89 @@
 package org.skyve.impl.persistence;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.PersistentBean;
 
-public class NoOpDynamicPersistenceTest {
+class NoOpDynamicPersistenceTest {
 
 	@SuppressWarnings("resource")
 	private final NoOpDynamicPersistence noop = new NoOpDynamicPersistence();
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void postConstructDoesNotThrow() {
+	void postConstructDoesNotThrow() {
 		noop.postConstruct(null);
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void persistDoesNotThrow() {
+	void persistDoesNotThrow() {
 		noop.persist(null);
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void deleteDoesNotThrow() {
+	void deleteDoesNotThrow() {
 		noop.delete(null);
 		assertNotNull(noop);
 	}
 
 	@Test
-	public void populateByIdReturnsNull() {
+	void populateByIdReturnsNull() {
 		assertNull(noop.populate("any-biz-id"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void populateBeanDoesNotThrow() {
+	void populateBeanDoesNotThrow() {
 		noop.populate((PersistentBean) null);
 		assertNotNull(noop);
 	}
 
 	@Test
-	public void evictAllCachedDoesNotThrow() {
+	void evictAllCachedDoesNotThrow() {
 		noop.evictAllCached();
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void evictCachedDoesNotThrow() {
+	void evictCachedDoesNotThrow() {
 		noop.evictCached(null);
 		assertNotNull(noop);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
-	public void cachedReturnsFalse() {
+	void cachedReturnsFalse() {
 		assertFalse(noop.cached(null));
 	}
 
 	@Test
-	public void beginDoesNotThrow() {
+	void beginDoesNotThrow() {
 		noop.begin();
 		assertNotNull(noop);
 	}
 
 	@Test
-	public void rollbackDoesNotThrow() {
+	void rollbackDoesNotThrow() {
 		noop.rollback();
 		assertNotNull(noop);
 	}
 
 	@Test
-	public void commitDoesNotThrow() {
+	void commitDoesNotThrow() {
 		noop.commit();
 		assertNotNull(noop);
 	}
 
 	@Test
-	public void closeDoesNotThrow() {
+	void closeDoesNotThrow() {
 		noop.close();
 		assertNotNull(noop);
 	}

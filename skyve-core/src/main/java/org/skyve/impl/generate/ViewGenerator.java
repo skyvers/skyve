@@ -92,11 +92,11 @@ public class ViewGenerator {
 	
 	private ProvidedRepository repository;
 	
-	public ViewGenerator(ProvidedRepository repository) {
+	public ViewGenerator(@Nonnull ProvidedRepository repository) {
 		this.repository = repository;
 	}
 
-	public ViewImpl generate(Customer customer, Document document, String viewName) {
+	public @Nonnull ViewImpl generate(@Nonnull Customer customer, @Nonnull Document document, @Nonnull String viewName) {
 		ViewImpl result = null;
 
 		Module module = customer.getModule(document.getOwningModuleName());
@@ -117,7 +117,7 @@ public class ViewGenerator {
 	}
 
 	@SuppressWarnings("unused")
-	public static ViewImpl generateListView(Customer customer, Document document, QueryDefinition query, String description) {
+	public static @Nonnull ViewImpl generateListView(@Nullable Customer customer, @Nonnull Document document, @Nullable QueryDefinition query, @Nullable String description) {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.list.toString());
 		StringBuilder title = new StringBuilder(64);
@@ -128,9 +128,7 @@ public class ViewGenerator {
 		if (finalDescription == null) {
 			finalDescription = document.getLocalisedPluralAlias();
 		}
-		if (finalDescription != null) {
-			title.append(finalDescription);
-		}
+		title.append(finalDescription);
 		result.setTitle(title.toString());
 
 		ActionImpl action = new ActionImpl();
@@ -146,7 +144,7 @@ public class ViewGenerator {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private ViewImpl generateEditView(Customer customer, Module module, Document document, boolean formLabelSideLayout) {
+	private @Nonnull ViewImpl generateEditView(@Nonnull Customer customer, @Nonnull Module module, @Nonnull Document document, boolean formLabelSideLayout) {
 		ViewImpl result = new ViewImpl();
 		result.setName(ViewType.edit.toString());
 
@@ -287,12 +285,12 @@ public class ViewGenerator {
 	}
 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void processAttributes(Customer customer, 
-									Module module, 
-									Document document,
-									Form form,
-									List<Detail> details,
-									String bindingPrefix) {
+	private void processAttributes(@Nonnull Customer customer, 
+									@Nonnull Module module, 
+									@Nonnull Document document,
+									@Nonnull Form form,
+									@Nonnull List<Detail> details,
+									@Nullable String bindingPrefix) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
@@ -453,10 +451,10 @@ public class ViewGenerator {
 		}
 	}
 	
-	private static void populatePropertyNames(Customer customer,
-												Module module,
-												Document document,
-												List<String> propertyNames) {
+	private static void populatePropertyNames(@Nonnull Customer customer,
+												@Nonnull Module module,
+												@Nonnull Document document,
+												@Nonnull List<String> propertyNames) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
 			String inheritedDocumentName = inherits.getDocumentName();
@@ -472,12 +470,12 @@ public class ViewGenerator {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static DataGrid generateDataGrid(CollectionType collectionType,
-												Customer customer,
-												Module module,
-												Document document,
-												String dataGridBinding,
-												List<String> propertyNames) {
+	private static @Nonnull DataGrid generateDataGrid(@Nonnull CollectionType collectionType,
+														@Nonnull Customer customer,
+														@Nonnull Module module,
+														@Nonnull Document document,
+														@Nullable String dataGridBinding,
+														@Nonnull List<String> propertyNames) {
 		DataGrid result = new DataGrid();
 		if (dataGridBinding != null) {
 			result.setBinding(dataGridBinding);
@@ -546,7 +544,7 @@ public class ViewGenerator {
 		return result;
 	}
 	
-	public ViewMetaData generateEditView(Customer customer, Document document) {
+	public @Nonnull ViewMetaData generateEditView(@Nonnull Customer customer, @Nonnull Document document) {
 		ViewImpl view = generate(customer, document, ViewType.edit.toString());
 		
 		ViewMetaData result = new ViewMetaData();
@@ -563,10 +561,10 @@ public class ViewGenerator {
 		return result;
 	}	
 
-	public String generateEditViewXML(Customer customer,
-										Document document,
-										boolean customerOverridden,
-										boolean uxuiOverridden) {
+	public @Nonnull String generateEditViewXML(@Nonnull Customer customer,
+												@Nonnull Document document,
+												boolean customerOverridden,
+												boolean uxuiOverridden) {
 		return XMLMetaData.marshalView(generateEditView(customer, document), customerOverridden, uxuiOverridden);
 	}
 
@@ -602,7 +600,7 @@ public class ViewGenerator {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		String srcPath = null;
 		String customerName = null;
 		String moduleName = null;

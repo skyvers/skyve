@@ -52,6 +52,7 @@ class ListGridBuilderTest {
 	@SuppressWarnings("static-method")
 	void paginatedListGridBuilderNullComponentReturnsNull() {
 		PaginatedListGridBuilder builder = new PaginatedListGridBuilder();
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertNull(result);
 	}
@@ -61,6 +62,7 @@ class ListGridBuilderTest {
 	void paginatedListGridBuilderWithDataTableSetsPaginator() {
 		PaginatedListGridBuilder builder = new PaginatedListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertSame(dataTable, result);
 		verify(dataTable).setPaginator(true);
@@ -74,6 +76,7 @@ class ListGridBuilderTest {
 	@SuppressWarnings("static-method")
 	void unsortableListGridBuilderNullComponentReturnsNull() {
 		UnsortableListGridBuilder builder = new UnsortableListGridBuilder();
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertNull(result);
 	}
@@ -90,6 +93,7 @@ class ListGridBuilderTest {
 		children.add(col2);
 		when(dataTable.getChildren()).thenReturn(children);
 
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertSame(dataTable, result);
 		verify(col1).setSortable(false);
@@ -102,6 +106,7 @@ class ListGridBuilderTest {
 	@SuppressWarnings("static-method")
 	void unfilterableListGridBuilderNullComponentReturnsNull() {
 		UnfilterableListGridBuilder builder = new UnfilterableListGridBuilder();
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.listGrid(null, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertNull(result);
 	}
@@ -116,6 +121,7 @@ class ListGridBuilderTest {
 		children.add(col);
 		when(dataTable.getChildren()).thenReturn(children);
 
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.listGrid(dataTable, "mod", "doc", "model", "uxui", null, null, null, null, false);
 		assertSame(dataTable, result);
 		verify(col).setFilterable(false);

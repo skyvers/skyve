@@ -6,12 +6,14 @@ import org.skyve.metadata.controller.Upload;
 import org.skyve.metadata.controller.UploadAction;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Leaves upload fixture beans unchanged after upload.xhtml action-route inspection.
  */
 abstract class AbstractUploadFixtureAction extends UploadAction<Bean> {
 	@Override
-	public Bean upload(Bean bean, Upload upload, UploadException exception, WebContext webContext) {
+	public @Nonnull Bean upload(@Nonnull Bean bean, @Nonnull Upload upload, @Nonnull UploadException exception, @Nonnull WebContext webContext) {
 		return bean;
 	}
 }

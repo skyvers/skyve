@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.module.query.BizQLReferenceImpl;
 import org.skyve.impl.metadata.repository.module.BizQLReferenceMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds BizQL query references.
  */
@@ -21,7 +23,7 @@ public class FluentBizQLReference extends FluentQueryReference<FluentBizQLRefere
 	 *
 	 * @param bizql The metadata to mutate.
 	 */
-	public FluentBizQLReference(BizQLReferenceMetaData bizql) {
+	public FluentBizQLReference(@Nonnull BizQLReferenceMetaData bizql) {
 		this.bizql = bizql;
 	}
 	
@@ -31,7 +33,7 @@ public class FluentBizQLReference extends FluentQueryReference<FluentBizQLRefere
 	 * @param bizql The source reference.
 	 * @return this fluent instance.
 	 */
-	public FluentBizQLReference from(@SuppressWarnings("hiding") BizQLReferenceImpl bizql) {
+	public @Nonnull FluentBizQLReference from(@SuppressWarnings("hiding") @Nonnull BizQLReferenceImpl bizql) {
 		super.from(bizql);
 		return this;
 	}
@@ -42,7 +44,7 @@ public class FluentBizQLReference extends FluentQueryReference<FluentBizQLRefere
 	 * @return The BizQL reference metadata instance.
 	 */
 	@Override
-	public BizQLReferenceMetaData get() {
+	public @Nonnull BizQLReferenceMetaData get() {
 		return bizql;
 	}
 }

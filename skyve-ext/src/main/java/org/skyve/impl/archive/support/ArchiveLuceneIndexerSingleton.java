@@ -22,6 +22,9 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.event.Level;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A singleton class that manages Lucene indexers for document archiving operations.
  * Implements the SystemObserver interface to initialize indices on startup
@@ -48,7 +51,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * 
 	 * @return The singleton instance of ArchiveLuceneIndexerSingleton
 	 */
-	public static ArchiveLuceneIndexerSingleton getInstance() {
+	public static @Nonnull ArchiveLuceneIndexerSingleton getInstance() {
 		return instance;
 	}
 
@@ -114,7 +117,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	/**
 	 * A record that stores an IndexWriter and its associated Directory.
 	 */
-	public static record LuceneConfig(IndexWriter indexWriter, Directory indexDirectory) {
+	public static record LuceneConfig(@Nonnull IndexWriter indexWriter, @Nonnull Directory indexDirectory) {
 	}
 
 	/**
@@ -124,7 +127,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * @param writer The index writer to add
 	 * @param directory The directory associated with the index writer
 	 */
-	public void addIndexWriter(ArchiveDocConfig config, IndexWriter writer, Directory directory) {
+	public void addIndexWriter(@Nonnull ArchiveDocConfig config, @Nonnull IndexWriter writer, @Nonnull Directory directory) {
 		luceneConfigs.put(config, new LuceneConfig(writer, directory));
 	}
 
@@ -134,7 +137,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * @param config The archive document configuration
 	 * @return The associated IndexWriter, or null if not found
 	 */
-	public IndexWriter getIndexWriter(ArchiveDocConfig config) {
+	public @Nullable IndexWriter getIndexWriter(@Nonnull ArchiveDocConfig config) {
 		return Optional.ofNullable(luceneConfigs.get(config))
 				.map(LuceneConfig::indexWriter)
 				.orElse(null);
@@ -145,7 +148,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * 
 	 * @param config The archive document configuration to remove
 	 */
-	public void removeIndexWriter(ArchiveDocConfig config) {
+	public void removeIndexWriter(@Nonnull ArchiveDocConfig config) {
 		LuceneConfig configToRemove = luceneConfigs.remove(config);
 		if (configToRemove != null) {
 			try {
@@ -165,7 +168,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * @param config The archive document configuration to check
 	 * @return true if the configuration has an active index writer, false otherwise
 	 */
-	public boolean hasIndexWriter(ArchiveDocConfig config) {
+	public boolean hasIndexWriter(@Nonnull ArchiveDocConfig config) {
 		return luceneConfigs.containsKey(config);
 	}
 
@@ -174,7 +177,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * 
 	 * @return The map of all active Lucene configurations
 	 */
-	public ConcurrentHashMap<ArchiveDocConfig, LuceneConfig> getLuceneConfigs() {
+	public @Nonnull ConcurrentHashMap<ArchiveDocConfig, LuceneConfig> getLuceneConfigs() {
 		return luceneConfigs;
 	}
 
@@ -184,7 +187,7 @@ public class ArchiveLuceneIndexerSingleton implements SystemObserver {
 	 * @return A new analyzer instance
 	 * @throws RuntimeException if analyzer creation fails
 	 */
-	private static Analyzer newAnalyzer() {
+	private static @Nonnull Analyzer newAnalyzer() {
 		try {
 			return CustomAnalyzer.builder()
 					.addTokenFilter(LowerCaseFilterFactory.NAME)

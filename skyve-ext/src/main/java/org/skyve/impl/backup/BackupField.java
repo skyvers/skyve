@@ -3,6 +3,9 @@ package org.skyve.impl.backup;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.Attribute.Sensitivity;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a field in the backup process, storing metadata about an attribute's type and sensitivity level.
  * 
@@ -19,20 +22,20 @@ public class BackupField {
 	 * @param attributeType - the type of the attribute.
 	 * @param sensitivity - the sensitivity level of the attribute.
 	 */
-	public BackupField(AttributeType attributeType, Sensitivity sensitivity) {
+	public BackupField(@Nonnull AttributeType attributeType, @Nullable Sensitivity sensitivity) {
 		this.attributeType = attributeType;
 		this.sensitivity = sensitivity;
 	}
 
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return attributeType;
 	}
 
-	public Sensitivity getSensitivity() {
+	public @Nullable Sensitivity getSensitivity() {
 		return sensitivity;
 	}
 
-	public void setSensitivity(Sensitivity sensitivity) {
+	public void setSensitivity(@Nullable Sensitivity sensitivity) {
 		this.sensitivity = sensitivity;
 	}
 }

@@ -3,6 +3,9 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.module.JobMetaDataImpl;
 import org.skyve.metadata.module.JobMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds scheduled job metadata for a module definition.
  */
@@ -21,7 +24,7 @@ public class FluentJob {
 	 *
 	 * @param job The metadata to mutate.
 	 */
-	public FluentJob(JobMetaDataImpl job) {
+	public FluentJob(@Nonnull JobMetaDataImpl job) {
 		this.job = job;
 	}
 
@@ -31,11 +34,13 @@ public class FluentJob {
 	 * @param job The source definition.
 	 * @return this fluent instance.
 	 */
-	public FluentJob from(@SuppressWarnings("hiding") JobMetaData job) {
+	public @Nonnull FluentJob from(@SuppressWarnings("hiding") @Nonnull JobMetaData job) {
 		name(job.getName());
 		displayName(job.getDisplayName());
 		description(job.getDescription());
 		className(job.getClassName());
+		job.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -45,7 +50,7 @@ public class FluentJob {
 	 * @param name The job name.
 	 * @return this fluent instance.
 	 */
-	public FluentJob name(String name) {
+	public @Nonnull FluentJob name(@Nullable String name) {
 		job.setName(name);
 		return this;
 	}
@@ -56,7 +61,7 @@ public class FluentJob {
 	 * @param displayName The display name.
 	 * @return this fluent instance.
 	 */
-	public FluentJob displayName(String displayName) {
+	public @Nonnull FluentJob displayName(@Nonnull String displayName) {
 		job.setDisplayName(displayName);
 		return this;
 	}
@@ -67,7 +72,7 @@ public class FluentJob {
 	 * @param description The job description.
 	 * @return this fluent instance.
 	 */
-	public FluentJob description(String description) {
+	public @Nonnull FluentJob description(@Nullable String description) {
 		job.setDescription(description);
 		return this;
 	}
@@ -78,17 +83,30 @@ public class FluentJob {
 	 * @param fullyQualifiedClassName The implementation class name.
 	 * @return this fluent instance.
 	 */
-	public FluentJob className(String fullyQualifiedClassName) {
+	public @Nonnull FluentJob className(@Nonnull String fullyQualifiedClassName) {
 		job.setClassName(fullyQualifiedClassName);
 		return this;
 	}
 	
 	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentJob putProperty(@Nonnull String k, @Nonnull String v) {
+		job.getProperties().put(k, v);
+		return this;
+	}
+
+	/**
 	 * Returns the mutable metadata backing this fluent wrapper.
 	 *
 	 * @return The job metadata instance.
 	 */
-	public JobMetaDataImpl get() {
+	public @Nonnull JobMetaDataImpl get() {
 		return job;
 	}
 }

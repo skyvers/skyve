@@ -1,7 +1,12 @@
 package org.skyve.impl.metadata.repository;
 
+import java.util.Set;
+import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.user.UserAccess;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,6 +14,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -63,6 +70,7 @@ import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Chart;
+import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.impl.metadata.view.widget.DialogButton;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.StaticImage;
@@ -124,7 +132,7 @@ import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("all")
+@SuppressWarnings({"all", "java:S3011"})
 class ViewValidatorTest {
 
 	@Mock
@@ -151,6 +159,7 @@ class ViewValidatorTest {
 
 		view = new ViewImpl();
 		view.setName("edit");
+		view.setTitle("Test View");
 	}
 
 	private ViewValidator newValidator() {
@@ -239,6 +248,14 @@ class ViewValidatorTest {
 	}
 
 	@Test
+	void viewWithoutTitle_throws() {
+		view.setTitle(null);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, v::visit);
+		assertTrue(e.getMessage().endsWith(" - title is required."), e.getMessage());
+	}
+
+	@Test
 	void viewBothHelpUrlAndFileName_throws() {
 		view.setHelpURL("http://example.com/help");
 		view.setHelpRelativeFileName("help.html");
@@ -273,7 +290,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_trueCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("true");
+		s.setXmlInvisibleCondition("true");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -282,7 +299,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_falseCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("false");
+		s.setXmlInvisibleCondition("false");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -291,7 +308,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_persistedCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("persisted");
+		s.setXmlInvisibleCondition("persisted");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -300,7 +317,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_createdCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("created");
+		s.setXmlInvisibleCondition("created");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -309,7 +326,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_changedCondition_noException() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("changed");
+		s.setXmlInvisibleCondition("changed");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -319,7 +336,7 @@ class ViewValidatorTest {
 	void spacer_notCondition_validConditionInDocument_noException() {
 		document.getConditions().put("myFlag", new ConditionImpl());
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("notMyFlag");
+		s.setXmlInvisibleCondition("notMyFlag");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -329,16 +346,64 @@ class ViewValidatorTest {
 	void spacer_validConditionInDocument_noException() {
 		document.getConditions().put("myFlag", new ConditionImpl());
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("myFlag");
+		s.setXmlInvisibleCondition("myFlag");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
 	}
 
 	@Test
+	void spacer_inlineConditionExpression_noException() {
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("{el:true}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionOnVisible_noException() {
+		Spacer s = new Spacer();
+		s.setXmlVisibleCondition("{el:true}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionNotBoolean_throws() {
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("{el:'text'}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionMalformed_throws() {
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("{el:)(}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void spacer_inlineConditionExpressionUnknownPrefix_throws() {
+		Spacer s = new Spacer();
+		s.setXmlVisibleCondition("{noSuchPrefix:whatever}");
+		view.getContained().add(s);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, v::visit);
+		// the positive expression is reported, never the stored inverse
+		assertTrue(e.getMessage().contains("{noSuchPrefix:whatever}"));
+		assertFalse(e.getMessage().contains("not{"));
+	}
+
+	@Test
 	void spacer_unknownCondition_throws() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("noSuchCondition");
+		s.setXmlInvisibleCondition("noSuchCondition");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -348,7 +413,7 @@ class ViewValidatorTest {
 	void spacer_notConditionBadCamelCase_throws() {
 		// "notxxx" — 'x' is lower-case after "not" → must be MetaDataException
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("notxxx");
+		s.setXmlInvisibleCondition("notxxx");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -407,7 +472,7 @@ class ViewValidatorTest {
 		document.getConditions().put("showBlurb", new ConditionImpl());
 		Blurb b = new Blurb();
 		b.setMarkup("<p>Content</p>");
-		b.setInvisibleConditionName("showBlurb");
+		b.setXmlInvisibleCondition("showBlurb");
 		view.getContained().add(b);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -725,7 +790,7 @@ class ViewValidatorTest {
 	@Test
 	void spacer_notConditionWithInvalidCamelCase_throws() {
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("notmyFlag");
+		s.setXmlInvisibleCondition("notmyFlag");
 		view.getContained().add(s);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -748,7 +813,7 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("baseFlag");
+		s.setXmlInvisibleCondition("baseFlag");
 		view.getContained().add(s);
 
 		ViewValidator v = newValidator(childDocument);
@@ -771,7 +836,7 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
 
 		Spacer s = new Spacer();
-		s.setInvisibleConditionName("missingFlag");
+		s.setXmlInvisibleCondition("missingFlag");
 		view.getContained().add(s);
 
 		ViewValidator v = newValidator(childDocument);
@@ -782,7 +847,7 @@ class ViewValidatorTest {
 	void blurb_unknownCondition_throws() {
 		Blurb b = new Blurb();
 		b.setMarkup("<p>Content</p>");
-		b.setInvisibleConditionName("noSuchCond");
+		b.setXmlInvisibleCondition("noSuchCond");
 		view.getContained().add(b);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -791,12 +856,12 @@ class ViewValidatorTest {
 	// ---- visitButton ----
 
 	@Test
-	void button_nullActionName_noException() {
-		// null action name → validateActionName does nothing
+	void button_nullActionName_throws() {
+		// the button action is required by view.xsd
 		Button btn = new Button();
 		view.getContained().add(btn);
 		ViewValidator v = newValidator();
-		assertDoesNotThrow(v::visit);
+		assertThrows(MetaDataException.class, v::visit);
 	}
 
 	@Test
@@ -835,7 +900,7 @@ class ViewValidatorTest {
 	@Test
 	void hbox_unknownCondition_throws() {
 		HBox hbox = new HBox();
-		hbox.setInvisibleConditionName("badCondition");
+		hbox.setXmlInvisibleCondition("badCondition");
 		view.getContained().add(hbox);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -872,7 +937,7 @@ class ViewValidatorTest {
 	@Test
 	void vbox_unknownCondition_throws() {
 		VBox vbox = new VBox();
-		vbox.setInvisibleConditionName("badCond");
+		vbox.setXmlInvisibleCondition("badCond");
 		view.getContained().add(vbox);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -913,7 +978,7 @@ class ViewValidatorTest {
 	@Test
 	void tabPane_unknownCondition_throws() {
 		TabPane tabPane = new TabPane();
-		tabPane.setInvisibleConditionName("badCondition");
+		tabPane.setXmlInvisibleCondition("badCondition");
 		view.getContained().add(tabPane);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -931,6 +996,7 @@ class ViewValidatorTest {
 	@Test
 	void tab_withSpacerInside_noException() {
 		Tab tab = new Tab();
+		tab.setTitle("Details");
 		Spacer s = new Spacer();
 		tab.getContained().add(s);
 		TabPane tabPane = new TabPane();
@@ -943,7 +1009,8 @@ class ViewValidatorTest {
 	@Test
 	void tab_unknownDisabledCondition_throws() {
 		Tab tab = new Tab();
-		tab.setDisabledConditionName("badCond");
+		tab.setTitle("Details");
+		tab.setXmlDisabledCondition("badCond");
 		TabPane tabPane = new TabPane();
 		tabPane.getTabs().add(tab);
 		view.getContained().add(tabPane);
@@ -1083,7 +1150,7 @@ class ViewValidatorTest {
 		ActionImpl action = new ActionImpl();
 		action.setName("myAction");
 		action.setImplicitName(ImplicitActionName.Save);
-		action.setDisabledConditionName("noSuchCondition");
+		action.setXmlDisabledCondition("noSuchCondition");
 		view.putAction(action);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
@@ -1095,7 +1162,7 @@ class ViewValidatorTest {
 		ActionImpl action = new ActionImpl();
 		action.setName("myAction");
 		action.setImplicitName(ImplicitActionName.Save);
-		action.setDisabledConditionName("canSave");
+		action.setXmlDisabledCondition("canSave");
 		view.putAction(action);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -1160,19 +1227,19 @@ class ViewValidatorTest {
 		assertDoesNotThrow(v::visit);
 	}
 
-	// ---- refreshConditionName on view ----
+	// ---- refreshIfCondition on view ----
 
 	@Test
-	void view_refreshConditionName_unknown_throws() {
-		view.setRefreshConditionName("noSuch");
+	void view_refreshIfCondition_unknown_throws() {
+		view.setRefreshIfCondition("noSuch");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
 	}
 
 	@Test
-	void view_refreshConditionName_valid_noException() {
+	void view_refreshIfCondition_valid_noException() {
 		document.getConditions().put("refreshable", new ConditionImpl());
-		view.setRefreshConditionName("refreshable");
+		view.setRefreshIfCondition("refreshable");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
 	}
@@ -1203,8 +1270,9 @@ class ViewValidatorTest {
 	void hboxInsideTabWithCondition_noException() {
 		document.getConditions().put("isVisible", new ConditionImpl());
 		Tab tab = new Tab();
+		tab.setTitle("Details");
 		HBox hbox = new HBox();
-		hbox.setInvisibleConditionName("isVisible");
+		hbox.setXmlInvisibleCondition("isVisible");
 		tab.getContained().add(hbox);
 		TabPane tabPane = new TabPane();
 		tabPane.getTabs().add(tab);
@@ -1218,7 +1286,7 @@ class ViewValidatorTest {
 		document.getConditions().put("flag", new ConditionImpl());
 		Spacer s1 = new Spacer();
 		Spacer s2 = new Spacer();
-		s2.setInvisibleConditionName("flag");
+		s2.setXmlInvisibleCondition("flag");
 		Blurb b = new Blurb();
 		b.setMarkup("<p>ok</p>");
 		view.getContained().add(s1);
@@ -1305,6 +1373,7 @@ class ViewValidatorTest {
 	@Test
 	void parameter_withValue_noException() {
 		Parameter parameter = mock(Parameter.class);
+		when(parameter.getName()).thenReturn("p");
 		when(parameter.getValue()).thenReturn("v");
 
 		ViewValidator v = newValidator();
@@ -1326,6 +1395,7 @@ class ViewValidatorTest {
 	@Test
 	void filterParameter_operatorIsNullWithoutValueOrBinding_noException() {
 		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn("name");
 		when(parameter.getOperator()).thenReturn(FilterOperator.isNull);
 
 		ViewValidator v = newValidator();
@@ -1596,6 +1666,7 @@ class ViewValidatorTest {
 		when(repository.getChartModel(any(), any(), eq("existingChartModel"), eq(false))).thenReturn(mock(ChartModel.class));
 
 		Chart chart = new Chart();
+		chart.setType(ChartType.pie);
 		chart.setModelName("existingChartModel");
 		view.getContained().add(chart);
 
@@ -1648,6 +1719,16 @@ class ViewValidatorTest {
 
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitCustomAction(action));
+	}
+
+	@Test
+	void customAction_missingResourceName_throws() {
+		ActionImpl action = new ActionImpl();
+		action.setName("NoClass");
+
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitCustomAction(action));
+		assertTrue(e.getMessage().contains("className is required"));
 	}
 
 	@Test
@@ -1892,6 +1973,7 @@ class ViewValidatorTest {
 	void sidebar_withWidth_noException() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
@@ -1927,11 +2009,11 @@ class ViewValidatorTest {
 	void setAndToggleEventActions_invalidBinding_throw() {
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("missingBool");
-		setDisabled.setDisabledConditionName("flag");
+		setDisabled.setXmlDisabledCondition("flag");
 
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("missingBool");
-		setInvisible.setInvisibleConditionName("flag");
+		setInvisible.setXmlInvisibleCondition("flag");
 
 		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();
 		toggleDisabled.setBinding("missingBool");
@@ -2006,7 +2088,8 @@ class ViewValidatorTest {
 	void sidebar_unknownInvisibleCondition_throws() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
-		sidebar.setInvisibleConditionName("missingCondition");
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
+		sidebar.setXmlInvisibleCondition("missingCondition");
 
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitSidebar(sidebar, true, true));
@@ -2057,7 +2140,8 @@ class ViewValidatorTest {
 		document.getConditions().put("flag", new ConditionImpl());
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(300));
-		sidebar.setInvisibleConditionName("flag");
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
+		sidebar.setXmlInvisibleCondition("flag");
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
@@ -2071,7 +2155,7 @@ class ViewValidatorTest {
 		Combo combo = new Combo();
 		ContentUpload content = new ContentUpload();
 		Radio radio = new Radio();
-		RichText richText = new RichText();
+		RichText richText = sizedRichText(null); // sized so that only the missing binding throws
 		Slider slider = new Slider();
 		Spinner spinner = new Spinner();
 		TextArea textArea = new TextArea();
@@ -2082,6 +2166,70 @@ class ViewValidatorTest {
 		assertThrows(MetaDataException.class, () -> v.visitSpinner(spinner, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitTextArea(textArea, true, true));
 		assertThrows(MetaDataException.class, () -> v.visitTextField(textField, true, true));
+	}
+
+	private static RichText sizedRichText(String binding) {
+		RichText richText = new RichText();
+		richText.setBinding(binding);
+		richText.setPixelWidth(Integer.valueOf(400));
+		richText.setPixelHeight(Integer.valueOf(160));
+		richText.setMinPixelHeight(Integer.valueOf(120));
+		richText.setMaxPixelHeight(Integer.valueOf(260));
+		return richText;
+	}
+
+	private void assertRichTextSizeRequired(RichText richText, String sizeAttributeName) {
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitRichText(richText, true, true));
+		assertTrue(e.getMessage().startsWith("RichText notes"), e.getMessage());
+		assertTrue(e.getMessage().endsWith(" - " + sizeAttributeName + " is required."), e.getMessage());
+	}
+
+	@Test
+	void richText_missingPixelWidth_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setPixelWidth(null);
+		assertRichTextSizeRequired(richText, "pixelWidth");
+	}
+
+	@Test
+	void richText_missingPixelHeight_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setPixelHeight(null);
+		assertRichTextSizeRequired(richText, "pixelHeight");
+	}
+
+	@Test
+	void richText_missingMinPixelHeight_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setMinPixelHeight(null);
+		assertRichTextSizeRequired(richText, "minPixelHeight");
+	}
+
+	@Test
+	void richText_missingMaxPixelHeight_throws() {
+		RichText richText = sizedRichText("notes");
+		richText.setMaxPixelHeight(null);
+		assertRichTextSizeRequired(richText, "maxPixelHeight");
+	}
+
+	@Test
+	void richText_allSizesOnMarkup_noException() {
+		org.skyve.impl.metadata.model.document.field.Markup notes = new org.skyve.impl.metadata.model.document.field.Markup();
+		notes.setName("notes");
+		document.putAttribute(notes);
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitRichText(sizedRichText("notes"), true, true));
+	}
+
+	@Test
+	void richText_defaultWidgetOfMarkup_noException() {
+		org.skyve.impl.metadata.model.document.field.Markup notes = new org.skyve.impl.metadata.model.document.field.Markup();
+		notes.setName("notes");
+		document.putAttribute(notes);
+		RichText richText = (RichText) notes.getDefaultInputWidget();
+		ViewValidator v = newValidator();
+		assertDoesNotThrow(() -> v.visitRichText(richText, true, true));
 	}
 
 	@Test
@@ -2144,6 +2292,7 @@ class ViewValidatorTest {
 		stat.setRelativeFile("images/logo.png");
 		DialogButton dialog = new DialogButton();
 		dialog.setDialogName("myDialog");
+		dialog.setDisplayName("Open Dialog");
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitDynamicImage(dynamic, true, true));
@@ -2285,6 +2434,7 @@ class ViewValidatorTest {
 	void visitNoOpWidgets_noException() {
 		DataGridContainerColumn containerColumn = new DataGridContainerColumn();
 		Inject inject = new Inject();
+		inject.setScript("console.log('injected');");
 
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitDataGridContainerColumn(containerColumn, true, true));
@@ -2521,6 +2671,8 @@ class ViewValidatorTest {
 		addChildDoc("ItemDoc", markupAttr);
 		HTML html = new HTML();
 		html.setBinding("body");
+		html.setPixelWidth(Integer.valueOf(400));
+		html.setPixelHeight(Integer.valueOf(200));
 		addDataGrid("items", html);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2646,7 +2798,9 @@ class ViewValidatorTest {
 	void link_resourceReference_noException() {
 		Link link = new Link();
 		link.setValue("Download");
-		link.setReference(new org.skyve.impl.metadata.view.reference.ResourceReference());
+		org.skyve.impl.metadata.view.reference.ResourceReference reference = new org.skyve.impl.metadata.view.reference.ResourceReference();
+		reference.setRelativeFile("docs/guide.pdf");
+		link.setReference(reference);
 		view.getContained().add(link);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2656,7 +2810,9 @@ class ViewValidatorTest {
 	void link_implicitActionReference_noException() {
 		Link link = new Link();
 		link.setValue("Go");
-		link.setReference(new org.skyve.impl.metadata.view.reference.ImplicitActionReference());
+		org.skyve.impl.metadata.view.reference.ImplicitActionReference reference = new org.skyve.impl.metadata.view.reference.ImplicitActionReference();
+		reference.setImplicitActionName(ImplicitActionName.Save);
+		link.setReference(reference);
 		view.getContained().add(link);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2666,7 +2822,9 @@ class ViewValidatorTest {
 	void link_externalReference_noException() {
 		Link link = new Link();
 		link.setValue("Visit");
-		link.setReference(new org.skyve.impl.metadata.view.reference.ExternalReference());
+		org.skyve.impl.metadata.view.reference.ExternalReference reference = new org.skyve.impl.metadata.view.reference.ExternalReference();
+		reference.setHref("https://example.com");
+		link.setReference(reference);
 		view.getContained().add(link);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -2732,6 +2890,47 @@ class ViewValidatorTest {
 		action.setResourceName("SomeReport");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+	}
+
+	@Test
+	void reportAction_missingReportName_throws() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		ActionImpl action = new ActionImpl();
+		action.setImplicitName(ImplicitActionName.Report);
+		// no resource (report) name
+		ParameterImpl modP = new ParameterImpl();
+		modP.setName(AbstractWebContext.MODULE_NAME);
+		modP.setValue("testMod");
+		action.getParameters().add(modP);
+		ParameterImpl docP = new ParameterImpl();
+		docP.setName(AbstractWebContext.DOCUMENT_NAME);
+		docP.setValue("Invoice");
+		action.getParameters().add(docP);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+		assertTrue(e.getMessage().contains("is missing the reportName"), e.getMessage());
+		verify(repository, never()).getReportFileName(any(), any(), any());
+	}
+
+	@Test
+	void reportAction_blankReportNameFromXml_throws() {
+		DocumentImpl reportDoc = new DocumentImpl();
+		reportDoc.setOwningModuleName("testMod");
+		reportDoc.setName("Invoice");
+		when(customer.getModule("testMod")).thenReturn(module);
+		when(module.getDocument(customer, "Invoice")).thenReturn(reportDoc);
+		org.skyve.impl.metadata.repository.view.actions.ReportAction reportAction = new org.skyve.impl.metadata.repository.view.actions.ReportAction();
+		reportAction.setModuleName("testMod");
+		reportAction.setDocumentName("Invoice");
+		reportAction.setReportName("   ");
+		ActionImpl action = reportAction.toMetaDataAction();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitReportAction(action));
+		assertTrue(e.getMessage().contains("is missing the reportName"), e.getMessage());
 	}
 
 	@Test
@@ -2823,6 +3022,7 @@ class ViewValidatorTest {
 	void sidebar_responsiveWidth_noException() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setResponsiveWidth(Integer.valueOf(6));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
 	}
@@ -2831,6 +3031,7 @@ class ViewValidatorTest {
 	void sidebar_percentageWidth_noException() {
 		Sidebar sidebar = new Sidebar();
 		sidebar.setPercentageWidth(Integer.valueOf(50));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitSidebar(sidebar, true, true));
 	}
@@ -2869,7 +3070,8 @@ class ViewValidatorTest {
 	void dialogButton_unknownDisabledCondition_throws() {
 		DialogButton button = new DialogButton();
 		button.setDialogName("confirmDelete");
-		button.setDisabledConditionName("noSuchCond");
+		button.setDisplayName("Delete");
+		button.setXmlDisabledCondition("noSuchCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitDialogButton(button, true, true));
 	}
@@ -2880,7 +3082,7 @@ class ViewValidatorTest {
 	void form_withDisabledCondition_noException() {
 		document.getConditions().put("formDisabled", new ConditionImpl());
 		Form form = new Form();
-		form.setDisabledConditionName("formDisabled");
+		form.setXmlDisabledCondition("formDisabled");
 		FormRow row = new FormRow();
 		FormItem item = new FormItem();
 		item.setWidget(new Spacer());
@@ -2894,7 +3096,7 @@ class ViewValidatorTest {
 	@Test
 	void form_missingCondition_throws() {
 		Form form = new Form();
-		form.setDisabledConditionName("missingCond");
+		form.setXmlDisabledCondition("missingCond");
 		FormRow row = new FormRow();
 		FormItem item = new FormItem();
 		item.setWidget(new Spacer());
@@ -2964,7 +3166,7 @@ class ViewValidatorTest {
 	void staticImage_unknownCondition_throws() {
 		StaticImage image = new StaticImage();
 		image.setRelativeFile("logo.png");
-		image.setInvisibleConditionName("missingCond");
+		image.setXmlInvisibleCondition("missingCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitStaticImage(image, true, true));
 	}
@@ -2973,7 +3175,7 @@ class ViewValidatorTest {
 	void dynamicImage_unknownInvisibleCondition_throws() {
 		org.skyve.impl.metadata.view.widget.DynamicImage image = new org.skyve.impl.metadata.view.widget.DynamicImage();
 		image.setName("chart");
-		image.setInvisibleConditionName("missingCond");
+		image.setXmlInvisibleCondition("missingCond");
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, () -> v.visitDynamicImage(image, true, true));
 	}
@@ -3052,11 +3254,11 @@ class ViewValidatorTest {
 		document.getConditions().put("dgFlag", new ConditionImpl());
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisabledConditionName("dgFlag");
-		grid.setDisableAddConditionName("dgFlag");
-		grid.setDisableEditConditionName("dgFlag");
-		grid.setDisableRemoveConditionName("dgFlag");
-		grid.setDisableZoomConditionName("dgFlag");
+		grid.setXmlDisabledCondition("dgFlag");
+		grid.setXmlDisableAddCondition("dgFlag");
+		grid.setXmlDisableEditCondition("dgFlag");
+		grid.setXmlDisableRemoveCondition("dgFlag");
+		grid.setXmlDisableZoomCondition("dgFlag");
 		view.getContained().add(grid);
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(v::visit);
@@ -3074,12 +3276,12 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
 		ListGrid grid = new ListGrid();
 		grid.setQueryName("crudQuery");
-		grid.setDisabledConditionName("crudFlag");
-		grid.setDisableAddConditionName("crudFlag");
-		grid.setDisableEditConditionName("crudFlag");
-		grid.setDisableZoomConditionName("crudFlag");
-		grid.setDisableRemoveConditionName("crudFlag");
-		grid.setPostRefreshConditionName("crudFlag");
+		grid.setXmlDisabledCondition("crudFlag");
+		grid.setXmlDisableAddCondition("crudFlag");
+		grid.setXmlDisableEditCondition("crudFlag");
+		grid.setXmlDisableZoomCondition("crudFlag");
+		grid.setXmlDisableRemoveCondition("crudFlag");
+		grid.setPostRefreshCondition("crudFlag");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitListGrid(grid, true, true));
 	}
@@ -3096,12 +3298,12 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
 		TreeGrid grid = new TreeGrid();
 		grid.setQueryName("treeQ");
-		grid.setDisabledConditionName("treeFlag");
-		grid.setDisableAddConditionName("treeFlag");
-		grid.setDisableEditConditionName("treeFlag");
-		grid.setDisableZoomConditionName("treeFlag");
-		grid.setDisableRemoveConditionName("treeFlag");
-		grid.setPostRefreshConditionName("treeFlag");
+		grid.setXmlDisabledCondition("treeFlag");
+		grid.setXmlDisableAddCondition("treeFlag");
+		grid.setXmlDisableEditCondition("treeFlag");
+		grid.setXmlDisableZoomCondition("treeFlag");
+		grid.setXmlDisableRemoveCondition("treeFlag");
+		grid.setPostRefreshCondition("treeFlag");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitTreeGrid(grid, true, true));
 	}
@@ -3118,8 +3320,8 @@ class ViewValidatorTest {
 		when(module.getDocument(customer, "TestDoc")).thenReturn(document);
 		ListRepeater repeater = new ListRepeater();
 		repeater.setQueryName("repQ");
-		repeater.setInvisibleConditionName("repFlag");
-		repeater.setPostRefreshConditionName("repFlag");
+		repeater.setXmlInvisibleCondition("repFlag");
+		repeater.setPostRefreshCondition("repFlag");
 		ViewValidator v = newValidator();
 		assertDoesNotThrow(() -> v.visitListRepeater(repeater, true, true));
 	}
@@ -3142,6 +3344,7 @@ class ViewValidatorTest {
 		model.setCategoryBinding(Bean.DOCUMENT_ID);
 		model.setValueBinding("amount");
 		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
 		chart.setModel(model);
 		view.getContained().add(chart);
 		ViewValidator v = newValidator();
@@ -3170,6 +3373,7 @@ class ViewValidatorTest {
 		model.setCategoryBinding(Bean.DOCUMENT_ID);
 		model.setValueBinding("amount");
 		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
 		chart.setModel(model);
 		view.getContained().add(chart);
 		ViewValidator v = newValidator();
@@ -3594,6 +3798,7 @@ class ViewValidatorTest {
 		model.setValueBinding("name");
 		model.setValueFunction(AggregateFunction.Count);
 		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
 		chart.setModel(model);
 		view.getContained().add(chart);
 		ViewValidator v = newValidator();
@@ -3660,10 +3865,10 @@ class ViewValidatorTest {
 		document.getConditions().put("showFlag", new ConditionImpl());
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("published");
-		setDisabled.setDisabledConditionName("showFlag");
+		setDisabled.setXmlDisabledCondition("showFlag");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("published");
-		setInvisible.setInvisibleConditionName("showFlag");
+		setInvisible.setXmlInvisibleCondition("showFlag");
 		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();
 		toggleDisabled.setBinding("published");
 		ToggleVisibilityEventAction toggleVisibility = new ToggleVisibilityEventAction();
@@ -3720,5 +3925,619 @@ class ViewValidatorTest {
 		view.getContained().add(hbox);
 		ViewValidator v = newValidator();
 		assertThrows(MetaDataException.class, v::visit);
+	}
+	private LookupDescription modelLookup() {
+		addAssociation("contact", "ContactDoc", "unusedReferenceQuery");
+		addTargetDocument("ContactDoc", null);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		lookup.setModelName("ContactsModel");
+		return lookup;
+	}
+
+	@Test
+	void lookupModelResolvesAgainstEnclosingDocument() {
+		LookupDescription lookup = modelLookup();
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+		verify(module, never()).getNullSafeMetaDataQuery(anyString());
+	}
+
+	@Test
+	void lookupRejectsQueryAndModelTogether() {
+		LookupDescription lookup = modelLookup();
+		lookup.setQuery("contacts");
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("query and a model"));
+	}
+
+	@Test
+	void lookupRejectsMissingModel() {
+		LookupDescription lookup = modelLookup();
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("ContactsModel"));
+	}
+
+	@Test
+	void lookupRejectsModelWithoutDrivingDocument() {
+		LookupDescription lookup = modelLookup();
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(mock(ListModel.class));
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("driving document"));
+	}
+
+	@Test
+	void lookupRejectsModelForDifferentDocument() {
+		LookupDescription lookup = modelLookup();
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("target document"));
+	}
+
+	@Test
+	void lookupRejectsUnprojectedModelDropdownColumn() {
+		LookupDescription lookup = modelLookup();
+		LookupDescriptionColumn dropdown = new LookupDescriptionColumn();
+		dropdown.setName("name");
+		lookup.getDropDownColumns().add(dropdown);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getName()).thenReturn("name");
+		when(model.getColumns()).thenReturn(List.of(column));
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("not projected"));
+	}
+
+	@Test
+	void lookupDerivesModelAccessAndPreservesSingularAccess() {
+		LookupDescription lookup = modelLookup();
+		view.getContained().add(lookup);
+		when(module.getName()).thenReturn("testMod");
+		newValidator(); // Consume the shared repository setup before exercising access derivation.
+		boolean accessControl = UtilImpl.ACCESS_CONTROL;
+		try {
+			UtilImpl.ACCESS_CONTROL = true;
+			view.resolve("desktop", customer, module, document, true);
+			Set<UserAccess> accesses = view.getAccesses(customer, document, "desktop");
+			assertTrue(accesses.contains(UserAccess.modelAggregate("testMod", "TestDoc", "ContactsModel")));
+			assertTrue(accesses.contains(UserAccess.singular("testMod", "ContactDoc")));
+			assertFalse(accesses.contains(UserAccess.queryAggregate("testMod", "unusedReferenceQuery")));
+			assertFalse(accesses.contains(UserAccess.documentAggregate("testMod", "ContactDoc")));
+		}
+		finally {
+			UtilImpl.ACCESS_CONTROL = accessControl;
+		}
+	}
+
+	@Test
+	void lookupModelInGridUsesCompoundBindingAndViewOwner() {
+		LookupDescription lookup = modelLookup();
+		addChildDoc("ItemDoc", document.getAttribute("contact"));
+		addDataGrid("items", lookup);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(newValidator()::visit);
+		verify(repository, org.mockito.Mockito.atLeastOnce()).getListModel(customer, document, "ContactsModel", false);
+	}
+
+	@Test
+	void lookupModelWithoutBindingInGridUsesCollectionTarget() {
+		DocumentImpl child = addChildDoc("ItemDoc", null);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		lookup.setModelName("ItemsModel");
+		addDataGrid("items", lookup);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ItemsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(child);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(newValidator()::visit);
+	}
+
+	@Test
+	void lookupRejectsSameNamedModelDocumentInDifferentModule() {
+		LookupDescription lookup = modelLookup();
+		DocumentImpl other = new DocumentImpl();
+		other.setName("ContactDoc");
+		other.setOwningModuleName("otherModule");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(other);
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("target document"));
+	}
+
+	@Test
+	void lookupWithoutQueryOrModelUsesAssociationQuery() {
+		LookupDescription lookup = modelLookup();
+		lookup.setModelName(null);
+		stubLookupQuery("unusedReferenceQuery", (DocumentImpl) module.getDocument(customer, "ContactDoc"));
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+		verify(module).getNullSafeMetaDataQuery("unusedReferenceQuery");
+		verify(repository, never()).getListModel(any(), any(), anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+	}
+
+	@Test
+	void lookupWithoutQueryOrModelInGridUsesDefaultQuery() {
+		DocumentImpl child = addChildDoc("ItemDoc", null);
+		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+		when(module.getDocumentDefaultQuery(customer, child.getName())).thenReturn(query);
+		when(query.getColumns()).thenReturn(List.of());
+		LookupDescription lookup = new LookupDescription();
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		addDataGrid("items", lookup);
+		assertDoesNotThrow(newValidator()::visit);
+		verify(module).getDocumentDefaultQuery(customer, "ItemDoc");
+	}
+
+	@Test
+	void lookupWithoutQueryOrModelInGridUsesNestedAssociationQuery() {
+		LookupDescription lookup = modelLookup();
+		lookup.setModelName(null);
+		addChildDoc("ItemDoc", document.getAttribute("contact"));
+		addDataGrid("items", lookup);
+		stubLookupQuery("unusedReferenceQuery", (DocumentImpl) module.getDocument(customer, "ContactDoc"));
+		assertDoesNotThrow(newValidator()::visit);
+		verify(module).getNullSafeMetaDataQuery("unusedReferenceQuery");
+	}
+
+	@Test
+	void lookupModelAcceptsProjectedDescriptionAndDropdownByBinding() {
+		LookupDescription lookup = modelLookup();
+		lookup.setDescriptionBinding("name");
+		Text name = new Text();
+		name.setName("name");
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		target.putAttribute(name);
+		LookupDescriptionColumn dropdown = new LookupDescriptionColumn();
+		dropdown.setName("name");
+		lookup.getDropDownColumns().add(dropdown);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getBinding()).thenReturn("name");
+		when(column.isProjected()).thenReturn(true);
+		when(model.getColumns()).thenReturn(List.of(column));
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+	}
+
+	@Test
+	void lookupModelRejectsUnprojectedDescription() {
+		LookupDescription lookup = modelLookup();
+		lookup.setDescriptionBinding("name");
+		Text name = new Text();
+		name.setName("name");
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		target.putAttribute(name);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.getName()).thenReturn("name");
+		when(model.getColumns()).thenReturn(List.of(column));
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("description binding of name which is not projected"));
+	}
+
+	@Test
+	void lookupModelRejectsMissingDropdownColumn() {
+		LookupDescription lookup = modelLookup();
+		LookupDescriptionColumn dropdown = new LookupDescriptionColumn();
+		dropdown.setName("missing");
+		lookup.getDropDownColumns().add(dropdown);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("drop down column of missing which is not defined"));
+	}
+
+	@Test
+	void lookupModelRejectsMissingDescriptionColumn() {
+		LookupDescription lookup = modelLookup();
+		lookup.setDescriptionBinding("name");
+		Text name = new Text();
+		name.setName("name");
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		target.putAttribute(name);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("description binding of name which is not defined"));
+	}
+
+	@Test
+	void lookupModelRejectsMissingBindingBeforeResolvingModel() {
+		LookupDescription lookup = new LookupDescription();
+		lookup.setModelName("ContactsModel");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+		MetaDataException failure = assertThrows(MetaDataException.class,
+				() -> newValidator().visitLookupDescription(lookup, true, true));
+		assertTrue(failure.getMessage().contains("binding"));
+		verify(repository, never()).getListModel(any(), any(), anyString(), org.mockito.ArgumentMatchers.anyBoolean());
+	}
+
+	@Test
+	void lookupModelWithCompoundFormBindingUsesViewOwner() {
+		LookupDescription lookup = modelLookup();
+		DocumentImpl intermediate = addTargetDocument("IntermediateDoc", document.getAttribute("contact"));
+		addAssociation("intermediate", intermediate.getName(), null);
+		lookup.setBinding("intermediate.contact");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(repository.getListModel(customer, document, "ContactsModel", false)).thenReturn(model);
+		DocumentImpl target = (DocumentImpl) module.getDocument(customer, "ContactDoc");
+		when(model.getDrivingDocument()).thenReturn(target);
+		when(model.getColumns()).thenReturn(List.of());
+		assertDoesNotThrow(() -> newValidator().visitLookupDescription(lookup, true, true));
+		verify(repository, never()).getListModel(customer, intermediate, "ContactsModel", false);
+	}
+
+	// ---- required values that metadata built in code can omit ----
+
+	private static void assertMessageContains(MetaDataException e, String expected) {
+		assertTrue(e.getMessage().contains(expected), e.getMessage());
+	}
+
+	private MetaDataException assertVisitThrows() {
+		ViewValidator v = newValidator();
+		return assertThrows(MetaDataException.class, v::visit);
+	}
+
+	@Test
+	void condition_baseDocumentModuleNotForCustomer_throws() {
+		DocumentImpl baseDocument = new DocumentImpl();
+		baseDocument.setOwningModuleName("otherMod");
+		baseDocument.setName("BaseDoc");
+
+		DocumentImpl childDocument = new DocumentImpl();
+		childDocument.setOwningModuleName("testMod");
+		childDocument.setName("ChildDoc");
+		Extends extension = new Extends();
+		extension.setDocumentName("BaseDoc");
+		childDocument.setExtends(extension);
+
+		when(module.getDocument(customer, "BaseDoc")).thenReturn(baseDocument);
+		when(repository.getModule(customer, "otherMod")).thenReturn(null);
+
+		Spacer s = new Spacer();
+		s.setXmlInvisibleCondition("baseFlag");
+		view.getContained().add(s);
+
+		ViewValidator v = newValidator(childDocument);
+		MetaDataException e = assertThrows(MetaDataException.class, v::visit);
+		assertMessageContains(e, "Module otherMod of document BaseDoc");
+		assertMessageContains(e, "does not exist for customer");
+	}
+
+	@Test
+	void button_iconShowActionVanishesAfterValidation_throwsIllegalState() {
+		ActionImpl action = new ActionImpl();
+		action.setName("act");
+		action.setIconStyleClass("fa fa-check");
+		ViewImpl spyView = org.mockito.Mockito.spy(view);
+		// first lookup validates the action exists, the second (for the icon) breaks the invariant
+		doReturn(action).doReturn(null).when(spyView).getAction("act");
+
+		Button btn = new Button();
+		btn.setActionName("act");
+		btn.setShow(ActionShow.icon);
+
+		ViewValidator v = new ViewValidator(spyView, repository, customer, document, "desktop");
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> v.visitButton(btn, true, true));
+		assertTrue(e.getMessage().contains("references a non-existent action act"), e.getMessage());
+	}
+
+	@Test
+	void dynamicImage_missingName_throws() {
+		org.skyve.impl.metadata.view.widget.DynamicImage image = new org.skyve.impl.metadata.view.widget.DynamicImage();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitDynamicImage(image, true, true));
+		assertMessageContains(e, " - name is required.");
+	}
+
+	@Test
+	void dialogButton_missingDisplayName_throws() {
+		DialogButton button = new DialogButton();
+		button.setDialogName("dlg");
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitDialogButton(button, true, true));
+		assertMessageContains(e, " - displayName is required.");
+	}
+
+	@Test
+	void chart_missingType_throws() {
+		when(repository.getChartModel(any(), any(), eq("existingChartModel"), eq(false))).thenReturn(mock(ChartModel.class));
+		Chart chart = new Chart();
+		chart.setModelName("existingChartModel");
+		view.getContained().add(chart);
+
+		assertMessageContains(assertVisitThrows(), " - type is required.");
+	}
+
+	@Test
+	void chart_inlineModelMissingLabel_throws() {
+		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
+		chart.setModel(new ChartBuilderMetaData());
+		view.getContained().add(chart);
+
+		assertMessageContains(assertVisitThrows(), " - label is required.");
+	}
+
+	private ChartBuilderMetaData addValidInlineChartModel() {
+		DocumentImpl chartDoc = new DocumentImpl();
+		chartDoc.setOwningModuleName("testMod");
+		chartDoc.setName("ChartDoc");
+		org.skyve.impl.metadata.model.document.field.Integer amount = new org.skyve.impl.metadata.model.document.field.Integer();
+		amount.setName("amount");
+		chartDoc.putAttribute(amount);
+		when(module.getDocument(any(), eq("ChartDoc"))).thenReturn(chartDoc);
+		ChartBuilderMetaData model = new ChartBuilderMetaData();
+		model.setLabel("Sales");
+		model.setModuleName("testMod");
+		model.setDocumentName("ChartDoc");
+		model.setCategoryBinding(Bean.DOCUMENT_ID);
+		model.setValueBinding("amount");
+		Chart chart = new Chart();
+		chart.setType(ChartType.bar);
+		chart.setModel(model);
+		view.getContained().add(chart);
+		return model;
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
+	void chart_temporalBucketMissingType_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.TemporalBucketMetaData bucket = new org.skyve.impl.metadata.view.model.chart.TemporalBucketMetaData();
+		bucket.setType(null); // the constructor defaults the type to day
+		model.setCategoryBucket(bucket);
+
+		assertMessageContains(assertVisitThrows(), " - type is required for temporalBucket.");
+	}
+
+	@Test
+	void chart_topMissingBy_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData top = new org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData();
+		top.setSort(org.skyve.metadata.SortDirection.ascending);
+		model.setTop(top);
+
+		assertMessageContains(assertVisitThrows(), " - by is required for top.");
+	}
+
+	@Test
+	void chart_topMissingSort_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData top = new org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData();
+		top.setBy(org.skyve.metadata.view.model.chart.OrderBy.value);
+		model.setTop(top);
+
+		assertMessageContains(assertVisitThrows(), " - sort is required for top.");
+	}
+
+	@Test
+	void chart_orderMissingBy_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData order = new org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData();
+		order.setSort(org.skyve.metadata.SortDirection.descending);
+		model.setOrder(order);
+
+		assertMessageContains(assertVisitThrows(), " - by is required for order.");
+	}
+
+	@Test
+	void chart_orderMissingSort_throws() {
+		ChartBuilderMetaData model = addValidInlineChartModel();
+		org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData order = new org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData();
+		order.setBy(org.skyve.metadata.view.model.chart.OrderBy.category);
+		model.setOrder(order);
+
+		assertMessageContains(assertVisitThrows(), " - sort is required for order.");
+	}
+
+	@Test
+	void html_missingPixelWidth_throws() {
+		HTML html = new HTML();
+		html.setBinding("text");
+		html.setPixelHeight(Integer.valueOf(100));
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitHTML(html, true, true));
+		assertMessageContains(e, " - pixelWidth is required.");
+	}
+
+	@Test
+	void html_missingPixelHeight_throws() {
+		HTML html = new HTML();
+		html.setBinding("text");
+		html.setPixelWidth(Integer.valueOf(100));
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitHTML(html, true, true));
+		assertMessageContains(e, " - pixelHeight is required.");
+	}
+
+	@Test
+	void lookupDescription_missingDescriptionBinding_throws() {
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitLookupDescription(lookup, true, true));
+		assertMessageContains(e, " - descriptionBinding is required.");
+	}
+
+	@Test
+	void parameter_missingName_throws() {
+		Parameter parameter = mock(Parameter.class);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitParameter(parameter, true, true));
+		assertMessageContains(e, " - name is required.");
+	}
+
+	@Test
+	void filterParameter_missingFilterBinding_throws() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitFilterParameter(parameter, true, true));
+		assertMessageContains(e, " - filterBinding is required.");
+	}
+
+	@Test
+	void filterParameter_missingOperator_throws() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn("status");
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitFilterParameter(parameter, true, true));
+		assertMessageContains(e, " - operator is required.");
+	}
+
+	private void addLink(org.skyve.impl.metadata.view.reference.Reference reference) {
+		Link link = new Link();
+		link.setValue("Go");
+		link.setReference(reference);
+		view.getContained().add(link);
+	}
+
+	@Test
+	void link_resourceReferenceMissingRelativeFile_throws() {
+		addLink(new org.skyve.impl.metadata.view.reference.ResourceReference());
+		assertMessageContains(assertVisitThrows(), " - relativeFile is required for a resource reference.");
+	}
+
+	@Test
+	void link_reportReferenceMissingModuleName_throws() {
+		ReportReference reference = new ReportReference();
+		reference.setDocumentName("TargetDoc");
+		reference.setReportName("report");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - moduleName is required for a report reference.");
+	}
+
+	@Test
+	void link_reportReferenceMissingDocumentName_throws() {
+		ReportReference reference = new ReportReference();
+		reference.setModuleName("testMod");
+		reference.setReportName("report");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - documentName is required for a report reference.");
+	}
+
+	@Test
+	void link_reportReferenceMissingReportName_throws() {
+		ReportReference reference = new ReportReference();
+		reference.setModuleName("testMod");
+		reference.setDocumentName("TargetDoc");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - reportName is required for a report reference.");
+	}
+
+	@Test
+	void link_implicitActionReferenceMissingName_throws() {
+		addLink(new org.skyve.impl.metadata.view.reference.ImplicitActionReference());
+		assertMessageContains(assertVisitThrows(), " - implicitActionName is required for an implicit action reference.");
+	}
+
+	@Test
+	void link_externalReferenceMissingHref_throws() {
+		addLink(new org.skyve.impl.metadata.view.reference.ExternalReference());
+		assertMessageContains(assertVisitThrows(), " - href is required for an external reference.");
+	}
+
+	@Test
+	void link_editViewReferenceMissingModuleName_throws() {
+		EditViewReference reference = new EditViewReference();
+		reference.setDocumentName("TargetDoc");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - moduleName is required for an edit view reference.");
+	}
+
+	@Test
+	void link_editViewReferenceMissingDocumentName_throws() {
+		EditViewReference reference = new EditViewReference();
+		reference.setModuleName("testMod");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - documentName is required for an edit view reference.");
+	}
+
+	@Test
+	void link_defaultListViewReferenceMissingModuleName_throws() {
+		DefaultListViewReference reference = new DefaultListViewReference();
+		reference.setDocumentName("TargetDoc");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - moduleName is required for a default list view reference.");
+	}
+
+	@Test
+	void link_defaultListViewReferenceMissingDocumentName_throws() {
+		DefaultListViewReference reference = new DefaultListViewReference();
+		reference.setModuleName("testMod");
+		addLink(reference);
+		assertMessageContains(assertVisitThrows(), " - documentName is required for a default list view reference.");
+	}
+
+	@Test
+	void link_actionReferenceMissingActionName_throws() {
+		addLink(new ActionReference());
+		assertMessageContains(assertVisitThrows(), " - action is required for an action reference.");
+	}
+
+	@Test
+	void tab_missingTitle_throws() {
+		Tab tab = new Tab();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitTab(tab, true, true));
+		assertMessageContains(e, " - title is required.");
+	}
+
+	@Test
+	void inject_missingScript_throws() {
+		Inject inject = new Inject();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitInject(inject, true, true));
+		assertMessageContains(e, " - script is required.");
+	}
+
+	@Test
+	void serverSideEventAction_missingActionName_throws() {
+		ServerSideActionEventAction server = new ServerSideActionEventAction();
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitServerSideActionEventAction(server, true, true));
+		assertMessageContains(e, "[server] event action in an event handler");
+		assertMessageContains(e, " - action is required.");
+	}
+
+	@Test
+	void sidebar_missingFloatingPixelWidthBreakpoint_throws() {
+		Sidebar sidebar = new Sidebar();
+		sidebar.setPixelWidth(Integer.valueOf(300));
+		ViewValidator v = newValidator();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> v.visitSidebar(sidebar, true, true));
+		assertMessageContains(e, " - floatingPixelWidthBreakpoint is required.");
 	}
 }

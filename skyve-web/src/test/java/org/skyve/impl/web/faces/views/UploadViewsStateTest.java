@@ -11,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -22,11 +24,12 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.cache.ConversationCacheConfig;
@@ -42,6 +45,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.RequestUxUiSelectionTestUtil;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadAffordance;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadCategory;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadKind;
@@ -49,7 +53,11 @@ import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadMode;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.util.JSON;
+import org.skyve.web.UserAgentType;
 
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
@@ -100,8 +108,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void contentUploadPostConstructSetsSanitisedStateWithoutSession() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -123,9 +131,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void contentUploadPostConstructDetectsSessionUserAccess() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
-		HttpSession session = Mockito.mock(HttpSession.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpSession session = mock(HttpSession.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(session);
 		when(session.getAttribute(org.skyve.web.WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(new Object());
@@ -144,7 +152,7 @@ class UploadViewsStateTest {
 	void contentUploadSuccessScriptUpdatesSmartClientCompanionBeforeContentId() throws Exception {
 		ContentUploadView view = new ContentUploadView();
 		setField(ContentUploadView.class, view, "companionBinding", "_attachment_media");
-		Bean bean = Mockito.mock(Bean.class);
+		Bean bean = mock(Bean.class);
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
 		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "user", "biz", "attachment")
@@ -170,7 +178,7 @@ class UploadViewsStateTest {
 	@Test
 	void contentUploadSuccessScriptOmitsCompanionAndEscapesFileNameWhenNoCompanionBinding() {
 		ContentUploadView view = new ContentUploadView();
-		Bean bean = Mockito.mock(Bean.class);
+		Bean bean = mock(Bean.class);
 		when(bean.getBizModule()).thenReturn("admin");
 		when(bean.getBizDocument()).thenReturn("Contact");
 		AttachmentContent content = new AttachmentContent("demo", "admin", "Contact", null, "user", "biz", "attachment")
@@ -188,8 +196,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedImageUploadPostConstructSetsSanitisedStateWithoutSession() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -213,8 +221,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadPostConstructSelectsImageLimitsFromRouteState() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -242,8 +250,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadPostConstructSelectsImageLimitsForCameraCaptureFallback() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -272,8 +280,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadPostConstructSelectsVideoLimitsForVideoCaptureFallback() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -303,8 +311,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadPostConstructSelectsGenericContentLimitsForLinkRoute() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -332,8 +340,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void captureAllAutoRouteExposesGenericCameraAndVideoAffordances() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -363,8 +371,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void captureAllLinkRouteExposesGenericCameraAndVideoAffordances() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -397,8 +405,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void captureAllAutoRouteSelectedCameraAffordanceUsesImageLimits() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -425,8 +433,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void captureAllAutoRouteSelectedVideoAffordanceUsesVideoLimits() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -453,8 +461,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void captureAllImageRouteExposesOnlyGenericAndCameraAffordances() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -479,8 +487,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void captureAllVideoRouteExposesOnlyGenericAndVideoAffordances() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -505,8 +513,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void selectedAffordanceCannotBypassDisplayCaptureContract() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -524,8 +532,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void selectedAffordanceRejectsUnknownPostedValue() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -558,13 +566,13 @@ class UploadViewsStateTest {
 
 	@Test
 	void imageModeRejectsNonImageFileNamesThroughImageWhitelist() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 		TestContentUploadView view = new TestContentUploadView();
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "contentBinding", "photo");
@@ -581,13 +589,13 @@ class UploadViewsStateTest {
 
 	@Test
 	void imageModeStopsValidationWhenBaseUploadValidationFails() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 		TestContentUploadView view = new TestContentUploadView();
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "contentBinding", "photo");
@@ -604,13 +612,13 @@ class UploadViewsStateTest {
 
 	@Test
 	void videoModeRejectsNonVideoUploadsAfterBaseValidationPasses() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 		TestContentUploadView view = new TestContentUploadView();
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		String originalVideoRegex = UtilImpl.UPLOADS_VIDEO_WHITELIST_REGEX;
 
 		try {
@@ -635,13 +643,13 @@ class UploadViewsStateTest {
 
 	@Test
 	void videoModeAcceptsVideoUploadsAndBypassesImageCropperValidation() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 		TestContentUploadView view = new TestContentUploadView();
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "contentBinding", "clip");
@@ -660,12 +668,12 @@ class UploadViewsStateTest {
 	}
 
 	@Test
-	void contentUploadHandleFileUploadStopsWhenValidationFails() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
+	void contentUploadHandleFileUploadStopsWhenValidationFails() {
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(event.getFile()).thenReturn(file);
 		doReturn(Long.valueOf((UtilImpl.UPLOADS_CONTENT_MAXIMUM_SIZE_IN_MB * AbstractUploadView.MB_IN_BYTES) + 1L)).when(file).getSize();
@@ -686,10 +694,10 @@ class UploadViewsStateTest {
 
 	@Test
 	void contentUploadHandleFileUploadRequiresUploadedFile() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
 
 		when(event.getFile()).thenReturn(null);
 
@@ -698,8 +706,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadPostConstructSelectsVideoLimitsFromRouteState() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -727,14 +735,14 @@ class UploadViewsStateTest {
 
 	@Test
 	void actionUploadDefaultsAndNoAccessBranchAreStable() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "uploadKind", "action");
 		setField(ContentUploadView.class, view, "action", "uploadAction");
@@ -760,15 +768,15 @@ class UploadViewsStateTest {
 
 	@Test
 	void actionUploadValidationFailureStopsBeforeRequestLookup() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "uploadKind", "action");
 		setField(ContentUploadView.class, view, "action", "uploadAction");
@@ -787,15 +795,15 @@ class UploadViewsStateTest {
 
 	@Test
 	void actionUploadShowsMalformedUrlWhenRouteStateIsMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "uploadKind", "action");
 		setField(ContentUploadView.class, view, "action", "uploadAction");
@@ -815,17 +823,17 @@ class UploadViewsStateTest {
 
 	@Test
 	void actionUploadShowsMalformedUrlWhenConversationMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		when(externalContext.getRequest()).thenReturn(request);
 		FacesContextBridge.setCurrent(context);
 
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 		setField(AbstractUploadView.class, view, "context", "missing-context");
 		setField(ContentUploadView.class, view, "uploadKind", "action");
 		setField(ContentUploadView.class, view, "action", "uploadAction");
@@ -844,7 +852,7 @@ class UploadViewsStateTest {
 	@Test
 	void addActionUploadProblemsCopiesErrorsAndWarnings() throws Exception {
 		ContentUploadView view = new ContentUploadView();
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		UploadException exception = new UploadException();
 		UploadException.Problem error = new UploadException.Problem("bad value", "row 1");
 		UploadException.Problem warning = new UploadException.Problem("odd value", "row 2");
@@ -862,7 +870,7 @@ class UploadViewsStateTest {
 	@Test
 	void addActionUploadProblemsUsesWarningSummaryWhenOnlyWarningsExist() throws Exception {
 		ContentUploadView view = new ContentUploadView();
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		UploadException exception = new UploadException();
 		UploadException.Problem warning = new UploadException.Problem("odd value", "row 2");
 		exception.addWarning(warning);
@@ -876,9 +884,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void addActionUploadSuccessFormatsKilobytesAndMegabytes() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		UploadedFile small = Mockito.mock(UploadedFile.class);
-		UploadedFile large = Mockito.mock(UploadedFile.class);
+		FacesContext context = mock(FacesContext.class);
+		UploadedFile small = mock(UploadedFile.class);
+		UploadedFile large = mock(UploadedFile.class);
 		when(small.getFileName()).thenReturn("small.csv");
 		doReturn(Long.valueOf(2048L)).when(small).getSize();
 		when(large.getFileName()).thenReturn("large.csv");
@@ -887,14 +895,14 @@ class UploadViewsStateTest {
 		invokeActionUploadSuccess(small, context);
 		invokeActionUploadSuccess(large, context);
 
-		verify(context, Mockito.times(2)).addMessage(isNull(), any(FacesMessage.class));
+		verify(context, times(2)).addMessage(isNull(), any(FacesMessage.class));
 	}
 
 	@Test
 	void baseUploadValidationAcceptsAllowedFile() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
 		when(file.getFileName()).thenReturn("notes.txt");
 
@@ -904,9 +912,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void baseUploadValidationRejectsOversizedFile() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(AbstractUploadView.MB_IN_BYTES + 1L)).when(file).getSize();
 		when(file.getFileName()).thenReturn("notes.txt");
 
@@ -915,10 +923,11 @@ class UploadViewsStateTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // one test per hidden-name shape, so the report names the shape that got through
 	void baseUploadValidationRejectsHiddenPathSegment() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
 		when(file.getFileName()).thenReturn("uploads/.secret.txt");
 
@@ -928,9 +937,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void baseUploadValidationRejectsLeadingHiddenFileName() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
 		when(file.getFileName()).thenReturn(".secret.txt");
 
@@ -940,9 +949,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void baseUploadValidationRejectsHiddenBackslashPathSegment() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
 		when(file.getFileName()).thenReturn("uploads\\.secret.txt");
 
@@ -952,9 +961,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void baseUploadValidationAllowsNullFileNameWhenSizeIsValid() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
 		when(file.getFileName()).thenReturn(null);
 
@@ -964,9 +973,9 @@ class UploadViewsStateTest {
 
 	@Test
 	void baseUploadValidationRejectsWhitelistMismatch() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		TestUploadView view = new TestUploadView(".*\\.txt", 1);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		UploadedFile file = mock(UploadedFile.class);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
 		when(file.getFileName()).thenReturn("document.pdf");
 
@@ -1066,8 +1075,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadViewActionRouteUsesActionStateAndFileLimits() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -1092,14 +1101,14 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedActionUploadReturnsBeforeReadingEventWhenAccessIsMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
 		setField(AbstractUploadView.class, view, "context", "ctx");
 		setField(ContentUploadView.class, view, "uploadKind", "action");
 		setField(ContentUploadView.class, view, "action", "uploadAction");
@@ -1112,11 +1121,11 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedActionUploadStopsWhenValidationFails() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
 		setField(ContentUploadView.class, view, "uploadState", UnifiedUploadState.fromRoute("action",
@@ -1140,11 +1149,11 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedActionUploadShowsMalformedUrlMessageWhenActionIsCleared() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
 		setField(AbstractUploadView.class, view, "context", "ctx");
@@ -1170,13 +1179,13 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedActionUploadShowsMalformedUrlMessageWhenConversationMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getRequest()).thenReturn(request);
@@ -1204,8 +1213,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadViewActionCameraRouteUsesImageLimits() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -1233,8 +1242,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void unifiedUploadViewActionVideoRouteUsesVideoLimits() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -1270,9 +1279,8 @@ class UploadViewsStateTest {
 						() -> UnifiedUploadState.fromRoute("boundContent", "ctx", null, "attachment", null, "video", "camera", null, null, null));
 		assertThrows(IllegalArgumentException.class,
 						() -> UnifiedUploadState.fromRoute("boundContent", "ctx", null, "attachment", null, null, "audio", null, null, null));
-		assertThrows(IllegalArgumentException.class,
-						() -> UnifiedUploadState.fromRoute("boundContent", "ctx", null, "attachment", null, null, null, null, null, null)
-													.categoryFor(UploadAffordance.camera));
+		UnifiedUploadState noAffordances = UnifiedUploadState.fromRoute("boundContent", "ctx", null, "attachment", null, null, null, null, null, null);
+		assertThrows(IllegalArgumentException.class, () -> noAffordances.categoryFor(UploadAffordance.camera));
 	}
 
 	@Test
@@ -1289,8 +1297,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void actionUploadPostConstructSanitisesActionParameter() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -1310,8 +1318,8 @@ class UploadViewsStateTest {
 
 	@Test
 	void bizportImportPostConstructSanitisesActionParameter() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
@@ -1330,14 +1338,14 @@ class UploadViewsStateTest {
 
 	@Test
 	void actionUploadHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "context", "missingContext");
 		setField(ContentUploadView.class, view, "uploadKind", "action");
@@ -1355,11 +1363,11 @@ class UploadViewsStateTest {
 
 	@Test
 	void contentUploadHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
 		setField(ContentUploadView.class, view, "contentBinding", "contentId");
@@ -1374,13 +1382,13 @@ class UploadViewsStateTest {
 
 	@Test
 	void contentUploadHandleFileUploadShowsMalformedUrlMessageWhenConversationMissing() throws Exception {
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getRequest()).thenReturn(request);
@@ -1403,18 +1411,18 @@ class UploadViewsStateTest {
 		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
 		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
 		Path cacheDirectory = Files.createTempDirectory("content-upload-cache");
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		HttpSession session = Mockito.mock(HttpSession.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
 		MockWebContext webContext = new MockWebContext();
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		HashMap<String, Object> values = new HashMap<>();
 		values.put(Bean.DOCUMENT_ID, "bean-1");
 		Bean bean = new DynamicBean("test", "Doc", values);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getRequest()).thenReturn(request);
@@ -1437,7 +1445,7 @@ class UploadViewsStateTest {
 			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
 			DefaultCaching.get().shutdown();
 			DefaultCaching.get().startup();
-			StateUtil.cacheConversation(webContext);
+			StateUtil.commitAndCacheConversation(webContext);
 			setField(AbstractUploadView.class, view, "context", webContext.getWebId());
 			bindPersistenceToThread(persistence);
 
@@ -1462,28 +1470,103 @@ class UploadViewsStateTest {
 	}
 
 	@Test
+	void contentUploadChecksContentAccessForTheUnsanitisedContentBinding() throws Exception {
+		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
+		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
+		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
+		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
+		Path cacheDirectory = Files.createTempDirectory("content-upload-access-cache");
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
+		MockWebContext webContext = new MockWebContext();
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		HashMap<String, Object> values = new HashMap<>();
+		values.put(Bean.DOCUMENT_ID, "bean-1");
+		Bean bean = new DynamicBean("test", "Doc", values);
+		ContentUploadView view = new ContentUploadView();
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
+
+		when(context.getExternalContext()).thenReturn(externalContext);
+		when(externalContext.getRequest()).thenReturn(request);
+		when(request.getSession(false)).thenReturn(session);
+		when(session.getId()).thenReturn(webContext.getSessionId());
+		RequestUxUiSelectionTestUtil.install(request,
+												UserAgentType.desktop,
+												false,
+												UxUi.newPrimeFaces(UxUi.DESKTOP_NAME, "editorial", "skyve", "blue"));
+		when(persistence.getUser()).thenReturn(user);
+		// content access is granted, but the user has no customer to check document access with
+		doReturn(Boolean.TRUE).when(user).canAccess(UserAccess.content("test", "Doc", "attachment.contentId"), UxUi.DESKTOP_NAME);
+		FacesContextBridge.setCurrent(context);
+		setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
+		setField(ContentUploadView.class, view, "contentBinding", "attachment_contentId");
+		when(event.getFile()).thenReturn(file);
+		doReturn(Long.valueOf(1024L)).when(file).getSize();
+		when(file.getFileName()).thenReturn("ok.txt");
+		when(file.getContent()).thenReturn(new byte[] {1, 2, 3});
+		when(file.getContentType()).thenReturn("text/plain");
+		webContext.setCurrentBean(bean);
+
+		try {
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = true;
+			UtilImpl.CACHE_DIRECTORY = cacheDirectory.toString() + File.separator;
+			UtilImpl.SESSION_CACHE = new SessionCacheConfig(100, 10);
+			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
+			DefaultCaching.get().shutdown();
+			DefaultCaching.get().startup();
+			StateUtil.commitAndCacheConversation(webContext);
+			setField(AbstractUploadView.class, view, "context", webContext.getWebId());
+			bindPersistenceToThread(persistence);
+
+			assertDoesNotThrow(() -> view.handleFileUpload(event));
+		}
+		finally {
+			unbindPersistenceFromThread();
+			DefaultCaching.get().shutdown();
+			UtilImpl.FORCE_NON_PERSISTENT_CACHING = originalForceNonPersistentCaching;
+			UtilImpl.CACHE_DIRECTORY = originalCacheDirectory;
+			UtilImpl.SESSION_CACHE = originalSessionCache;
+			UtilImpl.CONVERSATION_CACHE = originalConversationCache;
+			try (Stream<Path> paths = Files.walk(cacheDirectory)) {
+				paths.sorted((a, b) -> b.compareTo(a))
+						.map(Path::toFile)
+						.forEach(File::delete);
+			}
+		}
+
+		verify(user).canAccess(UserAccess.content("test", "Doc", "attachment.contentId"), UxUi.DESKTOP_NAME);
+		verify(user).getCustomer();
+		verify(persistence).rollback();
+		verify(context).addMessage(isNull(), any());
+	}
+
+	@Test
 	void actionUploadRollsBackAndReportsMessageWhenActionDenied() throws Exception {
 		boolean originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
 		String originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 		SessionCacheConfig originalSessionCache = UtilImpl.SESSION_CACHE;
 		ConversationCacheConfig originalConversationCache = UtilImpl.CONVERSATION_CACHE;
 		Path cacheDirectory = Files.createTempDirectory("action-upload-cache");
-		FacesContext context = Mockito.mock(FacesContext.class);
-		ExternalContext externalContext = Mockito.mock(ExternalContext.class);
-		HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
-		HttpSession session = Mockito.mock(HttpSession.class);
+		FacesContext context = mock(FacesContext.class);
+		ExternalContext externalContext = mock(ExternalContext.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpSession session = mock(HttpSession.class);
 		MockWebContext webContext = new MockWebContext();
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		User user = Mockito.mock(User.class);
-		CustomerImpl customer = Mockito.mock(CustomerImpl.class);
-		Module module = Mockito.mock(Module.class);
-		Document document = Mockito.mock(Document.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
 		HashMap<String, Object> values = new HashMap<>();
 		values.put(Bean.DOCUMENT_ID, "bean-1");
 		Bean bean = new DynamicBean("test", "Doc", values);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(context.getExternalContext()).thenReturn(externalContext);
 		when(externalContext.getSession(false)).thenReturn(null);
@@ -1511,7 +1594,7 @@ class UploadViewsStateTest {
 			UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(100, 10);
 			DefaultCaching.get().shutdown();
 			DefaultCaching.get().startup();
-			StateUtil.cacheConversation(webContext);
+			StateUtil.commitAndCacheConversation(webContext);
 			setField(AbstractUploadView.class, view, "context", webContext.getWebId());
 			view.postConstruct();
 			setField(AbstractUploadView.class, view, "canAccess", Boolean.TRUE);
@@ -1539,11 +1622,11 @@ class UploadViewsStateTest {
 
 	@Test
 	void contentUploadHandleFileUploadReturnsWhenAccessIsMissing() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		ContentUploadView view = new ContentUploadView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(event.getFile()).thenReturn(file);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
@@ -1556,11 +1639,11 @@ class UploadViewsStateTest {
 
 	@Test
 	void bizportImportHandleFileUploadShowsMalformedUrlMessageWhenContextMissing() {
-		FacesContext context = Mockito.mock(FacesContext.class);
+		FacesContext context = mock(FacesContext.class);
 		FacesContextBridge.setCurrent(context);
 		BizportImportView view = new BizportImportView();
-		FileUploadEvent event = Mockito.mock(FileUploadEvent.class);
-		UploadedFile file = Mockito.mock(UploadedFile.class);
+		FileUploadEvent event = mock(FileUploadEvent.class);
+		UploadedFile file = mock(UploadedFile.class);
 
 		when(event.getFile()).thenReturn(file);
 		doReturn(Long.valueOf(1024L)).when(file).getSize();
@@ -1569,6 +1652,38 @@ class UploadViewsStateTest {
 		assertDoesNotThrow(() -> view.handleFileUpload(event));
 
 		verify(context).addMessage(isNull(), any());
+	}
+
+	/**
+	 * The messages carried to the view as an upload page closes keep the page's text and severities:
+	 * HTML markup is not escaped again (the page's growl shows it unescaped), and the JSON holds no {@code <}, {@code >}
+	 * or {@code &}, so it can be written into a script. A detail that repeats its summary is left out.
+	 */
+	@Test
+	void messagesJSONKeepsTheTextAndSeveritiesTheUploadPageShows() throws Exception {
+		FacesContext context = mock(FacesContext.class);
+		when(context.getMessageList()).thenReturn(List.of(new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "a.txt is uploaded"),
+															new FacesMessage(FacesMessage.SEVERITY_WARN, "Successful", "with <b>warnings</b> &amp; more"),
+															new FacesMessage(FacesMessage.SEVERITY_ERROR, "Unsuccessful", null),
+															new FacesMessage(FacesMessage.SEVERITY_FATAL, "]]></eval>", "\"quoted\"")));
+
+		String json = AbstractUploadView.messagesJSON(context);
+
+		assertFalse(json.contains("<") || json.contains(">") || json.contains("&"), json);
+		assertEquals(List.of(Map.of("severity", "info", "summary", "Successful", "detail", "a.txt is uploaded"),
+								Map.of("severity", "warn", "summary", "Successful", "detail", "with <b>warnings</b> &amp; more"),
+								// a message without a detail has its summary as its detail: shown once
+								Map.of("severity", "error", "summary", "Unsuccessful", "detail", ""),
+								Map.of("severity", "fatal", "summary", "]]></eval>", "detail", "\"quoted\"")),
+						JSON.unmarshall(json));
+	}
+
+	@Test
+	void messagesJSONIsAnEmptyArrayWithoutMessages() {
+		FacesContext context = mock(FacesContext.class);
+		when(context.getMessageList()).thenReturn(List.of());
+
+		assertEquals("[]", AbstractUploadView.messagesJSON(context));
 	}
 
 	private static void setField(Class<?> owner, Object target, String name, Object value) throws Exception {

@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Image;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentImage metadata.
  */
@@ -18,7 +20,7 @@ public class FluentImage extends FluentConstrainableField<FluentImage> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentImage(Image image) {
+	public FluentImage(@Nonnull Image image) {
 		this.image = image;
 	}
 
@@ -26,7 +28,7 @@ public class FluentImage extends FluentConstrainableField<FluentImage> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentImage from(@SuppressWarnings("hiding") Image image) {
+	public @Nonnull FluentImage from(@SuppressWarnings("hiding") @Nonnull Image image) {
 		super.from(image);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentImage extends FluentConstrainableField<FluentImage> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Image get() {
+	public @Nonnull Image get() {
 		return image;
 	}
 }

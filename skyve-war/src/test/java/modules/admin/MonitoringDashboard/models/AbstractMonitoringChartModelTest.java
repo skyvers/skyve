@@ -31,6 +31,7 @@ class AbstractMonitoringChartModelTest extends AbstractSkyveTest {
 
 	/** Minimal concrete subclass to expose protected static methods. */
 	private static class TestChartModel extends AbstractMonitoringChartModel {
+		@SuppressWarnings("null") // passes null on purpose
 		@Override
 		public ChartData getChartData() {
 			return null;

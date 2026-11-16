@@ -3,11 +3,12 @@ package org.skyve.impl.metadata.model.document.field;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.ConverterName;
@@ -56,7 +57,7 @@ class ConvertibleFieldTest {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.Date();
 		field.setConverter(mockConverter);
 		assertThat(field.getConverterForCustomer(customer), is(mockConverter));
-		Mockito.verifyNoInteractions(customer);
+		verifyNoInteractions(customer);
 	}
 
 	@Test
@@ -64,32 +65,32 @@ class ConvertibleFieldTest {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.Date();
 		// no converter set — should delegate to customer default
 		field.getConverterForCustomer(customer);
-		Mockito.verify(customer).getDefaultDateConverter();
+		verify(customer).getDefaultDateConverter();
 	}
 
 	@Test
 	void getConverterForCustomerWithTimeTypeDelegatesToCustomer() {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.Time();
 		field.getConverterForCustomer(customer);
-		Mockito.verify(customer).getDefaultTimeConverter();
+		verify(customer).getDefaultTimeConverter();
 	}
 
 	@Test
 	void getConverterForCustomerWithDateTimeTypeDelegatesToCustomer() {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.DateTime();
 		field.getConverterForCustomer(customer);
-		Mockito.verify(customer).getDefaultDateTimeConverter();
+		verify(customer).getDefaultDateTimeConverter();
 	}
 
 	@Test
 	void getConverterForCustomerWithTimestampTypeDelegatesToCustomer() {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.Timestamp();
 		field.getConverterForCustomer(customer);
-		Mockito.verify(customer).getDefaultTimestampConverter();
+		verify(customer).getDefaultTimestampConverter();
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void getConverterForCustomerWithNonTemporalTypeReturnsNull() {
 		ConvertibleField field = new org.skyve.impl.metadata.model.document.field.Text();
 		// Text type is not temporal, no converter default — returns null

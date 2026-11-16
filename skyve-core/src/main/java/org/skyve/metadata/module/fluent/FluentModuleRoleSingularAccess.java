@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleSingularUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleSingularUserAccessMetaData} metadata.
  * 
@@ -21,14 +23,14 @@ public class FluentModuleRoleSingularAccess extends
 	/**
 	 * Creates a new FluentModuleRoleSingularAccess from the specified ModuleRoleDocumentAggregateUserAccessMetaData.
 	 */
-	public FluentModuleRoleSingularAccess(ModuleRoleSingularUserAccessMetaData access) {
+	public FluentModuleRoleSingularAccess(@Nonnull ModuleRoleSingularUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleSingularAccess from a runtime metadata.
 	 */
-	protected FluentModuleRoleSingularAccess from(String documentName, Set<String> uxuis) {
+	protected @Nonnull FluentModuleRoleSingularAccess from(@Nonnull String documentName, @Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -37,7 +39,7 @@ public class FluentModuleRoleSingularAccess extends
 	/**
 	 * Specifies the document name for this FluentModuleRoleSingularAccess.
 	 */
-	public FluentModuleRoleSingularAccess documentName(final String documentName) {
+	public @Nonnull FluentModuleRoleSingularAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -46,7 +48,7 @@ public class FluentModuleRoleSingularAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleSingularUserAccessMetaData get() {
+	public @Nonnull ModuleRoleSingularUserAccessMetaData get() {
 		return access;
 	}
 }

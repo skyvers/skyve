@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -25,12 +26,12 @@ public class CustomerModuleMetaData extends NamedMetaData {
 
 	private FormLabelLayout formLabelLayout;
 
-	public FormLabelLayout getFormLabelLayout() {
+	public @Nullable FormLabelLayout getFormLabelLayout() {
 		return formLabelLayout;
 	}
 
 	@XmlAttribute
-	public void setFormLabelLayout(FormLabelLayout formLabelLayout) {
+	public void setFormLabelLayout(@Nullable FormLabelLayout formLabelLayout) {
 		this.formLabelLayout = formLabelLayout;
 	}
 }

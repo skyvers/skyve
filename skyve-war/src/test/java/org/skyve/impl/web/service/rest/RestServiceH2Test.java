@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import modules.test.domain.AllAttributesPersistent;
 
 class RestServiceH2Test extends AbstractSkyveTest {
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void insertJsonPostPersistsAndReturnsInsertedBean() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
@@ -52,6 +54,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		verify(response).setContentType("application/json");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void updateJsonPostUpdatesPersistedBeanAndReturnsUpdatedJson() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
@@ -329,7 +332,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 
 		String missingContentId = "missing-" + System.nanoTime();
 		String requestUri = "/rest/content/" + missingContentId;
-		org.mockito.Mockito.when(request.getRequestURI()).thenReturn(requestUri);
+		when(request.getRequestURI()).thenReturn(requestUri);
 
 		byte[] result = service.queryContent(missingContentId);
 

@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.repository.view.actions;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -30,7 +32,7 @@ public class ValidatableAction extends PositionableAction {
 	 * @return {@code true} to perform client-side validation, {@code false} to bypass it,
 	 *         or {@code null} to use framework defaults
 	 */
-	public Boolean getClientValidation() {
+	public @Nullable Boolean getClientValidation() {
 		return clientValidation;
 	}
 	
@@ -41,7 +43,7 @@ public class ValidatableAction extends PositionableAction {
 	 *        {@code false} to skip it, or {@code null} to use framework defaults
 	 */
 	@XmlAttribute(required = false)
-	public void setClientValidation(Boolean clientValidation) {
+	public void setClientValidation(@Nullable Boolean clientValidation) {
 		this.clientValidation = clientValidation;
 	}
 
@@ -51,7 +53,7 @@ public class ValidatableAction extends PositionableAction {
 	 * @return runtime action metadata with client-validation policy applied
 	 */
 	@Override
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
 		result.setClientValidation(clientValidation);
 		return result;

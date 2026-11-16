@@ -1,30 +1,41 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.ViewRenderer;
 import org.skyve.impl.metadata.MetadataIconResolver.ResolvedIcon;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
-import org.skyve.impl.metadata.model.document.field.Text;
-import org.skyve.impl.metadata.view.ActionImpl;
-import org.skyve.impl.metadata.view.LoadingType;
-import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.Inject;
+import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.VerticalAlignment;
+import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.HBox;
+import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
 import org.skyve.impl.metadata.view.container.VBox;
@@ -32,7 +43,6 @@ import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormColumn;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
-import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.event.EventSource;
 import org.skyve.impl.metadata.view.event.RerenderEventAction;
 import org.skyve.impl.metadata.view.event.ServerSideActionEventAction;
@@ -40,8 +50,6 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
-import org.skyve.impl.metadata.view.ViewImpl;
-import org.skyve.impl.metadata.view.container.Sidebar;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
 import org.skyve.impl.metadata.view.widget.Chart.ChartType;
@@ -50,6 +58,11 @@ import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.Spacer;
 import org.skyve.impl.metadata.view.widget.StaticImage;
 import org.skyve.impl.metadata.view.widget.bound.Label;
+import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.ChangeableInputWidget;
+import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
+import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
+import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.CompleteType;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
@@ -59,19 +72,25 @@ import org.skyve.impl.metadata.view.widget.bound.input.GeometryInputType;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
 import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
+import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.Password;
 import org.skyve.impl.metadata.view.widget.bound.input.Radio;
 import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
-import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
-import org.skyve.metadata.controller.ImplicitActionName;
-import org.skyve.metadata.controller.Customisations;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.controller.Customisations;
+import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.model.Dynamic;
+import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.OWASP;
 
+@SuppressWarnings("java:S5960") // JUnit assertions belong in this test class.
 class SmartClientViewRendererCoverageTest {
 	private static final ResolvedIcon NO_ICON = new ResolvedIcon(null, null);
 
@@ -167,7 +186,7 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderedView(NO_ICON);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("var v0=isc.DynamicForm.create({invisibleConditionName:'true'});"));
+		assertTrue(code.contains("var v0=isc.DynamicForm.create({invisibleCondition:'true'});"));
 		assertTrue(code.contains("view._vm.addMember(v0);"));
 		assertTrue(code.contains("view.addContained(v0);"));
 	}
@@ -271,6 +290,32 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderTabWithInlineConditionsWritesIdentifiersAndNeverTheExpressions() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(NO_ICON);
+
+		TabPane tabPane = new TabPane();
+		renderer.renderTabPane(tabPane);
+
+		Tab tab = new Tab();
+		tab.setXmlDisabledCondition("{el:bean.text eq 'a'}");
+		tab.setXmlVisibleCondition("{role:admin.BasicUser}");
+
+		renderer.renderTab("Overview", null, tab);
+		renderer.renderedTab("Overview", null, tab);
+		renderer.renderedTabPane(tabPane);
+
+		String code = renderer.getCode().toString();
+		assertTrue(code.contains("disabledCondition:'" + BindUtil.conditionIdentifier("{el:bean.text eq 'a'}") + "'"), code);
+		assertTrue(code.contains("invisibleCondition:'not" + BindUtil.conditionIdentifier("{role:admin.BasicUser}") + "'"), code);
+		assertFalse(code.contains("{el:"), code);
+		assertFalse(code.contains("{role:"), code);
+	}
+
+	@Test
 	void renderTabPaneAndTabWithIconStyleWritesSelectedBindingAndTabMetadata() {
 		when(view.getName()).thenReturn("edit");
 		when(view.getSidebar()).thenReturn(null);
@@ -284,8 +329,8 @@ class SmartClientViewRendererCoverageTest {
 
 		Tab tab = new Tab();
 		tab.setIconStyleClass("fa-solid fa-star");
-		tab.setDisabledConditionName("bean.tabDisabled");
-		tab.setInvisibleConditionName("bean.tabHidden");
+		tab.setXmlDisabledCondition("bean.tabDisabled");
+		tab.setXmlInvisibleCondition("bean.tabHidden");
 
 		renderer.renderTab("Overview", null, tab);
 		renderer.renderedTab("Overview", null, tab);
@@ -295,8 +340,8 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("selectedTabIndexBinding:'bean_currentTab'"), code);
 		assertTrue(code.contains(".addBizTab({name:'0'"), code);
 		assertTrue(code.contains("<i class=\"bizhubFontIcon fa-solid fa-star\"></i><span> &nbsp;</span>Overview"), code);
-		assertTrue(code.contains("disabledConditionName:'bean.tabDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'bean.tabHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'bean.tabDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'bean.tabHidden'"), code);
 	}
 
 	@Test
@@ -421,14 +466,14 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderView(NO_ICON);
 
 		TabPane tabPane = new TabPane();
-		tabPane.setDisabledConditionName("bean.tabPaneDisabled");
-		tabPane.setInvisibleConditionName("bean.tabPaneHidden");
+		tabPane.setXmlDisabledCondition("bean.tabPaneDisabled");
+		tabPane.setXmlInvisibleCondition("bean.tabPaneHidden");
 		renderer.renderTabPane(tabPane);
 		renderer.renderedTabPane(tabPane);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("disabledConditionName:'bean.tabPaneDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'bean.tabPaneHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'bean.tabPaneDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'bean.tabPaneHidden'"), code);
 	}
 
 	@Test
@@ -516,6 +561,58 @@ class SmartClientViewRendererCoverageTest {
 	}
 
 	@Test
+	void renderChartWithoutAModelNameOrAModelIsAMetaDataError() {
+		when(view.getName()).thenReturn("edit");
+		when(view.getSidebar()).thenReturn(null);
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, document, view, "desktop", false);
+		renderer.renderView(NO_ICON);
+		Chart chart = new Chart(); // no model name or model
+		chart.setType(ChartType.pie);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> renderer.renderChart(chart));
+
+		org.junit.jupiter.api.Assertions.assertEquals("Chart requires a modelName or a model", e.getMessage());
+	}
+
+	@Test
+	void renderFormLookupDescriptionNotBoundToARelationIsAnInvariantFailure() {
+		addTextAttribute("name");
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("name");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> renderer.renderFormLookupDescription(null, false, false, Bean.BIZ_KEY, lookup));
+
+		org.junit.jupiter.api.Assertions.assertEquals("Lookup description name has no lookup definition", e.getMessage());
+	}
+
+	@Test
+	void renderFormLookupDescriptionWithoutAModelOrAQueryIsAMetaDataError() {
+		document.setDynamism(new Dynamic());
+		AssociationImpl association = new AssociationImpl();
+		association.setName("contact");
+		association.setDisplayName("Contact");
+		association.setDocumentName("Contact");
+		association.setType(AssociationType.aggregation);
+		document.putAttribute(association);
+		MetaDataQueryDefinition defaultQuery = mock(MetaDataQueryDefinition.class);
+		when(defaultQuery.getName()).thenReturn("qContacts");
+		when(defaultQuery.getDocumentName()).thenReturn("Contact");
+		when(module.getDocumentDefaultQuery(customer, "Contact")).thenReturn(defaultQuery);
+		SmartClientViewRenderer renderer = rendererWithOpenForm();
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		lookup.setDescriptionBinding(Bean.BIZ_KEY);
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> renderer.renderFormLookupDescription(null, true, true, Bean.BIZ_KEY, lookup));
+
+		org.junit.jupiter.api.Assertions.assertEquals("Lookup description has no query to use.", e.getMessage());
+	}
+
+	@Test
 	void renderSpacerStaticImageAndLabelAppendStandaloneComponents() {
 		when(view.getName()).thenReturn("edit");
 		when(view.getSidebar()).thenReturn(null);
@@ -526,7 +623,7 @@ class SmartClientViewRendererCoverageTest {
 		Spacer spacer = new Spacer();
 		spacer.setPixelWidth(Integer.valueOf(12));
 		spacer.setPixelHeight(Integer.valueOf(8));
-		spacer.setInvisibleConditionName("bean.hideSpacer");
+		spacer.setXmlInvisibleCondition("bean.hideSpacer");
 		renderer.renderSpacer(spacer);
 
 		StaticImage image = new StaticImage();
@@ -539,7 +636,7 @@ class SmartClientViewRendererCoverageTest {
 		renderer.renderLabel("Contact summary", false, label);
 
 		String code = renderer.getCode().toString();
-		assertTrue(code.contains("isc.LayoutSpacer.create({width:12,height:8,invisibleConditionName:'bean.hideSpacer'})"), code);
+		assertTrue(code.contains("isc.LayoutSpacer.create({width:12,height:8,invisibleCondition:'bean.hideSpacer'})"), code);
 		assertTrue(code.contains("isc.BizImage.create({modoc:'admin.Contact',file:'images/contact.png',width:64})"), code);
 		assertTrue(code.contains("isc.BizLabel.create({width:'100%',textAlign:'right',value:'Contact summary'});"), code);
 	}
@@ -572,8 +669,8 @@ class SmartClientViewRendererCoverageTest {
 		Geometry geometry = new Geometry();
 		geometry.setBinding("area");
 		geometry.setType(GeometryInputType.polygon);
-		geometry.setDisabledConditionName("areaDisabled");
-		geometry.setInvisibleConditionName("areaHidden");
+		geometry.setXmlDisabledCondition("areaDisabled");
+		geometry.setXmlInvisibleCondition("areaHidden");
 		renderer.visitGeometry(geometry, true, true);
 		renderer.visitedGeometry(geometry, true, true);
 		renderer.visitedFormItem(geometryItem, true, true);
@@ -589,8 +686,8 @@ class SmartClientViewRendererCoverageTest {
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("type:'geometry'"), code);
 		assertTrue(code.contains("drawingTools:'polygon'"), code);
-		assertTrue(code.contains("disabledConditionName:'areaDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'areaHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'areaDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'areaHidden'"), code);
 		assertTrue(code.contains("type:'geometryMap'"), code);
 		assertTrue(code.contains("height:'100%'"), code);
 		assertTrue(code.contains("minHeight:170"), code);
@@ -716,8 +813,7 @@ class SmartClientViewRendererCoverageTest {
 		content.setCapture(ContentCapture.video);
 		content.setShowMarkup(Boolean.TRUE);
 
-		SmartClientDataGridFieldDefinition definition =
-				new SmartClientDataGridFieldDefinition(user, customer, module, document, content, null, false, true, false, "desktop");
+		SmartClientDataGridFieldDefinition definition = new SmartClientDataGridFieldDefinition(user, customer, module, document, document, content, null, false, true, false, "desktop");
 		String javascript = definition.toJavascript();
 
 		assertTrue(javascript.contains("editorType:'bizContent'"), javascript);
@@ -727,9 +823,27 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(javascript.contains("companion:'_attachment'"), javascript);
 		assertTrue(javascript.contains("k=(rec&&rec['_attachment'])||'link'"), javascript);
 		assertFalse(javascript.contains("&_w=200&_h=200"), javascript);
-		assertTrue(javascript.contains("style=\"width:100%;height:auto;aspect-ratio:1 / 1;object-fit:contain\""), javascript);
+		// An unsized column still asks for a thumbnail, never the original image, sized by the column's width
+		assertTrue(javascript.contains("formatCellValue:function(v,rec,row,col,grid){"), javascript);
+		assertTrue(javascript.contains("var s=SKYVE.Util.contentPreviewSize(grid&&grid.getFieldWidth?grid.getFieldWidth(col):null,null);"), javascript);
+		assertTrue(javascript.contains("<img src=\"'+u+'&_w='+s+'&_h='+s+'\" style=\"width:100%;height:auto;aspect-ratio:1 / 1;object-fit:contain\""), javascript);
 		assertTrue(javascript.contains("<video controls preload=\"metadata\""), javascript);
 		assertTrue(javascript.contains("style=\"width:100%;height:auto;aspect-ratio:16 / 9;object-fit:contain\""), javascript);
+	}
+
+	@Test
+	void contentUploadDataGridFieldWithOneSideAsksForAQuantisedSquareThumbnail() {
+		addTextAttribute("attachment");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		content.setPixelWidth(Integer.valueOf(120));
+
+		SmartClientDataGridFieldDefinition definition = new SmartClientDataGridFieldDefinition(user, customer, module, document, document, content, null, false, true, false, "desktop");
+		String javascript = definition.toJavascript();
+
+		assertTrue(javascript.contains("var s=SKYVE.Util.contentPreviewSize(120,null);"), javascript);
+		assertTrue(javascript.contains("&_w='+s+'&_h='+s+'\" style=\"width:120px;height:auto;aspect-ratio:1 / 1;object-fit:contain\""), javascript);
+		assertFalse(javascript.contains("&_w=120"), javascript);
 	}
 
 	@Test
@@ -961,6 +1075,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("numValues:5"), code);
 		assertTrue(code.contains("roundValues:false,roundingPrecision:2"), code);
 		assertTrue(code.contains("vertical:true"), code);
+		assertTrue(code.contains("sliderProperties:{overflow:'hidden'}"), code);
 		assertTrue(code.contains("type:'spinner'"), code);
 		assertTrue(code.contains("min:0.0"), code);
 		assertTrue(code.contains("max:10.0"), code);
@@ -981,8 +1096,8 @@ class SmartClientViewRendererCoverageTest {
 
 		ActionImpl custom = action("customAction");
 		custom.setClientValidation(Boolean.FALSE);
-		custom.setDisabledConditionName("customDisabled");
-		custom.setInvisibleConditionName("customHidden");
+		custom.setXmlDisabledCondition("customDisabled");
+		custom.setXmlInvisibleCondition("customHidden");
 		ParameterImpl literal = new ParameterImpl();
 		literal.setName("literal.param");
 		literal.setValue("fixed");
@@ -1000,8 +1115,8 @@ class SmartClientViewRendererCoverageTest {
 		String code = renderer.getCode().toString();
 		assertTrue(code.contains("view.addEditAction(isc.BizButton.create({validate:false,type:null,actionName:'customAction'"), code);
 		assertTrue(code.contains("<i class=\"bizhubFontIcon fa-solid fa-play\"></i><span> &nbsp;</span>Do It"), code);
-		assertTrue(code.contains("disabledConditionName:'customDisabled'"), code);
-		assertTrue(code.contains("invisibleConditionName:'customHidden'"), code);
+		assertTrue(code.contains("disabledCondition:'customDisabled'"), code);
+		assertTrue(code.contains("invisibleCondition:'customHidden'"), code);
 		assertTrue(code.contains("tooltip:'Run it'"), code);
 		assertTrue(code.contains("confirm:'Sure?'"), code);
 		assertTrue(code.contains("params:{'literal_param':'fixed','bound_param':'{contact.name}'}"), code);
@@ -1091,12 +1206,12 @@ class SmartClientViewRendererCoverageTest {
 
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("contact.name");
-		setDisabled.setDisabledConditionName("nameDisabled");
+		setDisabled.setXmlDisabledCondition("nameDisabled");
 		renderer.visitSetDisabledEventAction(setDisabled, true, true);
 
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("contact.secret");
-		setInvisible.setInvisibleConditionName("secretHidden");
+		setInvisible.setXmlInvisibleCondition("secretHidden");
 		renderer.visitSetInvisibleEventAction(setInvisible, true, true);
 
 		ToggleDisabledEventAction toggleDisabled = new ToggleDisabledEventAction();
@@ -1117,6 +1232,84 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("view.setInvisible('contact_secret','secretHidden');"), code);
 		assertTrue(code.contains("view.toggleDisabled('contact_active');"), code);
 		assertTrue(code.contains("view.toggleVisibility('contact_notes');"), code);
+	}
+
+	/**
+	 * A form item the user types into, whose change handler calls the server, fires it when the value is committed, not
+	 * on every keypress, and runs the handler's server events as a blur handler's.
+	 */
+	@Test
+	void aTypedItemWithAServerChangeHandlerChangesOnCommitAndDefersItsEvents() {
+		for (ChangeableInputWidget widget : List.of(new TextField(), new Password(), new TextArea(), new Spinner(), new ColourPicker())) {
+			RerenderEventAction rerender = new RerenderEventAction();
+			rerender.setClientValidation(Boolean.FALSE);
+			widget.getChangedActions().add(rerender);
+
+			String code = changedHandlerCode(widget, rerender);
+
+			assertTrue(code.startsWith("changeOnKeypress:false,changed:function(form,item,value){var view=form._view;" +
+										"view._blurry=isc.RPCManager.requestsArePending()?null:item;" +
+										"view.rerenderBlurryAction(false,'newPassword');},"),
+						widget.getClass().getSimpleName() + ": " + code);
+		}
+	}
+
+	/**
+	 * Other change handlers fire as SmartClient fires them: an item with completion or no typing, or a handler that
+	 * makes no request.
+	 */
+	@Test
+	void otherChangeHandlersAreUnchanged() {
+		TextField complete = new TextField();
+		complete.setComplete(CompleteType.previous);
+		List<ChangeableInputWidget> widgets = List.of(complete, new CheckBox(), new Combo(), new Radio(), new Slider());
+		for (ChangeableInputWidget widget : widgets) {
+			RerenderEventAction rerender = new RerenderEventAction();
+			rerender.setClientValidation(Boolean.FALSE);
+			widget.getChangedActions().add(rerender);
+
+			assertEquals("changed:function(form,item,value){var view=form._view;view.rerenderAction(false,'newPassword');},",
+							changedHandlerCode(widget, rerender),
+							widget.getClass().getSimpleName());
+		}
+
+		Password clientOnly = new Password();
+		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
+		setDisabled.setBinding("confirmPassword");
+		setDisabled.setXmlDisabledCondition("noPassword");
+		clientOnly.getChangedActions().add(setDisabled);
+		SmartClientViewRenderer renderer = rendererInAForm();
+		int start = renderer.getCode().length();
+		renderer.visitOnChangedEventHandler(clientOnly, true, true);
+		renderer.visitSetDisabledEventAction(setDisabled, true, true);
+		renderer.visitedOnChangedEventHandler(clientOnly, true, true);
+		assertEquals("changed:function(form,item,value){var view=form._view;view.setDisabled('confirmPassword','noPassword');},",
+						renderer.getCode().substring(start));
+	}
+
+	/**
+	 * Renders a form item's change handler of one rerender, returning its code.
+	 */
+	private String changedHandlerCode(ChangeableInputWidget widget, RerenderEventAction rerender) {
+		SmartClientViewRenderer renderer = rendererInAForm();
+		EventSource source = mock(EventSource.class);
+		when(source.getSource()).thenReturn("newPassword");
+		int start = renderer.getCode().length();
+		renderer.visitOnChangedEventHandler(widget, true, true);
+		renderer.visitRerenderEventAction(rerender, source, true, true);
+		renderer.visitedOnChangedEventHandler(widget, true, true);
+		return renderer.getCode().substring(start);
+	}
+
+	/**
+	 * A renderer visiting a form, so that it renders form items (its current form is set).
+	 */
+	private SmartClientViewRenderer rendererInAForm() {
+		SmartClientViewRenderer renderer = rendererWithViewContainer();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		renderer.visitForm(form, true, true);
+		return renderer;
 	}
 
 	private SmartClientViewRenderer rendererWithOpenForm() {
@@ -1198,4 +1391,54 @@ class SmartClientViewRendererCoverageTest {
 		action.setResourceName(resourceName);
 		return action;
 	}
+	@Test
+	void modelLookupDataSourceIncludesOwnerAndHiddenDescription() {
+		DocumentImpl owner = mock(DocumentImpl.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(owner.getListModel(customer, "ContactsModel", true)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		when(model.getLocalisedDescription()).thenReturn("Contacts");
+		when(model.getColumns()).thenReturn(List.of());
+		LookupDescription lookup = new LookupDescription();
+		lookup.setModelName("ContactsModel");
+		lookup.setDescriptionBinding("bizKey");
+		StringBuilder output = new StringBuilder();
+		String id = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, owner, "ContactsModel",
+				"admin_Order__ContactsModel_contact", lookup, "desktop", false, output, new TreeSet<>());
+		org.junit.jupiter.api.Assertions.assertEquals("admin_Order__ContactsModel_contact", id);
+		assertTrue(output.toString().contains("ID:'admin_Order__ContactsModel_contact'"));
+		assertTrue(output.toString().contains("modoc:'admin.Contact"));
+		assertTrue(output.toString().contains("{name:'bizKey',type:'text',hidden:true}"));
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void nestedGridLookupUsesViewDocumentModel() {
+		document.setDynamism(new Dynamic());
+		DocumentImpl owner = spy(document);
+		ListModel<Bean> model = mock(ListModel.class);
+		doReturn(model).when(owner).getListModel(customer, "ContactsModel", true);
+		when(model.getDrivingDocument()).thenReturn(document);
+		DocumentImpl row = new DocumentImpl();
+		row.setName("Line");
+		row.setOwningModuleName("admin");
+		row.setDynamism(new Dynamic());
+		AssociationImpl association = new AssociationImpl();
+		association.setName("contact");
+		association.setDisplayName("Contact");
+		association.setDocumentName("Contact");
+		association.setType(AssociationType.aggregation);
+		row.putAttribute(association);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("contact");
+		lookup.setDescriptionBinding("bizKey");
+		lookup.setModelName("ContactsModel");
+		SmartClientViewRenderer renderer = new SmartClientViewRenderer(user, module, owner, view, "desktop", false);
+		SmartClientDataGridFieldDefinition field = renderer.getDataGridField(row, lookup, null, false, true);
+		org.junit.jupiter.api.Assertions.assertEquals("admin_Contact__ContactsModel_contact", field.getLookup().getOptionDataSource());
+		verify(owner).getListModel(customer, "ContactsModel", true);
+		assertTrue(field.toJavascript().contains("requestProperties.params._c=view.gather(false)._c"));
+		assertTrue(field.toJavascript().contains("this.formItem.grid.parentElement._view"));
+	}
+
 }

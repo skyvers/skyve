@@ -9,6 +9,7 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base converter for {@link DateTime} attributes using a configured
@@ -23,7 +24,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * @return the result value
 	 */
 	@Override
-	public final AttributeType getAttributeType() {
+	public final @Nonnull AttributeType getAttributeType() {
 		return AttributeType.dateTime;
 	}
 
@@ -32,7 +33,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<DateTime> getValueType() {
+	public @Nonnull Class<DateTime> getValueType() {
 		return DateTime.class;
 	}
 	
@@ -41,7 +42,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<DateTime> getFormat() {
+	public @Nullable Format<DateTime> getFormat() {
 		return null;
 	}
 
@@ -50,7 +51,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<DateTime> getValidator() {
+	public @Nullable Validator<DateTime> getValidator() {
 		return null;
 	}
 
@@ -58,7 +59,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * The i18n key used to represent an error in conversion using this converter
 	 * @return	The i18n key.
 	 */
-	protected abstract String getI18nKey();
+	protected abstract @Nonnull String getI18nKey();
 	
 	/**
 	 * Overridden to yield non-null results.
@@ -72,7 +73,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * @return the result value
 	 */
 	@Override
-	public DateTime fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull DateTime fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			return new DateTime(CORE.getDateFormat(getFormatPattern()).parse(displayValue).getTime());
 		}
@@ -87,7 +88,7 @@ public abstract class AbstractDateTimeConverter implements Converter<DateTime> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(DateTime value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull DateTime value) throws ConversionException {
 		try {
 			return CORE.getDateFormat(getFormatPattern()).format(value);
 		}

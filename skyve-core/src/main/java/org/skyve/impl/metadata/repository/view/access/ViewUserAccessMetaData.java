@@ -8,6 +8,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -29,10 +30,10 @@ public abstract class ViewUserAccessMetaData implements SerializableMetaData {
 	private List<ViewUserAccessUxUiMetadata> uxuis = new ArrayList<>();
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "uxui")
-	public List<ViewUserAccessUxUiMetadata> getUxuis() {
+	public @Nonnull List<ViewUserAccessUxUiMetadata> getUxuis() {
 		return uxuis;
 	}
 	
-	public abstract void validate(String metaDataName, Module module);
-	public abstract UserAccess toUserAccess(String moduleName, String documentName);
+	public abstract void validate(@Nonnull String metaDataName, @Nonnull Module module);
+	public abstract @Nonnull UserAccess toUserAccess(@Nonnull String moduleName, @Nonnull String documentName);
 }

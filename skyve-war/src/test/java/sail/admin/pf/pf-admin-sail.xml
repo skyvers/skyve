@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <automation uxui="tablet"
 			userAgentType="tablet"
-			testStrategy="Verify"
+			testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -14,9 +14,14 @@
 	<interaction name="LoginError">
 		<method>
 			<login user="badmin" password="badmin" />
+			<testFailure />
 			<login user="admin" password="admin" />
+			<testSuccess />
 		</method>
 	</interaction>
+	<!--
+		Moves to the phase 3 admin suite. "admin" fails the password policy (12 characters, upper, lower and numeric),
+		and a password that passes would change the bootstrap user's real password and lock later runs out.
 	<interaction name="Change password">
 		<method>
 			<navigateEdit module="admin" document="ChangePassword" />
@@ -26,6 +31,7 @@
 			<action name="MakePasswordChange" />
 		</method>
 	</interaction>
+	-->
 	<interaction name="Menu User Dashboard">
 		<method>
 			<navigateEdit module="admin" document="UserDashboard" />
@@ -57,14 +63,23 @@
 			<save />
 			<tabSelect path="Contents" />
 			<action name="AddUnsubscribeLink" />
+			<comment>AddImage is an upload action: upload an image with it</comment>
+			<upload action="AddImage" file="sail/files/sail-image.png" />
+			<comment>Press it again and leave its upload page open: the refusals below must still show their messages</comment>
 			<action name="AddImage" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />
-			<action name="GetCount" />
-			<action name="TestSend" confirm="true" />
-			<action name="GetResults" />
-			<action name="CreateFiles" confirm="true" />
-			<action name="SendNow" confirm="true" />
+			<!-- Nothing is tagged, so these refuse to run: check that they say why -->
+			<action name="GetCount" testSuccess="false" />
+			<testFailure message="A tag must be selected for results" />
+			<action name="TestSend" confirm="true" testSuccess="false" />
+			<testFailure message="There are no tagged items" />
+			<action name="GetResults" testSuccess="false" />
+			<testFailure message="A tag must be selected for results" />
+			<action name="CreateFiles" confirm="true" testSuccess="false" />
+			<testFailure message="A tag must be selected for results" />
+			<action name="SendNow" confirm="true" testSuccess="false" />
+			<testFailure message="A tag must be selected for results" />
 			<tabSelect path="Subscriptions" />
 			<delete />
 		</method>
@@ -110,7 +125,11 @@
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
+			<!--
+				Backup moved to the admin suite (suite/00-backup.xml and 99-restore.xml), which makes, restores and deletes its
+				backup: a backup made here would be left behind, and the suites require that no other backup exists.
 			<action name="Backup" />
+			-->
 			<action name="UploadBackup" />
 			<tabSelect path="Data Refresh" />
 			<save />
@@ -128,7 +147,9 @@
 			<tabSelect path="Markdown Preview" />
 			<tabSelect path="Document Preview" />
 			<tabSelect path="Help" />
-			<action name="Submit" confirm="true" />
+			<!-- The generated test data has no module, so Submit refuses it: check that it says why -->
+			<action name="Submit" confirm="true" testSuccess="false" />
+			<testFailure message="a default module is required" />
 		</method>
 	</interaction>
 	<interaction name="Menu System Dashboard">

@@ -66,6 +66,8 @@ import org.skyve.impl.web.faces.components.ListGrid;
 import org.skyve.impl.web.faces.components.Map;
 import org.skyve.impl.web.faces.components.View;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.el.ExpressionFactory;
 import jakarta.faces.FacesException;
 import jakarta.faces.application.Application;
@@ -81,6 +83,7 @@ import jakarta.faces.component.behavior.Behavior;
 import jakarta.faces.component.html.HtmlForm;
 import jakarta.faces.component.html.HtmlInputHidden;
 import jakarta.faces.component.html.HtmlInputText;
+import jakarta.faces.component.html.HtmlOutputLabel;
 import jakarta.faces.component.html.HtmlOutputLink;
 import jakarta.faces.component.html.HtmlOutputText;
 import jakarta.faces.component.html.HtmlPanelGrid;
@@ -99,7 +102,7 @@ public class MockApplication extends Application {
 	 * Returns the mock expression factory used by SAIL execution tests.
 	 */
 	@Override
-	public ExpressionFactory getExpressionFactory() {
+	public @Nonnull ExpressionFactory getExpressionFactory() {
     	return ef;
     }
 
@@ -110,7 +113,7 @@ public class MockApplication extends Application {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public UIComponent createComponent(String componentType) throws FacesException {
+	public @Nonnull UIComponent createComponent(@SuppressWarnings("null") @Nonnull String componentType) throws FacesException {
 		if (AutoComplete.COMPONENT_TYPE.equals(componentType)) {
 			return new AutoComplete();
 		}
@@ -180,6 +183,9 @@ public class MockApplication extends Application {
 		else if (HtmlInputText.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlInputText();
 		}
+		else if (HtmlOutputLabel.COMPONENT_TYPE.equals(componentType)) {
+			return new HtmlOutputLabel();
+		}
 		else if (HtmlOutputLink.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlOutputLink();
 		}
@@ -189,7 +195,7 @@ public class MockApplication extends Application {
 		else if (HtmlPanelGrid.COMPONENT_TYPE.equals(componentType)) {
 			return new HtmlPanelGrid() {
 			    @Override
-				public String getClientId() {
+				public @Nullable String getClientId() {
 			    	// work around FacesContext.getCurrentInstance().
 			    	return getId();
 			    }
@@ -199,7 +205,7 @@ public class MockApplication extends Application {
 			// Override getClientId() as Map components need DIV client IDs to attach Javascript to.
 			return new HtmlPanelGroup() {
 				@Override
-				public String getClientId() {
+				public @Nonnull String getClientId() {
 					return "MOCKED:" + getId();
 				}
 			};
@@ -342,7 +348,7 @@ public class MockApplication extends Application {
 	 * @throws FacesException when the behavior ID is not mapped by this mock registry
 	 */
 	@Override
-	public Behavior createBehavior(String behaviorId) throws FacesException {
+	public @Nonnull Behavior createBehavior(@SuppressWarnings("null") @Nonnull String behaviorId) throws FacesException {
 		if (AjaxBehavior.BEHAVIOR_ID.equals(behaviorId)) {
 			return new AjaxBehavior();
 		}
@@ -356,7 +362,7 @@ public class MockApplication extends Application {
 	 * Returns no action listener in this mock implementation.
 	 */
 	@Override
-	public ActionListener getActionListener() {
+	public @Nullable ActionListener getActionListener() {
 		return null;
 	}
 
@@ -364,7 +370,7 @@ public class MockApplication extends Application {
 	 * Ignores action listener assignment in this mock implementation.
 	 */
 	@Override
-	public void setActionListener(ActionListener listener) {
+	public void setActionListener(@Nullable ActionListener listener) {
 		// nothing to see here
 	}
 
@@ -372,7 +378,7 @@ public class MockApplication extends Application {
 	 * Returns no default locale in this mock implementation.
 	 */
 	@Override
-	public Locale getDefaultLocale() {
+	public @Nullable Locale getDefaultLocale() {
 		return null;
 	}
 
@@ -380,7 +386,7 @@ public class MockApplication extends Application {
 	 * Ignores locale assignment in this mock implementation.
 	 */
 	@Override
-	public void setDefaultLocale(Locale locale) {
+	public void setDefaultLocale(@Nullable Locale locale) {
 		// nothing to see here
 	}
 
@@ -388,7 +394,7 @@ public class MockApplication extends Application {
 	 * Returns no default render kit ID in this mock implementation.
 	 */
 	@Override
-	public String getDefaultRenderKitId() {
+	public @Nullable String getDefaultRenderKitId() {
 		return null;
 	}
 
@@ -396,7 +402,7 @@ public class MockApplication extends Application {
 	 * Ignores default render kit assignment in this mock implementation.
 	 */
 	@Override
-	public void setDefaultRenderKitId(String renderKitId) {
+	public void setDefaultRenderKitId(@Nullable String renderKitId) {
 		// nothing to see here
 	}
 
@@ -404,7 +410,7 @@ public class MockApplication extends Application {
 	 * Returns no message bundle in this mock implementation.
 	 */
 	@Override
-	public String getMessageBundle() {
+	public @Nullable String getMessageBundle() {
 		return null;
 	}
 
@@ -412,7 +418,7 @@ public class MockApplication extends Application {
 	 * Ignores message bundle assignment in this mock implementation.
 	 */
 	@Override
-	public void setMessageBundle(String bundle) {
+	public void setMessageBundle(@Nullable String bundle) {
 		// nothing to see here
 	}
 
@@ -420,7 +426,7 @@ public class MockApplication extends Application {
 	 * Returns no navigation handler in this mock implementation.
 	 */
 	@Override
-	public NavigationHandler getNavigationHandler() {
+	public @Nullable NavigationHandler getNavigationHandler() {
 		return null;
 	}
 
@@ -428,7 +434,7 @@ public class MockApplication extends Application {
 	 * Ignores navigation handler assignment in this mock implementation.
 	 */
 	@Override
-	public void setNavigationHandler(NavigationHandler handler) {
+	public void setNavigationHandler(@Nullable NavigationHandler handler) {
 		// nothing to see here
 	}
 
@@ -436,7 +442,7 @@ public class MockApplication extends Application {
 	 * Returns no view handler in this mock implementation.
 	 */
 	@Override
-	public ViewHandler getViewHandler() {
+	public @Nullable ViewHandler getViewHandler() {
 		return null;
 	}
 
@@ -444,7 +450,7 @@ public class MockApplication extends Application {
 	 * Ignores view handler assignment in this mock implementation.
 	 */
 	@Override
-	public void setViewHandler(ViewHandler handler) {
+	public void setViewHandler(@Nullable ViewHandler handler) {
 		// nothing to see here
 	}
 
@@ -452,7 +458,7 @@ public class MockApplication extends Application {
 	 * Returns no state manager in this mock implementation.
 	 */
 	@Override
-	public StateManager getStateManager() {
+	public @Nullable StateManager getStateManager() {
 		return null;
 	}
 
@@ -460,7 +466,7 @@ public class MockApplication extends Application {
 	 * Ignores state manager assignment in this mock implementation.
 	 */
 	@Override
-	public void setStateManager(StateManager manager) {
+	public void setStateManager(@Nullable StateManager manager) {
 		// nothing to see here
 	}
 
@@ -468,7 +474,7 @@ public class MockApplication extends Application {
 	 * Ignores component registration in this mock implementation.
 	 */
 	@Override
-	public void addComponent(String componentType, String componentClass) {
+	public void addComponent(@Nullable String componentType, @Nullable String componentClass) {
 		// nothing to see here
 	}
 
@@ -476,7 +482,7 @@ public class MockApplication extends Application {
 	 * Returns no dynamic component type iterator in this mock implementation.
 	 */
 	@Override
-	public Iterator<String> getComponentTypes() {
+	public @Nullable Iterator<String> getComponentTypes() {
 		return null;
 	}
 
@@ -484,7 +490,7 @@ public class MockApplication extends Application {
 	 * Ignores converter registration by ID in this mock implementation.
 	 */
 	@Override
-	public void addConverter(String converterId, String converterClass) {
+	public void addConverter(@Nullable String converterId, @Nullable String converterClass) {
 		// nothing to see here
 	}
 
@@ -492,7 +498,7 @@ public class MockApplication extends Application {
 	 * Ignores converter registration by target type in this mock implementation.
 	 */
 	@Override
-	public void addConverter(Class<?> targetClass, String converterClass) {
+	public void addConverter(@Nullable Class<?> targetClass, @Nullable String converterClass) {
 		// nothing to see here
 	}
 
@@ -500,7 +506,7 @@ public class MockApplication extends Application {
 	 * Returns no converter for ID lookups in this mock implementation.
 	 */
 	@Override
-	public Converter<?> createConverter(String converterId) {
+	public @Nullable Converter<?> createConverter(@Nullable String converterId) {
 		return null;
 	}
 
@@ -508,7 +514,7 @@ public class MockApplication extends Application {
 	 * Returns no converter for target class lookups in this mock implementation.
 	 */
 	@Override
-	public Converter createConverter(Class<?> targetClass) {
+	public @Nullable Converter createConverter(@Nullable Class<?> targetClass) {
 		return null;
 	}
 
@@ -516,7 +522,7 @@ public class MockApplication extends Application {
 	 * Returns no registered converter IDs in this mock implementation.
 	 */
 	@Override
-	public Iterator<String> getConverterIds() {
+	public @Nullable Iterator<String> getConverterIds() {
 		return null;
 	}
 
@@ -524,7 +530,7 @@ public class MockApplication extends Application {
 	 * Returns no registered converter target types in this mock implementation.
 	 */
 	@Override
-	public Iterator<Class<?>> getConverterTypes() {
+	public @Nullable Iterator<Class<?>> getConverterTypes() {
 		return null;
 	}
 
@@ -532,7 +538,7 @@ public class MockApplication extends Application {
 	 * Returns no supported locales in this mock implementation.
 	 */
 	@Override
-	public Iterator<Locale> getSupportedLocales() {
+	public @Nullable Iterator<Locale> getSupportedLocales() {
 		return null;
 	}
 
@@ -540,7 +546,7 @@ public class MockApplication extends Application {
 	 * Ignores supported locale assignment in this mock implementation.
 	 */
 	@Override
-	public void setSupportedLocales(Collection<Locale> locales) {
+	public void setSupportedLocales(@Nullable Collection<Locale> locales) {
 		// nothing to see here
 	}
 
@@ -548,7 +554,7 @@ public class MockApplication extends Application {
 	 * Ignores validator registration in this mock implementation.
 	 */
 	@Override
-	public void addValidator(String validatorId, String validatorClass) {
+	public void addValidator(@Nullable String validatorId, @Nullable String validatorClass) {
 		// nothing to see here
 	}
 
@@ -556,7 +562,7 @@ public class MockApplication extends Application {
 	 * Returns no validator instance in this mock implementation.
 	 */
 	@Override
-	public Validator<?> createValidator(String validatorId) throws FacesException {
+	public @Nullable Validator<?> createValidator(@Nullable String validatorId) throws FacesException {
 		return null;
 	}
 
@@ -564,7 +570,7 @@ public class MockApplication extends Application {
 	 * Returns no registered validator IDs in this mock implementation.
 	 */
 	@Override
-	public Iterator<String> getValidatorIds() {
+	public @Nullable Iterator<String> getValidatorIds() {
 		return null;
 	}
 }

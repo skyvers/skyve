@@ -4,6 +4,7 @@ import org.skyve.impl.metadata.repository.NamedMetaData;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -22,12 +23,12 @@ public class CustomerFeatureRoleMetaData extends NamedMetaData {
 	
 	private String moduleName;
 
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(name = "module")
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 }

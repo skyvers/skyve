@@ -209,6 +209,7 @@
 					<skyveDir>../../</skyveDir>
 					<customer>bizhub</customer>
 					<generateDomainConfig>
+						<validate>true</validate>
 						<debug>true</debug>
 						<dialect>H2_NO_INDEXES</dialect>
 						<excludedModules>test,whosin,whosinintegrate</excludedModules>
@@ -378,6 +379,18 @@
 				</excludes>
 			</resource>
 		</resources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+			<!-- SAIL scripts live beside the SAIL tests that run them as classpath resources -->
+			<testResource>
+				<directory>src/test/java</directory>
+				<includes>
+					<include>sail/**/*.xml</include>
+				</includes>
+			</testResource>
+		</testResources>
 	</build>
 
 	<dependencies>

@@ -225,7 +225,7 @@ public class Bizlet<T extends Bean> implements MetaData {
 	 * @return the meta-data bizlet's completions or null.
 	 */
 	public @Nullable List<String> complete(@Nonnull String attributeName,
-											@Nonnull String value,
+											@Nullable String value,
 											@Nullable T bean) throws Exception {
 		// Execute the metaDataBizlet if one exists
 		if (metaDataBizlet != null) {
@@ -343,10 +343,10 @@ public class Bizlet<T extends Bean> implements MetaData {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({"java:S112", "java:S1130"}) // Intentionally permitted exceptions
-	public T preExecute(@Nonnull ImplicitActionName actionName,
-							@Nonnull T bean,
-							@Nullable Bean parentBean,
-							@Nonnull WebContext webContext) throws Exception {
+	public @Nonnull T preExecute(@Nonnull ImplicitActionName actionName,
+									@Nonnull T bean,
+									@Nullable Bean parentBean,
+									@Nonnull WebContext webContext) throws Exception {
 		return bean;
 	}
 	

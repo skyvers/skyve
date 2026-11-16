@@ -3,6 +3,9 @@ package org.skyve.toolchain.config;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Stores the parameters for the domain generation mojo.
  */
@@ -18,6 +21,13 @@ public class GenerateDomainConfig {
 	 */
 	@Parameter(required = true, defaultValue = "false")
 	private boolean multiTenant = false;
+
+	/**
+	 * Metadata validation switch. Disable only to bootstrap generated classes that are required by
+	 * handwritten metadata implementations, then compile and regenerate with validation enabled.
+	 */
+	@Parameter(required = true, defaultValue = "true")
+	private boolean validate = true;
 
 	/**
 	 * Dialect options.
@@ -80,11 +90,29 @@ public class GenerateDomainConfig {
 	}
 
 	/**
+	 * Returns whether metadata should be validated before domain generation.
+	 *
+	 * @return {@code true} when metadata validation is enabled
+	 */
+	public boolean isValidate() {
+		return validate;
+	}
+
+	/**
+	 * Sets whether metadata should be validated before domain generation.
+	 *
+	 * @param validate whether metadata validation is enabled
+	 */
+	public void setValidate(boolean validate) {
+		this.validate = validate;
+	}
+
+	/**
 	 * Returns the configured SQL dialect.
 	 *
 	 * @return the dialect name
 	 */
-	public String getDialect() {
+	public @Nonnull String getDialect() {
 		return dialect;
 	}
 
@@ -93,7 +121,7 @@ public class GenerateDomainConfig {
 	 *
 	 * @param dialect the dialect name
 	 */
-	public void setDialect(String dialect) {
+	public void setDialect(@Nonnull String dialect) {
 		this.dialect = dialect;
 	}
 
@@ -102,7 +130,7 @@ public class GenerateDomainConfig {
 	 *
 	 * @return the excluded module list, or an empty string
 	 */
-	public String getExcludedModules() {
+	public @Nonnull String getExcludedModules() {
 		return excludedModules;
 	}
 
@@ -111,7 +139,7 @@ public class GenerateDomainConfig {
 	 *
 	 * @param excludedModules the excluded module list
 	 */
-	public void setExcludedModules(String excludedModules) {
+	public void setExcludedModules(@Nonnull String excludedModules) {
 		this.excludedModules = excludedModules;
 	}
 
@@ -120,7 +148,7 @@ public class GenerateDomainConfig {
 	 *
 	 * @return the customisations class name, or {@code null}
 	 */
-	public String getCustomisationsClass() {
+	public @Nullable String getCustomisationsClass() {
 		return customisationsClass;
 	}
 
@@ -129,7 +157,7 @@ public class GenerateDomainConfig {
 	 *
 	 * @param customisationsClass the customisations class name
 	 */
-	public void setCustomisationsClass(String customisationsClass) {
+	public void setCustomisationsClass(@Nullable String customisationsClass) {
 		this.customisationsClass = UtilImpl.processStringValue(customisationsClass);
 	}
 }

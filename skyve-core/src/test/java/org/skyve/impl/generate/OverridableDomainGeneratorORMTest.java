@@ -1,18 +1,28 @@
 package org.skyve.impl.generate;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.skyve.domain.Bean;
+import org.skyve.domain.ChildBean;
+import org.skyve.domain.HierarchicalBean;
 import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
@@ -28,12 +38,15 @@ import org.skyve.impl.metadata.model.document.field.Decimal5;
 import org.skyve.impl.metadata.model.document.field.Decimal10;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
+import org.skyve.impl.metadata.model.document.field.Field.IndexType;
 import org.skyve.impl.metadata.model.document.field.Integer;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.Markup;
 import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.model.document.field.Timestamp;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Association.AssociationType;
@@ -1131,6 +1144,389 @@ class OverridableDomainGeneratorORMTest {
 				null, new TreeSet<>(), null, false, "");
 
 		assertFalse(contents.toString().contains("<bag name=\"orders\""), "Non-persistent referenced doc inverse should be skipped");
+	}
+
+	// ---- null-safety invariants and index generation ----------------------
+
+	/** Instantiate a generator for the given dialect and tenancy. */
+	private static OverridableDomainGenerator generator(DialectOptions dialectOptions, boolean multiTenant) {
+		return new OverridableDomainGenerator(false, false, multiTenant,
+				dialectOptions, "", "", "", "", null);
+	}
+
+	/** Set the private {@code modocDerivations} entry for a base document. */
+	@SuppressWarnings("unchecked")
+	private static void seedDerivations(OverridableDomainGenerator gen, String baseModoc, Document... derivations)
+			throws Exception {
+		Field f = OverridableDomainGenerator.class.getDeclaredField("modocDerivations");
+		f.setAccessible(true);
+		TreeMap<String, Document> result = new TreeMap<>();
+		for (Document derivation : derivations) {
+			result.put(derivation.getOwningModuleName() + '.' + derivation.getName(), derivation);
+		}
+		((TreeMap<String, TreeMap<String, Document>>) f.get(gen)).put(baseModoc, result);
+	}
+
+	/** Invoke {@code generateORM} for a vanilla, non-recursive base class and return the mapping. */
+	private static String orm(OverridableDomainGenerator gen, Module module, Document doc) throws Exception {
+		StringBuilder contents = new StringBuilder();
+		ormMethod().invoke(gen, contents, module, doc, "modules.", false, false, null, new StringBuilder(), "");
+		return contents.toString();
+	}
+
+	/** Invoke {@code generateAttributeMappings} for a vanilla document and return the mapping. */
+	private static String attributeMappings(OverridableDomainGenerator gen, Module module, Document doc, Persistent p)
+			throws Exception {
+		StringBuilder contents = new StringBuilder();
+		attrMappingsMethod().invoke(gen, contents, null, module, doc, p, null, new TreeSet<>(), null, false, "");
+		return contents.toString();
+	}
+
+	/** Assert the reflective call threw the given exception type with a message containing the given text. */
+	private static <T extends Throwable> T assertCause(Class<T> type, String messagePart, Executable call) {
+		InvocationTargetException e = assertThrows(InvocationTargetException.class, call);
+		Throwable cause = e.getCause();
+		assertTrue(type.isInstance(cause), "Expected " + type.getSimpleName() + " but got " + cause);
+		String message = cause.getMessage();
+		assertTrue((message != null) && message.contains(messagePart), "Unexpected message " + message);
+		return type.cast(cause);
+	}
+
+	@Test
+	void generateORMWithIndexingDialectAndMultiTenancyIndexesImplicitColumns() throws Exception {
+		OverridableDomainGenerator gen = generator(DialectOptions.H2, true);
+		DocumentImpl doc = simpleDoc("IdxDoc", "myMod");
+		Persistent p = simplePersistent("MOD_IdxDoc", doc);
+		seedPropertyLengths(gen, p, "_dummy", 0);
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		setRepository(gen, repo);
+
+		String result = orm(gen, mockModule("myMod"), doc);
+
+		assertTrue(result.contains("<property name=\"" + Bean.BIZ_KEY + "\" length=\"1024\" index=\""), result);
+		assertTrue(result.contains("<property name=\"" + Bean.CUSTOMER_NAME + "\" length=\"50\" index=\""), result);
+		assertTrue(result.contains("<property name=\"" + Bean.USER_ID + "\" length=\"36\" index=\""), result);
+	}
+
+	@Test
+	void generateORMForHierarchicalDocumentIndexesParentId() throws Exception {
+		OverridableDomainGenerator gen = generator(DialectOptions.H2, false);
+		DocumentImpl doc = simpleDoc("Node", "myMod");
+		doc.setParentDocumentName("Node");
+		Persistent p = simplePersistent("MOD_Node", doc);
+		seedPropertyLengths(gen, p, "_dummy", 0);
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Node")).thenReturn(doc);
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.getModule(null, "myMod")).thenReturn(module);
+		setRepository(gen, repo);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			String result = orm(gen, module, doc);
+
+			assertTrue(result.contains("<property name=\"" + HierarchicalBean.PARENT_ID + "\" length=\"36\" index=\""), result);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	void generateORMForChildDocumentIndexesAndConstrainsParent() throws Exception {
+		OverridableDomainGenerator gen = generator(DialectOptions.H2, false);
+		DocumentImpl parent = simpleDoc("Order", "myMod");
+		simplePersistent("MOD_Order", parent);
+		DocumentImpl doc = simpleDoc("Line", "myMod");
+		doc.setParentDocumentName("Order");
+		Persistent p = simplePersistent("MOD_Line", doc);
+		seedPropertyLengths(gen, p, "_dummy", 0);
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Order")).thenReturn(parent);
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.getModule(null, "myMod")).thenReturn(module);
+		setRepository(gen, repo);
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			String result = orm(gen, module, doc);
+
+			assertTrue(result.contains("<many-to-one name=\"" + ChildBean.PARENT_NAME + "\" entity-name=\"myModOrder\""), result);
+			assertTrue(result.contains("update=\"false\" index=\""), result);
+			assertTrue(result.contains("foreign-key=\""), result);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@Test
+	void generateORMThrowsWhenPersistableDocumentHasNoPersistentName() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl doc = spy(simpleDoc("NoName", "myMod"));
+		doc.setPersistent(new Persistent());
+		doReturn(java.lang.Boolean.TRUE).when(doc).isPersistable();
+		setRepository(gen, mock(ProvidedRepository.class));
+		Module module = mockModule("myMod");
+
+		assertCause(IllegalStateException.class,
+						"Persistable document myMod.NoName has no persistent name",
+						() -> orm(gen, module, doc));
+	}
+
+	@Test
+	void generateORMThrowsWhenPersistentNameExceedsTheDialectIdentifierLimit() throws Exception {
+		OverridableDomainGenerator gen = generator(DialectOptions.MYSQL_5, false);
+		DocumentImpl doc = simpleDoc("LongDoc", "myMod");
+		simplePersistent("T".repeat(65), doc);
+		setRepository(gen, mock(ProvidedRepository.class));
+		Module module = mockModule("myMod");
+
+		assertCause(MetaDataException.class,
+						"is longer than the allowed data store identifier character limit of 64",
+						() -> orm(gen, module, doc));
+	}
+
+	@Test
+	void generateORMThrowsWhenNamedPersistentDocumentIsNotPersistable() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl doc = spy(simpleDoc("NotPersistable", "myMod"));
+		simplePersistent("MOD_NotPersistable", doc);
+		doReturn(java.lang.Boolean.FALSE).when(doc).isPersistable();
+		setRepository(gen, mock(ProvidedRepository.class));
+		Module module = mockModule("myMod");
+
+		assertCause(IllegalStateException.class,
+						"No entity name was generated for document myMod.NotPersistable",
+						() -> orm(gen, module, doc));
+	}
+
+	@Test
+	void generateORMMapsSingleJoinedAndUnmappedDerivationsFromTheirModules() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl base = simpleDoc("Base", "myMod");
+		simplePersistent("MOD_Base", base);
+		org.skyve.metadata.model.Extends inherits = new org.skyve.metadata.model.Extends();
+		inherits.setDocumentName("Base");
+
+		DocumentImpl single = simpleDoc("SingleSub", "myMod");
+		single.setExtends(inherits);
+		simplePersistent("MOD_Base", single).setStrategy(ExtensionStrategy.single);
+		DocumentImpl joined = simpleDoc("JoinedSub", "myMod");
+		joined.setExtends(inherits);
+		simplePersistent("MOD_JoinedSub", joined).setStrategy(ExtensionStrategy.joined);
+		DocumentImpl unmapped = simpleDoc("TransientSub", "myMod");
+		unmapped.setExtends(inherits);
+		seedDerivations(gen, "myMod.Base", single, joined, unmapped);
+
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Base")).thenReturn(base);
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.getModule(null, "myMod")).thenReturn(module);
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(null, module, single)).thenReturn(base);
+		when(repo.findNearestPersistentSingleOrJoinedSuperDocument(null, module, joined)).thenReturn(base);
+		setRepository(gen, repo);
+
+		String result = orm(gen, module, base);
+
+		assertTrue(result.contains("<subclass name=\"modules.myMod.domain.SingleSub\""), result);
+		assertTrue(result.contains("<joined-subclass name=\"modules.myMod.domain.JoinedSub\""), result);
+		verify(repo, times(3)).getModule(null, "myMod");
+	}
+
+	@Test
+	void generateAttributeMappingsInlinesMappedBaseDocumentAttributes() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl base = simpleDoc("MappedBase", "baseMod");
+		Persistent basePersistent = new Persistent();
+		basePersistent.setStrategy(ExtensionStrategy.mapped);
+		base.setPersistent(basePersistent);
+		Text code = new Text();
+		code.setName("code");
+		code.setDisplayName("Code");
+		base.putAttribute(code);
+
+		DocumentImpl doc = simpleDoc("Sub", "myMod");
+		org.skyve.metadata.model.Extends inherits = new org.skyve.metadata.model.Extends();
+		inherits.setDocumentName("MappedBase");
+		doc.setExtends(inherits);
+		Persistent p = simplePersistent("MOD_Sub", doc);
+		seedPropertyLengths(gen, p, "code", 10);
+
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "MappedBase")).thenReturn(base);
+		Module baseModule = mockModule("baseMod");
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.getModule(null, "baseMod")).thenReturn(baseModule);
+		setRepository(gen, repo);
+
+		String result = attributeMappings(gen, module, doc, p);
+
+		assertTrue(result.contains("<property name=\"code\" length=\"10\""), result);
+		verify(repo).getModule(null, "baseMod");
+	}
+
+	@Test
+	void generateAttributeMappingsMapsEmbeddedAssociationAsComponent() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl address = simpleDoc("Address", "addrMod");
+		address.setPersistent(new Persistent());
+		Text street = new Text();
+		street.setName("street");
+		street.setDisplayName("Street");
+		address.putAttribute(street);
+
+		DocumentImpl doc = simpleDoc("Contact", "myMod");
+		Persistent p = simplePersistent("MOD_Contact", doc);
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("address");
+		assoc.setDisplayName("Address");
+		assoc.setDocumentName("Address");
+		assoc.setType(AssociationType.embedded);
+		doc.putRelation(assoc);
+		seedPropertyLengths(gen, p, "street", 100);
+
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Address")).thenReturn(address);
+		Module addressModule = mockModule("addrMod");
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.getModule(null, "addrMod")).thenReturn(addressModule);
+		setRepository(gen, repo);
+
+		String result = attributeMappings(gen, module, doc, p);
+
+		assertTrue(result.contains("<component name=\"address\">"), result);
+		assertTrue(result.contains("<property name=\"street\" length=\"100\""), result);
+		verify(repo).getModule(null, "addrMod");
+	}
+
+	@Test
+	void generateAttributeMappingsIndexesBothColumnsOfAnArcAssociation() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl animal = simpleDoc("Animal", "myMod");
+		Persistent animalPersistent = new Persistent();
+		animalPersistent.setStrategy(ExtensionStrategy.mapped);
+		animal.setPersistent(animalPersistent);
+
+		DocumentImpl doc = simpleDoc("Owner", "myMod");
+		Persistent p = simplePersistent("MOD_Owner", doc);
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("pet");
+		assoc.setDisplayName("Pet");
+		assoc.setDocumentName("Animal");
+		assoc.setType(AssociationType.aggregation);
+		doc.putRelation(assoc);
+
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Animal")).thenReturn(animal);
+		setRepository(gen, mock(ProvidedRepository.class));
+
+		String result = attributeMappings(gen, module, doc, p);
+
+		assertTrue(result.contains("<any name=\"pet\""), result);
+		assertTrue(result.contains("<column name=\"pet_type\" index=\""), result);
+		assertTrue(result.contains("<column name=\"pet_id\" length=\"36\" index=\""), result);
+	}
+
+	@Test
+	void generateAttributeMappingsIndexesAggregationForIndexingDialect() throws Exception {
+		OverridableDomainGenerator gen = generator(DialectOptions.H2, false);
+		DocumentImpl dept = simpleDoc("Dept", "myMod");
+		simplePersistent("MOD_Dept", dept);
+		DocumentImpl doc = simpleDoc("Employee", "myMod");
+		Persistent p = simplePersistent("MOD_Employee", doc);
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("department");
+		assoc.setDisplayName("Department");
+		assoc.setDocumentName("Dept");
+		assoc.setType(AssociationType.aggregation);
+		doc.putRelation(assoc);
+
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Dept")).thenReturn(dept);
+		setRepository(gen, mock(ProvidedRepository.class));
+
+		String result = attributeMappings(gen, module, doc, p);
+
+		assertTrue(result.contains("cascade=\"persist,save-update,refresh,merge\" index=\""), result);
+	}
+
+	@Test
+	void generateAttributeMappingsIndexesDatabaseIndexedEnumeration() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl doc = simpleDoc("StatusDoc", "myMod");
+		Persistent p = simplePersistent("MOD_StatusDoc", doc);
+		Enumeration status = new Enumeration();
+		status.setName("status");
+		status.setDisplayName("Status");
+		status.setOwningDocument(doc);
+		status.setIndex(IndexType.database);
+		doc.putAttribute(status);
+		seedPropertyLengths(gen, p, "status", 30);
+		setRepository(gen, mock(ProvidedRepository.class));
+
+		String result = attributeMappings(gen, mockModule("myMod"), doc, p);
+
+		assertTrue(result.contains("<property name=\"status\" length=\"30\" index=\""), result);
+	}
+
+	@Test
+	void generateAttributeMappingsThrowsForEnumerationWithoutOwningDocument() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl doc = simpleDoc("OrphanEnumDoc", "myMod");
+		Persistent p = simplePersistent("MOD_OrphanEnumDoc", doc);
+		Enumeration status = new Enumeration();
+		status.setName("status");
+		status.setDisplayName("Status");
+		doc.putAttribute(status);
+		seedPropertyLengths(gen, p, "status", 30);
+		setRepository(gen, mock(ProvidedRepository.class));
+		Module module = mockModule("myMod");
+
+		assertCause(IllegalStateException.class,
+						"Enumeration status has no owning document",
+						() -> attributeMappings(gen, module, doc, p));
+	}
+
+	@Test
+	void generateAttributeMappingsIndexesDatabaseIndexedField() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl doc = simpleDoc("FieldIdxDoc", "myMod");
+		Persistent p = simplePersistent("MOD_FieldIdxDoc", doc);
+		Text code = new Text();
+		code.setName("code");
+		code.setDisplayName("Code");
+		code.setIndex(IndexType.database);
+		doc.putAttribute(code);
+		seedPropertyLengths(gen, p, "code", 20);
+		setRepository(gen, mock(ProvidedRepository.class));
+
+		String result = attributeMappings(gen, mockModule("myMod"), doc, p);
+
+		assertTrue(result.contains("<property name=\"code\" length=\"20\" index=\""), result);
+	}
+
+	@Test
+	void generateAttributeMappingsThrowsWhenPersistentHasNoNameForAConstraintName() throws Exception {
+		OverridableDomainGenerator gen = generator();
+		DocumentImpl dept = simpleDoc("Dept", "myMod");
+		simplePersistent("MOD_Dept", dept);
+		DocumentImpl doc = simpleDoc("Employee", "myMod");
+		Persistent p = new Persistent();
+		doc.setPersistent(p);
+		AssociationImpl assoc = new AssociationImpl();
+		assoc.setName("department");
+		assoc.setDisplayName("Department");
+		assoc.setDocumentName("Dept");
+		assoc.setType(AssociationType.aggregation);
+		doc.putRelation(assoc);
+		Module module = mockModule("myMod");
+		when(module.getDocument(null, "Dept")).thenReturn(dept);
+		setRepository(gen, mock(ProvidedRepository.class));
+
+		assertCause(IllegalStateException.class, "has no name", () -> attributeMappings(gen, module, doc, p));
 	}
 
 	// ---- helper methods ---------------------------------------------------

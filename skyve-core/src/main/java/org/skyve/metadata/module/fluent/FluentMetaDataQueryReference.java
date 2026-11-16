@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.module.query.MetaDataQueryReferenceImpl;
 import org.skyve.impl.metadata.repository.module.MetaDataQueryReferenceMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds metadata query references.
  */
@@ -21,7 +23,7 @@ public class FluentMetaDataQueryReference extends FluentQueryReference<FluentMet
 	 *
 	 * @param query The metadata to mutate.
 	 */
-	public FluentMetaDataQueryReference(MetaDataQueryReferenceMetaData query) {
+	public FluentMetaDataQueryReference(@Nonnull MetaDataQueryReferenceMetaData query) {
 		this.query = query;
 	}
 	
@@ -31,7 +33,7 @@ public class FluentMetaDataQueryReference extends FluentQueryReference<FluentMet
 	 * @param query The source reference.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryReference from(@SuppressWarnings("hiding") MetaDataQueryReferenceImpl query) {
+	public @Nonnull FluentMetaDataQueryReference from(@SuppressWarnings("hiding") @Nonnull MetaDataQueryReferenceImpl query) {
 		super.from(query);
 		return this;
 	}
@@ -42,7 +44,7 @@ public class FluentMetaDataQueryReference extends FluentQueryReference<FluentMet
 	 * @return The metadata query reference metadata instance.
 	 */
 	@Override
-	public MetaDataQueryReferenceMetaData get() {
+	public @Nonnull MetaDataQueryReferenceMetaData get() {
 		return query;
 	}
 }

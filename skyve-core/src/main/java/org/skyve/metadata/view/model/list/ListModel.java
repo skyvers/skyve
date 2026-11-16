@@ -21,6 +21,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
+import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -73,10 +74,10 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 	private static final String FILTERING_NOT_CATERED_FOR = " is not catered for in filtering";
 
 	private T bean;
-	public T getBean() {
+	public @Nullable T getBean() {
 		return bean;
 	}
-	public void setBean(T bean) {
+	public void setBean(@Nullable T bean) {
 		this.bean = bean;
 	}
 
@@ -102,34 +103,34 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		this.endRow = endRow;
 	}
 
-	protected final SortParameter[] getSortParameters() {
+	protected final @Nullable SortParameter[] getSortParameters() {
 		return sorts;
 	}
 
-	public void setSortParameters(SortParameter[] sorts) {
+	public void setSortParameters(@Nullable SortParameter[] sorts) {
 		this.sorts = sorts;
 	}
 
-	protected final AggregateFunction getSummary() {
+	protected final @Nullable AggregateFunction getSummary() {
 		return summary;
 	}
 
-	public void setSummary(AggregateFunction summary) {
+	public void setSummary(@Nullable AggregateFunction summary) {
 		this.summary = summary;
 	}
 
-	protected final String getSelectedTagId() {
+	protected final @Nullable String getSelectedTagId() {
 		return selectedTagId;
 	}
 
-	public void setSelectedTagId(String selectedTagId) {
+	public void setSelectedTagId(@Nullable String selectedTagId) {
 		this.selectedTagId = selectedTagId;
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public final void addParameters(Document drivingDocument,
-										List<FilterParameter> filterParameters,
-										List<Parameter> parameters)
+	public final void addParameters(@Nonnull Document drivingDocument,
+										@Nullable List<FilterParameter> filterParameters,
+										@Nullable List<Parameter> parameters)
 	throws Exception {
 		Filter filter = getFilter();
 		Customer customer = CORE.getCustomer();
@@ -148,9 +149,18 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 																	true);
 				parameterName = parameter.getLeft();
 				Object value = parameter.getRight();
+				FilterOperator operator = param.getOperator();
+				
+				// A model without a filter can only take parameters that add no criteria (null values)
+				if (filter == null) {
+					if ((value != null) || FilterOperator.isNull.equals(operator) || FilterOperator.notNull.equals(operator)) {
+						throw new IllegalStateException("List model " + getClass().getName() + " does not support filtering but has filter parameter " + parameterName);
+					}
+					continue;
+				}
 				
 				// Add the filter to the model
-				switch (param.getOperator()) {
+				switch (operator) {
 					case equal:
 						if (value != null) {
 							addEquals(filter, parameterName, value);
@@ -199,62 +209,62 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 						break;
 					case nullOrEqual:
 						if (value != null) {
-							Filter equalFilter = newFilter();
+							Filter equalFilter = newNonNullFilter();
 							addEquals(equalFilter, parameterName, value);
 							addNullOrSomething(filter, equalFilter, parameterName);
 						}
 						break;
 					case nullOrGreater:
 						if (value != null) {
-							Filter greaterFilter = newFilter();
+							Filter greaterFilter = newNonNullFilter();
 							addGreaterThan(greaterFilter, parameterName, value);
 							addNullOrSomething(filter, greaterFilter, parameterName);
 						}
 						break;
 					case nullOrGreaterEqual:
 						if (value != null) {
-							Filter greaterEqualFilter = newFilter();
+							Filter greaterEqualFilter = newNonNullFilter();
 							addGreaterThan(greaterEqualFilter, parameterName, value);
 							addNullOrSomething(filter, greaterEqualFilter, parameterName);
 						}
 						break;
 					case nullOrLess:
 						if (value != null) {
-							Filter lessFilter = newFilter();
+							Filter lessFilter = newNonNullFilter();
 							addGreaterThan(lessFilter, parameterName, value);
 							addNullOrSomething(filter, lessFilter, parameterName);
 						}
 						break;
 					case nullOrLessEqual:
 						if (value != null) {
-							Filter lessEqualFilter = newFilter();
+							Filter lessEqualFilter = newNonNullFilter();
 							addGreaterThan(lessEqualFilter, parameterName, value);
 							addNullOrSomething(filter, lessEqualFilter, parameterName);
 						}
 						break;
 					case nullOrLike:
 						if (value != null) {
-							Filter likeFilter = newFilter();
+							Filter likeFilter = newNonNullFilter();
 							likeFilter.addContains(parameterName, (String) value);
 							addNullOrSomething(filter, likeFilter, parameterName);
 						}
 						break;
 					case nullOrNotEqual:
 						if (value != null) {
-							Filter notEqualFilter = newFilter();
+							Filter notEqualFilter = newNonNullFilter();
 							addNotEquals(notEqualFilter, parameterName, value);
 							addNullOrSomething(filter, notEqualFilter, parameterName);
 						}
 						break;
 					case nullOrNotLike:
 						if (value != null) {
-							Filter notLikeFilter = newFilter();
+							Filter notLikeFilter = newNonNullFilter();
 							notLikeFilter.addNotContains(parameterName, (String) value);
 							addNullOrSomething(filter, notLikeFilter, parameterName);
 						}
 						break;
 					default:
-						throw new IllegalStateException(param.getOperator() + " is not supported");
+						throw new IllegalStateException(operator + " is not supported");
 				}
 			}
 		}
@@ -274,13 +284,13 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private Pair<String, Object> processParameter(@Nonnull Customer customer,
-													@Nonnull Module module,
-													@Nonnull Document document,
-													@Nonnull String name,
-													@Nullable String binding,
-													@Nullable String value,
-													boolean filter) {
+	private @Nonnull Pair<String, Object> processParameter(@Nonnull Customer customer,
+															@Nonnull Module module,
+															@Nonnull Document document,
+															@Nonnull String name,
+															@Nullable String binding,
+															@Nullable String value,
+															boolean filter) {
 		String newBinding = binding;
 
 		// The resulting parameter contents
@@ -377,9 +387,9 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		return new ImmutablePair<>(newName, newValue);
 	}
 	
-	public abstract String getDescription();
+	public abstract @Nullable String getDescription();
 	
-	public String getLocalisedDescription() {
+	public @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 	
@@ -390,12 +400,15 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 	 * @param column	The column to get the title for.
 	 * @return	The title.
 	 */
-	public String determineColumnTitle(MetaDataQueryColumn column) {
+	public @Nullable String determineColumnTitle(@Nonnull MetaDataQueryColumn column) {
 		String result = column.getLocalisedDisplayName();
 		if (result == null) {
 			String binding = column.getBinding();
 			if (binding != null) {
 				Document d = getDrivingDocument();
+				if (d == null) {
+					throw new IllegalStateException("List model " + getClass().getName() + " has no driving document to resolve column binding " + binding);
+				}
 				Customer c = CORE.getCustomer();
 				Module m = c.getModule(d.getOwningModuleName());
 				TargetMetaData target = BindUtil.getMetaDataForBinding(c, m, d, binding);
@@ -418,23 +431,38 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 		return result;
 	}
 	
-	public abstract Document getDrivingDocument();
+	public abstract @Nullable Document getDrivingDocument();
 	
-	public abstract List<MetaDataQueryColumn> getColumns();
+	public abstract @Nonnull List<MetaDataQueryColumn> getColumns();
 	
-	public abstract Set<String> getProjections();
+	public abstract @Nonnull Set<String> getProjections();
 	
-	public abstract Filter getFilter();
-	public abstract Filter newFilter();
-	public abstract void putParameter(String name, Object value);
-	public abstract Page fetch() throws Exception;
-	public abstract AutoClosingIterable<Bean> iterate() throws Exception;
+	public abstract @Nullable Filter getFilter();
+	public abstract @Nullable Filter newFilter();
+
+	/**
+	 * Returns a new filter for composing filter criteria.
+	 *
+	 * @return the new filter from {@link #newFilter()}
+	 * @throws IllegalStateException if this model does not support filtering ({@link #newFilter()} returns null)
+	 */
+	private @Nonnull Filter newNonNullFilter() {
+		Filter result = newFilter();
+		if (result == null) {
+			throw new IllegalStateException("List model " + getClass().getName() + " does not support filtering - newFilter() returned null");
+		}
+		return result;
+	}
+
+	public abstract void putParameter(@Nonnull String name, @Nullable Object value);
+	public abstract @Nonnull Page fetch() throws Exception;
+	public abstract @Nonnull AutoClosingIterable<Bean> iterate() throws Exception;
 	
-	public abstract Bean update(String bizId, SortedMap<String, Object> properties)
+	public abstract @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties)
 	throws Exception;
-	public abstract void remove(String bizId) throws Exception;
+	public abstract void remove(@Nonnull String bizId) throws Exception;
 	
-	public static void addEquals(Filter filter, String binding, Object value) {
+	public static void addEquals(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object value) {
 		if (value instanceof String string) {
 			filter.addEquals(binding, string);
 		}
@@ -464,7 +492,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-    public static void addNotEquals(Filter filter, String binding, Object value) {
+    public static void addNotEquals(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object value) {
     	if (value instanceof String string) {
 			filter.addNotEquals(binding, string);
 		}
@@ -494,7 +522,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-    public static void addGreaterThan(Filter filter, String binding, Object value) {
+    public static void addGreaterThan(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object value) {
     	if (value instanceof String string) {
     		filter.addGreaterThan(binding, string);
     	}
@@ -515,7 +543,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-    public static void addGreaterThanOrEqualTo(Filter filter, String binding, Object value) {
+    public static void addGreaterThanOrEqualTo(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object value) {
     	if (value instanceof String string) {
     		filter.addGreaterThanOrEqualTo(binding, string);
     	}
@@ -536,7 +564,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-    public static void addLessThan(Filter filter, String binding, Object value) {
+    public static void addLessThan(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object value) {
     	if (value instanceof String string) {
 			filter.addLessThan(binding, string);
     	}
@@ -557,7 +585,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-    public static void addLessThanOrEqualTo(Filter filter, String binding, Object value) {
+    public static void addLessThanOrEqualTo(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object value) {
     	if (value instanceof String string) {
 			filter.addLessThanOrEqualTo(binding, string);
     	}
@@ -578,7 +606,7 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-    public static void addBetween(Filter filter, String binding, Object start, Object end) {
+    public static void addBetween(@Nonnull Filter filter, @Nonnull String binding, @Nonnull Object start, @Nonnull Object end) {
     	if (start instanceof String stringStart) {
 			filter.addBetween(binding, stringStart, (String) end);
     	}
@@ -599,21 +627,21 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
     	}
     }
     
-	private void addNullOrSomething(Filter filterToAddTo, Filter somethingFilter, String binding) {
-		Filter orFilter = newFilter();
+	private void addNullOrSomething(@Nonnull Filter filterToAddTo, @Nonnull Filter somethingFilter, @Nonnull String binding) {
+		Filter orFilter = newNonNullFilter();
 		orFilter.addNull(binding);
 		orFilter.addOr(somethingFilter);
 		filterToAddTo.addAnd(orFilter);
 	}
 	
-	public static Object[] getTop100VariantDomainValueCodesFromDescriptionFilter(Document document, Attribute attribute, String like) {
+	public static @Nonnull Object[] getTop100VariantDomainValueCodesFromDescriptionFilter(@Nonnull Document document, @Nonnull Attribute attribute, @Nonnull String like) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) CORE.getCustomer(),
 																				DomainType.variant,
 																				attribute, 
 																				null,
 																				true);
 		
-		if ((values == null) || values.isEmpty()) {
+		if (values.isEmpty()) {
 			return new Object[0];
 		}
 		

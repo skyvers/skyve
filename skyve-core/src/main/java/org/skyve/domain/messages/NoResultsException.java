@@ -3,6 +3,8 @@ package org.skyve.domain.messages;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Thrown by query methods that require exactly one result but find none.
  *
@@ -34,7 +36,7 @@ public class NoResultsException extends DomainException implements MessageExcept
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

@@ -4,20 +4,50 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.primefaces.model.DualListModel;
 import org.skyve.domain.Bean;
+import org.skyve.domain.DynamicBean;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.views.FacesView;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.metadata.model.document.Collection;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 
 import jakarta.faces.FacesException;
 
 @SuppressWarnings("static-method")
 class SkyveDualListModelMapTest {
+	@AfterEach
+	@SuppressWarnings({"unchecked", "java:S3011"}) // Test cleanup must access the framework-owned thread-local
+	void clearThreadPersistence() throws ReflectiveOperationException {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
+	}
 
 	@Test
 	void getWithNullViewCreatesEmptyDualListModel() {
@@ -123,5 +153,144 @@ class SkyveDualListModelMapTest {
 		FacesException thrown = assertThrows(FacesException.class, () -> map.get("roles"));
 
 		assertTrue(thrown.getMessage().contains("Could not scatter list membership roles"));
+	}
+
+	@Test
+	void gatherThrowsWhenANewMemberMustBeFoundButTheViewHasNoWebContext() {
+		GatherFixture fixture = new GatherFixture();
+		when(fixture.view.getWebContext()).thenReturn(null);
+
+		FacesException thrown = assertThrows(FacesException.class, fixture.map::gather);
+
+		assertEquals("Could not gather list membership roles", thrown.getMessage());
+		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, thrown.getCause());
+		assertEquals("Cannot gather list membership roles as the FacesView has no web context", cause.getMessage());
+		assertTrue(fixture.roles.isEmpty());
+	}
+
+	@Test
+	void gatherAddsANewMemberFoundThroughTheViewWebContext() {
+		GatherFixture fixture = new GatherFixture();
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(fixture.view.getWebContext()).thenReturn(webContext);
+		Bean role = mock(Bean.class);
+		doReturn(role).when(fixture.persistence).retrieve(fixture.roleDocument, "r1");
+
+		fixture.map.gather();
+
+		assertEquals(List.of(role), fixture.roles);
+		assertFalse(fixture.map.containsKey("roles"));
+	}
+
+	@Test
+	void scatterListsAnOrderedMembershipsMembersInTheCollectionsOrder() {
+		ScatterFixture fixture = new ScatterFixture(true);
+
+		DualListModel<DomainValue> model = fixture.map.get("roles");
+
+		assertEquals(List.of("r3", "r1"), codes(model.getTarget()));
+		assertEquals(List.of("r2"), codes(model.getSource()));
+	}
+
+	@Test
+	void scatterListsAnUnorderedMembershipsMembersInTheCandidatesOrder() {
+		ScatterFixture fixture = new ScatterFixture(false);
+
+		DualListModel<DomainValue> model = fixture.map.get("roles");
+
+		assertEquals(List.of("r1", "r3"), codes(model.getTarget()));
+		assertEquals(List.of("r2"), codes(model.getSource()));
+	}
+
+	private static List<String> codes(List<DomainValue> values) {
+		return values.stream().map(DomainValue::getCode).toList();
+	}
+
+	/**
+	 * A view of an admin.User bean whose "roles" collection of admin.Role holds roles "r3" then "r1", and whose domain
+	 * values (the candidates) are "r1", "r2" and "r3" in that order.
+	 */
+	private static final class ScatterFixture {
+		final SkyveDualListModelMap map;
+
+		ScatterFixture(boolean ordered) {
+			User user = mock(User.class);
+			CustomerImpl customer = mock(CustomerImpl.class);
+			Module module = mock(Module.class);
+			DocumentImpl userDocument = mock(DocumentImpl.class);
+			Document roleDocument = mock(Document.class);
+			Collection collection = mock(Collection.class);
+			when(user.getCustomer()).thenReturn(customer);
+			when(customer.getModule("admin")).thenReturn(module);
+			when(module.getDocument(customer, "User")).thenReturn(userDocument);
+			when(module.getDocument(customer, "Role")).thenReturn(roleDocument);
+			when(userDocument.getAttribute("roles")).thenReturn(collection);
+			when(collection.getDocumentName()).thenReturn("Role");
+			when(collection.getOrdered()).thenReturn(Boolean.valueOf(ordered));
+			AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+			persistence.setUser(user);
+			persistence.setForThread();
+
+			List<Bean> roles = new ArrayList<>();
+			roles.add(role("r3"));
+			roles.add(role("r1"));
+			Map<String, Object> values = new HashMap<>();
+			values.put("roles", roles);
+			Bean bean = new DynamicBean("admin", "User", values);
+			List<DomainValue> candidates = new ArrayList<>();
+			candidates.add(new DomainValue("r1", "Role 1"));
+			candidates.add(new DomainValue("r2", "Role 2"));
+			candidates.add(new DomainValue("r3", "Role 3"));
+			when(userDocument.getDomainValues(any(), any(), any(), any(), anyBoolean())).thenReturn(candidates);
+
+			FacesView view = mock(FacesView.class);
+			when(view.getCurrentBean()).thenReturn(new BeanMapAdapter(bean, null));
+			map = new SkyveDualListModelMap(view);
+		}
+
+		private static Bean role(String bizId) {
+			Bean result = mock(Bean.class);
+			when(result.getBizId()).thenReturn(bizId);
+			return result;
+		}
+	}
+
+	/**
+	 * A view of an admin.User bean with an empty "roles" collection of admin.Role and a membership model
+	 * whose target holds role "r1".
+	 */
+	private static final class GatherFixture {
+		final FacesView view = mock(FacesView.class);
+		final Document roleDocument = mock(Document.class);
+		final List<Bean> roles = new ArrayList<>();
+		final AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		final SkyveDualListModelMap map;
+
+		@SuppressWarnings("boxing")
+		GatherFixture() {
+			User user = mock(User.class);
+			Customer customer = mock(Customer.class);
+			Module module = mock(Module.class);
+			Document userDocument = mock(Document.class);
+			Collection collection = mock(Collection.class);
+			when(user.getCustomer()).thenReturn(customer);
+			when(user.canReadBean(any(), any(), any(), any(), any(), any())).thenReturn(Boolean.TRUE);
+			when(customer.getModule("admin")).thenReturn(module);
+			when(module.getDocument(customer, "User")).thenReturn(userDocument);
+			when(module.getDocument(customer, "Role")).thenReturn(roleDocument);
+			when(userDocument.getAttribute("roles")).thenReturn(collection);
+			when(collection.getDocumentName()).thenReturn("Role");
+			when(roleDocument.isPersistable()).thenReturn(Boolean.TRUE);
+			persistence.setUser(user);
+			persistence.setForThread();
+
+			Map<String, Object> values = new HashMap<>();
+			values.put("roles", roles);
+			when(view.getCurrentBean()).thenReturn(new BeanMapAdapter(new DynamicBean("admin", "User", values), null));
+			map = new SkyveDualListModelMap(view);
+			List<DomainValue> target = new ArrayList<>();
+			target.add(new DomainValue("r1", "Role 1"));
+			map.put("roles", new DualListModel<>(new ArrayList<>(), target));
+		}
 	}
 }

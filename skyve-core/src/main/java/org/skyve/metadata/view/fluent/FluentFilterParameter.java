@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.view.widget.FilterParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds {@link FilterParameter} metadata for list and query filtering.
  */
@@ -23,7 +26,7 @@ public class FluentFilterParameter {
 	 * @param filterParameter
 	 *            the metadata instance to mutate
 	 */
-	public FluentFilterParameter(FilterParameterImpl filterParameter) {
+	public FluentFilterParameter(@Nonnull FilterParameterImpl filterParameter) {
 		this.filterParameter = filterParameter;
 	}
 
@@ -34,7 +37,7 @@ public class FluentFilterParameter {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentFilterParameter from(@SuppressWarnings("hiding") FilterParameter filterParameter) {
+	public @Nonnull FluentFilterParameter from(@SuppressWarnings("hiding") @Nonnull FilterParameter filterParameter) {
 		filterBinding(filterParameter.getFilterBinding());
 		value(filterParameter.getValue());
 		valueBinding(filterParameter.getValueBinding());
@@ -49,7 +52,7 @@ public class FluentFilterParameter {
 	 *            the filter binding expression
 	 * @return this builder
 	 */
-	public FluentFilterParameter filterBinding(String filterBinding) {
+	public @Nonnull FluentFilterParameter filterBinding(@Nonnull String filterBinding) {
 		filterParameter.setFilterBinding(filterBinding);
 		return this;
 	}
@@ -61,7 +64,7 @@ public class FluentFilterParameter {
 	 *            the literal filter value
 	 * @return this builder
 	 */
-	public FluentFilterParameter value(String value) {
+	public @Nonnull FluentFilterParameter value(@Nullable String value) {
 		filterParameter.setValue(value);
 		return this;
 	}
@@ -73,7 +76,7 @@ public class FluentFilterParameter {
 	 *            the value-binding expression
 	 * @return this builder
 	 */
-	public FluentFilterParameter valueBinding(String valueBinding) {
+	public @Nonnull FluentFilterParameter valueBinding(@Nullable String valueBinding) {
 		filterParameter.setValueBinding(valueBinding);
 		return this;
 	}
@@ -85,7 +88,7 @@ public class FluentFilterParameter {
 	 *            the filter operator
 	 * @return this builder
 	 */
-	public FluentFilterParameter operator(FilterOperator operator) {
+	public @Nonnull FluentFilterParameter operator(@Nonnull FilterOperator operator) {
 		filterParameter.setOperator(operator);
 		return this;
 	}
@@ -95,7 +98,7 @@ public class FluentFilterParameter {
 	 *
 	 * @return the wrapped filter-parameter metadata
 	 */
-	public FilterParameterImpl get() {
+	public @Nonnull FilterParameterImpl get() {
 		return filterParameter;
 	}
 }

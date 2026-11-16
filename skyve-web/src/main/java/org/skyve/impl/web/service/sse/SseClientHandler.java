@@ -2,7 +2,6 @@ package org.skyve.impl.web.service.sse;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -12,16 +11,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.metadata.user.User;
 import org.skyve.util.JSON;
 import org.skyve.util.PushMessage;
 import org.skyve.util.PushMessage.PushMessageReceiver;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
@@ -136,20 +137,15 @@ public class SseClientHandler implements PushMessageReceiver {
 	@GET
 	@Path("/stream")
 	@Produces(MediaType.SERVER_SENT_EVENTS)
-	public void streamEvents(@Context SseEventSink eventSink,
-								@Context HttpServletRequest request,
-								@HeaderParam("Last-Event-ID") String lastEventId)
+	public void streamEvents(@Context @Nonnull SseEventSink eventSink,
+								@Context @Nonnull HttpServletRequest request,
+								@HeaderParam("Last-Event-ID") @Nullable String lastEventId)
 			throws InterruptedException {
 
 		try (SseEventSink sink = eventSink) {
 			sinkRef = sink;
 
-			User user = Optional.of(request)
-					.map(HttpServletRequest::getSession)
-					.map(s -> s.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME))
-					.map(User.class::cast)
-					.orElse(null);
-
+			User user = WebUtil.getValidatedSessionUser(request);
 			if (user == null) {
 				LOGGER.warn("No user provided");
 				return;
@@ -280,7 +276,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	 * @throws InterruptedException if the container interrupts this thread
 	 */
 	@SuppressWarnings("resource") // The sink is closed by the container after this method returns, or by cleanupAndClose() on error
-	private void sendMessageLoop(SseEventSink sink) throws InterruptedException {
+	private void sendMessageLoop(@Nonnull SseEventSink sink) throws InterruptedException {
 		// Immediately send a keep-alive to flush the headers to the client
 		if (!sendEvent(sink, createKeepAlive())) {
 			return;
@@ -321,7 +317,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	 * @param event the event to send
 	 * @return {@code true} if the send completed successfully; {@code false} otherwise
 	 */
-	private boolean sendEvent(SseEventSink sink, OutboundSseEvent event) {
+	private boolean sendEvent(@Nonnull SseEventSink sink, @Nonnull OutboundSseEvent event) {
 		try {
 			sink.send(event).toCompletableFuture().get(UtilImpl.PUSH_SEND_TIMEOUT_IN_SECONDS, TimeUnit.SECONDS);
 			lastSuccessfulSendMillis = System.currentTimeMillis();
@@ -355,7 +351,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	 *
 	 * @return a comment-only {@link OutboundSseEvent}
 	 */
-	private OutboundSseEvent createKeepAlive() {
+	private @Nonnull OutboundSseEvent createKeepAlive() {
 		return sse.newEventBuilder().comment("keep-alive").build();
 	}
 
@@ -370,7 +366,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	 * @param msg the push message to serialise
 	 * @return an {@link OutboundSseEvent} carrying the serialised JSON payload
 	 */
-	private OutboundSseEvent createEvent(PushMessage msg) {
+	private @Nonnull OutboundSseEvent createEvent(@Nonnull PushMessage msg) {
 		String msgString = JSON.marshall(msg.getItems());
 		long eventId = eventIdSequence.incrementAndGet();
 
@@ -390,7 +386,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	 *
 	 * @param throwable the exception thrown or produced by the send future
 	 */
-	private void logSendFailure(Throwable throwable) {
+	private void logSendFailure(@Nonnull Throwable throwable) {
 		Throwable cause = throwable.getCause();
 		Throwable failure = (cause == null) ? throwable : cause;
 
@@ -408,7 +404,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	 *
 	 * @param sink the sink to close
 	 */
-	private void closeSink(SseEventSink sink) {
+	private void closeSink(@Nonnull SseEventSink sink) {
 		try {
 			sink.close();
 		}
@@ -455,12 +451,12 @@ public class SseClientHandler implements PushMessageReceiver {
 	}
 
 	@Override
-	public String forUserId() {
+	public @Nonnull String forUserId() {
 		return userId;
 	}
 
 	@Override
-	public void sendMessage(PushMessage message) {
+	public void sendMessage(@Nonnull PushMessage message) {
 		if (closed.get()) {
 			return;
 		}
@@ -526,7 +522,7 @@ public class SseClientHandler implements PushMessageReceiver {
 	}
 
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this)
 				.add("userId", String.valueOf(userId))
 				.add("userName", String.valueOf(userName))

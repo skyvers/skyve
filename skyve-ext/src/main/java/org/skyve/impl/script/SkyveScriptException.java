@@ -2,6 +2,9 @@ package org.skyve.impl.script;
 
 import org.skyve.domain.messages.SkyveException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents interpreter and processing errors encountered while handling Skyve scripts.
  */
@@ -19,7 +22,7 @@ public class SkyveScriptException extends SkyveException {
 	 * @param message Error message.
 	 * @param lineNumber Source line number.
 	 */
-	public SkyveScriptException(final ExceptionType type, final String message, final int lineNumber) {
+	public SkyveScriptException(final @Nonnull ExceptionType type, final @Nonnull String message, final int lineNumber) {
 		super(message);
 		this.lineNumber = lineNumber;
 		this.type = type;
@@ -33,7 +36,7 @@ public class SkyveScriptException extends SkyveException {
 	 * @param lineNumber Source line number.
 	 * @param i18nValues Substitution values.
 	 */
-	public SkyveScriptException(final ExceptionType type, final String message, final int lineNumber, String... i18nValues) {
+	public SkyveScriptException(final @Nonnull ExceptionType type, final @Nonnull String message, final int lineNumber, @Nullable String... i18nValues) {
 		super(message, i18nValues);
 		this.lineNumber = lineNumber;
 		this.type = type;
@@ -47,7 +50,7 @@ public class SkyveScriptException extends SkyveException {
 	 * @param lineNumber Source line number.
 	 * @param i18n Whether the message is an i18n key.
 	 */
-	public SkyveScriptException(final ExceptionType type, final String message, final int lineNumber, boolean i18n) {
+	public SkyveScriptException(final @Nonnull ExceptionType type, final @Nonnull String message, final int lineNumber, boolean i18n) {
 		super(message, i18n);
 		this.lineNumber = lineNumber;
 		this.type = type;
@@ -67,7 +70,7 @@ public class SkyveScriptException extends SkyveException {
 	 *
 	 * @return The exception type.
 	 */
-	public ExceptionType getType() {
+	public @Nonnull ExceptionType getType() {
 		return type;
 	}
 

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.ServerSideAction;
 
 public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAction<T>> extends AbstractH2Test {
@@ -19,6 +20,9 @@ public abstract class AbstractActionTest<T extends Bean, A extends ServerSideAct
 		T bean = getBean();
 		Assertions.assertNotNull(action);
 		Assertions.assertNotNull(bean);
+
+		// actions are normally injected by the repository, so inject any @Inject fields here too
+		UtilImpl.inject(action);
 		try {
 			action.execute(bean, new MockWebContext());
 		} catch (@SuppressWarnings("unused") ValidationException e) {

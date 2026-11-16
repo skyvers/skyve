@@ -9,6 +9,9 @@ import org.skyve.content.MimeType;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * MailAttachment
  * 
@@ -39,7 +42,7 @@ public class MailAttachment implements Serializable {
 	 * @param attachment
 	 * @param contentType
 	 */
-	public MailAttachment(String attachmentFileName, byte[] attachment, String attachmentContentType) {
+	public MailAttachment(@Nullable String attachmentFileName, @Nullable byte[] attachment, @Nullable String attachmentContentType) {
 		this.attachmentFileName = attachmentFileName;
 		this.attachment = attachment;
 		this.attachmentContentType = attachmentContentType;
@@ -52,7 +55,7 @@ public class MailAttachment implements Serializable {
 	 * @param attachment
 	 * @param attachmentMimeType
 	 */
-	public MailAttachment(String attachmentFileName, byte[] attachment, MimeType attachmentMimeType) {
+	public MailAttachment(@Nullable String attachmentFileName, @Nullable byte[] attachment, @Nonnull MimeType attachmentMimeType) {
 		this(attachmentFileName, attachment, attachmentMimeType.toString());
 	}
 
@@ -61,7 +64,7 @@ public class MailAttachment implements Serializable {
 	 * 
 	 * @param contentId	The contentId of the attachment content to add as an attachment.
 	 */
-	public MailAttachment(String contentId) {
+	public MailAttachment(@Nonnull String contentId) {
 		try (ContentManager cm = EXT.newContentManager()) {
 			AttachmentContent content = cm.getAttachment(contentId);
 			if (content == null) {
@@ -85,36 +88,36 @@ public class MailAttachment implements Serializable {
 	 * @param attachmentFileName
 	 * @param contentId	The contentId of the attachment content to add as an attachment.
 	 */
-	public MailAttachment(String attachmentFileName, String contentId) {
+	public MailAttachment(@Nullable String attachmentFileName, @Nonnull String contentId) {
 		this(contentId);
 		this.attachmentFileName = attachmentFileName;
 	}
 	
-	public String getAttachmentFileName() {
+	public @Nullable String getAttachmentFileName() {
 		return attachmentFileName;
 	}
 
-	public void setAttachmentFileName(String attachmentFileName) {
+	public void setAttachmentFileName(@Nullable String attachmentFileName) {
 		this.attachmentFileName = attachmentFileName;
 	}
 
-	public byte[] getAttachment() {
+	public @Nullable byte[] getAttachment() {
 		return attachment;
 	}
 
-	public void setAttachment(byte[] attachment) {
+	public void setAttachment(@Nullable byte[] attachment) {
 		this.attachment = attachment;
 	}
 
-	public String getAttachmentContentType() {
+	public @Nullable String getAttachmentContentType() {
 		return attachmentContentType;
 	}
 
-	public void setAttachmentContentType(String attachmentContentType) {
+	public void setAttachmentContentType(@Nullable String attachmentContentType) {
 		this.attachmentContentType = attachmentContentType;
 	}
 	
-	public void setAttachmentMimeType(MimeType attachmentMimeType) {
+	public void setAttachmentMimeType(@Nonnull MimeType attachmentMimeType) {
 		this.attachmentContentType = attachmentMimeType.toString();
 	}
 }

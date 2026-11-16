@@ -1,15 +1,16 @@
 package org.skyve.impl.metadata.repository.behaviour;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.behaviour.IfStatement;
 import org.skyve.impl.metadata.behaviour.InvokeStatement;
 import org.skyve.impl.metadata.behaviour.InvokeStaticStatement;
+import org.skyve.impl.metadata.behaviour.MethodArgument;
 import org.skyve.impl.metadata.behaviour.SetStatement;
 import org.skyve.impl.metadata.repository.ConvertibleMetaData;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -21,6 +22,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -66,15 +69,15 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the logical action name declared in metadata.
 	 *
-	 * @return action name, or {@code null} when unspecified
+	 * @return action name
 	 */
 	@Override
-	public String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -84,7 +87,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @param name action name, trimmed to {@code null} when blank
 	 */
 	@XmlAttribute(required = true)
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -93,7 +96,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 *
 	 * @return documentation text, or {@code null} when unspecified
 	 */
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 	
@@ -104,7 +107,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 */
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 
@@ -113,7 +116,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 *
 	 * @return mutable statement list in declaration order
 	 */
-	public List<StatementMetaData> getStatements() {
+	public @Nonnull List<StatementMetaData> getStatements() {
 		return statements;
 	}
 
@@ -166,13 +169,65 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @throws MetaDataException if the action name is missing
 	 */
 	@Override
-	public ActionMetaData convert(String metaDataName) {
+	public @Nonnull ActionMetaData convert(@Nonnull String metaDataName) {
 		String theName = getName();
-		if (theName == null) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean nameMissing = (theName == null);
+		if (nameMissing) {
 			throw new MetaDataException(metaDataName + " : The action [name] is required for action " + metaDataName);
 		}
 
-		// TODO validate statements recursively
+		// validate statements recursively
+		List<StatementMetaData> statementsToValidate = new ArrayList<>(statements);
+		for (int i = 0; i < statementsToValidate.size(); i++) {
+			StatementMetaData statement = statementsToValidate.get(i);
+			if (statement instanceof IfStatement ifStatement) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean conditionMissing = (ifStatement.getCondition() == null);
+				if (conditionMissing) {
+					throw new MetaDataException(metaDataName + " : The if [condition] is required for action " + theName);
+				}
+				statementsToValidate.addAll(ifStatement.getThenStatements());
+				statementsToValidate.addAll(ifStatement.getElseStatements());
+			}
+			else if (statement instanceof SetStatement setStatement) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean bindingMissing = (setStatement.getBinding() == null);
+				if (bindingMissing) {
+					throw new MetaDataException(metaDataName + " : The set [binding] is required for action " + theName);
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean expressionMissing = (setStatement.getExpression() == null);
+				if (expressionMissing) {
+					throw new MetaDataException(metaDataName + " : The set [expression] is required for action " + theName);
+				}
+			}
+			else if (statement instanceof InvokeStatement invokeStatement) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean classNameMissing = (invokeStatement instanceof InvokeStaticStatement invokeStaticStatement) &&
+												(invokeStaticStatement.getClassName() == null);
+				if (classNameMissing) {
+					throw new MetaDataException(metaDataName + " : The invokeStatic [className] is required for action " + theName);
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean methodNameMissing = (invokeStatement.getMethodName() == null);
+				if (methodNameMissing) {
+					throw new MetaDataException(metaDataName + " : The invoke [method] is required for action " + theName);
+				}
+				for (MethodArgument argument : invokeStatement.getArguments()) {
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean typeNameMissing = (argument.getTypeName() == null);
+					if (typeNameMissing) {
+						throw new MetaDataException(metaDataName + " : The argument [typeName] is required for action " + theName);
+					}
+					@SuppressWarnings("null") // metadata built in code bypasses the XSD
+					boolean expressionMissing = (argument.getExpression() == null);
+					if (expressionMissing) {
+						throw new MetaDataException(metaDataName + " : The argument [expression] is required for action " + theName);
+					}
+				}
+			}
+		}
 		
 		return this;
 	}
@@ -183,7 +238,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 * @return mutable action property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -194,7 +249,7 @@ public class ActionMetaData implements NamedMetaData, ConvertibleMetaData<Action
 	 *
 	 * @param bean the document instance bound to this action execution
 	 */
-	public void execute(Bean bean) {
+	public void execute(@Nonnull Bean bean) {
 		statements.forEach(s -> s.execute(bean));
 	}
 }

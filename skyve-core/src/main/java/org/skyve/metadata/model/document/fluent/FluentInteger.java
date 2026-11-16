@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Integer;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentInteger metadata.
  */
@@ -19,7 +22,7 @@ public class FluentInteger extends FluentConvertibleField<FluentInteger> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentInteger(Integer integer) {
+	public FluentInteger(@Nonnull Integer integer) {
 		this.integer = integer;
 	}
 
@@ -27,7 +30,7 @@ public class FluentInteger extends FluentConvertibleField<FluentInteger> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentInteger from(@SuppressWarnings("hiding") Integer integer) {
+	public @Nonnull FluentInteger from(@SuppressWarnings("hiding") @Nonnull Integer integer) {
 		super.from(integer);
 		validator(integer.getValidator());
 		return this;
@@ -35,7 +38,7 @@ public class FluentInteger extends FluentConvertibleField<FluentInteger> {
 	/**
 	 * Sets validation metadata used by this field definition.
 	 */
-	public FluentInteger validator(IntegerValidator validator) {
+	public @Nonnull FluentInteger validator(@Nullable IntegerValidator validator) {
 		integer.setValidator(validator);
 		return this;
 	}
@@ -44,7 +47,7 @@ public class FluentInteger extends FluentConvertibleField<FluentInteger> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Integer get() {
+	public @Nonnull Integer get() {
 		return integer;
 	}
 }

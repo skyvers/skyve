@@ -37,7 +37,7 @@ public interface DynamicImage<T extends Bean> extends MetaData {
 
 		private MimeType mimeType;
 		
-		private ImageFormat(MimeType mimeType) {
+		private ImageFormat(@Nonnull MimeType mimeType) {
 			this.mimeType = mimeType;
 		}
 		
@@ -45,7 +45,7 @@ public interface DynamicImage<T extends Bean> extends MetaData {
 		 * Returns the mimeType.
 		 * @return the result
 		 */
-		public MimeType getMimeType() {
+		public @Nonnull MimeType getMimeType() {
 			return mimeType;
 		}
 	}
@@ -78,7 +78,7 @@ public interface DynamicImage<T extends Bean> extends MetaData {
 	 * for the cache header so certain Duration values are incompatible with this usage.
 	 * @return null for no caching
 	 */
-	default Duration getCacheTime() {
+	default @Nullable Duration getCacheTime() {
 		return null;
 	}
 }

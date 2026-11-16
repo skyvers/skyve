@@ -1,11 +1,14 @@
 package org.skyve.impl.metadata.module.query;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Implementation of a projected (data-bound) column in a metadata query.
@@ -42,14 +45,14 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 	
 	private String customFormatterName;
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
-	public String getExpression() {
+	public @Nullable String getExpression() {
 		return expression;
 	}
 
-	public void setExpression(String expression) {
+	public void setExpression(@Nullable String expression) {
 		this.expression = expression;
 	}
 
@@ -99,34 +102,34 @@ public class MetaDataQueryProjectedColumnImpl extends AbstractMetaDataQueryColum
 	}
 
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 
 	@Override
-	public FormatterName getFormatterName() {
+	public @Nullable FormatterName getFormatterName() {
 		return formatterName;
 	}
 
-	public void setFormatterName(FormatterName formatterName) {
+	public void setFormatterName(@Nullable FormatterName formatterName) {
 		this.formatterName = formatterName;
 	}
 
 	@Override
-	public String getCustomFormatterName() {
+	public @Nullable String getCustomFormatterName() {
 		return customFormatterName;
 	}
 
-	public void setCustomFormatterName(String customFormatterName) {
+	public void setCustomFormatterName(@Nullable String customFormatterName) {
 		this.customFormatterName = customFormatterName;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

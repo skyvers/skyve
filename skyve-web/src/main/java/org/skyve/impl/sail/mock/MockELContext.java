@@ -1,5 +1,6 @@
 package org.skyve.impl.sail.mock;
 
+import jakarta.annotation.Nullable;
 import jakarta.el.ELContext;
 import jakarta.el.ELResolver;
 import jakarta.el.FunctionMapper;
@@ -13,7 +14,7 @@ public class MockELContext extends ELContext {
 	 * Returns no resolver because expression resolution is not required in these tests.
 	 */
 	@Override
-	public ELResolver getELResolver() {
+	public @Nullable ELResolver getELResolver() {
 		return null;
 	}
 
@@ -21,7 +22,7 @@ public class MockELContext extends ELContext {
 	 * Returns no function mapper because function evaluation is not required in these tests.
 	 */
 	@Override
-	public FunctionMapper getFunctionMapper() {
+	public @Nullable FunctionMapper getFunctionMapper() {
 		return null;
 	}
 
@@ -29,7 +30,7 @@ public class MockELContext extends ELContext {
 	 * Returns no variable mapper because variable evaluation is not required in these tests.
 	 */
 	@Override
-	public VariableMapper getVariableMapper() {
+	public @Nullable VariableMapper getVariableMapper() {
 		return null;
 	}
 }

@@ -6,6 +6,7 @@ import org.locationtech.jts.io.WKTReader;
 import org.locationtech.jts.io.WKTWriter;
 import org.skyve.domain.messages.DomainException;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlSchemaType(name = "string")
@@ -28,7 +29,7 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class GeometryMapper extends XmlAdapter<String, Geometry> {
 	@Override
-	public Geometry unmarshal(String geometry) throws Exception {
+	public @Nullable Geometry unmarshal(@Nullable String geometry) throws Exception {
 		Geometry result = null;
 		
 		if (geometry != null) {
@@ -44,7 +45,7 @@ public class GeometryMapper extends XmlAdapter<String, Geometry> {
 	}
 
 	@Override
-	public String marshal(Geometry geometry) throws Exception {
+	public @Nullable String marshal(@Nullable Geometry geometry) throws Exception {
 		String result = null;
 		
 		if (geometry != null) {

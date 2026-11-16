@@ -25,6 +25,8 @@ public enum AdminRole implements ModuleRole {
 	DEV_OPS("DevOps"),
 	/** The "JobMaintainer" role. */
 	JOB_MAINTAINER("JobMaintainer"),
+	/** The "SAILRecorder" role. */
+	SAIL_RECORDER("SAILRecorder"),
 	/** The "SecurityAdministrator" role. */
 	SECURITY_ADMINISTRATOR("SecurityAdministrator"),
 	/** The "ViewUser" role. */

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
@@ -34,7 +35,7 @@ public class Id extends Field {
 	 */
 	@Override
 	@XmlTransient
-	public DomainType getDomainType() {
+	public @Nullable DomainType getDomainType() {
 		return null;
 	}
 }

@@ -3,6 +3,9 @@ package org.skyve.domain.types.formatters;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Format a String into a temporal representation. 
  */
@@ -19,7 +22,7 @@ public class StringFormatter implements Formatter<String> {
 	 * @param escapeJS the escapeJS
 	 * @param sanitise the sanitise
 	 */
-	public StringFormatter(boolean escapeHTML, boolean escapeJSON, boolean escapeJS, Sanitisation sanitise) {
+	public StringFormatter(boolean escapeHTML, boolean escapeJSON, boolean escapeJS, @Nullable Sanitisation sanitise) {
 		super();
 		this.escapeHTML = escapeHTML;
 		this.escapeJSON = escapeJSON;
@@ -32,7 +35,7 @@ public class StringFormatter implements Formatter<String> {
 	 * @return the result
 	 */
 	@Override
-	public Class<String> getValueType() {
+	public @Nonnull Class<String> getValueType() {
 		return String.class;
 	}
 	
@@ -42,7 +45,7 @@ public class StringFormatter implements Formatter<String> {
 	 * @return the result
 	 */
 	@Override
-	public String toDisplayValue(String value) {
+	public @Nonnull String toDisplayValue(@Nonnull String value) {
 		String result = value;
 
 		if (escapeHTML) {

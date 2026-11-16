@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleModelAggregateUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleModelAggregateUserAccessMetaData} metadata.
  * 
@@ -21,14 +23,14 @@ public class FluentModuleRoleModelAggregateAccess extends
 	/**
 	 * Creates a new FluentModuleRoleModelAggregateAccess from the specified ModuleRoleModelAggregateUserAccessMetaData.
 	 */
-	public FluentModuleRoleModelAggregateAccess(ModuleRoleModelAggregateUserAccessMetaData access) {
+	public FluentModuleRoleModelAggregateAccess(@Nonnull ModuleRoleModelAggregateUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleModelAggregateAccess from runtime metadata.
 	 */
-	protected FluentModuleRoleModelAggregateAccess from(String documentName, String modelName, Set<String> uxuis) {
+	protected @Nonnull FluentModuleRoleModelAggregateAccess from(@Nonnull String documentName, @Nonnull String modelName, @Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		modelName(modelName);
 		uxuis.forEach(u -> addUxUi(u));
@@ -38,7 +40,7 @@ public class FluentModuleRoleModelAggregateAccess extends
 	/**
 	 * Specifies the document name for this FluentModuleRoleModelAggregateAccess.
 	 */
-	public FluentModuleRoleModelAggregateAccess documentName(final String documentName) {
+	public @Nonnull FluentModuleRoleModelAggregateAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -46,7 +48,7 @@ public class FluentModuleRoleModelAggregateAccess extends
 	/**
 	 * Specifies the model name for this FluentModuleRoleModelAggregateAccess.
 	 */
-	public FluentModuleRoleModelAggregateAccess modelName(final String modelName) {
+	public @Nonnull FluentModuleRoleModelAggregateAccess modelName(final @Nonnull String modelName) {
 		access.setModelName(modelName);
 		return this;
 	}
@@ -55,7 +57,7 @@ public class FluentModuleRoleModelAggregateAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleModelAggregateUserAccessMetaData get() {
+	public @Nonnull ModuleRoleModelAggregateUserAccessMetaData get() {
 		return access;
 	}
 }

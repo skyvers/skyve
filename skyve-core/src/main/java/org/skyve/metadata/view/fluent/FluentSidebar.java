@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.container.Sidebar;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for sidebar container metadata.
@@ -21,7 +25,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @param sidebar
 	 *            the sidebar metadata to mutate
 	 */
-	public FluentSidebar(Sidebar sidebar) {
+	public FluentSidebar(@Nonnull Sidebar sidebar) {
 		this.sidebar = sidebar;
 	}
 	
@@ -34,23 +38,23 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the source sidebar metadata
 	 * @return this builder
 	 */
-	public FluentSidebar from(@SuppressWarnings("hiding") Sidebar sidebar) {
+	public @Nonnull FluentSidebar from(@SuppressWarnings("hiding") @Nonnull Sidebar sidebar) {
 		widgetId(sidebar.getWidgetId());
 		relativeWidth(sidebar, this);
 
 		Integer i = sidebar.getFloatingPixelWidthBreakpoint();
-		if (i != null) {
-			this.sidebar.setFloatingPixelWidthBreakpoint(i);
-		}
+		this.sidebar.setFloatingPixelWidthBreakpoint(i);
 		i = sidebar.getFloatingPixelWidth();
 		if (i != null) {
 			this.sidebar.setFloatingPixelWidth(i);
 		}
 		
-		invisibleConditionName(sidebar.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(sidebar.getXmlInvisibleCondition(), sidebar.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		super.from(sidebar);
 		
+		sidebar.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -61,7 +65,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentSidebar widgetId(String widgetId) {
+	public @Nonnull FluentSidebar widgetId(@Nullable String widgetId) {
 		sidebar.setWidgetId(widgetId);
 		return this;
 	}
@@ -74,7 +78,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSidebar pixelWidth(int pixelWidth) {
+	public @Nonnull FluentSidebar pixelWidth(int pixelWidth) {
 		sidebar.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -87,7 +91,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSidebar responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentSidebar responsiveWidth(int responsiveWidth) {
 		sidebar.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -100,7 +104,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return this builder
 	 */
 	@Override
-	public FluentSidebar percentageWidth(int percentageWidth) {
+	public @Nonnull FluentSidebar percentageWidth(int percentageWidth) {
 		sidebar.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -112,7 +116,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the breakpoint width in pixels
 	 * @return this builder
 	 */
-	public FluentSidebar floatingPixelWidthBreakpoint(int pixelWidth) {
+	public @Nonnull FluentSidebar floatingPixelWidthBreakpoint(int pixelWidth) {
 		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -124,20 +128,45 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 *            the floating width in pixels
 	 * @return this builder
 	 */
-	public FluentSidebar floatingPixelWidth(int pixelWidth) {
+	public @Nonnull FluentSidebar floatingPixelWidth(int pixelWidth) {
 		sidebar.setFloatingPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this sidebar when it evaluates to true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the invisibility condition identifier
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentSidebar invisibleConditionName(String invisibleConditionName) {
-		sidebar.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentSidebar invisibleCondition(@Nullable String invisibleCondition) {
+		sidebar.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentSidebar visibleCondition(@Nullable String visibleCondition) {
+		sidebar.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentSidebar putProperty(@Nonnull String k, @Nonnull String v) {
+		sidebar.getProperties().put(k, v);
 		return this;
 	}
 
@@ -147,7 +176,7 @@ public class FluentSidebar extends FluentContainer<FluentSidebar> implements Flu
 	 * @return the mutable sidebar metadata
 	 */
 	@Override
-	public Sidebar get() {
+	public @Nonnull Sidebar get() {
 		return sidebar;
 	}
 }

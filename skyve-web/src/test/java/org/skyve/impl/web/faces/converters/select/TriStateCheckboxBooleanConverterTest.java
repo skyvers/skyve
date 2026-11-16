@@ -1,56 +1,56 @@
 package org.skyve.impl.web.faces.converters.select;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Before;
-import org.junit.Test;
-public class TriStateCheckboxBooleanConverterTest {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+class TriStateCheckboxBooleanConverterTest {
 
 	private TriStateCheckboxBooleanConverter converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new TriStateCheckboxBooleanConverter();
 	}
 
 	@Test
-	public void getAsObjectReturnsNullForNullValue() {
+	void getAsObjectReturnsNullForNullValue() {
 		assertNull(converter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void getAsObjectReturnsNullForEmptyString() {
+	void getAsObjectReturnsNullForEmptyString() {
 		assertNull(converter.getAsObject(null, null, ""));
 	}
 
 	@Test
-	public void getAsObjectReturnsTrueForOne() {
+	void getAsObjectReturnsTrueForOne() {
 		assertEquals(Boolean.TRUE, converter.getAsObject(null, null, "1"));
 	}
 
 	@Test
-	public void getAsObjectReturnsFalseForTwo() {
+	void getAsObjectReturnsFalseForTwo() {
 		assertEquals(Boolean.FALSE, converter.getAsObject(null, null, "2"));
 	}
 
 	@Test
-	public void getAsObjectReturnsNullForOtherValue() {
+	void getAsObjectReturnsNullForOtherValue() {
 		assertNull(converter.getAsObject(null, null, "0"));
 	}
 
 	@Test
-	public void getAsStringReturnsZeroForNullValue() {
+	void getAsStringReturnsZeroForNullValue() {
 		assertEquals("0", converter.getAsString(null, null, null));
 	}
 
 	@Test
-	public void getAsStringReturnsOneForTrue() {
+	void getAsStringReturnsOneForTrue() {
 		assertEquals("1", converter.getAsString(null, null, Boolean.TRUE));
 	}
 
 	@Test
-	public void getAsStringReturnsTwoForFalse() {
+	void getAsStringReturnsTwoForFalse() {
 		assertEquals("2", converter.getAsString(null, null, Boolean.FALSE));
 	}
 }
