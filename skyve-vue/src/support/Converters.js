@@ -76,11 +76,12 @@ function Decimal2DollarsAndCentsAbsolute(numValue) {
 
 /**
  * This one works a bit differently to the other percentage
- * converters, no multiplication here (ie: 45 => '45%')
+ * converters, no multiplication here (ie: 45 => '45%'), and no thousands
+ * separator, as the Java converter writes it and reads it back (1000%)
  */
 function SimplePercentage(numValue) {
 
-    return COMMON.zeroDecimalPlaces(numValue) + '%';
+    return `${Math.round(numValue)}%`;
 }
 
 

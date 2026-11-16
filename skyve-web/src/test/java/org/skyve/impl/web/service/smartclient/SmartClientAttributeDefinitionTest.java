@@ -343,7 +343,7 @@ class SmartClientAttributeDefinitionTest {
 		percentage.setName("percentage");
 		percentage.setDisplayName("Percentage");
 		percentage.setConverter(new SimplePercentage());
-		assertEquals("bizIntegerPercentage", definitionFor(percentage).getType());
+		assertEquals("bizSimplePercentage", definitionFor(percentage).getType());
 
 		LongInteger longCount = new LongInteger();
 		longCount.setName("longCount");

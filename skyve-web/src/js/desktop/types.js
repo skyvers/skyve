@@ -2309,7 +2309,8 @@ isc.BizSimplePercentageItem.addClassMethods({
 			return value;
 		}
 
-		return value.toLocalizedString(0, ".", ",", "-") + "%";
+		// no thousands separator, as the Java converter (SimplePercentage) writes it and reads it back
+		return Math.round(value) + "%";
 	},
 });
 

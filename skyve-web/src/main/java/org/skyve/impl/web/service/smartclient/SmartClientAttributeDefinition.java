@@ -429,7 +429,8 @@ abstract class SmartClientAttributeDefinition {
 			case integer, longInteger:
 				type = "integer";
 				if (converter instanceof SimplePercentage) {
-					type = "bizIntegerPercentage";
+					// a whole number of percent (12 is 12%), not a fraction (bizIntegerPercentage: 0.12 is 12%)
+					type = "bizSimplePercentage";
 				}
 				else if(converter instanceof IntegerSeparator){
 					type = "bizIntegerSeparator";
