@@ -1133,8 +1133,9 @@
 	}
 
 	/**
-	 * A filter value as listGridFilter writes it: an enum's label, a boolean, a date or time as the column shows it (its
-	 * type's format, which is its converter's), or else as Skyve's default converter.
+	 * A filter value as listGridFilter writes it: an enum's label, a boolean, a date, time or number as the column shows
+	 * it (its type's format, which is its converter's: 12% for a percentage column's 0.12, which the filter row would read
+	 * back as 0.12%), or else as Skyve's default converter.
 	 */
 	function filterText(grid, fieldName, value) {
 		var field = grid.getField(fieldName) || {};
@@ -1144,7 +1145,7 @@
 		if (field.valueMap && !isc.isA.Array(field.valueMap) && (field.valueMap[value] != null)) {
 			return strip(field.valueMap[value]);
 		}
-		var type = isc.isA.Date(value) ? displayType(field.type) : null;
+		var type = (isc.isA.Date(value) || isc.isA.Number(value)) ? displayType(field.type) : null;
 		if (type) {
 			return strip(String(type.shortDisplayFormatter(value, field, grid, {})));
 		}
