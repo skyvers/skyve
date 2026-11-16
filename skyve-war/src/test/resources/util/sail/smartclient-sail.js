@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 12;
+	var VERSION = 13;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1250,9 +1250,9 @@
 		association: ["equals"],
 		enum: ["equals"],
 		boolean: ["equals"],
-		date: ["equals", "lessThan", "greaterThan"],
-		datetime: ["equals", "lessThan", "greaterThan"],
-		time: ["equals", "lessThan", "greaterThan"]
+		date: ["equals", "notEquals", "lessThan", "greaterThan"],
+		datetime: ["equals", "notEquals", "lessThan", "greaterThan"],
+		time: ["equals", "notEquals", "lessThan", "greaterThan"]
 	};
 
 	/**

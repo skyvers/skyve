@@ -506,8 +506,8 @@ public class SmartClientSelenide extends Selenide<
 	 * filter's Filter button is pressed. A grid in advanced filtering stays in it.
 	 * <p>
 	 * The browser helper checks the operator against the column (enums, booleans and associations take equals; dates and
-	 * times equals, lessThan and greaterThan) and reads the value: an enum's option by its label, else its code; a boolean
-	 * true or false; a date or time in the format the column shows.
+	 * times equals, notEquals, lessThan and greaterThan) and reads the value: an enum's option by its label, else its
+	 * code; a boolean true or false; a date or time in the format the column shows.
 	 *
 	 * @param locator	a locator of the list grid's rows
 	 * @param column	the column's field name (its sanitised binding)
