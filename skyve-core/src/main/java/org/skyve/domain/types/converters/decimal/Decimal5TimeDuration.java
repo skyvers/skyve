@@ -38,12 +38,14 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 				throw new ConversionException(ConversionException.DECIMAL_5_TIME_DURATION_KEY);
 			}
 	
-			Decimal5 hours = new Decimal5(displayValue.substring(0, colonIndex));
+			String hoursValue = displayValue.substring(0, colonIndex);
+			Decimal5 hours = new Decimal5(hoursValue);
 			Decimal5 minutes = new Decimal5(displayValue.substring(colonIndex + 1));
 			minutes = minutes.divide(Decimal5.SIXTY);
 	
+			// The sign is the hours' text's: -0:30 is negative, although its hours are zero
 			Decimal5 returnValue;
-			if (hours.compareTo(Decimal5.ZERO) >= 0) {
+			if (! hoursValue.trim().startsWith("-")) {
 				returnValue = hours.add(minutes);
 			}
 			else {
