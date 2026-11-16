@@ -314,8 +314,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - Meta File DNE", metaFile.getPath());
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(FileUtil.string(metaFile));
+		Map<String, Object> meta = readContentMeta(dir);
 
 		String contentType = (String) meta.get(CONTENT_TYPE);
 
@@ -361,6 +360,21 @@ public abstract class AbstractContentManager implements ContentManager {
 		return result;
 	}
 	
+	/**
+	 * Reads and parses the meta.json in a content folder of the file content store.
+	 *
+	 * <p>The keys are those written by {@link #writeContentMeta(String, AttachmentContent)}.
+	 *
+	 * @param contentFolder	the content ID folder
+	 * @return the meta.json properties
+	 * @throws java.io.FileNotFoundException if there is no meta.json, or contentFolder is not a folder
+	 * @throws Exception if the meta.json cannot be read or is not a JSON object
+	 */
+	@SuppressWarnings("unchecked")
+	static @Nonnull Map<String, Object> readContentMeta(@Nonnull File contentFolder) throws Exception {
+		return (Map<String, Object>) JSON.unmarshall(FileUtil.string(new File(contentFolder, META_JSON)));
+	}
+
 	/**
 	 * Determine the filename to use for stored content based on name/type and suffix rules.
 	 *
