@@ -1470,9 +1470,21 @@ isc.Time.addClassProperties({
 	PMIndicator: " PM",
 });
 
+/**
+ * Registers HH_MI_Item: a 12 hour time with its hour padded, as the converter writes it (02:47 PM).
+ * Extends BizTimeItem.
+ */
+isc.ClassFactory.defineClass("HH_MI_Item", "BizTimeItem");
+
+isc.HH_MI_Item.addProperties({
+	displayFormat: "toShortPaddedTime",
+	timeFormatter: "toShortPaddedTime",
+});
+
 isc.SimpleType.create({
 	name: "HH_MI",
 	inheritsFrom: "bizTime",
+	editorType: "HH_MI_Item",
 
 	/**
 	 * Formats the internal time value into the `HH_MI` format (`02:47 PM`).
