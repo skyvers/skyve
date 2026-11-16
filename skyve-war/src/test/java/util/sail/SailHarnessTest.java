@@ -24,8 +24,8 @@ import org.skyve.metadata.sail.language.step.interaction.session.Login;
 
 /**
  * Unit tests of the SAIL harness pieces that need no browser: the test strategy override, password masking in step
- * descriptions, the suite runner's restore gating, the cross-JVM server lock, and the text typed into a Vue list
- * grid's filter calendar.
+ * descriptions, the suite runner's restore gating, the cross-JVM server lock, the text typed into a Vue list
+ * grid's filter calendar, and the id of a PrimeFaces inline grid cell in a row.
  */
 class SailHarnessTest {
 	@AfterEach
@@ -45,6 +45,16 @@ class SailHarnessTest {
 		System.setProperty(InterpretedWebDriverExecutor.TEST_STRATEGY_PROPERTY, "Check");
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, InterpretedWebDriverExecutor::testStrategyOverride);
 		assertTrue(e.getMessage().contains("Assert") && e.getMessage().contains("Verify") && e.getMessage().contains("None"), e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void anInlineGridCellIsAddressedInItsRow() {
+		assertAll(() -> assertEquals("s1:s457:0:s463", PrimeFacesInterpretedWebDriverExecutor.inlineCellClientId("s1:s457:s463", "s1:s457", 0)),
+					() -> assertEquals("s1:s457:12:p:s463", PrimeFacesInterpretedWebDriverExecutor.inlineCellClientId("s1:s457:p:s463", "s1:s457", 12)),
+					// not in the grid: an id that only starts with the grid's id, and the view's own field
+					() -> assertNull(PrimeFacesInterpretedWebDriverExecutor.inlineCellClientId("s1:s4570:s463", "s1:s457", 0)),
+					() -> assertNull(PrimeFacesInterpretedWebDriverExecutor.inlineCellClientId("s1:s19", "s1:s457", 0)));
 	}
 
 	@Test

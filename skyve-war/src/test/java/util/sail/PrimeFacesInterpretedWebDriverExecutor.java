@@ -149,7 +149,48 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	
 	private ComponentBuilder componentBuilder;
 	private LayoutBuilder layoutBuilder;
-	
+
+	/**
+	 * A row of an inline data grid whose cells (inputs) the following {@code <dataEnter />} and {@code <testValue />}
+	 * steps address, as SmartClient's inline edit does: set by {@code <dataGridNew />} (the new row) and
+	 * {@code <dataGridEdit />} on an inline grid, in the context they ran in.
+	 *
+	 * @param context	the context the grid is in
+	 * @param binding	the grid's binding
+	 * @param gridClientId	the grid's data table client id
+	 * @param row	the zero-based row
+	 */
+	private record InlineRow(@Nonnull PrimeFacesAutomationContext context,
+								@Nonnull String binding,
+								@Nonnull String gridClientId,
+								int row) {
+		/**
+		 * Returns the client id of a component in this row, if the component is one of the grid's cells.
+		 *
+		 * @return the id with the row's index after the grid's id, or null if the component is not in the grid
+		 */
+		@Nullable String cellClientId(@Nonnull UIComponent component) {
+			return inlineCellClientId(PrimeFacesAutomationContext.clientId(component), gridClientId, row);
+		}
+	}
+
+	/**
+	 * Returns the client id a data table gives a component of one of its cells in a row: the row's index after the
+	 * table's own id, as UIData names its rows' components.
+	 *
+	 * @param componentClientId	the component's client id, without a row (as the collected component tree has it)
+	 * @param gridClientId	the data table's client id
+	 * @param row	the zero-based row
+	 * @return the id in the row, or null if the component is not in the data table
+	 */
+	static @Nullable String inlineCellClientId(@Nonnull String componentClientId, @Nonnull String gridClientId, int row) {
+		String prefix = gridClientId + ':';
+		return componentClientId.startsWith(prefix) ? prefix + row + componentClientId.substring(gridClientId.length()) : null;
+	}
+
+	/** The inline grid row that cell steps address; see {@link #inlineRow()}. */
+	private InlineRow inlineRow;
+
 	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide selenide) {
 		this(selenide, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
 	}
@@ -346,9 +387,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 		String singleLineValue = (multiLineValue == null) ? null : multiLineValue.replace('\n', ' ');
 
+		InlineRow row = inlineRow();
 		boolean success = false;
-		for (UIComponent component : components) {
-			String clientId = PrimeFacesAutomationContext.clientId(component);
+		for (UIComponent component : cellsFirst(components, row)) {
+			String clientId = clientId(component, row);
 			String value = multiLine(component) ? multiLineValue : singleLineValue;
 			selenide.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
 
@@ -405,6 +447,60 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 														identifier,
 														singleLineValue));
 		}
+	}
+
+	/**
+	 * Returns the inline grid row that the current {@code <dataEnter />} or {@code <testValue />} addresses: the one the
+	 * last {@code <dataGridNew />} or {@code <dataGridEdit />} on an inline grid set, in the current context, while
+	 * every step since then has been a {@code <dataEnter />} or a {@code <testValue />}. Any other step ends it, as it
+	 * ends SmartClient's inline edit.
+	 *
+	 * @return the row, or null if the steps address the view's widgets
+	 */
+	private @Nullable InlineRow inlineRow() {
+		Step previous = getPreviousStep();
+		if ((inlineRow != null) &&
+				(inlineRow.context() == peek()) &&
+				((previous instanceof DataGridNew) || (previous instanceof DataGridEdit) ||
+					(previous instanceof DataEnter) || (previous instanceof TestValue))) {
+			return inlineRow;
+		}
+		inlineRow = null;
+		return null;
+	}
+
+	/**
+	 * Orders the components for a binding so that an inline row's grid cells come first, as SmartClient tries an inline
+	 * edit's columns first.
+	 *
+	 * @param components	the binding's components, in page order
+	 * @param row	the inline row, or null
+	 * @return the components, the row's grid cells first
+	 */
+	private static @Nonnull List<UIComponent> cellsFirst(@Nonnull List<UIComponent> components, @Nullable InlineRow row) {
+		if (row == null) {
+			return components;
+		}
+		List<UIComponent> result = new ArrayList<>(components.size());
+		for (UIComponent component : components) {
+			if (row.cellClientId(component) != null) {
+				result.add(component);
+			}
+		}
+		for (UIComponent component : components) {
+			if (row.cellClientId(component) == null) {
+				result.add(component);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a component's client id: in the inline row when the component is one of its grid's cells.
+	 */
+	private static @Nonnull String clientId(@Nonnull UIComponent component, @Nullable InlineRow row) {
+		String cell = (row == null) ? null : row.cellClientId(component);
+		return (cell == null) ? PrimeFacesAutomationContext.clientId(component) : cell;
 	}
 
 	/**
@@ -480,9 +576,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		String multiLineExpected = (expectedValue == null) ? "" : substituteTokens(expectedValue).replace("\r\n", "\n").trim();
 		String singleLineExpected = multiLineExpected.replace('\n', ' ');
 
+		InlineRow row = inlineRow();
 		boolean found = false;
-		for (UIComponent component : components) {
-			String clientId = PrimeFacesAutomationContext.clientId(component);
+		for (UIComponent component : cellsFirst(components, row)) {
+			String clientId = clientId(component, row);
 			if (component instanceof PickList) {
 				List<String> members = selenide.pickListMembers(clientId);
 				if (members == null) {
@@ -977,16 +1074,37 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	}
 
 	/**
-	 * Fails: PrimeFaces data grids have no row edit gesture. An inline grid shows its cells as inputs,
-	 * and other grids zoom into a row ({@code <dataGridZoom />}).
+	 * Addresses a row of an inline data grid: the following {@code <dataEnter />} and {@code <testValue />} steps
+	 * address its cells, which are inputs, so there is no gesture to make (see {@link #inlineRow()}). Fails for other
+	 * grids: PrimeFaces data grids have no row edit gesture, so zoom into a row ({@code <dataGridZoom />}).
 	 *
 	 * @param edit	the step
 	 */
 	@Override
 	public void executeDataGridEdit(DataGridEdit edit) {
-		throw new UnsupportedOperationException(String.format("<dataGridEdit /> on [%s] is not available in PrimeFaces: " +
-																"its data grids have no row edit gesture; use <dataGridZoom />",
-																edit.getBinding()));
+		String binding = edit.getBinding();
+		PrimeFacesAutomationContext context = peek();
+		@SuppressWarnings("null") // a null here fails the test
+		List<Object> widgets = context.getSkyveWidgets(binding);
+		if ((widgets == null) || widgets.isEmpty() ||
+				(! (widgets.get(0) instanceof DataGrid grid)) || (! Boolean.TRUE.equals(grid.getInline()))) {
+			throw new UnsupportedOperationException(String.format("<dataGridEdit /> on [%s] is not available in PrimeFaces: " +
+																	"its data grids have no row edit gesture, except an inline grid's cells, which are inputs; use <dataGridZoom />",
+																	binding));
+		}
+		List<UIComponent> components = context.getFacesComponents(binding);
+		if (components != null) {
+			for (UIComponent component : components) {
+				String gridClientId = PrimeFacesAutomationContext.clientId(component);
+				Integer row = resolveRow(edit, gridClientId);
+				if (row != null) {
+					selenide.trace(String.format("Address the cells of row %d of inline data grid [%s] (%s)", row, binding, gridClientId));
+					inlineRow = new InlineRow(context, binding, gridClientId, row.intValue());
+					return;
+				}
+			}
+		}
+		throw new DomainException(String.format("<dataGridEdit /> with binding [%s] could not be done: the grid is not on the page", binding));
 	}
 
 	private void dataGridGesture(Step step, String binding, GridRowStep rowStep) {
@@ -1049,6 +1167,12 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 							success = selenide.dataGridSelect(new PrimeFacesDataGridSelectCommand(dataGridClientId, row.intValue()));
 						} else {
 							success = selenide.dataGridButton(new PrimeFacesDataGridButtonCommand(dataGridClientId, buttonClientId, ajax));
+							if (success && inline && (step instanceof DataGridNew)) {
+								// the new row is added last: the following cell steps address it
+								int newRow = selenide.countRows(dataGridClientId, null) - 1;
+								selenide.trace(String.format("    the new row is row %d", Integer.valueOf(newRow)));
+								inlineRow = new InlineRow(context, binding, dataGridClientId, newRow);
+							}
 						}
 					}
 				}

@@ -416,6 +416,15 @@ public abstract class InterpretedWebDriverExecutor<
 		return TestStrategy.None == getTestStrategy();
 	}
 
+	/**
+	 * Returns the top-level step executed before the current one, in the same procedure.
+	 *
+	 * @return the step, or null if the current step is the procedure's first
+	 */
+	protected final @Nullable Step getPreviousStep() {
+		return previousStep;
+	}
+
 	private void record(@Nonnull String failure) {
 		failures.add(failure);
 		selenide.trace("FAILED: " + failure);
