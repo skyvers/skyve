@@ -23,6 +23,11 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.XMLConstants;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Result;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.validation.Schema;
@@ -48,6 +53,7 @@ import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.Workflow;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
@@ -123,6 +129,22 @@ public class XMLMetaData {
 	private static final Schema SAIL_SCHEMA;
 	/** Knows both SAIL roots: a workflow, and an automation on its own. */
 	private static final JAXBContext SAIL_WORKFLOW_CONTEXT;
+	private static final JAXBContext SAIL_SUITE_CONTEXT;
+
+	/**
+	 * The root element of a SAIL document; see {@link XMLMetaData#sailRootOfString(String)}.
+	 */
+	public enum SAILRoot {
+		/** A {@code <suite>}: unmarshal it with {@link XMLMetaData#unmarshalSAILSuiteString(String, String)}. */
+		SUITE,
+		/** A {@code <workflow>}: unmarshal it with {@link XMLMetaData#unmarshalSAILWorkflowString(String)}. */
+		WORKFLOW,
+		/**
+		 * An {@code <automation>}: unmarshal it with {@link XMLMetaData#unmarshalSAILString(String)}, or as a workflow
+		 * of one with {@link XMLMetaData#unmarshalSAILWorkflowString(String)}.
+		 */
+		AUTOMATION
+	}
 
 	static {
 		try {
@@ -147,6 +169,7 @@ public class XMLMetaData {
 
 			SAIL_CONTEXT = JAXBContext.newInstance(Automation.class);
 			SAIL_WORKFLOW_CONTEXT = JAXBContext.newInstance(Workflow.class, Automation.class);
+			SAIL_SUITE_CONTEXT = JAXBContext.newInstance(Suite.class);
 			SAIL_SCHEMA = getSchema(UtilImpl.getAbsoluteBasePath() + "schemas/sail.xsd");
 		}
 		catch (Exception e) {
@@ -940,6 +963,170 @@ public class XMLMetaData {
 	}
 
 	/**
+	 * Marshals a SAIL suite.
+	 *
+	 * @param suite	the suite
+	 * @return the XML
+	 * @throws MetaDataException	if the suite cannot be marshalled, or is not valid against sail.xsd
+	 */
+	public static @Nonnull String marshalSAILSuite(@Nonnull Suite suite) {
+		try {
+			Marshaller marshaller = SAIL_SUITE_CONTEXT.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
+			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
+									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
+			marshaller.setSchema(SAIL_SCHEMA);
+			DocumentResult dom4j = new DocumentResult();
+			marshaller.marshal(suite, dom4j);
+
+			Document document = dom4j.getDocument();
+			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
+			document.accept(visitor);
+			return format(document, true);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not marshal SAIL suite", e);
+		}
+	}
+
+	/**
+	 * Unmarshals a SAIL file whose root is a {@code <suite>}, and validates it with {@link Suite#validate(String)}.
+	 *
+	 * @param file	the file's path, which also names the suite in messages
+	 * @return the valid suite
+	 * @throws MetaDataException	if the file cannot be read, is not valid against sail.xsd, or the suite is not
+	 * 								valid (the message names the suite and the member at fault)
+	 */
+	public static @Nonnull Suite unmarshalSAILSuiteFile(@Nonnull String file) {
+		Suite result;
+		// As unmarshalSAILFile: read as UTF-8 explicitly
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (BufferedInputStream bis = new BufferedInputStream(fis)) {
+				try (InputStreamReader isr = new InputStreamReader(bis, StandardCharsets.UTF_8)) {
+					try (BufferedReader br = new BufferedReader(isr)) {
+						result = unmarshalSAILSuite(br);
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL suite at " + file, e);
+		}
+		// outside the try, so that a validation message is not wrapped
+		result.validate(file);
+		return result;
+	}
+
+	/**
+	 * Unmarshals SAIL whose root is a {@code <suite>}, and validates it with {@link Suite#validate(String)}.
+	 *
+	 * @param sail	the XML
+	 * @param name	the suite's name for messages, usually its classpath resource or file
+	 * @return the valid suite
+	 * @throws MetaDataException	if the XML is not valid against sail.xsd, or the suite is not valid (the message
+	 * 								names the suite and the member at fault)
+	 */
+	public static @Nonnull Suite unmarshalSAILSuiteString(@Nonnull String sail, @Nonnull String name) {
+		Suite result;
+		try (StringReader sr = new StringReader(sail)) {
+			result = unmarshalSAILSuite(sr);
+		}
+		catch (Exception e) {
+			throw new MetaDataException("Could not unmarshal SAIL suite " + name, e);
+		}
+		result.validate(name);
+		return result;
+	}
+
+	/**
+	 * Unmarshals SAIL whose root is a {@code <suite>}, and validates it; messages call the suite "(string)". Prefer
+	 * {@link #unmarshalSAILSuiteString(String, String)}, which names it.
+	 *
+	 * @param sail	the XML
+	 * @return the valid suite
+	 * @throws MetaDataException	if the XML is not valid against sail.xsd, or the suite is not valid
+	 */
+	public static @Nonnull Suite unmarshalSAILSuiteString(@Nonnull String sail) {
+		return unmarshalSAILSuiteString(sail, "(string)");
+	}
+
+	private static @Nonnull Suite unmarshalSAILSuite(@Nonnull Reader reader) throws JAXBException {
+		Unmarshaller unmarshaller = SAIL_SUITE_CONTEXT.createUnmarshaller();
+		unmarshaller.setSchema(SAIL_SCHEMA);
+		return (Suite) unmarshaller.unmarshal(reader);
+	}
+
+	/**
+	 * Returns the root element of a SAIL document, so that a generic runner can unmarshal a suite, a workflow or an
+	 * automation with the right method. Reads only up to the root element; the document is not validated.
+	 *
+	 * @param sail	the XML
+	 * @return the root
+	 * @throws MetaDataException	if the XML is not well formed up to its root, or its root is not a SAIL
+	 * 								{@code <suite>}, {@code <workflow>} or {@code <automation>}
+	 */
+	public static @Nonnull SAILRoot sailRootOfString(@Nonnull String sail) {
+		try (StringReader sr = new StringReader(sail)) {
+			return sailRoot(sr, "(string)");
+		}
+	}
+
+	/**
+	 * Returns the root element of a SAIL file; see {@link #sailRootOfString(String)}.
+	 *
+	 * @param file	the file's path
+	 * @return the root
+	 * @throws MetaDataException	if the file cannot be read, is not well formed up to its root, or its root is not a
+	 * 								SAIL {@code <suite>}, {@code <workflow>} or {@code <automation>}
+	 */
+	public static @Nonnull SAILRoot sailRootOfFile(@Nonnull String file) {
+		try (FileInputStream fis = new FileInputStream(file)) {
+			try (InputStreamReader isr = new InputStreamReader(fis, StandardCharsets.UTF_8)) {
+				return sailRoot(isr, file);
+			}
+		}
+		catch (IOException e) {
+			throw new MetaDataException("Could not read SAIL at " + file, e);
+		}
+	}
+
+	private static @Nonnull SAILRoot sailRoot(@Nonnull Reader reader, @Nonnull String name) {
+		try {
+			XMLInputFactory factory = XMLInputFactory.newFactory();
+			// No DTDs or external entities: only the root element is wanted
+			factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+			// Not closed: it holds no resource of its own, and the caller closes the reader
+			XMLStreamReader xml = factory.createXMLStreamReader(reader);
+			// Skip to the root, past any declaration, comments, processing instructions, DOCTYPE and white space;
+			// a document without a root throws instead of ending
+			while (xml.next() != XMLStreamConstants.START_ELEMENT) {
+				// skip
+			}
+			String namespace = xml.getNamespaceURI();
+			String element = xml.getLocalName();
+			if (SAIL_NAMESPACE.equals(namespace)) {
+				switch (element) {
+					case "suite":
+						return SAILRoot.SUITE;
+					case "workflow":
+						return SAILRoot.WORKFLOW;
+					case "automation":
+						return SAILRoot.AUTOMATION;
+					default:
+						break;
+				}
+			}
+			String ns = (namespace == null) ? XMLConstants.NULL_NS_URI : namespace;
+			throw new MetaDataException("SAIL " + name + " has root {" + ns + "}" + element +
+											", not a <suite>, <workflow> or <automation> in " + SAIL_NAMESPACE);
+		}
+		catch (XMLStreamException e) {
+			throw new MetaDataException("Could not read the root element of SAIL " + name, e);
+		}
+	}
+
+	/**
 	 * Preferred XML attribute order, sampled from the admin module and completed with
 	 * other bundled metadata. Edit one entry to reorder an element; unlisted
 	 * attributes and elements follow alphabetic order. Namespace declarations and
@@ -1486,7 +1673,8 @@ public class XMLMetaData {
 															ViewMetaData.class,
 															Router.class,
 															Automation.class,
-															Workflow.class);
+															Workflow.class,
+															Suite.class);
 		jaxbContext.generateSchema(new SchemaOutputResolver() {
 			@Override
 			public @Nonnull Result createOutput(@SuppressWarnings("null") @Nonnull String namespaceUri,

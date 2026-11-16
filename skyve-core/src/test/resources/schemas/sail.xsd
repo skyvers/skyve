@@ -107,6 +107,17 @@
 
   <xs:element name="save" type="tns:save"/>
 
+  <xs:element name="suite" type="tns:suite">
+    <xs:annotation>
+      <xs:documentation>
+        A SAIL suite: an execution plan of independent members, each a workflow or automation file relative to the
+        suite file's folder. Set-up members run first, in order; then the ordinary members, in order; then the
+        optional restore, even after failures, if its own requirements passed. Each member gets its own run (no
+        {run} or {var:name} sharing). Every ordinary member requires every set-up member.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
   <xs:element name="switchMode" type="tns:switchMode"/>
 
   <xs:element name="tabSelect" type="tns:tabSelect"/>
@@ -751,6 +762,111 @@
     <xs:sequence>
       <xs:element ref="tns:automation" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="testStrategy" type="tns:testStrategy">
+      <xs:annotation>
+        <xs:documentation>
+          The default test strategy for the automations that state none; an automation's own testStrategy wins.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="suite">
+    <xs:sequence>
+      <xs:element name="viewRoles" type="tns:viewRoles" form="qualified" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            The roles the runner builds views with for one user that the members sign in as; one per user.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="setUp" type="tns:suiteMember" form="qualified" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            A set-up member: runs first, in order, locked to its own test strategy. Every ordinary member requires it.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="member" type="tns:ordinarySuiteMember" form="qualified" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            An ordinary member: runs in order after the set-up members; a failure does not stop the others.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="restore" type="tns:suiteMember" form="qualified" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The restore member: runs last, even after failures, if its own requirements passed. It can require only
+            set-up members, and is locked to its own test strategy.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="testStrategy" type="tns:testStrategy">
+      <xs:annotation>
+        <xs:documentation>
+          The default test strategy for the automations of members that state none; a workflow's or an automation's
+          own testStrategy wins.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="evidence" type="tns:evidence">
+      <xs:annotation>
+        <xs:documentation>The evidence the suite asks its run to keep; the run can override it.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="viewRoles">
+    <xs:sequence>
+      <xs:element name="role" type="xs:string" form="qualified" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>A role: module.Role, or a customer role's name.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="user" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The user name as the members sign in with it; can hold {run} and {var:name}.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="suiteMember">
+    <xs:sequence/>
+    <xs:attribute name="file" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The workflow or automation file, relative to the suite file's folder. It also names the member in requires.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="requires">
+      <xs:annotation>
+        <xs:documentation>
+          Space-separated files of earlier members that must pass before this one runs; otherwise it is skipped.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:list itemType="xs:string"/>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="ordinarySuiteMember">
+    <xs:complexContent>
+      <xs:extension base="tns:suiteMember">
+        <xs:sequence/>
+        <xs:attribute name="lockTestStrategy" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>
+              true to run this member with its own test strategy, ignoring a run's override. Default false.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 
   <xs:simpleType name="testStrategy">
@@ -758,6 +874,16 @@
       <xs:enumeration value="Assert"/>
       <xs:enumeration value="Verify"/>
       <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="evidence">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="failures"/>
+      <xs:enumeration value="snapshots"/>
+      <xs:enumeration value="video"/>
+      <xs:enumeration value="all"/>
     </xs:restriction>
   </xs:simpleType>
 
