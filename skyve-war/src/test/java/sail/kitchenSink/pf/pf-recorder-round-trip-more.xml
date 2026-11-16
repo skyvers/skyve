@@ -5,8 +5,8 @@
 	link in a row), uploads (refused and accepted, by action and into a content widget), Vue list grid filters, sorting
 	and selection, a data table's selection, a number the application generates that the list is then filtered by (a
 	capture), server-side questions, a data grid's selection (the List Grid Fixture's grid with a selectedIdBinding), a
-	PrimeFaces data table list grid's filters (typed text, a combo, a check box and a typed date) and sorts, and a map
-	menu item.
+	PrimeFaces data table list grid's filters (typed text, a combo, a check box and a typed date) and sorts, a Vue list
+	grid's filters on dates and times (with the default converters and with others), and a map menu item.
 	PrimeFaces has no lookup New or Edit and no row edit. It has no login: it runs in a session that is already signed in
 	and recording. The lookup values it makes sort first ("0 ...") and are deleted again at the end.
 -->
@@ -129,6 +129,32 @@
 			<listGridSort module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" />
 			<listGridClearFilter module="kitchensink" query="qListGridFixtureFacesAttributes" />
 			<listGridZoom module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="0 SAIL types {run}" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="A Vue list grid: filters on dates and times, typed as the columns show them">
+		<method>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="0 SAIL dates {run}" />
+			<dataEnter binding="date" value="15-Jun-2021" />
+			<dataEnter binding="monthFirstDate" value="05/06/2026" />
+			<dataEnter binding="twelveHourDateTime" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="monthNameTimestamp" value="May-06-2026 02:47:25 PM" />
+			<dataEnter binding="time" value="10:00" />
+			<ok />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>A date and a time with the default converters, a month first date, a 12 hour date time and a timestamp with a month name. The 12 hour filters compare with values that were not entered: on a server whose locale writes am and pm, the 12 hour values are typed in lower case and shown in upper case, so a filter with the value shown is recorded as a capture of it</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="{run}" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="05/07/2026 02:47 PM" operator="lessThan" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="May-07-2026 02:47:25 PM" operator="lessThan" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="time" value="10:00" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="0 SAIL dates {run}" minRows="1" maxRows="1" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureVueAttributes" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="{run}" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="0 SAIL dates {run}" />
 			<delete />
 		</method>
 	</interaction>

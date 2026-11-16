@@ -472,6 +472,8 @@
 						equals: "equals", iEquals: "equals", notEqual: "notEquals", iNotEqual: "notEquals",
 						lessThan: "lessThan", greaterThan: "greaterThan" };
 	var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+	/** Skyve's default converters' patterns, for a date or time column whose format the map does not give. */
+	var DEFAULT_FORMATS = { date: "dd-MMM-yyyy", dateTime: "dd-MMM-yyyy HH:mm", timestamp: "dd-MMM-yyyy HH:mm:ss", time: "HH:mm" };
 
 	/** Adds a row to a step: rowContaining (or row) and the row's texts, for the checks. */
 	function withRow(step, rows, rowNum) {
@@ -838,8 +840,15 @@
 		return (n < 10) ? "0" + n : String(n);
 	}
 
-	/** A filter value as listGridFilter writes it: an enum's label, a boolean, a date as Skyve's default converter. */
-	function filterText(column, value) {
+	/**
+	 * A filter value as listGridFilter writes it: an enum's label, a boolean, a date or time in the format of the column's
+	 * converter, as the column shows it (the map's format, or else Skyve's default for the column's type).
+	 *
+	 * @param column	the Vue list grid's column (its type and enum values)
+	 * @param value	the filter's value
+	 * @param format	the column's converter's format pattern from the map, or undefined
+	 */
+	function filterText(column, value, format) {
 		if ((value === true) || (value === false)) {
 			return String(value);
 		}
@@ -851,33 +860,73 @@
 				return String(option.label);
 			}
 		}
-		if (value instanceof Date) {
-			var date = pad(value.getDate()) + "-" + MONTHS[value.getMonth()] + "-" + value.getFullYear();
-			if (column && (column.type === "dateTime")) {
-				return date + " " + pad(value.getHours()) + ":" + pad(value.getMinutes());
-			}
-			if (column && (column.type === "timestamp")) {
-				return date + " " + pad(value.getHours()) + ":" + pad(value.getMinutes()) + ":" + pad(value.getSeconds());
-			}
-			if (column && (column.type === "time")) {
-				return pad(value.getHours()) + ":" + pad(value.getMinutes());
-			}
-			return date;
+		var date = column ? filterDate(column.type, value) : null;
+		if (date) {
+			return formatDate(date, format || DEFAULT_FORMATS[column.type]);
 		}
 		return String(value);
 	}
 
-	/** The column binding of a Vue list grid's field, from the map's columns, or the field unsanitised. */
-	function columnBinding(entry, field) {
+	/**
+	 * The date and time of a date or time column's filter value: a Date (date time and timestamp calendars), yyyy-MM-dd
+	 * (the date calendar), HH:mm:ss (the time calendar; HH:mm before) or an ISO date and time (a filter kept from
+	 * before); or null for another column's value.
+	 */
+	function filterDate(type, value) {
+		if (!DEFAULT_FORMATS[type]) {
+			return null;
+		}
+		if (value instanceof Date) {
+			return value;
+		}
+		var text = String(value);
+		var date = /^(\d{4})-(\d\d)-(\d\d)$/.exec(text);
+		if (date) {
+			return new Date(Number(date[1]), Number(date[2]) - 1, Number(date[3]));
+		}
+		var time = /^(\d\d):(\d\d)(?::(\d\d))?$/.exec(text);
+		if (time) {
+			return new Date(1970, 0, 1, Number(time[1]), Number(time[2]), Number(time[3] || 0));
+		}
+		var parsed = new Date(text);
+		return isNaN(parsed.getTime()) ? null : parsed;
+	}
+
+	/**
+	 * Formats a date and time with a Java date format pattern, in English as Skyve's converters do: the letters Skyve's
+	 * date and time converters use (yyyy, MMM, MM, dd, HH, hh, mm, ss and a); any other character is written as it is.
+	 */
+	function formatDate(date, pattern) {
+		var hours = date.getHours();
+		var fields = { yyyy: String(date.getFullYear()), MMM: MONTHS[date.getMonth()], MM: pad(date.getMonth() + 1),
+						dd: pad(date.getDate()), HH: pad(hours), hh: pad((hours % 12) || 12), mm: pad(date.getMinutes()),
+						ss: pad(date.getSeconds()), a: (hours < 12) ? "AM" : "PM" };
+		return pattern.replace(/yyyy|MMM|MM|dd|HH|hh|mm|ss|a/g, function (letters) {
+			return fields[letters];
+		});
+	}
+
+	/** The map's column of a Vue list grid's field (by its name, binding or sanitised binding), or undefined. */
+	function mapColumn(entry, field) {
 		var grid = map.grids[entry.listGrid] || {};
-		var found = (grid.columns || []).filter(function (c) {
+		return (grid.columns || []).filter(function (c) {
 			return (c.name === field) || (c.binding === field) || (c.binding && (c.binding.replace(/\./g, "_") === field));
 		})[0];
+	}
+
+	/** The column binding of a Vue list grid's field, from the map's columns, or the field unsanitised. */
+	function columnBinding(entry, field) {
+		var found = mapColumn(entry, field);
 		return found ? (found.binding || found.name) : String(field).replace(/_(\d*)_/g, "[$1]").replace(/_/g, ".");
 	}
 
-	/** A Vue list grid's filters and sort: { ok, any, columns: { field: { operator, value } }, sort: [{ field, order }] }. */
-	function vueState(component) {
+	/**
+	 * A Vue list grid's filters and sort: { ok, any, columns: { field: { operator, value } }, sort: [{ field, order }] }.
+	 *
+	 * @param component	the grid's component
+	 * @param entry	the grid's map entry
+	 */
+	function vueState(component, entry) {
 		var topLevel = component.selectedTopLevelOperator;
 		topLevel = (topLevel && topLevel.value) ? topLevel.value : topLevel;
 		var result = { ok: topLevel !== "or", columns: {}, sort: [] };
@@ -897,7 +946,8 @@
 				if (!operator) {
 					result.ok = false;
 				} else {
-					result.columns[field] = { operator: operator, value: filterText(columns[field], constraints[0].value) };
+					var format = (mapColumn(entry, field) || {}).format;
+					result.columns[field] = { operator: operator, value: filterText(columns[field], constraints[0].value, format) };
 				}
 			}
 		});
@@ -918,7 +968,7 @@
 			if (!component) {
 				return;
 			}
-			var now = vueState(component);
+			var now = vueState(component, entry);
 			var before = vueStates[id];
 			vueStates[id] = now;
 			if (!before) {
@@ -981,7 +1031,7 @@
 		Object.keys(map.ids).forEach(function (id) {
 			var component = map.ids[id].listGrid ? vueComponent(id) : null;
 			if (component && !vueStates[id]) {
-				vueStates[id] = vueState(component);
+				vueStates[id] = vueState(component, map.ids[id]);
 			}
 		});
 	}

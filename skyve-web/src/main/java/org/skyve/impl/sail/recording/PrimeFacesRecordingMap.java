@@ -10,7 +10,9 @@ import org.primefaces.component.column.Column;
 import org.primefaces.component.datatable.DataTable;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
@@ -83,7 +85,8 @@ import jakarta.faces.component.UIComponent;
  * with; on a list page, the context's own list is {@code list}, and its steps need no attributes. A column of a list
  * grid rendered as a PrimeFaces data table also has its header's client id ({@code id}) and, if it can be filtered, the
  * comparison its filter makes ({@code operator}: {@code contains} or {@code equals}), from which the recorder writes
- * the table's filters and sorts.</li>
+ * the table's filters and sorts. A date, date time, timestamp or time column of a Vue list grid has the format pattern
+ * of its converter ({@code format}), in which the recorder writes the column's filter value.</li>
  * <li>An element inside a data table has a row in its page id, which the map leaves out: the page's
  * {@code s60:3:s70} is the map's {@code s60:s70} ({@link PrimeFacesAutomationContext#clientId(UIComponent, Integer)}).
  * The recorder takes the row from the page.</li>
@@ -459,7 +462,9 @@ public final class PrimeFacesRecordingMap {
 	/**
 	 * A list grid's columns, from its model: each one's binding, name, title, and whether it is hidden. A column of a
 	 * PrimeFaces data table also has the client id of its header ({@code id}), which its sort request names, and, if
-	 * it can be filtered, the comparison its typed or chosen filter makes ({@code operator}).
+	 * it can be filtered, the comparison its typed or chosen filter makes ({@code operator}). A date, date time,
+	 * timestamp or time column of a Vue list grid has its converter's format pattern ({@code format}): the grid's
+	 * cells and filter calendar show the converter's format, so a filter on the column is written in it.
 	 *
 	 * @param model	the list grid's model
 	 * @param table	the data table that renders the list grid, or null for a Vue list grid
@@ -483,6 +488,9 @@ public final class PrimeFacesRecordingMap {
 			Column tableColumn = (field == null) ? null : tableColumns.get(field);
 			if (tableColumn != null) {
 				putTableColumn(model, binding, tableColumn, c);
+			}
+			else if ((table == null) && (binding != null)) {
+				putIfNotNull(c, "format", dateOrTimeFormat(columnAttribute(model, binding)));
 			}
 			result.add(c);
 		}
@@ -519,13 +527,7 @@ public final class PrimeFacesRecordingMap {
 	 * the implicit bizKey; {@code equals} otherwise (a constant domain's combo, a boolean's check box, numbers, dates).
 	 */
 	private static @Nonnull String filterOperator(@Nonnull ListModel<Bean> model, @Nonnull String binding) {
-		Document driving = model.getDrivingDocument();
-		Attribute attribute = null;
-		if (driving != null) {
-			Customer customer = CORE.getUser().getCustomer();
-			TargetMetaData target = BindUtil.getMetaDataForBinding(customer, customer.getModule(driving.getOwningModuleName()), driving, binding);
-			attribute = target.getAttribute();
-		}
+		Attribute attribute = columnAttribute(model, binding);
 		if (attribute == null) {
 			return binding.endsWith(Bean.BIZ_KEY) ? CONTAINS : EQUALS;
 		}
@@ -536,6 +538,32 @@ public final class PrimeFacesRecordingMap {
 		}
 		boolean textual = (type == AttributeType.text) || (type == AttributeType.memo) || (type == AttributeType.markup) || (type == AttributeType.colour);
 		return (textual && (domain == null)) ? CONTAINS : EQUALS;
+	}
+
+	/** The attribute a list grid column's binding reaches from its model's driving document, or null (an implicit attribute). */
+	private static @Nullable Attribute columnAttribute(@Nonnull ListModel<Bean> model, @Nonnull String binding) {
+		Document driving = model.getDrivingDocument();
+		if (driving == null) {
+			return null;
+		}
+		Customer customer = CORE.getUser().getCustomer();
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, customer.getModule(driving.getOwningModuleName()), driving, binding);
+		return target.getAttribute();
+	}
+
+	/**
+	 * The format pattern of a date, date time, timestamp or time attribute's converter (the customer's default converter
+	 * for its type when it names none), or null for another attribute.
+	 */
+	private static @Nullable String dateOrTimeFormat(@Nullable Attribute attribute) {
+		if (attribute instanceof ConvertibleField field) {
+			AttributeType type = field.getAttributeType();
+			if ((type == AttributeType.date) || (type == AttributeType.dateTime) || (type == AttributeType.timestamp) || (type == AttributeType.time)) {
+				Converter<?> converter = field.getConverterForCustomer(CORE.getUser().getCustomer());
+				return (converter == null) ? null : converter.getFormatPattern();
+			}
+		}
+		return null;
 	}
 
 	/** The component, or the first of its descendants, that is of the type; or null. */

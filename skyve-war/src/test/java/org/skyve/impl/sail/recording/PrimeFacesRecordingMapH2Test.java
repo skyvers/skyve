@@ -113,6 +113,36 @@ class PrimeFacesRecordingMapH2Test extends AbstractSkyveTest {
 	}
 
 	/**
+	 * A Vue list grid's date and time columns give their converter's format pattern, in which the recorder writes their
+	 * filters: the attribute's converter, or else the customer's default for its type. Other columns, and a data
+	 * table's columns, have none.
+	 */
+	@Test
+	void aVueListGridsDateAndTimeColumnsHaveTheirConvertersFormats() throws Exception {
+		AbstractPersistence.get().setUser(SailUsers.bootstrapLikeUser(u));
+		Map<String, Object> map = parse(PrimeFacesRecordingMap.edit("kitchensink", "ListGridFixture", "tablet", UserAgentType.tablet));
+		Map<String, Object> grids = (Map<String, Object>) map.get("grids");
+		List<Map<String, Object>> faces = (List<Map<String, Object>>) ((Map<String, Object>) grids.get("kitchensink.qListGridFixtureFacesAttributes")).get("columns");
+		List<Map<String, Object>> vue = (List<Map<String, Object>>) ((Map<String, Object>) grids.get("kitchensink.qListGridFixtureVueAttributes")).get("columns");
+		Map<String, Object> formats = new java.util.TreeMap<>();
+		vue.forEach(column -> {
+			if (column.containsKey("format")) {
+				formats.put((String) column.get("binding"), column.get("format"));
+			}
+		});
+
+		assertAll(() -> assertEquals(Map.of("date", "dd-MMM-yyyy",
+											"dateTime", "dd-MMM-yyyy HH:mm",
+											"time", "HH:mm",
+											"timestamp", "dd-MMM-yyyy HH:mm:ss",
+											"monthFirstDate", "MM/dd/yyyy",
+											"twelveHourDateTime", "MM/dd/yyyy hh:mm a",
+											"monthNameTimestamp", "MMM-dd-yyyy hh:mm:ss a",
+											"twelveHourTime", "hh:mm:ss a"), formats),
+					() -> assertTrue(faces.stream().noneMatch(column -> column.containsKey("format")), "no formats for a data table: " + faces));
+	}
+
+	/**
 	 * A list model column with neither a name nor a binding (one a list model makes in code) has no data table field:
 	 * it is listed with its title and no header id, and the other columns keep theirs.
 	 */

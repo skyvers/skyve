@@ -103,7 +103,8 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 
 	/**
 	 * Lookups, data grids, uploads, Vue list grid filters, sorting and selection, a data table's selection, a generated
-	 * number reused later (a capture), server-side questions, a data grid's selection and a map: see
+	 * number reused later (a capture), server-side questions, a data grid's selection, a Vue list grid's filters on
+	 * dates and times written as the columns show them (each column's converter), and a map: see
 	 * pf-recorder-round-trip-more.xml.
 	 */
 	@Test
@@ -136,7 +137,12 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 				"<listGridSort module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"text\" descending=\"true\"/>",
 				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"booleanFlag\"/>",
 				"<listGridSort module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\" column=\"text\"/>",
-				"<listGridClearFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\"/>");
+				"<listGridClearFilter module=\"kitchensink\" query=\"qListGridFixtureFacesAttributes\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"date\" value=\"15-Jun-2021\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"monthFirstDate\" value=\"05/06/2026\" operator=\"equals\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"twelveHourDateTime\" value=\"05/07/2026 02:47 PM\" operator=\"lessThan\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"monthNameTimestamp\" value=\"May-07-2026 02:47:25 PM\" operator=\"lessThan\"/>",
+				"<listGridFilter module=\"kitchensink\" query=\"qListGridFixtureVueAttributes\" column=\"time\" value=\"10:00\" operator=\"equals\"/>");
 		replay(xml);
 	}
 
