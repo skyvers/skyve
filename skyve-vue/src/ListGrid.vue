@@ -17,6 +17,33 @@ function defaultMatchMode(columnType) {
 }
 
 /**
+ * The criteria for a filter on a date time or timestamp column whose converter shows only the date (its filter
+ * calendar takes a day): the day the user sees, as the server compares date times exactly.
+ * Equals is the whole day (from its start to the next day's), Not Equals outside it, Before before it starts and
+ * After after it ends; any other match mode compares with the day's start.
+ *
+ * @param {String} fieldName the column's field
+ * @param {String} matchMode the filter's match mode (see MatchModes.js)
+ * @param {Date} day the day (its time is ignored)
+ */
+function dayCriteria(fieldName, matchMode, day) {
+
+    const start = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+    const end = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
+    const compare = (operator, value) => ({ fieldName, operator, value });
+    switch (matchMode) {
+        case MatchModes.MODES.EQUALS:
+            return { _constructor: 'AdvancedCriteria', operator: 'and', criteria: [compare('greaterOrEqual', start), compare('lessThan', end)] };
+        case MatchModes.MODES.NOT_EQUALS:
+            return { _constructor: 'AdvancedCriteria', operator: 'or', criteria: [compare('lessThan', start), compare('greaterOrEqual', end)] };
+        case MatchModes.MODES.GREATER_THAN:
+            return compare('greaterOrEqual', end);
+        default:
+            return compare(matchMode, start);
+    }
+}
+
+/**
  * Compare the two provided arrays for equality;
  * ie: same length, and contents are equal 
  * accoring to ==.
@@ -457,11 +484,16 @@ export default {
                 // Ignore contstraints with empty/nullish value
                 const nonNullConstraints = constraints.filter(con => (con.value ?? '') !== '');
 
-                const createCriteria = (constraint) => ({
-                    'fieldName': columnName,
-                    'value': constraint.value,
-                    'operator': constraint.matchMode
-                });
+                // A date time or timestamp column filtered by a day compares with the whole day
+                const calendar = this.columnDefinitionsMap.get(columnName)?.calendar;
+                const byDay = calendar && (calendar.dateFormat != null) && (! calendar.showTime);
+                const createCriteria = (constraint) => (byDay && (constraint.value instanceof Date)) ?
+                    dayCriteria(columnName, constraint.matchMode, constraint.value) :
+                    {
+                        'fieldName': columnName,
+                        'value': constraint.value,
+                        'operator': constraint.matchMode
+                    };
 
                 if (nonNullConstraints.length == 1) {
                     // One constraint for this column
@@ -685,8 +717,33 @@ export default {
             this.firstRow = event.first ?? 0;
             this.pageSize = event.rows ?? 50;
             this.sortColumn = event.sortField ?? '';
-            this.filters = event.filters ?? {};
+            this.filters = this.reviveFilterDates(event.filters ?? {});
             this.smartClientCriteria = event.smartClientCriteria;
+        },
+        /**
+         * Puts back as Dates the values of restored filters on date time and timestamp columns, which come back as
+         * ISO 8601 strings (a snapshot is JSON): their calendars take a Date, and show a string as it is.
+         * Date and time columns keep their strings (yyyy-MM-dd, HH:mm:ss), which their calendars take.
+         * The filters are changed in place.
+         *
+         * @returns the filters
+         */
+        reviveFilterDates(filters) {
+
+            for (const [field, filter] of Object.entries(filters)) {
+                const type = this.columnDefinitionsMap.get(field)?.type;
+                if ((type == 'dateTime') || (type == 'timestamp')) {
+                    for (const constraint of filter?.constraints ?? []) {
+                        if ((typeof constraint.value === 'string') && (constraint.value !== '')) {
+                            const date = new Date(constraint.value);
+                            if (!Number.isNaN(date.getTime())) {
+                                constraint.value = date;
+                            }
+                        }
+                    }
+                }
+            }
+            return filters;
         },
         /**
          * Initialise/clear the filter state, optionally setting some 
@@ -714,7 +771,7 @@ export default {
 
             if (snapstate) {
                 // Filters
-                const incomingFilters = snapstate.filters ?? {};
+                const incomingFilters = this.reviveFilterDates(snapstate.filters ?? {});
                 this.initFilters(incomingFilters);
                 this.smartClientCriteria = snapstate.smartClientCriteria;
 
