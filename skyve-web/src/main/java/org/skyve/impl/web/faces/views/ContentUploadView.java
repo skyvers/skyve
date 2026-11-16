@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
@@ -19,6 +20,7 @@ import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
@@ -36,6 +38,7 @@ import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.content.ContentMediaClassifier;
 import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.FacesWebContext;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadAffordance;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadCategory;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadKind;
@@ -60,6 +63,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.application.FacesMessage.Severity;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
@@ -79,16 +83,18 @@ public class ContentUploadView extends AbstractUploadView {
 
 	/**
 	 * Tells a PrimeFaces upload page's owner, from within the page's frame, that its upload action has run, so that hiding
-	 * the page refreshes the view; with {@code true}, also closes the page (the upload succeeded), as a content upload's
-	 * page is closed. See {@code SKYVE.PF.afterActionUpload}. A SmartClient upload window has no PrimeFaces owner, so the
-	 * script does nothing there.
+	 * the page refreshes the view; with {@code true} and the page's messages (the upload succeeded), also shows the
+	 * messages in the view's growl and closes the page, as a content upload's page is closed. See
+	 * {@code SKYVE.PF.afterActionUpload}. A SmartClient upload window has no PrimeFaces owner, so the script does nothing
+	 * there.
 	 */
 	private static final String AFTER_ACTION_UPLOAD_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,%s)}";
 
 	/**
 	 * The callback parameter that tells a SmartClient upload window, once its upload action has run, whether the upload
 	 * succeeded: upload.xhtml's {@code skyveAfterActionUpload} (the upload's {@code oncomplete}) refreshes the view, and
-	 * closes the window when it is {@code true}, as a content upload's window is closed.
+	 * when it is {@code true}, shows the page's messages ({@link #MESSAGES_PARAM}) in the view's growl and closes the
+	 * window, as a content upload's window is closed.
 	 */
 	private static final String ACTION_UPLOAD_SUCCEEDED_PARAM = "actionUploadSucceeded";
 
@@ -757,6 +763,7 @@ public class ContentUploadView extends AbstractUploadView {
 				throw new DomainException("File Upload could not be processed", e);
 			}
 
+			addWebContextNotifications(webContext, fc);
 			StateUtil.commitAndCacheConversation(webContext);
 
 			boolean success = (! exception.hasProblems());
@@ -767,8 +774,18 @@ public class ContentUploadView extends AbstractUploadView {
 				addActionUploadProblems(exception, fc);
 			}
 			PrimeFaces primeFaces = PrimeFaces.current();
-			primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, Boolean.toString(success)));
-			primeFaces.ajax().addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.valueOf(success));
+			PrimeFaces.Ajax ajax = primeFaces.ajax();
+			if (success) {
+				// The page closes: its messages are shown in the view's growl instead (runtime issue P3)
+				String messages = messagesJSON(fc);
+				primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, "true," + messages));
+				ajax.addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);
+				ajax.addCallbackParam(MESSAGES_PARAM, messages);
+			}
+			else {
+				primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, "false"));
+				ajax.addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.FALSE);
+			}
 		}
 		catch (ActionUnavailableException e) {
 			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
@@ -781,6 +798,36 @@ public class ContentUploadView extends AbstractUploadView {
 			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "File upload failed for action " + actionName, e);
 			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
+		}
+	}
+
+	/**
+	 * Adds the growls and messages that the upload action or an interceptor added to the conversation's web context as
+	 * the page's messages, as {@code FacesWebContext} adds them, so that the page shows them, and carries them to the
+	 * view when it closes. Only a SmartClient conversation ({@code SmartClientWebContext}) holds them: a PrimeFaces one
+	 * adds them to the page's messages straight away, and has none to add here.
+	 *
+	 * @param webContext the conversation the upload action ran in; must not be {@code null}
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private static void addWebContextNotifications(@Nonnull AbstractWebContext webContext, @Nonnull FacesContext fc) {
+		addNotifications(webContext.getGrowls(), fc);
+		addNotifications(webContext.getMessages(), fc);
+	}
+
+	/**
+	 * Adds growls or messages, each a severity and a summary, as messages whose summary and detail are the summary.
+	 *
+	 * @param notifications the growls or messages, or {@code null} for none
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private static void addNotifications(@Nullable List<Map<String, String>> notifications, @Nonnull FacesContext fc) {
+		if (notifications != null) {
+			for (Map<String, String> notification : notifications) {
+				String text = notification.get("summary");
+				Severity severity = FacesWebContext.determineFacesSeverity(MessageSeverity.valueOf(notification.get("severity")));
+				fc.addMessage(null, new FacesMessage(severity, text, text));
+			}
 		}
 	}
 
@@ -874,7 +921,7 @@ public class ContentUploadView extends AbstractUploadView {
 	}
 
 	/**
-	 * Queues a successful action-upload message including the uploaded file size.
+	 * Queues a successful action-upload message including the uploaded file's name (escaped) and size.
 	 *
 	 * @param file uploaded file metadata; must not be {@code null}
 	 * @param fc active Faces context used for messages; must not be {@code null}
@@ -882,7 +929,9 @@ public class ContentUploadView extends AbstractUploadView {
 	private static void addActionUploadSuccess(@Nonnull UploadedFile file, @Nonnull FacesContext fc) {
 		long size = file.getSize();
 		StringBuilder message = new StringBuilder(128);
-		message.append(file.getFileName()).append(" is uploaded. File Size is ");
+		// The file name is the user's: escaped, as the page's growl (and the view's, which the message is carried to)
+		// shows the message's markup
+		message.append(OWASP.escapeHtml(file.getFileName())).append(" is uploaded. File Size is ");
 
 		DecimalFormat format = CORE.getDecimalFormat("###,##0.00");
 		if (size > 1048576) {

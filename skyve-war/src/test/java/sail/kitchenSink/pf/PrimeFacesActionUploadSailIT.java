@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 import util.AbstractInterpretedSailWorkflow;
 
 /**
- * An action upload that succeeds closes its upload page, which refreshes the view (runtime issue P3,
- * docs/sail-runtime-issues.md), in each PrimeFaces UX/UI: an overlay for {@code tablet} and {@code external}, a
- * full-screen dialog for {@code phone}.
+ * An action upload that succeeds closes its upload page, which refreshes the view, and shows the page's messages in the
+ * view's growl: the upload's success and the upload action's own growl (runtime issue P3, docs/sail-runtime-issues.md),
+ * in each PrimeFaces UX/UI: an overlay for {@code tablet} and {@code external}, a full-screen dialog for {@code phone}.
  * <p>
  * The upload step closes an upload page that stays open with its close icon, as a user would, for a Skyve without the
  * fix. So the script first hides the close icons: an upload page that does not close itself then fails the step.
@@ -39,7 +39,12 @@ class PrimeFacesActionUploadSailIT extends AbstractInterpretedSailWorkflow {
 				"s.textContent = '.ui-overlaypanel-close, .ui-dialog-titlebar-close {display: none !important;}';" +
 				"document.head.appendChild(s);</execute>" +
 				"<upload action=\"ActionsUpload\" file=\"sail/files/sail-upload.txt\" />" +
+				"<comment>The upload page's messages, in the view's growl</comment>" +
+				"<testMessage contains=\"sail-upload.txt is uploaded\" type=\"info\" />" +
+				"<testMessage contains=\"Actions Upload took the file\" type=\"info\" />" +
 				"<testValue binding=\"outcome\" value=\"Actions Upload ran\" />" +
+				"<comment>On a phone the growls cover the toolbar until they fade: close them, as a user would</comment>" +
+				"<execute>PF('pushGrowl').removeAll();</execute>" +
 				"<cancel />" +
 				"</method></interaction></automation>";
 	}

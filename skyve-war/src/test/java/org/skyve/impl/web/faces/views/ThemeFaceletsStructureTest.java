@@ -40,11 +40,17 @@ class ThemeFaceletsStructureTest {
 		// Runtime issue P3: a SmartClient action upload that succeeded closes its window
 		assertTrue(upload.contains("if (args && args.actionUploadSucceeded) {"), upload);
 		assertTrue(upload.contains("owner.isc.WindowStack.popoff(false);"), upload);
+		// and shows the page's messages in the view's growl as it closes
+		assertTrue(upload.contains("owner.isc.BizUtil.growl(owner.JSON.parse(args.uploadMessages));"), upload);
 		assertFalse(upload.contains("window.parent.isc"), upload);
 
 		assertSharedIframePage(bizImport);
 		assertTrue(bizImport.contains("var owner = SKYVE.Util.findSmartClientWindow();"), bizImport);
-		assertTrue(bizImport.contains("oncomplete=\"skyveAfterBizImport()\""), bizImport);
+		assertTrue(bizImport.contains("oncomplete=\"skyveAfterBizImport(args)\""), bizImport);
+		// Runtime issue P3: an import without problems closes its window, showing the page's messages in the view
+		assertTrue(bizImport.contains("if (args && args.bizImportSucceeded) {"), bizImport);
+		assertTrue(bizImport.contains("owner.isc.BizUtil.growl(owner.JSON.parse(args.uploadMessages));"), bizImport);
+		assertTrue(bizImport.contains("owner.isc.WindowStack.popoff(false);"), bizImport);
 		assertFalse(bizImport.contains("window.parent.isc"), bizImport);
 
 		assertSharedIframePage(imageMarkup);

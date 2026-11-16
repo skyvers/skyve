@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -48,8 +49,10 @@ import org.springframework.mock.web.MockHttpSession;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
+import modules.kitchensink.ActionsFixture.actions.ActionsUpload;
 import modules.kitchensink.domain.ActionsFixture;
 import modules.kitchensink.domain.ActionsFixtureRow;
+import modules.kitchensink.domain.ConditionsFixture;
 import modules.test.AbstractSkyveTest;
 
 /**
@@ -69,8 +72,17 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	private static final String USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36";
 	/** An action of the admin user's edit view that its create view does not offer. */
 	private static final String EDIT_VIEW_ONLY_ACTION = "GeneratePassword";
-	/** The script that closes a PrimeFaces upload page after its action upload has succeeded (runtime issue P3). */
-	private static final String CLOSE_UPLOAD_PAGE_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,true)}";
+	/**
+	 * The messages of a successful upload of {@code upload.txt} (8 bytes): the action's growl (its text once), then the
+	 * upload's success, as JSON, which the upload page carries to the view as it closes (runtime issue P3).
+	 */
+	private static final String UPLOAD_MESSAGES = "[{\"detail\":\"\",\"severity\":\"info\",\"summary\":\"" + ActionsUpload.GROWL + "\"}," +
+													"{\"detail\":\"upload.txt is uploaded. File Size is 0.01 KB\",\"severity\":\"info\",\"summary\":\"Successful\"}]";
+	/**
+	 * The script that closes a PrimeFaces upload page after its action upload has succeeded, showing the page's messages
+	 * in the view (runtime issue P3).
+	 */
+	private static final String CLOSE_UPLOAD_PAGE_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,true," + UPLOAD_MESSAGES + ")}";
 	/**
 	 * The script that tells a PrimeFaces upload page's owner that its upload action ran and showed problems, so that
 	 * closing the page refreshes the view (runtime issue P8).
@@ -81,6 +93,13 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	 * upload.xhtml closes the window (runtime issue P3).
 	 */
 	private static final String UPLOAD_SUCCEEDED_PARAM = "actionUploadSucceeded";
+	/**
+	 * The callback parameter that carries a SmartClient upload or import window's messages, as JSON, to show in the view
+	 * as the window closes (runtime issue P3).
+	 */
+	private static final String MESSAGES_PARAM = "uploadMessages";
+	/** The callback parameter that tells a SmartClient import window that its import succeeded without problems. */
+	private static final String IMPORT_SUCCEEDED_PARAM = "bizImportSucceeded";
 
 	/**
 	 * Reaches the protected {@link FacesContext#setCurrentInstance(FacesContext)}.
@@ -197,13 +216,44 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 		view.handleFileUpload(upload("upload.txt", "uploaded".getBytes(StandardCharsets.UTF_8)));
 
-		assertEquals(List.of("Successful"), messages.stream().map(FacesMessage::getSummary).toList());
+		assertEquals(List.of(ActionsUpload.GROWL, "Successful"), messages.stream().map(FacesMessage::getSummary).toList());
 		assertEquals("Actions Upload ran", cachedFixture(webId).getOutcome());
 	}
 
 	/**
+	 * The growls an upload action adds to a SmartClient conversation are shown on the upload page, as a PrimeFaces
+	 * conversation's are, so that the page carries them to the view as it closes (runtime issue P3).
+	 */
+	@Test
+	void anUploadActionsGrowlIsShownByItsUploadPage() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("upload.txt", "uploaded".getBytes(StandardCharsets.UTF_8)));
+
+		FacesMessage growl = messages.get(0);
+		assertEquals(FacesMessage.SEVERITY_INFO, growl.getSeverity());
+		assertEquals(ActionsUpload.GROWL, growl.getSummary());
+		assertEquals(ActionsUpload.GROWL, growl.getDetail());
+	}
+
+	/**
+	 * The success message names the file escaped: the upload page's growl, and the view's that the message is carried
+	 * to (runtime issue P3), show its markup.
+	 */
+	@Test
+	void theSuccessMessageEscapesTheFileName() throws Exception {
+		String webId = cacheConversation(ActionsFixture.newInstance());
+		ContentUploadView view = actionUploadView(webId, "ActionsUpload");
+
+		view.handleFileUpload(upload("<img src=x onerror=alert(1)>.txt", "uploaded".getBytes(StandardCharsets.UTF_8)));
+
+		assertEquals("&lt;img src=x onerror=alert(1)&gt;.txt is uploaded. File Size is 0.01 KB", messages.get(1).getDetail());
+	}
+
+	/**
 	 * Runtime issue P3: in PrimeFaces, an action upload that succeeds closes its upload page, as a content upload does,
-	 * and closing it refreshes the view.
+	 * showing the page's messages in the view, and closing it refreshes the view.
 	 */
 	@Test
 	void aSuccessfulUploadClosesItsUploadPage() throws Exception {
@@ -216,8 +266,9 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	}
 
 	/**
-	 * Runtime issue P3: in SmartClient, an action upload that succeeds tells its upload window so, and the window's
-	 * page (upload.xhtml) closes it, as a content upload's is closed, and refreshes the view.
+	 * Runtime issue P3: in SmartClient, an action upload that succeeds tells its upload window so, with the page's
+	 * messages, and the window's page (upload.xhtml) refreshes the view, shows the messages in it and closes the window,
+	 * as a content upload's is closed.
 	 */
 	@Test
 	void aSuccessfulUploadTellsItsSmartClientWindowToClose() throws Exception {
@@ -227,6 +278,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 		view.handleFileUpload(upload("upload.txt", "uploaded".getBytes(StandardCharsets.UTF_8)));
 
 		verify(ajax).addCallbackParam(UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);
+		verify(ajax).addCallbackParam(MESSAGES_PARAM, UPLOAD_MESSAGES);
 	}
 
 	/**
@@ -245,9 +297,10 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 		assertEquals(2, messages.size(), messages::toString);
 		verify(primeFaces, times(2)).executeScript(UPLOAD_RAN_SCRIPT);
 		verify(primeFaces, never()).executeScript(CLOSE_UPLOAD_PAGE_SCRIPT);
-		// and a SmartClient upload window stays open too
+		// and a SmartClient upload window stays open too, showing its messages itself
 		verify(ajax, times(2)).addCallbackParam(UPLOAD_SUCCEEDED_PARAM, Boolean.FALSE);
 		verify(ajax, never()).addCallbackParam(UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);
+		verify(ajax, never()).addCallbackParam(eq(MESSAGES_PARAM), any());
 	}
 
 	/**
@@ -348,6 +401,42 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 		assertEquals(List.of("Actions Import ran"), view.getProblems().stream().map(Problem::getWhat).toList());
 		assertEquals(List.of("Successful"), messages.stream().map(FacesMessage::getSummary).toList());
+	}
+
+	/**
+	 * Runtime issue P3: an import without problems tells its SmartClient window so, with the page's messages, and the
+	 * window's page (bizImport.xhtml) refreshes the view, shows the messages in it and closes the window.
+	 */
+	@Test
+	void aCleanImportTellsItsSmartClientWindowToClose() throws Exception {
+		String webId = cacheConversation(ConditionsFixture.newInstance());
+		BizportImportView view = importView(webId, "ConditionsImport");
+
+		view.handleFileUpload(upload("import.xls", workbook()));
+
+		assertTrue(view.getProblems().isEmpty(), view.getProblems()::toString);
+		assertEquals(List.of("The import completed successfully."), messages.stream().map(FacesMessage::getDetail).toList());
+		verify(ajax).addCallbackParam(IMPORT_SUCCEEDED_PARAM, Boolean.TRUE);
+		verify(ajax).addCallbackParam(MESSAGES_PARAM, "[{\"detail\":\"The import completed successfully.\",\"severity\":\"info\",\"summary\":\"Successful\"}]");
+	}
+
+	/**
+	 * An import with problems, warnings only here, or that is refused, leaves its SmartClient window open, showing them.
+	 */
+	@Test
+	void anImportWithProblemsLeavesItsSmartClientWindowOpen() throws Exception {
+		String webId = cacheConversation(persistedFixture());
+		BizportImportView view = importView(webId, "ActionsImport");
+		view.handleFileUpload(upload("import.xls", workbook()));
+
+		ActionsFixture fixture = ActionsFixture.newInstance();
+		fixture.setDisableImport(Boolean.TRUE);
+		webId = cacheConversation(fixture);
+		view = importView(webId, "ActionsImport");
+		view.handleFileUpload(upload("import.xls", workbook()));
+
+		assertEquals(2, messages.size(), messages::toString);
+		verify(ajax, never()).addCallbackParam(anyString(), any());
 	}
 
 	@Test
@@ -491,6 +580,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 		when(external.getSession(false)).thenReturn(session);
 		FacesContext fc = mock(FacesContext.class);
 		when(fc.getExternalContext()).thenReturn(external);
+		when(fc.getMessageList()).thenReturn(messages);
 		doAnswer(invocation -> Boolean.valueOf(messages.add(invocation.getArgument(1)))).when(fc).addMessage(isNull(), any(FacesMessage.class));
 		FacesContextBridge.setCurrent(fc);
 	}

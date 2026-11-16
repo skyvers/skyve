@@ -1,11 +1,17 @@
 package org.skyve.impl.web.faces.views;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.regex.Pattern;
 
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 import org.skyve.util.Util;
 import org.skyve.web.WebContext;
@@ -30,6 +36,16 @@ public abstract class AbstractUploadView extends LocalisableView {
 	 * Number of bytes in one megabyte.
 	 */
 	public static final long MB_IN_BYTES = 1024L * 1024L;
+
+	/**
+	 * The callback parameter that carries a page's messages to the view that opened it, when the page closes itself
+	 * after a clean upload or import (runtime issue P3): the JSON of {@link #messagesJSON(FacesContext)}, which the page
+	 * shows in the view's growl as it closes, so that the user still sees them.
+	 */
+	protected static final String MESSAGES_PARAM = "uploadMessages";
+
+	/** The PrimeFaces client's names of the Faces message severities, by their ordinal. */
+	private static final String[] CLIENT_SEVERITIES = {"info", "warn", "error", "fatal"};
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.CONTEXT_NAME + "}")
@@ -177,5 +193,37 @@ public abstract class AbstractUploadView extends LocalisableView {
 		}
 		
 		return true;
+	}
+
+	/**
+	 * Returns the messages that this page shows for the response, as a JSON array of objects with the
+	 * {@code severity} (PrimeFaces' client name: {@code info}, {@code warn}, {@code error} or {@code fatal}),
+	 * {@code summary} and {@code detail} of each, in order, to be shown in the view's growl as the page closes. A detail
+	 * that repeats its summary, as a growl or message added through the web context does, is left empty, so that the
+	 * view shows the text once, as it shows the web context's growls.
+	 *
+	 * <p>The text is kept as the page's growl shows it (its {@code escape} is {@code false}): each message was escaped
+	 * where it needed to be when it was added, so it is not escaped again, and the view's growl does not escape it
+	 * either. {@code <}, {@code >} and {@code &} are written as JSON unicode escapes, so that the array can also be
+	 * written into a script of the response.
+	 *
+	 * @param fc the active Faces context, whose messages are read; must not be {@code null}
+	 * @return the JSON array, {@code []} when there are no messages
+	 */
+	protected static @Nonnull String messagesJSON(@Nonnull FacesContext fc) {
+		List<Map<String, String>> messages = new ArrayList<>();
+		for (FacesMessage message : fc.getMessageList()) {
+			FacesMessage.Severity severity = message.getSeverity();
+			int ordinal = (severity == null) ? 0 : severity.getOrdinal();
+			Map<String, String> item = new TreeMap<>();
+			item.put("severity", CLIENT_SEVERITIES[((ordinal >= 0) && (ordinal < CLIENT_SEVERITIES.length)) ? ordinal : 0]);
+			String summary = Objects.toString(message.getSummary(), "");
+			String detail = Objects.toString(message.getDetail(), "");
+			item.put("summary", summary);
+			// A growl or message from the web context has its text as both (FacesWebContext): show it once, as a view does
+			item.put("detail", detail.equals(summary) ? "" : detail);
+			messages.add(item);
+		}
+		return JSON.marshall(messages).replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026");
 	}
 }
