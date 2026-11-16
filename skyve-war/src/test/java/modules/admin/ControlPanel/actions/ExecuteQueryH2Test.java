@@ -18,6 +18,7 @@ import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.Group.GroupExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
@@ -56,9 +57,12 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteWithValidQueryReturnsResults() throws Exception {
 		// setup the test data - create some users in the database
+		long suffix = System.nanoTime();
 		User user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(user1, "query-user1-" + suffix, "Query 1");
 		CORE.getPersistence().save(user1);
 		User user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(user2, "query-user2-" + suffix, "Query 2");
 		CORE.getPersistence().save(user2);
 
 		// set a valid query
@@ -111,9 +115,12 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 	@Test
 	void testExecuteFormatsMultipleResultsWithNewlines() throws Exception {
 		// setup the test data - create multiple users
+		long suffix = System.nanoTime();
 		User user1 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(user1, "query-user1-" + suffix, "Query 1");
 		CORE.getPersistence().save(user1);
 		User user2 = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(user2, "query-user2-" + suffix, "Query 2");
 		CORE.getPersistence().save(user2);
 
 		// set a valid query
@@ -140,5 +147,21 @@ class ExecuteQueryH2Test extends AbstractH2Test {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Names a built user and its groups. DataBuilder names both with random lorem text and both names are unique,
+	 * so two users built in one test sometimes share a user name or a group name.
+	 * @param user	The user to name.
+	 * @param userName	A user name that no other user in the test has.
+	 * @param groupLabel	A label that no other user in the test has, short enough for "{groupLabel} group N" to fit
+	 * 						the 30 character group name.
+	 */
+	private static void nameUniquely(User user, String userName, String groupLabel) {
+		user.setUserName(userName);
+		int groupNumber = 0;
+		for (GroupExtension group : user.getGroups()) {
+			group.setName(groupLabel + " group " + (++groupNumber));
+		}
 	}
 }
