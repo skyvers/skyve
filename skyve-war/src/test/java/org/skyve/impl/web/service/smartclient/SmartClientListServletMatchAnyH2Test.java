@@ -35,7 +35,6 @@ import util.AbstractH2Test;
  * on a date time column (from the day's start to the next day's) and SmartClient's advanced filter sends a nested
  * clause: each criterion is ORed with the others, whichever comes first.
  */
-@SuppressWarnings("static-method")
 class SmartClientListServletMatchAnyH2Test extends AbstractH2Test {
 	private static final String TEXT = ListAttributes.textPropertyName;
 	private static final String DATE_TIME = ListAttributes.dateTimePropertyName;
@@ -92,7 +91,6 @@ class SmartClientListServletMatchAnyH2Test extends AbstractH2Test {
 	@Test
 	void anInMemoryFilterOredWithAGroupFirstIsNotEverything() throws Exception {
 		InMemoryFilter filter = new InMemoryFilter();
-		@SuppressWarnings("unchecked")
 		ListModel<Bean> model = mock(ListModel.class);
 		when(model.getFilter()).thenReturn(filter);
 		when(model.newFilter()).thenAnswer(invocation -> new InMemoryFilter());
