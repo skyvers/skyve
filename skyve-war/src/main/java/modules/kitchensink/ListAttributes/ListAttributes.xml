@@ -92,6 +92,24 @@
 		<image name="image">
 			<displayName>Image</displayName>
 		</image>
+		<!-- Dates and times with converters other than the customer's defaults, so that a list grid's filters are
+			 typed as these columns show them (SAIL's listGridFilter on a Vue list grid) -->
+		<date name="monthFirstDate">
+			<displayName>Month First Date</displayName>
+			<converterName>MM_DD_YYYY</converterName>
+		</date>
+		<dateTime name="twelveHourDateTime">
+			<displayName>12 Hour Date Time</displayName>
+			<converterName>MM_DD_YYYY_HH_MI</converterName>
+		</dateTime>
+		<timestamp name="monthNameTimestamp">
+			<displayName>Month Name Timestamp</displayName>
+			<converterName>MMM_DD_YYYY_HH_MI_SS</converterName>
+		</timestamp>
+		<time name="twelveHourTime">
+			<displayName>12 Hour Time</displayName>
+			<converterName>HH_MI_SS</converterName>
+		</time>
 	</attributes>
 	<conditions>
 		<condition name="condition">

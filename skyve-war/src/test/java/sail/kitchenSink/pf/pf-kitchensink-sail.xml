@@ -168,6 +168,10 @@
 			<dataEnter binding="dateTime" value="01-Jan-2020 10:00" />
 			<dataEnter binding="time" value="10:00" />
 			<dataEnter binding="timestamp" value="01-Jan-2020 10:00:10" />
+			<dataEnter binding="monthFirstDate" value="05/06/2026" />
+			<dataEnter binding="twelveHourDateTime" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="monthNameTimestamp" value="May-06-2026 02:47:25 PM" />
+			<dataEnter binding="twelveHourTime" value="02:47:25 PM" />
 			<ok />
 			<listGridNew module="kitchensink" document="ListAttributes" />
 			<dataEnter binding="text" value="SAIL types {run} b" />
@@ -178,6 +182,10 @@
 			<dataEnter binding="dateTime" value="15-Jun-2021 12:30" />
 			<dataEnter binding="time" value="12:30" />
 			<dataEnter binding="timestamp" value="15-Jun-2021 12:30:30" />
+			<dataEnter binding="monthFirstDate" value="06/05/2026" />
+			<dataEnter binding="twelveHourDateTime" value="06/05/2026 09:15 AM" />
+			<dataEnter binding="monthNameTimestamp" value="Jun-05-2026 09:15:05 AM" />
+			<dataEnter binding="twelveHourTime" value="09:15:05 AM" />
 			<ok />
 			<listGridNew module="kitchensink" document="ListAttributes" />
 			<dataEnter binding="text" value="SAIL types {run} c" />
@@ -188,6 +196,10 @@
 			<dataEnter binding="dateTime" value="31-Dec-2022 18:45" />
 			<dataEnter binding="time" value="18:45" />
 			<dataEnter binding="timestamp" value="31-Dec-2022 18:45:50" />
+			<dataEnter binding="monthFirstDate" value="12/31/2026" />
+			<dataEnter binding="twelveHourDateTime" value="12/31/2026 11:59 PM" />
+			<dataEnter binding="monthNameTimestamp" value="Dec-31-2026 11:59:59 PM" />
+			<dataEnter binding="twelveHourTime" value="11:59:59 PM" />
 			<ok />
 		</method>
 	</interaction>
@@ -268,6 +280,38 @@
 			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="timestamp" />
+			<comment>Vue list grid: dates and times with other converters, typed as their cells show them (a month first date, a 12 hour date time, a timestamp with a month name, and a 12 hour time); a's 05/06/2026 is b's 06/05/2026 with the day and month swapped</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="06/05/2026" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="05/06/2026 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="06/05/2026 09:15 AM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="06/05/2026 09:15 AM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="Jun-05-2026 09:15:05 AM" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="Dec-31-2026 11:59:59 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourTime" value="11:59:59 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourTime" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="booleanFlag" value="true" operator="equals" />
 			<listGridClearFilter module="kitchensink" query="qListGridFixtureVueAttributes" />
 			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />

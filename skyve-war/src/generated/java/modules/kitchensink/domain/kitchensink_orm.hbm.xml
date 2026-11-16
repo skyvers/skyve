@@ -156,6 +156,10 @@
 		<property name="time" type="TimeOnly" />
 		<property name="timestamp" type="Timestamp" />
 		<property name="image" length="36" />
+		<property name="monthFirstDate" type="DateOnly" />
+		<property name="twelveHourDateTime" type="DateTime" />
+		<property name="monthNameTimestamp" type="Timestamp" />
+		<property name="twelveHourTime" type="TimeOnly" />
 		<filter name="kitchensinkListAttributesNoneFilter" condition="1=0"/>
 		<filter name="kitchensinkListAttributesCustomerFilter" condition="bizCustomer=:customerParam"/>
 		<filter name="kitchensinkListAttributesDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>

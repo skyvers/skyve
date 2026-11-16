@@ -121,6 +121,18 @@ public class ListAttributes extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String imagePropertyName = "image";
 
+	/** @hidden */
+	public static final String monthFirstDatePropertyName = "monthFirstDate";
+
+	/** @hidden */
+	public static final String twelveHourDateTimePropertyName = "twelveHourDateTime";
+
+	/** @hidden */
+	public static final String monthNameTimestampPropertyName = "monthNameTimestamp";
+
+	/** @hidden */
+	public static final String twelveHourTimePropertyName = "twelveHourTime";
+
 	/**
 	 * ConstantEnum
 	 **/
@@ -296,6 +308,26 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * Image
 	 **/
 	private String image;
+
+	/**
+	 * Month First Date
+	 **/
+	private DateOnly monthFirstDate;
+
+	/**
+	 * 12 Hour Date Time
+	 **/
+	private DateTime twelveHourDateTime;
+
+	/**
+	 * Month Name Timestamp
+	 **/
+	private Timestamp monthNameTimestamp;
+
+	/**
+	 * 12 Hour Time
+	 **/
+	private TimeOnly twelveHourTime;
 
 	@Override
 	@XmlTransient
@@ -720,6 +752,86 @@ public class ListAttributes extends AbstractPersistentBean {
 	public void setImage(String image) {
 		preset(imagePropertyName, image);
 		this.image = image;
+	}
+
+	/**
+	 * {@link #monthFirstDate} accessor.
+	 * @return	The value.
+	 **/
+	public DateOnly getMonthFirstDate() {
+		return monthFirstDate;
+	}
+
+	/**
+	 * {@link #monthFirstDate} mutator.
+	 * @param monthFirstDate	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "date")
+	@XmlJavaTypeAdapter(DateOnlyMapper.class)
+	public void setMonthFirstDate(DateOnly monthFirstDate) {
+		preset(monthFirstDatePropertyName, monthFirstDate);
+		this.monthFirstDate = monthFirstDate;
+	}
+
+	/**
+	 * {@link #twelveHourDateTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getTwelveHourDateTime() {
+		return twelveHourDateTime;
+	}
+
+	/**
+	 * {@link #twelveHourDateTime} mutator.
+	 * @param twelveHourDateTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setTwelveHourDateTime(DateTime twelveHourDateTime) {
+		preset(twelveHourDateTimePropertyName, twelveHourDateTime);
+		this.twelveHourDateTime = twelveHourDateTime;
+	}
+
+	/**
+	 * {@link #monthNameTimestamp} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getMonthNameTimestamp() {
+		return monthNameTimestamp;
+	}
+
+	/**
+	 * {@link #monthNameTimestamp} mutator.
+	 * @param monthNameTimestamp	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setMonthNameTimestamp(Timestamp monthNameTimestamp) {
+		preset(monthNameTimestampPropertyName, monthNameTimestamp);
+		this.monthNameTimestamp = monthNameTimestamp;
+	}
+
+	/**
+	 * {@link #twelveHourTime} accessor.
+	 * @return	The value.
+	 **/
+	public TimeOnly getTwelveHourTime() {
+		return twelveHourTime;
+	}
+
+	/**
+	 * {@link #twelveHourTime} mutator.
+	 * @param twelveHourTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "time")
+	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
+	public void setTwelveHourTime(TimeOnly twelveHourTime) {
+		preset(twelveHourTimePropertyName, twelveHourTime);
+		this.twelveHourTime = twelveHourTime;
 	}
 
 	/**

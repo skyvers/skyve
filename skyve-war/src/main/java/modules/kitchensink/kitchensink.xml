@@ -227,7 +227,7 @@
 			</columns>
 		</query>
 		<query name="qListGridFixtureVueAttributes" documentName="ListAttributes">
-			<description>List attributes listed by the List Grid Fixture's Vue list grid, for filters on each column type.</description>
+			<description>List attributes listed by the List Grid Fixture's Vue list grid, for filters on each column type, and on dates and times with other converters than the defaults.</description>
 			<columns>
 				<column binding="text" displayName="Text" sortOrder="ascending" />
 				<column binding="constantEnum" displayName="Constant Enum" />
@@ -237,6 +237,10 @@
 				<column binding="dateTime" displayName="Date Time" />
 				<column binding="time" displayName="Time" />
 				<column binding="timestamp" displayName="Timestamp" />
+				<column binding="monthFirstDate" displayName="Month First Date" />
+				<column binding="twelveHourDateTime" displayName="12 Hour Date Time" />
+				<column binding="monthNameTimestamp" displayName="Month Name Timestamp" />
+				<column binding="twelveHourTime" displayName="12 Hour Time" />
 			</columns>
 		</query>
 		<query name="qListGridFixtureFacesAttributes" documentName="ListAttributes">
