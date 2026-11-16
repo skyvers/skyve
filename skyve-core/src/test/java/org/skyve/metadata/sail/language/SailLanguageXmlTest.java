@@ -195,9 +195,10 @@ class SailLanguageXmlTest {
 
 	@Test
 	void aWorkflowWithoutTestStrategyAndASingleAutomationHaveNoDefault() {
-		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(LANGUAGE_GAPS);
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString("<automation xmlns=\"http://www.skyve.org/xml/sail\" uxui=\"desktop\" " +
+																		"userAgentType=\"desktop\"><interaction name=\"i\"><method>" +
+																		"<comment>c</comment></method></interaction></automation>");
 		Automation automation = workflow.getAutomations().get(0);
-		automation.setTestStrategy(null);
 		String unknownStrategy = WORKFLOW_WITH_DEFAULT.replace("testStrategy=\"Verify\"", "testStrategy=\"Maybe\"");
 		assertAll(() -> assertThat(workflow.getTestStrategy(), is(nullValue())),
 					() -> assertThat(workflow.getEffectiveTestStrategy(automation), is(nullValue())),

@@ -141,13 +141,16 @@ class SuiteTest {
 		SuiteMember restore = restore(suite);
 		Workflow workflow = new Workflow();
 		Automation automation = new Automation();
-		assertAll(() -> assertNull(suite.getEffectiveTestStrategy(setUp, workflow, automation)),
-					() -> assertNull(suite.getEffectiveTestStrategy(locked, workflow, automation)),
-					() -> assertNull(suite.getEffectiveTestStrategy(restore, workflow, automation)));
+		// with nothing stated, a locked member resolves to Assert, never to null or the suite's None
+		assertAll(() -> assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(setUp, workflow, automation)),
+					() -> assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(locked, workflow, automation)),
+					() -> assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(restore, workflow, automation)));
+		suite.setTestStrategy(null);
+		assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(setUp, workflow, automation));
 		workflow.setTestStrategy(TestStrategy.Verify);
 		assertEquals(TestStrategy.Verify, suite.getEffectiveTestStrategy(setUp, workflow, automation));
-		automation.setTestStrategy(TestStrategy.Assert);
-		assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(locked, workflow, automation));
+		automation.setTestStrategy(TestStrategy.None);
+		assertEquals(TestStrategy.None, suite.getEffectiveTestStrategy(locked, workflow, automation));
 	}
 
 	@Test
@@ -238,6 +241,7 @@ class SuiteTest {
 	void aFileThatIsNotANormalisedRelativePathIsRejected() {
 		String normalised = "has an empty, . or .. segment; it must be a normalised path within the suite's folder";
 		String absolute = "is absolute; it must be relative to the suite's folder";
+		String whiteSpace = "has white space; requires separates files with spaces";
 		assertAll(() -> assertFileRejected("/sail/01-c.xml", absolute),
 					() -> assertFileRejected("C:/sail/01-c.xml", absolute),
 					() -> assertFileRejected("c:01-c.xml", absolute),
@@ -248,7 +252,9 @@ class SuiteTest {
 					() -> assertFileRejected("./01-c.xml", normalised),
 					() -> assertFileRejected("pf/./01-c.xml", normalised),
 					() -> assertFileRejected("../01-c.xml", normalised),
-					() -> assertFileRejected("pf/../sc/01-c.xml", normalised));
+					() -> assertFileRejected("pf/../sc/01-c.xml", normalised),
+					() -> assertFileRejected("pf/01 session.xml", whiteSpace),
+					() -> assertFileRejected("pf/01\tsession.xml", whiteSpace));
 	}
 
 	@Test
@@ -344,15 +350,18 @@ class SuiteTest {
 	}
 
 	@Test
-	void viewRolesWithAnEmptyOrNullRoleAreRejected() {
+	void viewRolesWithABlankEmptyOrNullRoleAreRejected() {
 		Suite empty = suite("", "01-c.xml", null);
 		empty.getViewRoles().add(viewRoles("jane", "admin.BasicUser", ""));
+		Suite blank = suite("", "01-c.xml", null);
+		blank.getViewRoles().add(viewRoles("kim", " \t"));
 		Suite nullRole = suite("", "01-c.xml", null);
 		ViewRoles roles = viewRoles("tim");
 		roles.getRoles().add(null);
 		nullRole.getViewRoles().add(roles);
-		assertAll(() -> assertMessage("SAIL suite s.xml: <viewRoles> for user jane has an empty <role>", empty),
-					() -> assertMessage("SAIL suite s.xml: <viewRoles> for user tim has an empty <role>", nullRole));
+		assertAll(() -> assertMessage("SAIL suite s.xml: <viewRoles> for user jane has a blank <role>", empty),
+					() -> assertMessage("SAIL suite s.xml: <viewRoles> for user kim has a blank <role>", blank),
+					() -> assertMessage("SAIL suite s.xml: <viewRoles> for user tim has a blank <role>", nullRole));
 	}
 
 	/**
@@ -402,7 +411,10 @@ class SuiteTest {
 	}
 
 	private static void assertFileRejected(String file, String problem) {
-		assertMessage("SAIL suite s.xml: <member> file " + file + " " + problem, suite("", file, null));
+		// not suite(...), which splits its files at spaces
+		Suite suite = new Suite();
+		suite.getMembers().add(member(new OrdinarySuiteMember(), file));
+		assertMessage("SAIL suite s.xml: <member> file " + file + " " + problem, suite);
 	}
 
 	private static void assertMessage(String expected, Suite suite) {

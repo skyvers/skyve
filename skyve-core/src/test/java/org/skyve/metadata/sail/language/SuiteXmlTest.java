@@ -160,6 +160,8 @@ class SuiteXmlTest {
 		assertAll(() -> assertInvalid("a <member> has no file", HEAD + "<member file=\" \"/>" + TAIL),
 					() -> assertInvalid("<member> file pf/../01-session.xml has an empty, . or .. segment; it must be a normalised path " +
 											"within the suite's folder", HEAD + "<member file=\"pf/../01-session.xml\"/>" + TAIL),
+					() -> assertInvalid("<member> file pf/01 session.xml has white space; requires separates files with spaces",
+											HEAD + "<member file=\"pf/01 session.xml\"/>" + TAIL),
 					() -> assertInvalid("<setUp> a.xml requires itself", HEAD + "<setUp file=\"a.xml\" requires=\"a.xml\"/><member file=\"b.xml\"/>" + TAIL),
 					() -> assertInvalid("<member> sc/b.xml requires pf/a.xml more than once",
 											HEAD + "<member file=\"pf/a.xml\"/><member file=\"sc/b.xml\" requires=\"pf/a.xml pf/a.xml\"/>" + TAIL),
@@ -171,7 +173,7 @@ class SuiteXmlTest {
 					() -> assertInvalid("<viewRoles> for user u is given more than once",
 											HEAD + "<viewRoles user=\"u\"><role>r</role></viewRoles><viewRoles user=\"u\"><role>s</role></viewRoles>" +
 												"<member file=\"b.xml\"/>" + TAIL),
-					() -> assertInvalid("<viewRoles> for user u has an empty <role>",
+					() -> assertInvalid("<viewRoles> for user u has a blank <role>",
 											HEAD + "<viewRoles user=\"u\"><role> </role></viewRoles><member file=\"b.xml\"/>" + TAIL));
 	}
 

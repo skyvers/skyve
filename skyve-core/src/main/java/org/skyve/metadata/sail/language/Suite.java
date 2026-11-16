@@ -83,6 +83,8 @@ public class Suite {
 
 	/** A drive letter, as in {@code C:}, which starts an absolute Windows path. */
 	private static final Pattern ABSOLUTE_WINDOWS_PATH = Pattern.compile("[A-Za-z]:");
+	/** White space, which would split a file in a {@code requires} list. */
+	private static final Pattern WHITE_SPACE = Pattern.compile("\\s");
 
 	private TestStrategy testStrategy;
 	private Evidence evidence;
@@ -243,9 +245,9 @@ public class Suite {
 	 * them, every earlier set-up member for a set-up member, or every set-up member for an ordinary member. A runner
 	 * skips the member if any of them failed or was skipped.
 	 *
-	 * <p>Precondition: the suite is valid ({@link #validate(String)}) and holds the member.
+	 * <p>Precondition: the suite is valid ({@link #validate(String)}).
 	 *
-	 * @param member	a member of this suite
+	 * @param member	a member of this suite; for a member not in it, only the members its {@code requires} names
 	 * @return the required members in run order, each once (a new list; empty if there are none)
 	 */
 	public @Nonnull List<SuiteMember> requirementsOf(@Nonnull SuiteMember member) {
@@ -268,12 +270,15 @@ public class Suite {
 
 	/**
 	 * Returns the test strategy that an automation of one of this suite's members runs with before any run override:
-	 * the automation's own, else its workflow's default, else, for an unlocked member only, this suite's default.
+	 * the automation's own, else its workflow's default; then, for an unlocked member, this suite's default, or for a
+	 * locked member, {@link TestStrategy#Assert}. A locked member therefore never resolves to {@code null}, so a run's
+	 * override cannot reach it as a missing default.
 	 *
 	 * @param member	the member whose workflow it is
 	 * @param workflow	the member's workflow
 	 * @param automation	one of the workflow's automations
-	 * @return the strategy, or {@code null} if none of them applies (the runner's default applies)
+	 * @return the strategy; {@code null} only for an unlocked member when none of them states one (the run's
+	 * 			override or the runner's default applies)
 	 * @see Workflow#getEffectiveTestStrategy(Automation)
 	 * @see #isTestStrategyLocked(SuiteMember)
 	 */
@@ -281,8 +286,8 @@ public class Suite {
 															@Nonnull Workflow workflow,
 															@Nonnull Automation automation) {
 		TestStrategy result = workflow.getEffectiveTestStrategy(automation);
-		if ((result == null) && (! isTestStrategyLocked(member))) {
-			result = testStrategy;
+		if (result == null) {
+			result = isTestStrategyLocked(member) ? TestStrategy.Assert : testStrategy;
 		}
 		return result;
 	}
@@ -291,7 +296,7 @@ public class Suite {
 	 * Checks what the schema cannot: that there is at least one ordinary member; that every member has a normalised
 	 * relative file, and no file is listed twice; that every {@code requires} names, once, another member of the suite
 	 * that runs before it; that the restore requires only set-up members; and that each view roles entry has a user,
-	 * given once, and no empty role. Running before is what rules out a cycle of requirements.
+	 * given once, and no blank role. Running before is what rules out a cycle of requirements.
 	 *
 	 * <p>Complexity: O(m + r) time, where m is the number of members and r the number of requirements.
 	 *
@@ -313,13 +318,15 @@ public class Suite {
 	}
 
 	/**
-	 * Throws if a view roles entry has no user, repeats a user, or has no role or an empty one.
+	 * Throws if a view roles entry has no user, repeats a user, or has no role or a blank one.
 	 */
 	private void validateViewRoles(@Nonnull String prefix) {
 		Set<String> users = new HashSet<>();
 		for (ViewRoles entry : viewRoles) {
 			String user = entry.getUser();
-			if (unset(user)) {
+			@SuppressWarnings("null") // getUser() is @Nonnull for a valid suite; its setter stores a blank user as null
+			boolean noUser = (user == null);
+			if (noUser) {
 				throw new MetaDataException(prefix + "a <viewRoles> has no user");
 			}
 			if (! users.add(user)) {
@@ -330,8 +337,8 @@ public class Suite {
 				throw new MetaDataException(prefix + "<viewRoles> for user " + user + " has no <role>");
 			}
 			for (String role : roles) {
-				if ((role == null) || role.isEmpty()) {
-					throw new MetaDataException(prefix + "<viewRoles> for user " + user + " has an empty <role>");
+				if ((role == null) || role.isBlank()) {
+					throw new MetaDataException(prefix + "<viewRoles> for user " + user + " has a blank <role>");
 				}
 			}
 		}
@@ -345,7 +352,9 @@ public class Suite {
 		Map<String, Integer> result = new HashMap<>();
 		for (int i = 0, l = all.size(); i < l; i++) {
 			String file = all.get(i).getFile();
-			if (unset(file)) {
+			@SuppressWarnings("null") // getFile() is @Nonnull for a valid suite; its setter stores a blank file as null
+			boolean noFile = (file == null);
+			if (noFile) {
 				throw new MetaDataException(prefix + "a <" + element(i) + "> has no file");
 			}
 			String problem = pathProblem(file);
@@ -365,6 +374,9 @@ public class Suite {
 	 * @return the problem, for a message, or {@code null} if it is a normalised relative path
 	 */
 	private static @Nullable String pathProblem(@Nonnull String file) {
+		if (WHITE_SPACE.matcher(file).find()) {
+			return "has white space; requires separates files with spaces";
+		}
 		if (file.indexOf('\\') >= 0) {
 			return "has a \\; separate folders with /";
 		}
@@ -428,15 +440,6 @@ public class Suite {
 	 */
 	private @Nonnull String describe(int position, @Nonnull SuiteMember member) {
 		return "<" + element(position) + "> " + member.getFile();
-	}
-
-	/**
-	 * Indicates if a file or user is unset: its setter stores a blank value as null. A helper rather than
-	 * {@code == null} because the getters are {@code @Nonnull} for callers of a valid suite, so Eclipse would call an
-	 * inline check dead code.
-	 */
-	private static boolean unset(@Nullable String value) {
-		return value == null;
 	}
 
 	/**
