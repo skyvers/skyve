@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	SmartClient SAIL conformance for converters: date times (kitchensink.ConvertersFixture, an attribute per converter).
+	Records a, b and c are entered in each field and in an inline grid row, typed as a user types them, then checked
+	with testValue after the save and once reopened from the list. Then each column of the list view's grid is
+	filtered with values written as the cells show them, and the rows each filter leaves are checked. The values catch
+	day and month swapped, 12 hour times at PM, noon and midnight, month names, seconds, negatives, separators, $ and
+	percentages, and rounding.
+	Run by SmartClientConvertersSailIT.
+-->
+<automation uxui="desktop"
+			userAgentType="desktop"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<switchMode />
+	</before>
+	<interaction name="Date times: record a, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersDateTimes" />
+			<listGridNew module="kitchensink" query="qConvertersDateTimes" />
+			<dataEnter binding="name" value="SAIL dateTimes {run} a" />
+			<dataEnter binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<dataEnter binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<comment>An inline grid row: its cells take the same values</comment>
+			<dataGridNew binding="dateTimeRows" />
+			<dataEnter binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<dataEnter binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<save />
+			<testSuccess />
+			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<dataGridEdit binding="dateTimeRows" row="0" />
+			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" />
+			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<dataGridEdit binding="dateTimeRows" row="0" />
+			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Date times: record b, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersDateTimes" />
+			<listGridNew module="kitchensink" query="qConvertersDateTimes" />
+			<dataEnter binding="name" value="SAIL dateTimes {run} b" />
+			<dataEnter binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<dataEnter binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<comment>An inline grid row: its cells take the same values</comment>
+			<dataGridNew binding="dateTimeRows" />
+			<dataEnter binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<dataEnter binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<save />
+			<testSuccess />
+			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<dataGridEdit binding="dateTimeRows" row="0" />
+			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" />
+			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<dataGridEdit binding="dateTimeRows" row="0" />
+			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Date times: record c, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersDateTimes" />
+			<listGridNew module="kitchensink" query="qConvertersDateTimes" />
+			<dataEnter binding="name" value="SAIL dateTimes {run} c" />
+			<dataEnter binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<dataEnter binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<comment>An inline grid row: its cells take the same values</comment>
+			<dataGridNew binding="dateTimeRows" />
+			<dataEnter binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<dataEnter binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<save />
+			<testSuccess />
+			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<dataGridEdit binding="dateTimeRows" row="0" />
+			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" />
+			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<dataGridEdit binding="dateTimeRows" row="0" />
+			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Date times: filter the list grid by each column, as its cells show the values">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersDateTimes" />
+			<listGridClearFilter module="kitchensink" query="qConvertersDateTimes" />
+			<comment>Only this run's records</comment>
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="name" value="{run}" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="3" maxRows="3" />
+			<comment>Each record's cells show its values as the converters write them</comment>
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05/06/2026 02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06/05/2026 12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="25/12/2026 12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05/06/2026 14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06/05/2026 12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="25/12/2026 00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05-Jun-2026 02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06-May-2026 12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="25-Dec-2026 12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05-Jun-2026 14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06-May-2026 12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="25-Dec-2026 00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06/05/2026 02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05/06/2026 12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="12/25/2026 12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06/05/2026 14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05/06/2026 12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="12/25/2026 00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="Jun-05-2026 02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="May-06-2026 12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="Dec-25-2026 12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="Jun-05-2026 14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="May-06-2026 12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="Dec-25-2026 00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/06/05 02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/05/06 12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/12/25 12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/06/05 14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/05/06 12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/12/25 00:00" minRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05/06/2026 02:47 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" operator="notEquals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHh24Mi" value="05/06/2026 14:47" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05/06/2026 14:47" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHh24Mi" value="05/06/2026 14:47" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHh24Mi" value="05/06/2026 14:47" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmYyyyHh24Mi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05-Jun-2026 02:47 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="05-Jun-2026 14:47" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="ddMmmYyyyHh24Mi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06/05/2026 02:47 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHh24Mi" value="06/05/2026 14:47" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="06/05/2026 14:47" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHh24Mi" value="06/05/2026 14:47" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHh24Mi" value="06/05/2026 14:47" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmDdYyyyHh24Mi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="Jun-05-2026 02:47 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="Jun-05-2026 14:47" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="mmmDdYyyyHh24Mi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/06/05 02:47 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHh24Mi" value="2026/06/05 14:47" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="2026/06/05 14:47" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHh24Mi" value="2026/06/05 14:47" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHh24Mi" value="2026/06/05 14:47" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersDateTimes" column="yyyyMmDdHh24Mi" />
+			<listGridClearFilter module="kitchensink" query="qConvertersDateTimes" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

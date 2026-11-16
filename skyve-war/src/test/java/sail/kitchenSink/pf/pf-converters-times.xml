@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces SAIL conformance for converters: times (kitchensink.ConvertersFixture, an attribute per converter).
+	Records a, b and c are entered in each field and in an inline grid row, typed as a user types them, then checked
+	with testValue after the save and once reopened from the list. Then each column is filtered in the Vue list grid
+	(the list view) and in the PrimeFaces data table (ConvertersDataTables), with values written as the cells show
+	them, and the rows each filter leaves are checked. The values catch day and month swapped, 12 hour times at PM,
+	noon and midnight, month names, seconds, negatives, separators, $ and percentages, and rounding.
+	Run by PrimeFacesConvertersSailIT.
+-->
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+	</before>
+	<interaction name="Times: record a, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersTimes" />
+			<listGridNew module="kitchensink" query="qConvertersTimes" />
+			<dataEnter binding="name" value="SAIL times {run} a" />
+			<dataEnter binding="hhMi" value="02:47 PM" />
+			<dataEnter binding="hh24Mi" value="14:47" />
+			<dataEnter binding="hhMiSs" value="02:47:25 PM" />
+			<dataEnter binding="hh24MiSs" value="14:47:25" />
+			<comment>An inline grid row: its cells take the same values</comment>
+			<dataGridNew binding="timeRows" />
+			<dataEnter binding="hhMi" value="02:47 PM" />
+			<dataEnter binding="hh24Mi" value="14:47" />
+			<dataEnter binding="hhMiSs" value="02:47:25 PM" />
+			<dataEnter binding="hh24MiSs" value="14:47:25" />
+			<save />
+			<testSuccess />
+			<testValue binding="hhMi" value="02:47 PM" />
+			<testValue binding="hh24Mi" value="14:47" />
+			<testValue binding="hhMiSs" value="02:47:25 PM" />
+			<testValue binding="hh24MiSs" value="14:47:25" />
+			<dataGridEdit binding="timeRows" row="0" />
+			<testValue binding="hhMi" value="02:47 PM" />
+			<testValue binding="hh24Mi" value="14:47" />
+			<testValue binding="hhMiSs" value="02:47:25 PM" />
+			<testValue binding="hh24MiSs" value="14:47:25" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} a" />
+			<testValue binding="hhMi" value="02:47 PM" />
+			<testValue binding="hh24Mi" value="14:47" />
+			<testValue binding="hhMiSs" value="02:47:25 PM" />
+			<testValue binding="hh24MiSs" value="14:47:25" />
+			<dataGridEdit binding="timeRows" row="0" />
+			<testValue binding="hhMi" value="02:47 PM" />
+			<testValue binding="hh24Mi" value="14:47" />
+			<testValue binding="hhMiSs" value="02:47:25 PM" />
+			<testValue binding="hh24MiSs" value="14:47:25" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Times: record b, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersTimes" />
+			<listGridNew module="kitchensink" query="qConvertersTimes" />
+			<dataEnter binding="name" value="SAIL times {run} b" />
+			<dataEnter binding="hhMi" value="12:00 PM" />
+			<dataEnter binding="hh24Mi" value="12:00" />
+			<dataEnter binding="hhMiSs" value="12:00:00 PM" />
+			<dataEnter binding="hh24MiSs" value="12:00:00" />
+			<comment>An inline grid row: its cells take the same values</comment>
+			<dataGridNew binding="timeRows" />
+			<dataEnter binding="hhMi" value="12:00 PM" />
+			<dataEnter binding="hh24Mi" value="12:00" />
+			<dataEnter binding="hhMiSs" value="12:00:00 PM" />
+			<dataEnter binding="hh24MiSs" value="12:00:00" />
+			<save />
+			<testSuccess />
+			<testValue binding="hhMi" value="12:00 PM" />
+			<testValue binding="hh24Mi" value="12:00" />
+			<testValue binding="hhMiSs" value="12:00:00 PM" />
+			<testValue binding="hh24MiSs" value="12:00:00" />
+			<dataGridEdit binding="timeRows" row="0" />
+			<testValue binding="hhMi" value="12:00 PM" />
+			<testValue binding="hh24Mi" value="12:00" />
+			<testValue binding="hhMiSs" value="12:00:00 PM" />
+			<testValue binding="hh24MiSs" value="12:00:00" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" />
+			<testValue binding="hhMi" value="12:00 PM" />
+			<testValue binding="hh24Mi" value="12:00" />
+			<testValue binding="hhMiSs" value="12:00:00 PM" />
+			<testValue binding="hh24MiSs" value="12:00:00" />
+			<dataGridEdit binding="timeRows" row="0" />
+			<testValue binding="hhMi" value="12:00 PM" />
+			<testValue binding="hh24Mi" value="12:00" />
+			<testValue binding="hhMiSs" value="12:00:00 PM" />
+			<testValue binding="hh24MiSs" value="12:00:00" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Times: record c, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersTimes" />
+			<listGridNew module="kitchensink" query="qConvertersTimes" />
+			<dataEnter binding="name" value="SAIL times {run} c" />
+			<dataEnter binding="hhMi" value="12:00 AM" />
+			<dataEnter binding="hh24Mi" value="00:00" />
+			<dataEnter binding="hhMiSs" value="12:00:59 AM" />
+			<dataEnter binding="hh24MiSs" value="00:00:59" />
+			<comment>An inline grid row: its cells take the same values</comment>
+			<dataGridNew binding="timeRows" />
+			<dataEnter binding="hhMi" value="12:00 AM" />
+			<dataEnter binding="hh24Mi" value="00:00" />
+			<dataEnter binding="hhMiSs" value="12:00:59 AM" />
+			<dataEnter binding="hh24MiSs" value="00:00:59" />
+			<save />
+			<testSuccess />
+			<testValue binding="hhMi" value="12:00 AM" />
+			<testValue binding="hh24Mi" value="00:00" />
+			<testValue binding="hhMiSs" value="12:00:59 AM" />
+			<testValue binding="hh24MiSs" value="00:00:59" />
+			<dataGridEdit binding="timeRows" row="0" />
+			<testValue binding="hhMi" value="12:00 AM" />
+			<testValue binding="hh24Mi" value="00:00" />
+			<testValue binding="hhMiSs" value="12:00:59 AM" />
+			<testValue binding="hh24MiSs" value="00:00:59" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} c" />
+			<testValue binding="hhMi" value="12:00 AM" />
+			<testValue binding="hh24Mi" value="00:00" />
+			<testValue binding="hhMiSs" value="12:00:59 AM" />
+			<testValue binding="hh24MiSs" value="00:00:59" />
+			<dataGridEdit binding="timeRows" row="0" />
+			<testValue binding="hhMi" value="12:00 AM" />
+			<testValue binding="hh24Mi" value="00:00" />
+			<testValue binding="hhMiSs" value="12:00:59 AM" />
+			<testValue binding="hh24MiSs" value="00:00:59" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Times: filter the Vue list grid by each column, as its cells show the values">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersTimes" />
+			<listGridClearFilter module="kitchensink" query="qConvertersTimes" />
+			<comment>Only this run's records</comment>
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="name" value="{run}" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="3" maxRows="3" />
+			<comment>Each record's cells show its values as the converters write them</comment>
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="02:47:25 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:59 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="14:47:25" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="00:00:59" minRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMi" value="12:00 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24Mi" value="12:00" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24Mi" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMiSs" value="12:00:00 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMiSs" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24MiSs" value="12:00:00" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24MiSs" />
+			<listGridClearFilter module="kitchensink" query="qConvertersTimes" />
+		</method>
+	</interaction>
+	<interaction name="Times: filter the PrimeFaces data table by each column, as its cells show the values">
+		<method>
+			<navigateEdit module="kitchensink" document="ConvertersDataTables" />
+			<listGridClearFilter module="kitchensink" query="qConvertersTimes" />
+			<comment>Only this run's records</comment>
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="name" value="{run}" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="3" maxRows="3" />
+			<comment>Each record's cells show its values as the converters write them</comment>
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="02:47 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="14:47" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="02:47:25 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00 PM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:59 AM" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="14:47:25" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="00:00:59" minRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMi" value="12:00 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMi" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24Mi" value="12:00" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24Mi" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMiSs" value="12:00:00 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00 PM" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hhMiSs" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24MiSs" value="12:00:00" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersTimes" rowContaining="12:00:00" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersTimes" column="hh24MiSs" />
+			<listGridClearFilter module="kitchensink" query="qConvertersTimes" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>
