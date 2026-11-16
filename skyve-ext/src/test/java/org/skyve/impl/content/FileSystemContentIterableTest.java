@@ -89,7 +89,9 @@ class FileSystemContentIterableTest {
 
 		SearchResult hit = all().get(0);
 		try (FileSystemContentManager manager = new FileSystemContentManager()) {
-			AttachmentContent attachment = manager.getAttachment(hit.getContentId());
+			String contentId = hit.getContentId();
+			assertNotNull(contentId);
+			AttachmentContent attachment = manager.getAttachment(contentId);
 
 			assertNotNull(attachment);
 			assertEquals(attachment.getBizId(), hit.getBizId());

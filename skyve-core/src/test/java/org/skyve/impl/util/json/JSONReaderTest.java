@@ -776,6 +776,7 @@ class JSONReaderTest {
 				"[{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"name\"},\"next\"]");
 
 		assertEquals(List.of(Map.of(), "next"), dynamic);
+		assertNotNull(object);
 		assertEquals(2, object.size());
 		assertNull(((TestBean) object.get(0)).getName());
 		assertEquals("next", object.get(1));

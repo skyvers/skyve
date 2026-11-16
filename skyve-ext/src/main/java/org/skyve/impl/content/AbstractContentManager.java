@@ -392,7 +392,12 @@ public abstract class AbstractContentManager implements ContentManager {
 	 */
 	@SuppressWarnings("unchecked")
 	static @Nonnull Map<String, Object> readContentMeta(@Nonnull File contentFolder) throws Exception {
-		return (Map<String, Object>) JSON.unmarshall(FileUtil.string(new File(contentFolder, META_JSON)));
+		Object meta = JSON.unmarshall(FileUtil.string(new File(contentFolder, META_JSON)));
+		// meta.json is data on disk, so it can hold anything - "null" or an array is not a content's properties
+		if (meta instanceof Map<?, ?>) {
+			return (Map<String, Object>) meta;
+		}
+		throw new IllegalStateException(META_JSON + " in " + contentFolder + " is not a JSON object");
 	}
 
 	/**

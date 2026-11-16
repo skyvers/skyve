@@ -107,7 +107,7 @@ public class FileSystemContentIterable implements ContentIterable {
 		 */
 		@Override
 		@SuppressWarnings("java:S2272") // NoSuchElement exception not required as this should be in a for loop
-		public SearchResult next() {
+		public @Nullable SearchResult next() {
 			if (! hasNext()) {
 				return null;
 			}
