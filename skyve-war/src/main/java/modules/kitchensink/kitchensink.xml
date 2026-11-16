@@ -30,6 +30,9 @@
 		<document ref="OrderedGridFixture" />
 		<document ref="OrderedGridFixtureRow" />
 		<document ref="OrderedGridFixtureLine" />
+		<document ref="ConvertersFixture" defaultQueryName="qConvertersFixtures" />
+		<document ref="ConvertersFixtureRow" />
+		<document ref="ConvertersDataTables" />
 	</documents>
 	<roles>
 		<role name="dev">
@@ -130,6 +133,9 @@
 				<document name="OrderedGridFixture" permission="CRUDD" />
 				<document name="OrderedGridFixtureRow" permission="CRUDD" />
 				<document name="OrderedGridFixtureLine" permission="CRUDD" />
+				<document name="ConvertersFixture" permission="CRUDD" />
+				<document name="ConvertersFixtureRow" permission="CRUDD" />
+				<document name="ConvertersDataTables" permission="CRUDD" />
 			</privileges>
 		</role>
 	</roles>
@@ -180,6 +186,12 @@
 		<list name="Ordered Grid Fixtures" document="OrderedGridFixture">
 			<role name="dev" />
 		</list>
+		<list name="Converters Fixtures" document="ConvertersFixture">
+			<role name="dev" />
+		</list>
+		<edit name="Converters Data Tables" document="ConvertersDataTables">
+			<role name="dev" />
+		</edit>
 		<!-- A tree and a calendar menu item, for SAIL's navigateTree and navigateCalendar (SmartClient only: PrimeFaces has
 			 no tree or calendar page) -->
 		<tree name="Condition Node Tree" query="qConditionsFixtureNodes">
@@ -267,6 +279,115 @@
 			<description>Nodes listed by the tree grids of the Kitchen Sink conditions fixture view.</description>
 			<columns>
 				<column binding="text" displayName="Text" />
+			</columns>
+		</query>
+		<query name="qConvertersFixtures" documentName="ConvertersFixture">
+			<description>Converters fixtures, with a few of their dates, times and numbers on other converters than the defaults: a month name, 12 hour times, seconds, dollars and percentages.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="mmmDdYyyy" />
+				<column binding="mmDdYyyyHhMi" />
+				<column binding="ddMmmYyyyHhMiSs" />
+				<column binding="hhMi" />
+				<column binding="decimal2DollarsAndCents" />
+				<column binding="decimal5TwoDecimalPlacesPercentage" />
+				<column binding="simplePercentage" />
+			</columns>
+		</query>
+		<query name="qConvertersDates" documentName="ConvertersFixture">
+			<description>Converters fixtures: dates, a column for each converter.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="ddMmYyyy" />
+				<column binding="ddMmmYyyy" />
+				<column binding="mmDdYyyy" />
+				<column binding="mmmDdYyyy" />
+				<column binding="yyyyMmDd" />
+			</columns>
+		</query>
+		<query name="qConvertersDateTimes" documentName="ConvertersFixture">
+			<description>Converters fixtures: date times, a column for each converter.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="ddMmYyyyHhMi" />
+				<column binding="ddMmYyyyHh24Mi" />
+				<column binding="ddMmmYyyyHhMi" />
+				<column binding="ddMmmYyyyHh24Mi" />
+				<column binding="mmDdYyyyHhMi" />
+				<column binding="mmDdYyyyHh24Mi" />
+				<column binding="mmmDdYyyyHhMi" />
+				<column binding="mmmDdYyyyHh24Mi" />
+				<column binding="yyyyMmDdHhMi" />
+				<column binding="yyyyMmDdHh24Mi" />
+			</columns>
+		</query>
+		<query name="qConvertersTimestamps" documentName="ConvertersFixture">
+			<description>Converters fixtures: timestamps, a column for each converter.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="ddMmYyyyHhMiSs" />
+				<column binding="ddMmYyyyHh24MiSs" />
+				<column binding="ddMmmYyyyHhMiSs" />
+				<column binding="ddMmmYyyyHh24MiSs" />
+				<column binding="mmDdYyyyHhMiSs" />
+				<column binding="mmDdYyyyHh24MiSs" />
+				<column binding="mmmDdYyyyHhMiSs" />
+				<column binding="mmmDdYyyyHh24MiSs" />
+				<column binding="yyyyMmDdHhMiSs" />
+				<column binding="yyyyMmDdHh24MiSs" />
+			</columns>
+		</query>
+		<query name="qConvertersDateOnly" documentName="ConvertersFixture">
+			<description>Converters fixtures: date times and timestamps shown as dates, a column for each converter.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="ddMmYyyyDateTime" />
+				<column binding="ddMmmYyyyDateTime" />
+				<column binding="mmDdYyyyDateTime" />
+				<column binding="mmmDdYyyyDateTime" />
+				<column binding="yyyyMmDdDateTime" />
+				<column binding="ddMmYyyyTimestamp" />
+				<column binding="ddMmmYyyyTimestamp" />
+				<column binding="mmDdYyyyTimestamp" />
+				<column binding="mmmDdYyyyTimestamp" />
+				<column binding="yyyyMmDdTimestamp" />
+			</columns>
+		</query>
+		<query name="qConvertersTimes" documentName="ConvertersFixture">
+			<description>Converters fixtures: times, a column for each converter.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="hhMi" />
+				<column binding="hh24Mi" />
+				<column binding="hhMiSs" />
+				<column binding="hh24MiSs" />
+			</columns>
+		</query>
+		<query name="qConvertersNumbers" documentName="ConvertersFixture">
+			<description>Converters fixtures: numbers, a column for each converter.</description>
+			<columns>
+				<column binding="name" sortOrder="ascending" />
+				<column binding="decimal2DollarsAndCents" />
+				<column binding="decimal2DollarsAndCentsAbsolute" />
+				<column binding="decimal2Integer" />
+				<column binding="decimal2IntegerPercentage" />
+				<column binding="decimal2OneDecimalPlace" />
+				<column binding="decimal5Integer" />
+				<column binding="decimal5IntegerPercentage" />
+				<column binding="decimal5DollarsAndCents" />
+				<column binding="decimal5TimeDuration" />
+				<column binding="decimal5OneDecimalPlace" />
+				<column binding="decimal5TwoDecimalPlaces" />
+				<column binding="decimal5TwoDecimalPlacesPercentage" />
+				<column binding="decimal10Integer" />
+				<column binding="decimal10IntegerPercentage" />
+				<column binding="decimal10DollarsAndCents" />
+				<column binding="decimal10OneDecimalPlace" />
+				<column binding="decimal10TwoDecimalPlaces" />
+				<column binding="decimal10TwoDecimalPlacesPercentage" />
+				<column binding="simplePercentage" />
+				<column binding="integerSeparator" />
+				<column binding="longIntegerSeparator" />
 			</columns>
 		</query>
 	</queries>

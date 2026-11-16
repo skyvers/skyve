@@ -1,0 +1,416 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Converters Fixture"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:c="http://www.skyve.org/xml/common"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="name" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Dates">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="ddMmYyyy" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyy" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyy" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyy" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDd" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Date times">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="ddMmYyyyHhMi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmYyyyHh24Mi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyyHhMi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyyHh24Mi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyyHhMi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyyHh24Mi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyyHhMi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyyHh24Mi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDdHhMi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDdHh24Mi" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Timestamps">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="ddMmYyyyHhMiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmYyyyHh24MiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyyHhMiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyyHh24MiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyyHhMiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyyHh24MiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyyHhMiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyyHh24MiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDdHhMiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDdHh24MiSs" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Date times and timestamps shown as dates">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="ddMmYyyyDateTime" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyyDateTime" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyyDateTime" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyyDateTime" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDdDateTime" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmYyyyTimestamp" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="ddMmmYyyyTimestamp" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmDdYyyyTimestamp" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="mmmDdYyyyTimestamp" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="yyyyMmDdTimestamp" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Times">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="hhMi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="hh24Mi" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="hhMiSs" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="hh24MiSs" />
+			</item>
+		</row>
+	</form>
+	<form border="true" borderTitle="Numbers">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item>
+				<default binding="decimal2DollarsAndCents" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal2DollarsAndCentsAbsolute" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal2Integer" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal2IntegerPercentage" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal2OneDecimalPlace" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5Integer" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5IntegerPercentage" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5DollarsAndCents" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5TimeDuration" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5OneDecimalPlace" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5TwoDecimalPlaces" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal5TwoDecimalPlacesPercentage" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal10Integer" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal10IntegerPercentage" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal10DollarsAndCents" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal10OneDecimalPlace" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal10TwoDecimalPlaces" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="decimal10TwoDecimalPlacesPercentage" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="simplePercentage" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="integerSeparator" />
+			</item>
+		</row>
+		<row>
+			<item>
+				<default binding="longIntegerSeparator" />
+			</item>
+		</row>
+	</form>
+	<dataGrid binding="dateRows" inline="true" title="Dates">
+		<boundColumn binding="ddMmYyyy" />
+		<boundColumn binding="ddMmmYyyy" />
+		<boundColumn binding="mmDdYyyy" />
+		<boundColumn binding="mmmDdYyyy" />
+		<boundColumn binding="yyyyMmDd" />
+	</dataGrid>
+	<dataGrid binding="dateTimeRows" inline="true" title="Date times">
+		<boundColumn binding="ddMmYyyyHhMi" />
+		<boundColumn binding="ddMmYyyyHh24Mi" />
+		<boundColumn binding="ddMmmYyyyHhMi" />
+		<boundColumn binding="ddMmmYyyyHh24Mi" />
+		<boundColumn binding="mmDdYyyyHhMi" />
+		<boundColumn binding="mmDdYyyyHh24Mi" />
+		<boundColumn binding="mmmDdYyyyHhMi" />
+		<boundColumn binding="mmmDdYyyyHh24Mi" />
+		<boundColumn binding="yyyyMmDdHhMi" />
+		<boundColumn binding="yyyyMmDdHh24Mi" />
+	</dataGrid>
+	<dataGrid binding="timestampRows" inline="true" title="Timestamps">
+		<boundColumn binding="ddMmYyyyHhMiSs" />
+		<boundColumn binding="ddMmYyyyHh24MiSs" />
+		<boundColumn binding="ddMmmYyyyHhMiSs" />
+		<boundColumn binding="ddMmmYyyyHh24MiSs" />
+		<boundColumn binding="mmDdYyyyHhMiSs" />
+		<boundColumn binding="mmDdYyyyHh24MiSs" />
+		<boundColumn binding="mmmDdYyyyHhMiSs" />
+		<boundColumn binding="mmmDdYyyyHh24MiSs" />
+		<boundColumn binding="yyyyMmDdHhMiSs" />
+		<boundColumn binding="yyyyMmDdHh24MiSs" />
+	</dataGrid>
+	<dataGrid binding="dateOnlyRows" inline="true" title="Date times and timestamps shown as dates">
+		<boundColumn binding="ddMmYyyyDateTime" />
+		<boundColumn binding="ddMmmYyyyDateTime" />
+		<boundColumn binding="mmDdYyyyDateTime" />
+		<boundColumn binding="mmmDdYyyyDateTime" />
+		<boundColumn binding="yyyyMmDdDateTime" />
+		<boundColumn binding="ddMmYyyyTimestamp" />
+		<boundColumn binding="ddMmmYyyyTimestamp" />
+		<boundColumn binding="mmDdYyyyTimestamp" />
+		<boundColumn binding="mmmDdYyyyTimestamp" />
+		<boundColumn binding="yyyyMmDdTimestamp" />
+	</dataGrid>
+	<dataGrid binding="timeRows" inline="true" title="Times">
+		<boundColumn binding="hhMi" />
+		<boundColumn binding="hh24Mi" />
+		<boundColumn binding="hhMiSs" />
+		<boundColumn binding="hh24MiSs" />
+	</dataGrid>
+	<dataGrid binding="numberRows" inline="true" title="Numbers">
+		<boundColumn binding="decimal2DollarsAndCents" />
+		<boundColumn binding="decimal2DollarsAndCentsAbsolute" />
+		<boundColumn binding="decimal2Integer" />
+		<boundColumn binding="decimal2IntegerPercentage" />
+		<boundColumn binding="decimal2OneDecimalPlace" />
+		<boundColumn binding="decimal5Integer" />
+		<boundColumn binding="decimal5IntegerPercentage" />
+		<boundColumn binding="decimal5DollarsAndCents" />
+		<boundColumn binding="decimal5TimeDuration" />
+		<boundColumn binding="decimal5OneDecimalPlace" />
+		<boundColumn binding="decimal5TwoDecimalPlaces" />
+		<boundColumn binding="decimal5TwoDecimalPlacesPercentage" />
+		<boundColumn binding="decimal10Integer" />
+		<boundColumn binding="decimal10IntegerPercentage" />
+		<boundColumn binding="decimal10DollarsAndCents" />
+		<boundColumn binding="decimal10OneDecimalPlace" />
+		<boundColumn binding="decimal10TwoDecimalPlaces" />
+		<boundColumn binding="decimal10TwoDecimalPlacesPercentage" />
+		<boundColumn binding="simplePercentage" />
+		<boundColumn binding="integerSeparator" />
+		<boundColumn binding="longIntegerSeparator" />
+	</dataGrid>
+	<actions>
+		<defaults />
+	</actions>
+</view>

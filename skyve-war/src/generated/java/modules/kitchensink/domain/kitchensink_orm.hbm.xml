@@ -81,6 +81,181 @@
 		<filter name="kitchensinkConditionsFixtureNodeUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="modules.kitchensink.domain.ConvertersFixture" table="KS_ConvertersFixture" entity-name="kitchensinkConvertersFixture">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="name" length="100" />
+		<property name="ddMmYyyy" type="DateOnly" />
+		<property name="ddMmmYyyy" type="DateOnly" />
+		<property name="mmDdYyyy" type="DateOnly" />
+		<property name="mmmDdYyyy" type="DateOnly" />
+		<property name="yyyyMmDd" type="DateOnly" />
+		<property name="ddMmYyyyHhMi" type="DateTime" />
+		<property name="ddMmYyyyHh24Mi" type="DateTime" />
+		<property name="ddMmmYyyyHhMi" type="DateTime" />
+		<property name="ddMmmYyyyHh24Mi" type="DateTime" />
+		<property name="mmDdYyyyHhMi" type="DateTime" />
+		<property name="mmDdYyyyHh24Mi" type="DateTime" />
+		<property name="mmmDdYyyyHhMi" type="DateTime" />
+		<property name="mmmDdYyyyHh24Mi" type="DateTime" />
+		<property name="yyyyMmDdHhMi" type="DateTime" />
+		<property name="yyyyMmDdHh24Mi" type="DateTime" />
+		<property name="ddMmYyyyHhMiSs" type="Timestamp" />
+		<property name="ddMmYyyyHh24MiSs" type="Timestamp" />
+		<property name="ddMmmYyyyHhMiSs" type="Timestamp" />
+		<property name="ddMmmYyyyHh24MiSs" type="Timestamp" />
+		<property name="mmDdYyyyHhMiSs" type="Timestamp" />
+		<property name="mmDdYyyyHh24MiSs" type="Timestamp" />
+		<property name="mmmDdYyyyHhMiSs" type="Timestamp" />
+		<property name="mmmDdYyyyHh24MiSs" type="Timestamp" />
+		<property name="yyyyMmDdHhMiSs" type="Timestamp" />
+		<property name="yyyyMmDdHh24MiSs" type="Timestamp" />
+		<property name="ddMmYyyyDateTime" type="DateTime" />
+		<property name="ddMmmYyyyDateTime" type="DateTime" />
+		<property name="mmDdYyyyDateTime" type="DateTime" />
+		<property name="mmmDdYyyyDateTime" type="DateTime" />
+		<property name="yyyyMmDdDateTime" type="DateTime" />
+		<property name="ddMmYyyyTimestamp" type="Timestamp" />
+		<property name="ddMmmYyyyTimestamp" type="Timestamp" />
+		<property name="mmDdYyyyTimestamp" type="Timestamp" />
+		<property name="mmmDdYyyyTimestamp" type="Timestamp" />
+		<property name="yyyyMmDdTimestamp" type="Timestamp" />
+		<property name="hhMi" type="TimeOnly" />
+		<property name="hh24Mi" type="TimeOnly" />
+		<property name="hhMiSs" type="TimeOnly" />
+		<property name="hh24MiSs" type="TimeOnly" />
+		<property name="decimal2DollarsAndCents" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2DollarsAndCentsAbsolute" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2Integer" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2IntegerPercentage" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2OneDecimalPlace" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5Integer" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5IntegerPercentage" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5DollarsAndCents" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5TimeDuration" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5OneDecimalPlace" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5TwoDecimalPlaces" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5TwoDecimalPlacesPercentage" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal10Integer" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10IntegerPercentage" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10DollarsAndCents" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10OneDecimalPlace" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10TwoDecimalPlaces" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10TwoDecimalPlacesPercentage" type="Decimal10" precision="28" scale="10" />
+		<property name="simplePercentage" />
+		<property name="integerSeparator" />
+		<property name="longIntegerSeparator" />
+		<bag name="dateRows" table="KS_ConvertersFixture_dateRows" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_dateRows_owner_id" />
+			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_dateRows_element_id" column="element_id" />
+		</bag>
+		<bag name="dateTimeRows" table="KS_ConvertersFixture_dateTimeRows" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_dateTimeRows_owner_id" />
+			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_dateTimeRows_element_id" column="element_id" />
+		</bag>
+		<bag name="timestampRows" table="KS_ConvertersFixture_timestampRows" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_timestampRows_owner_id" />
+			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_timestampRows_element_id" column="element_id" />
+		</bag>
+		<bag name="dateOnlyRows" table="KS_ConvertersFixture_dateOnlyRows" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_dateOnlyRows_owner_id" />
+			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_dateOnlyRows_element_id" column="element_id" />
+		</bag>
+		<bag name="timeRows" table="KS_ConvertersFixture_timeRows" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_timeRows_owner_id" />
+			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_timeRows_element_id" column="element_id" />
+		</bag>
+		<bag name="numberRows" table="KS_ConvertersFixture_numberRows" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_numberRows_owner_id" />
+			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_numberRows_element_id" column="element_id" />
+		</bag>
+		<filter name="kitchensinkConvertersFixtureNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkConvertersFixtureCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkConvertersFixtureDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkConvertersFixtureUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.kitchensink.domain.ConvertersFixtureRow" table="KS_ConvertersFixtureRow" entity-name="kitchensinkConvertersFixtureRow">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="ddMmYyyy" type="DateOnly" />
+		<property name="ddMmmYyyy" type="DateOnly" />
+		<property name="mmDdYyyy" type="DateOnly" />
+		<property name="mmmDdYyyy" type="DateOnly" />
+		<property name="yyyyMmDd" type="DateOnly" />
+		<property name="ddMmYyyyHhMi" type="DateTime" />
+		<property name="ddMmYyyyHh24Mi" type="DateTime" />
+		<property name="ddMmmYyyyHhMi" type="DateTime" />
+		<property name="ddMmmYyyyHh24Mi" type="DateTime" />
+		<property name="mmDdYyyyHhMi" type="DateTime" />
+		<property name="mmDdYyyyHh24Mi" type="DateTime" />
+		<property name="mmmDdYyyyHhMi" type="DateTime" />
+		<property name="mmmDdYyyyHh24Mi" type="DateTime" />
+		<property name="yyyyMmDdHhMi" type="DateTime" />
+		<property name="yyyyMmDdHh24Mi" type="DateTime" />
+		<property name="ddMmYyyyHhMiSs" type="Timestamp" />
+		<property name="ddMmYyyyHh24MiSs" type="Timestamp" />
+		<property name="ddMmmYyyyHhMiSs" type="Timestamp" />
+		<property name="ddMmmYyyyHh24MiSs" type="Timestamp" />
+		<property name="mmDdYyyyHhMiSs" type="Timestamp" />
+		<property name="mmDdYyyyHh24MiSs" type="Timestamp" />
+		<property name="mmmDdYyyyHhMiSs" type="Timestamp" />
+		<property name="mmmDdYyyyHh24MiSs" type="Timestamp" />
+		<property name="yyyyMmDdHhMiSs" type="Timestamp" />
+		<property name="yyyyMmDdHh24MiSs" type="Timestamp" />
+		<property name="ddMmYyyyDateTime" type="DateTime" />
+		<property name="ddMmmYyyyDateTime" type="DateTime" />
+		<property name="mmDdYyyyDateTime" type="DateTime" />
+		<property name="mmmDdYyyyDateTime" type="DateTime" />
+		<property name="yyyyMmDdDateTime" type="DateTime" />
+		<property name="ddMmYyyyTimestamp" type="Timestamp" />
+		<property name="ddMmmYyyyTimestamp" type="Timestamp" />
+		<property name="mmDdYyyyTimestamp" type="Timestamp" />
+		<property name="mmmDdYyyyTimestamp" type="Timestamp" />
+		<property name="yyyyMmDdTimestamp" type="Timestamp" />
+		<property name="hhMi" type="TimeOnly" />
+		<property name="hh24Mi" type="TimeOnly" />
+		<property name="hhMiSs" type="TimeOnly" />
+		<property name="hh24MiSs" type="TimeOnly" />
+		<property name="decimal2DollarsAndCents" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2DollarsAndCentsAbsolute" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2Integer" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2IntegerPercentage" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal2OneDecimalPlace" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5Integer" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5IntegerPercentage" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5DollarsAndCents" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5TimeDuration" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5OneDecimalPlace" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5TwoDecimalPlaces" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal5TwoDecimalPlacesPercentage" type="Decimal5" precision="23" scale="5" />
+		<property name="decimal10Integer" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10IntegerPercentage" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10DollarsAndCents" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10OneDecimalPlace" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10TwoDecimalPlaces" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal10TwoDecimalPlacesPercentage" type="Decimal10" precision="28" scale="10" />
+		<property name="simplePercentage" />
+		<property name="integerSeparator" />
+		<property name="longIntegerSeparator" />
+		<filter name="kitchensinkConvertersFixtureRowNoneFilter" condition="1=0"/>
+		<filter name="kitchensinkConvertersFixtureRowCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="kitchensinkConvertersFixtureRowDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="kitchensinkConvertersFixtureRowUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.kitchensink.domain.DialogsFixture" table="KS_DialogsFixture" entity-name="kitchensinkDialogsFixture">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -317,6 +492,26 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="kitchensinkConditionsFixtureNodeUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConvertersFixtureNoneFilter" />
+	<filter-def name="kitchensinkConvertersFixtureCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConvertersFixtureDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConvertersFixtureUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConvertersFixtureRowNoneFilter" />
+	<filter-def name="kitchensinkConvertersFixtureRowCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConvertersFixtureRowDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="kitchensinkConvertersFixtureRowUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="kitchensinkDialogsFixtureNoneFilter" />

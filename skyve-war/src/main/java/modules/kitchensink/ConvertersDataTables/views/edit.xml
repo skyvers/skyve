@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Converters Data Tables"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:c="http://www.skyve.org/xml/common"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<listGrid query="qConvertersDates" title="Dates" continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qConvertersDateTimes" title="Date times" continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qConvertersTimestamps" title="Timestamps" continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qConvertersDateOnly" title="Date times and timestamps shown as dates" continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qConvertersTimes" title="Times" continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<listGrid query="qConvertersNumbers" title="Numbers" continueConversation="false">
+		<properties>
+			<c:property key="componentBuilderClass">faces</c:property>
+		</properties>
+	</listGrid>
+	<actions>
+		<defaults />
+	</actions>
+</view>
