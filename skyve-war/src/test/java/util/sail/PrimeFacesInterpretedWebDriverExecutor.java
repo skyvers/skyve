@@ -362,7 +362,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					|| component instanceof InputMask) {
 				success = selenide.text(new PrimeFacesTextCommand(clientId, value, false));
 			} else if (component instanceof DatePicker) {
-				success = selenide.typeOver(clientId + "_input", value);
+				success = selenide.typeOver(clientId + "_input", (value == null) ? null : selenide.datePickerText(clientId, value));
 			} else if (component instanceof Spinner) {
 				success = selenide._input(clientId, value, false);
 			} else if (component instanceof SelectOneMenu) {
