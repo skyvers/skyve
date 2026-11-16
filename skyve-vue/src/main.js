@@ -11,7 +11,7 @@ import DateOnlyCalendar from './DateOnlyCalendar.vue'
 import SnapshotPicker from './SnapshotPicker.vue'
 import Image from './Image.vue'
 
-import PrimeVue from 'primevue/config'
+import PrimeVue, { defaultOptions } from 'primevue/config'
 
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
@@ -27,6 +27,12 @@ import ContextMenu from "primevue/contextmenu";
 
 // SKYVE name space definition
 window.SKYVE ??= {};
+
+/**
+ * PrimeVue's English locale, but with a 12 hour time's AM and PM as the Java converters write them
+ * (PrimeVue's are am and pm, and it reads a typed PM as AM).
+ */
+const LOCALE = { ...defaultOptions.locale, am: 'AM', pm: 'PM' };
 
 // The mounted list grids by container id: { app, container, props }
 const grids = new Map();
@@ -65,7 +71,7 @@ function mount(gridConfig, container) {
     const grid = createApp({
         render: () => h(ListGrid, props)
     });
-    grid.use(PrimeVue, { ripple: true });
+    grid.use(PrimeVue, { ripple: true, locale: LOCALE });
     grid.component('Button', Button);
     grid.component('Column', Column);
     grid.component('DataTable', DataTable);

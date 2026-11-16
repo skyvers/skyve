@@ -8,6 +8,10 @@ export default {
         hourFormat: {
             type: String,
             default: '24'
+        },
+        showSeconds: {
+            type: Boolean,
+            default: false
         }
     },
     data() {
@@ -16,6 +20,10 @@ export default {
         };
     },
     computed: {
+        /**
+         * The time as HH:mm:ss, which the server reads whatever the column's converter
+         * (the seconds are 00 unless the calendar shows them).
+         */
         timeString() {
 
             if ((this.date ?? '') == '')
@@ -23,8 +31,9 @@ export default {
 
             const hrs = ('' + this.date.getHours()).padStart(2, '0');
             const mins = ('' + this.date.getMinutes()).padStart(2, '0');
+            const secs = this.showSeconds ? ('' + this.date.getSeconds()).padStart(2, '0') : '00';
 
-            return `${hrs}:${mins}`;
+            return `${hrs}:${mins}:${secs}`;
         }
     },
     emits: ['update:modelValue'],
@@ -36,14 +45,15 @@ export default {
         }
     },
     created() {
-        const pattern = /(\d\d):(\d\d)/;
+        const pattern = /(\d\d):(\d\d)(?::(\d\d))?/;
         const match = (this.modelValue ?? '').match(pattern);
         if (match != null) {
             const hrs = match[1];
             const mins = match[2];
+            const secs = match[3] ?? 0;
 
             const newDate = new Date();
-            newDate.setHours(hrs, mins);
+            newDate.setHours(hrs, mins, secs);
             this.date = newDate;
         }
     }
@@ -55,6 +65,7 @@ export default {
         timeOnly
         showTime
         :hourFormat="hourFormat"
+        :showSeconds="showSeconds"
     />
 </template>
 <style scoped></style>

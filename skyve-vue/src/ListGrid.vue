@@ -4,7 +4,7 @@ import { FilterOperator } from 'primevue/api';
 import { MatchModes } from './support/MatchModes';
 import Dropdown from 'primevue/dropdown';
 import { openDocInNewWindow, openDocInSameWindow, SNAP_KEY_PREFIX, unsanitiseBinding } from './support/Util';
-import { applyConverters } from './support/Converters';
+import { applyConverters, calendarProps } from './support/Converters';
 
 /**
  * Map from the skyve attribute type to
@@ -77,11 +77,9 @@ export default {
         model: String,
         title: String,
         columns: Object,
+        // The filter calendar's date and hour formats for a date or time column whose converter has no
+        // calendar (each column's converter normally sets them - see calendarProps() in Converters.js)
         dateFormat: {
-            type: String,
-            default: 'dd/mm/yy'
-        },
-        dateTimeFormat: {
             type: String,
             default: 'dd/mm/yy'
         },
@@ -257,7 +255,8 @@ export default {
          * 
          * Additionally calculate a dataType property
          * used to determine which filter operators
-         * are shown.
+         * are shown, and for a date or time column the
+         * props of its filter calendar (calendar).
          */
         columnDefinitionsMap() {
 
@@ -284,6 +283,16 @@ export default {
                 // Default type to 'text' if not mapped above
                 const dataType = columnDataTypesMap[defCopy.type] ?? 'text'
                 defCopy.dataType = dataType;
+
+                // The filter calendar takes and shows values as the column's converter formats them
+                if (dataType == 'date') {
+                    defCopy.calendar = calendarProps(defCopy.converter) ?? {
+                        dateFormat: this.dateFormat,
+                        showTime: defCopy.type != 'date',
+                        hourFormat: this.hourFormat,
+                        showSeconds: defCopy.type == 'timestamp'
+                    };
+                }
 
                 columnMap.set(defCopy.field, defCopy);
             });
@@ -1360,28 +1369,29 @@ export default {
                     <DateOnlyCalendar
                         v-else-if="col.type == 'date'"
                         v-model="filterModel.value"
-                        :dateFormat="dateFormat"
+                        :dateFormat="col.calendar.dateFormat"
                     />
                     <Calendar
                         v-else-if="col.type == 'dateTime'"
                         v-model="filterModel.value"
-                        :dateFormat="dateFormat"
-                        showTime
-                        :hourFormat="hourFormat"
+                        :dateFormat="col.calendar.dateFormat"
+                        :showTime="col.calendar.showTime"
+                        :hourFormat="col.calendar.hourFormat"
                     />
                     <Calendar
                         v-else-if="col.type == 'timestamp'"
                         v-model="filterModel.value"
-                        :dateFormat="dateFormat"
-                        showTime
-                        :hourFormat="hourFormat"
-                        showSeconds
+                        :dateFormat="col.calendar.dateFormat"
+                        :showTime="col.calendar.showTime"
+                        :hourFormat="col.calendar.hourFormat"
+                        :showSeconds="col.calendar.showSeconds"
                         :stepSecond="5"
                     />
                     <TimeCalendar
                         v-else-if="col.type == 'time'"
                         v-model="filterModel.value"
-                        :hourFormat="hourFormat"
+                        :hourFormat="col.calendar.hourFormat"
+                        :showSeconds="col.calendar.showSeconds"
                     />
                     <InputText
                         v-else-if="['text', 'numeric'].includes(col.type)"
