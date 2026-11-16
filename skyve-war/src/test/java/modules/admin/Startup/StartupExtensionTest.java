@@ -4,7 +4,11 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +21,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.skyve.impl.util.UtilImpl;
@@ -58,11 +61,11 @@ class StartupExtensionTest {
 		UtilImpl.MAP_LAYERS = "google.maps.MapTypeId.ROADMAP";
 
 		// mock the bean to return the default properties
-		Mockito.when(bean.getMailServerUrl()).thenReturn(UtilImpl.SMTP);
-		Mockito.when(bean.getMailSender()).thenReturn(UtilImpl.SMTP_SENDER);
-		Mockito.when(bean.getMailPort()).thenReturn(Integer.valueOf(UtilImpl.SMTP_PORT));
-		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.valueOf(UtilImpl.SMTP_TEST_BOGUS_SEND));
-		Mockito.when(bean.getMapLayer()).thenReturn(UtilImpl.MAP_LAYERS);
+		when(bean.getMailServerUrl()).thenReturn(UtilImpl.SMTP);
+		when(bean.getMailSender()).thenReturn(UtilImpl.SMTP_SENDER);
+		when(bean.getMailPort()).thenReturn(Integer.valueOf(UtilImpl.SMTP_PORT));
+		when(bean.getMailBogusSend()).thenReturn(Boolean.valueOf(UtilImpl.SMTP_TEST_BOGUS_SEND));
+		when(bean.getMapLayer()).thenReturn(UtilImpl.MAP_LAYERS);
 	}
 
 	@AfterEach
@@ -78,30 +81,30 @@ class StartupExtensionTest {
 	@Test
 	void testSaveConfigurationEmptyPropertiesWritesNulls() throws Exception {
 		// setup mocks
-		Mockito.doNothing().when(bean).writeConfiguration(anyString());
+		doNothing().when(bean).writeConfiguration(anyString());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 	}
 	
 	@Test
 	void testSaveConfigurationUpdatesApiProperties() throws Exception {
 		// setup mocks
-		Mockito.when(bean.getApiGoogleMapsKey()).thenReturn("12345");
-		Mockito.when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("12345");
-		Mockito.when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("12345");
+		when(bean.getApiGoogleMapsKey()).thenReturn("12345");
+		when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("12345");
+		when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("12345");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify the results
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_MAPS_V3_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
@@ -111,16 +114,16 @@ class StartupExtensionTest {
 	@Test
 	void testSaveConfigurationUpdatesBackupProperties() throws Exception {
 		// setup mocks
-		Mockito.when(bean.getBackupType()).thenReturn(BackupType.none);
+		when(bean.getBackupType()).thenReturn(BackupType.none);
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify the results
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_EXTERNAL_BACKUP_CLASS_KEY));
 	}
@@ -128,18 +131,18 @@ class StartupExtensionTest {
 	@Test
 	void testSaveConfigurationUpdatesEnvironmentProperties() throws Exception {
 		// setup mocks
-		Mockito.when(bean.getEnvironmentIdentifier()).thenReturn("dev");
-		Mockito.when(bean.getEnvironmentSupportEmail()).thenReturn("test@test.com");
-		Mockito.when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
+		when(bean.getEnvironmentIdentifier()).thenReturn("dev");
+		when(bean.getEnvironmentSupportEmail()).thenReturn("test@test.com");
+		when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify the results
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_IDENTIFIER_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_SHOW_SETUP_KEY));
@@ -153,25 +156,25 @@ class StartupExtensionTest {
 		UtilImpl.SMTP_LOG_ATTACHMENTS = false; // set to false to ensure it is overridden and included below
 		
 		// setup mocks
-		Mockito.when(bean.getMailServerUrl()).thenReturn("127.0.0.1");
-		Mockito.when(bean.getMailSender()).thenReturn("test2@test.com");
-		Mockito.when(bean.getMailPort()).thenReturn(Integer.valueOf(465));
-		Mockito.when(bean.getMailUsername()).thenReturn("username");
-		Mockito.when(bean.getMailPassword()).thenReturn("password");
-		Mockito.when(bean.getMailBogusSend()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getMailTestRecipient()).thenReturn("test@test.com");
-		Mockito.when(bean.getMailLogBodyExcerpt()).thenReturn(Boolean.TRUE);
-		Mockito.when(bean.getMailLogAttachments()).thenReturn(Boolean.TRUE);
-		Mockito.when(bean.getMailLogAttachmentsMaxBytes()).thenReturn(Long.valueOf(1024));
+		when(bean.getMailServerUrl()).thenReturn("127.0.0.1");
+		when(bean.getMailSender()).thenReturn("test2@test.com");
+		when(bean.getMailPort()).thenReturn(Integer.valueOf(465));
+		when(bean.getMailUsername()).thenReturn("username");
+		when(bean.getMailPassword()).thenReturn("password");
+		when(bean.getMailBogusSend()).thenReturn(Boolean.FALSE);
+		when(bean.getMailTestRecipient()).thenReturn("test@test.com");
+		when(bean.getMailLogBodyExcerpt()).thenReturn(Boolean.TRUE);
+		when(bean.getMailLogAttachments()).thenReturn(Boolean.TRUE);
+		when(bean.getMailLogAttachmentsMaxBytes()).thenReturn(Long.valueOf(1024));
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify the results
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_PORT_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_PWD_KEY));
@@ -191,19 +194,19 @@ class StartupExtensionTest {
 	@Test
 	void testSaveConfigurationUpdatesMapProperties() throws Exception {
 		// setup mocks
-		Mockito.when(bean.getMapCentre()).thenReturn(new GeometryFactory().createPoint(new Coordinate(1, 1)));
-		Mockito.when(bean.getMapLayer()).thenReturn("google.maps.MapTypeId.HYBRID");
-		Mockito.when(bean.getMapType()).thenReturn(MapType.gmap);
-		Mockito.when(bean.getMapZoom()).thenReturn(Integer.valueOf(19));
+		when(bean.getMapCentre()).thenReturn(new GeometryFactory().createPoint(new Coordinate(1, 1)));
+		when(bean.getMapLayer()).thenReturn("google.maps.MapTypeId.HYBRID");
+		when(bean.getMapType()).thenReturn(MapType.gmap);
+		when(bean.getMapZoom()).thenReturn(Integer.valueOf(19));
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify the results
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.MAP_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.MAP_CENTRE_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.MAP_LAYERS_KEY));
@@ -216,15 +219,15 @@ class StartupExtensionTest {
 		UtilImpl.CONCURRENT_SESSION_WARNINGS = true;
 		UtilImpl.CONCURRENT_SESSION_NOTIFICATIONS = true;
 
-		Mockito.when(bean.getConcurrentSessionWarnings()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getConcurrentSessionNotifications()).thenReturn(Boolean.FALSE);
+		when(bean.getConcurrentSessionWarnings()).thenReturn(Boolean.FALSE);
+		when(bean.getConcurrentSessionNotifications()).thenReturn(Boolean.FALSE);
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		bean.saveConfiguration();
 
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_CONCURRENT_SESSION_WARNINGS_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_CONCURRENT_SESSION_NOTIFICATIONS_KEY));
@@ -250,15 +253,15 @@ class StartupExtensionTest {
 	@Test
 	void testSetDontShowEmptyOverrideProperties() throws Exception {
 		// setup mocks
-		Mockito.when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
+		when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 		
 		// call the method under test
 		bean.setDontShow();
 		
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_SHOW_SETUP_KEY));
 	}
@@ -271,15 +274,15 @@ class StartupExtensionTest {
 		overrideProperties.put(StartupExtension.SMTP_STANZA_KEY, smtp);
 
 		// setup mocks
-		Mockito.when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
+		when(bean.getDontShowAgain()).thenReturn(Boolean.TRUE);
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.setDontShow();
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.ENVIRONMENT_SHOW_SETUP_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SMTP_STANZA_KEY));
@@ -294,18 +297,18 @@ class StartupExtensionTest {
 		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = null;
 
 		// setup mocks
-		Mockito.when(bean.getCaptchaType()).thenReturn(CaptchaType.googleRecaptcha);
-		Mockito.when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("site-key");
-		Mockito.when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("secret-key");
+		when(bean.getCaptchaType()).thenReturn(CaptchaType.googleRecaptcha);
+		when(bean.getApiGoogleRecaptchaSiteKey()).thenReturn("site-key");
+		when(bean.getApiGoogleRecaptchaSecretKey()).thenReturn("secret-key");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SECRET_KEY));
 	}
@@ -319,18 +322,18 @@ class StartupExtensionTest {
 		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = null;
 
 		// setup mocks
-		Mockito.when(bean.getCaptchaType()).thenReturn(CaptchaType.cloudflareTurnstile);
-		Mockito.when(bean.getApiCloudflareTurnstileSiteKey()).thenReturn("turnstile-site");
-		Mockito.when(bean.getApiCloudflareTurnstileSecretKey()).thenReturn("turnstile-secret");
+		when(bean.getCaptchaType()).thenReturn(CaptchaType.cloudflareTurnstile);
+		when(bean.getApiCloudflareTurnstileSiteKey()).thenReturn("turnstile-site");
+		when(bean.getApiCloudflareTurnstileSecretKey()).thenReturn("turnstile-secret");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_CLOUDFLARE_TURNSTILE_SITE_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_CLOUDFLARE_TURNSTILE_SECRET_KEY));
 	}
@@ -342,10 +345,10 @@ class StartupExtensionTest {
 		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = "existing-turnstile";
 
 		// setup mocks - captchaType is null, should clear all keys
-		Mockito.when(bean.getCaptchaType()).thenReturn(null);
+		when(bean.getCaptchaType()).thenReturn(null);
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		try {
 			// call the method under test
@@ -357,7 +360,7 @@ class StartupExtensionTest {
 		}
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_GOOGLE_RECAPTCHA_SITE_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.API_CLOUDFLARE_TURNSTILE_SITE_KEY));
 	}
@@ -387,14 +390,14 @@ class StartupExtensionTest {
 		properties.put(StartupExtension.API_STANZA_KEY, api);
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
-		Mockito.doReturn("{}").when(bean).marshall(anyMap());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doReturn("{}").when(bean).marshall(anyMap());
 
 		// call the method under test
 		bean.clearApi(properties);
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 	}
 
 	@Test
@@ -407,15 +410,15 @@ class StartupExtensionTest {
 		UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = true;
 
 		// setup mocks - return false to differ from UtilImpl's true values
-		Mockito.when(bean.getPasswordChangeNotifications()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getDifferentCountryLoginNotifications()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getIpAddressChangeNotifications()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getAccessExceptionNotifications()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getSecurityExceptionNotifications()).thenReturn(Boolean.FALSE);
-		Mockito.when(bean.getSecurityNotificationsEmail()).thenReturn("security@example.com");
+		when(bean.getPasswordChangeNotifications()).thenReturn(Boolean.FALSE);
+		when(bean.getDifferentCountryLoginNotifications()).thenReturn(Boolean.FALSE);
+		when(bean.getIpAddressChangeNotifications()).thenReturn(Boolean.FALSE);
+		when(bean.getAccessExceptionNotifications()).thenReturn(Boolean.FALSE);
+		when(bean.getSecurityExceptionNotifications()).thenReturn(Boolean.FALSE);
+		when(bean.getSecurityNotificationsEmail()).thenReturn("security@example.com");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		try {
 			bean.saveConfiguration();
@@ -428,7 +431,7 @@ class StartupExtensionTest {
 			UtilImpl.SECURITY_EXCEPTION_NOTIFICATIONS = true;
 		}
 
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_PASSWORD_CHANGE_NOTIFICATIONS_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.SECURITY_IP_ADDRESS_CHANGE_NOTIFICATIONS_KEY));
@@ -439,18 +442,18 @@ class StartupExtensionTest {
 	@Test
 	void testSaveConfigurationUpdatesBackupWithAzureType() throws Exception {
 		// setup mocks
-		Mockito.when(bean.getBackupType()).thenReturn(BackupType.azure);
-		Mockito.when(bean.getBackupConnectionString()).thenReturn("DefaultEndpointsProtocol=https");
-		Mockito.when(bean.getBackupDirectoryName()).thenReturn("skyve-backup");
+		when(bean.getBackupType()).thenReturn(BackupType.azure);
+		when(bean.getBackupConnectionString()).thenReturn("DefaultEndpointsProtocol=https");
+		when(bean.getBackupDirectoryName()).thenReturn("skyve-backup");
 
 		ArgumentCaptor<String> valueCapture = ArgumentCaptor.forClass(String.class);
-		Mockito.doNothing().when(bean).writeConfiguration(valueCapture.capture());
+		doNothing().when(bean).writeConfiguration(valueCapture.capture());
 
 		// call the method under test
 		bean.saveConfiguration();
 
 		// verify
-		Mockito.verify(bean, times(1)).writeConfiguration(anyString());
+		verify(bean, times(1)).writeConfiguration(anyString());
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_STANZA_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_EXTERNAL_BACKUP_CLASS_KEY));
 		assertThat(valueCapture.getValue(), containsString(StartupExtension.BACKUP_PROPERTIES_KEY));

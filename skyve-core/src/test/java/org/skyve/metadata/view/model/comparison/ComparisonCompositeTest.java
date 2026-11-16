@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.view.model.comparison.ComparisonComposite.Mutation;
@@ -165,7 +166,7 @@ class ComparisonCompositeTest {
 	@SuppressWarnings("static-method")
 	void setDocumentRoundtrip() {
 		ComparisonComposite cc = new ComparisonComposite();
-		org.skyve.metadata.model.document.Document doc = org.mockito.Mockito.mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.document.Document doc = mock(org.skyve.metadata.model.document.Document.class);
 		cc.setDocument(doc);
 		assertThat(cc.getDocument(), is(doc));
 	}

@@ -9,7 +9,8 @@ application's metadata, not HTML ids or CSS selectors.
 The interpreted executors run a script in a real browser through Selenide,
 against a running Skyve server. One executor drives PrimeFaces (PF) and one
 drives SmartClient (SC). This guide covers writing scripts, the complete
-op-code set and how each renderer supports it, and running the suites.
+op-code set and how each renderer supports it, adding SAIL to an application,
+running the suites, recording, and adding an op-code.
 
 ```xml
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
@@ -33,9 +34,6 @@ op-code set and how each renderer supports it, and running the suites.
 	</after>
 </automation>
 ```
-
-Runtime bugs that the suites found are listed in
-[SAIL runtime issues](sail-runtime-issues.md).
 
 The schema is `skyve-war/src/main/java/schemas/sail.xsd`, with an identical copy
 in `skyve-core/src/test/resources/schemas/sail.xsd`. Both executors implement
@@ -465,7 +463,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | `dataEnter` | `binding`\*, `value`\*, `navigateToWidget`, `match` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
 | `dataEnter match` | `index` (default), `code`, `label` | How the value names a combo or radio option: its position, its code or its label. A code or label must name exactly one option. `code` and `label` fail on any other widget. Prefer `code`: labels change with the language, and positions change when options are added. | yes: the option's value or its label as the page shows them (a combo's empty first entry counts) | yes: the option's position is found from the item's options, then it is chosen as with an index |
 | `testDataEnter` | `fixture` | Builds a bean with `DataBuilder` (the named fixture, or the `sail` fixture), then enters its values into every scalar widget of the view. Membership widgets are skipped. | yes | yes |
-| `upload` | `binding` or `action` (exactly one), `file`\*, `testSuccess` | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it; in SmartClient, `action` can also name a BizPort import action, whose import page (`bizImport.xhtml`) the step drives the same way. An upload action's page that succeeds, and an import page whose import has no problems, close themselves and show their messages in the view's growl (runtime issue P3), which `testMessage` can check; one with problems (warnings too) stays open, so an import that warns needs `testSuccess="false"`. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. With `testSuccess="false"`, the upload may be refused: the step does not check that the widget holds content or that no error shows. A refusal shown on the upload page is kept, and the upload page is closed with its close button, as a user does after reading it. A following `<testFailure message="..."/>` then checks the refusal, wherever it shows: on the upload page or in the view. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
+| `upload` | `binding` or `action` (exactly one), `file`\*, `testSuccess` | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it; in SmartClient, `action` can also name a BizPort import action, whose import page (`bizImport.xhtml`) the step drives the same way. An upload action's page that succeeds, and an import page whose import has no problems, close themselves and show their messages in the view's growl, which `testMessage` can check; one with problems (warnings too) stays open, so an import that warns needs `testSuccess="false"`. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. With `testSuccess="false"`, the upload may be refused: the step does not check that the widget holds content or that no error shows. A refusal shown on the upload page is kept, and the upload page is closed with its close button, as a user does after reading it. A following `<testFailure message="..."/>` then checks the refusal, wherever it shows: on the upload page or in the view. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
 | `lookupDescriptionAutoComplete` | `binding`\*, `search`\*, `pick` | Types the search text into the lookup and picks the first suggestion. With `pick`, it picks the first suggestion, in the order shown, that contains the text (case-sensitive). Fails if nothing matches. | yes | yes; only the rows the drop-down has fetched are searched. After `dataGridNew`/`dataGridEdit` on an inline grid, a column of the binding is used first, as for `dataEnter` |
 | `lookupDescriptionPick` | `binding`\*, `row` or `rowContaining` (exactly one) | Opens the lookup's drop-down and picks the zero-based row, or the first row, in the order shown, that contains the text (case-sensitive). | yes; `rowContaining` sees only the rows the drop-down shows | yes; `rowContaining` sees only the rows the drop-down has fetched. After `dataGridNew`/`dataGridEdit` on an inline grid, a column of the binding is used first, as for `dataEnter` |
 | `lookupDescriptionNew` | `binding`\* | Opens New on the lookup and pushes the related document's context. | no: PF lookups have no New | yes |
@@ -527,7 +525,7 @@ of these defaults from the current context.
 | `dataGridLink` | `binding`\*, `row` or `rowContaining`, `text`\*, `confirm`, `testSuccess` | Clicks the first displayed link in the row whose visible text contains `text` (case-sensitive), such as a "Revoke Access" link in every row. A link that runs an action is pressed as an [action step](#actions) presses its button: `confirm` answers its confirmation and questions, and the step checks for errors unless `testSuccess="false"` or it was declined; the view and its context stay. Any other link is followed as `navigateLink` follows one: the top context loses its document and view type. Which kind a link is comes from the view's metadata: the grid's links whose shown value contains the text (or every link of the grid if none does) all have an action reference. No such link in the row fails the step, listing the row's links. | yes; a click on a row's link does not select the row, so it works on a grid that zooms when a row is selected | yes |
 | `listGridNew` | `module`, `document`, `query`, `model`, `createView` | Presses New and pushes the new document's context. | yes; on a Vue list grid, its toolbar's New button, or the floating one a list view shows above its paginator | yes |
 | `listGridZoom` | as `listGridNew` without `createView`, plus `row` or `rowContaining` | Opens the row and pushes its context. | yes; on a Vue list grid, the row's View Detail button, or a click on the row when the grid zooms on a row click | yes |
-| `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it: the grid restores its selection by design, without running the selected action (P7). The step fails if the row does not show as selected afterwards. | yes |
+| `listGridSelect` | as `listGridZoom` | Selects the row without opening it. | only on grids with a `selectedIdBinding`. On a Vue list grid, it clicks the row. A row that already shows as selected is clicked twice, to unselect and select it: the grid restores its selection by design, without running the selected action. The step fails if the row does not show as selected afterwards. | yes |
 | `listGridFilter` | `module`, `document`, `query`, `model`; `column`\*, `value`, `operator` | Filters a column, as a user does in the grid's column filters. `column` is the column's binding. `operator` is `contains` (the default), `startsWith`, `equals`, `notEquals`, `lessThan` or `greaterThan`. Filters on different columns are ANDed, and a new filter on a column replaces its old one. Without `value`, the step clears that column's filter; `operator` then fails the step. | yes; see [Filtering lists](#filtering-lists) | yes; see [Filtering lists](#filtering-lists) |
 | `listGridClearFilter` | `module`, `document`, `query`, `model` | Clears every column filter. | yes: Clear in each filtered column's menu (Vue); in a data table it deletes each typed filter's text, chooses each combo filter's empty option and unsets each check box | yes: the toolbar's Clear filter button, which clears the filter row and the advanced filter |
 | `listGridSort` | `module`, `document`, `query`, `model`; `column`\*, `descending` | Sorts by the column alone, ascending unless `descending="true"`. Sort before a `rowContaining` when more than one row could match. | yes: clicks the column title until it alone shows the direction. PrimeFaces ignores a sort click on an empty data table, so that fails | yes: clicks the column header, once for ascending and again to reverse |
@@ -696,6 +694,200 @@ Two system properties help when a run fails:
 `PrimeFacesSailTestStrategyIT` runs one script under each strategy against the
 kitchen sink, and checks that each strategy behaves as this table says.
 
+## Adding SAIL to an Application
+
+This section is for an application built on Skyve, such as one made with Skyve
+Foundry. Skyve's own tests are set up in `skyve-war` already.
+
+### The harness
+
+The harness is not a jar. It is test source in `skyve-war/src/test/java/util/**`
+and `skyve-war/src/test/resources/util/**`, and `skyve:assemble` copies both
+folders into the app's `src/test` tree with the rest of the Skyve template.
+Assemble also changes the customer in `util.InternalBaseH2Test` to the app's
+customer, so the views are built for it.
+
+- Do not edit the harness in an app. Assemble deletes the app's files under
+  both `util` folders before it copies, so changes are lost. Fix the harness
+  in Skyve instead.
+- Keep the app's own tests out of `util`, for example in a `sail` package.
+- An app assembled before Skyve 10 has no `util/sail/smartclient-sail.js`, and
+  every SC test fails saying it is not on the test classpath. Assemble again.
+
+### Dependencies
+
+The harness needs these test-scope dependencies, as `skyve-war/pom.xml` has
+them. Most Skyve apps have all but Selenide and Mojarra. Use the versions the
+app's pom manages, or else Skyve's root `pom.xml`.
+
+```xml
+<!-- JUnit 5 -->
+<dependency>
+	<groupId>org.junit.jupiter</groupId>
+	<artifactId>junit-jupiter-engine</artifactId>
+	<scope>test</scope>
+</dependency>
+<!-- CDI for Skyve on H2 in the test JVM -->
+<dependency>
+	<groupId>org.jboss.weld.se</groupId>
+	<artifactId>weld-se-core</artifactId>
+	<scope>test</scope>
+</dependency>
+<!-- The browser driver -->
+<dependency>
+	<groupId>com.codeborne</groupId>
+	<artifactId>selenide</artifactId>
+	<version>7.12.1</version>
+	<scope>test</scope>
+</dependency>
+<!-- Mojarra, for the PF executor's component trees; without it:
+     ClassNotFoundException: com.sun.faces.util.Util -->
+<dependency>
+	<groupId>org.glassfish</groupId>
+	<artifactId>jakarta.faces</artifactId>
+	<version>4.0.11</version> <!-- Skyve's mojarra.version -->
+	<scope>test</scope>
+</dependency>
+<!-- Jakarta Mail and EL implementations, and mocks for the OmniFaces CDI bootstrap -->
+<dependency>
+	<groupId>org.eclipse.angus</groupId>
+	<artifactId>jakarta.mail</artifactId>
+	<scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.glassfish.expressly</groupId>
+	<artifactId>expressly</artifactId>
+	<scope>test</scope>
+</dependency>
+<dependency>
+	<groupId>org.springframework</groupId>
+	<artifactId>spring-test</artifactId>
+	<scope>test</scope>
+</dependency>
+```
+
+### Where scripts go
+
+| Location | Test call | Maven setup |
+|---|---|---|
+| `src/test/resources/sail/**` | `sailResource("sail/contacts.xml")` | None |
+| Beside the tests, `src/test/java/sail/**/*.xml`, as `skyve-war` does | `sailResource("sail/contacts.xml")` | The test resource below |
+| Any file | `sailFile("src/test/java/sail/contacts.xml")` | None, but the path is relative to the directory Maven runs in |
+
+Declaring `testResources` replaces Maven's default, so repeat
+`src/test/resources`:
+
+```xml
+<testResources>
+	<testResource>
+		<directory>src/test/resources</directory>
+	</testResource>
+	<!-- SAIL scripts live beside the SAIL tests that run them -->
+	<testResource>
+		<directory>src/test/java</directory>
+		<includes>
+			<include>sail/**/*.xml</include>
+		</includes>
+	</testResource>
+</testResources>
+```
+
+To catch schema errors in the unit build, add a test like
+`sail.SailScriptsUnmarshalTest`, which unmarshals every script with
+`XMLMetaData.unmarshalSAILFile` (or `unmarshalSAILWorkflowFile` for a
+`<workflow>`).
+
+### Keeping SAIL out of the build
+
+A plain `mvn test` or `mvn verify` must never run SAIL tests: they need a
+server, and they change its data.
+
+- Name every SAIL test class `*SailIT`. Skyve's root pom excludes `**/*IT`
+  from surefire; check that the app's pom does too.
+- Failsafe is skipped unless `skipIntegrationTests` is `false`.
+- Run SAIL tests through surefire with an explicit `-Dtest`, which overrides
+  the exclusion, as in [Commands](#commands).
+- Turn reruns off; see **Reruns** under [System properties](#system-properties).
+  Biz Hub Apps, whose pom fixes the rerun count, has a profile for it:
+
+```xml
+<!-- SAIL ITs: no reruns (a rerun repeats destructive steps); mvn -Psail-it -->
+<profile>
+	<id>sail-it</id>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<rerunFailingTestsCount>0</rerunFailingTestsCount>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+</profile>
+```
+
+```bash
+mvn -Psail-it test -Dtest='ContactsSailIT' \
+	-Dsurefire.failIfNoSpecifiedTests=false \
+	-Dsail.baseUrl=http://localhost:8180/myapp/
+```
+
+Run against a disposable server, set up as in
+[A disposable server](#a-disposable-server) with the app's own datasource and
+JSON. Turn off anything in the app that sends mail or posts to outside
+services.
+
+### A test class
+
+A test extends one of the test bases in
+[How the Interpreted Executors Work](#how-the-interpreted-executors-work).
+Its constructor chooses the browser, whose user agent decides the UX/UI the
+server renders (see [UX/UI and user agent](#uxui-and-user-agent)):
+
+```java
+package sail;
+
+import org.junit.jupiter.api.Test;
+
+import util.AbstractPrimeFacesInterpretedSail;
+import util.sail.BrowserConfiguration;
+import util.sail.BrowserConfiguration.Browsers;
+import util.sail.Devices;
+
+class ContactsSailIT extends AbstractPrimeFacesInterpretedSail {
+	ContactsSailIT() {
+		// The script declares uxui="tablet" userAgentType="tablet"
+		super(new BrowserConfiguration()
+				.browser(Browsers.chrome)
+				.userAgentString(Devices.ipad.userAgentString));
+	}
+
+	@Test
+	void contacts() {
+		viewRoles("clerk", "admin.BasicUser"); // only for users with fewer roles
+		sailResource("sail/contacts.xml");
+	}
+}
+```
+
+- **Phone:** add `.resolution(Devices.iphone.resolution.getWidth(),
+  Devices.iphone.resolution.getHeight())` with `Devices.iphone`'s user agent,
+  for `uxui="phone"`.
+- **SmartClient:** extend `AbstractSmartClientInterpretedSail` with
+  `new BrowserConfiguration().browser(Browsers.chrome)`, for `uxui="desktop"`.
+  The script follows `<login/>` with `<switchMode/>`.
+- `sailResource`, `sailFile` and `sailString` run a script from the classpath,
+  a file or a string. `viewRoles` is described in [The test user](#the-test-user)
+  and `variable` in [The run token and variables](#the-run-token-and-variables).
+  Workflows use `AbstractInterpretedSailWorkflow` (see [Workflows](#workflows)),
+  and multi-file suites `util.sail.SailSuite`.
+- A failed step throws an `AssertionError`, so the test needs no assertions of
+  its own.
+- An app with its own `router.DefaultUxUiSelector` may route users by role.
+  Check what it gives the user agent and each user the scripts sign in as.
+
 ## Running the Tests
 
 ### A disposable server
@@ -762,21 +954,21 @@ tests. The SAIL ITs are:
 |---|---|---|
 | `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, one that checks the window steps' and `listGridTool`'s failures (`windowAndToolFailures`), and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
-| `PrimeFacesFocusSailIT` | where a page puts the focus (runtime issue P11): a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
-| `PrimeFacesRequiredMessagesSailIT` | when required-field messages show (runtime issue P5): not when a view first renders, after a rerender without client validation or for an action with `clientValidation="false"`; only for an action with client validation. One inline script per UX/UI | PF, tablet, phone and external |
+| `PrimeFacesFocusSailIT` | where a page puts the focus: a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
+| `PrimeFacesRequiredMessagesSailIT` | when required-field messages show: not when a view first renders, after a rerender without client validation or for an action with `clientValidation="false"`; only for an action with client validation. One inline script per UX/UI | PF, tablet, phone and external |
 | `PrimeFacesSelectMenuSailIT` | a select menu step ends only when its drop down has closed, even when the item was clicked while the drop down was still opening (its transitions are slowed); the focus PrimeFaces gives the menu at the end of the closing does not scroll the page under the next step | PF, tablet |
-| `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own (runtime issue P3), with the close icons hidden so that the upload step cannot close the page itself; a growl pushed just before the messages and one pushed after them all stay showing. One inline script per UX/UI | PF, tablet, phone and external |
+| `PrimeFacesActionUploadSailIT` | a successful action upload closes its upload page, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close icons hidden so that the upload step cannot close the page itself; a growl pushed just before the messages and one pushed after them all stay showing. One inline script per UX/UI | PF, tablet, phone and external |
 | `PrimeFacesAdminSuiteSailIT` | `sail/admin/pf/suite/*.xml` | PF, tablet |
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
 | `PrimeFacesAdminPhoneSailIT` | `sail/admin/pf/admin-phone-smoke.xml` | PF, phone |
 | `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml`, `sc-kitchensink-sail-find.xml` (`find`), and inline scripts that check the find steps' failures (`findFailures`) and the window steps' failures (`windowFailures`) | SC |
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
-| `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid); runtime issue SC-12 | SC |
-| `SmartClientFastTypingSailIT` | the User wizard's new password, whose change handler rerenders, typed in one burst of keys through Selenium, then left with Tab, then typed again with Next clicked at once (runtime issue SC-8) | SC |
-| `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept (runtime issue SC-10) | SC |
-| `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing (runtime issue SC-6) | SC |
-| `SmartClientActionUploadSailIT` | a refused action upload leaves its window open showing why; a successful one closes its window, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own (runtime issue P3), with the close buttons hidden so that the upload step cannot close the window itself; a growl pushed as the page refreshes the view, and a growl in the refresh's response, leave the messages showing; a BizPort import that warns leaves its window open, and a clean one (an empty workbook into admin's Data Maintenance) closes it and shows "The import completed successfully." in the view | SC |
+| `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid) | SC |
+| `SmartClientFastTypingSailIT` | the User wizard's new password, whose change handler rerenders, typed in one burst of keys through Selenium, then left with Tab, then typed again with Next clicked at once | SC |
+| `SmartClientListGridSelectedEventSailIT` | selects a List Grid Fixture list grid row whose selected event rerenders: one request and one selection event, and the selection kept | SC |
+| `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing | SC |
+| `SmartClientActionUploadSailIT` | a refused action upload leaves its window open showing why; a successful one closes its window, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close buttons hidden so that the upload step cannot close the window itself; a growl pushed as the page refreshes the view, and a growl in the refresh's response, leave the messages showing; a BizPort import that warns leaves its window open, and a clean one (an empty workbook into admin's Data Maintenance) closes it and shows "The import completed successfully." in the view | SC |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/suite/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC |
 | `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
 | `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters and a data table's filters and sorts, captures, questions), `pf-recorder-round-trip-windows.xml` (new windows, back and refresh), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
@@ -936,8 +1128,11 @@ fixtures, with `testStrategy="Assert"`.
 `sc-kitchensink-sail.xml` covers the same ground for SmartClient, except
 membership and ListGridFixture (`componentBuilderClass` only applies to
 PrimeFaces). It also clicks the ActionsFixture's Run From Row link in a row,
-declined and confirmed, which PF does in its separate `rowLink` test. The only kitchen sink membership widget is on ConditionsFixture,
-which never settles in SmartClient (runtime issue SC-4).
+declined and confirmed, which PF does in its separate `rowLink` test. The SC kitchen sink also covers ConditionsFixture's visible and enabled
+conditions: it enters a value in its slider, then turns Show and Allow off and
+on, checking with `testWidget` that a slider and a password field are hidden,
+disabled and enabled again. Its list membership (the kitchen sink's only one)
+is covered in SmartClient by the admin suite only.
 
 The SmartClient windows interaction also presses the List Grid Fixture's list
 grid tools: Deselect, which clears the selected id, and Refresh, which shows
@@ -969,7 +1164,7 @@ Kitchen sink fixtures for the newer steps:
 - ModelLookupFixture's inline data grid `rows` has model lookup description
   columns, `selection` and `singleSelection`, which the form above it also
   has. The SC kitchen sink sets them in a new row, and changes one again
-  after `dataGridEdit` (runtime issue SC-11).
+  after `dataGridEdit`.
 - `OrderedGridFixture` (the "Ordered Grid Fixtures" menu list) is saved and has
   three ordered collections:
   - `rows`, a data grid whose rows are added through their own view. Both
@@ -983,12 +1178,12 @@ Kitchen sink fixtures for the newer steps:
     assigns members in the order its value names them in SC, and in the
     candidates' order in PF. Both kitchen sinks then reorder them with
     `listMembershipMove` (a drag in SC; PF's move up and down buttons, which
-    Skyve shows for an ordered membership, runtime issue P12), save, and check
+    Skyve shows for an ordered membership), save, and check
     their order once reopened.
 - ListGridFixture's "PrimeFaces data table of column types" has a filter
   parameter (`text` not null), so SmartClient completes its criteria in the
-  browser; the SC kitchen sink filters its time column there (runtime issue
-  SC-9). PF does not use that grid.
+  browser; the SC kitchen sink filters its time column there.
+  PF does not use that grid.
 - ActionsFixture's Upload action refuses a file named `sail-refused.txt` with
   "The file sail-refused.txt already exists" (an `UploadException`), as Upload
   Backup refuses a backup that exists, and one named `sail-invalid.txt` with
@@ -997,8 +1192,7 @@ Kitchen sink fixtures for the newer steps:
   is no longer available."), for `upload testSuccess="false"`. The upload page
   shows the first two as the upload's problems, and the third as the refusal of
   an unavailable action. A file it takes adds a growl, "Actions Upload took the
-  file", which the upload page carries to the view as it closes (runtime issue
-  P3).
+  file", which the upload page carries to the view as it closes.
 - ActionsFixture's rows grid has a Run From Row link in each row, whose action
   asks for a confirmation, for `dataGridLink`.
 - ListGridFixture shows `selectedVueId`, the selected id of its first list grid,
@@ -1073,7 +1267,7 @@ and would be restored instead, so run the suites with the job scheduler off,
 as the test servers are. 99-restore deletes row 0 after the restore, and checks
 the delete by the backup being deselected, as other backups may be listed. The
 restore is held back unless 00-backup passed, so it never restores a backup
-that is not this run's. (Until runtime issue P1 was fixed, the list showed the
+that is not this run's. (Until a fix in 2026-11, the list showed the
 oldest backup first, and 00-precondition asserted that no backup existed.)
 
 **The leftover-marker precondition.** 00-precondition asserts that no restore
@@ -1094,7 +1288,7 @@ The admin suites must never lock `admin` out. They run no `testDataEnter` on
 Configuration, change passwords only for the user they create, and back up with
 data sensitivity "none". A backup with any other data sensitivity redacts every
 password, by design, so after its restore `admin` could not sign in until its
-password was reset (runtime issue P2).
+password was reset.
 
 With each suite deleting its own backup in 99-restore, the PF and SC suites can
 run one after the other, in either order, against the same server.
@@ -1426,6 +1620,22 @@ dropped silently.
 - Replaying a recording finds rows by the text they showed when recorded, so it expects the same data. Records the
   recording created are created again with the same values: put `{run}` into values that must be unique.
 
+### From a recording to a test
+
+A recording replays as downloaded, but it is a first draft. To commit it as a
+test:
+
+1. Save it with the other scripts (see [Where scripts go](#where-scripts-go)).
+2. Write its test with the base for its `uxui`: SmartClient for `desktop`,
+   otherwise PrimeFaces with that device. Paste the header's `viewRoles(...)`
+   line, and define the password with `variable("password", ...)`.
+3. Put `{run}` into values that must be unique, so the test can run again.
+4. Resolve each `unmapped` and `unconfirmed` comment: write the step by hand or
+   remove it.
+5. Add the checks that were not added with Check while recording.
+6. Put each uploaded file under `sail/files/` on the test classpath.
+7. Remove real data: names, addresses, amounts.
+
 ## Known Limitations
 
 - **No tree or calendar in PF.** The PF UX/UIs have no tree or calendar page,
@@ -1473,16 +1683,16 @@ dropped silently.
 - **Paged lists.** `rowContaining` and `testGridRows` see only the rows the
   browser has, which is the first page of a paged list. Use `listGridFilter`
   and `listGridSort` to bring the row onto it.
-- **Runtime bugs.** Some runtime bugs have workarounds in the scripts or the
-  executors, such as the second click on a Vue list grid row (P7). See the
-  issues list.
+- **Restored Vue list grid selections.** A Vue list grid restores its
+  selection without running its selected action, by design, so the PF
+  executor clicks a row that already shows as selected twice (see
+  `listGridSelect`).
 
 ## Runtime Bugs Found
 
-The suites found Skyve runtime bugs that are outside SAIL's scope. Most are
-now fixed; the scripts avoid or work around the rest. Each one, with
-its reproduction and suspected cause, is in
-[SAIL runtime issues](sail-runtime-issues.md).
+The suites found Skyve runtime bugs that are outside SAIL's scope. All are now
+fixed, or were found to be by design. Their reproductions, causes and fixes were
+in `docs/sail-runtime-issues.md`, removed on 2026-11-16; see its git history.
 
 ## Other Executors
 
@@ -1513,6 +1723,78 @@ other implementations, which generate test code instead of driving a browser:
 - The SAIL generator (`org.skyve.impl.generate.sail.Generator`) writes menu and
   view scripts. It adds `<switchMode/>` after the generated `<login/>` for
   desktop automations.
+
+## Adding an Op-code
+
+An op-code touches the language, every executor, the harness, the recorder,
+the conformance suites and this document. Work in that order, and land each
+layer with its tests. The window steps are a worked example: commits
+`08afbed6e0` (language), `8782d4d550` (harness) and `68ac09e728` (recorder).
+
+**1. Language (skyve-core).**
+
+| File | Change |
+|---|---|
+| `org/skyve/metadata/sail/language/step/...` | The step class, in the package for its kind. Annotate it with `@XmlType` and `@XmlRootElement`, both with `namespace = XMLMetaData.SAIL_NAMESPACE`. It implements `Step`: `execute(Executor)` calls `executor.executeYourStep(this)`, and `getIdentifier` labels it in traces. A row step implements `GridRowStep`, and a capture `CaptureStep`. Its Javadoc is its specification, including how it fails. List it in the package's `package-info.java`. |
+| `Procedure.java`, `Interaction.java` | `@XmlElementRef(type = YourStep.class)` in the step lists. Otherwise the step does not unmarshal. |
+| `org/skyve/metadata/sail/execution/Executor.java` | `executeYourStep(YourStep)`. This breaks executors outside Skyve: add it to [Upgrading](#upgrading). |
+| `org/skyve/impl/sail/execution/ContextualExecutor.java` | The context changes, and any rule that is the same for every renderer |
+| `sail.xsd` | Regenerate with `XMLMetaData.main`, which writes the schemas from the JAXB classes. Copy it to `skyve-war/src/main/java/schemas/sail.xsd` and `skyve-core/src/test/resources/schemas/sail.xsd`; the two must be identical. |
+
+Rules the XSD cannot express, such as "exactly one of `row` and
+`rowContaining`", are checked when the step runs, and fail with a
+`MetaDataException`. Test the step class, the XML round trip
+(`SailLanguageXmlTest`) and any context change (`ContextualExecutorTest`).
+
+**2. Generators (skyve-ext).** `WebDriverExecutor` and `SeleneseExecutor`
+implement the method. Unless they generate code for it, they emit the "not
+supported by this generator" comment and move the contexts; see
+[Other Executors](#other-executors). Update `SailExecutorTest`.
+
+**3. Harness (skyve-war tests).** `InterpretedWebDriverExecutor` does what is
+the same for both renderers: `substituteTokens` on values, checking columns
+against the query, and the strategy. It leaves the gesture to a
+[renderer hook](#renderer-hooks) that throws "is not implemented yet" until a
+renderer overrides it. The PF gesture goes in
+`PrimeFacesInterpretedWebDriverExecutor` and `PrimeFacesSelenide`, and the SC
+gesture in `SmartClientInterpretedWebDriverExecutor`, `SmartClientSelenide`
+and, for a new locator kind, `smartclient-sail.js`. A renderer with no UI for
+the step overrides the hook to fail with the reason. Gestures and waits follow
+the [Synchronisation Rules](#synchronisation-rules). Unit-test the shared part
+in `InterpretedWebDriverExecutorTest`.
+
+**4. Conformance.** Add the step to both kitchen sinks, with a `kitchensink`
+fixture if none fits, and add an inline failure test to each kitchen sink IT,
+run under Verify, for each way the step should fail. Write each case as a
+`@Test` with `assertAll`, not a `@TestFactory`: with reruns on, surefire
+reports a failing dynamic test as a flake and the build passes. Run both
+kitchen sinks headless and headed against a disposable server, and the admin
+suites if the change could affect them.
+
+**5. Recorder (skyve-web).** If users make the gesture, record it:
+
+| File | Change |
+|---|---|
+| `src/js/sail/recorder-sc.js`, `recorder-pf.js` | Detect the gesture and send its entry. Shared parts go in `recorder-core.js`. |
+| `org/skyve/impl/sail/recording/SailRecordingBuilder.java` | Turn the entry into the step |
+| `SailRecordingChecks.java` | Check the step against the metadata on Stop |
+| `PrimeFacesRecordingMap.java` | PF: name any new element in the page's map |
+| The two recorder round-trip ITs and their scripts | Record the gesture, then replay the recording unedited |
+
+Rebuild the bundles with `ant compress` in `skyve-web`, and commit
+`recorder-sc-min.js`, `recorder-pf-min.js` and their source maps. Browsers
+cache Skyve's scripts, so hard-reload when testing by hand.
+
+**6. Documentation.** In this document:
+
+- the op-code reference row, with its PF and SC support;
+- the list of attributes where `{run}` is substituted, if the step takes text;
+- the recorder's gesture table;
+- [Known Limitations](#known-limitations);
+- [Upgrading](#upgrading).
+
+Report any runtime bug the suites find as a Skyve issue. Finally, run
+`SailScriptsUnmarshalTest`.
 
 ## Upgrading
 
@@ -1566,3 +1848,22 @@ implements `Executor` directly is affected.
 - `skyve:assemble` now also copies `src/test/resources/util/**`, which holds
   the SmartClient helper. It deletes an app's own files under that folder, as
   it already did under `src/test/java/util`.
+
+## Troubleshooting
+
+| Symptom | Cause and fix |
+|---|---|
+| `No SAIL base URL: set -Dsail.baseUrl=...` | Name the disposable server; there is no default |
+| The test prints a lock file's name and waits | Another SAIL test is using the server ([One test per server](#one-test-per-server)) |
+| `ClassNotFoundException: com.sun.faces.util.Util` | Add Mojarra ([Dependencies](#dependencies)) |
+| `util/sail/smartclient-sail.js` is not on the test classpath | Assemble the app again with Skyve 10 ([The harness](#the-harness)) |
+| Every sign in fails on a new server | The content add-in is missing from `<content directory>/addins/` |
+| `admin`'s first sign in goes to the setup page | Set `environment.showSetup` to `false` |
+| A PF step finds the wrong or no button | The views were built for another user, or the script's `uxui` is not what the server renders: [The test user](#the-test-user), [UX/UI and user agent](#uxui-and-user-agent) |
+| `rowContaining` misses a row you can see | The row is past the first page, or the case differs: filter or sort first |
+| A step fails only headed | The window lost the OS focus; the message says so |
+| A failing test passes as a flake | Surefire reran it: `-Dsurefire.rerunFailingTestsCount=0` |
+| A step "is not implemented yet" | The renderer has no gesture for it; see the op-code's PF and SC columns |
+
+For any failure, `-Dsail.failureDir` saves a screenshot and the page source,
+and `-Dsail.snapshotDir` and `-Dsail.videoDir` show the whole run.

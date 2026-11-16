@@ -1684,7 +1684,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			else {
 				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, new TreeSet<>());
 				code.insert(0, ds);
 			}
 		}
@@ -2780,6 +2780,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.TRUE.equals(slider.getVertical())) {
 			code.append("vertical:true,");
 		}
+		// SmartClient's SliderItem makes its slider canvas overflow:'visible'. At some form widths a slider
+		// in a '*' column overflows it by a few pixels, which widens the form, so the form resizes the
+		// slider to the wider column, and then back, without end: the form redraws for ever and never
+		// settles. The slider lays out its track and range labels to fit its width, and its value label
+		// floats outside it, so clipping the slider hides nothing.
+		code.append("sliderProperties:{overflow:'hidden'},");
 		size(slider, null, code);
 		disabled(slider.getDisabledCondition(), code);
 		invisible(slider.getInvisibleCondition(), code);
@@ -3626,7 +3632,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * colour picker) whose change handler calls the server fires it when the value is committed, as PrimeFaces' change
 	 * event and Skyve's own date and number items do, not on every keypress: SmartClient's default
 	 * {@code changeOnKeypress: true} sent a request on each key, and the request's prompt took the focus, so the keys
-	 * typed meanwhile were lost (runtime issue SC-8). The value is committed when the user leaves the item, often by
+	 * typed meanwhile were lost. The value is committed when the user leaves the item, often by
 	 * clicking a button, so the handler's server events run as a blur handler's do: deferred, with the view's
 	 * {@code _blurry} marker set, so that the button's click is run after them rather than lost under their request.
 	 * A handler with only client-side actions is left firing on every keypress, as it sends no request.

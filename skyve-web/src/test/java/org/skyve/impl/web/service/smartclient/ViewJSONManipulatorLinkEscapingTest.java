@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -96,7 +97,7 @@ class ViewJSONManipulatorLinkEscapingTest {
 		@SuppressWarnings("unchecked")
 		Map<String, Map<String, ViewFormat>> formats = (Map<String, Map<String, ViewFormat>>) field.get(manipulator);
 		ViewFormat format = formats.get("").get("_0");
-		assertTrue(Sanitisation.none.equals(format.getSanitise()));
+		assertEquals(Sanitisation.none, format.getSanitise());
 		return format;
 	}
 }

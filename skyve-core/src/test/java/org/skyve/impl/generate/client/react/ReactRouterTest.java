@@ -3,6 +3,8 @@ package org.skyve.impl.generate.client.react;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -74,12 +76,12 @@ class ReactRouterTest {
 		ReactGenerator generator = new ReactGenerator("desktop", projectDir.toString());
 		ReactRouter router = new ReactRouter(generator);
 
-		Customer customer = org.mockito.Mockito.mock(Customer.class);
-		org.mockito.Mockito.when(customer.getModules()).thenReturn(java.util.Collections.emptyList());
-		User user = org.mockito.Mockito.mock(User.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = org.mockito.Mockito.mock(AbstractPersistence.class);
-		org.mockito.Mockito.when(persistence.getUser()).thenReturn(user);
+		Customer customer = mock(Customer.class);
+		when(customer.getModules()).thenReturn(java.util.Collections.emptyList());
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 
 		AtomicReference<Object> previous = setThreadLocalPersistence(persistence);
 		try {
@@ -102,10 +104,10 @@ class ReactRouterTest {
 		ReactGenerator generator = new ReactGenerator("desktop", projectDir.toString());
 		ReactRouter router = new ReactRouter(generator);
 
-		Customer customer = org.mockito.Mockito.mock(Customer.class);
-		Module module = org.mockito.Mockito.mock(Module.class);
-		Document document = org.mockito.Mockito.mock(Document.class);
-		DocumentRef ref = org.mockito.Mockito.mock(DocumentRef.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		DocumentRef ref = mock(DocumentRef.class);
 		MenuImpl menu = new MenuImpl();
 
 		EditItem editItem = new EditItem();
@@ -149,50 +151,50 @@ class ReactRouterTest {
 		menu.getItems().add(treeItem);
 		menu.getItems().add(calendarItem);
 
-		MetaDataQueryDefinition qCalendar = org.mockito.Mockito.mock(MetaDataQueryDefinition.class);
-		MetaDataQueryDefinition qUsers = org.mockito.Mockito.mock(MetaDataQueryDefinition.class);
-		MetaDataQueryDefinition defaultQuery = org.mockito.Mockito.mock(MetaDataQueryDefinition.class);
-		ListModel<org.skyve.domain.Bean> listModel = org.mockito.Mockito.mock(ListModel.class);
+		MetaDataQueryDefinition qCalendar = mock(MetaDataQueryDefinition.class);
+		MetaDataQueryDefinition qUsers = mock(MetaDataQueryDefinition.class);
+		MetaDataQueryDefinition defaultQuery = mock(MetaDataQueryDefinition.class);
+		ListModel<org.skyve.domain.Bean> listModel = mock(ListModel.class);
 
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
-		org.mockito.Mockito.when(module.getMenu()).thenReturn(menu);
-		org.mockito.Mockito.when(module.getDocument(customer, "User")).thenReturn(document);
+		when(module.getName()).thenReturn("admin");
+		when(module.getMenu()).thenReturn(menu);
+		when(module.getDocument(customer, "User")).thenReturn(document);
 
 		Map<String, DocumentRef> refs = new HashMap<>();
 		refs.put("User", ref);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(refs);
-		org.mockito.Mockito.when(ref.getOwningModuleName()).thenReturn("admin");
+		when(module.getDocumentRefs()).thenReturn(refs);
+		when(ref.getOwningModuleName()).thenReturn("admin");
 
-		org.mockito.Mockito.when(module.getMetaDataQuery("qCalendar")).thenReturn(qCalendar);
-		org.mockito.Mockito.when(module.getMetaDataQuery("qUsers")).thenReturn(qUsers);
-		org.mockito.Mockito.when(module.getNullSafeMetaDataQuery("qUsers")).thenReturn(qUsers);
-		org.mockito.Mockito.when(module.getDocumentDefaultQuery(customer, "User")).thenReturn(defaultQuery);
+		when(module.getMetaDataQuery("qCalendar")).thenReturn(qCalendar);
+		when(module.getMetaDataQuery("qUsers")).thenReturn(qUsers);
+		when(module.getNullSafeMetaDataQuery("qUsers")).thenReturn(qUsers);
+		when(module.getDocumentDefaultQuery(customer, "User")).thenReturn(defaultQuery);
 
-		org.mockito.Mockito.when(qCalendar.getName()).thenReturn("qCalendar");
-		org.mockito.Mockito.when(qCalendar.getDocumentName()).thenReturn("User");
-		org.mockito.Mockito.when(qCalendar.getDocumentModule(customer)).thenReturn(module);
-		org.mockito.Mockito.when(qUsers.getName()).thenReturn("qUsers");
-		org.mockito.Mockito.when(qUsers.getDocumentName()).thenReturn("User");
-		org.mockito.Mockito.when(qUsers.getDocumentModule(customer)).thenReturn(module);
-		org.mockito.Mockito.when(defaultQuery.getName()).thenReturn("User");
-		org.mockito.Mockito.when(defaultQuery.getDocumentName()).thenReturn("User");
-		org.mockito.Mockito.when(defaultQuery.getDocumentModule(customer)).thenReturn(module);
+		when(qCalendar.getName()).thenReturn("qCalendar");
+		when(qCalendar.getDocumentName()).thenReturn("User");
+		when(qCalendar.getDocumentModule(customer)).thenReturn(module);
+		when(qUsers.getName()).thenReturn("qUsers");
+		when(qUsers.getDocumentName()).thenReturn("User");
+		when(qUsers.getDocumentModule(customer)).thenReturn(module);
+		when(defaultQuery.getName()).thenReturn("User");
+		when(defaultQuery.getDocumentName()).thenReturn("User");
+		when(defaultQuery.getDocumentModule(customer)).thenReturn(module);
 
-		org.mockito.Mockito.when(document.getName()).thenReturn("User");
-		org.mockito.Mockito.when(document.getOwningModuleName()).thenReturn("admin");
-		org.mockito.Mockito.when(document.getIcon16x16RelativeFileName()).thenReturn("user.png");
-		org.mockito.Mockito.when(document.getIconStyleClass()).thenReturn("icon-user");
-		org.mockito.Mockito.when(document.getListModel(customer, "UserModel", false)).thenReturn(listModel);
-		org.mockito.Mockito.when(document.getView(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(customer),
+		when(document.getName()).thenReturn("User");
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getIcon16x16RelativeFileName()).thenReturn("user.png");
+		when(document.getIconStyleClass()).thenReturn("icon-user");
+		when(document.getListModel(customer, "UserModel", false)).thenReturn(listModel);
+		when(document.getView(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(customer),
 				org.mockito.ArgumentMatchers.anyString())).thenReturn(null);
 
-		org.mockito.Mockito.when(customer.getModules()).thenReturn(List.of(module));
-		org.mockito.Mockito.when(customer.getModule("admin")).thenReturn(module);
+		when(customer.getModules()).thenReturn(List.of(module));
+		when(customer.getModule("admin")).thenReturn(module);
 
-		User user = org.mockito.Mockito.mock(User.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = org.mockito.Mockito.mock(AbstractPersistence.class);
-		org.mockito.Mockito.when(persistence.getUser()).thenReturn(user);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 
 		AtomicReference<Object> previous = setThreadLocalPersistence(persistence);
 		try {
@@ -222,12 +224,12 @@ class ReactRouterTest {
 		ReactGenerator generator = new ReactGenerator("desktop", projectDir.toString());
 		ReactRouter router = new ReactRouter(generator);
 
-		Customer customer = org.mockito.Mockito.mock(Customer.class);
-		org.mockito.Mockito.when(customer.getModules()).thenReturn(java.util.Collections.emptyList());
-		User user = org.mockito.Mockito.mock(User.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = org.mockito.Mockito.mock(AbstractPersistence.class);
-		org.mockito.Mockito.when(persistence.getUser()).thenReturn(user);
+		Customer customer = mock(Customer.class);
+		when(customer.getModules()).thenReturn(java.util.Collections.emptyList());
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 
 		AtomicReference<Object> previous = setThreadLocalPersistence(persistence);
 		try {
@@ -249,10 +251,10 @@ class ReactRouterTest {
 		ReactGenerator generator = new ReactGenerator("desktop", projectDir.toString());
 		ReactRouter router = new ReactRouter(generator);
 
-		Customer customer = org.mockito.Mockito.mock(Customer.class);
-		Module module = org.mockito.Mockito.mock(Module.class);
-		Document document = org.mockito.Mockito.mock(Document.class);
-		DocumentRef ref = org.mockito.Mockito.mock(DocumentRef.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		DocumentRef ref = mock(DocumentRef.class);
 		MenuImpl menu = new MenuImpl();
 
 		CalendarItem calendarItem = new CalendarItem();
@@ -275,47 +277,47 @@ class ReactRouterTest {
 		menu.getItems().add(mapItem);
 		menu.getItems().add(treeItem);
 
-		MetaDataQueryDefinition qCalendar = org.mockito.Mockito.mock(MetaDataQueryDefinition.class);
-		MetaDataQueryDefinition qMap = org.mockito.Mockito.mock(MetaDataQueryDefinition.class);
-		MetaDataQueryDefinition qTree = org.mockito.Mockito.mock(MetaDataQueryDefinition.class);
+		MetaDataQueryDefinition qCalendar = mock(MetaDataQueryDefinition.class);
+		MetaDataQueryDefinition qMap = mock(MetaDataQueryDefinition.class);
+		MetaDataQueryDefinition qTree = mock(MetaDataQueryDefinition.class);
 
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
-		org.mockito.Mockito.when(module.getMenu()).thenReturn(menu);
-		org.mockito.Mockito.when(module.getDocument(customer, "User")).thenReturn(document);
+		when(module.getName()).thenReturn("admin");
+		when(module.getMenu()).thenReturn(menu);
+		when(module.getDocument(customer, "User")).thenReturn(document);
 
 		Map<String, DocumentRef> refs = new HashMap<>();
 		refs.put("User", ref);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(refs);
-		org.mockito.Mockito.when(ref.getOwningModuleName()).thenReturn("crm");
+		when(module.getDocumentRefs()).thenReturn(refs);
+		when(ref.getOwningModuleName()).thenReturn("crm");
 
-		org.mockito.Mockito.when(module.getMetaDataQuery("qCalendar")).thenReturn(qCalendar);
-		org.mockito.Mockito.when(module.getMetaDataQuery("qMap")).thenReturn(qMap);
-		org.mockito.Mockito.when(module.getMetaDataQuery("qTree")).thenReturn(qTree);
+		when(module.getMetaDataQuery("qCalendar")).thenReturn(qCalendar);
+		when(module.getMetaDataQuery("qMap")).thenReturn(qMap);
+		when(module.getMetaDataQuery("qTree")).thenReturn(qTree);
 
-		org.mockito.Mockito.when(qCalendar.getName()).thenReturn("qCalendar");
-		org.mockito.Mockito.when(qCalendar.getDocumentName()).thenReturn("User");
-		org.mockito.Mockito.when(qCalendar.getDocumentModule(customer)).thenReturn(module);
-		org.mockito.Mockito.when(qMap.getName()).thenReturn("qMap");
-		org.mockito.Mockito.when(qMap.getDocumentName()).thenReturn("User");
-		org.mockito.Mockito.when(qMap.getDocumentModule(customer)).thenReturn(module);
-		org.mockito.Mockito.when(qTree.getName()).thenReturn("qTree");
-		org.mockito.Mockito.when(qTree.getDocumentName()).thenReturn("User");
-		org.mockito.Mockito.when(qTree.getDocumentModule(customer)).thenReturn(module);
+		when(qCalendar.getName()).thenReturn("qCalendar");
+		when(qCalendar.getDocumentName()).thenReturn("User");
+		when(qCalendar.getDocumentModule(customer)).thenReturn(module);
+		when(qMap.getName()).thenReturn("qMap");
+		when(qMap.getDocumentName()).thenReturn("User");
+		when(qMap.getDocumentModule(customer)).thenReturn(module);
+		when(qTree.getName()).thenReturn("qTree");
+		when(qTree.getDocumentName()).thenReturn("User");
+		when(qTree.getDocumentModule(customer)).thenReturn(module);
 
-		org.mockito.Mockito.when(document.getName()).thenReturn("User");
-		org.mockito.Mockito.when(document.getOwningModuleName()).thenReturn("admin");
-		org.mockito.Mockito.when(document.getIcon16x16RelativeFileName()).thenReturn("user.png");
-		org.mockito.Mockito.when(document.getIconStyleClass()).thenReturn("icon-user");
-		org.mockito.Mockito.when(document.getView(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(customer),
+		when(document.getName()).thenReturn("User");
+		when(document.getOwningModuleName()).thenReturn("admin");
+		when(document.getIcon16x16RelativeFileName()).thenReturn("user.png");
+		when(document.getIconStyleClass()).thenReturn("icon-user");
+		when(document.getView(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.eq(customer),
 				org.mockito.ArgumentMatchers.anyString())).thenReturn(null);
 
-		org.mockito.Mockito.when(customer.getModules()).thenReturn(List.of(module));
-		org.mockito.Mockito.when(customer.getModule("admin")).thenReturn(module);
+		when(customer.getModules()).thenReturn(List.of(module));
+		when(customer.getModule("admin")).thenReturn(module);
 
-		User user = org.mockito.Mockito.mock(User.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = org.mockito.Mockito.mock(AbstractPersistence.class);
-		org.mockito.Mockito.when(persistence.getUser()).thenReturn(user);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 
 		AtomicReference<Object> previous = setThreadLocalPersistence(persistence);
 		try {

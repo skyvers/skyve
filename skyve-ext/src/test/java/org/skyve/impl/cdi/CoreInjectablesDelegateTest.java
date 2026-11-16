@@ -162,7 +162,8 @@ class CoreInjectablesDelegateTest {
 		when(customer.getModule("admin")).thenReturn(module);
 		when(customer.getModules()).thenReturn(modules);
 		when(customer.getRoles()).thenReturn(roles);
-		when(customer.getRole("RoleA")).thenReturn(mock(CustomerRole.class));
+		CustomerRole roleA = mock(CustomerRole.class);
+		when(customer.getRole("RoleA")).thenReturn(roleA);
 		when(customer.isAllowModuleRoles()).thenReturn(Boolean.TRUE);
 		when(customer.getInterceptors()).thenReturn(interceptors);
 		when(customer.getObservers()).thenReturn(observers);

@@ -1,9 +1,9 @@
 package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.security.Principal;
@@ -35,8 +35,8 @@ class SmartClientTextSearchServletTest {
 	@Test
 	void doGetWrapsInfrastructureFailuresAsServletException() {
 		SmartClientTextSearchServlet servlet = new SmartClientTextSearchServlet();
-		HttpServletRequest request = org.mockito.Mockito.mock(HttpServletRequest.class);
-		HttpServletResponse response = org.mockito.Mockito.mock(HttpServletResponse.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(request.getParameterNames()).thenReturn(Collections.enumeration(Collections.singleton("query")));
 		when(request.getParameter("query")).thenReturn("smith");
@@ -47,8 +47,8 @@ class SmartClientTextSearchServletTest {
 	@Test
 	void doGetHandlesRequestsWithoutQueryParameter() {
 		SmartClientTextSearchServlet servlet = new SmartClientTextSearchServlet();
-		HttpServletRequest request = org.mockito.Mockito.mock(HttpServletRequest.class);
-		HttpServletResponse response = org.mockito.Mockito.mock(HttpServletResponse.class);
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 
 		when(request.getParameterNames()).thenReturn(Collections.emptyEnumeration());
 

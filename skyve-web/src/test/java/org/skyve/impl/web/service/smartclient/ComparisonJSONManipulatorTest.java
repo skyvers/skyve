@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -234,7 +235,7 @@ class ComparisonJSONManipulatorTest {
 	@Test
 	void toJSONStructureUsesMetadataFieldDefinitionForConstantDomainProperty() throws Exception {
 		User user = mock(User.class);
-		CustomerImpl customer = org.mockito.Mockito.spy(new CustomerImpl());
+		CustomerImpl customer = spy(new CustomerImpl());
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		Module module = mock(Module.class);
 		DocumentImpl document = new DocumentImpl();

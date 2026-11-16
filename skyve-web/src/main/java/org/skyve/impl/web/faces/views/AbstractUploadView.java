@@ -39,7 +39,7 @@ public abstract class AbstractUploadView extends LocalisableView {
 
 	/**
 	 * The callback parameter that carries a page's messages to the view that opened it, when the page closes itself
-	 * after a clean upload or import (runtime issue P3): the JSON of {@link #messagesJSON(FacesContext)}, which the page
+	 * after a clean upload or import: the JSON of {@link #messagesJSON(FacesContext)}, which the page
 	 * shows in the view's growl as it closes, so that the user still sees them.
 	 */
 	protected static final String MESSAGES_PARAM = "uploadMessages";

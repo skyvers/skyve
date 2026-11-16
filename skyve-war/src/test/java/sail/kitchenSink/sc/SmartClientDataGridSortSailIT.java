@@ -14,7 +14,7 @@ import util.sail.commands.impl.SmartClientButtonCommand;
 
 /**
  * Sorting an unordered SmartClient data grid by a column header only changes what the grid shows: saving afterwards
- * keeps the collection's own order (runtime issue SC-12).
+ * keeps the collection's own order.
  * <p>
  * No SAIL step sorts a data grid, so after a script has made a saved fixture with three rows, the header click is made
  * through {@link util.sail.SmartClientSelenide#sortDataGrid}, a real click, and so is the Save that follows. The Save's

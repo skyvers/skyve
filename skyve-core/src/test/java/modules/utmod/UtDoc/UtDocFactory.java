@@ -6,5 +6,6 @@ import org.skyve.util.test.SkyveFactory;
 public class UtDocFactory {
 	// Marker class used for annotation-driven test discovery.
 	public UtDocFactory() {
+		// nothing to initialise: the class only carries its @SkyveFactory annotation
 	}
 }

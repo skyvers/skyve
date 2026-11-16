@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 import org.skyve.domain.types.converters.date.DD_MMM_YYYY;
 import org.skyve.domain.types.converters.datetime.DD_MM_YYYY_HH24_MI;
 import org.skyve.domain.types.converters.time.HH24_MI;
@@ -404,16 +403,16 @@ class CustomerImplTest {
 
         @Test
         void testPutObserverReturnsTrueFirstTime() {
-                ObserverMetaData observer = Mockito.mock(ObserverMetaData.class);
-                Mockito.when(observer.getClassName()).thenReturn("com.example.MyObserver");
+                ObserverMetaData observer = mock(ObserverMetaData.class);
+                when(observer.getClassName()).thenReturn("com.example.MyObserver");
                 CustomerImpl customer = new CustomerImpl();
                 assertTrue(customer.putObserver(observer));
         }
 
         @Test
         void testPutObserverReturnsFalseForDuplicate() {
-                ObserverMetaData observer = Mockito.mock(ObserverMetaData.class);
-                Mockito.when(observer.getClassName()).thenReturn("com.example.MyObserver");
+                ObserverMetaData observer = mock(ObserverMetaData.class);
+                when(observer.getClassName()).thenReturn("com.example.MyObserver");
                 CustomerImpl customer = new CustomerImpl();
                 customer.putObserver(observer);
                 assertFalse(customer.putObserver(observer));
@@ -421,8 +420,8 @@ class CustomerImplTest {
 
         @Test
         void testGetObserversContainsPutObserver() {
-                ObserverMetaData observer = Mockito.mock(ObserverMetaData.class);
-                Mockito.when(observer.getClassName()).thenReturn("com.example.X");
+                ObserverMetaData observer = mock(ObserverMetaData.class);
+                when(observer.getClassName()).thenReturn("com.example.X");
                 CustomerImpl customer = new CustomerImpl();
                 customer.putObserver(observer);
                 assertTrue(customer.getObservers().contains(observer));
@@ -508,7 +507,7 @@ class CustomerImplTest {
 
         @Test
         void testSetAndGetUiResources() {
-                UIResources res = Mockito.mock(UIResources.class);
+                UIResources res = mock(UIResources.class);
                 CustomerImpl customer = new CustomerImpl();
                 assertNull(customer.getUiResources());
                 customer.setUiResources(res);
@@ -517,7 +516,7 @@ class CustomerImplTest {
 
         @Test
         void testSetAndGetHtmlResources() {
-                HTMLResources res = Mockito.mock(HTMLResources.class);
+                HTMLResources res = mock(HTMLResources.class);
                 CustomerImpl customer = new CustomerImpl();
                 assertNull(customer.getHtmlResources());
                 customer.setHtmlResources(res);
@@ -526,7 +525,7 @@ class CustomerImplTest {
 
         @Test
         void testSetAndGetLoginResources() {
-                LoginResources res = Mockito.mock(LoginResources.class);
+                LoginResources res = mock(LoginResources.class);
                 CustomerImpl customer = new CustomerImpl();
                 assertNull(customer.getLoginResources());
                 customer.setLoginResources(res);
@@ -560,16 +559,16 @@ class CustomerImplTest {
         @Test
         void testPutInterceptorReturnsTrueFirstTime() {
                 CustomerImpl customer = new CustomerImpl();
-                InterceptorMetaData interceptor = Mockito.mock(InterceptorMetaData.class);
-                Mockito.when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
+                InterceptorMetaData interceptor = mock(InterceptorMetaData.class);
+                when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
                 assertTrue(customer.putInterceptor(interceptor));
         }
 
         @Test
         void testPutInterceptorReturnsFalseForDuplicate() {
                 CustomerImpl customer = new CustomerImpl();
-                InterceptorMetaData interceptor = Mockito.mock(InterceptorMetaData.class);
-                Mockito.when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
+                InterceptorMetaData interceptor = mock(InterceptorMetaData.class);
+                when(interceptor.getClassName()).thenReturn("com.example.MyInterceptor");
                 customer.putInterceptor(interceptor);
                 assertFalse(customer.putInterceptor(interceptor));
         }
@@ -577,8 +576,8 @@ class CustomerImplTest {
         @Test
         void testGetInterceptorsContainsPutInterceptor() {
                 CustomerImpl customer = new CustomerImpl();
-                InterceptorMetaData interceptor = Mockito.mock(InterceptorMetaData.class);
-                Mockito.when(interceptor.getClassName()).thenReturn("com.example.X");
+                InterceptorMetaData interceptor = mock(InterceptorMetaData.class);
+                when(interceptor.getClassName()).thenReturn("com.example.X");
                 customer.putInterceptor(interceptor);
                 Collection<InterceptorMetaData> result = customer.getInterceptors();
                 assertNotNull(result);
@@ -589,16 +588,16 @@ class CustomerImplTest {
         @Test
         void testNotifyLoginWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
-                jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
+                org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+                jakarta.servlet.http.HttpSession session = mock(jakarta.servlet.http.HttpSession.class);
                 assertDoesNotThrow(() -> customer.notifyLogin(user, session));
         }
 
         @Test
         void testNotifyLogoutWithNoObserversDoesNotThrow() {
                 CustomerImpl customer = new CustomerImpl();
-                org.skyve.metadata.user.User user = Mockito.mock(org.skyve.metadata.user.User.class);
-                jakarta.servlet.http.HttpSession session = Mockito.mock(jakarta.servlet.http.HttpSession.class);
+                org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+                jakarta.servlet.http.HttpSession session = mock(jakarta.servlet.http.HttpSession.class);
                 assertDoesNotThrow(() -> customer.notifyLogout(user, session));
         }
 
@@ -1324,18 +1323,18 @@ class CustomerImplTest {
 	@Test
 	void getBaseDocumentReturnsNullWhenDerivationsMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 		assertNull(customer.getBaseDocument(doc));
 	}
 
 	@Test
 	void getDerivedDocumentsReturnsEmptyListWhenDerivationsMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 		List<String> result = customer.getDerivedDocuments(doc);
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
@@ -1350,9 +1349,9 @@ class CustomerImplTest {
 		Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
 		derivations.put(ADMIN_SPECIAL_USER_DOCUMENT, ADMIN_USER_DOCUMENT);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 
 		List<String> result = customer.getDerivedDocuments(doc);
 		assertEquals(1, result.size());
@@ -1368,9 +1367,9 @@ class CustomerImplTest {
 		Map<String, String> derivations = (Map<String, String>) derivationsField.get(customer);
 		derivations.put(ADMIN_SPECIAL_USER_DOCUMENT, ADMIN_USER_DOCUMENT);
 
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
-		Mockito.when(doc.getName()).thenReturn("SpecialUser");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("SpecialUser");
 
 		assertEquals(ADMIN_USER_DOCUMENT, customer.getBaseDocument(doc));
 	}
@@ -1378,9 +1377,9 @@ class CustomerImplTest {
 	@Test
 	void getExportedReferencesReturnsNullWhenMapIsEmpty() {
 		CustomerImpl customer = new CustomerImpl();
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
-		Mockito.when(doc.getName()).thenReturn("User");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn(ADMIN_MODULE_NAME);
+		when(doc.getName()).thenReturn("User");
 		assertNull(customer.getExportedReferences(doc));
 	}
 }

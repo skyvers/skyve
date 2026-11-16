@@ -72,8 +72,9 @@ class ExecuteSAILTest extends AbstractH2Test {
 		controlPanel.setSailLayoutBuilder(LAYOUT_BUILDER);
 		controlPanel.setSail(SAIL);
 
+		ExecuteSAIL action = new ExecuteSAIL();
 		ValidationException e = assertThrows(ValidationException.class,
-				() -> new ExecuteSAIL().execute(controlPanel, null));
+				() -> action.execute(controlPanel, null));
 
 		assertEquals(1, e.getMessages().size());
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName));

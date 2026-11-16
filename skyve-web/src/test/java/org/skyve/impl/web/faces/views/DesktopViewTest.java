@@ -194,6 +194,8 @@ class DesktopViewTest {
 	@Test
 	void headerTemplateIncludesSearchButtonWhenTextSearchIsEnabled() {
 		DesktopView view = new DesktopView() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public boolean isCanTextSearch() {
 				return true;
@@ -212,6 +214,8 @@ class DesktopViewTest {
 	@Test
 	void headerTemplateOmitsSearchButtonWhenTextSearchIsDisabled() {
 		DesktopView view = new DesktopView() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public boolean isCanTextSearch() {
 				return false;
@@ -230,6 +234,8 @@ class DesktopViewTest {
 	@Test
 	void headerTemplateDefersHeightToSmartClientHeader() {
 		DesktopView view = new DesktopView() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public boolean isCanTextSearch() {
 				return false;
@@ -285,7 +291,7 @@ class DesktopViewTest {
 	}
 
 	/**
-	 * A list opened by its URL, with no menu item, defines its own data source before showing it (runtime issue SC-3),
+	 * A list opened by its URL, with no menu item, defines its own data source before showing it,
 	 * when the user may fetch its rows. The definition does nothing when the menu has already defined it.
 	 */
 	@Test

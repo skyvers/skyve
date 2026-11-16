@@ -70,6 +70,7 @@ class SmartClientTagServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // each tag action's missing-parameter error reads better as its own named test
 	void listWithoutAMenuButtonIdIsAnError() throws Exception {
 		CapturedResponse response = service(newRequest(u)
 				.param("a", "L")).doGet();

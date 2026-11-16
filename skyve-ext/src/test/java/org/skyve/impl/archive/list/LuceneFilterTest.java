@@ -1217,51 +1217,61 @@ class LuceneFilterTest {
 
     @Test
     void testAddTaggedThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addTagged("tag", true));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addTagged("tag", true));
     }
 
     @Test
     void testAddWithinGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addWithin("binding", null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addWithin("binding", null));
     }
 
     @Test
     void testAddContainsGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addContains("binding", (org.locationtech.jts.geom.Geometry) null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addContains("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 
     @Test
     void testAddCrossesGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addCrosses("binding", null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addCrosses("binding", null));
     }
 
     @Test
     void testAddDisjointGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addDisjoint("binding", null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addDisjoint("binding", null));
     }
 
     @Test
     void testAddIntersectsGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addIntersects("binding", null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addIntersects("binding", null));
     }
 
     @Test
     void testAddOverlapsGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addOverlaps("binding", null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addOverlaps("binding", null));
     }
 
     @Test
     void testAddTouchesGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addTouches("binding", null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addTouches("binding", null));
     }
 
     @Test
     void testAddNotEqualsGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 
     @Test
     void testAddEqualsGeometryThrowsUnsupportedOperationException() {
-        assertThrows(UnsupportedOperationException.class, () -> new LuceneFilter().addEquals("binding", (org.locationtech.jts.geom.Geometry) null));
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addEquals("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 }

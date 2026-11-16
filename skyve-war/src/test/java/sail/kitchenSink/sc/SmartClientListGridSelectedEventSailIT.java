@@ -11,7 +11,7 @@ import util.sail.BrowserConfiguration.Browsers;
 
 /**
  * Selecting a SmartClient list grid row whose selected event rerenders the view runs the event once, keeps the row
- * selected and sets the selected id binding (runtime issue SC-10).
+ * selected and sets the selected id binding.
  * <p>
  * The List Grid Fixture's "PrimeFaces data table" list grid has a {@code selectedIdBinding} and an
  * {@code onSelectedHandlers} {@code <rerender>}. The rerender's response refreshes the view's list grids. The refresh

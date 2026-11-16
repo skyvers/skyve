@@ -27,13 +27,16 @@ class PushMessageTest {
 	@BeforeEach
 	void setUp() {
 		// Ensure reaper is stopped before each test
-		PushMessage.stopReaper();
-		PushMessage.RECEIVERS.clear();
+		resetPushState();
 	}
 
 	@AfterEach
 	void tearDown() {
 		// Ensure reaper is always stopped after each test
+		resetPushState();
+	}
+
+	private static void resetPushState() {
 		PushMessage.stopReaper();
 		PushMessage.RECEIVERS.clear();
 	}

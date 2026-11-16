@@ -10,15 +10,6 @@ class ModuleDocumentRefTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void setOwningModuleNameRoundtripIsConsistent() {
-		// Also validates that after setting owning module, properties map is initialised
-		Module.DocumentRef ref = new Module.DocumentRef();
-		ref.setOwningModuleName("admin");
-		assertThat(ref.getOwningModuleName(), is("admin"));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
 	void setOwningModuleNameRoundtrip() {
 		Module.DocumentRef ref = new Module.DocumentRef();
 		ref.setOwningModuleName("admin");

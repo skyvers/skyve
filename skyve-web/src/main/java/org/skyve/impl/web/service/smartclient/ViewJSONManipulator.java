@@ -205,29 +205,6 @@ public class ViewJSONManipulator extends ViewVisitor {
 			return Encode.forJavaScriptAttribute(confirmationText).replace("{", "\\{").replace("}", "\\}");
 		}
 
-		// The action is declared on the row document's edit or create view in a data widget,
-		// as ReferenceProcessor.obtainActionForActionReference() finds it for faces
-		private @Nullable Action obtainAction(@Nonnull String actionName) {
-			Action result = null;
-			if (dataWidgetDocument == null) {
-				result = view.getAction(actionName);
-			}
-			else {
-				for (ViewType viewType : new ViewType[] {ViewType.edit, ViewType.create}) {
-					try {
-						result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
-					}
-					catch (@SuppressWarnings("unused") MetaDataException e) {
-						// No view of this type, try the next
-					}
-					if (result != null) {
-						break;
-					}
-				}
-			}
-			return result;
-		}
-
 		@Override
 		public void processContentReference(@Nonnull ContentReference reference) {
 			String binding = reference.getBinding();
@@ -359,6 +336,29 @@ public class ViewJSONManipulator extends ViewVisitor {
 	// so that code generated server-side can look up the appropriate controls
 	private int editIdCounter = 0;
 	private int createIdCounter = 0;
+
+	// The action is declared on the row document's edit or create view in a data widget,
+	// as ReferenceProcessor.obtainActionForActionReference() finds it for faces
+	private @Nullable Action obtainAction(@Nonnull String actionName) {
+		Action result = null;
+		if (dataWidgetDocument == null) {
+			result = view.getAction(actionName);
+		}
+		else {
+			for (ViewType viewType : new ViewType[] {ViewType.edit, ViewType.create}) {
+				try {
+					result = dataWidgetDocument.getView(currentUxUi, customer, viewType.name()).getAction(actionName);
+				}
+				catch (@SuppressWarnings("unused") MetaDataException e) {
+					// No view of this type, try the next
+				}
+				if (result != null) {
+					break;
+				}
+			}
+		}
+		return result;
+	}
 
 	// HrefProcessor - takes a Reference and appends a suitable href in htmlGuts
 	HrefProcessor hrefProcessor = new HrefProcessor();
@@ -1180,7 +1180,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 		String selectedTabIndexBinding = tabPane.getSelectedTabIndexBinding();
 		if (selectedTabIndexBinding != null) {
 			// Mutable when it is a document attribute, which can be set: the client sends the tab the user selected, so that
-			// a later response does not select the old one again (runtime issue SC-7). PrimeFaces likewise writes its tab
+			// a later response does not select the old one again. PrimeFaces likewise writes its tab
 			// view's activeIndex unless the binding is read only. A binding to anything else is only read.
 			boolean attribute = false;
 			try {

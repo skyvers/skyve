@@ -14,7 +14,6 @@ import org.primefaces.component.picklist.PickList;
 import org.primefaces.model.DualListModel;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 
-@SuppressWarnings({"static-method", "unchecked"})
 class AssociationPickListConverterTest {
 
 	private AssociationPickListConverter converter;

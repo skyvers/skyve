@@ -3,12 +3,12 @@ package org.skyve.util;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.metadata.customer.Customer;
 
 /**
@@ -84,7 +84,7 @@ class JSONTest {
 
 	@Test
 	void marshallWithNullCustomerAndObjectReturnsJson() {
-		String result = JSON.marshall(Mockito.mock(Customer.class), "hello");
+		String result = JSON.marshall(mock(Customer.class), "hello");
 		assertNotNull(result);
 	}
 
@@ -93,7 +93,7 @@ class JSONTest {
 	@Test
 	void marshallWithNullCustomerObjectAndPropertyNamesReturnsJson() {
 		Set<String> props = new HashSet<>();
-		String result = JSON.marshall(Mockito.mock(Customer.class), "hello", props);
+		String result = JSON.marshall(mock(Customer.class), "hello", props);
 		assertNotNull(result);
 	}
 }

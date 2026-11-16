@@ -27,6 +27,7 @@ public class JUnitMultiThreadedRunnerWithParameters extends BlockJUnit4ClassRunn
 	}
 
 	@AfterAll
+	@SuppressWarnings("java:S2925") // polls the public THREAD_COUNT, the contract this class documents for a test's @AfterClass
 	static void waitForThreadsToComplete() throws Exception {
 		while (JUnitMultiThreadedRunnerWithParameters.THREAD_COUNT.get() > 0) {
 			Thread.sleep(100);

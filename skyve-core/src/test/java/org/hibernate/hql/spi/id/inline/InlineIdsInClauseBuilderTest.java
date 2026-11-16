@@ -14,6 +14,7 @@ import org.hibernate.type.TypeResolver;
 import org.hibernate.type.spi.TypeConfiguration;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings({"static-method", "boxing"})
 class InlineIdsInClauseBuilderTest {
 	private static class LimitedInExpressionCountDialect extends H2Dialect {
 		private final int inExpressionCountLimit;
@@ -165,6 +166,8 @@ class InlineIdsInClauseBuilderTest {
 		assertThat("(id) in (" + idFragment + ")", is("(id) in ((1),(2) ) or ( id ) in ((3),(4) ) or ( id ) in ((5))"));
 	}
 
+	// InlineIdsInClauseBuilder's constructor takes Hibernate 5's deprecated TypeResolver.
+	@SuppressWarnings("deprecation")
 	private static TypeResolver typeResolver() {
 		TypeConfiguration typeConfiguration = new TypeConfiguration();
 		return new TypeResolver(typeConfiguration, new TypeFactory(typeConfiguration));

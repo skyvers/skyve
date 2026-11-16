@@ -20,7 +20,7 @@ import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
 
 /**
- * Where PrimeFaces puts the focus (runtime issue P11, docs/sail-runtime-issues.md). Each view's form has a
+ * Where PrimeFaces puts the focus. Each view's form has a
  * {@code <p:focus/>}, which focuses the first input of a page that has just been loaded (a GET). It used to do so after
  * every ajax response as well, which scrolled the page to its first input and took the focus from the field the user
  * had moved to.

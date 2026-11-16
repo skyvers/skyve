@@ -68,6 +68,7 @@ class PrimeFacesInlineWebDriverExecutorTest {
 		dataGridNew.setBinding("contacts");
 		ListGridSelect listGridSelect = new ListGridSelect();
 		listGridSelect.setRow(Integer.valueOf(0));
+		TestDataEnter testDataEnter = new TestDataEnter();
 
 		assertThrows(MetaDataException.class, () -> executor.executeTabSelect(tabSelect));
 		assertThrows(MetaDataException.class, () -> executor.executeDataEnter(dataEnter));
@@ -75,7 +76,7 @@ class PrimeFacesInlineWebDriverExecutorTest {
 		assertThrows(MetaDataException.class, () -> executor.executeLookupDescriptionPick(pick));
 		assertThrows(MetaDataException.class, () -> executor.executeDataGridNew(dataGridNew));
 		assertThrows(MetaDataException.class, () -> executor.executeListGridSelect(listGridSelect));
-		assertThrows(MetaDataException.class, () -> executor.executeTestDataEnter(new TestDataEnter()));
+		assertThrows(MetaDataException.class, () -> executor.executeTestDataEnter(testDataEnter));
 	}
 
 	@Test
@@ -87,7 +88,8 @@ class PrimeFacesInlineWebDriverExecutorTest {
 		executor.executeNavigateEdit(edit);
 		executor.executeNavigateLink(new NavigateLink());
 
-		assertThrows(MetaDataException.class, () -> executor.executeTestDataEnter(new TestDataEnter()));
+		TestDataEnter testDataEnter = new TestDataEnter();
+		assertThrows(MetaDataException.class, () -> executor.executeTestDataEnter(testDataEnter));
 	}
 
 	@Test

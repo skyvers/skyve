@@ -32,6 +32,7 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void suite() {
 		// The user that 03-security-admin makes, in a group with these roles: build that user's views with them
 		viewRoles("sail{run}", "admin.BasicUser", "admin.ContactViewer");

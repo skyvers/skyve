@@ -456,7 +456,7 @@ class BinderTest {
 		assertFalse(Binder.isDynamic(customer, module, document, attribute));
 		assertFalse(Binder.isDynamic(customer, module, attribute));
 		assertThrows(RuntimeException.class, () -> Binder.isDynamic(customer, module,
-				(org.skyve.metadata.model.document.Relation) mock(org.skyve.metadata.model.document.Relation.class)));
+				mock(org.skyve.metadata.model.document.Relation.class)));
 
 		assertDoesNotThrow(() -> Binder.populateProperties(user, null, new TreeMap<>(), false));
 		assertThrows(RuntimeException.class, () -> Binder.populateProperty(user, new SimpleOwner("O2"), "bizKey", "K", false));

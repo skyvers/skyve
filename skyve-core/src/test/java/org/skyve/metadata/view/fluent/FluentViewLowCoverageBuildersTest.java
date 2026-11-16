@@ -182,6 +182,8 @@ class FluentViewLowCoverageBuildersTest {
         @Test
         void eventActionFromWithUnknownTypeThrowsIllegalArgument() {
                 EventAction unknown = new EventAction() {
+                        private static final long serialVersionUID = 1L;
+
                         @Override public Map<String, String> getProperties() { return new TreeMap<>(); }
                 };
                 assertThrows(IllegalArgumentException.class, () -> FluentEventAction.from(unknown));

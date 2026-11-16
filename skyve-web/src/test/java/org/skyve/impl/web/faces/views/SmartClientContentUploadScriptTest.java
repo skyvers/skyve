@@ -15,6 +15,7 @@ class SmartClientContentUploadScriptTest {
 	private static final Path COMMON_UTIL_SCRIPT = Path.of("src/js/common/util.js");
 
 	@Test
+	@SuppressWarnings("java:S5961") // each assertion pins one source fragment of the one link preview editor
 	void contentUploadLinkPreviewIsVerticallyCentredInEditor() throws IOException {
 		String script = Files.readString(TYPES_SCRIPT);
 

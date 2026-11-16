@@ -3,6 +3,8 @@ package org.skyve.impl.web.faces.actions;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -38,7 +40,7 @@ class PreRenderColdHitActionTest {
 		PreRenderColdHitAction action = new PreRenderColdHitAction(facesView);
 		assertNull(action.callback());
 
-		org.mockito.Mockito.verify(facesView, never()).initialise();
+		verify(facesView, never()).initialise();
 	}
 
 	@Test
@@ -54,7 +56,7 @@ class PreRenderColdHitActionTest {
 		PreRenderColdHitAction action = new PreRenderColdHitAction(facesView);
 		assertNull(action.callback());
 
-		org.mockito.Mockito.verify(facesView).initialise();
+		verify(facesView).initialise();
 	}
 
 	@Test
@@ -65,8 +67,8 @@ class PreRenderColdHitActionTest {
 		PreRenderColdHitAction action = new PreRenderColdHitAction(facesView);
 		assertNull(action.callback());
 
-		org.mockito.Mockito.verify(facesView, never()).initialise();
-		org.mockito.Mockito.verifyNoMoreInteractions(facesView);
+		verify(facesView, never()).initialise();
+		verifyNoMoreInteractions(facesView);
 	}
 
 	@SuppressWarnings({ "unchecked", "java:S112", "java:S3011" }) // Reflection installs private thread state for focused tests.

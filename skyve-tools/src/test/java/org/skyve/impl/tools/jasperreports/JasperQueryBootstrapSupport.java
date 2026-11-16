@@ -65,6 +65,7 @@ abstract class JasperQueryBootstrapSupport {
 	static void tearDownJasperQueryBootstrap() throws Exception {
 		try {
 			if (bootstrapComplete) {
+				@SuppressWarnings("resource") // closed below unless something else closed it already
 				SessionFactory sessionFactory = getSessionFactory();
 				if ((sessionFactory != null) && (! sessionFactory.isClosed())) {
 					sessionFactory.close();

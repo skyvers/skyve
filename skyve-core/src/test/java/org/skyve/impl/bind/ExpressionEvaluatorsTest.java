@@ -6,12 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -24,17 +25,17 @@ import org.skyve.metadata.module.Module;
 class ExpressionEvaluatorsTest {
 
 	private static Customer mockCustomer() {
-		Customer c = Mockito.mock(Customer.class);
-		Mockito.when(c.getModules()).thenReturn(Collections.emptyList());
+		Customer c = mock(Customer.class);
+		when(c.getModules()).thenReturn(Collections.emptyList());
 		return c;
 	}
 
 	private static Module mockModule() {
-		return Mockito.mock(Module.class);
+		return mock(Module.class);
 	}
 
 	private static Document mockDocument() {
-		return Mockito.mock(Document.class);
+		return mock(Document.class);
 	}
 
 	// ------------------------------------------------------------------ I18N

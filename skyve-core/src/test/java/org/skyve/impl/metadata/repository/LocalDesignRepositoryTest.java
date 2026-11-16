@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,6 +11,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -210,7 +211,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainPassesForMinimalValidSetup() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 
@@ -227,7 +228,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForTopLayoutMismatch() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module module = mock(Module.class);
@@ -251,7 +252,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForInvalidFeatureRole() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module module = mock(Module.class);
@@ -272,7 +273,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForUnknownModuleEntry() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 
@@ -294,7 +295,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForInvalidCustomerRoleModuleRole() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module moduleFromCustomer = mock(Module.class);
@@ -324,7 +325,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedQueryModuleUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 
@@ -345,7 +346,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedMetaDataQueryUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -368,7 +369,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedSQLQueryUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -391,7 +392,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedBizQLQueryUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -414,7 +415,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenImportedQueryDrivingDocumentUnknown() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -440,7 +441,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenMenuDocumentMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 
@@ -463,7 +464,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenTransientDocumentUsedInListItem() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -488,7 +489,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenMenuQueryMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -507,7 +508,8 @@ class LocalDesignRepositoryTest {
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 		when(module.getMetaDataQuery("MissingQuery")).thenReturn(null);
 
 		assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
@@ -515,7 +517,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenTreeDocumentNotHierarchical() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -533,7 +535,8 @@ class LocalDesignRepositoryTest {
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 		when(document.getParentDocumentName()).thenReturn("ParentDoc");
 		when(document.getName()).thenReturn("Doc");
 
@@ -542,7 +545,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenListModelCannotBeResolved() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -561,7 +564,8 @@ class LocalDesignRepositoryTest {
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 
 		doReturn(null).when(repository).getListModel(customer, document, "MissingModel", false);
 
@@ -570,7 +574,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenMapModelCannotBeResolved() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -589,7 +593,8 @@ class LocalDesignRepositoryTest {
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 
 		doThrow(new RuntimeException("missing map model")).when(repository).getMapModel(customer, document, "MissingMapModel", false);
 
@@ -598,7 +603,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainAllowsTransientDocumentForListModelItem() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -629,7 +634,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenActionPrivilegeReferencesMissingAction() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -659,7 +664,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenModelAggregateAccessModelMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -683,7 +688,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenReportAccessReportMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Module reportModule = mock(Module.class);
@@ -709,7 +714,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenActionPrivilegeResolvesToMetaDataAction() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -741,7 +746,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenModelAggregateAccessResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -766,7 +771,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenReportAccessResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Module reportModule = mock(Module.class);
@@ -792,7 +797,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenDynamicImageAccessMissing() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -816,7 +821,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenDynamicImageAccessResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -841,7 +846,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenActionPrivilegeResolvesToClassAction() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -870,7 +875,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainAllowsTransientDocumentForEditItem() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -895,7 +900,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenMapModelResolves() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -917,7 +922,8 @@ class LocalDesignRepositoryTest {
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getRoles()).thenReturn(List.of());
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 		when(document.getAttribute("location")).thenReturn(location);
 		when(location.getAttributeType()).thenReturn(AttributeType.geometry);
 		doReturn(Geometry.class).when(location).getImplementingType();
@@ -929,7 +935,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenModelMenuItemHasNoDocument() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 
@@ -953,7 +959,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainPassesWhenImportedSQLQueryExists() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Module importedModule = mock(Module.class);
@@ -977,7 +983,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsWhenFeatureRoleModuleCannotBeResolved() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 
@@ -997,7 +1003,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateCustomerForGenerateDomainThrowsForUnnamedCustomerRoleModuleRole() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module homeModule = mock(Module.class);
 		Module moduleFromCustomer = mock(Module.class);
@@ -1022,7 +1028,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateDocumentForGenerateDomainThrowsWhenInverseTargetModuleCannotBeResolved() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Document document = inverseDocument(module);
@@ -1037,7 +1043,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateDocumentForGenerateDomainThrowsWhenInverseTargetDocumentCannotBeFound() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module otherModule = mock(Module.class);
@@ -1071,10 +1077,11 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenContentAccessBindingIsInvalid() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = moduleWithRoleAccess(customer, UserAccess.content("testModule", "Doc", "missing"));
-		when(module.getDocument(customer, "Doc")).thenReturn(mock(Document.class));
+		Document document = mock(Document.class);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
 		assertTrue(e.getMessage().endsWith("] in module testModule with binding missing is not a valid binding."), e.getMessage());
@@ -1082,7 +1089,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenADocumentAccessHasNoDocumentName() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		@SuppressWarnings("null") // passes null on purpose
 		UserAccess access = UserAccess.dynamicImage("testModule", null, "image");
@@ -1094,7 +1101,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenAContentAccessHasNoBinding() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		@SuppressWarnings("null") // passes null on purpose
 		UserAccess access = UserAccess.content("testModule", "Doc", null);
@@ -1106,7 +1113,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateModuleForGenerateDomainThrowsWhenMapItemHasNoGeometryBinding() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
@@ -1123,7 +1130,8 @@ class LocalDesignRepositoryTest {
 		when(module.getMetadataQueries()).thenReturn(List.of());
 		when(module.getMenu()).thenReturn(menu);
 		when(module.getDocument(customer, "Doc")).thenReturn(document);
-		when(document.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(document.getPersistent()).thenReturn(persistent);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> repository.validateModuleForGenerateDomain(customer, module));
 		assertEquals("Map Menu [mapItem] in module testModule has no geometryBinding.", e.getMessage());
@@ -1131,7 +1139,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateDocumentForGenerateDomainThrowsWhenANamedConditionIsNotDefined() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document document = mock(Document.class);
 		when(document.getOwningModuleName()).thenReturn("admin");
@@ -1145,7 +1153,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateDocumentForGenerateDomainThrowsWhenACollectionOrderingBindingIsInvalid() {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Module module = mock(Module.class);
 		Module otherModule = mock(Module.class);
@@ -1173,7 +1181,7 @@ class LocalDesignRepositoryTest {
 
 	@Test
 	void validateViewForGenerateDomainThrowsWhenAReportAccessReportDoesNotExist() throws Exception {
-		LocalDesignRepository repository = org.mockito.Mockito.spy(new LocalDesignRepository());
+		LocalDesignRepository repository = spy(new LocalDesignRepository());
 		CustomerImpl customer = mock(CustomerImpl.class);
 		ModuleImpl module = mock(ModuleImpl.class);
 		when(module.getName()).thenReturn("admin");
@@ -1252,7 +1260,8 @@ class LocalDesignRepositoryTest {
 	 */
 	private static void stubPersistentHomeDocument(Customer customer, Module module) {
 		Document homeDocument = mock(Document.class);
-		when(homeDocument.getPersistent()).thenReturn(mock(Persistent.class));
+		Persistent persistent = mock(Persistent.class);
+		when(homeDocument.getPersistent()).thenReturn(persistent);
 		when(module.getHomeDocumentName()).thenReturn("PersistentHomeDocument");
 		when(module.getDocument(customer, "PersistentHomeDocument")).thenReturn(homeDocument);
 	}

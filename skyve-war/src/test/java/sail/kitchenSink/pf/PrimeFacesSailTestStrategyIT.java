@@ -75,7 +75,8 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void verifyReportsEveryFailureAtTheEnd() {
-		AssertionError e = assertThrows(AssertionError.class, () -> sailString(SCRIPT.formatted("Verify")));
+		String script = SCRIPT.formatted("Verify");
+		AssertionError e = assertThrows(AssertionError.class, () -> sailString(script));
 		String message = e.getMessage();
 		assertAll(() -> assertTrue(message.contains("with 5 failure(s)"), message),
 					() -> assertTrue(message.contains("Interaction \"Wrong values\" step 3 <testValue binding=\"eventText\" value=\"not entered\" />: expected [eventText] to be 'not entered' but it was 'entered'"), message),
@@ -89,7 +90,8 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 
 	@Test
 	void assertStopsAtTheFirstFailure() {
-		AssertionError e = assertThrows(AssertionError.class, () -> sailString(SCRIPT.formatted("Assert")));
+		String script = SCRIPT.formatted("Assert");
+		AssertionError e = assertThrows(AssertionError.class, () -> sailString(script));
 		String message = e.getMessage();
 		assertAll(() -> assertTrue(message.startsWith("Interaction \"Wrong values\" step 3 "), message),
 					() -> assertFalse(message.contains("step 4"), message));

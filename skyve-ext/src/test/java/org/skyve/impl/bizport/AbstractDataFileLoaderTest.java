@@ -476,9 +476,10 @@ class AbstractDataFileLoaderTest {
 		DataFileField field = field("company.name", AttributeType.text);
 		field.setLoadAction(null);
 		Bean order = new DynamicBean("sales", "Order", new TreeMap<>());
+		StringBuilder what = new StringBuilder();
 
 		DomainException thrown = assertThrows(DomainException.class,
-				() -> loader.lookupBean(order, field, "Acme", new StringBuilder()));
+				() -> loader.lookupBean(order, field, "Acme", what));
 
 		assertThat(thrown.getMessage(), containsString("No load action"));
 	}

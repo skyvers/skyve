@@ -322,7 +322,7 @@
 			<testValue binding="selection" value="SAIL filter {run} c" />
 			<lookupDescriptionPick binding="singleSelection" rowContaining="SAIL filter {run} b" />
 			<testValue binding="singleSelection" value="SAIL filter {run} b" />
-			<comment>Edit the row again and change a model lookup column: its drop-down's fetch must not end the row's edit (runtime issue SC-11)</comment>
+			<comment>Edit the row again and change a model lookup column: its drop-down's fetch must not end the row's edit</comment>
 			<dataGridEdit binding="rows" row="0" />
 			<testValue binding="selection" value="SAIL filter {run} c" />
 			<testValue binding="singleSelection" value="SAIL filter {run} b" />
@@ -352,7 +352,7 @@
 			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" />
 			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
-			<comment>The grid has a filter parameter, so the browser completes its criteria before it fetches: a time in the advanced filter must still be sent as a time (runtime issue SC-9)</comment>
+			<comment>The grid has a filter parameter, so the browser completes its criteria before it fetches: a time in the advanced filter must still be sent as a time</comment>
 			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="lessThan" />
 			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
@@ -405,7 +405,7 @@
 		<method>
 			<comment>Selecting a row of the List Grid Fixture's second list grid rerenders the view, which shows the row's id and
 				a blurb's link to it. The rerender refreshes the grid, which keeps the row selected and does not select it
-				again (runtime issue SC-10).</comment>
+				again.</comment>
 			<navigateEdit module="kitchensink" document="ListGridFixture" />
 			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run} b" />
 			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run} b" />

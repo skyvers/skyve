@@ -296,7 +296,8 @@ class SmartClientLookupDefinitionTest {
 		when(query.getName()).thenReturn("customerQuery");
 		when(query.getDocumentName()).thenReturn("Contact");
 		when(query.getColumns()).thenReturn(List.of(column));
-		when(module.getDocument(customer, "Contact")).thenReturn(mock(Document.class));
+		Document contactDocument = mock(Document.class);
+		when(module.getDocument(customer, "Contact")).thenReturn(contactDocument);
 
 		MetaDataException e = assertThrows(MetaDataException.class,
 											() -> new SmartClientLookupDefinition(false, null, customer, module,

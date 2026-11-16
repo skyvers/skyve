@@ -236,7 +236,7 @@ class EnumUserTypeTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testNullSafeSetToCodeInvocationThrowsHibernateException() throws Exception {
+	void testNullSafeSetToCodeInvocationThrowsHibernateException() {
 		// covers L120-121: toCode method invocation throws → HibernateException
 		EnumUserType newType = new EnumUserType();
 		Properties props = new Properties();

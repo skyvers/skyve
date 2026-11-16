@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -53,7 +55,8 @@ class DefaultUxUiSelectorTest {
 	@Test
 	void selectReturnsExternalWhenSessionIsNull() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
-		when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+		Principal principal = mock(Principal.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
 		when(request.getSession(false)).thenReturn(null);
 
 		UxUi result = selector.select(UserAgentType.desktop, request);
@@ -65,7 +68,8 @@ class DefaultUxUiSelectorTest {
 	void selectReturnsExternalWhenSessionHasNoUserAttribute() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+		Principal principal = mock(Principal.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
 		when(request.getSession(false)).thenReturn(session);
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
 		when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
@@ -79,7 +83,8 @@ class DefaultUxUiSelectorTest {
 	void selectReturnsPHONEForPhoneUserAgent() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+		Principal principal = mock(Principal.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
 		when(request.getSession(false)).thenReturn(session);
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
 		when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
@@ -93,7 +98,8 @@ class DefaultUxUiSelectorTest {
 	void selectReturnsTABLETForTabletUserAgent() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+		Principal principal = mock(Principal.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
 		when(request.getSession(false)).thenReturn(session);
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
 		when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
@@ -107,7 +113,8 @@ class DefaultUxUiSelectorTest {
 	void selectUsesSessionUxUiNameWhenPresent() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+		Principal principal = mock(Principal.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
 		when(request.getSession(false)).thenReturn(session);
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
 		when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME)).thenReturn("phone");
@@ -121,7 +128,8 @@ class DefaultUxUiSelectorTest {
 	void selectIgnoresUnknownSessionUxUiNameAndFallsThrough() {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
-		when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+		Principal principal = mock(Principal.class);
+		when(request.getUserPrincipal()).thenReturn(principal);
 		when(request.getSession(false)).thenReturn(session);
 		when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
 		when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME)).thenReturn("unknownUxUi");
@@ -140,7 +148,8 @@ class DefaultUxUiSelectorTest {
 		boolean previousShowSetup = UtilImpl.SHOW_SETUP;
 		UtilImpl.SHOW_SETUP = true;
 		try {
-			when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+			Principal principal = mock(Principal.class);
+			when(request.getUserPrincipal()).thenReturn(principal);
 			when(request.getSession(false)).thenReturn(session);
 			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
 			doReturn(true).when(user).isInRole(modules.admin.domain.Startup.MODULE_NAME, "SecurityAdministrator");
@@ -163,7 +172,8 @@ class DefaultUxUiSelectorTest {
 		boolean previousShowSetup = UtilImpl.SHOW_SETUP;
 		UtilImpl.SHOW_SETUP = true;
 		try {
-			when(request.getUserPrincipal()).thenReturn(mock(java.security.Principal.class));
+			Principal principal = mock(Principal.class);
+			when(request.getUserPrincipal()).thenReturn(principal);
 			when(request.getSession(false)).thenReturn(session);
 			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
 			doReturn(true).when(user).isInRole(modules.admin.domain.Startup.MODULE_NAME, "SecurityAdministrator");

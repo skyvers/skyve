@@ -15,7 +15,7 @@ import modules.kitchensink.domain.ActionsFixture;
 
 /**
  * Records that it ran, and growls {@value #GROWL}, which is all the actions fixture needs to put a condition on an upload
- * action, and shows that the upload page carries the action's growls to the view when it closes (runtime issue P3).
+ * action, and shows that the upload page carries the action's growls to the view when it closes.
  * It refuses a file named {@value #REFUSED_FILE_NAME} with an {@link UploadException}, as an application refuses a file
  * that already exists (as admin's Upload Backup does), and one named {@value #INVALID_FILE_NAME} with a
  * {@link ValidationException} (as some applications' upload actions do), and one named {@value #UNAVAILABLE_FILE_NAME}

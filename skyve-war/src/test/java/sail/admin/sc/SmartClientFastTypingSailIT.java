@@ -18,7 +18,7 @@ import util.sail.BrowserConfiguration.Browsers;
 
 /**
  * Typing fast into a SmartClient field whose change handler calls the server keeps every key, and a button clicked
- * straight after the typing still runs (runtime issue SC-8).
+ * straight after the typing still runs.
  * <p>
  * The User wizard's new password rerenders the form when it changes. SAIL's executor types such a field one key at a
  * time, so this test types the whole password in one burst of key events, as a fast typist or a paste of keys would,

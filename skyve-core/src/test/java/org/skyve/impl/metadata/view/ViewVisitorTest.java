@@ -3,9 +3,9 @@ package org.skyve.impl.metadata.view;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -82,11 +82,11 @@ class ViewVisitorTest {
 	}
 
 	private static CustomerImpl mockCustomer() {
-		return Mockito.mock(CustomerImpl.class);
+		return mock(CustomerImpl.class);
 	}
 
 	private static ModuleImpl mockModule() {
-		return Mockito.mock(ModuleImpl.class);
+		return mock(ModuleImpl.class);
 	}
 
 	/** DocumentImpl is final — pass null (none of these tests dereference the document parameter). */

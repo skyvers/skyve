@@ -316,7 +316,7 @@ class DataMaintenanceActionsH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	void truncateAuditLogSetResultCountUsesAggregateCount() throws Exception {
+	void truncateAuditLogSetResultCountUsesAggregateCount() {
 		Persistence persistence = mock(Persistence.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 		DocumentFilter filter = mock(DocumentFilter.class);

@@ -74,28 +74,28 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 	private static final String EDIT_VIEW_ONLY_ACTION = "GeneratePassword";
 	/**
 	 * The messages of a successful upload of {@code upload.txt} (8 bytes): the action's growl (its text once), then the
-	 * upload's success, as JSON, which the upload page carries to the view as it closes (runtime issue P3).
+	 * upload's success, as JSON, which the upload page carries to the view as it closes.
 	 */
 	private static final String UPLOAD_MESSAGES = "[{\"detail\":\"\",\"severity\":\"info\",\"summary\":\"" + ActionsUpload.GROWL + "\"}," +
 													"{\"detail\":\"upload.txt is uploaded. File Size is 0.01 KB\",\"severity\":\"info\",\"summary\":\"Successful\"}]";
 	/**
 	 * The script that closes a PrimeFaces upload page after its action upload has succeeded, showing the page's messages
-	 * in the view (runtime issue P3).
+	 * in the view.
 	 */
 	private static final String CLOSE_UPLOAD_PAGE_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,true," + UPLOAD_MESSAGES + ")}";
 	/**
 	 * The script that tells a PrimeFaces upload page's owner that its upload action ran and showed problems, so that
-	 * closing the page refreshes the view (runtime issue P8).
+	 * closing the page refreshes the view.
 	 */
 	private static final String UPLOAD_RAN_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,false)}";
 	/**
 	 * The callback parameter that tells a SmartClient upload window whether its action upload succeeded, so that
-	 * upload.xhtml closes the window (runtime issue P3).
+	 * upload.xhtml closes the window.
 	 */
 	private static final String UPLOAD_SUCCEEDED_PARAM = "actionUploadSucceeded";
 	/**
 	 * The callback parameter that carries a SmartClient upload or import window's messages, as JSON, to show in the view
-	 * as the window closes (runtime issue P3).
+	 * as the window closes.
 	 */
 	private static final String MESSAGES_PARAM = "uploadMessages";
 	/** The callback parameter that tells a SmartClient import window that its import succeeded without problems. */
@@ -222,7 +222,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 	/**
 	 * The growls an upload action adds to a SmartClient conversation are shown on the upload page, as a PrimeFaces
-	 * conversation's are, so that the page carries them to the view as it closes (runtime issue P3). The text is the
+	 * conversation's are, so that the page carries them to the view as it closes. The text is the
 	 * summary, with an empty detail, so that the page's growl, which shows details, shows it once.
 	 */
 	@Test
@@ -240,7 +240,7 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 	/**
 	 * The success message names the file escaped: the upload page's growl, and the view's that the message is carried
-	 * to (runtime issue P3), show its markup.
+	 * to, show its markup.
 	 */
 	@Test
 	void theSuccessMessageEscapesTheFileName() throws Exception {
@@ -284,8 +284,8 @@ class ActionsFixtureBizPortAndUploadH2Test extends AbstractSkyveTest {
 
 	/**
 	 * An upload that its action refuses leaves its upload page open, showing why, and tells the page's owner that the
-	 * action ran, so that closing the page refreshes the view (runtime issue P8: a page closed without an upload does
-	 * not refresh it).
+	 * action ran, so that closing the page refreshes the view: a page closed without an upload does not
+	 * refresh it.
 	 */
 	@Test
 	void aRefusedUploadLeavesItsUploadPageOpen() throws Exception {

@@ -208,7 +208,7 @@ class HibernateQueryDelegateTest {
 
 			assertEquals(7, updated);
 			verify(hibernateQuery).setTimeout(2);
-			verify(hibernateQuery).setParameterList(eq("ids"), eq(List.of("a", "b")));
+			verify(hibernateQuery).setParameterList("ids", List.of("a", "b"));
 			verify(hibernateQuery).setParameterList(eq("codes"), any(Object[].class));
 			verify(hibernateQuery).setParameter("x", Integer.valueOf(9));
 		}

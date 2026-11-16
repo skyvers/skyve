@@ -6,9 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.model.Attribute;
 
@@ -117,10 +118,10 @@ class ComparisonPropertyTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void attributeConstructorWithNullBeansUsesAttributeValues() {
-		Attribute attr = Mockito.mock(Attribute.class);
-		Mockito.when(attr.getName()).thenReturn("myField");
-		Mockito.when(attr.getLocalisedDisplayName()).thenReturn("My Field");
-		Mockito.when(attr.getDefaultInputWidget()).thenReturn(null);
+		Attribute attr = mock(Attribute.class);
+		when(attr.getName()).thenReturn("myField");
+		when(attr.getLocalisedDisplayName()).thenReturn("My Field");
+		when(attr.getDefaultInputWidget()).thenReturn(null);
 
 		ComparisonProperty p = new ComparisonProperty(attr, null, null);
 
@@ -137,13 +138,13 @@ class ComparisonPropertyTest {
 		// Using "bizModule" means PROPERTY_UTILS.getProperty(mockBean, "bizModule") will call
 		// mockBean.getBizModule() which returns null (Mockito default). This covers the
 		// oldBean != null and newBean != null branches.
-		Attribute attr = Mockito.mock(Attribute.class);
-		Mockito.when(attr.getName()).thenReturn("bizModule");
-		Mockito.when(attr.getLocalisedDisplayName()).thenReturn("Module");
-		Mockito.when(attr.getDefaultInputWidget()).thenReturn(null);
+		Attribute attr = mock(Attribute.class);
+		when(attr.getName()).thenReturn("bizModule");
+		when(attr.getLocalisedDisplayName()).thenReturn("Module");
+		when(attr.getDefaultInputWidget()).thenReturn(null);
 
-		org.skyve.domain.Bean oldBean = Mockito.mock(org.skyve.domain.Bean.class);
-		org.skyve.domain.Bean newBean = Mockito.mock(org.skyve.domain.Bean.class);
+		org.skyve.domain.Bean oldBean = mock(org.skyve.domain.Bean.class);
+		org.skyve.domain.Bean newBean = mock(org.skyve.domain.Bean.class);
 
 		ComparisonProperty p = new ComparisonProperty(attr, oldBean, newBean);
 

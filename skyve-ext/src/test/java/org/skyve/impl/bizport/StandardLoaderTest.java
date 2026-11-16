@@ -452,8 +452,10 @@ class StandardLoaderTest {
 		SheetKey elementKey = new SheetKey("sales", "Line");
 		ownerColumn.setReferencedSheet(ownerKey);
 		elementColumn.setReferencedSheet(elementKey);
-		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
-		when(workbook.getSheet(elementKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+		BizPortSheet elementSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(elementKey)).thenReturn(elementSheet);
 		DynamicBean element = dynamicBean("sales", "Line", "E1", Map.of());
 		DynamicBean owner = dynamicBean("sales", "Order", "O1", Map.of("lines", new ArrayList<Bean>(List.of(element))));
 		putMappedBean(loader, ownerDocument, "O1", owner);
@@ -480,8 +482,10 @@ class StandardLoaderTest {
 		ownerColumn.setReferencedSheet(ownerKey);
 		elementColumn.setReferencedSheet(elementKey);
 		when(sheet.nextRow()).thenReturn(true, true, false);
-		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
-		when(workbook.getSheet(elementKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
+		BizPortSheet elementSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(elementKey)).thenReturn(elementSheet);
 		DynamicBean element = dynamicBean("sales", "Line", "E1", Map.of());
 		DynamicBean owner = dynamicBean("sales", "Order", "O1", Map.of("lines", new ArrayList<Bean>(List.of(element))));
 		putMappedBean(loader, ownerDocument, "O1", owner);
@@ -555,7 +559,8 @@ class StandardLoaderTest {
 		BizPortColumn parentColumn = sheet.getColumn(ChildBean.PARENT_NAME);
 		SheetKey parentKey = new SheetKey("sales", "Order");
 		parentColumn.setReferencedSheet(parentKey);
-		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet parentSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(parentKey)).thenReturn(parentSheet);
 		Customer customer = mock(Customer.class);
 		Document childDocument = document("sales", "Line");
 		Document parentDocument = document("sales", "Order");
@@ -577,7 +582,8 @@ class StandardLoaderTest {
 		BizPortColumn childColumn = sheet.getColumn(Bean.DOCUMENT_ID);
 		SheetKey parentKey = new SheetKey("sales", "Order");
 		parentColumn.setReferencedSheet(parentKey);
-		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet parentSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(parentKey)).thenReturn(parentSheet);
 		Customer customer = mock(Customer.class);
 		Document childDocument = document("sales", "Line");
 		Document parentDocument = document("sales", "Order");
@@ -599,7 +605,8 @@ class StandardLoaderTest {
 		BizPortColumn parentColumn = sheet.getColumn(ChildBean.PARENT_NAME);
 		SheetKey parentKey = new SheetKey("sales", "Order");
 		parentColumn.setReferencedSheet(parentKey);
-		when(workbook.getSheet(parentKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet parentSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(parentKey)).thenReturn(parentSheet);
 		Customer customer = mock(Customer.class);
 		Document childDocument = document("sales", "Line");
 		Document parentDocument = document("sales", "Order");
@@ -750,7 +757,8 @@ class StandardLoaderTest {
 		BizPortColumn column = sheet.getColumn("customer");
 		SheetKey customerKey = new SheetKey("sales", "Customer");
 		column.setReferencedSheet(customerKey);
-		when(workbook.getSheet(customerKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet customerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(customerKey)).thenReturn(customerSheet);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		Document customerDocument = document("sales", "Customer");
@@ -783,7 +791,8 @@ class StandardLoaderTest {
 		when(sheet.nextRow()).thenReturn(true, false);
 		when(sheet.getValue(Bean.DOCUMENT_ID, AttributeType.text, problems)).thenReturn("O1");
 		doReturn(List.<Attribute>of(association)).when(orderDocument).getAllAttributes(customer);
-		when(workbook.getSheet(customerKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet customerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(customerKey)).thenReturn(customerSheet);
 		when(module.getDocument(customer, "Customer")).thenReturn(customerDocument);
 		DynamicBean order = dynamicBean("sales", "Order", "O1", Map.of("customer", mock(Bean.class)));
 		DynamicBean customerBean = dynamicBean("sales", "Customer", "C1", Map.of());
@@ -918,7 +927,8 @@ class StandardLoaderTest {
 		Persistence persistence = mock(Persistence.class);
 		User user = mock(User.class);
 		when(persistence.getUser()).thenReturn(user);
-		when(user.getCustomer()).thenReturn(mock(Customer.class));
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
 
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> loader.populate(persistence));
 
@@ -979,7 +989,8 @@ class StandardLoaderTest {
 		BizPortColumn ownerColumn = sheet.getColumn(PersistentBean.OWNER_COLUMN_NAME);
 		SheetKey ownerKey = new SheetKey("sales", "Order");
 		ownerColumn.setReferencedSheet(ownerKey);
-		when(workbook.getSheet(ownerKey)).thenReturn(mock(BizPortSheet.class));
+		BizPortSheet ownerSheet = mock(BizPortSheet.class);
+		when(workbook.getSheet(ownerKey)).thenReturn(ownerSheet);
 		when(sheet.getColumn(PersistentBean.ELEMENT_COLUMN_NAME)).thenReturn(null);
 		when(sheet.getTitle()).thenReturn("Items");
 		putMappedBean(loader, ownerDocument, "O1", mock(Bean.class));

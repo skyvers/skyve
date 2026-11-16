@@ -73,9 +73,12 @@ class SailViewRolesTest {
 	@Test
 	void userWithRolesRejectsUnknownRoles() {
 		Fixture f = new Fixture();
-		assertAll(() -> assertThrows(IllegalArgumentException.class, () -> SailUsers.userWithRoles(f.testUser, List.of("nope.Role"))),
-					() -> assertThrows(IllegalArgumentException.class, () -> SailUsers.userWithRoles(f.testUser, List.of("todo.Nope"))),
-					() -> assertThrows(IllegalArgumentException.class, () -> SailUsers.userWithRoles(f.testUser, List.of("Nope"))));
+		List<String> unknownModule = List.of("nope.Role");
+		List<String> unknownModuleRole = List.of("todo.Nope");
+		List<String> unknownCustomerRole = List.of("Nope");
+		assertAll(() -> assertThrows(IllegalArgumentException.class, () -> SailUsers.userWithRoles(f.testUser, unknownModule)),
+					() -> assertThrows(IllegalArgumentException.class, () -> SailUsers.userWithRoles(f.testUser, unknownModuleRole)),
+					() -> assertThrows(IllegalArgumentException.class, () -> SailUsers.userWithRoles(f.testUser, unknownCustomerRole)));
 	}
 
 	@Test

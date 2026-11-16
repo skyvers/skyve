@@ -574,7 +574,7 @@
 			<comment>This file makes the action find itself unavailable: the upload page shows the refusal, as for any action</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-unavailable.txt" testSuccess="false" />
 			<testFailure message="This action is no longer available." />
-			<comment>A successful action upload closes its upload page, which refreshes the view (runtime issue P3)</comment>
+			<comment>A successful action upload closes its upload page, which refreshes the view</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
 			<testValue binding="outcome" value="Actions Upload ran" />
 			<dataEnter binding="disableUpload" value="true" />
@@ -599,7 +599,7 @@
 			<testWidget tab="Tab button" enabled="false" />
 			<dataEnter binding="disableTab" value="false" />
 			<testWidget binding="outcome" enabled="false" />
-			<comment>A click low on the page straight after an upload: closing the upload page refreshes the view, which must not move the page (runtime issue P11)</comment>
+			<comment>A click low on the page straight after an upload: closing the upload page refreshes the view, which must not move the page</comment>
 			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
 			<tabSelect path="Rows" />
 			<dataGridNew binding="rows" />

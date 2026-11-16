@@ -106,28 +106,33 @@ class POISheetTest {
 
 	@Test
 	void addRowThrowsWhenNotMaterialised() {
-		assertThrows(IllegalStateException.class, () -> new POISheet("TestSheet").addRow("key"));
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.addRow("key"));
 	}
 
 	@Test
 	void moveToRowThrowsWhenNotMaterialised() {
-		assertThrows(IllegalStateException.class, () -> new POISheet("TestSheet").moveToRow("key"));
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.moveToRow("key"));
 	}
 
 	@Test
 	void nextRowThrowsWhenNotMaterialised() {
-		assertThrows(NullPointerException.class, () -> new POISheet("TestSheet").nextRow());
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(NullPointerException.class, sheet::nextRow);
 	}
 
 	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getValueThrowsWhenNotMaterialised() {
-		assertThrows(IllegalStateException.class, () -> new POISheet("TestSheet").getValue("binding", null, null));
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.getValue("binding", null, null));
 	}
 
 	@Test
 	void setValueThrowsWhenNotMaterialised() {
-		assertThrows(IllegalStateException.class, () -> new POISheet("TestSheet").setValue("binding", "value"));
+		POISheet sheet = new POISheet("TestSheet");
+		assertThrows(IllegalStateException.class, () -> sheet.setValue("binding", "value"));
 	}
 
 	@Test
@@ -158,7 +163,8 @@ class POISheetTest {
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
-		assertThrows(IllegalStateException.class, () -> sheet.addColumn("col", new BizPortColumn("Col", null)));
+		BizPortColumn column = new BizPortColumn("Col", null);
+		assertThrows(IllegalStateException.class, () -> sheet.addColumn("col", column));
 	}
 
 	@Test

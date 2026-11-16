@@ -7,13 +7,13 @@
 	- navigateTree, navigateMap, navigateCalendar: implemented in the shared executor base. The kitchen sink's
 	  Calendar, Map and Tree items are links; its Condition Node Tree, List Attribute Map and List Attribute Calendar items
 	  are navigated by SmartClientRecorderRoundTripSailIT (sc-recorder-round-trip-more.xml).
-	- listMembership: the kitchen sink's only list membership is on ConditionsFixture (see below); the SC admin suite
-	  covers it (group roles).
+	- listMembership: the kitchen sink's only list membership is on ConditionsFixture; the SC admin suite covers it
+	  (group roles).
 	- contentSignature, checkMembership (not rendered by SmartClient), comparison, geometryMap, map, chart:
 	  no op-code enters data into them.
 	- zoomIn that opens a view: no fixture has a populated zoom in reference, so the refused path is tested.
-	- ConditionsFixture: SmartClient never finishes processing one of its forms here, so SAIL cannot wait for it.
-	- listGridNew in a view: the kitchen sink's list grids in views hide New (ConditionsFixture's does not, see above).
+	- listGridNew in a view: the kitchen sink's list grids in views hide New, except ConditionsFixture's, which this suite
+	  does not press.
 	- Finding by content (list filters and sorting, captureValue, dataEnter match, lookups by row text): see
 	  sc-kitchensink-sail-find.xml.
 -->
@@ -355,6 +355,30 @@
 		</method>
 	</interaction>
 
+	<interaction name="Conditions Fixture: visible and enabled conditions">
+		<method>
+			<comment>SAIL waits for SmartClient to settle after each step, so a widget that keeps its form redrawing fails here</comment>
+			<comment>Show and Allow start ticked, so the form items are shown and enabled; changing either rerenders the view</comment>
+			<navigateEdit module="kitchensink" document="ConditionsFixture" />
+			<testWidget binding="slider1" visible="true" enabled="true" />
+			<testWidget binding="password1" visible="true" enabled="true" />
+			<dataEnter binding="slider1" value="7" />
+			<testValue binding="slider1" value="7" />
+			<comment>slider1 is shown by a Skyve expression and enabled by a Java condition; password1 the other way round</comment>
+			<dataEnter binding="show" value="false" />
+			<testWidget binding="slider1" visible="false" />
+			<testWidget binding="password1" visible="false" />
+			<dataEnter binding="allow" value="false" />
+			<dataEnter binding="show" value="true" />
+			<testWidget binding="slider1" visible="true" enabled="false" />
+			<testWidget binding="password1" visible="true" enabled="false" />
+			<dataEnter binding="allow" value="true" />
+			<testWidget binding="slider1" visible="true" enabled="true" />
+			<testWidget binding="password1" visible="true" enabled="true" />
+			<testValue binding="slider1" value="7" />
+		</method>
+	</interaction>
+
 	<interaction name="Server-side questions">
 		<method>
 			<navigateEdit module="kitchensink" document="DialogsFixture" />
@@ -395,7 +419,7 @@
 			<save />
 			<comment>The saved fixture now shows in the view's "Saved selections" list grid</comment>
 			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
-			<comment>Lists with no menu item, opened by their URLs: the document's default query, and a query (runtime issue SC-3)</comment>
+			<comment>Lists with no menu item, opened by their URLs: the document's default query, and a query</comment>
 			<navigateList module="kitchensink" document="ModelLookupFixture" />
 			<testGridRows module="kitchensink" document="ModelLookupFixture" rowContaining="SAIL model lookup {run}" minRows="1" maxRows="1" />
 			<navigateList module="kitchensink" query="qModelLookupFixtures" />

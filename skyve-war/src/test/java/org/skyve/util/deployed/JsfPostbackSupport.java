@@ -75,7 +75,7 @@ public final class JsfPostbackSupport {
 	public static String encode(Map<String, String> values) {
 		StringBuilder result = new StringBuilder(values.size() * 32);
 		for (Map.Entry<String, String> entry : values.entrySet()) {
-			if (result.length() > 0) {
+			if (! result.isEmpty()) {
 				result.append('&');
 			}
 			result.append(java.net.URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8)).append('=')

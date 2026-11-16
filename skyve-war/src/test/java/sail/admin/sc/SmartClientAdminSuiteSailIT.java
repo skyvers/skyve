@@ -36,6 +36,7 @@ class SmartClientAdminSuiteSailIT extends AbstractSmartClientInterpretedSail {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void suite() {
 		// 03 makes this user with a group giving these roles, then signs in as them: build their views with their roles
 		viewRoles("sail{run}", "admin.BasicUser", "admin.ContactViewer");

@@ -74,7 +74,7 @@ class SmartClientWebContextTest {
 	}
 
 	@Test
-	void preparedDownloadMatchesOnlyItsDocumentActionAndTarget() throws Exception {
+	void preparedDownloadMatchesOnlyItsDocumentActionAndTarget() {
 		SmartClientWebContext context = context();
 		assertFalse(context.isPreparedDownload("mod.Doc", "Download", null, null));
 		context.recordPreparedDownload("Download", "mod", "Doc", "child", "rows", "row1");

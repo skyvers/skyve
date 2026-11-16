@@ -94,7 +94,8 @@ public final class SailSuite {
 		refuseTestStrategyOverride("A SAIL admin suite");
 
 		String only = System.getProperty(ONLY_PROPERTY);
-		List<String> prefixes = ((only == null) || only.isBlank()) ? List.of() : List.of(only.trim().split("\\s*,\\s*"));
+		List<String> prefixes = (only == null) ? List.of() :
+				Arrays.stream(only.split(",")).map(String::trim).filter(prefix -> ! prefix.isEmpty()).toList();
 		List<String> toRun = new ArrayList<>(setUp);
 		for (String file : files) {
 			if (prefixes.isEmpty() || prefixes.stream().anyMatch(file::startsWith)) {

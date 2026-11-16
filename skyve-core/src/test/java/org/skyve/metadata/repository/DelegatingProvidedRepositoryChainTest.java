@@ -81,6 +81,7 @@ class DelegatingProvidedRepositoryChainTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5961") // one assertion per delegated lookup method over a shared fixture; splitting would only repeat the setup
 	void firstNonNullLookupMethodsReturnFirstAvailableValue() {
 		ProvidedRepository d1 = mock(ProvidedRepository.class);
 		ProvidedRepository d2 = mock(ProvidedRepository.class);
@@ -321,6 +322,7 @@ class DelegatingProvidedRepositoryChainTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5961") // one assertion per delegated lookup method over a shared fixture; splitting would only repeat the setup
 	void lookupMethodsReturnNullWhenAllDelegatesReturnNull() {
 		ProvidedRepository d1 = mock(ProvidedRepository.class);
 		ProvidedRepository d2 = mock(ProvidedRepository.class);

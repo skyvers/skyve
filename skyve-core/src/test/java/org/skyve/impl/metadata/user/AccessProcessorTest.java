@@ -41,7 +41,8 @@ class AccessProcessorTest {
 		Menu menu = mock(Menu.class);
 		when(menu.getItems()).thenReturn(List.of(mock(MenuItem.class))); // an item outside of accesses
 		ProvidedRepository repository = mock(ProvidedRepository.class);
-		when(repository.getRouter()).thenReturn(mock(Router.class));
+		Router router = mock(Router.class);
+		when(repository.getRouter()).thenReturn(router);
 		Map<String, Set<String>> accesses = new HashMap<>();
 
 		ProvidedRepository previous = ProvidedRepositoryFactory.isConfigured() ? ProvidedRepositoryFactory.get() : null;

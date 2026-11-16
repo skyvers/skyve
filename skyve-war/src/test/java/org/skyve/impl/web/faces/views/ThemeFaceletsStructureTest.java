@@ -19,10 +19,11 @@ import org.skyve.metadata.router.UxUi;
 class ThemeFaceletsStructureTest {
 	private static final String IFRAME_TEMPLATE_PATH = "WEB-INF/pages/templates/iframe/template.xhtml";
 	/**
-	 * The growl that shows an upload or import page's messages in the view (runtime issue P3): bound in the opener, as
+	 * The growl that shows an upload or import page's messages in the view: bound in the opener, as
 	 * the page is gone when the refresh returns, and with keep, so that it does not remove the growls showing.
 	 */
 	private static final String SHOW_MESSAGES_AFTER_THE_REFRESH = "owner.isc.BizUtil.growl.bind(owner.isc.BizUtil, owner.JSON.parse(args.uploadMessages), null, null, true)";
+	private static final Pattern RAW_TEMPLATE_NAME = Pattern.compile("(skyve|skyvePublic|skyveStartup|adminUnsubscribe)\\.templateName");
 	private static final List<String> FAMILIES = List.of("editorial", "ecuador", "ultima", "diamond");
 	private static final List<String> DYNAMIC_CLIENT_PAGES = List.of("external/home.xhtml",
 			"external/edit.xhtml",
@@ -34,6 +35,7 @@ class ThemeFaceletsStructureTest {
 			"unsubscribe.xhtml");
 
 	@Test
+	@SuppressWarnings("java:S5961") // one checklist of the popup pages' required markup; splitting it per page would only repeat the reads
 	void popupPagesUseSharedIframeTemplateAndRetainCallbacksAndBodyScripts() throws IOException {
 		String upload = read("upload.xhtml");
 		String bizImport = read("bizImport.xhtml");
@@ -201,7 +203,7 @@ class ThemeFaceletsStructureTest {
 			for (Path file : files.filter(path -> path.toString().endsWith(".xhtml")).toList()) {
 				String page = Files.readString(file);
 				String description = file + ": " + page;
-				assertFalse(page.matches("(?s).*(skyve|skyvePublic|skyveStartup|adminUnsubscribe)\\.templateName.*"), description);
+				assertFalse(RAW_TEMPLATE_NAME.matcher(page).find(), description);
 				assertFalse(page.contains("getThemeColour("), description);
 				assertFalse(page.contains("pfTheme"), description);
 				assertFalse(page.contains(".split('-')"), description);
@@ -256,7 +258,7 @@ class ThemeFaceletsStructureTest {
 
 	/**
 	 * The pages focus their first input only when they are loaded (a GET), never after an ajax response or another
-	 * postback (runtime issue P11): the one {@code p:focus} is the shared include's, rendered only when not a postback.
+	 * postback: the one {@code p:focus} is the shared include's, rendered only when not a postback.
 	 */
 	@Test
 	void pagesFocusTheirFirstInputOnlyWhenLoaded() throws IOException {

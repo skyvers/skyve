@@ -26,7 +26,7 @@ import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.UIComponentBase;
 import jakarta.faces.context.FacesContext;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "resource"}) // each test's MockFacesContext is the current instance until tearDown()
 class PrimeFacesAutomationContextTest {
 	private abstract static class FacesContextBridge extends FacesContext {
 		static void setCurrent(FacesContext context) {

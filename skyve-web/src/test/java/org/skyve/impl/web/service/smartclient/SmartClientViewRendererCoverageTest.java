@@ -1075,6 +1075,7 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(code.contains("numValues:5"), code);
 		assertTrue(code.contains("roundValues:false,roundingPrecision:2"), code);
 		assertTrue(code.contains("vertical:true"), code);
+		assertTrue(code.contains("sliderProperties:{overflow:'hidden'}"), code);
 		assertTrue(code.contains("type:'spinner'"), code);
 		assertTrue(code.contains("min:0.0"), code);
 		assertTrue(code.contains("max:10.0"), code);
@@ -1235,7 +1236,7 @@ class SmartClientViewRendererCoverageTest {
 
 	/**
 	 * A form item the user types into, whose change handler calls the server, fires it when the value is committed, not
-	 * on every keypress, and runs the handler's server events as a blur handler's (runtime issue SC-8).
+	 * on every keypress, and runs the handler's server events as a blur handler's.
 	 */
 	@Test
 	void aTypedItemWithAServerChangeHandlerChangesOnCommitAndDefersItsEvents() {

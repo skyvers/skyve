@@ -52,6 +52,7 @@ import util.sail.commands.TextCommand;
  * @param <SELC> SelectOneCommand type
  * @author simeonsolomou
  */
+@SuppressWarnings("java:S119") // twelve command types: mnemonic names say which is which, single letters would not
 public abstract class Selenide<
 		BTNC extends ButtonCommand,
 		CHKC extends CheckboxCommand,

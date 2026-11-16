@@ -3872,17 +3872,21 @@ class TabularComponentBuilderTest {
 		org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropDown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
 		dropDown.setName("name");
 		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
-		when(user.getCustomer()).thenReturn(mock(org.skyve.metadata.customer.Customer.class));
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
 		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
 		when(persistence.getUser()).thenReturn(user);
 		AbstractPersistence previous = currentPersistenceIfPresent();
 		try {
 			persistence.setForThread();
+			List<FilterParameter> filterParameters = List.of();
+			List<Parameter> parameters = List.of();
+			List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of(dropDown);
 
 			IllegalStateException e = assertThrows(IllegalStateException.class,
 													() -> builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
-																					"bizKey", null, List.of(), List.of(), null, false,
-																					owningDocument, null, List.of(dropDown)));
+																					"bizKey", null, filterParameters, parameters, null, false,
+																					owningDocument, null, dropDownColumns));
 
 			assertEquals("A lookup description of customer has neither a model nor a query", e.getMessage());
 		}
@@ -3897,7 +3901,8 @@ class TabularComponentBuilderTest {
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("unboundId");
 		builder.setManagedBeanForTest(managedBean);
-		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(mock(HtmlOutputText.class));
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
 		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
 		when(panelGrid.getChildren()).thenReturn(new ArrayList<>());
 		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
@@ -4787,7 +4792,7 @@ class TabularComponentBuilderTest {
 		// appended to the body so a fixed or scrolling action bar cannot clip it
 		verify(overlayPanel).setFor("uploadButtonId");
 		verify(overlayPanel).setAppendTo("@(body)");
-		// closing it refreshes the view only after its upload action has run (runtime issue P8)
+		// closing it refreshes the view only after its upload action has run
 		verify(overlayPanel).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadOverlayId');if(SKYVE.PF.actionUploadRan('uploadOverlayId'))uploadRefreshId()");
 		assertEquals(1, overlayChildren.size());
 		assertSame(iframe, overlayChildren.get(0));

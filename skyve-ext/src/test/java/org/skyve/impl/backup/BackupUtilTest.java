@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -1022,7 +1023,7 @@ class BackupUtilTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void getTablesForAllCustomersThrowsWhenCustomerMissing() throws Exception {
+	void getTablesForAllCustomersThrowsWhenCustomerMissing() {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		try {
@@ -1030,13 +1031,8 @@ class BackupUtilTest {
 			when(repository.getAllCustomerNames()).thenReturn(Collections.singletonList("missingCustomer"));
 			when(repository.getCustomer("missingCustomer")).thenReturn(null);
 
-			try {
-				BackupUtil.getTablesForAllCustomers();
-				fail("Expected MetaDataException");
-			}
-			catch (MetaDataException e) {
-				assertThat(e.getMessage(), containsString("missingCustomer does not exist"));
-			}
+			MetaDataException e = assertThrows(MetaDataException.class, BackupUtil::getTablesForAllCustomers);
+			assertThat(e.getMessage(), containsString("missingCustomer does not exist"));
 		}
 		finally {
 			ProvidedRepositoryFactory.set(previousRepository);

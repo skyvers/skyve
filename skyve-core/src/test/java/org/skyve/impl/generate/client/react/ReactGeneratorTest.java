@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -52,12 +54,12 @@ class ReactGeneratorTest {
 		ReactGenerator generator = new ReactGenerator("desktop", projectDir.toString());
 		generator.components.add(new StubReactComponent(generator, "admin", "UserGenerated"));
 
-		Customer customer = org.mockito.Mockito.mock(Customer.class);
-		org.mockito.Mockito.when(customer.getModules()).thenReturn(Collections.emptyList());
-		User user = org.mockito.Mockito.mock(User.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = org.mockito.Mockito.mock(AbstractPersistence.class);
-		org.mockito.Mockito.when(persistence.getUser()).thenReturn(user);
+		Customer customer = mock(Customer.class);
+		when(customer.getModules()).thenReturn(Collections.emptyList());
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 
 		AtomicReference<Object> previous = setThreadLocalPersistence(persistence);
 		try {
