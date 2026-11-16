@@ -300,9 +300,9 @@ class SmartClientFieldAndDataGridDefinitionUnsafeTest {
 		def.type = "image";
 		def.pixelWidth = Integer.valueOf(32);
 		String imageJs = def.toJavascript();
-		assertTrue(imageJs.contains("formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'"));
+		assertTrue(imageJs.contains("formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(32,32);if(v){var u='content?_n='+v+'"));
 		assertFalse(imageJs.contains("emulationAwareUrl"));
-		assertTrue(imageJs.contains("&_w=32&_h=32"));
+		assertTrue(imageJs.contains("&_w='+s+'&_h='+s+'"));
 
 		def.type = "link";
 		String linkJs = def.toJavascript();

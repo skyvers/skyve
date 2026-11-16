@@ -432,7 +432,7 @@ public class UserDashboardExtension extends UserDashboard {
 						String imgSrc = "content?_n=" + cId + "&_doc=" + moduleName + "." + documentName + "&_b=" + a.getName()
 								+ "&_w=24&_h=24";
 						icon = String.format("<span class='icon'>"
-								+ "  <img src='%1$s'/>"
+								+ "  <img src='%1$s' style='width:24px;height:24px;object-fit:contain'/>"
 								+ "</span>", OWASP.escapeHtml(imgSrc));
 					}
 					break;

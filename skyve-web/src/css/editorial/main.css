@@ -3958,11 +3958,27 @@ mark {
 		font-weight: 300;
 		line-height: 1.3;
 		margin-bottom: 0;
+		/* Two lines: the clamp below doesn't reach the text inside .skyve-title (inline-flex), so without this a long
+		   title grows past the fixed header and covers the top of the action bar, taking its taps and swipes. */
+		max-height: calc(2 * 1.3em);
 		max-width: 100%;
+		/* The title is also a PrimeFaces .ui-panel-content, padded 1rem by the component theme: inside the two-line
+		   height, that padding would push the text down and cut off its second line. */
+		padding-bottom: 0;
+		padding-top: 0;
 		min-width: 0;
 		overflow: hidden;
 		overflow-wrap: anywhere;
 		white-space: normal;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	/* The title text itself is clamped to two lines, ending in an ellipsis. */
+	#header .title .skyve-title-text {
+		display: -webkit-box;
+		line-clamp: 2;
+		overflow: hidden;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
 	}
@@ -4102,11 +4118,27 @@ mark {
 		font-weight: 300;
 		line-height: 1.3;
 		margin-bottom: 0;
+		/* Two lines: the clamp below doesn't reach the text inside .skyve-title (inline-flex), so without this a long
+		   title grows past the fixed header and covers the top of the action bar, taking its taps and swipes. */
+		max-height: calc(2 * 1.3em);
 		max-width: 100%;
+		/* The title is also a PrimeFaces .ui-panel-content, padded 1rem by the component theme: inside the two-line
+		   height, that padding would push the text down and cut off its second line. */
+		padding-bottom: 0;
+		padding-top: 0;
 		min-width: 0;
 		overflow: hidden;
 		overflow-wrap: anywhere;
 		white-space: normal;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 2;
+	}
+
+	/* The title text itself is clamped to two lines, ending in an ellipsis. */
+	#header .title .skyve-title-text {
+		display: -webkit-box;
+		line-clamp: 2;
+		overflow: hidden;
 		-webkit-box-orient: vertical;
 		-webkit-line-clamp: 2;
 	}

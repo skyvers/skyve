@@ -201,21 +201,24 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			result.append(",companion:'").append(companion).append('\'');
 		}
 		result.append(",showMarkup:").append(isContentMarkupAllowed(content, display));
-		result.append(",formatCellValue:function(v,rec,row,col){");
+		result.append(",formatCellValue:function(v,rec,row,col,grid){");
 		result.append("if(!v){return ''}");
 		result.append("var k='").append(display).append("';");
 		if (ContentDisplay.auto.equals(display)) {
 			result.append("k=(rec&&rec['").append(companion).append("'])||'link';");
 		}
 		result.append("var u='content?_n='+v+'&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(binding).append("';");
-		result.append("if(k==='image'){return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-		if (imageWidth != null) {
-			result.append("&_w=").append(imageWidth);
+		// A thumbnail sized to the box, rounded up so few sizes are cached, as for the form's content widget.
+		// Without a pixel width, the image is as wide as its column.
+		result.append("if(k==='image'){var s=SKYVE.Util.contentPreviewSize(");
+		if (imageWidth == null) {
+			result.append("grid&&grid.getFieldWidth?grid.getFieldWidth(col):null");
 		}
-		if (imageHeight != null) {
-			result.append("&_h=").append(imageHeight);
+		else {
+			result.append(imageWidth);
 		}
-		result.append("\" style=\"");
+		result.append(',').append(imageHeight).append(");");
+		result.append("return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'&_w='+s+'&_h='+s+'\" style=\"");
 		appendMediaStyle(result, imageWidth, imageHeight, "1 / 1");
 		result.append("object-fit:contain\"/></a>'}");
 		result.append("if(k==='video'){return '<video controls preload=\"metadata\" src=\"'+u+'\" style=\"");

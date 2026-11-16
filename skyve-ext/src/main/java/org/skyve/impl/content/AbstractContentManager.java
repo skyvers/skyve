@@ -26,6 +26,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
@@ -83,6 +84,25 @@ public abstract class AbstractContentManager implements ContentManager {
 	@SuppressWarnings("java:S112") // allow throws Exception for implementations
 	public abstract void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception;
 	
+	/**
+	 * Deletes the stored thumbnails of a removed attachment, so they don't stay on the disk forever.
+	 * A problem is logged rather than thrown, as the attachment has already been removed.
+	 * Call this at the end of {@link #removeAttachment(String)} in the process that serves the attachment,
+	 * as that is where its thumbnails are made - a remote content client calls it after the remote removal.
+	 *
+	 * @param contentId	The removed attachment's content id.
+	 */
+	protected static void deleteStoredThumbnails(@Nonnull String contentId) {
+		try {
+			Thumbnail.deleteStoredThumbnails(contentId);
+		}
+		catch (Exception e) {
+			CONTENT_LOGGER.warn("Could not delete the stored thumbnails of removed attachment {} - delete its folder in the thumbnail directory - {}",
+									contentId,
+									e.getLocalizedMessage());
+		}
+	}
+
 	/**
 	 * Append a balanced folder structure for storing a content file based on it's content ID.
 	 * 
@@ -314,8 +334,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - Meta File DNE", metaFile.getPath());
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(FileUtil.string(metaFile));
+		Map<String, Object> meta = readContentMeta(dir);
 
 		String contentType = (String) meta.get(CONTENT_TYPE);
 
@@ -361,6 +380,21 @@ public abstract class AbstractContentManager implements ContentManager {
 		return result;
 	}
 	
+	/**
+	 * Reads and parses the meta.json in a content folder of the file content store.
+	 *
+	 * <p>The keys are those written by {@link #writeContentMeta(String, AttachmentContent)}.
+	 *
+	 * @param contentFolder	the content ID folder
+	 * @return the meta.json properties
+	 * @throws java.io.FileNotFoundException if there is no meta.json, or contentFolder is not a folder
+	 * @throws Exception if the meta.json cannot be read or is not a JSON object
+	 */
+	@SuppressWarnings("unchecked")
+	static @Nonnull Map<String, Object> readContentMeta(@Nonnull File contentFolder) throws Exception {
+		return (Map<String, Object>) JSON.unmarshall(FileUtil.string(new File(contentFolder, META_JSON)));
+	}
+
 	/**
 	 * Determine the filename to use for stored content based on name/type and suffix rules.
 	 *

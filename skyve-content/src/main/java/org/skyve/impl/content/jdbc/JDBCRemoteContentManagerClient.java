@@ -204,6 +204,8 @@ public class JDBCRemoteContentManagerClient extends AbstractContentManager {
 				s.execute();
 			}
 		}
+		// The thumbnails are made and stored here, not on the content server
+		deleteStoredThumbnails(contentId);
 	}
 
 	/**

@@ -29,6 +29,7 @@ import org.skyve.domain.types.converters.Converter;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
@@ -328,6 +329,23 @@ class JSONReaderTest {
 		assertEquals("hello", list.get(0));
 		assertEquals(Long.valueOf(42L), list.get(1));
 		assertEquals(Boolean.TRUE, list.get(2));
+	}
+
+	/** Verifies string elements spelt like punctuation are values, not structural tokens. */
+	@Test
+	void readArrayOfPunctuationStrings() throws Exception {
+		Map<Object, Object> result = readDynamic("{\"items\":[\"]\",\"}\",\",\",\":\"],\"next\":1}");
+
+		assertEquals(List.of("]", "}", ",", ":"), result.get("items"));
+		assertEquals(Long.valueOf(1L), result.get("next"));
+	}
+
+	/** Verifies a key spelt like an object end is a key, not the end of the object. */
+	@Test
+	void readObjectWithPunctuationKey() throws Exception {
+		Map<Object, Object> result = readDynamic("{\"}\":1,\"]\":2}");
+
+		assertEquals(Map.of("}", Long.valueOf(1L), "]", Long.valueOf(2L)), result);
 	}
 
 	// ---- string escapes --------------------------------------------------
@@ -659,6 +677,16 @@ class JSONReaderTest {
 				() -> reader.read("{\"bizModule\":\"test\",\"wrong\":\"Document\"}"));
 		assertThrows(IllegalStateException.class,
 				() -> reader.read("{\"bizModule\":\"test\",\"bizDocument\":\"Document\":null}"));
+		IllegalStateException moduleException = assertThrows(IllegalStateException.class,
+				() -> reader.read("{\"bizModule\":null,\"bizDocument\":\"Document\"}"));
+		IllegalStateException documentException = assertThrows(IllegalStateException.class,
+				() -> reader.read("{\"bizModule\":\"test\",\"bizDocument\":null}"));
+		IllegalStateException propertyException = assertThrows(IllegalStateException.class,
+				() -> reader.read("{\"bizModule\":\"test\",\"bizDocument\":\"Document\",null:1}"));
+
+		assertTrue(moduleException.getMessage().contains("moduleName"));
+		assertTrue(documentException.getMessage().contains("documentName"));
+		assertTrue(propertyException.getMessage().contains("propertyName"));
 	}
 
 	/** Verifies an invalid incoming document identifier leaves the generated identifier intact. */
@@ -695,6 +723,63 @@ class JSONReaderTest {
 		Mockito.verify(document).setBizCustomer("customer");
 		Mockito.verify(document).setBizDataGroupId("group");
 		Mockito.verify(document).setBizUserId("user");
+	}
+
+	/** Verifies null locks, versions and values are assigned, and immutable properties are skipped. */
+	@Test
+	void readDocumentAssignsNullsAndSkipsImmutableProperties() throws Exception {
+		ReaderDocument document = Mockito.mock(ReaderDocument.class);
+		DocumentContext context = documentContext(document);
+		String json = "{\"bizModule\":\"test\",\"bizDocument\":\"Document\","
+				+ "\"bizLock\":null,\"bizVersion\":null,\"bizKey\":1,\"name\":null}";
+
+		Object result = new JSONReader(context.user()).read(json);
+
+		assertSame(document, result);
+		Mockito.verify(document).setBizLock(null);
+		Mockito.verify(document).setBizVersion(null);
+		Mockito.verify(document).setName(null);
+	}
+
+	/** Verifies display strings are kept when the attribute has no converter or is not convertible. */
+	@Test
+	void readDocumentKeepsDisplayValueWithoutConverter() throws Exception {
+		ReaderDocument convertibleDocument = Mockito.mock(ReaderDocument.class);
+		DocumentContext convertibleContext = documentContext(convertibleDocument);
+		ConvertibleField field = Mockito.mock(ConvertibleField.class);
+		Mockito.when(convertibleContext.metadata().getAttribute("name")).thenReturn(field);
+		Mockito.doReturn(String.class).when(field).getImplementingType();
+		ReaderDocument plainDocument = Mockito.mock(ReaderDocument.class);
+		DocumentContext plainContext = documentContext(plainDocument);
+		Attribute attribute = Mockito.mock(Attribute.class);
+		Mockito.when(plainContext.metadata().getAttribute("name")).thenReturn(attribute);
+		Mockito.doReturn(String.class).when(attribute).getImplementingType();
+		String json = "{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"name\":\"display\"}";
+
+		new JSONReader(convertibleContext.user()).read(json);
+		new JSONReader(plainContext.user()).read(json);
+
+		Mockito.verify(convertibleDocument).setName("display");
+		Mockito.verify(plainDocument).setName("display");
+	}
+
+	/** Verifies a key followed by the object end closes the object in every mode without reading past it. */
+	@Test
+	void readKeyWithoutValueEndsObjectInEveryMode() throws Exception {
+		DocumentContext context = documentContext();
+		String className = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
+
+		List<?> dynamic = (List<?>) new JSONReader(null).read("[{\"name\"},\"next\"]");
+		List<?> object = (List<?>) new JSONReader(null).read(
+				"[{\"class\":\"" + className + "\",\"name\"},\"next\"]");
+		List<?> document = (List<?>) new JSONReader(context.user()).read(
+				"[{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"name\"},\"next\"]");
+
+		assertEquals(List.of(Map.of(), "next"), dynamic);
+		assertEquals(2, object.size());
+		assertNull(((TestBean) object.get(0)).getName());
+		assertEquals("next", object.get(1));
+		assertEquals(List.of(context.document(), "next"), document);
 	}
 
 	/** Verifies a document list property must expose an existing mutable collection. */
@@ -931,6 +1016,35 @@ class JSONReaderTest {
 		@SuppressWarnings("unchecked")
 		Map<Object, Object> map = (Map<Object, Object>) new JSONReader(null).read("{name: \"Alice\"}");
 		assertEquals("Alice", map.get("name"));
+	}
+
+	/** Verifies unquoted keys spelt with a leading literal are keys, not the literal. */
+	@Test
+	void readUnquotedKeysStartingWithLiterals() throws Exception {
+		Map<Object, Object> result = readDynamic("{nullable:null,trueClientIp:true,falsehood:false,null_1:1,true$:2}");
+
+		Map<Object, Object> expected = new LinkedHashMap<>();
+		expected.put("nullable", null);
+		expected.put("trueClientIp", Boolean.TRUE);
+		expected.put("falsehood", Boolean.FALSE);
+		expected.put("null_1", Long.valueOf(1L));
+		expected.put("true$", Long.valueOf(2L));
+		assertEquals(expected, result);
+	}
+
+	/** Verifies literals are recognised when they end the input. */
+	@Test
+	void readTopLevelLiterals() throws Exception {
+		assertEquals(Boolean.TRUE, new JSONReader(null).read("true"));
+		assertEquals(Boolean.FALSE, new JSONReader(null).read("false"));
+		assertNull(new JSONReader(null).read("null"));
+	}
+
+	/** Verifies an unknown escape keeps the escaped character, as JavaScript does. */
+	@Test
+	void readStringKeepsCharacterOfUnknownEscape() throws Exception {
+		Map<Object, Object> result = readDynamic("{\"v\":\"a\\qb\"}");
+		assertEquals("aqb", result.get("v"));
 	}
 
 	// ---- malformed JSON error paths -----------------------------------------

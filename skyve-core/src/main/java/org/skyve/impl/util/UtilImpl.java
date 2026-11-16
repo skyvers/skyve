@@ -241,11 +241,13 @@ public class UtilImpl {
     // Where to store/retrieve archive documents (Audits, etc)
     public static ArchiveConfig ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 
-	// The number of threads that are allowed to serve thumb nails at once.
-	// Too many threads can cause out of memory errors.
-	// You can calculate this as concurrentThreads * memory usage determined by targetSize below
-	// For the default of 10 concurrentThreads at 4MB the approximately max memory usage is 40MB.
-	public static int THUMBNAIL_CONCURRENT_THREADS = 10;
+	// The number of thumb nails that can be made at once - 0 means half the processors.
+	// Either way it is no more than a quarter of the maximum heap allows, at up to 128MB per thumb nail for the default
+	// maximumDimension of 2048 (a photo taken on its side is turned upright in a copy), so making thumb nails uses at most
+	// about a quarter of the heap.
+	// Other requests wait their turn. Stored thumb nails are served without waiting.
+	// A request that cannot start within 60 seconds (a safety limit) gets a 503 (Service Unavailable) response.
+	public static int THUMBNAIL_CONCURRENT_THREADS = 0;
 
 	// The sub-sampling doesn't kick in until the image's largest dimension is at least double the target size
 	// Then it sub-samples pixels by 2, 3 etc.
@@ -253,13 +255,23 @@ public class UtilImpl {
 	// targetSize * 2 (double width) * targetSize * 2 (double height) * 4 (ARGB bytes per pixel) / 1024 (KB) / 1024 (MB)
 	// assuming the images are relatively square.
 	// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
+	// This applies to an image read without a size, such as an original with its markup drawn in.
+	// A thumbnail is instead decoded at between once and twice its own size, so it shrinks smoothly - see maximumDimension.
 	public static int THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
 
 	// The largest width or height in pixels of a requested thumbnail or dynamic image; a bigger image is shrunk to fit, keeping its shape.
-	// This limits the memory a request can use - 2048 is about 16MB per image. It must be a whole number greater than 0.
+	// A requested thumbnail fits a square of its larger side rounded up to 64, 128, 256 and so on, up to this size,
+	// so a request can only choose from a few sizes, and only a few are stored per image.
+	// This limits the memory a thumbnail can use: one of up to half this size decodes at most maximumDimension squared
+	// pixels at 4 bytes each (16MB for 2048), and one of this size at most (2 x maximumDimension) squared (64MB for 2048).
+	// An image of more than 256 megapixels is not read at all, and shows its file type icon.
+	// It must be a whole number greater than 0.
 	public static int THUMBNAIL_MAXIMUM_DIMENSION = 2048;
 
-	// Thumbnails can be stored on the file system or generated on the fly each time
+	// Thumbnails can be stored on the file system or generated on the fly each time.
+	// Nothing is stored when the drive has less than 10% of its space free.
+	// An attachment's thumbnails are deleted with it by content garbage collection.
+	// Making thumbnails still takes CPU, so rate limit the content and resources URLs at your reverse proxy.
 	public static boolean THUMBNAIL_FILE_STORAGE = true;
 
 	// Where to put thumbnails if fileStorage is true - defaults to <content.directory>/SKYVE_THUMBNAILS/
@@ -856,7 +868,7 @@ public class UtilImpl {
     	ADDINS_DIRECTORY = null;
         ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 
-    	THUMBNAIL_CONCURRENT_THREADS = 10;
+    	THUMBNAIL_CONCURRENT_THREADS = 0;
     	THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
     	THUMBNAIL_MAXIMUM_DIMENSION = 2048;
     	THUMBNAIL_FILE_STORAGE = true;

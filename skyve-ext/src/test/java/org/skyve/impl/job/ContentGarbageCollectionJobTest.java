@@ -10,6 +10,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -19,11 +20,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import org.quartz.JobExecutionException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResult;
 import org.skyve.domain.Bean;
@@ -58,6 +61,8 @@ class ContentGarbageCollectionJobTest {
 	private Class<? extends AbstractContentManager> originalContentManagerClass;
 	private ProvidedRepository originalRepository;
 	private boolean originalContentTrace;
+	private boolean originalThumbnailFileStorage;
+	private String originalThumbnailDirectory;
 	private AbstractPersistence persistence;
 
 	@BeforeEach
@@ -65,6 +70,10 @@ class ContentGarbageCollectionJobTest {
 		originalContentManagerClass = AbstractContentManager.IMPLEMENTATION_CLASS;
 		originalRepository = ProvidedRepositoryFactory.get();
 		originalContentTrace = org.skyve.impl.util.UtilImpl.CONTENT_TRACE;
+		originalThumbnailFileStorage = org.skyve.impl.util.UtilImpl.THUMBNAIL_FILE_STORAGE;
+		originalThumbnailDirectory = org.skyve.impl.util.UtilImpl.THUMBNAIL_DIRECTORY;
+		// So running the job never sweeps a real thumbnail directory
+		org.skyve.impl.util.UtilImpl.THUMBNAIL_FILE_STORAGE = false;
 		AbstractContentManager.IMPLEMENTATION_CLASS = RecordingContentManager.class;
 		RecordingContentManager.reset();
 		persistence = mock(AbstractPersistence.class);
@@ -81,6 +90,8 @@ class ContentGarbageCollectionJobTest {
 			ProvidedRepositoryFactory.set(originalRepository);
 		}
 		org.skyve.impl.util.UtilImpl.CONTENT_TRACE = originalContentTrace;
+		org.skyve.impl.util.UtilImpl.THUMBNAIL_FILE_STORAGE = originalThumbnailFileStorage;
+		org.skyve.impl.util.UtilImpl.THUMBNAIL_DIRECTORY = originalThumbnailDirectory;
 		unbindPersistenceFromThread();
 	}
 
@@ -139,6 +150,36 @@ class ContentGarbageCollectionJobTest {
 		assertTrue(trackingSet(job, "orphanedAttachmentContentIds").isEmpty());
 		assertTrue(trackingSet(job, "orphanedBeanBizIds").isEmpty());
 		verify(persistence).commit(true);
+	}
+
+	/** Confirms that old stored thumbnails are swept at most once a day. */
+	@Test
+	@SuppressWarnings("static-method")
+	void sweepOldThumbnailsDeletesOldThumbnailsAtMostOnceADay(@TempDir File thumbnails) throws Exception {
+		org.skyve.impl.util.UtilImpl.THUMBNAIL_FILE_STORAGE = true;
+		org.skyve.impl.util.UtilImpl.THUMBNAIL_DIRECTORY = thumbnails.getAbsolutePath() + '/';
+		// Later than any sweep before it in this JVM
+		long now = System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1000);
+
+		File first = oldThumbnail(thumbnails, "first");
+		ContentGarbageCollectionJob.sweepOldThumbnails(now);
+		assertFalse(first.exists());
+
+		File second = oldThumbnail(thumbnails, "second");
+		ContentGarbageCollectionJob.sweepOldThumbnails(now + TimeUnit.HOURS.toMillis(23));
+		assertTrue(second.exists(), "swept less than a day ago");
+		ContentGarbageCollectionJob.sweepOldThumbnails(now + TimeUnit.HOURS.toMillis(25));
+		assertFalse(second.exists());
+	}
+
+	/** Makes a stored thumbnail a year old, well past the retention period. */
+	private static File oldThumbnail(File thumbnails, String folder) throws Exception {
+		File result = new File(thumbnails, folder + "/128x128.png");
+		assertTrue(result.getParentFile().mkdirs());
+		assertTrue(result.createNewFile());
+		long old = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(365);
+		assertTrue(result.setLastModified(old));
+		return result;
 	}
 
 	/** Confirms that one failed removal does not abort collection or leave stale tracking entries. */

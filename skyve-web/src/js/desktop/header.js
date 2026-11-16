@@ -36,7 +36,7 @@ isc.BizHeader.addMethods({
 		const userDisplay = isc.BizUtil.userContactName;
 
 		const avatar64 = userImg
-			? `<img src="${userImg}" style="width:64px;height:64px;border-radius:50%;margin-bottom:6px"/>`
+			? `<img src="${userImg}" style="width:64px;height:64px;object-fit:cover;border-radius:50%;margin-bottom:6px"/>`
 			: `<div style="width:64px;height:64px;border-radius:50%;background:#6c757d;color:#fff;
                  display:flex;align-items:center;justify-content:center;margin-bottom:6px">
                    ${userInitials}

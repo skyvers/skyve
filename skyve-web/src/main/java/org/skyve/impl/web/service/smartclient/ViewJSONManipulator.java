@@ -1399,7 +1399,7 @@ public class ViewJSONManipulator extends ViewVisitor {
 				htmlGuts.append("<img src=\"dynamic.png?_n=").append(image.getName());
 				htmlGuts.append("&_doc={bizModule}.{bizDocument}");
 				
-				Integer pixelWidth = image.getPixelHeight();
+				Integer pixelWidth = image.getPixelWidth();
 				Integer pixelHeight = image.getPixelHeight();
 				Integer initialPixelWidth = image.getImageInitialPixelWidth();
 				Integer initialPixelHeight = image.getImageInitialPixelHeight();
