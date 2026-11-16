@@ -292,6 +292,42 @@ SKYVE.PF = function() {
 	};
 
 	patchPrimeFacesLocaleAmPm();
+
+	// The date picker compares a typed AM or PM with its locale's exactly, so with Skyve's AM and PM it refused a typed
+	// am or pm, which Skyve's converters read. Its time parse matches a typed AM or PM in either case; it still writes
+	// AM and PM. The date picker's script loads after this one, so its plugin is patched once it is loaded: now if it
+	// is, when the page is ready (before any value is typed), and after each ajax response (which may load it).
+	var patchPrimeFacesDatePickerAmPmCase = function() {
+		var datePickerPrototype = window.jQuery && $.prime && $.prime.datePicker && $.prime.datePicker.prototype;
+		if ((! datePickerPrototype) || datePickerPrototype.skyveAmPmCasePatch) {
+			return;
+		}
+
+		var populateTime = datePickerPrototype.populateTime;
+		if (typeof populateTime !== 'function') {
+			return;
+		}
+
+		datePickerPrototype.populateTime = function(value, timeString, ampm) {
+			var locale = this.options && this.options.locale;
+			var marker = ampm;
+			if (marker && locale) {
+				var upper = String(marker).toUpperCase();
+				if (locale.am && (upper === String(locale.am).toUpperCase())) {
+					marker = locale.am;
+				}
+				else if (locale.pm && (upper === String(locale.pm).toUpperCase())) {
+					marker = locale.pm;
+				}
+			}
+			return populateTime.call(this, value, timeString, marker);
+		};
+		datePickerPrototype.skyveAmPmCasePatch = true;
+	};
+
+	patchPrimeFacesDatePickerAmPmCase();
+	$(patchPrimeFacesDatePickerAmPmCase);
+	$(document).on('pfAjaxComplete', patchPrimeFacesDatePickerAmPmCase);
 	
 	var prepareMorph = function(source, target, options) {
 		var sourceElement = getElement(source);
