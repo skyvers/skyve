@@ -51,6 +51,18 @@ SKYVE.PF = function() {
 		return element;
 	};
 
+	// Shows growls from script in the push growl: the view's own growl is updated by every response, which would
+	// remove them (a pushed growl, or an upload page's messages as it closes, before the refresh that follows)
+	var pushGrowls = function(msgs) {
+		PrimeFaces.cw('Growl', 'pushGrowl', {
+			id: 'pushGrowl',
+			widgetVar: 'pushGrowl',
+			life: 6000,
+			sticky: false,
+			msgs: msgs
+		});
+	};
+
 	var getWidgetElement = function(widgetVar) {
 		var widget = window.PF ? window.PF(widgetVar) : null;
 		return widget && widget.jq ? widget.jq[0] : null;
@@ -785,16 +797,21 @@ SKYVE.PF = function() {
 		/**
 		 * Notes that an upload page's upload action has run, so that hiding the page refreshes the view
 		 * (see actionUploadRan), and closes the page of an upload that has succeeded, as afterContentUpload closes a
-		 * content upload's: hides the overlay or dialog that holds the page's frame, whose hide handler then refreshes
-		 * the view.
+		 * content upload's: shows the page's messages in the view's growl, so that the user still sees them, then hides
+		 * the overlay or dialog that holds the page's frame, whose hide handler then refreshes the view.
 		 *
 		 * @param uploadWindow	The upload page's window, in the frame.
 		 * @param close	Whether to close the page: true when the upload succeeded, false when the page shows its problems.
+		 * @param messages	When closing, the page's messages: each a severity, summary and detail, shown unescaped, as the
+		 * 					page's growl shows them.
 		 */
-		afterActionUpload: function(uploadWindow, close) {
+		afterActionUpload: function(uploadWindow, close, messages) {
 			var frame = uploadWindow.frameElement;
 			actionUploadFrameIds[frame.id] = true;
 			if (close) {
+				if (messages && (messages.length > 0)) {
+					pushGrowls(messages);
+				}
 				var panel = $(frame).closest('.ui-overlaypanel, .ui-dialog');
 				var widget = panel.length ? PrimeFaces.getWidgetById(panel.attr('id')) : null;
 				if (widget) {
@@ -1129,13 +1146,7 @@ SKYVE.PF = function() {
 			}
 			
 			if (growls.length > 0) {
-				PrimeFaces.cw('Growl', 'pushGrowl', {
-					id: 'pushGrowl', 
-					widgetVar: 'pushGrowl',
-					life: 6000, 
-					sticky: false, 
-					msgs: growls 
-				});
+				pushGrowls(growls);
 			}
 		},
 		

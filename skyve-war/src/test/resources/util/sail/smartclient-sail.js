@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 11;
+	var VERSION = 12;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -2112,10 +2112,11 @@
 		return { element: isc.AutoTest.getElement(S.objectLocator(button)), disabled: button.isDisabled() };
 	};
 
-	/** The upload page's iframe in the top-most window, if one is open. */
+	/** The upload page's iframe in the top-most window, if one is open: an upload page, or a BizPort import's. */
 	S.uploadFrame = function () {
 		var frames = Array.prototype.slice.call(document.querySelectorAll("iframe")).filter(function (f) {
-			return String(f.src || "").indexOf("upload.xhtml") >= 0 && f.getClientRects().length > 0;
+			var src = String(f.src || "");
+			return (src.indexOf("upload.xhtml") >= 0 || src.indexOf("bizImport.xhtml") >= 0) && f.getClientRects().length > 0;
 		});
 		return frames.length ? frames[frames.length - 1] : null;
 	};

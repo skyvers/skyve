@@ -18,7 +18,7 @@ SC-2's suspected cause, which cites the code before its fix, at `2f4c2021b8`.
 |---|---|---|---|---|
 | [P1](#p1-fixed-backups-are-listed-oldest-first) | Backups are listed oldest first | both | Confirmed | fixed (a74e625b8c) |
 | [P2](#p2-fixed-restoring-a-redacted-backup-locks-everyone-out) | Restoring a redacted backup locks everyone out | both | Confirmed | fixed (a74e625b8c) |
-| [P3](#p3-fixed-an-action-upload-never-closes-or-refreshes) | An action upload never closes or refreshes | both | Confirmed | fixed (35ee72a540; SC 1d3b95cd0c) |
+| [P3](#p3-fixed-an-action-upload-never-closes-or-refreshes) | An action upload never closes or refreshes | both | Confirmed | fixed (35ee72a540; SC 1d3b95cd0c; messages 69d9846c19) |
 | [P4](#p4-fixed-update-my-details-fails-with-an-optimistic-lock) | Update My Details fails with an optimistic lock | both | Confirmed (restore); sign ins not reproduced | fixed (a74e625b8c) |
 | [P5](#p5-tablet-escapingfixture-shows-required-field-messages-at-once) | Tablet EscapingFixture shows required-field messages at once | PF | Not reproduced | not reproduced; runtime matches Mike's rule |
 | [P6](#p6-fixed-re-run-job-of-generate-test-data-always-fails) | Re-run Job of Generate Test Data always fails | both | Confirmed | fixed (a74e625b8c) |
@@ -295,7 +295,91 @@ come in the same response handling, so the step never reads the message from a
 window that then closes. `_sail.windowClose` now returns the top window's close
 button only when it shows.
 
-**Status:** fixed (35ee72a540); SmartClient fixed (1d3b95cd0c).
+**Messages carried to the view (Mike, 2026-11-16: "I'd choose your
+recommendation if it is not too complex").** Closing the page on success lost
+its messages: the upload page's growl showed "Successful - <file> is uploaded.
+File Size is N KB" and any growl or message the upload action added, and the
+page closed at once. Now a page that succeeds still closes, and its messages
+are shown in the view's own growl as it closes. This applies to action uploads
+in both renderers, and to the BizPort import window (SmartClient only, the only
+client that opens it). A page with problems (errors, or only warnings), a
+refusal and an unexpected failure stay open, showing them, as before. Content
+uploads lose nothing (no message), so they are unchanged.
+
+- The server sends the messages in the same response. `AbstractUploadView.messagesJSON`
+  turns the page's Faces messages (`FacesContext.getMessageList()`) into a JSON
+  array of `severity` (PrimeFaces' client names), `summary` and `detail`. A
+  detail that repeats its summary, as a growl added through the web context does
+  (`FacesWebContext` sets both), is sent empty, so the view shows the text once,
+  as it shows the web context's growls.
+- PrimeFaces: the success script becomes
+  `SKYVE.PF.afterActionUpload(window,true,<messages>)`, and `afterActionUpload`
+  shows them in the view's push growl (`#pushGrowl`) before it hides the page.
+  Not the view's `#growl`: that one is updated by every response, and the
+  refresh that hiding the page sends would remove them at once. `onPushMessage`
+  shares the same helper (`pushGrowls`). The prime `skyve-min.js` is
+  regenerated.
+- SmartClient: `ContentUploadView` sends the JSON as the callback parameter
+  `uploadMessages` with `actionUploadSucceeded`, and `skyveAfterActionUpload`
+  shows it with the opener's `isc.BizUtil.growl` (parsed by the opener's `JSON`,
+  so the growl's objects outlive the page's frame) after the refresh and before
+  the window closes. `BizportImportView` sends `bizImportSucceeded` and
+  `uploadMessages` only for an import without problems, and `bizImport.xhtml`'s
+  `skyveAfterBizImport(args)` does the same: refresh, growl, close. With
+  problems, or after a failure, it sends neither and the window stays open.
+- SmartClient also lost the upload action's own growls and messages: a
+  SmartClient conversation keeps them in `SmartClientWebContext` (transient), not
+  in the page's Faces messages, so the upload page never showed them and the
+  next request did not either. `ContentUploadView` now adds them to the page's
+  messages after the action runs (as `FacesWebContext` does in PrimeFaces), so
+  the page shows them when it stays open and carries them when it closes.
+
+**Escaping.** Unchanged. Both upload pages' growls have `escape="false"`, and so
+do the views' growls: SmartClient's `isc.BizUtil.growl` and the PrimeFaces push
+growl are PrimeFaces Growl widgets created without `escape`, which render the
+summary and detail as HTML. The messages are carried as the page held them, not
+escaped again: each was escaped where it was added (OWASP for refusals, the
+fixed markup of the problems messages, `Util.i18n` for the web context's). In
+the JSON, `<`, `>` and `&` are written as `\u003c`, `\u003e` and `\u0026`, so the
+array can be written into the success script safely (a message cannot end the
+script's CDATA or a string); `JSON.parse` and the script give back the same
+text. The success message's file name was not escaped
+(`addActionUploadSuccess`), so a file name with markup (Skyve's default
+whitelist allows `<` and `>` in a name) showed as markup on the page, and would
+have in the view; it is now escaped with `OWASP.escapeHtml`
+(`theSuccessMessageEscapesTheFileName` failed before and passes now).
+
+**Tests.** `ActionsFixtureBizPortAndUploadH2Test`: `aSuccessfulUploadClosesItsUploadPage`
+(the script carries the messages), `aSuccessfulUploadTellsItsSmartClientWindowToClose`
+(the callback parameter), `anUploadActionsGrowlIsShownByItsUploadPage` and
+`anUploadRunsWhileItsButtonIsEnabled` (a SmartClient conversation's growl
+reaches the page) and `aCleanImportTellsItsSmartClientWindowToClose`
+(ConditionsFixture's clean import) failed before the change and pass with it;
+`aRefusedUploadLeavesItsUploadPageOpen` and `anImportWithProblemsLeavesItsSmartClientWindowOpen`
+check that refusals and problems send no messages. `ThemeFaceletsStructureTest`
+checks both pages' hooks. `UploadViewsStateTest` checks the JSON: severities,
+markup kept, no `<`, `>` or `&`, a repeated detail left out. The kitchen sink's
+`ActionsUpload` now growls "Actions Upload took the file", so the carrying of an
+action's own growl is proven. `PrimeFacesActionUploadSailIT` (all three UX/UIs)
+and `SmartClientActionUploadSailIT` check both growls in the view after the
+page closed itself; against a server without the change they fail ("expected an
+info message containing 'sail-upload.txt is uploaded' but found: no
+messages"). `SmartClientActionUploadSailIT.aCleanImportClosesItsWindow` imports
+an empty workbook (`sail/files/sail-import.xls`) into ActionsFixture, whose
+import warns, so the window must still be open when the step reads the warning,
+then into admin's Data Maintenance, without close buttons, and checks "The
+import completed successfully." in the view; without the change it fails ("The
+upload window has no close button"). The kitchen sink's ConditionsFixture has a
+clean import too, but SmartClient never settles on it (see
+`sc-kitchensink-sail.xml`). The SC upload step drives a BizPort import page now
+(`<upload action="..."/>` with an import action; see docs/sail.md).
+
+On a phone, the growls cover the view's toolbar until they fade, as any growl
+does there: `PrimeFacesActionUploadSailIT` closes them (`PF('pushGrowl').removeAll()`)
+before it presses Cancel, as a user would.
+
+**Status:** fixed (35ee72a540); SmartClient fixed (1d3b95cd0c); messages carried
+to the view (69d9846c19).
 
 ## P4 (fixed): Update My Details fails with an optimistic lock
 

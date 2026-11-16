@@ -1021,9 +1021,9 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
-	 * Uploads a file through Skyve's upload page: click the trigger (a content item's Upload button, or an upload action),
-	 * choose the file in the page's file input, press its Upload button (the image editor's, for an image), and wait for the
-	 * page's window to close.
+	 * Uploads a file through Skyve's upload page: click the trigger (a content item's Upload button, an upload action, or a
+	 * BizPort import action, whose page is the import page), choose the file in the page's file input, press its Upload
+	 * button (the image editor's, for an image), and wait for the page's window to close.
 	 *
 	 * @param trigger	the element that opens the upload page
 	 * @param file		the file
@@ -1094,9 +1094,10 @@ public class SmartClientSelenide extends Selenide<
 		}
 		trace("    upload pressed");
 		// Waits for the upload to be processed: the upload page closes its window (content uploads, and upload actions
-		// that succeed), or shows why it could not (an upload action's problems, or a refusal), or reports a success
-		// in its own messages and stays open (upload actions, in a Skyve without runtime issue P3's fix: Apps' A/B runs
-		// on master), when the window is closed below as a user would
+		// and imports that succeed without problems), or shows why it could not (an upload action's or import's
+		// problems, or a refusal), or reports a success in its own messages and stays open (upload actions and imports,
+		// in a Skyve without runtime issue P3's fix: Apps' A/B runs on master), when the window is closed below as a
+		// user would
 		WebElement uploadFrame = frame;
 		String outcome = until("the upload to finish", d -> {
 			if (! (script("return _sail.uploadFrame()") instanceof WebElement)) {
@@ -1142,9 +1143,11 @@ public class SmartClientSelenide extends Selenide<
 	private @Nonnull List<String> uploadPageOutcome(@Nonnull WebElement frame) {
 		try {
 			driver.switchTo().frame(frame);
-			// an error, followed by the problems the page lists (an upload action's refusal is in its problems table)
+			// an error, followed by the problems the page lists (an upload action's refusal is in its problems table;
+			// a BizPort import page always shows its table, with an empty message row until the import has problems)
 			Object result = script("var p = document.querySelector('#problems table');" +
-									"var problems = p ? p.innerText.replace(/\\s+/g, ' ').trim() : '';" +
+									"var listed = p && p.querySelector('tbody tr:not(.ui-datatable-empty-message)');" +
+									"var problems = listed ? p.innerText.replace(/\\s+/g, ' ').trim() : '';" +
 									"var e = Array.from(document.querySelectorAll('.ui-growl-error, .ui-growl-fatal, .ui-messages-error')).find(function(x) {" +
 									"  return x.getClientRects().length > 0 && (x.innerText || '').trim();});" +
 									"if (e) return ['error', e.innerText.replace(/\\s+/g, ' ').trim() + (problems ? ' ' + problems : '')];" +

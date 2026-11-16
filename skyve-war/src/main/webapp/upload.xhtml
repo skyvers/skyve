@@ -44,14 +44,18 @@
 						$('#stopUpload').appendTo(bar);
 					});
 
-					// SmartClient: once an upload action has run, refresh the view, and close the window if the upload
-					// succeeded (args.actionUploadSucceeded); an upload with problems leaves it open, showing them.
+					// SmartClient: once an upload action has run, refresh the view, and if the upload succeeded
+					// (args.actionUploadSucceeded), show this page's messages (args.uploadMessages) in the view's growl
+					// and close the window; an upload with problems leaves it open, showing them.
 					// The window closes last: the opener is read from the window stack, and closing it removes this page.
 					function skyveAfterActionUpload(uploadKind, args) {
 						var owner = SKYVE.Util.findSmartClientWindow();
 						if (owner && uploadKind === 'action') {
 							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
 							if (args && args.actionUploadSucceeded) {
+								if (args.uploadMessages) {
+									owner.isc.BizUtil.growl(owner.JSON.parse(args.uploadMessages));
+								}
 								owner.isc.WindowStack.popoff(false);
 							}
 						}

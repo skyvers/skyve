@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
@@ -56,6 +57,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate upload view response fragments.
 public class BizportImportView extends AbstractUploadView {
 	private static final long serialVersionUID = -8452779436908784172L;
+
+	/**
+	 * The callback parameter that tells a SmartClient import window that the import succeeded without problems:
+	 * bizImport.xhtml's {@code skyveAfterBizImport} (the upload's {@code oncomplete}) refreshes the view, and then shows
+	 * the page's messages ({@link #MESSAGES_PARAM}) in the view's growl and closes the window (runtime issue P3).
+	 */
+	private static final String BIZ_IMPORT_SUCCEEDED_PARAM = "bizImportSucceeded";
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
@@ -129,6 +137,10 @@ public class BizportImportView extends AbstractUploadView {
 	 * form first, so a saved edit that changes the action's conditions decides the check. A refusal's
 	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a warning,
 	 * rolled back, and enqueued as the refusal's localised message.
+	 *
+	 * <p>An import without problems tells the SmartClient window to close (the {@code bizImportSucceeded} callback
+	 * parameter), with the page's messages to show in the view as it closes; one with errors or warnings, or that
+	 * fails, leaves the window open, showing them.
 	 *
 	 * @param event PrimeFaces upload event containing the uploaded file
 	 * @throws Exception when unexpected import processing failures occur before they are converted
@@ -260,6 +272,10 @@ public class BizportImportView extends AbstractUploadView {
 			else {
 				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "The import completed successfully.");
 				fc.addMessage(null, msg);
+				// The window closes: its messages are shown in the view's growl instead
+				PrimeFaces.Ajax ajax = PrimeFaces.current().ajax();
+				ajax.addCallbackParam(BIZ_IMPORT_SUCCEEDED_PARAM, Boolean.TRUE);
+				ajax.addCallbackParam(MESSAGES_PARAM, messagesJSON(fc));
 			}
 		}
 		catch (ActionUnavailableException e) {

@@ -22,6 +22,8 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -53,6 +55,7 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
+import org.skyve.util.JSON;
 import org.skyve.web.UserAgentType;
 
 import jakarta.faces.application.FacesMessage;
@@ -1648,6 +1651,38 @@ class UploadViewsStateTest {
 		assertDoesNotThrow(() -> view.handleFileUpload(event));
 
 		verify(context).addMessage(isNull(), any());
+	}
+
+	/**
+	 * The messages carried to the view as an upload page closes (runtime issue P3) keep the page's text and severities:
+	 * HTML markup is not escaped again (the page's growl shows it unescaped), and the JSON holds no {@code <}, {@code >}
+	 * or {@code &}, so it can be written into a script. A detail that repeats its summary is left out.
+	 */
+	@Test
+	void messagesJSONKeepsTheTextAndSeveritiesTheUploadPageShows() throws Exception {
+		FacesContext context = Mockito.mock(FacesContext.class);
+		when(context.getMessageList()).thenReturn(List.of(new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "a.txt is uploaded"),
+															new FacesMessage(FacesMessage.SEVERITY_WARN, "Successful", "with <b>warnings</b> &amp; more"),
+															new FacesMessage(FacesMessage.SEVERITY_ERROR, "Unsuccessful", null),
+															new FacesMessage(FacesMessage.SEVERITY_FATAL, "]]></eval>", "\"quoted\"")));
+
+		String json = AbstractUploadView.messagesJSON(context);
+
+		assertFalse(json.contains("<") || json.contains(">") || json.contains("&"), json);
+		assertEquals(List.of(Map.of("severity", "info", "summary", "Successful", "detail", "a.txt is uploaded"),
+								Map.of("severity", "warn", "summary", "Successful", "detail", "with <b>warnings</b> &amp; more"),
+								// a message without a detail has its summary as its detail: shown once
+								Map.of("severity", "error", "summary", "Unsuccessful", "detail", ""),
+								Map.of("severity", "fatal", "summary", "]]></eval>", "detail", "\"quoted\"")),
+						JSON.unmarshall(json));
+	}
+
+	@Test
+	void messagesJSONIsAnEmptyArrayWithoutMessages() {
+		FacesContext context = Mockito.mock(FacesContext.class);
+		when(context.getMessageList()).thenReturn(List.of());
+
+		assertEquals("[]", AbstractUploadView.messagesJSON(context));
 	}
 
 	private static void setField(Class<?> owner, Object target, String name, Object value) throws Exception {

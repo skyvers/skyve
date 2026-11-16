@@ -3,6 +3,7 @@ package modules.kitchensink.ActionsFixture.actions;
 import org.skyve.CORE;
 import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.domain.messages.ValidationException;
@@ -13,7 +14,8 @@ import org.skyve.web.WebContext;
 import modules.kitchensink.domain.ActionsFixture;
 
 /**
- * Records that it ran, which is all the actions fixture needs to put a condition on an upload action.
+ * Records that it ran, and growls {@value #GROWL}, which is all the actions fixture needs to put a condition on an upload
+ * action, and shows that the upload page carries the action's growls to the view when it closes (runtime issue P3).
  * It refuses a file named {@value #REFUSED_FILE_NAME} with an {@link UploadException}, as an application refuses a file
  * that already exists (as admin's Upload Backup does), and one named {@value #INVALID_FILE_NAME} with a
  * {@link ValidationException} (as some applications' upload actions do), and one named {@value #UNAVAILABLE_FILE_NAME}
@@ -27,9 +29,11 @@ public class ActionsUpload extends UploadAction<ActionsFixture> {
 	public static final String INVALID_FILE_NAME = "sail-invalid.txt";
 	/** The name of the file that this action refuses as unavailable. */
 	public static final String UNAVAILABLE_FILE_NAME = "sail-unavailable.txt";
+	/** What this action growls when it takes a file. */
+	public static final String GROWL = "Actions Upload took the file";
 
 	/**
-	 * Records in the outcome that the upload ran, or refuses a file named {@value #REFUSED_FILE_NAME},
+	 * Records in the outcome that the upload ran, and growls {@value #GROWL}, or refuses a file named {@value #REFUSED_FILE_NAME},
 	 * {@value #INVALID_FILE_NAME} or {@value #UNAVAILABLE_FILE_NAME}.
 	 *
 	 * @param bean	The fixture.
@@ -54,6 +58,7 @@ public class ActionsUpload extends UploadAction<ActionsFixture> {
 			throw new ActionUnavailableException(CORE.getUser(), bean.getBizDocument(), "ActionsUpload");
 		}
 		bean.setOutcome("Actions Upload ran");
+		webContext.growl(MessageSeverity.info, GROWL);
 		return bean;
 	}
 }

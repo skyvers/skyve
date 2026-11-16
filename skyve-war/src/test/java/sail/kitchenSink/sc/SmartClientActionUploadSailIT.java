@@ -10,8 +10,10 @@ import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
 
 /**
- * A SmartClient action upload that succeeds closes its upload window, and refreshes the view (runtime issue P3,
- * docs/sail-runtime-issues.md); one with problems leaves the window open, showing them.
+ * A SmartClient action upload that succeeds closes its upload window, refreshes the view and shows the upload page's
+ * messages in the view's growl (runtime issue P3, docs/sail-runtime-issues.md): the upload's success and the upload
+ * action's own growl; one with problems leaves the window open, showing them. A BizPort import does the same: a clean
+ * import closes its window, showing its success in the view, and one with warnings stays open.
  * <p>
  * The upload step closes an upload window that stays open with its close button, as a user would, for a Skyve without
  * the fix. So before the successful upload an {@code <execute>} step has windows open without a close button: an
@@ -49,7 +51,38 @@ class SmartClientActionUploadSailIT extends AbstractSmartClientInterpretedSail {
 							"<comment>No close buttons: the upload window must close by itself</comment>" +
 							"<execute>" + NO_CLOSE_BUTTONS + "</execute>" +
 							"<upload action=\"ActionsUpload\" file=\"sail/files/sail-upload.txt\" />" +
+							"<comment>The upload page's messages, in the view's growl</comment>" +
+							"<testMessage contains=\"sail-upload.txt is uploaded\" type=\"info\" />" +
+							"<testMessage contains=\"Actions Upload took the file\" type=\"info\" />" +
 							"<testValue binding=\"outcome\" value=\"Actions Upload ran\" />" +
+							"</method></interaction></automation>";
+		Assertions.assertDoesNotThrow(() -> sailString(script));
+
+		Assertions.assertEquals(Long.valueOf(0), Selenide.executeJavaScript("return isc.WindowStack._stack.length"));
+	}
+
+	/**
+	 * A BizPort import without problems closes its window and shows its success in the view's growl; one with warnings
+	 * leaves its window open, showing them, and the step closes it.
+	 */
+	@Test
+	void aCleanImportClosesItsWindow() {
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<before><login user=\"admin\" password=\"admin\" /><switchMode /></before>" +
+							"<interaction name=\"Import with warnings\"><method>" +
+							"<navigateEdit module=\"kitchensink\" document=\"ActionsFixture\" />" +
+							"<comment>Warnings: the window stays open showing them, and the step closes it</comment>" +
+							"<upload action=\"ActionsImport\" file=\"sail/files/sail-import.xls\" testSuccess=\"false\" />" +
+							"<testFailure message=\"Actions Import ran\" />" +
+							"</method></interaction>" +
+							"<interaction name=\"Clean import\"><method>" +
+							"<comment>An empty workbook: nothing to import, so no problems (SmartClient never settles on the" +
+							" kitchen sink's ConditionsFixture, whose import is clean, so admin's Data Maintenance is used)</comment>" +
+							"<navigateEdit module=\"admin\" document=\"DataMaintenance\" />" +
+							"<comment>No close buttons: the import window must close by itself</comment>" +
+							"<execute>" + NO_CLOSE_BUTTONS + "</execute>" +
+							"<upload action=\"DataMaintenanceImportAction\" file=\"sail/files/sail-import.xls\" />" +
+							"<testMessage contains=\"The import completed successfully.\" type=\"info\" />" +
 							"</method></interaction></automation>";
 		Assertions.assertDoesNotThrow(() -> sailString(script));
 

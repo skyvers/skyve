@@ -58,7 +58,7 @@ public class FacesWebContext extends ViewWebContext {
 	 * @param severity the Skyve message severity to map
 	 * @return the corresponding JSF message severity
 	 */
-	private static @Nullable Severity determineFacesSeverity(@Nonnull MessageSeverity severity) {
+	public static @Nullable Severity determineFacesSeverity(@Nonnull MessageSeverity severity) {
 		Severity result = null;
 		switch (severity) {
 			case info:
