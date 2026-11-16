@@ -955,7 +955,10 @@ public class SmartClientListServlet extends HttpServlet {
 			return;
 		}
 
-		boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
+		// Under "or", the first criterion that adds to the filter is its base, and each later one is ORed with it,
+		// whether it is a group (nested advanced criteria) or a simple criterion. A bound parameter adds nothing.
+		// Ask the filter rather than counting criteria: an OR onto an empty filter is wrong for some filters (an
+		// empty InMemoryFilter's predicate is always true, so the OR would match every row).
 		for (Map<String, Object> criterion : criteria) {
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = {}", JSON.marshall(criterion));
 			String binding = (String) criterion.get("fieldName");
@@ -976,10 +979,10 @@ public class SmartClientListServlet extends HttpServlet {
 															model,
 															subFilter);
 				if (! subFilter.isEmpty()) {
-					if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
+					if (CompoundFilterOperator.or.equals(compoundFilterOperator) && (! filter.isEmpty())) {
 						filter.addOr(subFilter);
 					}
-					else { // not is taken into account below
+					else { // and, not (taken into account below), and the first group under or
 						filter.addAnd(subFilter);
 					}
 				}
@@ -1134,7 +1137,7 @@ public class SmartClientListServlet extends HttpServlet {
 						addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
 						break;
 					case or:
-						if (firstCriteriaIteration) {
+						if (filter.isEmpty()) {
 							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
 						}
 						else {
@@ -1332,7 +1335,6 @@ public class SmartClientListServlet extends HttpServlet {
 						break;
 					default:
 				}
-				firstCriteriaIteration = false;
 			}
 		}
 	}
