@@ -317,15 +317,16 @@ uploads lose nothing (no message), so they are unchanged.
   shows them in the view's push growl (`#pushGrowl`) before it hides the page.
   Not the view's `#growl`: that one is updated by every response, and the
   refresh that hiding the page sends would remove them at once. `onPushMessage`
-  shares the same helper (`pushGrowls`). The prime `skyve-min.js` is
+  shares the same helper (`pushGrowls`), which adds to the growls showing
+  (`keepAlive`; see the review fixes below). The prime `skyve-min.js` is
   regenerated.
 - SmartClient: `ContentUploadView` sends the JSON as the callback parameter
   `uploadMessages` with `actionUploadSucceeded`, and `skyveAfterActionUpload`
-  shows it with the opener's `isc.BizUtil.growl` (parsed by the opener's `JSON`,
-  so the growl's objects outlive the page's frame) after the refresh and before
-  the window closes. `BizportImportView` sends `bizImportSucceeded` and
+  refreshes the view, closes the window, and shows the messages with the
+  opener's `isc.BizUtil.growl` once the refresh has returned (see the review
+  fixes below). `BizportImportView` sends `bizImportSucceeded` and
   `uploadMessages` only for an import without problems, and `bizImport.xhtml`'s
-  `skyveAfterBizImport(args)` does the same: refresh, growl, close. With
+  `skyveAfterBizImport(args)` does the same. With
   problems, or after a failure, it sends neither and the window stays open.
 - SmartClient also lost the upload action's own growls and messages: a
   SmartClient conversation keeps them in `SmartClientWebContext` (transient), not
@@ -378,8 +379,55 @@ On a phone, the growls cover the view's toolbar until they fade, as any growl
 does there: `PrimeFacesActionUploadSailIT` closes them (`PF('pushGrowl').removeAll()`)
 before it presses Cancel, as a user would.
 
+**Review fixes (2026-11-16).** The carried growls removed other growls, or were
+removed by them:
+
+- SmartClient: the pages called `isc.BizUtil.growl` without `keep`, so the
+  growl removed the growls showing, such as an unread pushed one, which
+  `onPushMessage` keeps (SC-6). They now pass `keep`.
+- SmartClient: the refresh (`saveInstance(true, '_PUSH')`) could return after
+  the growl. A growl in its response (a bizlet or interceptor growling as the
+  view renders) is shown without `keep`, and removed the carried ones. The
+  carried growl is now the refresh's completion callback, so it runs once the
+  refresh's own growls are shown (on success, failure or a validation error
+  alike). The window still closes at once. The callback is the opener's
+  `isc.BizUtil.growl` bound, in the opener, to the messages parsed by the
+  opener's `JSON`, so nothing of the page's frame, which is gone by then, runs.
+  The refresh's own growls still replace the growls showing, as every SmartClient
+  response's growls do (a pre-existing behaviour, not changed here).
+- PrimeFaces: `pushGrowls` had no `keepAlive`, so the carried growls removed an
+  unread pushed growl, and a push arriving within their 6 seconds (a job
+  started by the upload action finishing, say) removed them. It now passes
+  `keepAlive: true`. This changes `onPushMessage` too: successive pushed growls
+  now add to each other in PrimeFaces, as SmartClient's do since SC-6.
+- SmartClient's upload action growls were added to the page with the text as
+  summary and detail, so an upload page that stays open (the action growled,
+  then reported problems) showed it twice (`showDetail="true"`). The detail is
+  now empty (not null: a message without a detail shows its summary as its
+  detail). `FacesWebContext` (PrimeFaces) is unchanged.
+
+Proofs, red before and green after: `anUploadActionsGrowlIsShownByItsUploadPage`
+(empty detail) and `ThemeFaceletsStructureTest` (the bound growl after the
+refresh, in both pages). `SmartClientActionUploadSailIT.aGrowlPushedBeforeTheUploadsMessagesStaysShowing`
+hands the view a pushed growl as the upload page refreshes it, and checks that
+it and the upload's messages show. `aGrowlInTheRefreshDoesNotRemoveTheUploadsMessages`
+has every response of the view show a growl, as a growling bizlet's does, and
+checks the upload's messages show after the refresh. `PrimeFacesActionUploadSailIT`
+pushes a growl just before the page shows its messages and another after them,
+and checks that all show (before the fix the first push was removed; checked
+separately, the second removed the upload's messages).
+
+The new SmartClient tests exposed a race in the SC upload step
+(`SmartClientSelenide.upload`): it found the upload window still open, then the
+window closed before it read the page, and its script, meant for the page's
+frame, ran in the view's document and took the view's growl (the pushed one) for
+the upload page's message, then found no close button. The step now reads an
+outcome only from the upload or import page itself (`location.pathname`), and
+otherwise looks again, when it finds the window closed. A growl showing in the
+view when an upload closes its window could do the same in any suite.
+
 **Status:** fixed (35ee72a540); SmartClient fixed (1d3b95cd0c); messages carried
-to the view (69d9846c19).
+to the view (69d9846c19); review fixes (7a847d51f1).
 
 ## P4 (fixed): Update My Details fails with an optimistic lock
 

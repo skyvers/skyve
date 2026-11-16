@@ -18,6 +18,11 @@ import org.skyve.metadata.router.UxUi;
 @SuppressWarnings({ "static-method", "java:S1192" }) // Repeated literals are deliberate Facelets structure contracts.
 class ThemeFaceletsStructureTest {
 	private static final String IFRAME_TEMPLATE_PATH = "WEB-INF/pages/templates/iframe/template.xhtml";
+	/**
+	 * The growl that shows an upload or import page's messages in the view (runtime issue P3): bound in the opener, as
+	 * the page is gone when the refresh returns, and with keep, so that it does not remove the growls showing.
+	 */
+	private static final String SHOW_MESSAGES_AFTER_THE_REFRESH = "owner.isc.BizUtil.growl.bind(owner.isc.BizUtil, owner.JSON.parse(args.uploadMessages), null, null, true)";
 	private static final List<String> FAMILIES = List.of("editorial", "ecuador", "ultima", "diamond");
 	private static final List<String> DYNAMIC_CLIENT_PAGES = List.of("external/home.xhtml",
 			"external/edit.xhtml",
@@ -38,18 +43,20 @@ class ThemeFaceletsStructureTest {
 		assertTrue(upload.contains("var owner = SKYVE.Util.findSmartClientWindow();"), upload);
 		assertTrue(upload.contains("oncomplete=\"skyveAfterActionUpload('#{_skyveContent.uploadState.uploadKind}', args)\""), upload);
 		// Runtime issue P3: a SmartClient action upload that succeeded closes its window
-		assertTrue(upload.contains("if (args && args.actionUploadSucceeded) {"), upload);
+		assertTrue(upload.contains("var succeeded = args && args.actionUploadSucceeded;"), upload);
 		assertTrue(upload.contains("owner.isc.WindowStack.popoff(false);"), upload);
-		// and shows the page's messages in the view's growl as it closes
-		assertTrue(upload.contains("owner.isc.BizUtil.growl(owner.JSON.parse(args.uploadMessages));"), upload);
+		// and shows the page's messages in the view's growl once the refresh has returned, keeping the growls showing
+		assertTrue(upload.contains(SHOW_MESSAGES_AFTER_THE_REFRESH), upload);
+		assertTrue(upload.contains("saveInstance(true, '_PUSH', growl);"), upload);
 		assertFalse(upload.contains("window.parent.isc"), upload);
 
 		assertSharedIframePage(bizImport);
 		assertTrue(bizImport.contains("var owner = SKYVE.Util.findSmartClientWindow();"), bizImport);
 		assertTrue(bizImport.contains("oncomplete=\"skyveAfterBizImport(args)\""), bizImport);
 		// Runtime issue P3: an import without problems closes its window, showing the page's messages in the view
-		assertTrue(bizImport.contains("if (args && args.bizImportSucceeded) {"), bizImport);
-		assertTrue(bizImport.contains("owner.isc.BizUtil.growl(owner.JSON.parse(args.uploadMessages));"), bizImport);
+		assertTrue(bizImport.contains("var succeeded = args && args.bizImportSucceeded;"), bizImport);
+		assertTrue(bizImport.contains(SHOW_MESSAGES_AFTER_THE_REFRESH), bizImport);
+		assertTrue(bizImport.contains("saveInstance(true, '_PUSH', growl);"), bizImport);
 		assertTrue(bizImport.contains("owner.isc.WindowStack.popoff(false);"), bizImport);
 		assertFalse(bizImport.contains("window.parent.isc"), bizImport);
 

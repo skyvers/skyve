@@ -803,9 +803,9 @@ public class ContentUploadView extends AbstractUploadView {
 
 	/**
 	 * Adds the growls and messages that the upload action or an interceptor added to the conversation's web context as
-	 * the page's messages, as {@code FacesWebContext} adds them, so that the page shows them, and carries them to the
-	 * view when it closes. Only a SmartClient conversation ({@code SmartClientWebContext}) holds them: a PrimeFaces one
-	 * adds them to the page's messages straight away, and has none to add here.
+	 * the page's messages, as {@code FacesWebContext} adds them (but with the text once), so that the page shows them,
+	 * and carries them to the view when it closes. Only a SmartClient conversation ({@code SmartClientWebContext}) holds
+	 * them: a PrimeFaces one adds them to the page's messages straight away, and has none to add here.
 	 *
 	 * @param webContext the conversation the upload action ran in; must not be {@code null}
 	 * @param fc active Faces context used for messages; must not be {@code null}
@@ -816,7 +816,8 @@ public class ContentUploadView extends AbstractUploadView {
 	}
 
 	/**
-	 * Adds growls or messages, each a severity and a summary, as messages whose summary and detail are the summary.
+	 * Adds growls or messages, each a severity and a summary, as messages with that summary and an empty detail, so
+	 * that the page's growl (which shows details) shows the text once.
 	 *
 	 * @param notifications the growls or messages, or {@code null} for none
 	 * @param fc active Faces context used for messages; must not be {@code null}
@@ -826,7 +827,8 @@ public class ContentUploadView extends AbstractUploadView {
 			for (Map<String, String> notification : notifications) {
 				String text = notification.get("summary");
 				Severity severity = FacesWebContext.determineFacesSeverity(MessageSeverity.valueOf(notification.get("severity")));
-				fc.addMessage(null, new FacesMessage(severity, text, text));
+				// an empty detail, not null: a message without a detail shows its summary as its detail
+				fc.addMessage(null, new FacesMessage(severity, text, ""));
 			}
 		}
 	}

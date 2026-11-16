@@ -45,17 +45,22 @@
 					});
 
 					// SmartClient: once an upload action has run, refresh the view, and if the upload succeeded
-					// (args.actionUploadSucceeded), show this page's messages (args.uploadMessages) in the view's growl
-					// and close the window; an upload with problems leaves it open, showing them.
+					// (args.actionUploadSucceeded), close the window and show this page's messages (args.uploadMessages)
+					// in the view's growl; an upload with problems leaves it open, showing them.
 					// The window closes last: the opener is read from the window stack, and closing it removes this page.
+					// The messages are shown once the refresh has returned, so that growls in its response (shown without
+					// keep) do not remove them, and with keep, so that they do not remove growls showing (such as a pushed
+					// one, SC-6). The growl call is bound in the opener (its function and the parsed messages), as this
+					// page is gone by then.
 					function skyveAfterActionUpload(uploadKind, args) {
 						var owner = SKYVE.Util.findSmartClientWindow();
 						if (owner && uploadKind === 'action') {
-							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
-							if (args && args.actionUploadSucceeded) {
-								if (args.uploadMessages) {
-									owner.isc.BizUtil.growl(owner.JSON.parse(args.uploadMessages));
-								}
+							var succeeded = args && args.actionUploadSucceeded;
+							var growl = (succeeded && args.uploadMessages) ?
+											owner.isc.BizUtil.growl.bind(owner.isc.BizUtil, owner.JSON.parse(args.uploadMessages), null, null, true) :
+											null;
+							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH', growl);
+							if (succeeded) {
 								owner.isc.WindowStack.popoff(false);
 							}
 						}
