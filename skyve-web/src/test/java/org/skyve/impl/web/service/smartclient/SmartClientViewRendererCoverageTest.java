@@ -765,9 +765,27 @@ class SmartClientViewRendererCoverageTest {
 		assertTrue(javascript.contains("companion:'_attachment'"), javascript);
 		assertTrue(javascript.contains("k=(rec&&rec['_attachment'])||'link'"), javascript);
 		assertFalse(javascript.contains("&_w=200&_h=200"), javascript);
-		assertTrue(javascript.contains("style=\"width:100%;height:auto;aspect-ratio:1 / 1;object-fit:contain\""), javascript);
+		// An unsized column still asks for a thumbnail, never the original image, sized by the column's width
+		assertTrue(javascript.contains("formatCellValue:function(v,rec,row,col,grid){"), javascript);
+		assertTrue(javascript.contains("var s=SKYVE.Util.contentPreviewSize(grid&&grid.getFieldWidth?grid.getFieldWidth(col):null,null);"), javascript);
+		assertTrue(javascript.contains("<img src=\"'+u+'&_w='+s+'&_h='+s+'\" style=\"width:100%;height:auto;aspect-ratio:1 / 1;object-fit:contain\""), javascript);
 		assertTrue(javascript.contains("<video controls preload=\"metadata\""), javascript);
 		assertTrue(javascript.contains("style=\"width:100%;height:auto;aspect-ratio:16 / 9;object-fit:contain\""), javascript);
+	}
+
+	@Test
+	void contentUploadDataGridFieldWithOneSideAsksForAQuantisedSquareThumbnail() {
+		addTextAttribute("attachment");
+		ContentUpload content = new ContentUpload();
+		content.setBinding("attachment");
+		content.setPixelWidth(Integer.valueOf(120));
+
+		SmartClientDataGridFieldDefinition definition = new SmartClientDataGridFieldDefinition(user, customer, module, document, document, content, null, false, true, false, "desktop");
+		String javascript = definition.toJavascript();
+
+		assertTrue(javascript.contains("var s=SKYVE.Util.contentPreviewSize(120,null);"), javascript);
+		assertTrue(javascript.contains("&_w='+s+'&_h='+s+'\" style=\"width:120px;height:auto;aspect-ratio:1 / 1;object-fit:contain\""), javascript);
+		assertFalse(javascript.contains("&_w=120"), javascript);
 	}
 
 	@Test

@@ -69,10 +69,10 @@ class ContentServletTest {
 		servlet.addResponseHeaders(resource, response);
 
 		verify(response).setHeader("Content-Disposition", "inline; filename=\"report.svg\"");
-		verify(response).setHeader("Cache-Control", "cache");
-		verify(response).setHeader("Pragma", "cache");
+		verify(response).setHeader("Cache-Control", "private, max-age=86400");
 		verify(response, never()).setHeader("Accept-Ranges", "bytes");
-		verify(response).addDateHeader(org.mockito.ArgumentMatchers.eq("Expires"), org.mockito.ArgumentMatchers.anyLong());
+		verify(response, never()).setHeader(org.mockito.ArgumentMatchers.eq("Pragma"), org.mockito.ArgumentMatchers.anyString());
+		verify(response, never()).addDateHeader(org.mockito.ArgumentMatchers.eq("Expires"), org.mockito.ArgumentMatchers.anyLong());
 	}
 
 	@Test
@@ -337,8 +337,9 @@ class ContentServletTest {
 		verify(response, never()).setHeader("Accept-Ranges", "bytes");
 		verify(response, never()).setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 		verify(response, never()).setContentLengthLong(org.mockito.ArgumentMatchers.anyLong());
-		verify(response, never()).getOutputStream();
-		assertEquals(0, out.size());
+		// The whole marked up image is sent, not the range, even though the thumbnail can't be stored here
+		assertTrue(out.size() > 0);
+		verify(response).setContentLength(out.size());
 	}
 
 	@Test

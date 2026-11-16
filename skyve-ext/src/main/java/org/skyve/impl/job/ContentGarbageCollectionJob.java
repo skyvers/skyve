@@ -3,6 +3,8 @@ package org.skyve.impl.job;
 import java.util.Date;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -25,18 +27,36 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.model.list.RDBMSDynamicPersistenceListModel;
 import org.skyve.persistence.Persistence;
 import org.skyve.persistence.SQL;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 /**
  * This job removes orphaned uploads and any textually indexed data left from delete/truncate SQL statements issued.
+ * Once a day it also deletes stored thumbnails older than 90 days.
  * 
  * @author sandsm01
  */
 public class ContentGarbageCollectionJob implements Job {
 	private static final long CONTENT_GC_ELIGIBLE_AGE_MILLIS = UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES * 60000L;
 	private static final String EXECUTE_PROBLEM_MESSAGE = "ContentGarbageCollectionJob.execute() problem...";
+
+	/**
+	 * How many days old a stored thumbnail has to be for the daily sweep to delete it.
+	 * This removes the thumbnails of images that are gone; one still in use is just made again.
+	 */
+	private static final int THUMBNAIL_RETENTION_DAYS = 90;
+
+	/**
+	 * How long to wait between thumbnail sweeps - a day, in milliseconds.
+	 */
+	private static final long THUMBNAIL_SWEEP_INTERVAL_MILLIS = TimeUnit.DAYS.toMillis(1);
+
+	/**
+	 * When the thumbnails were last swept, as this job runs more often than the sweep needs to.
+	 */
+	private static final AtomicLong LAST_THUMBNAIL_SWEEP_MILLIS = new AtomicLong();
 
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ContentGarbageCollectionJob.class);
     private static final Logger CONTENT_LOGGER = Category.CONTENT.logger();
@@ -209,9 +229,35 @@ public class ContentGarbageCollectionJob implements Job {
 				p.commit(true);
 			}
 			LOGGER.info("Successfully performed Content Garbage Collection");
+			sweepOldThumbnails(System.currentTimeMillis());
 		}
 		catch (Exception e) {
 			throw new JobExecutionException("Error encountered whilst performing CMS garbage collection", e);
+		}
+	}
+
+	/**
+	 * Deletes stored thumbnails older than {@link #THUMBNAIL_RETENTION_DAYS}, if file storage is on
+	 * and they haven't been swept in the last day. A problem is logged rather than thrown.
+	 *
+	 * @param now	The time now, in milliseconds.
+	 */
+	static void sweepOldThumbnails(long now) {
+		if (! UtilImpl.THUMBNAIL_FILE_STORAGE) {
+			return;
+		}
+		long last = LAST_THUMBNAIL_SWEEP_MILLIS.get();
+		if (((last != 0L) && ((now - last) < THUMBNAIL_SWEEP_INTERVAL_MILLIS)) ||
+				(! LAST_THUMBNAIL_SWEEP_MILLIS.compareAndSet(last, now))) {
+			return;
+		}
+		try {
+			int deleted = Thumbnail.deleteStoredThumbnailsOlderThan(THUMBNAIL_RETENTION_DAYS);
+			LOGGER.info("ContentGarbageCollectionJob deleted {} stored thumbnail files older than {} days",
+							Integer.valueOf(deleted), Integer.valueOf(THUMBNAIL_RETENTION_DAYS));
+		}
+		catch (Exception e) {
+			LOGGER.warn("ContentGarbageCollectionJob could not delete old stored thumbnails - {}", e.getLocalizedMessage());
 		}
 	}
 }

@@ -665,6 +665,8 @@ class ViewJSONManipulatorCoreTest {
 
 		String html = objectField(manipulator, "htmlGuts").toString();
 		assertTrue(html.contains("dynamic.png?_n=avatar"), html);
+		// The width falls back to the initial width, not the pixel height, so the image keeps its shape
+		assertTrue(html.contains("dynamic.png?_n=avatar&_doc={bizModule}.{bizDocument}&_w=22&_h=44&"), html);
 		assertTrue(html.contains("dynamic.png?_n=avatarInitial"), html);
 		assertTrue(html.contains("_w=28"), html);
 		assertTrue(html.contains("_h=29"), html);

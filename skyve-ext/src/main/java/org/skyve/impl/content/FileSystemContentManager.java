@@ -148,6 +148,8 @@ public class FileSystemContentManager extends AbstractContentManager {
 					}
 				}
 			}
+		// Its thumbnails are no use now
+		deleteStoredThumbnails(contentId);
 		}
 
 	private static boolean deleteIfEmpty(File directory) throws IOException {

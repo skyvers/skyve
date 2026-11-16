@@ -807,20 +807,23 @@ abstract class SmartClientAttributeDefinition {
 				String hpx = (pixelHeight == null) ? 
 								((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
 								pixelHeight.toString();
-				result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
+				// A thumbnail sized to the box, allowing for the screen's pixel ratio, rounded up so few sizes are cached
+				result.append(",formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(");
+				result.append(wpx).append(',').append(hpx).append(");if(v){var u='content?_n='+v+'");
 				result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
 				result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-				result.append("&_w=").append(wpx).append("&_h=").append(hpx);
+				result.append("&_w='+s+'&_h='+s+'");
         		result.append("\" style=\"width:").append(wpx).append("px;height:").append(hpx);
-        		result.append("px:object-fit:contain\"/></a>'}if(rec && rec.bizId){return '");
+        		result.append("px;object-fit:contain\"/></a>'}if(rec && rec.bizId){return '");
         		if (emptyThumbnailRelativeFile == null) {
         			result.append("'}");
         		}
         		else {
 					result.append("<img src=\"resources?_n=").append(emptyThumbnailRelativeFile);
 					result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+");
-					result.append("'&_w=").append(wpx).append("&_h=").append(hpx);
-					result.append("\"/>'}");
+					result.append("'&_w='+s+'&_h='+s+'");
+					result.append("\" style=\"width:").append(wpx).append("px;height:").append(hpx);
+					result.append("px;object-fit:contain\"/>'}");
         		}
         		result.append("return ''}");
 			}

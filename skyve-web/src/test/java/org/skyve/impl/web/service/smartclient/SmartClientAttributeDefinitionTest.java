@@ -458,9 +458,12 @@ class SmartClientAttributeDefinitionTest {
 
 		String result = js.toString();
 		assertTrue(result.contains("formatCellValue:function"));
-		assertTrue(result.contains("_w=72&_h=48"));
+		// The thumbnail size comes from the 72x48 box, allowing for the screen's pixel ratio
+		assertTrue(result.contains("formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(72,48);"), result);
 		assertTrue(result.contains("images/placeholder.png"));
-		assertTrue(result.contains("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_w=72&_h=48\"/>'}return ''}"), result);
+		// Both images are drawn in the 72x48 box, keeping their shape
+		assertTrue(result.contains("&_w='+s+'&_h='+s+'\" style=\"width:72px;height:48px;object-fit:contain\"/></a>'}"), result);
+		assertTrue(result.contains("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_w='+s+'&_h='+s+'\" style=\"width:72px;height:48px;object-fit:contain\"/>'}return ''}"), result);
 	}
 
 	@Test
@@ -706,7 +709,7 @@ class SmartClientAttributeDefinitionTest {
 		definition.appendEditorProperties(js, false, null, null);
 
 		String result = js.toString();
-		assertTrue(result.contains("_w=64&_h=64"));
+		assertTrue(result.contains("var s=SKYVE.Util.contentPreviewSize(64,64);"), result);
 		assertTrue(result.contains("if(rec && rec.bizId){return ''}"));
 	}
 

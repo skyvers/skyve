@@ -107,8 +107,8 @@ class SmartClientQueryColumnDefinitionUnsafeTest {
 		def.setEmptyThumbnailRelativeFile("img/empty.png");
 
 		String js = def.toJavascript();
-		assertTrue(js.contains("formatCellValue:function(v,rec,row,col){if(v){"));
-		assertTrue(js.contains("_w=50&_h=50"));
+		assertTrue(js.contains("formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(50,50);if(v){"), js);
+		assertTrue(js.contains("_w='+s+'&_h='+s+'"), js);
 		assertTrue(js.contains("resources?_n=img/empty.png"));
 		assertTrue(js.contains(",width:58"));
 		assertFalse(js.contains("escapeHTML:true"));

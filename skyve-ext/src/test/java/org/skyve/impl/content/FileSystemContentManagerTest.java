@@ -29,6 +29,7 @@ class FileSystemContentManagerTest {
 	private final boolean previousFileStorage = UtilImpl.CONTENT_FILE_STORAGE;
 	private final boolean previousFileSuffixes = UtilImpl.CONTENT_FILE_SUFFIXES;
 	private final String previousContentDirectory = UtilImpl.CONTENT_DIRECTORY;
+	private final String previousThumbnailDirectory = UtilImpl.THUMBNAIL_DIRECTORY;
 
 	@TempDir
 	private Path tempDir;
@@ -38,6 +39,7 @@ class FileSystemContentManagerTest {
 		UtilImpl.CONTENT_FILE_STORAGE = previousFileStorage;
 		UtilImpl.CONTENT_FILE_SUFFIXES = previousFileSuffixes;
 		UtilImpl.CONTENT_DIRECTORY = previousContentDirectory;
+		UtilImpl.THUMBNAIL_DIRECTORY = previousThumbnailDirectory;
 	}
 
 	@Test
@@ -164,6 +166,48 @@ class FileSystemContentManagerTest {
 			assertNull(manager.getAttachment(attachment.getContentId()));
 		}
 		assertTrue(Files.exists(tempDir));
+	}
+
+	@Test
+	void removeAttachmentDeletesItsStoredThumbnails() throws Exception {
+		configureFileStorage();
+		String contentId = "12345678-1234-1234-1234-123456789abf";
+		File thumbnails = storedThumbnailFolder(contentId);
+		AttachmentContent attachment = new AttachmentContent("demo", "admin", "User", "group1", "user1", "biz1", "avatar")
+				.attachment("avatar.png", "image/png", "png".getBytes(StandardCharsets.UTF_8));
+		attachment.setContentId(contentId);
+
+		try (FileSystemContentManager manager = new FileSystemContentManager()) {
+			manager.put(attachment, false);
+			manager.removeAttachment(contentId);
+		}
+
+		// Every removal cleans up, not just content garbage collection
+		assertFalse(thumbnails.exists());
+	}
+
+	@Test
+	void removeAttachmentWithoutFileStorageStillDeletesItsStoredThumbnails() throws Exception {
+		UtilImpl.CONTENT_FILE_STORAGE = false;
+		String contentId = "12345678-1234-1234-1234-123456789ac0";
+		File thumbnails = storedThumbnailFolder(contentId);
+
+		try (FileSystemContentManager manager = new FileSystemContentManager()) {
+			manager.removeAttachment(contentId);
+		}
+
+		assertFalse(thumbnails.exists());
+	}
+
+	/** Stores a thumbnail for a content id in a temporary thumbnail directory, and returns its folder. */
+	private File storedThumbnailFolder(String contentId) throws Exception {
+		UtilImpl.THUMBNAIL_DIRECTORY = tempDir.resolve("thumbnails").toString() + File.separator;
+		StringBuilder path = new StringBuilder(128).append(UtilImpl.THUMBNAIL_DIRECTORY);
+		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, path);
+		File result = new File(path.toString());
+		assertTrue(result.mkdirs());
+		assertTrue(new File(result, "128x128.png").createNewFile());
+		return result;
 	}
 
 	@Test

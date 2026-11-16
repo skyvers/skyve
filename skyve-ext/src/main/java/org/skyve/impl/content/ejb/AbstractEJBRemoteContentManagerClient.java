@@ -100,6 +100,8 @@ public abstract class AbstractEJBRemoteContentManagerClient extends AbstractCont
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() sent for {}", contentId);
 		EJBRemoteContentManagerServer server = obtainServer();
 		server.removeAttachment(contentId);
+		// The thumbnails are made and stored here, not on the content server
+		deleteStoredThumbnails(contentId);
 	}
 
 	@Override

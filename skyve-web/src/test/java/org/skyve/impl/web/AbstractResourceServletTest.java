@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -134,6 +135,8 @@ class AbstractResourceServletTest {
 		servlet.doGet(request, response);
 
 		verify(response).sendError(HttpServletResponse.SC_NOT_FOUND);
+		// Not kept by the browser, so it is asked for again once it exists or the user signs in
+		verify(response).setHeader("Cache-Control", "no-store");
 	}
 
 	@Test
@@ -161,6 +164,36 @@ class AbstractResourceServletTest {
 		servlet.doGet(request, response);
 
 		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	}
+
+	@Test
+	void doGetReturns503WhenTheThumbnailCouldNotBeMadeInTime() {
+		TestServlet servlet = new TestServlet();
+		servlet.resource = TestResource.throwing(new Thumbnail.BusyException("Timed out waiting to make a thumbnail"));
+
+		HttpServletRequest request = request(Map.of(), null, null, false);
+		HttpServletResponse response = responseWithOutput();
+
+		servlet.doGet(request, response);
+
+		verify(response).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+		verify(response).setHeader("Retry-After", "5");
+		verify(response).setHeader("Cache-Control", "no-store");
+	}
+
+	@Test
+	void doGetReturns500ForASocketTimeoutNot503() {
+		TestServlet servlet = new TestServlet();
+		// A SocketTimeoutException is an InterruptedIOException, but the server isn't busy making thumbnails
+		servlet.resource = TestResource.throwing(new SocketTimeoutException("Read timed out"));
+
+		HttpServletRequest request = request(Map.of(), null, null, false);
+		HttpServletResponse response = responseWithOutput();
+
+		servlet.doGet(request, response);
+
+		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+		verify(response, never()).setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 	}
 
 	@Test
@@ -582,19 +615,38 @@ class AbstractResourceServletTest {
 	}
 
 	@Test
-	void parseRequestParamsCapsEachImageSide() throws Exception {
+	void parseRequestParamsCapsTheSizeAtTheMaximumDimension() throws Exception {
 		assertAll(() -> assertEquals("2048x2048", parsedImageSize("8192", "2048"), "both sides at or above the cap"),
 					() -> assertEquals("2048x2048", parsedImageSize("2048", "2048"), "exactly at the cap"),
-					() -> assertEquals("2048x2047", parsedImageSize("2049", "2047"), "one above and one below the cap"),
-					() -> assertEquals("200x2048", parsedImageSize("200", "4096"), "only the oversized side changes"),
-					() -> assertEquals("2048x1", parsedImageSize("8192", "1"), "a thin side is kept, not rounded to 0"),
-					() -> assertEquals("2048x0", parsedImageSize(String.valueOf(Integer.MAX_VALUE), null), "no height requested"),
-					() -> assertEquals("64x48", parsedImageSize("64", "48"), "below the cap"));
+					() -> assertEquals("2048x2048", parsedImageSize("200", "4096"), "one side above the cap"),
+					() -> assertEquals("2048x2048", parsedImageSize(String.valueOf(Integer.MAX_VALUE), null), "no height requested"));
 
 		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
 		try {
 			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 100;
 			assertEquals("100x100", parsedImageSize("400", "200"));
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
+		}
+	}
+
+	@Test
+	void parseRequestParamsMakesASquareOfTheLargerSideRoundedUpToAStep() throws Exception {
+		assertAll(() -> assertEquals("64x64", parsedImageSize("24", "24"), "a small fixed size"),
+					() -> assertEquals("64x64", parsedImageSize("64", "48"), "exactly a step"),
+					() -> assertEquals("512x512", parsedImageSize("257", "100"), "just over a step"),
+					() -> assertEquals("1024x1024", parsedImageSize("1000", "1000"), "a large square"),
+					() -> assertEquals("256x256", parsedImageSize("200", null), "width only"),
+					() -> assertEquals("256x256", parsedImageSize("0", "200"), "height only"),
+					() -> assertEquals("256x256", parsedImageSize("-1", "200"), "negative width"),
+					() -> assertEquals("0x0", parsedImageSize("0", "0"), "no size is the original"),
+					() -> assertEquals("0x0", parsedImageSize(null, null), "no parameters is the original"));
+
+		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 1000;
+			assertEquals("1000x1000", parsedImageSize("600", "600"), "the maximum is the last step");
 		}
 		finally {
 			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
@@ -650,6 +702,19 @@ class AbstractResourceServletTest {
 
 		assertNull(resource.getContentType());
 		assertNull(resource.getFileName());
+	}
+
+	@Test
+	void abstractResourceLoadsOnceWhenLoadReturnsNull() throws Exception {
+		SimpleAbstractResource resource = new SimpleAbstractResource();
+		resource.imageWidth = 10;
+		resource.imageHeight = 10;
+
+		// The servlet asks for each of these, so a slow load would otherwise run three times
+		assertNull(resource.getContentType());
+		assertNull(resource.getFileName());
+		assertNull(resource.getBytes());
+		assertEquals(1, resource.loadCalls);
 	}
 
 	private static Thumbnail thumbnailForFile(String prefix, String suffix) throws Exception {

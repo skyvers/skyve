@@ -115,6 +115,8 @@ public class RestRemoteContentManagerClient extends AbstractContentManager {
 		StringBuilder url = new StringBuilder(128);
 		url.append(UtilImpl.CONTENT_REST_SERVER_URL).append(REST_CONTENT_PATH).append(RestRemoteContentManagerServer.ATTACHMENT_PATH).append('/').append(contentId);
 		call(url.toString(), "DELETE", null);
+		// The thumbnails are made and stored here, not on the content server
+		deleteStoredThumbnails(contentId);
 	}
 
 	private static String call(String url, String method, String body) {

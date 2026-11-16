@@ -135,6 +135,24 @@ class ContentServletH2Test extends AbstractSkyveTest {
 		assertArrayEquals(bytes, response.getContentAsByteArray());
 	}
 
+	@Test
+	void noMarkupRequestServesTheOriginalWhateverSizeIsAskedFor() throws Exception {
+		byte[] bytes = "raw-marked-content".getBytes(StandardCharsets.UTF_8);
+		AttachmentContent attachment = putAttachment(bytes, "<svg/>");
+		MockHttpServletRequest request = contentRequest(attachment.getContentId());
+		request.setParameter(AbstractWebContext.NO_MARKUP, "");
+		request.setParameter("_w", "512");
+		request.setParameter("_h", "512");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		new ContentServlet().service(request, response);
+
+		// Not a thumbnail, which would be stored where the marked up thumbnail belongs
+		assertEquals(HttpServletResponse.SC_OK, response.getStatus());
+		assertEquals("video/mp4", response.getContentType());
+		assertArrayEquals(bytes, response.getContentAsByteArray());
+	}
+
 	private AttachmentContent putAttachment(byte[] bytes) throws Exception {
 		return putAttachment(bytes, null);
 	}

@@ -527,6 +527,8 @@ public class Util {
     /**
      * Constructs a HTML image URL for the given content item
      * (If the content item is not an image type, the content servlet returns a file type thumbnail)
+     * The image is shown at the given width and height, keeping its shape, as the thumbnail the
+     * content servlet sends can be bigger or smaller than asked for.
      * 
 	 * @param bizModule - the module of the document containing the content
 	 * @param bizDocument - the document containing the content
@@ -548,7 +550,9 @@ public class Util {
     	result.append(getContentUrl(bizModule, bizDocument, binding, contentId));
     	result.append("&_w=").append(width);
     	result.append("&_h=").append(height);
-    	result.append("\"/>");
+    	result.append("\" width=\"").append(width);
+    	result.append("\" height=\"").append(height);
+    	result.append("\" style=\"object-fit:contain\"/>");
         
     	return result.toString();
     }

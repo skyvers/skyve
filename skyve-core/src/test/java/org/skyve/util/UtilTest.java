@@ -359,6 +359,8 @@ class UtilTest {
 		String image = Util.getContentImageUrl("admin", "Contact", "photo", "cid1", 80, 40);
 		assertTrue(image.contains("_w=80"));
 		assertTrue(image.contains("_h=40"));
+		// The thumbnail sent can be another size, so the tag keeps the size asked for
+		assertTrue(image.endsWith("\" width=\"80\" height=\"40\" style=\"object-fit:contain\"/>"), image);
 
 		String anchor = Util.getContentAnchorUrl("admin", "Contact", "photo", "cid1", true, "Open");
 		assertTrue(anchor.contains("target=\"_blank\""));

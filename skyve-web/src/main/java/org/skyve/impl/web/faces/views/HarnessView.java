@@ -413,6 +413,7 @@ public abstract class HarnessView extends LocalisableView {
 			sb.append("u.mapZoom=").append(UtilImpl.MAP_ZOOM).append(';');
 		}
 		sb.append("u.ckEditorConfigFileUrl='").append(UtilImpl.CKEDITOR_CONFIG_FILE_URL).append("';");
+		sb.append("u.thumbnailMaximumDimension=").append(UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION).append(';');
 
 		// Set report formats for export from Customisations
 		sb.append("u.allowedReportFormats=[");

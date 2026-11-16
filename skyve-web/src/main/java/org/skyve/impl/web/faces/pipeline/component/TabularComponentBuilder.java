@@ -139,6 +139,8 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+import org.skyve.impl.util.ImageUtil;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.converters.select.AssociationAutoCompleteConverter;
 import org.skyve.impl.web.faces.converters.select.AssociationPickListConverter;
@@ -5298,30 +5300,24 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 
 	/**
 	 * Returns the thumbnail size to request for an image preview box.
-	 * The box's larger side is rounded up to 256, 512, 1024 or 2048 (the most) so the
-	 * thumbnail cache holds at most four sizes per image, however boxes are sized.
+	 * The box's larger side is rounded up to a {@link ImageUtil#thumbnailStep(int) step} that doubles from 64,
+	 * where the last step is {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}, so the thumbnail cache holds only
+	 * a few sizes per image, however boxes are sized. With the default of 2048 the steps are 64, 128, 256, 512, 1024 and 2048.
 	 * The servlet fits the image inside this square, keeping its aspect ratio.
-	 * This matches {@code SKYVE.Util.contentPreviewSize()} used by SmartClient.
+	 * This matches {@code SKYVE.Util.contentPreviewSize()} used by SmartClient, which also allows for the screen's pixel ratio.
 	 *
 	 * @param pixelWidth box width in pixels, or {@code null} if not fixed
 	 * @param pixelHeight box height in pixels, or {@code null} if not fixed
-	 * @return 256, 512, 1024 or 2048; 1024 when neither side is fixed, as for responsive boxes
+	 * @return the step; 1024 (or the maximum if smaller) when neither side is fixed, as for responsive boxes
 	 */
 	static int contentPreviewSize(@Nullable Integer pixelWidth, @Nullable Integer pixelHeight) {
 		int side = Math.max((pixelWidth == null) ? 0 : pixelWidth.intValue(),
 								(pixelHeight == null) ? 0 : pixelHeight.intValue());
 		if (side <= 0) {
-			return 1024;
+			return Math.min(1024, UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION);
 		}
-		for (int step : CONTENT_PREVIEW_SIZES) {
-			if (side <= step) {
-				return step;
-			}
-		}
-		return CONTENT_PREVIEW_SIZES[CONTENT_PREVIEW_SIZES.length - 1];
+		return ImageUtil.thumbnailStep(side);
 	}
-
-	private static final int[] CONTENT_PREVIEW_SIZES = {256, 512, 1024, 2048};
 
 	// To enable a scaled image to keep its aspect ratio, construct something like
 	// <div><img/></div> & set the size of the div to what is required

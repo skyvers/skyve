@@ -120,6 +120,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
@@ -955,12 +956,39 @@ class TabularComponentBuilderTest {
 		assertAll(
 			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
 			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(0), Integer.valueOf(-5)), "no usable size"),
-			() -> assertEquals(256, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(64), null), "small box"),
+			() -> assertEquals(64, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(24), null), "smallest step"),
+			() -> assertEquals(128, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(65), null), "small box"),
 			() -> assertEquals(256, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(256), Integer.valueOf(100)), "exactly a step"),
 			() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(200), Integer.valueOf(257)), "taller than wide"),
 			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, Integer.valueOf(600)), "height only"),
 			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(1025), Integer.valueOf(10)), "large box"),
 			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), Integer.valueOf(4000)), "capped"));
+	}
+
+	@Test
+	void contentPreviewSizeEndsAtTheThumbnailMaximumDimension() {
+		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 1000;
+			assertAll(
+				() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(300), null), "below the maximum"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(600), null), "the maximum is the last step"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), null), "above the maximum"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"));
+
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 4096;
+			assertAll(
+				() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(2000), null), "the default steps still apply"),
+				() -> assertEquals(4096, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(3000), null), "a larger maximum adds a step"),
+				() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
+				() -> assertEquals(4096, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(Integer.MAX_VALUE), null), "no overflow"));
+
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 50;
+			assertEquals(50, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(24), null), "a maximum below the first step");
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
+		}
 	}
 
 	@Test

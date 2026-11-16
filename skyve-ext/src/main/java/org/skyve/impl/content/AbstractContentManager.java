@@ -26,6 +26,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
@@ -83,6 +84,25 @@ public abstract class AbstractContentManager implements ContentManager {
 	@SuppressWarnings("java:S112") // allow throws Exception for implementations
 	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
 	
+	/**
+	 * Deletes the stored thumbnails of a removed attachment, so they don't stay on the disk forever.
+	 * A problem is logged rather than thrown, as the attachment has already been removed.
+	 * Call this at the end of {@link #removeAttachment(String)} in the process that serves the attachment,
+	 * as that is where its thumbnails are made - a remote content client calls it after the remote removal.
+	 *
+	 * @param contentId	The removed attachment's content id.
+	 */
+	protected static void deleteStoredThumbnails(@Nonnull String contentId) {
+		try {
+			Thumbnail.deleteStoredThumbnails(contentId);
+		}
+		catch (Exception e) {
+			CONTENT_LOGGER.warn("Could not delete the stored thumbnails of removed attachment {} - delete its folder in the thumbnail directory - {}",
+									contentId,
+									e.getLocalizedMessage());
+		}
+	}
+
 	/**
 	 * Append a balanced folder structure for storing a content file based on it's content ID.
 	 * 
