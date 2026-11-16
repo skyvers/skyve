@@ -32,6 +32,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.view.Action;
@@ -464,7 +465,9 @@ public final class PrimeFacesRecordingMap {
 	 * PrimeFaces data table also has the client id of its header ({@code id}), which its sort request names, and, if
 	 * it can be filtered, the comparison its typed or chosen filter makes ({@code operator}). A date, date time,
 	 * timestamp or time column of a Vue list grid has its converter's format pattern ({@code format}): the grid's
-	 * cells and filter calendar show the converter's format, so a filter on the column is written in it.
+	 * cells and filter calendar show the converter's format, so a filter on the column is written in it. A Vue list
+	 * grid's columns leave out the query's columns that are not projected, as the grid does
+	 * ({@code VueListGridScript}).
 	 *
 	 * @param model	the list grid's model
 	 * @param table	the data table that renders the list grid, or null for a Vue list grid
@@ -474,6 +477,9 @@ public final class PrimeFacesRecordingMap {
 		List<MetaDataQueryColumn> columns = model.getColumns();
 		List<Map<String, Object>> result = new ArrayList<>(columns.size());
 		for (MetaDataQueryColumn column : columns) {
+			if ((table == null) && (column instanceof MetaDataQueryProjectedColumn projected) && (! projected.isProjected())) {
+				continue;
+			}
 			Map<String, Object> c = new LinkedHashMap<>();
 			String binding = column.getBinding();
 			String name = column.getName();

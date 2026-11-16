@@ -20,6 +20,8 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.mock.MockFacesContext;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.JSON;
 import org.skyve.web.UserAgentType;
@@ -138,8 +140,31 @@ class PrimeFacesRecordingMapH2Test extends AbstractSkyveTest {
 											"monthFirstDate", "MM/dd/yyyy",
 											"twelveHourDateTime", "MM/dd/yyyy hh:mm a",
 											"monthNameTimestamp", "MMM-dd-yyyy hh:mm:ss a",
-											"twelveHourTime", "hh:mm:ss a"), formats),
+											"twelveHourTime", "hh:mm:ss a",
+											"dateTimeAsDate", "MM/dd/yyyy"), formats),
 					() -> assertTrue(faces.stream().noneMatch(column -> column.containsKey("format")), "no formats for a data table: " + faces));
+	}
+
+	/**
+	 * A Vue list grid does not show a query's columns that are not projected, so its map leaves them out without
+	 * resolving their bindings: one that does not resolve would otherwise break the map, and with it recording on the
+	 * page.
+	 */
+	@Test
+	void aVueListGridLeavesOutColumnsThatAreNotProjected() {
+		MetaDataQueryProjectedColumnImpl shown = new MetaDataQueryProjectedColumnImpl();
+		shown.setBinding("monthFirstDate");
+		MetaDataQueryProjectedColumnImpl hidden = new MetaDataQueryProjectedColumnImpl();
+		hidden.setBinding("noSuchAttribute");
+		hidden.setSelected(false);
+		Customer customer = u.getCustomer();
+		Document listAttributes = customer.getModule("kitchensink").getDocument(customer, "ListAttributes");
+		ListModel<Bean> model = mock(ListModel.class);
+		when(model.getColumns()).thenReturn(List.of(shown, hidden));
+		when(model.getDrivingDocument()).thenReturn(listAttributes);
+		when(model.determineColumnTitle(shown)).thenReturn("Month First Date");
+		List<Map<String, Object>> columns = PrimeFacesRecordingMap.listGridColumns(model, null);
+		assertEquals(List.of(Map.of("binding", "monthFirstDate", "title", "Month First Date", "format", "MM/dd/yyyy")), columns);
 	}
 
 	/**
