@@ -2868,7 +2868,8 @@ isc.BizTimeDurationItem.addClassMethods({
 			if (match) {
 				const hours = parseInt(match[1] | 0, 10);
 				const minutes = Math.min(parseInt(match[2] | 0, 10), 59);
-				if (hours >= 0) {
+				// the sign is the text's: -0:30 is negative, although its hours are 0
+				if (match[1].charAt(0) !== "-") {
 					return hours + minutes / 60.0;
 				}
 				return hours - minutes / 60.0;
@@ -2912,7 +2913,8 @@ isc.BizTimeDurationItem.addClassMethods({
 			stringMinutes = "0" + stringMinutes;
 		}
 
-		return hours + ":" + stringMinutes;
+		// the sign is the value's: -0.5 is -0:30, although its hours are 0
+		return ((value < 0) && (hours === 0) && (stringMinutes !== "00") ? "-" : "") + hours + ":" + stringMinutes;
 	},
 });
 

@@ -52,17 +52,25 @@ function _createNumberFormatter({ scale, style = 'decimal' }) {
 }
 
 /**
- * Decimal5TimeDuration formatter function
- * 
- * Modifies the given field value in the supplied row
+ * Formats decimal hours as the Java converter (TimeDurationFormatter) does: hours (truncated), a colon and the
+ * minutes rounded half up to 2 digits, with a sign for a negative duration (1.5 is 1:30, -0.5 is -0:30).
  */
 function Decimal5TimeDuration(numValue) {
 
-    let newVal = COMMON.twoDecimalPlaces(numValue);
-
-    // Decimal seperator is locale dependent
-    const decSep = newVal.at(-3);
-    return newVal.replace(decSep, ':');
+    let hours = Math.trunc(numValue);
+    // the minutes rounded half up (away from zero), from the hours' fraction rounded to 4 significant digits as Java does
+    const fraction = Number(((numValue - hours) * 60).toPrecision(4));
+    let minutes = Math.sign(fraction) * Math.round(Math.abs(fraction));
+    if (minutes === 60) {
+        minutes = 0;
+        hours++;
+    }
+    else if (minutes === -60) {
+        minutes = 0;
+        hours--;
+    }
+    const sign = ((hours < 0) || (minutes < 0)) ? '-' : '';
+    return `${sign}${Math.abs(hours)}:${String(Math.abs(minutes)).padStart(2, '0')}`;
 }
 
 function Decimal2DollarsAndCentsAbsolute(numValue) {
@@ -146,7 +154,7 @@ const Converters = {
     Decimal5Integer: COMMON.zeroDecimalPlaces,  // 9,510
     Decimal5IntegerPercentage: _createNumberFormatter({ scale: 0, style: 'percent' }),  // 951,001%
     Decimal5DollarsAndCents: COMMON.twoDecimalPlaces,  // 9,510.01
-    Decimal5TimeDuration,  // 9510:00
+    Decimal5TimeDuration,  // 9510:00 (1.5 is 1:30)
     Decimal5OneDecimalPlace: COMMON.oneDecimalPlaces,  // 9,510.0
     Decimal5TwoDecimalPlaces: COMMON.twoDecimalPlaces,  // 9,510.01
     Decimal5TwoDecimalPlacesPercentage: _createNumberFormatter({ scale: 2, style: 'percent' }),  // 951,001.23%
