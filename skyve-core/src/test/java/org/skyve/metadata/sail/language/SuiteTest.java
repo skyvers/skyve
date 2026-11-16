@@ -10,8 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.MetaDataException;
@@ -32,8 +34,7 @@ class SuiteTest {
 	@Test
 	void allMembersWithoutARestoreEndWithTheLastMember() {
 		Suite suite = suite("", "01-c.xml", null);
-		assertAll(() -> assertEquals(List.of("01-c.xml"), files(suite.getAllMembers())),
-					() -> assertThrows(UnsupportedOperationException.class, () -> suite.getAllMembers().clear()));
+		assertEquals(List.of("01-c.xml"), files(suite.getAllMembers()));
 	}
 
 	@Test
@@ -69,56 +70,84 @@ class SuiteTest {
 	}
 
 	@Test
-	void setUpAndRestoreRequireOnlyWhatTheyName() {
+	void aSetUpRequiresEveryEarlierSetUp() {
+		Suite suite = suite("00-a.xml 00-b.xml 00-c.xml", "01-d.xml", null);
+		List<SuiteMember> setUps = suite.getSetUps();
+		assertAll(() -> assertTrue(suite.requirementsOf(setUps.get(0)).isEmpty()),
+					() -> assertEquals(List.of("00-a.xml"), files(suite.requirementsOf(setUps.get(1)))),
+					() -> assertEquals(List.of("00-a.xml", "00-b.xml"), files(suite.requirementsOf(setUps.get(2)))));
+	}
+
+	@Test
+	void theRestoreRequiresOnlyWhatItNames() {
 		Suite suite = suite("00-a.xml 00-b.xml", "01-c.xml", "99-e.xml");
-		SuiteMember b = suite.getSetUps().get(1);
 		SuiteMember restore = restore(suite);
-		assertAll(() -> assertTrue(suite.requirementsOf(suite.getSetUps().get(0)).isEmpty()),
-					() -> assertTrue(suite.requirementsOf(b).isEmpty()),
-					() -> assertTrue(suite.requirementsOf(restore).isEmpty()));
-		b.getRequires().add("00-a.xml");
+		assertTrue(suite.requirementsOf(restore).isEmpty());
 		restore.getRequires().add("00-b.xml");
-		assertAll(() -> assertEquals(List.of("00-a.xml"), files(suite.requirementsOf(b))),
-					() -> assertEquals(List.of("00-b.xml"), files(suite.requirementsOf(restore))));
+		assertEquals(List.of("00-b.xml"), files(suite.requirementsOf(restore)));
 	}
 
 	@Test
-	void setUpAndRestoreAreAlwaysLockedAndAnOrdinaryMemberOnlyWhenItSaysSo() {
-		OrdinarySuiteMember ordinary = new OrdinarySuiteMember();
-		assertAll(() -> assertTrue(new SuiteMember().isTestStrategyLocked()),
-					() -> assertNull(ordinary.getLockTestStrategy()),
-					() -> assertFalse(ordinary.isTestStrategyLocked()));
-		ordinary.setLockTestStrategy(Boolean.FALSE);
-		assertFalse(ordinary.isTestStrategyLocked());
-		ordinary.setLockTestStrategy(Boolean.TRUE);
-		assertAll(() -> assertEquals(Boolean.TRUE, ordinary.getLockTestStrategy()),
-					() -> assertTrue(ordinary.isTestStrategyLocked()));
+	void aMemberNotInTheSuiteRequiresOnlyWhatItNames() {
+		Suite suite = suite("00-a.xml", "01-c.xml", null);
+		OrdinarySuiteMember stranger = member(new OrdinarySuiteMember(), "02-x.xml");
+		stranger.getRequires().add("01-c.xml");
+		assertEquals(List.of("01-c.xml"), files(suite.requirementsOf(stranger)));
 	}
 
 	@Test
-	void theRequiresAttributeIsAbsentWhenEmptyAndReplacesTheRequirements() {
-		SuiteMember member = new SuiteMember();
-		assertNull(member.getRequiresAttribute());
-		member.setRequiresAttribute(new ArrayList<>(List.of("a.xml", "b.xml")));
-		assertAll(() -> assertEquals(List.of("a.xml", "b.xml"), member.getRequires()),
-					() -> assertEquals(List.of("a.xml", "b.xml"), member.getRequiresAttribute()));
-		member.setRequiresAttribute(null);
-		assertAll(() -> assertTrue(member.getRequires().isEmpty()),
-					() -> assertNull(member.getRequiresAttribute()));
+	void lockingIsDecidedByThePlaceInTheSuite() {
+		Suite suite = suite("00-a.xml", "01-c.xml 02-d.xml 03-e.xml", "99-e.xml");
+		List<OrdinarySuiteMember> members = suite.getMembers();
+		members.get(1).setLockTestStrategy(Boolean.FALSE);
+		members.get(2).setLockTestStrategy(Boolean.TRUE);
+		// an ordinary member put in the set-up list is locked as a set-up
+		OrdinarySuiteMember unlockedSetUp = member(new OrdinarySuiteMember(), "00-z.xml");
+		unlockedSetUp.setLockTestStrategy(Boolean.FALSE);
+		suite.getSetUps().add(unlockedSetUp);
+		SuiteMember restore = restore(suite);
+		assertAll(() -> assertTrue(suite.isTestStrategyLocked(suite.getSetUps().get(0))),
+					() -> assertTrue(suite.isTestStrategyLocked(unlockedSetUp)),
+					() -> assertTrue(suite.isTestStrategyLocked(restore)),
+					() -> assertNull(members.get(0).getLockTestStrategy()),
+					() -> assertFalse(suite.isTestStrategyLocked(members.get(0))),
+					() -> assertFalse(suite.isTestStrategyLocked(members.get(1))),
+					() -> assertTrue(suite.isTestStrategyLocked(members.get(2))),
+					() -> assertFalse(suite.isTestStrategyLocked(member(new SuiteMember(), "elsewhere.xml"))));
 	}
 
 	@Test
-	void theAutomationsStrategyWinsThenTheWorkflowsThenTheSuites() {
-		Suite suite = new Suite();
+	void theAutomationsStrategyWinsThenTheWorkflowsThenTheSuitesForAnUnlockedMember() {
+		Suite suite = suite("", "01-c.xml", null);
+		OrdinarySuiteMember member = suite.getMembers().get(0);
 		Workflow workflow = new Workflow();
 		Automation automation = new Automation();
-		assertNull(suite.getEffectiveTestStrategy(workflow, automation));
+		assertNull(suite.getEffectiveTestStrategy(member, workflow, automation));
 		suite.setTestStrategy(TestStrategy.None);
-		assertEquals(TestStrategy.None, suite.getEffectiveTestStrategy(workflow, automation));
+		assertEquals(TestStrategy.None, suite.getEffectiveTestStrategy(member, workflow, automation));
 		workflow.setTestStrategy(TestStrategy.Verify);
-		assertEquals(TestStrategy.Verify, suite.getEffectiveTestStrategy(workflow, automation));
+		assertEquals(TestStrategy.Verify, suite.getEffectiveTestStrategy(member, workflow, automation));
 		automation.setTestStrategy(TestStrategy.Assert);
-		assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(workflow, automation));
+		assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(member, workflow, automation));
+	}
+
+	@Test
+	void aLockedMemberIgnoresTheSuitesStrategy() {
+		Suite suite = suite("00-a.xml", "01-c.xml", "99-e.xml");
+		suite.setTestStrategy(TestStrategy.None);
+		OrdinarySuiteMember locked = suite.getMembers().get(0);
+		locked.setLockTestStrategy(Boolean.TRUE);
+		SuiteMember setUp = suite.getSetUps().get(0);
+		SuiteMember restore = restore(suite);
+		Workflow workflow = new Workflow();
+		Automation automation = new Automation();
+		assertAll(() -> assertNull(suite.getEffectiveTestStrategy(setUp, workflow, automation)),
+					() -> assertNull(suite.getEffectiveTestStrategy(locked, workflow, automation)),
+					() -> assertNull(suite.getEffectiveTestStrategy(restore, workflow, automation)));
+		workflow.setTestStrategy(TestStrategy.Verify);
+		assertEquals(TestStrategy.Verify, suite.getEffectiveTestStrategy(setUp, workflow, automation));
+		automation.setTestStrategy(TestStrategy.Assert);
+		assertEquals(TestStrategy.Assert, suite.getEffectiveTestStrategy(locked, workflow, automation));
 	}
 
 	@Test
@@ -145,16 +174,16 @@ class SuiteTest {
 	}
 
 	@Test
-	void evidenceValuesAreTheXmlValuesInIncreasingOrder() {
-		assertEquals(List.of("none", "failures", "snapshots", "video", "all"),
-						List.of(Suite.Evidence.values()).stream().map(Enum::name).toList());
+	void evidenceNamesAreTheXmlValues() {
+		assertEquals(Set.of("none", "failures", "snapshots", "video", "all"),
+						Stream.of(Suite.Evidence.values()).map(Enum::name).collect(Collectors.toSet()));
 	}
 
 	@Test
 	void aValidSuitePasses() {
-		Suite suite = suite("00-a.xml 00-b.xml", "01-c.xml 02-d.xml", "99-e.xml");
+		Suite suite = suite("00-a.xml 00-b.xml", "pf/01-session.xml sc/01-session.xml sc/04-devops.xml", "99-e.xml");
 		suite.getSetUps().get(1).getRequires().add("00-a.xml");
-		suite.getMembers().get(1).getRequires().addAll(List.of("01-c.xml", "00-a.xml"));
+		suite.getMembers().get(2).getRequires().addAll(List.of("pf/01-session.xml", "00-a.xml"));
 		restore(suite).getRequires().addAll(List.of("00-a.xml", "00-b.xml"));
 		suite.getViewRoles().add(viewRoles("jane{run}", "admin.BasicUser"));
 		suite.getViewRoles().add(viewRoles("tim", "admin.BasicUser", "admin.ContactViewer"));
@@ -163,7 +192,8 @@ class SuiteTest {
 
 	@Test
 	void aSuiteWithoutSetUpsOrRestorePasses() {
-		assertDoesNotThrow(() -> suite("", "01-c.xml", null).validate("s.xml"));
+		Suite suite = suite("", "01-c.xml", null);
+		assertDoesNotThrow(() -> suite.validate("s.xml"));
 	}
 
 	@Test
@@ -191,7 +221,50 @@ class SuiteTest {
 	@Test
 	void aFileListedTwiceIsRejected() {
 		assertAll(() -> assertMessage("SAIL suite s.xml: 01-c.xml is listed more than once", suite("", "01-c.xml 01-c.xml", null)),
-					() -> assertMessage("SAIL suite s.xml: 00-a.xml is listed more than once", suite("00-a.xml", "01-c.xml", "00-a.xml")));
+					() -> assertMessage("SAIL suite s.xml: 00-a.xml is listed more than once", suite("00-a.xml", "01-c.xml", "00-a.xml")),
+					() -> assertMessage("SAIL suite s.xml: pf/01-c.xml is listed more than once",
+											suite("", "pf/01-c.xml sc/01-c.xml pf/01-c.xml", null)));
+	}
+
+	@Test
+	void theSameFileNameInTwoFoldersIsTwoMembers() {
+		Suite suite = suite("", "pf/01-session.xml sc/01-session.xml sc/03-security-admin.xml", null);
+		suite.getMembers().get(2).getRequires().add("pf/01-session.xml");
+		assertAll(() -> assertDoesNotThrow(() -> suite.validate("s.xml")),
+					() -> assertEquals(List.of("pf/01-session.xml"), files(suite.requirementsOf(suite.getMembers().get(2)))));
+	}
+
+	@Test
+	void aFileThatIsNotANormalisedRelativePathIsRejected() {
+		String normalised = "has an empty, . or .. segment; it must be a normalised path within the suite's folder";
+		String absolute = "is absolute; it must be relative to the suite's folder";
+		assertAll(() -> assertFileRejected("/sail/01-c.xml", absolute),
+					() -> assertFileRejected("C:/sail/01-c.xml", absolute),
+					() -> assertFileRejected("c:01-c.xml", absolute),
+					() -> assertFileRejected("pf\\01-c.xml", "has a \\; separate folders with /"),
+					() -> assertFileRejected("\\\\host\\01-c.xml", "has a \\; separate folders with /"),
+					() -> assertFileRejected("pf//01-c.xml", normalised),
+					() -> assertFileRejected("pf/", normalised),
+					() -> assertFileRejected("./01-c.xml", normalised),
+					() -> assertFileRejected("pf/./01-c.xml", normalised),
+					() -> assertFileRejected("../01-c.xml", normalised),
+					() -> assertFileRejected("pf/../sc/01-c.xml", normalised));
+	}
+
+	@Test
+	void aSetUpOrRestoreFileIsCheckedToo() {
+		Suite setUp = suite("../00-a.xml", "01-c.xml", null);
+		Suite restore = suite("", "01-c.xml", "/99-e.xml");
+		assertAll(() -> assertMessage("SAIL suite s.xml: <setUp> file ../00-a.xml has an empty, . or .. segment; " +
+										"it must be a normalised path within the suite's folder", setUp),
+					() -> assertMessage("SAIL suite s.xml: <restore> file /99-e.xml is absolute; it must be relative to the suite's folder",
+										restore));
+	}
+
+	@Test
+	void namesWithDotsThatAreNotSegmentsArePaths() {
+		Suite suite = suite("", "..a.xml pf/.hidden.xml a..b/c.xml", null);
+		assertDoesNotThrow(() -> suite.validate("s.xml"));
 	}
 
 	@Test
@@ -199,6 +272,13 @@ class SuiteTest {
 		Suite suite = suite("00-a.xml", "01-c.xml 02-d.xml", null);
 		suite.getMembers().get(1).getRequires().add("03-x.xml");
 		assertMessage("SAIL suite s.xml: <member> 02-d.xml requires 03-x.xml, which is not a member of the suite", suite);
+	}
+
+	@Test
+	void aRequirementNamedTwiceIsRejected() {
+		Suite suite = suite("00-a.xml", "pf/01-c.xml sc/02-d.xml", null);
+		suite.getMembers().get(1).getRequires().addAll(List.of("pf/01-c.xml", "00-a.xml", "pf/01-c.xml"));
+		assertMessage("SAIL suite s.xml: <member> sc/02-d.xml requires pf/01-c.xml more than once", suite);
 	}
 
 	@Test
@@ -217,21 +297,12 @@ class SuiteTest {
 	}
 
 	@Test
-	void aCycleOfTwoIsRejectedNamingIt() {
+	void aCycleIsRejectedByTheRunOrder() {
 		Suite suite = suite("", "01-c.xml 02-d.xml", null);
 		suite.getMembers().get(0).getRequires().add("02-d.xml");
 		suite.getMembers().get(1).getRequires().add("01-c.xml");
-		assertMessage("SAIL suite s.xml: <member> 02-d.xml is in a cycle of requires: 01-c.xml -> 02-d.xml -> 01-c.xml", suite);
-	}
-
-	@Test
-	void aLongerCycleAfterAnAcyclicPathIsRejectedNamingOnlyTheCycle() {
-		Suite suite = suite("00-a.xml", "01-c.xml 02-d.xml 03-e.xml", null);
-		// 00-a.xml is searched, and done, before 01-c.xml leads into the cycle
-		suite.getMembers().get(0).getRequires().addAll(List.of("00-a.xml", "02-d.xml"));
-		suite.getMembers().get(1).getRequires().add("03-e.xml");
-		suite.getMembers().get(2).getRequires().add("02-d.xml");
-		assertMessage("SAIL suite s.xml: <member> 03-e.xml is in a cycle of requires: 02-d.xml -> 03-e.xml -> 02-d.xml", suite);
+		assertMessage("SAIL suite s.xml: <member> 01-c.xml requires 02-d.xml, which runs after it (<member> 02-d.xml); " +
+						"members run in order", suite);
 	}
 
 	@Test
@@ -273,15 +344,15 @@ class SuiteTest {
 	}
 
 	@Test
-	void viewRolesWithABlankOrNullRoleAreRejected() {
-		Suite blank = suite("", "01-c.xml", null);
-		blank.getViewRoles().add(viewRoles("jane", "admin.BasicUser", " "));
+	void viewRolesWithAnEmptyOrNullRoleAreRejected() {
+		Suite empty = suite("", "01-c.xml", null);
+		empty.getViewRoles().add(viewRoles("jane", "admin.BasicUser", ""));
 		Suite nullRole = suite("", "01-c.xml", null);
 		ViewRoles roles = viewRoles("tim");
 		roles.getRoles().add(null);
 		nullRole.getViewRoles().add(roles);
-		assertAll(() -> assertMessage("SAIL suite s.xml: <viewRoles> for user jane has a blank <role>", blank),
-					() -> assertMessage("SAIL suite s.xml: <viewRoles> for user tim has a blank <role>", nullRole));
+		assertAll(() -> assertMessage("SAIL suite s.xml: <viewRoles> for user jane has an empty <role>", empty),
+					() -> assertMessage("SAIL suite s.xml: <viewRoles> for user tim has an empty <role>", nullRole));
 	}
 
 	/**
@@ -328,6 +399,10 @@ class SuiteTest {
 
 	private static List<String> files(List<SuiteMember> members) {
 		return members.stream().map(SuiteMember::getFile).toList();
+	}
+
+	private static void assertFileRejected(String file, String problem) {
+		assertMessage("SAIL suite s.xml: <member> file " + file + " " + problem, suite("", file, null));
 	}
 
 	private static void assertMessage(String expected, Suite suite) {

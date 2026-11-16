@@ -10,6 +10,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
+import jakarta.xml.bind.annotation.adapters.CollapsedStringAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * The roles that a {@link Suite}'s runner builds the views with for one user that its scripts sign in as, for example
@@ -36,7 +38,7 @@ public class ViewRoles {
 	/**
 	 * Returns the user name as the suite's scripts sign in with it.
 	 *
-	 * @return the user name; never {@code null} once set or unmarshalled
+	 * @return the user name; never {@code null} in a suite that passed {@link Suite#validate(String)}
 	 */
 	public @Nonnull String getUser() {
 		return user;
@@ -54,11 +56,13 @@ public class ViewRoles {
 	}
 
 	/**
-	 * Returns the user's roles, each {@code module.Role} or a customer role's name.
+	 * Returns the user's roles, each {@code module.Role} or a customer role's name. Unmarshalling collapses the white
+	 * space in each role (an {@code xs:token}), so a role written over several lines still matches.
 	 *
 	 * @return the roles, in the order written (a live list; at least one in a valid suite)
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "role", required = true)
+	@XmlJavaTypeAdapter(CollapsedStringAdapter.class)
 	public @Nonnull List<String> getRoles() {
 		return roles;
 	}

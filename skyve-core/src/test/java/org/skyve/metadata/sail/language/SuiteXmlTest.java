@@ -22,42 +22,44 @@ import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Suite.Evidence;
 
 /**
- * Unmarshals and marshals {@code <suite>} and the workflow {@code testStrategy} default through sail.xsd, and tells SAIL
- * roots apart. This depends on skyve-core/src/test/resources/schemas/sail.xsd being in sync with
- * skyve-war/src/main/java/schemas/sail.xsd.
+ * Unmarshals {@code <suite>} through sail.xsd, and tells SAIL roots apart. This depends on
+ * skyve-core/src/test/resources/schemas/sail.xsd being in sync with skyve-war/src/main/java/schemas/sail.xsd.
  */
 @SuppressWarnings("static-method")
 class SuiteXmlTest {
+	private static final String NAME = "sail/admin/suite.xml";
+
 	private static final String SUITE = """
 			<?xml version="1.0" encoding="UTF-8"?>
 			<!-- the admin suite -->
 			<suite xmlns="http://www.skyve.org/xml/sail" testStrategy="Assert" evidence="video">
 				<viewRoles user="sail{run}">
 					<role>admin.BasicUser</role>
-					<role>admin.ContactViewer</role>
+					<role>
+						admin.ContactViewer
+					</role>
 				</viewRoles>
 				<viewRoles user="tim">
 					<role>admin.BasicUser</role>
 				</viewRoles>
 				<setUp file="00-precondition.xml"/>
 				<setUp file="00-backup.xml"/>
-				<member file="01-session.xml"/>
-				<member file="03-security-admin.xml" lockTestStrategy="false"/>
-				<member file="04-devops.xml" requires="03-security-admin.xml" lockTestStrategy="true"/>
+				<member file="pf/01-session.xml"/>
+				<member file="sc/01-session.xml"/>
+				<member file="pf/03-security-admin.xml" lockTestStrategy="false"/>
+				<member file="sc/04-devops.xml" requires="pf/03-security-admin.xml" lockTestStrategy="true"/>
 				<restore file="99-restore.xml" requires="00-precondition.xml  00-backup.xml"/>
 			</suite>
 			""";
 
 	private static final String HEAD = "<suite xmlns=\"http://www.skyve.org/xml/sail\">";
 	private static final String TAIL = "</suite>";
+	private static final String XSI = "xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
 
 	private static final String WORKFLOW = """
-			<workflow xmlns="http://www.skyve.org/xml/sail" testStrategy="Verify">
+			<workflow xmlns="http://www.skyve.org/xml/sail">
 				<automation uxui="external" userAgentType="desktop">
 					<interaction name="a"><method><comment>a</comment></method></interaction>
-				</automation>
-				<automation uxui="desktop" userAgentType="desktop" testStrategy="None">
-					<interaction name="b"><method><comment>b</comment></method></interaction>
 				</automation>
 			</workflow>
 			""";
@@ -70,7 +72,7 @@ class SuiteXmlTest {
 
 	@Test
 	void unmarshalsASuite() {
-		assertSuite(XMLMetaData.unmarshalSAILSuiteString(SUITE, "admin/suite.xml"));
+		assertSuite(XMLMetaData.unmarshalSAILSuiteString(SUITE, NAME));
 	}
 
 	@Test
@@ -81,23 +83,8 @@ class SuiteXmlTest {
 	}
 
 	@Test
-	void marshalsAndUnmarshalsASuite() {
-		String xml = XMLMetaData.marshalSAILSuite(XMLMetaData.unmarshalSAILSuiteString(SUITE));
-		assertAll(() -> assertTrue(xml.contains("<suite "), xml),
-					() -> assertTrue(xml.contains("requires=\"00-precondition.xml 00-backup.xml\""), xml),
-					() -> assertSuite(XMLMetaData.unmarshalSAILSuiteString(xml)));
-	}
-
-	@Test
-	void aSuiteThatIsNotValidAgainstTheSchemaDoesNotMarshal() {
-		Suite suite = new Suite();
-		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.marshalSAILSuite(suite));
-		assertEquals("Could not marshal SAIL suite", e.getMessage());
-	}
-
-	@Test
 	void aMinimalSuiteHasNoDefaults() {
-		Suite suite = XMLMetaData.unmarshalSAILSuiteString(HEAD + "<member file=\"a.xml\"/>" + TAIL);
+		Suite suite = XMLMetaData.unmarshalSAILSuiteString(HEAD + "<member file=\"a.xml\"/>" + TAIL, NAME);
 		OrdinarySuiteMember member = suite.getMembers().get(0);
 		assertAll(() -> assertNull(suite.getTestStrategy()),
 					() -> assertNull(suite.getEvidence()),
@@ -106,22 +93,14 @@ class SuiteXmlTest {
 					() -> assertTrue(suite.getSetUps().isEmpty()),
 					() -> assertTrue(member.getRequires().isEmpty()),
 					() -> assertNull(member.getLockTestStrategy()),
-					() -> assertFalse(member.isTestStrategyLocked()));
-	}
-
-	@Test
-	void aMinimalSuiteMarshalsWithoutEmptyAttributes() {
-		String xml = XMLMetaData.marshalSAILSuite(XMLMetaData.unmarshalSAILSuiteString(HEAD + "<member file=\"a.xml\"/>" + TAIL));
-		assertAll(() -> assertFalse(xml.contains("requires"), xml),
-					() -> assertFalse(xml.contains("lockTestStrategy"), xml),
-					() -> assertFalse(xml.contains("testStrategy"), xml));
+					() -> assertFalse(suite.isTestStrategyLocked(member)));
 	}
 
 	@Test
 	void everyEvidenceValueUnmarshals() {
 		for (Evidence evidence : Evidence.values()) {
 			Suite suite = XMLMetaData.unmarshalSAILSuiteString("<suite xmlns=\"http://www.skyve.org/xml/sail\" evidence=\"" +
-																	evidence + "\"><member file=\"a.xml\"/>" + TAIL);
+																	evidence + "\"><member file=\"a.xml\"/>" + TAIL, NAME);
 			assertEquals(evidence, suite.getEvidence());
 		}
 	}
@@ -142,6 +121,16 @@ class SuiteXmlTest {
 	}
 
 	@Test
+	void xsiTypeCannotMakeASetUpOrRestoreAnOrdinaryMember() {
+		String tns = "xmlns:tns=\"http://www.skyve.org/xml/sail\" ";
+		assertAll(() -> assertSchemaRejects(HEAD + "<setUp " + XSI + tns + "xsi:type=\"tns:ordinarySuiteMember\" file=\"a.xml\" " +
+												"lockTestStrategy=\"false\"/><member file=\"b.xml\"/>" + TAIL),
+					() -> assertSchemaRejects(HEAD + "<member file=\"b.xml\"/><restore " + XSI + tns +
+												"xsi:type=\"tns:ordinarySuiteMember\" file=\"r.xml\"/>" + TAIL),
+					() -> assertSchemaRejects(HEAD + "<member " + XSI + tns + "xsi:type=\"tns:suiteMember\" file=\"b.xml\"/>" + TAIL));
+	}
+
+	@Test
 	void aSuiteIsNotAWorkflowOrAnAutomation() {
 		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILWorkflowString(SUITE)),
 					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(SUITE)),
@@ -149,40 +138,40 @@ class SuiteXmlTest {
 	}
 
 	@Test
-	void aValidationErrorFromAStringNamesTheSuiteUnwrapped() {
+	void aValidationErrorNamesTheSuiteUnwrapped() {
 		String xml = HEAD + "<member file=\"a.xml\" requires=\"b.xml\"/>" + TAIL;
-		MetaDataException named = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml, "sail/x/suite.xml"));
-		MetaDataException unnamed = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml));
-		assertAll(() -> assertEquals("SAIL suite sail/x/suite.xml: <member> a.xml requires b.xml, which is not a member of the suite",
-										named.getMessage()),
-					() -> assertNull(named.getCause()),
-					() -> assertEquals("SAIL suite (string): <member> a.xml requires b.xml, which is not a member of the suite",
-										unnamed.getMessage()));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml, NAME));
+		assertAll(() -> assertEquals("SAIL suite sail/admin/suite.xml: <member> a.xml requires b.xml, which is not a member of the suite",
+										e.getMessage()),
+					() -> assertNull(e.getCause()));
 	}
 
 	@Test
 	void aValidationErrorFromAFileNamesTheFile(@TempDir Path dir) throws IOException {
-		Path file = dir.resolve("suite.xml");
-		Files.writeString(file, HEAD + "<member file=\"a.xml\"/><member file=\"a.xml\"/>" + TAIL, StandardCharsets.UTF_8);
-		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteFile(file.toString()));
+		Path path = dir.resolve("suite.xml");
+		Files.writeString(path, HEAD + "<member file=\"a.xml\"/><member file=\"a.xml\"/>" + TAIL, StandardCharsets.UTF_8);
+		String file = path.toString();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteFile(file));
 		assertEquals("SAIL suite " + file + ": a.xml is listed more than once", e.getMessage());
 	}
 
 	@Test
 	void eachValidationErrorIsReportedFromXml() {
 		assertAll(() -> assertInvalid("a <member> has no file", HEAD + "<member file=\" \"/>" + TAIL),
+					() -> assertInvalid("<member> file pf/../01-session.xml has an empty, . or .. segment; it must be a normalised path " +
+											"within the suite's folder", HEAD + "<member file=\"pf/../01-session.xml\"/>" + TAIL),
 					() -> assertInvalid("<setUp> a.xml requires itself", HEAD + "<setUp file=\"a.xml\" requires=\"a.xml\"/><member file=\"b.xml\"/>" + TAIL),
+					() -> assertInvalid("<member> sc/b.xml requires pf/a.xml more than once",
+											HEAD + "<member file=\"pf/a.xml\"/><member file=\"sc/b.xml\" requires=\"pf/a.xml pf/a.xml\"/>" + TAIL),
 					() -> assertInvalid("<restore> r.xml requires b.xml, which is not a set-up member; a restore can require only set-up members",
 											HEAD + "<member file=\"b.xml\"/><restore file=\"r.xml\" requires=\"b.xml\"/>" + TAIL),
-					() -> assertInvalid("<member> c.xml is in a cycle of requires: b.xml -> c.xml -> b.xml",
-											HEAD + "<member file=\"b.xml\" requires=\"c.xml\"/><member file=\"c.xml\" requires=\"b.xml\"/>" + TAIL),
 					() -> assertInvalid("<member> b.xml requires c.xml, which runs after it (<member> c.xml); members run in order",
 											HEAD + "<member file=\"b.xml\" requires=\"c.xml\"/><member file=\"c.xml\"/>" + TAIL),
 					() -> assertInvalid("a <viewRoles> has no user", HEAD + "<viewRoles user=\"\"><role>r</role></viewRoles><member file=\"b.xml\"/>" + TAIL),
 					() -> assertInvalid("<viewRoles> for user u is given more than once",
 											HEAD + "<viewRoles user=\"u\"><role>r</role></viewRoles><viewRoles user=\"u\"><role>s</role></viewRoles>" +
 												"<member file=\"b.xml\"/>" + TAIL),
-					() -> assertInvalid("<viewRoles> for user u has a blank <role>",
+					() -> assertInvalid("<viewRoles> for user u has an empty <role>",
 											HEAD + "<viewRoles user=\"u\"><role> </role></viewRoles><member file=\"b.xml\"/>" + TAIL));
 	}
 
@@ -191,33 +180,6 @@ class SuiteXmlTest {
 		String file = dir.resolve("missing.xml").toString();
 		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteFile(file));
 		assertEquals("Could not unmarshal SAIL suite at " + file, e.getMessage());
-	}
-
-	@Test
-	void aWorkflowsTestStrategyIsTheDefaultForItsAutomations() {
-		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(WORKFLOW);
-		List<Automation> automations = workflow.getAutomations();
-		assertAll(() -> assertEquals(TestStrategy.Verify, workflow.getTestStrategy()),
-					() -> assertNull(automations.get(0).getTestStrategy()),
-					() -> assertEquals(TestStrategy.Verify, workflow.getEffectiveTestStrategy(automations.get(0))),
-					() -> assertEquals(TestStrategy.None, workflow.getEffectiveTestStrategy(automations.get(1))));
-	}
-
-	@Test
-	void aWorkflowsTestStrategyMarshalsAndUnmarshals() {
-		String xml = XMLMetaData.marshalSAILWorkflow(XMLMetaData.unmarshalSAILWorkflowString(WORKFLOW));
-		assertAll(() -> assertTrue(xml.contains("testStrategy=\"Verify\""), xml),
-					() -> assertEquals(TestStrategy.Verify, XMLMetaData.unmarshalSAILWorkflowString(xml).getTestStrategy()));
-	}
-
-	@Test
-	void aWorkflowWithoutTestStrategyAndASingleAutomationHaveNoDefault() {
-		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION);
-		Automation automation = workflow.getAutomations().get(0);
-		assertAll(() -> assertNull(workflow.getTestStrategy()),
-					() -> assertNull(workflow.getEffectiveTestStrategy(automation)),
-					() -> assertSchemaRejects("<workflow xmlns=\"http://www.skyve.org/xml/sail\" testStrategy=\"Maybe\">" +
-												AUTOMATION + "</workflow>"));
 	}
 
 	@Test
@@ -230,9 +192,9 @@ class SuiteXmlTest {
 
 	@Test
 	void tellsTheRootOfAFile(@TempDir Path dir) throws IOException {
-		Path file = dir.resolve("workflow.xml");
-		Files.writeString(file, WORKFLOW, StandardCharsets.UTF_8);
-		assertEquals(SAILRoot.WORKFLOW, XMLMetaData.sailRootOfFile(file.toString()));
+		Path path = dir.resolve("workflow.xml");
+		Files.writeString(path, WORKFLOW, StandardCharsets.UTF_8);
+		assertEquals(SAILRoot.WORKFLOW, XMLMetaData.sailRootOfFile(path.toString()));
 	}
 
 	@Test
@@ -275,28 +237,30 @@ class SuiteXmlTest {
 					() -> assertEquals("tim", viewRoles.get(1).getUser()),
 					() -> assertEquals(List.of("00-precondition.xml", "00-backup.xml"),
 										suite.getSetUps().stream().map(SuiteMember::getFile).toList()),
-					() -> assertEquals(List.of("01-session.xml", "03-security-admin.xml", "04-devops.xml"),
+					() -> assertEquals(List.of("pf/01-session.xml", "sc/01-session.xml", "pf/03-security-admin.xml", "sc/04-devops.xml"),
 										members.stream().map(SuiteMember::getFile).toList()),
 					() -> assertTrue(members.get(0).getRequires().isEmpty()),
-					() -> assertFalse(members.get(0).isTestStrategyLocked()),
-					() -> assertEquals(Boolean.FALSE, members.get(1).getLockTestStrategy()),
-					() -> assertFalse(members.get(1).isTestStrategyLocked()),
-					() -> assertEquals(List.of("03-security-admin.xml"), members.get(2).getRequires()),
-					() -> assertTrue(members.get(2).isTestStrategyLocked()),
+					() -> assertFalse(suite.isTestStrategyLocked(members.get(0))),
+					() -> assertEquals(Boolean.FALSE, members.get(2).getLockTestStrategy()),
+					() -> assertFalse(suite.isTestStrategyLocked(members.get(2))),
+					() -> assertEquals(List.of("pf/03-security-admin.xml"), members.get(3).getRequires()),
+					() -> assertTrue(suite.isTestStrategyLocked(members.get(3))),
+					() -> assertEquals(List.of("00-precondition.xml", "00-backup.xml", "pf/03-security-admin.xml"),
+										suite.requirementsOf(members.get(3)).stream().map(SuiteMember::getFile).toList()),
 					() -> assertEquals("99-restore.xml", (restore == null) ? null : restore.getFile()),
 					() -> assertEquals(List.of("00-precondition.xml", "00-backup.xml"), (restore == null) ? null : restore.getRequires()),
-					() -> assertTrue((restore != null) && restore.isTestStrategyLocked()),
-					() -> assertTrue(suite.getSetUps().get(0).isTestStrategyLocked()));
+					() -> assertTrue((restore != null) && suite.isTestStrategyLocked(restore)),
+					() -> assertTrue(suite.isTestStrategyLocked(suite.getSetUps().get(0))));
 	}
 
 	private static void assertSchemaRejects(String xml) {
-		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml), xml);
-		assertTrue(e.getMessage().startsWith("Could not unmarshal SAIL suite (string)"), e.getMessage());
+		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml, NAME), xml);
+		assertTrue(e.getMessage().startsWith("Could not unmarshal SAIL suite " + NAME), e.getMessage());
 	}
 
 	private static void assertInvalid(String expected, String xml) {
-		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml), xml);
-		assertEquals("SAIL suite (string): " + expected, e.getMessage());
+		MetaDataException e = assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILSuiteString(xml, NAME), xml);
+		assertEquals("SAIL suite " + NAME + ": " + expected, e.getMessage());
 	}
 
 	private static void assertRootMessage(String expected, String xml) {

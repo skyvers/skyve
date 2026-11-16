@@ -963,33 +963,6 @@ public class XMLMetaData {
 	}
 
 	/**
-	 * Marshals a SAIL suite.
-	 *
-	 * @param suite	the suite
-	 * @return the XML
-	 * @throws MetaDataException	if the suite cannot be marshalled, or is not valid against sail.xsd
-	 */
-	public static @Nonnull String marshalSAILSuite(@Nonnull Suite suite) {
-		try {
-			Marshaller marshaller = SAIL_SUITE_CONTEXT.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.FALSE);
-			marshaller.setProperty(Marshaller.JAXB_SCHEMA_LOCATION,
-									SAIL_NAMESPACE + " http://www.skyve.org/xml/sail.xsd");
-			marshaller.setSchema(SAIL_SCHEMA);
-			DocumentResult dom4j = new DocumentResult();
-			marshaller.marshal(suite, dom4j);
-
-			Document document = dom4j.getDocument();
-			Visitor visitor = new JAXBFixingVisitor(VIEW_NAMESPACE);
-			document.accept(visitor);
-			return format(document, true);
-		}
-		catch (Exception e) {
-			throw new MetaDataException("Could not marshal SAIL suite", e);
-		}
-	}
-
-	/**
 	 * Unmarshals a SAIL file whose root is a {@code <suite>}, and validates it with {@link Suite#validate(String)}.
 	 *
 	 * @param file	the file's path, which also names the suite in messages
@@ -1039,17 +1012,8 @@ public class XMLMetaData {
 	}
 
 	/**
-	 * Unmarshals SAIL whose root is a {@code <suite>}, and validates it; messages call the suite "(string)". Prefer
-	 * {@link #unmarshalSAILSuiteString(String, String)}, which names it.
-	 *
-	 * @param sail	the XML
-	 * @return the valid suite
-	 * @throws MetaDataException	if the XML is not valid against sail.xsd, or the suite is not valid
+	 * Unmarshals a {@code <suite>} validated against sail.xsd; {@link Suite#validate(String)} is left to the caller.
 	 */
-	public static @Nonnull Suite unmarshalSAILSuiteString(@Nonnull String sail) {
-		return unmarshalSAILSuiteString(sail, "(string)");
-	}
-
 	private static @Nonnull Suite unmarshalSAILSuite(@Nonnull Reader reader) throws JAXBException {
 		Unmarshaller unmarshaller = SAIL_SUITE_CONTEXT.createUnmarshaller();
 		unmarshaller.setSchema(SAIL_SCHEMA);
@@ -1090,6 +1054,9 @@ public class XMLMetaData {
 		}
 	}
 
+	/**
+	 * Reads a SAIL document's root element, naming the document in messages; it does not close the reader.
+	 */
 	private static @Nonnull SAILRoot sailRoot(@Nonnull Reader reader, @Nonnull String name) {
 		try {
 			XMLInputFactory factory = XMLInputFactory.newFactory();

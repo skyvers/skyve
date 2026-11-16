@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
@@ -166,6 +167,41 @@ class SailLanguageXmlTest {
 		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(WORKFLOW)),
 					() -> assertThrows(MetaDataException.class,
 											() -> XMLMetaData.unmarshalSAILWorkflowString("<workflow xmlns=\"http://www.skyve.org/xml/sail\"/>")));
+	}
+
+	private static final String WORKFLOW_WITH_DEFAULT = "<workflow xmlns=\"http://www.skyve.org/xml/sail\" testStrategy=\"Verify\">" +
+			"<automation uxui=\"external\" userAgentType=\"desktop\"><interaction name=\"a\"><method>" +
+			"<comment>a</comment></method></interaction></automation>" +
+			"<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"None\"><interaction name=\"b\"><method>" +
+			"<comment>b</comment></method></interaction></automation>" +
+			"</workflow>";
+
+	@Test
+	void aWorkflowsTestStrategyIsTheDefaultForItsAutomations() {
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(WORKFLOW_WITH_DEFAULT);
+		List<Automation> automations = workflow.getAutomations();
+		assertAll(() -> assertEquals(TestStrategy.Verify, workflow.getTestStrategy()),
+					() -> assertThat(automations.get(0).getTestStrategy(), is(nullValue())),
+					() -> assertEquals(TestStrategy.Verify, workflow.getEffectiveTestStrategy(automations.get(0))),
+					() -> assertEquals(TestStrategy.None, workflow.getEffectiveTestStrategy(automations.get(1))));
+	}
+
+	@Test
+	void aWorkflowsTestStrategyMarshalsAndUnmarshals() {
+		String xml = XMLMetaData.marshalSAILWorkflow(XMLMetaData.unmarshalSAILWorkflowString(WORKFLOW_WITH_DEFAULT));
+		assertAll(() -> assertTrue(xml.contains("testStrategy=\"Verify\""), xml),
+					() -> assertEquals(TestStrategy.Verify, XMLMetaData.unmarshalSAILWorkflowString(xml).getTestStrategy()));
+	}
+
+	@Test
+	void aWorkflowWithoutTestStrategyAndASingleAutomationHaveNoDefault() {
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(LANGUAGE_GAPS);
+		Automation automation = workflow.getAutomations().get(0);
+		automation.setTestStrategy(null);
+		String unknownStrategy = WORKFLOW_WITH_DEFAULT.replace("testStrategy=\"Verify\"", "testStrategy=\"Maybe\"");
+		assertAll(() -> assertThat(workflow.getTestStrategy(), is(nullValue())),
+					() -> assertThat(workflow.getEffectiveTestStrategy(automation), is(nullValue())),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILWorkflowString(unknownStrategy)));
 	}
 
 	@Test

@@ -4,15 +4,14 @@ import org.skyve.impl.util.XMLMetaData;
 
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
  * An ordinary member of a {@link Suite}: a {@code <member>} element. It runs after every set-up member has passed (it
  * requires them without naming them), and does not stop the suite's other members if it fails.
  *
- * <p>Unlike a set-up or restore member, an ordinary member accepts a run's test strategy override unless it sets
- * {@code lockTestStrategy="true"}.
+ * <p>Unlike a set-up or restore member, an ordinary member accepts a run's test strategy override, and the suite's
+ * default, unless it sets {@code lockTestStrategy="true"}; see {@link Suite#isTestStrategyLocked(SuiteMember)}.
  *
  * <p>Not thread-safe: a member is built, or unmarshalled, before a suite runs.
  *
@@ -41,16 +40,5 @@ public class OrdinarySuiteMember extends SuiteMember {
 	@XmlAttribute(name = "lockTestStrategy")
 	public void setLockTestStrategy(@Nullable Boolean lockTestStrategy) {
 		this.lockTestStrategy = lockTestStrategy;
-	}
-
-	/**
-	 * Indicates if a run's test strategy override must not apply to this member.
-	 *
-	 * @return {@code true} only if {@code lockTestStrategy} is {@code true}
-	 */
-	@Override
-	@XmlTransient
-	public boolean isTestStrategyLocked() {
-		return Boolean.TRUE.equals(lockTestStrategy);
 	}
 }

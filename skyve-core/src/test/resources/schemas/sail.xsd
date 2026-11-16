@@ -783,7 +783,8 @@
       <xs:element name="setUp" type="tns:suiteMember" form="qualified" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>
-            A set-up member: runs first, in order, locked to its own test strategy. Every ordinary member requires it.
+            A set-up member: runs first, in order, locked to its own test strategy. Every later set-up member and every
+            ordinary member requires it.
           </xs:documentation>
         </xs:annotation>
       </xs:element>
@@ -806,8 +807,8 @@
     <xs:attribute name="testStrategy" type="tns:testStrategy">
       <xs:annotation>
         <xs:documentation>
-          The default test strategy for the automations of members that state none; a workflow's or an automation's
-          own testStrategy wins.
+          The default test strategy for the automations of unlocked members that state none; a workflow's or an
+          automation's own testStrategy wins. Set-up, restore and lockTestStrategy="true" members ignore it.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
@@ -820,7 +821,7 @@
 
   <xs:complexType name="viewRoles">
     <xs:sequence>
-      <xs:element name="role" type="xs:string" form="qualified" maxOccurs="unbounded">
+      <xs:element name="role" type="xs:token" form="qualified" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>A role: module.Role, or a customer role's name.</xs:documentation>
         </xs:annotation>
@@ -833,12 +834,13 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="suiteMember">
+  <xs:complexType name="suiteMember" block="#all">
     <xs:sequence/>
     <xs:attribute name="file" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          The workflow or automation file, relative to the suite file's folder. It also names the member in requires.
+          The workflow or automation file: a normalised path relative to the suite file's folder, with / between
+          folders and no . or .. segments. It also names the member in requires.
         </xs:documentation>
       </xs:annotation>
     </xs:attribute>
@@ -854,14 +856,15 @@
     </xs:attribute>
   </xs:complexType>
 
-  <xs:complexType name="ordinarySuiteMember">
+  <xs:complexType name="ordinarySuiteMember" block="#all">
     <xs:complexContent>
       <xs:extension base="tns:suiteMember">
         <xs:sequence/>
         <xs:attribute name="lockTestStrategy" type="xs:boolean">
           <xs:annotation>
             <xs:documentation>
-              true to run this member with its own test strategy, ignoring a run's override. Default false.
+              true to run this member with its own test strategy, ignoring a run's override and the suite's default.
+              Default false.
             </xs:documentation>
           </xs:annotation>
         </xs:attribute>

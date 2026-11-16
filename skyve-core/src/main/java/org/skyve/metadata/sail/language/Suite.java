@@ -1,12 +1,12 @@
 package org.skyve.metadata.sail.language;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
@@ -30,20 +30,23 @@ import jakarta.xml.bind.annotation.XmlType;
  * 	&lt;/viewRoles&gt;
  * 	&lt;setUp file="00-precondition.xml"/&gt;
  * 	&lt;setUp file="00-backup.xml"/&gt;
- * 	&lt;member file="01-session.xml"/&gt;
- * 	&lt;member file="04-devops.xml" requires="03-security-admin.xml" lockTestStrategy="true"/&gt;
+ * 	&lt;member file="pf/01-session.xml"/&gt;
+ * 	&lt;member file="sc/01-session.xml"/&gt;
+ * 	&lt;member file="sc/04-devops.xml" requires="pf/03-security-admin.xml" lockTestStrategy="true"/&gt;
  * 	&lt;restore file="99-restore.xml" requires="00-precondition.xml 00-backup.xml"/&gt;
  * &lt;/suite&gt;
  * </pre>
  *
  * <p>A suite runs its set-up members in order, then its ordinary members in order, then its optional restore. Each
  * member gets its own run: members share no {@code {run}} token and no {@code {var:name}} values. A member runs only if
- * every member it requires passed; every ordinary member requires every set-up member without naming them (see
- * {@link #requirementsOf(SuiteMember)}). A failed ordinary member does not stop the others. The restore runs last, even
- * after failures, if its own requirements passed.
+ * every member it requires passed; without naming them, each set-up member requires every earlier set-up member, and
+ * every ordinary member requires every set-up member (see {@link #requirementsOf(SuiteMember)}). A failed ordinary
+ * member does not stop the others. The restore runs last, even after failures, if its own requirements passed.
  *
- * <p>{@code testStrategy} is a default for the automations of every member that states none; an automation's own
- * attribute, then its workflow's, wins (see {@link #getEffectiveTestStrategy(Workflow, Automation)}). {@code evidence}
+ * <p>Set-up members, the restore and ordinary members with {@code lockTestStrategy="true"} are locked to their own test
+ * strategy (see {@link #isTestStrategyLocked(SuiteMember)}). {@code testStrategy} is a default for the automations of
+ * every unlocked member that states none; an automation's own attribute, then its workflow's, wins (see
+ * {@link #getEffectiveTestStrategy(SuiteMember, Workflow, Automation)}). {@code evidence}
  * is a request for the run's evidence, which the run can override. {@code viewRoles} register the roles that the
  * runner builds views with for the users the members sign in as.
  *
@@ -77,6 +80,9 @@ public class Suite {
 		/** Keep the failures, the snapshots and the videos. */
 		all
 	}
+
+	/** A drive letter, as in {@code C:}, which starts an absolute Windows path. */
+	private static final Pattern ABSOLUTE_WINDOWS_PATH = Pattern.compile("[A-Za-z]:");
 
 	private TestStrategy testStrategy;
 	private Evidence evidence;
@@ -176,7 +182,7 @@ public class Suite {
 	/**
 	 * Returns every member in run order: the set-up members, the ordinary members, then the restore.
 	 *
-	 * @return a new, unmodifiable list
+	 * @return a new list
 	 */
 	@XmlTransient
 	public @Nonnull List<SuiteMember> getAllMembers() {
@@ -186,7 +192,7 @@ public class Suite {
 		if (restore != null) {
 			result.add(restore);
 		}
-		return Collections.unmodifiableList(result);
+		return result;
 	}
 
 	/**
@@ -213,54 +219,79 @@ public class Suite {
 	 * @return {@code true} if it is a set-up member (by identity)
 	 */
 	public boolean isSetUp(@Nonnull SuiteMember member) {
-		for (SuiteMember setUp : setUps) {
-			if (setUp == member) {
-				return true;
-			}
-		}
-		return false;
+		return indexOf(setUps, member) >= 0;
 	}
 
 	/**
-	 * Returns the members that must pass before a member runs: those its {@code requires} names and, for an ordinary
-	 * member, every set-up member. A runner skips the member if any of them failed or was skipped.
+	 * Indicates if a run's test strategy override, and this suite's {@code testStrategy} default, must not apply to a
+	 * member. The member's place in the suite decides, not its Java class: a set-up member and the restore are always
+	 * locked; an ordinary member is locked if its {@code lockTestStrategy} is {@code true}.
+	 *
+	 * @param member	the member
+	 * @return {@code true} if it is locked; {@code false} if it is an unlocked ordinary member or not in this suite
+	 */
+	public boolean isTestStrategyLocked(@Nonnull SuiteMember member) {
+		if ((member == restore) || isSetUp(member)) {
+			return true;
+		}
+		int index = indexOf(members, member);
+		return (index >= 0) && Boolean.TRUE.equals(members.get(index).getLockTestStrategy());
+	}
+
+	/**
+	 * Returns the members that must pass before a member runs: those its {@code requires} names and, without naming
+	 * them, every earlier set-up member for a set-up member, or every set-up member for an ordinary member. A runner
+	 * skips the member if any of them failed or was skipped.
 	 *
 	 * <p>Precondition: the suite is valid ({@link #validate(String)}) and holds the member.
 	 *
 	 * @param member	a member of this suite
-	 * @return the required members in run order, each once (a new, unmodifiable list; empty if there are none)
+	 * @return the required members in run order, each once (a new list; empty if there are none)
 	 */
 	public @Nonnull List<SuiteMember> requirementsOf(@Nonnull SuiteMember member) {
+		// the set-ups before this many are required implicitly: the earlier ones for a set-up, all for an ordinary member
+		int implicitSetUps = indexOf(setUps, member);
+		if (implicitSetUps < 0) {
+			implicitSetUps = (indexOf(members, member) >= 0) ? setUps.size() : 0;
+		}
 		Set<String> required = new HashSet<>(member.getRequires());
-		boolean ordinary = members.contains(member);
 		List<SuiteMember> result = new ArrayList<>();
-		for (SuiteMember candidate : getAllMembers()) {
-			if ((ordinary && isSetUp(candidate)) || required.contains(candidate.getFile())) {
+		List<SuiteMember> all = getAllMembers();
+		for (int i = 0, l = all.size(); i < l; i++) {
+			SuiteMember candidate = all.get(i);
+			if ((i < implicitSetUps) || required.contains(candidate.getFile())) {
 				result.add(candidate);
 			}
 		}
-		return Collections.unmodifiableList(result);
+		return result;
 	}
 
 	/**
 	 * Returns the test strategy that an automation of one of this suite's members runs with before any run override:
-	 * the automation's own, else its workflow's default, else this suite's default.
+	 * the automation's own, else its workflow's default, else, for an unlocked member only, this suite's default.
 	 *
+	 * @param member	the member whose workflow it is
 	 * @param workflow	the member's workflow
 	 * @param automation	one of the workflow's automations
-	 * @return the strategy, or {@code null} if none of them states one (the runner's default applies)
+	 * @return the strategy, or {@code null} if none of them applies (the runner's default applies)
 	 * @see Workflow#getEffectiveTestStrategy(Automation)
+	 * @see #isTestStrategyLocked(SuiteMember)
 	 */
-	public @Nullable TestStrategy getEffectiveTestStrategy(@Nonnull Workflow workflow, @Nonnull Automation automation) {
+	public @Nullable TestStrategy getEffectiveTestStrategy(@Nonnull SuiteMember member,
+															@Nonnull Workflow workflow,
+															@Nonnull Automation automation) {
 		TestStrategy result = workflow.getEffectiveTestStrategy(automation);
-		return (result == null) ? testStrategy : result;
+		if ((result == null) && (! isTestStrategyLocked(member))) {
+			result = testStrategy;
+		}
+		return result;
 	}
 
 	/**
-	 * Checks what the schema cannot: that every member has a file and no file is listed twice; that every
-	 * {@code requires} names another member of the suite that runs before it, without a cycle; that the restore
-	 * requires only set-up members; that there is at least one ordinary member; and that each view roles entry has a
-	 * user, given once, and non-blank roles.
+	 * Checks what the schema cannot: that there is at least one ordinary member; that every member has a normalised
+	 * relative file, and no file is listed twice; that every {@code requires} names, once, another member of the suite
+	 * that runs before it; that the restore requires only set-up members; and that each view roles entry has a user,
+	 * given once, and no empty role. Running before is what rules out a cycle of requirements.
 	 *
 	 * <p>Complexity: O(m + r) time, where m is the number of members and r the number of requirements.
 	 *
@@ -275,74 +306,20 @@ public class Suite {
 		}
 
 		List<SuiteMember> all = getAllMembers();
-		int[][] requirements = requirements(prefix, all, positions(prefix, all));
-		validateNoCycle(prefix, all, requirements);
+		Map<String, Integer> positions = positions(prefix, all);
 		for (int i = 0, l = all.size(); i < l; i++) {
-			for (int p : requirements[i]) {
-				if (p > i) {
-					throw new MetaDataException(prefix + describe(i, all.get(i)) + " requires " + all.get(p).getFile() +
-													", which runs after it (" + describe(p, all.get(p)) + "); members run in order");
-				}
-			}
+			validateRequires(prefix, all, positions, i);
 		}
 	}
 
 	/**
-	 * Returns the run order position of each member's file, throwing if a file is missing or listed twice.
+	 * Throws if a view roles entry has no user, repeats a user, or has no role or an empty one.
 	 */
-	private @Nonnull Map<String, Integer> positions(@Nonnull String prefix, @Nonnull List<SuiteMember> all) {
-		Map<String, Integer> result = new HashMap<>();
-		for (int i = 0, l = all.size(); i < l; i++) {
-			String file = all.get(i).getFile();
-			if (blank(file)) {
-				throw new MetaDataException(prefix + "a <" + element(i) + "> has no file");
-			}
-			if (result.put(file, Integer.valueOf(i)) != null) {
-				throw new MetaDataException(prefix + file + " is listed more than once");
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Returns the run order positions of each member's requirements, throwing if one is unknown, the member itself, or
-	 * a restore's requirement that is not a set-up member.
-	 */
-	private @Nonnull int[][] requirements(@Nonnull String prefix,
-											@Nonnull List<SuiteMember> all,
-											@Nonnull Map<String, Integer> positions) {
-		int[][] result = new int[all.size()][];
-		for (int i = 0, l = all.size(); i < l; i++) {
-			SuiteMember member = all.get(i);
-			List<String> requires = member.getRequires();
-			int[] memberRequirements = new int[requires.size()];
-			for (int j = 0, m = requires.size(); j < m; j++) {
-				String required = requires.get(j);
-				Integer position = positions.get(required);
-				if (position == null) {
-					throw new MetaDataException(prefix + describe(i, member) + " requires " + required +
-													", which is not a member of the suite");
-				}
-				int p = position.intValue();
-				if (p == i) {
-					throw new MetaDataException(prefix + describe(i, member) + " requires itself");
-				}
-				if ((member == restore) && (p >= setUps.size())) {
-					throw new MetaDataException(prefix + describe(i, member) + " requires " + required +
-													", which is not a set-up member; a restore can require only set-up members");
-				}
-				memberRequirements[j] = p;
-			}
-			result[i] = memberRequirements;
-		}
-		return result;
-	}
-
 	private void validateViewRoles(@Nonnull String prefix) {
 		Set<String> users = new HashSet<>();
 		for (ViewRoles entry : viewRoles) {
 			String user = entry.getUser();
-			if (blank(user)) {
+			if (unset(user)) {
 				throw new MetaDataException(prefix + "a <viewRoles> has no user");
 			}
 			if (! users.add(user)) {
@@ -353,50 +330,87 @@ public class Suite {
 				throw new MetaDataException(prefix + "<viewRoles> for user " + user + " has no <role>");
 			}
 			for (String role : roles) {
-				if (blank(role)) {
-					throw new MetaDataException(prefix + "<viewRoles> for user " + user + " has a blank <role>");
+				if ((role == null) || role.isEmpty()) {
+					throw new MetaDataException(prefix + "<viewRoles> for user " + user + " has an empty <role>");
 				}
 			}
 		}
 	}
 
 	/**
-	 * Throws if the requirements form a cycle, naming it. A depth first search, O(m + r).
+	 * Returns the run order position of each member's file, throwing if a file is missing, not a normalised relative
+	 * path, or listed twice.
 	 */
-	private void validateNoCycle(@Nonnull String prefix, @Nonnull List<SuiteMember> all, @Nonnull int[][] requirements) {
-		// 0 = not visited, 1 = on the current path, 2 = done
-		int[] states = new int[all.size()];
-		List<Integer> path = new ArrayList<>();
+	private @Nonnull Map<String, Integer> positions(@Nonnull String prefix, @Nonnull List<SuiteMember> all) {
+		Map<String, Integer> result = new HashMap<>();
 		for (int i = 0, l = all.size(); i < l; i++) {
-			if (states[i] == 0) {
-				visit(prefix, all, requirements, i, states, path);
+			String file = all.get(i).getFile();
+			if (unset(file)) {
+				throw new MetaDataException(prefix + "a <" + element(i) + "> has no file");
+			}
+			String problem = pathProblem(file);
+			if (problem != null) {
+				throw new MetaDataException(prefix + "<" + element(i) + "> file " + file + " " + problem);
+			}
+			if (result.put(file, Integer.valueOf(i)) != null) {
+				throw new MetaDataException(prefix + file + " is listed more than once");
 			}
 		}
+		return result;
 	}
 
-	private void visit(@Nonnull String prefix,
-						@Nonnull List<SuiteMember> all,
-						@Nonnull int[][] requirements,
-						int index,
-						@Nonnull int[] states,
-						@Nonnull List<Integer> path) {
-		states[index] = 1;
-		path.add(Integer.valueOf(index));
-		for (int p : requirements[index]) {
-			if (states[p] == 1) {
-				StringBuilder cycle = new StringBuilder(64);
-				for (int j = path.indexOf(Integer.valueOf(p)), l = path.size(); j < l; j++) {
-					cycle.append(all.get(path.get(j).intValue()).getFile()).append(" -> ");
-				}
-				cycle.append(all.get(p).getFile());
-				throw new MetaDataException(prefix + describe(index, all.get(index)) + " is in a cycle of requires: " + cycle);
-			}
-			if (states[p] == 0) {
-				visit(prefix, all, requirements, p, states, path);
+	/**
+	 * Returns what is wrong with a member's file as a path relative to the suite file's folder.
+	 *
+	 * @return the problem, for a message, or {@code null} if it is a normalised relative path
+	 */
+	private static @Nullable String pathProblem(@Nonnull String file) {
+		if (file.indexOf('\\') >= 0) {
+			return "has a \\; separate folders with /";
+		}
+		if (file.startsWith("/") || ABSOLUTE_WINDOWS_PATH.matcher(file).lookingAt()) {
+			return "is absolute; it must be relative to the suite's folder";
+		}
+		for (String segment : file.split("/", -1)) {
+			if (segment.isEmpty() || ".".equals(segment) || "..".equals(segment)) {
+				return "has an empty, . or .. segment; it must be a normalised path within the suite's folder";
 			}
 		}
-		path.remove(path.size() - 1);
-		states[index] = 2;
+		return null;
+	}
+
+	/**
+	 * Throws if the member at a run order position requires a file that is not in the suite, itself, a file twice, a
+	 * member that runs after it, or (for the restore) a member that is not a set-up member.
+	 */
+	private void validateRequires(@Nonnull String prefix,
+									@Nonnull List<SuiteMember> all,
+									@Nonnull Map<String, Integer> positions,
+									int index) {
+		SuiteMember member = all.get(index);
+		Set<String> seen = new HashSet<>();
+		for (String required : member.getRequires()) {
+			Integer position = positions.get(required);
+			if (position == null) {
+				throw new MetaDataException(prefix + describe(index, member) + " requires " + required +
+												", which is not a member of the suite");
+			}
+			int p = position.intValue();
+			if (p == index) {
+				throw new MetaDataException(prefix + describe(index, member) + " requires itself");
+			}
+			if (! seen.add(required)) {
+				throw new MetaDataException(prefix + describe(index, member) + " requires " + required + " more than once");
+			}
+			if ((member == restore) && (p >= setUps.size())) {
+				throw new MetaDataException(prefix + describe(index, member) + " requires " + required +
+												", which is not a set-up member; a restore can require only set-up members");
+			}
+			if (p > index) {
+				throw new MetaDataException(prefix + describe(index, member) + " requires " + required + ", which runs after it (" +
+												describe(p, all.get(p)) + "); members run in order");
+			}
+		}
 	}
 
 	/**
@@ -410,13 +424,30 @@ public class Suite {
 	}
 
 	/**
-	 * Describes the member at a run order position for a message, for example "setUp 00-backup.xml".
+	 * Describes the member at a run order position for a message, for example "&lt;setUp&gt; 00-backup.xml".
 	 */
 	private @Nonnull String describe(int position, @Nonnull SuiteMember member) {
 		return "<" + element(position) + "> " + member.getFile();
 	}
 
-	private static boolean blank(@Nullable String value) {
-		return (value == null) || value.isBlank();
+	/**
+	 * Indicates if a file or user is unset: its setter stores a blank value as null. A helper rather than
+	 * {@code == null} because the getters are {@code @Nonnull} for callers of a valid suite, so Eclipse would call an
+	 * inline check dead code.
+	 */
+	private static boolean unset(@Nullable String value) {
+		return value == null;
+	}
+
+	/**
+	 * Returns the index of a member in a list by identity, or -1.
+	 */
+	private static int indexOf(@Nonnull List<? extends SuiteMember> list, @Nonnull SuiteMember member) {
+		for (int i = 0, l = list.size(); i < l; i++) {
+			if (list.get(i) == member) {
+				return i;
+			}
+		}
+		return -1;
 	}
 }
