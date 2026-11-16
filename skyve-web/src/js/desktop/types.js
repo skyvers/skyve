@@ -2196,7 +2196,8 @@ isc.BizIntegerPercentageItem.addMethods({
 
 isc.SimpleType.create({
 	name: "bizIntegerPercentage",
-	inheritsFrom: "integer",
+	// a decimal: 12% is 0.12
+	inheritsFrom: "float",
 	editorType: "BizIntegerPercentageItem",
 
 	/**
