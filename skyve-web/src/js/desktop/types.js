@@ -1464,9 +1464,28 @@ isc.SimpleType.create({
 	},
 });
 
+// 12 hour times show AM and PM in upper case, as Skyve's converters (hh:mm a in English) write them
+isc.Time.addClassProperties({
+	AMIndicator: " AM",
+	PMIndicator: " PM",
+});
+
 isc.SimpleType.create({
 	name: "HH_MI",
 	inheritsFrom: "bizTime",
+
+	/**
+	 * Formats the internal time value into the `HH_MI` format (`02:47 PM`).
+	 *
+	 * @param {Date|string|null} internalValue - the value to be formatted.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} component - the component instance.
+	 * @param {Object} record - the record object containing the value.
+	 * @returns {string} The formatted time string.
+	 */
+	shortDisplayFormatter: function (internalValue, field, component, record) {
+		return isc.Time.toShortTime(internalValue, "toShortPaddedTime", true);
+	},
 });
 
 /**
@@ -1478,8 +1497,8 @@ isc.ClassFactory.defineClass("HH_MI_SS_Item", "BizTimeItem");
 isc.HH_MI_SS_Item.addProperties({
 	use24HourTime: false,
 	hint: "HH:MI:SS am/pm",
-	dateFormatter: "toTime",
-	timeFormatter: "toTime",
+	dateFormatter: "toPaddedTime",
+	timeFormatter: "toPaddedTime",
 });
 
 isc.SimpleType.create({
@@ -1496,7 +1515,7 @@ isc.SimpleType.create({
 	 * @returns {string} The formatted time string.
 	 */
 	shortDisplayFormatter: function (internalValue, field, component, record) {
-		return isc.Time.toTime(internalValue, "toTime", true);
+		return isc.Time.toTime(internalValue, "toPaddedTime", true);
 	},
 });
 
