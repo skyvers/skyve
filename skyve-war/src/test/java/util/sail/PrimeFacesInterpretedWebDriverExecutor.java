@@ -22,6 +22,7 @@ import org.primefaces.component.texteditor.TextEditor;
 import org.primefaces.component.tristatecheckbox.TriStateCheckbox;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.domain.types.converters.Converter;
@@ -1370,7 +1371,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 * <p>
 	 * Values: an option is named by its shown label, or else by its code; a boolean is true or false; a date, date time,
 	 * time or timestamp is written as the column's attribute shows it (its converter's format, as {@code <dataEnter />}
-	 * takes it), and is typed into a Vue calendar in the calendar's own format.
+	 * takes it), and is typed into a Vue calendar as it is: the calendar takes the format of the column's converter.
 	 * Other columns and comparisons fail the step with the reason.
 	 *
 	 * @param filter	the step
@@ -1627,34 +1628,51 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	/**
 	 * Returns the text to type into a Vue list grid's filter calendar for a value written as the column's attribute
-	 * shows it (its converter's format): the calendar's format is dd/mm/yyyy, then HH:mm for a date time and HH:mm:ss
-	 * for a timestamp, and HH:mm for a time.
+	 * shows it (its converter's format; see {@link #vueCalendarText(Converter, String, String, String)}).
 	 *
 	 * @throws MetaDataException	if the value is not in the attribute's format
 	 */
 	private @Nonnull String vueCalendarText(@Nonnull ListGridFilter filter, @Nonnull String column, @Nonnull String type, @Nonnull String value) {
-		Customer c = CORE.getUser().getCustomer();
 		Attribute attribute = listGridAttribute(filter, column);
-		Converter<?> converter = (attribute instanceof ConvertibleField field) ? field.getConverterForCustomer(c) : null;
-		Object date;
-		try {
-			date = (attribute == null) ? null : BindUtil.fromString(c, converter, attribute.getImplementingType(), value);
+		Converter<?> converter = (attribute instanceof ConvertibleField field) ? field.getConverterForCustomer(CORE.getUser().getCustomer()) : null;
+		return vueCalendarText(converter, column, type, value);
+	}
+
+	/**
+	 * Returns the text to type into a Vue list grid's filter calendar for a value written in the format of the
+	 * column's converter. The calendar takes and shows the format of the column's converter, as the column's cells do
+	 * (skyve-vue's Converters.js), so the text is the value read and written again by the converter: the value itself,
+	 * with what the converter writes in full written in full (5/6/2026 is typed 05/06/2026 for MM_DD_YYYY).
+	 *
+	 * @param converter	the column's converter, or null if its attribute has none (it is not a date or time)
+	 * @param column	the column, for the message
+	 * @param type	the column's type in the grid (date, dateTime, timestamp or time), for the message
+	 * @param value	the value as the column shows it
+	 * @throws MetaDataException	if the value is not in the converter's format
+	 */
+	static @Nonnull String vueCalendarText(@Nullable Converter<?> converter, @Nonnull String column, @Nonnull String type, @Nonnull String value) {
+		String result = null;
+		if (converter != null) {
+			try {
+				result = redisplay(converter, value);
+			}
+			catch (@SuppressWarnings("unused") Exception e) {
+				result = null;
+			}
 		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			date = null;
-		}
-		if (! (date instanceof java.util.Date d)) {
+		if (result == null) {
 			throw new MetaDataException(String.format("<listGridFilter /> value '%s' for column [%s] is not a %s in the format its attribute shows%s",
 														value, column, type,
 														(converter == null) ? "" : " (" + converter.getClass().getSimpleName() + ")"));
 		}
-		String pattern = switch (type) {
-			case "dateTime" -> "dd/MM/yyyy HH:mm";
-			case "timestamp" -> "dd/MM/yyyy HH:mm:ss";
-			case "time" -> "HH:mm";
-			default -> "dd/MM/yyyy";
-		};
-		return new java.text.SimpleDateFormat(pattern).format(d);
+		return result;
+	}
+
+	/**
+	 * Returns the display value read by the converter, as the converter writes it.
+	 */
+	private static @Nonnull <T> String redisplay(@Nonnull Converter<T> converter, @Nonnull String displayValue) throws ConversionException {
+		return converter.toDisplayValue(converter.fromDisplayValue(displayValue));
 	}
 
 	/**

@@ -17,12 +17,15 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.skyve.metadata.ConverterName;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 
 /**
  * Unit tests of the SAIL harness pieces that need no browser: the test strategy override, password masking in step
- * descriptions, the suite runner's restore gating, and the cross-JVM server lock.
+ * descriptions, the suite runner's restore gating, the cross-JVM server lock, and the text typed into a Vue list
+ * grid's filter calendar.
  */
 class SailHarnessTest {
 	@AfterEach
@@ -122,6 +125,38 @@ class SailHarnessTest {
 		assertEquals(3, run(java, probe.toString(), lockFile.toString()), "another JVM cannot take the lock while this one holds it");
 		SailServerLock.releaseAll();
 		assertEquals(0, run(java, probe.toString(), lockFile.toString()), "another JVM can take it once released");
+	}
+
+	/**
+	 * A Vue list grid's filter calendar takes the format of the column's converter, so a listGridFilter value (written
+	 * as the column shows it) is typed as it is, with what the converter writes in full written in full. 05/06/2026
+	 * on a month first column is 6 May: typed as 06/05/2026 the calendar would read 5 June.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void aVueFilterCalendarIsTypedInTheFormatOfTheColumnsConverter() {
+		assertAll(() -> assertEquals("05/06/2026", vueCalendarText(ConverterName.MM_DD_YYYY, "date", "05/06/2026")),
+					() -> assertEquals("05/06/2026", vueCalendarText(ConverterName.MM_DD_YYYY, "date", "5/6/2026")),
+					() -> assertEquals("15-Jun-2021", vueCalendarText(ConverterName.DD_MMM_YYYY, "date", "15-Jun-2021")),
+					() -> assertEquals("05/06/2026 02:47 PM", vueCalendarText(ConverterName.MM_DD_YYYY_HH_MI, "dateTime", "05/06/2026 02:47 PM")),
+					() -> assertEquals("15-Jun-2021 12:30", vueCalendarText(ConverterName.DD_MMM_YYYY_HH24_MI, "dateTime", "15-Jun-2021 12:30")),
+					() -> assertEquals("Jun-05-2026 02:47:25 PM", vueCalendarText(ConverterName.MMM_DD_YYYY_HH_MI_SS, "timestamp", "Jun-05-2026 02:47:25 PM")),
+					() -> assertEquals("15-Jun-2021", vueCalendarText(ConverterName.DD_MMM_YYYY_Timestamp, "timestamp", "15-Jun-2021")),
+					() -> assertEquals("02:47:25 PM", vueCalendarText(ConverterName.HH_MI_SS, "time", "02:47:25 PM")),
+					() -> assertEquals("12:30", vueCalendarText(ConverterName.HH24_MI, "time", "12:30")));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void aVueFilterCalendarValueNotInTheFormatOfTheColumnsConverterFails() {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> vueCalendarText(ConverterName.MM_DD_YYYY, "date", "15-Jun-2021"));
+		assertTrue(e.getMessage().contains("'15-Jun-2021'") && e.getMessage().contains("MM_DD_YYYY"), e.getMessage());
+		e = assertThrows(MetaDataException.class, () -> PrimeFacesInterpretedWebDriverExecutor.vueCalendarText(null, "text", "date", "15-Jun-2021"));
+		assertTrue(e.getMessage().contains("[text]"), e.getMessage());
+	}
+
+	private static String vueCalendarText(ConverterName converter, String type, String value) {
+		return PrimeFacesInterpretedWebDriverExecutor.vueCalendarText(converter.getConverter(), "column", type, value);
 	}
 
 	private static int run(String... command) throws IOException, InterruptedException {
