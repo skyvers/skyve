@@ -268,6 +268,30 @@ SKYVE.PF = function() {
 	$(patchPrimeFacesStickyDataTableFilters);
 
 	// end of sticky header fixes
+
+	// Skyve's converters write a 12 hour time's AM and PM in English (Locale.ENGLISH), and read them in either case.
+	// A PrimeFaces date picker writes and reads only the AM and PM of its user's locale (am and pm in en-AU and en-GB),
+	// so it refused a typed PM and emptied itself. It takes the AM and PM of its locale settings over its user's, so
+	// every locale's settings get Skyve's; their day and month names are untouched. Patched here, as this script loads
+	// after PrimeFaces' core and before the date pickers are made.
+	var patchPrimeFacesLocaleAmPm = function() {
+		var getLocaleSettings = window.PrimeFaces && PrimeFaces.getLocaleSettings;
+		if ((typeof getLocaleSettings !== 'function') || getLocaleSettings.skyveAmPmPatch) {
+			return;
+		}
+
+		PrimeFaces.getLocaleSettings = function() {
+			var result = getLocaleSettings.apply(this, arguments);
+			if (result) {
+				result.am = 'AM';
+				result.pm = 'PM';
+			}
+			return result;
+		};
+		PrimeFaces.getLocaleSettings.skyveAmPmPatch = true;
+	};
+
+	patchPrimeFacesLocaleAmPm();
 	
 	var prepareMorph = function(source, target, options) {
 		var sourceElement = getElement(source);
