@@ -660,34 +660,6 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Returns the text to type into a PrimeFaces date picker for a value in its converter's format: the value, with a
-	 * 12 hour time's AM or PM (in either case) as the picker's locale writes it. Skyve's converters write AM and PM
-	 * (Locale.ENGLISH), but the picker reads only its locale's own: in en-AU and en-GB, am and pm, so a typed PM is
-	 * refused and the picker empties itself. The server reads either.
-	 *
-	 * @param id	the date picker's client id
-	 * @param value	the value, in the format of the field's converter
-	 * @return the text to type
-	 */
-	@SuppressWarnings("unchecked")
-	public @Nonnull String datePickerText(@Nonnull String id, @Nonnull String value) {
-		List<Object> amPm = (List<Object>) js("var w = PrimeFaces.getWidgetById(arguments[0]); var c = w ? w.cfg : null;" +
-												"var l = c ? (c.locale || c.userLocale) : null;" +
-												"return (c && (c.hourFormat === '12') && l && l.am && l.pm) ? [l.am, l.pm] : null;", id);
-		int end = value.length() - 2;
-		if ((amPm != null) && (end > 0) && (value.charAt(end - 1) == ' ')) {
-			String marker = value.substring(end);
-			if (marker.equalsIgnoreCase("AM")) {
-				return value.substring(0, end) + amPm.get(0);
-			}
-			if (marker.equalsIgnoreCase("PM")) {
-				return value.substring(0, end) + amPm.get(1);
-			}
-		}
-		return value;
-	}
-
-	/**
 	 * Replaces the text of an input as a user does: clicks into it, selects its text and types over it (or deletes it),
 	 * then leaves it with Tab, so that its change event (and any ajax handler) fires once, with the new text.
 	 * {@code clear()} would first fire a change event with an empty value: a date picker that holds a value can then be
