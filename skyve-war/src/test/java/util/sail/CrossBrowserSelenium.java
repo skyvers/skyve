@@ -21,36 +21,39 @@ import org.openqa.selenium.safari.SafariOptions;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import util.sail.BrowserConfiguration.Browsers;
 
 abstract class CrossBrowserSelenium {
 	protected WebDriver driver;
 	protected BrowserConfiguration configuration;
 	protected Actions actions;
-	
+	/** The settings the browser was started with, resolved from its configuration; null before it starts. */
+	protected SailSettings settings;
+
+	/**
+	 * Starts the browser that the configuration's resolved settings name, with their headless mode.
+	 *
+	 * @param configuration	the browser's configuration
+	 * @throws IllegalArgumentException	if a setting is invalid (before any browser starts)
+	 */
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
 		this.configuration = configuration;
-		Browsers browser = configuration.getBrowser();
-		if (browser == null) {
-			setupChrome(configuration);
-		}
-		else {
-			switch (browser) {
-				case chrome:
-					setupChrome(configuration);
-					break;
-				case firefox:
-					setupFirefox(configuration);
-					break;
-				case safari:
-					setupSafari(configuration);
-					break;
-				case edge:
-					setupEdge(configuration);
-					break;
-				default:
-					throw new IllegalStateException("Browser not supported");
-			}
+		this.settings = configuration.resolve();
+		boolean headless = this.settings.headless();
+		switch (this.settings.browser()) {
+			case chrome:
+				setupChrome(configuration, headless);
+				break;
+			case firefox:
+				setupFirefox(configuration, headless);
+				break;
+			case safari:
+				setupSafari(configuration);
+				break;
+			case edge:
+				setupEdge(configuration, headless);
+				break;
+			default:
+				throw new IllegalStateException("Browser not supported");
 		}
 		actions = new Actions(driver);
 	}
@@ -64,8 +67,18 @@ abstract class CrossBrowserSelenium {
 	 */
 	public void useBrowserOf(@Nonnull CrossBrowserSelenium other) {
 		this.configuration = other.configuration;
+		this.settings = other.settings;
 		this.driver = other.driver;
 		this.actions = other.actions;
+	}
+
+	/**
+	 * Returns the settings the browser was started with.
+	 *
+	 * @return the settings, or null before the browser starts
+	 */
+	public @Nullable SailSettings getSettings() {
+		return settings;
 	}
 
 	/**
@@ -84,11 +97,12 @@ abstract class CrossBrowserSelenium {
 	}
 
 	/**
-	 * 
-	 * @param config
-	 * @throws Exception
+	 * Starts Chrome with the configuration's user agent and window size.
+	 *
+	 * @param config	the configuration
+	 * @param headless	whether to run headless
 	 */
-	private void setupChrome(BrowserConfiguration config) {
+	private void setupChrome(BrowserConfiguration config, boolean headless) {
 		List<String> arguments = new ArrayList<>(6);
 		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
 		arguments.add("--disable-backgrounding-occluded-windows");
@@ -98,7 +112,7 @@ abstract class CrossBrowserSelenium {
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
-		if (config.isHeadless()) {
+		if (headless) {
 			arguments.add("--headless");
 			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
 			if (config.getResolution() == null) {
@@ -114,13 +128,14 @@ abstract class CrossBrowserSelenium {
 	}
 
 	/**
-	 * 
-	 * @param config
-	 * @throws Exception
+	 * Starts Firefox with the configuration's window size.
+	 *
+	 * @param config	the configuration
+	 * @param headless	whether to run headless
 	 */
-	private void setupFirefox(BrowserConfiguration config) {
+	private void setupFirefox(BrowserConfiguration config, boolean headless) {
 		FirefoxOptions options = new FirefoxOptions();
-		if (config.isHeadless()) {
+		if (headless) {
 			options.addArguments("-headless");
 		}
 		FirefoxProfile profile = new FirefoxProfile();
@@ -147,13 +162,13 @@ abstract class CrossBrowserSelenium {
 		setupBrowser(config);
 	}
 
-	private void setupEdge(BrowserConfiguration config) {
+	private void setupEdge(BrowserConfiguration config, boolean headless) {
 		List<String> arguments = new ArrayList<>(2);
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
-		if (config.isHeadless()) {
+		if (headless) {
 			arguments.add("headless");
 		}
 		

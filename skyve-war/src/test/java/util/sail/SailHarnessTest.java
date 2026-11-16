@@ -28,8 +28,8 @@ class SailHarnessTest {
 	@AfterEach
 	@SuppressWarnings("static-method")
 	void clearProperties() {
-		System.clearProperty(InterpretedWebDriverExecutor.TEST_STRATEGY_PROPERTY);
-		System.clearProperty(SailSuite.ONLY_PROPERTY);
+		System.clearProperty(SailSettings.TEST_STRATEGY);
+		System.clearProperty(SailSettings.SUITE_ONLY);
 		SailServerLock.releaseAll();
 	}
 
@@ -37,9 +37,9 @@ class SailHarnessTest {
 	@SuppressWarnings("static-method")
 	void theTestStrategyOverrideIgnoresCaseAndRejectsUnknownNames() {
 		assertNull(InterpretedWebDriverExecutor.testStrategyOverride());
-		System.setProperty(InterpretedWebDriverExecutor.TEST_STRATEGY_PROPERTY, " verify ");
+		System.setProperty(SailSettings.TEST_STRATEGY, " verify ");
 		assertEquals(TestStrategy.Verify, InterpretedWebDriverExecutor.testStrategyOverride());
-		System.setProperty(InterpretedWebDriverExecutor.TEST_STRATEGY_PROPERTY, "Check");
+		System.setProperty(SailSettings.TEST_STRATEGY, "Check");
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, InterpretedWebDriverExecutor::testStrategyOverride);
 		assertTrue(e.getMessage().contains("Assert") && e.getMessage().contains("Verify") && e.getMessage().contains("None"), e.getMessage());
 	}
@@ -58,7 +58,7 @@ class SailHarnessTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void theSuiteRefusesTheTestStrategyOverride() {
-		System.setProperty(InterpretedWebDriverExecutor.TEST_STRATEGY_PROPERTY, "None");
+		System.setProperty(SailSettings.TEST_STRATEGY, "None");
 		List<String> ran = new ArrayList<>();
 		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").restore("99.xml", "00-pre.xml");
 		assertThrows(IllegalStateException.class, () -> suite.run(ran::add));
@@ -91,10 +91,30 @@ class SailHarnessTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void onlyRunsTheChosenFilesBetweenTheSetUpAndTheRestore() {
-		System.setProperty(SailSuite.ONLY_PROPERTY, "02");
+		System.setProperty(SailSettings.SUITE_ONLY, "02");
 		List<String> ran = new ArrayList<>();
 		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml").run(ran::add);
 		assertEquals(List.of("s/00-pre.xml", "s/02.xml", "s/99.xml"), ran);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void theSuitesSettingsInCodeChooseTheFiles() {
+		List<String> ran = new ArrayList<>();
+		SailSettings.Code code = SailSettings.code().suiteOnly("01");
+		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml").settings(code).run(ran::add);
+		assertEquals(List.of("s/00-pre.xml", "s/01.xml", "s/99.xml"), ran);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void theSuiteRefusesATestStrategyOverrideInCode() {
+		List<String> ran = new ArrayList<>();
+		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml");
+		suite.settings().testStrategy(TestStrategy.Verify);
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> suite.run(ran::add));
+		assertAll(() -> assertTrue(e.getMessage().contains("unset sail.testStrategy (it is Verify, from code)"), e.getMessage()),
+					() -> assertTrue(ran.isEmpty(), ran.toString()));
 	}
 
 	@Test

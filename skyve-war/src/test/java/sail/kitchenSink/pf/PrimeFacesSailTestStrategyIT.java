@@ -62,9 +62,8 @@ class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 			""";
 
 	@BeforeEach
-	@SuppressWarnings("static-method")
 	void refuseOverride() {
-		SailSuite.refuseTestStrategyOverride("PrimeFacesSailTestStrategyIT");
+		SailSuite.refuseTestStrategyOverride("PrimeFacesSailTestStrategyIT", settings().resolve());
 	}
 
 	public PrimeFacesSailTestStrategyIT() {

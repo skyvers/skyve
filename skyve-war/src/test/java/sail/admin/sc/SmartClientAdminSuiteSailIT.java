@@ -50,6 +50,7 @@ class SmartClientAdminSuiteSailIT extends AbstractSmartClientInterpretedSail {
 						"98-destructive.xml",
 						"99-truncate.xml")
 				.restore("99-restore.xml", "00-precondition.xml", "00-backup.xml")
+				.settings(settings())
 				.run(this::sailResource);
 	}
 }

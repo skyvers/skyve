@@ -8,6 +8,7 @@ import org.skyve.web.UserAgentType;
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SailServerLock;
+import util.sail.SailSettings;
 import util.sail.SailViewRoles;
 import util.sail.SailWorkflow;
 
@@ -29,6 +30,9 @@ import util.sail.SailWorkflow;
  * Unlike the single-renderer test bases, no browser is started before a test: the workflow starts the browser each
  * automation needs. The server lock ({@link SailServerLock}) is taken by the first workflow and held until the class has
  * finished.
+ * <p>
+ * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
+ * {@code settings().headless(false).timeoutSeconds(60)}, before the workflow runs.
  */
 public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	/** The roles the views are built with for the users the scripts sign in as. */
@@ -45,6 +49,16 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	 */
 	protected final void viewRoles(@Nonnull String userName, @Nonnull String... roleNames) {
 		viewRoles.register(userName, roleNames);
+	}
+
+	/**
+	 * Returns the test's code-level settings, to change before the workflow runs, e.g.
+	 * {@code settings().variable("password", "x")}.
+	 *
+	 * @return the settings builder of the workflow
+	 */
+	protected final @Nonnull SailSettings.Code settings() {
+		return workflow.settings();
 	}
 
 	/**

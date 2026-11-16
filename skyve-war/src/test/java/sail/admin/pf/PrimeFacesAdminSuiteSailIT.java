@@ -45,6 +45,7 @@ class PrimeFacesAdminSuiteSailIT extends AbstractPrimeFacesInterpretedSail {
 						"05-reports-misc.xml",
 						"98-destructive.xml")
 				.restore("99-restore.xml", "00-precondition.xml", "00-backup.xml")
+				.settings(settings())
 				.run(this::sailResource);
 	}
 }

@@ -43,12 +43,16 @@ import util.sail.BrowserConfiguration.Browsers;
  * 		when the test class has finished (as the test bases do with {@link SailServerLock#releaseAll()}).</li>
  * <li>The run stops at the first automation that fails, as later ones build on earlier ones. The browser is stopped
  * 		when the workflow ends.</li>
+ * <li>The settings ({@link SailSettings}) are resolved, and checked, before the first browser starts, with this
+ * 		workflow's code-level {@link #settings()}, which beat each browser configuration's own values. Their variables
+ * 		({@value SailSettings#VAR_PREFIX}{@code name}) start the run; a value captured later replaces them.</li>
  * </ul>
  * Not thread-safe.
  */
 public final class SailWorkflow {
 	private final SailViewRoles viewRoles;
 	private final Map<UserAgentType, Supplier<BrowserConfiguration>> browsers = new EnumMap<>(UserAgentType.class);
+	private SailSettings.Code settings = SailSettings.code();
 
 	/**
 	 * Creates a runner that builds views with the given registered roles.
@@ -69,6 +73,28 @@ public final class SailWorkflow {
 	 */
 	public @Nonnull SailWorkflow browser(@Nonnull UserAgentType userAgentType, @Nonnull Supplier<BrowserConfiguration> configuration) {
 		browsers.put(userAgentType, configuration);
+		return this;
+	}
+
+	/**
+	 * Returns the workflow's code-level settings, to change in a test, e.g. {@code settings().headless(false)}.
+	 *
+	 * @return the settings: a new builder, unless {@link #settings(SailSettings.Code)} gave the test's
+	 */
+	public @Nonnull SailSettings.Code settings() {
+		return settings;
+	}
+
+	/**
+	 * Uses a test's code-level settings, so that the workflow shares them with the rest of the test.
+	 *
+	 * <p>Side effects: replaces the settings the workflow had.
+	 *
+	 * @param code	the settings; shared, so later changes to them apply
+	 * @return this runner
+	 */
+	public @Nonnull SailWorkflow settings(@Nonnull SailSettings.Code code) {
+		settings = code;
 		return this;
 	}
 
@@ -160,18 +186,20 @@ public final class SailWorkflow {
 		if (legs.isEmpty()) {
 			throw new IllegalArgumentException("A SAIL workflow needs at least one automation");
 		}
+		settings.resolve(); // an invalid setting fails here, before any browser starts
 		RunState run = new RunState();
 		Browser browser = null;
 		try {
 			for (Leg leg : legs) {
 				Automation automation = leg.automation();
 				boolean smartClient = "desktop".equals(automation.getUxui());
-				BrowserConfiguration configuration = configuration(automation.getUserAgentType());
+				BrowserConfiguration configuration = configuration(automation.getUserAgentType()).settings(settings);
+				SailSettings resolved = configuration.resolve();
 				SailServerLock.acquire(configuration.getBaseUrl()); // once: this JVM holds it after the first time
 				browser = browserFor(browser, configuration, smartClient);
 				System.out.println(String.format("SAIL workflow: %s in %s (run %s)", leg.name(), smartClient ? "SmartClient" : "PrimeFaces", run.getRunToken()));
 				try {
-					execute(automation, browser, run);
+					execute(automation, browser, run, resolved);
 				}
 				catch (AssertionError | RuntimeException e) { // a step failure, or an invalid script
 					throw new AssertionError("SAIL workflow: " + leg.name() + " failed: " + e.getMessage(), e);
@@ -223,21 +251,24 @@ public final class SailWorkflow {
 	}
 
 	/**
-	 * Indicates if two configurations give the same browser: the same browser, user agent, window size and headless mode.
+	 * Indicates if two configurations give the same browser: the same browser, user agent, window size, headless mode
+	 * and server, as resolved.
 	 */
 	private static boolean sameDevice(@Nonnull BrowserConfiguration a, @Nonnull BrowserConfiguration b) {
-		return Objects.equals(a.getBrowser(), b.getBrowser()) &&
+		SailSettings sa = a.resolve();
+		SailSettings sb = b.resolve();
+		return (sa.browser() == sb.browser()) &&
 				Objects.equals(a.getUserAgentString(), b.getUserAgentString()) &&
 				Objects.equals(a.getResolution(), b.getResolution()) &&
-				(a.isHeadless() == b.isHeadless()) &&
-				Objects.equals(a.getBaseUrl(), b.getBaseUrl());
+				(sa.headless() == sb.headless()) &&
+				Objects.equals(sa.baseUrl(), sb.baseUrl());
 	}
 
 	/**
 	 * Runs one automation as the test bases do: as a user with every role (or the signed-in user's registered roles),
-	 * sharing the workflow's run.
+	 * sharing the workflow's run, with the leg's settings.
 	 */
-	private void execute(@Nonnull Automation automation, @Nonnull Browser browser, @Nonnull RunState run) {
+	private void execute(@Nonnull Automation automation, @Nonnull Browser browser, @Nonnull RunState run, @Nonnull SailSettings legSettings) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User testUser = persistence.getUser();
 		persistence.setUser(SailUsers.bootstrapLikeUser(testUser));
@@ -247,6 +278,7 @@ public final class SailWorkflow {
 															new PrimeFacesInterpretedWebDriverExecutor((PrimeFacesSelenide) browser.selenide());
 			executor.useViewRoles(viewRoles);
 			executor.shareRun(run);
+			executor.useSettings(legSettings);
 			automation.execute(executor);
 		}
 		finally {

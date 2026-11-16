@@ -18,6 +18,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SailServerLock;
+import util.sail.SailSettings;
 import util.sail.SailViewRoles;
 import util.sail.SmartClientInterpretedWebDriverExecutor;
 import util.sail.SmartClientSelenide;
@@ -28,6 +29,11 @@ import util.sail.SmartClientSelenide;
  * Each test class holds {@link SailServerLock} for its server ({@code -Dsail.baseUrl}) from before its first browser
  * starts until the class has finished, so SAIL tests against one server run one at a time, even in forked JVMs
  * (surefire's {@code forkCount}). A test whose server is in use waits for the other to finish: the one necessary wait.
+ * <p>
+ * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
+ * {@code settings().headless(false).timeoutSeconds(60)}, and beats the configuration's own values and the properties
+ * file, though not a {@code -D} or environment variable. Set the browser's settings (browser, headless, base URL,
+ * timeout) in the constructor, as the browser starts before each test; the others apply to each script as it starts.
  */
 public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test {
 
@@ -36,8 +42,21 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	private BrowserConfiguration configuration;
 	@Nonnull protected SmartClientSelenide selenium = new SmartClientSelenide();
 	
+	/** The test's code-level settings; see {@link #settings()}. */
+	private final SailSettings.Code settings = SailSettings.code();
+
 	protected AbstractSmartClientInterpretedSail(@Nonnull BrowserConfiguration configuration) {
-		this.configuration = configuration;
+		this.configuration = configuration.settings(settings);
+	}
+
+	/**
+	 * Returns the test's code-level settings, to change in a test or its constructor, e.g.
+	 * {@code settings().testStrategy(TestStrategy.Verify).evidence(SailSettings.Evidence.ALL)}.
+	 *
+	 * @return the settings builder, shared by every script this test runs
+	 */
+	protected final @Nonnull SailSettings.Code settings() {
+		return settings;
 	}
 	
 	/** The roles the views are built with for the users the scripts sign in as. */
@@ -54,18 +73,16 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		viewRoles.register(userName, roleNames);
 	}
 
-	/** The variables every automation of this test starts with; see {@link #variable(String, String)}. */
-	private final java.util.Map<String, String> variables = new java.util.TreeMap<>();
-
 	/**
 	 * Defines a variable that every script this test runs starts with, for {@code {var:name}}. A recorded script signs
-	 * in with {@code password="{var:password}"}: define {@code password} to run it unedited.
+	 * in with {@code password="{var:password}"}: define {@code password} to run it unedited. It is a code-level setting
+	 * ({@code settings().variable(name, value)}), so {@code -Dsail.var.name} beats it.
 	 *
 	 * @param name	the variable name
 	 * @param value	the value
 	 */
 	protected final void variable(@Nonnull String name, @Nonnull String value) {
-		variables.put(name, value);
+		settings.variable(name, value);
 	}
 
 	@BeforeEach
@@ -129,7 +146,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
 			SmartClientInterpretedWebDriverExecutor executor = new SmartClientInterpretedWebDriverExecutor(selenium);
 			executor.useViewRoles(viewRoles);
-			executor.useVariables(variables);
+			executor.useSettings(configuration.resolve());
 			automation.execute(executor);
 		}
 		finally {
