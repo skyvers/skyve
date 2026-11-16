@@ -273,7 +273,8 @@
 		} else if (item.getValueMap && item.getValueMap() && !isc.isA.TextItem(item)) {
 			// combos and radios: the option's code, which does not change with the language or the options' order
 			return (value == null || value === "") ? { unmapped: "cleared " + binding } : { binding: binding, value: String(value), match: "code" };
-		} else if (isc.isA.Date(value)) {
+		} else if (isc.isA.Date(value) || isc.isA.Number(value)) {
+			// as the field shows it (its type's format, which is its converter's): 12.50%, not 0.125
 			text = item.getDisplayValue();
 		} else {
 			text = (value == null) ? "" : String(value);
@@ -955,7 +956,8 @@
 		if (field && field.valueMap) {
 			return { binding: binding, value: String(value), match: "code" };
 		}
-		if (isc.isA.Date(value)) {
+		if (isc.isA.Date(value) || isc.isA.Number(value)) {
+			// as the cell shows it (its type's format, which is its converter's)
 			return { binding: binding, value: strip(grid.getCellValue(record, rowNum, grid.getFieldNum(fieldName))) };
 		}
 		return { binding: binding, value: String(value) };
