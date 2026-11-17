@@ -2119,7 +2119,8 @@ isc.BizIntegerPercentageItem.addClassMethods({
 		}
 
 		if (value) {
-			value = value.toString().trim().trim("%");
+			// without the thousands separators the format writes (1,234%)
+			value = value.toString().replace(/,/g, "").trim().trim("%");
 			if (isNaN(value)) {
 				return null;
 			} else {
@@ -2701,7 +2702,8 @@ isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
 		}
 
 		if (value) {
-			value = value.toString().trim(" ").trim("%");
+			// without the thousands separators the format writes (1,234.50%)
+			value = value.toString().replace(/,/g, "").trim(" ").trim("%");
 			if (isNaN(value)) {
 				return null;
 			} else {
