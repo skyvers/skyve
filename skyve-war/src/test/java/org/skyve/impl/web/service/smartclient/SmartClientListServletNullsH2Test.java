@@ -161,7 +161,6 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 
 	private Set<String> filterInMemory(CompoundFilterOperator operator, List<Map<String, Object>> criteria) throws Exception {
 		InMemoryFilter filter = new InMemoryFilter();
-		@SuppressWarnings("unchecked")
 		ListModel<Bean> model = mock(ListModel.class);
 		when(model.getFilter()).thenReturn(filter);
 		when(model.newFilter()).thenAnswer(invocation -> new InMemoryFilter());
