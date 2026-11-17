@@ -15,7 +15,8 @@ import jakarta.annotation.Nullable;
  * executed by different executors (one per renderer), by giving each executor the same state with
  * {@link ContextualExecutor#shareRun(RunState)}.
  *
- * <p>Not thread-safe: the executors that share it run one after another on one thread.
+ * <p>An instance is not thread-safe: the executors that share it run one after another on one thread. Making
+ * instances is: runs started on several threads at once (a load test's virtual users) get different tokens.
  */
 public final class RunState {
 	/** The last run token's time, so that runs started in the same millisecond get different tokens. */
@@ -30,6 +31,8 @@ public final class RunState {
 	 * The token is the current time in milliseconds in base 36: 8 or more lower-case letters and digits. It is unique in
 	 * the JVM: a run started in the same millisecond as the one before it (such as by a load test's virtual users)
 	 * takes the next millisecond's token.
+	 *
+	 * <p>Side effects: advances the JVM-wide time of the last token.
 	 */
 	public RunState() {
 		this(System.currentTimeMillis());
@@ -37,6 +40,8 @@ public final class RunState {
 
 	/**
 	 * Starts a run with a token for a time, or the time after the last token's if that is not later.
+	 *
+	 * <p>Side effects: advances the JVM-wide time of the last token.
 	 *
 	 * @param millis	the current time in milliseconds
 	 */

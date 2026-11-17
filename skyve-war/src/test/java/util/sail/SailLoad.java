@@ -3,7 +3,6 @@ package util.sail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -18,12 +17,15 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -138,13 +140,29 @@ public final class SailLoad {
 		private final SailWorkflow workflow;
 		private final LongSupplier clock;
 		private final Recorder recorder;
+		private final AtomicBoolean stopping;
 		private int iteration;
 
-		VirtualUser(int number, @Nonnull SailWorkflow workflow, @Nonnull LongSupplier clock, @Nonnull Recorder recorder) {
+		VirtualUser(int number,
+						@Nonnull SailWorkflow workflow,
+						@Nonnull LongSupplier clock,
+						@Nonnull Recorder recorder,
+						@Nonnull AtomicBoolean stopping) {
 			this.number = number;
 			this.workflow = workflow;
 			this.clock = clock;
 			this.recorder = recorder;
+			this.stopping = stopping;
+		}
+
+		/**
+		 * Indicates if the run is stopping (its time limit passed, or it was interrupted), so that the iteration should
+		 * not start more work.
+		 *
+		 * @return true once the run is stopping or this thread is interrupted
+		 */
+		public boolean stopping() {
+			return stopping.get() || Thread.currentThread().isInterrupted();
 		}
 
 		/**
@@ -236,6 +254,20 @@ public final class SailLoad {
 	}
 
 	/**
+	 * Prepares a virtual user's thread before its first iteration; replaced in tests whose fake users need no persistence.
+	 */
+	@FunctionalInterface
+	interface UserThread {
+		/**
+		 * Prepares the thread.
+		 *
+		 * @return what undoes it when the user ends
+		 * @throws RuntimeException	if the thread cannot be prepared
+		 */
+		@Nonnull Runnable open();
+	}
+
+	/**
 	 * The scheduler of a real run: a scheduled thread pool with a thread for each virtual user.
 	 */
 	static final class ExecutorScheduler implements Scheduler {
@@ -323,6 +355,10 @@ public final class SailLoad {
 														" must be longer than the duration " + described(settings, SailSettings.LOAD_DURATION));
 				}
 			}
+			else if ((timeLimit != null) && (rampUp.compareTo(timeLimit) >= 0)) {
+				throw new IllegalArgumentException("SAIL load: the ramp-up " + described(settings, SailSettings.LOAD_RAMP_UP) +
+													" must be shorter than the time limit " + described(settings, SailSettings.LOAD_TIME_LIMIT));
+			}
 			int iterations = settings.loadIterations();
 			if ((iterations == 0) && (duration == null)) {
 				iterations = 1;
@@ -373,17 +409,6 @@ public final class SailLoad {
 		}
 	}
 
-	/**
-	 * A file to run in each iteration, and what it is.
-	 *
-	 * @param path	a file path or a classpath resource
-	 * @param file	true for a file
-	 * @param root	what kind of SAIL document it is
-	 */
-	private record Entry(@Nonnull String path, boolean file, @Nonnull SAILRoot root) {
-		// a value
-	}
-
 	/** The load settings given by this class's methods. */
 	private final SailSettings.Code load = SailSettings.code();
 	/** The settings the engines run with: the test's, if given. */
@@ -395,8 +420,12 @@ public final class SailLoad {
 	private IntFunction<Scheduler> schedulers = ExecutorScheduler::new;
 	private SailSettings.Environment environment;
 	private Path reportDirectory;
-	/** False for tests whose fake users run on the test's own thread, which must keep its persistence. */
-	private boolean userPersistence = true;
+	/** Prepares each user's thread, or null for a persistence with the test thread's user, as the test bases set it up. */
+	private UserThread userThread;
+	/** Stops a user's browser at the end of each iteration. */
+	private Consumer<SailWorkflow> browserCloser = SailWorkflow::closeBrowser;
+	/** True once {@link #settings()} gave this run's own builder out, which {@link #settings(SailSettings.Code)} would drop. */
+	private boolean ownSettingsGiven;
 
 	private SailLoad() {
 		// see the factories
@@ -496,6 +525,9 @@ public final class SailLoad {
 	 * @return the settings builder
 	 */
 	public @Nonnull SailSettings.Code settings() {
+		if (settings == load) {
+			ownSettingsGiven = true;
+		}
 		return settings;
 	}
 
@@ -505,8 +537,15 @@ public final class SailLoad {
 	 *
 	 * @param code	the test's settings; shared, so they must not change while the run lasts
 	 * @return this run
+	 * @throws IllegalStateException	if {@link #settings()} gave out this run's own builder already, whose values the
+	 * 			virtual users would then not run with
 	 */
 	public @Nonnull SailLoad settings(@Nonnull SailSettings.Code code) {
+		if (ownSettingsGiven && (code != load)) {
+			throw new IllegalStateException("SAIL load: settings() gave out this run's own settings before settings(Code) " +
+											"replaced them, so what was set there would be lost: call settings(Code) first, " +
+											"and set those values on the test's settings");
+		}
 		settings = code;
 		return this;
 	}
@@ -571,9 +610,15 @@ public final class SailLoad {
 		return this;
 	}
 
-	/** Gives the users' threads no persistence of their own, for tests whose fake users run on the test's thread. */
-	@Nonnull SailLoad withoutUserPersistence() {
-		userPersistence = false;
+	/** Prepares the users' threads another way, for tests whose fake users need no persistence. */
+	@Nonnull SailLoad userThread(@Nonnull UserThread preparation) {
+		userThread = preparation;
+		return this;
+	}
+
+	/** Stops the users' browsers another way, for tests. */
+	@Nonnull SailLoad browserCloser(@Nonnull Consumer<SailWorkflow> closer) {
+		browserCloser = closer;
 		return this;
 	}
 
@@ -597,10 +642,10 @@ public final class SailLoad {
 		if (resourcesOrFiles.length == 0) {
 			throw new IllegalArgumentException("SAIL load: name at least one SAIL file to run");
 		}
-		List<Entry> entries = new ArrayList<>(resourcesOrFiles.length);
 		for (String path : resourcesOrFiles) {
-			entries.add(entry(path));
+			checkBracket(path);
 		}
+		List<String> entries = List.of(resourcesOrFiles);
 		verdict(execute(String.join(", ", resourcesOrFiles), user -> runEntries(user, entries)));
 	}
 
@@ -626,24 +671,20 @@ public final class SailLoad {
 	}
 
 	/**
-	 * Works out what a path is, and checks that a suite has no bracket unless it is allowed.
+	 * Checks that an entry is there, and that a suite has no bracket unless it is allowed: the one parse before the run.
 	 *
-	 * @throws IllegalArgumentException	if it is missing, or a suite's bracket is not allowed
+	 * @throws IllegalArgumentException	if it is neither a file nor a resource, or a suite's bracket is not allowed
 	 */
-	private @Nonnull Entry entry(@Nonnull String path) {
-		boolean file = Files.isRegularFile(Path.of(path));
+	private void checkBracket(@Nonnull String path) {
 		Suite suite = null;
-		SAILRoot root;
-		if (file) {
-			root = XMLMetaData.sailRootOfFile(path);
-			if (root == SAILRoot.SUITE) {
+		if (Files.isRegularFile(Path.of(path))) {
+			if (XMLMetaData.sailRootOfFile(path) == SAILRoot.SUITE) {
 				suite = XMLMetaData.unmarshalSAILSuiteFile(path);
 			}
 		}
 		else {
-			String xml = resource(path);
-			root = XMLMetaData.sailRootOfString(xml);
-			if (root == SAILRoot.SUITE) {
+			String xml = SailWorkflow.resource(path);
+			if (XMLMetaData.sailRootOfString(xml) == SAILRoot.SUITE) {
 				suite = XMLMetaData.unmarshalSAILSuiteString(xml, path);
 			}
 		}
@@ -653,41 +694,25 @@ public final class SailLoad {
 												"the others. Load workflows or suites without a bracket, or call " +
 												"allowSuiteBracket() if its bracket is safe to run concurrently.");
 		}
-		return new Entry(path, file, root);
-	}
-
-	private static @Nonnull String resource(@Nonnull String path) {
-		try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
-			if (stream == null) {
-				throw new IllegalArgumentException("SAIL load: " + path + " is neither a file nor a resource on the test classpath");
-			}
-			return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("SAIL load: could not read the resource " + path, e);
-		}
 	}
 
 	/**
-	 * Runs an iteration's entries, each independent of the others.
+	 * Runs an iteration's entries, each independent of the others, as {@code SailRunIT} does
+	 * ({@link SailSuite#runEntry(String, SailWorkflow)}). Once the run is stopping, no further entry starts.
 	 *
 	 * @throws AssertionError	or a RuntimeException, what the one failed entry threw; a {@link MultipleFailuresError}
 	 * 			with each failure if several failed
 	 */
-	private static void runEntries(@Nonnull VirtualUser user, @Nonnull List<Entry> entries) {
+	static void runEntries(@Nonnull VirtualUser user, @Nonnull List<String> entries) {
 		List<Throwable> failures = new ArrayList<>();
 		SailWorkflow engine = user.workflow();
-		for (Entry entry : entries) {
+		for (String entry : entries) {
+			if (user.stopping()) {
+				failures.add(new IllegalStateException("SAIL load: " + entry + " did not start: the run is stopping"));
+				break;
+			}
 			try {
-				if (entry.root() == SAILRoot.SUITE) {
-					(entry.file() ? SailSuite.file(entry.path(), engine) : SailSuite.resource(entry.path(), engine)).run();
-				}
-				else if (entry.file()) {
-					engine.runFiles(entry.path());
-				}
-				else {
-					engine.runResources(entry.path());
-				}
+				SailSuite.runEntry(entry, engine);
 			}
 			catch (AssertionError | RuntimeException e) { // a failed script; the next entry is independent
 				failures.add(e);
@@ -721,43 +746,60 @@ public final class SailLoad {
 		SailSettings.Environment sources = (environment == null) ? SailSettings.Environment.current() : environment;
 		List<SailSettings.Layer> layers = (settings == load) ? List.of(load.layer()) : List.of(load.layer(), settings.layer());
 		Plan plan = Plan.of(SailSettings.resolve(sources, layers)); // an invalid setting fails here, before any user starts
-		// the test thread's user, for each user thread's persistence, as the test bases set it up
-		User testUser = (userPersistence && AbstractPersistence.isPresent()) ? AbstractPersistence.get().getUser() : null;
+		UserThread preparation = (userThread == null) ? persistenceOfTheTestUser() : userThread;
 		Recorder recorder = new Recorder();
 		AtomicBoolean stopping = new AtomicBoolean();
+		Set<Integer> started = ConcurrentHashMap.newKeySet();
 		List<String> problems = new ArrayList<>();
+		boolean interrupted = false;
 		PrintStream out = System.out;
 		out.println("SAIL load " + name + ": " + plan);
 		long start = clock.getAsLong();
 		Scheduler scheduler = schedulers.apply(plan.users());
 		System.setOut(new UserPrefixedStream(out));
 		try {
-			for (int user = 1; user <= plan.users(); user++) {
-				int number = user;
-				scheduler.schedule(() -> runUser(number, plan, start, task, recorder, stopping, testUser), plan.delay(number));
+			try {
+				for (int user = 1; user <= plan.users(); user++) {
+					int number = user;
+					scheduler.schedule(() -> {
+						started.add(Integer.valueOf(number));
+						runUser(number, plan, start, task, preparation, recorder, stopping);
+					}, plan.delay(number));
+				}
+			}
+			catch (RuntimeException | Error e) { // NOSONAR java:S1181 a user could not be scheduled: stop the ones that were, then fail
+				stopping.set(true);
+				if (stop(scheduler, plan, problems)) {
+					Thread.currentThread().interrupt();
+				}
+				throw e;
 			}
 			Duration timeLimit = plan.timeLimit();
 			if (! scheduler.awaitEnd(timeLimit)) {
 				stopping.set(true);
 				problems.add("the time limit of " + timeLimit + " (" + SailSettings.LOAD_TIME_LIMIT + ") passed: the users still running were interrupted");
-				if (! scheduler.stop(plan.stopLimit())) {
-					problems.add("some users did not stop within " + plan.stopLimit() + " of being interrupted: their browsers may still be open");
-				}
+				interrupted = stop(scheduler, plan, problems);
 			}
 		}
-		catch (@SuppressWarnings("unused") InterruptedException e) {
-			Thread.currentThread().interrupt();
+		catch (@SuppressWarnings("unused") InterruptedException e) { // the test thread was interrupted (its flag is now clear)
 			stopping.set(true);
-			problems.add("the run was interrupted");
+			problems.add("the run was interrupted: its users were stopped");
+			stop(scheduler, plan, problems);
+			interrupted = true;
 		}
 		finally {
 			System.setOut(out);
+		}
+		for (int user = 1; user <= plan.users(); user++) {
+			if (! started.contains(Integer.valueOf(user))) {
+				problems.add(userName(user) + " never started: the run stopped first");
+			}
 		}
 		problems.addAll(recorder.problems());
 		SailLoadReport result = new SailLoadReport(name, plan, recorder.samples(), recorder.iterations(), clock.getAsLong() - start, problems);
 		out.println(result.describe());
 		Path folder = ((reportDirectory == null) ? sources.workingDirectory().resolve(REPORT_DIR) : reportDirectory)
-						.resolve(FOLDER_TIME.format(LocalDateTime.now()) + '-' + name.replaceAll("[^A-Za-z0-9._-]+", "_"));
+						.resolve(SailMedia.sanitise(FOLDER_TIME.format(LocalDateTime.now()) + '-' + name, 120));
 		try {
 			result.write(folder);
 			out.println("SAIL load report: " + folder.resolve("index.html"));
@@ -765,45 +807,92 @@ public final class SailLoad {
 		catch (IOException e) {
 			out.println("SAIL load: could not write the report in " + folder + ": " + e);
 		}
+		if (interrupted) {
+			Thread.currentThread().interrupt(); // the test thread's interrupt, kept for its caller
+		}
 		return result;
 	}
 
 	/**
-	 * Runs one virtual user's iterations on its own thread, with a persistence for the test's user.
+	 * Interrupts the users still running and waits, up to the settings' timeout, for them to end. Called with this
+	 * thread's interrupt flag clear, so that the wait can happen.
+	 *
+	 * @return true if this thread was interrupted while it waited (its flag is then clear, for the caller to restore)
+	 */
+	private static boolean stop(@Nonnull Scheduler scheduler, @Nonnull Plan plan, @Nonnull List<String> problems) {
+		try {
+			if (! scheduler.stop(plan.stopLimit())) {
+				problems.add("some users did not stop within " + plan.stopLimit() + " of being interrupted: their browsers may still be open");
+			}
+			return false;
+		}
+		catch (@SuppressWarnings("unused") InterruptedException e) {
+			problems.add("the wait for the interrupted users to stop was interrupted: their browsers may still be open");
+			return true;
+		}
+	}
+
+	/**
+	 * Returns the preparation of a real run's user threads: a persistence with the test thread's user, begun, as the test
+	 * bases set it up (the executors build views with it), and rolled back and closed when the user ends.
+	 *
+	 * @throws IllegalStateException	if the test thread has no persistence with a user
+	 */
+	private static @Nonnull UserThread persistenceOfTheTestUser() {
+		User testUser = AbstractPersistence.isPresent() ? AbstractPersistence.get().getUser() : null;
+		if (testUser == null) {
+			throw new IllegalStateException("SAIL load: the test thread has no Skyve persistence with a user, which each virtual " +
+											"user needs to build views: run the load from a test that extends a test base " +
+											"such as AbstractH2Test (or a SAIL test base)");
+		}
+		return () -> {
+			AbstractPersistence persistence = AbstractPersistence.get();
+			persistence.setUser(testUser);
+			persistence.begin();
+			return () -> {
+				persistence.rollback();
+				persistence.commit(true);
+			};
+		};
+	}
+
+	/**
+	 * Runs one virtual user's iterations on its own thread, prepared as the test's thread is. Whatever it throws is noted
+	 * as a problem of the run: nothing reads a scheduled user's own failure.
 	 */
 	private void runUser(int number,
 							@Nonnull Plan plan,
 							long start,
 							@Nonnull VirtualUserTask task,
+							@Nonnull UserThread preparation,
 							@Nonnull Recorder recorder,
-							@Nonnull AtomicBoolean stopping,
-							@Nullable User testUser) {
+							@Nonnull AtomicBoolean stopping) {
 		TRACE_USER.set(userName(number));
-		AbstractPersistence persistence = null;
+		Runnable cleanUp = null;
 		try {
-			if (testUser != null) {
-				persistence = AbstractPersistence.get();
-				persistence.setUser(testUser);
-				persistence.begin();
-			}
-			VirtualUser user = new VirtualUser(number, engine(), clock, recorder);
+			cleanUp = preparation.open();
+			VirtualUser user = new VirtualUser(number, engine(), clock, recorder, stopping);
 			Duration duration = plan.duration();
 			long end = (duration == null) ? Long.MAX_VALUE : start + duration.toNanos();
 			for (int iteration = 1;
-					(! stopping.get()) && (! Thread.currentThread().isInterrupted()) &&
+					(! user.stopping()) &&
 						((plan.iterations() == 0) || (iteration <= plan.iterations())) &&
 						((duration == null) || (clock.getAsLong() - end < 0L));
 					iteration++) {
 				runIteration(user, iteration, task, recorder);
 			}
 		}
-		catch (RuntimeException e) { // its persistence or engine could not be made: the summary says why it ran no more
-			recorder.problem(userName(number) + " stopped: " + e);
+		catch (Throwable t) { // NOSONAR java:S1181 any failure of the user's thread, an Error too, must reach the summary, not an unread future
+			recorder.problem(userName(number) + " stopped: " + t);
 		}
 		finally {
-			if (persistence != null) {
-				persistence.rollback();
-				persistence.commit(true);
+			try {
+				if (cleanUp != null) {
+					cleanUp.run();
+				}
+			}
+			catch (Throwable t) { // NOSONAR java:S1181 as above, for the thread's clean-up
+				recorder.problem(userName(number) + ": its thread could not be cleaned up: " + t);
 			}
 			TRACE_USER.remove();
 		}
@@ -825,19 +914,19 @@ public final class SailLoad {
 			Thread.currentThread().interrupt(); // stopped at the time limit
 			failure = e;
 		}
-		catch (Exception | AssertionError e) { // the iteration failed; the next one is independent
-			failure = e;
+		catch (Throwable t) { // NOSONAR java:S1181 any failure of the iteration, an Error too, fails it in the summary
+			failure = t;
 		}
 		finally {
 			SailLoadProbe.set(null);
 		}
 		try {
 			// a suite can leave its last browser open for the engine's next run: every iteration ends with none open
-			user.workflow().closeBrowser();
+			browserCloser.accept(user.workflow());
 		}
-		catch (RuntimeException e) {
+		catch (Throwable t) { // NOSONAR java:S1181 a browser that would not stop fails the iteration, whatever it threw
 			if (failure == null) {
-				failure = e;
+				failure = t;
 			}
 		}
 		long ended = clock.getAsLong();

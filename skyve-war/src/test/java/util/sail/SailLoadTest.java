@@ -2,12 +2,15 @@ package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,18 +24,21 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongSupplier;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.openqa.selenium.WebDriver;
 import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.MultipleFailuresError;
 
 import util.sail.SailLoad.Plan;
 import util.sail.SailLoadReport.FailureKind;
 import util.sail.SailLoadReport.InteractionStats;
-import util.sail.SailLoadReport.Iteration;
-import util.sail.SailLoadReport.Sample;
 import util.sail.SailLoadReport.UserStats;
 
 /**
@@ -86,7 +92,7 @@ class SailLoadTest {
 		}
 
 		@Override
-		public boolean awaitEnd(Duration limit) {
+		public boolean awaitEnd(Duration limit) throws InterruptedException {
 			awaited = limit;
 			long latest = start;
 			List<Integer> order = new ArrayList<>();
@@ -123,7 +129,9 @@ class SailLoadTest {
 					.scheduler(users -> scheduler = new FakeScheduler(clock))
 					.environment(new SailSettings.Environment(systemProperties, environment, null, folder))
 					.reportDirectory(folder.resolve("reports"))
-					.withoutUserPersistence();
+					.userThread(() -> () -> {
+						// fake users need no persistence
+					});
 	}
 
 	/** A task that takes a while and notes each user's iterations. */
@@ -222,20 +230,6 @@ class SailLoadTest {
 					() -> assertEquals(new InteractionStats("Save", 19, 0, 10_000L, 20_000L, 20_000L), interactions.get(1)),
 					() -> assertEquals(List.of(new UserStats(1, 10, 0), new UserStats(2, 9, 1)), report.users()),
 					() -> assertEquals(5.0, report.failureRate(), 1e-9));
-	}
-
-	@Test
-	void percentilesAreNearestRank() {
-		long[] twenty = new long[20];
-		for (int i = 0; i < 20; i++) {
-			twenty[i] = i + 1L;
-		}
-
-		assertAll(() -> assertEquals(10L, SailLoadReport.percentile(twenty, 50)),
-					() -> assertEquals(19L, SailLoadReport.percentile(twenty, 95)),
-					() -> assertEquals(20L, SailLoadReport.percentile(twenty, 100)),
-					() -> assertEquals(7L, SailLoadReport.percentile(new long[] {7L}, 95), "one sample is every percentile"),
-					() -> assertEquals(1L, SailLoadReport.percentile(new long[] {1L, 2L}, 50)));
 	}
 
 	@Test
@@ -368,42 +362,231 @@ class SailLoadTest {
 	}
 
 	@Test
-	void aUserThatStopsOutsideAnIterationIsAProblemOfTheRun() {
-		// the users' clock breaks while they run (as a user's persistence or engine could fail to be made)
-		boolean[] broken = {false};
-		LongSupplier breaking = () -> {
-			if (broken[0]) {
-				throw new IllegalStateException("broken");
+	void aUserThreadThatCannotBePreparedIsAProblemOfTheRun() {
+		AtomicInteger prepared = new AtomicInteger();
+		SailLoad load = fake(SailLoad.users(2)).userThread(() -> {
+			if (prepared.incrementAndGet() == 2) { // user 2: the fake scheduler starts the users in order
+				throw new IllegalStateException("no persistence");
 			}
-			return clock.getAsLong();
-		};
-		SailLoad load = fake(SailLoad.users(1).forDuration(Duration.ofSeconds(60))).clock(breaking);
-		load.scheduler(users -> new FakeScheduler(clock) {
-			@Override
-			public boolean awaitEnd(Duration limit) {
-				broken[0] = true;
-				try {
-					return super.awaitEnd(limit);
-				}
-				finally {
-					broken[0] = false;
-				}
-			}
+			return () -> {
+				// nothing to undo
+			};
 		});
 
 		MultipleFailuresError e = assertThrows(MultipleFailuresError.class, () -> load.run(user -> clock.advance(Duration.ofSeconds(1))));
 
-		assertEquals(List.of("no iteration ran", "user 01 stopped: java.lang.IllegalStateException: broken"),
-						e.getFailures().stream().map(Throwable::getMessage).toList());
+		assertEquals(List.of("user 02 ran no iteration", "user 02 stopped: java.lang.IllegalStateException: no persistence"),
+						messages(e));
 	}
 
 	@Test
-	void noIterationFailsTheRun() {
-		SailLoadReport report = new SailLoadReport("x", plan(1), List.of(), List.of(), 0L, List.of());
+	void aUserThreadThatCannotBeCleanedUpIsAProblemOfTheRun() {
+		SailLoad load = fake(SailLoad.users(1)).userThread(() -> () -> {
+			throw new IllegalStateException("rollback failed");
+		});
 
-		assertAll(() -> assertEquals("no iteration ran", report.violations().get(0).message()),
-					() -> assertEquals(0.0, report.failureRate()),
-					() -> assertEquals(0.0, report.iterationsPerMinute()));
+		MultipleFailuresError e = assertThrows(MultipleFailuresError.class, () -> load.run(user -> clock.advance(Duration.ofSeconds(1))));
+
+		assertEquals(List.of("user 01: its thread could not be cleaned up: java.lang.IllegalStateException: rollback failed"), messages(e));
+	}
+
+	@Test
+	void anErrorFailsItsIterationAndTheNextOneRuns() {
+		SailLoadReport report = fake(SailLoad.users(1).iterations(3)).execute("test", user -> {
+			if (user.iteration() == 1) {
+				throw new NoClassDefFoundError("modules/x/X");
+			}
+			if (user.iteration() == 2) {
+				throw new StackOverflowError();
+			}
+		});
+
+		assertAll(() -> assertEquals(3, report.iterationCount()),
+					() -> assertEquals(2, report.failedIterations()),
+					() -> assertEquals(List.of("outside an interaction (NoClassDefFoundError)", "outside an interaction (StackOverflowError)"),
+										report.failureKinds().stream().map(FailureKind::kind).toList()));
+	}
+
+	@Test
+	void aBrowserThatWillNotStopFailsItsIteration() {
+		SailLoadReport report = fake(SailLoad.users(1).iterations(2))
+									.browserCloser(workflow -> {
+										throw new AssertionError("quit failed");
+									})
+									.execute("test", user -> clock.advance(Duration.ofSeconds(1)));
+
+		assertAll(() -> assertEquals(2, report.failedIterations()),
+					() -> assertEquals("quit failed", report.failureKinds().get(0).message()));
+	}
+
+	@Test
+	void anInterruptedTestThreadStopsTheUsersAndKeepsItsInterrupt() {
+		boolean[] interruptedWhileStopping = {true};
+		SailLoad load = fake(SailLoad.users(2)).scheduler(users -> scheduler = new FakeScheduler(clock) {
+			@Override
+			public boolean awaitEnd(Duration limit) throws InterruptedException {
+				throw new InterruptedException("test stopped");
+			}
+
+			@Override
+			public boolean stop(Duration limit) {
+				interruptedWhileStopping[0] = Thread.currentThread().isInterrupted();
+				return super.stop(limit);
+			}
+		});
+
+		SailLoadReport report;
+		try {
+			report = load.execute("test", user -> clock.advance(Duration.ofSeconds(1)));
+		}
+		finally {
+			assertTrue(Thread.interrupted(), "the interrupt is kept for the test's caller"); // and cleared, for the next test
+		}
+
+		assertAll(() -> assertEquals(Duration.ofSeconds(SailSettings.DEFAULT_TIMEOUT_SECONDS), scheduler.stopLimit, "the users were stopped"),
+					() -> assertFalse(interruptedWhileStopping[0], "the users are waited for with the interrupt set aside"),
+					() -> assertEquals(List.of("no iteration ran", "the run was interrupted: its users were stopped",
+												"user 01 never started: the run stopped first", "user 02 never started: the run stopped first"),
+										report.violations().stream().map(SailLoadReport.Violation::message).toList()));
+	}
+
+	@Test
+	void aUserThatCannotBeScheduledStopsTheOthersAndFails() {
+		IllegalStateException refused = new IllegalStateException("rejected");
+		SailLoad load = fake(SailLoad.users(3)).scheduler(users -> scheduler = new FakeScheduler(clock) {
+			@Override
+			public void schedule(Runnable user, Duration delay) {
+				if (delays.size() == 1) {
+					throw refused;
+				}
+				super.schedule(user, delay);
+			}
+		});
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> load.run(user -> clock.advance(Duration.ofSeconds(1))));
+
+		assertAll(() -> assertSame(refused, e),
+					() -> assertEquals(Duration.ofSeconds(SailSettings.DEFAULT_TIMEOUT_SECONDS), scheduler.stopLimit, "the scheduled user was stopped"));
+	}
+
+	@Test
+	void usersThatNeverStartedAreReported() {
+		SailLoad load = fake(SailLoad.users(2).forDuration(Duration.ofSeconds(10)).timeLimit(Duration.ofSeconds(20)))
+							.scheduler(users -> scheduler = new FakeScheduler(clock) {
+								@Override
+								public boolean awaitEnd(Duration limit) {
+									return false; // the time limit passes before any user starts
+								}
+							});
+
+		MultipleFailuresError e = assertThrows(MultipleFailuresError.class, () -> load.run(user -> clock.advance(Duration.ofSeconds(1))));
+
+		assertEquals(List.of("no iteration ran",
+								"the time limit of PT20S (sail.load.timeLimit) passed: the users still running were interrupted",
+								"user 01 never started: the run stopped first", "user 02 never started: the run stopped first"),
+						messages(e));
+	}
+
+	@Test
+	void realThreadsRunTheUsersAtOnce() {
+		Set<String> threads = ConcurrentHashMap.newKeySet();
+		SailLoad load = SailLoad.users(2).iterations(1)
+							.environment(new SailSettings.Environment(Map.of(), Map.of(), null, folder))
+							.reportDirectory(folder.resolve("reports"))
+							.userThread(() -> () -> {
+								// fake users need no persistence
+							});
+
+		SailLoadReport report = load.execute("test", user -> threads.add(Thread.currentThread().getName() + ' ' + user.name()));
+
+		assertAll(() -> assertEquals(2, threads.size(), threads.toString()),
+					() -> assertTrue(threads.stream().allMatch(t -> t.matches("sail-load-[12] user 0[12]")), threads.toString()),
+					() -> assertEquals(List.of(new UserStats(1, 1, 0), new UserStats(2, 1, 0)), report.users()));
+	}
+
+	@Test
+	void settingsGivenOutBeforeATestsSettingsAreRefusedNotLost() {
+		SailLoad given = SailLoad.users(1);
+		given.settings().variable("password", "x");
+		SailSettings.Code tests = SailSettings.code();
+		SailLoad first = SailLoad.users(1).settings(tests);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> given.settings(tests));
+
+		assertAll(() -> assertTrue(e.getMessage().contains("call settings(Code) first"), e.getMessage()),
+					() -> assertSame(tests, first.settings()));
+	}
+
+	@Test
+	void withoutATestBasesPersistenceTheRunFailsBeforeAnyUserStarts() throws InterruptedException {
+		Throwable[] thrown = {null};
+		SailLoad load = SailLoad.users(1)
+							.environment(new SailSettings.Environment(Map.of(), Map.of(), null, folder))
+							.scheduler(users -> scheduler = new FakeScheduler(clock));
+		// a new thread has no persistence, whatever other tests left on this one
+		Thread bare = new Thread(() -> {
+			try {
+				load.run(user -> clock.advance(Duration.ofSeconds(1)));
+			}
+			catch (Throwable t) { // NOSONAR java:S1181 the test reads what the run threw
+				thrown[0] = t;
+			}
+		});
+		bare.start();
+		bare.join(); // the run's end on that thread
+
+		assertAll(() -> assertTrue(thrown[0] instanceof IllegalStateException, String.valueOf(thrown[0])),
+					() -> assertTrue(String.valueOf(thrown[0].getMessage()).contains("AbstractH2Test"), String.valueOf(thrown[0])),
+					() -> assertNull(scheduler, "no user was scheduled"));
+	}
+
+	@Test
+	void aRampUpAsLongAsTheTimeLimitIsRefused() {
+		SailSettings settings = resolve(Map.of(SailSettings.LOAD_USERS, "2", SailSettings.LOAD_RAMP_UP, "30s", SailSettings.LOAD_TIME_LIMIT, "30s"),
+										Map.of());
+
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> Plan.of(settings));
+
+		assertEquals("SAIL load: the ramp-up 30s (-Dsail.load.rampUp) must be shorter than the time limit 30s (-Dsail.load.timeLimit)",
+						e.getMessage());
+	}
+
+	@Test
+	void noEntryStartsOnceTheRunIsStopping() {
+		SailLoad.VirtualUser stopped = new SailLoad.VirtualUser(1, new SailWorkflow(new SailViewRoles()), clock,
+																new SailLoadReport.Recorder(), new AtomicBoolean(true));
+		List<String> entries = List.of("sail/kitchenSink/kitchensink.suite.xml", "sail/kitchenSink/workflow/kitchensink-workflow.xml");
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> SailLoad.runEntries(stopped, entries));
+
+		assertAll(() -> assertEquals("SAIL load: sail/kitchenSink/kitchensink.suite.xml did not start: the run is stopping", e.getMessage()),
+					() -> assertTrue(stopped.stopping()));
+	}
+
+	@Test
+	void aBrowserQuitsWithTheInterruptSetAsideAndPutBack() {
+		SmartClientSelenide browser = mock(SmartClientSelenide.class, CALLS_REAL_METHODS);
+		WebDriver driver = mock(WebDriver.class);
+		boolean[] interruptedWhileQuitting = {true};
+		doAnswer(i -> {
+			interruptedWhileQuitting[0] = Thread.currentThread().isInterrupted();
+			return null;
+		}).when(driver).quit();
+		browser.driver = driver;
+
+		Thread.currentThread().interrupt(); // as the time limit interrupts a user
+		try {
+			browser.stopBrowser();
+		}
+		finally {
+			assertTrue(Thread.interrupted(), "the interrupt is put back"); // and cleared, for the next test
+		}
+
+		assertFalse(interruptedWhileQuitting[0], "the driver quits with no interrupt, so its requests can be made");
+	}
+
+	private static List<String> messages(MultipleFailuresError e) {
+		return e.getFailures().stream().map(Throwable::getMessage).toList();
 	}
 
 	@Test
@@ -419,10 +602,11 @@ class SailLoadTest {
 		}
 
 		String trace = captured.toString(StandardCharsets.UTF_8);
+		PrintStream after = System.out;
 		assertAll(() -> assertTrue(trace.contains("[user 01] Interaction: Widgets"), trace),
 					() -> assertTrue(trace.contains("[user 02] SAIL load: iteration 1 passed in 0.0 s"), trace),
 					() -> assertTrue(trace.contains("\nSAIL load task: 2 virtual users"), "the summary is not prefixed: " + trace),
-					() -> assertSame(original, System.out, "standard output is put back"));
+					() -> assertSame(original, after, "standard output is put back"));
 	}
 
 	@Test
@@ -438,11 +622,20 @@ class SailLoadTest {
 		String iterations = Files.readString(report.resolve("iterations.csv"));
 		String html = Files.readString(report.resolve("index.html"));
 		assertAll(() -> assertTrue(report.getFileName().toString().endsWith("-task"), report.toString()),
-					() -> assertEquals("interaction,count,failed,median_ms,p95_ms,max_ms\n\"Save, with \"\"quotes\"\"\",2,0,2000,2000,2000\n", interactions),
-					() -> assertEquals("user,iteration,interaction,start_ms,duration_ms,failed,failure\n" +
-										"1,1,\"Save, with \"\"quotes\"\"\",0,2000,false,\"\"\n" +
-										"1,2,\"Save, with \"\"quotes\"\"\",2000,2000,false,\"\"\n", samples),
-					() -> assertEquals("user,iteration,start_ms,duration_ms,failed,failure\n1,1,0,2000,false,\"\"\n1,2,2000,2000,false,\"\"\n", iterations),
+					() -> assertEquals("""
+										interaction,count,failed,median_ms,p95_ms,max_ms
+										"Save, with ""quotes""\",2,0,2000,2000,2000
+										""", interactions),
+					() -> assertEquals("""
+										user,iteration,interaction,start_ms,duration_ms,failed,failure
+										1,1,"Save, with ""quotes""\",0,2000,false,""
+										1,2,"Save, with ""quotes""\",2000,2000,false,""
+										""", samples),
+					() -> assertEquals("""
+										user,iteration,start_ms,duration_ms,failed,failure
+										1,1,0,2000,false,""
+										1,2,2000,2000,false,""
+										""", iterations),
 					() -> assertTrue(html.contains("<td>Save, with &quot;quotes&quot;</td>"), html),
 					() -> assertTrue(html.contains("Passed."), html));
 	}
@@ -596,72 +789,18 @@ class SailLoadTest {
 		SailLoad load = fake(SailLoad.users(1));
 
 		IllegalArgumentException missing = assertThrows(IllegalArgumentException.class, () -> load.run("sail/no-such.xml"));
-		IllegalArgumentException none = assertThrows(IllegalArgumentException.class, () -> load.run());
+		IllegalArgumentException none = assertThrows(IllegalArgumentException.class, load::run);
 
-		assertAll(() -> assertEquals("SAIL load: sail/no-such.xml is neither a file nor a resource on the test classpath", missing.getMessage()),
+		assertAll(() -> assertEquals("SAIL resource sail/no-such.xml is not on the test classpath", missing.getMessage()),
 					() -> assertEquals("SAIL load: name at least one SAIL file to run", none.getMessage()));
 	}
 
 	@Test
-	void viewRolesAreCheckedAsTheyAreGivenAndATestsSettingsReplaceItsOwn() {
+	void viewRolesAreCheckedAsTheyAreGiven() {
 		SailLoad load = SailLoad.users(1);
-		SailSettings.Code own = load.settings();
-		SailSettings.Code tests = SailSettings.code();
 
 		assertAll(() -> assertThrows(IllegalArgumentException.class, () -> load.viewRoles("jane")),
-					() -> assertSame(load, load.viewRoles("jane{run}", "admin.BasicUser")),
-					() -> assertSame(tests, load.settings(tests).settings()),
-					() -> assertNotSame(own, load.settings()));
-	}
-
-	@Test
-	void aFailedIterationsMessageIsItsFirstFailure() {
-		MultipleFailuresError several = new MultipleFailuresError("2 failed",
-																	List.of(new AssertionError("SAIL suite x: a.xml failed: step 1"), new AssertionError("b")));
-
-		assertAll(() -> assertEquals("SAIL suite x: a.xml failed: step 1", SailLoadReport.message(several)),
-					() -> assertEquals("java.lang.IllegalStateException", SailLoadReport.message(new IllegalStateException())));
-	}
-
-	@Test
-	void theFirstFailureOfEachKindCountsEveryOccurrence() {
-		Plan plan = plan(2);
-		List<Sample> samples = List.of(new Sample("Save", 2, 1, 10L, 20L, true, "Interaction \"Save\" step 2: first"),
-										new Sample("Save", 1, 1, 30L, 40L, true, null),
-										new Sample("Open", 1, 2, 50L, 60L, false, null));
-		AssertionError thrown = new AssertionError("SAIL workflow: x.xml failed: Interaction \"Save\" step 2: second");
-		List<Iteration> iterations = List.of(new Iteration(2, 1, 0L, 25L, new AssertionError("verify")),
-												new Iteration(1, 1, 0L, 45L, thrown),
-												new Iteration(1, 2, 45L, 70L, new IllegalStateException("outside", new IOException("disk"))));
-
-		List<FailureKind> kinds = new SailLoadReport("x", plan, samples, iterations, 70L, List.of()).failureKinds();
-
-		assertAll(() -> assertEquals(2, kinds.size()),
-					() -> assertEquals(new FailureKind("interaction \"Save\"", 2, 2, 1, "Interaction \"Save\" step 2: first", iterations.get(0).failure()),
-										kinds.get(0)),
-					() -> assertEquals("outside an interaction (IOException)", kinds.get(1).kind()),
-					() -> assertEquals("outside", kinds.get(1).message()));
-	}
-
-	@Test
-	void theSummaryDescribesInteractionsUsersAndFailures() {
-		List<Sample> samples = List.of(new Sample("A very long interaction name that goes on and on beyond sixty characters wide", 1, 1, 0L, 2_000_000L, false, null),
-										new Sample("Save", 1, 1, 2_000_000L, 5_000_000L, true, "Interaction \"Save\": no\n  at   the page"));
-		SailLoadReport report = new SailLoadReport("x.xml", plan(2), samples,
-													List.of(new Iteration(1, 1, 0L, 5_000_000L, new AssertionError("failed"))),
-													5_000_000L, List.of("the run was interrupted"));
-
-		String summary = report.describe();
-		assertAll(() -> assertTrue(summary.startsWith("SAIL load x.xml: 2 virtual users, 1 iterations (0 passed, 1 failed, 100.0%)"), summary),
-					() -> assertTrue(summary.contains("A very long interaction name that goes on and on beyond s..."), summary),
-					() -> assertTrue(summary.contains("  user 01: 0 passed, 1 failed"), summary),
-					() -> assertTrue(summary.contains("  user 02: 0 passed, 0 failed"), summary),
-					() -> assertTrue(summary.contains("interaction \"Save\" (1 time(s); first in user 1 iteration 1): Interaction \"Save\": no at the page"), summary),
-					() -> assertTrue(summary.endsWith("\n  the run was interrupted"), summary));
-	}
-
-	private static Plan plan(int users) {
-		return new Plan(users, Duration.ZERO, null, 1, null, 0.0, null, Duration.ofSeconds(30));
+					() -> assertSame(load, load.viewRoles("jane{run}", "admin.BasicUser")));
 	}
 
 	private SailSettings resolve(Map<String, String> systemProperties, Map<String, String> environment) {

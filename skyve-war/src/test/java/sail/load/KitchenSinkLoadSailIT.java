@@ -12,12 +12,13 @@ import util.sail.SailServerLock;
 
 /**
  * A load run of the kitchen sink conformance suite ({@code sail/kitchenSink/kitchensink.suite.xml}): 5 virtual users,
- * started over 20 seconds, each starting the suite again and again for 2 minutes, each with its own browser and run
- * token. The suite has no bracket, and its members make and delete their own data, so the users can run it at once.
+ * started over 20 seconds, each running the suite once (about 10 minutes with 5 users at once), each with its own
+ * browser and run token. The suite has no bracket, and its members make and delete their own data, so the users can
+ * run it at once.
  * <p>
  * It shows that {@link SailLoad} composes with any test: this one extends {@link AbstractH2Test}, as the Biz Hub Apps
- * ITs do, and releases the server lock itself. The settings beat the code as usual, e.g.
- * {@code -Dsail.load.users=20 -Dsail.load.duration=10m -Dsail.load.maxP95=5s}.
+ * ITs do, and releases the server lock itself. The settings beat the code as usual, e.g. {@code -Dsail.load.users=2},
+ * or {@code -Dsail.load.iterations=3 -Dsail.load.maxP95=60s}.
  * <p>
  * {@code pf/pf-kitchensink-sail.xml} is left out: it signs in as admin with a wrong password on purpose, and every
  * virtual user signs in as admin, so with several users at once the failed attempts lock admin's account for all of
@@ -30,8 +31,8 @@ class KitchenSinkLoadSailIT extends AbstractH2Test {
 	@Test
 	@SuppressWarnings({"static-method", "java:S2699"}) // the scripts' test steps are the assertions: the load run fails the test when an iteration fails
 	void load() {
-		// an iteration of the suite takes several minutes, so the ones in flight at the end get 20 minutes to finish
-		SailLoad load = SailLoad.users(5).rampUp(Duration.ofSeconds(20)).forDuration(Duration.ofMinutes(2)).timeLimit(Duration.ofMinutes(20));
+		// an iteration of the suite takes about 10 minutes: the time limit stops a run that hangs
+		SailLoad load = SailLoad.users(5).rampUp(Duration.ofSeconds(20)).iterations(1).timeLimit(Duration.ofMinutes(20));
 		// the bootstrap user's password on a test server; never in the scripts
 		load.settings().variable("password", "admin")
 				.suiteOnly("pf/pf-kitchensink-row-link.xml", "sc/", "workflow/");

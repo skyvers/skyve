@@ -1034,7 +1034,11 @@ public final class SailSettings {
 	 * Parses a duration: a whole number and a unit ({@code 500ms}, {@code 30s}, {@code 5m}, {@code 1h}) or ISO-8601
 	 * ({@code PT1M30S}).
 	 *
+	 * @param value	the setting's text
 	 * @param zero	true if zero is valid
+	 * @return the duration
+	 * @throws IllegalArgumentException	saying what is valid, if it is not a duration, is negative, or is zero when zero
+	 * 			is not valid
 	 */
 	private static @Nonnull Duration duration(@Nonnull String value, boolean zero) {
 		Duration result = null;

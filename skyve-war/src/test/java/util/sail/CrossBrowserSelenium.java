@@ -137,9 +137,22 @@ abstract class CrossBrowserSelenium {
 		return configuration;
 	}
 
+	/**
+	 * Quits the browser, if one started. A thread that was interrupted (a load run's user stopped at its time limit)
+	 * still quits it: the interrupt is set aside while the browser quits, as the driver's requests would fail at once
+	 * and leave the browser running, and then put back.
+	 */
 	public void stopBrowser() {
 		if (driver != null) {
-			driver.quit();
+			boolean interrupted = Thread.interrupted();
+			try {
+				driver.quit();
+			}
+			finally {
+				if (interrupted) {
+					Thread.currentThread().interrupt();
+				}
+			}
 		}
 	}
 

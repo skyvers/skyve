@@ -195,7 +195,7 @@ final class SailLoadReport {
 		this.iterations = new ArrayList<>(iterations);
 		this.iterations.sort(Comparator.comparingLong(Iteration::startNanos));
 		this.elapsedNanos = elapsedNanos;
-		this.problems = List.copyOf(problems);
+		this.problems = problems.stream().map(SailMedia::hidePasswords).toList();
 		interactions = interactionStats(this.samples);
 		users = userStats(plan.users(), this.iterations);
 		failureKinds = failureKinds(this.samples, this.iterations);
@@ -328,8 +328,9 @@ final class SailLoadReport {
 		return result;
 	}
 
+	/** Puts a message on one line, at most {@value #MESSAGE_LENGTH} characters, with any login password hidden. */
 	private static @Nonnull String shorten(@Nonnull String message) {
-		String result = message.replaceAll("\\s+", " ").trim();
+		String result = SailMedia.hidePasswords(message).replaceAll("\\s+", " ").trim();
 		return (result.length() <= MESSAGE_LENGTH) ? result : result.substring(0, MESSAGE_LENGTH) + "...";
 	}
 
@@ -378,7 +379,8 @@ final class SailLoadReport {
 	}
 
 	/**
-	 * Returns why the run fails, if it does: its own problems (none ran, its time limit, users that would not stop), then
+	 * Returns why the run fails, if it does: no iteration at all, or a user that ran none; the run's own problems (its
+	 * time limit, users that would not stop or never started, a user's thread that failed); then
 	 * its failed iterations unless the failure rate is within {@value SailSettings#LOAD_MAX_FAILURE_RATE} (each kind of
 	 * failure, after the rate), then each interaction whose 95th percentile is above {@value SailSettings#LOAD_MAX_P95}.
 	 *
@@ -388,6 +390,13 @@ final class SailLoadReport {
 		List<Violation> result = new ArrayList<>();
 		if (iterations.isEmpty()) {
 			result.add(new Violation("no iteration ran", null));
+		}
+		else {
+			for (UserStats user : users) {
+				if ((user.passed() + user.failed()) == 0) {
+					result.add(new Violation(String.format("user %02d ran no iteration", Integer.valueOf(user.user())), null));
+				}
+			}
 		}
 		for (String problem : problems) {
 			result.add(new Violation(problem, null));
@@ -454,13 +463,13 @@ final class SailLoadReport {
 										Long.valueOf(interaction.maxMillis())));
 		}
 		for (UserStats user : users) {
-			result.append(String.format("%n  user %02d: %d passed, %d failed", Integer.valueOf(user.user()),
+			result.append(String.format("\n  user %02d: %d passed, %d failed", Integer.valueOf(user.user()),
 											Integer.valueOf(user.passed()), Integer.valueOf(user.failed())));
 		}
 		if (! failureKinds.isEmpty()) {
 			result.append("\n  first failure of each kind:");
 			for (FailureKind kind : failureKinds) {
-				result.append(String.format("%n    %s (%d time(s); first in user %d iteration %d): %s", kind.kind(),
+				result.append(String.format("\n    %s (%d time(s); first in user %d iteration %d): %s", kind.kind(),
 												Integer.valueOf(kind.count()), Integer.valueOf(kind.user()),
 												Integer.valueOf(kind.iteration()), kind.message()));
 			}
@@ -538,8 +547,13 @@ final class SailLoadReport {
 		Files.writeString(folder.resolve("index.html"), html(), StandardCharsets.UTF_8);
 	}
 
-	private static @Nonnull String csv(@Nonnull String value) {
-		return '"' + value.replace("\"", "\"\"") + '"';
+	/**
+	 * Quotes a CSV cell. A cell that a spreadsheet would read as a formula (starting with {@code =}, {@code +}, {@code -}
+	 * or {@code @}) starts with {@code '} instead, so that opening the report cannot run one.
+	 */
+	static @Nonnull String csv(@Nonnull String value) {
+		boolean formula = (! value.isEmpty()) && ("=+-@".indexOf(value.charAt(0)) >= 0);
+		return '"' + (formula ? "'" : "") + value.replace("\"", "\"\"") + '"';
 	}
 
 	private @Nonnull String html() {
@@ -547,21 +561,21 @@ final class SailLoadReport {
 		result.append("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>SAIL load</title>")
 				.append("<style>body{font-family:sans-serif;margin:16px}table{border-collapse:collapse;margin:8px 0}")
 				.append("td,th{border:1px solid #ccc;padding:2px 8px}td.n{text-align:right}.failed{color:#b00020}</style>")
-				.append("</head><body>\n<h1>SAIL load</h1>\n<p>").append(escape(headline())).append("</p>\n");
+				.append("</head><body>\n<h1>SAIL load</h1>\n<p>").append(SailMedia.escape(headline())).append("</p>\n");
 		List<Violation> violations = violations();
 		result.append("<p class=\"").append(violations.isEmpty() ? "" : "failed").append("\">")
 				.append(violations.isEmpty() ? "Passed." : "Failed:").append("</p>\n");
 		if (! violations.isEmpty()) {
 			result.append("<ul>");
 			for (Violation violation : violations) {
-				result.append("<li>").append(escape(violation.message())).append("</li>");
+				result.append("<li>").append(SailMedia.escape(violation.message())).append("</li>");
 			}
 			result.append("</ul>\n");
 		}
 		result.append("<h2>Interactions</h2>\n<table><tr><th>interaction</th><th>count</th><th>failed</th><th>median ms</th>")
 				.append("<th>p95 ms</th><th>max ms</th></tr>\n");
 		for (InteractionStats interaction : interactions) {
-			result.append("<tr><td>").append(escape(interaction.name())).append("</td>").append(cell(interaction.count()))
+			result.append("<tr><td>").append(SailMedia.escape(interaction.name())).append("</td>").append(cell(interaction.count()))
 					.append(cell(interaction.failures())).append(cell(interaction.medianMillis())).append(cell(interaction.p95Millis()))
 					.append(cell(interaction.maxMillis())).append("</tr>\n");
 		}
@@ -573,9 +587,9 @@ final class SailLoadReport {
 		if (! failureKinds.isEmpty()) {
 			result.append("<h2>First failure of each kind</h2>\n<table><tr><th>kind</th><th>times</th><th>first</th><th>message</th></tr>\n");
 			for (FailureKind kind : failureKinds) {
-				result.append("<tr><td>").append(escape(kind.kind())).append("</td>").append(cell(kind.count()))
+				result.append("<tr><td>").append(SailMedia.escape(kind.kind())).append("</td>").append(cell(kind.count()))
 						.append("<td>user ").append(kind.user()).append(" iteration ").append(kind.iteration()).append("</td><td>")
-						.append(escape(kind.message())).append("</td></tr>\n");
+						.append(SailMedia.escape(kind.message())).append("</td></tr>\n");
 			}
 			result.append("</table>\n");
 		}
@@ -588,7 +602,4 @@ final class SailLoadReport {
 		return "<td class=\"n\">" + value + "</td>";
 	}
 
-	private static @Nonnull String escape(@Nonnull String text) {
-		return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
-	}
 }

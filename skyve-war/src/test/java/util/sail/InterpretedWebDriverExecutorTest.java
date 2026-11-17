@@ -3,6 +3,7 @@ package util.sail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,6 +52,7 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.impl.sail.execution.RunState;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
@@ -729,6 +731,93 @@ class InterpretedWebDriverExecutorTest {
 		List<MetaDataQueryColumn> columns = List.of(name, amount);
 		when(query.getColumns()).thenReturn(columns);
 		when(module.getMetaDataQuery("qThings")).thenReturn(query);
+	}
+
+	/** An interaction that a load run's probe was told about. */
+	private record Probed(String name, long startNanos, long endNanos, boolean failed, String failure) {
+		// a value
+	}
+
+	/**
+	 * Runs an automation with a load run's probe on this thread, as a virtual user does.
+	 *
+	 * @return what the probe was told, in order
+	 */
+	private static List<Probed> probed(Runnable run) {
+		List<Probed> result = new ArrayList<>();
+		long[] nanos = {0L};
+		SailLoadProbe.set(new SailLoadProbe("user01-it001", () -> nanos[0] += 10L,
+											(name, start, end, failed, failure) -> result.add(new Probed(name, start, end, failed, failure))));
+		try {
+			run.run();
+		}
+		finally {
+			SailLoadProbe.set(null);
+		}
+		return result;
+	}
+
+	private static final String GO_BACK = "<interaction name=\"Go back\"><method><navigateBack/></method></interaction>";
+	private static final String NOTE = "<interaction name=\"Note\"><method><comment>noted</comment></method></interaction>";
+
+	private static Automation automation(String testStrategy, String interactions) {
+		return XMLMetaData.unmarshalSAILString("<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"" + testStrategy +
+												"\" xmlns=\"http://www.skyve.org/xml/sail\">" + interactions + "</automation>");
+	}
+
+	@Test
+	void underVerifyALoadRunsProbeGetsEachInteractionWithItsFirstFailure() {
+		doThrow(new IllegalStateException("There is no earlier page")).when(executor.selenide).back();
+		Automation automation = automation("Verify", GO_BACK + NOTE);
+
+		List<Probed> probed = probed(() -> assertThrows(AssertionError.class, () -> executor.executeAutomation(automation)));
+
+		assertAll(() -> assertEquals(List.of("Go back", "Note"), probed.stream().map(Probed::name).toList()),
+					() -> assertTrue(probed.get(0).failed()),
+					() -> assertTrue(probed.get(0).failure().startsWith("Interaction \"Go back\" step 1"), probed.get(0).failure()),
+					() -> assertTrue(probed.get(0).failure().contains("There is no earlier page"), probed.get(0).failure()),
+					() -> assertTrue(probed.get(0).endNanos() > probed.get(0).startNanos(), "timed by the probe's clock"),
+					() -> assertFalse(probed.get(1).failed()),
+					() -> assertNull(probed.get(1).failure()));
+	}
+
+	@Test
+	void underAssertALoadRunsProbeGetsTheThrownFailure() {
+		doThrow(new IllegalStateException("There is no earlier page")).when(executor.selenide).back();
+		Automation automation = automation("Assert", GO_BACK + NOTE);
+
+		List<Probed> probed = probed(() -> assertThrows(AssertionError.class, () -> executor.executeAutomation(automation)));
+
+		assertAll(() -> assertEquals(1, probed.size(), "the automation stops at the failure"),
+					() -> assertEquals("Go back", probed.get(0).name()),
+					() -> assertTrue(probed.get(0).failed()),
+					() -> assertTrue(probed.get(0).failure().contains("There is no earlier page"), probed.get(0).failure()));
+	}
+
+	@Test
+	void anInteractionThatThrowsSomethingElseIsFailedWithNoMessage() {
+		Interaction broken = mock(Interaction.class);
+		when(broken.getName()).thenReturn("Broken");
+		when(broken.getBefore()).thenThrow(new IllegalStateException("not a step failure"));
+
+		List<Probed> probed = probed(() -> assertThrows(IllegalStateException.class, () -> executor.executeInteraction(broken)));
+
+		assertEquals(List.of(new Probed("Broken", 10L, 20L, true, null)), probed);
+	}
+
+	@Test
+	void withNoProbeAnInteractionRunsAsBefore() {
+		doThrow(new IllegalStateException("There is no earlier page")).when(executor.selenide).back();
+		Automation automation = automation("Verify", GO_BACK);
+		List<Probed> earlier = probed(() -> {
+			// a load run's probe, cleared before this automation runs
+		});
+
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+
+		assertAll(() -> assertNull(SailLoadProbe.current()),
+					() -> assertTrue(e.getMessage().contains("There is no earlier page"), e.getMessage()),
+					() -> assertTrue(earlier.isEmpty(), "nothing reported to a probe"));
 	}
 
 	private static ThreadLocal<AbstractPersistence> threadLocalPersistence() {
