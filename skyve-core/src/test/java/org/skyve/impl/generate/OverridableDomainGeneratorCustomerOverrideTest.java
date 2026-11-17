@@ -1438,6 +1438,56 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		assertAnInversePairWithACustomerExtensionCompiles("T", new InverseOne());
 	}
 
+	/**
+	 * acme's override of Receipt leaves out a reference or an inverse between Receipt and Order, so the
+	 * generated ReceiptVanilla declares it, and the hand-written ReceiptExtension extends
+	 * ReceiptVanilla. The accessors keeping the other side up to date pass ReceiptVanilla to Order as
+	 * the ReceiptExtension that Order's vanilla accessors take, which is the class the vanilla mapping
+	 * maps.
+	 */
+	private static void assertANarrowedAwayRelationshipWithAnExtensionCompiles(boolean receiptHoldsTheAssociation, AbstractInverse inverse) throws Exception {
+		InverseRelationship relationship = (inverse instanceof InverseOne) ? InverseRelationship.oneToOne : InverseRelationship.oneToMany;
+		DocumentImpl receipt = document("Receipt", "SALES_Receipt", null, null, "code");
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		if (receiptHoldsTheAssociation) {
+			receipt.putRelation(association("order", "Order"));
+			order.putRelation(inverse(inverse, "receipts", "Receipt", "order", relationship));
+		}
+		else {
+			receipt.putRelation(inverse(inverse, "orders", "Order", "receipt", relationship));
+			order.putRelation(association("receipt", "Receipt"));
+		}
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(receipt)
+				.vanilla(order)
+				.extension("Receipt", "ReceiptVanilla")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code")));
+		String receiptVanilla = files.get("modules/sales/domain/ReceiptVanilla.java");
+		assertAll(
+				() -> assertTrue(receiptVanilla.contains("(ReceiptExtension) this"), receiptVanilla),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	@Test
+	void aNarrowedAwayAssociationWithAnInverseManyAndAnExtensionCompiles() throws Exception {
+		assertANarrowedAwayRelationshipWithAnExtensionCompiles(true, new InverseMany());
+	}
+
+	@Test
+	void aNarrowedAwayAssociationWithAnInverseOneAndAnExtensionCompiles() throws Exception {
+		assertANarrowedAwayRelationshipWithAnExtensionCompiles(true, new InverseOne());
+	}
+
+	@Test
+	void aNarrowedAwayInverseManyWithAnExtensionCompiles() throws Exception {
+		assertANarrowedAwayRelationshipWithAnExtensionCompiles(false, new InverseMany());
+	}
+
+	@Test
+	void aNarrowedAwayInverseOneWithAnExtensionCompiles() throws Exception {
+		assertANarrowedAwayRelationshipWithAnExtensionCompiles(false, new InverseOne());
+	}
+
 	// ----- generation with metadata validation off ------------------------------------
 
 	/**

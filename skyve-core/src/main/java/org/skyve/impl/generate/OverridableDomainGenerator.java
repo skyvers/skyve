@@ -3020,7 +3020,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tif (result) {\n");
 				methods.append("\t\t\telement.setParent(");
 				if (castThisToExtension) {
-					methods.append("(").append(owningDocumentName).append("Extension) ");
+					appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 				}
 				methods.append("this);\n");
 				methods.append("\t\t}\n");
@@ -3031,7 +3031,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tif (result) {\n");
 				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
 				if (castThisToExtension) {
-					methods.append("(").append(owningDocumentName).append("Extension) ");
+					appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 				}
 				methods.append("this);\n");
 				methods.append("\t\t}\n");
@@ -3053,14 +3053,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(");
 				if (castThisToExtension) {
-					methods.append("(").append(owningDocumentName).append("Extension) ");
+					appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 				}
 				methods.append("this);\n");
 			}
 			else if (inverse != null) {
 				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
 				if (castThisToExtension) {
-					methods.append("(").append(owningDocumentName).append("Extension) ");
+					appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 				}
 				methods.append("this);\n");
 			}
@@ -3154,7 +3154,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 				methods.append("\t\t\t\t").append(name).append(".setParent(");
 				if (castThisToExtension) {
-					methods.append("(").append(owningDocumentName).append("Extension) ");
+					appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 				}
 				methods.append("this);\n");
 				methods.append("\t\t\t}\n\n");
@@ -3166,7 +3166,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 					methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append('(');
 					if (castThisToExtension) {
-						methods.append("(").append(owningDocumentName).append("Extension) ");
+						appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 					}
 					methods.append("this);\n");
 					methods.append("\t\t\t}\n");
@@ -3180,7 +3180,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("\t\t\tif ((").append(name).append(" != null) && (").append(name).append(".get").append(inverseMethodName).append("ElementById(getBizId()) == null)) {\n");
 					methods.append("\t\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
 					if (castThisToExtension) {
-						methods.append("(").append(owningDocumentName).append("Extension) ");
+						appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 					}
 					methods.append("this);\n");
 					methods.append("\t\t\t}\n");
@@ -3205,6 +3205,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Appends the cast of <code>this</code> to the document's hand-written extension, which a vanilla
+	 * class passes to the other side of a relationship, and imports the extension, which a generated
+	 * <code>&lt;Document&gt;Vanilla</code> class does not otherwise import.
+	 *
+	 * @param module	The document's module.
+	 * @param documentName	The document.
+	 * @param imports	The class's imports.
+	 * @param methods	The class's methods.
+	 */
+	private static void appendExtensionCast(@Nonnull Module module,
+												@Nonnull String documentName,
+												@Nonnull Set<String> imports,
+												@Nonnull StringBuilder methods) {
+		imports.add(new StringBuilder(128).append(ProvidedRepository.MODULES_NAME).append('.')
+											.append(module.getName()).append('.')
+											.append(documentName).append('.')
+											.append(documentName).append("Extension").toString());
+		methods.append('(').append(documentName).append("Extension) ");
 	}
 
 	/**
@@ -3449,7 +3470,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\telement.set").append(inverseMethodName).append("(");
 			}
 			if (castThisToExtension) {
-				methods.append('(').append(owningDocumentName).append("Extension) ");
+				appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 			}
 			methods.append("this);\n");
 			methods.append("\t\treturn result;\n");
@@ -3473,7 +3494,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\telement.set").append(inverseMethodName).append("(");
 			}
 			if (castThisToExtension) {
-				methods.append('(').append(owningDocumentName).append("Extension) ");
+				appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 			}
 			methods.append("this);\n");
 			methods.append("\t}\n\n");
@@ -3542,7 +3563,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append("(");
 			}
 			if (castThisToExtension) {
-				methods.append('(').append(owningDocumentName).append("Extension) ");
+				appendExtensionCast(owningModule, owningDocumentName, imports, methods);
 			}
 			methods.append("this);\n");
 			methods.append("\t\t\t}\n");
