@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
@@ -73,16 +76,18 @@ class MetaDataEvictionH2Test extends AbstractH2TestDispose {
 	}
 
 	/**
-	 * An enumeration caches its enum classes, which go with its document when eviction loads it again.
+	 * An enumeration caches its enum classes, which go with its document when eviction loads it
+	 * again: the enumeration loaded again starts with no cached enum class.
 	 */
 	@Test
-	void customerEvictionLoadsTheEnumerationsAgainWithoutTheirCachedEnumClasses() {
+	void customerEvictionLoadsTheEnumerationsAgainWithoutTheirCachedEnumClasses() throws Exception {
 		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		Customer customer = repository.getCustomer(CUSTOMER);
 		assertNotNull(customer, "customer");
 		Enumeration before = (Enumeration) contact(repository, customer).getAttribute(Contact.contactTypePropertyName);
 		assertNotNull(before, "before");
 		Class<?> enumClass = before.getImplementingType(customer);
+		int cachedBefore = cachedEnumClasses(before).size();
 
 		repository.evictCachedMetaData(customer);
 
@@ -90,9 +95,24 @@ class MetaDataEvictionH2Test extends AbstractH2TestDispose {
 		assertNotNull(evictedCustomer, "customer");
 		Enumeration after = (Enumeration) contact(repository, evictedCustomer).getAttribute(Contact.contactTypePropertyName);
 		assertNotNull(after, "after");
+		int cachedAfterEviction = cachedEnumClasses(after).size();
+		Class<?> evictedEnumClass = after.getImplementingType(evictedCustomer);
 		assertAll(() -> assertSame(ContactType.class, enumClass),
+					() -> assertEquals(1, cachedBefore, "cached before eviction"),
 					() -> assertNotSame(before, after),
-					() -> assertSame(ContactType.class, after.getImplementingType(evictedCustomer)));
+					() -> assertEquals(0, cachedAfterEviction, "cached after eviction"),
+					() -> assertSame(ContactType.class, evictedEnumClass),
+					() -> assertEquals(1, cachedEnumClasses(after).size(), "cached again"));
+	}
+
+	/**
+	 * Reads an enumeration's private cache of enum classes by customer.
+	 */
+	@SuppressWarnings("java:S3011") // the cache has no accessor, and no other observable effect
+	private static Map<?, ?> cachedEnumClasses(Enumeration enumeration) throws ReflectiveOperationException {
+		Field field = Enumeration.class.getDeclaredField("implementingTypes");
+		field.setAccessible(true);
+		return (Map<?, ?>) field.get(enumeration);
 	}
 
 	private static DocumentImpl contact(ProvidedRepository repository, Customer customer) {
