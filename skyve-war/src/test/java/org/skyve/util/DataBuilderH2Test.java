@@ -4,16 +4,28 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Job.JobExtension;
+import modules.admin.Job.JobFactory;
+import modules.admin.Tag.TagExtension;
+import modules.admin.Tag.TagFactory;
 import modules.admin.domain.Contact;
+import modules.admin.domain.Job;
 import modules.admin.domain.Tag;
 import modules.admin.domain.User;
 import util.AbstractH2Test;
@@ -108,7 +120,8 @@ class DataBuilderH2Test extends AbstractH2Test {
 	void testTypeConfiguration() throws Exception {
 		// setup the test data
 		db = new DataBuilder();
-		Tag result1 = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		// use factoryBuild to ignore the TagFactory, whose own DataBuilder has no type configuration
+		Tag result1 = db.factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
 		// validate the test data
 		assertNull(getFieldValue(db, "types"), "type should be null initially");
@@ -116,12 +129,60 @@ class DataBuilderH2Test extends AbstractH2Test {
 
 		// call the method under test
 		db.type(AttributeType.bool, false);
-		Tag result2 = db.build(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+		Tag result2 = db.factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
 		// verify the result
 		java.util.Map<AttributeType, Boolean> types = getFieldValue(db, "types");
 		assertEquals(Boolean.FALSE, types.get(AttributeType.bool));
 		assertThat("boolean attributes should now be excluded", result2.getVisible(), is(nullValue()));
+	}
+
+	/**
+	 * TagFactory's crud fixture builds the Tag, pointing its upload at Contact.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void testTagFactoryBuildsTheCrudFixture() {
+		StringBuilder trace = new StringBuilder();
+		Tag result = tracedCrudBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME, trace);
+
+		assertAll(() -> assertTrue(trace.indexOf("Invoking method " + TagFactory.class.getName() + "::crudInstance for fixture crud") >= 0, trace::toString),
+					() -> assertInstanceOf(TagExtension.class, result),
+					() -> assertEquals(Contact.MODULE_NAME, result.getUploadModuleName()),
+					() -> assertEquals(Contact.DOCUMENT_NAME, result.getUploadDocumentName()));
+	}
+
+	/**
+	 * JobFactory's crud fixture builds the Job.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void testJobFactoryBuildsTheCrudFixture() {
+		StringBuilder trace = new StringBuilder();
+		Job result = tracedCrudBuild(Job.MODULE_NAME, Job.DOCUMENT_NAME, trace);
+
+		assertAll(() -> assertTrue(trace.indexOf("Invoking method " + JobFactory.class.getName() + "::crudInstance for fixture crud") >= 0, trace::toString),
+					() -> assertInstanceOf(JobExtension.class, result));
+	}
+
+	/**
+	 * Builds a bean of the document for the crud fixture with DataBuilder tracing on.
+	 *
+	 * @param trace	Receives what the trace printed.
+	 */
+	private static <T extends Bean> T tracedCrudBuild(String moduleName, String documentName, StringBuilder trace) {
+		PrintStream out = System.out;
+		ByteArrayOutputStream traced = new ByteArrayOutputStream();
+		System.setOut(new PrintStream(traced, true, StandardCharsets.UTF_8));
+		DataBuilder.setTrace(true);
+		try {
+			return new DataBuilder().fixture(FixtureType.crud).build(moduleName, documentName);
+		}
+		finally {
+			DataBuilder.setTrace(false);
+			System.setOut(out);
+			trace.append(traced.toString(StandardCharsets.UTF_8));
+		}
 	}
 
 	/**
