@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -161,7 +162,7 @@ class SmartClientListServletOperatorsH2Test extends AbstractH2Test {
 		SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module, document, CORE.getUser(), operator, criteria, null, model);
 		Page page = model.fetch();
 		Set<String> result = new TreeSet<>();
-		for (Bean bean : page.getRows()) {
+		for (Bean bean : Objects.requireNonNull(page.getRows())) {
 			result.add((String) Binder.get(bean, TEXT));
 		}
 		return result;
