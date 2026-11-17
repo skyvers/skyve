@@ -110,10 +110,11 @@ When a customer's document override leaves out an attribute of the vanilla docum
 - **A longer length widens the shared column.** When a customer's override gives an attribute a longer `<length>` than the vanilla document, the vanilla mapping uses the longest length, as the customers share the table.
 - **An override can't change a type.** The vanilla mapping and each customer's map the same table and columns, and a customer's class inherits each vanilla property it keeps, with the vanilla Java type. So generation stops, whether validation is on or off, when a customer's override:
   - gives a vanilla attribute another type, such as `integer` for `text`. Types with the same Java type that are mapped the same way can be swapped, such as `memo` and `markup`, or `content` and `image`;
-  - points an association, collection or inverse at another document;
-  - changes the values, or the enum class, of an enumeration its class inherits. An enumeration that the customer's `<Document>Override` declares itself, because another customer's override narrows it away, can have other values.
+  - points a relation its class inherits at another document. A relation that the customer's `<Document>Override` declares itself, because another customer's override narrows it away, can point at another document only if it is an inverse or a child collection, whose key is in the other document's table; an association's column and a collection's join table are shared;
+  - changes the enum of an enumeration its class inherits: the codes or Java identifiers of its values, its enum class, or the document whose class nests the enum, as when an enumeration that refers to another document's is declared in place, or the other way round. A value's Java identifier comes from its description unless the value is named, so a new description changes it too. An enumeration that the customer's `<Document>Override` declares itself, because another customer's override narrows it away, can have other values.
 
   Add an attribute of another name instead.
+- **An inherited enumeration keeps the vanilla labels.** When a customer's override changes only the descriptions or the order of the values of an enumeration its class inherits, generation warns, naming the customer, document and attribute, and carries on. The customer's descriptions and order are ignored, and the vanilla enum's apply.
 
 ### Cleaning customer output
 
@@ -174,7 +175,7 @@ Work through this list when you upgrade a project to this version.
   - a customer's override of a document that other documents extend needs its own class;
   - a customer's override narrows a document that other documents extend;
   - a new customer document extends another document;
-  - a customer's override gives a vanilla attribute another type, points a relation at another document, or changes an enumeration its class inherits;
+  - a customer's override gives a vanilla attribute another type, points a relation at another document where the shared table can't follow, or changes the enum of an enumeration its class inherits (see [Generated classes and mappings](#generated-classes-and-mappings)). A change to only the descriptions or order of an inherited enumeration's values is a warning, and the vanilla enum's apply;
   - a customer output path is blocked by a file that isn't generated, or runs through a symbolic link.
 - **Customer output is deleted on every run.** Move any files of your own out of the generated customer `domain/` directories and `orm.hbm.xml`.
 - **`DataBuilder` checks factory beans for an overriding customer.** For a customer that overrides the document, a factory method that returns the vanilla class is now used, but a bean it returns that isn't of the customer's bean class is discarded with a warning, and a random bean is built instead.

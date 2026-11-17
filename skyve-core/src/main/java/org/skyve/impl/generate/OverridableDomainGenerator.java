@@ -343,6 +343,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										@Nonnull Document vanillaDocument,
 										@Nonnull Module module,
 										@Nonnull Document document) {
+		/**
+		 * Names the override, to start a refusal or warning.
+		 *
+		 * @return	the customer's override of the module-qualified document.
+		 */
+		@Nonnull String description() {
+			return "Customer " + customerName + "'s override of document " + vanillaDocument.getOwningModuleName() + '.' + vanillaDocument.getName();
+		}
 	}
 
 	/**
@@ -353,24 +361,29 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * override cannot:
 	 * <ul>
 	 * 	<li>give a property another type, unless both have the same Java type and are mapped the same
-	 * 		way, as a memo and markup, or content and an image, are (see {@link #sameJavaAndMappingType(Attribute, Attribute)});</li>
-	 * 	<li>point a relation at another document;</li>
-	 * 	<li>change an inherited enumeration, whose enum the vanilla class declares from the vanilla
-	 * 		values (see {@link #sameEnum(Enumeration, Enumeration)}). An enumeration the customer's
-	 * 		class declares itself, as a narrowed document's override does, can have other values.</li>
+	 * 		way (see {@link #checkOverrideType(CustomerOverride, String, AttributeType, AttributeType, boolean)});</li>
+	 * 	<li>point a relation at another document, unless the customer's class declares it and the
+	 * 		other document's table holds its key (see {@link #checkOverrideRelationTarget(CustomerOverride, Relation, Relation, boolean)});</li>
+	 * 	<li>change the enum of an inherited enumeration, whose enum the vanilla class declares from the
+	 * 		vanilla values (see {@link #checkOverrideEnumeration(CustomerOverride, Enumeration, Enumeration)}).
+	 * 		An enumeration the customer's class declares itself, as a narrowed document's override does,
+	 * 		can have other values.</li>
 	 * </ul>
 	 * These are errors whether or not validation is on.
+	 * <p/>
+	 * Side effects: warns on the console about an inherited enumeration whose values' descriptions or
+	 * order differ, as the vanilla enum's apply.
 	 *
 	 * @param customerOverride	The customer's override.
 	 * @throws MetaDataException	if the override changes a vanilla property in one of these ways.
 	 */
 	private void checkOverrideProperties(@Nonnull CustomerOverride customerOverride) {
 		Document vanillaDocument = customerOverride.vanillaDocument();
-		String moduleName = vanillaDocument.getOwningModuleName();
-		String documentName = vanillaDocument.getName();
-		Set<String> inheritedPropertyNames = overrideInheritedPropertyNames(moduleName, documentName, customerOverride.vanillaClass());
-		Map<String, AttributeType> overrideProperties = generateDocumentPropertyNames(customerOverride.document());
-		String refusal = "Customer " + customerOverride.customerName() + "'s override of document " + moduleName + '.' + documentName;
+		Document overrideDocument = customerOverride.document();
+		Set<String> inheritedPropertyNames = overrideInheritedPropertyNames(vanillaDocument.getOwningModuleName(),
+																			vanillaDocument.getName(),
+																			customerOverride.vanillaClass());
+		Map<String, AttributeType> overrideProperties = generateDocumentPropertyNames(overrideDocument);
 		for (Entry<String, AttributeType> vanillaProperty : generateDocumentPropertyNames(vanillaDocument).entrySet()) {
 			String propertyName = vanillaProperty.getKey();
 			AttributeType vanillaType = vanillaProperty.getValue();
@@ -380,36 +393,147 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 			boolean inherited = inheritedPropertyNames.contains(propertyName);
 			Attribute vanillaAttribute = vanillaDocument.getAttribute(propertyName);
-			Attribute overrideAttribute = customerOverride.document().getAttribute(propertyName);
+			Attribute overrideAttribute = overrideDocument.getAttribute(propertyName);
 			if (overrideType != vanillaType) {
-				if ((vanillaAttribute == null) || (overrideAttribute == null) || // a condition
-						(! sameJavaAndMappingType(vanillaAttribute, overrideAttribute))) {
-					throw new MetaDataException(refusal + " changes the type of " + propertyName + " from " + vanillaType + " to " + overrideType +
-													", but " + (inherited ?
-																	"the customer's class inherits the vanilla property and its mapping shares the vanilla table" :
-																	"the customer's mapping shares the vanilla table and its column") +
-													". Keep " + propertyName + " as " + vanillaType + " in the override, or add an attribute of another name.");
-				}
+				checkOverrideType(customerOverride, propertyName, vanillaType, overrideType, inherited);
 			}
 			else if ((vanillaAttribute instanceof Relation vanillaRelation) && (overrideAttribute instanceof Relation overrideRelation)) {
-				String vanillaTarget = relationTarget(customerOverride.vanillaModule(), vanillaRelation);
-				String overrideTarget = relationTarget(customerOverride.module(), overrideRelation);
-				if (! vanillaTarget.equals(overrideTarget)) {
-					throw new MetaDataException(refusal + " changes the document of " + propertyName + " from " + vanillaTarget + " to " + overrideTarget +
-													", but " + (inherited ?
-																	"the customer's class inherits the vanilla property, typed by " + vanillaTarget + "'s class, and its mapping shares the vanilla table" :
-																	"the customer's mapping shares the vanilla table and its references to " + vanillaTarget) +
-													". Keep " + propertyName + " referring to " + vanillaTarget + " in the override, or add a relation of another name.");
-				}
+				checkOverrideRelationTarget(customerOverride, vanillaRelation, overrideRelation, inherited);
 			}
 			else if (inherited &&
 						(vanillaAttribute instanceof Enumeration vanillaEnumeration) &&
-						(overrideAttribute instanceof Enumeration overrideEnumeration) &&
-						(! sameEnum(vanillaEnumeration, overrideEnumeration))) {
-				throw new MetaDataException(refusal + " changes the values or enum of enumeration " + propertyName +
-												", but the customer's class inherits the vanilla property, whose enum is generated from the vanilla document." +
-												" Declare " + propertyName + " as the vanilla document does in the override, or add an enumeration of another name.");
+						(overrideAttribute instanceof Enumeration overrideEnumeration)) {
+				checkOverrideEnumeration(customerOverride, vanillaEnumeration, overrideEnumeration);
 			}
+		}
+	}
+
+	/**
+	 * Refuses an override's change of a vanilla property's type, unless both types have the same Java
+	 * type and are mapped the same way, as a memo and markup, or content and an image, are (see
+	 * {@link #sameJavaAndMappingType(Attribute, Attribute)}).
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @param propertyName	The property's name.
+	 * @param vanillaType	The vanilla property's type.
+	 * @param overrideType	The override's type for the property, which differs.
+	 * @param inherited	Whether the customer's class inherits the vanilla property.
+	 * @throws MetaDataException	if the two types don't fit the same field and storage.
+	 */
+	private static void checkOverrideType(@Nonnull CustomerOverride customerOverride,
+											@Nonnull String propertyName,
+											@Nonnull AttributeType vanillaType,
+											@Nonnull AttributeType overrideType,
+											boolean inherited) {
+		Attribute vanillaAttribute = customerOverride.vanillaDocument().getAttribute(propertyName);
+		Attribute overrideAttribute = customerOverride.document().getAttribute(propertyName);
+		if ((vanillaAttribute != null) && (overrideAttribute != null) && // not a condition
+				sameJavaAndMappingType(vanillaAttribute, overrideAttribute)) {
+			return;
+		}
+		throw new MetaDataException(customerOverride.description() + " changes the type of " + propertyName + " from " + vanillaType + " to " + overrideType +
+										", but " + (inherited ?
+														"the customer's class inherits the vanilla property and its mapping shares the vanilla table" :
+														"the customer's mapping shares " + sharedStorage(customerOverride, vanillaAttribute)) +
+										". Keep " + propertyName + " as " + vanillaType + " in the override, or add an attribute of another name.");
+	}
+
+	/**
+	 * Names the vanilla storage that a customer's mapping shares for a property its class declares itself.
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @param vanillaAttribute	The vanilla attribute, or null for a condition.
+	 * @return	the vanilla table, and the column or table that stores the property.
+	 */
+	private static @Nonnull String sharedStorage(@Nonnull CustomerOverride customerOverride, @Nullable Attribute vanillaAttribute) {
+		if ((vanillaAttribute instanceof Relation relation) && keyedByTarget(relation)) {
+			String target = relationTarget(customerOverride.vanillaModule(), relation);
+			return (relation instanceof Inverse) ?
+						"the vanilla table and the column of " + target + "'s table that the inverse maps" :
+						"the vanilla table and the parent column of " + target + "'s table";
+		}
+		return (vanillaAttribute instanceof Collection) ?
+					"the vanilla table and its join table" :
+					"the vanilla table and its column";
+	}
+
+	/**
+	 * Refuses an override's change of the document a vanilla relation targets. The customer's class
+	 * inherits an inherited relation typed by the vanilla target's class, and the customer's mapping
+	 * stores an association's references in the shared column, and an aggregation's or composition's
+	 * in the shared join table. A relation the customer's class declares itself can target another
+	 * document if it is, in the vanilla document or the override, an inverse or a child collection,
+	 * as the other document's table then holds the key (see {@link #keyedByTarget(Relation)}).
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @param vanillaRelation	The vanilla relation.
+	 * @param overrideRelation	The override's relation of the same name and type.
+	 * @param inherited	Whether the customer's class inherits the vanilla relation.
+	 * @throws MetaDataException	if the override points the relation at another document where that breaks.
+	 */
+	private static void checkOverrideRelationTarget(@Nonnull CustomerOverride customerOverride,
+													@Nonnull Relation vanillaRelation,
+													@Nonnull Relation overrideRelation,
+													boolean inherited) {
+		String vanillaTarget = relationTarget(customerOverride.vanillaModule(), vanillaRelation);
+		String overrideTarget = relationTarget(customerOverride.module(), overrideRelation);
+		if (vanillaTarget.equals(overrideTarget) ||
+				((! inherited) && (keyedByTarget(vanillaRelation) || keyedByTarget(overrideRelation)))) {
+			return;
+		}
+		String reason;
+		if (inherited) {
+			reason = "the customer's class inherits the vanilla property, typed by " + vanillaTarget + "'s class, and its mapping shares the vanilla table";
+		}
+		else if (vanillaRelation instanceof Collection) {
+			reason = "the customer's mapping shares the vanilla join table of references to " + vanillaTarget;
+		}
+		else {
+			reason = "the customer's mapping shares the vanilla table and its column of references to " + vanillaTarget;
+		}
+		String propertyName = vanillaRelation.getName();
+		throw new MetaDataException(customerOverride.description() + " changes the document of " + propertyName + " from " + vanillaTarget + " to " + overrideTarget +
+										", but " + reason + ". Keep " + propertyName + " referring to " + vanillaTarget + " in the override, or add a relation of another name.");
+	}
+
+	/**
+	 * Determines whether the key of a relation is in its target document's table: an inverse's
+	 * reference column, or a child collection's parent column.
+	 *
+	 * @param relation	The relation.
+	 * @return	true if the target document's table holds the key.
+	 */
+	private static boolean keyedByTarget(@Nonnull Relation relation) {
+		return (relation instanceof Inverse) ||
+				((relation instanceof Collection collection) && CollectionType.child.equals(collection.getType()));
+	}
+
+	/**
+	 * Refuses an override's change of the enum of an enumeration the customer's class inherits, and
+	 * warns about a change of only its values' descriptions or order. The vanilla class declares the
+	 * enum from the vanilla values and the customer's mapping names it, so another enum would not fit
+	 * the inherited field or the mapping, and the vanilla enum's descriptions and order apply.
+	 * <p/>
+	 * Side effects: prints a warning on the console when only the descriptions or order differ.
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @param vanillaEnumeration	The vanilla enumeration.
+	 * @param overrideEnumeration	The override's enumeration of the same name.
+	 * @throws MetaDataException	if the override's enumeration generates another enum (see {@link #sameEnum(Enumeration, Enumeration)}).
+	 */
+	@SuppressWarnings("java:S106") // the generator runs from the command line, where its warnings must reach the console without a logging binding
+	private static void checkOverrideEnumeration(@Nonnull CustomerOverride customerOverride,
+													@Nonnull Enumeration vanillaEnumeration,
+													@Nonnull Enumeration overrideEnumeration) {
+		String propertyName = vanillaEnumeration.getName();
+		if (! sameEnum(vanillaEnumeration, overrideEnumeration)) {
+			throw new MetaDataException(customerOverride.description() + " changes the value codes or names, or the enum, of enumeration " + propertyName +
+											", but the customer's class inherits the vanilla property, whose enum is generated from the vanilla document." +
+											" Declare " + propertyName + " as the vanilla document does in the override, or add an enumeration of another name.");
+		}
+		if (! sameValueDescriptionsAndOrder(vanillaEnumeration, overrideEnumeration)) {
+			System.err.println("WARNING: " + customerOverride.description() + " changes the descriptions or order of the values of enumeration " + propertyName +
+								", which the customer's class inherits with the vanilla enum. The override's descriptions and order are ignored, and the vanilla enum's apply.");
 		}
 	}
 
@@ -446,18 +570,58 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Determines whether two enumerations generate the same enum: the same enum type name, hand-written
-	 * enum class and values, in the same order, with the same codes, Java identifiers and descriptions.
+	 * Determines whether two enumerations generate the same enum, which the generated mapping names in
+	 * the same way: the same enum type name and hand-written enum class, otherwise nested in the class of
+	 * the same document, with values of the same codes and Java identifiers. The values' descriptions and
+	 * order can differ (see {@link #sameValueDescriptionsAndOrder(Enumeration, Enumeration)}).
 	 *
 	 * @param enumeration	An enumeration.
 	 * @param other	The other enumeration.
 	 * @return	true if they generate the same enum.
 	 */
 	private static boolean sameEnum(@Nonnull Enumeration enumeration, @Nonnull Enumeration other) {
-		if ((! enumeration.toJavaIdentifier().equals(other.toJavaIdentifier())) ||
-				(! Objects.equals(enumeration.getImplementingEnumClassName(), other.getImplementingEnumClassName()))) {
-			return false;
+		String implementingEnumClassName = enumeration.getImplementingEnumClassName();
+		return enumeration.toJavaIdentifier().equals(other.toJavaIdentifier()) &&
+				Objects.equals(implementingEnumClassName, other.getImplementingEnumClassName()) &&
+				((implementingEnumClassName != null) || Objects.equals(enumDocumentName(enumeration), enumDocumentName(other))) &&
+				valueJavaIdentifiers(enumeration).equals(valueJavaIdentifiers(other));
+	}
+
+	/**
+	 * Names the document whose class nests a generated enum: the document that declares the
+	 * enumeration, or the one that declares the enumeration it references.
+	 *
+	 * @param enumeration	The enumeration.
+	 * @return	the module-qualified document name, or null if the enumeration has no owning document.
+	 */
+	private static @Nullable String enumDocumentName(@Nonnull Enumeration enumeration) {
+		Document document = enumeration.getTarget().getOwningDocument();
+		return (document == null) ? null : document.getOwningModuleName() + '.' + document.getName();
+	}
+
+	/**
+	 * Returns the Java identifier of each of an enumeration's values, by code.
+	 *
+	 * @param enumeration	The enumeration.
+	 * @return	the identifiers in code order.
+	 */
+	private static @Nonnull Map<String, String> valueJavaIdentifiers(@Nonnull Enumeration enumeration) {
+		Map<String, String> result = new TreeMap<>();
+		for (EnumeratedValue value : enumeration.getValues()) {
+			result.put(value.getCode(), value.toJavaIdentifier());
 		}
+		return result;
+	}
+
+	/**
+	 * Determines whether two enumerations list values of the same codes in the same order, with the same
+	 * descriptions.
+	 *
+	 * @param enumeration	An enumeration.
+	 * @param other	The other enumeration.
+	 * @return	true if the values' codes, order and descriptions are the same.
+	 */
+	private static boolean sameValueDescriptionsAndOrder(@Nonnull Enumeration enumeration, @Nonnull Enumeration other) {
 		List<EnumeratedValue> values = enumeration.getValues();
 		List<EnumeratedValue> otherValues = other.getValues();
 		if (values.size() != otherValues.size()) {
@@ -467,7 +631,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			EnumeratedValue value = values.get(i);
 			EnumeratedValue otherValue = otherValues.get(i);
 			if ((! value.getCode().equals(otherValue.getCode())) ||
-					(! value.toJavaIdentifier().equals(otherValue.toJavaIdentifier())) ||
 					(! Objects.equals(value.getDescription(), otherValue.getDescription()))) {
 				return false;
 			}

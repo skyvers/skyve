@@ -769,14 +769,134 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
 		assertEquals("Customer beta's override of document sales.Order changes the document of items from sales.Product to sales.Service, " +
-						"but the customer's mapping shares the vanilla table and its references to sales.Product. " +
+						"but the customer's mapping shares the vanilla join table of references to sales.Product. " +
 						"Keep items referring to sales.Product in the override, or add a relation of another name.",
 						e.getMessage());
 	}
 
+	/** A customer's mapping shares the vanilla table, so an association its class declares itself cannot point at another document. */
+	@Test
+	void anOverrideThatPointsAnAssociationItsClassDeclaresAtAnotherDocumentIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		vanillaOrder.putRelation(association("customer", "Customer"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		betaOrder.putRelation(association("customer", "Account"));
+		Fixture fixture = new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(document("Customer", "SALES_Customer", null, null, "name"))
+				.vanilla(document("Account", "SALES_Account", null, null, "name"))
+				.acme(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.beta(betaOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Customer beta's override of document sales.Order changes the document of customer from sales.Customer to sales.Account, " +
+						"but the customer's mapping shares the vanilla table and its column of references to sales.Customer. " +
+						"Keep customer referring to sales.Customer in the override, or add a relation of another name.",
+						e.getMessage());
+	}
+
+	/** The customer's class inherits an inverse typed by the vanilla target's class, as for any relation. */
+	@Test
+	void anOverrideThatPointsAnInheritedInverseAtAnotherDocumentIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(inverse(new InverseMany(), "lines", "Shipment", "order", InverseRelationship.oneToMany));
+		Fixture fixture = ordersLinesAndShipments(vanillaOrder).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Customer acme's override of document sales.Order changes the document of lines from sales.Line to sales.Shipment, " +
+						"but the customer's class inherits the vanilla property, typed by sales.Line's class, and its mapping shares the vanilla table. " +
+						"Keep lines referring to sales.Line in the override, or add a relation of another name.",
+						e.getMessage());
+	}
+
+	/**
+	 * Beta's override of a document acme's narrows declares an inverse itself, and the other document's
+	 * table holds its key, so it can point at another document. The classes are not compiled, as the
+	 * generated accessors of an association maintain its inverse, which they cannot once it is narrowed
+	 * away or pointed elsewhere.
+	 */
+	@Test
+	void anOverrideCanPointAnInverseItsClassDeclaresAtAnotherDocument() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		vanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		betaOrder.putRelation(inverse(new InverseMany(), "lines", "Shipment", "order", InverseRelationship.oneToMany));
+
+		Map<String, String> files = generate(ordersLinesAndShipments(vanillaOrder)
+				.acme(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.beta(betaOrder));
+
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		assertAll(() -> assertTrue(betaMapping.contains("<one-to-many entity-name=\"betasalesShipment\""), betaMapping),
+					() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	/**
+	 * Beta's override of a document acme's narrows declares a child collection itself, and the child
+	 * document's table holds its key, so it can point at another document.
+	 */
+	@Test
+	void anOverrideCanPointAChildCollectionItsClassDeclaresAtAnotherDocument() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(childCollection("lines", "Line"));
+		vanillaOrder.putRelation(childCollection("notes", "Note"));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity");
+		line.setParentDocumentName("Order");
+		DocumentImpl note = document("Note", "SALES_Note", null, null, "text");
+		note.setParentDocumentName("Order");
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(childCollection("notes", "Note"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code");
+		betaOrder.putRelation(childCollection("lines", "Note"));
+		betaOrder.putRelation(childCollection("notes", "Note"));
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(line)
+				.vanilla(note)
+				.acme(acmeOrder)
+				.beta(betaOrder));
+
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		assertAll(() -> assertTrue(betaMapping.contains("<one-to-many entity-name=\"betasalesNote\""), betaMapping),
+					() -> assertEquals(List.of(), mappingProblems(files)),
+					() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/** A collection its class declares itself is stored in the shared join table, so it cannot become another type. */
+	@Test
+	void anOverrideThatChangesTheTypeOfACollectionItsClassDeclaresIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		vanillaOrder.putRelation(aggregatedCollection("items", "Product"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		betaOrder.putRelation(association("items", "Product"));
+		Fixture fixture = new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(document("Product", "SALES_Product", null, null, "name"))
+				.acme(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.beta(betaOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Customer beta's override of document sales.Order changes the type of items from collection to association, " +
+						"but the customer's mapping shares the vanilla table and its join table. " +
+						"Keep items as collection in the override, or add an attribute of another name.",
+						e.getMessage());
+	}
+
+	/** The vanilla Order, with Line and Shipment, which both reference Order. */
+	private static Fixture ordersLinesAndShipments(DocumentImpl vanillaOrder) {
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity");
+		line.putRelation(association("order", "Order"));
+		DocumentImpl shipment = document("Shipment", "SALES_Shipment", null, null, "carrier");
+		shipment.putRelation(association("order", "Order"));
+		return new Fixture().vanilla(vanillaOrder).vanilla(line).vanilla(shipment);
+	}
+
 	/** The customer's class inherits the enumeration, with the enum generated from the vanilla values. */
 	@Test
-	void anOverrideThatChangesTheValuesOfAnInheritedEnumerationIsRefused() {
+	void anOverrideThatChangesTheCodesOfAnInheritedEnumerationIsRefused() {
 		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
 		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
 		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
@@ -784,7 +904,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		Fixture fixture = new Fixture().vanilla(vanillaOrder).acme(acmeOrder);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
-		assertEquals("Customer acme's override of document sales.Order changes the values or enum of enumeration status, " +
+		assertEquals("Customer acme's override of document sales.Order changes the value codes or names, or the enum, of enumeration status, " +
 						"but the customer's class inherits the vanilla property, whose enum is generated from the vanilla document. " +
 						"Declare status as the vanilla document does in the override, or add an enumeration of another name.",
 						e.getMessage());
@@ -807,7 +927,128 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				.beta(betaOrder);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
-		assertTrue(e.getMessage().startsWith("Customer beta's override of document sales.Order changes the values or enum of enumeration status"), e.getMessage());
+		assertTrue(e.getMessage().startsWith("Customer beta's override of document sales.Order changes the value codes or names, or the enum, of enumeration status"), e.getMessage());
+	}
+
+	/** A value's Java identifier comes from its description unless it is named, so a new description can change it. */
+	@Test
+	void anOverrideThatChangesTheJavaIdentifierOfAnInheritedEnumerationsValueIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		Enumeration acmeStatus = enumeration(acmeOrder, "status");
+		acmeStatus.getXmlValues().get(1).setDescription("Urgent");
+		acmeOrder.putAttribute(acmeStatus);
+		Fixture fixture = new Fixture().vanilla(vanillaOrder).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertTrue(e.getMessage().startsWith("Customer acme's override of document sales.Order changes the value codes or names, or the enum, of enumeration status"),
+					e.getMessage());
+	}
+
+	/**
+	 * The customer's mapping names the enum nested in the class of the document that declares the
+	 * enumeration the override's refers to, which is not the enum the customer's class inherits.
+	 */
+	@Test
+	void anOverrideThatPointsAnInheritedEnumerationAtAnotherDocumentsIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl quote = document("Quote", "SALES_Quote", null, null, "code");
+		quote.putAttribute(enumeration(quote, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putAttribute(enumerationReference(acmeOrder, "status", "Quote", "status"));
+		Fixture fixture = new Fixture().vanilla(vanillaOrder).vanilla(quote).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order changes the value codes or names, or the enum, of enumeration status, " +
+						"but the customer's class inherits the vanilla property, whose enum is generated from the vanilla document. " +
+						"Declare status as the vanilla document does in the override, or add an enumeration of another name.",
+						e.getMessage());
+	}
+
+	/**
+	 * The vanilla enumeration refers to another document's, so the enum the customer's class inherits
+	 * is nested in that document's class, and the override's own enumeration's enum is generated nowhere.
+	 */
+	@Test
+	void anOverrideThatDeclaresAnInheritedReferencingEnumerationItselfIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumerationReference(vanillaOrder, "status", "Quote", "status"));
+		DocumentImpl quote = document("Quote", "SALES_Quote", null, null, "code");
+		quote.putAttribute(enumeration(quote, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putAttribute(enumeration(acmeOrder, "status"));
+		Fixture fixture = new Fixture().vanilla(vanillaOrder).vanilla(quote).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertTrue(e.getMessage().startsWith("Customer acme's override of document sales.Order changes the value codes or names, or the enum, of enumeration status"),
+					e.getMessage());
+	}
+
+	/**
+	 * The customer's class inherits the vanilla enum, so an override's descriptions and order of the
+	 * same values are ignored, which generation warns about, whether or not validation is on.
+	 */
+	@Test
+	void anOverrideThatChangesOnlyTheDescriptionsOrOrderOfAnInheritedEnumerationWarns() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		Enumeration acmeStatus = enumeration(acmeOrder, "status");
+		EnumeratedValue high = acmeStatus.getXmlValues().get(1);
+		high.setName("high"); // the Java identifier the vanilla description gives
+		high.setDescription("Urgent");
+		acmeOrder.putAttribute(acmeStatus);
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		betaOrder.putAttribute(enumeration(betaOrder, "status", "high", "low"));
+
+		PrintStream previousErr = System.err;
+		ByteArrayOutputStream err = new ByteArrayOutputStream();
+		Map<String, String> files;
+		System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
+		try {
+			files = generate(new Fixture().vanilla(vanillaOrder).acme(acmeOrder).beta(betaOrder));
+		}
+		finally {
+			System.setErr(previousErr);
+		}
+
+		String warnings = err.toString(StandardCharsets.UTF_8);
+		String acmeOverride = files.get("customers/acme/modules/sales/domain/OrderOverride.java");
+		assertAll(() -> assertTrue(warnings.contains("WARNING: Customer acme's override of document sales.Order changes the descriptions or order of the values of enumeration status, " +
+														"which the customer's class inherits with the vanilla enum. " +
+														"The override's descriptions and order are ignored, and the vanilla enum's apply."), warnings),
+					() -> assertTrue(warnings.contains("WARNING: Customer beta's override of document sales.Order changes the descriptions or order of the values of enumeration status"), warnings),
+					() -> assertFalse(acmeOverride.contains("enum Status"), acmeOverride),
+					() -> assertEquals("modules.sales.domain.Order$Status", enumClass(files.get("customers/acme/modules/orm.hbm.xml"), "acmesalesOrder", "status")),
+					() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	/**
+	 * The checks run once every customer's narrowing is known: beta's override, later in the customer
+	 * order, narrows away the enumeration acme's override changes, so acme's class declares it itself
+	 * and it can have other values.
+	 */
+	@Test
+	void anOverrideCanChangeTheValuesOfAnEnumerationALaterCustomerNarrowsAway() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putAttribute(enumeration(acmeOrder, "status", "low", "high", "urgent"));
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(vanillaOrder)
+				.acme(acmeOrder)
+				.beta(document("Order", "SALES_Order", null, null, "code")));
+
+		String acmeOverride = files.get("customers/acme/modules/sales/domain/OrderOverride.java");
+		assertAll(() -> assertTrue(acmeOverride.contains("public enum Status implements Enumeration"), acmeOverride),
+					() -> assertTrue(acmeOverride.contains("urgent"), acmeOverride),
+					() -> assertEquals("customers.acme.modules.sales.domain.OrderOverride$Status",
+										enumClass(files.get("customers/acme/modules/orm.hbm.xml"), "acmesalesOrder", "status")),
+					() -> assertEquals(List.of(), mappingProblems(files)),
+					() -> assertEquals(List.of(), compilationErrors(files)));
 	}
 
 	/** An override can declare an inherited enumeration again as the vanilla document does. */
@@ -979,12 +1220,17 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 
 	/** An enumeration of the document that references Order's status. */
 	private static Enumeration orderStatusReference(Document owningDocument, String name) {
+		return enumerationReference(owningDocument, name, "Order", "status");
+	}
+
+	/** An enumeration of the document that references another document's enumeration. */
+	private static Enumeration enumerationReference(Document owningDocument, String name, String documentName, String attributeName) {
 		Enumeration result = new Enumeration();
 		result.setOwningDocument(owningDocument);
 		result.setName(name);
 		result.setDisplayName(name);
-		result.setDocumentRef("Order");
-		result.setAttributeRef("status");
+		result.setDocumentRef(documentName);
+		result.setAttributeRef(attributeName);
 		return result;
 	}
 
