@@ -3,11 +3,15 @@ package org.skyve;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -17,6 +21,11 @@ import org.junit.jupiter.api.Test;
 import org.skyve.bizport.BizPortSheet;
 import org.skyve.bizport.BizPortWorkbook;
 import org.skyve.domain.messages.MessageSeverity;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.ModuleDocument;
+import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.util.PushMessage;
@@ -393,6 +402,45 @@ class EXTTest {
 		when(user.getName()).thenReturn("tester");
 
 		assertThrows(IllegalArgumentException.class, () -> EXT.checkAccess(user, access, "desktop"));
+	}
+
+	private enum TestDocument implements ModuleDocument {
+		CONTACT;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String documentName() {
+			return "Contact";
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testStandardBizExportWithModuleDocumentResolvesTheDocumentByName() throws Exception {
+		// The String form resolves the document through the current customer before exporting;
+		// the lookup fails on purpose so the test stops at the names it was given.
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("admin")).thenReturn(module);
+		MetaDataException missing = new MetaDataException("no Contact");
+		when(module.getDocument(customer, "Contact")).thenThrow(missing);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		try {
+			assertSame(missing, assertThrows(MetaDataException.class, () -> EXT.standardBizExport(TestDocument.CONTACT)));
+		}
+		finally {
+			((ThreadLocal<?>) field.get(null)).remove();
+		}
 	}
 
 	private static class TestReceiver implements PushMessageReceiver {

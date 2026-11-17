@@ -8,6 +8,7 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -231,6 +232,17 @@ public interface User extends NamedMetaData {
 	 * @return the effective scope; {@link DocumentPermissionScope#none} if no roles grant access
 	 */
 	@Nonnull DocumentPermissionScope getScope(@Nonnull String moduleName, @Nonnull String documentName);
+
+	/**
+	 * Returns the effective {@link DocumentPermissionScope} for the user on the given
+	 * document; a typed shortcut for {@link #getScope(String, String)}.
+	 *
+	 * @param document  the compile-time document reference; must not be {@code null}
+	 * @return the effective scope; {@link DocumentPermissionScope#none} if no roles grant access
+	 */
+	default @Nonnull DocumentPermissionScope getScope(@Nonnull ModuleDocument document) {
+		return getScope(document.moduleName(), document.documentName());
+	}
 	
 	/**
 	 * Returns {@code true} if this user can read the given bean, considering both the

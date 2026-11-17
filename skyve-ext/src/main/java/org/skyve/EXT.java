@@ -61,6 +61,7 @@ import org.skyve.impl.web.WebContainer;
 import org.skyve.job.JobScheduler;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.Role;
@@ -321,6 +322,17 @@ public class EXT {
 		Module m = c.getModule(moduleName);
 		Document d = m.getDocument(c, documentName);
 		return standardBizExport(d);
+	}
+
+	/**
+	 * Export all persisted instances of the referenced document from the data store; a typed
+	 * shortcut for {@link #standardBizExport(String, String)}.
+	 *
+	 * @param document	The compile-time reference to the document to export.
+	 * @return	A workbook.
+	 */
+	public static @Nonnull BizPortWorkbook standardBizExport(@Nonnull final ModuleDocument document) {
+		return standardBizExport(document.moduleName(), document.documentName());
 	}
 
 	/**

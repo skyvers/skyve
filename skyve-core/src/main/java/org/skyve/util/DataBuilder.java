@@ -30,6 +30,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
@@ -369,6 +370,28 @@ public class DataBuilder {
 		return build(moduleName, documentName, false);
 	}
 	
+	/**
+	 * Builds a populated bean instance for the referenced document; a typed shortcut for
+	 * {@link #build(String, String)}.
+	 *
+	 * @param document Compile-time reference to the document to instantiate
+	 * @return Populated bean instance
+	 */
+	public @Nonnull <T extends Bean> T build(@Nonnull ModuleDocument document) {
+		return build(document.moduleName(), document.documentName());
+	}
+
+	/**
+	 * Builds a populated bean instance for the referenced document while suppressing recursive
+	 * factory re-entry; a typed shortcut for {@link #factoryBuild(String, String)}.
+	 *
+	 * @param document Compile-time reference to the document to instantiate
+	 * @return Populated bean instance
+	 */
+	public @Nonnull <T extends Bean> T factoryBuild(@Nonnull ModuleDocument document) {
+		return factoryBuild(document.moduleName(), document.documentName());
+	}
+
 	private @Nonnull <T extends Bean> T build(@Nonnull String moduleName, @Nonnull String documentName, boolean allowFactoryRecursion) {
 		Module m = customer.getModule(moduleName);
 		Document d = m.getDocument(customer, documentName);
