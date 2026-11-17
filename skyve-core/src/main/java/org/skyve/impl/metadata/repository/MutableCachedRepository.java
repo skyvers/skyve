@@ -104,21 +104,23 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			// Clear any customer overrides and any modules the customer has access to.
 			// NB moduleNames set is in insertion order
 			Set<String> moduleNames = ((CustomerImpl) customer).getModuleEntries().keySet();
-			List<String> modulePrefixes = new ArrayList<>(moduleNames.size());
+			List<String> moduleKeys = new ArrayList<>(moduleNames.size());
 			for (String moduleName : moduleNames) {
-				modulePrefixes.add(MODULES_NAMESPACE + moduleName);
+				moduleKeys.add(MODULES_NAMESPACE + moduleName);
 			}
 			
+			// Match a key itself or the keys below it, so that customer test2 or module admin2 is
+			// not evicted with test or admin
 			Iterator<String> i = cache.keySet().iterator();
-			final String customerOverridePrefix = CUSTOMERS_NAMESPACE + customer.getName();
+			final String customerKey = CUSTOMERS_NAMESPACE + customer.getName();
 			while (i.hasNext()) {
 				String key = i.next();
-				if (key.startsWith(customerOverridePrefix)) {
+				if (isOrIsBelow(key, customerKey)) {
 					i.remove();
 					continue;
 				}
-				for (String modulePrefix : modulePrefixes) {
-					if (key.startsWith(modulePrefix)) {
+				for (String moduleKey : moduleKeys) {
+					if (isOrIsBelow(key, moduleKey)) {
 						i.remove();
 						break;
 					}
@@ -127,6 +129,18 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		}
 	}
 	
+	/**
+	 * Determines whether a cache key is the given key or a key below it.
+	 *
+	 * @param key	The cache key.
+	 * @param parentKey	The key, such as <code>customers/test</code> or <code>modules/admin</code>.
+	 * @return	true if the key is the parent key or starts with the parent key and a '/'.
+	 */
+	private static boolean isOrIsBelow(@Nonnull String key, @Nonnull String parentKey) {
+		return key.startsWith(parentKey) &&
+				((key.length() == parentKey.length()) || (key.charAt(parentKey.length()) == '/'));
+	}
+
 	/**
 	 * Returns the cached global router, loading and converting it on first access.
 	 *

@@ -447,6 +447,33 @@ class MutableCachedRepositoryTest {
 					() -> assertNull(repo.vtable(null, "modules/admin/User/views/edit")));
 	}
 
+	/**
+	 * Evicting a customer removes its own keys and those of its modules, not those of a customer or
+	 * module whose name starts with the same characters.
+	 */
+	@Test
+	void evictingACustomerLeavesCustomersAndModulesWithLongerNames() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		String[] evicted = {"customers/test", "customers/test/modules/test/Doc", "modules/admin", "modules/admin/User"};
+		String[] kept = {"customers/test2", "customers/test2/modules/test/Doc", "modules/admin2", "modules/admin2/User"};
+		for (String key : evicted) {
+			repo.addEmptyKey(key);
+		}
+		for (String key : kept) {
+			repo.addEmptyKey(key);
+		}
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("test");
+		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
+		moduleEntries.put("admin", null);
+		when(customer.getModuleEntries()).thenReturn(moduleEntries);
+
+		repo.evictCachedMetaData(customer);
+
+		assertAll(() -> assertAll(java.util.Arrays.stream(evicted).map(key -> () -> assertNull(repo.vtable(null, key), key))),
+					() -> assertAll(java.util.Arrays.stream(kept).map(key -> () -> assertEquals(key, repo.vtable(null, key)))));
+	}
+
 	// ---- unnamed metadata ----
 
 	@Test
