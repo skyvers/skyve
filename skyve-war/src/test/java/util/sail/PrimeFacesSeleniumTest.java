@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
@@ -86,8 +88,8 @@ class PrimeFacesSeleniumTest {
 
 	/**
 	 * A lookup waits for its element up to the settings' timeout ({@code sail.timeoutSeconds}), not a fixed second: an
-	 * element that a slow page shows after 1.5 seconds is found within a 3 second timeout, and a missing element is
-	 * given up on only after the timeout.
+	 * element that a slow page shows after 1.5 seconds is found within a 30 second timeout, and a missing element is
+	 * given up on only after the timeout. The checks are outcomes and a lower bound, which a slow machine cannot break.
 	 */
 	@Test
 	@SuppressWarnings("static-method")
@@ -104,7 +106,7 @@ class PrimeFacesSeleniumTest {
 		when(driver.findElement(By.id("missing"))).thenThrow(new NoSuchElementException("missing"));
 		PrimeFacesSelenium selenium = new PrimeFacesSelenium();
 		selenium.driver = driver;
-		selenium.settings = timeoutSeconds(3);
+		selenium.settings = timeoutSeconds(30);
 		WebElement found = selenium.byId("late");
 		selenium.settings = timeoutSeconds(2);
 		long start = System.nanoTime();
@@ -117,7 +119,9 @@ class PrimeFacesSeleniumTest {
 	}
 
 	/**
-	 * A button that goes to another page waits for the page by its view state, and pauses for nothing else.
+	 * A button that goes to another page waits for the page by its view state, and pauses for nothing else: with the
+	 * view state changed at the first check, it returns after that one check, and it never sleeps (a sleep on a thread
+	 * whose interrupt flag is set would end at once and clear the flag). No time is measured.
 	 */
 	@Test
 	@SuppressWarnings("static-method")
@@ -136,11 +140,19 @@ class PrimeFacesSeleniumTest {
 		selenium.driver = driver;
 		selenium.settings = timeoutSeconds(1);
 
-		long start = System.nanoTime();
-		selenium.redirectButton("go", false);
-		long took = System.nanoTime() - start;
+		boolean stillInterrupted;
+		try {
+			Thread.currentThread().interrupt();
+			selenium.redirectButton("go", false);
+		}
+		finally {
+			stillInterrupted = Thread.interrupted(); // reads and clears the flag
+		}
 
-		assertTrue(took < 250_000_000L, () -> "took " + took + " ns");
+		// the view state is read once before the click, then twice by the one condition check
+		assertAll(() -> assertTrue(stillInterrupted, "nothing slept"),
+					() -> verify(driver, times(3)).findElements(By.name("jakarta.faces.ViewState")),
+					() -> verify((JavascriptExecutor) driver, times(1)).executeScript("return document.readyState"));
 	}
 
 	private static WebElement viewState(String value) {
