@@ -27,7 +27,6 @@ import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -68,17 +67,23 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	private static final class Fixture {
 		private final Map<String, DocumentImpl> vanilla = new TreeMap<>();
 		private final Map<String, Map<String, DocumentImpl>> overrides = Map.of("acme", new TreeMap<>(), "beta", new TreeMap<>());
-		private final Set<String> extended = new TreeSet<>();
+		/** Extension source path (without "Extension.java") to the class it extends. */
+		private final Map<String, String> extended = new TreeMap<>();
 
-		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> class. */
+		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> extending its domain class. */
 		Fixture extension(String documentName) {
-			extended.add("modules/" + MODULE + '/' + documentName + '/' + documentName);
+			return extension(documentName, documentName);
+		}
+
+		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> extending the named class. */
+		Fixture extension(String documentName, String superclassName) {
+			extended.put("modules/" + MODULE + '/' + documentName + '/' + documentName, superclassName);
 			return this;
 		}
 
 		/** Gives the acme customer's override of the document a hand-written <code>&lt;Document&gt;Extension</code> class. */
 		Fixture acmeExtension(String documentName) {
-			extended.add("customers/acme/modules/" + MODULE + '/' + documentName + '/' + documentName);
+			extended.put("customers/acme/modules/" + MODULE + '/' + documentName + '/' + documentName, documentName + "Override");
 			return this;
 		}
 
@@ -165,10 +170,12 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	private static Map<String, String> generate(Fixture fixture) throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-override");
 		Path src = root.resolve("source");
-		for (String extensionPath : fixture.extended) {
+		for (Map.Entry<String, String> entry : fixture.extended.entrySet()) {
+			String extensionPath = entry.getKey();
 			Path extension = src.resolve(extensionPath + "Extension.java");
 			Files.createDirectories(extension.getParent());
-			Files.writeString(extension, "class Extension {}");
+			String className = extensionPath.substring(extensionPath.lastIndexOf('/') + 1) + "Extension";
+			Files.writeString(extension, "public class " + className + "\n\t\textends " + entry.getValue() + " {\n}\n");
 		}
 
 		CustomerImpl acme = new CustomerImpl();
@@ -506,20 +513,64 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	}
 
 	@Test
-	@Disabled("Item C2(b): a narrowed document with a hand-written extension - awaiting a design decision")
 	void aNarrowedDocumentWithAnExtensionMapsItsVanillaClass() throws Exception {
 		Map<String, String> files = generate(new Fixture()
 				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
-				.extension("Receipt")
+				.extension("Receipt", "ReceiptVanilla")
 				.acme(document("Receipt", "SALES_Receipt", null, null, "code")));
 
+		String domainClass = files.get("modules/sales/domain/Receipt.java");
 		String vanillaClass = files.get("modules/sales/domain/ReceiptVanilla.java");
+		String override = files.get("customers/acme/modules/sales/domain/ReceiptOverride.java");
 		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
 		assertAll(
-				() -> assertTrue(vanillaClass.contains("public class ReceiptVanilla extends ReceiptExtension"), vanillaClass),
-				() -> assertTrue(vanillaClass.contains("description"), vanillaClass),
-				// the mapping maps description, which only ReceiptVanilla declares
-				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.domain.ReceiptVanilla\""), vanillaMapping));
+				// Receipt <- ReceiptVanilla <- ReceiptExtension
+				() -> assertTrue(domainClass.contains("public abstract class Receipt extends AbstractPersistentBean"), domainClass),
+				() -> assertFalse(domainClass.contains("description"), domainClass),
+				() -> assertTrue(vanillaClass.contains("public abstract class ReceiptVanilla extends Receipt "), "abstract, as Receipt has an extension: " + vanillaClass),
+				() -> assertFalse(vanillaClass.contains("import modules.sales.Receipt.ReceiptExtension;"), vanillaClass),
+				() -> assertTrue(vanillaClass.contains("private String description"), "ReceiptVanilla declares what acme leaves out: " + vanillaClass),
+				// the vanilla mapping maps the extension, which inherits description from ReceiptVanilla
+				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.Receipt.ReceiptExtension\""), vanillaMapping),
+				() -> assertTrue(vanillaMapping.contains("<property name=\"description\""), vanillaMapping),
+				// acme's override extends the extension, inheriting description unmapped
+				() -> assertTrue(override.contains("public class ReceiptOverride extends ReceiptExtension"), override),
+				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.ReceiptOverride\""), acmeMapping),
+				() -> assertFalse(acmeMapping.contains("name=\"description\""), acmeMapping));
+	}
+
+	@Test
+	void aNarrowedDocumentsExtensionMustExtendItsVanillaClass() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "Receipt")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code"));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("ReceiptExtension must extend ReceiptVanilla because customer acme's override of Receipt leaves out attributes, which only ReceiptVanilla declares.",
+						e.getMessage());
+	}
+
+	@Test
+	void anExtensionMustNotExtendAVanillaClassThatIsNotGenerated() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "modules.sales.domain.ReceiptVanilla");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("ReceiptExtension must extend Receipt because no customer's override of Receipt leaves out attributes, so ReceiptVanilla is not generated.",
+						e.getMessage());
+	}
+
+	@Test
+	void anExtensionExtendingAnIntermediateClassIsNotChecked() throws Exception {
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "ReceiptBehaviour")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code")));
+
+		assertTrue(files.containsKey("modules/sales/domain/ReceiptVanilla.java"), files.keySet().toString());
 	}
 
 	// ----- overrides in an inheritance hierarchy -------------------------------

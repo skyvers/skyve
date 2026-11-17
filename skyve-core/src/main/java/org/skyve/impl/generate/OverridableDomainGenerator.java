@@ -27,6 +27,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -118,6 +120,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private static class DomainClass {
 		private boolean isAbstract = false;
+		// the first customer whose override leaves out a vanilla attribute, making the class abstract
+		private String narrowingCustomerName = null;
 		// attribute name -> attribute type
 		private TreeMap<String, AttributeType> attributes = new TreeMap<>();
 	}
@@ -295,6 +299,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										}
 										i.remove();
 										vanillaDocumentClass.isAbstract = true;
+										if (vanillaDocumentClass.narrowingCustomerName == null) {
+											vanillaDocumentClass.narrowingCustomerName = customerName;
+										}
 									}
 								}
 							}
@@ -463,6 +470,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (write) {
 					generation.put(javaFilePath, javaFileContents);
 				}
+
+				checkExtensionSuperclass(modulePath, documentName, domainClass);
 
 				if ((domainClass != null) && domainClass.isAbstract) {
 					// Generate the concrete vanilla class
@@ -966,6 +975,53 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												" has the name of the class " + className + " generated for document " + documentName +
 												". Rename the document.");
 			}
+		}
+	}
+
+	/**
+	 * Checks the direct superclass of a vanilla document's hand-written <code>&lt;Document&gt;Extension</code>,
+	 * if it has one. When a customer override leaves out a vanilla attribute, the generated
+	 * <code>&lt;Document&gt;Vanilla</code> class carries it and sits between the domain class and the
+	 * extension, so the extension must extend <code>&lt;Document&gt;Vanilla</code>; otherwise it must
+	 * extend the domain class, as <code>&lt;Document&gt;Vanilla</code> is not generated. An extension that
+	 * extends some other class - an intermediate class of the project's own - is not checked.
+	 *
+	 * @param modulePath	The module's path (<code>modules/&lt;m&gt;</code>).
+	 * @param documentName	The document name.
+	 * @param domainClass	The document's vanilla domain class metadata, or null.
+	 * @throws IOException	if the extension source cannot be read.
+	 * @throws MetaDataException	if the extension extends the wrong generated class.
+	 */
+	private void checkExtensionSuperclass(@Nonnull String modulePath,
+											@Nonnull String documentName,
+											@Nullable DomainClass domainClass)
+	throws IOException {
+		Path extensionPath = Paths.get(srcPath, modulePath, documentName, documentName + "Extension.java");
+		if (! Files.isRegularFile(extensionPath)) {
+			return;
+		}
+		String extensionName = documentName + "Extension";
+		String vanillaClassName = documentName + VANILLA_CLASS_SUFFIX;
+		Matcher matcher = Pattern.compile("\\bclass\\s+" + extensionName + "\\b[^{]*?\\bextends\\s+([\\w.]+)")
+									.matcher(Files.readString(extensionPath, StandardCharsets.UTF_8));
+		if (! matcher.find()) {
+			return;
+		}
+		String superclassName = matcher.group(1);
+		superclassName = superclassName.substring(superclassName.lastIndexOf('.') + 1);
+		String narrowingCustomerName = ((domainClass != null) && domainClass.isAbstract) ? domainClass.narrowingCustomerName : null;
+		boolean narrowed = (narrowingCustomerName != null);
+		if (narrowed && superclassName.equals(documentName)) {
+			throw new MetaDataException(extensionName + " must extend " + vanillaClassName + " because customer " +
+											narrowingCustomerName + "'s override of " + documentName +
+											" leaves out attributes, which only " + vanillaClassName + " declares.");
+		}
+		if ((! narrowed) && superclassName.equals(vanillaClassName)) {
+			throw new MetaDataException(extensionName + " must extend " + documentName + " because no customer's override of " +
+											documentName + " leaves out attributes, so " + vanillaClassName + " is not generated.");
+		}
+		if (debug && (! superclassName.equals(documentName)) && (! superclassName.equals(vanillaClassName))) {
+			LOGGER.info("{} extends {}, not {} - not checked", extensionName, superclassName, narrowed ? vanillaClassName : documentName);
 		}
 	}
 
@@ -3900,7 +3956,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 																		.append('/')
 																		.append(baseDocumentName)
 																		.append("Extension.java").toString();
-			baseDocumentExtensionClassExists = new File(baseDocumentExtensionPath).exists();
+			// the concrete vanilla class of a narrowed document sits between the domain class and its
+			// extension, so it extends the domain class
+			baseDocumentExtensionClassExists = ((customer != null) || (! overridden)) &&
+													new File(baseDocumentExtensionPath).exists();
 			if (baseDocumentExtensionClassExists) {
 				imports.add(new StringBuilder(128).append("modules.")
 													.append(baseDocument.getOwningModuleName())

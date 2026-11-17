@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.model.document;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -10,7 +11,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
@@ -67,13 +67,13 @@ class DocumentImplBeanClassTest {
 		// fixture
 	}
 
-	/** A hand-written extension of a narrowed document. */
-	public static class ReceiptExtension extends Receipt {
+	/** The abstract concrete vanilla class generated for the narrowed Receipt, which carries the narrowed-away properties. */
+	public abstract static class ReceiptVanilla extends Receipt {
 		// fixture
 	}
 
-	/** The concrete vanilla class generated for the narrowed Receipt, which carries the narrowed-away properties. */
-	public static class ReceiptVanilla extends ReceiptExtension {
+	/** A hand-written extension of a narrowed document, which extends its vanilla class. */
+	public static class ReceiptExtension extends ReceiptVanilla {
 		// fixture
 	}
 
@@ -184,10 +184,11 @@ class DocumentImplBeanClassTest {
 	}
 
 	@Test
-	@Disabled("Item C2(b): a narrowed document with a hand-written extension - awaiting a design decision")
 	void aNarrowedVanillaDocumentWithAnExtensionUsesItsVanillaClass() throws Exception {
-		// ReceiptVanilla extends ReceiptExtension and carries the properties the narrowing took off
-		// Receipt, but the vanilla extension is found first
-		assertEquals(ReceiptVanilla.class, beanClass("beta", "Receipt"));
+		// Receipt <- ReceiptVanilla <- ReceiptExtension: the extension has every vanilla property,
+		// through ReceiptVanilla
+		Class<?> result = beanClass("beta", "Receipt");
+		assertAll(() -> assertEquals(ReceiptExtension.class, result),
+					() -> assertEquals(ReceiptVanilla.class, result.getSuperclass()));
 	}
 }
