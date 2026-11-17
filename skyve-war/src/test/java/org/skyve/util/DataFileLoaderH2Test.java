@@ -11,11 +11,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal10;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
@@ -752,5 +754,56 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 		// no number at the start: loaded as the empty cell is
 		assertEquals(0, beans.get(2).getDecimal10().compareTo(beans.get(2).getDecimal2()), "kg 1");
 		assertEquals(0, beans.get(2).getDecimal10().compareTo(beans.get(2).getDecimal5()), "abc");
+	}
+
+	/**
+	 * A spreadsheet's number cells are read as English text with a converter, whatever the JVM's locale: in a German
+	 * JVM, 0.5 is not "0,5" (which an English converter reads as 5) and 1,234.50 in a #,##0.00 cell is not "1.234,50"
+	 * (read as 1.234); a date cell with a converter still loads its date.
+	 */
+	@Test
+	void poiSheetLoaderReadsNumberCellsInEnglishInAGermanJvm() throws Exception {
+		Locale display = Locale.getDefault(Locale.Category.DISPLAY);
+		Locale format = Locale.getDefault(Locale.Category.FORMAT);
+		Locale locale = Locale.getDefault();
+		Locale.setDefault(Locale.GERMANY);
+		try (XSSFWorkbook wb = new XSSFWorkbook()) {
+			org.apache.poi.ss.usermodel.Sheet sheet = wb.createSheet("Data");
+			org.apache.poi.ss.usermodel.CellStyle grouped = wb.createCellStyle();
+			grouped.setDataFormat(wb.createDataFormat().getFormat("#,##0.00"));
+			org.apache.poi.ss.usermodel.CellStyle date = wb.createCellStyle();
+			date.setDataFormat(wb.createDataFormat().getFormat("dd-mmm-yyyy"));
+			org.apache.poi.ss.usermodel.Row row = sheet.createRow(0);
+			row.createCell(0).setCellValue("german");
+			row.createCell(1).setCellValue(0.5);
+			org.apache.poi.ss.usermodel.Cell cell = row.createCell(2);
+			cell.setCellValue(1234.5);
+			cell.setCellStyle(grouped);
+			cell = row.createCell(3);
+			cell.setCellValue(java.time.LocalDate.of(2026, 6, 5));
+			cell.setCellStyle(date);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			wb.write(baos);
+
+			UploadException exception = new UploadException();
+			POISheetLoader loader = new POISheetLoader(new ByteArrayInputStream(baos.toByteArray()), 0, MODULE, DOCUMENT, exception);
+			loader.setActivityType(LoaderActivityType.CREATE_ALL);
+			loader.addField(new DataFileField(AllAttributesPersistent.textPropertyName, 0));
+			loader.addField(new DataFileField(AllAttributesPersistent.decimal2PropertyName, null, false, 1, ConverterName.Decimal2DollarsAndCents.getConverter()));
+			loader.addField(new DataFileField(AllAttributesPersistent.decimal5PropertyName, null, false, 2, ConverterName.Decimal5TwoDecimalPlaces.getConverter()));
+			loader.addField(new DataFileField(AllAttributesPersistent.datePropertyName, null, false, 3, ConverterName.DD_MMM_YYYY.getConverter()));
+
+			List<AllAttributesPersistent> beans = loader.beanResults();
+
+			assertEquals(1, beans.size());
+			assertEquals(new Decimal2("0.5"), beans.get(0).getDecimal2(), "0.5");
+			assertEquals(new Decimal5("1234.5"), beans.get(0).getDecimal5(), "1,234.50");
+			assertEquals(new DateOnly(java.time.LocalDate.of(2026, 6, 5)), beans.get(0).getDate(), "05-Jun-2026");
+		}
+		finally {
+			Locale.setDefault(locale);
+			Locale.setDefault(Locale.Category.DISPLAY, display);
+			Locale.setDefault(Locale.Category.FORMAT, format);
+		}
 	}
 }

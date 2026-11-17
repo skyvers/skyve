@@ -2,6 +2,7 @@ package org.skyve.impl.bizport;
 
 import java.io.InputStream;
 import java.util.Date;
+import java.util.Locale;
 import java.util.TreeMap;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -208,7 +209,8 @@ public class POISheetLoader extends AbstractDataFileLoader {
 
 		if (row != null) {
 			Cell cell = row.getCell(col, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
-			DataFormatter df = new DataFormatter();
+			// English, as the converters read numbers and dates whatever the JVM's locale (a German JVM writes 0.5 as 0,5)
+			DataFormatter df = new DataFormatter(Locale.ENGLISH);
 
 			if (cell != null) {
 				// try to interpret whatever we find as a String
