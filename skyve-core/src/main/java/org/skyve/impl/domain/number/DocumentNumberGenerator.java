@@ -14,6 +14,11 @@ import jakarta.annotation.Nullable;
  * <p>This is the default implementation registered via
  * {@link NumberGeneratorStaticSingleton#setDefault()}.
  *
+ * <p>Threading: thread-safe; see {@link AbstractDocumentNumberGenerator}. The number is taken
+ * in the caller's transaction, so a transaction that rolls back gives its number back (no
+ * gaps), and the sequence's row stays locked until the caller's transaction ends: concurrent
+ * transactions numbering from one sequence wait for each other.
+ *
  * @see AbstractDocumentNumberGenerator
  * @see NumberGeneratorStaticSingleton
  */

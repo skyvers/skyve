@@ -13,6 +13,10 @@ import jakarta.annotation.Nullable;
  * Generates document sequence numbers in an autonomous (inner) database
  * transaction, so that sequence allocation is committed immediately and
  * not rolled back if the outer transaction fails.
+ *
+ * <p>Threading: thread-safe; see {@link AbstractDocumentNumberGenerator}. The sequence's row is
+ * locked only for the inner transaction, so concurrent callers wait for each other briefly; a
+ * number taken by an outer transaction that later rolls back is not reused (a gap).
  */
 public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocumentNumberGenerator {
 	@Override

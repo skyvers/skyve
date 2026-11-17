@@ -7,6 +7,7 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.app.admin.DocumentNumber;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -31,6 +32,22 @@ import jakarta.annotation.Nullable;
  * the maximum value already present in the field's column so that generated numbers
  * never collide with existing data.
  *
+ * <p>Threading: thread-safe, and safe across a cluster of servers sharing one database.
+ * Instances hold no state; mutual exclusion is in the database, through the
+ * {@link Persistence} supplied to {@link #getNextNumber}. An existing row is read with a
+ * pessimistic write lock ({@link Persistence#retrieveAndLock}: {@code SELECT ... FOR UPDATE}
+ * or the dialect's equivalent), so concurrent transactions increment it one at a time, each
+ * from the number the previous one committed, and each holds the lock until its transaction
+ * ends.
+ *
+ * <p>Two transactions that both find no row both try to create it. The {@code DocumentNumber}
+ * document's {@code uniqueSequence} constraint makes the second wait (up to the database's
+ * lock timeout) until the first ends; if the first committed, the second's check fails with a
+ * {@link UniqueConstraintViolationException}, which is caught, and the second then locks and
+ * increments the row the first created. The constraint check reads committed data, so this
+ * holds at the READ COMMITTED isolation level, the default for H2, PostgreSQL, Oracle and
+ * SQL Server.
+ *
  * <p>Subclasses must implement {@link NumberGenerator#next} using the
  * {@link #getNextNumber} helper, supplying the appropriate
  * {@link org.skyve.persistence.Persistence} instance.
@@ -41,13 +58,56 @@ import jakarta.annotation.Nullable;
 public abstract class AbstractDocumentNumberGenerator implements NumberGenerator {
 	private static final String NUMERIC_PATTERN = "^\\d+$";
 
-	@SuppressWarnings({"static-method", "java:S3776"}) // Complexity OK
+	/**
+	 * Takes the next number of a sequence: increments its {@code DocumentNumber} row,
+	 * creating the row on first use, and returns the new value.
+	 *
+	 * <p>Precondition: {@code pers} has an active transaction.
+	 *
+	 * <p>Side effects: inserts or updates the sequence's {@code DocumentNumber} row through
+	 * {@code pers}, so the number is committed or rolled back with {@code pers}'s
+	 * transaction, and evicts the row from {@code pers}'s first-level cache.
+	 *
+	 * <p>Threading: concurrent calls, in any threads or servers sharing the database, return
+	 * distinct numbers; see the class comment. The call blocks while another transaction
+	 * holds the sequence's row lock, or is creating its row, until that transaction ends,
+	 * and from then on holds that lock itself until {@code pers}'s transaction ends.
+	 *
+	 * @param pers the persistence whose transaction takes the number
+	 * @param prefix the prefix of the sequence's values, eg {@code "INV"} for {@code INV0001},
+	 *        or {@code null} for none
+	 * @param moduleName the module of the numbered document
+	 * @param documentName the numbered document
+	 * @param fieldName the field or sequence name
+	 * @param numberLength the minimum length of the number, zero-padded after the prefix
+	 * @return the next number of the sequence
+	 * @throws UniqueConstraintViolationException if creating the sequence's row conflicts with
+	 *         another transaction's row a second time, as when the row is deleted while in use
+	 */
 	protected @Nonnull String getNextNumber(@Nonnull Persistence pers,
 											@Nullable String prefix,
 											@Nonnull String moduleName,
 											@Nonnull String documentName,
 											@Nonnull String fieldName,
 											int numberLength) {
+		return getNextNumber(pers, prefix, moduleName, documentName, fieldName, numberLength, true);
+	}
+
+	/**
+	 * Takes the next number of a sequence as {@link #getNextNumber(Persistence, String, String, String, String, int)}
+	 * does, the second attempt finding the row another transaction created first.
+	 *
+	 * @param retryCreation whether a conflicting creation is followed by a second attempt
+	 *        ({@code true} on the first attempt) or throws ({@code false} on the second)
+	 */
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private @Nonnull String getNextNumber(@Nonnull Persistence pers,
+											@Nullable String prefix,
+											@Nonnull String moduleName,
+											@Nonnull String documentName,
+											@Nonnull String fieldName,
+											int numberLength,
+											boolean retryCreation) {
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
 		Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
@@ -111,7 +171,18 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 			nextNumber = incrementAlpha(prefix, lastNumber, numberLength);
 			dN.setDocumentNumber(nextNumber);
 
-			pers.preMerge(document, dN);
+			try {
+				pers.preMerge(document, dN);
+			}
+			catch (UniqueConstraintViolationException e) {
+				// A new row fails the check when another transaction created this sequence's row after
+				// the query above found none. The check waited for that transaction to commit, so the
+				// row can now be read and locked: take the number from it.
+				if (retryCreation) {
+					return getNextNumber(pers, prefix, moduleName, documentName, fieldName, numberLength, false);
+				}
+				throw e;
+			}
 			pers.upsertBeanTuple(dN);
 			pers.postMerge(document, dN);
 		}
