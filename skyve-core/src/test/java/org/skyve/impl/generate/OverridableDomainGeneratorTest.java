@@ -344,7 +344,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	void shouldEmitGeneratedInsertOnScalarFieldProperty() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
@@ -374,7 +374,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	void shouldEmitGeneratedAlwaysOnScalarFieldProperty() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
@@ -404,7 +404,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	void shouldNotEmitGeneratedAttributeWhenGeneratedIsNull() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);

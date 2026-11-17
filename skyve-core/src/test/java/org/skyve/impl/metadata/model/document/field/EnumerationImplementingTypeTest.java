@@ -51,7 +51,6 @@ import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
  * enums by the names of the generated classes, as classes in the <code>modules</code> and
  * <code>customers</code> packages of the test classes would be found as metadata by other tests.
  */
-@SuppressWarnings("static-method")
 class EnumerationImplementingTypeTest {
 	private static final String MODULE = "utmod";
 	private static final String OVERRIDING_CUSTOMER = "utcust";

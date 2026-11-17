@@ -3982,7 +3982,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsChildCollectionGeneratesBagElement() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE");
@@ -4030,7 +4029,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsAggregationCollectionGeneratesManyToMany() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE2");
@@ -4077,7 +4075,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsCompositionCollectionGeneratesComposeBag() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE3");
@@ -4121,7 +4118,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsOrderedCompositionGeneratesListElement() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE4");
@@ -4166,7 +4162,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsTransientCollectionIsSkipped() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_TABLE5");
@@ -4209,7 +4204,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsAssociationGeneratesManyToOne() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_ASSOC_TABLE");
@@ -4521,7 +4515,6 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- generateAttributeMappings with catalog/schema on Persistent ------
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsWithCatalogOnPersistentIncludesCatalogAttribute() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_CAT_TABLE");
@@ -4565,7 +4558,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsWithSchemaOnPersistentIncludesSchemaAttribute() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_SCH_TABLE");
@@ -4611,7 +4603,6 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- generateAttributeMappings with cacheName on non-child collection --
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsWithCacheNameOnAggregationIncludesCacheElement() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_CACHE_TABLE");
@@ -4657,7 +4648,6 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- generateAttributeMappings with ownerDatabaseIndex = true ----------
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsWithOwnerDatabaseIndexGeneratesKeyWithIndex() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_IDX_TABLE");
@@ -4705,7 +4695,6 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- generateAttributeMappings with elementDatabaseIndex = true --------
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsWithElementDatabaseIndexGeneratesManyToManyWithIndex() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_EL_IDX_TABLE");
@@ -4753,7 +4742,6 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- generateAttributeMappings with persistent collection referencing dynamic doc ---
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsPersistentCollectionReferencingDynamicDocIsSkipped() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_DYN_TABLE");
@@ -4802,7 +4790,6 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- generateAttributeMappings child + polymorphicallymapped → throw ---
 
 	@Test
-	@SuppressWarnings("boxing")
 	void generateAttributeMappingsChildCollectionWithPolymorphicTargetThrows() throws Exception {
 		OverridableDomainGenerator gen = generator();
 		setupPersistentPropertyLengths(gen, "OWN_POLY_TABLE");
