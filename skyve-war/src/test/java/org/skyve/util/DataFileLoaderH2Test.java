@@ -16,11 +16,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.messages.UploadException;
+import org.skyve.domain.types.Decimal10;
+import org.skyve.domain.types.Decimal2;
+import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.bizport.AbstractDataFileLoader.LoaderActivityType;
 import org.skyve.impl.bizport.CSVLoader;
 import org.skyve.impl.bizport.DataFileField;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.bizport.POISheetLoader;
+import org.skyve.metadata.ConverterName;
 
 import modules.test.domain.AllAttributesPersistent;
 
@@ -717,4 +721,36 @@ class DataFileLoaderH2Test extends AbstractH2Test {
                 String where = loader.getWhere();
                 assertNotNull(where, "getWhere() should return non-null after processing");
         }
+
+	/**
+	 * A cell with text after its number loads the number with a decimal converter, as the loader read it before the
+	 * converters read the whole text (a form or a list filter refuses 1,234.50 kg).
+	 */
+	@Test
+	void csvLoaderReadsTheNumberAtTheStartOfACellWithADecimalConverter() {
+		InputStream is = csvStream(
+				"text,decimal2,decimal5,decimal10",
+				"alpha,\"1,234.50 kg\",\"$1,234.50 AUD\",12.5% of the total",
+				"beta,\"1,234.50\",-$2.00,12.5%",
+				"gamma,kg 1,abc,");
+		UploadException exception = new UploadException();
+		CSVLoader loader = new CSVLoader(LoaderActivityType.CREATE_ALL, is, exception, MODULE, DOCUMENT);
+		loader.addField(new DataFileField(AllAttributesPersistent.textPropertyName, 0));
+		loader.addField(new DataFileField(AllAttributesPersistent.decimal2PropertyName, null, false, 1, ConverterName.Decimal2OneDecimalPlace.getConverter()));
+		loader.addField(new DataFileField(AllAttributesPersistent.decimal5PropertyName, null, false, 2, ConverterName.Decimal5DollarsAndCents.getConverter()));
+		loader.addField(new DataFileField(AllAttributesPersistent.decimal10PropertyName, null, false, 3, ConverterName.Decimal10TwoDecimalPlacesPercentage.getConverter()));
+
+		List<AllAttributesPersistent> beans = loader.beanResults();
+
+		assertEquals(3, beans.size());
+		assertEquals(new Decimal2("1234.50"), beans.get(0).getDecimal2(), "1,234.50 kg");
+		assertEquals(new Decimal5("1234.50"), beans.get(0).getDecimal5(), "$1,234.50 AUD");
+		assertEquals(new Decimal10("0.125"), beans.get(0).getDecimal10(), "12.5% of the total");
+		assertEquals(new Decimal2("1234.50"), beans.get(1).getDecimal2(), "1,234.50");
+		assertEquals(new Decimal5("-2"), beans.get(1).getDecimal5(), "-$2.00");
+		assertEquals(new Decimal10("0.125"), beans.get(1).getDecimal10(), "12.5%");
+		// no number at the start: loaded as the empty cell is
+		assertEquals(0, beans.get(2).getDecimal10().compareTo(beans.get(2).getDecimal2()), "kg 1");
+		assertEquals(0, beans.get(2).getDecimal10().compareTo(beans.get(2).getDecimal5()), "abc");
+	}
 }

@@ -1,5 +1,8 @@
 package org.skyve.impl.bizport;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +22,9 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.decimal.AbstractDecimalConverter;
+import org.skyve.domain.types.converters.decimal.AbstractDecimalPercentageConverter;
+import org.skyve.domain.types.converters.decimal.currency.AbstractDollarsAndCentsConverter;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.metadata.customer.Customer;
@@ -684,7 +690,11 @@ public abstract class AbstractDataFileLoader {
 								try {
 									loadValue = converter.fromDisplayValue(displayValue.trim());
 								} catch (@SuppressWarnings("unused") Exception e) {
-									LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, converter.toString());
+									// a cell may have text after its number (1,234.50 kg), which the loader has always read
+									loadValue = leadingNumber(converter, displayValue.trim());
+									if (loadValue == null) {
+										LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, converter.toString());
+									}
 								}
 								
 								if (loadValue == null) {
@@ -1021,5 +1031,42 @@ public abstract class AbstractDataFileLoader {
 		@SuppressWarnings("unchecked")
 		List<T> result = (List<T>) results;
 		return result;
+	}
+
+	/**
+	 * Reads the number at the start of a data file's cell for a decimal converter, as the loader did before the
+	 * converters read the whole text: a cell such as {@code 1,234.50 kg} loads 1234.50. A percentage's {@code %} is
+	 * removed wherever it is, and a {@code $} at the start of dollars. Forms and list filters read the whole text.
+	 *
+	 * @param converter the field's converter
+	 * @param displayValue the cell's text, trimmed
+	 * @return the value, or {@code null} if the converter is not a decimal converter or the text does not start with a
+	 * 			number
+	 */
+	static @Nullable Object leadingNumber(@Nonnull Converter<?> converter, @Nonnull String displayValue) {
+		if (! (converter instanceof AbstractDecimalConverter<?> decimalConverter)) {
+			return null;
+		}
+		String text = displayValue;
+		if (converter instanceof AbstractDecimalPercentageConverter<?>) {
+			text = text.replace("%", "");
+		}
+		else if ((converter instanceof AbstractDollarsAndCentsConverter<?>) && text.startsWith("$")) {
+			text = text.substring(1).trim();
+		}
+		DecimalFormat format = CORE.getDecimalFormat(decimalConverter.getFormatPattern());
+		format.setParseBigDecimal(true);
+		ParsePosition position = new ParsePosition(0);
+		Number number = format.parse(text, position);
+		if ((position.getIndex() == 0) || (! (number instanceof BigDecimal decimal))) {
+			return null;
+		}
+		try {
+			// the converter scales the number (and a percentage's is divided by 100)
+			return converter.fromDisplayValue(decimal.toPlainString());
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return null;
+		}
 	}
 }
