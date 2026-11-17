@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -43,7 +44,14 @@ import jakarta.servlet.http.HttpSession;
 
 /**
  * Manages serialised conversation (page-scope) state in the HTTP session,
- * providing store and retrieve operations for Faces view state and navigation data.
+ * providing store and retrieve operations for Faces view state and navigation data,
+ * and keeps the per-user session id sets and per-session CSRF token sets.
+ *
+ * <p>Thread-safe: all public methods may be called concurrently without external synchronisation.
+ * The session id and CSRF token sets are changed with Ehcache's atomic conditional operations
+ * ({@code putIfAbsent}, {@code replace(key, old, new)}, {@code remove(key, old)}) on a new copy of the
+ * set, so simultaneous changes to one user's sessions or one session's tokens are never lost, and a
+ * set read from the cache is never changed afterwards.
  */
 public class StateUtil {
 
@@ -150,39 +158,85 @@ public class StateUtil {
 	private static @Nonnull Cache<String, TreeSet> getSessions() {
 		return EXT.getCaching().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
 	}
-	
+
 	/**
-	 * Adds a session.
-	 */
-	@SuppressWarnings({"rawtypes", "unchecked"})
-	public static void addSession(@Nonnull String userId, @Nonnull HttpSession session) {
-		Cache<String, TreeSet> sessions = getSessions();
-		TreeSet sessionIds = sessions.get(userId);
-		if (sessionIds == null) {
-			sessionIds = new TreeSet<>();
-		}
-		sessionIds.add(session.getId());
-		// Note that EHCache puts are thread-safe
-		sessions.put(userId, sessionIds);
-	}
-	
-	/**
-	 * Removes the session.
+	 * Atomically applies a change to the set cached under a key, retrying until no other thread changed
+	 * that entry in between.
+	 *
+	 * <p>Each attempt copies the current set (an empty set when the key is absent), applies the change to
+	 * the copy, and writes the copy only if the entry still holds the set that was read: with
+	 * {@code putIfAbsent} when the key was absent, {@code remove(key, old)} when the copy is empty and
+	 * {@code removeWhenEmpty} is set, else {@code replace(key, old, new)}. The cached set itself is never
+	 * changed, so a reader holding it sees a consistent snapshot. When the change reports no change,
+	 * nothing is written.
+	 *
+	 * <p>Threading: safe to call concurrently for the same key, and takes no lock of its own; an attempt
+	 * fails only because another thread's change to the entry succeeded (or the entry expired), so the
+	 * loop ends. A JVM lock would not be enough if the cache were ever shared across JVMs; the cache's
+	 * own conditional operations are atomic whatever the cache's topology is.
+	 *
+	 * @param cache	the cache holding the sets
+	 * @param key	the entry's key
+	 * @param removeWhenEmpty	{@code true} to remove the entry when the change leaves its set empty,
+	 * 							{@code false} to keep an empty set
+	 * @param change	applies the change to the copy it is given, returning {@code true} if the copy changed;
+	 * 					it may run more than once, so it must have no other side effects
+	 * @param <E>	the set's element type
 	 */
 	@SuppressWarnings("rawtypes")
-	public static void removeSession(@Nonnull String userId, @Nonnull HttpSession session) {
-		Cache<String, TreeSet> sessions = getSessions();
-		TreeSet sessionIds = sessions.get(userId);
-		if (sessionIds != null) {
-			sessionIds.remove(session.getId());
-			if (sessionIds.isEmpty()) {
-				sessions.remove(userId);
+	private static <E> void updateSet(@Nonnull Cache<String, TreeSet> cache,
+										@Nonnull String key,
+										boolean removeWhenEmpty,
+										@Nonnull Predicate<TreeSet<E>> change) {
+		boolean written = false;
+		while (! written) {
+			TreeSet<E> current = cache.get(key);
+			TreeSet<E> next = (current == null) ? new TreeSet<>() : new TreeSet<>(current);
+			if (! change.test(next)) {
+				return;
+			}
+			if (current == null) {
+				written = (cache.putIfAbsent(key, next) == null);
+			}
+			else if (removeWhenEmpty && next.isEmpty()) {
+				written = cache.remove(key, current);
 			}
 			else {
-				// Note that EHCache puts are thread-safe
-				sessions.put(userId, sessionIds);
+				written = cache.replace(key, current, next);
 			}
 		}
+	}
+
+	/**
+	 * Registers a session id against a user, keeping the user's other session ids.
+	 *
+	 * <p>Side effects: writes the user's entry in the session cache (unless the id is already there).
+	 *
+	 * <p>Threading: atomic; simultaneous sign-ins of one user each keep their session id.
+	 *
+	 * @param userId	the user's id
+	 * @param session	the session to register
+	 */
+	public static void addSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		String sessionId = session.getId();
+		updateSet(getSessions(), userId, true, (TreeSet<String> sessionIds) -> sessionIds.add(sessionId));
+	}
+
+	/**
+	 * Unregisters a session id from a user, removing the user's entry when it was the last one.
+	 *
+	 * <p>Side effects: writes or removes the user's entry in the session cache (unless the id is not there).
+	 *
+	 * <p>Threading: atomic; simultaneous sign-ins and sign-outs of one user change only their own session id.
+	 *
+	 * @param userId	the user's id
+	 * @param session	the session to unregister
+	 */
+	public static void removeSession(@Nonnull String userId, @Nonnull HttpSession session) {
+		String sessionId = session.getId();
+		// an unknown user's copy is empty: nothing to remove, whatever the id (TreeSet.remove(null) would throw)
+		updateSet(getSessions(), userId, true,
+					(TreeSet<String> sessionIds) -> (! sessionIds.isEmpty()) && sessionIds.remove(sessionId));
 	}
 	
 	/**
@@ -238,14 +292,21 @@ public class StateUtil {
 		getSessions().remove(userId);
 	}
 	
+	/**
+	 * Returns the session ids registered against a user.
+	 *
+	 * @param userId	the user's id
+	 * @return	a read-only snapshot, in session id order, that later sign-ins and sign-outs do not change;
+	 * 			empty when the user has no sessions
+	 */
 	public static @Nonnull Set<String> getSessions(@Nonnull String userId) {
 		@SuppressWarnings("rawtypes")
 		Cache<String, TreeSet> sessions = getSessions();
 		Set<String> result = sessions.get(userId);
 		if (result == null) {
-			result = Collections.emptySet();
+			return Collections.emptySet();
 		}
-		return result;
+		return Collections.unmodifiableSet(result);
 	}
 
 	public static @Nonnull Cache<String, IPGeolocation> getGeoIPs() {
@@ -265,17 +326,18 @@ public class StateUtil {
 	}
 	
 	/**
-	 * Performs clearTokens.
+	 * Invalidates every CSRF token of a session.
+	 *
+	 * <p>Side effects: replaces a known session's token set with an empty one in the CSRF token cache;
+	 * does nothing for an unknown session.
+	 *
+	 * <p>Threading: atomic.
+	 *
+	 * @param sessionId	the session's id
 	 */
 	@SuppressWarnings("rawtypes")
 	public static void clearTokens(@Nonnull String sessionId) {
-		Cache<String, TreeSet> tokens = getTokens();
-		TreeSet values = tokens.get(sessionId);
-		if (values != null) {
-			values.clear();
-			// Note that EHCache puts are thread-safe
-			tokens.put(sessionId, values);
-		}
+		getTokens().replace(sessionId, new TreeSet());
 	}
 	
 	/**
@@ -313,22 +375,19 @@ public class StateUtil {
 	/**
 	 * Removes one token from a session's tokens, leaving its other tokens valid.
 	 *
-	 * <p>Side effects: puts the session's token set back in the CSRF token cache.
+	 * <p>Side effects: writes the session's token set in the CSRF token cache when it held the token;
+	 * a set left empty stays in the cache.
+	 *
+	 * <p>Threading: atomic; simultaneous token changes in one session are all kept.
 	 *
 	 * @param sessionId	the session's id
 	 * @param token	the token to remove, or {@code null} to do nothing
 	 */
-	@SuppressWarnings("rawtypes")
 	public static void removeToken(@Nonnull String sessionId, @Nullable Integer token) {
 		if (token == null) {
 			return;
 		}
-		Cache<String, TreeSet> tokens = getTokens();
-		TreeSet values = tokens.get(sessionId);
-		if ((values != null) && values.remove(token)) {
-			// Note that EHCache puts are thread-safe
-			tokens.put(sessionId, values);
-		}
+		updateSet(getTokens(), sessionId, false, (TreeSet<Integer> values) -> values.remove(token));
 	}
 
 	public static void replaceToken(@Nonnull HttpSession session,
@@ -337,7 +396,18 @@ public class StateUtil {
 		replaceToken(session.getId(), oldToken, newToken);
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	/**
+	 * Replaces one of a session's CSRF tokens with a new one, leaving its other tokens valid.
+	 *
+	 * <p>Side effects: writes the session's token set in the CSRF token cache, creating it for a new
+	 * session; does nothing when both tokens are the same.
+	 *
+	 * <p>Threading: atomic; simultaneous token changes in one session are all kept.
+	 *
+	 * @param sessionId	the session's id
+	 * @param oldToken	the token to invalidate, or {@code null} to only add {@code newToken}
+	 * @param newToken	the token to make valid
+	 */
 	public static void replaceToken(@Nonnull String sessionId,
 										@Nullable Integer oldToken,
 										@Nonnull Integer newToken) {
@@ -345,19 +415,10 @@ public class StateUtil {
 			return;
 		}
 		
-		Cache<String, TreeSet> tokens = getTokens();
-		TreeSet values = tokens.get(sessionId);
-		if (values == null) {
-			values = new TreeSet();
-		}
-		else {
-			if (oldToken != null) {
-				values.remove(oldToken);
-			}
-		}
-		values.add(newToken);
-		// Note that EHCache puts are thread-safe
-		tokens.put(sessionId, values);
+		updateSet(getTokens(), sessionId, false, (TreeSet<Integer> values) -> {
+			boolean removed = (oldToken != null) && values.remove(oldToken);
+			return values.add(newToken) || removed;
+		});
 	}
 	
 	// This is thread-safe

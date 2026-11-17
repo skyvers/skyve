@@ -2,8 +2,11 @@ package org.skyve.impl.cache;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,6 +16,8 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import org.ehcache.Cache;
@@ -383,12 +388,88 @@ class SessionTrackingTest {
 	}
 
 	@Test
+	void removeSessionOfAnUnknownUserDoesNothingEvenWithoutASessionId() {
+		String userId = "no-such-user-" + System.nanoTime();
+		StateUtil.removeSession(userId, mock(HttpSession.class)); // getId() is null
+		assertThat(StateUtil.getSessionCount(userId), is(0));
+	}
+
+	@Test
+	void replaceTokenWithAnAlreadyValidNewTokenStillInvalidatesTheOldOne() {
+		String sessionId = "already-valid-" + System.nanoTime();
+		Integer oldToken = Integer.valueOf(1);
+		Integer newToken = Integer.valueOf(2);
+		StateUtil.replaceToken(sessionId, null, oldToken);
+		StateUtil.replaceToken(sessionId, null, newToken);
+
+		StateUtil.replaceToken(sessionId, oldToken, newToken);
+		StateUtil.replaceToken(sessionId, oldToken, newToken); // nothing left to change
+
+		assertThat(StateUtil.checkToken(sessionId, oldToken), is(false));
+		assertThat(StateUtil.checkToken(sessionId, newToken), is(true));
+		StateUtil.clearTokens(sessionId);
+	}
+
+	@Test
 	void replaceTokenWithSameOldAndNewDoesNothing() {
 		String sessionId = "same-token-" + System.nanoTime();
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(sessionId, token, token);
 		// token was not stored since old==new
 		assertThat(StateUtil.checkToken(sessionId, token), is(false));
+	}
+
+	@Test
+	void getSessionsReturnsAReadOnlySnapshot() {
+		HttpSession first = session("first");
+		StateUtil.addSession("snapshot-user", first);
+		Set<String> snapshot = StateUtil.getSessions("snapshot-user");
+
+		StateUtil.addSession("snapshot-user", session("second"));
+
+		assertEquals(Set.of("first"), snapshot);
+		assertThrows(UnsupportedOperationException.class, () -> snapshot.add("forged"));
+		assertEquals(2, StateUtil.getSessionCount("snapshot-user"));
+	}
+
+	@Test
+	void removingTheLastSessionRemovesTheUsersEntryAndSecondCallsChangeNothing() {
+		HttpSession session = session("only");
+		StateUtil.addSession("last-user", session);
+		StateUtil.addSession("last-user", session);
+		assertEquals(1, StateUtil.getSessionCount("last-user"));
+
+		StateUtil.removeSession("last-user", session("other"));
+		assertEquals(1, StateUtil.getSessionCount("last-user"));
+		StateUtil.removeSession("last-user", session);
+		StateUtil.removeSession("last-user", session);
+
+		assertFalse(sessionsCache().containsKey("last-user"));
+	}
+
+	@Test
+	void clearingTokensKeepsAnEmptyEntryOnlyForAKnownSession() {
+		StateUtil.replaceToken("known", null, Integer.valueOf(1));
+		StateUtil.removeToken("known", Integer.valueOf(1));
+		assertTrue(tokensCache().containsKey("known"));
+
+		StateUtil.replaceToken("cleared", null, Integer.valueOf(2));
+		StateUtil.clearTokens("cleared");
+		StateUtil.clearTokens("never-seen");
+
+		assertFalse(StateUtil.checkToken("cleared", Integer.valueOf(2)));
+		assertTrue(tokensCache().containsKey("cleared"));
+		assertFalse(tokensCache().containsKey("never-seen"));
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Cache<String, TreeSet> sessionsCache() {
+		return DefaultCaching.get().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Cache<String, TreeSet> tokensCache() {
+		return DefaultCaching.get().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
 	private static HttpSession session(String id) {
