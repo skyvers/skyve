@@ -4988,8 +4988,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 	<li>directly in <code>modules/&lt;m&gt;/domain/</code> - module metadata enums,
 	 * 		<code>&lt;Document&gt;Override</code> classes and new customer document classes;</li>
 	 * 	<li>directly in <code>domain/</code> - the customer role enum;</li>
-	 * 	<li><code>modules/orm.hbm.xml</code> - the customer ORM mapping;</li>
-	 * 	<li><code>modules/metadata-enums-only.txt</code> - a marker an earlier generator wrote.</li>
+	 * 	<li><code>modules/orm.hbm.xml</code> - the customer ORM mapping.</li>
 	 * </ul>
 	 * Symbolic links to directories are not followed. Nothing else is collected, so this is safe when
 	 * the generated source path is the source path, where <code>customers/&lt;c&gt;/</code> also holds the
@@ -5004,13 +5003,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			for (Path moduleDirectory : entries(modulesDirectory, true)) {
 				result.addAll(entries(moduleDirectory.resolve(ProvidedRepository.DOMAIN_NAME), false));
 			}
-			if (Files.isDirectory(modulesDirectory, LinkOption.NOFOLLOW_LINKS)) {
-				for (String fileName : new String[] {"orm.hbm.xml", "metadata-enums-only.txt"}) {
-					Path file = modulesDirectory.resolve(fileName);
-					if (Files.exists(file, LinkOption.NOFOLLOW_LINKS) && (! Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS))) {
-						result.add(file);
-					}
-				}
+			Path mapping = modulesDirectory.resolve("orm.hbm.xml");
+			if (Files.isDirectory(modulesDirectory, LinkOption.NOFOLLOW_LINKS) &&
+					Files.exists(mapping, LinkOption.NOFOLLOW_LINKS) &&
+					(! Files.isDirectory(mapping, LinkOption.NOFOLLOW_LINKS))) {
+				result.add(mapping);
 			}
 			result.addAll(entries(customerDirectory.resolve(ProvidedRepository.DOMAIN_NAME), false));
 		}

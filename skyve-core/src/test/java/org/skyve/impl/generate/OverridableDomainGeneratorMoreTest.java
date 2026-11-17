@@ -5768,18 +5768,6 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void generateDeletesAStaleMetadataEnumsOnlyMarker() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-marker");
-		generateInto(root, customerEnumRepository(salesOverride(), true));
-		Path marker = Files.writeString(root.resolve(CUSTOMER_MODULES).resolve("metadata-enums-only.txt"), "old marker");
-
-		generateInto(root, customerEnumRepository(salesOverride(), true));
-
-		assertFalse(Files.exists(marker), "The marker an earlier generator wrote is customer output");
-		assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java")));
-	}
-
-	@Test
 	void generateFailsBeforeDeletingAnythingWhenACustomerFileIsBlocked() throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-blocked");
 		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
