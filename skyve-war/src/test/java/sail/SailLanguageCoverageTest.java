@@ -79,6 +79,7 @@ class SailLanguageCoverageTest {
 			Map.entry("listGridTool@model", "the kitchen sink's only list model grid lists values that do not change while a script runs, so a refresh has nothing to check"),
 			Map.entry("dataEnter@navigateToWidget", "no executor reads it (the interpreted ones find the widget wherever it is); kept for older scripts"),
 			// defaults that the kitchen sink has no reason to state
+			Map.entry("save@confirm", "the kitchen sink's only confirming Save (EscapingFixture's) sits after the default Save that <defaults/> adds, and <save/> presses the first"),
 			Map.entry("ok@confirm", "the kitchen sink's OK buttons ask for no confirmation"),
 			Map.entry("zoomOut@confirm", "the kitchen sink's Zoom Out buttons ask for no confirmation"),
 			Map.entry("cancel@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Cancel does"),

@@ -660,28 +660,6 @@
 			<cancel />
 		</method>
 	</interaction>
-	<interaction name="Escaping Fixture: a Save that asks first">
-		<method>
-			<comment>The Escaping Fixture's Save asks for a confirmation: declined, nothing is saved; confirmed, the record is saved</comment>
-			<navigateEdit module="kitchensink" document="EscapingFixture" />
-			<dataEnter binding="text1" value="SAIL declined save {run}" />
-			<dataEnter binding="text2" value="Second" />
-			<save confirm="false" />
-			<cancel />
-			<navigateList module="kitchensink" document="EscapingFixture" />
-			<testGridRows module="kitchensink" document="EscapingFixture" rowContaining="SAIL declined save {run}" maxRows="0" />
-			<navigateEdit module="kitchensink" document="EscapingFixture" />
-			<dataEnter binding="text1" value="SAIL confirmed save {run}" />
-			<dataEnter binding="text2" value="Second" />
-			<save confirm="true" />
-			<testSuccess />
-			<cancel />
-			<navigateList module="kitchensink" document="EscapingFixture" />
-			<testGridRows module="kitchensink" document="EscapingFixture" rowContaining="SAIL confirmed save {run}" minRows="1" maxRows="1" />
-			<listGridZoom module="kitchensink" document="EscapingFixture" rowContaining="SAIL confirmed save {run}" />
-			<delete />
-		</method>
-	</interaction>
 	<interaction name="Contexts, links, maps and scripts">
 		<method>
 			<clearContext />
