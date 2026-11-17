@@ -13,7 +13,6 @@ import org.skyve.domain.types.formatters.Formatters;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.AbstractInverse;
-import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Field;
@@ -1072,9 +1071,7 @@ public class LocalDesignRepository extends FileSystemRepository {
 														" but the collection is a child collection.  The [parent] attribute should be used instead of an inverse reference.");
 					}
 				}
-				inverse.setRelationship((targetReference instanceof Collection) ?
-											InverseRelationship.manyToMany :
-											(one ? InverseRelationship.oneToOne : InverseRelationship.oneToMany));
+				inverse.setRelationship(inverse.relationshipTo(targetReference));
 			}
 		}
 

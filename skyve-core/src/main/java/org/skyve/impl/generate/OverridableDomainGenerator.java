@@ -2057,7 +2057,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				Persistent inversePersistent = inverseDocument.getPersistent();				
 				String inverseReferenceName = inverse.getReferenceName();
 				String inverseModuleName = inverseDocument.getOwningModuleName();
-				InverseRelationship inverseRelationship = inverse.getRelationship();
 				Boolean cascade = inverse.getCascade();
 				
 				// Ignore non-persistent inverse document
@@ -2069,6 +2068,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				if (inverseDocument.isDynamic()) {
 					continue;
 				}
+
+				InverseRelationship inverseRelationship = inverseRelationship(inverse, inverseDocument);
 				
 				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
 					contents.append("\t\t<one-to-one name=\"").append(inverse.getName());
@@ -3150,7 +3151,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\t}\n\n");
 			}
 			else if (inverse != null) {
-				if (InverseRelationship.oneToOne.equals(inverse.getRelationship())) {
+				if (InverseRelationship.oneToOne.equals(inverseRelationship(inverse, reference))) {
 					methods.append("\t\t\t").append(referenceClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
 					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 					methods.append("\t\t\tif (").append(name).append(" != null) {\n");
@@ -3187,7 +3188,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// if 1 to 1 inverse add null methods
 			if (inverse != null) {
-				InverseRelationship relationship = inverse.getRelationship();
+				InverseRelationship relationship = inverseRelationship(inverse, reference);
 				if (relationship != InverseRelationship.manyToMany) { // 1:1 or 1:many
 					methods.append("\tpublic void null").append(methodName).append("() {\n");
 					methods.append("\t\tthis.").append(name).append(" = null;\n");
@@ -3195,6 +3196,48 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 		}
+	}
+
+	/**
+	 * The relationship of an inverse to the reference it inverts in its document. Metadata
+	 * validation works the relationship out before generation; with validation off it is worked
+	 * out here, the same way.
+	 *
+	 * @param inverse	The inverse.
+	 * @param inverseDocument	The document the inverse names, which declares the reference it inverts.
+	 * @return	The relationship.
+	 * @throws MetaDataException	if the relationship is not set and the document has no such reference.
+	 */
+	private static @Nonnull InverseRelationship inverseRelationship(@Nonnull AbstractInverse inverse, @Nonnull Document inverseDocument) {
+		InverseRelationship result = inverse.getRelationship();
+		if (result == null) {
+			String referenceName = inverse.getReferenceName();
+			Reference targetReference = inverseDocument.getReferenceByName(referenceName);
+			if (targetReference == null) {
+				throw new MetaDataException("The inverse " + inverse.getName() + " names the reference " + referenceName +
+												", which document " + inverseDocument.getOwningModuleName() + '.' + inverseDocument.getName() +
+												" does not have.");
+			}
+			result = inverseRelationship(inverse, targetReference);
+		}
+		return result;
+	}
+
+	/**
+	 * The relationship of an inverse to the reference it inverts, worked out from the reference when
+	 * metadata validation has not set it.
+	 *
+	 * @param inverse	The inverse.
+	 * @param targetReference	The reference the inverse inverts.
+	 * @return	The relationship.
+	 */
+	private static @Nonnull InverseRelationship inverseRelationship(@Nonnull AbstractInverse inverse, @Nonnull Reference targetReference) {
+		InverseRelationship result = inverse.getRelationship();
+		if (result == null) {
+			result = inverse.relationshipTo(targetReference);
+			inverse.setRelationship(result);
+		}
+		return result;
 	}
 
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
@@ -3217,7 +3260,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String inverseReferenceName = inverse.getReferenceName();
 		String propertyPackageName = propertyDocument.getOwningModuleName();
 		String name = inverse.getName();
-		InverseRelationship relationship = inverse.getRelationship();
+		InverseRelationship relationship = inverseRelationship(inverse, propertyDocument);
 		boolean toMany = (! InverseRelationship.oneToOne.equals(relationship));
 		boolean many = InverseRelationship.manyToMany.equals(relationship);
 		boolean deprecated = inverse.isDeprecated();

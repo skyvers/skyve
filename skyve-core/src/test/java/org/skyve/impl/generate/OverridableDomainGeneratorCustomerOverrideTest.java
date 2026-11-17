@@ -1364,4 +1364,57 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
 		assertTrue(acmeMapping.contains("<many-to-one name=\"parent\" entity-name=\"acmesalesNote\""), acmeMapping);
 	}
+
+	// ----- generation with metadata validation off ------------------------------------
+
+	/**
+	 * Metadata validation works out each inverse's relationship, so with validation off generation
+	 * has to work it out too: it cast every inverse that was not one to one to InverseMany, which
+	 * failed for an InverseOne, and generated a one to one inverse's Java as a collection.
+	 */
+	@Test
+	void inversesWithoutAWorkedOutRelationshipAreGeneratedWithValidationOff() throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		AbstractInverse note = new InverseOne();
+		note.setName("note");
+		note.setDisplayName("note");
+		note.setDocumentName("Note");
+		note.setReferenceName("order");
+		order.putRelation(note);
+		AbstractInverse lines = new InverseMany();
+		lines.setName("lines");
+		lines.setDisplayName("lines");
+		lines.setDocumentName("Line");
+		lines.setReferenceName("order");
+		order.putRelation(lines);
+		AbstractInverse tags = new InverseMany();
+		tags.setName("tags");
+		tags.setDisplayName("tags");
+		tags.setDocumentName("Tag");
+		tags.setReferenceName("orders");
+		order.putRelation(tags);
+		DocumentImpl noteDocument = document("Note", "SALES_Note", null, null, "text");
+		noteDocument.putRelation(association("order", "Order"));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "text");
+		line.putRelation(association("order", "Order"));
+		DocumentImpl tag = document("Tag", "SALES_Tag", null, null, "text");
+		CollectionImpl orders = new CollectionImpl();
+		orders.setName("orders");
+		orders.setDisplayName("orders");
+		orders.setDocumentName("Order");
+		orders.setType(CollectionType.aggregation);
+		tag.putRelation(orders);
+
+		Map<String, String> files = generate(new Fixture().vanilla(order).vanilla(noteDocument).vanilla(line).vanilla(tag), false);
+		String mapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		String orderClass = files.get("modules/sales/domain/Order.java");
+		assertAll(
+				() -> assertEquals(List.of(), mappingProblems(files)),
+				() -> assertTrue(mapping.contains("<one-to-one name=\"note\" entity-name=\"salesNote\" property-ref=\"order\""), mapping),
+				() -> assertTrue(mapping.contains("<one-to-many entity-name=\"salesLine\""), mapping),
+				() -> assertTrue(mapping.contains("table=\"SALES_Tag_orders\""), mapping),
+				() -> assertTrue(orderClass.contains("private Note note"), orderClass),
+				() -> assertTrue(orderClass.contains("private List<Line> lines"), orderClass),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
 }

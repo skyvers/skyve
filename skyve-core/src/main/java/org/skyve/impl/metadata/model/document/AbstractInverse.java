@@ -3,8 +3,10 @@ package org.skyve.impl.metadata.model.document;
 import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.document.Inverse;
+import org.skyve.metadata.model.document.Reference;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -95,6 +97,21 @@ public abstract class AbstractInverse extends AbstractAttribute implements Inver
 	@XmlTransient
 	public void setRelationship(@Nonnull InverseRelationship relationship) {
 		this.relationship = relationship;
+	}
+
+	/**
+	 * Works out the relationship from the reference this inverse inverts: many to many for a
+	 * collection, otherwise one to one or one to many by the inverse's cardinality.
+	 *
+	 * @param targetReference	The reference named by {@link #getReferenceName()} in the document
+	 * 							named by {@link #getDocumentName()}.
+	 * @return	The relationship.
+	 */
+	public @Nonnull InverseRelationship relationshipTo(@Nonnull Reference targetReference) {
+		if (targetReference instanceof Collection) {
+			return InverseRelationship.manyToMany;
+		}
+		return InverseCardinality.one.equals(getCardinality()) ? InverseRelationship.oneToOne : InverseRelationship.oneToMany;
 	}
 
 	@Override
