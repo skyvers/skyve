@@ -1339,16 +1339,45 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	void anOverrideWithAnInverseManyOfANewCustomerDocumentGivesConsistentMappings() throws Exception {
 		Map<String, String> files = generateInverseToANewCustomerDocument(inverse(new InverseMany(), "notes", "Note", "order", InverseRelationship.oneToMany));
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		String note = files.get("customers/acme/modules/sales/domain/Note.java");
 		assertAll(
 				() -> assertTrue(acmeMapping.contains("<bag name=\"notes\""), acmeMapping),
-				() -> assertTrue(acmeMapping.contains("<one-to-many entity-name=\"acmesalesNote\""), acmeMapping));
+				() -> assertTrue(acmeMapping.contains("<one-to-many entity-name=\"acmesalesNote\""), acmeMapping),
+				() -> assertTrue(note.contains("private OrderOverride order"), note),
+				() -> assertEquals(List.of(), compilationErrors(files)));
 	}
 
 	@Test
 	void anOverrideWithAnInverseOneOfANewCustomerDocumentGivesConsistentMappings() throws Exception {
 		Map<String, String> files = generateInverseToANewCustomerDocument(inverse(new InverseOne(), "note", "Note", "order", InverseRelationship.oneToOne));
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
-		assertTrue(acmeMapping.contains("<one-to-one name=\"note\" entity-name=\"acmesalesNote\" property-ref=\"order\""), acmeMapping);
+		assertAll(
+				() -> assertTrue(acmeMapping.contains("<one-to-one name=\"note\" entity-name=\"acmesalesNote\" property-ref=\"order\""), acmeMapping),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/**
+	 * acme's override of Line adds an association to Order, whose override adds its inverse, so each
+	 * override class types the other document as the other's override class, which has the property
+	 * the generated accessors maintain.
+	 */
+	@Test
+	void overridesWithAnAssociationAndItsInverseTypeEachOtherAsOverrideClasses() throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		order.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "text");
+		line.putRelation(association("order", "Order"));
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.vanilla(document("Line", "SALES_Line", null, null, "text"))
+				.acme(order)
+				.acme(line));
+		String orderOverride = files.get("customers/acme/modules/sales/domain/OrderOverride.java");
+		String lineOverride = files.get("customers/acme/modules/sales/domain/LineOverride.java");
+		assertAll(
+				() -> assertTrue(orderOverride.contains("List<LineOverride> lines"), orderOverride),
+				() -> assertTrue(lineOverride.contains("private OrderOverride order"), lineOverride),
+				() -> assertEquals(List.of(), compilationErrors(files)));
 	}
 
 	@Test

@@ -5,7 +5,8 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			Customer override fixture: a persistent document only the test customer has.
+			Customer override fixture: a persistent document only the test customer has, with an owner
+			OverrideAdds, whose inverse only the test customer's override of OverrideAdds declares.
 		]]>
 	</documentation>
 	<persistent name="TEST_OverrideCustomerOnly" />
@@ -17,5 +18,9 @@
 			<displayName>Text</displayName>
 			<length>100</length>
 		</text>
+		<association name="owner" type="aggregation">
+			<displayName>Owner</displayName>
+			<documentName>OverrideAdds</documentName>
+		</association>
 	</attributes>
 </document>

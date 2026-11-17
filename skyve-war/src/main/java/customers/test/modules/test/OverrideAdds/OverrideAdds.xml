@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems and the customerTextSet condition.
+			The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems, the ownedItems inverse of OverrideCustomerOnly.owner and the customerTextSet condition.
 		]]>
 	</documentation>
 	<persistent name="TEST_OverrideAdds" />
@@ -30,6 +30,11 @@
 			<documentName>OverrideCustomerOnly</documentName>
 			<minCardinality>0</minCardinality>
 		</collection>
+		<inverseMany name="ownedItems">
+			<displayName>Owned Items</displayName>
+			<documentName>OverrideCustomerOnly</documentName>
+			<referenceName>owner</referenceName>
+		</inverseMany>
 	</attributes>
 	<conditions>
 		<condition name="customerTextSet">

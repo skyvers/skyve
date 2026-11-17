@@ -135,6 +135,31 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 					() -> assertEquals("item", override.getCustomerOnlyItems().get(0).getText()));
 	}
 
+	/**
+	 * The new customer document OverrideCustomerOnly has an owner association to OverrideAdds, whose
+	 * inverse ownedItems only the test customer's override declares, so the association is typed as
+	 * OverrideAddsOverride and its mutator maintains the inverse.
+	 */
+	@Test
+	void anAssociationFromACustomerDocumentMaintainsTheOverridesInverse() throws Exception {
+		runAs(TEST_CUSTOMER);
+		OverrideAddsOverride owner = newInstance(TestDocument.OVERRIDE_ADDS);
+		owner.setText("owner");
+		OverrideCustomerOnly item = newInstance(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY);
+		item.setText("owned");
+		item.setOwner(owner);
+		int ownedInMemory = owner.getOwnedItems().size();
+
+		OverrideCustomerOnly saved = CORE.getPersistence().save(item);
+		CORE.getPersistence().evictAllCached();
+		OverrideAddsOverride result = assertInstanceOf(OverrideAddsOverride.class,
+														CORE.getPersistence().retrieve(TestDocument.OVERRIDE_ADDS, saved.getOwner().getBizId()));
+
+		assertAll(() -> assertEquals(1, ownedInMemory),
+					() -> assertEquals(1, result.getOwnedItems().size()),
+					() -> assertEquals("owned", result.getOwnedItems().get(0).getText()));
+	}
+
 	@Test
 	void aCustomerWithoutTheOverrideUsesTheVanillaClass() throws Exception {
 		Customer bizhub = runAs(CUSTOMER);

@@ -2915,6 +2915,15 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			referenceClassName += "Extension";
 		}
 
+		// A customer class declaring the reference types it as the customer's override class, if the
+		// customer has one, as the target's inverse of the reference can be the override's own
+		String overrideClassName = customerOverrideClassName(customer, referenceDocument);
+		if (overrideClassName != null) {
+			int lastDotIndex = overrideClassName.lastIndexOf('.');
+			referencePackagePath = overrideClassName.substring(0, lastDotIndex);
+			referenceClassName = overrideClassName.substring(lastDotIndex + 1);
+		}
+
 		if (! referencePackagePath.equals(packagePath)) {
 			imports.add(new StringBuilder(256).append(referencePackagePath).append('.').append(referenceClassName).toString());
 		}
@@ -3199,6 +3208,43 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
+	 * The customer's generated override class of a document, which the customer's beans of the
+	 * document are, for a reference or inverse a customer class declares - a new customer document's
+	 * class or a <code>&lt;Document&gt;Override</code>, which declare their own properties. The
+	 * override class has the properties the customer's override of the document adds, such as the
+	 * inverse of a reference from a new customer document, which the vanilla class lacks.
+	 *
+	 * @param customer	The customer whose class is generated, or null for a vanilla class.
+	 * @param document	The customer's version of the referenced document.
+	 * @return	The fully qualified override class name, or null if the customer has no override class
+	 * 			for the document or the class generated is vanilla.
+	 */
+	private @Nullable String customerOverrideClassName(@Nullable Customer customer, @Nonnull Document document) {
+		if (customer == null) {
+			return null;
+		}
+		String moduleName = document.getOwningModuleName();
+		String documentName = document.getName();
+		Map<String, DomainClass> documentVanillaClasses = moduleDocumentVanillaClasses.get(moduleName);
+		if ((documentVanillaClasses == null) || (! documentVanillaClasses.containsKey(documentName))) {
+			return null; // a new customer document has no override class
+		}
+		String key = ProvidedRepository.MODULES_NAMESPACE + moduleName + '/' + documentName;
+		String documentPackagePath = repository.vtable(customer.getName(), key);
+		if ((documentPackagePath == null) ||
+				(! documentPackagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) ||
+				(! overrideNeedsCustomerClass(customer, document))) {
+			return null;
+		}
+		return new StringBuilder(128).append(ProvidedRepository.CUSTOMERS_NAME).append('.')
+										.append(customer.getName()).append('.')
+										.append(ProvidedRepository.MODULES_NAME).append('.')
+										.append(moduleName).append('.')
+										.append(ProvidedRepository.DOMAIN_NAME).append('.')
+										.append(documentName).append(OVERRIDE_CLASS_SUFFIX).toString();
+	}
+
+	/**
 	 * The relationship of an inverse to the reference it inverts in its document. Metadata
 	 * validation works the relationship out before generation; with validation off it is worked
 	 * out here, the same way.
@@ -3291,6 +3337,16 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 															.append('.')
 															.append(propertyClassName).toString();
 			propertyClassName += "Extension";
+		}
+
+		// A customer class declaring the inverse types it as the customer's override class of its
+		// document, if the customer has one, as the reference the inverse inverts can be the override's own.
+		// An inverse overriding a vanilla one keeps the vanilla type of the methods it overrides.
+		String overrideClassName = overriddenInverse ? null : customerOverrideClassName(customer, propertyDocument);
+		if (overrideClassName != null) {
+			int lastDotIndex = overrideClassName.lastIndexOf('.');
+			propertyPackagePath = overrideClassName.substring(0, lastDotIndex);
+			propertyClassName = overrideClassName.substring(lastDotIndex + 1);
 		}
 
 		if (! propertyPackagePath.equals(packagePath)) {

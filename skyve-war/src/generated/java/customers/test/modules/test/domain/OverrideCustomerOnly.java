@@ -12,8 +12,10 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Override Customer Only
  * <br/>
- * Customer override fixture: a persistent document only the test customer has.
+ * Customer override fixture: a persistent document only the test customer has, with an owner
+			OverrideAdds, whose inverse only the test customer's override of OverrideAdds declares.
  * 
+ * @navhas n owner 0..1 OverrideAdds
  * @stereotype "persistent"
  */
 @XmlType
@@ -35,10 +37,18 @@ public class OverrideCustomerOnly extends AbstractPersistentBean {
 	/** @hidden */
 	public static final String textPropertyName = "text";
 
+	/** @hidden */
+	public static final String ownerPropertyName = "owner";
+
 	/**
 	 * Text
 	 **/
 	private String text;
+
+	/**
+	 * Owner
+	 **/
+	private OverrideAddsOverride owner = null;
 
 	@Override
 	@XmlTransient
@@ -91,5 +101,36 @@ public class OverrideCustomerOnly extends AbstractPersistentBean {
 	public void setText(String text) {
 		preset(textPropertyName, text);
 		this.text = text;
+	}
+
+	/**
+	 * {@link #owner} accessor.
+	 * @return	The value.
+	 **/
+	public OverrideAddsOverride getOwner() {
+		return owner;
+	}
+
+	/**
+	 * {@link #owner} mutator.
+	 * @param owner	The new value.
+	 **/
+	@XmlElement
+	public void setOwner(OverrideAddsOverride owner) {
+		if (this.owner != owner) {
+			preset(ownerPropertyName, owner);
+			OverrideAddsOverride oldOwner = this.owner;
+			this.owner = owner;
+			if ((owner != null) && (owner.getOwnedItemsElementById(getBizId()) == null)) {
+				owner.getOwnedItems().add(this);
+			}
+			if (oldOwner != null) {
+				oldOwner.getOwnedItems().remove(this);
+			}
+		}
+	}
+
+	public void nullOwner() {
+		this.owner = null;
 	}
 }

@@ -5,6 +5,7 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
+import java.util.ArrayList;
 import java.util.List;
 import modules.test.domain.OverrideAdds;
 import org.skyve.impl.domain.ChangeTrackingArrayList;
@@ -12,7 +13,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 /**
  * Override Adds
  * <br/>
- * The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems and the customerTextSet condition.
+ * The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems, the ownedItems inverse of OverrideCustomerOnly.owner and the customerTextSet condition.
  * 
  * @navhas n customerOnlyItem 0..1 OverrideCustomerOnly
  * @navhas n customerOnlyItems 0..n OverrideCustomerOnly
@@ -37,6 +38,9 @@ public class OverrideAddsOverride extends OverrideAdds {
 	/** @hidden */
 	public static final String customerOnlyItemsPropertyName = "customerOnlyItems";
 
+	/** @hidden */
+	public static final String ownedItemsPropertyName = "ownedItems";
+
 	/**
 	 * Customer Text
 	 **/
@@ -51,6 +55,11 @@ public class OverrideAddsOverride extends OverrideAdds {
 	 * Customer Only Items
 	 **/
 	private List<OverrideCustomerOnly> customerOnlyItems = new ChangeTrackingArrayList<>("customerOnlyItems", this);
+
+	/**
+	 * Owned Items
+	 **/
+	private List<OverrideCustomerOnly> ownedItems = new ArrayList<>();
 
 	/**
 	 * {@link #customerText} accessor.
@@ -148,6 +157,78 @@ public class OverrideAddsOverride extends OverrideAdds {
 	 **/
 	public OverrideCustomerOnly removeCustomerOnlyItemsElement(int index) {
 		return customerOnlyItems.remove(index);
+	}
+
+	/**
+	 * {@link #ownedItems} accessor.
+	 * @return	The value.
+	 **/
+	@XmlElement
+	public List<OverrideCustomerOnly> getOwnedItems() {
+		return ownedItems;
+	}
+
+	/**
+	 * {@link #ownedItems} accessor.
+	 * @param bizId	The bizId of the element in the list.
+	 * @return	The value of the element in the list.
+	 **/
+	public OverrideCustomerOnly getOwnedItemsElementById(String bizId) {
+		return getElementById(ownedItems, bizId);
+	}
+
+	/**
+	 * {@link #ownedItems} mutator.
+	 * @param bizId	The bizId of the element in the list.
+	 * @param element	The new value of the element in the list.
+	 **/
+	public void setOwnedItemsElementById(String bizId, OverrideCustomerOnly element) {
+		setElementById(ownedItems, element);
+	}
+
+	/**
+	 * {@link #ownedItems} add.
+	 * @param element	The element to add.
+	 **/
+	public boolean addOwnedItemsElement(OverrideCustomerOnly element) {
+		boolean result = false;
+		if (getElementById(ownedItems, element.getBizId()) == null) {
+			result = ownedItems.add(element);
+		}
+		element.setOwner(this);
+		return result;
+	}
+
+	/**
+	 * {@link #ownedItems} add.
+	 * @param index	The index in the list to add the element to.
+	 * @param element	The element to add.
+	 **/
+	public void addOwnedItemsElement(int index, OverrideCustomerOnly element) {
+		ownedItems.add(index, element);
+		element.setOwner(this);
+	}
+
+	/**
+	 * {@link #ownedItems} remove.
+	 * @param element	The element to remove.
+	 **/
+	public boolean removeOwnedItemsElement(OverrideCustomerOnly element) {
+		boolean result = ownedItems.remove(element);
+		if (result) {
+			element.nullOwner();
+		}
+		return result;
+	}
+
+	/**
+	 * {@link #ownedItems} remove.
+	 * @param index	The index in the list to remove the element from.
+	 **/
+	public OverrideCustomerOnly removeOwnedItemsElement(int index) {
+		OverrideCustomerOnly result = ownedItems.remove(index);
+		result.nullOwner();
+		return result;
 	}
 
 	/**
