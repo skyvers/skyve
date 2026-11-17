@@ -40,10 +40,10 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
-import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.Bean;
@@ -957,20 +957,6 @@ class DataBuilderTest {
 		}
 		finally {
 			clearPersistenceThreadLocal();
-		}
-	}
-
-	private enum TestDocument implements ModuleDocument {
-		CONTACT;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String documentName() {
-			return "Contact";
 		}
 	}
 

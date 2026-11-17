@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.skyve.impl.generate.CustomerGenerationTestSupport.snapshot;
+import static org.skyve.impl.generate.CustomerGenerationTestSupport.text;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -5468,28 +5470,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	private static void generateInto(Path generatedSrc, Path generatedTest, ProvidedRepository repo) throws Exception {
-		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
-				false,
-				false,
-				DialectOptions.H2_NO_INDEXES,
-				"",
-				normalisedPath(generatedSrc),
-				"",
-				normalisedPath(generatedTest),
-				new String[] {"sales"});
-		gen.repository = repo;
-		gen.generate();
-	}
-
-	/** Returns every file below the directory, by relative path, with its contents. */
-	private static Map<String, String> snapshot(Path directory) throws Exception {
-		Map<String, String> result = new TreeMap<>();
-		try (Stream<Path> paths = Files.walk(directory)) {
-			for (Path path : paths.filter(Files::isRegularFile).toList()) {
-				result.put(directory.relativize(path).toString().replace(java.io.File.separatorChar, '/'), Files.readString(path));
-			}
-		}
-		return result;
+		CustomerGenerationTestSupport.generate("", generatedSrc, generatedTest, repo, true);
 	}
 
 	/**
@@ -5547,13 +5528,6 @@ class OverridableDomainGeneratorMoreTest {
 	@FunctionalInterface
 	private interface RepositoryAction {
 		void run(ProvidedRepository repo) throws Exception;
-	}
-
-	private static Text text(String name) {
-		Text result = new Text();
-		result.setName(name);
-		result.setDisplayName(name);
-		return result;
 	}
 
 	@Test
@@ -5630,11 +5604,11 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void generateThrowsWhenCustomerRoleNamesCollideAfterMangling() {
+	void generateThrowsWhenCustomerRoleNamesCollideAfterMangling() throws Exception {
 		ProvidedRepository repo = customerEnumRepository(salesOverride(), false, List.of("Tenant Manager", "TenantManager"));
+		Path root = Files.createTempDirectory("odg-customer-roles-dup");
 
-		MetaDataException e = assertThrows(MetaDataException.class,
-											() -> generateInto(Files.createTempDirectory("odg-customer-roles-dup"), repo));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generateInto(root, repo));
 		assertTrue(e.getMessage().contains("Customer acme customer role TenantManager yields the duplicate Java enum constant name TENANT_MANAGER"),
 					e.getMessage());
 	}
@@ -5645,11 +5619,11 @@ class OverridableDomainGeneratorMoreTest {
 
 		withDocumentOverrideRepository(true, repo -> generateInto(root, repo));
 
-		String ext = Files.readString(root.resolve(CUSTOMER_DOMAIN).resolve("OrderOverride.java"));
+		String override = Files.readString(root.resolve(CUSTOMER_DOMAIN).resolve("OrderOverride.java"));
 		String orm = Files.readString(root.resolve(CUSTOMER_ORM));
 		assertAll(
-				() -> assertTrue(ext.contains("package customers.acme.modules.sales.domain;"), ext),
-				() -> assertTrue(ext.contains("notes"), ext),
+				() -> assertTrue(override.contains("package customers.acme.modules.sales.domain;"), override),
+				() -> assertTrue(override.contains("notes"), override),
 				() -> assertTrue(orm.contains("customers.acme.modules.sales.domain.OrderOverride"), orm));
 	}
 
@@ -5677,7 +5651,6 @@ class OverridableDomainGeneratorMoreTest {
 		withDocumentOverrideRepository(true, repo -> {
 			generateInto(root, repo);
 			snapshots.put("first", snapshot(root));
-			// used to fail with FileAlreadyExistsException on orm.hbm.xml
 			generateInto(root, repo);
 			snapshots.put("second", snapshot(root));
 		});

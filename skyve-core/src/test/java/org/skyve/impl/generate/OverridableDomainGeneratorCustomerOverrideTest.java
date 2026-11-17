@@ -10,6 +10,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.skyve.impl.generate.CustomerGenerationTestSupport.snapshot;
+import static org.skyve.impl.generate.CustomerGenerationTestSupport.text;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,7 +28,6 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -50,7 +51,6 @@ import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
-import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -80,7 +80,7 @@ import org.w3c.dom.NodeList;
  */
 @SuppressWarnings("static-method")
 class OverridableDomainGeneratorCustomerOverrideTest {
-	private static final String MODULE = "sales";
+	private static final String MODULE = CustomerGenerationTestSupport.MODULE;
 
 	/**
 	 * Vanilla documents of the sales module and the acme and beta customers' overrides of some of them.
@@ -192,10 +192,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			result.setExtends(inherits);
 		}
 		for (String attributeName : attributeNames) {
-			Text text = new Text();
-			text.setName(attributeName);
-			text.setDisplayName(attributeName);
-			result.putAttribute(text);
+			result.putAttribute(text(attributeName));
 		}
 		return result;
 	}
@@ -351,18 +348,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepositoryFactory.set(repo);
 		try {
-			OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
-					false,
-					false,
-					DialectOptions.H2_NO_INDEXES,
-					src.toString() + '/',
-					root.resolve("src").toString() + '/',
-					"",
-					root.resolve("test").toString() + '/',
-					new String[] {MODULE});
-			gen.repository = repo;
-			gen.validate = validate;
-			gen.generate();
+			CustomerGenerationTestSupport.generate(src.toString() + '/', root.resolve("src"), root.resolve("test"), repo, validate);
 		}
 		finally {
 			ProvidedRepositoryFactory.set(previousRepository);
@@ -373,12 +359,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		for (Map.Entry<String, byte[]> entry : fixture.extended.entrySet()) {
 			result.put(entry.getKey(), new String(entry.getValue(), StandardCharsets.ISO_8859_1));
 		}
-		Path generated = root.resolve("src");
-		try (Stream<Path> paths = Files.walk(generated)) {
-			for (Path path : paths.filter(Files::isRegularFile).toList()) {
-				result.put(generated.relativize(path).toString().replace(java.io.File.separatorChar, '/'), Files.readString(path));
-			}
-		}
+		result.putAll(snapshot(root.resolve("src")));
 		return result;
 	}
 
@@ -572,9 +553,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
 		assertAll(
 				() -> assertTrue(vanillaOrder.contains("public abstract class Order"), "acme's narrowing makes the vanilla class abstract"),
-				() -> assertTrue(acmeOverride != null, "acme needs a concrete class for its Order, got " + files.keySet()),
-				() -> assertTrue((acmeOverride != null) && acmeOverride.contains("public class OrderOverride extends Order"), String.valueOf(acmeOverride)),
-				() -> assertTrue((acmeOverride != null) && (! acmeOverride.contains("description")), "acme dropped description"),
+				() -> assertNotNull(acmeOverride, "acme needs a concrete class for its Order, got " + files.keySet()),
+				() -> assertTrue(acmeOverride.contains("public class OrderOverride extends Order"), acmeOverride),
+				() -> assertFalse(acmeOverride.contains("description"), "acme dropped description"),
 				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.OrderOverride\""), acmeMapping),
 				() -> assertFalse(acmeMapping.contains("<class name=\"modules.sales.domain.Order\""), "acme must not map the abstract class"),
 				() -> assertEquals(List.of(), mappingProblems(files)));
@@ -590,7 +571,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
 		assertAll(
 				() -> assertTrue(vanillaClass.contains("public class OrderVanilla extends Order"), vanillaClass),
-				() -> assertTrue(vanillaClass.contains("description"), "the vanilla extension keeps what acme dropped"),
+				() -> assertTrue(vanillaClass.contains("description"), "the vanilla class keeps what acme dropped"),
 				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.domain.OrderVanilla\""), vanillaMapping),
 				() -> assertTrue(vanillaMapping.contains("name=\"description\""), vanillaMapping),
 				() -> assertFalse(files.containsKey("customers/beta/modules/orm.hbm.xml"), "beta overrides nothing"));
@@ -606,9 +587,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		String betaOverride = files.get("customers/beta/modules/sales/domain/OrderOverride.java");
 		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
 		assertAll(
-				() -> assertTrue(betaOverride != null, "beta's override adds nothing, but the vanilla class is abstract, got " + files.keySet()),
-				() -> assertTrue((betaOverride != null) && betaOverride.contains("public class OrderOverride extends Order"), String.valueOf(betaOverride)),
-				() -> assertTrue((betaOverride != null) && betaOverride.contains("description"), "beta keeps what acme dropped"),
+				() -> assertNotNull(betaOverride, "beta's override adds nothing, but the vanilla class is abstract, got " + files.keySet()),
+				() -> assertTrue(betaOverride.contains("public class OrderOverride extends Order"), betaOverride),
+				() -> assertTrue(betaOverride.contains("description"), "beta keeps what acme dropped"),
 				() -> assertTrue(betaMapping.contains("<class name=\"customers.beta.modules.sales.domain.OrderOverride\""), betaMapping),
 				() -> assertTrue(betaMapping.contains("name=\"description\""), betaMapping),
 				() -> assertEquals(List.of(), mappingProblems(files)));
@@ -1300,13 +1281,20 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 
 	@Test
 	void anExtensionsCommentsAndLiteralsAreIgnored() throws Exception {
-		String source = "package modules.sales.Receipt;\n\n" +
-							"import modules.sales.domain.ReceiptVanilla;\n\n" +
-							"/**\n * Not: public class ReceiptExtension extends Receipt {\n */\n" +
-							"public class ReceiptExtension /* extends Receipt */ // extends Receipt\n" +
-							"\t\textends ReceiptVanilla {\n" +
-							"\tprivate static final String TEXT = \"class ReceiptExtension extends Receipt {\";\n" +
-							"\tprivate static final long serialVersionUID = 1L;\n}\n";
+		String source = """
+				package modules.sales.Receipt;
+
+				import modules.sales.domain.ReceiptVanilla;
+
+				/**
+				 * Not: public class ReceiptExtension extends Receipt {
+				 */
+				public class ReceiptExtension /* extends Receipt */ // extends Receipt
+				\t\textends ReceiptVanilla {
+				\tprivate static final String TEXT = "class ReceiptExtension extends Receipt {";
+				\tprivate static final long serialVersionUID = 1L;
+				}
+				""";
 		Map<String, String> files = generate(new Fixture()
 				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
 				.extensionSource("Receipt", source)
@@ -1350,7 +1338,8 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		String override = files.get("customers/acme/modules/sales/domain/InvoiceOverride.java");
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
 		assertAll(
-				() -> assertTrue((override != null) && override.contains("public abstract class InvoiceOverride extends Invoice"), String.valueOf(override)),
+				() -> assertNotNull(override, files.keySet()::toString),
+				() -> assertTrue(override.contains("public abstract class InvoiceOverride extends Invoice"), override),
 				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.Invoice.InvoiceExtension\""), acmeMapping),
 				() -> assertEquals(List.of(), compilationErrors(files)));
 	}
@@ -1358,9 +1347,8 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	// ----- references to a new customer document ------------------------------------
 
 	/**
-	 * An association from a customer document to a new customer document, found by the skyve-war test
-	 * customer fixtures: the association's document has to be resolved for the customer, as the vanilla
-	 * module does not have it.
+	 * An association from a customer document to a new customer document: the association's document
+	 * has to be resolved for the customer, as the vanilla module does not have it.
 	 */
 	@Test
 	void anOverrideWithAnAssociationToANewCustomerDocumentGivesConsistentMappings() throws Exception {
@@ -1377,7 +1365,8 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	}
 
 	/**
-	 * An inverse with the relationship that metadata validation works out before generation.
+	 * An inverse with the relationship that metadata validation works out before generation, or none
+	 * as with validation off.
 	 */
 	private static AbstractInverse inverse(AbstractInverse result, String name, String documentName, String referenceName, InverseRelationship relationship) {
 		result.setName(name);
@@ -1595,39 +1584,20 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 
 	/**
 	 * Metadata validation works out each inverse's relationship, so with validation off generation
-	 * has to work it out too: it cast every inverse that was not one to one to InverseMany, which
-	 * failed for an InverseOne, and generated a one to one inverse's Java as a collection.
+	 * works it out, and maps and generates each inverse by it.
 	 */
 	@Test
 	void inversesWithoutAWorkedOutRelationshipAreGeneratedWithValidationOff() throws Exception {
 		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
-		AbstractInverse note = new InverseOne();
-		note.setName("note");
-		note.setDisplayName("note");
-		note.setDocumentName("Note");
-		note.setReferenceName("order");
-		order.putRelation(note);
-		AbstractInverse lines = new InverseMany();
-		lines.setName("lines");
-		lines.setDisplayName("lines");
-		lines.setDocumentName("Line");
-		lines.setReferenceName("order");
-		order.putRelation(lines);
-		AbstractInverse tags = new InverseMany();
-		tags.setName("tags");
-		tags.setDisplayName("tags");
-		tags.setDocumentName("Tag");
-		tags.setReferenceName("orders");
-		order.putRelation(tags);
+		order.putRelation(inverse(new InverseOne(), "note", "Note", "order", null));
+		order.putRelation(inverse(new InverseMany(), "lines", "Line", "order", null));
+		order.putRelation(inverse(new InverseMany(), "tags", "Tag", "orders", null));
 		DocumentImpl noteDocument = document("Note", "SALES_Note", null, null, "text");
 		noteDocument.putRelation(association("order", "Order"));
 		DocumentImpl line = document("Line", "SALES_Line", null, null, "text");
 		line.putRelation(association("order", "Order"));
 		DocumentImpl tag = document("Tag", "SALES_Tag", null, null, "text");
-		CollectionImpl orders = new CollectionImpl();
-		orders.setName("orders");
-		orders.setDisplayName("orders");
-		orders.setDocumentName("Order");
+		CollectionImpl orders = childCollection("orders", "Order");
 		orders.setType(CollectionType.aggregation);
 		tag.putRelation(orders);
 

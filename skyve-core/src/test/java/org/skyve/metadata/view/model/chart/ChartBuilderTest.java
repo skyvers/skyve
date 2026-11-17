@@ -17,8 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.SortDirection;
-import org.skyve.metadata.model.document.ModuleDocument;
-import org.skyve.metadata.module.query.ModuleQuery;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 /**
@@ -150,34 +150,6 @@ class ChartBuilderTest {
 		Method method = ChartBuilder.class.getDeclaredMethod("minMax", List.class, boolean.class);
 		method.setAccessible(true);
 		return (Number) method.invoke(null, beans, Boolean.valueOf(min));
-	}
-
-	private enum TestDocument implements ModuleDocument {
-		CONTACT;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String documentName() {
-			return "Contact";
-		}
-	}
-
-	private enum TestQuery implements ModuleQuery {
-		Q_CONTACTS;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String queryName() {
-			return "qContacts";
-		}
 	}
 
 	@Test

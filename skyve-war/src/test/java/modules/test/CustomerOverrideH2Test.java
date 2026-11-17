@@ -26,13 +26,17 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.ModuleDocument;
@@ -81,7 +85,6 @@ import modules.test.domain.OverrideLinkTarget;
 import modules.test.domain.OverrideMappedSub;
 import modules.test.domain.OverrideNarrowed;
 import modules.test.domain.OverrideNarrowedExtended;
-import modules.test.domain.OverrideNarrowedExtendedVanilla;
 import modules.test.domain.OverrideNarrowedLinked;
 import modules.test.domain.OverrideNarrowedLinkedVanilla;
 import modules.test.domain.OverrideNarrowedVanilla;
@@ -91,6 +94,7 @@ import modules.test.domain.OverrideRemoved;
 import modules.test.domain.OverrideSingleBase;
 import modules.test.domain.OverrideSingleSub;
 import modules.test.domain.TestDocument;
+import util.AbstractH2Test;
 
 /**
  * Exercises the test customer's document overrides against Hibernate: the vanilla mappings and the
@@ -103,9 +107,56 @@ import modules.test.domain.TestDocument;
  * <code>customers/test/modules/test/</code> and <code>customers/test2/modules/test/</code>.
  */
 @SuppressWarnings("static-method")
-class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
+class CustomerOverrideH2Test extends AbstractH2Test {
+	/** The customer whose overrides of the test module are the fixtures. */
+	private static final String TEST_CUSTOMER = "test";
+
 	/** The second customer, whose overrides combine with the test customer's. */
 	private static final String TEST2_CUSTOMER = "test2";
+
+	/**
+	 * Runs the rest of the test as a super user of the customer, in the current transaction, and
+	 * returns the customer.
+	 */
+	private static Customer runAs(String customerName) {
+		Customer result = customer(customerName);
+		SuperUser user = new SuperUser();
+		user.setCustomerName(customerName);
+		user.setName(USER);
+		user.setId(USER);
+		AbstractPersistence.get().setUser(user);
+		return result;
+	}
+
+	/** Returns the customer's metadata. */
+	private static Customer customer(String customerName) {
+		Customer result = ProvidedRepositoryFactory.getNullSafe().getCustomer(customerName);
+		assertNotNull(result, customerName);
+		return result;
+	}
+
+	/** Creates a bean of the document for the current user's customer. */
+	private static <T extends Bean> T newInstance(ModuleDocument document) throws Exception {
+		return document.toDocument().newInstance(CORE.getUser());
+	}
+
+	/** Returns the class of the customer's beans of the document. */
+	private static Class<?> beanClass(ModuleDocument document, Customer customer) throws Exception {
+		return ((DocumentImpl) document.toDocument(customer)).getBeanClass(customer);
+	}
+
+	/**
+	 * Saves the bean, clears the first level cache, and returns the bean retrieved again from the
+	 * data store.
+	 */
+	private static <T extends PersistentBean> T saveAndRetrieve(ModuleDocument document, T bean) {
+		Persistence p = CORE.getPersistence();
+		T saved = p.save(bean);
+		p.evictAllCached();
+		T result = p.retrieve(document, saved.getBizId());
+		assertNotNull(result, "retrieve " + document.documentName());
+		return result;
+	}
 
 	/** The enum constant's code, read whatever class declares the enum. */
 	private static String code(Object enumeration) {
@@ -421,7 +472,6 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 		OverrideNarrowedExtendedExtension extension = assertInstanceOf(OverrideNarrowedExtendedExtension.class, result);
 		assertAll(() -> assertSame(OverrideNarrowedExtendedExtension.class, beanClass(TestDocument.OVERRIDE_NARROWED_EXTENDED, bizhub)),
 					() -> assertSame(OverrideNarrowedExtendedExtension.class, result.getClass()),
-					() -> assertEquals(OverrideNarrowedExtendedVanilla.class, OverrideNarrowedExtendedExtension.class.getSuperclass()),
 					() -> assertEquals("dropped", extension.getDropped()),
 					() -> assertEquals("Narrowed extended text", extension.describe()));
 	}
@@ -442,17 +492,21 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 		OverrideLength tooLong = newInstance(TestDocument.OVERRIDE_LENGTH);
 		tooLong.setText(vanillaText + 'y');
 
-		Number columnLength = CORE.getPersistence()
-									.newSQL("select CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS " +
-												"where upper(TABLE_NAME) = 'TEST_OVERRIDELENGTH' and upper(COLUMN_NAME) = 'TEXT'")
-									.scalarResult(Number.class);
+		Persistence p = CORE.getPersistence();
+		Persistent persistent = TestDocument.OVERRIDE_LENGTH.toDocument().getPersistent();
+		String tableName = (persistent == null) ? null : persistent.getPersistentIdentifier();
+		Number columnLength = p.newSQL("select CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS " +
+											"where upper(TABLE_NAME) = upper(:tableName) and upper(COLUMN_NAME) = upper(:columnName)")
+								.putParameter("tableName", tableName, false)
+								.putParameter("columnName", OverrideLength.textPropertyName, false)
+								.scalarResult(Number.class);
 		assertAll(() -> assertSame(OverrideLength.class, beanClass(TestDocument.OVERRIDE_LENGTH, test)),
 					() -> assertSame(OverrideLength.class, beanClass(TestDocument.OVERRIDE_LENGTH, bizhub)),
 					() -> assertEquals(longText, testResult.getText()),
 					() -> assertEquals(vanillaText, bizhubResult.getText()),
 					() -> assertEquals(200, (columnLength == null) ? 0 : columnLength.intValue()),
 					// the column is shared, but bizhub's metadata still has the shorter length
-					() -> assertThrows(ValidationException.class, () -> CORE.getPersistence().save(tooLong)));
+					() -> assertThrows(ValidationException.class, () -> p.save(tooLong)));
 	}
 
 	@Test

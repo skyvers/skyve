@@ -101,7 +101,8 @@ class CustomerRoleReferenceTest {
 
 	@Test
 	void toRoleThrowsWhenTheCustomerDoesNotDeclareTheRole() {
-		when(repository.getCustomer("acme")).thenReturn(mock(Customer.class));
+		Customer customer = mock(Customer.class);
+		when(repository.getCustomer("acme")).thenReturn(customer);
 
 		MetaDataException e = assertThrows(MetaDataException.class, AcmeCustomerRole.MISSING::toRole);
 		assertEquals("Customer role Missing does not exist for customer acme", e.getMessage());
@@ -109,6 +110,7 @@ class CustomerRoleReferenceTest {
 
 	@Test
 	void toRoleThrowsWhenTheCustomerDoesNotExist() {
-		assertThrows(MetaDataException.class, GhostCustomerRole.MANAGER::toRole);
+		MetaDataException e = assertThrows(MetaDataException.class, GhostCustomerRole.MANAGER::toRole);
+		assertEquals("Customer ghost does not exist", e.getMessage());
 	}
 }

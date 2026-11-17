@@ -22,6 +22,7 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
@@ -357,20 +358,6 @@ class SingletonCachedBizletTest {
 		persistence.setForThread();
 
 		assertDoesNotThrow(() -> SingletonCachedBizlet.clear("admin", "Contact"));
-	}
-
-	private enum TestDocument implements ModuleDocument {
-		CONTACT;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String documentName() {
-			return "Contact";
-		}
 	}
 
 	@Test

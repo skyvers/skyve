@@ -11,8 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.skyve.metadata.model.document.ModuleDocument;
-import org.skyve.metadata.module.query.ModuleQuery;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestQuery;
 
 @SuppressWarnings("static-method")
 class UserAccessTest {
@@ -343,34 +343,6 @@ class UserAccessTest {
 	}
 
 	// ---- Typed reference factories ----
-
-	private enum TestDocument implements ModuleDocument {
-		CONTACT;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String documentName() {
-			return "Contact";
-		}
-	}
-
-	private enum TestQuery implements ModuleQuery {
-		Q_CONTACTS;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String queryName() {
-			return "qContacts";
-		}
-	}
 
 	@Test
 	void typedFactoriesEqualTheStringForms() {

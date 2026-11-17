@@ -11,10 +11,10 @@ import static org.mockito.Mockito.withSettings;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
-import org.skyve.metadata.model.document.ModuleDocument;
-import org.skyve.metadata.module.query.ModuleBizQL;
-import org.skyve.metadata.module.query.ModuleQuery;
-import org.skyve.metadata.module.query.ModuleSQL;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestBizQL;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestQuery;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestSQL;
 
 /**
  * Tests that the typed-reference default methods of {@link Persistence} delegate to the String
@@ -25,62 +25,6 @@ class PersistenceTest {
 	/** Lets Mockito's subclass mock maker call the interface's default methods for real. */
 	private abstract static class PersistenceDouble implements Persistence {
 		private static final long serialVersionUID = 1L;
-	}
-
-	private enum TestDocument implements ModuleDocument {
-		CONTACT;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String documentName() {
-			return "Contact";
-		}
-	}
-
-	private enum TestQuery implements ModuleQuery {
-		Q_CONTACTS;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String queryName() {
-			return "qContacts";
-		}
-	}
-
-	private enum TestBizQL implements ModuleBizQL {
-		B_CONTACTS;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String queryName() {
-			return "bContacts";
-		}
-	}
-
-	private enum TestSQL implements ModuleSQL {
-		S_CONTACTS;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String queryName() {
-			return "sContacts";
-		}
 	}
 
 	private static Persistence mockPersistence() {
