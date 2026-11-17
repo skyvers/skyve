@@ -644,7 +644,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param names	The metadata names to generate enum constants for.
 	 * @throws MetaDataException	if two names yield the same Java enum constant name.
 	 */
-	@SuppressWarnings("java:S107") // too many parameters
+	@SuppressWarnings("java:S107") // each parameter is a different part of the generated enum, which its callers give as literals
 	private void generateModuleMetadataEnum(final @Nonnull Module module,
 											final @Nullable String customerName,
 											final @Nonnull String packagePath,
@@ -661,11 +661,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		final String moduleName = module.getName();
 
 		// Dodge document class names in the same generated package - e.g. a module could declare a
-		// document named <Module>Role. The comparison is case-insensitive because the generated
-		// files must coexist on case-insensitive file systems (macOS, Windows).
-		String enumName = BindUtil.toJavaTypeIdentifier(moduleName) + kindSuffix;
-		while (containsIgnoreCase(module.getDocumentRefs().keySet(), enumName)) {
-			enumName += kindSuffix;
+		// document named <Module>Role
+		StringBuilder enumName = new StringBuilder(64).append(BindUtil.toJavaTypeIdentifier(moduleName)).append(kindSuffix);
+		while (documentNamedLike(module, enumName.toString()) != null) {
+			enumName.append(kindSuffix);
 		}
 
 		StringBuilder javadoc = new StringBuilder(256);
@@ -680,7 +679,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		generateMetadataEnum(packagePath,
-								enumName,
+								enumName.toString(),
 								javadoc,
 								interfaceClassName,
 								"Module",
@@ -746,7 +745,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param names	The metadata names to generate enum constants for; not empty.
 	 * @throws MetaDataException	if two names yield the same Java enum constant name.
 	 */
-	@SuppressWarnings("java:S107") // too many parameters
+	@SuppressWarnings("java:S107") // each parameter is a different part of the generated enum, which its callers give as literals
 	private void generateMetadataEnum(final @Nonnull String packagePath,
 										final @Nonnull String enumName,
 										final @Nonnull CharSequence javadoc,
@@ -763,14 +762,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		StringBuilder contents = new StringBuilder(2048);
 		contents.append("package ").append(packageName).append(";\n\n");
 
-		Set<String> imports = new TreeSet<>();
-		imports.add("jakarta.annotation.Generated");
-		imports.add(interfaceClassName);
-
-		// generate imports
-		for (String importClassName : imports) {
-			contents.append("import ").append(importClassName).append(";\n");
-		}
+		// generate imports, in order, as the interfaces are in org.skyve
+		contents.append("import jakarta.annotation.Generated;\n");
+		contents.append("import ").append(interfaceClassName).append(";\n");
 
 		// generate javadoc
 		contents.append("\n/**\n");
@@ -821,9 +815,41 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 	}
 
-	/** Whether the set contains the candidate, compared case-insensitively. */
-	private static boolean containsIgnoreCase(final Set<String> names, final String candidate) {
-		return names.stream().anyMatch(candidate::equalsIgnoreCase);
+	/**
+	 * Finds a document of a module named like a generated class, compared case-insensitively because
+	 * the generated files must coexist on case-insensitive file systems (macOS, Windows).
+	 *
+	 * @param module	The module.
+	 * @param className	The generated class's simple name.
+	 * @return	the name of the document, or null if no document in the module is named like the class.
+	 */
+	private static @Nullable String documentNamedLike(@Nonnull Module module, @Nonnull String className) {
+		for (String name : module.getDocumentRefs().keySet()) {
+			if (name.equalsIgnoreCase(className)) {
+				return name;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the package name of a fully qualified class name.
+	 *
+	 * @param className	The fully qualified class name.
+	 * @return	the package name.
+	 */
+	private static @Nonnull String packageName(@Nonnull String className) {
+		return className.substring(0, className.lastIndexOf('.'));
+	}
+
+	/**
+	 * Returns the simple name of a fully qualified class name.
+	 *
+	 * @param className	The fully qualified class name.
+	 * @return	the simple name.
+	 */
+	private static @Nonnull String simpleName(@Nonnull String className) {
+		return className.substring(className.lastIndexOf('.') + 1);
 	}
 
 	/** Escapes a metadata name for emission inside a generated Java String literal. */
@@ -946,6 +972,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						if (write) {
 							generation.put(javaFilePath, javaFileContents);
 						}
+						checkCustomerExtensionSuperclass(customer, moduleName, documentName, (vanillaDocumentName != null));
 						generateOverriddenORM(mappingFileContents, customer, module, document, filterDefinitions);
 					}
 				}
@@ -976,12 +1003,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @throws MetaDataException	if a document in the module has the class's name.
 	 */
 	private static void checkGeneratedClassName(@Nonnull Module module, @Nonnull String documentName, @Nonnull String className) {
-		for (String name : module.getDocumentRefs().keySet()) {
-			if (name.equalsIgnoreCase(className)) {
-				throw new MetaDataException("Document " + name + " in module " + module.getName() +
-												" has the name of the class " + className + " generated for document " + documentName +
-												". Rename the document.");
-			}
+		String name = documentNamedLike(module, className);
+		if (name != null) {
+			throw new MetaDataException("Document " + name + " in module " + module.getName() +
+											" has the name of the class " + className + " generated for document " + documentName +
+											". Rename the document.");
 		}
 	}
 
@@ -993,23 +1019,89 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * extend the domain class, as <code>&lt;Document&gt;Vanilla</code> is not generated. An extension that
 	 * extends some other class - an intermediate class of the project's own - is not checked.
 	 *
-	 * <p>The source is read leniently - as ISO-8859-1, which decodes any bytes and leaves the ASCII of the
-	 * declaration intact - and comments and literals are ignored. A source that cannot be read is skipped
-	 * with a warning; it never fails generation.
-	 *
 	 * @param modulePath	The module's path (<code>modules/&lt;m&gt;</code>).
 	 * @param documentName	The document name.
 	 * @param domainClass	The document's vanilla domain class metadata, or null.
 	 * @throws MetaDataException	if the extension extends the wrong generated class and {@link #validate} is on;
 	 * 									with it off, the problem is printed to {@link System#err} as a warning.
 	 */
-	@SuppressWarnings("java:S106") // the generator runs from the command line, where its warnings must reach the console without a logging binding
 	private void checkExtensionSuperclass(@Nonnull String modulePath,
 											@Nonnull String documentName,
 											@Nullable DomainClass domainClass) {
-		Path extensionPath = Paths.get(srcPath, modulePath, documentName, documentName + "Extension.java");
-		if (! Files.isRegularFile(extensionPath)) {
+		String superclassName = extensionSuperclassName(modulePath, documentName);
+		if (superclassName == null) {
 			return;
+		}
+		String narrowingCustomerName = (domainClass == null) ? null : domainClass.narrowingCustomerName;
+		String problem = extensionSuperclassProblem(documentName, superclassName, narrowingCustomerName);
+		if (problem != null) {
+			reportExtensionSuperclassProblem(problem);
+		}
+		else if (debug && (! superclassName.equals(documentName)) && (! superclassName.equals(documentName + VANILLA_CLASS_SUFFIX))) {
+			LOGGER.info("{}Extension extends {}, not {}{} - not checked",
+							documentName,
+							superclassName,
+							documentName,
+							(narrowingCustomerName == null) ? "" : VANILLA_CLASS_SUFFIX);
+		}
+	}
+
+	/**
+	 * Checks the direct superclass of a customer's own hand-written <code>&lt;Document&gt;Extension</code>,
+	 * if it has one. Skyve and the customer's mapping use the customer's extension, so it must extend
+	 * the class generated for the customer: the <code>&lt;Document&gt;Override</code> generated for the
+	 * customer's override of a vanilla document, or the class generated for a new customer document.
+	 * One that extends another class generated for the document, or the vanilla extension, compiles
+	 * but does not have the customer's properties or the customer's mapping, so it is a problem. An
+	 * extension that extends some other class - an intermediate class of the project's own - is not checked.
+	 *
+	 * @param customer	The customer.
+	 * @param moduleName	The module name.
+	 * @param documentName	The document name.
+	 * @param override	Whether the document overrides a vanilla document, rather than being a new one.
+	 * @throws MetaDataException	if the extension extends the wrong generated class and {@link #validate} is on;
+	 * 									with it off, the problem is printed to {@link System#err} as a warning.
+	 */
+	private void checkCustomerExtensionSuperclass(@Nonnull Customer customer,
+													@Nonnull String moduleName,
+													@Nonnull String documentName,
+													boolean override) {
+		String customerName = customer.getName();
+		String superclassName = extensionSuperclassName(ProvidedRepository.CUSTOMERS_NAMESPACE + customerName + '/' +
+															ProvidedRepository.MODULES_NAMESPACE + moduleName,
+														documentName);
+		String expectedName = override ? documentName + OVERRIDE_CLASS_SUFFIX : documentName;
+		Set<String> generatedNames = Set.of(documentName,
+												documentName + VANILLA_CLASS_SUFFIX,
+												documentName + OVERRIDE_CLASS_SUFFIX,
+												documentName + "Extension");
+		if ((superclassName != null) && (! superclassName.equals(expectedName)) && generatedNames.contains(superclassName)) {
+			reportExtensionSuperclassProblem("Customer " + customerName + "'s " + documentName + "Extension must extend " +
+												expectedName + ", the class generated for its " +
+												(override ? "override of " : "new document ") +
+												moduleName + '.' + documentName + ", not " + superclassName + '.');
+		}
+	}
+
+	/**
+	 * Reads the simple name of the class that a hand-written <code>&lt;Document&gt;Extension</code> extends.
+	 *
+	 * <p>The source is read leniently - as ISO-8859-1, which decodes any bytes and leaves the ASCII of the
+	 * declaration intact - and comments and literals are ignored. A source that cannot be read is skipped
+	 * with a warning; it never fails generation.
+	 *
+	 * @param modulePath	The path of the module the extension is in, below the source path
+	 * 						(<code>modules/&lt;m&gt;</code> or <code>customers/&lt;c&gt;/modules/&lt;m&gt;</code>).
+	 * @param documentName	The document name.
+	 * @return	the simple name of the superclass, or null if there is no extension, it cannot be read or it
+	 * 			declares no superclass.
+	 */
+	@SuppressWarnings("java:S106") // the generator runs from the command line, where its warnings must reach the console without a logging binding
+	private @Nullable String extensionSuperclassName(@Nonnull String modulePath, @Nonnull String documentName) {
+		String extensionName = documentName + "Extension";
+		Path extensionPath = Paths.get(srcPath, modulePath, documentName, extensionName + ".java");
+		if (! Files.isRegularFile(extensionPath)) {
+			return null;
 		}
 		String source;
 		try {
@@ -1017,32 +1109,31 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		catch (IOException e) {
 			System.err.println("WARNING: Could not read " + extensionPath + " to check what it extends - " + e);
-			return;
+			return null;
 		}
-		String extensionName = documentName + "Extension";
 		Matcher matcher = Pattern.compile("\\bclass\\s+" + extensionName + "\\b[^{]*?\\bextends\\s+([\\w.]+)")
 									.matcher(stripCommentsAndLiterals(source));
 		if (! matcher.find()) {
-			return;
+			return null;
 		}
-		String superclassName = matcher.group(1);
-		superclassName = superclassName.substring(superclassName.lastIndexOf('.') + 1);
-		String narrowingCustomerName = (domainClass == null) ? null : domainClass.narrowingCustomerName;
-		String problem = extensionSuperclassProblem(documentName, superclassName, narrowingCustomerName);
-		if (problem != null) {
-			// the generated domain is right either way - the extension needs fixing - so this is a
-			// validation, and only warns when validation is off
-			if (validate) {
-				throw new MetaDataException(problem);
-			}
-			System.err.println("WARNING: " + problem);
+		String result = matcher.group(1);
+		return result.substring(result.lastIndexOf('.') + 1);
+	}
+
+	/**
+	 * Reports a hand-written extension that extends the wrong generated class. The generated domain is
+	 * right either way - the extension needs fixing - so this is a validation, and only warns when
+	 * validation is off, so that the domain can be generated while the extension is fixed.
+	 *
+	 * @param problem	The problem.
+	 * @throws MetaDataException	if {@link #validate} is on.
+	 */
+	@SuppressWarnings("java:S106") // the generator runs from the command line, where its warnings must reach the console without a logging binding
+	private void reportExtensionSuperclassProblem(@Nonnull String problem) {
+		if (validate) {
+			throw new MetaDataException(problem);
 		}
-		else if (debug && (! superclassName.equals(documentName)) && (! superclassName.equals(documentName + VANILLA_CLASS_SUFFIX))) {
-			LOGGER.info("{} extends {}, not {} - not checked",
-							extensionName,
-							superclassName,
-							documentName + ((narrowingCustomerName == null) ? "" : VANILLA_CLASS_SUFFIX));
-		}
+		System.err.println("WARNING: " + problem);
 	}
 
 	/**
@@ -1110,29 +1201,52 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * 			if no comment or literal starts at the index.
 	 */
 	private static int commentOrLiteralEnd(@Nonnull String source, int start) {
-		final int length = source.length();
-		char c = source.charAt(start);
-		char next = (start + 1 < length) ? source.charAt(start + 1) : '\0';
-		if ((c == '/') && (next == '/')) { // line comment
+		if (source.startsWith("//", start)) { // line comment
 			int end = source.indexOf('\n', start);
-			return (end < 0) ? length : end;
+			return (end < 0) ? source.length() : end;
 		}
-		if ((c == '/') && (next == '*')) { // block or javadoc comment
-			int end = source.indexOf("*/", start + 2);
-			return (end < 0) ? length : end + 2;
+		if (source.startsWith("/*", start)) { // block or javadoc comment
+			return endAfter(source, "*/", start + 2);
 		}
 		if (source.startsWith("\"\"\"", start)) { // text block
-			int end = source.indexOf("\"\"\"", start + 3);
-			return (end < 0) ? length : end + 3;
+			return endAfter(source, "\"\"\"", start + 3);
 		}
+		char c = source.charAt(start);
 		if ((c == '"') || (c == '\'')) { // string or character literal
-			int end = start + 1;
-			while ((end < length) && (source.charAt(end) != c) && (source.charAt(end) != '\n')) {
-				end += (source.charAt(end) == '\\') ? 2 : 1;
-			}
-			return Math.min(end + 1, length);
+			return quotedLiteralEnd(source, start, c);
 		}
 		return -1;
+	}
+
+	/**
+	 * Finds the index after the first terminator in Java source from an index.
+	 *
+	 * @param source	The Java source.
+	 * @param terminator	The terminator, such as <code>*&#47;</code>.
+	 * @param from	The index to look from.
+	 * @return	the index after the terminator, or the source length if it is not found.
+	 */
+	private static int endAfter(@Nonnull String source, @Nonnull String terminator, int from) {
+		int end = source.indexOf(terminator, from);
+		return (end < 0) ? source.length() : end + terminator.length();
+	}
+
+	/**
+	 * Finds the end of a string or character literal in Java source, which ends at its closing quote,
+	 * skipping escaped characters, or at the end of its line if it is not closed.
+	 *
+	 * @param source	The Java source.
+	 * @param start	The index of the opening quote.
+	 * @param quote	The quote character.
+	 * @return	the index after the closing quote or the line break, or the source length.
+	 */
+	private static int quotedLiteralEnd(@Nonnull String source, int start, char quote) {
+		final int length = source.length();
+		int end = start + 1;
+		while ((end < length) && (source.charAt(end) != quote) && (source.charAt(end) != '\n')) {
+			end += (source.charAt(end) == '\\') ? 2 : 1;
+		}
+		return Math.min(end + 1, length);
 	}
 
 	/**
@@ -3020,9 +3134,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// customer has one, as the target's inverse of the reference can be the override's own
 		String overrideClassName = customerOverrideClassName(customer, referenceDocument);
 		if (overrideClassName != null) {
-			int lastDotIndex = overrideClassName.lastIndexOf('.');
-			referencePackagePath = overrideClassName.substring(0, lastDotIndex);
-			referenceClassName = overrideClassName.substring(lastDotIndex + 1);
+			referencePackagePath = packageName(overrideClassName);
+			referenceClassName = simpleName(overrideClassName);
 		}
 
 		if (! referencePackagePath.equals(packagePath)) {
@@ -3458,9 +3571,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// An inverse overriding a vanilla one keeps the vanilla type of the methods it overrides.
 		String overrideClassName = overriddenInverse ? null : customerOverrideClassName(customer, propertyDocument);
 		if (overrideClassName != null) {
-			int lastDotIndex = overrideClassName.lastIndexOf('.');
-			propertyPackagePath = overrideClassName.substring(0, lastDotIndex);
-			propertyClassName = overrideClassName.substring(lastDotIndex + 1);
+			propertyPackagePath = packageName(overrideClassName);
+			propertyClassName = simpleName(overrideClassName);
 		}
 
 		if (! propertyPackagePath.equals(packagePath)) {

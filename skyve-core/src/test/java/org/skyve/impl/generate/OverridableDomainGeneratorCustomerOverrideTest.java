@@ -125,11 +125,20 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		 * which extends the customer's override class.
 		 */
 		Fixture acmeExtension(String documentName) {
+			return acmeExtension(documentName, "customers.acme.modules." + MODULE + ".domain." + documentName + "Override");
+		}
+
+		/**
+		 * Gives the acme customer's override of the document, or its new document, a hand-written
+		 * <code>&lt;Document&gt;Extension</code>, which extends the class of the fully qualified name.
+		 */
+		Fixture acmeExtension(String documentName, String superclassName) {
 			String packageName = "customers.acme.modules." + MODULE + '.' + documentName;
 			extended.put(packageName.replace('.', '/') + '/' + documentName + "Extension.java",
 							("package " + packageName + ";\n\n" +
-								"import customers.acme.modules." + MODULE + ".domain." + documentName + "Override;\n\n" +
-								"public class " + documentName + "Extension extends " + documentName + "Override {\n" +
+								"import " + superclassName + ";\n\n" +
+								"public class " + documentName + "Extension extends " +
+								superclassName.substring(superclassName.lastIndexOf('.') + 1) + " {\n" +
 								"\tprivate static final long serialVersionUID = 1L;\n}\n").getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
@@ -909,6 +918,72 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertTrue(results.get("narrowed").containsKey("modules/sales/domain/ReceiptVanilla.java"), results.get("narrowed").keySet().toString()),
 				() -> assertTrue(results.get("narrowed").containsKey("customers/acme/modules/orm.hbm.xml"), results.get("narrowed").keySet().toString()),
 				() -> assertTrue(results.get("notNarrowed").containsKey("modules/sales/domain/sales_orm.hbm.xml"), results.get("notNarrowed").keySet().toString()));
+	}
+
+	/**
+	 * A customer's own extension must extend the class generated for the customer, which the customer's
+	 * mapping maps through it. Extending the vanilla class or the vanilla extension compiles, but
+	 * Hibernate fails at startup.
+	 */
+	@Test
+	void aCustomersExtensionMustExtendItsOverrideClass() {
+		Fixture extendingTheVanillaClass = new Fixture()
+				.vanilla(document("Invoice", "SALES_Invoice", null, null, "code"))
+				.acme(document("Invoice", "SALES_Invoice", null, null, "code", "notes"))
+				.acmeExtension("Invoice", "modules.sales.domain.Invoice");
+		Fixture extendingTheVanillaExtension = new Fixture()
+				.vanilla(document("Invoice", "SALES_Invoice", null, null, "code"))
+				.extension("Invoice")
+				.acme(document("Invoice", "SALES_Invoice", null, null, "code"))
+				.acmeExtension("Invoice", "modules.sales.Invoice.InvoiceExtension");
+
+		MetaDataException vanillaClass = assertThrows(MetaDataException.class, () -> generate(extendingTheVanillaClass));
+		MetaDataException vanillaExtension = assertThrows(MetaDataException.class, () -> generate(extendingTheVanillaExtension));
+		assertAll(() -> assertEquals("Customer acme's InvoiceExtension must extend InvoiceOverride, the class generated for its override of sales.Invoice, not Invoice.",
+										vanillaClass.getMessage()),
+					() -> assertEquals("Customer acme's InvoiceExtension must extend InvoiceOverride, the class generated for its override of sales.Invoice, not InvoiceExtension.",
+										vanillaExtension.getMessage()));
+	}
+
+	@Test
+	void aCustomersExtensionOfANewDocumentMustExtendItsClass() throws Exception {
+		Fixture wrong = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(document("Quote", "SALES_Quote", null, null, "code"))
+				.acmeExtension("Quote", "customers.acme.modules.sales.domain.QuoteOverride");
+		Fixture right = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(document("Quote", "SALES_Quote", null, null, "code"))
+				.acmeExtension("Quote", "customers.acme.modules.sales.domain.Quote");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(wrong));
+		Map<String, String> files = generate(right);
+		assertAll(() -> assertEquals("Customer acme's QuoteExtension must extend Quote, the class generated for its new document sales.Quote, not QuoteOverride.",
+										e.getMessage()),
+					() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	@Test
+	void aWrongCustomerExtensionSuperclassOnlyWarnsWithValidationOff() throws Exception {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Invoice", "SALES_Invoice", null, null, "code"))
+				.acme(document("Invoice", "SALES_Invoice", null, null, "code", "notes"))
+				.acmeExtension("Invoice", "modules.sales.domain.Invoice");
+
+		PrintStream previousErr = System.err;
+		ByteArrayOutputStream err = new ByteArrayOutputStream();
+		Map<String, String> files;
+		System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
+		try {
+			files = generate(fixture, false);
+		}
+		finally {
+			System.setErr(previousErr);
+		}
+
+		String warnings = err.toString(StandardCharsets.UTF_8);
+		assertAll(() -> assertTrue(warnings.contains("WARNING: Customer acme's InvoiceExtension must extend InvoiceOverride"), warnings),
+					() -> assertTrue(files.containsKey("customers/acme/modules/orm.hbm.xml"), files.keySet().toString()));
 	}
 
 	@Test
