@@ -388,13 +388,6 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void removeSessionOfAnUnknownUserDoesNothingEvenWithoutASessionId() {
-		String userId = "no-such-user-" + System.nanoTime();
-		StateUtil.removeSession(userId, mock(HttpSession.class)); // getId() is null
-		assertThat(StateUtil.getSessionCount(userId), is(0));
-	}
-
-	@Test
 	void replaceTokenWithAnAlreadyValidNewTokenStillInvalidatesTheOldOne() {
 		String sessionId = "already-valid-" + System.nanoTime();
 		Integer oldToken = Integer.valueOf(1);

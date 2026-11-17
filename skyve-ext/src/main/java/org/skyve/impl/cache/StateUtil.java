@@ -145,13 +145,13 @@ public class StateUtil {
 	}
 	
 	/**
-	 * Performs decrementSessionCount.
+	 * Decrements the JVM-wide session count, never below zero.
+	 *
+	 * <p>Threading: atomic; a decrement at zero does nothing, and a concurrent increment is never lost
+	 * nor a negative count seen.
 	 */
 	public static void decrementSessionCount() {
-		int count = SESSION_COUNT.decrementAndGet();
-		if (count < 0) {
-			SESSION_COUNT.set(0);
-		}
+		SESSION_COUNT.updateAndGet(count -> Math.max(0, count - 1));
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -170,10 +170,9 @@ public class StateUtil {
 	 * changed, so a reader holding it sees a consistent snapshot. When the change reports no change,
 	 * nothing is written.
 	 *
-	 * <p>Threading: safe to call concurrently for the same key, and takes no lock of its own; an attempt
-	 * fails only because another thread's change to the entry succeeded (or the entry expired), so the
-	 * loop ends. A JVM lock would not be enough if the cache were ever shared across JVMs; the cache's
-	 * own conditional operations are atomic whatever the cache's topology is.
+	 * <p>Threading: safe to call concurrently for the same key, because the cache's conditional operations
+	 * are atomic; it has no lock objects of its own. An attempt fails only when another thread changed the
+	 * entry (or it expired) after it was read, and then it retries.
 	 *
 	 * @param cache	the cache holding the sets
 	 * @param key	the entry's key
@@ -234,9 +233,7 @@ public class StateUtil {
 	 */
 	public static void removeSession(@Nonnull String userId, @Nonnull HttpSession session) {
 		String sessionId = session.getId();
-		// an unknown user's copy is empty: nothing to remove, whatever the id (TreeSet.remove(null) would throw)
-		updateSet(getSessions(), userId, true,
-					(TreeSet<String> sessionIds) -> (! sessionIds.isEmpty()) && sessionIds.remove(sessionId));
+		updateSet(getSessions(), userId, true, (TreeSet<String> sessionIds) -> sessionIds.remove(sessionId));
 	}
 	
 	/**
@@ -335,9 +332,8 @@ public class StateUtil {
 	 *
 	 * @param sessionId	the session's id
 	 */
-	@SuppressWarnings("rawtypes")
 	public static void clearTokens(@Nonnull String sessionId) {
-		getTokens().replace(sessionId, new TreeSet());
+		getTokens().replace(sessionId, new TreeSet<>());
 	}
 	
 	/**

@@ -20,10 +20,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.Timeout.ThreadMode;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -177,6 +180,91 @@ class StateUtilConcurrencyTest {
 		assertTrue(failures.isEmpty(), () -> describe(failures));
 	}
 
+	/**
+	 * Revoking every session (as a password change does) while the user's sessions start and end: no revoked
+	 * session id may come back, which would leave a session valid after its revocation.
+	 */
+	@ParameterizedTest
+	@EnumSource(Topology.class)
+	void concurrentRevocationOfAUsersSessionsLeavesNoRevokedSession(Topology topology) throws Exception {
+		start(topology);
+		List<String> failures = new ArrayList<>();
+		for (int round = 0; round < ROUNDS; round++) {
+			String userId = "user-" + round;
+			List<HttpSession> revoked = sessions("r" + round + "-old", THREADS);
+			List<HttpSession> starting = sessions("r" + round + "-new", THREADS);
+			for (HttpSession session : revoked) {
+				StateUtil.addSession(userId, session);
+			}
+			List<Runnable> tasks = new ArrayList<>();
+			tasks.add(() -> StateUtil.removeSessions(userId));
+			for (int i = 0; i < THREADS; i++) {
+				HttpSession end = revoked.get(i);
+				HttpSession begin = starting.get(i);
+				tasks.add(() -> StateUtil.removeSession(userId, end));
+				tasks.add(() -> StateUtil.addSession(userId, begin));
+			}
+			runTogether(failures, round, tasks);
+			checkNoRevokedSession(failures, round, userId, ids(starting));
+		}
+		assertTrue(failures.isEmpty(), () -> describe(failures));
+	}
+
+	/**
+	 * Session count decrements at zero racing increments and reads: the count is never seen below zero. A
+	 * decrement that went to -1 and was then reset to 0 showed -1 to readers, and lost any increment made
+	 * in between; that window is what the readers catch.
+	 */
+	@Test
+	void concurrentSessionCountChangesNeverShowANegativeCount() throws Exception {
+		int changes = 200_000;
+		while (StateUtil.getSessionCount() > 0) {
+			StateUtil.decrementSessionCount();
+		}
+		AtomicBoolean done = new AtomicBoolean();
+		AtomicInteger lowest = new AtomicInteger();
+		List<Runnable> tasks = new ArrayList<>();
+		for (int i = 0; i < THREADS / 2; i++) {
+			tasks.add(() -> {
+				for (int j = 0; j < changes; j++) {
+					StateUtil.decrementSessionCount();
+				}
+			});
+			tasks.add(() -> {
+				for (int j = 0; j < changes; j++) {
+					StateUtil.incrementSessionCount();
+				}
+			});
+		}
+		List<Runnable> readers = new ArrayList<>();
+		for (int i = 0; i < THREADS / 2; i++) {
+			readers.add(() -> {
+				while (! done.get()) {
+					lowest.accumulateAndGet(StateUtil.getSessionCount(), Math::min);
+				}
+			});
+		}
+		List<Future<?>> reading = new ArrayList<>();
+		for (Runnable reader : readers) {
+			reading.add(executor.submit(reader));
+		}
+		List<String> failures = new ArrayList<>();
+		try {
+			runTogether(failures, 0, tasks);
+		}
+		finally {
+			done.set(true);
+		}
+		for (Future<?> future : reading) {
+			future.get(10, TimeUnit.SECONDS);
+		}
+		while (StateUtil.getSessionCount() > 0) {
+			StateUtil.decrementSessionCount();
+		}
+		assertTrue(failures.isEmpty(), () -> String.join("; ", failures));
+		assertTrue(lowest.get() >= 0, () -> "the session count was seen at " + lowest.get());
+	}
+
 	@ParameterizedTest
 	@EnumSource(Topology.class)
 	void concurrentTokenChangesInOneSessionKeepEveryToken(Topology topology) throws Exception {
@@ -274,6 +362,24 @@ class StateUtilConcurrencyTest {
 			boolean registered = sessionsCache().containsKey(userId);
 			if (registered == expected.isEmpty()) {
 				failures.add("round " + round + ": user entry " + (registered ? "left behind" : "missing"));
+			}
+		}
+		catch (RuntimeException e) { // a set corrupted by racing updates cannot be read
+			failures.add("round " + round + ": reading the sessions threw " + e);
+		}
+	}
+
+	/**
+	 * Records a failure if the user has any session but the new ones; a new session may or may not
+	 * survive, depending on whether it started before the revocation.
+	 */
+	private static void checkNoRevokedSession(List<String> failures, int round, String userId, Set<String> started) {
+		try {
+			Set<String> left = new TreeSet<>(StateUtil.getSessions(userId));
+			Set<String> unexpected = new TreeSet<>(left);
+			unexpected.removeAll(started);
+			if (! unexpected.isEmpty()) {
+				failures.add("round " + round + ": revoked sessions " + unexpected + " came back; left " + left);
 			}
 		}
 		catch (RuntimeException e) { // a set corrupted by racing updates cannot be read
