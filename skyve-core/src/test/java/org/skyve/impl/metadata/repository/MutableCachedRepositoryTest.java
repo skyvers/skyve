@@ -448,6 +448,52 @@ class MutableCachedRepositoryTest {
 	}
 
 	/**
+	 * A dynamic repository, whose eviction needs no persistence, that scaffolds views as a file
+	 * system repository does.
+	 */
+	private static final class ScaffoldingDynamicRepository extends UnsynchronisedDynamicRepository {
+		@Override
+		public boolean getUseScaffoldedViews() {
+			return true;
+		}
+	}
+
+	/**
+	 * Evicting a customer evicts the shared documents of its modules, which other customers' views
+	 * are scaffolded from too, so their scaffolded views of those documents go as well, while a
+	 * customer without those modules keeps its scaffolded views. A scaffolded view is no metadata
+	 * that the vtable finds.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void evictingACustomerEvictsEveryCustomersScaffoldedViewsOfItsModules() {
+		ScaffoldingDynamicRepository repo = new ScaffoldingDynamicRepository();
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl acme = mockCustomer("acme", module);
+		CustomerImpl beta = mockCustomer("beta", module);
+		View betaView = repo.getView(null, beta, document, ViewType.edit.toString());
+		CustomerImpl other = mock(CustomerImpl.class);
+		when(other.getName()).thenReturn("other");
+		Map<String, FormLabelLayout> otherModules = new HashMap<>();
+		otherModules.put("crm", null);
+		when(other.getModuleEntries()).thenReturn(otherModules);
+
+		repo.evictCachedMetaData(other);
+		View betaViewAfterOtherEviction = repo.getView(null, beta, document, ViewType.edit.toString());
+		repo.evictCachedMetaData(acme);
+		// re-put the evicted module and document, as a repository building its metadata does
+		module = repo.putModule(minimalModule("admin", "User"));
+		Document reloaded = repo.putDocument(module, minimalDocument("User"));
+		View betaViewAfterAcmeEviction = repo.getView(null, beta, reloaded, ViewType.edit.toString());
+
+		assertAll(() -> assertSame(betaView, betaViewAfterOtherEviction),
+					() -> assertNotSame(betaView, betaViewAfterAcmeEviction),
+					() -> assertNull(repo.vtable("beta", "modules/admin/User/views/edit")));
+	}
+
+	/**
 	 * Evicting a customer removes its own keys and those of its modules, not those of a customer or
 	 * module whose name starts with the same characters.
 	 */

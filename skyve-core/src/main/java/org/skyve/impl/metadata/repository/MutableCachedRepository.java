@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.CORE;
 import org.skyve.impl.generate.DomainGenerator;
@@ -75,6 +76,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	private Map<String, Optional<MetaData>> cache;
 
 	/**
+	 * Views scaffolded outside dev mode, by customer, module, document and view name - eg
+	 * bizhub/admin/Contact/edit. They are kept apart from the cache, as a customer's override of a
+	 * document can have other attributes, so each customer has its own, and as they come from no
+	 * metadata file, so the cache's keys stay those of the metadata that exists.
+	 */
+	private final Map<String, View> scaffoldedViews = new ConcurrentHashMap<>();
+
+	/**
 	 * Used to supply the Map implementation required by this repository.
 	 * Creates a mutable repository using the supplied cache implementation.
 	 *
@@ -89,7 +98,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 *
 	 * <p>When {@code customer} is {@code null}, the full cache is cleared. Otherwise,
 	 * customer overrides and cached module/document/view/action/bizlet entries for
-	 * the customer's accessible modules are removed.
+	 * the customer's accessible modules are removed, as are the customer's scaffolded views
+	 * and every customer's scaffolded views of documents in those modules.
 	 *
 	 * @param customer the customer scope to evict, or {@code null} for a full eviction
 	 */
@@ -99,6 +109,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		// Clear the lot
 		if (customer == null) {
 			cache.clear();
+			scaffoldedViews.clear();
 		}
 		else {
 			// Clear any customer overrides and any modules the customer has access to.
@@ -126,6 +137,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 					}
 				}
 			}
+
+			// Clear the customer's scaffolded views, and every customer's of the evicted modules'
+			// documents, which are scaffolded from them
+			final String customerName = customer.getName();
+			scaffoldedViews.keySet().removeIf(key -> {
+				String[] parts = key.split("/", 3); // customer, module, rest
+				return customerName.equals(parts[0]) || moduleNames.contains(parts[1]);
+			});
 		}
 	}
 	
@@ -637,18 +656,20 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 				result = scaffoldView(customer, owningModule, document, name, uxui);
 			}
 			else {
-				// Cache the scaffolded view as the customer's override of the view, as a customer's
-				// override of the document can have other attributes. The customer lookup above finds it.
-				StringBuilder key = new StringBuilder(128);
-				key.append(CUSTOMERS_NAMESPACE).append(customer.getName()).append('/');
-				key.append(MODULES_NAMESPACE).append(owningModule.getName()).append('/');
-				key.append(document.getName()).append('/').append(VIEWS_NAMESPACE).append(name);
-				String viewKey = key.toString();
-				Optional<MetaData> o = cache.get(viewKey);
-				if (o == null) { // key absent
+				// Cache the scaffolded view for the customer, as a customer's override of the document
+				// can have other attributes
+				String viewKey = new StringBuilder(128).append(customer.getName()).append('/')
+															.append(owningModule.getName()).append('/')
+															.append(document.getName()).append('/')
+															.append(name).toString();
+				result = scaffoldedViews.get(viewKey);
+				if (result == null) {
 					result = scaffoldView(customer, owningModule, document, name, uxui);
 					if (result != null) {
-						cache.putIfAbsent(viewKey, Optional.of(result));
+						View previous = scaffoldedViews.putIfAbsent(viewKey, result);
+						if (previous != null) {
+							result = previous;
+						}
 					}
 				}
 			}
