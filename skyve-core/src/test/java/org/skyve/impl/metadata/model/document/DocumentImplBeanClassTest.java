@@ -23,7 +23,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
  * fixture classes under the names Skyve looks up, so no fixture packages sit on the test class path
  * (a <code>customers</code> package there would look like a customer to the repository tests).
  */
-@SuppressWarnings({"static-method", "unused"})
+@SuppressWarnings("static-method")
 class DocumentImplBeanClassTest {
 	private static final String MODULE = "beanclassfixture";
 
