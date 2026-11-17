@@ -970,6 +970,26 @@ public class SmartClientListServlet extends HttpServlet {
 				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get(CRITERIA_FIELD);
+				if (CompoundFilterOperator.not.equals(compoundFilterOperator)) {
+					// Under not, each criterion is negated, so a group is negated as a whole (De Morgan), not just its leaves:
+					// not (a and b) is (not a) or (not b), not (a or b) is not [a, b] and not (not [a, b]) is a or b.
+					if (CompoundFilterOperator.and.equals(subCompoundFilterOperator)) {
+						subCompoundFilterOperator = CompoundFilterOperator.or;
+						if (subCritiera != null) {
+							List<Map<String, Object>> negated = new ArrayList<>(subCritiera.size());
+							for (Map<String, Object> subCriterion : subCritiera) {
+								negated.add(Map.of(OPERATOR_FIELD, CompoundFilterOperator.not.toString(), CRITERIA_FIELD, List.of(subCriterion)));
+							}
+							subCritiera = negated;
+						}
+					}
+					else if (CompoundFilterOperator.or.equals(subCompoundFilterOperator)) {
+						subCompoundFilterOperator = CompoundFilterOperator.not;
+					}
+					else {
+						subCompoundFilterOperator = CompoundFilterOperator.or;
+					}
+				}
 				addAdvancedFilterCriteriaToQueryInternal(module,
 															document,
 															user,
@@ -982,7 +1002,7 @@ public class SmartClientListServlet extends HttpServlet {
 					if (CompoundFilterOperator.or.equals(compoundFilterOperator) && (! filter.isEmpty())) {
 						filter.addOr(subFilter);
 					}
-					else { // and, not (taken into account below), and the first group under or
+					else { // and, not (the group is negated above), and the first group under or
 						filter.addAnd(subFilter);
 					}
 				}
