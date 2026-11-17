@@ -829,6 +829,8 @@ class SmartClientListServletHelperTest {
 		org.mockito.Mockito.when(document.getAttribute("name")).thenReturn(nameField);
 		org.mockito.Mockito.when(model.newFilter()).thenReturn(orFilter);
 		org.mockito.Mockito.doReturn(false).when(orFilter).isEmpty();
+		// the filter is empty until the first criterion is added to it
+		org.mockito.Mockito.when(filter.isEmpty()).thenReturn(Boolean.TRUE, Boolean.FALSE);
 
 		java.util.Map<String, Object> c1 = new java.util.HashMap<>();
 		c1.put("fieldName", "name");
