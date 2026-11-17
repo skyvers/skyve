@@ -168,6 +168,7 @@ class SkyveFacesPhaseListenerTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5778") // the side-effect mocks run after afterPhase in the lambda to prove expiry throws before any of them
 	void selectionMarkerFreePreUpgradePostbackExpiresBeforeEveryRestoreSideEffect() throws Exception {
 		LifecycleRequest postback = lifecycleRequest(
 				UxUi.newPrimeFaces("tablet", "external", "casablanca", "blue"),
@@ -180,9 +181,10 @@ class SkyveFacesPhaseListenerTest {
 		Runnable modelMutation = mock(Runnable.class);
 		Runnable accessCheck = mock(Runnable.class);
 		Runnable action = mock(Runnable.class);
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
 		FacesException exception = assertThrows(FacesException.class, () -> {
-			new SkyveFacesPhaseListener().afterPhase(postback.event);
+			listener.afterPhase(postback.event);
 			modelMutation.run();
 			accessCheck.run();
 			action.run();
@@ -253,9 +255,9 @@ class SkyveFacesPhaseListenerTest {
 			Map<String, Object> sessionMap = new HashMap<>();
 			sessionMap.put(FacesUtil.MANAGED_BEAN_NAME_KEY, view);
 			PhaseEvent event = restoreViewEvent(webContext, sessionMap, Map.of());
+			SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
-			FacesException exception = assertThrows(FacesException.class,
-														() -> new SkyveFacesPhaseListener().afterPhase(event));
+			FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
 
 			assertCachedConversationHasNoPersistence(exception, webContext.getWebId());
 			verify(view).hydrate(any());
@@ -269,9 +271,9 @@ class SkyveFacesPhaseListenerTest {
 			PhaseEvent event = restoreViewEvent(webContext,
 												new HashMap<>(),
 												Map.of(AbstractWebContext.CONTEXT_NAME, webContext.getWebId()));
+			SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
-			FacesException exception = assertThrows(FacesException.class,
-														() -> new SkyveFacesPhaseListener().afterPhase(event));
+			FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
 
 			assertCachedConversationHasNoPersistence(exception, webContext.getWebId());
 		});
@@ -280,12 +282,13 @@ class SkyveFacesPhaseListenerTest {
 	@Test
 	void postRenderingAViewWithNoWebContextThrowsAndStillCommits() throws Exception {
 		FacesView view = mock(FacesView.class);
-		when(view.getPostRenderBean()).thenReturn(mock(Bean.class));
+		Bean postRenderBean = mock(Bean.class);
+		when(view.getPostRenderBean()).thenReturn(postRenderBean);
 		PhaseEvent event = renderResponseEvent(view);
 		AbstractPersistence persistence = bindPersistence();
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
-		FacesException exception = assertThrows(FacesException.class,
-													() -> new SkyveFacesPhaseListener().afterPhase(event));
+		FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
 
 		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, exception.getCause());
 		assertEquals("Cannot post render as FacesView skyve has no web context", cause.getMessage());
@@ -298,9 +301,9 @@ class SkyveFacesPhaseListenerTest {
 		FacesView view = mock(FacesView.class);
 		PhaseEvent event = renderResponseEvent(view);
 		AbstractPersistence persistence = bindPersistence();
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
-		FacesException exception = assertThrows(FacesException.class,
-													() -> new SkyveFacesPhaseListener().afterPhase(event));
+		FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(event));
 
 		IllegalStateException cause = assertInstanceOf(IllegalStateException.class, exception.getCause());
 		assertEquals("Cannot cache the conversation as FacesView skyve has no web context", cause.getMessage());
@@ -423,9 +426,9 @@ class SkyveFacesPhaseListenerTest {
 										boolean ajax) throws Exception {
 		LifecycleRequest postback = lifecycleRequest(uxui, type, emulated, true, ajax, viewMap);
 		AbstractPersistence persistence = bindPersistence();
+		SkyveFacesPhaseListener listener = new SkyveFacesPhaseListener();
 
-		FacesException exception = assertThrows(FacesException.class,
-				() -> new SkyveFacesPhaseListener().afterPhase(postback.event));
+		FacesException exception = assertThrows(FacesException.class, () -> listener.afterPhase(postback.event));
 
 		assertInstanceOf(ViewExpiredException.class, exception.getCause());
 		verifyNoInteractions(persistence);

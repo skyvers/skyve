@@ -109,18 +109,8 @@ class MetaDataServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // the doGet, forced top labels and doPost paths read better as named tests than as parameter rows
 	void doGetRendersAuthenticatedViewMetadata() throws Exception {
-		java.io.StringWriter body = new java.io.StringWriter();
-		HttpServletResponse response = responseWritingTo(body);
-
-		invokeServletMethod("doGet", authenticatedViewRequest(u, "admin", "JobSchedule"), response);
-
-		assertTrue(body.toString().contains("\"type\":\"view\""), body.toString());
-		assertTrue(body.toString().contains("\"name\":\"edit\""), body.toString());
-	}
-
-	@Test
-	void doGetRendersAuthenticatedViewMetadataUsingRequestSelection() throws Exception {
 		java.io.StringWriter body = new java.io.StringWriter();
 		HttpServletResponse response = responseWritingTo(body);
 

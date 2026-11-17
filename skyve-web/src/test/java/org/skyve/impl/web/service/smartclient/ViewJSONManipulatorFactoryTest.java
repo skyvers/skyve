@@ -1,5 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.AfterEach;
@@ -127,8 +128,8 @@ class ViewJSONManipulatorFactoryTest {
 	}
 
 	private static Object[] newManipulatorArgs() {
-		User user = org.mockito.Mockito.mock(User.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(new CustomerImpl());
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(new CustomerImpl());
 		DocumentImpl document = new DocumentImpl();
 		document.setPersistent(new org.skyve.metadata.model.Persistent());
 		ModuleImpl module = new ModuleImpl();

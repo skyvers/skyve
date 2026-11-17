@@ -72,6 +72,7 @@ class ChartServletTest {
 		return request;
 	}
 
+	@SuppressWarnings("resource") // a PrintWriter over a StringWriter holds nothing to close
 	private static HttpServletResponse responseWritingTo(StringWriter body) throws Exception {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		when(response.getWriter()).thenReturn(new PrintWriter(body));

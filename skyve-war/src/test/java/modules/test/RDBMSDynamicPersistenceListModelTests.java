@@ -20,7 +20,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
 	void testConstructorQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
-		row = p.save(row);
+		p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
@@ -35,7 +35,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
 	void testPostConstructQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
-		row = p.save(row);
+		p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
@@ -57,7 +57,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
 	void testSetBeanQuery() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
-		row = p.save(row);
+		p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
@@ -80,7 +80,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
 	void testConstructorModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
-		row = p.save(row);
+		p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
@@ -100,7 +100,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
 	void testPostConstructModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
-		row = p.save(row);
+		p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		
@@ -126,7 +126,7 @@ class RDBMSDynamicPersistenceListModelTests extends AbstractSkyveTest {
 	@Test
 	void testSetBeanModel() throws Exception {
 		DynamicPersistentBean row = Util.constructRandomInstance(u, m, aadpd, 2);
-		row = p.save(row);
+		p.save(row);
 		row = Util.constructRandomInstance(u, m, aadpd, 2);
 		p.save(row);
 		

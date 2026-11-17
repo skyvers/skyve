@@ -844,10 +844,8 @@ public class SmartClientSelenide extends Selenide<
 		Object messages = script("return _sail.messages()");
 		if (messages instanceof List<?> list) {
 			for (Object message : (List<Object>) list) {
-				if (message instanceof Map<?, ?> m) {
-					if ((type == null) || type.equals(m.get("type"))) {
-						result.add(String.valueOf(m.get("text")));
-					}
+				if ((message instanceof Map<?, ?> m) && ((type == null) || type.equals(m.get("type")))) {
+					result.add(String.valueOf(m.get("text")));
 				}
 			}
 		}
@@ -1096,7 +1094,7 @@ public class SmartClientSelenide extends Selenide<
 		// Waits for the upload to be processed: the upload page closes its window (content uploads, and upload actions
 		// and imports that succeed without problems), or shows why it could not (an upload action's or import's
 		// problems, or a refusal), or reports a success in its own messages and stays open (upload actions and imports,
-		// in a Skyve without runtime issue P3's fix: Apps' A/B runs on master), when the window is closed below as a
+		// in an older Skyve: Apps' A/B runs on master), when the window is closed below as a
 		// user would
 		WebElement uploadFrame = frame;
 		String outcome = until("the upload to finish", d -> {

@@ -26,14 +26,16 @@ class PrimeFacesContentUploadResourcesTest {
 		String css = Files.readString(UPLOAD_CSS);
 
 		assertTrue(css.contains("grid-template-columns: auto minmax(0, 1fr) auto;"), css);
-		assertTrue(css.contains("#upload .ui-fileupload-row > .ui-fileupload-preview {\n"
-				+ "\talign-self: center;\n"
-				+ "\tgrid-column: 1;\n"
-				+ "\tgrid-row: 1 / 4;\n"
-				+ "}"), css);
+		assertTrue(css.contains("""
+				#upload .ui-fileupload-row > .ui-fileupload-preview {
+					align-self: center;
+					grid-column: 1;
+					grid-row: 1 / 4;
+				}"""), css);
 		assertTrue(css.contains("#upload .ui-fileupload-row > .ui-fileupload-filename {\n\tgrid-column: 2;"), css);
-		assertTrue(css.contains("#upload .ui-fileupload-row > div:last-child {\n"
-				+ "\talign-self: center;\n"
-				+ "\tgrid-column: 3;"), css);
+		assertTrue(css.contains("""
+				#upload .ui-fileupload-row > div:last-child {
+					align-self: center;
+					grid-column: 3;"""), css);
 	}
 }

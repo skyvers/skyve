@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Geometry;
@@ -34,7 +35,7 @@ class MapModelTest {
 	@Test
 	void setBeanRoundtrip() {
 		TestMapModel model = new TestMapModel();
-		Bean mockBean = org.mockito.Mockito.mock(Bean.class);
+		Bean mockBean = mock(Bean.class);
 		model.setBean(mockBean);
 		assertThat(model.getBean(), is(mockBean));
 	}
@@ -42,7 +43,7 @@ class MapModelTest {
 	@Test
 	void postConstructDoesNotThrow() {
 		TestMapModel model = new TestMapModel();
-		Customer mockCustomer = org.mockito.Mockito.mock(Customer.class);
+		Customer mockCustomer = mock(Customer.class);
 		model.postConstruct(mockCustomer, false);
 		assertNotNull(model);
 	}

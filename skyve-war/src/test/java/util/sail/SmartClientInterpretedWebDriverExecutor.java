@@ -41,7 +41,6 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.impl.metadata.module.menu.AbstractDocumentOrQueryOrModelMenuItem;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
-import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
@@ -230,7 +229,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		String[] titles = path.split("::");
 		StringBuilder prefix = new StringBuilder(path.length());
 		for (String title : titles) {
-			if (prefix.length() > 0) {
+			if (! prefix.isEmpty()) {
 				prefix.append("::");
 			}
 			prefix.append(title);
@@ -308,13 +307,12 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * everything else is typed. While a data grid row is being edited inline (after {@code dataGridEdit}
 	 * or {@code dataGridNew} on an inline grid), the binding is first tried as a column of that grid.
 	 */
+	@SuppressWarnings("null") // checks values the annotations say are non-null
 	@Override
 	public void executeDataEnter(DataEnter dataEnter) {
 		Match match = dataEnter.getEffectiveMatch();
 		String matchValue = dataEnter.getValue();
-		@SuppressWarnings("null") // SAIL XML turns a blank value into null
-		boolean matchValuePresent = (matchValue != null);
-		if ((match != Match.index) && matchValuePresent) {
+		if ((match != Match.index) && (matchValue != null)) { // SAIL XML turns a blank value into null
 			enterOption(dataEnter, substituteTokens(matchValue), match);
 			return;
 		}
@@ -604,7 +602,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			autoCompleteLookupDescriptionAndPick(complete, substituteTokens(search), substituteTokens(pick));
 			return;
 		}
-		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteTokens(search));
+		lookupDescription(complete, complete.getBinding(), null, searchPresent ? substituteTokens(search) : null);
 	}
 
 	@Override
@@ -866,12 +864,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 *
 	 * @param step the Step object representing the data grid action to perform
 	 * @param binding the binding string used to identify the data grid UI elements
-	 * @param row optional row index for row-specific gestures; required for select, zoom, and remove actions
+	 * @param requestedRow optional row index for row-specific gestures; required for select, zoom, and remove actions
 	 */
-	private void dataGridGesture(@Nonnull Step step, @Nonnull String binding, @Nullable Integer row) {
+	private void dataGridGesture(@Nonnull Step step, @Nonnull String binding, @Nullable Integer requestedRow) {
 		prepareForInteraction();
 		SmartClientAutomationContext context = context();
-		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
 
 		@SuppressWarnings("null") // a null here fails the test; uses a nullable result where the API expects non-null
@@ -882,6 +879,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 		}
 		boolean inline = (context.getLocators(binding + ".inline") != null);
 
+		Integer row = requestedRow;
 		if ((row == null) && (step instanceof GridRowStep gridRow) && (gridRow.getRowContaining() != null)) {
 			row = Integer.valueOf(rowContaining(context, binding + ".select", gridRow));
 		}
@@ -969,22 +967,21 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * Performs a list grid gesture (new, select, or zoom) on UI elements identified by the step's binding.
 	 *
 	 * @param step the Step object representing the list grid action to perform
-	 * @param row the row index for row-specific actions; may be required depending on the step type
+	 * @param requestedRow the row index for row-specific actions; may be required depending on the step type
 	 */
-	private void listGridGesture(@Nonnull Step step, @Nullable Integer row) {
+	private void listGridGesture(@Nonnull Step step, @Nullable Integer requestedRow) {
 		prepareForInteraction();
 		SmartClientAutomationContext context = context();
-		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		String buttonIdentifier = step.getIdentifier(context);
 		@SuppressWarnings("null") // a null here fails the test
 		String listGridIdentifier = buttonIdentifier.substring(0, buttonIdentifier.lastIndexOf('.'));
 
-		@SuppressWarnings("null") // a null here fails the test
 		List<Locator> locators = context.getLocators(buttonIdentifier);
 		if (locators == null) {
 			throw new MetaDataException(String.format("<%s /> with identifier [%s] is not defined", step.getClass()
 					.getSimpleName(), listGridIdentifier));
 		}
+		Integer row = requestedRow;
 		if ((row == null) && (step instanceof GridRowStep gridRow) && (gridRow.getRowContaining() != null)) {
 			row = Integer.valueOf(rowContaining(context, listGridIdentifier + ".select", gridRow));
 		}
@@ -1073,16 +1070,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 					result.setDocumentName(key);
 				} else {
 					Document d = m.getDocument(c, context.getDocumentName());
+					// getListModel() throws when the document has no such model
 					ListModel<Bean> lm = d.getListModel(c, key, true);
-					if (lm != null) {
-						d = lm.getDrivingDocument();
-						result.setModuleName(d.getOwningModuleName());
-						result.setDocumentName(d.getName());
-					} else {
-						throw new MetaDataException(
-								String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined",
-										step.getClass().getSimpleName(), step.getIdentifier(context)));
-					}
+					d = lm.getDrivingDocument();
+					result.setModuleName(d.getOwningModuleName());
+					result.setDocumentName(d.getName());
 				}
 			}
 		}
@@ -1097,6 +1089,7 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	 * combos and radios their option's text, dates and times their formatted text, rich text its text
 	 * (or its HTML), sliders their number. A lookup description displays its description.
 	 */
+	@SuppressWarnings("null") // checks a value the annotations say is non-null: SAIL XML turns a blank value into null
 	@Override
 	public void executeTestValue(TestValue test) {
 		if (isNoneStrategy()) {

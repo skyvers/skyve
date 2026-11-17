@@ -62,7 +62,8 @@ class RestServiceDeleteJsonTest {
 		setPrivateField(service, "response", response);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
-		when(persistence.getUser()).thenReturn(mock(User.class));
+		User user = mock(User.class);
+		when(persistence.getUser()).thenReturn(user);
 		bindPersistenceToThread(persistence);
 
 		String result = service.deleteJSONGet("not-json");

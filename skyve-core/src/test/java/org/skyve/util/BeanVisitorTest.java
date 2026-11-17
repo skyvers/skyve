@@ -214,6 +214,7 @@ class BeanVisitorTest {
 									List.of(childRelation, childrenRelation),
 									parentDoc);
 
+		@SuppressWarnings("java:S5969") // the visitor follows every relation, so each getter of this test-only interface is stubbed
 		GraphBean root = mock(GraphBean.class);
 		Bean child = mock(Bean.class);
 		Bean collectionChild = mock(Bean.class);
@@ -298,7 +299,8 @@ class BeanVisitorTest {
 		when(root.getBizId()).thenReturn("root");
 		when(root.getBizModule()).thenReturn("admin");
 		when(root.getBizDocument()).thenReturn("RootDoc");
-		when(root.getInverseRel()).thenReturn(mock(Bean.class));
+		Bean inverseBean = mock(Bean.class);
+		when(root.getInverseRel()).thenReturn(inverseBean);
 
 		RecordingBeanVisitor visitor = new RecordingBeanVisitor(false, false, false);
 		visitor.visit(rootDoc, root, customer);
@@ -327,6 +329,7 @@ class BeanVisitorTest {
 									List.of(relA, relB),
 									null);
 
+		@SuppressWarnings("java:S5969") // the visitor follows every relation, so each getter of this test-only interface is stubbed
 		DualChildBean root = mock(DualChildBean.class);
 		Bean sharedChild = mock(Bean.class);
 		when(root.getBizId()).thenReturn("root");

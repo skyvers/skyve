@@ -3,12 +3,13 @@ package org.skyve.metadata.view.model.chart;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.metadata.view.model.chart.colours.RainbowColourSeries;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
@@ -46,7 +47,7 @@ class TupleChartBuilderTest {
 	@SuppressWarnings("static-method")
 	void withDocumentQueryReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
-		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
+		DocumentQuery mockQuery = mock(DocumentQuery.class);
 		TupleChartBuilder result = builder.with(mockQuery);
 		assertThat(result, sameInstance(builder));
 	}
@@ -55,7 +56,7 @@ class TupleChartBuilderTest {
 	@SuppressWarnings("static-method")
 	void withBizQLReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
-		BizQL mockBizQL = Mockito.mock(BizQL.class);
+		BizQL mockBizQL = mock(BizQL.class);
 		TupleChartBuilder result = builder.with(mockBizQL);
 		assertThat(result, sameInstance(builder));
 	}
@@ -64,7 +65,7 @@ class TupleChartBuilderTest {
 	@SuppressWarnings("static-method")
 	void withSQLReturnsSelf() {
 		TupleChartBuilder builder = new TupleChartBuilder();
-		SQL mockSQL = Mockito.mock(SQL.class);
+		SQL mockSQL = mock(SQL.class);
 		TupleChartBuilder result = builder.with(mockSQL);
 		assertThat(result, sameInstance(builder));
 	}
@@ -72,9 +73,9 @@ class TupleChartBuilderTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void buildWithLabelReturnsChartData() {
-		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
+		DocumentQuery mockQuery = mock(DocumentQuery.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Label1", Integer.valueOf(42) });
-		Mockito.when(mockQuery.tupleResults()).thenReturn(rows);
+		when(mockQuery.tupleResults()).thenReturn(rows);
 		TupleChartBuilder builder = new TupleChartBuilder().with(mockQuery);
 		ChartData data = builder.build("My Label");
 		assertThat(data, notNullValue());
@@ -83,9 +84,9 @@ class TupleChartBuilderTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void buildWithTitleAndLabelReturnsChartData() {
-		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
+		DocumentQuery mockQuery = mock(DocumentQuery.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Label1", Integer.valueOf(10) });
-		Mockito.when(mockQuery.tupleResults()).thenReturn(rows);
+		when(mockQuery.tupleResults()).thenReturn(rows);
 		TupleChartBuilder builder = new TupleChartBuilder().with(mockQuery);
 		ChartData data = builder.build("Title", "Label");
 		assertThat(data, notNullValue());
@@ -94,9 +95,9 @@ class TupleChartBuilderTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void buildWithColourSeriesReturnsChartData() {
-		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
+		DocumentQuery mockQuery = mock(DocumentQuery.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Label1", Integer.valueOf(5) });
-		Mockito.when(mockQuery.tupleResults()).thenReturn(rows);
+		when(mockQuery.tupleResults()).thenReturn(rows);
 		TupleChartBuilder builder = new TupleChartBuilder().with(mockQuery);
 		ChartData data = builder.build(new RainbowColourSeries(), new RainbowColourSeries(), "Label");
 		assertThat(data, notNullValue());
@@ -105,9 +106,9 @@ class TupleChartBuilderTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void buildViaSQL() {
-		SQL mockSQL = Mockito.mock(SQL.class);
+		SQL mockSQL = mock(SQL.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "Item", Integer.valueOf(3) });
-		Mockito.when(mockSQL.tupleResults()).thenReturn(rows);
+		when(mockSQL.tupleResults()).thenReturn(rows);
 		TupleChartBuilder builder = new TupleChartBuilder().with(mockSQL);
 		ChartData data = builder.build("SQL Label");
 		assertThat(data, notNullValue());
@@ -116,9 +117,9 @@ class TupleChartBuilderTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void buildViaBizQL() {
-		BizQL mockBizQL = Mockito.mock(BizQL.class);
+		BizQL mockBizQL = mock(BizQL.class);
 		List<Object[]> rows = Collections.singletonList(new Object[] { "BizQL", Integer.valueOf(7) });
-		Mockito.when(mockBizQL.tupleResults()).thenReturn(rows);
+		when(mockBizQL.tupleResults()).thenReturn(rows);
 		TupleChartBuilder builder = new TupleChartBuilder().with(mockBizQL);
 		ChartData data = builder.build("BizQL Label");
 		assertThat(data, notNullValue());

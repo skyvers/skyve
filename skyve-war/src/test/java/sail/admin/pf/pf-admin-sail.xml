@@ -65,7 +65,7 @@
 			<action name="AddUnsubscribeLink" />
 			<comment>AddImage is an upload action: upload an image with it</comment>
 			<upload action="AddImage" file="sail/files/sail-image.png" />
-			<comment>Press it again and leave its upload page open: the refusals below must still show their messages (runtime issue P8)</comment>
+			<comment>Press it again and leave its upload page open: the refusals below must still show their messages</comment>
 			<action name="AddImage" />
 			<tabSelect path="Attachments" />
 			<tabSelect path="Manage" />

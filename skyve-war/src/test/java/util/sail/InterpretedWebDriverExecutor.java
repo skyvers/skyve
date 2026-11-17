@@ -156,13 +156,13 @@ import jakarta.annotation.Nullable;
  * cannot do what the step says, and makes the implicit success check, {@link #checkSuccess(String)}, where the other
  * steps of its kind do. A hook that changes a list grid waits for the grid's fetch to end before it returns.
  *
- * @param <AC> automation context type
+ * @param <C> automation context type
  * @param <S> concrete Selenide implementation
  * @author simeonsolomou
  */
 public abstract class InterpretedWebDriverExecutor<
-	AC extends AutomationContext<?, ?>,
-	S extends Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> extends WebDriverExecutor<AC> {
+	C extends AutomationContext<?, ?>,
+	S extends Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> extends WebDriverExecutor<C> {
 
 	/** System property naming a directory to save failure screenshots and page sources into. */
 	public static final String FAILURE_DIRECTORY_PROPERTY = "sail.failureDir";
@@ -335,7 +335,7 @@ public abstract class InterpretedWebDriverExecutor<
 					media.stepEnded(failure);
 				}
 				if ((! halt) && (TestStrategy.Verify == getTestStrategy())) {
-					record(failure);
+					recordFailure(failure);
 					SailFailure cause = new SailFailure(failure, t);
 					thrown.add(cause);
 					selenide.trace("    Cause: " + causes(t));
@@ -367,7 +367,7 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		String failure = failureMessage(reason.get());
 		if (TestStrategy.Verify == getTestStrategy()) {
-			record(failure);
+			recordFailure(failure);
 		}
 		else {
 			diagnose();
@@ -416,7 +416,7 @@ public abstract class InterpretedWebDriverExecutor<
 		return TestStrategy.None == getTestStrategy();
 	}
 
-	private void record(@Nonnull String failure) {
+	private void recordFailure(@Nonnull String failure) {
 		failures.add(failure);
 		selenide.trace("FAILED: " + failure);
 		diagnose();
@@ -1009,7 +1009,7 @@ public abstract class InterpretedWebDriverExecutor<
 		selenide.trace("Navigate back");
 		selenide.back();
 		// not super.executeNavigateBack(): WebDriverExecutor's writes a generator comment
-		AC context = peek();
+		C context = peek();
 		if (context != null) {
 			forgetView(context);
 		}
@@ -1376,7 +1376,7 @@ public abstract class InterpretedWebDriverExecutor<
 										text, link.getBinding(), action ? "" : " (it leads to another page)"));
 		boolean declined = clickDataGridLink(link, text, action);
 		if (! action) {
-			AC context = peek();
+			C context = peek();
 			if (context != null) {
 				context.setDocumentName(null);
 				context.setViewType(null);
@@ -1403,7 +1403,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @return true if the link runs an action, false if it leads to another page
 	 */
 	private boolean dataGridLinkRunsAction(@Nonnull String binding, @Nonnull String text) {
-		AC context = peek();
+		C context = peek();
 		if (context == null) {
 			return true;
 		}
@@ -1525,7 +1525,7 @@ public abstract class InterpretedWebDriverExecutor<
 										@Nullable String modelName,
 										@Nonnull String column,
 										@Nullable Boolean filter) {
-		AC context = peek();
+		C context = peek();
 		// A step that names no list means the list the context shows (see NavigateList.listGridIdentifier)
 		PushListContext list = (context == null) ? null : context.getList();
 		String listModuleName = moduleName;
@@ -1984,7 +1984,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @return {@code true} if it is an ordered collection; {@code false} otherwise, or when there is no document context
 	 */
 	protected boolean isOrderedCollection(@Nonnull String binding) {
-		AC context = peek();
+		C context = peek();
 		String moduleName = (context == null) ? null : context.getModuleName();
 		String documentName = (context == null) ? null : context.getDocumentName();
 		if ((moduleName == null) || (documentName == null)) {

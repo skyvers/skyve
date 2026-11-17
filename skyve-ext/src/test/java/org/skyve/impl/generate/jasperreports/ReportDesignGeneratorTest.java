@@ -845,9 +845,10 @@ class ReportDesignGeneratorTest {
 		design.setJoinAlias(new HashMap<>());
 		design.setAlias('a');
 
+		BaseFieldReportDesignGenerator generator = new BaseFieldReportDesignGenerator();
 		IllegalStateException[] thrown = new IllegalStateException[1];
 		withThreadLocalCustomer(customer, () -> thrown[0] = assertThrows(IllegalStateException.class,
-																			() -> new BaseFieldReportDesignGenerator().addFields(design)));
+																			() -> generator.addFields(design)));
 
 		assertEquals("Report design SpecialOrders has no join aliases after adding a join", thrown[0].getMessage());
 	}
@@ -863,9 +864,10 @@ class ReportDesignGeneratorTest {
 		StringBuilder join = new StringBuilder(" left join CUSTOMER b on a.bizId = b.customer_id");
 		Customer customer = mock(Customer.class);
 		Document document = mock(Document.class);
+		StringBuilder fieldPrefix = new StringBuilder();
 
 		IllegalStateException e = assertThrows(IllegalStateException.class,
-												() -> ReportDesignGenerator.fieldFromAttribute(spec, customer, document, text, join, new StringBuilder()));
+												() -> ReportDesignGenerator.fieldFromAttribute(spec, customer, document, text, join, fieldPrefix));
 
 		assertEquals("Report design Orders has no join aliases", e.getMessage());
 	}
@@ -878,9 +880,10 @@ class ReportDesignGeneratorTest {
 		Customer customer = mock(Customer.class);
 		Document document = mock(Document.class);
 		AssociationImpl association = association("customer", "Customer", true);
+		StringBuilder join = new StringBuilder();
 
 		IllegalStateException e = assertThrows(IllegalStateException.class,
-												() -> ReportDesignGenerator.addJoinForAssociation(new StringBuilder(), customer, spec, document, association, "customer"));
+												() -> ReportDesignGenerator.addJoinForAssociation(join, customer, spec, document, association, "customer"));
 
 		assertEquals("Report design Orders has no joins", e.getMessage());
 	}
@@ -893,9 +896,10 @@ class ReportDesignGeneratorTest {
 		Customer customer = mock(Customer.class);
 		Document document = mock(Document.class);
 		AssociationImpl association = association("customer", "Customer", true);
+		StringBuilder join = new StringBuilder();
 
 		IllegalStateException e = assertThrows(IllegalStateException.class,
-												() -> ReportDesignGenerator.addJoinForAssociation(new StringBuilder(), customer, spec, document, association, "customer"));
+												() -> ReportDesignGenerator.addJoinForAssociation(join, customer, spec, document, association, "customer"));
 
 		assertEquals("Report design Orders has no module name", e.getMessage());
 	}

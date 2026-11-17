@@ -129,7 +129,6 @@ class TestGridRowsTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void getIdentifierReturnsListGridIdentifier() {
 		AutomationContext<GenerateListContext, GenerateEditContext> ctx = mock(AutomationContext.class);
 		when(ctx.getModuleName()).thenReturn("admin");

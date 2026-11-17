@@ -137,6 +137,8 @@ class MetaDataServletViewTitleEscapingTest {
 
 	private static Parameter parameter(String name, String value, String valueBinding) {
 		return new Parameter() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String getName() {
 				return name;
@@ -156,6 +158,8 @@ class MetaDataServletViewTitleEscapingTest {
 
 	private static Invisible invisible(String conditionName) {
 		return new Invisible() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String getInvisibleCondition() {
 				return conditionName;
@@ -185,6 +189,8 @@ class MetaDataServletViewTitleEscapingTest {
 
 	private static Disableable disableable(String conditionName) {
 		return new Disableable() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String getDisabledCondition() {
 				return conditionName;

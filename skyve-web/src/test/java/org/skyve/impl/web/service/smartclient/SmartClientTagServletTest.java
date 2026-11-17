@@ -55,7 +55,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -65,7 +66,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doPost(request, response));
 	}
@@ -75,7 +77,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser(null);
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
 	}
@@ -85,7 +88,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithoutUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
@@ -96,7 +100,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("X");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
@@ -107,7 +112,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("X");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doPost(request, response));
@@ -118,7 +124,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doGet(request, response));
@@ -129,7 +136,8 @@ class SmartClientTagServletTest {
 		SmartClientTagServlet servlet = new SmartClientTagServlet();
 		HttpServletRequest request = newRequestWithSessionUser("L");
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		when(response.getWriter()).thenReturn(mock(PrintWriter.class, Mockito.RETURNS_SELF));
+		PrintWriter writer = mock(PrintWriter.class, Mockito.RETURNS_SELF);
+		when(response.getWriter()).thenReturn(writer);
 		when(request.getParameter(org.skyve.impl.web.AbstractWebContext.CSRF_TOKEN_NAME)).thenReturn("7");
 
 		assertDoesNotThrow(() -> servlet.doPost(request, response));

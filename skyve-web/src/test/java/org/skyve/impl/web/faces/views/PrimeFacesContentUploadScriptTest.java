@@ -14,6 +14,7 @@ class PrimeFacesContentUploadScriptTest {
 	private static final Path SCRIPT = Path.of("src/js/prime/pf.js");
 
 	@Test
+	@SuppressWarnings("java:S5961") // each assertion pins one source fragment of the one upload callback
 	void mediaKindCallbackUsesExactCompanionFieldWithoutFallingBackToContentField() throws IOException {
 		String script = Files.readString(SCRIPT);
 

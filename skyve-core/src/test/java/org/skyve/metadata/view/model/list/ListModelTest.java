@@ -1,11 +1,14 @@
 package org.skyve.metadata.view.model.list;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -17,7 +20,6 @@ import java.util.SortedMap;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
-import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -456,9 +458,10 @@ class ListModelTest {
 		when(parameter.getOperator()).thenReturn(FilterOperator.isNull);
 		Document document = mockDrivingDocument();
 		ListModel<Bean> model = new NoFilterListModel(null, null, document);
+		List<FilterParameter> parameters = List.of(parameter);
 
 		withCustomer(() -> assertThrows(IllegalStateException.class,
-											() -> model.addParameters(document, List.of(parameter), null)));
+											() -> model.addParameters(document, parameters, null)));
 	}
 
 	@Test
@@ -469,8 +472,9 @@ class ListModelTest {
 		when(parameter.getOperator()).thenReturn(FilterOperator.equal);
 		Document document = mockDrivingDocument();
 		ListModel<Bean> model = new NoFilterListModel(null, null, document);
+		List<FilterParameter> parameters = List.of(parameter);
 
-		withCustomer(() -> model.addParameters(document, List.of(parameter), null));
+		withCustomer(() -> assertDoesNotThrow(() -> model.addParameters(document, parameters, null)));
 	}
 
 	@Test
@@ -482,9 +486,10 @@ class ListModelTest {
 		when(parameter.getValue()).thenReturn("value");
 		Document document = mockDrivingDocument();
 		ListModel<Bean> model = new NoFilterListModel(mock(Filter.class), null, document);
+		List<FilterParameter> parameters = List.of(parameter);
 
 		withCustomer(() -> assertThrows(IllegalStateException.class,
-											() -> model.addParameters(document, List.of(parameter), null)));
+											() -> model.addParameters(document, parameters, null)));
 	}
 
 	@Test
@@ -533,8 +538,8 @@ class ListModelTest {
 		when(document.getDomainValues(customer, DomainType.variant, attribute, null, true)).thenReturn(List.of());
 		User user = mock(User.class);
 		when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
-														Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+														withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -577,11 +582,12 @@ class ListModelTest {
 	 */
 	private static void withCustomer(Executable body) {
 		Customer customer = mock(Customer.class);
-		when(customer.getModule("test")).thenReturn(mock(Module.class));
+		Module module = mock(Module.class);
+		when(customer.getModule("test")).thenReturn(module);
 		User user = mock(User.class);
 		when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
-														Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+														withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {

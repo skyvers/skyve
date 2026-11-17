@@ -404,9 +404,7 @@ public class SmartClientSAILViewVisitor {
 	 */
 	private final void visitButton(@Nonnull Button button) {
 		String actionName = button.getActionName();
-		if (actionName != null) {
-			automationContext.put(actionName, Locator.widget(viewName, Kind.button, buttonName(actionName), null, null, null));
-		}
+		automationContext.put(actionName, Locator.widget(viewName, Kind.button, buttonName(actionName), null, null, null));
 	}
 
 	/**
@@ -562,16 +560,13 @@ public class SmartClientSAILViewVisitor {
 		ImplicitActionName implicitName = action.getImplicitName();
 		if (classNamed(implicitName)) {
 			// an upload, download, import or export action's button carries the action's name (its class)
-			String name = action.getName();
-			if (name != null) {
-				visitAction(name);
-			}
+			visitAction(action.getName());
 		}
 		else if (implicitName != null) {
 			visit(viewType, implicitName);
 			// a named action of an implicit kind is also addressed by its name
 			String name = action.getName();
-			if ((name != null) && (! name.equals(implicitName.toString())) && (! ImplicitActionName.DEFAULTS.equals(implicitName))) {
+			if ((! name.equals(implicitName.toString())) && (! ImplicitActionName.DEFAULTS.equals(implicitName))) {
 				automationContext.put(name, Locator.widget(viewName, Kind.button, implicitName.toString(), null, null, null));
 			}
 		} else {

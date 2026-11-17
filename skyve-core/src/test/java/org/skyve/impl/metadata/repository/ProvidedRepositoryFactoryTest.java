@@ -2,15 +2,15 @@ package org.skyve.impl.metadata.repository;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.CORE;
 import org.skyve.metadata.repository.ProvidedRepository;
 
@@ -60,7 +60,7 @@ class ProvidedRepositoryFactoryTest {
 	@SuppressWarnings("static-method")
 	void withARepositoryEveryAccessorReturnsIt() {
 		ProvidedRepository previous = ProvidedRepositoryFactory.get();
-		ProvidedRepository repository = Mockito.mock(ProvidedRepository.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
 		ProvidedRepositoryFactory.set(repository);
 		try {
 			assertTrue(ProvidedRepositoryFactory.isConfigured());

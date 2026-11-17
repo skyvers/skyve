@@ -500,7 +500,7 @@ public class SkyveScriptInterpreter {
 	private static void addModuleRef(@Nonnull String module, @Nonnull String document) {
 		// don't add if this has already been added to the module
 		for (ModuleDocumentMetaData md : currentModule.getDocuments()) {
-			if (md.getModuleRef() != null && md.getModuleRef().equals(module) && md.getRef().equals(document)) {
+			if (module.equals(md.getModuleRef()) && md.getRef().equals(document)) {
 				return;
 			}
 		}

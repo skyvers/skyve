@@ -29,7 +29,7 @@
 			<testWidget binding="queryTrace" enabled="true" />
 			<dataEnter binding="queryTrace" value="true" />
 			<testValue binding="queryTrace" value="true" />
-			<comment>GenerateMenuSAIL set the view's selected tab to Results: the check box's rerender keeps the tab the user selected (runtime issue SC-7)</comment>
+			<comment>GenerateMenuSAIL set the view's selected tab to Results: the check box's rerender keeps the tab the user selected</comment>
 			<testWidget binding="queryTrace" visible="true" />
 			<dataEnter binding="queryTrace" value="false" />
 			<testValue binding="queryTrace" value="false" />

@@ -2,19 +2,20 @@ package org.skyve.domain;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class DynamicBeanTest {
 
@@ -654,8 +655,8 @@ class DynamicBeanTest {
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
 	void isChangedTrueWhenInnerBeanIsChanged() {
-		Bean mockBean = Mockito.mock(Bean.class);
-		Mockito.when(mockBean.isChanged()).thenReturn(Boolean.TRUE);
+		Bean mockBean = mock(Bean.class);
+		when(mockBean.isChanged()).thenReturn(Boolean.TRUE);
 		Map<String, Object> outerProps = new HashMap<>();
 		outerProps.put(DynamicBean.BEAN_PROPERTY_KEY, mockBean);
 		DynamicBean outer = new DynamicBean("admin", "User", outerProps);

@@ -415,8 +415,9 @@ class MutableCachedRepositoryTest {
 	@Test
 	void putCustomerThrowsWhenCustomerHasNoName() {
 		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		CustomerMetaData unnamed = new CustomerMetaData();
 
-		assertThrows(MetaDataException.class, () -> repo.putCustomer(new CustomerMetaData()));
+		assertThrows(MetaDataException.class, () -> repo.putCustomer(unnamed));
 	}
 
 	@Test

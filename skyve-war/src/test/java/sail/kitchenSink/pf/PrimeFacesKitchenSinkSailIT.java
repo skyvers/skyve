@@ -29,6 +29,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void test() {
 		sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml");
 	}
@@ -37,6 +38,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * {@code <dataGridLink />}: the Actions Fixture's Run From Row link in a row, declined and confirmed.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void rowLink() {
 		sailResource("sail/kitchenSink/pf/pf-kitchensink-row-link.xml");
 	}
@@ -47,6 +49,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * between two automations in the same browser session.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void switchModeFromSmartClient() {
 		sailString(automation("<login user=\"admin\" password=\"admin\" /><testSuccess /><testMenu module=\"kitchensink\" />"));
 		selenium.switchToSmartClient();

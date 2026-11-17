@@ -358,7 +358,8 @@ class ReportViewVisitorLayoutTest {
 
 	@Test
 	void visitDataGridWithAnUnresolvableBindingThrowsMetaDataException() {
-		assertThrows(MetaDataException.class, () -> visitor.visitDataGrid(new DataGrid(), true, true));
+		DataGrid grid = new DataGrid();
+		assertThrows(MetaDataException.class, () -> visitor.visitDataGrid(grid, true, true));
 	}
 
 	@Test

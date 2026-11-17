@@ -37,7 +37,6 @@ import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
-import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
@@ -126,7 +125,6 @@ import jakarta.faces.component.UICommand;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlInputHidden;
 import util.sail.PrimeFacesSelenide.VueFilterInput;
-import util.sail.commands.impl.PrimeFacesButtonCommand;
 import util.sail.commands.impl.PrimeFacesCheckboxCommand;
 import util.sail.commands.impl.PrimeFacesDataGridButtonCommand;
 import util.sail.commands.impl.PrimeFacesDataGridSelectCommand;
@@ -769,7 +767,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			autoCompleteLookupDescriptionAndPick(complete, substituteTokens(search), substituteTokens(pick));
 			return;
 		}
-		lookupDescription(complete, complete.getBinding(), null, (search == null) ? null : substituteTokens(search));
+		lookupDescription(complete, complete.getBinding(), null, searchPresent ? substituteTokens(search) : null);
 	}
 
 	@Override
@@ -1319,16 +1317,11 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 					result.setDocumentName(key);
 				} else {
 					Document d = m.getDocument(c, context.getDocumentName());
+					// getListModel() throws when the document has no such model
 					ListModel<Bean> lm = d.getListModel(c, key, true);
-					if (lm != null) {
-						d = lm.getDrivingDocument();
-						result.setModuleName(d.getOwningModuleName());
-						result.setDocumentName(d.getName());
-					} else {
-						throw new MetaDataException(String.format("<%s /> with identifier [%s] requires queryName, documentName or modelName defined.",
-																	step.getClass().getSimpleName(),
-																	step.getIdentifier(context)));
-					}
+					d = lm.getDrivingDocument();
+					result.setModuleName(d.getOwningModuleName());
+					result.setDocumentName(d.getName());
 				}
 			}
 		}
@@ -1403,10 +1396,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																			vueOperators(type)));
 				}
 				entered = switch (input) {
-					case text -> value;
-					case option -> vueColumn.options().get(optionIndex(column, value, vueColumn.options())).get(1);
-					case check -> booleanValue(column, value);
-					case calendar -> vueCalendarText(filter, column, type, value);
+					case TEXT -> value;
+					case OPTION -> vueColumn.options().get(optionIndex(column, value, vueColumn.options())).get(1);
+					case CHECK -> booleanValue(column, value);
+					case CALENDAR -> vueCalendarText(filter, column, type, value);
 				};
 			}
 			selenide.vueListGridFilter(grid.clientId(), vueColumn.field(), matchMode, entered, input);
@@ -1618,10 +1611,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	private static @Nullable VueFilterInput vueFilterInput(@Nonnull String type) {
 		return switch (type) {
-			case "text", "numeric" -> VueFilterInput.text;
-			case "enum" -> VueFilterInput.option;
-			case "boolean" -> VueFilterInput.check;
-			case "date", "dateTime", "timestamp", "time" -> VueFilterInput.calendar;
+			case "text", "numeric" -> VueFilterInput.TEXT;
+			case "enum" -> VueFilterInput.OPTION;
+			case "boolean" -> VueFilterInput.CHECK;
+			case "date", "dateTime", "timestamp", "time" -> VueFilterInput.CALENDAR;
 			default -> null;
 		};
 	}
@@ -1771,7 +1764,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	private static @Nullable String facesFilterToggleId(@Nonnull ListGridOnPage grid) {
 		DataTable table = findChild(grid.component(), DataTable.class);
-		int count = (table == null) ? 0 : table.getChildCount();
+		if (table == null) {
+			return null;
+		}
+		int count = table.getChildCount();
 		if (count == 0) {
 			return null;
 		}
@@ -1879,7 +1875,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				continue;
 			}
 			// a combo or radio shows its option's label (after its index and value)
-			return ((component instanceof SelectOneMenu) || (component instanceof SelectOneRadio)) ? actuals.get(2) : actuals.get(0);
+			return actuals.get(((component instanceof SelectOneMenu) || (component instanceof SelectOneRadio)) ? 2 : 0);
 		}
 		throw new DomainException(String.format("<captureValue /> with binding [%s] has no widget shown on the page", identifier));
 	}
@@ -2439,7 +2435,7 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	@Override
 	public void executeExecute(org.skyve.metadata.sail.language.step.Execute execute) {
-		selenide.runScript(execute.getScript());
+		selenide.runScript(Objects.requireNonNull(execute.getScript(), "<execute /> has no script"));
 	}
 
 	/**

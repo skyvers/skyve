@@ -60,7 +60,8 @@ class VueListGridComponentBuilderTest {
 		application = mock(Application.class);
 		expressionFactory = mock(ExpressionFactory.class);
 		when(facesContext.getApplication()).thenReturn(application);
-		when(facesContext.getELContext()).thenReturn(mock(ELContext.class));
+		ELContext elContext = mock(ELContext.class);
+		when(facesContext.getELContext()).thenReturn(elContext);
 		when(application.getExpressionFactory()).thenReturn(expressionFactory);
 		FacesContextBridge.setCurrent(facesContext);
 	}

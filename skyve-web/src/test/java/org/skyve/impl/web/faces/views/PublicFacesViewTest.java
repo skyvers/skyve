@@ -42,7 +42,8 @@ class PublicFacesViewTest {
 		ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
 		String originalCustomer = UtilImpl.CUSTOMER;
 		ProvidedRepository repository = mock(ProvidedRepository.class);
-		when(repository.getCustomer("acme")).thenReturn(mock(Customer.class));
+		Customer customer = mock(Customer.class);
+		when(repository.getCustomer("acme")).thenReturn(customer);
 		when(repository.retrievePublicUserName("acme")).thenReturn(null);
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		PublicFacesView view = new PublicFacesView();

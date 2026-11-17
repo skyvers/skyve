@@ -31,7 +31,7 @@
 			<dataEnter binding="dataSensitivity" value="1" />
 			<testValue binding="dataSensitivity" value="none" />
 			<action name="Backup" />
-			<comment>The job's "Backup Completed" push message, which can arrive at once, is added to this growl, not put in its place (runtime issue SC-6)</comment>
+			<comment>The job's "Backup Completed" push message, which can arrive at once, is added to this growl, not put in its place</comment>
 			<testMessage contains="Backup Job has been started" type="info" />
 			<comment>The backup is a job: wait for it to finish</comment>
 			<navigateMenu module="admin" item="Jobs" />

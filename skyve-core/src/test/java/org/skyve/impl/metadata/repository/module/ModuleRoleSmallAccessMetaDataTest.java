@@ -2,10 +2,12 @@ package org.skyve.impl.metadata.repository.module;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.MetaDataException;
@@ -309,9 +311,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 		// Actually super.validate calls module.getDocumentRefs() which NPEs on null module
 		// So documentName is set and binding is null → super.validate throws NPE, not MetaDataException
 		// Use a mock module that has the document
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		when(module.getName()).thenReturn("admin");
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
 	}
 
@@ -328,9 +330,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 	void dynamicImageAccessValidateThrowsWhenDocumentSetButImageNameNull() {
 		ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
 		md.setDocumentName("Contact");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		when(module.getName()).thenReturn("admin");
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
 	}
 
@@ -339,9 +341,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 	void previousCompleteAccessValidateThrowsWhenDocumentSetButBindingNull() {
 		ModuleRolePreviousCompleteUserAccessMetaData md = new ModuleRolePreviousCompleteUserAccessMetaData();
 		md.setDocumentName("Contact");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		when(module.getName()).thenReturn("admin");
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
 	}
 
@@ -465,9 +467,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 	void documentAggregateAccessValidateThrowsWhenDocumentNotInModule() {
 		ModuleRoleDocumentAggregateUserAccessMetaData md = new ModuleRoleDocumentAggregateUserAccessMetaData();
 		md.setDocumentName("Contact");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.emptyMap());
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.emptyMap());
+		when(module.getName()).thenReturn("admin");
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
 	}
 
@@ -477,9 +479,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 		ModuleRolePreviousCompleteUserAccessMetaData md = new ModuleRolePreviousCompleteUserAccessMetaData();
 		md.setDocumentName("Contact");
 		md.setBinding("owner");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		when(module.getName()).thenReturn("admin");
 		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 
@@ -489,9 +491,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 		ModuleRoleDynamicImageUserAccessMetaData md = new ModuleRoleDynamicImageUserAccessMetaData();
 		md.setDocumentName("Contact");
 		md.setImageName("myImage");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		when(module.getName()).thenReturn("admin");
 		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 
@@ -501,9 +503,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 		ModuleRoleContentUserAccessMetaData md = new ModuleRoleContentUserAccessMetaData();
 		md.setDocumentName("Contact");
 		md.setBinding("photo");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getDocumentRefs()).thenReturn(java.util.Collections.singletonMap("Contact", null));
+		when(module.getName()).thenReturn("admin");
 		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 
@@ -532,9 +534,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 	void queryAggregateAccessValidateThrowsWhenQueryNotInModule() {
 		ModuleRoleQueryAggregateUserAccessMetaData md = new ModuleRoleQueryAggregateUserAccessMetaData();
 		md.setQueryName("myQuery");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.mockito.Mockito.when(module.getMetaDataQuery("myQuery")).thenReturn(null);
-		org.mockito.Mockito.when(module.getName()).thenReturn("admin");
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		when(module.getMetaDataQuery("myQuery")).thenReturn(null);
+		when(module.getName()).thenReturn("admin");
 		assertThrows(MetaDataException.class, () -> md.validate("test", "role", module));
 	}
 
@@ -543,9 +545,9 @@ class ModuleRoleSmallAccessMetaDataTest {
 	void queryAggregateAccessValidatePassesWhenQueryInModule() {
 		ModuleRoleQueryAggregateUserAccessMetaData md = new ModuleRoleQueryAggregateUserAccessMetaData();
 		md.setQueryName("myQuery");
-		org.skyve.metadata.module.Module module = org.mockito.Mockito.mock(org.skyve.metadata.module.Module.class);
-		org.skyve.metadata.module.query.MetaDataQueryDefinition query = org.mockito.Mockito.mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
-		org.mockito.Mockito.when(module.getMetaDataQuery("myQuery")).thenReturn(query);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		org.skyve.metadata.module.query.MetaDataQueryDefinition query = mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
+		when(module.getMetaDataQuery("myQuery")).thenReturn(query);
 		assertDoesNotThrow(() -> md.validate("test", "role", module));
 	}
 }

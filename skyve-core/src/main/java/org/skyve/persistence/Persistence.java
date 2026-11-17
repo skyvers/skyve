@@ -370,9 +370,10 @@ public interface Persistence extends Serializable {
 	 * It is guaranteed that the document scopes are reset at the end of the method call.
 	 * @param scope	The scope to use for ALL documents.
 	 * @param function	The function to apply.
+	 * @return The value returned by the function.
 	 */
-	@Nullable <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope,
-													@Nonnull Function<Persistence, R> function);
+	<R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope,
+										@Nonnull Function<Persistence, R> function);
 
 	/**
 	 * Sets all document scopes for this persistence instance and accepts the consumer.

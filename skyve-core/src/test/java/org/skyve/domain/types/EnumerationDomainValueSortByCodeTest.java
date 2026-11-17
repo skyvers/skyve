@@ -47,8 +47,8 @@ class EnumerationDomainValueSortByCodeTest {
 		list.add(new DomainValue("a", "A"));
 		list.add(new DomainValue("b", "B"));
 		list.sort(new DomainValueSortByCode());
-		assertEquals(list.get(0).getCode(), "a");
-		assertEquals(list.get(1).getCode(), "b");
-		assertEquals(list.get(2).getCode(), "c");
+		assertEquals("a", list.get(0).getCode());
+		assertEquals("b", list.get(1).getCode());
+		assertEquals("c", list.get(2).getCode());
 	}
 }

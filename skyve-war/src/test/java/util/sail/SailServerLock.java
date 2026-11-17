@@ -21,6 +21,7 @@ import jakarta.annotation.Nonnull;
  * {@code skyve-sail-<base url>.lock} in {@code java.io.tmpdir}, so it holds across forked JVMs, and the operating system
  * releases it if a JVM dies.
  */
+@SuppressWarnings("resource") // the channels and locks outlive acquire() on purpose; releaseAll() closes them
 public final class SailServerLock {
 	private static final Map<String, Held> HELD = new HashMap<>();
 

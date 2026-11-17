@@ -878,8 +878,8 @@ isc.BizUtil.addClassMethods({
 	/**
 	 * Handles push messages.
 	 * A pushed growl is added to the growls showing: it arrives on its own schedule, such as a job's when it finishes, and
-	 * must not remove a growl the user has not read yet, such as the "started" growl of the action that started the job
-	 * (runtime issue SC-6). PrimeFaces pages show pushed growls in a growl of their own for the same reason.
+	 * must not remove a growl the user has not read yet, such as the "started" growl of the action that started the job.
+	 * PrimeFaces pages show pushed growls in a growl of their own for the same reason.
 	 * @param {Array} pushMessage - the push messages to handle.
 	 */
 	onPushMessage: function (pushMessage) {

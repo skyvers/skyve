@@ -68,7 +68,8 @@ class LoginServletLoginResourcesTest {
 		UtilImpl.CUSTOMER = "demo";
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		Customer customer = mock(Customer.class);
-		when(customer.getLoginResources()).thenReturn(mock(LoginResources.class)); // no pages defined
+		LoginResources loginResources = mock(LoginResources.class); // no pages defined
+		when(customer.getLoginResources()).thenReturn(loginResources);
 		when(repository.getCustomer("demo")).thenReturn(customer);
 		ProvidedRepositoryFactory.set(repository);
 

@@ -376,7 +376,8 @@ class AbstractBeanTest {
 		User mockUser = mock(User.class);
 		Customer mockCustomer = mock(Customer.class);
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
-		when(mockCustomer.getModule(bean.getBizModule())).thenReturn(mock(Module.class));
+		Module mockModule = mock(Module.class);
+		when(mockCustomer.getModule(bean.getBizModule())).thenReturn(mockModule);
 		withMockPersistence(mockUser, () -> {
 			bean.callPreset("bizCustomer", "newValue");
 			assertTrue(bean.isChanged());
@@ -388,7 +389,8 @@ class AbstractBeanTest {
 		User mockUser = mock(User.class);
 		Customer mockCustomer = mock(Customer.class);
 		when(mockUser.getCustomer()).thenReturn(mockCustomer);
-		when(mockCustomer.getModule(bean.getBizModule())).thenReturn(mock(Module.class));
+		Module mockModule = mock(Module.class);
+		when(mockCustomer.getModule(bean.getBizModule())).thenReturn(mockModule);
 		withMockPersistence(mockUser, () -> {
 			bean.callPreset("bizCustomer", "newValue");
 			assertFalse(bean.isNotChanged());

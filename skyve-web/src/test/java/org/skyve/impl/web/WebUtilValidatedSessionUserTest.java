@@ -144,7 +144,8 @@ class WebUtilValidatedSessionUserTest {
 		HttpSession session = session(user);
 		StateUtil.addSession(USER_ID, session);
 		HttpServletRequest request = request(session, null);
-		when(request.getUserPrincipal()).thenReturn(mock(Principal.class)); // getName() returns null
+		Principal principal = mock(Principal.class); // getName() returns null
+		when(request.getUserPrincipal()).thenReturn(principal);
 
 		assertNull(WebUtil.getValidatedSessionUser(request));
 		verify(session, never()).invalidate();

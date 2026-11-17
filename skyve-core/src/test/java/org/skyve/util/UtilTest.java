@@ -243,6 +243,7 @@ class UtilTest {
 	// ---- MEGABYTE constant ----
 
 	@Test
+	@SuppressWarnings("java:S3415") // the constant is the value under test; 1024L * 1024L is the expected value
 	void megabyteConstantIsCorrectValue() {
 		assertEquals(1024L * 1024L, Util.MEGABYTE);
 	}
@@ -402,12 +403,12 @@ class UtilTest {
 		assertThat(Util.getLoggedOutUrl(), is(notNullValue()));
 		assertTrue(Util.getResetPasswordUrl().contains("passwordResetToken"));
 
-		assertDoesNotThrow(() -> Util.getServerUrl());
-		assertDoesNotThrow(() -> Util.getSkyveContext());
-		assertDoesNotThrow(() -> Util.getSkyveContextRealPath());
-		assertDoesNotThrow(() -> Util.getModuleDirectory());
-		assertDoesNotThrow(() -> Util.getPasswordHashingAlgorithm());
-		assertDoesNotThrow(() -> Util.getSupportEmailAddress());
+		assertDoesNotThrow(Util::getServerUrl);
+		assertDoesNotThrow(Util::getSkyveContext);
+		assertDoesNotThrow(Util::getSkyveContextRealPath);
+		assertDoesNotThrow(Util::getModuleDirectory);
+		assertDoesNotThrow(Util::getPasswordHashingAlgorithm);
+		assertDoesNotThrow(Util::getSupportEmailAddress);
 	}
 
 	@Test
@@ -424,9 +425,7 @@ class UtilTest {
 	@Test
 	void isRtlAndSecureUrlAndCloneHelpersAreInvokable() {
 		assertFalse(Util.isRTL());
-		assertDoesNotThrow(() -> {
-			Util.isSecureUrl();
-		});
+		assertDoesNotThrow(Util::isSecureUrl);
 		String serverUrl = Util.getServerUrl();
 		if (serverUrl != null) {
 			assertThat(Boolean.valueOf(Util.isSecureUrl()), is(Boolean.valueOf(serverUrl.startsWith("https://"))));

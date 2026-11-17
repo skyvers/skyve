@@ -6,8 +6,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -243,9 +245,9 @@ class DownloadResponseWriterTest {
 
 	@Test
 	void emptyDownloadSetsZeroLength() throws Exception {
-		Download download = org.mockito.Mockito.mock(Download.class);
-		org.mockito.Mockito.when(download.getMimeType()).thenReturn(MimeType.plain);
-		org.mockito.Mockito.when(download.getFileName()).thenReturn("empty.txt");
+		Download download = mock(Download.class);
+		when(download.getMimeType()).thenReturn(MimeType.plain);
+		when(download.getFileName()).thenReturn("empty.txt");
 		HttpServletResponse response = responseWithOutput(new CapturingServletOutputStream());
 
 		DownloadResponseWriter.write(download, null, null, response, false);
@@ -281,7 +283,7 @@ class DownloadResponseWriterTest {
 	}
 
 	private static HttpServletResponse responseWithOutput(CapturingServletOutputStream out) throws IOException {
-		HttpServletResponse response = org.mockito.Mockito.mock(HttpServletResponse.class);
+		HttpServletResponse response = mock(HttpServletResponse.class);
 		doReturn(out).when(response).getOutputStream();
 		return response;
 	}

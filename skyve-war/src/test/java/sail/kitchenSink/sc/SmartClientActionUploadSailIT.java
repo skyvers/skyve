@@ -11,7 +11,7 @@ import util.sail.BrowserConfiguration.Browsers;
 
 /**
  * A SmartClient action upload that succeeds closes its upload window, refreshes the view and shows the upload page's
- * messages in the view's growl (runtime issue P3, docs/sail-runtime-issues.md): the upload's success and the upload
+ * messages in the view's growl: the upload's success and the upload
  * action's own growl; one with problems leaves the window open, showing them. A BizPort import does the same: a clean
  * import closes its window, showing its success in the view, and one with warnings stays open.
  * <p>

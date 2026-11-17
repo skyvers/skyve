@@ -1,11 +1,12 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -239,7 +240,7 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		HttpServletResponse response = exportResponse(output);
 		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 		when(response.isCommitted()).thenReturn(false);
-		org.mockito.Mockito.doThrow(new IOException("redirect failed")).when(response).sendRedirect(anyString());
+		doThrow(new IOException("redirect failed")).when(response).sendRedirect(anyString());
 
 		invokeRedirectToErrorPage(response, "REF-2");
 

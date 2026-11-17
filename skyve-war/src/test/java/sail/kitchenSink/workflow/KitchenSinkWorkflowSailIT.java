@@ -17,6 +17,7 @@ class KitchenSinkWorkflowSailIT extends AbstractInterpretedSailWorkflow {
 	 * a new browser.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void legsInSeparateFiles() {
 		sailWorkflow("sail/kitchenSink/workflow/workflow-1-pf-create.xml",
 						"sail/kitchenSink/workflow/workflow-2-sc-change.xml",
@@ -28,6 +29,7 @@ class KitchenSinkWorkflowSailIT extends AbstractInterpretedSailWorkflow {
 	 * browser, finds it by its number and deletes it.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void oneWorkflowFile() {
 		sailWorkflow("sail/kitchenSink/workflow/kitchensink-workflow.xml");
 	}

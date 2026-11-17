@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -287,7 +288,8 @@ class ViewAccessMetaDataTest {
         void queryAggregateAccessValidatePassesWhenQueryInModule() {
                 ViewQueryAggregateUserAccessMetaData md = new ViewQueryAggregateUserAccessMetaData();
                 md.setQueryName("qAllContacts");
-                when(mockModule.getMetaDataQuery("qAllContacts")).thenReturn(org.mockito.Mockito.mock(MetaDataQueryDefinition.class));
+                MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
+                when(mockModule.getMetaDataQuery("qAllContacts")).thenReturn(query);
                 assertDoesNotThrow(() -> md.validate("test", mockModule));
         }
 

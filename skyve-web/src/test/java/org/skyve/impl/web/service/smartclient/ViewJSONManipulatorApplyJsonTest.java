@@ -175,7 +175,7 @@ class ViewJSONManipulatorApplyJsonTest {
 	}
 
 	/**
-	 * A tab pane's selected tab index binding to an attribute takes the tab the user selected (runtime issue SC-7), but
+	 * A tab pane's selected tab index binding to an attribute takes the tab the user selected, but
 	 * only the index of one of its tabs: a crafted value is ignored.
 	 */
 	@Test

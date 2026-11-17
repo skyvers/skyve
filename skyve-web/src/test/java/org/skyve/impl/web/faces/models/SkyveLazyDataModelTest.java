@@ -334,9 +334,11 @@ class SkyveLazyDataModelTest {
 		ListModel<Bean> listModel = expressionColumnListModel();
 		when(listModel.newFilter()).thenReturn(null);
 		SkyveLazyDataModel model = lookupModel();
+		Customer customer = customerForSalesModule();
+		Document drivingDocument = salesDocument();
 
 		IllegalStateException e = assertThrows(IllegalStateException.class,
-												() -> invokeApplyLookupFilter(model, listModel, customerForSalesModule(), salesDocument()));
+												() -> invokeApplyLookupFilter(model, listModel, customer, drivingDocument));
 
 		assertEquals("List model " + listModel.getClass().getName() + " does not support filtering", e.getMessage());
 	}
@@ -348,9 +350,11 @@ class SkyveLazyDataModelTest {
 		when(listModel.newFilter()).thenReturn(fieldFilter);
 		when(listModel.getFilter()).thenReturn(null);
 		SkyveLazyDataModel model = lookupModel();
+		Customer customer = customerForSalesModule();
+		Document drivingDocument = salesDocument();
 
 		IllegalStateException e = assertThrows(IllegalStateException.class,
-												() -> invokeApplyLookupFilter(model, listModel, customerForSalesModule(), salesDocument()));
+												() -> invokeApplyLookupFilter(model, listModel, customer, drivingDocument));
 
 		assertEquals("List model " + listModel.getClass().getName() + " does not support filtering", e.getMessage());
 		// the expression alias is searched without resolving a document attribute

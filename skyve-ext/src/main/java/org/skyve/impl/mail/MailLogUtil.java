@@ -506,7 +506,7 @@ public class MailLogUtil {
 				for (Mail mail : mails) {
 					for (MailAttachment attachment : mail.getAttachments()) {
 						byte[] bytes = (attachment == null) ? null : attachment.getAttachment();
-						if ((bytes == null) || (bytes.length == 0)) {
+						if ((attachment == null) || (bytes == null) || (bytes.length == 0)) {
 							continue;
 						}
 

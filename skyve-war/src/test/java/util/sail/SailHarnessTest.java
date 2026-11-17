@@ -119,7 +119,8 @@ class SailHarnessTest {
 					}
 				}
 				""");
-		String key = baseUrl.toLowerCase().replaceAll("/+$", "").replaceAll("[^a-z0-9]+", "_");
+		// the lock's key: the base URL without its trailing slash, with each run of other characters as _
+		String key = baseUrl.substring(0, baseUrl.length() - 1).toLowerCase().replaceAll("[^a-z0-9]+", "_");
 		Path lockFile = Path.of(System.getProperty("java.io.tmpdir"), "skyve-sail-" + key + ".lock");
 		String java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
 		assertEquals(3, run(java, probe.toString(), lockFile.toString()), "another JVM cannot take the lock while this one holds it");

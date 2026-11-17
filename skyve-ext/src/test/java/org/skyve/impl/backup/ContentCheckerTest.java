@@ -5,6 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -256,7 +258,7 @@ class ContentCheckerTest {
 
 		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
 
-		org.mockito.Mockito.verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY where bizCustomer = 'demo'");
+		verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY where bizCustomer = 'demo'");
 		assertThat(counter(checker, "missingContentCount"), is(0));
 		assertThat(counter(checker, "erroneousContentCount"), is(0));
 	}
@@ -280,7 +282,7 @@ class ContentCheckerTest {
 
 		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
 
-		org.mockito.Mockito.verifyNoInteractions(cm);
+		verifyNoInteractions(cm);
 		assertThat(counter(checker, "missingContentCount"), is(0));
 		assertThat(counter(checker, "erroneousContentCount"), is(0));
 	}
@@ -301,7 +303,7 @@ class ContentCheckerTest {
 
 		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
 
-		org.mockito.Mockito.verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY");
+		verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY");
 	}
 
 	@Test

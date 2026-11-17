@@ -175,6 +175,7 @@ class ExpressionEvaluatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // each completion case asserts a different shape of result, so separate named tests read more clearly
 	void completeExpressionReturnsEmptyListWhenNoExpressionSyntax() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);

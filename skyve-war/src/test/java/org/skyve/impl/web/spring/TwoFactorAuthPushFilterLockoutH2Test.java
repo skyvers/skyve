@@ -330,7 +330,7 @@ class TwoFactorAuthPushFilterLockoutH2Test extends AbstractH2Test {
 			try (ResultSet rs = ps.executeQuery()) {
 				if (rs.next()) {
 					int failures = rs.getInt(1);
-					return rs.wasNull() ? Integer.valueOf(0) : Integer.valueOf(failures);
+					return Integer.valueOf(rs.wasNull() ? 0 : failures);
 				}
 			}
 		} catch (SQLException e) {

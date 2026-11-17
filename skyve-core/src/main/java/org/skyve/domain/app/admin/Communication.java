@@ -66,7 +66,7 @@ public interface Communication extends PersistentBean {
 		 */
 		@Override
 		public @Nonnull String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		/**
@@ -178,7 +178,7 @@ public interface Communication extends PersistentBean {
 		 */
 		@Override
 		public @Nonnull String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		/**

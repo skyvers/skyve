@@ -385,7 +385,7 @@
 									<div class="ui gray button">
 										<i class="microsoft icon"></i>
 									</div>
-									<a href="oauth2/authorization/microsoft" class="ui basic gray left pointing label">Azure AD</a>
+									<a href="oauth2/authorization/microsoft" class="ui basic gray left pointing label">Entra ID</a>
 								</div>
 							</div>
 							<% } %>							

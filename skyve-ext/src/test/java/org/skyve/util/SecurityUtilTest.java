@@ -167,6 +167,7 @@ class SecurityUtilTest {
 	// ======== getSourceIpAddress() ========
 
 	@Test
+	@SuppressWarnings("java:S5976") // each header combination is a named scenario with its own stubbing; separate tests read better than a parameter table
 	void testGetSourceIpAddressFromForwardedHeader() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
 		when(request.getHeader("Forwarded")).thenReturn("for=203.0.113.5; proto=https");

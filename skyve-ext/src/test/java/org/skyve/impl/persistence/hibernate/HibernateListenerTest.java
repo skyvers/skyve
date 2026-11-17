@@ -134,9 +134,10 @@ class HibernateListenerTest {
 			Exception failure = new Exception("pre-remove failed");
 			doThrow(failure).when(persistence).preRemove(bean);
 			PreDeleteEvent event = new PreDeleteEvent(bean, "id-1", new Object[0], mock(EntityPersister.class), null);
+			HibernateListener listener = new HibernateListener();
 
 			DomainException thrown = assertThrows(DomainException.class,
-					() -> new HibernateListener().onPreDelete(event));
+					() -> listener.onPreDelete(event));
 
 			assertSame(failure, thrown.getCause());
 		}
@@ -171,9 +172,10 @@ class HibernateListenerTest {
 			SkyveException failure = new DomainException("post-remove failed");
 			doThrow(failure).when(persistence).postRemove(bean);
 			PostDeleteEvent event = new PostDeleteEvent(bean, "id-1", new Object[0], mock(EntityPersister.class), null);
+			HibernateListener listener = new HibernateListener();
 
 			assertSame(failure, assertThrows(SkyveException.class,
-					() -> new HibernateListener().onPostDelete(event)));
+					() -> listener.onPostDelete(event)));
 		}
 		finally {
 			unbindPersistenceFromThread();

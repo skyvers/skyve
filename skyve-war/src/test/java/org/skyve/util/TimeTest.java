@@ -28,7 +28,7 @@ class TimeTest {
 	@SuppressWarnings("static-method")
 	void testMaxNoArgsThrowsException() {
 		// call the method under test
-		assertThrows(IllegalArgumentException.class, () -> Time.max());
+		assertThrows(IllegalArgumentException.class, Time::max);
 	}
 
 	@Test
@@ -50,7 +50,7 @@ class TimeTest {
 	@SuppressWarnings("static-method")
 	void testMinNoArgsThrowsException() {
 		// call the method under test
-		assertThrows(IllegalArgumentException.class, () -> Time.min());
+		assertThrows(IllegalArgumentException.class, Time::min);
 	}
 
 	@Test

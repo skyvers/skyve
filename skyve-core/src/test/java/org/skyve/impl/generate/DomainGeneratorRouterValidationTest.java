@@ -27,7 +27,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 class DomainGeneratorRouterValidationTest {
 	@Test
 	@SuppressWarnings("static-method")
-	void validatesModuleToGlobalTargetOnceForCustomerWithNoDocuments() throws Exception {
+	void validatesModuleToGlobalTargetOnceForCustomerWithNoDocuments() {
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		Customer customer = mock(Customer.class);
 		when(repository.getCustomer("empty")).thenReturn(customer);
@@ -51,7 +51,7 @@ class DomainGeneratorRouterValidationTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void validatesRouterOnceWhileRetainingPerDocumentViewValidation() throws Exception {
+	void validatesRouterOnceWhileRetainingPerDocumentViewValidation() {
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -101,8 +101,8 @@ class DomainGeneratorRouterValidationTest {
 		when(repository.getModuleRouters()).thenReturn(List.of());
 		when(repository.getRouter()).thenReturn(effective);
 
-		assertThrows(MetaDataException.class,
-				() -> new TestDomainGenerator(repository).validateCustomer("invalid"));
+		TestDomainGenerator generator = new TestDomainGenerator(repository);
+		assertThrows(MetaDataException.class, () -> generator.validateCustomer("invalid"));
 
 		verify(repository, times(1)).getRouter();
 	}
@@ -127,8 +127,8 @@ class DomainGeneratorRouterValidationTest {
 		when(repository.getModuleRouters()).thenReturn(List.of());
 		when(repository.getRouter()).thenReturn(effective);
 
-		MetaDataException e = assertThrows(MetaDataException.class,
-				() -> new TestDomainGenerator(repository).validateCustomer("unnamed"));
+		TestDomainGenerator generator = new TestDomainGenerator(repository);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generator.validateCustomer("unnamed"));
 
 		assertEquals("The router defines a UX/UI with no name.", e.getMessage());
 	}

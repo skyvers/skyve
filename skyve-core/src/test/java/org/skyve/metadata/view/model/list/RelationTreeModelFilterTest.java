@@ -3,8 +3,10 @@ package org.skyve.metadata.view.model.list;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,7 +14,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.OptimisticLock;
@@ -89,8 +90,8 @@ class RelationTreeModelFilterTest {
 		User user = mock(User.class);
 		when(user.getName()).thenReturn(userName);
 		when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
-														Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+														withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 	}

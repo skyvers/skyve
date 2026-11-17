@@ -10,7 +10,7 @@ import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
 
 /**
- * A growl pushed to a SmartClient page is added to the growls showing, and does not replace them (runtime issue SC-6).
+ * A growl pushed to a SmartClient page is added to the growls showing, and does not replace them.
  * <p>
  * Backup and Restore growl that their job has started, and the job pushes a growl when it finishes, often within a
  * fraction of a second. Whether the admin suites' {@code testMessage} steps read the first growl before the push arrives

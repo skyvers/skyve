@@ -191,7 +191,8 @@ public class RunImport implements ServerSideAction<ImportExport> {
 						}
 					}
 					try {
-						if (b != null && (b.getBizKey() == null || b.getBizKey().trim().isEmpty())) {
+						String bizKey = (b == null) ? null : b.getBizKey();
+						if (b != null && (bizKey == null || bizKey.trim().isEmpty())) {
 							String msg = "The new record has no value for bizKey at row " + created + ".";
 							ValidationException ve = new ValidationException(new Message(msg));
 							throw ve;

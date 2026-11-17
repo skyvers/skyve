@@ -251,7 +251,7 @@ class ViewImplTest {
 	}
 
 	@Test
-	void getAccessesThrowsWhenAComponentAggregateHasNoComponent() throws Exception {
+	void getAccessesThrowsWhenAComponentAggregateHasNoComponent() {
 		Set<UserAccess> fragmentAccesses = new TreeSet<>();
 		@SuppressWarnings("null") // passes null on purpose
 		UserAccess componentless = UserAccess.queryAggregate("other", null);

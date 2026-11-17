@@ -3,6 +3,11 @@ package org.skyve.impl.util;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -14,7 +19,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
@@ -62,9 +66,9 @@ class ValidationUtilTest {
 
 	@Test
 	void validateBeanPropertyInverseOneSkipsValidation() {
-		Attribute attribute = Mockito.mock(Attribute.class);
-		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.inverseOne);
-		Mockito.when(attribute.getName()).thenReturn("someInverse");
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.inverseOne);
+		when(attribute.getName()).thenReturn("someInverse");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
@@ -74,9 +78,9 @@ class ValidationUtilTest {
 
 	@Test
 	void validateBeanPropertyInverseManySkipsValidation() {
-		Attribute attribute = Mockito.mock(Attribute.class);
-		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.inverseMany);
-		Mockito.when(attribute.getName()).thenReturn("someInverseMany");
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.inverseMany);
+		when(attribute.getName()).thenReturn("someInverseMany");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
@@ -86,10 +90,10 @@ class ValidationUtilTest {
 
 	@Test
 	void validateBeanPropertyBizKeyBindingSkipsValidation() {
-		Attribute attribute = Mockito.mock(Attribute.class);
+		Attribute attribute = mock(Attribute.class);
 		// Use a non-inverse type but the special bizKey binding name
-		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(attribute.getName()).thenReturn(Bean.BIZ_KEY);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		when(attribute.getName()).thenReturn(Bean.BIZ_KEY);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
@@ -100,13 +104,13 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanPropertyRequiredAttributeAddsMessageWhenValueNull() {
 		// "bizId" is a valid Bean interface property — BindUtil.get(mockBean, "bizId") returns null
-		Attribute attribute = Mockito.mock(Attribute.class);
-		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(attribute.getName()).thenReturn("bizId");
-		Mockito.when(attribute.isRequired()).thenReturn(Boolean.TRUE);
-		Mockito.when(attribute.getLocalisedDisplayName()).thenReturn("ID");
-		Mockito.when(attribute.getLocalisedRequiredMessage()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		when(attribute.getName()).thenReturn("bizId");
+		when(attribute.isRequired()).thenReturn(Boolean.TRUE);
+		when(attribute.getLocalisedDisplayName()).thenReturn("ID");
+		when(attribute.getLocalisedRequiredMessage()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
@@ -117,13 +121,13 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanPropertyRequiredAttributeWithCustomMessageAddsCustomMessage() {
 		// Custom required message — exercises the non-null requiredMessage branch
-		Attribute attribute = Mockito.mock(Attribute.class);
-		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(attribute.getName()).thenReturn("bizId");
-		Mockito.when(attribute.isRequired()).thenReturn(Boolean.TRUE);
-		Mockito.when(attribute.getLocalisedDisplayName()).thenReturn("ID");
-		Mockito.when(attribute.getLocalisedRequiredMessage()).thenReturn("Custom required message");
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		when(attribute.getName()).thenReturn("bizId");
+		when(attribute.isRequired()).thenReturn(Boolean.TRUE);
+		when(attribute.getLocalisedDisplayName()).thenReturn("ID");
+		when(attribute.getLocalisedRequiredMessage()).thenReturn("Custom required message");
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
@@ -135,12 +139,12 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanPropertyNotRequiredNonNullValueAddsNoMessages() {
 		// Not required, value present — no messages should be added
-		Attribute attribute = Mockito.mock(Attribute.class);
-		Mockito.when(attribute.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(attribute.getName()).thenReturn("bizId");
-		Mockito.when(attribute.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(attribute.getLocalisedDisplayName()).thenReturn("ID");
-		Mockito.when(bean.getBizId()).thenReturn("some-id");
+		Attribute attribute = mock(Attribute.class);
+		when(attribute.getAttributeType()).thenReturn(AttributeType.text);
+		when(attribute.getName()).thenReturn("bizId");
+		when(attribute.isRequired()).thenReturn(Boolean.FALSE);
+		when(attribute.getLocalisedDisplayName()).thenReturn("ID");
+		when(bean.getBizId()).thenReturn("some-id");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
@@ -151,15 +155,15 @@ class ValidationUtilTest {
 	@Test
 	void validateTextAttributeExceedingLengthAddsMessage() {
 		// Text attribute with value exceeding max length
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Description");
-		Mockito.when(text.getLength()).thenReturn(5);
-		Mockito.when(text.getFormat()).thenReturn(null);
-		Mockito.when(text.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn("toolongvalue");
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("bizId");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("Description");
+		when(text.getLength()).thenReturn(5);
+		when(text.getFormat()).thenReturn(null);
+		when(text.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn("toolongvalue");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, bean, e);
@@ -170,15 +174,15 @@ class ValidationUtilTest {
 	@Test
 	void validateTextAttributeWithinLengthAddsNoMessage() {
 		// Text attribute with value within max length
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Description");
-		Mockito.when(text.getLength()).thenReturn(50);
-		Mockito.when(text.getFormat()).thenReturn(null);
-		Mockito.when(text.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn("short");
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("bizId");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("Description");
+		when(text.getLength()).thenReturn(50);
+		when(text.getFormat()).thenReturn(null);
+		when(text.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn("short");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, bean, e);
@@ -189,13 +193,13 @@ class ValidationUtilTest {
 	@Test
 	void validateCollectionMinCardinalityBelowMinAddsMessage() {
 		// Collection with minCardinality=2 and empty collection → adds message
-		Collection collection = Mockito.mock(Collection.class);
-		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
-		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
-		Mockito.when(collection.getMinCardinality()).thenReturn(2);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Collection collection = mock(Collection.class);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("bizId");
+		when(collection.isRequired()).thenReturn(Boolean.FALSE);
+		when(collection.getLocalisedDisplayName()).thenReturn("Items");
+		when(collection.getMinCardinality()).thenReturn(2);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, collection, bean, e);
@@ -206,13 +210,13 @@ class ValidationUtilTest {
 	@Test
 	void validateCollectionMinCardinalitySingularAddsMessage() {
 		// Collection with minCardinality=1 → singular message branch
-		Collection collection = Mockito.mock(Collection.class);
-		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
-		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
-		Mockito.when(collection.getMinCardinality()).thenReturn(1);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Collection collection = mock(Collection.class);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("bizId");
+		when(collection.isRequired()).thenReturn(Boolean.FALSE);
+		when(collection.getLocalisedDisplayName()).thenReturn("Items");
+		when(collection.getMinCardinality()).thenReturn(1);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, collection, bean, e);
@@ -223,14 +227,14 @@ class ValidationUtilTest {
 	@Test
 	void validateCollectionMaxCardinalityNullCollectionAddsNoMessage() {
 		// maxCardinality=1 with null collection → no message (null check guards)
-		Collection collection = Mockito.mock(Collection.class);
-		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
-		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
-		Mockito.when(collection.getMinCardinality()).thenReturn(0);
-		Mockito.when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(1));
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Collection collection = mock(Collection.class);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("bizId");
+		when(collection.isRequired()).thenReturn(Boolean.FALSE);
+		when(collection.getLocalisedDisplayName()).thenReturn("Items");
+		when(collection.getMinCardinality()).thenReturn(0);
+		when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(1));
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, collection, bean, e);
@@ -241,14 +245,14 @@ class ValidationUtilTest {
 	@Test
 	void validateCollectionWithinCardinalityLimitsAddsNoMessage() {
 		// Collection with minCardinality=0 and no max → no messages with null value
-		Collection collection = Mockito.mock(Collection.class);
-		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
-		Mockito.when(collection.getName()).thenReturn("bizId");
-		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
-		Mockito.when(collection.getMinCardinality()).thenReturn(0);
-		Mockito.when(collection.getMaxCardinality()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Collection collection = mock(Collection.class);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("bizId");
+		when(collection.isRequired()).thenReturn(Boolean.FALSE);
+		when(collection.getLocalisedDisplayName()).thenReturn("Items");
+		when(collection.getMinCardinality()).thenReturn(0);
+		when(collection.getMaxCardinality()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, collection, bean, e);
@@ -259,20 +263,20 @@ class ValidationUtilTest {
 	@Test
 	void validateCollectionExceedingPluralMaxCardinalityAddsMessage() {
 		// 3 items exceeding maxCardinality=2 → plural message added
-		Collection collection = Mockito.mock(Collection.class);
-		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
-		Mockito.when(collection.getName()).thenReturn("items");
-		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
-		Mockito.when(collection.getMinCardinality()).thenReturn(0);
-		Mockito.when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(2));
+		Collection collection = mock(Collection.class);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("items");
+		when(collection.isRequired()).thenReturn(Boolean.FALSE);
+		when(collection.getLocalisedDisplayName()).thenReturn("Items");
+		when(collection.getMinCardinality()).thenReturn(0);
+		when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(2));
 
 		List<Bean> items = new ArrayList<>();
-		items.add(Mockito.mock(Bean.class));
-		items.add(Mockito.mock(Bean.class));
-		items.add(Mockito.mock(Bean.class));
-		Mockito.when(bean.isDynamic("items")).thenReturn(Boolean.TRUE);
-		Mockito.when(bean.getDynamic("items")).thenReturn(items);
+		items.add(mock(Bean.class));
+		items.add(mock(Bean.class));
+		items.add(mock(Bean.class));
+		when(bean.isDynamic("items")).thenReturn(Boolean.TRUE);
+		when(bean.getDynamic("items")).thenReturn(items);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, collection, bean, e);
@@ -283,19 +287,19 @@ class ValidationUtilTest {
 	@Test
 	void validateCollectionExceedingSingularMaxCardinalityAddsMessage() {
 		// 2 items exceeding maxCardinality=1 → singular message added
-		Collection collection = Mockito.mock(Collection.class);
-		Mockito.when(collection.getAttributeType()).thenReturn(AttributeType.collection);
-		Mockito.when(collection.getName()).thenReturn("items");
-		Mockito.when(collection.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(collection.getLocalisedDisplayName()).thenReturn("Items");
-		Mockito.when(collection.getMinCardinality()).thenReturn(0);
-		Mockito.when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(1));
+		Collection collection = mock(Collection.class);
+		when(collection.getAttributeType()).thenReturn(AttributeType.collection);
+		when(collection.getName()).thenReturn("items");
+		when(collection.isRequired()).thenReturn(Boolean.FALSE);
+		when(collection.getLocalisedDisplayName()).thenReturn("Items");
+		when(collection.getMinCardinality()).thenReturn(0);
+		when(collection.getMaxCardinality()).thenReturn(Integer.valueOf(1));
 
 		List<Bean> items = new ArrayList<>();
-		items.add(Mockito.mock(Bean.class));
-		items.add(Mockito.mock(Bean.class));
-		Mockito.when(bean.isDynamic("items")).thenReturn(Boolean.TRUE);
-		Mockito.when(bean.getDynamic("items")).thenReturn(items);
+		items.add(mock(Bean.class));
+		items.add(mock(Bean.class));
+		when(bean.isDynamic("items")).thenReturn(Boolean.TRUE);
+		when(bean.getDynamic("items")).thenReturn(items);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, collection, bean, e);
@@ -307,13 +311,13 @@ class ValidationUtilTest {
 	void validateIntegerAttributeWithNullValidatorAddsNoMessage() {
 		// Integer attribute with null validator — exercises the integer else-if branch
 		org.skyve.impl.metadata.model.document.field.Integer intAttr =
-			Mockito.mock(org.skyve.impl.metadata.model.document.field.Integer.class);
-		Mockito.when(intAttr.getAttributeType()).thenReturn(AttributeType.integer);
-		Mockito.when(intAttr.getName()).thenReturn("bizId");
-		Mockito.when(intAttr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(intAttr.getLocalisedDisplayName()).thenReturn("Count");
-		Mockito.when(intAttr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+			mock(org.skyve.impl.metadata.model.document.field.Integer.class);
+		when(intAttr.getAttributeType()).thenReturn(AttributeType.integer);
+		when(intAttr.getName()).thenReturn("bizId");
+		when(intAttr.isRequired()).thenReturn(Boolean.FALSE);
+		when(intAttr.getLocalisedDisplayName()).thenReturn("Count");
+		when(intAttr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, intAttr, bean, e);
@@ -324,13 +328,13 @@ class ValidationUtilTest {
 	@Test
 	void validateLongIntegerAttributeWithNullValidatorAddsNoMessage() {
 		// LongInteger attribute with null validator — exercises the longInteger else-if branch
-		LongInteger longAttr = Mockito.mock(LongInteger.class);
-		Mockito.when(longAttr.getAttributeType()).thenReturn(AttributeType.longInteger);
-		Mockito.when(longAttr.getName()).thenReturn("bizId");
-		Mockito.when(longAttr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(longAttr.getLocalisedDisplayName()).thenReturn("LongCount");
-		Mockito.when(longAttr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		LongInteger longAttr = mock(LongInteger.class);
+		when(longAttr.getAttributeType()).thenReturn(AttributeType.longInteger);
+		when(longAttr.getName()).thenReturn("bizId");
+		when(longAttr.isRequired()).thenReturn(Boolean.FALSE);
+		when(longAttr.getLocalisedDisplayName()).thenReturn("LongCount");
+		when(longAttr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, longAttr, bean, e);
@@ -341,13 +345,13 @@ class ValidationUtilTest {
 	@Test
 	void validateDateAttributeWithNullValidatorAddsNoMessage() {
 		// Date attribute with null validator — exercises the date else-if branch
-		Date dateAttr = Mockito.mock(Date.class);
-		Mockito.when(dateAttr.getAttributeType()).thenReturn(AttributeType.date);
-		Mockito.when(dateAttr.getName()).thenReturn("bizId");
-		Mockito.when(dateAttr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(dateAttr.getLocalisedDisplayName()).thenReturn("StartDate");
-		Mockito.when(dateAttr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Date dateAttr = mock(Date.class);
+		when(dateAttr.getAttributeType()).thenReturn(AttributeType.date);
+		when(dateAttr.getName()).thenReturn("bizId");
+		when(dateAttr.isRequired()).thenReturn(Boolean.FALSE);
+		when(dateAttr.getLocalisedDisplayName()).thenReturn("StartDate");
+		when(dateAttr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, dateAttr, bean, e);
@@ -358,13 +362,13 @@ class ValidationUtilTest {
 	@Test
 	void validateDateTimeAttributeWithNullValidatorAddsNoMessage() {
 		// DateTime attribute with null validator — exercises the dateTime else-if branch
-		DateTime dateTimeAttr = Mockito.mock(DateTime.class);
-		Mockito.when(dateTimeAttr.getAttributeType()).thenReturn(AttributeType.dateTime);
-		Mockito.when(dateTimeAttr.getName()).thenReturn("bizId");
-		Mockito.when(dateTimeAttr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(dateTimeAttr.getLocalisedDisplayName()).thenReturn("CreatedAt");
-		Mockito.when(dateTimeAttr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		DateTime dateTimeAttr = mock(DateTime.class);
+		when(dateTimeAttr.getAttributeType()).thenReturn(AttributeType.dateTime);
+		when(dateTimeAttr.getName()).thenReturn("bizId");
+		when(dateTimeAttr.isRequired()).thenReturn(Boolean.FALSE);
+		when(dateTimeAttr.getLocalisedDisplayName()).thenReturn("CreatedAt");
+		when(dateTimeAttr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, dateTimeAttr, bean, e);
@@ -375,13 +379,13 @@ class ValidationUtilTest {
 	@Test
 	void validateTimeAttributeWithNullValidatorAddsNoMessage() {
 		// Time attribute with null validator — exercises the time else-if branch
-		Time timeAttr = Mockito.mock(Time.class);
-		Mockito.when(timeAttr.getAttributeType()).thenReturn(AttributeType.time);
-		Mockito.when(timeAttr.getName()).thenReturn("bizId");
-		Mockito.when(timeAttr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(timeAttr.getLocalisedDisplayName()).thenReturn("StartTime");
-		Mockito.when(timeAttr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Time timeAttr = mock(Time.class);
+		when(timeAttr.getAttributeType()).thenReturn(AttributeType.time);
+		when(timeAttr.getName()).thenReturn("bizId");
+		when(timeAttr.isRequired()).thenReturn(Boolean.FALSE);
+		when(timeAttr.getLocalisedDisplayName()).thenReturn("StartTime");
+		when(timeAttr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, timeAttr, bean, e);
@@ -392,13 +396,13 @@ class ValidationUtilTest {
 	@Test
 	void validateTimestampAttributeWithNullValidatorAddsNoMessage() {
 		// Timestamp attribute with null validator — exercises the timestamp else-if branch
-		Timestamp tsAttr = Mockito.mock(Timestamp.class);
-		Mockito.when(tsAttr.getAttributeType()).thenReturn(AttributeType.timestamp);
-		Mockito.when(tsAttr.getName()).thenReturn("bizId");
-		Mockito.when(tsAttr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(tsAttr.getLocalisedDisplayName()).thenReturn("CreatedOn");
-		Mockito.when(tsAttr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Timestamp tsAttr = mock(Timestamp.class);
+		when(tsAttr.getAttributeType()).thenReturn(AttributeType.timestamp);
+		when(tsAttr.getName()).thenReturn("bizId");
+		when(tsAttr.isRequired()).thenReturn(Boolean.FALSE);
+		when(tsAttr.getLocalisedDisplayName()).thenReturn("CreatedOn");
+		when(tsAttr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, tsAttr, bean, e);
@@ -409,13 +413,13 @@ class ValidationUtilTest {
 	@Test
 	void validateDecimal2AttributeWithNullValidatorAddsNoMessage() {
 		// Decimal2 attribute with null validator — exercises the decimal2 else-if branch
-		Decimal2 dec2Attr = Mockito.mock(Decimal2.class);
-		Mockito.when(dec2Attr.getAttributeType()).thenReturn(AttributeType.decimal2);
-		Mockito.when(dec2Attr.getName()).thenReturn("bizId");
-		Mockito.when(dec2Attr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(dec2Attr.getLocalisedDisplayName()).thenReturn("Amount");
-		Mockito.when(dec2Attr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Decimal2 dec2Attr = mock(Decimal2.class);
+		when(dec2Attr.getAttributeType()).thenReturn(AttributeType.decimal2);
+		when(dec2Attr.getName()).thenReturn("bizId");
+		when(dec2Attr.isRequired()).thenReturn(Boolean.FALSE);
+		when(dec2Attr.getLocalisedDisplayName()).thenReturn("Amount");
+		when(dec2Attr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, dec2Attr, bean, e);
@@ -426,13 +430,13 @@ class ValidationUtilTest {
 	@Test
 	void validateDecimal5AttributeWithNullValidatorAddsNoMessage() {
 		// Decimal5 attribute with null validator — exercises the decimal5 else-if branch
-		Decimal5 dec5Attr = Mockito.mock(Decimal5.class);
-		Mockito.when(dec5Attr.getAttributeType()).thenReturn(AttributeType.decimal5);
-		Mockito.when(dec5Attr.getName()).thenReturn("bizId");
-		Mockito.when(dec5Attr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(dec5Attr.getLocalisedDisplayName()).thenReturn("Price");
-		Mockito.when(dec5Attr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Decimal5 dec5Attr = mock(Decimal5.class);
+		when(dec5Attr.getAttributeType()).thenReturn(AttributeType.decimal5);
+		when(dec5Attr.getName()).thenReturn("bizId");
+		when(dec5Attr.isRequired()).thenReturn(Boolean.FALSE);
+		when(dec5Attr.getLocalisedDisplayName()).thenReturn("Price");
+		when(dec5Attr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, dec5Attr, bean, e);
@@ -443,13 +447,13 @@ class ValidationUtilTest {
 	@Test
 	void validateDecimal10AttributeWithNullValidatorAddsNoMessage() {
 		// Decimal10 attribute with null validator — exercises the decimal10 else-if branch
-		Decimal10 dec10Attr = Mockito.mock(Decimal10.class);
-		Mockito.when(dec10Attr.getAttributeType()).thenReturn(AttributeType.decimal10);
-		Mockito.when(dec10Attr.getName()).thenReturn("bizId");
-		Mockito.when(dec10Attr.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(dec10Attr.getLocalisedDisplayName()).thenReturn("Precision");
-		Mockito.when(dec10Attr.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn(null);
+		Decimal10 dec10Attr = mock(Decimal10.class);
+		when(dec10Attr.getAttributeType()).thenReturn(AttributeType.decimal10);
+		when(dec10Attr.getName()).thenReturn("bizId");
+		when(dec10Attr.isRequired()).thenReturn(Boolean.FALSE);
+		when(dec10Attr.getLocalisedDisplayName()).thenReturn("Precision");
+		when(dec10Attr.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn(null);
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, dec10Attr, bean, e);
@@ -692,17 +696,17 @@ class ValidationUtilTest {
 	@Test
 	void validateTextAttributeWithFormatMaskViolationAddsMessage() {
 		// Text attribute with TextFormat mask="###" and value "abc" → format violation in validateFormat
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Field");
-		Mockito.when(text.getLength()).thenReturn(50);
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("bizId");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("Field");
+		when(text.getLength()).thenReturn(50);
 		TextFormat textFormat = new TextFormat();
 		textFormat.setMask("###");
-		Mockito.when(text.getFormat()).thenReturn(textFormat);
-		Mockito.when(text.getValidator()).thenReturn(null);
-		Mockito.when(bean.getBizId()).thenReturn("abc");
+		when(text.getFormat()).thenReturn(textFormat);
+		when(text.getValidator()).thenReturn(null);
+		when(bean.getBizId()).thenReturn("abc");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, bean, e);
@@ -713,17 +717,17 @@ class ValidationUtilTest {
 	@Test
 	void validateTextAttributeWithTextValidatorViolationAddsMessage() {
 		// Text attribute with TextValidator (digits-only regex) and alphabetic value → adds message
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Field");
-		Mockito.when(text.getLength()).thenReturn(100);
-		Mockito.when(text.getFormat()).thenReturn(null);
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("bizId");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("Field");
+		when(text.getLength()).thenReturn(100);
+		when(text.getFormat()).thenReturn(null);
 		TextValidator tv = new TextValidator();
 		tv.setRegularExpression("[0-9]+");
-		Mockito.when(text.getValidator()).thenReturn(tv);
-		Mockito.when(bean.getBizId()).thenReturn("notdigits");
+		when(text.getValidator()).thenReturn(tv);
+		when(bean.getBizId()).thenReturn("notdigits");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, bean, e);
@@ -735,23 +739,23 @@ class ValidationUtilTest {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	void validateConverterWithNonNullValidatorCallsValidate() {
 		// Converter with a non-null Validator → exercises line 132 (validator.validate call)
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Field");
-		Mockito.when(text.getLength()).thenReturn(Integer.MAX_VALUE);
-		Mockito.when(text.getFormat()).thenReturn(null);
-		Mockito.when(text.getValidator()).thenReturn(null);
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("bizId");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("Field");
+		when(text.getLength()).thenReturn(Integer.MAX_VALUE);
+		when(text.getFormat()).thenReturn(null);
+		when(text.getValidator()).thenReturn(null);
 
-		org.skyve.domain.types.converters.Converter mockConverter = Mockito.mock(org.skyve.domain.types.converters.Converter.class);
-		org.skyve.domain.types.converters.Validator mockValidator = Mockito.mock(org.skyve.domain.types.converters.Validator.class);
-		Mockito.when(mockConverter.getValidator()).thenReturn(mockValidator);
-		Mockito.when(mockConverter.getFormat()).thenReturn(null);
-		org.skyve.metadata.customer.Customer mockCustomer = Mockito.mock(org.skyve.metadata.customer.Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
-		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(mockConverter);
-		Mockito.when(bean.getBizId()).thenReturn("someValue");
+		org.skyve.domain.types.converters.Converter mockConverter = mock(org.skyve.domain.types.converters.Converter.class);
+		org.skyve.domain.types.converters.Validator mockValidator = mock(org.skyve.domain.types.converters.Validator.class);
+		when(mockConverter.getValidator()).thenReturn(mockValidator);
+		when(mockConverter.getFormat()).thenReturn(null);
+		org.skyve.metadata.customer.Customer mockCustomer = mock(org.skyve.metadata.customer.Customer.class);
+		when(user.getCustomer()).thenReturn(mockCustomer);
+		when(text.getConverterForCustomer(mockCustomer)).thenReturn(mockConverter);
+		when(bean.getBizId()).thenReturn("someValue");
 
 		ValidationException e = new ValidationException();
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, text, bean, e);
@@ -764,15 +768,15 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanAgainstDocumentWithNoAttributesDoesNotThrow() {
 		// Covers L69 (CORE.getUser() path), L73-75 (empty loop), L79-88 (no inheritance), L90 (no failures)
-		Customer mockCustomer = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+		Customer mockCustomer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(mockCustomer);
 
-		Document document = Mockito.mock(Document.class);
-		Mockito.when(document.getAttributes()).thenReturn(Collections.emptyList());
-		Mockito.when(document.getExtends()).thenReturn(null);
+		Document document = mock(Document.class);
+		when(document.getAttributes()).thenReturn(Collections.emptyList());
+		when(document.getExtends()).thenReturn(null);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
-				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+				withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -787,27 +791,27 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanAgainstDocumentThrowsWhenRequiredFieldMissing() {
 		// Covers L91-92: LOGGER.warn + throw when validation fails
-		Customer mockCustomer = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+		Customer mockCustomer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(mockCustomer);
 
 		// A required Text attribute whose value is null → generates a validation message
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("bizId");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.TRUE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("Name");
-		Mockito.when(text.getLocalisedRequiredMessage()).thenReturn(null);
-		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("bizId");
+		when(text.isRequired()).thenReturn(Boolean.TRUE);
+		when(text.getLocalisedDisplayName()).thenReturn("Name");
+		when(text.getLocalisedRequiredMessage()).thenReturn(null);
+		when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
 		// bean.getBizId() returns null (default for Mockito mock)
 
-		Document document = Mockito.mock(Document.class);
+		Document document = mock(Document.class);
 		List<Attribute> attrs = new ArrayList<>();
 		attrs.add(text);
-		Mockito.doReturn(attrs).when(document).getAttributes();
-		Mockito.when(document.getExtends()).thenReturn(null);
+		doReturn(attrs).when(document).getAttributes();
+		when(document.getExtends()).thenReturn(null);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
-				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+				withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {
@@ -824,22 +828,22 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanPropertyTextWithUpperCaseFormatReformatsValue() {
 		// Covers validateFormat L276-283: success path where value is reformatted
-		Customer mockCustomer = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+		Customer mockCustomer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(mockCustomer);
 
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("myField");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("My Field");
-		Mockito.when(text.getLength()).thenReturn(Integer.MAX_VALUE);
-		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
-		Mockito.when(text.getValidator()).thenReturn(null);
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("myField");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("My Field");
+		when(text.getLength()).thenReturn(Integer.MAX_VALUE);
+		when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
+		when(text.getValidator()).thenReturn(null);
 
 		// TextFormat with uppercase → "myvalue" becomes "MYVALUE" after toDisplayValue
 		TextFormat textFormat = new TextFormat();
 		textFormat.setCase(Format.TextCase.upper);
-		Mockito.when(text.getFormat()).thenReturn(textFormat);
+		when(text.getFormat()).thenReturn(textFormat);
 
 		// DynamicBean with property "myField" = "myvalue"
 		Map<String, Object> props = new HashMap<>();
@@ -855,22 +859,22 @@ class ValidationUtilTest {
 	@Test
 	void validateBeanPropertyTextWithInvalidMaskAddsValidationMessage() {
 		// Covers validateFormat L300-303: catch block when format parsing fails
-		Customer mockCustomer = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+		Customer mockCustomer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(mockCustomer);
 
-		Text text = Mockito.mock(Text.class);
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.when(text.getName()).thenReturn("myField");
-		Mockito.when(text.isRequired()).thenReturn(Boolean.FALSE);
-		Mockito.when(text.getLocalisedDisplayName()).thenReturn("My Field");
-		Mockito.when(text.getLength()).thenReturn(Integer.MAX_VALUE);
-		Mockito.when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
-		Mockito.when(text.getValidator()).thenReturn(null);
+		Text text = mock(Text.class);
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		when(text.getName()).thenReturn("myField");
+		when(text.isRequired()).thenReturn(Boolean.FALSE);
+		when(text.getLocalisedDisplayName()).thenReturn("My Field");
+		when(text.getLength()).thenReturn(Integer.MAX_VALUE);
+		when(text.getConverterForCustomer(mockCustomer)).thenReturn(null);
+		when(text.getValidator()).thenReturn(null);
 
 		// TextFormat with digit mask "###" → "abc" can't be formatted → ParseException
 		TextFormat textFormat = new TextFormat();
 		textFormat.setMask("###");
-		Mockito.when(text.getFormat()).thenReturn(textFormat);
+		when(text.getFormat()).thenReturn(textFormat);
 
 		// DynamicBean with property "myField" = "abc" (letters, not digits → mask fails)
 		Map<String, Object> props = new HashMap<>();
@@ -886,29 +890,29 @@ class ValidationUtilTest {
 
 	@Test
 	void validateBeanAgainstDocumentTraversesInheritanceChain() {
-		Customer mockCustomer = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(mockCustomer);
+		Customer mockCustomer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(mockCustomer);
 
 		// base document with no attributes and no further extends
-		Document baseDocument = Mockito.mock(Document.class);
-		Mockito.when(baseDocument.getAttributes()).thenReturn(Collections.emptyList());
-		Mockito.when(baseDocument.getExtends()).thenReturn(null);
+		Document baseDocument = mock(Document.class);
+		when(baseDocument.getAttributes()).thenReturn(Collections.emptyList());
+		when(baseDocument.getExtends()).thenReturn(null);
 
 		// child document extends base
 		Extends ext = new Extends();
 		ext.setDocumentName("BaseDocument");
 
-		Module mockModule = Mockito.mock(Module.class);
-		Mockito.when(mockModule.getDocument(mockCustomer, "BaseDocument")).thenReturn(baseDocument);
-		Mockito.when(mockCustomer.getModule("admin")).thenReturn(mockModule);
+		Module mockModule = mock(Module.class);
+		when(mockModule.getDocument(mockCustomer, "BaseDocument")).thenReturn(baseDocument);
+		when(mockCustomer.getModule("admin")).thenReturn(mockModule);
 
-		Document document = Mockito.mock(Document.class);
-		Mockito.when(document.getAttributes()).thenReturn(Collections.emptyList());
-		Mockito.when(document.getExtends()).thenReturn(ext);
-		Mockito.when(document.getOwningModuleName()).thenReturn("admin");
+		Document document = mock(Document.class);
+		when(document.getAttributes()).thenReturn(Collections.emptyList());
+		when(document.getExtends()).thenReturn(ext);
+		when(document.getOwningModuleName()).thenReturn("admin");
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class,
-				Mockito.withSettings().defaultAnswer(Mockito.CALLS_REAL_METHODS));
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+				withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
 		try {

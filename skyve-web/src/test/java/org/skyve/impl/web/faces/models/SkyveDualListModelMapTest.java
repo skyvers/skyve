@@ -171,7 +171,8 @@ class SkyveDualListModelMapTest {
 	@Test
 	void gatherAddsANewMemberFoundThroughTheViewWebContext() {
 		GatherFixture fixture = new GatherFixture();
-		when(fixture.view.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(fixture.view.getWebContext()).thenReturn(webContext);
 		Bean role = mock(Bean.class);
 		doReturn(role).when(fixture.persistence).retrieve(fixture.roleDocument, "r1");
 

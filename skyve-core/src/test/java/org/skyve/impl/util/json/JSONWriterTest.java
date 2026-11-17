@@ -9,10 +9,16 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.Serial;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
@@ -29,7 +35,6 @@ import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.domain.AbstractPersistentBean;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -72,44 +77,46 @@ class JSONWriterTest {
 
 	/** Creates document metadata covering every attribute-writing branch. */
 	private static WriterDocumentContext writerDocumentContext() {
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		Document metadata = Mockito.mock(Document.class);
-		Reference reference = Mockito.mock(Reference.class);
-		Attribute domain = Mockito.mock(Attribute.class);
-		Attribute bool = Mockito.mock(Attribute.class);
-		Attribute text = Mockito.mock(Attribute.class);
-		WriterDocument document = Mockito.mock(WriterDocument.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document metadata = mock(Document.class);
+		Reference reference = mock(Reference.class);
+		Attribute domain = mock(Attribute.class);
+		Attribute bool = mock(Attribute.class);
+		Attribute text = mock(Attribute.class);
+		@SuppressWarnings("java:S5969") // a mock stubs the whole bean contract (persistent, child and hierarchical) far more briefly than a hand-written subclass
+		WriterDocument document = mock(WriterDocument.class);
 
-		Mockito.when(document.getBizModule()).thenReturn("test");
-		Mockito.when(document.getBizDocument()).thenReturn("Document");
-		Mockito.when(document.getBizId()).thenReturn("id");
-		Mockito.when(document.getBizCustomer()).thenReturn("customer");
-		Mockito.when(document.getBizDataGroupId()).thenReturn("group");
-		Mockito.when(document.getBizUserId()).thenReturn("user");
-		Mockito.when(document.getBizVersion()).thenReturn(Integer.valueOf(2));
-		Mockito.when(document.getBizLock()).thenReturn(new OptimisticLock(ADMIN_USERNAME, Date.from(Instant.EPOCH)));
-		Mockito.doReturn(Boolean.FALSE).when(document).isDynamic(anyString());
-		Mockito.doReturn(Mockito.mock(Bean.class)).when((ChildBean<?>) document).getParent();
-		Mockito.when(((ChildBean<?>) document).getBizOrdinal()).thenReturn(Integer.valueOf(3));
-		Mockito.when(((HierarchicalBean<?>) document).getBizParentId()).thenReturn("parent-id");
-		Mockito.when(document.getReference()).thenReturn(Mockito.mock(Bean.class));
-		Mockito.when(document.getChoice()).thenReturn("choice");
-		Mockito.when(document.getFlag()).thenReturn(Boolean.TRUE);
-		Mockito.when(document.getText()).thenReturn("text");
+		when(document.getBizModule()).thenReturn("test");
+		when(document.getBizDocument()).thenReturn("Document");
+		when(document.getBizId()).thenReturn("id");
+		when(document.getBizCustomer()).thenReturn("customer");
+		when(document.getBizDataGroupId()).thenReturn("group");
+		when(document.getBizUserId()).thenReturn("user");
+		when(document.getBizVersion()).thenReturn(Integer.valueOf(2));
+		when(document.getBizLock()).thenReturn(new OptimisticLock(ADMIN_USERNAME, Date.from(Instant.EPOCH)));
+		doReturn(Boolean.FALSE).when(document).isDynamic(anyString());
+		doReturn(mock(Bean.class)).when((ChildBean<?>) document).getParent();
+		when(((ChildBean<?>) document).getBizOrdinal()).thenReturn(Integer.valueOf(3));
+		when(((HierarchicalBean<?>) document).getBizParentId()).thenReturn("parent-id");
+		Bean referencedBean = mock(Bean.class);
+		when(document.getReference()).thenReturn(referencedBean);
+		when(document.getChoice()).thenReturn("choice");
+		when(document.getFlag()).thenReturn(Boolean.TRUE);
+		when(document.getText()).thenReturn("text");
 
-		Mockito.when(reference.getName()).thenReturn("reference");
-		Mockito.when(domain.getName()).thenReturn("choice");
-		Mockito.when(domain.getDomainType()).thenReturn(DomainType.constant);
-		Mockito.when(bool.getName()).thenReturn("flag");
-		Mockito.when(bool.getAttributeType()).thenReturn(AttributeType.bool);
-		Mockito.when(text.getName()).thenReturn("text");
-		Mockito.when(text.getAttributeType()).thenReturn(AttributeType.text);
-		Mockito.doReturn(String.class).when(text).getImplementingType();
-		Mockito.when(customer.getModule("test")).thenReturn(module);
-		Mockito.when(module.getDocument(customer, "Document")).thenReturn(metadata);
-		Mockito.when(metadata.getAttribute("text")).thenReturn(text);
-		Mockito.doReturn(List.of(reference, domain, bool, text)).when(metadata).getAllAttributes(customer);
+		when(reference.getName()).thenReturn("reference");
+		when(domain.getName()).thenReturn("choice");
+		when(domain.getDomainType()).thenReturn(DomainType.constant);
+		when(bool.getName()).thenReturn("flag");
+		when(bool.getAttributeType()).thenReturn(AttributeType.bool);
+		when(text.getName()).thenReturn("text");
+		when(text.getAttributeType()).thenReturn(AttributeType.text);
+		doReturn(String.class).when(text).getImplementingType();
+		when(customer.getModule("test")).thenReturn(module);
+		when(module.getDocument(customer, "Document")).thenReturn(metadata);
+		when(metadata.getAttribute("text")).thenReturn(text);
+		doReturn(List.of(reference, domain, bool, text)).when(metadata).getAllAttributes(customer);
 		return new WriterDocumentContext(customer, document);
 	}
 
@@ -131,6 +138,7 @@ class JSONWriterTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // one named test per scalar type reads more clearly than a parameterized table
 	void writeNullReturnsNullLiteral() {
 		JSONWriter writer = new JSONWriter(null);
 		String result = writer.write(null, null);
@@ -454,9 +462,9 @@ class JSONWriterTest {
 	@Test
 	void writeRecordWrapsAccessorFailure() {
 		FailingRecord value = new FailingRecord("ignored");
+		JSONWriter writer = new JSONWriter(null);
 
-		IllegalStateException exception = assertThrows(IllegalStateException.class,
-				() -> new JSONWriter(null).write(value, null));
+		IllegalStateException exception = assertThrows(IllegalStateException.class, () -> writer.write(value, null));
 
 		assertThat(exception.getMessage(), containsString(VALUE));
 		assertSame(IllegalStateException.class, exception.getCause().getClass());
@@ -494,7 +502,7 @@ class JSONWriterTest {
 		assertThat(result, containsString("\"bizVersion\":2"));
 		assertThat(result, containsString("\"bizParentId\":\"parent-id\""));
 		assertThat(result, not(containsString("\"children\":")));
-		Mockito.verify((HierarchicalBean<?>) context.document(), Mockito.never()).getChildren();
+		verify((HierarchicalBean<?>) context.document(), never()).getChildren();
 	}
 
 	/** Verifies projected documents sanitise bindings and tolerate missing properties. */
@@ -515,7 +523,7 @@ class JSONWriterTest {
 	@Test
 	void writeDocumentHandlesMetadataFailure() {
 		WriterDocumentContext context = writerDocumentContext();
-		Mockito.when(context.customer().getModule("test")).thenThrow(new IllegalStateException("metadata failed"));
+		when(context.customer().getModule("test")).thenThrow(new IllegalStateException("metadata failed"));
 
 		String result = new JSONWriter(context.customer()).write(context.document(), null);
 
@@ -730,7 +738,7 @@ class JSONWriterTest {
         @Test
         void writeSkyveBeansWithoutCustomerThrowsIllegalStateException() {
                 JSONWriter writer = new JSONWriter(null);
-                Bean mockBean = Mockito.mock(Bean.class);
+                Bean mockBean = mock(Bean.class);
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalStateException.class,
                         () -> writer.write(mockBean, null)
@@ -745,8 +753,8 @@ class JSONWriterTest {
                 // value() is called with topLevel=false (from map()) and propertyNames != null
                 // → string(bean.getBizId()) is called instead of document()
                 JSONWriter writer = new JSONWriter(null);
-                Bean mockBean = Mockito.mock(Bean.class);
-                Mockito.when(mockBean.getBizId()).thenReturn("projection-id-123");
+                Bean mockBean = mock(Bean.class);
+                when(mockBean.getBizId()).thenReturn("projection-id-123");
 
                 Map<String, Object> map = new LinkedHashMap<>();
                 map.put("ref", mockBean);
@@ -808,7 +816,7 @@ class JSONWriterTest {
 
 	@Test
 	void writeOptimisticLockOutputsString() {
-		Date timestamp = Date.from(LocalDateTime.of(2024, 1, 15, 10, 30)
+		Date timestamp = Date.from(LocalDateTime.of(2024, Month.JANUARY, 15, 10, 30)
 				.atZone(ZoneId.systemDefault()).toInstant());
 		OptimisticLock lock = new OptimisticLock(ADMIN_USERNAME, timestamp);
 		String result = new JSONWriter(null).write(lock, null);

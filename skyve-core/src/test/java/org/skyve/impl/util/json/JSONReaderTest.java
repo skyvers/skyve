@@ -10,6 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.notNull;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -22,7 +26,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.converters.Converter;
@@ -194,22 +197,22 @@ class JSONReaderTest {
 
 	/** Creates a minimal user and metadata graph that returns a mocked document instance. */
 	private static DocumentContext documentContext() throws Exception {
-		return documentContext(Mockito.mock(Bean.class));
+		return documentContext(mock(Bean.class));
 	}
 
 	/** Creates a minimal user and metadata graph for a supplied document instance. */
 	private static DocumentContext documentContext(Bean document) throws Exception {
-		User user = Mockito.mock(User.class);
-		Customer customer = Mockito.mock(Customer.class);
-		Module module = Mockito.mock(Module.class);
-		DocumentImpl documentMetaData = Mockito.mock(DocumentImpl.class);
-		Mockito.when(user.getCustomer()).thenReturn(customer);
-		Mockito.when(user.getDataGroupId()).thenReturn("group");
-		Mockito.when(user.getId()).thenReturn("user");
-		Mockito.when(customer.getName()).thenReturn("customer");
-		Mockito.when(customer.getModule("test")).thenReturn(module);
-		Mockito.when(module.getDocument(customer, "Document")).thenReturn(documentMetaData);
-		Mockito.when(documentMetaData.newInstance(customer)).thenReturn(document);
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		DocumentImpl documentMetaData = mock(DocumentImpl.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getDataGroupId()).thenReturn("group");
+		when(user.getId()).thenReturn("user");
+		when(customer.getName()).thenReturn("customer");
+		when(customer.getModule("test")).thenReturn(module);
+		when(module.getDocument(customer, "Document")).thenReturn(documentMetaData);
+		when(documentMetaData.newInstance(customer)).thenReturn(document);
 		return new DocumentContext(user, document, documentMetaData);
 	}
 
@@ -595,10 +598,11 @@ class JSONReaderTest {
 	@Test
 	void readObjectModeRejectsNullCollectionAndMapProperties() {
 		String beanClass = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
+		JSONReader reader = new JSONReader(null);
 
-		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read(
+		assertThrows(IllegalStateException.class, () -> reader.read(
 				"{\"class\":\"" + beanClass + "\",\"missingValues\":[1]}"));
-		assertThrows(IllegalStateException.class, () -> new JSONReader(null).read(
+		assertThrows(IllegalStateException.class, () -> reader.read(
 				"{\"class\":\"" + beanClass + "\",\"missingAttributes\":{\"a\":1}}"));
 	}
 
@@ -703,10 +707,10 @@ class JSONReaderTest {
 	/** Verifies document-specific identifiers, collections, locks, versions, and ownership. */
 	@Test
 	void readDocumentPopulatesReservedProperties() throws Exception {
-		ReaderDocument document = Mockito.mock(ReaderDocument.class);
+		ReaderDocument document = mock(ReaderDocument.class);
 		List<Object> items = new ArrayList<>();
-		Mockito.when(document.getItems()).thenReturn(items);
-		Mockito.doReturn(Boolean.TRUE).when(document).isNotPersisted();
+		when(document.getItems()).thenReturn(items);
+		doReturn(Boolean.TRUE).when(document).isNotPersisted();
 		DocumentContext context = documentContext(document);
 		String json = "{\"bizModule\":\"test\",\"bizDocument\":\"Document\","
 				+ "\"bizId\":\"123e4567-e89b-12d3-a456-426614174000\",\"items\":[1],"
@@ -716,19 +720,19 @@ class JSONReaderTest {
 
 		assertSame(document, result);
 		assertEquals(List.of(Long.valueOf(1L)), items);
-		Mockito.verify(document).setBizId("123e4567-e89b-12d3-a456-426614174000");
-		Mockito.verify(document).setBizLock(notNull());
-		Mockito.verify(document).setBizVersion(Integer.valueOf(2));
-		Mockito.verify(document).setName(null);
-		Mockito.verify(document).setBizCustomer("customer");
-		Mockito.verify(document).setBizDataGroupId("group");
-		Mockito.verify(document).setBizUserId("user");
+		verify(document).setBizId("123e4567-e89b-12d3-a456-426614174000");
+		verify(document).setBizLock(notNull());
+		verify(document).setBizVersion(Integer.valueOf(2));
+		verify(document).setName(null);
+		verify(document).setBizCustomer("customer");
+		verify(document).setBizDataGroupId("group");
+		verify(document).setBizUserId("user");
 	}
 
 	/** Verifies null locks, versions and values are assigned, and immutable properties are skipped. */
 	@Test
 	void readDocumentAssignsNullsAndSkipsImmutableProperties() throws Exception {
-		ReaderDocument document = Mockito.mock(ReaderDocument.class);
+		ReaderDocument document = mock(ReaderDocument.class);
 		DocumentContext context = documentContext(document);
 		String json = "{\"bizModule\":\"test\",\"bizDocument\":\"Document\","
 				+ "\"bizLock\":null,\"bizVersion\":null,\"bizKey\":1,\"name\":null}";
@@ -736,31 +740,31 @@ class JSONReaderTest {
 		Object result = new JSONReader(context.user()).read(json);
 
 		assertSame(document, result);
-		Mockito.verify(document).setBizLock(null);
-		Mockito.verify(document).setBizVersion(null);
-		Mockito.verify(document).setName(null);
+		verify(document).setBizLock(null);
+		verify(document).setBizVersion(null);
+		verify(document).setName(null);
 	}
 
 	/** Verifies display strings are kept when the attribute has no converter or is not convertible. */
 	@Test
 	void readDocumentKeepsDisplayValueWithoutConverter() throws Exception {
-		ReaderDocument convertibleDocument = Mockito.mock(ReaderDocument.class);
+		ReaderDocument convertibleDocument = mock(ReaderDocument.class);
 		DocumentContext convertibleContext = documentContext(convertibleDocument);
-		ConvertibleField field = Mockito.mock(ConvertibleField.class);
-		Mockito.when(convertibleContext.metadata().getAttribute("name")).thenReturn(field);
-		Mockito.doReturn(String.class).when(field).getImplementingType();
-		ReaderDocument plainDocument = Mockito.mock(ReaderDocument.class);
+		ConvertibleField field = mock(ConvertibleField.class);
+		when(convertibleContext.metadata().getAttribute("name")).thenReturn(field);
+		doReturn(String.class).when(field).getImplementingType();
+		ReaderDocument plainDocument = mock(ReaderDocument.class);
 		DocumentContext plainContext = documentContext(plainDocument);
-		Attribute attribute = Mockito.mock(Attribute.class);
-		Mockito.when(plainContext.metadata().getAttribute("name")).thenReturn(attribute);
-		Mockito.doReturn(String.class).when(attribute).getImplementingType();
+		Attribute attribute = mock(Attribute.class);
+		when(plainContext.metadata().getAttribute("name")).thenReturn(attribute);
+		doReturn(String.class).when(attribute).getImplementingType();
 		String json = "{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"name\":\"display\"}";
 
 		new JSONReader(convertibleContext.user()).read(json);
 		new JSONReader(plainContext.user()).read(json);
 
-		Mockito.verify(convertibleDocument).setName("display");
-		Mockito.verify(plainDocument).setName("display");
+		verify(convertibleDocument).setName("display");
+		verify(plainDocument).setName("display");
 	}
 
 	/** Verifies a key followed by the object end closes the object in every mode without reading past it. */
@@ -786,54 +790,58 @@ class JSONReaderTest {
 	/** Verifies a document list property must expose an existing mutable collection. */
 	@Test
 	void readDocumentRejectsNullCollectionProperty() throws Exception {
-		ReaderDocument document = Mockito.mock(ReaderDocument.class);
-		Mockito.doReturn(null).when(document).getItems();
+		ReaderDocument document = mock(ReaderDocument.class);
+		doReturn(null).when(document).getItems();
 		DocumentContext context = documentContext(document);
+		JSONReader reader = new JSONReader(context.user());
 
-		assertThrows(IllegalStateException.class, () -> new JSONReader(context.user()).read(
+		assertThrows(IllegalStateException.class, () -> reader.read(
 				"{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"items\":[1]}"));
 	}
 
 	/** Verifies non-empty document strings are converted through attribute metadata. */
 	@Test
 	void readDocumentConvertsDisplayValue() throws Exception {
-		ReaderDocument document = Mockito.mock(ReaderDocument.class);
+		ReaderDocument document = mock(ReaderDocument.class);
 		DocumentContext context = documentContext(document);
-		ConvertibleField field = Mockito.mock(ConvertibleField.class);
-		Converter<String> converter = Mockito.mock(Converter.class);
+		ConvertibleField field = mock(ConvertibleField.class);
+		Converter<String> converter = mock(Converter.class);
 		Customer customer = context.user().getCustomer();
-		Mockito.when(context.metadata().getAttribute("name")).thenReturn(field);
-		Mockito.doReturn(String.class).when(field).getImplementingType();
-		Mockito.doReturn(converter).when(field).getConverterForCustomer(customer);
-		Mockito.when(converter.fromDisplayValue("display")).thenReturn("converted");
+		when(context.metadata().getAttribute("name")).thenReturn(field);
+		doReturn(String.class).when(field).getImplementingType();
+		doReturn(converter).when(field).getConverterForCustomer(customer);
+		when(converter.fromDisplayValue("display")).thenReturn("converted");
 
 		Object result = new JSONReader(context.user()).read(
 				"{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"name\":\"display\"}");
 
 		assertSame(document, result);
-		Mockito.verify(document).setName("converted");
+		verify(document).setName("converted");
 	}
 
 	/** Verifies malformed Java class metadata is rejected before object population. */
 	@Test
 	void readObjectModeRejectsMalformedClassSeparator() {
 		String className = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
+		JSONReader reader = new JSONReader(null);
 
 		assertThrows(IllegalStateException.class,
-				() -> new JSONReader(null).read("{\"class\":\"" + className + "\":null}"));
+				() -> reader.read("{\"class\":\"" + className + "\":null}"));
 	}
 
 	/** Verifies unterminated document and Java object bodies cannot loop indefinitely. */
 	@Test
 	void readObjectModesRejectUnterminatedBodies() throws Exception {
-		DocumentContext context = documentContext(Mockito.mock(ReaderDocument.class));
+		DocumentContext context = documentContext(mock(ReaderDocument.class));
 		String className = "org.skyve.impl.util.json.JSONReaderTest$TestBean";
+		JSONReader documentReader = new JSONReader(context.user());
+		JSONReader objectReader = new JSONReader(null);
 
 		IllegalStateException documentException = assertThrows(IllegalStateException.class,
-				() -> new JSONReader(context.user()).read(
+				() -> documentReader.read(
 						"{\"bizModule\":\"test\",\"bizDocument\":\"Document\",\"bizLock\":\"\""));
 		IllegalStateException objectException = assertThrows(IllegalStateException.class,
-				() -> new JSONReader(null).read("{\"class\":\"" + className + "\",\"name\":\"value\""));
+				() -> objectReader.read("{\"class\":\"" + className + "\",\"name\":\"value\""));
 
 		assertTrue(documentException.getMessage().contains("unterminated"));
 		assertTrue(objectException.getMessage().contains("unterminated"));
@@ -916,8 +924,10 @@ class JSONReaderTest {
 	/** Verifies rejection of null primitive components. */
 	@Test
 	void readTypedRecordRejectsNullPrimitiveComponent() {
+		JSONReader reader = new JSONReader(null);
+
 		IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-				() -> new JSONReader(null).read("{\"value\":null}", GenericPrimitiveRecord.class));
+				() -> reader.read("{\"value\":null}", GenericPrimitiveRecord.class));
 
 		assertTrue(exception.getMessage().contains("int"));
 	}
@@ -956,8 +966,9 @@ class JSONReaderTest {
 	/** Verifies rejection of generic type variables that cannot be resolved from a raw class. */
 	@Test
 	void readTypedRecordRejectsUnresolvedTypeVariable() {
-		assertThrows(IllegalArgumentException.class,
-				() -> new JSONReader(null).read("{\"value\":1}", GenericRecord.class));
+		JSONReader reader = new JSONReader(null);
+
+		assertThrows(IllegalArgumentException.class, () -> reader.read("{\"value\":1}", GenericRecord.class));
 	}
 
 	/** Verifies that typed reads do not load a class named by the payload. */
@@ -1051,6 +1062,7 @@ class JSONReaderTest {
 	// ---- malformed JSON error paths -----------------------------------------
 
 	@Test
+	@SuppressWarnings("java:S5976") // one named test per malformed shape reads more clearly than a parameterized table
 	void malformedUnterminatedStringThrows() {
 		JSONReader reader = new JSONReader(null);
 		assertThrows(IllegalStateException.class, () -> reader.read("{\"key\":\"unclosed"));

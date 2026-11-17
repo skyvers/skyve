@@ -1,6 +1,6 @@
 package org.skyve.impl.web.faces.views;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.lang.reflect.Field;
@@ -23,9 +23,8 @@ class FacesViewApiStructureTest {
 	@Test
 	void retainsNoMutableSelectionFields() {
 		for (Field field : FacesView.class.getDeclaredFields()) {
-			assertFalse(UxUi.class.equals(field.getType()), "Unexpected UX/UI field: " + field.getName());
-			assertFalse(UserAgentType.class.equals(field.getType()),
-					"Unexpected user-agent field: " + field.getName());
+			assertNotEquals(UxUi.class, field.getType(), "Unexpected UX/UI field: " + field.getName());
+			assertNotEquals(UserAgentType.class, field.getType(), "Unexpected user-agent field: " + field.getName());
 		}
 	}
 }

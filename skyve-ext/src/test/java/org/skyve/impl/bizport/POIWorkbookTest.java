@@ -233,27 +233,32 @@ class POIWorkbookTest {
 		SheetKey key = new SheetKey("mod", "doc");
 		POISheet sheet = new POISheet("Test");
 		wb.addSheet(key, sheet);
-		assertThrows(IllegalArgumentException.class, () -> wb.addSheet(key, new POISheet("Test2")));
+		POISheet duplicate = new POISheet("Test2");
+		assertThrows(IllegalArgumentException.class, () -> wb.addSheet(key, duplicate));
 	}
 
 	@Test
 	void writeThrowsWhenNotMaterialised() {
 		POIWorkbook wb = new POIWorkbook(true);
-		assertThrows(IllegalStateException.class, () -> wb.write(new ByteArrayOutputStream()));
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		assertThrows(IllegalStateException.class, () -> wb.write(out));
 	}
 
 	@Test
 	void addSheetThrowsWhenAlreadyMaterialised() {
 		POIWorkbook wb = new POIWorkbook(true);
 		wb.materialise();
-		assertThrows(IllegalStateException.class, () -> wb.addSheet(new SheetKey("mod", "doc"), new POISheet("S")));
+		SheetKey key = new SheetKey("mod", "doc");
+		POISheet sheet = new POISheet("S");
+		assertThrows(IllegalStateException.class, () -> wb.addSheet(key, sheet));
 	}
 
 	@Test
 	void removeSheetThrowsWhenAlreadyMaterialised() {
 		POIWorkbook wb = new POIWorkbook(true);
 		wb.materialise();
-		assertThrows(IllegalStateException.class, () -> wb.removeSheet(new SheetKey("mod", "doc")));
+		SheetKey key = new SheetKey("mod", "doc");
+		assertThrows(IllegalStateException.class, () -> wb.removeSheet(key));
 	}
 
 	@Test
@@ -282,7 +287,8 @@ class POIWorkbookTest {
 		java.util.Map<String, BizPortColumn> columns = (java.util.Map<String, BizPortColumn>) columnsField.get(sheet);
 		columns.put("name", null);
 
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> wb.write(new ByteArrayOutputStream()));
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> wb.write(out));
 
 		assertEquals("Sheet MySheet has no column for binding name", e.getMessage());
 	}

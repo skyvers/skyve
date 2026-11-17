@@ -47,10 +47,13 @@ class ContextualExecutorTest {
 	@Test
 	void navigationWithoutContextThrowsMetaDataException() {
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		NavigateEdit edit = new NavigateEdit();
+		NavigateLink link = new NavigateLink();
+		NavigateTree tree = new NavigateTree();
 
-		assertThrows(MetaDataException.class, () -> executor.executeNavigateEdit(new NavigateEdit()));
-		assertThrows(MetaDataException.class, () -> executor.executeNavigateLink(new NavigateLink()));
-		assertThrows(MetaDataException.class, () -> executor.executeNavigateTree(new NavigateTree()));
+		assertThrows(MetaDataException.class, () -> executor.executeNavigateEdit(edit));
+		assertThrows(MetaDataException.class, () -> executor.executeNavigateLink(link));
+		assertThrows(MetaDataException.class, () -> executor.executeNavigateTree(tree));
 	}
 
 	@Test
@@ -63,8 +66,9 @@ class ContextualExecutorTest {
 		push.setModuleName("sales");
 		push.setQueryName("missing");
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		AutomationContext<GenerateListContext, GenerateEditContext> context = newContext();
 
-		assertThrows(MetaDataException.class, () -> executor.newContext(push, newContext()));
+		assertThrows(MetaDataException.class, () -> executor.newContext(push, context));
 	}
 
 	/**
@@ -154,8 +158,9 @@ class ContextualExecutorTest {
 		push.setDocumentName("Customer");
 		push.setModelName("recent");
 		ContextualExecutor<AutomationContext<GenerateListContext, GenerateEditContext>> executor = newExecutor();
+		AutomationContext<GenerateListContext, GenerateEditContext> context = newContext();
 
-		assertThrows(IllegalStateException.class, () -> executor.newContext(push, newContext()));
+		assertThrows(IllegalStateException.class, () -> executor.newContext(push, context));
 	}
 
 	@Test

@@ -24,5 +24,4 @@ This file is intentionally a table of contents only.
 - [docs/coverage-plan.md](docs/coverage-plan.md)
 - [docs/architecture-design.md](docs/architecture-design.md)
 - [docs/sail.md](docs/sail.md)
-- [docs/sail-runtime-issues.md](docs/sail-runtime-issues.md)
 - [README.md](README.md)

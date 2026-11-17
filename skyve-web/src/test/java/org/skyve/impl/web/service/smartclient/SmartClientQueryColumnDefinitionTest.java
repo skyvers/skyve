@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -356,7 +357,7 @@ class SmartClientQueryColumnDefinitionTest {
 
 	private static SmartClientQueryColumnDefinition definitionFor(Attribute attribute) throws Exception {
 		User user = mock(User.class);
-		CustomerImpl customer = org.mockito.Mockito.spy(new CustomerImpl());
+		CustomerImpl customer = spy(new CustomerImpl());
 		Module module = mock(Module.class);
 		DocumentImpl document = new DocumentImpl();
 		document.setName("Contact");

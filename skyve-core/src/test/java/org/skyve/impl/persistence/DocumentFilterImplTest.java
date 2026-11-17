@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -332,7 +333,7 @@ class DocumentFilterImplTest {
 	@Test
 	void addMemberOfCollectionAppendsCorrectClause() {
 		DocumentFilterImpl memberFilter = new DocumentFilterImpl(mockQuery, null);
-		org.skyve.domain.Bean beanMock = org.mockito.Mockito.mock(org.skyve.domain.Bean.class);
+		org.skyve.domain.Bean beanMock = mock(org.skyve.domain.Bean.class);
 		memberFilter.addMemberOfCollection("contacts", beanMock);
 		assertEquals(":param0 member of bean.contacts", memberFilter.toString());
 	}
@@ -340,7 +341,7 @@ class DocumentFilterImplTest {
 	@Test
 	void addNotMemberOfCollectionAppendsCorrectClause() {
 		DocumentFilterImpl notMemberFilter = new DocumentFilterImpl(mockQuery, null);
-		org.skyve.domain.Bean beanMock = org.mockito.Mockito.mock(org.skyve.domain.Bean.class);
+		org.skyve.domain.Bean beanMock = mock(org.skyve.domain.Bean.class);
 		notMemberFilter.addNotMemberOfCollection("contacts", beanMock);
 		assertEquals(":param0 not member of bean.contacts", notMemberFilter.toString());
 	}

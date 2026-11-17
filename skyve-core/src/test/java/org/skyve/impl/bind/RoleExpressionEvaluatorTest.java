@@ -6,13 +6,14 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -70,11 +71,11 @@ class RoleExpressionEvaluatorTest {
 
 	@Test
 	void completeReturnsAllRolesWhenFragmentIsNull() {
-		Role mockRole = Mockito.mock(Role.class);
-		Mockito.when(mockRole.getName()).thenReturn("BasicUser");
-		Mockito.when(module.getName()).thenReturn("admin");
-		Mockito.when(module.getRoles()).thenReturn(List.of(mockRole));
-		Mockito.when(customer.getModules()).thenReturn(List.of(module));
+		Role mockRole = mock(Role.class);
+		when(mockRole.getName()).thenReturn("BasicUser");
+		when(module.getName()).thenReturn("admin");
+		when(module.getRoles()).thenReturn(List.of(mockRole));
+		when(customer.getModules()).thenReturn(List.of(module));
 
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		List<String> result = evaluator.completeWithoutPrefixOrSuffix(null, customer, module, document);
@@ -83,13 +84,13 @@ class RoleExpressionEvaluatorTest {
 
 	@Test
 	void completeFiltersRolesByFragment() {
-		Role mockRole1 = Mockito.mock(Role.class);
-		Mockito.when(mockRole1.getName()).thenReturn("BasicUser");
-		Role mockRole2 = Mockito.mock(Role.class);
-		Mockito.when(mockRole2.getName()).thenReturn("SuperUser");
-		Mockito.when(module.getName()).thenReturn("admin");
-		Mockito.when(module.getRoles()).thenReturn(List.of(mockRole1, mockRole2));
-		Mockito.when(customer.getModules()).thenReturn(List.of(module));
+		Role mockRole1 = mock(Role.class);
+		when(mockRole1.getName()).thenReturn("BasicUser");
+		Role mockRole2 = mock(Role.class);
+		when(mockRole2.getName()).thenReturn("SuperUser");
+		when(module.getName()).thenReturn("admin");
+		when(module.getRoles()).thenReturn(List.of(mockRole1, mockRole2));
+		when(customer.getModules()).thenReturn(List.of(module));
 
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		List<String> result = evaluator.completeWithoutPrefixOrSuffix("admin.B", customer, module, document);
@@ -98,11 +99,11 @@ class RoleExpressionEvaluatorTest {
 
 	@Test
 	void completeReturnsEmptyWhenNoRolesMatch() {
-		Role mockRole = Mockito.mock(Role.class);
-		Mockito.when(mockRole.getName()).thenReturn("BasicUser");
-		Mockito.when(module.getName()).thenReturn("admin");
-		Mockito.when(module.getRoles()).thenReturn(List.of(mockRole));
-		Mockito.when(customer.getModules()).thenReturn(List.of(module));
+		Role mockRole = mock(Role.class);
+		when(mockRole.getName()).thenReturn("BasicUser");
+		when(module.getName()).thenReturn("admin");
+		when(module.getRoles()).thenReturn(List.of(mockRole));
+		when(customer.getModules()).thenReturn(List.of(module));
 
 		RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
 		List<String> result = evaluator.completeWithoutPrefixOrSuffix("admin.X", customer, module, document);
@@ -111,11 +112,11 @@ class RoleExpressionEvaluatorTest {
 
 	@Test
 	void evaluateReturnsTrueWhenUserInRole() throws Exception {
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.TRUE);
+		User user = mock(User.class);
+		when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.TRUE);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
@@ -129,11 +130,11 @@ class RoleExpressionEvaluatorTest {
 
 	@Test
 	void evaluateReturnsFalseWhenUserNotInRole() throws Exception {
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.FALSE);
+		User user = mock(User.class);
+		when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.FALSE);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();
@@ -147,13 +148,13 @@ class RoleExpressionEvaluatorTest {
 
 	@Test
 	void formatReturnsDisplayValueForBooleanResult() throws Exception {
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.TRUE);
-		Customer c = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(c);
+		User user = mock(User.class);
+		when(user.isInRole("admin", "BasicUser")).thenReturn(Boolean.TRUE);
+		Customer c = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(c);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			RoleExpressionEvaluator evaluator = new RoleExpressionEvaluator();

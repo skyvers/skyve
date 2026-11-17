@@ -204,7 +204,7 @@ public abstract class User extends UserProxyExtension implements org.skyve.domai
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -274,7 +274,7 @@ public abstract class User extends UserProxyExtension implements org.skyve.domai
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.primefaces.context.PrimeRequestContext;
 import org.skyve.EXT;
+import org.skyve.dialog.Dialogs;
 import org.skyve.dialog.Question;
 import org.skyve.dialog.QuestionException;
 import org.skyve.domain.Bean;
@@ -278,7 +279,8 @@ class DialogsFixturePrimeFacesH2Test extends AbstractSkyveTest {
 		beforePhase(PhaseId.RENDER_RESPONSE);
 		assertFalse(EXT.getDialogs().canAsk());
 		Question question = Question.okCancel("render", "Render", "Can rendering ask?");
-		assertThrows(IllegalStateException.class, () -> EXT.getDialogs().ask(question));
+		Dialogs dialogs = EXT.getDialogs();
+		assertThrows(IllegalStateException.class, () -> dialogs.ask(question));
 	}
 
 	@Test

@@ -161,7 +161,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -232,7 +232,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -302,7 +302,7 @@ public abstract class Tag extends AbstractPersistentBean implements org.skyve.do
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override

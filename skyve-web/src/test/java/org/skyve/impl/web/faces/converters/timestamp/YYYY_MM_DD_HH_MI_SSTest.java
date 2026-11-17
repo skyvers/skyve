@@ -31,6 +31,16 @@ class YYYY_MM_DD_HH_MI_SSTest {
 	}
 
 	@Test
+	void testGetAsObjectTrimsSurroundingSpaces() {
+		// setup the test data
+		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
+		Time.setTime(testDate, 02, 30, 05);
+
+		// call the method under test with the value padded by spaces
+		Assertions.assertEquals(testDate, converter.getAsObject(null, null, "  2020/03/01 02:30:05 AM  "));
+	}
+
+	@Test
 	void testGetAsObjectValidFormatPM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));

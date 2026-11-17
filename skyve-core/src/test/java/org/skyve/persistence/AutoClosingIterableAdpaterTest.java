@@ -39,6 +39,6 @@ class AutoClosingIterableAdpaterTest {
 	@Test
 	void closeDoesNotThrow() {
 		AutoClosingIterableAdpater<String> adapter = new AutoClosingIterableAdpater<>(Arrays.asList("x"));
-		assertDoesNotThrow(() -> adapter.close());
+		assertDoesNotThrow(adapter::close);
 	}
 }

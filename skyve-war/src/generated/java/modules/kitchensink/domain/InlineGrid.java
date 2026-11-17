@@ -104,7 +104,7 @@ public class InlineGrid extends AbstractTransientBean implements ChildBean<Kitch
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override

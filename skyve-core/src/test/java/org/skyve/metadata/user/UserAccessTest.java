@@ -311,6 +311,7 @@ class UserAccessTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S3415") // the object under test goes first so that its equals() is the one called
 	void equalsReturnsFalseForNull() {
 		UserAccess a = UserAccess.singular("mod", "doc");
 		assertNotEquals(a, null);
