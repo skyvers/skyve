@@ -29,10 +29,12 @@ import org.junit.jupiter.api.function.Executable;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.impl.domain.AbstractTransientBean;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -40,6 +42,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModelRow;
 
 import jakarta.el.ELClass;
 import jakarta.el.ELProcessor;
@@ -57,24 +60,36 @@ class RelatedEnumerationTest {
 	public enum Shade { RED, DARK }
 	public enum Size { SMALL }
 
-	/** A stand-in for a generated bean class of the Root document with no enumerations of its own. */
-	public static final class RootBean extends DynamicBean {
+	/** A stand-in for a generated bean class of the Root document. */
+	public abstract static class GeneratedRootBean extends AbstractTransientBean {
 		private static final long serialVersionUID = 1L;
 
-		public RootBean() {
-			super(MODULE, "Root", new HashMap<>());
+		@Override
+		public String getBizModule() {
+			return MODULE;
+		}
+
+		@Override
+		public String getBizDocument() {
+			return "Root";
+		}
+
+		@Override
+		public String getBizKey() {
+			return "Root";
 		}
 	}
 
+	/** A stand-in for a generated bean class of the Root document with no enumerations of its own. */
+	public static final class RootBean extends GeneratedRootBean {
+		private static final long serialVersionUID = 1L;
+	}
+
 	/** A stand-in for a generated bean class of the Root document that declares an enumeration. */
-	public static final class LocalEnumRootBean extends DynamicBean {
+	public static final class LocalEnumRootBean extends GeneratedRootBean {
 		private static final long serialVersionUID = 1L;
 
 		public enum Colour { GREEN }
-
-		public LocalEnumRootBean() {
-			super(MODULE, "Root", new HashMap<>());
-		}
 	}
 
 	private Customer customer;
@@ -96,6 +111,7 @@ class RelatedEnumerationTest {
 		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(RootBean.class);
 		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(LocalEnumRootBean.class);
 		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(DynamicBean.class);
+		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(ListModelRow.class);
 	}
 
 	// ---- metadata fixtures ----
@@ -523,6 +539,43 @@ class RelatedEnumerationTest {
 		clearInvocations(customer);
 		assertEquals(Colour.BLUE, evaluator.evaluateWithoutPrefixOrSuffix("Colour.BLUE", bean));
 		verify(customer, times(2)).getModule(MODULE);
+	}
+
+	/**
+	 * A list model's rows are dynamic beans of a class of their own, which every document's rows share.
+	 */
+	@Test
+	void evaluationDoesNotRememberAnythingForADynamicBeanSubclass() throws Exception {
+		rootRelatedToColour();
+		bindUserOfCustomer();
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		assertEquals(Colour.RED, evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new ListModelRow(MODULE, "Root", new HashMap<>())));
+		assertTrue(relatedEnumBeans(ListModelRow.class).isEmpty());
+
+		// another document's row is searched for itself
+		document("Unrelated");
+		ListModelRow unrelated = new ListModelRow(MODULE, "Unrelated", new HashMap<>());
+		assertUnresolved("Colour", () -> evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", unrelated));
+	}
+
+	/** Classes can be regenerated and reloaded in dev mode, so nothing is remembered for a bean class. */
+	@Test
+	void evaluationDoesNotRememberAnythingInDevMode() throws Exception {
+		rootRelatedToColour();
+		bindUserOfCustomer();
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+		boolean devMode = UtilImpl.DEV_MODE;
+		UtilImpl.DEV_MODE = true;
+		try {
+			assertEquals(Colour.RED, evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean()));
+			clearInvocations(customer);
+			assertEquals(Colour.BLUE, evaluator.evaluateWithoutPrefixOrSuffix("Colour.BLUE", new RootBean()));
+		}
+		finally {
+			UtilImpl.DEV_MODE = devMode;
+		}
+		assertAll(() -> assertTrue(relatedEnumBeans(RootBean.class).isEmpty()),
+					() -> verify(customer, times(2)).getModule(MODULE));
 	}
 
 	@Test

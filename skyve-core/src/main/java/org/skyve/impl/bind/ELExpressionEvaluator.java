@@ -31,6 +31,7 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -97,7 +98,8 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * The enumerations of related documents that an expression evaluated against a bean class has
 	 * named, keyed by customer name and then simple name, as a customer's classes can declare an
 	 * enum class of their own. They are added as expressions name them; only names that resolved are
-	 * kept, so each map is bounded by the enumerations that can be reached.
+	 * kept, so each map is bounded by the enumerations that can be reached. Nothing is kept in dev
+	 * mode, or for a dynamic bean, whose class documents share.
 	 * ClassValue does not pin redeployed class loaders.
 	 */
 	static final ClassValue<Map<String, Map<String, ELClass>>> RELATED_ENUM_BEANS = new ClassValue<>() {
@@ -784,6 +786,11 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	 * loaded class can be one a customer's or narrowed document's generated class declares, whose name
 	 * differs from the name of the vanilla domain class's enum for the same enumeration.
 	 *
+	 * <p>While the domain is partly compiled, so that one enumeration's class loads and the other's is
+	 * not compiled yet, the names compared can be the same for classes that differ once both are
+	 * compiled, such as a customer's own enum and the vanilla one. A real ambiguity can then go
+	 * unreported when an expression is validated at generation, and surface at run time.
+	 *
 	 * @param customer the customer metadata context
 	 * @param enumeration the enumeration metadata
 	 * @param other the other enumeration metadata
@@ -894,22 +901,23 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		/**
 		 * Returns the related enumerations remembered for the bean's class and the current user's customer.
 		 *
-		 * @return the map to remember them in, or {@code null} if they are not remembered: for a dynamic
-		 * 			bean class, or without a user's customer name
+		 * @return the map to remember them in, or {@code null} if they are not remembered: in dev mode,
+		 * 			where classes can be regenerated and reloaded; for a dynamic bean, including a
+		 * 			subclass such as a list model's row, whose class every document of its kind shares;
+		 * 			or without a user's customer name
 		 */
 		private @Nullable Map<String, ELClass> relatedEnumBeans() {
 			if (relatedEnumBeans == null) {
-				Class<?> beanClass = bean.getClass();
-				if (DynamicBean.class.getPackageName().equals(beanClass.getPackageName())) {
+				if (UtilImpl.DEV_MODE || (bean instanceof DynamicBean)) {
 					return null;
 				}
 				User user = AbstractPersistence.get().getUser();
-				@SuppressWarnings("null") // a persistence has no user until one is set
+				@SuppressWarnings({"null", "java:S2583"}) // a persistence has no user until one is set, whatever getUser() declares
 				String customerName = (user == null) ? null : user.getCustomerName();
 				if (customerName == null) {
 					return null;
 				}
-				relatedEnumBeans = RELATED_ENUM_BEANS.get(beanClass).computeIfAbsent(customerName, k -> new ConcurrentHashMap<>());
+				relatedEnumBeans = RELATED_ENUM_BEANS.get(bean.getClass()).computeIfAbsent(customerName, k -> new ConcurrentHashMap<>());
 			}
 			return relatedEnumBeans;
 		}
