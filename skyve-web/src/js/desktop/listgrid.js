@@ -115,8 +115,9 @@ isc.BizListGrid.addMethods({
 				);
 			}
 
-			// These criteria go to the server other than through the data source's fetch: make a day filter the day's range
-			return isc.BizUtil.dataSourceDayCriteria(this._dataSource, criteria);
+			// These criteria go to the server other than through the data source's fetch: as the fetch does, convert relative
+			// dates (such as today) to dates, then make a day filter the day's range
+			return isc.BizUtil.dataSourceDayCriteria(this._dataSource, this._dataSource.convertRelativeDates(criteria));
 		};
 
 		/**
