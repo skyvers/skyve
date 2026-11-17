@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
@@ -26,7 +27,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.skyve.domain.Bean;
@@ -70,8 +74,12 @@ import org.skyve.metadata.model.document.Inverse;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Reference.ReferenceType;
 import org.skyve.metadata.model.document.Relation;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.BizQLDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -91,6 +99,16 @@ import jakarta.annotation.Nullable;
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated source and mapping output.
 public final class OverridableDomainGenerator extends DomainGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(OverridableDomainGenerator.class);
+
+	/**
+	 * Matches the declaration of a generated module metadata enum (see
+	 * {@link #generateModuleMetadataEnum}) - the generator marker immediately followed by an enum
+	 * implementing one of the module member reference interfaces. Group 1 is the enum name.
+	 */
+	private static final Pattern GENERATED_METADATA_ENUM_DECLARATION = Pattern.compile(
+			"^@Generated\\(value = \"" + Pattern.quote(OverridableDomainGenerator.class.getName()) + "\"\\)\\R" +
+			"public enum (\\w+) implements Module(?:Role|Document|Query|BizQL|SQL|Job) \\{$",
+			Pattern.MULTILINE);
 
 	/**
 	 * Simple container for generated document class metadata.
@@ -155,14 +173,30 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (customer == null) {
 				throw new MetaDataException("Customer " + customerName + " does not exist.");
 			}
+
+			// generate the metadata enums of each module this customer overrides from its effective module
+			for (Module module : customer.getModules()) {
+				String moduleName = module.getName();
+				String moduleKey = repository.vtable(customerName, ProvidedRepository.MODULES_NAMESPACE + moduleName);
+				if ((moduleKey != null) && moduleKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
+					String packagePath = new StringBuilder(128).append(ProvidedRepository.CUSTOMERS_NAMESPACE)
+																.append(customerName)
+																.append('/')
+																.append(ProvidedRepository.MODULES_NAMESPACE)
+																.append(moduleName)
+																.append('/')
+																.append(ProvidedRepository.DOMAIN_NAME).toString();
+					generateModuleMetadataEnums(module, customerName, packagePath);
+				}
+			}
+
 			String modulesPath = new StringBuilder(256).append(generatedSrcPath)
 														.append(ProvidedRepository.CUSTOMERS_NAMESPACE)
 														.append(customerName)
 														.append('/')
 														.append(ProvidedRepository.MODULES_NAME)
 														.append('/').toString();
-			File customerModulesDirectory = new File(modulesPath);
-			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
+			if (isCustomerDomainGenerationEnabled(Paths.get(modulesPath))) {
 				generateOverridden(customer, modulesPath);
 				visitedOverriddenORMDocumentsPerCustomer.clear();
 				generateOverridden(customer, modulesPath);
@@ -225,8 +259,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 														.append('/')
 														.append(ProvidedRepository.MODULES_NAME)
 														.append('/').toString();
-			File customerModulesDirectory = new File(modulesPath);
-			if (customerModulesDirectory.exists() && customerModulesDirectory.isDirectory()) {
+			if (isCustomerDomainGenerationEnabled(Paths.get(modulesPath))) {
 				for (final Module module : customer.getModules()) {
 					final String moduleName = module.getName();
 					final TreeMap<String, DomainClass> vanillaDocumentClasses = moduleDocumentVanillaClasses.get(moduleName);
@@ -521,55 +554,94 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			generation.put(mappingFilePath, mappingFileContents);
 		}
 
-		generateModuleMetadataEnums(module, packagePath);
+		generateModuleMetadataEnums(module, null, packagePath);
 	}
 
 	/**
 	 * Generate one enum per kind of module metadata (<code>&lt;Module&gt;Role</code>,
-	 * <code>&lt;Module&gt;Document</code>, <code>&lt;Module&gt;Query</code>) in the module's
-	 * domain package, each implementing the corresponding <code>org.skyve.metadata</code>
-	 * reference interface so a single enum constant carries the module name and metadata name
-	 * (e.g. <code>user.isInRole(AdminRole.AUDIT_MANAGER)</code>) and resolves itself through the
-	 * current customer via the interface's default method. An empty kind generates no enum.
+	 * <code>&lt;Module&gt;Document</code>, <code>&lt;Module&gt;Query</code>,
+	 * <code>&lt;Module&gt;BizQL</code>, <code>&lt;Module&gt;SQL</code> and
+	 * <code>&lt;Module&gt;Job</code>) in the given domain package, each implementing the
+	 * corresponding <code>org.skyve.metadata</code> reference interface so a single enum constant
+	 * carries the module name and metadata name (e.g. <code>user.isInRole(AdminRole.AUDIT_MANAGER)</code>)
+	 * and resolves itself through the current customer via the interface's default method. The
+	 * module's queries are split by type: metadata queries, BizQL and SQL each get their own enum.
+	 * An empty kind generates no enum.
+	 * <p/>
+	 * For a customer override the module is the customer's effective module - the override replaces
+	 * the vanilla module definition, so the enums list exactly the metadata that resolves for that
+	 * customer - and the package is the customer's module domain package.
 	 *
-	 * @param module	The module to generate metadata enums for.
-	 * @param packagePath	The module's domain package path (relative, '/' separated).
+	 * @param module	The module to generate metadata enums for - vanilla, or the customer's override.
+	 * @param customerName	The customer whose module override this is, or null for a vanilla module.
+	 * @param packagePath	The domain package path (relative, '/' separated) to generate into.
 	 */
-	private void generateModuleMetadataEnums(final Module module, final String packagePath) {
-		generateModuleMetadataEnum(module, packagePath, "Role", "role", "roles",
+	private void generateModuleMetadataEnums(final @Nonnull Module module,
+												final @Nullable String customerName,
+												final @Nonnull String packagePath) {
+		generateModuleMetadataEnum(module, customerName, packagePath, "Role", "role", "roles",
 									"org.skyve.metadata.user.ModuleRole", "roleName",
 									module.getRoles().stream().map(Role::getName).toList());
-		generateModuleMetadataEnum(module, packagePath, "Document", "document", "documents",
+		generateModuleMetadataEnum(module, customerName, packagePath, "Document", "document", "documents",
 									"org.skyve.metadata.model.document.ModuleDocument", "documentName",
 									new ArrayList<>(module.getDocumentRefs().keySet()));
-		generateModuleMetadataEnum(module, packagePath, "Query", "query", "queries",
+
+		List<String> metaDataQueryNames = new ArrayList<>();
+		List<String> bizQLNames = new ArrayList<>();
+		List<String> sqlNames = new ArrayList<>();
+		for (QueryDefinition query : module.getMetadataQueries()) {
+			if (query instanceof MetaDataQueryDefinition) {
+				metaDataQueryNames.add(query.getName());
+			}
+			else if (query instanceof BizQLDefinition) {
+				bizQLNames.add(query.getName());
+			}
+			else if (query instanceof SQLDefinition) {
+				sqlNames.add(query.getName());
+			}
+		}
+		generateModuleMetadataEnum(module, customerName, packagePath, "Query", "metadata query", "metadata queries",
 									"org.skyve.metadata.module.query.ModuleQuery", "queryName",
-									module.getMetadataQueries().stream().map(QueryDefinition::getName).toList());
+									metaDataQueryNames);
+		generateModuleMetadataEnum(module, customerName, packagePath, "BizQL", "BizQL query", "BizQL queries",
+									"org.skyve.metadata.module.query.ModuleBizQL", "queryName",
+									bizQLNames);
+		generateModuleMetadataEnum(module, customerName, packagePath, "SQL", "SQL query", "SQL queries",
+									"org.skyve.metadata.module.query.ModuleSQL", "queryName",
+									sqlNames);
+
+		generateModuleMetadataEnum(module, customerName, packagePath, "Job", "job", "jobs",
+									"org.skyve.metadata.module.ModuleJob", "jobName",
+									module.getJobs().stream().map(JobMetaData::getName).toList());
 	}
 
 	/**
 	 * Generate one module metadata reference enum (e.g. <code>AdminRole</code>) with a constant
 	 * per metadata name, implementing the given reference interface. The enum class name dodges
-	 * document class names in the same package case-insensitively, mirroring the module metadata
+	 * the module's document class names case-insensitively, mirroring the module metadata
 	 * factory class. Nothing is generated when there are no names.
 	 *
-	 * @param module	The module to generate the enum for.
-	 * @param packagePath	The module's domain package path (relative, '/' separated).
-	 * @param kindSuffix	The enum class name suffix - "Role", "Document" or "Query".
+	 * @param module	The module to generate the enum for - vanilla, or the customer's override.
+	 * @param customerName	The customer whose module override this is, or null for a vanilla module.
+	 * @param packagePath	The domain package path (relative, '/' separated) to generate into.
+	 * @param kindSuffix	The enum class name suffix - "Role", "Document", "Query", "BizQL", "SQL" or "Job".
 	 * @param kind	The singular metadata kind for javadoc and error messages - e.g. "role".
-	 * @param kindPlural	The plural metadata kind for javadoc - e.g. "roles", "queries".
+	 * @param kindPlural	The plural metadata kind for javadoc - e.g. "roles", "metadata queries".
 	 * @param interfaceClassName	The fully qualified reference interface the enum implements.
 	 * @param nameAccessor	The interface's name accessor method - e.g. "roleName".
 	 * @param names	The metadata names to generate enum constants for.
+	 * @throws MetaDataException	if two names yield the same Java enum constant name.
 	 */
-	private void generateModuleMetadataEnum(final Module module,
-											final String packagePath,
-											final String kindSuffix,
-											final String kind,
-											final String kindPlural,
-											final String interfaceClassName,
-											final String nameAccessor,
-											final List<String> names) {
+	@SuppressWarnings("java:S107") // too many parameters
+	private void generateModuleMetadataEnum(final @Nonnull Module module,
+											final @Nullable String customerName,
+											final @Nonnull String packagePath,
+											final @Nonnull String kindSuffix,
+											final @Nonnull String kind,
+											final @Nonnull String kindPlural,
+											final @Nonnull String interfaceClassName,
+											final @Nonnull String nameAccessor,
+											final @Nonnull List<String> names) {
 		if (names.isEmpty()) {
 			return;
 		}
@@ -601,7 +673,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// generate javadoc
 		contents.append("\n/**\n");
 		contents.append(" * Compile-time references to the ").append(kindPlural).append(" declared in the ")
-					.append(moduleName).append(" module.\n");
+					.append(moduleName).append(" module");
+		if (customerName != null) {
+			contents.append(" for customer ").append(customerName);
+		}
+		contents.append(".\n");
+		if ("Document".equals(kindSuffix)) {
+			contents.append(" * Documents the module references from other modules are included and are addressed through this module.\n");
+		}
 		contents.append(" * Generated - local changes will be overwritten.\n");
 		contents.append(" */\n");
 		contents.append("@Generated(value = \"").append(getClass().getName()).append("\")\n");
@@ -4297,6 +4376,146 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
+	 * Determines whether a customer's domain generation (extension classes, new customer documents and
+	 * the customer ORM mapping) is switched on. A developer opts in by creating the customer's generated
+	 * modules directory (<code>&lt;generatedSrcPath&gt;/customers/&lt;c&gt;/modules/</code>). Module
+	 * metadata enum generation also writes below that directory, so a directory whose files are all
+	 * generated module metadata enums was not created by the developer and does not opt in - otherwise
+	 * generating the enums would switch on customer domain generation for the next run.
+	 *
+	 * @param customerModulesDirectory	The customer's generated modules directory.
+	 * @return	true if the directory exists and either is empty or holds a file that is not a generated
+	 * 			module metadata enum.
+	 * @throws IOException	if the directory cannot be read.
+	 */
+	private static boolean isCustomerDomainGenerationEnabled(@Nonnull Path customerModulesDirectory)
+	throws IOException {
+		if (! Files.isDirectory(customerModulesDirectory)) {
+			return false;
+		}
+		try (Stream<Path> children = Files.list(customerModulesDirectory)) {
+			if (children.findAny().isEmpty()) {
+				return true;
+			}
+		}
+		return ! holdsOnlyGeneratedMetadataEnums(customerModulesDirectory);
+	}
+
+	/**
+	 * Determines whether every file below a directory is a generated module metadata enum.
+	 * Directories themselves are ignored, so a tree holding no files at all qualifies.
+	 *
+	 * <p>Complexity: O(f) file reads where f is the number of files below the directory; stops at
+	 * the first file that does not qualify.
+	 *
+	 * @param directory	The directory to inspect.
+	 * @return	true if there is no file below the directory other than generated module metadata enums.
+	 * @throws IOException	if the directory or a file cannot be read.
+	 */
+	private static boolean holdsOnlyGeneratedMetadataEnums(@Nonnull Path directory) throws IOException {
+		try (Stream<Path> paths = Files.walk(directory)) {
+			Iterator<Path> i = paths.iterator();
+			while (i.hasNext()) {
+				Path path = i.next();
+				if ((! Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) && (! isGeneratedMetadataEnum(path))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Determines whether a file is a module metadata enum written by this generator: a regular
+	 * <code>.java</code> file (not a link) carrying the generator's <code>@Generated</code> marker on
+	 * an enum, named after the file, that implements one of the module member reference interfaces.
+	 * Anything else - including the gated customer domain classes, which are classes not enums - is
+	 * never identified, so it is never deleted as a generated enum.
+	 *
+	 * @param file	The file to inspect.
+	 * @return	true if the file is a generated module metadata enum.
+	 * @throws IOException	if the file cannot be read.
+	 */
+	private static boolean isGeneratedMetadataEnum(@Nonnull Path file) throws IOException {
+		Path fileNamePath = file.getFileName();
+		String fileName = (fileNamePath == null) ? null : fileNamePath.toString();
+		if ((fileName == null) ||
+				(! fileName.endsWith(".java")) ||
+				(! Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))) {
+			return false;
+		}
+		Matcher matcher = GENERATED_METADATA_ENUM_DECLARATION.matcher(Files.readString(file, StandardCharsets.UTF_8));
+		return matcher.find() && fileName.equals(matcher.group(1) + ".java");
+	}
+
+	/**
+	 * Deletes the module metadata enums generated into customer module domain directories
+	 * (<code>&lt;generatedSrcPath&gt;/customers/&lt;c&gt;/modules/&lt;m&gt;/domain/</code>) by a previous run,
+	 * so they can be written afresh. A customer module directory left with no files - one that held
+	 * nothing but generated enums, such as a module the customer no longer overrides - is deleted
+	 * along with any customer directories this leaves empty. Every other file is left untouched.
+	 *
+	 * <p>Side effects: deletes files and directories below the generated source directory.
+	 *
+	 * @throws IOException	if a directory cannot be read or a file cannot be deleted.
+	 */
+	private void deleteGeneratedCustomerMetadataEnums() throws IOException {
+		// src/generated/java/customers
+		final Path customersDirectory = Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME);
+		final File[] customerDirectories = customersDirectory.toFile().listFiles(File::isDirectory);
+		if (customerDirectories == null) {
+			return;
+		}
+
+		for (File customerDirectory : customerDirectories) {
+			final Path modulesDirectory = customerDirectory.toPath().resolve(ProvidedRepository.MODULES_NAME);
+			final File[] moduleDirectories = modulesDirectory.toFile().listFiles(File::isDirectory);
+			if (moduleDirectories == null) {
+				continue;
+			}
+
+			for (File moduleDirectory : moduleDirectories) {
+				final Path moduleDirectoryPath = moduleDirectory.toPath();
+				final File[] domainFiles = moduleDirectoryPath.resolve(ProvidedRepository.DOMAIN_NAME).toFile().listFiles();
+				if (domainFiles != null) {
+					for (File domainFile : domainFiles) {
+						Path domainFilePath = domainFile.toPath();
+						if (isGeneratedMetadataEnum(domainFilePath)) {
+							Files.delete(domainFilePath);
+						}
+					}
+				}
+
+				// With this run's enums deleted, a tree left with no other files held nothing but generated enums
+				if (holdsOnlyGeneratedMetadataEnums(moduleDirectoryPath)) {
+					if (debug) System.out.println("Deleting generated customer module directory " + moduleDirectoryPath);
+					deleteDirectory(moduleDirectoryPath);
+					deleteEmptyDirectory(modulesDirectory);
+					deleteEmptyDirectory(customerDirectory.toPath());
+					deleteEmptyDirectory(customersDirectory);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Deletes a directory if it exists and is empty.
+	 *
+	 * @param directory	The directory to delete.
+	 * @throws IOException	if the directory cannot be read or deleted.
+	 */
+	private static void deleteEmptyDirectory(@Nonnull Path directory) throws IOException {
+		if (Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+			try (Stream<Path> children = Files.list(directory)) {
+				if (children.findAny().isPresent()) {
+					return;
+				}
+			}
+			Files.delete(directory);
+		}
+	}
+
+	/**
 	 * Deletes the generated source domain and test directories and all files below them for all active
 	 * modules. Deletes the entire source and test generated directories for unreferenced modules. This
 	 * is to ensure a clean start for generating the domain.
@@ -4337,6 +4556,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 		}
+
+		// src/generated/java/customers/*/modules/*/domain metadata enums
+		deleteGeneratedCustomerMetadataEnums();
 
 		// delete the generated test directory
 		final Path generatedTestDirectory = Paths.get(generatedTestPath);

@@ -1,5 +1,6 @@
 package org.skyve.impl.generate;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
@@ -41,8 +43,12 @@ import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.BizQLDefinition;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
+import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.user.Role;
 import org.skyve.metadata.repository.ProvidedRepository;
 
@@ -5093,30 +5099,77 @@ class OverridableDomainGeneratorMoreTest {
 
 		Map<String, Module.DocumentRef> refs = new TreeMap<>();
 		for (String documentName : documentNames) {
-			refs.put(documentName, new Module.DocumentRef());
+			// owned by another module so the generator's document visitor skips them - these tests
+			// exercise the metadata enums only
+			Module.DocumentRef ref = new Module.DocumentRef();
+			ref.setOwningModuleName("elsewhere");
+			refs.put(documentName, ref);
 		}
 		when(module.getDocumentRefs()).thenReturn(refs);
 
-		List<QueryDefinition> queries = queryNames.stream().map(name -> {
-			QueryDefinition query = mock(QueryDefinition.class);
-			when(query.getName()).thenReturn(name);
-			return query;
-		}).toList();
-		when(module.getMetadataQueries()).thenReturn(queries);
+		withQueriesAndJobs(module, queryNames, List.of(), List.of(), List.of());
 
 		return module;
 	}
 
+	/**
+	 * Stubs the module's queries - metadata, BizQL and SQL definitions in that order, as
+	 * {@link Module#getMetadataQueries()} returns them all together - and its jobs.
+	 */
+	private static void withQueriesAndJobs(Module module,
+											List<String> metaDataQueryNames,
+											List<String> bizQLNames,
+											List<String> sqlNames,
+											List<String> jobNames) {
+		List<QueryDefinition> queries = new java.util.ArrayList<>();
+		for (String name : metaDataQueryNames) {
+			queries.add(namedQuery(MetaDataQueryDefinition.class, name));
+		}
+		for (String name : bizQLNames) {
+			queries.add(namedQuery(BizQLDefinition.class, name));
+		}
+		for (String name : sqlNames) {
+			queries.add(namedQuery(SQLDefinition.class, name));
+		}
+		when(module.getMetadataQueries()).thenReturn(queries);
+
+		List<JobMetaData> jobs = jobNames.stream().map(name -> {
+			JobMetaData job = mock(JobMetaData.class);
+			when(job.getName()).thenReturn(name);
+			return job;
+		}).toList();
+		when(module.getJobs()).thenReturn(jobs);
+	}
+
+	private static QueryDefinition namedQuery(Class<? extends QueryDefinition> type, String name) {
+		QueryDefinition query = mock(type);
+		when(query.getName()).thenReturn(name);
+		return query;
+	}
+
 	private static String generateModuleMetadataEnums(Module module) throws Exception {
+		return generateModuleMetadataEnums(module, null, "modules/" + module.getName() + "/domain");
+	}
+
+	private static String generateModuleMetadataEnums(Module module, String customerName, String packagePath)
+	throws Exception {
 		OverridableDomainGenerator gen = new OverridableDomainGenerator(true, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
-		declaredMethod("generateModuleMetadataEnums", Module.class, String.class)
-				.invoke(gen, module, "modules/" + module.getName() + "/domain");
+		declaredMethod("generateModuleMetadataEnums", Module.class, String.class, String.class)
+				.invoke(gen, module, customerName, packagePath);
 		StringBuilder all = new StringBuilder(2048);
 		for (Map.Entry<Path, CharSequence> entry : gen.generation.entrySet()) {
 			all.append(entry.getKey().getFileName()).append('\n').append(entry.getValue()).append('\n');
 		}
 		return all.toString();
+	}
+
+	/** Returns the generated source of one enum from the concatenated generator output. */
+	private static String generatedEnum(String all, String enumName) {
+		int start = all.indexOf(enumName + ".java\n");
+		assertTrue(start >= 0, enumName + " should be generated, got: " + all);
+		int end = all.indexOf("\n}\n", start);
+		return all.substring(start, end + 3);
 	}
 
 	@Test
@@ -5143,6 +5196,8 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(java.contains("public enum StaffPortalQuery implements ModuleQuery {"), java);
 		assertTrue(java.contains("Q_ACTIVE_USERS(\"qActiveUsers\")"), java);
 		assertTrue(java.contains("public String queryName() {"), java);
+		assertTrue(java.contains("Compile-time references to the roles declared in the staffPortal module.\n"), java);
+		assertFalse(java.contains("for customer"), java);
 	}
 
 	@Test
@@ -5156,7 +5211,107 @@ class OverridableDomainGeneratorMoreTest {
 
 		assertFalse(java.contains("StaffPortalRole"), "No role enum should be generated, got: " + java);
 		assertFalse(java.contains("StaffPortalQuery"), "No query enum should be generated, got: " + java);
+		assertFalse(java.contains("StaffPortalBizQL"), "No BizQL enum should be generated, got: " + java);
+		assertFalse(java.contains("StaffPortalSQL"), "No SQL enum should be generated, got: " + java);
+		assertFalse(java.contains("StaffPortalJob"), "No job enum should be generated, got: " + java);
 		assertTrue(java.contains("public enum StaffPortalDocument implements ModuleDocument {"), java);
+	}
+
+	@Test
+	void shouldSplitModuleQueriesIntoMetaDataBizQLAndSQLEnums() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of(),
+				List.of("MyDetails"),
+				List.of());
+		withQueriesAndJobs(module,
+				List.of("qActiveUsers"),
+				List.of("bizActiveCount"),
+				List.of("sqlPurge"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module);
+		String query = generatedEnum(java, "StaffPortalQuery");
+		String bizQL = generatedEnum(java, "StaffPortalBizQL");
+		String sql = generatedEnum(java, "StaffPortalSQL");
+
+		assertAll(
+				() -> assertTrue(query.contains("import org.skyve.metadata.module.query.ModuleQuery;"), query),
+				() -> assertTrue(query.contains("public enum StaffPortalQuery implements ModuleQuery {"), query),
+				() -> assertTrue(query.contains("Compile-time references to the metadata queries declared in the staffPortal module."), query),
+				() -> assertTrue(query.contains("Q_ACTIVE_USERS(\"qActiveUsers\")"), query),
+				() -> assertFalse(query.contains("bizActiveCount"), query),
+				() -> assertFalse(query.contains("sqlPurge"), query),
+				() -> assertTrue(bizQL.contains("import org.skyve.metadata.module.query.ModuleBizQL;"), bizQL),
+				() -> assertTrue(bizQL.contains("public enum StaffPortalBizQL implements ModuleBizQL {"), bizQL),
+				() -> assertTrue(bizQL.contains("Compile-time references to the BizQL queries declared in the staffPortal module."), bizQL),
+				() -> assertTrue(bizQL.contains("/** The \"bizActiveCount\" BizQL query. */"), bizQL),
+				() -> assertTrue(bizQL.contains("BIZ_ACTIVE_COUNT(\"bizActiveCount\")"), bizQL),
+				() -> assertTrue(bizQL.contains("public String queryName() {"), bizQL),
+				() -> assertFalse(bizQL.contains("qActiveUsers"), bizQL),
+				() -> assertFalse(bizQL.contains("sqlPurge"), bizQL),
+				() -> assertTrue(sql.contains("import org.skyve.metadata.module.query.ModuleSQL;"), sql),
+				() -> assertTrue(sql.contains("public enum StaffPortalSQL implements ModuleSQL {"), sql),
+				() -> assertTrue(sql.contains("Compile-time references to the SQL queries declared in the staffPortal module."), sql),
+				() -> assertTrue(sql.contains("SQL_PURGE(\"sqlPurge\")"), sql),
+				() -> assertTrue(sql.contains("public String queryName() {"), sql),
+				() -> assertFalse(sql.contains("qActiveUsers"), sql),
+				() -> assertFalse(sql.contains("bizActiveCount"), sql));
+	}
+
+	@Test
+	void shouldGenerateModuleJobEnum() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of(),
+				List.of("MyDetails"),
+				List.of());
+		withQueriesAndJobs(module, List.of(), List.of(), List.of(), List.of("jNightlyPurge", "Send Reminders"));
+
+		String job = generatedEnum(generateModuleMetadataEnums(module), "StaffPortalJob");
+
+		assertAll(
+				() -> assertTrue(job.contains("import org.skyve.metadata.module.ModuleJob;"), job),
+				() -> assertTrue(job.contains("public enum StaffPortalJob implements ModuleJob {"), job),
+				() -> assertTrue(job.contains("Compile-time references to the jobs declared in the staffPortal module."), job),
+				() -> assertTrue(job.contains("J_NIGHTLY_PURGE(\"jNightlyPurge\")"), job),
+				() -> assertTrue(job.contains("SEND_REMINDERS(\"Send Reminders\")"), job),
+				() -> assertTrue(job.contains("public String jobName() {"), job),
+				() -> assertTrue(job.contains("return \"staffPortal\";"), job));
+	}
+
+	@Test
+	void shouldSuffixNewModuleMetadataEnumNamesOnDocumentCollision() throws Exception {
+		// Documents claim the BizQL, SQL (differing by case) and job enum candidates
+		Module module = moduleConstantsModule("staffPortal",
+				List.of(),
+				List.of("StaffPortalBizQL", "StaffPortalSql", "StaffPortalJob"),
+				List.of());
+		withQueriesAndJobs(module, List.of(), List.of("bizCount"), List.of("sqlPurge"), List.of("jPurge"));
+
+		String java = generateModuleMetadataEnums(module);
+
+		assertAll(
+				() -> assertTrue(java.contains("public enum StaffPortalBizQLBizQL implements ModuleBizQL {"), java),
+				() -> assertTrue(java.contains("public enum StaffPortalSQLSQL implements ModuleSQL {"), java),
+				() -> assertTrue(java.contains("public enum StaffPortalJobJob implements ModuleJob {"), java));
+	}
+
+	@Test
+	void shouldNameCustomerInCustomerModuleMetadataEnums() throws Exception {
+		Module module = moduleConstantsModule("staffPortal",
+				List.of("Manager"),
+				List.of("MyDetails"),
+				List.of());
+
+		String java = generateModuleMetadataEnums(module, "acme", "customers/acme/modules/staffPortal/domain");
+		String role = generatedEnum(java, "StaffPortalRole");
+		String document = generatedEnum(java, "StaffPortalDocument");
+
+		assertAll(
+				() -> assertTrue(role.contains("package customers.acme.modules.staffPortal.domain;"), role),
+				() -> assertTrue(role.contains("Compile-time references to the roles declared in the staffPortal module for customer acme."), role),
+				() -> assertTrue(role.contains("return \"staffPortal\";"), role),
+				() -> assertTrue(document.contains("Compile-time references to the documents declared in the staffPortal module for customer acme."), document),
+				() -> assertTrue(document.contains("Documents the module references from other modules are included"), document));
 	}
 
 	@Test
@@ -5245,6 +5400,170 @@ class OverridableDomainGeneratorMoreTest {
 				() -> generateModuleMetadataEnums(module));
 		assertTrue(e.getCause() instanceof MetaDataException, String.valueOf(e.getCause()));
 		assertTrue(e.getCause().getMessage().contains("READ_ONLY"), e.getCause().getMessage());
+	}
+
+	// ----- customer module metadata enums -----------------------------------
+
+	/**
+	 * A repository with vanilla module "sales" (role Clerk, documents Order and Invoice) and
+	 * customer "acme", whose effective sales module is the given override. The customer overrides
+	 * the sales module only when {@code overridden}.
+	 */
+	private static ProvidedRepository customerEnumRepository(Module salesOverride, boolean overridden) {
+		Module sales = moduleConstantsModule("sales", List.of("Clerk"), List.of("Order", "Invoice"), List.of());
+
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("acme");
+		when(customer.getModules()).thenReturn(List.of(overridden ? salesOverride : sales));
+
+		ProvidedRepository repo = mock(ProvidedRepository.class);
+		when(repo.getAllVanillaModuleNames()).thenReturn(List.of("sales"));
+		when(repo.getModule(null, "sales")).thenReturn(sales);
+		when(repo.getAllCustomerNames()).thenReturn(List.of("acme"));
+		when(repo.getCustomer("acme")).thenReturn(customer);
+		when(repo.vtable("acme", "modules/sales")).thenReturn(overridden ? "customers/acme/modules/sales" : "modules/sales");
+		return repo;
+	}
+
+	/** The acme override of sales: adds the role Auditor and the document Refund, and drops Invoice. */
+	private static Module salesOverride() {
+		return moduleConstantsModule("sales", List.of("Clerk", "Auditor"), List.of("Order", "Refund"), List.of());
+	}
+
+	/** Runs a writing generator over the repository into {@code <root>/src} and {@code <root>/test}. */
+	private static void generateInto(Path root, ProvidedRepository repo) throws Exception {
+		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
+				false,
+				false,
+				DialectOptions.H2_NO_INDEXES,
+				"",
+				normalisedPath(root.resolve("src")),
+				"",
+				normalisedPath(root.resolve("test")),
+				null);
+		gen.repository = repo;
+		gen.generate();
+	}
+
+	/** Returns every file below the directory, by relative path, with its contents. */
+	private static Map<String, String> snapshot(Path directory) throws Exception {
+		Map<String, String> result = new TreeMap<>();
+		try (Stream<Path> paths = Files.walk(directory)) {
+			for (Path path : paths.filter(Files::isRegularFile).toList()) {
+				result.put(directory.relativize(path).toString(), Files.readString(path));
+			}
+		}
+		return result;
+	}
+
+	@Test
+	void generateWritesCustomerModuleMetadataEnumsForTheEffectiveOverride() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums");
+
+		generateInto(root, customerEnumRepository(salesOverride(), true));
+
+		Path customerDomain = root.resolve("src/customers/acme/modules/sales/domain");
+		String role = Files.readString(customerDomain.resolve("SalesRole.java"));
+		String document = Files.readString(customerDomain.resolve("SalesDocument.java"));
+		String vanillaDocument = Files.readString(root.resolve("src/modules/sales/domain/SalesDocument.java"));
+		assertAll(
+				() -> assertTrue(role.contains("package customers.acme.modules.sales.domain;"), role),
+				() -> assertTrue(role.contains("public enum SalesRole implements ModuleRole {"), role),
+				() -> assertTrue(role.contains("declared in the sales module for customer acme."), role),
+				() -> assertTrue(role.contains("CLERK(\"Clerk\")"), role),
+				() -> assertTrue(role.contains("AUDITOR(\"Auditor\")"), role),
+				() -> assertTrue(document.contains("ORDER(\"Order\")"), document),
+				() -> assertTrue(document.contains("REFUND(\"Refund\")"), document),
+				() -> assertFalse(document.contains("INVOICE"), "The override drops Invoice, got: " + document),
+				() -> assertTrue(vanillaDocument.contains("INVOICE(\"Invoice\")"), vanillaDocument),
+				() -> assertFalse(vanillaDocument.contains("REFUND"), vanillaDocument),
+				// enum generation does not switch on the gated customer domain generation
+				() -> assertFalse(Files.exists(root.resolve("src/customers/acme/modules/orm.hbm.xml"))));
+	}
+
+	@Test
+	void generateWritesNoCustomerModuleMetadataEnumsWithoutAnOverride() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums-none");
+
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+
+		assertTrue(Files.exists(root.resolve("src/modules/sales/domain/SalesRole.java")));
+		assertFalse(Files.exists(root.resolve("src/customers")), "No customer output expected");
+	}
+
+	@Test
+	void generateDodgesCustomerDocumentNamesInCustomerModuleMetadataEnums() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums-dodge");
+		Module override = moduleConstantsModule("sales", List.of("Clerk"), List.of("Order", "SalesRole"), List.of());
+
+		generateInto(root, customerEnumRepository(override, true));
+
+		Path customerDomain = root.resolve("src/customers/acme/modules/sales/domain");
+		assertAll(
+				() -> assertTrue(Files.exists(customerDomain.resolve("SalesRoleRole.java"))),
+				() -> assertFalse(Files.exists(customerDomain.resolve("SalesRole.java"))),
+				() -> assertTrue(Files.exists(root.resolve("src/modules/sales/domain/SalesRole.java")),
+									"The vanilla module has no SalesRole document so keeps the plain name"));
+	}
+
+	@Test
+	void generateTwiceGivesIdenticalOutputWithCustomerModuleMetadataEnums() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums-twice");
+		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
+
+		generateInto(root, repo);
+		Map<String, String> first = snapshot(root);
+		generateInto(root, repo);
+		Map<String, String> second = snapshot(root);
+
+		assertTrue(first.containsKey("src/customers/acme/modules/sales/domain/SalesRole.java".replace('/', java.io.File.separatorChar)), first.keySet().toString());
+		assertEquals(first, second);
+	}
+
+	@Test
+	void generateRemovesStaleCustomerModuleMetadataEnumsOnly() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums-stale");
+		generateInto(root, customerEnumRepository(salesOverride(), true));
+		Path customerDomain = root.resolve("src/customers/acme/modules/sales/domain");
+		assertTrue(Files.exists(customerDomain.resolve("SalesRole.java")));
+
+		// the override disappears
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+
+		assertFalse(Files.exists(root.resolve("src/customers")), "Stale customer enums and their directories should be removed");
+		assertTrue(Files.exists(root.resolve("src/modules/sales/domain/SalesRole.java")));
+	}
+
+	@Test
+	void generateKeepsOtherFilesWhenRemovingStaleCustomerModuleMetadataEnums() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums-keep");
+		generateInto(root, customerEnumRepository(salesOverride(), true));
+		Path customerDomain = root.resolve("src/customers/acme/modules/sales/domain");
+		// a file the enum generation did not write - e.g. a hand-written class or gated output
+		Path keep = customerDomain.resolve("Keep.java");
+		Files.writeString(keep, "@jakarta.annotation.Generated(value = \"other\")\npublic enum Keep implements ModuleRole {\n}\n");
+
+		// the override disappears
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+
+		assertAll(
+				() -> assertTrue(Files.exists(keep), "A file that is not a generated metadata enum must be kept"),
+				() -> assertFalse(Files.exists(customerDomain.resolve("SalesRole.java"))),
+				() -> assertFalse(Files.exists(customerDomain.resolve("SalesDocument.java"))));
+	}
+
+	@Test
+	void generateIgnoresFilesNamedUnlikeTheirGeneratedMetadataEnum() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-enums-renamed");
+		generateInto(root, customerEnumRepository(salesOverride(), true));
+		Path customerDomain = root.resolve("src/customers/acme/modules/sales/domain");
+		// generated enum content, but in a file not named after the enum
+		Path copy = customerDomain.resolve("Copy.java");
+		Files.copy(customerDomain.resolve("SalesRole.java"), copy);
+
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+
+		assertTrue(Files.exists(copy), "Only files named after their generated enum are deleted");
 	}
 
 	// ----- null-safety invariants -------------------------------------------

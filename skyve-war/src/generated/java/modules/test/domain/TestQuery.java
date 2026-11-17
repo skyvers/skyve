@@ -4,36 +4,36 @@ import jakarta.annotation.Generated;
 import org.skyve.metadata.module.query.ModuleQuery;
 
 /**
- * Compile-time references to the queries declared in the test module.
+ * Compile-time references to the metadata queries declared in the test module.
  * Generated - local changes will be overwritten.
  */
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 public enum TestQuery implements ModuleQuery {
-	/** The "qH" query. */
+	/** The "qH" metadata query. */
 	Q_H("qH"),
-	/** The "qHPoly" query. */
+	/** The "qHPoly" metadata query. */
 	Q_H_POLY("qHPoly"),
-	/** The "qMB" query. */
+	/** The "qMB" metadata query. */
 	Q_MB("qMB"),
-	/** The "qMEJS" query. */
+	/** The "qMEJS" metadata query. */
 	Q_MEJS("qMEJS"),
-	/** The "qMEJSNotPoly" query. */
+	/** The "qMEJSNotPoly" metadata query. */
 	Q_MEJS_NOT_POLY("qMEJSNotPoly"),
-	/** The "qMESS" query. */
+	/** The "qMESS" metadata query. */
 	Q_MESS("qMESS"),
-	/** The "qMSJS" query. */
+	/** The "qMSJS" metadata query. */
 	Q_MSJS("qMSJS"),
-	/** The "qMSSS" query. */
+	/** The "qMSSS" metadata query. */
 	Q_MSSS("qMSSS"),
-	/** The "qMetaDataQueryColumnBinding" query. */
+	/** The "qMetaDataQueryColumnBinding" metadata query. */
 	Q_META_DATA_QUERY_COLUMN_BINDING("qMetaDataQueryColumnBinding"),
-	/** The "qMetaDataQueryFromAndFilterBinding" query. */
+	/** The "qMetaDataQueryFromAndFilterBinding" metadata query. */
 	Q_META_DATA_QUERY_FROM_AND_FILTER_BINDING("qMetaDataQueryFromAndFilterBinding"),
-	/** The "qExpressionQuery" query. */
+	/** The "qExpressionQuery" metadata query. */
 	Q_EXPRESSION_QUERY("qExpressionQuery"),
-	/** The "qAssociations" query. */
+	/** The "qAssociations" metadata query. */
 	Q_ASSOCIATIONS("qAssociations"),
-	/** The "qRDBMSDynamic" query. */
+	/** The "qRDBMSDynamic" metadata query. */
 	Q_RDBMS_DYNAMIC("qRDBMSDynamic");
 
 	private final String name;

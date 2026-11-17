@@ -5,6 +5,7 @@ import org.skyve.metadata.model.document.ModuleDocument;
 
 /**
  * Compile-time references to the documents declared in the test module.
+ * Documents the module references from other modules are included and are addressed through this module.
  * Generated - local changes will be overwritten.
  */
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
