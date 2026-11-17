@@ -1161,7 +1161,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		String value = dataEnter.getValue();
 		@SuppressWarnings("null") // SAIL XML turns a blank value into null
 		boolean blank = (value == null);
-		if (blank) {
+		if (blank) { // NOSONAR java:S2583 getValue() is @Nonnull, but SAIL XML (JAXB) turns a blank value into null
 			return "null";
 		}
 		if (Boolean.TRUE.toString().equals(value)) {

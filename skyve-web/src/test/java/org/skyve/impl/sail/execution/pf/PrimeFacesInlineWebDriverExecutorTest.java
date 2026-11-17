@@ -281,15 +281,17 @@ class PrimeFacesInlineWebDriverExecutorTest {
 	@Test
 	void optionAndCheckBoxValuesMustBeNumbersOrBooleans() {
 		TestPrimeFacesInlineWebDriverExecutor executor = new TestPrimeFacesInlineWebDriverExecutor();
+		DataEnter name = entry("Person");
+		DataEnter hostile = entry(HOSTILE);
 		executor.pushContextWith(inForm(new SelectOneMenu()));
-		MetaDataException person = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry("Person")));
-		MetaDataException combo = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry(HOSTILE)));
+		MetaDataException person = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(name));
+		MetaDataException combo = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(hostile));
 		executor.executePopContext(new PopContext());
 		executor.pushContextWith(inForm(new SelectOneRadio()));
-		MetaDataException radio = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry(HOSTILE)));
+		MetaDataException radio = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(hostile));
 		executor.executePopContext(new PopContext());
 		executor.pushContextWith(inForm(new SelectBooleanCheckbox()));
-		MetaDataException checkBox = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry(HOSTILE)));
+		MetaDataException checkBox = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(hostile));
 		executor.executeDataEnter(entry("true"));
 		executor.executeDataEnter(entry("false"));
 		executor.executeDataEnter(entry(null));

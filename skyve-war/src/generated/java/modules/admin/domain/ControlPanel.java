@@ -460,7 +460,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * Executor
 	 **/
-	private SailExecutor sailExecutor;
+	private SailExecutor sailExecutor = SailExecutor.primeFacesInlineWebDriver;
 
 	/**
 	 * Component Builder

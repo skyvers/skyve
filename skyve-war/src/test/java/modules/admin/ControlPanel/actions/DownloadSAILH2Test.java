@@ -35,6 +35,7 @@ import org.skyve.metadata.controller.Download;
 import jakarta.inject.Inject;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
+import modules.admin.domain.ControlPanel.SailExecutor;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
 import util.AbstractH2TestTruncate;
 
@@ -103,8 +104,12 @@ class DownloadSAILH2Test extends AbstractH2TestTruncate {
 		assertCompiles(source, classes);
 	}
 
+	/**
+	 * A new Control Panel has the only executor, so Execute and Download work from it; a cleared executor is refused.
+	 */
 	@Test
-	void downloadNeedsAnExecutor() {
+	void theExecutorDefaultsToTheOnlyOneAndIsRequired() {
+		assertEquals(SailExecutor.primeFacesInlineWebDriver, ControlPanel.newInstance().getSailExecutor());
 		bean.setSailExecutor(null);
 		ValidationException e = assertThrows(ValidationException.class, () -> downloadSAIL.prepare(bean, webContext));
 		List<String> bindings = new ArrayList<>();

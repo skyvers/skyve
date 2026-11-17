@@ -2,13 +2,13 @@ package util.sail;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.function.Function;
 
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -252,12 +252,6 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		if (confirm) {
 			confirm();
 		}
-		try {
-			Thread.sleep(250);
-		}
-		catch (@SuppressWarnings("unused") InterruptedException e) {
-			// nothing to do here
-		}
 		waitForFullPageResponse(viewState);
 	}
 
@@ -405,7 +399,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	 * @throws AssertionError	if the element is null, not displayed, or disabled (by its {@code disabled} attribute or
 	 * 							PrimeFaces' {@code ui-state-disabled} style)
 	 */
-	@Nonnull WebElement usable(@Nullable WebElement element, @Nonnull String what) {
+	private @Nonnull WebElement usable(@Nullable WebElement element, @Nonnull String what) {
 		if (element == null) {
 			return Assertions.fail(what + " is not on the page " + driver.getCurrentUrl());
 		}
@@ -427,7 +421,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	 * @return	false if the page shows an error or fatal message (printed to standard error)
 	 */
 	public boolean verifySuccess() {
-		WebElement messages = byId("messages");
+		WebElement messages = present(By.id("messages"));
 		if ((messages != null) && messages.isDisplayed()) {
 			String innerHTML = messages.getDomProperty("innerHTML");
 			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
@@ -447,7 +441,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	}
 
 	public boolean verifyFailure(String messageToCheck) {
-		WebElement messages = byId("messages");
+		WebElement messages = present(By.id("messages"));
 		if ((messages != null) && messages.isDisplayed()) {
 			String innerHTML = messages.getDomProperty("innerHTML");
 			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
@@ -497,7 +491,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 
 	public void waitForAjaxResponse() {
 		// Wait until wheelOfDeath is invisible after AJAX
-		WebElement element = byId("wheelOfDeath_start");
+		WebElement element = present(By.id("wheelOfDeath_start"));
 		if (element != null) {
 			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
 			wait.until(ExpectedConditions.invisibilityOf(element));
@@ -546,7 +540,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	public String getViewState() {
 		String result = null;
 
-		WebElement element = byName("jakarta.faces.ViewState");
+		WebElement element = present(By.name("jakarta.faces.ViewState"));
 		if (element != null) {
 			result = element.getDomProperty("value");
 		}
@@ -603,16 +597,34 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		}
 	}
 
+	/**
+	 * Returns the element with an id, waiting for it as {@link #by(By)} does.
+	 *
+	 * @param id	the id
+	 * @return	the element, or null if it is not on the page by the timeout
+	 */
 	public WebElement byId(String id) {
-		return by(i -> driver.findElement(By.id(i)),id);
+		return by(By.id(id));
 	}
 
+	/**
+	 * Returns the first element an XPath finds, waiting for it as {@link #by(By)} does.
+	 *
+	 * @param xpath	the XPath
+	 * @return	the element, or null if it is not on the page by the timeout
+	 */
 	public WebElement byXpath(String xpath) {
-		return by(x -> driver.findElement(By.xpath(x)), xpath);
+		return by(By.xpath(xpath));
 	}
 
+	/**
+	 * Returns the first element with a name, waiting for it as {@link #by(By)} does.
+	 *
+	 * @param name	the name
+	 * @return	the element, or null if it is not on the page by the timeout
+	 */
 	public WebElement byName(String name) {
-		return by(n -> driver.findElement(By.name(n)), name);
+		return by(By.name(name));
 	}
 
 	/*
@@ -621,29 +633,38 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	By.tagName(name)
 	 */
 
-	private static long MAX_WAIT = 1000L;
-	private static long WAIT = 50L;
-
-	private static @Nullable WebElement by(@Nonnull Function<String, WebElement> function, @Nonnull String search) {
-		for (long l = 0; l <= MAX_WAIT; l += WAIT) {
-			try {
-				try {
-					WebElement result = function.apply(search);
-					result.isDisplayed(); // check for stale element
-					result.isEnabled(); // check for stale element
-					return result;
-				}
-				catch (NoSuchElementException | StaleElementReferenceException e) {
-					if (l > MAX_WAIT) {
-						throw e;
-					}
-					Thread.sleep(WAIT);
-				}
-			}
-			catch (@SuppressWarnings("unused") InterruptedException e) {
-				// do nothing here
-			}
+	/**
+	 * Returns an element that a gesture needs, waiting until it is on the page (and not stale) for up to the settings'
+	 * timeout ({@value SailSettings#TIMEOUT_SECONDS}): the page may still be rendering after a request.
+	 *
+	 * @param locator	how to find the element
+	 * @return	the element, or null if it is not on the page by the timeout
+	 */
+	private @Nullable WebElement by(@Nonnull By locator) {
+		SailSettings resolved = settings;
+		Duration timeout = (resolved == null) ? Duration.ofSeconds(SailSettings.DEFAULT_TIMEOUT_SECONDS) : resolved.timeout();
+		try {
+			// WebDriverWait ignores NotFoundException; a stale element is looked for again
+			return new WebDriverWait(driver, timeout).ignoring(StaleElementReferenceException.class).until(d -> {
+				WebElement result = d.findElement(locator);
+				result.isDisplayed(); // check for stale element
+				result.isEnabled(); // check for stale element
+				return result;
+			});
 		}
-		return null;
+		catch (@SuppressWarnings("unused") TimeoutException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Returns an element that a page may or may not have, such as its messages, without waiting.
+	 *
+	 * @param locator	how to find the element
+	 * @return	the first element found, or null if there is none
+	 */
+	private @Nullable WebElement present(@Nonnull By locator) {
+		List<WebElement> found = driver.findElements(locator);
+		return found.isEmpty() ? null : found.get(0);
 	}
 }

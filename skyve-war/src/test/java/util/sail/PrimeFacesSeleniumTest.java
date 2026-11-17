@@ -2,14 +2,20 @@ package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -17,7 +23,7 @@ import org.opentest4j.AssertionFailedError;
 
 /**
  * Unit tests of {@link PrimeFacesSelenium}, the base of the Java tests the Control Panel generates, with a mocked driver.
- * A missing element costs the harness's one second wait for it.
+ * A missing element costs the settings' timeout, which the tests set short.
  */
 class PrimeFacesSeleniumTest {
 	/**
@@ -58,6 +64,7 @@ class PrimeFacesSeleniumTest {
 		when(driver.findElement(By.id("readOnly"))).thenReturn(readOnly);
 		PrimeFacesSelenium selenium = new PrimeFacesSelenium();
 		selenium.driver = driver;
+		selenium.settings = timeoutSeconds(1);
 
 		assertAll(() -> assertMessage("#missing is not on the page http://localhost/skyve/?a=e", () -> selenium.button("missing", true, false)),
 					() -> assertMessage("#hidden is not displayed on http://localhost/skyve/?a=e", () -> selenium.text("hidden", "x")),
@@ -75,6 +82,75 @@ class PrimeFacesSeleniumTest {
 	void assertionsAreJUnit5s() {
 		PrimeFacesSelenium selenium = withMessages("<div class=\"ui-messages-error\"><ul><li>Required</li></ul></div>");
 		assertThrows(AssertionFailedError.class, selenium::assertSuccess);
+	}
+
+	/**
+	 * A lookup waits for its element up to the settings' timeout ({@code sail.timeoutSeconds}), not a fixed second: an
+	 * element that a slow page shows after 1.5 seconds is found within a 3 second timeout, and a missing element is
+	 * given up on only after the timeout.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void lookupsWaitForTheSettingsTimeout() {
+		WebElement late = element(true, true, null, null);
+		long shown = System.nanoTime() + 1_500_000_000L;
+		WebDriver driver = mock(WebDriver.class);
+		when(driver.findElement(By.id("late"))).thenAnswer(invocation -> {
+			if (System.nanoTime() < shown) {
+				throw new NoSuchElementException("late");
+			}
+			return late;
+		});
+		when(driver.findElement(By.id("missing"))).thenThrow(new NoSuchElementException("missing"));
+		PrimeFacesSelenium selenium = new PrimeFacesSelenium();
+		selenium.driver = driver;
+		selenium.settings = timeoutSeconds(3);
+		WebElement found = selenium.byId("late");
+		selenium.settings = timeoutSeconds(2);
+		long start = System.nanoTime();
+		WebElement missing = selenium.byId("missing");
+		long waited = System.nanoTime() - start;
+
+		assertAll(() -> assertSame(late, found, "the late element"),
+					() -> assertNull(missing, "no missing element"),
+					() -> assertTrue(waited >= 2_000_000_000L, () -> "gave up on the missing element after " + waited + " ns"));
+	}
+
+	/**
+	 * A button that goes to another page waits for the page by its view state, and pauses for nothing else.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void aRedirectButtonWaitsOnlyForThePage() {
+		WebElement button = element(true, true, null, null);
+		WebElement before = viewState("before");
+		WebElement after = viewState("after");
+		WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
+		when(driver.findElement(By.id("go"))).thenReturn(button);
+		List<WebElement> beforeState = List.of(before);
+		List<WebElement> afterState = List.of(after);
+		when(driver.findElements(By.name("jakarta.faces.ViewState"))).thenReturn(beforeState).thenReturn(afterState);
+		when(driver.findElement(By.name("jakarta.faces.ViewState"))).thenReturn(before, after);
+		when(((JavascriptExecutor) driver).executeScript("return document.readyState")).thenReturn("complete");
+		PrimeFacesSelenium selenium = new PrimeFacesSelenium();
+		selenium.driver = driver;
+		selenium.settings = timeoutSeconds(1);
+
+		long start = System.nanoTime();
+		selenium.redirectButton("go", false);
+		long took = System.nanoTime() - start;
+
+		assertTrue(took < 250_000_000L, () -> "took " + took + " ns");
+	}
+
+	private static WebElement viewState(String value) {
+		WebElement result = element(true, true, null, null);
+		when(result.getDomProperty("value")).thenReturn(value);
+		return result;
+	}
+
+	private static SailSettings timeoutSeconds(long seconds) {
+		return SailSettings.resolve(SailSettings.Environment.none(), List.of(SailSettings.code().timeoutSeconds(seconds).layer()));
 	}
 
 	private static void assertMessage(String expected, Executable gesture) {
@@ -106,6 +182,7 @@ class PrimeFacesSeleniumTest {
 		when(Boolean.valueOf(messages.isEnabled())).thenReturn(Boolean.TRUE);
 		when(messages.getDomProperty("innerHTML")).thenReturn(innerHTML);
 		WebDriver driver = mock(WebDriver.class);
+		when(driver.findElements(By.id("messages"))).thenReturn(List.of(messages));
 		when(driver.findElement(By.id("messages"))).thenReturn(messages);
 		PrimeFacesSelenium result = new PrimeFacesSelenium();
 		result.driver = driver;
