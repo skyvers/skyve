@@ -254,7 +254,7 @@ class DocumentImplBeanClassTest {
 	}
 
 	@Test
-	void withoutACustomerADocumentUsesItsVanillaBeanClass() throws Exception {
+	void withoutACustomerADocumentUsesItsVanillaBeanClass() {
 		assertAll(() -> assertEquals(OrderVanilla.class, document("Order").getBeanClass(null)),
 					() -> assertEquals(InvoiceExtension.class, document("Invoice").getBeanClass(null)));
 	}
