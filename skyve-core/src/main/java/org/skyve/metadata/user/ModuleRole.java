@@ -13,13 +13,23 @@ import jakarta.annotation.Nonnull;
  * <p/>
  * See {@link ModuleMember} for when the String form is still required.
  */
-public interface ModuleRole extends ModuleMember {
+public interface ModuleRole extends ModuleMember, AssignableRole {
 	/**
 	 * The role name within the module.
 	 *
 	 * @return the role name
 	 */
 	@Nonnull String roleName();
+
+	/**
+	 * The name a group or user role assignment stores for this module role.
+	 *
+	 * @return <code>moduleName() + '.' + roleName()</code> - e.g. <code>admin.AuditManager</code>
+	 */
+	@Override
+	default @Nonnull String assignedRoleName() {
+		return moduleName() + '.' + roleName();
+	}
 
 	/**
 	 * Resolves this reference to the role metadata through the current user's customer, so

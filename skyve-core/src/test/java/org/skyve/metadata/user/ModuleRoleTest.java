@@ -58,6 +58,11 @@ class ModuleRoleTest {
 	}
 
 	@Test
+	void assignedRoleNameIsTheModuleDotRoleName() {
+		assertEquals("admin.AuditManager", TestRole.AUDIT_MANAGER.assignedRoleName());
+	}
+
+	@Test
 	void toRoleWithCustomerResolvesTheRoleInTheModule() {
 		Customer customer = mock(Customer.class);
 		Role role = mock(Role.class);

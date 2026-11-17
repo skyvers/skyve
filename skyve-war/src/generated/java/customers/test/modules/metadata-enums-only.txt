@@ -1,2 +1,0 @@
-generateDomain created this directory only for the generated module metadata enums of customer test.
-Delete this file to opt customer test in to customer domain generation (<Document>Ext classes and orm.hbm.xml) from the next run.

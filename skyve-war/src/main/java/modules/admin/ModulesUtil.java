@@ -18,6 +18,7 @@ import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.AssignableRole;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
@@ -789,5 +790,29 @@ public class ModulesUtil {
 		}
 
 		return g;
+	}
+
+	/**
+	 * Configures a permissions group with at least the roles specified, naming them by their
+	 * compile-time references - module roles (e.g. <code>AdminRole.SECURITY_ADMINISTRATOR</code>) or
+	 * customer roles (e.g. <code>TestCustomerRole.TEST_MANAGER</code>).
+	 * Delegates to {@link #configureGroup(String, String...)} with each role's
+	 * {@link AssignableRole#assignedRoleName()}.
+	 * <p/>
+	 * Side effects: creates the group if no group has the name, adds any missing roles to it, and
+	 * saves it if anything changed.
+	 *
+	 * @param name	the group name
+	 * @param role	the first role the group must have
+	 * @param moreRoles	any further roles the group must have
+	 * @return	the configured group
+	 */
+	public static GroupExtension configureGroup(String name, AssignableRole role, AssignableRole... moreRoles) {
+		String[] roleNames = new String[moreRoles.length + 1];
+		roleNames[0] = role.assignedRoleName();
+		for (int i = 0, l = moreRoles.length; i < l; i++) {
+			roleNames[i + 1] = moreRoles[i].assignedRoleName();
+		}
+		return configureGroup(name, roleNames);
 	}
 }

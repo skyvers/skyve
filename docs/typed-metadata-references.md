@@ -65,10 +65,18 @@ A customer module override (`customers/<customer>/modules/<module>/<module>.xml`
 
 - **Customer code** can import the customer enums. A reference to metadata that the override removed then fails to compile.
 - **Code shared across customers** should use the vanilla enums, and only for metadata every customer keeps.
-- **Clean regeneration.** Customer enums are regenerated on every run, and those of an override you remove are deleted.
-- **They don't switch on customer domain generation.** The generated customer `Ext` classes and ORM mapping (`orm.hbm.xml`) are produced only for a customer that has opted in. When `generateDomain` has to create `src/generated/java/customers/<customer>/modules/` for the enums, it also writes `metadata-enums-only.txt` there, and while that file is present the customer is not opted in.
-- **Opting in.** Create `src/generated/java/customers/<customer>/modules/` yourself before the first run, or delete `metadata-enums-only.txt`. Customer domain generation is on whenever that directory exists without the marker, whatever else is in it.
-- **The marker is generator-owned.** `generateDomain` writes it, keeps it while it generates enums for a customer that hasn't opted in, and deletes it when the customer no longer overrides any module, together with the directory if nothing else is left in it. Don't edit it or add it by hand.
+- **Customer domain generation always runs.** For every customer, `generateDomain` writes a `<Document>Ext` class for each document override that adds attributes, a class for each new customer document, and the customer ORM mapping `customers/<customer>/modules/orm.hbm.xml`. It used to do this only when you had created `src/generated/java/customers/<customer>/modules/` yourself. A customer whose overrides need no mapping, because it overrides no documents, gets no mapping file and no directories.
+- **An override that drops an attribute changes the vanilla class.** When a customer's document override leaves out an attribute of the vanilla document, the vanilla class loses that property and becomes abstract, with a vanilla `<Document>Ext` class for the customers that keep it. This was already the case for projects that had opted in, and now applies to every project with such an override.
+- **Customer output is cleaned on every run.** Before writing, `generateDomain` deletes every file directly in `customers/<customer>/modules/<module>/domain/` and `customers/<customer>/domain/`, and `customers/<customer>/modules/orm.hbm.xml`, all below the generated source path. It then deletes the directories this leaves empty, up to `customers/<customer>/`. So output for an override or role you remove disappears, and repeated runs give the same result. Don't keep your own files in those directories, as they are deleted too. Everything else under `customers/` is left alone, so a project whose generated source path is its source path keeps its customer metadata, resources and module overrides.
+
+## Customer roles
+
+A customer can declare customer roles in `customer.xml` under `<roles>`. Each is a named bundle of module roles. For a customer that declares any, `generateDomain` writes `<Customer>CustomerRole` in `customers.<customer>.domain`. For example, `customers.test.domain.TestCustomerRole.TEST_MANAGER` names the `test` customer's `TestManager` role.
+
+- **`CustomerRoleReference`** (`org.skyve.metadata.customer`) is the interface the enum implements. It has `customerName()`, `roleName()`, `toCustomer()` and `toRole()` → `CustomerRole`, which throw `MetaDataException` if the customer or the role doesn't exist.
+- **`AssignableRole`** (`org.skyve.metadata.user`) is the common parent of `ModuleRole` and `CustomerRoleReference`. Its `assignedRoleName()` is the name a group or user role assignment stores: `module.Role` for a module role, such as `admin.BasicUser`, and the bare name for a customer role, such as `TestManager`.
+- **`ModulesUtil.configureGroup(String, AssignableRole, AssignableRole...)`** configures a group with module and customer roles by reference. For example, `configureGroup("Managers", AdminRole.BASIC_USER, TestCustomerRole.TEST_MANAGER)`.
+- **`isInRole` doesn't take customer roles.** Skyve expands a customer role into its module roles when the user signs in, so a user is only ever checked against module roles. Use `CustomerRoleReference` to assign roles, and `ModuleRole` to check them.
 
 ## When to use strings
 

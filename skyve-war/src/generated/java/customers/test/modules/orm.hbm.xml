@@ -1,0 +1,135 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping default-access="field">
+
+	<typedef name="OptimisticLock" class="org.skyve.impl.domain.types.OptimisticLockUserType" />
+	<typedef name="Decimal2" class="org.skyve.impl.domain.types.Decimal2UserType" />
+	<typedef name="Decimal5" class="org.skyve.impl.domain.types.Decimal5UserType" />
+	<typedef name="Decimal10" class="org.skyve.impl.domain.types.Decimal10UserType" />
+	<typedef name="DateOnly" class="org.skyve.impl.domain.types.DateOnlyUserType" />
+	<typedef name="DateTime" class="org.skyve.impl.domain.types.DateTimeUserType" />
+	<typedef name="TimeOnly" class="org.skyve.impl.domain.types.TimeOnlyUserType" />
+	<typedef name="Timestamp" class="org.skyve.impl.domain.types.TimestampUserType" />
+	<typedef name="Enum" class="org.skyve.impl.domain.types.EnumUserType" />
+	<class name="modules.test.domain.Reachability" table="TEST_Reachability" entity-name="testtestReachability">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="255" />
+		<many-to-one name="persistentAggregatedAssociation" entity-name="testtestAllAttributesPersistent" column="persistentAggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_Reachability_persistentAggregatedAssociation"/>
+		<bag name="persistentAggregatedCollection" table="TEST_Reachability_persistentAggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_TEST_Reachability_persistentAggregatedCollection_owner_id" />
+			<many-to-many entity-name="testtestAllAttributesPersistent" foreign-key="FK_TEST_Reachability_persistentAggregatedCollection_element_id" column="element_id" />
+		</bag>
+		<many-to-one name="persistentComposedAssociation" entity-name="testtestAllAttributesPersistent" column="persistentComposedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_persistentComposedAssociation" foreign-key="FK_TEST_Reachability_persistentComposedAssociation"/>
+		<bag name="persistentComposedCollection" table="TEST_Reachability_persistentComposedCollection" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_TEST_Reachability_persistentComposedCollection_owner_id" />
+			<many-to-many entity-name="testtestAllAttributesPersistent" foreign-key="FK_TEST_Reachability_persistentComposedCollection_element_id" column="element_id" />
+		</bag>
+		<filter name="testtestReachabilityNoneFilter" condition="1=0"/>
+		<filter name="testtestReachabilityCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestReachabilityDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestReachabilityUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="customers.test.modules.test.domain.AllAttributesPersistentExt" table="TEST_AllAttributesPersistent" entity-name="testtestAllAttributesPersistent">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<many-to-one name="aggregatedAssociation" entity-name="testtestAllAttributesPersistent" column="aggregatedAssociation_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedAssociation"/>
+		<many-to-one name="composedAssociation" entity-name="testtestAllAttributesPersistent" column="composedAssociation_id" unique="true" cascade="persist,save-update,refresh,delete-orphan,merge" unique-key="UK_composedAssociation" foreign-key="FK_TEST_AllAttributesPersistent_composedAssociation"/>
+		<component name="embeddedAssociation">
+			<parent name="parent" />
+			<property name="booleanFlag" column="embedded_booleanFlag" />
+			<property name="colour" column="embedded_colour" />
+			<property name="content" length="36" column="embedded_content" />
+			<property name="date" type="DateOnly" column="embedded_date" />
+			<property name="dateTime" type="DateTime" column="embedded_dateTime" />
+			<property name="decimal10" type="Decimal10" precision="28" scale="10" column="embedded_decimal10" />
+			<property name="decimal2" type="Decimal2" precision="20" scale="2" column="embedded_decimal2" />
+			<property name="decimal5" type="Decimal5" precision="23" scale="5" column="embedded_decimal5" />
+			<property name="enum3" length="5" column="embedded_enum3">
+				<type name="Enum">
+					<param name="enumClass">modules.test.domain.AllAttributesEmbedded$Enum3</param>
+				</type>
+			</property>
+			<property name="geometry" column="embedded_geometry" />
+			<property name="id" length="36" column="embedded_id" />
+			<property name="normalInteger" column="embedded_normalInteger" />
+			<property name="longInteger" column="embedded_longInteger" />
+			<property name="markup" type="text" column="embedded_markup" />
+			<property name="memo" type="text" column="embedded_memo" />
+			<property name="text" length="255" column="embedded_text" />
+			<property name="time" type="TimeOnly" column="embedded_time" />
+			<property name="timestamp" type="Timestamp" column="embedded_timestamp" />
+		</component>
+		<property name="booleanFlag" />
+		<bag name="aggregatedCollection" table="TEST_AllAttributesPersistent_aggregatedCollection" cascade="persist,save-update,refresh,merge">
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_owner_id" />
+			<many-to-many entity-name="testtestAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_aggregatedCollection_element_id" column="element_id" />
+		</bag>
+		<bag name="composedCollection" table="TEST_AllAttributesPersistent_composedCollection" cascade="all-delete-orphan">
+			<key column="owner_id" foreign-key="FK_TEST_AllAttributesPersistent_composedCollection_owner_id" />
+			<many-to-many entity-name="testtestAllAttributesPersistent" foreign-key="FK_TEST_AllAttributesPersistent_composedCollection_element_id" column="element_id" />
+		</bag>
+		<property name="colour" />
+		<property name="date" type="DateOnly" />
+		<property name="dateTime" type="DateTime" />
+		<property name="decimal10" type="Decimal10" precision="28" scale="10" />
+		<property name="decimal2" type="Decimal2" precision="20" scale="2" />
+		<property name="decimal5" type="Decimal5" precision="23" scale="5" />
+		<property name="enum3" length="5">
+			<type name="Enum">
+				<param name="enumClass">modules.test.domain.AllAttributesPersistent$Enum3</param>
+			</type>
+		</property>
+		<property name="geometry" />
+		<property name="id" length="36" />
+		<property name="normalInteger" />
+		<bag name="inverseAggregatedAssociation" inverse="true">
+			<key column="aggregatedAssociation_id" />
+			<one-to-many entity-name="testtestAllAttributesPersistent" />
+		</bag>
+		<property name="longInteger" />
+		<property name="markup" type="text" />
+		<property name="memo" type="text" />
+		<property name="text" length="255" />
+		<property name="time" type="TimeOnly" />
+		<property name="timestamp" type="Timestamp" />
+		<filter name="testtestAllAttributesPersistentNoneFilter" condition="1=0"/>
+		<filter name="testtestAllAttributesPersistentCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestAllAttributesPersistentDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestAllAttributesPersistentUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<filter-def name="testtestReachabilityNoneFilter" />
+	<filter-def name="testtestReachabilityCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestReachabilityDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestReachabilityUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestAllAttributesPersistentNoneFilter" />
+	<filter-def name="testtestAllAttributesPersistentCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestAllAttributesPersistentDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestAllAttributesPersistentUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+</hibernate-mapping>

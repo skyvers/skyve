@@ -35,6 +35,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.CustomerRole;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.model.Extends;
@@ -901,7 +902,7 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void generateOverriddenWithNoModulesCreatesCustomerOrmEntry() throws Exception {
+	void generateOverriddenWithNoModulesCreatesNoCustomerOrmEntry() throws Exception {
 		Path temp = Files.createTempDirectory("odg-generate-overridden");
 		Path generatedSrc = temp.resolve("generated-src");
 		Path generatedTest = temp.resolve("generated-test");
@@ -927,11 +928,11 @@ class OverridableDomainGeneratorMoreTest {
 				.invoke(gen, customer, normalisedPath(customerModulesPath));
 
 		Path mappingPath = customerModulesPath.resolve("orm.hbm.xml");
-		assertTrue(gen.generation.containsKey(mappingPath));
+		assertFalse(gen.generation.containsKey(mappingPath), "A mapping without any class is not generated");
 	}
 
 	@Test
-	void generateWithVanillaModuleAndCustomerModulesDirectoryWritesMappings() throws Exception {
+	void generateWithVanillaModuleAndNoCustomerDocumentsWritesOnlyTheVanillaMapping() throws Exception {
 		Path temp = Files.createTempDirectory("odg-generate-full");
 		Path generatedSrc = temp.resolve("generated-src");
 		Path generatedTest = temp.resolve("generated-test");
@@ -968,7 +969,8 @@ class OverridableDomainGeneratorMoreTest {
 		gen.generate();
 
 		assertTrue(Files.exists(generatedSrc.resolve("modules/sales/domain/sales_orm.hbm.xml")));
-		assertTrue(Files.exists(customerModulesPath.resolve("orm.hbm.xml")));
+		// a customer mapping without any class is not written, and the emptied directories go
+		assertFalse(Files.exists(customerModulesPath));
 		assertTrue(gen.generation.isEmpty(), "Generation map should be written and drained");
 	}
 
@@ -5402,19 +5404,33 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(e.getCause().getMessage().contains("READ_ONLY"), e.getCause().getMessage());
 	}
 
-	// ----- customer module metadata enums -----------------------------------
+	// ----- customer output -------------------------------------------------
+
+	private static final String CUSTOMER = "src/customers/acme";
+	private static final String CUSTOMER_MODULES = CUSTOMER + "/modules";
+	private static final String CUSTOMER_DOMAIN = CUSTOMER_MODULES + "/sales/domain";
+	private static final String CUSTOMER_ORM = CUSTOMER_MODULES + "/orm.hbm.xml";
+	private static final String CUSTOMER_ROLE_ENUM = CUSTOMER + "/domain/AcmeCustomerRole.java";
 
 	/**
 	 * A repository with vanilla module "sales" (role Clerk, documents Order and Invoice) and
 	 * customer "acme", whose effective sales module is the given override. The customer overrides
-	 * the sales module only when {@code overridden}.
+	 * the sales module only when {@code overridden}, and declares the given customer roles.
 	 */
-	private static ProvidedRepository customerEnumRepository(Module salesOverride, boolean overridden) {
+	private static ProvidedRepository customerEnumRepository(Module salesOverride,
+																boolean overridden,
+																List<String> customerRoleNames) {
 		Module sales = moduleConstantsModule("sales", List.of("Clerk"), List.of("Order", "Invoice"), List.of());
 
 		Customer customer = mock(Customer.class);
 		when(customer.getName()).thenReturn("acme");
 		when(customer.getModules()).thenReturn(List.of(overridden ? salesOverride : sales));
+		List<CustomerRole> customerRoles = customerRoleNames.stream().map(name -> {
+			CustomerRole role = mock(CustomerRole.class);
+			when(role.getName()).thenReturn(name);
+			return role;
+		}).toList();
+		when(customer.getRoles()).thenReturn(customerRoles);
 
 		ProvidedRepository repo = mock(ProvidedRepository.class);
 		when(repo.getAllVanillaModuleNames()).thenReturn(List.of("sales"));
@@ -5425,22 +5441,33 @@ class OverridableDomainGeneratorMoreTest {
 		return repo;
 	}
 
+	private static ProvidedRepository customerEnumRepository(Module salesOverride, boolean overridden) {
+		return customerEnumRepository(salesOverride, overridden, List.of());
+	}
+
 	/** The acme override of sales: adds the role Auditor and the document Refund, and drops Invoice. */
 	private static Module salesOverride() {
 		return moduleConstantsModule("sales", List.of("Clerk", "Auditor"), List.of("Order", "Refund"), List.of());
 	}
 
-	/** Runs a writing generator over the repository into {@code <root>/src} and {@code <root>/test}. */
+	/**
+	 * Runs a writing generator over the repository into {@code <root>/src} and {@code <root>/test}.
+	 * The sales module is excluded from domain test generation.
+	 */
 	private static void generateInto(Path root, ProvidedRepository repo) throws Exception {
+		generateInto(root.resolve("src"), root.resolve("test"), repo);
+	}
+
+	private static void generateInto(Path generatedSrc, Path generatedTest, ProvidedRepository repo) throws Exception {
 		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
 				false,
 				false,
 				DialectOptions.H2_NO_INDEXES,
 				"",
-				normalisedPath(root.resolve("src")),
+				normalisedPath(generatedSrc),
 				"",
-				normalisedPath(root.resolve("test")),
-				null);
+				normalisedPath(generatedTest),
+				new String[] {"sales"});
 		gen.repository = repo;
 		gen.generate();
 	}
@@ -5450,24 +5477,74 @@ class OverridableDomainGeneratorMoreTest {
 		Map<String, String> result = new TreeMap<>();
 		try (Stream<Path> paths = Files.walk(directory)) {
 			for (Path path : paths.filter(Files::isRegularFile).toList()) {
-				result.put(directory.relativize(path).toString(), Files.readString(path));
+				result.put(directory.relativize(path).toString().replace(java.io.File.separatorChar, '/'), Files.readString(path));
 			}
 		}
 		return result;
 	}
 
-	private static final String CUSTOMER_MODULES = "src/customers/acme/modules";
-	private static final String CUSTOMER_DOMAIN = CUSTOMER_MODULES + "/sales/domain";
-	private static final String MARKER = CUSTOMER_MODULES + "/metadata-enums-only.txt";
-	private static final String CUSTOMER_ORM = CUSTOMER_MODULES + "/orm.hbm.xml";
+	/**
+	 * A repository with vanilla module "sales" declaring the persistent document Order (code), and
+	 * CustomerImpl "acme" with the sales module. When {@code overridden}, acme overrides Order with an
+	 * extra property (notes), so it gets an OrderExt class and a customer ORM mapping. The repository
+	 * is installed in {@link ProvidedRepositoryFactory} for the duration of {@code action}.
+	 */
+	private static void withDocumentOverrideRepository(boolean overridden, RepositoryAction action) throws Exception {
+		ProvidedRepository repo = mock(ProvidedRepository.class);
 
-	/** Deletes every file below the directory, leaving the directories. */
-	private static void deleteFilesOnly(Path directory) throws Exception {
-		try (Stream<Path> paths = Files.walk(directory)) {
-			for (Path path : paths.filter(Files::isRegularFile).toList()) {
-				Files.delete(path);
-			}
+		DocumentImpl vanillaDocument = newDocument();
+		vanillaDocument.setName("Order");
+		vanillaDocument.setOwningModuleName("sales");
+		vanillaDocument.setPersistent(persistentOf("SALES_ORDER"));
+		vanillaDocument.putAttribute(text("code"));
+
+		DocumentImpl overrideDocument = newDocument();
+		overrideDocument.setName("Order");
+		overrideDocument.setOwningModuleName("sales");
+		overrideDocument.setPersistent(persistentOf("SALES_ORDER"));
+		overrideDocument.putAttribute(text("code"));
+		overrideDocument.putAttribute(text("notes"));
+
+		Module.DocumentRef documentRef = new Module.DocumentRef();
+		documentRef.setOwningModuleName("sales");
+
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn("sales");
+		when(module.getDocumentRefs()).thenReturn(Map.of("Order", documentRef));
+
+		CustomerImpl customer = new CustomerImpl();
+		customer.setName("acme");
+		customer.getModuleEntries().put("sales", null);
+
+		when(module.getDocument(null, "Order")).thenReturn(vanillaDocument);
+		when(module.getDocument(customer, "Order")).thenReturn(overridden ? overrideDocument : vanillaDocument);
+		when(repo.getModule(null, "sales")).thenReturn(module);
+		when(repo.getModule(customer, "sales")).thenReturn(module);
+		when(repo.getAllVanillaModuleNames()).thenReturn(List.of("sales"));
+		when(repo.getAllCustomerNames()).thenReturn(List.of("acme"));
+		when(repo.getCustomer("acme")).thenReturn(customer);
+		when(repo.vtable("acme", "modules/sales/Order")).thenReturn(overridden ? "customers/acme/modules/sales/Order" : "modules/sales/Order");
+
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repo);
+		try {
+			action.run(repo);
 		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	@FunctionalInterface
+	private interface RepositoryAction {
+		void run(ProvidedRepository repo) throws Exception;
+	}
+
+	private static Text text(String name) {
+		Text result = new Text();
+		result.setName(name);
+		result.setDisplayName(name);
+		return result;
 	}
 
 	@Test
@@ -5480,7 +5557,6 @@ class OverridableDomainGeneratorMoreTest {
 		String role = Files.readString(customerDomain.resolve("SalesRole.java"));
 		String document = Files.readString(customerDomain.resolve("SalesDocument.java"));
 		String vanillaDocument = Files.readString(root.resolve("src/modules/sales/domain/SalesDocument.java"));
-		String marker = Files.readString(root.resolve(MARKER));
 		assertAll(
 				() -> assertTrue(role.contains("package customers.acme.modules.sales.domain;"), role),
 				() -> assertTrue(role.contains("public enum SalesRole implements ModuleRole {"), role),
@@ -5492,20 +5568,19 @@ class OverridableDomainGeneratorMoreTest {
 				() -> assertFalse(document.contains("INVOICE"), "The override drops Invoice, got: " + document),
 				() -> assertTrue(vanillaDocument.contains("INVOICE(\"Invoice\")"), vanillaDocument),
 				() -> assertFalse(vanillaDocument.contains("REFUND"), vanillaDocument),
-				// the generator created the modules directory, so it marks it as not opted in
-				() -> assertTrue(marker.contains("only for the generated module metadata enums of customer acme"), marker),
-				() -> assertTrue(marker.contains("Delete this file to opt customer acme in"), marker),
-				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_ORM))));
+				// no customer document, so no mapping
+				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_ORM))),
+				() -> assertFalse(Files.exists(root.resolve(CUSTOMER).resolve("domain")), "No customer roles, so no role enum"));
 	}
 
 	@Test
-	void generateWritesNoCustomerModuleMetadataEnumsWithoutAnOverride() throws Exception {
+	void generateWritesNoCustomerOutputWithoutOverridesOrRoles() throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-enums-none");
 
 		generateInto(root, customerEnumRepository(salesOverride(), false));
 
 		assertTrue(Files.exists(root.resolve("src/modules/sales/domain/SalesRole.java")));
-		assertFalse(Files.exists(root.resolve("src/customers")), "No customer output expected");
+		assertFalse(Files.exists(root.resolve("src/customers")), "No customer output expected - no mapping and no directories");
 	}
 
 	@Test
@@ -5524,173 +5599,168 @@ class OverridableDomainGeneratorMoreTest {
 	}
 
 	@Test
-	void generateTwiceGivesIdenticalOutputWithCustomerModuleMetadataEnums() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-twice");
-		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
+	void generateWritesTheCustomerRoleEnum() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-roles");
+
+		generateInto(root, customerEnumRepository(salesOverride(), false, List.of("Tenant Manager", "Back\\Office")));
+
+		String java = Files.readString(root.resolve(CUSTOMER_ROLE_ENUM));
+		assertAll(
+				() -> assertTrue(java.contains("package customers.acme.domain;"), java),
+				() -> assertTrue(java.contains("import org.skyve.metadata.customer.CustomerRoleReference;"), java),
+				() -> assertTrue(java.contains("Compile-time references to the customer roles declared for customer acme."), java),
+				() -> assertTrue(java.contains("@Generated(value = \"org.skyve.impl.generate.OverridableDomainGenerator\")"), java),
+				() -> assertTrue(java.contains("public enum AcmeCustomerRole implements CustomerRoleReference {"), java),
+				() -> assertTrue(java.contains("/** The \"Tenant Manager\" customer role. */"), java),
+				() -> assertTrue(java.contains("TENANT_MANAGER(\"Tenant Manager\")"), java),
+				() -> assertTrue(java.contains("(\"Back\\\\Office\")"), "Backslashes should be escaped, got: " + java),
+				() -> assertTrue(java.contains("public String customerName() {\n\t\treturn \"acme\";"), java),
+				() -> assertTrue(java.contains("public String roleName() {\n\t\treturn name;"), java),
+				// no module override and no customer document
+				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_MODULES))));
+	}
+
+	@Test
+	void generateThrowsWhenCustomerRoleNamesCollideAfterMangling() {
+		ProvidedRepository repo = customerEnumRepository(salesOverride(), false, List.of("Tenant Manager", "TenantManager"));
+
+		MetaDataException e = assertThrows(MetaDataException.class,
+											() -> generateInto(Files.createTempDirectory("odg-customer-roles-dup"), repo));
+		assertTrue(e.getMessage().contains("Customer acme customer role TenantManager yields the duplicate Java enum constant name TENANT_MANAGER"),
+					e.getMessage());
+	}
+
+	@Test
+	void generateWritesCustomerDomainOutputWithoutAPreexistingDirectory() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-domain");
+
+		withDocumentOverrideRepository(true, repo -> generateInto(root, repo));
+
+		String ext = Files.readString(root.resolve(CUSTOMER_DOMAIN).resolve("OrderExt.java"));
+		String orm = Files.readString(root.resolve(CUSTOMER_ORM));
+		assertAll(
+				() -> assertTrue(ext.contains("package customers.acme.modules.sales.domain;"), ext),
+				() -> assertTrue(ext.contains("notes"), ext),
+				() -> assertTrue(orm.contains("customers.acme.modules.sales.domain.OrderExt"), orm));
+	}
+
+	@Test
+	void generateTwiceGivesIdenticalCustomerOutput() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-twice");
+		ProvidedRepository repo = customerEnumRepository(salesOverride(), true, List.of("Manager"));
 
 		generateInto(root, repo);
 		Map<String, String> first = snapshot(root);
-		// the modules directory exists now - the marker keeps it from opting the customer in
 		generateInto(root, repo);
 		Map<String, String> second = snapshot(root);
 
-		String separator = java.io.File.separator;
 		assertAll(
-				() -> assertTrue(first.containsKey(CUSTOMER_DOMAIN.replace("/", separator) + separator + "SalesRole.java"), first.keySet().toString()),
-				() -> assertTrue(first.containsKey(MARKER.replace("/", separator)), first.keySet().toString()),
-				() -> assertFalse(second.containsKey(CUSTOMER_ORM.replace("/", separator)), second.keySet().toString()),
+				() -> assertTrue(first.containsKey(CUSTOMER_DOMAIN + "/SalesRole.java"), first.keySet().toString()),
+				() -> assertTrue(first.containsKey(CUSTOMER_ROLE_ENUM), first.keySet().toString()),
 				() -> assertEquals(first, second));
 	}
 
 	@Test
-	void generateKeepsCustomerDomainGenerationOffForStrayFiles() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-ds-store");
-		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
-		generateInto(root, repo);
-		// Finder litters any directory it browses
-		Files.writeString(root.resolve(CUSTOMER_MODULES).resolve(".DS_Store"), "finder");
-		Files.writeString(root.resolve(CUSTOMER_DOMAIN).resolve(".DS_Store"), "finder");
+	void generateTwiceGivesIdenticalCustomerDomainOutput() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-domain-twice");
 
-		generateInto(root, repo);
-		generateInto(root, repo);
+		Map<String, Map<String, String>> snapshots = new TreeMap<>();
+		withDocumentOverrideRepository(true, repo -> {
+			generateInto(root, repo);
+			snapshots.put("first", snapshot(root));
+			// used to fail with FileAlreadyExistsException on orm.hbm.xml
+			generateInto(root, repo);
+			snapshots.put("second", snapshot(root));
+		});
 
+		Map<String, String> first = snapshots.get("first");
 		assertAll(
-				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_ORM)), "A stray file must not opt the customer in"),
-				() -> assertTrue(Files.exists(root.resolve(MARKER))),
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java"))));
+				() -> assertTrue(first.containsKey(CUSTOMER_ORM), first.keySet().toString()),
+				() -> assertTrue(first.containsKey(CUSTOMER_DOMAIN + "/OrderExt.java"), first.keySet().toString()),
+				() -> assertEquals(first, snapshots.get("second")));
 	}
 
 	@Test
-	void generateSwitchesCustomerDomainGenerationOnWhenTheMarkerIsDeleted() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-opt-in");
-		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
-		generateInto(root, repo);
-		assertFalse(Files.exists(root.resolve(CUSTOMER_ORM)));
-
-		Files.delete(root.resolve(MARKER));
-		generateInto(root, repo);
-
-		assertAll(
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_ORM)), "Deleting the marker opts the customer in"),
-				() -> assertFalse(Files.exists(root.resolve(MARKER)), "The marker is not written for an opted in customer"),
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java"))));
-	}
-
-	@Test
-	void generateKeepsAnOptedInCustomerOptedInWhenGatedOutputIsClearedLeavingEnums() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-opted-in-enums");
-		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
-		Files.createDirectories(root.resolve(CUSTOMER_MODULES));
-		generateInto(root, repo);
-		assertTrue(Files.exists(root.resolve(CUSTOMER_ORM)));
-		assertFalse(Files.exists(root.resolve(MARKER)));
-
-		// the developer clears the gated output by hand, leaving the enums
-		Files.delete(root.resolve(CUSTOMER_ORM));
-		generateInto(root, repo);
-
-		assertAll(
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_ORM)), "The customer must stay opted in"),
-				() -> assertFalse(Files.exists(root.resolve(MARKER))),
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java"))));
-	}
-
-	@Test
-	void generateKeepsAnOptedInCustomerOptedInWhenAllFilesAreCleared() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-opted-in-dirs");
-		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
-		Files.createDirectories(root.resolve(CUSTOMER_MODULES));
-		generateInto(root, repo);
-
-		// the developer deletes every file, leaving the directories
-		deleteFilesOnly(root.resolve("src/customers"));
-		generateInto(root, repo);
-
-		assertAll(
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_ORM)), "The customer must stay opted in"),
-				() -> assertFalse(Files.exists(root.resolve(MARKER))),
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java"))));
-	}
-
-	@Test
-	void generateKeepsAnOptedInCustomerModulesDirectoryWhenItsOverrideIsRemoved() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-opted-in-removed");
-		Files.createDirectories(root.resolve(CUSTOMER_MODULES));
-		generateInto(root, customerEnumRepository(salesOverride(), true));
-		Files.delete(root.resolve(CUSTOMER_ORM));
-
-		// the override disappears
-		generateInto(root, customerEnumRepository(salesOverride(), false));
-
-		assertAll(
-				() -> assertTrue(Files.isDirectory(root.resolve(CUSTOMER_MODULES)), "An opted in modules directory is never deleted"),
-				() -> assertTrue(Files.exists(root.resolve(CUSTOMER_ORM)), "The customer stays opted in"),
-				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_MODULES).resolve("sales")), "The emptied module directories are deleted"));
-	}
-
-	@Test
-	void generateOverwritesAnUnrecognisedFileAtAnOwnedEnumPath() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-overwrite");
-		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
-		generateInto(root, repo);
-		Path role = root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java");
-		String generated = Files.readString(role);
-		// hand edited, or from a generator whose header differs - no longer recognised
-		Files.writeString(role, "public enum SalesRole {\n}\n");
-
-		generateInto(root, repo);
-
-		assertEquals(generated, Files.readString(role));
-	}
-
-	@Test
-	void generateRemovesARemovedCustomerOverrideWithItsMarker() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-stale");
-		generateInto(root, customerEnumRepository(salesOverride(), true));
+	void generateRemovesCustomerOutputWhenTheOverridesAndRolesAreRemoved() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-removed");
+		generateInto(root, customerEnumRepository(salesOverride(), true, List.of("Manager")));
 		assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java")));
+		assertTrue(Files.exists(root.resolve(CUSTOMER_ROLE_ENUM)));
 
-		// the override disappears
 		generateInto(root, customerEnumRepository(salesOverride(), false));
 
-		assertFalse(Files.exists(root.resolve("src/customers")), "Stale customer enums, the marker and their directories should be removed");
+		assertFalse(Files.exists(root.resolve("src/customers")), "Stale customer output and its directories should be removed");
 		assertTrue(Files.exists(root.resolve("src/modules/sales/domain/SalesRole.java")));
 	}
 
 	@Test
-	void generateKeepsOtherFilesWhenRemovingStaleCustomerModuleMetadataEnums() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-keep");
-		generateInto(root, customerEnumRepository(salesOverride(), true));
-		Path customerDomain = root.resolve(CUSTOMER_DOMAIN);
-		// files the enum generation did not write, at a stale enum path and beside it
-		Path stale = customerDomain.resolve("SalesJob.java");
-		Files.writeString(stale, "public class SalesJob {\n}\n");
-		Path keep = customerDomain.resolve("Keep.java");
-		Files.writeString(keep, "@jakarta.annotation.Generated(value = \"other\")\npublic enum Keep implements ModuleRole {\n}\n");
+	void generateRemovesCustomerDomainOutputWhenTheDocumentOverrideIsRemoved() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-domain-removed");
+		withDocumentOverrideRepository(true, repo -> generateInto(root, repo));
+		assertTrue(Files.exists(root.resolve(CUSTOMER_ORM)));
 
-		// the override disappears
-		generateInto(root, customerEnumRepository(salesOverride(), false));
+		withDocumentOverrideRepository(false, repo -> generateInto(root, repo));
 
-		assertAll(
-				() -> assertTrue(Files.exists(stale), "A file that is not a generated metadata enum must be kept"),
-				() -> assertTrue(Files.exists(keep), "A file that is not a generated metadata enum must be kept"),
-				() -> assertFalse(Files.exists(customerDomain.resolve("SalesRole.java"))),
-				() -> assertFalse(Files.exists(customerDomain.resolve("SalesDocument.java"))),
-				() -> assertTrue(Files.exists(root.resolve(MARKER)), "The marker stays while other files keep the directory"),
-				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_ORM))));
+		assertFalse(Files.exists(root.resolve("src/customers")), "The stale OrderExt, mapping and directories should be removed");
 	}
 
 	@Test
-	void generateIgnoresFilesNamedUnlikeTheirGeneratedMetadataEnum() throws Exception {
-		Path root = Files.createTempDirectory("odg-customer-enums-renamed");
-		generateInto(root, customerEnumRepository(salesOverride(), true));
-		Path customerDomain = root.resolve(CUSTOMER_DOMAIN);
-		// generated enum content, but in a file not named after the enum
-		Path copy = customerDomain.resolve("Copy.java");
-		Files.copy(customerDomain.resolve("SalesRole.java"), copy);
+	void generateCleansOnlyCustomerGeneratedDirectories() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-clean");
+		generateInto(root, customerEnumRepository(salesOverride(), true, List.of("Manager")));
+		// files nobody generated: in the generated directories, which are cleaned
+		Path inModuleDomain = Files.writeString(root.resolve(CUSTOMER_DOMAIN).resolve("Keep.java"), "class Keep {}");
+		Path inCustomerDomain = Files.writeString(root.resolve(CUSTOMER).resolve("domain/Keep.java"), "class Keep {}");
+		// and elsewhere, which is never touched
+		Path inModules = Files.writeString(root.resolve(CUSTOMER_MODULES).resolve("notes.txt"), "notes");
+		Path inModule = Files.writeString(root.resolve(CUSTOMER_MODULES).resolve("sales/notes.txt"), "notes");
+		Files.createDirectories(root.resolve(CUSTOMER_DOMAIN).resolve("nested"));
+		Path nested = Files.writeString(root.resolve(CUSTOMER_DOMAIN).resolve("nested/notes.txt"), "notes");
 
 		generateInto(root, customerEnumRepository(salesOverride(), false));
 
-		assertTrue(Files.exists(copy), "Only files named after their generated enum are deleted");
+		assertAll(
+				() -> assertFalse(Files.exists(inModuleDomain), "Files in customers/<c>/modules/<m>/domain/ are generated output"),
+				() -> assertFalse(Files.exists(inCustomerDomain), "Files in customers/<c>/domain/ are generated output"),
+				() -> assertFalse(Files.exists(root.resolve(CUSTOMER).resolve("domain")), "The emptied customer domain directory goes"),
+				() -> assertTrue(Files.exists(inModules)),
+				() -> assertTrue(Files.exists(inModule)),
+				() -> assertTrue(Files.exists(nested), "Subdirectories of a generated directory are left alone"),
+				() -> assertFalse(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java"))));
+	}
+
+	@Test
+	void generateNeverDeletesMetadataWhenTheGeneratedSourcePathIsTheSourcePath() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-src-is-generated");
+		Path src = root.resolve("src");
+		// customer metadata, resources and a module override living beside the generated output
+		Path customerXml = write(src.resolve("customers/acme/acme.xml"), "<customer/>");
+		Path logo = write(src.resolve("customers/acme/resources/logo.png"), "png");
+		Path moduleXml = write(src.resolve("customers/acme/modules/sales/sales.xml"), "<module/>");
+		Path documentXml = write(src.resolve("customers/acme/modules/sales/Order/Order.xml"), "<document/>");
+		Path bizlet = write(src.resolve("customers/acme/modules/sales/Order/OrderBizlet.java"), "class OrderBizlet {}");
+		ProvidedRepository repo = customerEnumRepository(salesOverride(), true, List.of("Manager"));
+
+		generateInto(src, root.resolve("test"), repo);
+		generateInto(src, root.resolve("test"), repo);
+		assertTrue(Files.exists(src.resolve("customers/acme/modules/sales/domain/SalesRole.java")));
+		assertTrue(Files.exists(src.resolve("customers/acme/domain/AcmeCustomerRole.java")));
+
+		generateInto(src, root.resolve("test"), customerEnumRepository(salesOverride(), false));
+
+		assertAll(
+				() -> assertEquals("<customer/>", Files.readString(customerXml)),
+				() -> assertEquals("png", Files.readString(logo)),
+				() -> assertEquals("<module/>", Files.readString(moduleXml)),
+				() -> assertEquals("<document/>", Files.readString(documentXml)),
+				() -> assertEquals("class OrderBizlet {}", Files.readString(bizlet)),
+				() -> assertFalse(Files.exists(src.resolve("customers/acme/modules/sales/domain"))),
+				() -> assertFalse(Files.exists(src.resolve("customers/acme/domain"))));
+	}
+
+	private static Path write(Path file, String contents) throws Exception {
+		Files.createDirectories(file.getParent());
+		return Files.writeString(file, contents);
 	}
 
 	// ----- null-safety invariants -------------------------------------------
