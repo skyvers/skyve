@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,11 +27,21 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.customer.ExportedReference;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
+import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
@@ -41,7 +52,10 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
+import org.skyve.metadata.model.document.Association.AssociationType;
+import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.w3c.dom.Element;
@@ -69,23 +83,49 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	private static final class Fixture {
 		private final Map<String, DocumentImpl> vanilla = new TreeMap<>();
 		private final Map<String, Map<String, DocumentImpl>> overrides = Map.of("acme", new TreeMap<>(), "beta", new TreeMap<>());
-		/** Extension source path (without "Extension.java") to the class it extends. */
-		private final Map<String, String> extended = new TreeMap<>();
+		/** Hand-written extension sources by their path below the source directory. */
+		private final Map<String, byte[]> extended = new TreeMap<>();
 
 		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> extending its domain class. */
 		Fixture extension(String documentName) {
 			return extension(documentName, documentName);
 		}
 
-		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> extending the named class. */
+		/**
+		 * Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> extending the named
+		 * class - a simple name in the module's domain package, or a fully qualified name.
+		 */
 		Fixture extension(String documentName, String superclassName) {
-			extended.put("modules/" + MODULE + '/' + documentName + '/' + documentName, superclassName);
+			String superclassImport = superclassName.contains(".") ? superclassName : "modules." + MODULE + ".domain." + superclassName;
+			return extensionSource(documentName, "package modules." + MODULE + '.' + documentName + ";\n\n" +
+														"import " + superclassImport + ";\n\n" +
+														"public class " + documentName + "Extension extends " +
+														superclassImport.substring(superclassImport.lastIndexOf('.') + 1) + " {\n" +
+														"\tprivate static final long serialVersionUID = 1L;\n}\n");
+		}
+
+		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> with the given source. */
+		Fixture extensionSource(String documentName, String source) {
+			return extensionBytes(documentName, source.getBytes(StandardCharsets.UTF_8));
+		}
+
+		/** Gives the vanilla document a hand-written <code>&lt;Document&gt;Extension</code> with the given source bytes. */
+		Fixture extensionBytes(String documentName, byte[] source) {
+			extended.put("modules/" + MODULE + '/' + documentName + '/' + documentName + "Extension.java", source);
 			return this;
 		}
 
-		/** Gives the acme customer's override of the document a hand-written <code>&lt;Document&gt;Extension</code> class. */
+		/**
+		 * Gives the acme customer's override of the document a hand-written <code>&lt;Document&gt;Extension</code>,
+		 * which extends the customer's override class.
+		 */
 		Fixture acmeExtension(String documentName) {
-			extended.put("customers/acme/modules/" + MODULE + '/' + documentName + '/' + documentName, documentName + "Override");
+			String packageName = "customers.acme.modules." + MODULE + '.' + documentName;
+			extended.put(packageName.replace('.', '/') + '/' + documentName + "Extension.java",
+							("package " + packageName + ";\n\n" +
+								"import customers.acme.modules." + MODULE + ".domain." + documentName + "Override;\n\n" +
+								"public class " + documentName + "Extension extends " + documentName + "Override {\n" +
+								"\tprivate static final long serialVersionUID = 1L;\n}\n").getBytes(StandardCharsets.UTF_8));
 			return this;
 		}
 
@@ -107,6 +147,21 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			return this;
 		}
 
+		/** A beta override of Line kept aside until {@link #useBetaLine()}. */
+		private DocumentImpl betaLine;
+
+		/** Whether generate() makes the extension sources unreadable. */
+		boolean unreadableExtensions = false;
+
+		Fixture betaLine(DocumentImpl document) {
+			betaLine = document;
+			return this;
+		}
+
+		void useBetaLine() {
+			beta(betaLine);
+		}
+
 		boolean overrides(String customerName, String documentName) {
 			Map<String, DocumentImpl> documents = overrides.get(customerName);
 			return (documents != null) && documents.containsKey(documentName);
@@ -119,6 +174,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		result.setOwningModuleName(MODULE);
 		result.setSingularAlias(name);
 		result.setPluralAlias(name + "s");
+		result.setBizKeyMethodCode("\t\treturn \"" + name + "\";");
 		if ((persistentName != null) || (strategy != null)) {
 			Persistent persistent = new Persistent();
 			persistent.setName(persistentName);
@@ -136,6 +192,52 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			text.setDisplayName(attributeName);
 			result.putAttribute(text);
 		}
+		return result;
+	}
+
+	/**
+	 * Records the customer's exported references - the persistent references to each document from the
+	 * customer's versions of the documents - as the repository does when it loads the customer.
+	 */
+	private static void exportReferences(Fixture fixture, CustomerImpl customer) throws Exception {
+		Map<String, DocumentImpl> documents = new TreeMap<>(fixture.vanilla);
+		documents.putAll(fixture.overrides.get(customer.getName()));
+		java.lang.reflect.Field field = CustomerImpl.class.getDeclaredField("exportedReferences");
+		field.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		Map<String, List<ExportedReference>> exportedReferences = (Map<String, List<ExportedReference>>) field.get(customer);
+		for (DocumentImpl document : documents.values()) {
+			if (document.getPersistent() == null) {
+				continue;
+			}
+			for (String referenceName : document.getReferenceNames()) {
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
+				ExportedReference ref = new ExportedReference();
+				ref.setModuleName(MODULE);
+				ref.setDocumentName(document.getName());
+				ref.setPersistent(document.getPersistent());
+				ref.setReferenceFieldName(referenceName);
+				ref.setType(reference.getType());
+				exportedReferences.computeIfAbsent(MODULE + '.' + reference.getDocumentName(), k -> new ArrayList<>()).add(ref);
+			}
+		}
+	}
+
+	private static AssociationImpl association(String name, String documentName) {
+		AssociationImpl result = new AssociationImpl();
+		result.setName(name);
+		result.setDisplayName(name);
+		result.setDocumentName(documentName);
+		result.setType(AssociationType.aggregation);
+		return result;
+	}
+
+	private static CollectionImpl childCollection(String name, String documentName) {
+		CollectionImpl result = new CollectionImpl();
+		result.setName(name);
+		result.setDisplayName(name);
+		result.setDocumentName(documentName);
+		result.setType(CollectionType.child);
 		return result;
 	}
 
@@ -180,12 +282,13 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	private static Map<String, String> generate(Fixture fixture, boolean validate) throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-override");
 		Path src = root.resolve("source");
-		for (Map.Entry<String, String> entry : fixture.extended.entrySet()) {
-			String extensionPath = entry.getKey();
-			Path extension = src.resolve(extensionPath + "Extension.java");
+		for (Map.Entry<String, byte[]> entry : fixture.extended.entrySet()) {
+			Path extension = src.resolve(entry.getKey());
 			Files.createDirectories(extension.getParent());
-			String className = extensionPath.substring(extensionPath.lastIndexOf('/') + 1) + "Extension";
-			Files.writeString(extension, "public class " + className + "\n\t\textends " + entry.getValue() + " {\n}\n");
+			Files.write(extension, entry.getValue());
+			if (fixture.unreadableExtensions) {
+				Files.setPosixFilePermissions(extension, Set.of());
+			}
 		}
 
 		CustomerImpl acme = new CustomerImpl();
@@ -194,6 +297,8 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		CustomerImpl beta = new CustomerImpl();
 		beta.setName("beta");
 		beta.getModuleEntries().put(MODULE, null);
+		exportReferences(fixture, acme);
+		exportReferences(fixture, beta);
 
 		Module module = module(fixture, null);
 		Module acmeModule = module(fixture, "acme");
@@ -258,7 +363,11 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			ProvidedRepositoryFactory.set(previousRepository);
 		}
 
+		// the generated files, and the hand-written extension sources by their path below the source directory
 		Map<String, String> result = new TreeMap<>();
+		for (Map.Entry<String, byte[]> entry : fixture.extended.entrySet()) {
+			result.put(entry.getKey(), new String(entry.getValue(), StandardCharsets.ISO_8859_1));
+		}
 		Path generated = root.resolve("src");
 		try (Stream<Path> paths = Files.walk(generated)) {
 			for (Path path : paths.filter(Files::isRegularFile).toList()) {
@@ -272,7 +381,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	 * Checks that the vanilla and customer mappings, loaded together as Skyve loads them into one
 	 * SessionFactory, hang together: subclass mappings are nested in or extend a class mapping, no
 	 * entity name is defined twice, every referenced entity name is defined, every mapped class was
-	 * generated, and a nested subclass mapping's class extends the enclosing mapping's class.
+	 * generated, a nested subclass mapping's class extends the enclosing mapping's class, every mapped
+	 * property is a field of the mapped class or a class it extends, and every enumeration type is
+	 * declared in the class it names. Hand-written extension sources count as classes.
 	 * Returns the problems found.
 	 */
 	private static List<String> mappingProblems(Map<String, String> files) throws Exception {
@@ -315,10 +426,33 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 					if (java == null) {
 						problems.add(file.getKey() + ": entity " + entityName + " maps class " + className + " which was not generated");
 					}
-					else if (element.getParentNode() instanceof Element parent && (! parent.getAttribute("name").isEmpty()) &&
+					else {
+						if (element.getParentNode() instanceof Element parent && (! parent.getAttribute("name").isEmpty()) &&
 								(! extendsTransitively(files, className, parent.getAttribute("name")))) {
-						problems.add(file.getKey() + ": entity " + entityName + " maps class " + className +
-										" which does not extend the enclosing mapping's class " + parent.getAttribute("name"));
+							problems.add(file.getKey() + ": entity " + entityName + " maps class " + className +
+											" which does not extend the enclosing mapping's class " + parent.getAttribute("name"));
+						}
+						for (Node child = element.getFirstChild(); child != null; child = child.getNextSibling()) {
+							if ((child instanceof Element property) && PROPERTY_TAGS.contains(property.getTagName())) {
+								String propertyName = property.getAttribute("name");
+								if ((! INHERITED_PROPERTIES.contains(propertyName)) && (! declaresField(files, className, propertyName))) {
+									problems.add(file.getKey() + ": entity " + entityName + " maps property " + propertyName +
+													" which " + className + " and the classes it extends do not declare");
+								}
+							}
+						}
+					}
+				}
+			}
+			NodeList params = xml.getElementsByTagName("param");
+			for (int i = 0, l = params.getLength(); i < l; i++) {
+				Element param = (Element) params.item(i);
+				if ("enumClass".equals(param.getAttribute("name"))) {
+					String enumClassName = param.getTextContent().trim();
+					int dollar = enumClassName.indexOf('$');
+					String java = files.get(enumClassName.substring(0, dollar).replace('.', '/') + ".java");
+					if ((java == null) || (! java.contains("public enum " + enumClassName.substring(dollar + 1) + ' '))) {
+						problems.add(file.getKey() + ": enumeration type " + enumClassName + " is not declared");
 					}
 				}
 			}
@@ -337,27 +471,87 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		return problems;
 	}
 
+	/** The mapping elements that map a property of the mapped class. */
+	private static final Set<String> PROPERTY_TAGS = Set.of("property", "many-to-one", "one-to-one", "bag", "list", "set", "map", "component");
+
+	/** The properties a generated class inherits from the Skyve bean classes. */
+	private static final Set<String> INHERITED_PROPERTIES = Set.of("bizId", "bizVersion", "bizLock", "bizKey", "bizCustomer",
+																	"bizFlagComment", "bizDataGroupId", "bizUserId", "bizOrdinal",
+																	"bizParentId", "parent");
+
+	/** The fully qualified superclass of a generated or extension class, or null if it is not one of them. */
+	private static String superclassOf(Map<String, String> files, String className) {
+		String java = files.get(className.replace('.', '/') + ".java");
+		if (java == null) {
+			return null;
+		}
+		Matcher m = Pattern.compile("public (?:abstract )?class \\w+ extends (\\w+)").matcher(java);
+		if (! m.find()) {
+			return null;
+		}
+		String superName = m.group(1);
+		Matcher i = Pattern.compile("import ([\\w.]+\\." + superName + ");").matcher(java);
+		return i.find() ? i.group(1) : className.substring(0, className.lastIndexOf('.')) + '.' + superName;
+	}
+
 	/** Whether the generated class extends the ancestor class, following the generated extends clauses. */
 	private static boolean extendsTransitively(Map<String, String> files, String className, String ancestorClassName) {
+		String current = superclassOf(files, className);
+		while (current != null) {
+			if (current.equals(ancestorClassName)) {
+				return true;
+			}
+			current = superclassOf(files, current);
+		}
+		return false;
+	}
+
+	/** Whether the class or a generated or extension class it extends declares the field. */
+	private static boolean declaresField(Map<String, String> files, String className, String fieldName) {
+		Pattern field = Pattern.compile("(?m)^\\s*private [^;=(]*\\b" + Pattern.quote(fieldName) + "\\s*[=;]");
 		String current = className;
 		while (current != null) {
 			String java = files.get(current.replace('.', '/') + ".java");
 			if (java == null) {
 				return false;
 			}
-			Matcher m = Pattern.compile("public (?:abstract )?class \\w+ extends (\\w+)").matcher(java);
-			if (! m.find()) {
-				return false;
-			}
-			String superName = m.group(1);
-			String packageName = current.substring(0, current.lastIndexOf('.'));
-			Matcher i = Pattern.compile("import ([\\w.]+\\." + superName + ");").matcher(java);
-			current = i.find() ? i.group(1) : packageName + '.' + superName;
-			if (current.equals(ancestorClassName)) {
+			if (field.matcher(java).find()) {
 				return true;
 			}
+			current = superclassOf(files, current);
 		}
 		return false;
+	}
+
+	/**
+	 * Compiles the generated and hand-written extension sources together, returning the errors.
+	 */
+	private static List<String> compilationErrors(Map<String, String> files) throws Exception {
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+		List<JavaFileObject> sources = new ArrayList<>();
+		for (Map.Entry<String, String> file : files.entrySet()) {
+			if (file.getKey().endsWith(".java")) {
+				sources.add(new SimpleJavaFileObject(URI.create("string:///" + file.getKey()), JavaFileObject.Kind.SOURCE) {
+					@Override
+					public CharSequence getCharContent(boolean ignoreEncodingErrors) {
+						return file.getValue();
+					}
+				});
+			}
+		}
+		Path classes = Files.createTempDirectory("odg-customer-override-classes");
+		try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnostics, null, StandardCharsets.UTF_8)) {
+			List<String> options = List.of("-proc:none", "-d", classes.toString(), "-classpath", System.getProperty("java.class.path"));
+			compiler.getTask(null, fileManager, diagnostics, options, null, sources).call();
+		}
+		List<String> result = new ArrayList<>();
+		for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+			if (Diagnostic.Kind.ERROR.equals(diagnostic.getKind())) {
+				result.add(diagnostic.getSource().getName() + ':' + diagnostic.getLineNumber() + ' ' + diagnostic.getMessage(null));
+			}
+		}
+		return result;
 	}
 
 	// ----- an override that narrows the vanilla document ----------------------
@@ -771,19 +965,283 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertTrue(acmeMapping.contains("<joined-subclass name=\"customers.acme.modules.sales.domain.SubOverride\""), acmeMapping));
 	}
 
+	private static final String NEW_DOCUMENT_EXTENDS = "the class generated for a new customer document cannot extend another document's class";
+
 	@Test
 	void aNewCustomerDocumentExtendingAJoinedDocumentIsRefused() {
 		Fixture fixture = new Fixture()
 				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code"))
 				.acme(document("Extra", "SALES_Extra", ExtensionStrategy.joined, "Base", "extra"));
-		assertRefused(fixture, "Customer acme document sales.Extra extends document Base", "cannot join a vanilla inheritance hierarchy");
+		assertRefused(fixture, "Customer acme's new document sales.Extra extends document Base", NEW_DOCUMENT_EXTENDS);
 	}
 
 	@Test
-	void aNewCustomerDocumentExtendingAMappedDocumentGivesConsistentMappings() throws Exception {
-		Map<String, String> files = assertConsistentMappings(new Fixture()
+	void aNewCustomerDocumentExtendingAMappedDocumentIsRefused() {
+		// its class would extend AbstractPersistentBean and lack the inherited code its mapping maps
+		Fixture fixture = new Fixture()
 				.vanilla(document("Base", null, ExtensionStrategy.mapped, null, "code"))
-				.acme(document("Extra", "SALES_Extra", ExtensionStrategy.joined, "Base", "extra")));
-		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("<class name=\"customers.acme.modules.sales.domain.Extra\""));
+				.acme(document("Extra", "SALES_Extra", ExtensionStrategy.joined, "Base", "extra"));
+		assertRefused(fixture, "Customer acme's new document sales.Extra extends document Base", NEW_DOCUMENT_EXTENDS);
 	}
+
+	@Test
+	void aCustomersOwnNewHierarchyIsRefused() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(document("NewBase", "SALES_NewBase", ExtensionStrategy.joined, null, "code"))
+				.acme(document("NewSub", "SALES_NewSub", ExtensionStrategy.joined, "NewBase", "sub"));
+		assertRefused(fixture, "Customer acme's new document sales.NewSub extends document NewBase", NEW_DOCUMENT_EXTENDS);
+	}
+
+	@Test
+	void overridingATransientDocumentThatExtendsAJoinedDocumentIsNotRefused() throws Exception {
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code"))
+				.vanilla(document("Wizard", null, null, "Base", "step"))
+				.acme(document("Wizard", null, null, "Base", "step", "notes")));
+		assertTrue(files.get("customers/acme/modules/sales/domain/WizardOverride.java").contains("public class WizardOverride extends Wizard"),
+					files.keySet().toString());
+	}
+
+	// ----- documents copied into a customer mapping ---------------------------------
+
+	/**
+	 * Vanilla Party extends the mapped Proxy with no strategy of its own - as admin.User extends
+	 * admin.UserProxy - so it is mapped as its own class on Proxy's table.
+	 */
+	private static Fixture proxied() {
+		return new Fixture()
+				.vanilla(document("Proxy", "SALES_Party", ExtensionStrategy.mapped, null, "code"))
+				.vanilla(document("Party", "SALES_Party", null, "Proxy", "name"));
+	}
+
+	@Test
+	void overridingANoStrategySubclassOfAMappedDocumentMapsTheOverrideClass() throws Exception {
+		Map<String, String> files = assertConsistentMappings(proxied()
+				.acme(document("Party", "SALES_Party", null, "Proxy", "name", "employeeNo")));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.PartyOverride\" table=\"SALES_Party\" entity-name=\"acmesalesParty\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("<property name=\"employeeNo\""), acmeMapping));
+	}
+
+	@Test
+	void overridingANoStrategySubclassOfAMappedDocumentWithAnExtensionMapsTheOverrideClass() throws Exception {
+		Map<String, String> files = assertConsistentMappings(proxied()
+				.extension("Party")
+				.acme(document("Party", "SALES_Party", null, "Proxy", "name", "employeeNo")));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(files.get("customers/acme/modules/sales/domain/PartyOverride.java").contains("public class PartyOverride extends PartyExtension")),
+				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.PartyOverride\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("<property name=\"employeeNo\""), acmeMapping),
+				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.Party.PartyExtension\""), vanillaMapping));
+	}
+
+	@Test
+	void narrowingANoStrategySubclassOfAMappedDocumentMapsTheGeneratedSubclasses() throws Exception {
+		Map<String, String> files = assertConsistentMappings(proxied()
+				.acme(document("Party", "SALES_Party", null, "Proxy")));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.domain.PartyVanilla\""), vanillaMapping),
+				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.PartyOverride\""), acmeMapping));
+	}
+
+	/** Order has description, which acme's override leaves out; Order references Client and has Lines. */
+	private static Fixture narrowedOrder() {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code", "description");
+		order.putRelation(association("client", "Client"));
+		order.putRelation(childCollection("lines", "Line"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(association("client", "Client"));
+		acmeOrder.putRelation(childCollection("lines", "Line"));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity");
+		line.setParentDocumentName("Order");
+		DocumentImpl betaLine = document("Line", "SALES_Line", null, null, "quantity", "notes");
+		betaLine.setParentDocumentName("Order");
+		DocumentImpl header = document("Header", "SALES_Header", null, null, "title");
+		header.putRelation(association("order", "Order"));
+		return new Fixture()
+				.vanilla(order)
+				.vanilla(document("Client", "SALES_Client", null, null, "name"))
+				.vanilla(line)
+				.vanilla(header)
+				.acme(acmeOrder)
+				.betaLine(betaLine);
+	}
+
+	/** Asserts beta's copy of the narrowed Order - which beta does not override - maps OrderVanilla. */
+	private static void assertCopiedNarrowedOrderMapsVanillaClass(Fixture fixture) throws Exception {
+		Map<String, String> files = assertConsistentMappings(fixture);
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(betaMapping.contains("<class name=\"modules.sales.domain.OrderVanilla\" table=\"SALES_Order\" entity-name=\"betasalesOrder\""), betaMapping),
+				() -> assertTrue(betaMapping.contains("<property name=\"description\""), betaMapping));
+	}
+
+	@Test
+	void aNarrowedDocumentCopiedThroughAnExportedReferenceMapsItsVanillaClass() throws Exception {
+		Fixture fixture = narrowedOrder();
+		fixture.beta(document("Client", "SALES_Client", null, null, "name", "notes"));
+		assertCopiedNarrowedOrderMapsVanillaClass(fixture);
+	}
+
+	@Test
+	void aNarrowedDocumentCopiedAsAParentMapsItsVanillaClass() throws Exception {
+		Fixture fixture = narrowedOrder();
+		fixture.useBetaLine();
+		assertCopiedNarrowedOrderMapsVanillaClass(fixture);
+	}
+
+	@Test
+	void aNarrowedDocumentCopiedAsAChildMapsItsVanillaClass() throws Exception {
+		// beta overrides Header, whose reference to Order copies Order, then Order's children
+		Fixture fixture = new Fixture();
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		order.setParentDocumentName("Header");
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity", "description");
+		line.setParentDocumentName("Order");
+		order.putRelation(childCollection("lines", "Line"));
+		DocumentImpl acmeLine = document("Line", "SALES_Line", null, null, "quantity");
+		acmeLine.setParentDocumentName("Order");
+		DocumentImpl header = document("Header", "SALES_Header", null, null, "title");
+		header.putRelation(childCollection("orders", "Order"));
+		DocumentImpl betaHeader = document("Header", "SALES_Header", null, null, "title", "notes");
+		betaHeader.putRelation(childCollection("orders", "Order"));
+		fixture.vanilla(header).vanilla(order).vanilla(line).acme(acmeLine).beta(betaHeader);
+
+		Map<String, String> files = assertConsistentMappings(fixture);
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(betaMapping.contains("<class name=\"modules.sales.domain.LineVanilla\" table=\"SALES_Line\" entity-name=\"betasalesLine\""), betaMapping),
+				() -> assertTrue(betaMapping.contains("<property name=\"description\""), betaMapping));
+	}
+
+	@Test
+	void aCopiedNarrowedSubclassMapsItsEnumerationsFromItsVanillaClass() throws Exception {
+		DocumentImpl sub = document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub");
+		sub.putAttribute(enumeration(sub, "status"));
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code"))
+				.vanilla(sub)
+				.beta(document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub"))
+				.acme(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code")));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(acmeMapping.contains("<joined-subclass name=\"modules.sales.domain.SubVanilla\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("modules.sales.domain.SubVanilla$Status"), acmeMapping));
+	}
+
+	// ----- generated sources compile ------------------------------------------------
+
+	@Test
+	void anOverrideOfANarrowedDocumentWithAnExtensionDoesNotRedeclareTheNarrowedAwayProperties() throws Exception {
+		DocumentImpl receipt = document("Receipt", "SALES_Receipt", null, null, "code", "description");
+		receipt.putAttribute(enumeration(receipt, "status"));
+		DocumentImpl betaReceipt = document("Receipt", "SALES_Receipt", null, null, "code", "description", "notes");
+		betaReceipt.putAttribute(enumeration(betaReceipt, "status"));
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(receipt)
+				.extension("Receipt", "ReceiptVanilla")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code"))
+				.beta(betaReceipt));
+
+		String betaOverride = files.get("customers/beta/modules/sales/domain/ReceiptOverride.java");
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(betaOverride.contains("public class ReceiptOverride extends ReceiptExtension"), betaOverride),
+				() -> assertTrue(betaOverride.contains("private String notes"), betaOverride),
+				() -> assertFalse(betaOverride.contains("enum Status"), "inherited from ReceiptVanilla: " + betaOverride),
+				() -> assertFalse(betaOverride.contains("private String description"), "inherited from ReceiptVanilla: " + betaOverride),
+				() -> assertTrue(betaMapping.contains("modules.sales.domain.ReceiptVanilla$Status"), betaMapping),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	@Test
+	void theGeneratedSourcesOfOverridesInAHierarchyCompile() throws Exception {
+		DocumentImpl sub = document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub", "description");
+		sub.putAttribute(enumeration(sub, "status"));
+		DocumentImpl acmeSub = document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub", "notes");
+		acmeSub.putAttribute(enumeration(acmeSub, "priority"));
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code"))
+				.vanilla(sub)
+				.acme(acmeSub)
+				.beta(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code")));
+		assertEquals(List.of(), compilationErrors(files));
+	}
+
+	// ----- reading the extension source -----------------------------------------------
+
+	@Test
+	void anExtensionInLatin1IsChecked() {
+		byte[] source = ("package modules.sales.Receipt;\n// Gr\u00fc\u00dfe\npublic class ReceiptExtension extends modules.sales.domain.Receipt {\n}\n")
+							.getBytes(StandardCharsets.ISO_8859_1);
+		Fixture fixture = new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extensionBytes("Receipt", source)
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code"));
+		assertRefused(fixture, "ReceiptExtension must extend ReceiptVanilla");
+	}
+
+	@Test
+	void anExtensionsCommentsAndLiteralsAreIgnored() throws Exception {
+		String source = "package modules.sales.Receipt;\n\n" +
+							"import modules.sales.domain.ReceiptVanilla;\n\n" +
+							"/**\n * Not: public class ReceiptExtension extends Receipt {\n */\n" +
+							"public class ReceiptExtension /* extends Receipt */ // extends Receipt\n" +
+							"\t\textends ReceiptVanilla {\n" +
+							"\tprivate static final String TEXT = \"class ReceiptExtension extends Receipt {\";\n" +
+							"\tprivate static final long serialVersionUID = 1L;\n}\n";
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extensionSource("Receipt", source)
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code")));
+		assertTrue(files.containsKey("modules/sales/domain/ReceiptVanilla.java"), files.keySet().toString());
+	}
+
+	@Test
+	void anUnreadableExtensionIsSkippedWithAWarning() throws Exception {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "Receipt")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code"));
+		fixture.unreadableExtensions = true;
+
+		PrintStream previousErr = System.err;
+		ByteArrayOutputStream err = new ByteArrayOutputStream();
+		Map<String, String> files;
+		System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
+		try {
+			files = generate(fixture);
+		}
+		finally {
+			System.setErr(previousErr);
+		}
+		String warnings = err.toString(StandardCharsets.UTF_8);
+		Map<String, String> result = files;
+		assertAll(
+				() -> assertTrue(warnings.contains("WARNING: Could not read"), warnings),
+				() -> assertTrue(result.containsKey("modules/sales/domain/ReceiptVanilla.java"), result.keySet().toString()));
+	}
+
+	// ----- a customer's own extension ---------------------------------------------
+
+	@Test
+	void anUnchangedOverrideWithItsOwnExtensionGetsAnOverrideClass() throws Exception {
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Invoice", "SALES_Invoice", null, null, "code"))
+				.acme(document("Invoice", "SALES_Invoice", null, null, "code"))
+				.acmeExtension("Invoice"));
+		String override = files.get("customers/acme/modules/sales/domain/InvoiceOverride.java");
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue((override != null) && override.contains("public abstract class InvoiceOverride extends Invoice"), String.valueOf(override)),
+				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.Invoice.InvoiceExtension\""), acmeMapping),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
 }

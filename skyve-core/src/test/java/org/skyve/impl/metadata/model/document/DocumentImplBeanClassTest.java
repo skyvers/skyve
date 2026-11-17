@@ -77,6 +77,21 @@ class DocumentImplBeanClassTest {
 		// fixture
 	}
 
+	/** A generated domain class. */
+	public static class Payment {
+		// fixture
+	}
+
+	/** The abstract class generated for customer acme's override of Payment, as acme has its own extension. */
+	public abstract static class PaymentOverride extends Payment {
+		// fixture
+	}
+
+	/** Customer acme's own hand-written extension of its Payment override. */
+	public static class AcmePaymentExtension extends PaymentOverride {
+		// fixture
+	}
+
 	/** The fixture classes by the names Skyve looks them up by. */
 	private static final Map<String, Class<?>> CLASSES = Map.ofEntries(
 			Map.entry("modules.beanclassfixture.domain.Item", Item.class),
@@ -88,14 +103,20 @@ class DocumentImplBeanClassTest {
 			Map.entry("customers.acme.modules.beanclassfixture.domain.InvoiceOverride", InvoiceOverride.class),
 			Map.entry("modules.beanclassfixture.domain.Receipt", Receipt.class),
 			Map.entry("modules.beanclassfixture.Receipt.ReceiptExtension", ReceiptExtension.class),
-			Map.entry("modules.beanclassfixture.domain.ReceiptVanilla", ReceiptVanilla.class));
+			Map.entry("modules.beanclassfixture.domain.ReceiptVanilla", ReceiptVanilla.class),
+			Map.entry("modules.beanclassfixture.domain.Payment", Payment.class),
+			Map.entry("customers.acme.modules.beanclassfixture.domain.PaymentOverride", PaymentOverride.class),
+			Map.entry("customers.acme.modules.beanclassfixture.Payment.PaymentExtension", AcmePaymentExtension.class));
 
 	/** The documents each customer overrides - acme has generated override classes, beta none. */
-	private static final Map<String, Set<String>> OVERRIDES = Map.of("acme", Set.of("Item", "Order", "Invoice"),
+	private static final Map<String, Set<String>> OVERRIDES = Map.of("acme", Set.of("Item", "Order", "Invoice", "Payment"),
 																		"beta", Set.of("Invoice"));
 
 	/** The documents with a hand-written vanilla extension. */
 	private static final Set<String> EXTENDED = Set.of("Invoice", "Receipt");
+
+	/** The documents customer acme has its own hand-written extension of. */
+	private static final Set<String> ACME_EXTENDED = Set.of("Payment");
 
 	private ProvidedRepository previousRepository;
 	private ClassLoader previousClassLoader;
@@ -110,6 +131,9 @@ class DocumentImplBeanClassTest {
 			String[] parts = key.split("/");
 			String documentName = parts[2];
 			if (parts.length == 4) { // modules/<m>/<Doc>/<Doc>Extension
+				if ("acme".equals(customerName) && ACME_EXTENDED.contains(documentName)) {
+					return "customers/acme/" + key;
+				}
 				return EXTENDED.contains(documentName) ? key : null;
 			}
 			return OVERRIDES.getOrDefault(customerName, Set.of()).contains(documentName) ? "customers/" + customerName + '/' + key : key;
@@ -170,6 +194,16 @@ class DocumentImplBeanClassTest {
 	@Test
 	void anOverrideWithoutAnOverrideClassUsesTheVanillaDomainClass() throws Exception {
 		assertEquals(Item.class, beanClass("acme", "Item"));
+	}
+
+	@Test
+	void anOverrideWithTheCustomersOwnExtensionUsesThatExtension() throws Exception {
+		assertEquals(AcmePaymentExtension.class, beanClass("acme", "Payment"));
+	}
+
+	@Test
+	void aDocumentACustomerHasItsOwnExtensionOfUsesTheDomainClassForOtherCustomers() throws Exception {
+		assertEquals(Payment.class, beanClass("beta", "Payment"));
 	}
 
 	@Test

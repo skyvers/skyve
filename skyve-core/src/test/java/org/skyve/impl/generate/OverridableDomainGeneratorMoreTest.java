@@ -5811,6 +5811,56 @@ class OverridableDomainGeneratorMoreTest {
 				() -> assertTrue(Files.isSymbolicLink(root.resolve("src/customers/other/modules/sales"))));
 	}
 
+	@Test
+	void generateFailsBeforeDeletingAnythingWhenACustomerDirectoryIsAFile() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-file-ancestor");
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+		write(root.resolve("src/customers/acme"), "not a directory");
+		Map<String, String> before = snapshot(root);
+
+		IOException e = assertThrows(IOException.class, () -> generateInto(root, customerEnumRepository(salesOverride(), true)));
+
+		assertAll(
+				() -> assertTrue(e.getMessage().contains("is a file, not a directory"), e.getMessage()),
+				() -> assertEquals(before, snapshot(root), "Nothing may be deleted when the run cannot complete"));
+	}
+
+	@Test
+	void generateRefusesToWriteThroughALinkedCustomerDirectory() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-write-link");
+		Path elsewhere = Files.createTempDirectory("odg-customer-write-link-elsewhere");
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+		Files.createSymbolicLink(root.resolve("src/customers"), elsewhere);
+		Map<String, String> before = snapshot(root);
+
+		IOException e = assertThrows(IOException.class, () -> generateInto(root, customerEnumRepository(salesOverride(), true)));
+
+		assertAll(
+				() -> assertTrue(e.getMessage().contains("through the linked directory"), e.getMessage()),
+				() -> assertEquals(before, snapshot(root), "Nothing may be deleted when the run cannot complete"),
+				() -> assertEquals(Map.of(), snapshot(elsewhere), "Nothing may be written outside the tree"));
+	}
+
+	@Test
+	void generateRegeneratesAFileRenamedOnlyInLetterCase() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-case");
+		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
+		generateInto(root, repo);
+		Path domain = root.resolve(CUSTOMER_DOMAIN);
+		// as left by a document or module renamed only in case on a case-insensitive file system
+		Path renamed = Files.move(domain.resolve("SalesRole.java"), domain.resolve("renaming.tmp"));
+		Files.move(renamed, domain.resolve("salesrole.java"));
+
+		generateInto(root, repo);
+
+		try (Stream<Path> files = Files.list(domain)) {
+			List<String> names = files.map(path -> path.getFileName().toString()).toList();
+			assertAll(
+					() -> assertTrue(names.contains("SalesRole.java"), names.toString()),
+					() -> assertFalse(names.contains("salesrole.java"), names.toString()));
+		}
+	}
+
 	private static Path write(Path file, String contents) throws Exception {
 		Files.createDirectories(file.getParent());
 		return Files.writeString(file, contents);
