@@ -12,6 +12,7 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.User;
 
 /**
@@ -43,15 +44,17 @@ public class GenerateUniqueUserName implements ServerSideAction<User> {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	public static String generateUniqueUserNameFromContactName(User user) throws Exception {
-		if (user.getContact() == null) {
+		ContactExtension contact = user.getContact();
+		if (contact == null) {
 			Message vm = new Message(User.contactPropertyName, "You first need to select a contact for this user");
 			ValidationException ve = new ValidationException(vm);
 			throw ve;
 		}
 		String newUName = "";
 
-		if (user.getContact() != null && user.getContact().getName() != null) {
-			newUName = user.getContact().getName().toLowerCase().replaceAll("[^a-z]", "");
+		String contactName = contact.getName();
+		if (contactName != null) {
+			newUName = contactName.toLowerCase().replaceAll("[^a-z]", "");
 			if (newUName.length() > 10) {
 				newUName = newUName.substring(0, 9);
 			}

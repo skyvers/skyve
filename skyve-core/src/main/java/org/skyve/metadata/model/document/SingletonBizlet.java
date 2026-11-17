@@ -49,7 +49,6 @@ public abstract class SingletonBizlet<T extends PersistentBean> extends Bizlet<T
 	 */
 	@SuppressWarnings({"java:S112", "java:S1130"}) // Intentionally permitted exceptions
 	public @Nonnull T newInstance(@Nonnull T bean, @Nonnull DocumentPermissionScope scope) throws Exception {
-		@SuppressWarnings("null")
 		@Nonnull T result = CORE.getPersistence().withDocumentPermissionScopes(scope, p -> {
 			try {
 				return monomorphicNewInstance(bean);

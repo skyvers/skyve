@@ -81,7 +81,7 @@ public class UniqueConstraintNullable extends AbstractPersistentBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override

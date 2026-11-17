@@ -3,7 +3,6 @@ package org.skyve.impl.snapshot;
 import org.skyve.metadata.FilterOperator;
 
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * Enumerates SmartClient-compatible filter operators used by snapshot serialization.
@@ -88,69 +87,28 @@ public enum SmartClientFilterOperator {
 	 * Maps a framework {@link FilterOperator} to the closest SmartClient operator.
 	 *
 	 * @param operator The framework operator.
-	 * @return The mapped SmartClient operator, or {@code null} when no mapping exists.
+	 * @return The mapped SmartClient operator.
 	 */
-	public static @Nullable SmartClientFilterOperator fromFilterOperator(@Nonnull FilterOperator operator) {
-		SmartClientFilterOperator result = null;
-		
-		switch (operator) {
-		case equal:
-			result = equals;
-			break;
-		case greater:
-			result = greaterThan;
-			break;
-		case greaterEqual:
-			result = greaterOrEqual;
-			break;
-		case isNull:
-			result = isNull;
-			break;
-		case less:
-			result = lessThan;
-			break;
-		case lessEqual:
-			result = lessOrEqual;
-			break;
-		case like:
-			result = iContains;
-			break;
-		case notEqual:
-			result = iNotEqual;
-			break;
-		case notLike:
-			result = iNotContains;
-			break;
-		case notNull:
-			result = notNull;
-			break;
-		case nullOrEqual:
-			result = equals;
-			break;
-		case nullOrGreater:
-			result = greaterThan;
-			break;
-		case nullOrGreaterEqual:
-			result = greaterOrEqual;
-			break;
-		case nullOrLess:
-			result = lessThan;
-			break;
-		case nullOrLessEqual:
-			result = lessOrEqual;
-			break;
-		case nullOrLike:
-			result = iContains;
-			break;
-		case nullOrNotEqual:
-			result = notEqual;
-			break;
-		case nullOrNotLike:
-			result = iNotContains;
-			break;
-		default:
-		}
-		
-		return result;
+	public static @Nonnull SmartClientFilterOperator fromFilterOperator(@Nonnull FilterOperator operator) {
+		return switch (operator) {
+			case equal -> equals;
+			case greater -> greaterThan;
+			case greaterEqual -> greaterOrEqual;
+			case isNull -> isNull;
+			case less -> lessThan;
+			case lessEqual -> lessOrEqual;
+			case like -> iContains;
+			case notEqual -> iNotEqual;
+			case notLike -> iNotContains;
+			case notNull -> notNull;
+			case nullOrEqual -> equals;
+			case nullOrGreater -> greaterThan;
+			case nullOrGreaterEqual -> greaterOrEqual;
+			case nullOrLess -> lessThan;
+			case nullOrLessEqual -> lessOrEqual;
+			case nullOrLike -> iContains;
+			case nullOrNotEqual -> notEqual;
+			case nullOrNotLike -> iNotContains;
+		};
 	}
 }

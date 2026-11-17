@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -460,7 +461,7 @@ public class DoctorUtil {
 					expression = pc.getExpression();
 				}
 				
-				table.setRowValues(binding, c.getLocalisedDisplayName(), expression, c.getFilterExpression(), titleCase(c.getSortOrder() == null ? "" : c.getSortOrder().toString()));
+				table.setRowValues(binding, c.getLocalisedDisplayName(), expression, c.getFilterExpression(), titleCase(Objects.toString(c.getSortOrder(), "")));
 			}
 			out.println(table.toHTML(true));
 		}

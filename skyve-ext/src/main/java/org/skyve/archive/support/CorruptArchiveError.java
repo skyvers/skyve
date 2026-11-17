@@ -171,7 +171,7 @@ public interface CorruptArchiveError extends PersistentBean {
          */
         @Override
         public @Nonnull String toLocalisedDescription() {
-            return Util.i18n(description);
+            return Util.nullSafeI18n(description);
         }
 
         /**

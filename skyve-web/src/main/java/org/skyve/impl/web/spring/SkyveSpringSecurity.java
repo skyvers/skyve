@@ -414,7 +414,8 @@ public class SkyveSpringSecurity {
 			public void updateUser(@SuppressWarnings("null") @Nonnull UserDetails user) {
 				TwoFactorAuthUser tfa = (TwoFactorAuthUser) user;
 				
-				Timestamp codeGenTS = tfa.getTfaCodeGeneratedTimestamp() == null ? null : new Timestamp(tfa.getTfaCodeGeneratedTimestamp().getTime());
+				org.skyve.domain.types.Timestamp generated = tfa.getTfaCodeGeneratedTimestamp();
+				Timestamp codeGenTS = (generated == null) ? null : new Timestamp(generated.getTime());
 				
 				JdbcTemplate t = getJdbcTemplate();
 				if (t == null) {

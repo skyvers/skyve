@@ -843,7 +843,7 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * @return The value returned by the function.
 	 */
 	@Override
-	public @Nullable <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Function<Persistence, R> function) {
+	public <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Function<Persistence, R> function) {
 		try {
 			setDocumentPermissionScopes(scope);
 			return function.apply(this);
