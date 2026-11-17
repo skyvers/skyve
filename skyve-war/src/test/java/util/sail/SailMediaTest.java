@@ -95,6 +95,41 @@ class SailMediaTest {
 					() -> assertTrue(index.contains("3 runs"), index));
 	}
 
+	/**
+	 * In a unit (a workflow), keepMedia=failed deletes the passed runs' folders only when the unit ends having passed:
+	 * a unit that failed later (a later leg) keeps them all.
+	 */
+	@Test
+	void aUnitKeepsItsRunsMediaUnlessTheWholeUnitPassed(@TempDir Path base) {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(), Map.of(), null, base);
+		SailSettings failedOnly = SailSettings.resolve(environment, List.of(SailSettings.code().snapshotDir(Path.of("media"))
+																					.keepMedia(SailSettings.KeepMedia.FAILED).layer()));
+		Path media = base.resolve("media");
+		SailMedia.beginUnit();
+		Path first;
+		Path second;
+		try {
+			first = run(failedOnly, media, "unitPassed1", null, true);
+			second = run(failedOnly, media, "unitPassed2", null, true);
+			assertAll(() -> assertTrue(Files.exists(first), "kept until the unit ends"),
+						() -> assertTrue(Files.exists(second), "kept until the unit ends"));
+		}
+		finally {
+			SailMedia.endUnit(true);
+		}
+		SailMedia.beginUnit();
+		Path kept;
+		try {
+			kept = run(failedOnly, media, "unitFailedLater", null, true);
+		}
+		finally {
+			SailMedia.endUnit(false);
+		}
+		assertAll(() -> assertFalse(Files.exists(first), "the passed unit's runs are deleted"),
+					() -> assertFalse(Files.exists(second), "the passed unit's runs are deleted"),
+					() -> assertTrue(Files.exists(kept.resolve("index.html")), "a failed unit keeps its passed runs"));
+	}
+
 	/** Runs one step in a run's media, labelled, and ends it; returns the run's folder. */
 	private static Path run(SailSettings settings, Path base, String label, String failure, boolean passed) {
 		PrimeFacesSelenide selenide = mock(PrimeFacesSelenide.class);

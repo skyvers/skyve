@@ -501,7 +501,7 @@ class SmartClientRecorderRoundTripSailIT extends AbstractSmartClientInterpretedS
 	 * Fetches a URL relative to the base URL in the browser's session and returns its text.
 	 */
 	private @Nonnull String fetch(@Nonnull String relativeUrl) {
-		String url = new BrowserConfiguration().getBaseUrl() + relativeUrl;
+		String url = selenium.getBaseUrl() + relativeUrl;
 		Object result = selenium.waitFor(d -> ((JavascriptExecutor) d).executeAsyncScript(
 				"var done = arguments[arguments.length - 1];" +
 				"fetch(arguments[0], {credentials: 'same-origin'}).then(function (r) { return r.text(); })" +

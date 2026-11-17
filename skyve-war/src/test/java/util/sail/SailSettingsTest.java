@@ -20,10 +20,10 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.Suite.Evidence;
 
 import util.sail.BrowserConfiguration.Browsers;
 import util.sail.SailSettings.Environment;
-import util.sail.SailSettings.Evidence;
 import util.sail.SailSettings.KeepMedia;
 import util.sail.SailSettings.Layer;
 import util.sail.SailSettings.Level;
@@ -82,12 +82,12 @@ class SailSettingsTest {
 					() -> assertNull(settings.snapshotDir()),
 					() -> assertFalse(settings.snapshotSource()),
 					() -> assertNull(settings.videoDir()),
-					() -> assertEquals(Evidence.NONE, settings.evidence()),
+					() -> assertEquals(Evidence.none, settings.evidence()),
 					() -> assertEquals(KeepMedia.ALL, settings.keepMedia()),
 					() -> assertEquals(List.of(), settings.suiteOnly()),
 					() -> assertEquals(List.of(), settings.run()),
 					() -> assertEquals(Map.of(), settings.variables()),
-					() -> assertNull(settings.propertiesFile()),
+					() -> assertEquals(List.of(), settings.ignored()),
 					() -> assertEquals(List.of(), settings.describe()));
 	}
 
@@ -128,7 +128,7 @@ class SailSettingsTest {
 	 */
 	@Test
 	void theInnermostScriptLevelWinsAndTheRunBeatsTheScripts() throws IOException {
-		Layer suite = SailSettings.suite("s.xml", TestStrategy.None, Evidence.VIDEO);
+		Layer suite = SailSettings.suite("s.xml", TestStrategy.None, Evidence.video);
 		Layer workflow = SailSettings.workflow("w.xml", TestStrategy.Verify);
 		Layer automation = SailSettings.automation("a.xml", TestStrategy.Assert);
 		SailSettings all = resolve(suite, workflow, automation);
@@ -140,35 +140,59 @@ class SailSettingsTest {
 					() -> assertEquals("automation a.xml", source(all, SailSettings.TEST_STRATEGY)),
 					() -> assertEquals(Level.AUTOMATION, level(all, SailSettings.TEST_STRATEGY)),
 					() -> assertNull(all.runOverride(SailSettings.TEST_STRATEGY), "a script's strategy is not an override"),
-					() -> assertEquals(Evidence.VIDEO, all.evidence()),
+					() -> assertEquals(Evidence.video, all.evidence()),
 					() -> assertEquals(TestStrategy.Verify, noAutomation.testStrategy()),
 					() -> assertEquals("workflow w.xml", source(noAutomation, SailSettings.TEST_STRATEGY)),
 					() -> assertEquals(TestStrategy.None, suiteOnly.testStrategy()),
 					() -> assertEquals("suite s.xml", source(suiteOnly, SailSettings.TEST_STRATEGY)),
 					() -> assertEquals(TestStrategy.Verify, file.testStrategy()),
 					() -> assertEquals(Level.FILE, overrideLevel(file, SailSettings.TEST_STRATEGY)),
-					() -> assertEquals(Evidence.SNAPSHOTS, file.evidence()));
+					() -> assertEquals(Evidence.snapshots, file.evidence()));
 	}
 
-	/** Code beats a browser configuration's own values, which are code too, so that a test's settings() rule its devices. */
+	/**
+	 * The test's code beats the properties file, which beats a browser configuration's own values (an IT's boilerplate),
+	 * so that the file and a test's settings() can both choose the browser.
+	 */
 	@Test
-	void aTestsCodeBeatsABrowserConfigurationsOwnValues() {
+	void aTestsCodeAndTheFileBeatABrowserConfigurationsOwnValues() throws IOException {
+		userFile("sail.headless=true\n");
 		SailSettings.Code test = SailSettings.code().browser(Browsers.firefox);
-		SailSettings.Code configuration = SailSettings.code().browser(Browsers.edge).headless(false);
-		SailSettings settings = resolve(test.layer(), configuration.layer("code: BrowserConfiguration"));
+		SailSettings.Code configuration = SailSettings.code().browser(Browsers.edge).headless(false).timeoutSeconds(7);
+		SailSettings settings = resolve(test.layer(), configuration.layer(Level.CONFIGURATION, "BrowserConfiguration"));
+		String file = directory.resolve("home/.skyve/sail.properties").toString();
 		assertAll(() -> assertEquals(Browsers.firefox, settings.browser()),
 					() -> assertEquals("code", source(settings, SailSettings.BROWSER)),
-					() -> assertFalse(settings.headless()),
-					() -> assertEquals("code: BrowserConfiguration", source(settings, SailSettings.HEADLESS)));
+					() -> assertTrue(settings.headless()),
+					() -> assertEquals(file, source(settings, SailSettings.HEADLESS)),
+					() -> assertEquals(Duration.ofSeconds(7), settings.timeout()),
+					() -> assertEquals(Level.CONFIGURATION, level(settings, SailSettings.TIMEOUT_SECONDS)));
 	}
 
 	@Test
 	void aBrowserConfigurationResolvesTheTestsSettingsBeforeItsOwn() {
 		BrowserConfiguration configuration = new BrowserConfiguration().browser(Browsers.edge);
-		Browsers own = configuration.getBrowser();
+		Environment sources = new Environment(system, env, null, directory);
+		Browsers own = configuration.resolve(sources).browser();
 		configuration.settings(SailSettings.code().browser(Browsers.safari));
 		assertAll(() -> assertEquals(Browsers.edge, own),
-					() -> assertEquals(Browsers.safari, configuration.getBrowser()));
+					() -> assertEquals(Browsers.safari, configuration.resolve(sources).browser()));
+	}
+
+	/** A fixed configuration (a deployed-environment test's browser) resolves only its own values: no SAIL setting moves it. */
+	@Test
+	void aFixedBrowserConfigurationIgnoresEverySailSetting() throws IOException {
+		userFile("sail.baseUrl=http://file.test/skyve/\nsail.headless=false\n");
+		env.put("SAIL_BASE_URL", "http://env.test/skyve/");
+		system.put(SailSettings.BROWSER, "firefox");
+		BrowserConfiguration configuration = new BrowserConfiguration().fixed().baseUrl("https://deployed.test/app/")
+										.settings(SailSettings.code().baseUrl("http://code.test/skyve/"));
+		SailSettings settings = configuration.resolve(new Environment(system, env, directory.resolve("home"), directory));
+		assertAll(() -> assertEquals("https://deployed.test/app/", settings.baseUrl()),
+					() -> assertEquals("BrowserConfiguration", source(settings, SailSettings.BASE_URL)),
+					() -> assertTrue(settings.headless()),
+					() -> assertEquals(Browsers.chrome, settings.browser()),
+					() -> assertEquals(List.of(), settings.describe().stream().filter(line -> ! line.startsWith("baseUrl=")).toList()));
 	}
 
 	@Test
@@ -202,11 +226,55 @@ class SailSettingsTest {
 					() -> assertEquals("SAIL_VAR_USER_NAME", source(settings, SailSettings.VAR_PREFIX + "user_name")));
 	}
 
+	/** sail.* and SAIL_* names that are not settings are ignored, and listed, except those other SAIL code reads. */
 	@Test
-	void sailPropertiesThatAreNotSettingsAreIgnored() {
+	void namesThatAreNotSettingsAreIgnoredAndListed() {
 		system.put("sail.recording", "true");
 		system.put("sail.personas", "/tmp/p.tsv");
-		assertEquals(List.of(), resolve().describe());
+		system.put("sail.timeoutSecs", "5");
+		env.put("SAIL_PERSONA_PASSWORD", "x");
+		env.put("SAIL_HEADLES", "false");
+		SailSettings settings = resolve();
+		assertAll(() -> assertEquals(List.of(), settings.describe()),
+					() -> assertEquals(List.of("-Dsail.timeoutSecs", "SAIL_HEADLES"), settings.ignored()));
+	}
+
+	/** A blank value counts as not set, for variables too: a lower level's value stays. */
+	@Test
+	void blankValuesCountAsNotSet() {
+		system.put(SailSettings.VAR_PREFIX + "password", "");
+		system.put(SailSettings.HEADLESS, " ");
+		SailSettings settings = resolve(SailSettings.code().variable("password", "from-code").headless(false).layer());
+		assertAll(() -> assertEquals(Map.of("password", "from-code"), settings.variables()),
+					() -> assertEquals("code", source(settings, SailSettings.VAR_PREFIX + "password")),
+					() -> assertFalse(settings.headless()));
+	}
+
+	/** An environment variable binds to a variable that only the properties file names. */
+	@Test
+	void anEnvironmentVariableBindsToAVariableTheFileNames() throws IOException {
+		userFile("sail.var.admin_password=from-file\n");
+		env.put("SAIL_VAR_ADMIN_PASSWORD", "from-env");
+		SailSettings settings = resolve();
+		assertAll(() -> assertEquals(Map.of("admin_password", "from-env"), settings.variables()),
+					() -> assertEquals("SAIL_VAR_ADMIN_PASSWORD", source(settings, SailSettings.VAR_PREFIX + "admin_password")));
+	}
+
+	@Test
+	void anEnvironmentHidesItsVariablesWhenShown() {
+		system.put(SailSettings.VAR_PREFIX + "password", "secret-d");
+		env.put("SAIL_VAR_TOKEN", "secret-env");
+		env.put("SAIL_HEADLESS", "false");
+		String shown = new Environment(system, env, null, directory).toString();
+		assertAll(() -> assertFalse(shown.contains("secret"), shown),
+					() -> assertTrue(shown.contains("SAIL_HEADLESS=false"), shown),
+					() -> assertTrue(shown.contains("sail.var.password=********"), shown));
+	}
+
+	@Test
+	void directoriesAreNormalisedAgainstTheWorkingDirectory() {
+		SailSettings settings = resolve(SailSettings.code().failureDir(Path.of("a/../b/./c")).layer());
+		assertEquals(directory.resolve("b/c"), settings.failureDir());
 	}
 
 	@Test
@@ -214,7 +282,6 @@ class SailSettingsTest {
 		Path file = userFile("sail.headless=false\nsail.var.password=secret\n");
 		SailSettings settings = resolve();
 		assertAll(() -> assertFalse(settings.headless()),
-					() -> assertEquals(file, settings.propertiesFile()),
 					() -> assertEquals(file.toString(), source(settings, SailSettings.HEADLESS)),
 					() -> assertEquals(Map.of("password", "secret"), settings.variables()));
 	}
@@ -227,10 +294,10 @@ class SailSettingsTest {
 		SailSettings fromCode = resolve(SailSettings.code().properties(Path.of("ci.properties")).layer());
 		env.put("SAIL_PROPERTIES", named.toString());
 		SailSettings fromEnvironment = resolve();
-		assertAll(() -> assertEquals(named, fromCode.propertiesFile()),
+		assertAll(() -> assertEquals(named.toString(), source(fromCode, SailSettings.TIMEOUT_SECONDS)),
 					() -> assertEquals(Duration.ofSeconds(90), fromCode.timeout()),
 					() -> assertTrue(fromCode.headless(), "the user's file is not read"),
-					() -> assertEquals(named, fromEnvironment.propertiesFile()),
+					() -> assertEquals(named.toString(), source(fromEnvironment, SailSettings.TIMEOUT_SECONDS)),
 					() -> assertEquals("SAIL_PROPERTIES", source(fromEnvironment, SailSettings.PROPERTIES)));
 	}
 
@@ -258,7 +325,8 @@ class SailSettingsTest {
 		userFile("sail.browser=opera\n");
 		SailSettings.Code code = SailSettings.code().set(SailSettings.TEST_STRATEGY, "Check").set(SailSettings.EVIDENCE, "some")
 										.set(SailSettings.KEEP_MEDIA, "passed").baseUrl("localhost:8080").set(SailSettings.SUITE_ONLY, " , ");
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> resolve(code.layer()));
+		Layer layer = code.layer();
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> resolve(layer));
 		String file = directory.resolve("home/.skyve/sail.properties").toString();
 		assertEquals("Invalid SAIL settings:\n" +
 						"  sail.baseUrl=localhost:8080 (code): use an http or https URL ending in /, such as http://localhost:8080/skyve/\n" +
@@ -289,7 +357,7 @@ class SailSettingsTest {
 		assertAll(() -> assertEquals(TestStrategy.Verify, settings.testStrategy()),
 					() -> assertEquals(Browsers.firefox, settings.browser()),
 					() -> assertFalse(settings.headless()),
-					() -> assertEquals(Evidence.VIDEO, settings.evidence()));
+					() -> assertEquals(Evidence.video, settings.evidence()));
 	}
 
 	@Test
@@ -304,7 +372,7 @@ class SailSettingsTest {
 												.snapshotDir(Path.of("s"))
 												.snapshotSource(true)
 												.videoDir(Path.of("/v"))
-												.evidence(Evidence.ALL)
+												.evidence(Evidence.all)
 												.keepMedia(KeepMedia.FAILED)
 												.suiteOnly("03", "04")
 												.run("a.xml", "b.xml")
@@ -320,7 +388,7 @@ class SailSettingsTest {
 					() -> assertEquals(directory.resolve("s"), settings.snapshotDir()),
 					() -> assertTrue(settings.snapshotSource()),
 					() -> assertEquals(Path.of("/v"), settings.videoDir()),
-					() -> assertEquals(Evidence.ALL, settings.evidence()),
+					() -> assertEquals(Evidence.all, settings.evidence()),
 					() -> assertEquals(KeepMedia.FAILED, settings.keepMedia()),
 					() -> assertEquals(List.of("03", "04"), settings.suiteOnly()),
 					() -> assertEquals(List.of("a.xml", "b.xml"), settings.run()),
@@ -361,9 +429,9 @@ class SailSettingsTest {
 	/** An evidence request turns on the kinds it names in target/sail; a directory that is set wins, and turns its kind on. */
 	@Test
 	void anEvidenceRequestUsesTheDefaultDirectoriesUnlessOneIsSet() {
-		SailSettings all = resolve(SailSettings.suite("s.xml", null, Evidence.ALL));
-		SailSettings failures = resolve(SailSettings.code().evidence(Evidence.FAILURES).videoDir(Path.of("v")).layer());
-		SailSettings snapshots = resolve(SailSettings.code().evidence(Evidence.SNAPSHOTS).layer());
+		SailSettings all = resolve(SailSettings.suite("s.xml", null, Evidence.all));
+		SailSettings failures = resolve(SailSettings.code().evidence(Evidence.failures).videoDir(Path.of("v")).layer());
+		SailSettings snapshots = resolve(SailSettings.code().evidence(Evidence.snapshots).layer());
 		Path media = directory.resolve("target/sail/media");
 		assertAll(() -> assertEquals(directory.resolve("target/sail/failures"), all.failureDir()),
 					() -> assertEquals(media, all.snapshotDir()),

@@ -434,7 +434,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 	private static final Pattern CONVERSATION_ID = Pattern.compile("_c=[0-9a-f-]+");
 
 	private @Nonnull String fetch(@Nonnull String relativeUrl) {
-		String url = new BrowserConfiguration().getBaseUrl() + relativeUrl;
+		String url = selenium.getBaseUrl() + relativeUrl;
 		Object result = selenium.waitFor(d -> ((JavascriptExecutor) d).executeAsyncScript(
 				"var done = arguments[arguments.length - 1];" +
 				"fetch(arguments[0], {credentials: 'same-origin'}).then(function (r) { return r.text(); })" +

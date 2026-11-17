@@ -93,6 +93,12 @@ public final class SailMedia {
 	private static final Pattern METHOD_CONTENT = Pattern.compile("<(?:\\w+:)?method>(.*)</(?:\\w+:)?method>", Pattern.DOTALL);
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
+	/**
+	 * The runs of the unit (a workflow) running on this thread, whose media is kept or deleted together; null outside
+	 * a unit. Set by {@link #beginUnit()} and removed by {@link #endUnit(boolean)}, which its caller calls in a
+	 * {@code finally}.
+	 */
+	private static final ThreadLocal<List<SailMedia>> UNIT = new ThreadLocal<>();
 
 	/** One executed step: where it ran, what it was, when, how it went, and its snapshot. */
 	record StepRecord(int sequence,
@@ -140,6 +146,8 @@ public final class SailMedia {
 	private final Path videoRun;
 	private final boolean saveSource;
 	private final SailSettings.KeepMedia keepMedia;
+	/** Whether the run passed with no failed step, once it has finished. */
+	private boolean passed;
 	private final List<StepRecord> steps = new ArrayList<>();
 	private Screencast screencast;
 	/** The browser the screencast was last started for (or tried), so that it is restarted only for a new browser. */
@@ -317,22 +325,69 @@ public final class SailMedia {
 	}
 
 	/**
-	 * Ends the run: stops the screencast, and writes the film strip, the player and each directory's list of runs; or,
-	 * when the run passed and {@value SailSettings#KEEP_MEDIA} is {@code failed}, deletes the run's folders instead.
+	 * Starts a unit of automation runs on this thread, such as a workflow, whose media is kept or deleted together: with
+	 * {@value SailSettings#KEEP_MEDIA}{@code =failed}, a passed run's folders are deleted only when the whole unit
+	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself.
 	 *
-	 * <p>Side effects: writes or deletes files in the run's folders, and rewrites each directory's list of runs.
-	 *
-	 * @param passed	whether the automation passed; a run with a failed step is kept even if this is true
+	 * <p>Side effects: sets this thread's unit, which the caller must end in a {@code finally}.
 	 */
-	void finish(boolean passed) {
+	static void beginUnit() {
+		UNIT.set(new ArrayList<>());
+	}
+
+	/**
+	 * Ends this thread's unit: if it passed, and every run in it passed, deletes the folders of its runs whose settings
+	 * keep only failed runs' media.
+	 *
+	 * <p>Side effects: may delete the runs' folders and rewrite their directories' lists of runs; clears the unit.
+	 *
+	 * @param unitPassed	whether the unit passed
+	 */
+	static void endUnit(boolean unitPassed) {
+		List<SailMedia> runs = UNIT.get();
+		UNIT.remove();
+		if ((runs == null) || (! unitPassed)) {
+			return;
+		}
+		for (SailMedia run : runs) {
+			if (! run.passed) {
+				return;
+			}
+		}
+		for (SailMedia run : runs) {
+			if (run.keepMedia == SailSettings.KeepMedia.FAILED) {
+				run.delete();
+			}
+		}
+	}
+
+	/**
+	 * Ends the run: stops the screencast, and writes the film strip, the player and each directory's list of runs.
+	 * Then, when the run passed and {@value SailSettings#KEEP_MEDIA} is {@code failed}, deletes the run's folders:
+	 * at once, or when its unit ends (see {@link #beginUnit()}).
+	 *
+	 * <p>Side effects: writes, and may delete, files in the run's folders, and rewrites each directory's list of runs.
+	 *
+	 * @param automationPassed	whether the automation passed; a run with a failed step counts as failed even so
+	 */
+	void finish(boolean automationPassed) {
 		if (screencast != null) {
 			screencast.stop();
 			screencast = null;
 		}
-		if (passed && (keepMedia == SailSettings.KeepMedia.FAILED) && steps.stream().noneMatch(StepRecord::failed)) {
-			delete();
-			return;
+		passed = automationPassed && steps.stream().noneMatch(StepRecord::failed);
+		writePages();
+		List<SailMedia> unit = UNIT.get();
+		if (unit != null) {
+			unit.add(this);
 		}
+		else if (passed && (keepMedia == SailSettings.KeepMedia.FAILED)) {
+			delete();
+		}
+	}
+
+	/** Writes the film strip, the player and each directory's list of runs. */
+	private void writePages() {
 		try {
 			Path filmStrip = (snapshotRun == null) ? null : snapshotRun.resolve("index.html");
 			Path player = (videoRun == null) ? null : videoRun.resolve("player.html");
@@ -382,6 +437,7 @@ public final class SailMedia {
 			}
 			catch (IOException | RuntimeException e) {
 				selenide.trace("Could not delete the SAIL media of a passed run (" + SailSettings.KEEP_MEDIA + "=failed) in " + folder + ": " + e);
+				return;
 			}
 		}
 		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders);

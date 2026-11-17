@@ -186,17 +186,19 @@ public final class SailWorkflow {
 		if (legs.isEmpty()) {
 			throw new IllegalArgumentException("A SAIL workflow needs at least one automation");
 		}
-		settings.resolve(); // an invalid setting fails here, before any browser starts
 		RunState run = new RunState();
-		Browser browser = null;
+		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = null;
+		boolean passed = false;
+		SailMedia.beginUnit(); // with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
 		try {
 			for (Leg leg : legs) {
 				Automation automation = leg.automation();
 				boolean smartClient = "desktop".equals(automation.getUxui());
 				BrowserConfiguration configuration = configuration(automation.getUserAgentType()).settings(settings);
+				// an invalid setting fails here, before this leg's browser starts
 				SailSettings resolved = configuration.resolve();
-				SailServerLock.acquire(configuration.getBaseUrl()); // once: this JVM holds it after the first time
-				browser = browserFor(browser, configuration, smartClient);
+				SailServerLock.acquire(resolved.requireBaseUrl()); // once: this JVM holds it after the first time
+				browser = browserFor(browser, configuration, resolved, smartClient);
 				System.out.println(String.format("SAIL workflow: %s in %s (run %s)", leg.name(), smartClient ? "SmartClient" : "PrimeFaces", run.getRunToken()));
 				try {
 					execute(automation, browser, run, resolved);
@@ -205,10 +207,12 @@ public final class SailWorkflow {
 					throw new AssertionError("SAIL workflow: " + leg.name() + " failed: " + e.getMessage(), e);
 				}
 			}
+			passed = true;
 		}
 		finally {
+			SailMedia.endUnit(passed);
 			if (browser != null) {
-				browser.selenide().stopBrowser();
+				browser.stopBrowser();
 			}
 		}
 	}
@@ -219,63 +223,47 @@ public final class SailWorkflow {
 	}
 
 	/**
-	 * The browser in use: the renderer's Selenide that drives it, and the configuration it was started with.
-	 *
-	 * @param selenide	a {@link PrimeFacesSelenide} or {@link SmartClientSelenide}
-	 * @param configuration	the configuration the browser was started with
+	 * Returns the browser for the next leg: the current one if the leg's settings and configuration ask for the same
+	 * browser (driven by the leg's renderer's Selenide, with the leg's timeout), or else a new one, after the current
+	 * one is stopped.
 	 */
-	private record Browser(@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide, @Nonnull BrowserConfiguration configuration) {
-	}
-
-	/**
-	 * Returns the browser for the next leg: the current one if its device is the same (driven by the leg's renderer's
-	 * Selenide), or else a new one, after the current one is stopped.
-	 */
-	private static @Nonnull Browser browserFor(@Nullable Browser current, @Nonnull BrowserConfiguration configuration, boolean smartClient) {
-		if ((current != null) && sameDevice(current.configuration(), configuration)) {
-			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide = current.selenide();
-			if (smartClient == (selenide instanceof SmartClientSelenide)) {
-				return current;
+	private static @Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browserFor(@Nullable Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> current,
+																						@Nonnull BrowserConfiguration configuration,
+																						@Nonnull SailSettings resolved,
+																						boolean smartClient) {
+		if ((current != null) && (current.browserChange(resolved, configuration) == null)) {
+			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> result = current;
+			if (smartClient != (current instanceof SmartClientSelenide)) {
+				result = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
+				result.useBrowserOf(current);
 			}
-			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
-			other.useBrowserOf(selenide);
-			return new Browser(other, current.configuration());
+			result.useSettings(resolved, configuration); // the same browser: applies the leg's timeout
+			return result;
 		}
 		if (current != null) {
 			System.out.println("SAIL workflow: a new browser for another device");
-			current.selenide().stopBrowser();
+			current.stopBrowser();
 		}
-		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
-		selenide.startBrowser(configuration);
-		return new Browser(selenide, configuration);
-	}
-
-	/**
-	 * Indicates if two configurations give the same browser: the same browser, user agent, window size, headless mode
-	 * and server, as resolved.
-	 */
-	private static boolean sameDevice(@Nonnull BrowserConfiguration a, @Nonnull BrowserConfiguration b) {
-		SailSettings sa = a.resolve();
-		SailSettings sb = b.resolve();
-		return (sa.browser() == sb.browser()) &&
-				Objects.equals(a.getUserAgentString(), b.getUserAgentString()) &&
-				Objects.equals(a.getResolution(), b.getResolution()) &&
-				(sa.headless() == sb.headless()) &&
-				Objects.equals(sa.baseUrl(), sb.baseUrl());
+		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> result = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
+		result.startBrowser(configuration, resolved);
+		return result;
 	}
 
 	/**
 	 * Runs one automation as the test bases do: as a user with every role (or the signed-in user's registered roles),
 	 * sharing the workflow's run, with the leg's settings.
 	 */
-	private void execute(@Nonnull Automation automation, @Nonnull Browser browser, @Nonnull RunState run, @Nonnull SailSettings legSettings) {
+	private void execute(@Nonnull Automation automation,
+							@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser,
+							@Nonnull RunState run,
+							@Nonnull SailSettings legSettings) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User testUser = persistence.getUser();
 		persistence.setUser(SailUsers.bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
-			InterpretedWebDriverExecutor<?, ?> executor = (browser.selenide() instanceof SmartClientSelenide sc) ?
+			InterpretedWebDriverExecutor<?, ?> executor = (browser instanceof SmartClientSelenide sc) ?
 															new SmartClientInterpretedWebDriverExecutor(sc) :
-															new PrimeFacesInterpretedWebDriverExecutor((PrimeFacesSelenide) browser.selenide());
+															new PrimeFacesInterpretedWebDriverExecutor((PrimeFacesSelenide) browser);
 			executor.useViewRoles(viewRoles);
 			executor.shareRun(run);
 			executor.useSettings(legSettings);

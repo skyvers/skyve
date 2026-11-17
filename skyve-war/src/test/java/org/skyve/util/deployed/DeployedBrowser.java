@@ -25,7 +25,7 @@ public final class DeployedBrowser extends PrimeFacesSelenium implements AutoClo
 
 	/** Starts a Chrome session with shared deployed-test defaults. */
 	public void start() {
-		BrowserConfiguration browser = new BrowserConfiguration().browser(Browsers.chrome)
+		BrowserConfiguration browser = new BrowserConfiguration().fixed().browser(Browsers.chrome)
 				.baseUrl(deployedConfiguration.getBaseUrl().toString()).headless(deployedConfiguration.isHeadless())
 				.pageLoadTimeout(deployedConfiguration.getTimeout()).scriptTimeout(deployedConfiguration.getTimeout());
 		startBrowser(browser);

@@ -32,8 +32,8 @@ import util.sail.SailUsers;
  * <p>
  * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
  * {@code settings().headless(false).timeoutSeconds(60)}, and beats the configuration's own values and the properties
- * file, though not a {@code -D} or environment variable. Set the browser's settings (browser, headless, base URL,
- * timeout) in the constructor, as the browser starts before each test; the others apply to each script as it starts.
+ * file, though not a {@code -D} or environment variable. They apply to each script as it starts: a browser-level change
+ * (browser, headless mode, base URL) made in a test method restarts the browser for the next script.
  */
 public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 
@@ -86,8 +86,9 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 	@BeforeEach
 	void setupBrowser() {
 		// One SAIL test at a time per server, even across forked JVMs (see SailServerLock): may wait for another to finish
-		SailServerLock.acquire(configuration.getBaseUrl());
-		selenium.startBrowser(configuration);
+		SailSettings resolved = configuration.resolve();
+		SailServerLock.acquire(resolved.requireBaseUrl());
+		selenium.startBrowser(configuration, resolved);
 	}
 
 	@AfterAll
@@ -138,13 +139,16 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 	 * {@link #viewRoles(String, String...)} builds the views with that user's roles instead.
 	 */
 	private void sail(Automation automation) {
+		// a browser-level change made in the test since the browser started restarts it; the timeout applies at once
+		SailSettings resolved = configuration.resolve();
+		selenium.useSettings(resolved, configuration);
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User testUser = persistence.getUser();
 		persistence.setUser(bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
 			PrimeFacesInterpretedWebDriverExecutor executor = new PrimeFacesInterpretedWebDriverExecutor(selenium);
 			executor.useViewRoles(viewRoles);
-			executor.useSettings(configuration.resolve());
+			executor.useSettings(resolved);
 			automation.execute(executor);
 		}
 		finally {

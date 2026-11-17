@@ -86,6 +86,8 @@ class InterpretedWebDriverExecutorTest {
 	void setUp() {
 		executor = mock(InterpretedWebDriverExecutor.class, withSettings().useConstructor().defaultAnswer(CALLS_REAL_METHODS));
 		executor.selenide = mock(SmartClientSelenide.class);
+		// settings from no sources: never this JVM's system properties, environment or properties file
+		executor.useSettings(SailSettings.resolve(SailSettings.Environment.none(), List.of()));
 
 		fixture = new SailViewRolesTest.Fixture();
 		persistence = mock(AbstractPersistence.class);

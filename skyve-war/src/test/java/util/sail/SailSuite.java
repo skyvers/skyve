@@ -44,6 +44,8 @@ public final class SailSuite {
 	private String restore;
 	private final List<String> restoreRequires = new ArrayList<>();
 	private SailSettings.Code settings = SailSettings.code();
+	/** The sources the settings resolve from: this JVM's, unless a test gives others. */
+	private SailSettings.Environment environment;
 
 	/**
 	 * Creates a suite of the scripts in a test classpath folder.
@@ -112,6 +114,12 @@ public final class SailSuite {
 		return this;
 	}
 
+	/** Resolves the settings from the given sources instead of this JVM's, for tests. */
+	@Nonnull SailSuite environment(@Nonnull SailSettings.Environment sources) {
+		environment = sources;
+		return this;
+	}
+
 	/**
 	 * Runs the suite.
 	 *
@@ -121,7 +129,8 @@ public final class SailSuite {
 	 * @throws IllegalArgumentException	if a setting is invalid
 	 */
 	public void run(@Nonnull Consumer<String> sailResource) {
-		SailSettings resolved = settings.resolve();
+		SailSettings resolved = SailSettings.resolve((environment == null) ? SailSettings.Environment.current() : environment,
+														List.of(settings.layer()));
 		refuseTestStrategyOverride("A SAIL admin suite", resolved);
 
 		List<String> prefixes = resolved.suiteOnly();

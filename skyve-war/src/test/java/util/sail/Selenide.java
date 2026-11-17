@@ -107,13 +107,13 @@ public abstract class Selenide<
 	}
 
 	@Override
-	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
-		super.startBrowser(configuration);
+	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration, @Nonnull SailSettings resolved) {
+		super.startBrowser(configuration, resolved);
 
 		WebDriverRunner.setWebDriver(driver);
 		// Selenide's should...() conditions share the one timeout
 		com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
-		this.baseUrl = configuration.getBaseUrl();
+		this.baseUrl = resolved.requireBaseUrl();
 	}
 
 	/**
@@ -127,10 +127,49 @@ public abstract class Selenide<
 		super.useBrowserOf(other);
 		WebDriverRunner.setWebDriver(driver);
 		com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
-		BrowserConfiguration shared = getConfiguration();
+		SailSettings shared = settings;
 		if (shared != null) {
-			this.baseUrl = shared.getBaseUrl();
+			this.baseUrl = shared.requireBaseUrl();
 		}
+	}
+
+	/**
+	 * Applies the settings that the next script runs with. If they, or the configuration, ask for another browser than
+	 * the one started (another browser, headless mode, server, user agent or window size), the browser restarts with
+	 * them, taking the server lock for a new server; otherwise the browser carries on, with their timeout.
+	 *
+	 * <p>Side effects: may stop and start the browser (which ends its session), and says so in the trace; sets
+	 * Selenide's timeout.
+	 *
+	 * @param resolved	the next script's settings, resolved from the configuration
+	 * @param next	the next script's configuration
+	 */
+	public void useSettings(@Nonnull SailSettings resolved, @Nonnull BrowserConfiguration next) {
+		String change = browserChange(resolved, next);
+		if (change == null) {
+			settings = resolved;
+			com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
+		}
+		else {
+			trace("SAIL: the browser's settings changed (" + change + "): starting a new browser");
+			stopBrowser();
+			SailServerLock.acquire(resolved.requireBaseUrl());
+			startBrowser(next, resolved);
+		}
+	}
+
+	/**
+	 * Returns the base URL of the server this browser runs against.
+	 *
+	 * @return the URL, ending in {@code /}
+	 * @throws IllegalStateException	if the browser has not started
+	 */
+	public @Nonnull String getBaseUrl() {
+		String result = baseUrl;
+		if (result == null) {
+			throw new IllegalStateException("The browser has not started");
+		}
+		return result;
 	}
 
 	/**

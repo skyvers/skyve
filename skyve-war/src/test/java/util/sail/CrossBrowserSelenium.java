@@ -3,6 +3,7 @@ package util.sail;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
@@ -29,17 +30,34 @@ abstract class CrossBrowserSelenium {
 	/** The settings the browser was started with, resolved from its configuration; null before it starts. */
 	protected SailSettings settings;
 
+	/** The user agent the browser was started with, to tell when a configuration asks for another; or null. */
+	private String startedUserAgent;
+	/** The window size the browser was started with, to tell when a configuration asks for another; or null. */
+	private Dimension startedResolution;
+
 	/**
 	 * Starts the browser that the configuration's resolved settings name, with their headless mode.
 	 *
-	 * @param configuration	the browser's configuration
+	 * @param configuration	the browser's user agent, window size and timeouts, and its own settings
 	 * @throws IllegalArgumentException	if a setting is invalid (before any browser starts)
 	 */
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
+		startBrowser(configuration, configuration.resolve());
+	}
+
+	/**
+	 * Starts the browser with settings already resolved from the configuration.
+	 *
+	 * @param configuration	the browser's user agent, window size and timeouts
+	 * @param resolved	the settings resolved from it, which name the browser, its headless mode and the timeouts
+	 */
+	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration, @Nonnull SailSettings resolved) {
 		this.configuration = configuration;
-		this.settings = configuration.resolve();
-		boolean headless = this.settings.headless();
-		switch (this.settings.browser()) {
+		this.settings = resolved;
+		startedUserAgent = configuration.getUserAgentString();
+		startedResolution = configuration.getResolution();
+		boolean headless = resolved.headless();
+		switch (resolved.browser()) {
 			case chrome:
 				setupChrome(configuration, headless);
 				break;
@@ -57,7 +75,35 @@ abstract class CrossBrowserSelenium {
 		}
 		actions = new Actions(driver);
 	}
-	
+
+	/**
+	 * Says how the browser that started differs from the one that settings and a configuration ask for: another
+	 * browser, headless mode, server, user agent or window size.
+	 *
+	 * @param resolved	the settings the next script runs with
+	 * @param next	the configuration the next script runs with
+	 * @return what differs, e.g. {@code headless false -> true}; or null if the same browser will do (or none started)
+	 */
+	@Nullable String browserChange(@Nonnull SailSettings resolved, @Nonnull BrowserConfiguration next) {
+		SailSettings started = settings;
+		if (started == null) {
+			return null;
+		}
+		List<String> changes = new ArrayList<>(5);
+		change(changes, "browser", started.browser(), resolved.browser());
+		change(changes, "headless", Boolean.valueOf(started.headless()), Boolean.valueOf(resolved.headless()));
+		change(changes, "baseUrl", started.baseUrl(), resolved.baseUrl());
+		change(changes, "user agent", startedUserAgent, next.getUserAgentString());
+		change(changes, "resolution", startedResolution, next.getResolution());
+		return changes.isEmpty() ? null : String.join(", ", changes);
+	}
+
+	private static void change(@Nonnull List<String> changes, @Nonnull String what, @Nullable Object from, @Nullable Object to) {
+		if (! Objects.equals(from, to)) {
+			changes.add(what + ' ' + from + " -> " + to);
+		}
+	}
+
 	/**
 	 * Drives the browser that another instance started, instead of starting one: for example a SmartClient executor's
 	 * gestures in the browser that a PrimeFaces script used, when a workflow moves to SmartClient on the same device.
@@ -68,6 +114,8 @@ abstract class CrossBrowserSelenium {
 	public void useBrowserOf(@Nonnull CrossBrowserSelenium other) {
 		this.configuration = other.configuration;
 		this.settings = other.settings;
+		this.startedUserAgent = other.startedUserAgent;
+		this.startedResolution = other.startedResolution;
 		this.driver = other.driver;
 		this.actions = other.actions;
 	}
@@ -99,7 +147,7 @@ abstract class CrossBrowserSelenium {
 	/**
 	 * Starts Chrome with the configuration's user agent and window size.
 	 *
-	 * @param config	the configuration
+	 * @param config	the user agent, window size and timeouts
 	 * @param headless	whether to run headless
 	 */
 	private void setupChrome(BrowserConfiguration config, boolean headless) {
@@ -130,7 +178,7 @@ abstract class CrossBrowserSelenium {
 	/**
 	 * Starts Firefox with the configuration's window size.
 	 *
-	 * @param config	the configuration
+	 * @param config	the user agent, window size and timeouts
 	 * @param headless	whether to run headless
 	 */
 	private void setupFirefox(BrowserConfiguration config, boolean headless) {
@@ -184,7 +232,8 @@ abstract class CrossBrowserSelenium {
 		
 		Timeouts timeouts = manage.timeouts();
 		Duration duration = config.getPageLoadTimeout();
-		timeouts.pageLoadTimeout((duration == null) ? Duration.ofSeconds(30) : duration);
+		SailSettings resolved = settings;
+		timeouts.pageLoadTimeout((duration != null) ? duration : ((resolved == null) ? Duration.ofSeconds(SailSettings.DEFAULT_TIMEOUT_SECONDS) : resolved.timeout()));
 		duration = config.getImplicitlyWait();
 		timeouts.implicitlyWait((duration == null) ? Duration.ofMillis(0) : duration);
 		duration = config.getScriptTimeout();

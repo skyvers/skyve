@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
@@ -22,25 +23,23 @@ import org.skyve.metadata.sail.language.step.interaction.session.Login;
 
 /**
  * Unit tests of the SAIL harness pieces that need no browser: the test strategy override, password masking in step
- * descriptions, the suite runner's restore gating, and the cross-JVM server lock.
+ * descriptions, the suite runner's restore gating, and the cross-JVM server lock. Settings resolve from given sources,
+ * never this JVM's system properties, environment or properties file.
  */
 class SailHarnessTest {
 	@AfterEach
 	@SuppressWarnings("static-method")
 	void clearProperties() {
-		System.clearProperty(SailSettings.TEST_STRATEGY);
-		System.clearProperty(SailSettings.SUITE_ONLY);
 		SailServerLock.releaseAll();
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
 	void theTestStrategyOverrideIgnoresCaseAndRejectsUnknownNames() {
-		assertNull(InterpretedWebDriverExecutor.testStrategyOverride());
-		System.setProperty(SailSettings.TEST_STRATEGY, " verify ");
-		assertEquals(TestStrategy.Verify, InterpretedWebDriverExecutor.testStrategyOverride());
-		System.setProperty(SailSettings.TEST_STRATEGY, "Check");
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, InterpretedWebDriverExecutor::testStrategyOverride);
+		assertNull(InterpretedWebDriverExecutor.testStrategyOverride(sources(Map.of())));
+		assertEquals(TestStrategy.Verify, InterpretedWebDriverExecutor.testStrategyOverride(sources(Map.of(SailSettings.TEST_STRATEGY, " verify "))));
+		SailSettings.Environment check = sources(Map.of(SailSettings.TEST_STRATEGY, "Check"));
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> InterpretedWebDriverExecutor.testStrategyOverride(check));
 		assertTrue(e.getMessage().contains("Assert") && e.getMessage().contains("Verify") && e.getMessage().contains("None"), e.getMessage());
 	}
 
@@ -58,9 +57,9 @@ class SailHarnessTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void theSuiteRefusesTheTestStrategyOverride() {
-		System.setProperty(SailSettings.TEST_STRATEGY, "None");
 		List<String> ran = new ArrayList<>();
-		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").restore("99.xml", "00-pre.xml");
+		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").restore("99.xml", "00-pre.xml")
+										.environment(sources(Map.of(SailSettings.TEST_STRATEGY, "None")));
 		assertThrows(IllegalStateException.class, () -> suite.run(ran::add));
 		assertTrue(ran.isEmpty(), ran.toString());
 	}
@@ -69,7 +68,8 @@ class SailHarnessTest {
 	@SuppressWarnings("static-method")
 	void theRestoreRunsAfterALaterFailureButNotAfterAFailedPrecondition() {
 		List<String> ran = new ArrayList<>();
-		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml", "00-backup.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml");
+		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml", "00-backup.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml")
+										.environment(sources(Map.of()));
 		assertThrows(AssertionError.class, () -> suite.run(file -> {
 			ran.add(file);
 			if (file.endsWith("01.xml")) {
@@ -91,9 +91,9 @@ class SailHarnessTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void onlyRunsTheChosenFilesBetweenTheSetUpAndTheRestore() {
-		System.setProperty(SailSettings.SUITE_ONLY, "02");
 		List<String> ran = new ArrayList<>();
-		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml").run(ran::add);
+		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml")
+							.environment(sources(Map.of(SailSettings.SUITE_ONLY, "02"))).run(ran::add);
 		assertEquals(List.of("s/00-pre.xml", "s/02.xml", "s/99.xml"), ran);
 	}
 
@@ -102,7 +102,8 @@ class SailHarnessTest {
 	void theSuitesSettingsInCodeChooseTheFiles() {
 		List<String> ran = new ArrayList<>();
 		SailSettings.Code code = SailSettings.code().suiteOnly("01");
-		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml").settings(code).run(ran::add);
+		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml").settings(code)
+							.environment(sources(Map.of())).run(ran::add);
 		assertEquals(List.of("s/00-pre.xml", "s/01.xml", "s/99.xml"), ran);
 	}
 
@@ -110,7 +111,7 @@ class SailHarnessTest {
 	@SuppressWarnings("static-method")
 	void theSuiteRefusesATestStrategyOverrideInCode() {
 		List<String> ran = new ArrayList<>();
-		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml");
+		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").environment(sources(Map.of()));
 		suite.settings().testStrategy(TestStrategy.Verify);
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> suite.run(ran::add));
 		assertAll(() -> assertTrue(e.getMessage().contains("unset sail.testStrategy (it is Verify, from code)"), e.getMessage()),
@@ -143,6 +144,31 @@ class SailHarnessTest {
 		assertEquals(3, run(java, probe.toString(), lockFile.toString()), "another JVM cannot take the lock while this one holds it");
 		SailServerLock.releaseAll();
 		assertEquals(0, run(java, probe.toString(), lockFile.toString()), "another JVM can take it once released");
+	}
+
+	/**
+	 * The next script's settings restart the browser only for a browser-level change (browser, headless mode, server,
+	 * user agent, window size); a new timeout applies to the running browser.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void onlyABrowserLevelChangeRestartsTheBrowser() {
+		BrowserConfiguration configuration = new BrowserConfiguration().baseUrl("http://localhost:1/skyve/");
+		PrimeFacesSelenide selenide = new PrimeFacesSelenide();
+		selenide.settings = configuration.resolve(sources(Map.of()));
+		SailSettings longer = configuration.settings(SailSettings.code().timeoutSeconds(90)).resolve(sources(Map.of()));
+		String sameBrowser = selenide.browserChange(longer, configuration);
+		selenide.useSettings(longer, configuration); // no change: no browser is started or stopped
+		SailSettings headed = configuration.settings(SailSettings.code().headless(false)).resolve(sources(Map.of()));
+		String change = selenide.browserChange(headed, configuration.userAgentString("UA").resolution(10, 20));
+		assertAll(() -> assertNull(sameBrowser),
+					() -> assertEquals(java.time.Duration.ofSeconds(90), selenide.timeout()),
+					() -> assertEquals("headless true -> false, user agent null -> UA, resolution null -> (10, 20)", change));
+	}
+
+	/** Sources with only the given system properties: no environment variables or properties file. */
+	private static SailSettings.Environment sources(Map<String, String> systemProperties) {
+		return new SailSettings.Environment(systemProperties, Map.of(), null, Path.of("").toAbsolutePath());
 	}
 
 	private static int run(String... command) throws IOException, InterruptedException {

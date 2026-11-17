@@ -17,10 +17,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.Suite.Evidence;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -29,12 +31,14 @@ import util.sail.BrowserConfiguration.Browsers;
 /**
  * The settings of a SAIL run, resolved from every place a setting can come from, each value with its source.
  * <p>
- * <b>Precedence</b>, highest first: a {@code -D} system property, an environment variable, code (see {@link #code()}),
- * the user's properties file, the suite, the workflow, the automation, and the default. Code beats the properties
- * file so that a developer's quick change in a test takes effect even with a personal file; only an explicit
- * {@code -D} or environment variable for this run beats code. Of the script levels, the innermost explicit value
- * wins: an automation's own {@code testStrategy} beats its workflow's, which beats its suite's, as the outer ones
- * are defaults for the automations that state none.
+ * <b>Precedence</b>, highest first: a {@code -D} system property, an environment variable, the test's code (see
+ * {@link #code()}), the user's properties file, a {@link BrowserConfiguration}'s own values, the suite, the workflow,
+ * the automation, and the default. The test's code beats the properties file so that a developer's quick change in a
+ * test takes effect even with a personal file; only an explicit {@code -D} or environment variable for this run beats
+ * it. A browser configuration's own values (an IT's boilerplate {@code .browser(chrome)}) come below the file, so that
+ * the file can choose the browser. Of the script levels, the innermost explicit value wins: an automation's own
+ * {@code testStrategy} beats its workflow's, which beats its suite's, as the outer ones are defaults for the
+ * automations that state none.
  * <ul>
  * <li><b>Environment variables</b> are {@code SAIL_} and the upper snake case of the key after {@code sail.}:
  * 		{@code SAIL_BASE_URL}, {@code SAIL_TIMEOUT_SECONDS}, {@code SAIL_SUITE_ONLY}, {@code SAIL_VAR_PASSWORD}
@@ -43,17 +47,16 @@ import util.sail.BrowserConfiguration.Browsers;
  * 		else {@code ~/.skyve/sail.properties} if it exists. It holds the same {@code sail.*} keys; a key it does not
  * 		know is refused, as it is most likely a typing error.</li>
  * <li><b>The script levels</b> set only what they own: an automation or workflow its {@code testStrategy}, a suite
- * 		its {@code testStrategy} and {@code evidence} (see {@link #automation}, {@link #workflow}, {@link #suite}).
- * 		The base URL is never in a script.</li>
+ * 		its {@code testStrategy} and {@code evidence}. The base URL is never in a script.</li>
  * </ul>
- * Resolution validates every effective value and fails before any browser starts, with an
- * {@link IllegalArgumentException} naming each invalid key, its value, its source and the valid values. A
- * {@code sail.*} system property or environment variable that is not a setting is ignored (other code has its own,
- * such as the server's {@code sail.recording}).
+ * A blank value counts as not set, so a higher level cannot clear a value that a lower level sets: to turn a
+ * directory off, remove it where it is set. Resolution validates every effective value and fails before any browser
+ * starts, with an {@link IllegalArgumentException} naming each invalid key, its value, its source and the valid
+ * values. A {@code sail.*} system property or {@code SAIL_*} environment variable that is not a setting is ignored,
+ * and listed in the run's trace (except the names that other SAIL code reads: {@code sail.recording},
+ * {@code sail.personas}, {@code sail.personaPassword} and {@code sail.workflowData}).
  * <p>
  * A resolved {@code SailSettings} is an immutable snapshot of the sources as they were when it was resolved.
- * {@link #describe()} lists the settings that do not come from their defaults, with their sources, and hides the
- * values of {@value #VAR_PREFIX}{@code *} variables.
  */
 public final class SailSettings {
 	/** The prefix of every SAIL setting's key. */
@@ -76,7 +79,12 @@ public final class SailSettings {
 	public static final String SNAPSHOT_SOURCE = "sail.snapshotSource";
 	/** A directory for the run's video. */
 	public static final String VIDEO_DIR = "sail.videoDir";
-	/** The evidence a run keeps when no directory is given for it; see {@link Evidence}. */
+	/**
+	 * The evidence a run keeps when no directory is given for it ({@link Evidence}): {@code none} (only the directories
+	 * that are set), {@code failures}, {@code snapshots} (and failures), {@code video} (and failures) or {@code all}. An
+	 * explicitly set directory always turns its kind on; a request adds the kinds it names, in
+	 * {@link #DEFAULT_FAILURE_DIR} and {@link #DEFAULT_MEDIA_DIR} under the working directory.
+	 */
 	public static final String EVIDENCE = "sail.evidence";
 	/** Which runs keep their snapshots and video; see {@link KeepMedia}. */
 	public static final String KEEP_MEDIA = "sail.keepMedia";
@@ -100,61 +108,19 @@ public final class SailSettings {
 	private static final List<String> KEYS = List.of(BASE_URL, HEADLESS, BROWSER, TIMEOUT_SECONDS, TEST_STRATEGY,
 														FAILURE_DIR, SNAPSHOT_DIR, SNAPSHOT_SOURCE, VIDEO_DIR, EVIDENCE,
 														KEEP_MEDIA, SUITE_ONLY, RUN, PROPERTIES);
+	/** The {@code sail.*} system properties that other SAIL code reads, so that they are not listed as ignored. */
+	private static final Set<String> OTHER_SAIL_PROPERTIES = Set.of("sail.recording", "sail.personas", "sail.personaPassword", "sail.workflowData");
 	private static final String MASK = "********";
+	/** The prefix of a SAIL environment variable. */
+	private static final String ENVIRONMENT_PREFIX = "SAIL_";
 	/** The prefix of a variable's environment variable. */
 	private static final String ENVIRONMENT_VAR_PREFIX = "SAIL_VAR_";
-
-	/**
-	 * The evidence a run keeps without naming directories for it. An explicitly set directory
-	 * ({@value #FAILURE_DIR}, {@value #SNAPSHOT_DIR}, {@value #VIDEO_DIR}) always turns its kind on; a request adds the
-	 * kinds it names, in {@link SailSettings#DEFAULT_FAILURE_DIR} and {@link SailSettings#DEFAULT_MEDIA_DIR} under the
-	 * working directory.
-	 */
-	public enum Evidence {
-		/** Nothing beyond the directories that are set. */
-		NONE,
-		/** A screenshot and the page source of each failure. */
-		FAILURES,
-		/** The failures, and a snapshot of every step with a film strip. */
-		SNAPSHOTS,
-		/** The failures, and a video of the run. */
-		VIDEO,
-		/** The failures, the snapshots and the video. */
-		ALL;
-
-		/**
-		 * Indicates if this request keeps failure screenshots.
-		 *
-		 * @return true for every request but {@link #NONE}
-		 */
-		public boolean failures() {
-			return this != NONE;
-		}
-
-		/**
-		 * Indicates if this request keeps step snapshots.
-		 *
-		 * @return true for {@link #SNAPSHOTS} and {@link #ALL}
-		 */
-		public boolean snapshots() {
-			return (this == SNAPSHOTS) || (this == ALL);
-		}
-
-		/**
-		 * Indicates if this request keeps a video.
-		 *
-		 * @return true for {@link #VIDEO} and {@link #ALL}
-		 */
-		public boolean video() {
-			return (this == VIDEO) || (this == ALL);
-		}
-	}
 
 	/** Which automation runs keep their snapshot and video folders. */
 	public enum KeepMedia {
 		/** Every run keeps them. */
 		ALL,
-		/** A run that passed deletes them when it ends. */
+		/** A run that passed deletes them when the unit it belongs to (a test's script, a workflow) passed. */
 		FAILED
 	}
 
@@ -164,10 +130,12 @@ public final class SailSettings {
 		SYSTEM_PROPERTY,
 		/** An environment variable. */
 		ENVIRONMENT,
-		/** Code: {@link SailSettings#code()}, or a {@link BrowserConfiguration}'s own values. */
+		/** The test's code: {@link SailSettings#code()}, as a test base's {@code settings()}. */
 		CODE,
 		/** The user's properties file. */
 		FILE,
+		/** A {@link BrowserConfiguration}'s own values. */
+		CONFIGURATION,
 		/** An automation's own attribute. */
 		AUTOMATION,
 		/** A workflow's default. */
@@ -180,17 +148,17 @@ public final class SailSettings {
 		/**
 		 * Indicates if this level is part of the run (a command, CI job or the test's code), rather than a script.
 		 *
-		 * @return true for {@code -D}, the environment, code and the properties file
+		 * @return true for {@code -D}, the environment, code, the properties file and a browser configuration
 		 */
 		public boolean isRun() {
-			return ordinal() <= FILE.ordinal();
+			return ordinal() <= CONFIGURATION.ordinal();
 		}
 	}
 
 	/**
 	 * Where a resolved value came from.
 	 *
-	 * @param level	the level
+	 * @param level	how high its source ranks
 	 * @param where	the exact place, for messages: {@code -Dsail.testStrategy}, {@code SAIL_TEST_STRATEGY}, {@code code},
 	 * 				the properties file's path, or the script
 	 */
@@ -204,50 +172,41 @@ public final class SailSettings {
 	/**
 	 * A resolved setting: its key, its text as given, and where it came from.
 	 *
-	 * @param key	the key, e.g. {@code sail.testStrategy} or {@code sail.var.password}
-	 * @param value	the value as given
+	 * @param key	e.g. {@code sail.testStrategy} or {@code sail.var.password}
+	 * @param value	the text as given (trimmed, but a variable's as given)
 	 * @param source	where it came from
 	 */
 	public record Setting(@Nonnull String key, @Nonnull String value, @Nonnull Source source) {
-		/**
-		 * Returns the value to show: the value, or a mask for a variable.
-		 *
-		 * @return the value or {@value SailSettings#MASK}
-		 */
-		public @Nonnull String shownValue() {
-			return key.startsWith(VAR_PREFIX) ? MASK : value;
-		}
-
 		/**
 		 * Describes the setting as {@code testStrategy=Verify (-Dsail.testStrategy)}, with a variable's value hidden.
 		 */
 		@Override
 		public @Nonnull String toString() {
-			return key.substring(PREFIX.length()) + '=' + shownValue() + " (" + source + ')';
+			return key.substring(PREFIX.length()) + '=' + (key.startsWith(VAR_PREFIX) ? MASK : value) + " (" + source + ')';
 		}
 	}
 
 	/**
 	 * The sources outside the code and the scripts: system properties, environment variables, the user's home (for
-	 * {@code ~/.skyve/sail.properties}) and the working directory (for the default evidence directories).
-	 * Given explicitly, so that tests can resolve settings without changing the JVM's own.
+	 * {@code ~/.skyve/sail.properties}) and the working directory (for relative directories). Given explicitly, so that
+	 * tests resolve settings without the JVM's own.
 	 *
-	 * @param systemProperties	the system properties
-	 * @param environment	the environment variables
-	 * @param userHome	the user's home directory
+	 * @param systemProperties	the {@code sail.*} system properties
+	 * @param environment	the {@code SAIL_*} environment variables
+	 * @param userHome	the user's home directory, or null to read no user properties file
 	 * @param workingDirectory	the directory relative directories resolve against
 	 */
-	public record Environment(@Nonnull Map<String, String> systemProperties,
-								@Nonnull Map<String, String> environment,
-								@Nonnull Path userHome,
-								@Nonnull Path workingDirectory) {
+	record Environment(@Nonnull Map<String, String> systemProperties,
+						@Nonnull Map<String, String> environment,
+						@Nullable Path userHome,
+						@Nonnull Path workingDirectory) {
 		/**
-		 * Returns this JVM's sources as they are now: a copy of its {@code sail.*} system properties, and its
-		 * environment.
+		 * Returns this JVM's sources as they are now: copies of its {@code sail.*} system properties and its
+		 * {@code SAIL_*} environment variables.
 		 *
 		 * @return the sources
 		 */
-		public static @Nonnull Environment current() {
+		static @Nonnull Environment current() {
 			Properties properties = System.getProperties();
 			Map<String, String> sail = new TreeMap<>();
 			for (String name : properties.stringPropertyNames()) {
@@ -255,7 +214,41 @@ public final class SailSettings {
 					sail.put(name, properties.getProperty(name));
 				}
 			}
-			return new Environment(sail, System.getenv(), Path.of(System.getProperty("user.home")), Path.of("").toAbsolutePath());
+			Map<String, String> env = new TreeMap<>();
+			for (Map.Entry<String, String> variable : System.getenv().entrySet()) {
+				if (variable.getKey().startsWith(ENVIRONMENT_PREFIX)) {
+					env.put(variable.getKey(), variable.getValue());
+				}
+			}
+			return new Environment(sail, env, Path.of(System.getProperty("user.home")), Path.of("").toAbsolutePath());
+		}
+
+		/**
+		 * Returns sources with nothing in them, for a configuration that must resolve only its own values.
+		 *
+		 * @return no system properties, environment variables or properties file; this JVM's working directory
+		 */
+		static @Nonnull Environment none() {
+			return new Environment(Map.of(), Map.of(), null, Path.of("").toAbsolutePath());
+		}
+
+		/**
+		 * Describes the sources with every variable's value hidden.
+		 */
+		@Override
+		public @Nonnull String toString() {
+			return "Environment[systemProperties=" + masked(systemProperties, VAR_PREFIX) +
+					", environment=" + masked(environment, ENVIRONMENT_VAR_PREFIX) +
+					", userHome=" + userHome + ", workingDirectory=" + workingDirectory + ']';
+		}
+
+		private static @Nonnull Map<String, String> masked(@Nonnull Map<String, String> values, @Nonnull String variablePrefix) {
+			Map<String, String> result = new TreeMap<>();
+			for (Map.Entry<String, String> entry : values.entrySet()) {
+				String key = entry.getKey();
+				result.put(key, key.startsWith(variablePrefix) ? MASK : entry.getValue());
+			}
+			return result;
 		}
 	}
 
@@ -264,7 +257,7 @@ public final class SailSettings {
 	 * {@link SailSettings#automation}, {@link SailSettings#workflow} and {@link SailSettings#suite}, which allow only
 	 * what each level owns.
 	 */
-	public static final class Layer {
+	static final class Layer {
 		private final Source source;
 		private final Map<String, String> values;
 		/** The source of each key, when each has its own (a system property or environment variable); or null. */
@@ -280,31 +273,17 @@ public final class SailSettings {
 			this.wheres = wheres;
 		}
 
-		/**
-		 * Returns this layer's level.
-		 *
-		 * @return the level
-		 */
-		public @Nonnull Level level() {
+		@Nonnull Level level() {
 			return source.level();
 		}
 
-		/**
-		 * Returns a value of this layer.
-		 *
-		 * @param key	the key
-		 * @return the value, or null if this layer does not set it
-		 */
-		public @Nullable String get(@Nonnull String key) {
-			return values.get(key);
+		/** Returns the value this layer gives a key, or null; a blank value counts as not given. */
+		@Nullable String get(@Nonnull String key) {
+			String result = values.get(key);
+			return ((result == null) || result.isBlank()) ? null : result;
 		}
 
-		/**
-		 * Returns where a value of this layer comes from.
-		 *
-		 * @param key	the key
-		 * @return the source, e.g. {@code -Dsail.testStrategy} for a system property
-		 */
+		/** Returns where this layer's value of a key comes from, e.g. {@code -Dsail.testStrategy} for a system property. */
 		@Nonnull Source sourceOf(@Nonnull String key) {
 			String where = (wheres == null) ? null : wheres.get(key);
 			return (where == null) ? source : new Source(source.level(), where);
@@ -315,8 +294,8 @@ public final class SailSettings {
 	 * The code level: a fluent builder of the settings a test gives in code, e.g.
 	 * {@code SailSettings.code().headless(false).timeoutSeconds(60).videoDir(Path.of("/tmp/v")).variable("password", "x")}.
 	 * The test bases, {@link SailWorkflow} and {@link SailSuite} each have one, from {@code settings()}. A value set here
-	 * beats the properties file and the scripts, but not a {@code -D} system property or an environment variable.
-	 * Values are checked when the settings are resolved.
+	 * beats the properties file, a browser configuration's own values and the scripts, but not a {@code -D} system
+	 * property or an environment variable. Values are checked when the settings are resolved.
 	 * <p>
 	 * Not thread-safe: a test sets it on its own thread, before the run that uses it.
 	 */
@@ -331,7 +310,7 @@ public final class SailSettings {
 		 * Sets a setting by key, as text, as a system property would; null clears it.
 		 *
 		 * @param key	a key of {@link SailSettings}, or {@value SailSettings#VAR_PREFIX}{@code name}
-		 * @param value	the value, or null
+		 * @param value	the text, or null to clear the key
 		 * @return this builder
 		 * @throws IllegalArgumentException	if the key is not a SAIL setting
 		 */
@@ -351,7 +330,7 @@ public final class SailSettings {
 		/**
 		 * Sets the Skyve base URL to run against.
 		 *
-		 * @param baseUrl	the URL, ending in {@code /}
+		 * @param baseUrl	an http or https URL, ending in {@code /}
 		 * @return this builder
 		 */
 		public @Nonnull Code baseUrl(@Nonnull String baseUrl) {
@@ -371,7 +350,7 @@ public final class SailSettings {
 		/**
 		 * Sets the browser, for every device of the run.
 		 *
-		 * @param browser	the browser
+		 * @param browser	Chrome, Firefox, Safari or Edge
 		 * @return this builder
 		 */
 		public @Nonnull Code browser(@Nonnull Browsers browser) {
@@ -391,7 +370,7 @@ public final class SailSettings {
 		/**
 		 * Overrides the scripts' test strategy, as {@code -Dsail.testStrategy} does.
 		 *
-		 * @param testStrategy	the strategy
+		 * @param testStrategy	Assert, Verify or None, for every automation that is not locked
 		 * @return this builder
 		 */
 		public @Nonnull Code testStrategy(@Nonnull TestStrategy testStrategy) {
@@ -401,7 +380,7 @@ public final class SailSettings {
 		/**
 		 * Sets the directory for failure screenshots and page sources.
 		 *
-		 * @param directory	the directory
+		 * @param directory	absolute, or relative to the working directory
 		 * @return this builder
 		 */
 		public @Nonnull Code failureDir(@Nonnull Path directory) {
@@ -411,7 +390,7 @@ public final class SailSettings {
 		/**
 		 * Sets the directory for step snapshots and their film strip.
 		 *
-		 * @param directory	the directory
+		 * @param directory	absolute, or relative to the working directory
 		 * @return this builder
 		 */
 		public @Nonnull Code snapshotDir(@Nonnull Path directory) {
@@ -431,7 +410,7 @@ public final class SailSettings {
 		/**
 		 * Sets the directory for the run's video.
 		 *
-		 * @param directory	the directory
+		 * @param directory	absolute, or relative to the working directory
 		 * @return this builder
 		 */
 		public @Nonnull Code videoDir(@Nonnull Path directory) {
@@ -439,13 +418,13 @@ public final class SailSettings {
 		}
 
 		/**
-		 * Requests evidence in the default directories; see {@link Evidence}.
+		 * Requests evidence in the default directories; see {@link SailSettings#EVIDENCE}.
 		 *
-		 * @param evidence	the request
+		 * @param evidence	what to keep
 		 * @return this builder
 		 */
 		public @Nonnull Code evidence(@Nonnull Evidence evidence) {
-			return set(EVIDENCE, evidence.name().toLowerCase());
+			return set(EVIDENCE, evidence.name());
 		}
 
 		/**
@@ -459,9 +438,9 @@ public final class SailSettings {
 		}
 
 		/**
-		 * Chooses the suite files to run, by prefix.
+		 * Chooses the suite members to run, by prefix of their file (e.g. {@code pf/}) or its name (e.g. {@code 03}).
 		 *
-		 * @param prefixes	the prefixes, e.g. {@code "03", "04"}
+		 * @param prefixes	e.g. {@code "pf/", "03"}
 		 * @return this builder
 		 */
 		public @Nonnull Code suiteOnly(@Nonnull String... prefixes) {
@@ -481,8 +460,8 @@ public final class SailSettings {
 		/**
 		 * Defines a variable that every automation starts with, for {@code {var:name}}, e.g. a password.
 		 *
-		 * @param name	the variable's name
-		 * @param value	the value
+		 * @param name	the name after {@code var:}
+		 * @param value	the value, used as given
 		 * @return this builder
 		 */
 		public @Nonnull Code variable(@Nonnull String name, @Nonnull String value) {
@@ -492,34 +471,26 @@ public final class SailSettings {
 		/**
 		 * Names the properties file to read instead of {@code ~/.skyve/sail.properties}.
 		 *
-		 * @param file	the file
+		 * @param file	absolute, or relative to the working directory
 		 * @return this builder
 		 */
 		public @Nonnull Code properties(@Nonnull Path file) {
 			return set(PROPERTIES, file.toString());
 		}
 
-		/**
-		 * Returns this builder's values as a layer with the source {@code code}.
-		 *
-		 * @return the layer, which shares this builder's values
-		 */
-		public @Nonnull Layer layer() {
-			return layer("code");
+		/** Returns this builder's values as the test's code layer; the layer shares the builder's values. */
+		@Nonnull Layer layer() {
+			return new Layer(Level.CODE, "code", values);
+		}
+
+		/** Returns this builder's values as a layer of a level, e.g. a browser configuration's; it shares the values. */
+		@Nonnull Layer layer(@Nonnull Level level, @Nonnull String where) {
+			return new Layer(level, where, values);
 		}
 
 		/**
-		 * Returns this builder's values as a code layer with the given source.
-		 *
-		 * @param where	the source, for messages
-		 * @return the layer, which shares this builder's values
-		 */
-		@Nonnull Layer layer(@Nonnull String where) {
-			return new Layer(Level.CODE, where, values);
-		}
-
-		/**
-		 * Resolves the settings with this builder as the code level.
+		 * Resolves the settings with this builder as the code level, from this JVM's system properties, environment and
+		 * the properties file.
 		 *
 		 * @return the settings
 		 * @throws IllegalArgumentException	if a setting is invalid
@@ -531,11 +502,12 @@ public final class SailSettings {
 
 	private final Environment environment;
 	private final List<Layer> layers;
-	/** The settings that do not come from their defaults, by key, in display order. */
+	/** The settings that do not come from their defaults, by key, in key order. */
 	private final Map<String, Setting> settings = new LinkedHashMap<>();
-	/** The variables, by name. */
+	/** The variables, by key. */
 	private final Map<String, Setting> variables = new TreeMap<>();
-	private Path propertiesFile;
+	/** The {@code sail.*} and {@code SAIL_*} names that are not settings, in order. */
+	private final List<String> ignored = new ArrayList<>();
 
 	// the parsed values, set once by parse()
 	private String url;
@@ -547,7 +519,7 @@ public final class SailSettings {
 	private Path snapshotDirectory;
 	private boolean withPageSources;
 	private Path videoDirectory;
-	private Evidence evidenceRequest = Evidence.NONE;
+	private Evidence evidenceRequest = Evidence.none;
 	private KeepMedia mediaKept = KeepMedia.ALL;
 	private List<String> onlyPrefixes = List.of();
 	private List<String> runScripts = List.of();
@@ -555,216 +527,6 @@ public final class SailSettings {
 	private SailSettings(@Nonnull Environment environment, @Nonnull List<Layer> layers) {
 		this.environment = environment;
 		this.layers = layers;
-	}
-
-	/**
-	 * Returns the Skyve base URL to run against.
-	 *
-	 * @return the URL, or null if none is set (there is no default)
-	 */
-	public @Nullable String baseUrl() {
-		return url;
-	}
-
-	/**
-	 * Indicates if the browser is headless.
-	 *
-	 * @return true unless set to false
-	 */
-	public boolean headless() {
-		return headlessBrowser;
-	}
-
-	/**
-	 * Returns the browser.
-	 *
-	 * @return the browser; Chrome by default
-	 */
-	public @Nonnull Browsers browser() {
-		return browserType;
-	}
-
-	/**
-	 * Returns the timeout for every wait on the browser. It is a limit, not a delay.
-	 *
-	 * @return the timeout; {@value #DEFAULT_TIMEOUT_SECONDS} seconds by default
-	 */
-	public @Nonnull Duration timeout() {
-		return waitTimeout;
-	}
-
-	/**
-	 * Returns the effective test strategy: a run-level override, else the innermost script level's.
-	 *
-	 * @return the strategy, or null if nothing sets one (the executor then asserts)
-	 */
-	public @Nullable TestStrategy testStrategy() {
-		return strategy;
-	}
-
-	/**
-	 * Returns the directory for failure screenshots and page sources: the one set, else the default one when the
-	 * evidence request asks for failures.
-	 *
-	 * @return the absolute directory, or null for none
-	 */
-	public @Nullable Path failureDir() {
-		if (failureDirectory != null) {
-			return failureDirectory;
-		}
-		return evidenceRequest.failures() ? environment.workingDirectory().resolve(DEFAULT_FAILURE_DIR) : null;
-	}
-
-	/**
-	 * Returns the directory for step snapshots: the one set, else the default one when the evidence request asks for
-	 * snapshots.
-	 *
-	 * @return the absolute directory, or null for none
-	 */
-	public @Nullable Path snapshotDir() {
-		if (snapshotDirectory != null) {
-			return snapshotDirectory;
-		}
-		return evidenceRequest.snapshots() ? environment.workingDirectory().resolve(DEFAULT_MEDIA_DIR) : null;
-	}
-
-	/**
-	 * Indicates if each step's page source is saved with its snapshot.
-	 *
-	 * @return false unless set to true
-	 */
-	public boolean snapshotSource() {
-		return withPageSources;
-	}
-
-	/**
-	 * Returns the directory for the run's video: the one set, else the default one when the evidence request asks for
-	 * video.
-	 *
-	 * @return the absolute directory, or null for none
-	 */
-	public @Nullable Path videoDir() {
-		if (videoDirectory != null) {
-			return videoDirectory;
-		}
-		return evidenceRequest.video() ? environment.workingDirectory().resolve(DEFAULT_MEDIA_DIR) : null;
-	}
-
-	/**
-	 * Returns the evidence request.
-	 *
-	 * @return the request; {@link Evidence#NONE} by default
-	 */
-	public @Nonnull Evidence evidence() {
-		return evidenceRequest;
-	}
-
-	/**
-	 * Returns which runs keep their snapshots and video.
-	 *
-	 * @return {@link KeepMedia#ALL} by default
-	 */
-	public @Nonnull KeepMedia keepMedia() {
-		return mediaKept;
-	}
-
-	/**
-	 * Returns the prefixes of the suite files to run.
-	 *
-	 * @return the prefixes (unmodifiable), or an empty list for all
-	 */
-	public @Nonnull List<String> suiteOnly() {
-		return onlyPrefixes;
-	}
-
-	/**
-	 * Returns the scripts and suites the generic runner runs.
-	 *
-	 * @return the classpath resources or file paths (unmodifiable), or an empty list for none
-	 */
-	public @Nonnull List<String> run() {
-		return runScripts;
-	}
-
-	/**
-	 * Returns the variables that every automation starts with.
-	 *
-	 * @return the values by variable name (without {@value #VAR_PREFIX}), sorted by name; a new map
-	 */
-	public @Nonnull Map<String, String> variables() {
-		Map<String, String> result = new TreeMap<>();
-		for (Setting variable : variables.values()) {
-			result.put(variable.key().substring(VAR_PREFIX.length()), variable.value());
-		}
-		return result;
-	}
-
-	/**
-	 * Returns the properties file that was read.
-	 *
-	 * @return the file, or null if there was none
-	 */
-	public @Nullable Path propertiesFile() {
-		return propertiesFile;
-	}
-
-	/**
-	 * Returns a setting as resolved, with its source.
-	 *
-	 * @param key	the key, e.g. {@value #TEST_STRATEGY} or {@value #VAR_PREFIX}{@code password}
-	 * @return the setting, or null if it has its default
-	 */
-	public @Nullable Setting setting(@Nonnull String key) {
-		return key.startsWith(VAR_PREFIX) ? variables.get(key) : settings.get(key);
-	}
-
-	/**
-	 * Returns a setting if it comes from the run ({@code -D}, the environment, code or the properties file), which
-	 * overrides what the scripts say: for example a test strategy override.
-	 *
-	 * @param key	the key
-	 * @return the setting, or null if a script level or the default gives it
-	 */
-	public @Nullable Setting runOverride(@Nonnull String key) {
-		Setting result = setting(key);
-		return ((result != null) && result.source().level().isRun()) ? result : null;
-	}
-
-	/**
-	 * Describes the settings that do not come from their defaults, each with its source, for the trace and the media
-	 * pages: e.g. {@code testStrategy=Verify (-Dsail.testStrategy)}. A variable's value is hidden. A directory that an
-	 * evidence request makes is listed too, with the request as its source.
-	 *
-	 * @return one line per setting, in key order; empty if every setting has its default
-	 */
-	public @Nonnull List<String> describe() {
-		List<String> result = new ArrayList<>(settings.size() + variables.size() + 3);
-		for (Setting setting : settings.values()) {
-			result.add(setting.toString());
-		}
-		Setting request = settings.get(EVIDENCE);
-		if (request != null) {
-			String from = " (" + EVIDENCE.substring(PREFIX.length()) + ", " + request.source() + ')';
-			if (failureDirectory == null) {
-				describeDirectory(result, FAILURE_DIR, failureDir(), from);
-			}
-			if (snapshotDirectory == null) {
-				describeDirectory(result, SNAPSHOT_DIR, snapshotDir(), from);
-			}
-			if (videoDirectory == null) {
-				describeDirectory(result, VIDEO_DIR, videoDir(), from);
-			}
-		}
-		for (Setting variable : variables.values()) {
-			result.add(variable.toString());
-		}
-		return result;
-	}
-
-	private static void describeDirectory(@Nonnull List<String> lines, @Nonnull String key, @Nullable Path directory, @Nonnull String from) {
-		if (directory != null) {
-			lines.add(key.substring(PREFIX.length()) + '=' + directory + from);
-		}
 	}
 
 	/**
@@ -783,30 +545,30 @@ public final class SailSettings {
 	 * @param testStrategy	the automation's {@code testStrategy}, or null if it states none
 	 * @return the layer
 	 */
-	public static @Nonnull Layer automation(@Nullable String name, @Nullable TestStrategy testStrategy) {
+	static @Nonnull Layer automation(@Nullable String name, @Nullable TestStrategy testStrategy) {
 		return scriptLayer(Level.AUTOMATION, (name == null) ? "automation" : "automation " + name, testStrategy, null);
 	}
 
 	/**
 	 * Makes a workflow's layer: its default test strategy for the automations that state none.
 	 *
-	 * @param name	the workflow, for messages
+	 * @param name	the workflow, for messages, e.g. its file
 	 * @param testStrategy	the workflow's {@code testStrategy}, or null
 	 * @return the layer
 	 */
-	public static @Nonnull Layer workflow(@Nonnull String name, @Nullable TestStrategy testStrategy) {
+	static @Nonnull Layer workflow(@Nonnull String name, @Nullable TestStrategy testStrategy) {
 		return scriptLayer(Level.WORKFLOW, "workflow " + name, testStrategy, null);
 	}
 
 	/**
 	 * Makes a suite's layer: its default test strategy and its evidence request.
 	 *
-	 * @param name	the suite, for messages
+	 * @param name	the suite, for messages, e.g. its file
 	 * @param testStrategy	the suite's {@code testStrategy}, or null
 	 * @param evidence	the suite's {@code evidence}, or null
 	 * @return the layer
 	 */
-	public static @Nonnull Layer suite(@Nonnull String name, @Nullable TestStrategy testStrategy, @Nullable Evidence evidence) {
+	static @Nonnull Layer suite(@Nonnull String name, @Nullable TestStrategy testStrategy, @Nullable Evidence evidence) {
 		return scriptLayer(Level.SUITE, "suite " + name, testStrategy, evidence);
 	}
 
@@ -819,19 +581,19 @@ public final class SailSettings {
 			values.put(TEST_STRATEGY, testStrategy.name());
 		}
 		if (evidence != null) {
-			values.put(EVIDENCE, evidence.name().toLowerCase());
+			values.put(EVIDENCE, evidence.name());
 		}
 		return new Layer(level, where, values);
 	}
 
 	/**
-	 * Resolves the settings from this JVM's system properties and environment, and the given layers.
+	 * Resolves the settings from this JVM's system properties, environment and properties file, and the given layers.
 	 *
 	 * @param layers	the code and script layers, in any order; layers of one level take precedence in the order given
 	 * @return the settings
 	 * @throws IllegalArgumentException	if a setting is invalid, or a named properties file is missing or unreadable
 	 */
-	public static @Nonnull SailSettings resolve(@Nonnull Layer... layers) {
+	static @Nonnull SailSettings resolve(@Nonnull Layer... layers) {
 		return resolve(Environment.current(), Arrays.asList(layers));
 	}
 
@@ -846,40 +608,53 @@ public final class SailSettings {
 	 * @throws IllegalArgumentException	listing every invalid setting with its source and the valid values, or if a named
 	 * 			properties file is missing or unreadable, or holds a key that is not a SAIL setting
 	 */
-	public static @Nonnull SailSettings resolve(@Nonnull Environment environment, @Nonnull List<Layer> layers) {
+	static @Nonnull SailSettings resolve(@Nonnull Environment environment, @Nonnull List<Layer> layers) {
 		List<Layer> given = new ArrayList<>(layers);
 		SailSettings result = new SailSettings(environment, given);
+		Layer system = result.systemLayer();
+		// the levels above the file name it; the environment's variables are bound once the file's keys are known too
+		List<Layer> above = new ArrayList<>(given.size() + 2);
+		above.add(system);
+		above.add(result.environmentLayer(given, null, false));
+		above.addAll(given);
+		above.sort(Comparator.comparing(Layer::level)); // stable: a level's layers keep their order
+		Layer file = result.fileLayer(first(above, PROPERTIES));
 		List<Layer> ordered = new ArrayList<>(given.size() + 3);
-		ordered.add(systemLayer(environment));
-		ordered.add(environmentLayer(environment, given));
+		ordered.add(system);
+		ordered.add(result.environmentLayer(given, file, true));
 		ordered.addAll(given);
-		// the file is found from the run levels above it
-		Layer file = result.fileLayer(ordered);
 		if (file != null) {
 			ordered.add(file);
 		}
-		ordered.sort(Comparator.comparing(Layer::level)); // stable: a level's layers keep their order
+		ordered.sort(Comparator.comparing(Layer::level));
 
 		for (String key : KEYS) {
-			for (Layer layer : ordered) {
-				String value = layer.get(key);
-				if ((value != null) && (! value.isBlank())) {
-					result.settings.put(key, new Setting(key, value.trim(), layer.sourceOf(key)));
-					break;
-				}
+			Layer layer = first(ordered, key);
+			if (layer != null) {
+				result.settings.put(key, new Setting(key, String.valueOf(layer.get(key)).trim(), layer.sourceOf(key)));
 			}
 		}
 		for (Layer layer : ordered) {
-			for (Map.Entry<String, String> entry : layer.values.entrySet()) {
-				String key = entry.getKey();
-				if (key.startsWith(VAR_PREFIX) && (! result.variables.containsKey(key))) {
-					// a value as given: a password may start or end with a space
-					result.variables.put(key, new Setting(key, entry.getValue(), layer.sourceOf(key)));
+			for (String key : layer.values.keySet()) {
+				// a value as given (a password may start or end with a space), but a blank one counts as not set
+				String value = layer.get(key);
+				if (key.startsWith(VAR_PREFIX) && (value != null) && (! result.variables.containsKey(key))) {
+					result.variables.put(key, new Setting(key, value, layer.sourceOf(key)));
 				}
 			}
 		}
 		result.parse();
 		return result;
+	}
+
+	/** Returns the highest of the ordered layers that gives a key a value, or null. */
+	private static @Nullable Layer first(@Nonnull List<Layer> ordered, @Nonnull String key) {
+		for (Layer layer : ordered) {
+			if (layer.get(key) != null) {
+				return layer;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -890,14 +665,15 @@ public final class SailSettings {
 	 * @return the settings
 	 * @throws IllegalArgumentException	if a setting is invalid
 	 */
-	public @Nonnull SailSettings with(@Nonnull Layer... more) {
+	@Nonnull SailSettings with(@Nonnull Layer... more) {
 		List<Layer> all = new ArrayList<>(layers.size() + more.length);
 		all.addAll(layers);
 		all.addAll(Arrays.asList(more));
 		return resolve(environment, all);
 	}
 
-	private static @Nonnull Layer systemLayer(@Nonnull Environment environment) {
+	/** Makes the system properties' layer, noting the {@code sail.*} properties that are not settings. */
+	private @Nonnull Layer systemLayer() {
 		Map<String, String> values = new LinkedHashMap<>();
 		Map<String, String> wheres = new LinkedHashMap<>();
 		for (Map.Entry<String, String> property : environment.systemProperties().entrySet()) {
@@ -906,46 +682,56 @@ public final class SailSettings {
 				values.put(key, property.getValue());
 				wheres.put(key, "-D" + key);
 			}
+			else if (! OTHER_SAIL_PROPERTIES.contains(key)) {
+				ignored.add("-D" + key);
+			}
 		}
 		return new Layer(Level.SYSTEM_PROPERTY, "-D", values, wheres);
 	}
 
-	private static @Nonnull Layer environmentLayer(@Nonnull Environment environment, @Nonnull List<Layer> given) {
+	/**
+	 * Makes the environment variables' layer.
+	 *
+	 * @param given	the code and script layers, whose variables bind the variables' environment variables
+	 * @param file	the properties file's layer, whose variables do too; or null
+	 * @param noteIgnored	true to note the {@code SAIL_*} variables that are not settings
+	 */
+	private @Nonnull Layer environmentLayer(@Nonnull List<Layer> given, @Nullable Layer file, boolean noteIgnored) {
 		Map<String, String> env = environment.environment();
 		Map<String, String> values = new LinkedHashMap<>();
 		Map<String, String> names = new LinkedHashMap<>();
+		Map<String, String> keysByName = new TreeMap<>();
 		for (String key : KEYS) {
-			String name = environmentName(key);
-			String value = env.get(name);
-			if (value != null) {
-				values.put(key, value);
-				names.put(key, name);
-			}
+			keysByName.put(environmentName(key), key);
 		}
-		Map<String, String> knownVariables = knownVariables(environment, given);
+		List<Layer> others = new ArrayList<>(given);
+		if (file != null) {
+			others.add(file);
+		}
+		for (Layer layer : others) {
+			addVariableKeys(keysByName, layer.values.keySet());
+		}
+		addVariableKeys(keysByName, environment.systemProperties().keySet());
+		Set<String> otherNames = new TreeSet<>();
+		for (String other : OTHER_SAIL_PROPERTIES) {
+			otherNames.add(environmentName(other));
+		}
 		for (Map.Entry<String, String> variable : env.entrySet()) {
 			String name = variable.getKey();
-			if (name.startsWith(ENVIRONMENT_VAR_PREFIX) && (name.length() > ENVIRONMENT_VAR_PREFIX.length())) {
-				// a variable's name is known from another source, or made from the environment variable's
-				String key = knownVariables.get(name);
-				if (key == null) {
-					key = VAR_PREFIX + camelCase(name.substring(ENVIRONMENT_VAR_PREFIX.length()));
-				}
+			String key = keysByName.get(name);
+			if ((key == null) && name.startsWith(ENVIRONMENT_VAR_PREFIX) && (name.length() > ENVIRONMENT_VAR_PREFIX.length())) {
+				// a variable no other source names: its name is the lower camel case of the environment variable's
+				key = VAR_PREFIX + camelCase(name.substring(ENVIRONMENT_VAR_PREFIX.length()));
+			}
+			if (key != null) {
 				values.put(key, variable.getValue());
 				names.put(key, name);
 			}
+			else if (noteIgnored && name.startsWith(ENVIRONMENT_PREFIX) && (! otherNames.contains(name))) {
+				ignored.add(name);
+			}
 		}
 		return new Layer(Level.ENVIRONMENT, "environment", values, names);
-	}
-
-	/** Returns the variable keys that the other sources name, by their environment variable's name. */
-	private static @Nonnull Map<String, String> knownVariables(@Nonnull Environment environment, @Nonnull List<Layer> given) {
-		Map<String, String> result = new TreeMap<>();
-		for (Layer layer : given) {
-			addVariableKeys(result, layer.values.keySet());
-		}
-		addVariableKeys(result, environment.systemProperties().keySet());
-		return result;
 	}
 
 	private static void addVariableKeys(@Nonnull Map<String, String> keysByEnvironmentName, @Nonnull Iterable<String> keys) {
@@ -963,12 +749,12 @@ public final class SailSettings {
 	 * {@code SAIL_VAR_*} that names no variable known from another source is the variable of its lower camel case name:
 	 * {@code SAIL_VAR_ADMIN_PASSWORD} is {@code adminPassword}.
 	 *
-	 * @param key	the key
+	 * @param key	a {@code sail.*} key
 	 * @return the environment variable's name
 	 */
-	public static @Nonnull String environmentName(@Nonnull String key) {
+	static @Nonnull String environmentName(@Nonnull String key) {
 		String name = key.startsWith(PREFIX) ? key.substring(PREFIX.length()) : key;
-		StringBuilder result = new StringBuilder(name.length() + 12).append("SAIL_");
+		StringBuilder result = new StringBuilder(name.length() + 12).append(ENVIRONMENT_PREFIX);
 		char previous = '.';
 		for (int i = 0, l = name.length(); i < l; i++) {
 			char c = name.charAt(i);
@@ -1005,33 +791,33 @@ public final class SailSettings {
 
 	/**
 	 * Returns the properties file's layer, or null when there is no file: the file a run level names, else
-	 * {@code ~/.skyve/sail.properties} if it exists.
+	 * {@code ~/.skyve/sail.properties} if it exists (and the environment has a user home).
 	 *
-	 * <p>Side effects: reads the file, and sets {@link #propertiesFile}.
+	 * <p>Side effects: reads the file.
 	 *
-	 * @param runLayers	the layers above the file, which may name it
+	 * @param naming	the highest layer above the file that names a file, or null
 	 * @throws IllegalArgumentException	if a named file is missing or unreadable, or holds a key that is not a setting
 	 */
-	private @Nullable Layer fileLayer(@Nonnull List<Layer> runLayers) {
-		Setting named = null;
-		List<Layer> above = new ArrayList<>(runLayers);
-		above.sort(Comparator.comparing(Layer::level));
-		for (Layer layer : above) {
-			String value = layer.get(PROPERTIES);
-			if ((value != null) && (! value.isBlank())) {
-				named = new Setting(PROPERTIES, value.trim(), layer.sourceOf(PROPERTIES));
-				break;
-			}
-		}
+	private @Nullable Layer fileLayer(@Nullable Layer naming) {
 		Path file;
-		if (named == null) {
-			file = environment.userHome().resolve(".skyve").resolve("sail.properties");
+		if (naming == null) {
+			Path home = environment.userHome();
+			if (home == null) {
+				return null;
+			}
+			file = home.resolve(".skyve").resolve("sail.properties");
 			if (! Files.isRegularFile(file)) {
 				return null;
 			}
 		}
 		else {
-			file = path(named.value(), "use a file path", named);
+			Setting named = new Setting(PROPERTIES, String.valueOf(naming.get(PROPERTIES)).trim(), naming.sourceOf(PROPERTIES));
+			try {
+				file = path(named.value());
+			}
+			catch (IllegalArgumentException e) {
+				throw new IllegalArgumentException("Invalid SAIL setting: " + describeProblem(named, "use a file path (" + e.getMessage() + ')'), e);
+			}
 			if (! Files.isRegularFile(file)) {
 				throw new IllegalArgumentException("Invalid SAIL setting: " + describeProblem(named, "there is no such file"));
 			}
@@ -1054,17 +840,18 @@ public final class SailSettings {
 			}
 		}
 		if (! unknown.isEmpty()) {
+			List<String> valid = new ArrayList<>(KEYS);
+			valid.remove(PROPERTIES);
 			throw new IllegalArgumentException(String.format("The SAIL properties file %s has keys that are not SAIL settings: %s; use %s or %s<name>",
-																file, unknown, KEYS.subList(0, KEYS.size() - 1), VAR_PREFIX));
+																file, unknown, valid, VAR_PREFIX));
 		}
-		propertiesFile = file;
 		return new Layer(Level.FILE, file.toString(), values);
 	}
 
 	/**
 	 * Indicates if a key is a SAIL setting or variable.
 	 *
-	 * @param key	the key
+	 * @param key	any key
 	 * @return true for a key of {@link SailSettings}, or {@value #VAR_PREFIX} and a name
 	 */
 	static boolean isSettingKey(@Nonnull String key) {
@@ -1099,10 +886,10 @@ public final class SailSettings {
 			case BROWSER -> browserType = constant(value, Browsers.values());
 			case TIMEOUT_SECONDS -> waitTimeout = Duration.ofSeconds(seconds(value));
 			case TEST_STRATEGY -> strategy = constant(value, TestStrategy.values());
-			case FAILURE_DIR -> failureDirectory = path(value, "use a directory path", setting);
-			case SNAPSHOT_DIR -> snapshotDirectory = path(value, "use a directory path", setting);
+			case FAILURE_DIR -> failureDirectory = directory(value);
+			case SNAPSHOT_DIR -> snapshotDirectory = directory(value);
 			case SNAPSHOT_SOURCE -> withPageSources = bool(value);
-			case VIDEO_DIR -> videoDirectory = path(value, "use a directory path", setting);
+			case VIDEO_DIR -> videoDirectory = directory(value);
 			case EVIDENCE -> evidenceRequest = constant(value, Evidence.values());
 			case KEEP_MEDIA -> mediaKept = constant(value, KeepMedia.values());
 			case SUITE_ONLY -> onlyPrefixes = list(value);
@@ -1163,13 +950,26 @@ public final class SailSettings {
 		throw new IllegalArgumentException("use one of " + String.join(", ", names) + " (in any case)");
 	}
 
-	/** Resolves a path against the working directory. */
-	private @Nonnull Path path(@Nonnull String value, @Nonnull String valid, @Nonnull Setting setting) {
+	private @Nonnull Path directory(@Nonnull String value) {
 		try {
-			return environment.workingDirectory().resolve(value);
+			return path(value);
+		}
+		catch (IllegalArgumentException e) {
+			throw new IllegalArgumentException("use a directory path (" + e.getMessage() + ')', e);
+		}
+	}
+
+	/**
+	 * Resolves a path against the working directory, normalised.
+	 *
+	 * @throws IllegalArgumentException	with the reason, if it is not a path
+	 */
+	private @Nonnull Path path(@Nonnull String value) {
+		try {
+			return environment.workingDirectory().resolve(value).normalize();
 		}
 		catch (InvalidPathException e) {
-			throw new IllegalArgumentException("Invalid SAIL setting: " + describeProblem(setting, valid + " (" + e.getReason() + ')'), e);
+			throw new IllegalArgumentException(e.getReason(), e);
 		}
 	}
 
@@ -1186,5 +986,248 @@ public final class SailSettings {
 		}
 		// the settings are an immutable snapshot
 		return Collections.unmodifiableList(result);
+	}
+
+	/**
+	 * Returns the Skyve base URL to run against.
+	 *
+	 * @return the URL, or null if none is set (there is no default)
+	 */
+	public @Nullable String baseUrl() {
+		return url;
+	}
+
+	/**
+	 * Returns the Skyve base URL to run against, which must be set.
+	 *
+	 * @return the URL
+	 * @throws IllegalStateException	if none is set, so a run never silently targets an unintended server
+	 */
+	public @Nonnull String requireBaseUrl() {
+		String result = url;
+		if (result == null) {
+			throw new IllegalStateException("No SAIL base URL: set -D" + BASE_URL + "=http://<host>:<port>/<context>/ (or " +
+												environmentName(BASE_URL) + ", or baseUrl in code or the SAIL properties file) " +
+												"to the disposable server to test against");
+		}
+		return result;
+	}
+
+	/**
+	 * Indicates if the browser is headless.
+	 *
+	 * @return true unless set to false
+	 */
+	public boolean headless() {
+		return headlessBrowser;
+	}
+
+	/**
+	 * Returns the browser.
+	 *
+	 * @return Chrome unless set
+	 */
+	public @Nonnull Browsers browser() {
+		return browserType;
+	}
+
+	/**
+	 * Returns the timeout for every wait on the browser. It is a limit, not a delay.
+	 *
+	 * @return {@value #DEFAULT_TIMEOUT_SECONDS} seconds unless set
+	 */
+	public @Nonnull Duration timeout() {
+		return waitTimeout;
+	}
+
+	/**
+	 * Returns the effective test strategy: a run-level override, else the innermost script level's.
+	 *
+	 * @return the strategy, or null if nothing sets one (the executor then asserts)
+	 */
+	public @Nullable TestStrategy testStrategy() {
+		return strategy;
+	}
+
+	/**
+	 * Returns the directory for failure screenshots and page sources: the one set, else the default one when the
+	 * evidence request asks for failures.
+	 *
+	 * @return the absolute directory, or null for none
+	 */
+	public @Nullable Path failureDir() {
+		if (failureDirectory != null) {
+			return failureDirectory;
+		}
+		return keepsFailures(evidenceRequest) ? environment.workingDirectory().resolve(DEFAULT_FAILURE_DIR) : null;
+	}
+
+	/**
+	 * Returns the directory for step snapshots: the one set, else the default one when the evidence request asks for
+	 * snapshots.
+	 *
+	 * @return the absolute directory, or null for none
+	 */
+	public @Nullable Path snapshotDir() {
+		if (snapshotDirectory != null) {
+			return snapshotDirectory;
+		}
+		return keepsSnapshots(evidenceRequest) ? environment.workingDirectory().resolve(DEFAULT_MEDIA_DIR) : null;
+	}
+
+	/**
+	 * Indicates if each step's page source is saved with its snapshot.
+	 *
+	 * @return false unless set to true
+	 */
+	public boolean snapshotSource() {
+		return withPageSources;
+	}
+
+	/**
+	 * Returns the directory for the run's video: the one set, else the default one when the evidence request asks for
+	 * video.
+	 *
+	 * @return the absolute directory, or null for none
+	 */
+	public @Nullable Path videoDir() {
+		if (videoDirectory != null) {
+			return videoDirectory;
+		}
+		return keepsVideo(evidenceRequest) ? environment.workingDirectory().resolve(DEFAULT_MEDIA_DIR) : null;
+	}
+
+	/**
+	 * Returns the evidence request.
+	 *
+	 * @return {@code none} unless set
+	 */
+	public @Nonnull Evidence evidence() {
+		return evidenceRequest;
+	}
+
+	/**
+	 * Returns which runs keep their snapshots and video.
+	 *
+	 * @return {@link KeepMedia#ALL} unless set
+	 */
+	public @Nonnull KeepMedia keepMedia() {
+		return mediaKept;
+	}
+
+	/**
+	 * Returns the prefixes of the suite members to run.
+	 *
+	 * @return the prefixes (unmodifiable), or an empty list for all
+	 */
+	public @Nonnull List<String> suiteOnly() {
+		return onlyPrefixes;
+	}
+
+	/**
+	 * Returns the scripts and suites the generic runner runs.
+	 *
+	 * @return the classpath resources or file paths (unmodifiable), or an empty list for none
+	 */
+	public @Nonnull List<String> run() {
+		return runScripts;
+	}
+
+	/**
+	 * Returns the variables that every automation starts with.
+	 *
+	 * @return the values by variable name (without {@value #VAR_PREFIX}), sorted by name; a new map
+	 */
+	public @Nonnull Map<String, String> variables() {
+		Map<String, String> result = new TreeMap<>();
+		for (Setting variable : variables.values()) {
+			result.put(variable.key().substring(VAR_PREFIX.length()), variable.value());
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a setting as resolved, with its source.
+	 *
+	 * @param key	e.g. {@value #TEST_STRATEGY} or {@value #VAR_PREFIX}{@code password}
+	 * @return the setting, or null if it has its default
+	 */
+	public @Nullable Setting setting(@Nonnull String key) {
+		return key.startsWith(VAR_PREFIX) ? variables.get(key) : settings.get(key);
+	}
+
+	/**
+	 * Returns a setting if it comes from the run ({@code -D}, the environment, code, the properties file or a browser
+	 * configuration), which overrides what the scripts say: for example a test strategy override.
+	 *
+	 * @param key	the setting's key
+	 * @return the setting, or null if a script level or the default gives it
+	 */
+	@Nullable Setting runOverride(@Nonnull String key) {
+		Setting result = setting(key);
+		return ((result != null) && result.source().level().isRun()) ? result : null;
+	}
+
+	/**
+	 * Returns the {@code sail.*} system properties ({@code -Dsail.x}) and {@code SAIL_*} environment variables that are
+	 * not settings, and so are ignored; without the names other SAIL code reads.
+	 *
+	 * @return the names, system properties first (unmodifiable)
+	 */
+	@Nonnull List<String> ignored() {
+		return Collections.unmodifiableList(ignored);
+	}
+
+	/**
+	 * Describes the settings that do not come from their defaults, each with its source, for the trace and the media
+	 * pages: e.g. {@code testStrategy=Verify (-Dsail.testStrategy)}. The settings come in the order of the keys, then
+	 * the directories an evidence request makes (with the request as their source), then the variables, by name, with
+	 * their values hidden.
+	 *
+	 * @return one line per setting; empty if every setting has its default
+	 */
+	@Nonnull List<String> describe() {
+		List<String> result = new ArrayList<>(settings.size() + variables.size() + 3);
+		for (Setting setting : settings.values()) {
+			result.add(setting.toString());
+		}
+		Setting request = settings.get(EVIDENCE);
+		if (request != null) {
+			String from = " (" + EVIDENCE.substring(PREFIX.length()) + ", " + request.source() + ')';
+			if (failureDirectory == null) {
+				describeDirectory(result, FAILURE_DIR, failureDir(), from);
+			}
+			if (snapshotDirectory == null) {
+				describeDirectory(result, SNAPSHOT_DIR, snapshotDir(), from);
+			}
+			if (videoDirectory == null) {
+				describeDirectory(result, VIDEO_DIR, videoDir(), from);
+			}
+		}
+		for (Setting variable : variables.values()) {
+			result.add(variable.toString());
+		}
+		return result;
+	}
+
+	/** Indicates if an evidence request keeps failure screenshots: every request but {@code none}. */
+	static boolean keepsFailures(@Nonnull Evidence request) {
+		return request != Evidence.none;
+	}
+
+	/** Indicates if an evidence request keeps step snapshots: {@code snapshots} and {@code all}. */
+	static boolean keepsSnapshots(@Nonnull Evidence request) {
+		return (request == Evidence.snapshots) || (request == Evidence.all);
+	}
+
+	/** Indicates if an evidence request keeps a video: {@code video} and {@code all}. */
+	static boolean keepsVideo(@Nonnull Evidence request) {
+		return (request == Evidence.video) || (request == Evidence.all);
+	}
+
+	private static void describeDirectory(@Nonnull List<String> lines, @Nonnull String key, @Nullable Path directory, @Nonnull String from) {
+		if (directory != null) {
+			lines.add(key.substring(PREFIX.length()) + '=' + directory + from);
+		}
 	}
 }

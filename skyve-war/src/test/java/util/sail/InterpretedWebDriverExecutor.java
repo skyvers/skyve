@@ -209,8 +209,8 @@ public abstract class InterpretedWebDriverExecutor<
 	private SailViewRoles viewRoles;
 	/** The persistence user when the first login of the run switched it, which the views are built from; or null. */
 	private User viewTemplateUser;
-	/** The variables each automation starts with, by name, or null for the settings' variables; see {@link #useVariables(Map)}. */
-	private Map<String, String> startingVariables;
+	/** The variables given by {@link #useVariables(Map)}, as a code layer under the settings' variables; or null. */
+	private SailSettings.Layer startingVariables;
 	/** The settings given by {@link #useSettings(SailSettings)}, or null for the browser's. */
 	private SailSettings settings;
 	/** The settings of the running (or last) automation, with its own test strategy; or null before the first. */
@@ -232,14 +232,16 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executeAutomation(@Nonnull Automation automation) {
 		// an invalid setting fails here, before any step runs
-		SailSettings resolved = settings().with(SailSettings.automation(null, automation.getTestStrategy()));
+		SailSettings.Layer own = SailSettings.automation(null, automation.getTestStrategy());
+		SailSettings resolved = (startingVariables == null) ? settings().with(own) : settings().with(startingVariables, own);
 		automationSettings = resolved;
 		List<String> described = resolved.describe();
-		selenide.trace("SAIL settings: " + (described.isEmpty() ? "all defaults" : String.join("; ", described)));
+		List<String> ignored = resolved.ignored();
+		selenide.trace("SAIL settings: " + (described.isEmpty() ? "all defaults" : String.join("; ", described)) +
+						(ignored.isEmpty() ? "" : "; ignored, as they are not SAIL settings: " + String.join(", ", ignored)));
 		initialiseAutomation(automation);
 		openerWindows.clear();
-		Map<String, String> variables = (startingVariables == null) ? resolved.variables() : startingVariables;
-		for (Map.Entry<String, String> variable : variables.entrySet()) {
+		for (Map.Entry<String, String> variable : resolved.variables().entrySet()) {
 			String name = variable.getKey();
 			// a run shared with earlier automations keeps what they captured
 			if (getVariable(name) == null) {
@@ -414,8 +416,8 @@ public abstract class InterpretedWebDriverExecutor<
 			return resolved.testStrategy();
 		}
 		// no automation has started: steps run on their own
-		TestStrategy override = testStrategyOverride();
-		return (override != null) ? override : super.getTestStrategy();
+		SailSettings current = settings();
+		return (current.runOverride(SailSettings.TEST_STRATEGY) != null) ? current.testStrategy() : super.getTestStrategy();
 	}
 
 	/**
@@ -426,7 +428,12 @@ public abstract class InterpretedWebDriverExecutor<
 	 * @throws IllegalArgumentException	if a setting is invalid, saying which values are valid
 	 */
 	public static @Nullable TestStrategy testStrategyOverride() {
-		SailSettings resolved = SailSettings.resolve();
+		return testStrategyOverride(SailSettings.Environment.current());
+	}
+
+	/** Returns the test strategy override of the given sources; see {@link #testStrategyOverride()}. */
+	static @Nullable TestStrategy testStrategyOverride(@Nonnull SailSettings.Environment environment) {
+		SailSettings resolved = SailSettings.resolve(environment, List.of());
 		return (resolved.runOverride(SailSettings.TEST_STRATEGY) == null) ? null : resolved.testStrategy();
 	}
 
@@ -437,7 +444,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 *
 	 * <p>Side effects: replaces the settings given before.
 	 *
-	 * @param runSettings	the settings
+	 * @param runSettings	the run's settings, resolved from the test's code and the browser configuration
 	 */
 	public final void useSettings(@Nonnull SailSettings runSettings) {
 		settings = runSettings;
@@ -795,15 +802,21 @@ public abstract class InterpretedWebDriverExecutor<
 	 * been captured. A recorded script signs in with {@code password="{var:password}"}, because the recorder never
 	 * records a password: the test supplies it this way, and the script runs unedited. A {@code <captureValue/>} of the
 	 * same name replaces the value for the rest of that automation, and a run shared with earlier automations keeps the
-	 * value they captured. Without this, the automations start with the settings' variables
-	 * ({@value SailSettings#VAR_PREFIX}{@code name}).
+	 * value they captured. They are code-level settings below the test's own, so {@code -Dsail.var.name} (and the test's
+	 * {@code settings().variable(...)}) beat them.
 	 *
 	 * <p>Side effects: replaces the variables given before.
 	 *
 	 * @param variables	the variables by name; copied
+	 * @deprecated	use {@link SailSettings.Code#variable(String, String)} in the test's {@code settings()}
 	 */
+	@Deprecated(since = "10")
 	public final void useVariables(@Nonnull Map<String, String> variables) {
-		startingVariables = new java.util.TreeMap<>(variables);
+		SailSettings.Code code = SailSettings.code();
+		for (Map.Entry<String, String> variable : variables.entrySet()) {
+			code.variable(variable.getKey(), variable.getValue());
+		}
+		startingVariables = code.layer(SailSettings.Level.CODE, "code: useVariables");
 	}
 
 	@Override

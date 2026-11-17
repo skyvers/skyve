@@ -22,9 +22,9 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	private String baseUrl;
 	
 	@Override
-	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
-		super.startBrowser(configuration);
-		this.baseUrl = configuration.getBaseUrl();
+	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration, @Nonnull SailSettings resolved) {
+		super.startBrowser(configuration, resolved);
+		this.baseUrl = resolved.requireBaseUrl();
 	}
 	
 	public void get(String url) {

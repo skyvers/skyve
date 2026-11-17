@@ -1,19 +1,24 @@
 package util.sail;
 
 import java.time.Duration;
+import java.util.List;
 
 import org.openqa.selenium.Dimension;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Browser configuration for SAIL (builder-of-sorts; without a build method).
  * <p>
- * The browser, base URL and headless mode set here are code-level values of {@link SailSettings}: a {@code -D} system
- * property or environment variable beats them (e.g. {@code -Dsail.baseUrl=http://localhost:8180/skyve/
- * -Dsail.headless=false}), and so do the settings of the test that uses this configuration (see
- * {@link #settings(SailSettings.Code)}), so that a quick change in a test's {@code settings()} applies to every
- * device it uses. The getters return the resolved values.
+ * The browser, base URL and headless mode set here are this configuration's own values in {@link SailSettings}
+ * (level {@link SailSettings.Level#CONFIGURATION}): a {@code -D} system property, an environment variable, the settings
+ * of the test that uses this configuration (see {@link #settings(SailSettings.Code)}) and the properties file beat them,
+ * e.g. {@code -Dsail.baseUrl=http://localhost:8180/skyve/ -Dsail.headless=false}. So an IT's {@code .browser(chrome)}
+ * never stops the file or a test's {@code settings()} choosing another browser. The getters return the resolved values.
+ * <p>
+ * A {@link #fixed()} configuration resolves only its own values, for a browser that is not a SAIL run's (such as a
+ * deployed-environment test's), so that no SAIL setting can send it, and its credentials, to another server.
  * <p>
  * There is deliberately no default base URL. SAIL scripts save, delete and run destructive admin
  * actions, so a run must name the (disposable) server it targets rather than fall back to a
@@ -46,18 +51,34 @@ public class BrowserConfiguration {
 	private final SailSettings.Code values = SailSettings.code();
 	/** The settings of the test that uses this configuration, which beat its own values; or null. */
 	private SailSettings.Code settings;
+	/** True to resolve only the values set here; see {@link #fixed()}. */
+	private boolean fixed;
 	private String userAgentString;
 	private Dimension resolution;
 	private Duration pageLoadTimeout;
 	private Duration implicitlyWait;
 	private Duration scriptTimeout;
 	
-	public BrowserConfiguration browser(Browsers browser) {
+	/**
+	 * Sets this configuration's own browser, which a run's {@value SailSettings#BROWSER} (from {@code -D}, the
+	 * environment, the test's settings or the properties file) beats.
+	 *
+	 * @param browser	the browser, or null to clear it (Chrome, unless a setting names one)
+	 * @return this configuration
+	 */
+	public BrowserConfiguration browser(@Nullable Browsers browser) {
 		values.set(SailSettings.BROWSER, (browser == null) ? null : browser.name());
 		return this;
 	}
 
-	public BrowserConfiguration baseUrl(String baseUrl) {
+	/**
+	 * Sets this configuration's own base URL, which a run's {@value SailSettings#BASE_URL} (from {@code -D}, the
+	 * environment, the test's settings or the properties file) beats.
+	 *
+	 * @param baseUrl	an http or https URL ending in {@code /}, or null to clear it
+	 * @return this configuration
+	 */
+	public BrowserConfiguration baseUrl(@Nullable String baseUrl) {
 		values.set(SailSettings.BASE_URL, baseUrl);
 		return this;
 	}
@@ -67,8 +88,27 @@ public class BrowserConfiguration {
 		return this;
 	}
 	
+	/**
+	 * Sets this configuration's own headless mode, which a run's {@value SailSettings#HEADLESS} (from {@code -D}, the
+	 * environment, the test's settings or the properties file) beats.
+	 *
+	 * @param headless	false to show the browser window
+	 * @return this configuration
+	 */
 	public BrowserConfiguration headless(boolean headless) {
 		values.headless(headless);
+		return this;
+	}
+
+	/**
+	 * Makes this configuration resolve only the values set on it: no {@code -D} system property, environment variable,
+	 * test settings or properties file applies. For a browser that is not a SAIL run's, such as a deployed-environment
+	 * test's, so that a SAIL setting cannot send it, and its credentials, to another server.
+	 *
+	 * @return this configuration
+	 */
+	public @Nonnull BrowserConfiguration fixed() {
+		fixed = true;
 		return this;
 	}
 
@@ -87,15 +127,24 @@ public class BrowserConfiguration {
 	}
 
 	/**
-	 * Resolves the settings this configuration runs with: {@code -D}, the environment, the test's settings, the values
-	 * set here, and the properties file, in that order.
+	 * Resolves the settings this configuration runs with: {@code -D}, the environment, the test's settings, the
+	 * properties file and the values set here, in that order; or, for a {@link #fixed()} configuration, only the values
+	 * set here.
+	 *
+	 * <p>Side effects: reads the properties file, if there is one.
 	 *
 	 * @return the settings
 	 * @throws IllegalArgumentException	if a setting is invalid
 	 */
 	public @Nonnull SailSettings resolve() {
-		SailSettings.Layer own = values.layer("code: BrowserConfiguration");
-		return (settings == null) ? SailSettings.resolve(own) : SailSettings.resolve(settings.layer(), own);
+		return resolve(fixed ? SailSettings.Environment.none() : SailSettings.Environment.current());
+	}
+
+	/** Resolves the settings from the given sources; see {@link #resolve()}. */
+	@Nonnull SailSettings resolve(@Nonnull SailSettings.Environment environment) {
+		SailSettings.Layer own = values.layer(SailSettings.Level.CONFIGURATION, "BrowserConfiguration");
+		List<SailSettings.Layer> layers = ((settings == null) || fixed) ? List.of(own) : List.of(settings.layer(), own);
+		return SailSettings.resolve(fixed ? SailSettings.Environment.none() : environment, layers);
 	}
 	
 	public BrowserConfiguration resolution(int width, int height) {
@@ -119,28 +168,23 @@ public class BrowserConfiguration {
 	}
 
 	/**
-	 * The browser to start.
-	 * @return	the resolved browser: Chrome unless set
+	 * Returns the resolved browser.
+	 * @return	Chrome unless a setting or {@link #browser(Browsers)} names another
+	 * @throws IllegalArgumentException	if a setting is invalid
 	 */
 	public @Nonnull Browsers getBrowser() {
 		return resolve().browser();
 	}
-	
+
 	/**
-	 * The Skyve base URL (ending in "/") to run against.
-	 * @return	the resolved base URL: from {@value SailSettings#BASE_URL}, its environment variable, the test's
-	 * 			settings, {@link #baseUrl(String)} or the properties file.
+	 * Returns the resolved Skyve base URL (ending in "/") to run against.
+	 * @return	the base URL from {@value SailSettings#BASE_URL}, its environment variable, the test's settings, the
+	 * 			properties file or {@link #baseUrl(String)}.
 	 * @throws IllegalStateException	if none sets it, so a run never silently targets an unintended server.
 	 * @throws IllegalArgumentException	if a setting is invalid
 	 */
 	public @Nonnull String getBaseUrl() {
-		String result = resolve().baseUrl();
-		if (result == null) {
-			throw new IllegalStateException("No SAIL base URL: set -D" + SailSettings.BASE_URL +
-												"=http://<host>:<port>/<context>/ (or " + SailSettings.environmentName(SailSettings.BASE_URL) +
-												", or baseUrl in code or the SAIL properties file) to the disposable server to test against");
-		}
-		return result;
+		return resolve().requireBaseUrl();
 	}
 
 	public String getUserAgentString() {
