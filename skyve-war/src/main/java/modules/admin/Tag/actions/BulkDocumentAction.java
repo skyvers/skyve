@@ -16,7 +16,6 @@ import org.skyve.web.WebContext;
 import modules.admin.Tag.TagDefaultAction;
 import modules.admin.Tag.TagExtension;
 import modules.admin.domain.AdminJob;
-import modules.admin.domain.Tag;
 
 /**
  * Server-side action that initiates bulk document actions on tagged items.

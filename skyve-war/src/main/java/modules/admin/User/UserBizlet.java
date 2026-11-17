@@ -29,7 +29,6 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.AdminJob;
-import modules.admin.domain.ChangePassword;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
