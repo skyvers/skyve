@@ -763,7 +763,8 @@
 				<skipUnitTests>true</skipUnitTests>
 				<skipIntegrationTests>false</skipIntegrationTests>
 				<surefire.rerunFailingTestsCount>0</surefire.rerunFailingTestsCount>
-				<groups>sail</groups>
+				<!-- load runs (performance) only when asked for, e.g. -Dgroups=performance; never on a shared server -->
+				<groups>sail &amp; !performance</groups>
 			</properties>
 			<build>
 				<pluginManagement>

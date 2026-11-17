@@ -18,6 +18,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.util.XMLMetaData.SAILRoot;
 
 import util.AbstractInterpretedSailWorkflow;
+import util.sail.SailLoad;
 import util.sail.SailSettings;
 
 /**
@@ -31,14 +32,25 @@ import util.sail.SailSettings;
  * Entries run in order, each independent of the others: the test fails with every entry that failed. Skipped (not
  * failed) when {@value SailSettings#RUN} is not set. Runs against {@code -Dsail.baseUrl} (required); the other settings,
  * such as {@code sail.var.<name>} for a script's {@code {var:name}}, apply as usual.
+ * <p>
+ * With {@value SailSettings#LOAD_USERS} set, it is a load run ({@link SailLoad}): that many virtual users run the entries
+ * at once, again and again, as the other {@code sail.load.*} settings say, e.g.
+ * {@code -Dsail.load.users=5 -Dsail.load.rampUp=20s -Dsail.load.duration=2m}; a suite with a backup and restore bracket
+ * is refused.
  */
 @Tag("sail")
 class SailRunIT extends AbstractInterpretedSailWorkflow {
 	@Test
 	@SuppressWarnings("java:S2699") // the scripts' test steps are the assertions: the harness fails the test when one fails
 	void run() {
-		List<String> entries = settings().resolve().run();
+		SailSettings resolved = settings().resolve();
+		List<String> entries = resolved.run();
 		assumeFalse(entries.isEmpty(), "Set -D" + SailSettings.RUN + " (or SAIL_RUN) to the scripts and suites to run");
+		if (resolved.loadUsers() > 0) {
+			// a load run: every virtual user runs every entry in each iteration
+			SailLoad.create().settings(settings()).run(entries.toArray(String[]::new));
+			return;
+		}
 		List<Executable> outcomes = new ArrayList<>(entries.size());
 		for (String entry : entries) {
 			Throwable failure = runEntry(entry);

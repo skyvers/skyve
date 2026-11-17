@@ -293,12 +293,39 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/**
 	 * Runs the interaction's before procedure, steps and after procedure. Under Verify, the after procedure
-	 * still runs when an earlier step throws.
+	 * still runs when an earlier step throws. In a load run's virtual user ({@link SailLoad}), the interaction's
+	 * duration and outcome go to the run's summary.
 	 *
 	 * @param interaction	the interaction to run
 	 */
 	@Override
 	public void executeInteraction(@Nonnull Interaction interaction) {
+		SailLoadProbe probe = SailLoadProbe.current();
+		if (probe == null) {
+			runInteraction(interaction);
+			return;
+		}
+		int failuresBefore = failures.size();
+		long started = probe.now();
+		boolean returned = false;
+		String failure = null;
+		try {
+			runInteraction(interaction);
+			returned = true;
+			// recorded under Verify: the first new failure
+			failure = (failures.size() > failuresBefore) ? failures.get(failuresBefore) : null;
+		}
+		catch (SailFailure e) { // thrown under Assert
+			failure = e.getMessage();
+			throw e;
+		}
+		finally {
+			probe.interaction(interaction.getName(), started, (! returned) || (failure != null), failure);
+		}
+	}
+
+	/** Runs an interaction, as {@link #executeInteraction(Interaction)} describes. */
+	private void runInteraction(@Nonnull Interaction interaction) {
 		String name = interaction.getName();
 		selenide.trace("Interaction: " + name);
 		LOGGER.info("Execute Interaction {}", name);
@@ -610,7 +637,8 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		try {
 			Files.createDirectories(path);
-			String prefix = String.format("%02d-%s-step%02d", Integer.valueOf(++failureCount),
+			// a load run's virtual users share the directory: their files start with the user and iteration
+			String prefix = SailLoadProbe.fileLabel() + String.format("%02d-%s-step%02d", Integer.valueOf(++failureCount),
 												String.valueOf(procedureName).replaceAll("[^A-Za-z0-9]+", "_"),
 												Integer.valueOf(stepNumber));
 			Files.write(path.resolve(prefix + ".png"), ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
