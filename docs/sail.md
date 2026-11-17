@@ -573,7 +573,10 @@ takes). Values are written the same way in both renderers:
   is not found by what it shows: filter by what is stored (see
   [Known Limitations](#known-limitations)). In SmartClient's filter row, a
   value the column's converter refuses (`+5`, `1e3`, `$5` in a column that is
-  not dollars) shows an error on the cell and the list is not filtered.
+  not dollars) shows an error on the cell and the list is not filtered; in its
+  advanced filter, such a value is cleared from the clause, which then does
+  not filter. `between` is exclusive at both ends and `betweenInclusive`
+  inclusive, as SmartClient defines them, on the server too.
 
 A step whose operator the column cannot take fails and names the operators it
 can take. Filter, clear and sort steps fail if an error message shows
@@ -1321,15 +1324,20 @@ The rules the converters scripts check, and what changed for users:
   show them (`02:47 PM`, not `2:47 pm`); a duration field refuses decimal hours
   without a colon (`2.5`), as PrimeFaces does; a date-only date time field keeps
   a value's time unless a different day is typed; a number the filter row cannot
-  read shows an error instead of being dropped; the absolute dollars column is
+  read shows an error instead of being dropped, and one the advanced filter
+  cannot read is cleared from its clause; the absolute dollars column is
   filtered by signed dollars; a list with a date-only column fetches from the
   server when its filter changes.
-- **User-visible change on the server:** the number converters (and
-  `DecimalFormatter`, so the number formatters) write and read English numbers
-  whatever the JVM's locale. Before, a German JVM showed `1.234,50` and read
-  `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the Vue list grid
-  showed `1,234.50`), and whether `1E3` or `1e3` was read as 1000 depended on
-  the locale.
+- **User-visible changes on the server:** a list's `between` and `iBetween`
+  exclude their ends, as SmartClient defines them (`iBetween` included them, and
+  `between` was not read); Match None of a range, a blank check or a variant
+  domain's description now matches the rows outside it; a spreadsheet imported
+  through BizPort is read as English text whatever the JVM's locale. The number
+  converters (and `DecimalFormatter`, so the number formatters) write and read
+  English numbers whatever the JVM's locale. Before, a German JVM showed
+  `1.234,50` and read `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the
+  Vue list grid showed `1,234.50`), and whether `1E3` or `1e3` was read as 1000
+  depended on the locale.
 
 ### Admin: application suite
 
