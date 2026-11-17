@@ -43,12 +43,6 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	/** The second customer, whose overrides combine with the test customer's. */
 	private static final String TEST2_CUSTOMER = "test2";
 
-	/**
-	 * The test2 customer's fixtures stop the SessionFactory or the build, so they wait in
-	 * src/test/pending: each test names the override it needs.
-	 */
-	private static final String PENDING_FIXTURE = "to run it, copy src/test/pending/customers/test2/test2.xml and the test's override into src/main/java/customers/test2 and generate the domain";
-
 	/** The enum constant's code, read whatever class declares the enum. */
 	private static String code(Object enumeration) {
 		return (enumeration == null) ? null : ((Enumeration) enumeration).toCode();
@@ -97,7 +91,6 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * OverrideProxiedExtension for testtestOverrideProxied, without customerText.
 	 */
 	@Test
-	@Disabled("generator bug: the customer mapping of an override of a subclass of a mapped document with an Extension maps the Extension, without the added attribute — fix pending")
 	void anOverrideOfASubclassOfAMappedDocumentWithAnExtensionSavesItsAddedAttribute() throws Exception {
 		Customer test = runAs(TEST_CUSTOMER);
 		OverrideProxiedOverride bean = newInstance(TestDocument.OVERRIDE_PROXIED);
@@ -156,10 +149,9 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * OverrideLinkTarget, which OverrideNarrowedLinked references, so test2's mapping copies
 	 * OverrideNarrowedLinked - mapping the abstract OverrideNarrowedLinked with dropped, which only
 	 * OverrideNarrowedLinkedVanilla has, so the SessionFactory does not start. The fixture is test2's
-	 * OverrideLinkTarget in src/test/pending.
+	 * OverrideLinkTarget in customers/test2.
 	 */
 	@Test
-	@Disabled("generator bug: a narrowed document copied into another customer's mapping maps the abstract class with the dropped attribute — fix pending; " + PENDING_FIXTURE)
 	void aNarrowedDocumentCopiedIntoAnotherCustomersMappingSavesItsDroppedAttribute() throws Exception {
 		runAs(TEST2_CUSTOMER);
 		Bean target = newInstance(TestDocument.OVERRIDE_LINK_TARGET);
@@ -181,10 +173,9 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * OverrideEnumJoinedBase without changes, so test2's mapping copies the hierarchy. Its mapping of
 	 * OverrideEnumJoinedSub's status names an enum class that is not generated
 	 * (<code>customers.test2.modules.test.domain.OverrideEnumJoinedSubOverride$Status</code>), so the
-	 * SessionFactory does not start. The fixture is test2's OverrideEnumJoinedBase in src/test/pending.
+	 * SessionFactory does not start. The fixture is test2's OverrideEnumJoinedBase in customers/test2.
 	 */
 	@Test
-	@Disabled("generator bug: a narrowed joined subclass copied into another customer's mapping names an enum class that does not exist — fix pending; " + PENDING_FIXTURE)
 	void aNarrowedJoinedSubclassCopiedIntoAnotherCustomersMappingSavesItsEnum() throws Exception {
 		runAs(TEST2_CUSTOMER);
 		PersistentBean bean = newInstance(TestDocument.OVERRIDE_ENUM_JOINED_SUB);
@@ -206,10 +197,9 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * status. The test2 customer's override keeps status, so its generated
 	 * OverrideEnumExtendedOverride extends the extension and declares status again, with its own enum
 	 * type, which clashes with OverrideEnumExtendedVanilla.getStatus(), so skyve-war does not compile.
-	 * The fixture is test2's OverrideEnumExtended in src/test/pending.
+	 * The fixture is test2's OverrideEnumExtended in customers/test2.
 	 */
 	@Test
-	@Disabled("generator bug: an override keeping an enum another customer narrows away clashes with the Vanilla class's accessor — fix pending; " + PENDING_FIXTURE)
 	void anOverrideKeepingAnEnumAnotherCustomerDropsSavesIt() throws Exception {
 		Customer test2 = runAs(TEST2_CUSTOMER);
 		PersistentBean bean = newInstance(TestDocument.OVERRIDE_ENUM_EXTENDED);
