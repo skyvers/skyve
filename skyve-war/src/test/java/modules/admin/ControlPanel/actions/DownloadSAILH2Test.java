@@ -2,6 +2,7 @@ package modules.admin.ControlPanel.actions;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.skyve.content.MimeType;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.sail.mock.MockWebContext;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.controller.Download;
 
 import jakarta.inject.Inject;
@@ -37,6 +40,8 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailExecutor;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
+import modules.admin.domain.ControlPanel.SailUserAgentType;
+import router.UxUis;
 import util.AbstractH2TestTruncate;
 
 /**
@@ -53,6 +58,8 @@ class DownloadSAILH2Test extends AbstractH2TestTruncate {
 	private DownloadSAIL downloadSAIL;
 	@Inject
 	private DownloadClientSAIL downloadClientSAIL;
+	@Inject
+	private GenerateMenuSAIL generateMenuSAIL;
 
 	private ControlPanelExtension bean;
 	private MockWebContext webContext;
@@ -88,8 +95,8 @@ class DownloadSAILH2Test extends AbstractH2TestTruncate {
 
 	/**
 	 * The external Control Panel's Download generates its module's menu SAIL for the desktop and downloads it the same
-	 * way, as a test that compiles. (The kitchen sink, as the Control Panel offers by default: the admin menu's SAIL
-	 * names Control Panel actions, such as StartSAILRecording, that the generated views do not show.)
+	 * way, as a test that compiles, for the kitchen sink, which the Control Panel offers by default (see
+	 * {@link #theAdminMenuNamesOnlyActionsTheViewsShowTheUser} for module admin).
 	 */
 	@Test
 	void theExternalViewsDownloadIsACompilingSailJavaToo(@TempDir Path classes) throws Exception {
@@ -102,6 +109,44 @@ class DownloadSAILH2Test extends AbstractH2TestTruncate {
 		String source = text(download);
 		assertTrue(source.contains("SailWorkflow.defaultBrowser(UserAgentType.desktop)"), source);
 		assertCompiles(source, classes);
+	}
+
+	/**
+	 * The admin menu's SAIL names only the actions its views show the SAIL user (C14). The user has DevOps but not
+	 * SAILRecorder, and the H2 configuration does not allow recording, so the Control Panel shows none of its recording
+	 * actions: they are not generated, and the external Control Panel's Download, whose generator fails with "not on the
+	 * view" on an action the view leaves out, generates a test that compiles. The actions that the user's DevOps role
+	 * shows are still generated, and a tab that only a saved Communication shows is a comment naming its condition.
+	 */
+	@Test
+	void theAdminMenuNamesOnlyActionsTheViewsShowTheUser(@TempDir Path classes) throws Exception {
+		Set<String> twoFactorCustomers = UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS;
+		// admin.Configuration's view reads it, and only a server's start-up sets it
+		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = Set.of();
+		try {
+			bean.setSailModuleName("admin");
+			bean.setSailTestStrategy(SailTestStrategy.Assert);
+			bean.setSailUxUi(UxUis.EXTERNAL.getName());
+			bean.setSailUserAgentType(SailUserAgentType.desktop);
+			generateMenuSAIL.execute(bean, webContext);
+			String sail = bean.getUnescapedResults();
+			assertNotNull(sail);
+			assertAll(() -> assertFalse(sail.contains("StartSAILRecording"), sail),
+						() -> assertFalse(sail.contains("StopSAILRecording"), sail),
+						() -> assertFalse(sail.contains("DownloadSAILRecording"), sail),
+						() -> assertTrue(sail.contains("<ns2:action name=\"GenerateTestData\"/>"), sail),
+						() -> assertTrue(sail.contains("<ns2:action name=\"DownloadClientSAIL\"/>"), sail),
+						() -> assertTrue(sail.contains("<ns2:comment>not generated: tab Subscriptions depends on visible=\"persisted\"</ns2:comment>"), sail));
+
+			downloadClientSAIL.prepare(bean, webContext);
+			String source = text(downloadClientSAIL.download(bean, webContext));
+			assertAll(() -> assertFalse(source.contains("StartSAILRecording"), source),
+						() -> assertTrue(source.contains("click [GenerateTestData]"), source));
+			assertCompiles(source, classes);
+		}
+		finally {
+			UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = twoFactorCustomers;
+		}
 	}
 
 	/**
