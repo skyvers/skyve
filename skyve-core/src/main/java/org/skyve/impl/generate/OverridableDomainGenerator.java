@@ -143,6 +143,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private TreeMap<String, TreeMap<String, Document>> modocDerivations = new TreeMap<>();
 
 	/**
+	 * The vanilla inverses, each described as its module-qualified document's inverse, by the
+	 * module-qualified document and name of the reference it inverts.
+	 */
+	private final TreeMap<String, String> vanillaInverses = new TreeMap<>();
+
+	/**
 	 * Set of moduleName.documentName documents already defined in overridden ORM
 	 */
 	private Set<String> visitedOverriddenORMDocumentsPerCustomer = new TreeSet<>();
@@ -250,6 +256,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					documentClasses.put(documentName, domainClass);
 
 					populateModocDerivations(module, document, null);
+					for (Attribute attribute : document.getAttributes()) {
+						if (attribute instanceof Inverse inverse) {
+							vanillaInverses.putIfAbsent(relationTarget(module, inverse) + '.' + inverse.getReferenceName(),
+															moduleName + '.' + documentName + "'s inverse " + inverse.getName());
+						}
+					}
 				}
 			}.visit(null, module);
 		}
@@ -291,7 +303,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								TreeMap<String, AttributeType> vanillaDocumentProperties = vanillaDocumentClass.attributes;
 								TreeMap<String, AttributeType> thisDocumentProperties = generateDocumentPropertyNames(document);
 								Module vanillaModule = getRepositoryModule(null, moduleName);
-								customerOverrides.add(new CustomerOverride(customerName,
+								customerOverrides.add(new CustomerOverride(customer,
 																			vanillaDocumentClass,
 																			vanillaModule,
 																			vanillaModule.getDocument(null, documentName),
@@ -324,20 +336,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		for (CustomerOverride customerOverride : customerOverrides) {
 			checkOverrideProperties(customerOverride);
+			checkOverrideInverses(customerOverride);
 		}
 	}
 
 	/**
 	 * A customer's override of a vanilla document, with the modules that resolve each one's relations.
 	 *
-	 * @param customerName	The customer's name.
+	 * @param customer	The customer.
 	 * @param vanillaClass	The vanilla document's domain class metadata.
 	 * @param vanillaModule	The vanilla module.
 	 * @param vanillaDocument	The vanilla document.
 	 * @param module	The customer's version of the module.
 	 * @param document	The customer's override of the document.
 	 */
-	private record CustomerOverride(@Nonnull String customerName,
+	private record CustomerOverride(@Nonnull Customer customer,
 										@Nonnull DomainClass vanillaClass,
 										@Nonnull Module vanillaModule,
 										@Nonnull Document vanillaDocument,
@@ -349,7 +362,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		 * @return	the customer's override of the module-qualified document.
 		 */
 		@Nonnull String description() {
-			return "Customer " + customerName + "'s override of document " + vanillaDocument.getOwningModuleName() + '.' + vanillaDocument.getName();
+			return "Customer " + customer.getName() + "'s override of document " + vanillaDocument.getOwningModuleName() + '.' + vanillaDocument.getName();
 		}
 	}
 
@@ -360,8 +373,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * {@link #overrideInheritedPropertyNames(String, String, DomainClass)}), with its Java type. So the
 	 * override cannot:
 	 * <ul>
+	 * 	<li>leave out an inverse, or a reference an inverse inverts, that a vanilla class keeps up to
+	 * 		date through the narrowed class (see {@link #checkOverrideLeavesOut(CustomerOverride, String)});</li>
 	 * 	<li>give a property another type, unless both have the same Java type and are mapped the same
 	 * 		way (see {@link #checkOverrideType(CustomerOverride, String, AttributeType, AttributeType, boolean)});</li>
+	 * 	<li>change the kind of a collection between child and joined, or of an association (see
+	 * 		{@link #checkOverrideRelationKind(CustomerOverride, Relation, Relation)});</li>
 	 * 	<li>point a relation at another document, unless the customer's class declares it and the
 	 * 		other document's table holds its key (see {@link #checkOverrideRelationTarget(CustomerOverride, Relation, Relation, boolean)});</li>
 	 * 	<li>change the enum of an inherited enumeration, whose enum the vanilla class declares from the
@@ -389,6 +406,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			AttributeType vanillaType = vanillaProperty.getValue();
 			AttributeType overrideType = overrideProperties.get(propertyName);
 			if (overrideType == null) { // left out
+				checkOverrideLeavesOut(customerOverride, propertyName);
 				continue;
 			}
 			boolean inherited = inheritedPropertyNames.contains(propertyName);
@@ -398,6 +416,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				checkOverrideType(customerOverride, propertyName, vanillaType, overrideType, inherited);
 			}
 			else if ((vanillaAttribute instanceof Relation vanillaRelation) && (overrideAttribute instanceof Relation overrideRelation)) {
+				checkOverrideRelationKind(customerOverride, vanillaRelation, overrideRelation);
 				checkOverrideRelationTarget(customerOverride, vanillaRelation, overrideRelation, inherited);
 			}
 			else if (inherited &&
@@ -406,6 +425,169 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				checkOverrideEnumeration(customerOverride, vanillaEnumeration, overrideEnumeration);
 			}
 		}
+	}
+
+	/**
+	 * Refuses an override that leaves out a vanilla property that a generated vanilla class keeps up to
+	 * date through the vanilla document's class, which narrowing makes abstract without the property:
+	 * an inverse, whose reference's accessors in the other document's vanilla class call the inverse's,
+	 * or a reference that a vanilla inverse inverts, whose accessors the inverse's call. A hand-written
+	 * extension of the document, which those classes are typed by, inherits the property from the
+	 * generated <code>&lt;Document&gt;Vanilla</code>, so the narrowing is allowed then.
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @param propertyName	The name of the vanilla property the override leaves out.
+	 * @throws MetaDataException	if a vanilla class would call accessors the narrowed class lacks.
+	 */
+	private void checkOverrideLeavesOut(@Nonnull CustomerOverride customerOverride, @Nonnull String propertyName) {
+		Document vanillaDocument = customerOverride.vanillaDocument();
+		String moduleName = vanillaDocument.getOwningModuleName();
+		String documentName = vanillaDocument.getName();
+		if (domainExtensionClassExists(ProvidedRepository.MODULES_NAMESPACE + moduleName, documentName)) {
+			return;
+		}
+		String qualifiedDocumentName = moduleName + '.' + documentName;
+		Attribute vanillaAttribute = vanillaDocument.getAttribute(propertyName);
+		String problem = null;
+		if (vanillaAttribute instanceof Inverse inverse) {
+			Document target = customerOverride.vanillaModule().getDocument(null, inverse.getDocumentName());
+			Reference reference = target.getReferenceByName(inverse.getReferenceName());
+			if ((! target.isDynamic()) && (reference != null)) {
+				problem = " leaves out inverse " + propertyName + ", but " + relationTarget(customerOverride.vanillaModule(), inverse) + "'s " +
+							relationKindName(reference) + ' ' + reference.getName() + " keeps it up to date";
+			}
+		}
+		else if (vanillaAttribute instanceof Reference reference) {
+			String inverse = vanillaInverses.get(qualifiedDocumentName + '.' + propertyName);
+			if (inverse != null) {
+				problem = " leaves out " + relationKindName(reference) + ' ' + propertyName + ", but " + inverse + " keeps it up to date";
+			}
+		}
+		if (problem != null) {
+			throw new MetaDataException(customerOverride.description() + problem + " through " + qualifiedDocumentName +
+											"'s vanilla class, which would then lack it." +
+											" Keep " + propertyName + " in the override, and hide it in the customer's views if it is not wanted.");
+		}
+	}
+
+	/**
+	 * Refuses an inverse that a customer's class declares, rather than inherits, when the class declaring
+	 * the reference it inverts was generated without it. The inverse's accessors call the reference's
+	 * <code>null&lt;Reference&gt;()</code> method, unless the relationship is many to many, and a
+	 * reference's class only has that method when it was generated for an inverse of the reference. A
+	 * customer's own class declaring the reference is generated with the customer's documents, which
+	 * have the inverse; a vanilla class is generated with the vanilla document, which needs an inverse
+	 * of the reference too.
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @throws MetaDataException	if the inverse's accessors would call a method that is not generated.
+	 */
+	private void checkOverrideInverses(@Nonnull CustomerOverride customerOverride) {
+		Document vanillaDocument = customerOverride.vanillaDocument();
+		Customer customer = customerOverride.customer();
+		Set<String> inheritedPropertyNames = overrideInheritedPropertyNames(vanillaDocument.getOwningModuleName(),
+																			vanillaDocument.getName(),
+																			customerOverride.vanillaClass());
+		for (Attribute attribute : customerOverride.document().getAttributes()) {
+			if ((! (attribute instanceof AbstractInverse inverse)) || inheritedPropertyNames.contains(inverse.getName())) {
+				continue;
+			}
+			Document target = customerOverride.module().getDocument(customer, inverse.getDocumentName());
+			String referenceName = inverse.getReferenceName();
+			if (target.isDynamic() ||
+					InverseRelationship.manyToMany.equals(resolveInverseRelationship(inverse, target)) ||
+					customerClassDeclares(customer, target, referenceName) ||
+					vanillaInverseOf(vanillaDocument, target.getName(), referenceName)) {
+				continue;
+			}
+			String qualifiedTargetName = relationTarget(customerOverride.module(), inverse);
+			Reference reference = target.getNullSafeReferenceByName(referenceName);
+			throw new MetaDataException(customerOverride.description() + " declares inverse " + inverse.getName() + " of " +
+											qualifiedTargetName + "'s " + relationKindName(reference) + ' ' + referenceName +
+											", but the vanilla class that declares " + referenceName + " is generated without an inverse of it" +
+											", so it lacks the null" + Character.toUpperCase(referenceName.charAt(0)) + referenceName.substring(1) +
+											"() method that the inverse's accessors call. Declare " + inverse.getName() + " in the vanilla document too.");
+		}
+	}
+
+	/**
+	 * Determines whether a vanilla document, or a document it extends, has an inverse of a reference.
+	 *
+	 * @param vanillaDocument	The vanilla document.
+	 * @param targetDocumentName	The name of the document that declares the reference.
+	 * @param referenceName	The reference's name.
+	 * @return	true if the vanilla document has an inverse of the reference.
+	 */
+	private boolean vanillaInverseOf(@Nonnull Document vanillaDocument, @Nonnull String targetDocumentName, @Nonnull String referenceName) {
+		for (Attribute attribute : getAllAttributes(vanillaDocument)) {
+			if ((attribute instanceof Inverse inverse) &&
+					targetDocumentName.equals(inverse.getDocumentName()) &&
+					referenceName.equals(inverse.getReferenceName())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Names the kind of a relation for a message.
+	 *
+	 * @param relation	The relation.
+	 * @return	association, collection or inverse.
+	 */
+	private static @Nonnull String relationKindName(@Nonnull Relation relation) {
+		if (relation instanceof Association) {
+			return "association";
+		}
+		return (relation instanceof Collection) ? "collection" : "inverse";
+	}
+
+	/**
+	 * Refuses an override's change of the kind of a vanilla collection or association where the kinds
+	 * are mapped differently on the shared tables: a child collection is keyed by the parent column of
+	 * the child document's table, and an aggregated or composed collection by a join table; and an
+	 * aggregated association's column is a plain foreign key, a composed association's a unique one, and
+	 * an embedded association is stored in the embedded document's columns. An aggregated collection can
+	 * become a composed one, and the other way round, as both use the same join table and differ only in
+	 * what is cascaded.
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @param vanillaRelation	The vanilla relation.
+	 * @param overrideRelation	The override's relation of the same name and type.
+	 * @throws MetaDataException	if the override changes the relation's kind and its mapping.
+	 */
+	private static void checkOverrideRelationKind(@Nonnull CustomerOverride customerOverride,
+													@Nonnull Relation vanillaRelation,
+													@Nonnull Relation overrideRelation) {
+		Object vanillaKind;
+		Object overrideKind;
+		String reason;
+		if ((vanillaRelation instanceof Collection vanillaCollection) && (overrideRelation instanceof Collection overrideCollection)) {
+			vanillaKind = vanillaCollection.getType();
+			overrideKind = overrideCollection.getType();
+			if (CollectionType.child.equals(vanillaKind) == CollectionType.child.equals(overrideKind)) {
+				return;
+			}
+			reason = "a child collection is keyed by the parent column of the child document's table, and an aggregation or composition by a join table";
+		}
+		else if ((vanillaRelation instanceof Association vanillaAssociation) && (overrideRelation instanceof Association overrideAssociation)) {
+			vanillaKind = vanillaAssociation.getType();
+			overrideKind = overrideAssociation.getType();
+			if (Objects.equals(vanillaKind, overrideKind)) {
+				return;
+			}
+			reason = "an aggregation's column is a plain foreign key, a composition's a unique one, and an embedded association is stored in the embedded document's columns";
+		}
+		else {
+			return;
+		}
+		String propertyName = vanillaRelation.getName();
+		String kindName = relationKindName(vanillaRelation);
+		throw new MetaDataException(customerOverride.description() + " changes the kind of " + kindName + ' ' + propertyName +
+										" from " + vanillaKind + " to " + overrideKind +
+										", but the customer's mapping shares the vanilla tables, where " + reason +
+										". Keep " + propertyName + " of kind " + vanillaKind + " in the override, or add " + ("association".equals(kindName) ? "an " : "a ") +
+										kindName + " of another name.");
 	}
 
 	/**

@@ -812,25 +812,181 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	}
 
 	/**
-	 * Beta's override of a document acme's narrows declares an inverse itself, and the other document's
-	 * table holds its key, so it can point at another document. The classes are not compiled, as the
-	 * generated accessors of an association maintain its inverse, which they cannot once it is narrowed
-	 * away or pointed elsewhere.
+	 * Acme can leave out Order's inverse only because Order has an extension, through which beta's
+	 * class inherits the inverse from OrderVanilla, so beta cannot point it at another document.
 	 */
 	@Test
-	void anOverrideCanPointAnInverseItsClassDeclaresAtAnotherDocument() throws Exception {
+	void anOverrideThatPointsAnInverseAnotherCustomerLeavesOutAtAnotherDocumentIsRefused() {
 		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
 		vanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		vanillaOrder.putRelation(inverse(new InverseMany(), "shipments", "Shipment", "order", InverseRelationship.oneToMany));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		acmeOrder.putRelation(inverse(new InverseMany(), "shipments", "Shipment", "order", InverseRelationship.oneToMany));
 		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
 		betaOrder.putRelation(inverse(new InverseMany(), "lines", "Shipment", "order", InverseRelationship.oneToMany));
+		betaOrder.putRelation(inverse(new InverseMany(), "shipments", "Shipment", "order", InverseRelationship.oneToMany));
+		Fixture fixture = ordersLinesAndShipments(vanillaOrder)
+				.extension("Order", "OrderVanilla")
+				.acme(acmeOrder)
+				.beta(betaOrder);
 
-		Map<String, String> files = generate(ordersLinesAndShipments(vanillaOrder)
-				.acme(document("Order", "SALES_Order", null, null, "code", "notes"))
-				.beta(betaOrder));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertTrue(e.getMessage().startsWith("Customer beta's override of document sales.Order changes the document of lines from sales.Line to sales.Shipment, " +
+												"but the customer's class inherits the vanilla property"),
+					e.getMessage());
+	}
 
-		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
-		assertAll(() -> assertTrue(betaMapping.contains("<one-to-many entity-name=\"betasalesShipment\""), betaMapping),
-					() -> assertEquals(List.of(), mappingProblems(files)));
+	/**
+	 * Line's association keeps Order's inverse up to date through Order's class, which narrowing makes
+	 * abstract without the inverse.
+	 */
+	@Test
+	void anOverrideThatLeavesOutAnInverseIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		Fixture fixture = ordersLinesAndShipments(vanillaOrder).acme(document("Order", "SALES_Order", null, null, "code"));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order leaves out inverse lines, " +
+						"but sales.Line's association order keeps it up to date through sales.Order's vanilla class, which would then lack it. " +
+						"Keep lines in the override, and hide it in the customer's views if it is not wanted.",
+						e.getMessage());
+	}
+
+	/**
+	 * Order's inverse keeps Line's association up to date through Line's class, which narrowing makes
+	 * abstract without the association.
+	 */
+	@Test
+	void anOverrideThatLeavesOutAReferenceAVanillaInverseInvertsIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		Fixture fixture = ordersLinesAndShipments(vanillaOrder).acme(document("Line", "SALES_Line", null, null, "quantity"));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Line leaves out association order, " +
+						"but sales.Order's inverse lines keeps it up to date through sales.Line's vanilla class, which would then lack it. " +
+						"Keep order in the override, and hide it in the customer's views if it is not wanted.",
+						e.getMessage());
+	}
+
+	/**
+	 * A hand-written extension inherits what narrowing leaves out from the generated vanilla class, and
+	 * the classes that keep the inverse and its reference up to date are typed by the extension.
+	 */
+	@Test
+	void anOverrideCanLeaveOutAnInverseOrItsReferenceOfADocumentWithAnExtension() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		Map<String, String> inverseLeftOut = generate(ordersLinesAndShipments(vanillaOrder)
+				.extension("Order", "OrderVanilla")
+				.acme(document("Order", "SALES_Order", null, null, "code")));
+
+		DocumentImpl otherVanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		otherVanillaOrder.putRelation(inverse(new InverseMany(), "lines", "Line", "order", InverseRelationship.oneToMany));
+		Map<String, String> referenceLeftOut = generate(ordersLinesAndShipments(otherVanillaOrder)
+				.extension("Line", "LineVanilla")
+				.acme(document("Line", "SALES_Line", null, null, "quantity")));
+
+		assertAll(() -> assertEquals(List.of(), mappingProblems(inverseLeftOut)),
+					() -> assertEquals(List.of(), compilationErrors(inverseLeftOut)),
+					() -> assertEquals(List.of(), mappingProblems(referenceLeftOut)),
+					() -> assertEquals(List.of(), compilationErrors(referenceLeftOut)));
+	}
+
+	/**
+	 * Shipment's vanilla class is generated without an inverse of its association, so it has no
+	 * nullOrder() for the inverse's accessors to call.
+	 */
+	@Test
+	void anOverrideThatDeclaresAnInverseOfAReferenceNoVanillaInverseInvertsIsRefused() {
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(inverse(new InverseMany(), "shipments", "Shipment", "order", InverseRelationship.oneToMany));
+		Fixture fixture = ordersLinesAndShipments(document("Order", "SALES_Order", null, null, "code")).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order declares inverse shipments of sales.Shipment's association order, " +
+						"but the vanilla class that declares order is generated without an inverse of it, " +
+						"so it lacks the nullOrder() method that the inverse's accessors call. Declare shipments in the vanilla document too.",
+						e.getMessage());
+	}
+
+	/** A many-to-many inverse's accessors call only the collection's accessor, which every class declaring it has. */
+	@Test
+	void anOverrideCanDeclareAManyToManyInverseOfACollectionNoVanillaInverseInverts() throws Exception {
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(inverse(new InverseMany(), "promotions", "Promotion", "orders", InverseRelationship.manyToMany));
+		DocumentImpl promotion = document("Promotion", "SALES_Promotion", null, null, "name");
+		promotion.putRelation(aggregatedCollection("orders", "Order"));
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.vanilla(promotion)
+				.acme(acmeOrder));
+
+		assertAll(() -> assertEquals(List.of(), mappingProblems(files)),
+					() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/** A child collection and a joined one are stored differently in the shared tables. */
+	@Test
+	void anOverrideThatChangesAChildCollectionToAnAggregationIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(childCollection("lines", "Line"));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity");
+		line.setParentDocumentName("Order");
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(aggregatedCollection("lines", "Line"));
+		Fixture fixture = new Fixture().vanilla(vanillaOrder).vanilla(line).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order changes the kind of collection lines from child to aggregation, " +
+						"but the customer's mapping shares the vanilla tables, where a child collection is keyed by the parent column of the child document's table, " +
+						"and an aggregation or composition by a join table. Keep lines of kind child in the override, or add a collection of another name.",
+						e.getMessage());
+	}
+
+	/** An aggregated and a composed collection share the join table, and differ only in what is cascaded. */
+	@Test
+	void anOverrideCanChangeAnAggregatedCollectionToAComposedOne() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(aggregatedCollection("items", "Product"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		CollectionImpl items = aggregatedCollection("items", "Product");
+		items.setType(CollectionType.composition);
+		acmeOrder.putRelation(items);
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(document("Product", "SALES_Product", null, null, "name"))
+				.acme(acmeOrder));
+
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(() -> assertTrue(acmeMapping.contains("<bag name=\"items\" table=\"SALES_Order_items\" cascade=\"all-delete-orphan\">"), acmeMapping),
+					() -> assertEquals(List.of(), mappingProblems(files)),
+					() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/** A composed association's column is unique, unlike an aggregated one's. */
+	@Test
+	void anOverrideThatChangesAnAggregatedAssociationToAComposedOneIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(association("customer", "Customer"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		AssociationImpl customer = association("customer", "Customer");
+		customer.setType(AssociationType.composition);
+		acmeOrder.putRelation(customer);
+		Fixture fixture = new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(document("Customer", "SALES_Customer", null, null, "name"))
+				.acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Customer acme's override of document sales.Order changes the kind of association customer from aggregation to composition, " +
+						"but the customer's mapping shares the vanilla tables, where an aggregation's column is a plain foreign key, a composition's a unique one, " +
+						"and an embedded association is stored in the embedded document's columns. " +
+						"Keep customer of kind aggregation in the override, or add an association of another name.",
+						e.getMessage());
 	}
 
 	/**
