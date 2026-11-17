@@ -580,7 +580,9 @@ takes). Values are written the same way in both renderers:
   `betweenInclusive` inclusive, as SmartClient defines them, on the server too.
   A negation (`notEquals`, not contains, not in, and Match None of a positive
   condition) also lists the rows with no value in the column; Match None of a
-  negation, or of `isBlank`, does not.
+  negation, or of `isBlank`, does not. Through an optional association this
+  holds for lists built on a document query only (see
+  [Known Limitations](#known-limitations)).
 
 A step whose operator the column cannot take fails and names the operators it
 can take. Filter, clear and sort steps fail if an error message shows
@@ -1843,6 +1845,13 @@ test:
   browser's locale; the server's converters and SmartClient write English
   numbers (`1,234.50`) whatever the JVM's or browser's locale. The suites run
   the browser in English.
+- **Match Any through an optional association.** In a list built on a document
+  query, a positive condition through an optional association still leaves out
+  the rows with no association when it is ORed with another condition:
+  `selection.description` equals `beta` or `name` equals `AF n` lists only the
+  `beta` row, where SmartClient's own evaluation also keeps `AF n`, which has no
+  selection. A query whose columns already join that association lists both.
+  Negations and "is null" on such a path do list the rows with no association.
 - **Inline cells in PF** are addressed by `dataEnter`, `testValue` and the
   lookup steps; `testWidget` and `captureValue` keep the row but address the
   view's widget.
