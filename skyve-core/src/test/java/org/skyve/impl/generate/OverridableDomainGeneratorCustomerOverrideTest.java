@@ -29,8 +29,10 @@ import java.util.stream.Stream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
@@ -41,6 +43,7 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -785,5 +788,28 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				.vanilla(document("Base", null, ExtensionStrategy.mapped, null, "code"))
 				.acme(document("Extra", "SALES_Extra", ExtensionStrategy.joined, "Base", "extra")));
 		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("<class name=\"customers.acme.modules.sales.domain.Extra\""));
+	}
+
+	/**
+	 * An association from a customer document to a new customer document, found by the skyve-war test
+	 * customer fixtures: generateAttributeMappings resolves the association's document without the
+	 * customer (<code>module.getDocument(null, ...)</code>), which does not find a new customer
+	 * document, while a collection is resolved with the customer and maps.
+	 */
+	@Test
+	@Disabled("generator bug: an association to a new customer document is resolved without the customer - fix pending")
+	void anOverrideWithAnAssociationToANewCustomerDocumentGivesConsistentMappings() throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		AssociationImpl note = new AssociationImpl();
+		note.setName("note");
+		note.setDisplayName("note");
+		note.setDocumentName("Note");
+		note.setType(AssociationType.aggregation);
+		order.putAttribute(note);
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(order)
+				.acme(document("Note", "SALES_Note", null, null, "text")));
+		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("entity-name=\"acmesalesNote\""));
 	}
 }

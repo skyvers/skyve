@@ -70,6 +70,32 @@ public enum TestDocument implements ModuleDocument {
 	MAPPED_SUBCLASSED_UNIQUE_JOINED_STRATEGY("MappedSubclassedUniqueJoinedStrategy"),
 	/** The "MappedSubclassedUniqueSingleStrategy" document. */
 	MAPPED_SUBCLASSED_UNIQUE_SINGLE_STRATEGY("MappedSubclassedUniqueSingleStrategy"),
+	/** The "OverrideAdds" document. */
+	OVERRIDE_ADDS("OverrideAdds"),
+	/** The "OverrideExtended" document. */
+	OVERRIDE_EXTENDED("OverrideExtended"),
+	/** The "OverrideJoinedBase" document. */
+	OVERRIDE_JOINED_BASE("OverrideJoinedBase"),
+	/** The "OverrideJoinedSub" document. */
+	OVERRIDE_JOINED_SUB("OverrideJoinedSub"),
+	/** The "OverrideLength" document. */
+	OVERRIDE_LENGTH("OverrideLength"),
+	/** The "OverrideMappedBase" document. */
+	OVERRIDE_MAPPED_BASE("OverrideMappedBase"),
+	/** The "OverrideMappedSub" document. */
+	OVERRIDE_MAPPED_SUB("OverrideMappedSub"),
+	/** The "OverrideNarrowed" document. */
+	OVERRIDE_NARROWED("OverrideNarrowed"),
+	/** The "OverrideNarrowedExtended" document. */
+	OVERRIDE_NARROWED_EXTENDED("OverrideNarrowedExtended"),
+	/** The "OverrideReferrer" document. */
+	OVERRIDE_REFERRER("OverrideReferrer"),
+	/** The "OverrideRemoved" document. */
+	OVERRIDE_REMOVED("OverrideRemoved"),
+	/** The "OverrideSingleBase" document. */
+	OVERRIDE_SINGLE_BASE("OverrideSingleBase"),
+	/** The "OverrideSingleSub" document. */
+	OVERRIDE_SINGLE_SUB("OverrideSingleSub"),
 	/** The "Reachability" document. */
 	REACHABILITY("Reachability"),
 	/** The "UniqueConstraintMultipleNavigable" document. */

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideCustomerOnly"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Customer override fixture: a persistent document only the test customer has.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideCustomerOnly" />
+	<singularAlias>Override Customer Only</singularAlias>
+	<pluralAlias>Override Customer Only</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>
