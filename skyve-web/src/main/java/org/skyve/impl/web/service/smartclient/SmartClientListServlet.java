@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -942,9 +941,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
-	// S2637: a simple criterion's binding is its field name, not null in that branch, but Sonar's flow analysis does not
-	// carry that through this method (it flagged the calls even with Objects.requireNonNull)
-	@SuppressWarnings({"java:S107", "java:S2637", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private static void addAdvancedFilterCriteriaToQueryInternal(@Nonnull Module module,
 																	@Nonnull Document document,
 																	@Nonnull User user,
@@ -1010,190 +1007,211 @@ public class SmartClientListServlet extends HttpServlet {
 					}
 				}
 			}
-			else { // simple criteria
-				String binding = fieldName; // not null: a criterion without a field name is a group (above)
-				Object value = criterion.get(VALUE_FIELD);
-				String valueString = null;
-				if (value != null) {
-					valueString = Util.processStringValue(value.toString());
-				}
-
-				String parameterName = null;
-				boolean parameter = (binding.charAt(0) == ':');
-				if (parameter) {
-					binding = binding.substring(1);
-					parameterName = binding;
-				}
-
-				// Determine the type and converter of the filtered attribute
-				Customer customer = user.getCustomer();
-				// the codes of a variant domain whose descriptions match the filter, filtered as a set
-				Object[] variantCodes = null;
-				Converter<?> converter = null;
-				Class<?> type = String.class;
-
-				TargetMetaData target = null;
-				try {
-					target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				}
-				catch (MetaDataException e) {
-					if (! parameter) {
-						throw e;
-					}
-				}
-				if (target != null) {
-					Document targetDocument = target.getDocument();
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						type = attribute.getImplementingType();
-						if (attribute instanceof Enumeration enumeration) {
-							converter = enumeration.getConverter();
-							filterOperator = transformWildcardFilterOperator(filterOperator);
-						}
-
-						DomainType domainType = attribute.getDomainType();
-						if (domainType != null) {
-							filterOperator = transformWildcardFilterOperator(filterOperator);
-							// Translate variant domain filters to a set of codes to search for
-							// a typed description (a list's values are codes already)
-							if ((! parameter) && (valueString != null) && (domainType == DomainType.variant) && (! (value instanceof List<?>))) {
-								// at most 100 codes: a negated filter by more matching descriptions lets the rest through
-								variantCodes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
-							}
-						}
-						if (attribute instanceof ConvertibleField field) {
-							converter = field.getConverterForCustomer(customer);
-						}
-						else if (attribute instanceof Association association) {
-							if (parameter) {
-								if (valueString != null) {
-									Module m = customer.getModule(targetDocument.getOwningModuleName());
-									Document d = m.getDocument(customer, association.getDocumentName());
-									value = CORE.getPersistence().retrieve(d, valueString);
-								}
-							}
-							else {
-								type = String.class;
-								binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
-								filterOperator = transformWildcardFilterOperator(filterOperator);
-							}
-						}
-					}
-					else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-						type = String.class;
-						binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
-					}
-					else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
-						type = String.class;
-					}
-				}
-
-				if (variantCodes != null) {
-					// in the set of codes, or not in it for a negative operator (transformWildcardFilterOperator gives notEqual)
-					value = variantCodes;
-					filterOperator = (filterOperator == SmartClientFilterOperator.notEqual) ?
-										SmartClientFilterOperator.notInSet :
-										SmartClientFilterOperator.inSet;
-				}
-				else if (value instanceof List<?>) {
-					@SuppressWarnings("unchecked")
-					List<Object> values = (List<Object>) value;
-					for (int i = 0, l = values.size(); i < l; i++) {
-						Object v = values.get(i);
-						if (v != null) {
-							v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
-							values.set(i, v);
-						}
-					}
-					// If we got an array and there is no operator (multi-select in filter header),
-					// or the operator is "exact" or "equals" (still multi-select in filter header but with other criteria)
-					// then set it to inSet
-					if ((filterOperator == SmartClientFilterOperator.equals) ||
-							(filterOperator == SmartClientFilterOperator.exact)) {
-						filterOperator = SmartClientFilterOperator.inSet;
-					}
-					// If the operator is notEquals, then set it to notInSet
-					else if (filterOperator == SmartClientFilterOperator.notEqual) {
-						filterOperator = SmartClientFilterOperator.notInSet;
-					}
-				}
-				else {
-					// Only convert filter parameters and parameters that aren't beans already
-					if (! (parameter && (value instanceof Bean))) {
-						value = fromString(binding, VALUE_FIELD, valueString, customer, converter, type);
-					}
-				}
-
-				if (parameterName != null) { // set for a parameter
-					model.putParameter(parameterName, value);
-					continue;
-				}
-
-				Object start = criterion.get("start");
-				String startString = null;
-				if (start != null) {
-					startString = start.toString();
-					if ("".equals(startString)) {
-						startString = null;
-					}
-				}
-
-				Object end = criterion.get("end");
-				String endString = null;
-				if (end != null) {
-					endString = end.toString();
-					if ("".equals(endString)) {
-						endString = null;
-					}
-				}
-
-				start = fromString(binding, "start", startString, customer, converter, type);
-				end = fromString(binding, "end", endString, customer, converter, type);
-
-				// These types do not support String wildcards, so we transform the positive ones to equals and the negative ones to notEqual
-				if ((value instanceof Date) ||
-						(value instanceof Number) ||
-						(value instanceof Boolean) ||
-						(start instanceof Date) ||
-						(start instanceof Number) ||
-						(start instanceof Boolean) ||
-						(end instanceof Date) ||
-						(end instanceof Number) ||
-						(end instanceof Boolean)) {
-					filterOperator = transformWildcardFilterOperator(filterOperator);
-				}
-
-				switch (compoundFilterOperator) {
-					case and:
-						addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
-						break;
-					case or:
-						if (filter.isEmpty()) {
-							addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
-						}
-						else {
-							Filter orFilter = nonNullFilter(model.newFilter(), model);
-							addCriterion(binding, filterOperator, value, start, end, tagId, orFilter, model);
-							if (! orFilter.isEmpty()) {
-								filter.addOr(orFilter);
-							}
-						}
-						break;
-					case not:
-						addNegation(binding, filterOperator, value, start, end, tagId, filter, model);
-						break;
-					default:
-				}
+			else {
+				addSimpleCriterion(fieldName, criterion, module, document, user, compoundFilterOperator, tagId, model, filter);
 			}
 		}
 	}
 
 	/**
-	 * Adds a simple criterion's negation for Match None: the opposite operator, a range's outside, and for the negations
-	 * also a row with no value (see {@link #NEGATIVE_OPERATORS}). A pattern, geometry or field comparison without a
-	 * negation adds nothing.
+	 * Adds a simple criterion (a field name, an operator and a value or range) to the filter, combined with the
+	 * criteria before it by the compound operator (a negation under not, see {@link #addNegation}).
 	 */
-	@SuppressWarnings({"java:S107", "java:S1479", "java:S6541"}) // the criterion's parts, as addCriterionToFilter takes them; one case per operator
+	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // the criterion and the criteria method's context; complexity OK
+	private static void addSimpleCriterion(@Nonnull String fieldName,
+											@Nonnull Map<String, Object> criterion,
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull User user,
+											@Nonnull CompoundFilterOperator compoundFilterOperator,
+											@Nullable String tagId,
+											@Nonnull ListModel<?> model,
+											@Nonnull Filter filter)
+	throws Exception {
+		String binding = fieldName;
+		SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get(OPERATOR_FIELD));
+		Object value = criterion.get(VALUE_FIELD);
+		String valueString = null;
+		if (value != null) {
+			valueString = Util.processStringValue(value.toString());
+		}
+
+		String parameterName = null;
+		boolean parameter = (binding.charAt(0) == ':');
+		if (parameter) {
+			binding = binding.substring(1);
+			parameterName = binding;
+		}
+
+		// Determine the type and converter of the filtered attribute
+		Customer customer = user.getCustomer();
+		// the codes of a variant domain whose descriptions match the filter, filtered as a set
+		Object[] variantCodes = null;
+		Converter<?> converter = null;
+		Class<?> type = String.class;
+
+		TargetMetaData target = null;
+		try {
+			target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		}
+		catch (MetaDataException e) {
+			if (! parameter) {
+				throw e;
+			}
+		}
+		if (target != null) {
+			Document targetDocument = target.getDocument();
+			Attribute attribute = target.getAttribute();
+			if (attribute != null) {
+				type = attribute.getImplementingType();
+				if (attribute instanceof Enumeration enumeration) {
+					converter = enumeration.getConverter();
+					filterOperator = transformWildcardFilterOperator(filterOperator);
+				}
+
+				DomainType domainType = attribute.getDomainType();
+				if (domainType != null) {
+					filterOperator = transformWildcardFilterOperator(filterOperator);
+					// Translate variant domain filters to a set of codes to search for
+					// a typed description (a list's values are codes already)
+					if ((! parameter) && (valueString != null) && (domainType == DomainType.variant) && (! (value instanceof List<?>))) {
+						// at most 100 codes: a negated filter by more matching descriptions lets the rest through
+						variantCodes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
+					}
+				}
+				if (attribute instanceof ConvertibleField field) {
+					converter = field.getConverterForCustomer(customer);
+				}
+				else if (attribute instanceof Association association) {
+					if (parameter) {
+						if (valueString != null) {
+							Module m = customer.getModule(targetDocument.getOwningModuleName());
+							Document d = m.getDocument(customer, association.getDocumentName());
+							value = CORE.getPersistence().retrieve(d, valueString);
+						}
+					}
+					else {
+						type = String.class;
+						binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+						filterOperator = transformWildcardFilterOperator(filterOperator);
+					}
+				}
+			}
+			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+				type = String.class;
+				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+			}
+			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
+				type = String.class;
+			}
+		}
+
+		if (variantCodes != null) {
+			// in the set of codes, or not in it for a negative operator (transformWildcardFilterOperator gives notEqual)
+			value = variantCodes;
+			filterOperator = (filterOperator == SmartClientFilterOperator.notEqual) ?
+								SmartClientFilterOperator.notInSet :
+								SmartClientFilterOperator.inSet;
+		}
+		else if (value instanceof List<?>) {
+			@SuppressWarnings("unchecked")
+			List<Object> values = (List<Object>) value;
+			for (int i = 0, l = values.size(); i < l; i++) {
+				Object v = values.get(i);
+				if (v != null) {
+					v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
+					values.set(i, v);
+				}
+			}
+			// If we got an array and there is no operator (multi-select in filter header),
+			// or the operator is "exact" or "equals" (still multi-select in filter header but with other criteria)
+			// then set it to inSet
+			if ((filterOperator == SmartClientFilterOperator.equals) ||
+					(filterOperator == SmartClientFilterOperator.exact)) {
+				filterOperator = SmartClientFilterOperator.inSet;
+			}
+			// If the operator is notEquals, then set it to notInSet
+			else if (filterOperator == SmartClientFilterOperator.notEqual) {
+				filterOperator = SmartClientFilterOperator.notInSet;
+			}
+		}
+		else {
+			// Only convert filter parameters and parameters that aren't beans already
+			if (! (parameter && (value instanceof Bean))) {
+				value = fromString(binding, VALUE_FIELD, valueString, customer, converter, type);
+			}
+		}
+
+		if (parameterName != null) { // set for a parameter
+			model.putParameter(parameterName, value);
+			return;
+		}
+
+		Object start = criterion.get("start");
+		String startString = null;
+		if (start != null) {
+			startString = start.toString();
+			if ("".equals(startString)) {
+				startString = null;
+			}
+		}
+
+		Object end = criterion.get("end");
+		String endString = null;
+		if (end != null) {
+			endString = end.toString();
+			if ("".equals(endString)) {
+				endString = null;
+			}
+		}
+
+		start = fromString(binding, "start", startString, customer, converter, type);
+		end = fromString(binding, "end", endString, customer, converter, type);
+
+		// These types do not support String wildcards, so we transform the positive ones to equals and the negative ones to notEqual
+		if ((value instanceof Date) ||
+				(value instanceof Number) ||
+				(value instanceof Boolean) ||
+				(start instanceof Date) ||
+				(start instanceof Number) ||
+				(start instanceof Boolean) ||
+				(end instanceof Date) ||
+				(end instanceof Number) ||
+				(end instanceof Boolean)) {
+			filterOperator = transformWildcardFilterOperator(filterOperator);
+		}
+
+		switch (compoundFilterOperator) {
+			case and:
+				addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
+				break;
+			case or:
+				if (filter.isEmpty()) {
+					addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
+				}
+				else {
+					Filter orFilter = nonNullFilter(model.newFilter(), model);
+					addCriterion(binding, filterOperator, value, start, end, tagId, orFilter, model);
+					if (! orFilter.isEmpty()) {
+						filter.addOr(orFilter);
+					}
+				}
+				break;
+			case not:
+				addNegation(binding, filterOperator, value, start, end, tagId, filter, model);
+				break;
+			default:
+		}
+	}
+
+	/**
+	 * Adds a simple criterion's negation for Match None (see {@link SmartClientFilterOperator#negation()}), or a range's
+	 * outside. The negation of a condition on a value also matches a row with no value, as SmartClient's own
+	 * evaluation does; the negation of a negative operator or of a null check does not. Field comparisons are not
+	 * implemented on the server, so they add nothing (were they, a negated field comparison would also have to match
+	 * when the other field has no value).
+	 */
+	@SuppressWarnings("java:S107") // the criterion's parts, as addCriterionToFilter takes them, and the model
 	private static void addNegation(@Nonnull String binding,
 									@Nonnull SmartClientFilterOperator filterOperator,
 									@Nullable Object value,
@@ -1203,164 +1221,23 @@ public class SmartClientListServlet extends HttpServlet {
 									@Nonnull Filter filter,
 									@Nonnull ListModel<?> model) {
 		switch (filterOperator) {
-			case substring, contains:
-				addCriterion(binding, SmartClientFilterOperator.notContains, value, start, end, tagId, filter, model);
-				break;
-			case iContains:
-				addCriterion(binding, SmartClientFilterOperator.iNotContains, value, start, end, tagId, filter, model);
-				break;
-			case notContains:
-				addCriterion(binding, SmartClientFilterOperator.contains, value, start, end, tagId, filter, model);
-				break;
-			case iNotContains:
-				addCriterion(binding, SmartClientFilterOperator.iContains, value, start, end, tagId, filter, model);
-				break;
-			case startsWith:
-				addCriterion(binding, SmartClientFilterOperator.notStartsWith, value, start, end, tagId, filter, model);
-				break;
-			case iStartsWith:
-				addCriterion(binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, tagId, filter, model);
-				break;
-			case notStartsWith:
-				addCriterion(binding, SmartClientFilterOperator.startsWith, value, start, end, tagId, filter, model);
-				break;
-			case iNotStartsWith:
-				addCriterion(binding, SmartClientFilterOperator.iStartsWith, value, start, end, tagId, filter, model);
-				break;
-			case endsWith:
-				addCriterion(binding, SmartClientFilterOperator.notEndsWith, value, start, end, tagId, filter, model);
-				break;
-			case iEndsWith:
-				addCriterion(binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, tagId, filter, model);
-				break;
-			case notEndsWith:
-				addCriterion(binding, SmartClientFilterOperator.endsWith, value, start, end, tagId, filter, model);
-				break;
-			case iNotEndsWith:
-				addCriterion(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter, model);
-				break;
-			case exact, equals:
-				addCriterion(binding, SmartClientFilterOperator.notEqual, value, start, end, tagId, filter, model);
-				break;
-			case iEquals:
-				addCriterion(binding, SmartClientFilterOperator.iNotEqual, value, start, end, tagId, filter, model);
-				break;
-			case notEqual:
-				addCriterion(binding, SmartClientFilterOperator.equals, value, start, end, tagId, filter, model);
-				break;
-			case iNotEqual:
-				addCriterion(binding, SmartClientFilterOperator.iEquals, value, start, end, tagId, filter, model);
-				break;
-			case greaterThan:
-				addNullOr(binding, SmartClientFilterOperator.lessOrEqual, value, start, end, tagId, filter, model);
-				break;
-			case greaterOrEqual:
-				addNullOr(binding, SmartClientFilterOperator.lessThan, value, start, end, tagId, filter, model);
-				break;
-			case lessThan:
-				addNullOr(binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, tagId, filter, model);
-				break;
-			case lessOrEqual:
-				addNullOr(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter, model);
-				break;
 			case betweenInclusive, iBetweenInclusive: // outside the range: before its start or after its end
 				addOutsideRange(binding, start, end, true, tagId, filter, model);
-				break;
+				return;
 			case between, iBetween: // outside the range: at or before its start, or at or after its end
 				addOutsideRange(binding, start, end, false, tagId, filter, model);
-				break;
-			case isNull:
-				addCriterion(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter, model);
-				break;
-			case notNull:
-				addCriterion(binding, SmartClientFilterOperator.isNull, value, start, end, tagId, filter, model);
-				break;
-			case isBlank:
-				addCriterion(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter, model);
-				break;
-			case notBlank:
-				addCriterion(binding, SmartClientFilterOperator.isBlank, value, start, end, tagId, filter, model);
-				break;
-			case equalsField:
-				addCriterion(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter, model);
-				break;
-			case iEqualsField:
-				addCriterion(binding, SmartClientFilterOperator.iNotEqualField, value, start, end, tagId, filter, model);
-				break;
-			case notEqualField:
-				addCriterion(binding, SmartClientFilterOperator.equalsField, value, start, end, tagId, filter, model);
-				break;
-			case iNotEqualField:
-				addCriterion(binding, SmartClientFilterOperator.iEqualsField, value, start, end, tagId, filter, model);
-				break;
-			case containsField:
-				addCriterion(binding, SmartClientFilterOperator.notContainsField, value, start, end, tagId, filter, model);
-				break;
-			case iContainsField:
-				addCriterion(binding, SmartClientFilterOperator.iNotContainsField, value, start, end, tagId, filter, model);
-				break;
-			case notContainsField:
-				addCriterion(binding, SmartClientFilterOperator.containsField, value, start, end, tagId, filter, model);
-				break;
-			case iNotContainsField:
-				addCriterion(binding, SmartClientFilterOperator.iContainsField, value, start, end, tagId, filter, model);
-				break;
-			case startsWithField:
-				addCriterion(binding, SmartClientFilterOperator.notStartsWithField, value, start, end, tagId, filter, model);
-				break;
-			case iStartsWithField:
-				addCriterion(binding, SmartClientFilterOperator.iNotStartsWithField, value, start, end, tagId, filter, model);
-				break;
-			case notStartsWithField:
-				addCriterion(binding, SmartClientFilterOperator.startsWithField, value, start, end, tagId, filter, model);
-				break;
-			case iNotStartsWithField:
-				addCriterion(binding, SmartClientFilterOperator.iStartsWithField, value, start, end, tagId, filter, model);
-				break;
-			case endsWithField:
-				addCriterion(binding, SmartClientFilterOperator.notEndsWithField, value, start, end, tagId, filter, model);
-				break;
-			case iEndsWithField:
-				addCriterion(binding, SmartClientFilterOperator.iNotEndsWithField, value, start, end, tagId, filter, model);
-				break;
-			case notEndsWithField:
-				addCriterion(binding, SmartClientFilterOperator.endsWithField, value, start, end, tagId, filter, model);
-				break;
-			case iNotEndsWithField:
-				addCriterion(binding, SmartClientFilterOperator.iEndsWithField, value, start, end, tagId, filter, model);
-				break;
-			case greaterThanField:
-				addNullOr(binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, tagId, filter, model);
-				break;
-			case greaterOrEqualField:
-				addNullOr(binding, SmartClientFilterOperator.lessThanField, value, start, end, tagId, filter, model);
-				break;
-			case lessThanField:
-				addNullOr(binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, tagId, filter, model);
-				break;
-			case lessOrEqualField:
-				addNullOr(binding, SmartClientFilterOperator.greaterThanField, value, start, end, tagId, filter, model);
-				break;
-			case inSet:
-				addCriterion(binding, SmartClientFilterOperator.notInSet, value, start, end, tagId, filter, model);
-				break;
-			case notInSet:
-				addCriterion(binding, SmartClientFilterOperator.inSet, value, start, end, tagId, filter, model);
-				break;
-			case regexp, iregexp:
-				// nothing to do
-				break;
-			case containsPattern, iContainsPattern, matchesPattern, iMatchesPattern,
-					startsWithPattern, iStartsWithPattern, endsWithPattern, iEndsWithPattern:
-				// nothing to do
-				break;
-			case geoContains, geoCrosses, geoDisjoint, geoEquals, geoIntersects, geoOverlaps, geoTouches, geoWithin:
-				// not negated yet: a geometry criterion under Match None adds nothing
-				break;
-			case and, or, not:
-				// nothing to do
-				break;
+				return;
 			default:
+		}
+		SmartClientFilterOperator negation = filterOperator.negation();
+		if (negation == null) { // patterns, geometries, field comparisons and the logical operators
+			return;
+		}
+		if (filterOperator.isNegative() || filterOperator.isNullCheck()) {
+			addCriterionToFilter(binding, negation, value, start, end, tagId, filter);
+		}
+		else {
+			addNullOrCriterion(binding, negation, value, start, end, tagId, filter, model);
 		}
 	}
 
@@ -1427,29 +1304,8 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
-	 * The operators that negate a condition. Like SmartClient's own evaluation of criteria (and InMemoryFilter), each
-	 * matches a row whose column has no value, which SQL's comparisons would leave out.
-	 */
-	private static final Set<SmartClientFilterOperator> NEGATIVE_OPERATORS = EnumSet.of(SmartClientFilterOperator.notEqual,
-																						SmartClientFilterOperator.iNotEqual,
-																						SmartClientFilterOperator.notContains,
-																						SmartClientFilterOperator.iNotContains,
-																						SmartClientFilterOperator.notStartsWith,
-																						SmartClientFilterOperator.iNotStartsWith,
-																						SmartClientFilterOperator.notEndsWith,
-																						SmartClientFilterOperator.iNotEndsWith,
-																						SmartClientFilterOperator.notInSet,
-																						SmartClientFilterOperator.notEqualField,
-																						SmartClientFilterOperator.iNotEqualField,
-																						SmartClientFilterOperator.notContainsField,
-																						SmartClientFilterOperator.iNotContainsField,
-																						SmartClientFilterOperator.notStartsWithField,
-																						SmartClientFilterOperator.iNotStartsWithField,
-																						SmartClientFilterOperator.notEndsWithField,
-																						SmartClientFilterOperator.iNotEndsWithField);
-
-	/**
-	 * Adds a criterion; a negative one (see {@link #NEGATIVE_OPERATORS}) also matches a row with no value.
+	 * Adds a criterion; a negative one (see {@link SmartClientFilterOperator#isNegative()}) also matches a row with no
+	 * value.
 	 */
 	@SuppressWarnings("java:S107") // the criterion's parts, as addCriterionToFilter takes them, and the model
 	private static void addCriterion(@Nonnull String binding,
@@ -1460,8 +1316,8 @@ public class SmartClientListServlet extends HttpServlet {
 										@Nullable String tagId,
 										@Nonnull Filter filter,
 										@Nonnull ListModel<?> model) {
-		if ((filterOperator != null) && NEGATIVE_OPERATORS.contains(filterOperator)) {
-			addNullOr(binding, filterOperator, value, start, end, tagId, filter, model);
+		if ((filterOperator != null) && filterOperator.isNegative()) {
+			addNullOrCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
 		}
 		else {
 			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
@@ -1473,27 +1329,27 @@ public class SmartClientListServlet extends HttpServlet {
 	 * and tree parent pseudo-bindings are not columns, so their criteria are added as they are.
 	 */
 	@SuppressWarnings("java:S107") // the criterion's parts, as addCriterionToFilter takes them, and the model
-	private static void addNullOr(@Nonnull String binding,
-									@Nonnull SmartClientFilterOperator filterOperator,
-									@Nullable Object value,
-									@Nullable Object start,
-									@Nullable Object end,
-									@Nullable String tagId,
-									@Nonnull Filter filter,
-									@Nonnull ListModel<?> model) {
+	private static void addNullOrCriterion(@Nonnull String binding,
+											@Nonnull SmartClientFilterOperator filterOperator,
+											@Nullable Object value,
+											@Nullable Object start,
+											@Nullable Object end,
+											@Nullable String tagId,
+											@Nonnull Filter filter,
+											@Nonnull ListModel<?> model) {
 		if (PersistentBean.TAGGED_NAME.equals(binding) || HierarchicalBean.PARENT_ID.equals(binding)) {
 			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
 			return;
 		}
 		Filter criterion = nonNullFilter(model.newFilter(), model);
 		addCriterionToFilter(binding, filterOperator, value, start, end, tagId, criterion);
-		addNullOr(binding, criterion, filter, model);
+		addNullOrFilter(binding, criterion, filter, model);
 	}
 
 	/**
 	 * ANDs "the column is null, or the criterion holds" onto the filter, when the criterion adds anything.
 	 */
-	private static void addNullOr(@Nonnull String binding, @Nonnull Filter criterion, @Nonnull Filter filter, @Nonnull ListModel<?> model) {
+	private static void addNullOrFilter(@Nonnull String binding, @Nonnull Filter criterion, @Nonnull Filter filter, @Nonnull ListModel<?> model) {
 		if (criterion.isEmpty()) {
 			return;
 		}
@@ -1539,7 +1395,7 @@ public class SmartClientListServlet extends HttpServlet {
 				outside.addOr(after);
 			}
 		}
-		addNullOr(binding, outside, filter, model);
+		addNullOrFilter(binding, outside, filter, model);
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK

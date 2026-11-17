@@ -3,6 +3,7 @@ package org.skyve.impl.snapshot;
 import org.skyve.metadata.FilterOperator;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Enumerates SmartClient-compatible filter operators used by snapshot serialization.
@@ -110,6 +111,72 @@ public enum SmartClientFilterOperator {
 			case nullOrLike -> iContains;
 			case nullOrNotEqual -> notEqual;
 			case nullOrNotLike -> iNotContains;
+		};
+	}
+
+	/**
+	 * Indicates if this operator negates a condition on a value (notEqual, the not contains, starts with and ends with
+	 * family, notInSet). SmartClient evaluates such a criterion as "not the condition", so it also matches a row with
+	 * no value.
+	 *
+	 * @return true for a negative operator
+	 */
+	public boolean isNegative() {
+		return switch (this) {
+			case notEqual, iNotEqual, notContains, iNotContains, notStartsWith, iNotStartsWith, notEndsWith, iNotEndsWith,
+					notInSet -> true;
+			default -> false;
+		};
+	}
+
+	/**
+	 * Indicates if this operator tests for no value (isNull, notNull, isBlank, notBlank).
+	 *
+	 * @return true for a null or blank check
+	 */
+	public boolean isNullCheck() {
+		return switch (this) {
+			case isNull, notNull, isBlank, notBlank -> true;
+			default -> false;
+		};
+	}
+
+	/**
+	 * Returns the operator that negates this one for a criterion under Match None (not): contains becomes notContains,
+	 * greaterThan lessOrEqual, isNull notNull and so on. Ranges (between and the rest) are negated by their outside,
+	 * not by one operator; patterns, geometries, field comparisons and the logical operators have no negation here.
+	 *
+	 * @return the negating operator, or null if there is none
+	 */
+	public @Nullable SmartClientFilterOperator negation() {
+		return switch (this) {
+			case substring, contains -> notContains;
+			case iContains -> iNotContains;
+			case notContains -> contains;
+			case iNotContains -> iContains;
+			case startsWith -> notStartsWith;
+			case iStartsWith -> iNotStartsWith;
+			case notStartsWith -> startsWith;
+			case iNotStartsWith -> iStartsWith;
+			case endsWith -> notEndsWith;
+			case iEndsWith -> iNotEndsWith;
+			case notEndsWith -> endsWith;
+			case iNotEndsWith -> iEndsWith;
+			case exact, equals -> notEqual;
+			case iEquals -> iNotEqual;
+			case notEqual -> equals;
+			case iNotEqual -> iEquals;
+			case greaterThan -> lessOrEqual;
+			case greaterOrEqual -> lessThan;
+			case lessThan -> greaterOrEqual;
+			case lessOrEqual -> greaterThan;
+			case isNull -> notNull;
+			case notNull -> isNull;
+			case isBlank -> notBlank;
+			case notBlank -> isBlank;
+			case inSet -> notInSet;
+			case notInSet -> inSet;
+			default -> null;
 		};
 	}
 }

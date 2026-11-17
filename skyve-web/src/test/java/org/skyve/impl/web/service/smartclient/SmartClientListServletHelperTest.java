@@ -899,9 +899,8 @@ class SmartClientListServletHelperTest {
 		notInSet.put("operator", SmartClientFilterOperator.notInSet.toString());
 		notInSet.put("value", new java.util.ArrayList<>(java.util.List.of("X", "Y")));
 
-		// a negation also matches a row with no value: (null or the negation), built in filters of its own
-		Filter child = mock(Filter.class);
-		when(model.newFilter()).thenReturn(child);
+		// a negation also matches a row with no value: the negation, and (null OR it), in filters of their own
+		Filter[] f = newFilters(model, 4);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
@@ -912,12 +911,10 @@ class SmartClientListServletHelperTest {
 				model,
 				filter);
 
-		verify(child).addNotContains("name", "abc");
+		verifyNullOr(filter, f[0], f[1]).addNotContains("name", "abc");
 		verify(filter).addContains("name", "def");
-		verify(child).addNotIn("name", "A", "B");
+		verifyNullOr(filter, f[2], f[3]).addNotIn("name", "A", "B");
 		verify(filter).addIn("name", "X", "Y");
-		verify(child, times(2)).addNull("name");
-		verify(filter, times(2)).addAnd(child);
 	}
 
 	@Test
@@ -1001,8 +998,7 @@ class SmartClientListServletHelperTest {
 		java.util.Map<String, Object> iEquals = criterion("name", SmartClientFilterOperator.iEquals, "r");
 		java.util.Map<String, Object> notEqual = criterion("name", SmartClientFilterOperator.notEqual, "s");
 		java.util.Map<String, Object> iNotEqual = criterion("name", SmartClientFilterOperator.iNotEqual, "t");
-		Filter child = mock(Filter.class);
-		when(model.newFilter()).thenReturn(child);
+		Filter[] f = newFilters(model, 12);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
@@ -1025,20 +1021,18 @@ class SmartClientListServletHelperTest {
 				filter);
 
 		// the negations (also matching no value) are in filters of their own
-		verify(child).addNotStartsWith("name", "ab");
-		verify(child).addNotStartsWith("name", "cd");
+		verifyNullOr(filter, f[0], f[1]).addNotStartsWith("name", "ab");
+		verifyNullOr(filter, f[2], f[3]).addNotStartsWith("name", "cd");
 		verify(filter).addStartsWith("name", "ef");
 		verify(filter).addStartsWith("name", "gh");
-		verify(child).addNotEndsWith("name", "ij");
-		verify(child).addNotEndsWith("name", "kl");
+		verifyNullOr(filter, f[4], f[5]).addNotEndsWith("name", "ij");
+		verifyNullOr(filter, f[6], f[7]).addNotEndsWith("name", "kl");
 		verify(filter).addEndsWith("name", "mn");
 		verify(filter).addEndsWith("name", "op");
-		verify(child).addNotEquals("name", "q");
-		verify(child).addNotEqualsIgnoreCase("name", "r");
+		verifyNullOr(filter, f[8], f[9]).addNotEquals("name", "q");
+		verifyNullOr(filter, f[10], f[11]).addNotEqualsIgnoreCase("name", "r");
 		verify(filter).addEquals("name", "s");
 		verify(filter).addEqualsIgnoreCase("name", "t");
-		verify(child, times(6)).addNull("name");
-		verify(filter, times(6)).addAnd(child);
 	}
 
 	@Test
@@ -1066,8 +1060,7 @@ class SmartClientListServletHelperTest {
 
 		// each negation (also matching no value) and not iBetween (exclusive: at or before the start, or at or after the
 		// end) are in filters of their own
-		Filter child = mock(Filter.class);
-		when(model.newFilter()).thenReturn(child);
+		Filter[] f = newFilters(model, 11);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
@@ -1078,14 +1071,16 @@ class SmartClientListServletHelperTest {
 				model,
 				filter);
 
-		verify(child).addLessThanOrEqualTo("name", "10");
-		verify(child).addLessThan("name", "11");
-		verify(child).addGreaterThanOrEqualTo("name", "12");
-		verify(child).addGreaterThan("name", "13");
-		verify(child).addLessThanOrEqualTo("name", "A");
-		verify(child).addGreaterThanOrEqualTo("name", "Z");
-		verify(child, times(5)).addNull("name");
-		verify(filter, times(5)).addAnd(child);
+		verifyNullOr(filter, f[0], f[1]).addLessThanOrEqualTo("name", "10");
+		verifyNullOr(filter, f[2], f[3]).addLessThan("name", "11");
+		verifyNullOr(filter, f[4], f[5]).addGreaterThanOrEqualTo("name", "12");
+		verifyNullOr(filter, f[6], f[7]).addGreaterThan("name", "13");
+		verify(f[8]).addLessThanOrEqualTo("name", "A");
+		verify(f[9]).addGreaterThanOrEqualTo("name", "Z");
+		verify(f[8]).addOr(f[9]);
+		verify(f[10]).addNull("name");
+		verify(f[10]).addOr(f[8]);
+		verify(filter).addAnd(f[10]);
 	}
 
 	@Test
@@ -1606,5 +1601,26 @@ class SmartClientListServletHelperTest {
 		criterion.put("operator", operator.toString());
 		criterion.put("value", value);
 		return criterion;
+	}
+
+	/** Makes the model's next new filters these mocks, in order. */
+	private static Filter[] newFilters(ListModel<?> model, int count) {
+		Filter[] result = new Filter[count];
+		for (int i = 0; i < count; i++) {
+			result[i] = mock(Filter.class);
+		}
+		when(model.newFilter()).thenReturn(result[0], java.util.Arrays.copyOfRange(result, 1, count));
+		return result;
+	}
+
+	/**
+	 * Verifies that the negation filter was ORed with "no value" in a filter of its own, ANDed onto the filter, and
+	 * returns the negation filter to verify what it holds.
+	 */
+	private static Filter verifyNullOr(Filter filter, Filter negation, Filter nullOr) {
+		verify(nullOr).addNull("name");
+		verify(nullOr).addOr(negation);
+		verify(filter).addAnd(nullOr);
+		return verify(negation);
 	}
 }
