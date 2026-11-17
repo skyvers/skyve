@@ -270,7 +270,8 @@ public class Enumeration extends ConstrainableField {
 		// look for the cached class before resolving the customer
 		Class<?> result = cachedImplementingType(customerName);
 		if (result == null) {
-			result = getImplementingType((customerName == null) ? null : user.getCustomer());
+			Customer customer = ((user == null) || (customerName == null)) ? null : user.getCustomer();
+			result = getImplementingType(customer);
 		}
 		return result;
 	}
