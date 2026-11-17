@@ -11,7 +11,10 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Converts integer values using grouped thousands separator formatting.
+ * Converts integer values using grouped thousands separator formatting ({@code 1,234,567}).
+ * <p>
+ * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with optional {@code ,}
+ * grouping (read leniently: {@code 1,23,4} is 1234). Anything else, or a value beyond an {@code int}, is refused.
  */
 public class IntegerSeparator implements Converter<Integer> {
 	/**
@@ -31,7 +34,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	@Override
 	public @Nonnull Integer fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
-			String result = displayValue.replace(",", "");
+			String result = displayValue.trim().replace(",", "");
 			return Integer.valueOf(result);
 		}
 		catch (NumberFormatException e) {

@@ -15,7 +15,10 @@ import jakarta.annotation.Nonnull;
  * Base converter for {@link Decimal} attributes displayed as dollars and cents,
  * with two decimal places and no currency symbol.
  *
- * <p>Parsing accepts the value with or without a leading {@code $} sign.
+ * <p>Parsing reads a number as {@link AbstractDecimalConverter} does, with or
+ * without a {@code $} before it, or between a {@code -} and it: {@code 1.00},
+ * {@code $1.00}, {@code $-1.00} and {@code -$1.00}. A {@code $} anywhere else is
+ * refused.
  *
  * @param <T> the decimal type converted
  */
@@ -45,7 +48,14 @@ public abstract class AbstractDollarsAndCentsConverter<T extends Decimal> extend
 	@Override
 	protected @Nonnull BigDecimal parse(@Nonnull DecimalFormat format, @Nonnull String displayValue)
 	throws ParseException {
-		String numberValue = displayValue.startsWith("$") ? displayValue.substring(1).trim() : displayValue;
+		// a $ before the number, or between a - and the number: $1.00, $-1.00 and -$1.00
+		String numberValue = displayValue.trim();
+		if (numberValue.startsWith("-$")) {
+			numberValue = "-" + numberValue.substring(2).trim();
+		}
+		else if (numberValue.startsWith("$")) {
+			numberValue = numberValue.substring(1).trim();
+		}
 		return super.parse(format, numberValue);
 	}
 }

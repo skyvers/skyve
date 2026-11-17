@@ -11,7 +11,11 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Converts integer values representing simple percentage display values.
+ * Converts integer values that are a whole number of percent: 12 is shown {@code 12%} (no thousands separator:
+ * {@code 1000%}).
+ * <p>
+ * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with or without a
+ * {@code %} at the end ({@code 12%} and {@code 12} are 12). Anything else, or a value beyond an {@code int}, is refused.
  */
 public class SimplePercentage implements Converter<Integer> {
 	/**
@@ -30,7 +34,11 @@ public class SimplePercentage implements Converter<Integer> {
 	 */
 	@Override
 	public @Nonnull Integer fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
-		String noPercentage = displayValue.replace("%", "");
+		// a % at the end only: 12% and 12 are 12
+		String noPercentage = displayValue.trim();
+		if (noPercentage.endsWith("%")) {
+			noPercentage = noPercentage.substring(0, noPercentage.length() - 1).trim();
+		}
 		try {
 			return Integer.valueOf(noPercentage);
 		}

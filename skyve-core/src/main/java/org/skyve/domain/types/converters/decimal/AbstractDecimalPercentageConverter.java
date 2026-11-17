@@ -16,7 +16,9 @@ import jakarta.annotation.Nonnull;
  * displayed as a percentage, so {@code 0.125} displays as {@code 12.5%} at one
  * decimal place.
  *
- * <p>Parsing accepts the value with or without a {@code %} sign and rounds it
+ * <p>Parsing reads the percentage as {@link AbstractDecimalConverter} reads a
+ * number, with or without a {@code %} sign at its end ({@code 12%} and {@code 12}
+ * are 0.12; a {@code %} anywhere else is refused), and rounds it
  * {@link RoundingMode#HALF_UP} to the precision displayed, so entering
  * {@code 12.5%} into an integer percentage stores {@code 0.13}. This matches the
  * SmartClient percentage editors.
@@ -62,7 +64,11 @@ public abstract class AbstractDecimalPercentageConverter<T extends Decimal> exte
 	@Override
 	protected @Nonnull BigDecimal parse(@Nonnull DecimalFormat format, @Nonnull String displayValue)
 	throws ParseException {
-		BigDecimal percentage = super.parse(format, displayValue.replace("%", ""));
+		String text = displayValue.trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length() - 1);
+		}
+		BigDecimal percentage = super.parse(format, text);
 		return percentage.setScale(format.getMaximumFractionDigits(), RoundingMode.HALF_UP).movePointLeft(2);
 	}
 }

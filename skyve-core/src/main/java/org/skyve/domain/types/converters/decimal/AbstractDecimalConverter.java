@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.util.function.Function;
 
 import org.skyve.CORE;
@@ -21,9 +22,20 @@ import jakarta.annotation.Nullable;
  * Base converter for {@link Decimal} attributes that display through a
  * {@link DecimalFormat} pattern.
  *
- * <p>Display values are rounded {@link RoundingMode#HALF_UP}, matching the
- * rounding of the {@link Decimal} types and the SmartClient and Vue renderers.
- * Any failure to format or parse, including a non-numeric parse result such as
+ * <p>Display values are rounded {@link RoundingMode#HALF_UP} to the places the
+ * pattern shows, from the decimal value (not a binary fraction), matching the
+ * rounding of the {@link Decimal} types and the SmartClient and Vue renderers;
+ * grouped in thousands with {@code ,}; with a {@code -} sign for a negative,
+ * except for a value that rounds to zero, which shows no sign ({@code 0.00}).
+ *
+ * <p>Parsing reads the whole text, trimmed: an optional {@code -}, digits with
+ * optional {@code ,} grouping (read leniently: {@code 1,23,4} is 1234), and an
+ * optional {@code .} with decimal places. More places than the pattern shows are
+ * kept to the scale of the decimal type (HALF_UP beyond it). Anything else, such
+ * as a {@code +} sign, an exponent ({@code 1E3}), letters or other text after the
+ * number ({@code 12abc}), or empty text, is refused.
+ *
+ * <p>Any failure to format or parse, including a non-numeric parse result such as
  * {@code NaN}, is reported as a {@link ConversionException} carrying the
  * converter's i18n key.
  *
@@ -165,6 +177,10 @@ public abstract class AbstractDecimalConverter<T extends Decimal> implements Con
 	 */
 	@SuppressWarnings("static-method")
 	protected @Nonnull String format(@Nonnull DecimalFormat format, @Nonnull BigDecimal value) {
+		// a value that rounds to zero shows no sign (DecimalFormat writes -0.00 for -0.001)
+		if (value.setScale(format.getMaximumFractionDigits(), RoundingMode.HALF_UP).signum() == 0) {
+			return format.format(BigDecimal.ZERO);
+		}
 		return format.format(value);
 	}
 
@@ -178,7 +194,13 @@ public abstract class AbstractDecimalConverter<T extends Decimal> implements Con
 	@SuppressWarnings("static-method")
 	protected @Nonnull BigDecimal parse(@Nonnull DecimalFormat format, @Nonnull String displayValue)
 	throws ParseException {
-		Number result = format.parse(displayValue);
+		// the whole text must be the number: DecimalFormat stops at the first character it cannot read (12abc is 12)
+		String text = displayValue.trim();
+		ParsePosition position = new ParsePosition(0);
+		Number result = format.parse(text, position);
+		if ((position.getErrorIndex() >= 0) || (position.getIndex() != text.length())) {
+			throw new ParseException(displayValue, Math.max(position.getErrorIndex(), position.getIndex()));
+		}
 		if (result instanceof BigDecimal decimal) {
 			return decimal;
 		}

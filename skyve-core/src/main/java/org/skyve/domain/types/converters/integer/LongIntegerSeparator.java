@@ -11,7 +11,10 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * Converts long values using grouped thousands separator formatting.
+ * Converts long values using grouped thousands separator formatting ({@code 12,345,678,901}).
+ * <p>
+ * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with optional {@code ,}
+ * grouping (read leniently). Anything else, or a value beyond a {@code long}, is refused.
  */
 public class LongIntegerSeparator implements Converter<Long> {
 	/**
@@ -31,7 +34,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	@Override
 	public @Nonnull Long fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
-			String result = displayValue.replace(",", "");
+			String result = displayValue.trim().replace(",", "");
 			return Long.valueOf(result);
 		}
 		catch (NumberFormatException e) {
