@@ -340,6 +340,8 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	/**
 	 * Returns the next alpha value - ie A00A1 becomes A00A2 etc
 	 *
+	 * <p>The digits are incremented as a {@link BigInteger}, so a run of digits of any length works.
+	 *
 	 * @param suppliedPrefix
 	 *        - if the sequence value has a known prefix before the number,
 	 *        eg INV0001 has a prefix of "INV"
@@ -349,8 +351,6 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 *        - the minimum length of the number when specified as a string
 	 *
 	 * @return - the next number
-	 *
-	 * <p>The digits are incremented as a {@link BigInteger}, so a run of digits of any length works.
 	 */
 	protected static @Nonnull String incrementAlpha(@Nullable String suppliedPrefix, @Nullable String lastNumber, int numberLength) {
 		String newNumber = "";
