@@ -21,7 +21,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -57,6 +56,11 @@ import jakarta.servlet.http.HttpSession;
 class StateUtilConcurrencyTest {
 	private static final int THREADS = 8;
 	private static final int ROUNDS = 200;
+	/**
+	 * Changes per session count writer: on the old code 10 000 showed a negative count in 30 of 30 runs (about
+	 * 0.1 s each), 5 000 in 16 of 20.
+	 */
+	private static final int SESSION_COUNT_CHANGES = 10_000;
 	/** Set when a worker did not finish: it may hold a cache lock for good. */
 	private static volatile boolean stuckWorker = false;
 
@@ -182,7 +186,8 @@ class StateUtilConcurrencyTest {
 
 	/**
 	 * Revoking every session (as a password change does) while the user's sessions start and end: no revoked
-	 * session id may come back, which would leave a session valid after its revocation.
+	 * session id may come back, which would leave a session valid after its revocation. Half of the revoked
+	 * sessions also end on their own at the same moment; the other half can only go through the revocation.
 	 */
 	@ParameterizedTest
 	@EnumSource(Topology.class)
@@ -191,7 +196,7 @@ class StateUtilConcurrencyTest {
 		List<String> failures = new ArrayList<>();
 		for (int round = 0; round < ROUNDS; round++) {
 			String userId = "user-" + round;
-			List<HttpSession> revoked = sessions("r" + round + "-old", THREADS);
+			List<HttpSession> revoked = sessions("r" + round + "-old", THREADS * 2);
 			List<HttpSession> starting = sessions("r" + round + "-new", THREADS);
 			for (HttpSession session : revoked) {
 				StateUtil.addSession(userId, session);
@@ -214,55 +219,72 @@ class StateUtilConcurrencyTest {
 	 * Session count decrements at zero racing increments and reads: the count is never seen below zero. A
 	 * decrement that went to -1 and was then reset to 0 showed -1 to readers, and lost any increment made
 	 * in between; that window is what the readers catch.
+	 * <p>
+	 * It touches no cache, so it has its own bounds and never sets {@link #stuckWorker}: a slow machine fails
+	 * this test alone. Each reader keeps its own minimum and returns it at the end.
 	 */
 	@Test
 	void concurrentSessionCountChangesNeverShowANegativeCount() throws Exception {
-		int changes = 200_000;
-		while (StateUtil.getSessionCount() > 0) {
-			StateUtil.decrementSessionCount();
-		}
+		resetSessionCount();
+		int writers = THREADS;
+		int readers = THREADS / 2;
+		CountDownLatch ready = new CountDownLatch(writers + readers);
+		CountDownLatch go = new CountDownLatch(1);
 		AtomicBoolean done = new AtomicBoolean();
-		AtomicInteger lowest = new AtomicInteger();
-		List<Runnable> tasks = new ArrayList<>();
-		for (int i = 0; i < THREADS / 2; i++) {
-			tasks.add(() -> {
-				for (int j = 0; j < changes; j++) {
-					StateUtil.decrementSessionCount();
+		List<Future<?>> writing = new ArrayList<>();
+		for (int i = 0; i < writers; i++) {
+			// mostly decrements, so the count sits at zero, where the old decrement went below it
+			boolean decrement = (i % 4 != 0);
+			writing.add(executor.submit(() -> {
+				ready.countDown();
+				go.await();
+				for (int j = 0; j < SESSION_COUNT_CHANGES; j++) {
+					if (decrement) {
+						StateUtil.decrementSessionCount();
+					}
+					else {
+						StateUtil.incrementSessionCount();
+					}
 				}
-			});
-			tasks.add(() -> {
-				for (int j = 0; j < changes; j++) {
-					StateUtil.incrementSessionCount();
-				}
-			});
+				return null;
+			}));
 		}
-		List<Runnable> readers = new ArrayList<>();
-		for (int i = 0; i < THREADS / 2; i++) {
-			readers.add(() -> {
+		List<Future<Integer>> reading = new ArrayList<>();
+		for (int i = 0; i < readers; i++) {
+			reading.add(executor.submit(() -> {
+				ready.countDown();
+				go.await();
+				int lowest = 0;
 				while (! done.get()) {
-					lowest.accumulateAndGet(StateUtil.getSessionCount(), Math::min);
+					lowest = Math.min(lowest, StateUtil.getSessionCount());
 				}
-			});
+				return Integer.valueOf(lowest);
+			}));
 		}
-		List<Future<?>> reading = new ArrayList<>();
-		for (Runnable reader : readers) {
-			reading.add(executor.submit(reader));
-		}
-		List<String> failures = new ArrayList<>();
 		try {
-			runTogether(failures, 0, tasks);
+			// every worker is parked on the go latch before it opens
+			assertTrue(ready.await(30, TimeUnit.SECONDS), "workers did not start");
+			go.countDown();
+			for (Future<?> future : writing) {
+				future.get(30, TimeUnit.SECONDS);
+			}
 		}
 		finally {
 			done.set(true);
 		}
-		for (Future<?> future : reading) {
-			future.get(10, TimeUnit.SECONDS);
+		int lowest = 0;
+		for (Future<Integer> future : reading) {
+			lowest = Math.min(lowest, future.get(30, TimeUnit.SECONDS).intValue());
 		}
+		resetSessionCount();
+		int seen = lowest;
+		assertTrue(seen >= 0, () -> "the session count was seen at " + seen);
+	}
+
+	private static void resetSessionCount() {
 		while (StateUtil.getSessionCount() > 0) {
 			StateUtil.decrementSessionCount();
 		}
-		assertTrue(failures.isEmpty(), () -> String.join("; ", failures));
-		assertTrue(lowest.get() >= 0, () -> "the session count was seen at " + lowest.get());
 	}
 
 	@ParameterizedTest
@@ -401,7 +423,8 @@ class StateUtilConcurrencyTest {
 
 	private static String describe(List<String> failures) {
 		long rounds = failures.stream().map(f -> f.substring(0, f.indexOf(':'))).distinct().count();
-		return rounds + " of " + ROUNDS + " rounds failed; first: " + String.join("; ", failures.subList(0, Math.min(3, failures.size())));
+		return rounds + " of " + ROUNDS + " rounds failed; first: "
+				+ String.join("; ", failures.subList(0, Math.min(3, failures.size())));
 	}
 
 	@SuppressWarnings("rawtypes")
