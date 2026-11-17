@@ -124,8 +124,9 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 			bean.trapException(e);
 		}
 		finally {
-			discardWrites(p);
+			// the user first, so that the rest of the request runs as its own user even if discarding fails
 			p.setUser(currentUser);
+			discardWrites(p);
 		}
 		bean.setTabIndex(Integer.valueOf(2));
 

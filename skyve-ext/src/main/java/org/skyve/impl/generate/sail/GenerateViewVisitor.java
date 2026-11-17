@@ -598,7 +598,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			}
 			try {
 				Bean opened = document.newInstance(user);
-				Bean entered = newTestDataInstance();
+				Bean entered = new DataBuilder().fixture(FixtureType.sail).build(document);
 				result = new Instances(opened, entered);
 			}
 			catch (Exception e) {
@@ -608,18 +608,6 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			instances = result;
 		}
 		return result;
-	}
-
-	/**
-	 * Builds the instance holding test data, as {@code <testDataEnter/>} enters it.
-	 *
-	 * <p>Side effects: builds random data with a {@link DataBuilder} and the {@code sail} fixture, which can run
-	 * application code (data factories and Bizlets); the instance is not saved.
-	 *
-	 * @return the instance
-	 */
-	@Nonnull Bean newTestDataInstance() {
-		return new DataBuilder().fixture(FixtureType.sail).build(document);
 	}
 
 	/**

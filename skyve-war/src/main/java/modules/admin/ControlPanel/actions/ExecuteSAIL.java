@@ -164,8 +164,9 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 				return executor.toString();
 			}
 			finally {
-				GenerateSAIL.discardWrites(p);
+				// the user first, so that the rest of the request runs as its own user even if discarding fails
 				p.setUser(currentUser);
+				GenerateSAIL.discardWrites(p);
 			}
 		}
 	}

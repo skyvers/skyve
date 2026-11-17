@@ -3647,14 +3647,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 		return result;
 	}
 
-	/**
-	 * Returns the resource (class) name of a class-backed action, which is validated to exist when the view is validated.
-	 *
-	 * @param action the action
-	 * @param resourceName the action's resource name
-	 * @return the resource name; never {@code null}
-	 * @throws MetaDataException when the action has no resource name
-	 */
 	private static @Nonnull String staticImageToUrl(@Nullable String imagePath) {
 		return "images/" + imagePath;
 	}

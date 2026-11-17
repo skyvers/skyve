@@ -106,6 +106,51 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 		assertEquals(before, rowCounts());
 	}
 
+	/**
+	 * A persistent bean that generation's application code changes without saving is not written later in the request,
+	 * even when a later save flushes the session: the session is cleared with the rollback.
+	 */
+	@Test
+	void anUnsavedChangeDuringGenerationIsNotFlushedLater() throws Exception {
+		Persistence p = CORE.getPersistence();
+		Contact contact = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		contact.setName("Before generation");
+		contact = p.save(contact);
+		p.commit(false);
+		p.begin();
+		String bizId = contact.getBizId();
+		GenerateSAIL changing = new GenerateMenuSAIL() {
+			@Override
+			public Automation single(User user,
+										String loginCustomer,
+										String loginPassword,
+										String moduleName,
+										String uxui,
+										UserAgentType userAgentType,
+										TestStrategy testStrategy)
+			throws Exception {
+				Contact retrieved = CORE.getPersistence().retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, bizId);
+				if (retrieved != null) { // it was saved and committed above
+					retrieved.setName("Changed while generating");
+				}
+				return super.single(user, loginCustomer, loginPassword, moduleName, uxui, userAgentType, testStrategy);
+			}
+		};
+		bean.setSailModuleName("kitchensink");
+
+		changing.execute(bean, webContext);
+		// Skyve's session flushes only on a save, which flushes every change in the session: save something later in
+		// the request, then commit as the request does
+		p.save(new DataBuilder().fixture(FixtureType.crud).<Contact> build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME));
+		p.commit(false);
+		p.begin();
+		p.evictAllCached();
+
+		Contact reread = p.retrieve(Contact.MODULE_NAME, Contact.DOCUMENT_NAME, bizId);
+		assertNotNull(reread);
+		assertEquals("Before generation", reread.getName());
+	}
+
 	private static long contacts() {
 		return CORE.getPersistence().newDocumentQuery(Contact.MODULE_NAME, Contact.DOCUMENT_NAME).beanResults().size();
 	}
@@ -121,7 +166,7 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 		Map<String, Long> result = new TreeMap<>();
 		for (String table : tables) {
 			Number count = p.newSQL("select count(1) from \"" + table + '"').scalarResult(Number.class);
-			result.put(table, Long.valueOf((count == null) ? -1 : count.longValue())); // count(1) always gives a row
+			result.put(table, Long.valueOf((count == null) ? -1 : count.longValue()));
 		}
 		return result;
 	}
