@@ -1066,3 +1066,43 @@ isc.BizUtil.addClassMethods({
 		return convert(advanced);
 	},
 });
+
+isc.BizUtil.addClassMethods({
+	/**
+	 * Returns the editor a type's values are filtered with when it differs from the type's editor (a SimpleType's
+	 * filterEditorType), or null.
+	 *
+	 * @param {string} type - the type's name.
+	 * @returns {string|null} - the editor's class name.
+	 */
+	filterEditorType: function (type) {
+		const simpleType = type ? isc.SimpleType.getType(type) : null;
+		return (simpleType && simpleType.filterEditorType) || null;
+	},
+
+	/**
+	 * Returns whether a list grid's filter row may filter: false when an item holds a number its converter refuses
+	 * (see the end of types.js), which then shows an error, so that the grid does not filter without the value.
+	 *
+	 * @param {Object} grid - the list grid.
+	 * @returns {boolean} - true to filter.
+	 */
+	filterEditorAccepts: function (grid) {
+		const editor = grid.filterEditor;
+		const form = editor && editor.getEditForm ? editor.getEditForm() : null;
+		if (!form) {
+			return true;
+		}
+		let result = true;
+		form.getItems().forEach((item) => {
+			if (item._refusedText) {
+				result = false;
+				const integer = item.isA("BizIntegerSeparatorItem") || item.isA("BizSimplePercentageItem");
+				editor.setFieldError(0, item.name, integer ? isc.Validator.notAnInteger : isc.Validator.notADecimal);
+			} else if (editor.cellHasErrors(0, item.name)) {
+				editor.setFieldError(0, item.name, null);
+			}
+		});
+		return result;
+	},
+});

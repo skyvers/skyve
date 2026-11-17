@@ -1469,6 +1469,8 @@ isc.BizListGrid.addMethods({
 			canShowFilterEditor: false, // Remove header context menu to show/hide filter row
 			allowFilterOperators: false, // Remove header context menu to allow selection of operators other than the default
 			filterByCell: false, // Ensure return/enter key or filter button click required to filter
+			// A number the Java converter refuses shows an error rather than being dropped (see the end of types.js)
+			filterEditorSubmit: () => isc.BizUtil.filterEditorAccepts(this.grid),
 			selectionType: "single",
 			alternateRecordStyles: true,
 			canEdit: true,
@@ -2174,6 +2176,11 @@ isc.BizListGrid.addMethods({
 					}
 					if (dsField.canSave === false) {
 						gridField.canEdit = false;
+					}
+					// A type's own filter row editor, such as signed dollars for dollars shown as a magnitude
+					const filterEditorType = isc.BizUtil.filterEditorType(dsField.type);
+					if (filterEditorType) {
+						gridField.filterEditorType = filterEditorType;
 					}
 					if (!hasDetailFields && dsField.detail) {
 						hasDetailFields = true;

@@ -1680,33 +1680,37 @@ isc.BizDecimal2Item.addClassMethods({
 	 *
 	 * @param {number} places - the decimal places shown.
 	 * @param {boolean} percent - true for a percentage (the value times 100 with a %).
-	 * @returns {Intl.NumberFormat} - the format.
+	 * @returns {{format: function(number): string}} - the format.
 	 */
 	numberFormat: function (places, percent) {
 		const key = places + (percent ? "%" : "");
 		let result = isc.BizDecimal2Item._numberFormats[key];
 		if (!result) {
-			result = new Intl.NumberFormat("en-US", {
+			// Not signDisplay "negative" for the zero, which browsers before Intl.NumberFormat v3 refuse (a RangeError)
+			const intl = new Intl.NumberFormat("en-US", {
 				style: percent ? "percent" : "decimal",
 				minimumFractionDigits: places,
 				maximumFractionDigits: places,
 				roundingMode: "halfExpand",
-				signDisplay: "negative",
 			});
+			const zero = intl.format(0);
+			// a value that rounds to zero shows no sign: its magnitude shows as zero does
+			result = { format: (value) => (intl.format(Math.abs(value)) === zero ? zero : intl.format(value)) };
 			isc.BizDecimal2Item._numberFormats[key] = result;
 		}
 		return result;
 	},
 
 	/**
-	 * Reads a decimal number as the Java converters do: an optional -, digits with optional , grouping (read leniently)
-	 * and an optional . with places; anything else (a +, an exponent, other text) is not a number.
+	 * Reads a decimal number as the Java converters do: an optional -, ASCII digits with optional , grouping between
+	 * them (read leniently) and an optional . with places; anything else (a +, an exponent, a , not between digits such
+	 * as 1, or ,1, other text) is not a number.
 	 *
 	 * @param {string} text - the trimmed text.
 	 * @returns {string|null} - the number's text without grouping, or null if it is not a number.
 	 */
 	numberText: function (text) {
-		if (!/^-?(\d[\d,]*)?(\.\d*)?$/.test(text) || !/\d/.test(text)) {
+		if (!/^-?(\d+(,\d+)*)?(\.\d*)?$/.test(text) || !/\d/.test(text)) {
 			return null;
 		}
 		return text.replace(/,/g, "");
@@ -2275,6 +2279,8 @@ isc.SimpleType.create({
 	name: "bizDollarsAndCentsAbsolute",
 	inheritsFrom: "float",
 	editorType: "BizDollarsAndCentsAbsoluteItem",
+	// a filter is signed dollars: -7.50 filters at -7.5 and shows -7.50 (see BizUtil.filterEditorType)
+	filterEditorType: "BizDollarsAndCentsItem",
 
 	/**
 	 * Formats the internal value for editing in the UI, without its sign.
@@ -2693,7 +2699,7 @@ isc.ClassFactory.defineClass("BizIntegerSeparatorItem", "TextItem");
 isc.BizIntegerSeparatorItem.addClassMethods({
 	/**
 	 * Parses a whole number as the Java converters (IntegerSeparator, LongIntegerSeparator) read it: an optional + or -
-	 * and digits, with optional , grouping (read leniently); anything else is not a number.
+	 * and ASCII digits, with optional , grouping between them (read leniently); anything else is not a number.
 	 *
 	 * @param {string|number} value - the value to parse.
 	 * @returns {number|null} - the number, or null if it is not one.
@@ -2705,11 +2711,11 @@ isc.BizIntegerSeparatorItem.addClassMethods({
 		if (!value) {
 			return null;
 		}
-		const text = value.toString().trim().replace(/,/g, "");
-		if (!/^[-+]?\d+$/.test(text)) {
+		const text = value.toString().trim();
+		if (!/^[-+]?\d+(,\d+)*$/.test(text)) {
 			return null;
 		}
-		const result = parseInt(text, 10);
+		const result = parseInt(text.replace(/,/g, ""), 10);
 		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
@@ -4889,4 +4895,44 @@ isc.SimpleType.create({
 	inheritsFrom: "canvas",
 	editorType: "GeometryMapItem",
 	validOperators: isc.GeometryItem.validOperators,
+});
+
+/**
+ * A number typed into a list grid's filter row that the Java converter would refuse (+5, $5 in a column that is not
+ * dollars, 1e3, 1,000% for a whole percentage) is not dropped from the filter: the item keeps the text and remembers
+ * it (_refusedText), and the grid shows an error and does not filter (see BizListGrid's filterEditorSubmit). Forms
+ * are unchanged: a refused number there leaves the field empty.
+ */
+[
+	"BizDecimal2Item",
+	"BizDollarsAndCentsAbsoluteItem",
+	"BizIntegerPercentageItem",
+	"BizSimplePercentageItem",
+	"BizIntegerSeparatorItem",
+	"BizTwoDecimalPlacesPercentageItem",
+	"BizTimeDurationItem",
+].forEach((className) => {
+	const prototype = isc[className].getPrototype();
+	const mapDisplayToValue = prototype.mapDisplayToValue;
+	const mapValueToDisplay = prototype.mapValueToDisplay;
+	const setValue = prototype.setValue;
+	isc[className].addMethods({
+		mapDisplayToValue: function (value) {
+			const result = mapDisplayToValue.call(this, value);
+			const typed = value == null ? "" : String(value).trim();
+			this._refusedText =
+				this.form && this.form.isSearchForm && typed !== "" && !isc.isA.Number(result) ? typed : null;
+			// no value (an empty string, not null, which would clear the item and its text)
+			return this._refusedText ? "" : result;
+		},
+
+		mapValueToDisplay: function (value) {
+			return this._refusedText && (value == null || value === "") ? this._refusedText : mapValueToDisplay.call(this, value);
+		},
+
+		setValue: function () {
+			this._refusedText = null;
+			return setValue.apply(this, arguments);
+		},
+	});
 });

@@ -36,13 +36,14 @@ function _createDateFormatter(format) {
  */
 function _createNumberFormatter({ scale, style = 'decimal' }) {
 
+    // Not signDisplay 'negative' for the zero, which browsers before Intl.NumberFormat v3 refuse (a RangeError)
     const numberFormat = new Intl.NumberFormat(undefined, {
         style,
         minimumFractionDigits: scale,
         maximumFractionDigits: scale,
-        roundingMode: 'halfExpand',
-        signDisplay: 'negative'
+        roundingMode: 'halfExpand'
     });
+    const zero = numberFormat.format(0);
 
     return (numValue) => {
 
@@ -51,7 +52,9 @@ function _createNumberFormatter({ scale, style = 'decimal' }) {
             return numValue;
         }
 
-        return numberFormat.format(numValue);
+        // a value that rounds to zero shows no sign: its magnitude shows as zero does
+        const magnitude = numberFormat.format(Math.abs(numValue));
+        return (magnitude === zero) ? zero : numberFormat.format(numValue);
     };
 }
 
