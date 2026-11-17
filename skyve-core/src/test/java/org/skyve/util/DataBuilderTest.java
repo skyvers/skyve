@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,6 +49,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.Bean;
 import org.skyve.util.DataBuilderFactoryClasses.Part;
+import org.skyve.util.DataBuilderFactoryClasses.Widget;
 import org.skyve.util.DataBuilderFactoryClasses.WidgetExtension;
 import org.skyve.util.DataBuilderFactoryClasses.WidgetSubclass;
 import org.skyve.util.test.SkyveFixture;
@@ -1024,6 +1026,18 @@ class DataBuilderTest {
 		}
 	}
 
+	/** A factory of admin.Widget returning the generated domain class, which the extension extends. */
+	public static final class DomainClassReturningFactory {
+		/** How many times DataBuilder invoked the factory method, so a test can show it was never chosen. */
+		static final AtomicInteger CALLS = new AtomicInteger();
+
+		@SkyveFixture(types = FixtureType.crud)
+		public static Widget crudInstance() {
+			CALLS.incrementAndGet();
+			return mock(Widget.class);
+		}
+	}
+
 	/** Invokes the data factory for admin.Widget for a customer whose bean class is the given one. */
 	private static Bean invokeWidgetDataFactory(Object factory, Class<?> beanClass) throws Exception {
 		ProvidedRepository original = getProvidedRepository();
@@ -1071,6 +1085,50 @@ class DataBuilderTest {
 		Bean result = invokeWidgetDataFactory(new WidgetFactory(), WidgetSubclass.class);
 		assertAll(() -> assertThat(result, is((Bean) null)),
 					() -> assertEquals(0, WidgetFactory.CALLS.get(), "the factory method must not be chosen"));
+	}
+
+	/**
+	 * A factory method returning the domain class of a document whose bean class is its extension is
+	 * ignored, and DataBuilder warns about it once however many beans it builds.
+	 */
+	@Test
+	void dataFactoryMethodReturningTheDomainClassOfAnExtendedDocumentIsIgnoredWithOneWarning() throws Exception {
+		ProvidedRepository original = getProvidedRepository();
+		PrintStream originalOut = System.out;
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		DomainClassReturningFactory.CALLS.set(0);
+		Bean first;
+		Bean second;
+		try {
+			DataBuilder builder = newBuilderWithMockUser().fixture(FixtureType.crud);
+			Customer customer = (Customer) getField(builder, "customer");
+			ProvidedRepository repository = mock(ProvidedRepository.class);
+			when(repository.getDataFactory(customer, "admin", "Widget")).thenReturn(new DomainClassReturningFactory());
+			setProvidedRepository(repository);
+			DocumentImpl document = spy(new DocumentImpl());
+			document.setOwningModuleName("admin");
+			document.setName("Widget");
+			doReturn(WidgetExtension.class).when(document).getBeanClass(customer);
+			DataBuilder.setTrace(true);
+			System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+
+			first = invokeDataFactory(builder, document, 1);
+			second = invokeDataFactory(builder, document, 1);
+		}
+		finally {
+			System.setOut(originalOut);
+			DataBuilder.setTrace(false);
+			setProvidedRepository(original);
+			clearPersistenceThreadLocal();
+		}
+
+		String output = out.toString(StandardCharsets.UTF_8);
+		String warning = "WARNING: " + DomainClassReturningFactory.class.getName() + "::crudInstance is ignored as it returns " +
+							Widget.class.getName() + ", not the bean class " + WidgetExtension.class.getName() + " of document admin.Widget";
+		assertAll(() -> assertThat(first, is((Bean) null)),
+					() -> assertThat(second, is((Bean) null)),
+					() -> assertEquals(0, DomainClassReturningFactory.CALLS.get(), "the factory method must not be chosen"),
+					() -> assertEquals(1, output.split(java.util.regex.Pattern.quote(warning), -1).length - 1, output));
 	}
 
 	/**
