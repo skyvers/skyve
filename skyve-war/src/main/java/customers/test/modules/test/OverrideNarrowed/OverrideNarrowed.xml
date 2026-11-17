@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideNarrowed"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			The test customer's override of OverrideNarrowed, leaving out dropped.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideNarrowed" />
+	<singularAlias>Override Narrowed</singularAlias>
+	<pluralAlias>Override Narrowed</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

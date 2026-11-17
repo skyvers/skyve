@@ -37,6 +37,7 @@ import javax.tools.ToolProvider;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
@@ -1244,4 +1245,26 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertEquals(List.of(), compilationErrors(files)));
 	}
 
+	/**
+	 * An association from a customer document to a new customer document, found by the skyve-war test
+	 * customer fixtures: generateAttributeMappings resolves the association's document without the
+	 * customer (<code>module.getDocument(null, ...)</code>), which does not find a new customer
+	 * document, while a collection is resolved with the customer and maps.
+	 */
+	@Test
+	@Disabled("generator bug: an association to a new customer document is resolved without the customer — fix pending")
+	void anOverrideWithAnAssociationToANewCustomerDocumentGivesConsistentMappings() throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		AssociationImpl note = new AssociationImpl();
+		note.setName("note");
+		note.setDisplayName("note");
+		note.setDocumentName("Note");
+		note.setType(AssociationType.aggregation);
+		order.putAttribute(note);
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(order)
+				.acme(document("Note", "SALES_Note", null, null, "text")));
+		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("entity-name=\"acmesalesNote\""));
+	}
 }

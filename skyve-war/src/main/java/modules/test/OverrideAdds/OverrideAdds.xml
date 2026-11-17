@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideAdds"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Customer override fixture: the test customer's override adds an attribute, an association to its own document and a condition.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideAdds" />
+	<singularAlias>Override Adds</singularAlias>
+	<pluralAlias>Override Adds</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

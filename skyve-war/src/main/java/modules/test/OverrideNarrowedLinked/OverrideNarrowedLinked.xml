@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideNarrowedLinked"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Customer override fixture: the test customer's override leaves out dropped, and it references OverrideLinkTarget, which the test2 customer overrides.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideNarrowedLinked" />
+	<singularAlias>Override Narrowed Linked</singularAlias>
+	<pluralAlias>Override Narrowed Linked</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+		<text name="dropped">
+			<displayName>Dropped</displayName>
+			<length>100</length>
+		</text>
+		<association name="target" type="aggregation">
+			<displayName>Target</displayName>
+			<documentName>OverrideLinkTarget</documentName>
+		</association>
+	</attributes>
+</document>
