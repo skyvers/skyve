@@ -562,7 +562,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	}
 
 	@Test
-	void aCustomerWithoutTheOverrideUsesTheVanillaExtensionWhenAnotherCustomerNarrows() throws Exception {
+	void aCustomerWithoutTheOverrideUsesTheVanillaClassWhenAnotherCustomerNarrows() throws Exception {
 		Map<String, String> files = generate(new Fixture()
 				.vanilla(document("Order", "SALES_Order", null, null, "code", "description"))
 				.acme(document("Order", "SALES_Order", null, null, "code")));
