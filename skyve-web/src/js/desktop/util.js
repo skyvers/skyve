@@ -154,13 +154,15 @@ isc.ResultSet.addMethods({
 	},
 
 	/**
-	 * Sets criteria and forces a fetch for spatial operators and day fields.
+	 * Sets criteria and forces a fetch for spatial operators, and for day fields when the criteria change (unchanged
+	 * criteria keep the rows, as a refresh that has just invalidated the cache fetches them anyway).
 	 * @param {Object} newCriteria - the new criteria to set.
 	 * @returns {Object} - the result of the original `setCriteria` method.
 	 */
 	setCriteria: function (newCriteria) {
+		const changed = isc.JSON.encode(newCriteria || {}) !== isc.JSON.encode(this.getCriteria() || {});
 		const result = this.skyveSetCriteria(newCriteria);
-		if (newCriteria && (this.hasSpatialOperator(newCriteria) || this.hasDayField(newCriteria))) {
+		if (newCriteria && (this.hasSpatialOperator(newCriteria) || (changed && this.hasDayField(newCriteria)))) {
 			this.invalidateCache();
 		}
 		return result;
