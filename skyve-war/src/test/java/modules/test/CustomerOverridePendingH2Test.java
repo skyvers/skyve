@@ -137,7 +137,6 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * without status.
 	 */
 	@Test
-	@Disabled("generator bug: a narrowed subclass's domain class is not abstract, so other customers do not get its Vanilla class — fix pending")
 	void aNarrowedSubclassKeepsTheDroppedEnumForOtherCustomers() throws Exception {
 		Customer bizhub = runAs(CUSTOMER);
 		OverrideEnumJoinedSub bean = newInstance(TestDocument.OVERRIDE_ENUM_JOINED_SUB);

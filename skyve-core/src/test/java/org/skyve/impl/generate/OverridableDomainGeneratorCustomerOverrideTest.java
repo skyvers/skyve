@@ -3,6 +3,7 @@ package org.skyve.impl.generate;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -964,6 +965,44 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		assertAll(
 				() -> assertTrue(vanillaMapping.contains("<joined-subclass name=\"modules.sales.domain.SubVanilla\""), vanillaMapping),
 				() -> assertTrue(acmeMapping.contains("<joined-subclass name=\"customers.acme.modules.sales.domain.SubOverride\""), acmeMapping));
+	}
+
+	/**
+	 * Narrows Sub of {@link #hierarchy} for the strategy and checks that Sub's domain class is abstract,
+	 * so that customers without the override get the concrete <code>SubVanilla</code>, which the vanilla
+	 * mapping maps, and that the generated sources compile.
+	 */
+	private static void assertNarrowedSubclassIsAbstract(ExtensionStrategy strategy) throws Exception {
+		Fixture fixture = hierarchy(strategy, false, false, false);
+		DocumentImpl sub = fixture.vanilla.get("Sub");
+		Persistent persistent = sub.getPersistent();
+		assertNotNull(persistent);
+		fixture.vanilla(document("Sub", persistent.getName(), persistent.getStrategy(), "Base", "sub", "description"))
+				.acme(sub);
+		Map<String, String> files = assertConsistentMappings(fixture);
+		String subClass = files.get("modules/sales/domain/Sub.java");
+		String subVanilla = files.get("modules/sales/domain/SubVanilla.java");
+		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(subClass.contains("public abstract class Sub extends Base"), subClass),
+				() -> assertTrue(subVanilla.contains("public class SubVanilla extends Sub"), subVanilla),
+				() -> assertTrue(vanillaMapping.contains("name=\"modules.sales.domain.SubVanilla\""), vanillaMapping),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	@Test
+	void aNarrowedJoinedSubclassIsAbstract() throws Exception {
+		assertNarrowedSubclassIsAbstract(ExtensionStrategy.joined);
+	}
+
+	@Test
+	void aNarrowedSingleSubclassIsAbstract() throws Exception {
+		assertNarrowedSubclassIsAbstract(ExtensionStrategy.single);
+	}
+
+	@Test
+	void aNarrowedSubclassOfAMappedDocumentIsAbstract() throws Exception {
+		assertNarrowedSubclassIsAbstract(ExtensionStrategy.mapped);
 	}
 
 	private static final String NEW_DOCUMENT_EXTENDS = "the class generated for a new customer document cannot extend another document's class";

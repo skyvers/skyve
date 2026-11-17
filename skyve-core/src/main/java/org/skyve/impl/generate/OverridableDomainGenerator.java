@@ -4459,20 +4459,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			contents.append("\n@PolymorphicPersistentBean");
 		}
 		contents.append("\npublic ");
-		if (domainExtensionClassExists) {
+		// A narrowed document's domain class is abstract, whether or not it extends another document;
+		// its generated <Document>Vanilla and <Document>Override classes are not
+		if (domainExtensionClassExists ||
+				document.isAbstract() ||
+				((! overridden) && isNarrowed(module.getName(), documentName))) {
 			contents.append("abstract ");
-		}
-		else if (baseDocumentName == null) {
-			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(module.getName());
-			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
-			if (document.isAbstract() || ((domainClass != null) && (domainClass.isAbstract))) {
-				contents.append("abstract ");
-			}
-		}
-		else {
-			if (document.isAbstract()) {
-				contents.append("abstract ");
-			}
 		}
 		contents.append("class ").append(documentName);
 		if (baseDocumentName != null) { // extension

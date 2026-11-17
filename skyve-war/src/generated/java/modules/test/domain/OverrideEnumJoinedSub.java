@@ -19,7 +19,7 @@ import org.skyve.domain.messages.DomainException;
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public class OverrideEnumJoinedSub extends OverrideEnumJoinedBase {
+public abstract class OverrideEnumJoinedSub extends OverrideEnumJoinedBase {
 	/**
 	 * For Serialization
 	 * @hidden
