@@ -1827,8 +1827,8 @@ test:
   lookup steps; `testWidget` and `captureValue` keep the row but address the
   view's widget.
 - **`notEquals` and rows with no value.** In SmartClient's advanced filter a
-  `notEquals` clause also matched rows whose column has no value; the Vue list
-  grid's did not. The converters scripts give every number column a value in
+  `notEquals` clause also matches rows whose column has no value; the Vue list
+  grid's does not. The converters scripts give every number column a value in
   every record, so their counts do not depend on it.
 - **Numbers beyond a browser's precision.** The server sends numbers to
   SmartClient and the Vue list grid as JSON numbers, so a value beyond 15
