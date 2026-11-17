@@ -997,4 +997,28 @@ class UserImplTest {
 
 		assertFalse(user.isInRole(TestModuleRole.AUDIT_MANAGER));
 	}
+
+	/** A compile-time document reference as the generated per-module document enums implement it. */
+	private enum TestModuleDocument implements org.skyve.metadata.model.document.ModuleDocument {
+		CONTACT;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String documentName() {
+			return "Contact";
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetScopeWithModuleDocumentDelegatesToModuleAndDocumentNames() {
+		UserImpl user = spy(new UserImpl());
+		doReturn(DocumentPermissionScope.customer).when(user).getScope("admin", "Contact");
+
+		assertEquals(DocumentPermissionScope.customer, user.getScope(TestModuleDocument.CONTACT));
+	}
 }

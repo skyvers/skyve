@@ -122,6 +122,16 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	}
 	
 	/**
+	 * Clear the cached details of the singleton document instance; a typed shortcut for
+	 * {@link #clear(String, String)}.
+	 *
+	 * @param document	the compile-time reference to the singleton document
+	 */
+	public static void clear(@Nonnull ModuleDocument document) {
+		clear(document.moduleName(), document.documentName());
+	}
+
+	/**
 	 * Clear all cached details.
 	 */
 	public static void dispose() {

@@ -16,8 +16,10 @@ import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
+import org.skyve.metadata.module.query.ModuleQuery;
 import org.skyve.metadata.view.model.chart.colours.ColourSeries;
 import org.skyve.metadata.view.model.chart.colours.RainbowColourSeries;
 import org.skyve.persistence.DocumentQuery;
@@ -64,6 +66,15 @@ public class ChartBuilder {
 		Module m = c.getModule(moduleName);
 		return with(m.getDocument(c, documentName));
 	}
+
+	/**
+	 * Document builder; a typed shortcut for {@link #with(String, String)}.
+	 * @param document	the compile-time document reference
+	 * @return this builder
+	 */
+	public @Nonnull ChartBuilder with(@SuppressWarnings("hiding") @Nonnull ModuleDocument document) {
+		return with(document.moduleName(), document.documentName());
+	}
 	
 	/**
 	 * Document Builder
@@ -102,6 +113,17 @@ public class ChartBuilder {
 		Customer c = CORE.getCustomer();
 		Module m = c.getModule(moduleName);
 		return with(m.getNullSafeMetaDataQuery(queryName));
+	}
+
+	/**
+	 * Query builder; a typed shortcut for {@link #withQuery(String, String)}.
+	 * This will use the query without the projections, orderings and groupings.
+	 * @param query	the compile-time metadata query reference
+	 * @return this builder
+	 * @throws org.skyve.metadata.MetaDataException if the module declares no such metadata query
+	 */
+	public @Nonnull ChartBuilder withQuery(@SuppressWarnings("hiding") @Nonnull ModuleQuery query) {
+		return withQuery(query.moduleName(), query.queryName());
 	}
 
 	/**

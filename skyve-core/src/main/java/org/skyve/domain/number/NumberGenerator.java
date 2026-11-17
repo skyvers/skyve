@@ -1,5 +1,7 @@
 package org.skyve.domain.number;
 
+import org.skyve.metadata.model.document.ModuleDocument;
+
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -91,6 +93,86 @@ public interface NumberGenerator {
 		return next(prefix, moduleName, documentName, fieldName, 0);
 	}
 
+	/**
+	 * Returns the next sequence value as an {@link Integer}, with no prefix or minimum length;
+	 * a typed shortcut for {@link #nextInt(String, String, String)}.
+	 *
+	 * @param document     the compile-time document reference
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next integer sequence value
+	 */
+	default @Nonnull Integer nextInt(@Nonnull ModuleDocument document, @Nonnull String fieldName) {
+		return nextInt(document.moduleName(), document.documentName(), fieldName);
+	}
+
+	/**
+	 * Returns the next sequence value as a {@link Long}, with no prefix or minimum length; a
+	 * typed shortcut for {@link #nextLong(String, String, String)}.
+	 *
+	 * @param document     the compile-time document reference
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next long sequence value
+	 */
+	default @Nonnull Long nextLong(@Nonnull ModuleDocument document, @Nonnull String fieldName) {
+		return nextLong(document.moduleName(), document.documentName(), fieldName);
+	}
+
+	/**
+	 * Returns the next sequence value as a plain string with no prefix and no minimum length
+	 * padding; a typed shortcut for {@link #next(String, String, String)}.
+	 *
+	 * @param document     the compile-time document reference
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next sequence value string
+	 */
+	default @Nonnull String next(@Nonnull ModuleDocument document, @Nonnull String fieldName) {
+		return next(document.moduleName(), document.documentName(), fieldName);
+	}
+
+	/**
+	 * Returns the next sequence value as a string with no prefix, left-padded with zeros to at
+	 * least {@code minimumLength} characters; a typed shortcut for
+	 * {@link #next(String, String, String, int)}.
+	 *
+	 * @param document     the compile-time document reference
+	 * @param fieldName    the field name that holds the sequence
+	 * @param minimumLength the minimum length of the returned string; shorter results are
+	 *                      zero-padded on the left
+	 * @return the next sequence value string
+	 */
+	default @Nonnull String next(@Nonnull ModuleDocument document, @Nonnull String fieldName, int minimumLength) {
+		return next(document.moduleName(), document.documentName(), fieldName, minimumLength);
+	}
+
+	/**
+	 * Returns the next sequence value as a string with the given prefix but no minimum length
+	 * padding; a typed shortcut for {@link #next(String, String, String, String)}.
+	 *
+	 * @param prefix       the string prefix prepended to the numeric value (e.g. {@code "INV"})
+	 * @param document     the compile-time document reference
+	 * @param fieldName    the field name that holds the sequence
+	 * @return the next sequence value string, e.g. {@code "INV42"}
+	 */
+	default @Nonnull String next(@Nullable String prefix, @Nonnull ModuleDocument document, @Nonnull String fieldName) {
+		return next(prefix, document.moduleName(), document.documentName(), fieldName);
+	}
+
+	/**
+	 * Returns a new document/sequence number for the referenced document's field in a
+	 * thread-safe way; a typed shortcut for {@link #next(String, String, String, String, int)}.
+	 *
+	 * @param prefix if the sequence value has a known prefix before the number, eg INV0001 has a prefix of "INV"
+	 * @param document the compile-time document reference
+	 * @param fieldName the fieldName/columnName in which the value is held
+	 * @param minimumLength the minimum length of the number when specified as a string
+	 * @return the next sequence number
+	 */
+	default @Nonnull String next(@Nullable String prefix,
+									@Nonnull ModuleDocument document,
+									@Nonnull String fieldName,
+									int minimumLength) {
+		return next(prefix, document.moduleName(), document.documentName(), fieldName, minimumLength);
+	}
 
 	/**
 	 * Returns a new document/sequence number for the given module.document.fieldName in a thread-safe way.

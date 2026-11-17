@@ -2,9 +2,12 @@ package org.skyve.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.withSettings;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
@@ -32,6 +35,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.model.document.Reference;
@@ -942,6 +946,37 @@ class DataBuilderTest {
 		}
 		catch (Exception e) {
 			throw new AssertionError(e);
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	private enum TestDocument implements ModuleDocument {
+		CONTACT;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String documentName() {
+			return "Contact";
+		}
+	}
+
+	@Test
+	void typedBuildsDelegateToTheStringForms() {
+		try {
+			DataBuilder builder = spy(newBuilderWithMockUser());
+			Bean built = mock(Bean.class);
+			Bean factoryBuilt = mock(Bean.class);
+			doReturn(built).when(builder).build("admin", "Contact");
+			doReturn(factoryBuilt).when(builder).factoryBuild("admin", "Contact");
+
+			assertAll(() -> assertSame(built, builder.<Bean>build(TestDocument.CONTACT)),
+						() -> assertSame(factoryBuilt, builder.<Bean>factoryBuild(TestDocument.CONTACT)));
 		}
 		finally {
 			clearPersistenceThreadLocal();

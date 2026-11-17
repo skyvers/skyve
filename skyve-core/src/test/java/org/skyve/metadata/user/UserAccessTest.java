@@ -4,12 +4,15 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.model.document.ModuleDocument;
+import org.skyve.metadata.module.query.ModuleQuery;
 
 @SuppressWarnings("static-method")
 class UserAccessTest {
@@ -337,5 +340,42 @@ class UserAccessTest {
 		UserAccess b = UserAccess.singular("zzz", "doc");
 		assertTrue(a.compareTo(b) < 0);
 		assertTrue(b.compareTo(a) > 0);
+	}
+
+	// ---- Typed reference factories ----
+
+	private enum TestDocument implements ModuleDocument {
+		CONTACT;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String documentName() {
+			return "Contact";
+		}
+	}
+
+	private enum TestQuery implements ModuleQuery {
+		Q_CONTACTS;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String queryName() {
+			return "qContacts";
+		}
+	}
+
+	@Test
+	void typedFactoriesEqualTheStringForms() {
+		assertAll(() -> assertEquals(UserAccess.singular("admin", "Contact"), UserAccess.singular(TestDocument.CONTACT)),
+					() -> assertEquals(UserAccess.documentAggregate("admin", "Contact"), UserAccess.documentAggregate(TestDocument.CONTACT)),
+					() -> assertEquals(UserAccess.queryAggregate("admin", "qContacts"), UserAccess.queryAggregate(TestQuery.Q_CONTACTS)));
 	}
 }

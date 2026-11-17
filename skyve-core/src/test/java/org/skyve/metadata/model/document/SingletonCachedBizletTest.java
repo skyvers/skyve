@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -356,5 +357,50 @@ class SingletonCachedBizletTest {
 		persistence.setForThread();
 
 		assertDoesNotThrow(() -> SingletonCachedBizlet.clear("admin", "Contact"));
+	}
+
+	private enum TestDocument implements ModuleDocument {
+		CONTACT;
+
+		@Override
+		public String moduleName() {
+			return "admin";
+		}
+
+		@Override
+		public String documentName() {
+			return "Contact";
+		}
+	}
+
+	@Test
+	void clearWithModuleDocumentRemovesTheCachedGlobalInstance() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("custA");
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getCustomerName()).thenReturn("custA");
+		when(user.getScope("admin", "Contact")).thenReturn(DocumentPermissionScope.global);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+
+		DocumentQuery query = mock(DocumentQuery.class);
+		when(persistence.newDocumentQuery("admin", "Contact")).thenReturn(query);
+
+		TestBean first = new TestBean("admin", "Contact", "P1", "First");
+		first.setBizVersion(Integer.valueOf(1));
+		TestBean second = new TestBean("admin", "Contact", "P2", "Second");
+		second.setBizVersion(Integer.valueOf(1));
+		when(query.beanResult()).thenReturn(first, second);
+
+		TestSingletonCachedBizlet bizlet = new TestSingletonCachedBizlet();
+		bizlet.newInstance(new TestBean("admin", "Contact", "S1", "Seed1"));
+		SingletonCachedBizlet.clear(TestDocument.CONTACT);
+
+		// with the cached bizId cleared, the singleton is looked up again rather than retrieved
+		assertSame(second, bizlet.newInstance(new TestBean("admin", "Contact", "S2", "Seed2")));
+		verify(query, times(2)).beanResult();
 	}
 }
