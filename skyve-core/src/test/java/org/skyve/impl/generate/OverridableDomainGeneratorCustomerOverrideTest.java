@@ -49,8 +49,12 @@ import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.InverseMany;
 import org.skyve.impl.metadata.model.document.InverseOne;
+import org.skyve.impl.metadata.model.document.field.Content;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
+import org.skyve.impl.metadata.model.document.field.Image;
+import org.skyve.impl.metadata.model.document.field.Markup;
+import org.skyve.impl.metadata.model.document.field.Memo;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -240,6 +244,15 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		result.setDisplayName(name);
 		result.setDocumentName(documentName);
 		result.setType(AssociationType.aggregation);
+		return result;
+	}
+
+	private static CollectionImpl aggregatedCollection(String name, String documentName) {
+		CollectionImpl result = new CollectionImpl();
+		result.setName(name);
+		result.setDisplayName(name);
+		result.setDocumentName(documentName);
+		result.setType(CollectionType.aggregation);
 		return result;
 	}
 
@@ -664,6 +677,189 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 						e.getMessage());
 	}
 
+	/**
+	 * A customer's mapping shares the vanilla table, so an override cannot change the type of a property
+	 * it declares itself, as beta's override of a document acme's narrows does.
+	 */
+	@Test
+	void anOverrideThatChangesTheTypeOfAPropertyItsClassDeclaresIsRefused() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.acme(document("Order", "SALES_Order", null, null, "code"))
+				.beta(withAttribute(document("Order", "SALES_Order", null, null, "code"), named(new org.skyve.impl.metadata.model.document.field.Integer(), "notes")));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer beta's override of document sales.Order changes the type of notes from text to integer, " +
+						"but the customer's mapping shares the vanilla table and its column. " +
+						"Keep notes as text in the override, or add an attribute of another name.",
+						e.getMessage());
+	}
+
+	/** A memo and markup are both strings mapped as text, so an override can change one to the other. */
+	@Test
+	void anOverrideCanChangeAMemoToMarkup() throws Exception {
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(withAttribute(document("Order", "SALES_Order", null, null, "code"), named(new Memo(), "notes")))
+				.acme(withAttribute(document("Order", "SALES_Order", null, null, "code"), named(new Markup(), "notes"))));
+
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(() -> assertTrue(acmeMapping.contains("<property name=\"notes\" type=\"text\""), acmeMapping),
+					() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	/** Content and an image are both strings mapped with a length of 36, so an override can change one to the other. */
+	@Test
+	void anOverrideCanChangeContentToAnImage() throws Exception {
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(withAttribute(document("Order", "SALES_Order", null, null, "code"), named(new Content(), "photo")))
+				.acme(withAttribute(document("Order", "SALES_Order", null, null, "code"), named(new Image(), "photo"))));
+
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(() -> assertTrue(acmeMapping.contains("<property name=\"photo\" length=\"36\""), acmeMapping),
+					() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	/** Text and a memo are both strings, but are mapped differently, so an override cannot change one to the other. */
+	@Test
+	void anOverrideThatChangesTextToAMemoIsRefused() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.acme(withAttribute(document("Order", "SALES_Order", null, null, "code"), named(new Memo(), "notes")));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Customer acme's override of document sales.Order changes the type of notes from text to memo, " +
+						"but the customer's class inherits the vanilla property and its mapping shares the vanilla table. " +
+						"Keep notes as text in the override, or add an attribute of another name.",
+						e.getMessage());
+	}
+
+	/** The customer's class inherits an association typed by the vanilla target's class. */
+	@Test
+	void anOverrideThatPointsAnAssociationAtAnotherDocumentIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putRelation(association("customer", "Customer"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putRelation(association("customer", "Account"));
+		Fixture fixture = new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(document("Customer", "SALES_Customer", null, null, "name"))
+				.vanilla(document("Account", "SALES_Account", null, null, "name"))
+				.acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order changes the document of customer from sales.Customer to sales.Account, " +
+						"but the customer's class inherits the vanilla property, typed by sales.Customer's class, and its mapping shares the vanilla table. " +
+						"Keep customer referring to sales.Customer in the override, or add a relation of another name.",
+						e.getMessage());
+	}
+
+	/** A customer's mapping shares the vanilla table, so a collection its class declares itself cannot point at another document either. */
+	@Test
+	void anOverrideThatPointsACollectionItsClassDeclaresAtAnotherDocumentIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		vanillaOrder.putRelation(aggregatedCollection("items", "Product"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code");
+		betaOrder.putRelation(aggregatedCollection("items", "Service"));
+		Fixture fixture = new Fixture()
+				.vanilla(vanillaOrder)
+				.vanilla(document("Product", "SALES_Product", null, null, "name"))
+				.vanilla(document("Service", "SALES_Service", null, null, "name"))
+				.acme(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.beta(betaOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Customer beta's override of document sales.Order changes the document of items from sales.Product to sales.Service, " +
+						"but the customer's mapping shares the vanilla table and its references to sales.Product. " +
+						"Keep items referring to sales.Product in the override, or add a relation of another name.",
+						e.getMessage());
+	}
+
+	/** The customer's class inherits the enumeration, with the enum generated from the vanilla values. */
+	@Test
+	void anOverrideThatChangesTheValuesOfAnInheritedEnumerationIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code");
+		acmeOrder.putAttribute(enumeration(acmeOrder, "status", "low", "high", "urgent"));
+		Fixture fixture = new Fixture().vanilla(vanillaOrder).acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order changes the values or enum of enumeration status, " +
+						"but the customer's class inherits the vanilla property, whose enum is generated from the vanilla document. " +
+						"Declare status as the vanilla document does in the override, or add an enumeration of another name.",
+						e.getMessage());
+	}
+
+	/**
+	 * Beta's override of a document with a vanilla extension extends the extension, so it inherits an
+	 * enumeration acme's override narrows away from the vanilla class too.
+	 */
+	@Test
+	void anOverrideThatChangesTheValuesOfAnEnumerationItInheritsThroughTheVanillaExtensionIsRefused() {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code");
+		betaOrder.putAttribute(enumeration(betaOrder, "status", "low", "high", "urgent"));
+		Fixture fixture = new Fixture()
+				.vanilla(vanillaOrder)
+				.extension("Order", "OrderVanilla")
+				.acme(document("Order", "SALES_Order", null, null, "code"))
+				.beta(betaOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertTrue(e.getMessage().startsWith("Customer beta's override of document sales.Order changes the values or enum of enumeration status"), e.getMessage());
+	}
+
+	/** An override can declare an inherited enumeration again as the vanilla document does. */
+	@Test
+	void anOverrideCanKeepAnInheritedEnumeration() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "code", "notes");
+		acmeOrder.putAttribute(enumeration(acmeOrder, "status"));
+
+		Map<String, String> files = generate(new Fixture().vanilla(vanillaOrder).acme(acmeOrder));
+
+		String acmeOverride = files.get("customers/acme/modules/sales/domain/OrderOverride.java");
+		assertAll(() -> assertFalse(acmeOverride.contains("enum Status"), acmeOverride),
+					() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	/**
+	 * Beta's override of a document acme's narrows declares the enumeration itself, so it can have
+	 * other values.
+	 */
+	@Test
+	void anOverrideCanChangeTheValuesOfAnEnumerationItsClassDeclares() throws Exception {
+		DocumentImpl vanillaOrder = document("Order", "SALES_Order", null, null, "code");
+		vanillaOrder.putAttribute(enumeration(vanillaOrder, "status"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code");
+		betaOrder.putAttribute(enumeration(betaOrder, "status", "low", "high", "urgent"));
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(vanillaOrder)
+				.acme(document("Order", "SALES_Order", null, null, "code"))
+				.beta(betaOrder));
+
+		String betaOverride = files.get("customers/beta/modules/sales/domain/OrderOverride.java");
+		assertAll(() -> assertTrue(betaOverride.contains("public enum Status implements Enumeration"), betaOverride),
+					() -> assertTrue(betaOverride.contains("urgent"), betaOverride),
+					() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	/** Names the field, with the name as its display name too. */
+	private static <T extends org.skyve.impl.metadata.model.document.field.Field> T named(T field, String name) {
+		field.setName(name);
+		field.setDisplayName(name);
+		return field;
+	}
+
+	/** Adds the attribute to the document. */
+	private static DocumentImpl withAttribute(DocumentImpl document, org.skyve.impl.metadata.model.document.field.Field attribute) {
+		document.putAttribute(attribute);
+		return document;
+	}
+
 	@Test
 	void aNarrowedEnumerationIsMappedToTheClassThatDeclaresIt() throws Exception {
 		DocumentImpl vanilla = document("Order", "SALES_Order", null, null, "code");
@@ -812,11 +1008,15 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	}
 
 	private static Enumeration enumeration(Document owningDocument, String name) {
+		return enumeration(owningDocument, name, "low", "high");
+	}
+
+	private static Enumeration enumeration(Document owningDocument, String name, String... codes) {
 		Enumeration result = new Enumeration();
 		result.setOwningDocument(owningDocument);
 		result.setName(name);
 		result.setDisplayName(name);
-		for (String code : List.of("low", "high")) {
+		for (String code : codes) {
 			EnumeratedValue value = new EnumeratedValue();
 			value.setCode(code);
 			value.setDescription(code);

@@ -108,7 +108,12 @@ When a customer's document override leaves out an attribute of the vanilla docum
 - **Generated class names aren't dodged.** Skyve finds the `<Document>Vanilla` and `<Document>Override` classes by name, so when one of them is generated, a document in the same module named like it, in any letter case, stops generation and asks you to rename it.
 - **Customer classes refer to customer classes.** In a new customer document's class or a `<Document>Override`, a reference or inverse to a document for which the customer has a `<Document>Override` is typed as that `<Document>Override`, so the accessors can keep an inverse that only the customer's override declares up to date. Vanilla classes, and properties a `<Document>Override` inherits, keep the vanilla types. So does a property that references another document's enumeration: its enum is the one the class declaring the property sees, so a vanilla class's property has the vanilla enum, even in the mapping and at run time for a customer whose override of the other document declares the enumeration again.
 - **A longer length widens the shared column.** When a customer's override gives an attribute a longer `<length>` than the vanilla document, the vanilla mapping uses the longest length, as the customers share the table.
-- **An override can't change a type.** The vanilla mapping and each customer's map the same table and columns, and a customer's class inherits each vanilla property it keeps, with the vanilla Java type. So generation stops when a customer's override gives a vanilla attribute another type, such as `integer` for `text`, whether validation is on or off. Add an attribute of another name instead.
+- **An override can't change a type.** The vanilla mapping and each customer's map the same table and columns, and a customer's class inherits each vanilla property it keeps, with the vanilla Java type. So generation stops, whether validation is on or off, when a customer's override:
+  - gives a vanilla attribute another type, such as `integer` for `text`. Types with the same Java type that are mapped the same way can be swapped, such as `memo` and `markup`, or `content` and `image`;
+  - points an association, collection or inverse at another document;
+  - changes the values, or the enum class, of an enumeration its class inherits. An enumeration that the customer's `<Document>Override` declares itself, because another customer's override narrows it away, can have other values.
+
+  Add an attribute of another name instead.
 
 ### Cleaning customer output
 
@@ -169,7 +174,7 @@ Work through this list when you upgrade a project to this version.
   - a customer's override of a document that other documents extend needs its own class;
   - a customer's override narrows a document that other documents extend;
   - a new customer document extends another document;
-  - a customer's override gives a vanilla attribute another type;
+  - a customer's override gives a vanilla attribute another type, points a relation at another document, or changes an enumeration its class inherits;
   - a customer output path is blocked by a file that isn't generated, or runs through a symbolic link.
 - **Customer output is deleted on every run.** Move any files of your own out of the generated customer `domain/` directories and `orm.hbm.xml`.
 - **`DataBuilder` checks factory beans for an overriding customer.** For a customer that overrides the document, a factory method that returns the vanilla class is now used, but a bean it returns that isn't of the customer's bean class is discarded with a warning, and a random bean is built instead.

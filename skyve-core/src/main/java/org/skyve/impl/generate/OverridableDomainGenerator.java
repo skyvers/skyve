@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -255,6 +256,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 		// TODO how do I handle overridden extended documents?
 
+		// The customers' overrides of vanilla documents, checked once every customer's narrowing is known
+		final List<CustomerOverride> customerOverrides = new ArrayList<>();
 		// Restrict the base class definitions based on customer overrides
 		for (String customerName : repository.getAllCustomerNames()) {
 			final Customer customer = repository.getCustomer(customerName);
@@ -287,7 +290,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							if (vanillaDocumentClass != null) {
 								TreeMap<String, AttributeType> vanillaDocumentProperties = vanillaDocumentClass.attributes;
 								TreeMap<String, AttributeType> thisDocumentProperties = generateDocumentPropertyNames(document);
-								checkOverridePropertyTypes(customerName, getRepositoryModule(null, moduleName).getDocument(null, documentName), thisDocumentProperties);
+								Module vanillaModule = getRepositoryModule(null, moduleName);
+								customerOverrides.add(new CustomerOverride(customerName,
+																			vanillaDocumentClass,
+																			vanillaModule,
+																			vanillaModule.getDocument(null, documentName),
+																			module,
+																			document));
 								Iterator<String> i = vanillaDocumentProperties.keySet().iterator();
 								while (i.hasNext()) {
 									String vanillaPropertyName = i.next();
@@ -312,34 +321,158 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}.visit(customer, module);
 			}
 		}
+
+		for (CustomerOverride customerOverride : customerOverrides) {
+			checkOverrideProperties(customerOverride);
+		}
 	}
 
 	/**
-	 * Checks that a customer's override of a vanilla document keeps the type of each vanilla property it
-	 * keeps. A customer's class inherits the vanilla property, with its Java type, and the customer's
-	 * mapping shares the vanilla document's table and columns, so a property of another type would not
-	 * fit the field or the column.
+	 * A customer's override of a vanilla document, with the modules that resolve each one's relations.
 	 *
 	 * @param customerName	The customer's name.
+	 * @param vanillaClass	The vanilla document's domain class metadata.
+	 * @param vanillaModule	The vanilla module.
 	 * @param vanillaDocument	The vanilla document.
-	 * @param overrideProperties	The override's property types by name.
-	 * @throws MetaDataException	if the override gives a vanilla property another type.
+	 * @param module	The customer's version of the module.
+	 * @param document	The customer's override of the document.
 	 */
-	private static void checkOverridePropertyTypes(@Nonnull String customerName,
-													@Nonnull Document vanillaDocument,
-													@Nonnull Map<String, AttributeType> overrideProperties) {
+	private record CustomerOverride(@Nonnull String customerName,
+										@Nonnull DomainClass vanillaClass,
+										@Nonnull Module vanillaModule,
+										@Nonnull Document vanillaDocument,
+										@Nonnull Module module,
+										@Nonnull Document document) {
+	}
+
+	/**
+	 * Checks that a customer's override of a vanilla document keeps each vanilla property it keeps as it
+	 * is where that matters. The customer's mapping shares the vanilla document's table and columns, and
+	 * the customer's class inherits each vanilla property that no customer's override narrows away (see
+	 * {@link #overrideInheritedPropertyNames(String, String, DomainClass)}), with its Java type. So the
+	 * override cannot:
+	 * <ul>
+	 * 	<li>give a property another type, unless both have the same Java type and are mapped the same
+	 * 		way, as a memo and markup, or content and an image, are (see {@link #sameJavaAndMappingType(Attribute, Attribute)});</li>
+	 * 	<li>point a relation at another document;</li>
+	 * 	<li>change an inherited enumeration, whose enum the vanilla class declares from the vanilla
+	 * 		values (see {@link #sameEnum(Enumeration, Enumeration)}). An enumeration the customer's
+	 * 		class declares itself, as a narrowed document's override does, can have other values.</li>
+	 * </ul>
+	 * These are errors whether or not validation is on.
+	 *
+	 * @param customerOverride	The customer's override.
+	 * @throws MetaDataException	if the override changes a vanilla property in one of these ways.
+	 */
+	private void checkOverrideProperties(@Nonnull CustomerOverride customerOverride) {
+		Document vanillaDocument = customerOverride.vanillaDocument();
+		String moduleName = vanillaDocument.getOwningModuleName();
+		String documentName = vanillaDocument.getName();
+		Set<String> inheritedPropertyNames = overrideInheritedPropertyNames(moduleName, documentName, customerOverride.vanillaClass());
+		Map<String, AttributeType> overrideProperties = generateDocumentPropertyNames(customerOverride.document());
+		String refusal = "Customer " + customerOverride.customerName() + "'s override of document " + moduleName + '.' + documentName;
 		for (Entry<String, AttributeType> vanillaProperty : generateDocumentPropertyNames(vanillaDocument).entrySet()) {
 			String propertyName = vanillaProperty.getKey();
 			AttributeType vanillaType = vanillaProperty.getValue();
 			AttributeType overrideType = overrideProperties.get(propertyName);
-			if ((overrideType != null) && (overrideType != vanillaType)) {
-				String documentName = vanillaDocument.getOwningModuleName() + '.' + vanillaDocument.getName();
-				throw new MetaDataException("Customer " + customerName + "'s override of document " + documentName +
-												" changes the type of " + propertyName + " from " + vanillaType + " to " + overrideType +
-												", but the customer's class inherits the vanilla property and its mapping shares the vanilla table." +
-												" Keep " + propertyName + " as " + vanillaType + " in the override, or add an attribute of another name.");
+			if (overrideType == null) { // left out
+				continue;
+			}
+			boolean inherited = inheritedPropertyNames.contains(propertyName);
+			Attribute vanillaAttribute = vanillaDocument.getAttribute(propertyName);
+			Attribute overrideAttribute = customerOverride.document().getAttribute(propertyName);
+			if (overrideType != vanillaType) {
+				if ((vanillaAttribute == null) || (overrideAttribute == null) || // a condition
+						(! sameJavaAndMappingType(vanillaAttribute, overrideAttribute))) {
+					throw new MetaDataException(refusal + " changes the type of " + propertyName + " from " + vanillaType + " to " + overrideType +
+													", but " + (inherited ?
+																	"the customer's class inherits the vanilla property and its mapping shares the vanilla table" :
+																	"the customer's mapping shares the vanilla table and its column") +
+													". Keep " + propertyName + " as " + vanillaType + " in the override, or add an attribute of another name.");
+				}
+			}
+			else if ((vanillaAttribute instanceof Relation vanillaRelation) && (overrideAttribute instanceof Relation overrideRelation)) {
+				String vanillaTarget = relationTarget(customerOverride.vanillaModule(), vanillaRelation);
+				String overrideTarget = relationTarget(customerOverride.module(), overrideRelation);
+				if (! vanillaTarget.equals(overrideTarget)) {
+					throw new MetaDataException(refusal + " changes the document of " + propertyName + " from " + vanillaTarget + " to " + overrideTarget +
+													", but " + (inherited ?
+																	"the customer's class inherits the vanilla property, typed by " + vanillaTarget + "'s class, and its mapping shares the vanilla table" :
+																	"the customer's mapping shares the vanilla table and its references to " + vanillaTarget) +
+													". Keep " + propertyName + " referring to " + vanillaTarget + " in the override, or add a relation of another name.");
+				}
+			}
+			else if (inherited &&
+						(vanillaAttribute instanceof Enumeration vanillaEnumeration) &&
+						(overrideAttribute instanceof Enumeration overrideEnumeration) &&
+						(! sameEnum(vanillaEnumeration, overrideEnumeration))) {
+				throw new MetaDataException(refusal + " changes the values or enum of enumeration " + propertyName +
+												", but the customer's class inherits the vanilla property, whose enum is generated from the vanilla document." +
+												" Declare " + propertyName + " as the vanilla document does in the override, or add an enumeration of another name.");
 			}
 		}
+	}
+
+	/**
+	 * Determines whether two attributes of different types have the same Java type and are mapped the same
+	 * way, so that they fit the same field and column: fields other than enumerations whose types have the
+	 * same Java type and the same mapping type (see {@link #propertyMappingType(AttributeType)}), such as a
+	 * memo and markup, or content and an image.
+	 *
+	 * @param attribute	An attribute.
+	 * @param other	The other attribute.
+	 * @return	true if they have the same Java type and mapping.
+	 */
+	private static boolean sameJavaAndMappingType(@Nonnull Attribute attribute, @Nonnull Attribute other) {
+		return (attribute instanceof Field) && (! (attribute instanceof Enumeration)) &&
+				(other instanceof Field) && (! (other instanceof Enumeration)) &&
+				attribute.getImplementingType().equals(other.getImplementingType()) &&
+				Objects.equals(propertyMappingType(attribute.getAttributeType()), propertyMappingType(other.getAttributeType()));
+	}
+
+	/**
+	 * Names the document a relation targets, in the module that resolves it.
+	 *
+	 * @param module	The module of the document that declares the relation, or the customer's version of it.
+	 * @param relation	The relation.
+	 * @return	the module-qualified name of the target document.
+	 */
+	private static @Nonnull String relationTarget(@Nonnull Module module, @Nonnull Relation relation) {
+		String targetDocumentName = relation.getDocumentName();
+		Module.DocumentRef ref = module.getDocumentRefs().get(targetDocumentName);
+		return (ref == null) ?
+					module.getName() + '.' + targetDocumentName :
+					ref.getModuleNameDotDocumentName(targetDocumentName);
+	}
+
+	/**
+	 * Determines whether two enumerations generate the same enum: the same enum type name, hand-written
+	 * enum class and values, in the same order, with the same codes, Java identifiers and descriptions.
+	 *
+	 * @param enumeration	An enumeration.
+	 * @param other	The other enumeration.
+	 * @return	true if they generate the same enum.
+	 */
+	private static boolean sameEnum(@Nonnull Enumeration enumeration, @Nonnull Enumeration other) {
+		if ((! enumeration.toJavaIdentifier().equals(other.toJavaIdentifier())) ||
+				(! Objects.equals(enumeration.getImplementingEnumClassName(), other.getImplementingEnumClassName()))) {
+			return false;
+		}
+		List<EnumeratedValue> values = enumeration.getValues();
+		List<EnumeratedValue> otherValues = other.getValues();
+		if (values.size() != otherValues.size()) {
+			return false;
+		}
+		for (int i = 0, l = values.size(); i < l; i++) {
+			EnumeratedValue value = values.get(i);
+			EnumeratedValue otherValue = otherValues.get(i);
+			if ((! value.getCode().equals(otherValue.getCode())) ||
+					(! value.toJavaIdentifier().equals(otherValue.toJavaIdentifier())) ||
+					(! Objects.equals(value.getDescription(), otherValue.getDescription()))) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -2381,56 +2514,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					contents.append("\" length=\"").append(fieldLength.toString());
 				}
 
-				AttributeType type = attribute.getAttributeType();
-				if (type == AttributeType.decimal2) {
-					contents.append("\" type=\"").append(DECIMAL2).append("\" precision=\"20\" scale=\"2");
-				}
-				else if (type == AttributeType.decimal5) {
-					contents.append("\" type=\"").append(DECIMAL5).append("\" precision=\"23\" scale=\"5");
-				}
-				else if (type == AttributeType.decimal10) {
-					contents.append("\" type=\"").append(DECIMAL10).append("\" precision=\"28\" scale=\"10");
-				}
-				else if (type == AttributeType.date) {
-					contents.append("\" type=\"").append(DATE_ONLY);
-				}
-				else if (type == AttributeType.dateTime) {
-					contents.append("\" type=\"").append(DATE_TIME);
-				}
-				else if (type == AttributeType.time) {
-					contents.append("\" type=\"").append(TIME_ONLY);
-				}
-				else if (type == AttributeType.timestamp) {
-					contents.append("\" type=\"").append(TIMESTAMP);
-				}
-				else if (type == AttributeType.id) {
-					contents.append("\" length=\"36");
-				}
-				else if ((type == AttributeType.content) || (type == AttributeType.image)) {
-					contents.append("\" length=\"36");
-				}
-				
-				/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
-				 * I don't think the JDBC recognizes CLOBs correctly as it
-				 * would insert through MySQL query browser.
-				 * This could be reproduced on linux on dev laptop and test environment on prod server.
-				 * Non-descript Error was
-				 * 15:54:10,829 WARN  [JDBCExceptionReporter] SQL Error: 1210, SQLState: HY000
-				 * 15:54:10,829 ERROR [JDBCExceptionReporter] Incorrect arguments to mysqld_stmt_execute
-				 * The net tells me that the problem is MySQL not linking surrogate UTF-16 chars in its fields
-				 * The following code is required if we hit the HY000 problem again
-				 * 
-				 * StringBuilder sb = new StringBuilder();
-				 * for (int i = 0; i < text.length(); i++) {
-				 *   char ch = text.charAt(i);
-				 *   if (!Character.isHighSurrogate(ch) && !Character.isLowSurrogate(ch)) {
-				 *     sb.append(ch);
-				 *   }
-				 * }
-				 * return sb.toString();
-				 */
-				else if ((type == AttributeType.memo) || (type == AttributeType.markup)) {
-					contents.append("\" type=\"text");
+				String mappingType = propertyMappingType(attribute.getAttributeType());
+				if (mappingType != null) {
+					contents.append(mappingType);
 				}
 
 				if (! fieldColumnName.equals(fieldName)) {
@@ -2449,6 +2535,47 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				contents.append("\" />\n");
 			}
 		}
+	}
+
+	/**
+	 * Returns the mapping attributes that a field's type adds to its property mapping, after its length.
+	 *
+	 * @param type	The field's attribute type.
+	 * @return	the attributes, starting with the quote that closes the attribute before them, or
+	 * 			{@code null} if the type adds none
+	 */
+	private static @Nullable String propertyMappingType(@Nonnull AttributeType type) {
+		return switch (type) {
+			case decimal2 -> "\" type=\"" + DECIMAL2 + "\" precision=\"20\" scale=\"2";
+			case decimal5 -> "\" type=\"" + DECIMAL5 + "\" precision=\"23\" scale=\"5";
+			case decimal10 -> "\" type=\"" + DECIMAL10 + "\" precision=\"28\" scale=\"10";
+			case date -> "\" type=\"" + DATE_ONLY;
+			case dateTime -> "\" type=\"" + DATE_TIME;
+			case time -> "\" type=\"" + TIME_ONLY;
+			case timestamp -> "\" type=\"" + TIMESTAMP;
+			case id, content, image -> "\" length=\"36";
+			/* Wouldn't update or insert rows in a mysql database in latin1 or utf8.
+			 * I don't think the JDBC recognizes CLOBs correctly as it
+			 * would insert through MySQL query browser.
+			 * This could be reproduced on linux on dev laptop and test environment on prod server.
+			 * Non-descript Error was
+			 * 15:54:10,829 WARN  [JDBCExceptionReporter] SQL Error: 1210, SQLState: HY000
+			 * 15:54:10,829 ERROR [JDBCExceptionReporter] Incorrect arguments to mysqld_stmt_execute
+			 * The net tells me that the problem is MySQL not linking surrogate UTF-16 chars in its fields
+			 * The following code is required if we hit the HY000 problem again
+			 * 
+			 * StringBuilder sb = new StringBuilder();
+			 * for (int i = 0; i < text.length(); i++) {
+			 *   char ch = text.charAt(i);
+			 *   if (!Character.isHighSurrogate(ch) && !Character.isLowSurrogate(ch)) {
+			 *     sb.append(ch);
+			 *   }
+			 * }
+			 * return sb.toString();
+			 */
+			case memo, markup -> "\" type=\"text";
+			default -> null;
+		};
 	}
 
 	/**
