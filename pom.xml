@@ -753,7 +753,8 @@
 			server, with no upstream unit tests, one fork and no reruns (a rerun would hide a flake and repeat destructive
 			steps), e.g.
 				mvn -pl skyve-war -am verify -Psail -Dsail.baseUrl=http://localhost:8080/skyve/
-			narrowed with -Dgroups=smoke (or admin, recording, ...) and -DexcludedGroups=destructive.
+			narrowed with -Dgroups=smoke (or admin, recording, ...) and -DexcludedGroups=destructive. One IT by name needs
+			-Dit.test=SailRunIT -Dfailsafe.failIfNoSpecifiedTests=false, as the upstream modules have no such test.
 			Evidence that a suite or -Dsail.evidence asks for goes under skyve-war/target/sail/.
 		-->
 		<profile>
