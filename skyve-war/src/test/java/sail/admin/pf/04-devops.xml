@@ -92,7 +92,7 @@
 			<save />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
-			<comment>UploadBackup opens the upload page; nothing is uploaded, so 00-backup.xml's backup stays the newest for 99-restore.xml</comment>
+			<comment>UploadBackup opens the upload page; nothing is uploaded, so SmartClient's backup from 00-backup.xml stays the newest for 99-restore.xml</comment>
 			<action name="UploadBackup" />
 			<tabSelect path="Data Refresh" />
 			<save />

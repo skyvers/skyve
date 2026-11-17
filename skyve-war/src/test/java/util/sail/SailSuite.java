@@ -277,6 +277,9 @@ public final class SailSuite {
 			}
 			return;
 		}
+		if (Thread.currentThread().getContextClassLoader().getResource(entry) == null) {
+			throw new IllegalArgumentException(entry + " is neither a file nor a resource on the test classpath");
+		}
 		String xml = SailWorkflow.resource(entry);
 		if (XMLMetaData.sailRootOfString(xml) == XMLMetaData.SAILRoot.SUITE) {
 			resource(entry, xml, engine).run();

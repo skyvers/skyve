@@ -260,4 +260,11 @@ class SailSuiteTest {
 		SailSuite.resource("sail/kitchenSink/kitchensink.suite.xml", engine).settings(code);
 		assertSame(code, engine.settings());
 	}
+
+	@Test
+	void anEntryThatIsNeitherAFileNorAResourceSaysSo() {
+		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SailSuite.runEntry("no/such/entry.xml", engine));
+		assertEquals("no/such/entry.xml is neither a file nor a resource on the test classpath", e.getMessage());
+	}
 }

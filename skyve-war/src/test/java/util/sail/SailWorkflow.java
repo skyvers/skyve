@@ -118,6 +118,11 @@ public final class SailWorkflow {
 	/**
 	 * Creates a runner that starts browsers and runs legs with the given functions, and resolves its settings from the
 	 * given sources, for tests of the browser's lifecycle.
+	 *
+	 * @param viewRoles	the roles of the users the scripts sign in as
+	 * @param starter	starts a new browser for a leg
+	 * @param legRunner	runs a leg's automation in its browser
+	 * @param environment	the sources the legs' settings resolve from, instead of this JVM's
 	 */
 	SailWorkflow(@Nonnull SailViewRoles viewRoles,
 					@Nonnull BrowserStarter starter,
@@ -222,7 +227,7 @@ public final class SailWorkflow {
 	 * @param workflow	the workflow (a single automation's is a workflow of one)
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
 	 */
-	public void runWorkflow(@Nonnull String name, @Nonnull Workflow workflow) {
+	void runWorkflow(@Nonnull String name, @Nonnull Workflow workflow) {
 		run(legs(name, workflow), null, false);
 	}
 
@@ -295,10 +300,10 @@ public final class SailWorkflow {
 	}
 
 	/**
-	 * Stops the browser that a suite member left open for the next, if any. A suite calls it when it ends; the workflow
-	 * test base calls it after each test, so no browser outlives its test.
+	 * Stops the browser that a suite member left open for the next, if any. A suite calls it when it ends, in a
+	 * {@code finally}, so no browser outlives its suite.
 	 */
-	public void closeBrowser() {
+	void closeBrowser() {
 		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
 		kept = null;
 		if (browser != null) {
@@ -334,7 +339,7 @@ public final class SailWorkflow {
 	 * @return the file's text
 	 * @throws IllegalArgumentException	if the resource is missing or unreadable
 	 */
-	public static @Nonnull String resource(@Nonnull String resourceName) {
+	static @Nonnull String resource(@Nonnull String resourceName) {
 		try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
 			if (stream == null) {
 				throw new IllegalArgumentException("SAIL resource " + resourceName + " is not on the test classpath");

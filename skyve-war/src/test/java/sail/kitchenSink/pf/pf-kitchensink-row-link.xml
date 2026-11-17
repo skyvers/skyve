@@ -26,11 +26,15 @@
 			<testGridRows binding="rows" rowContaining="Run From Row ran" maxRows="0" />
 			<dataGridLink binding="rows" rowContaining="SAIL link row {run}" text="Run From Row" />
 			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
-			<comment>The same link, by the row's number</comment>
-			<dataGridLink binding="rows" row="0" text="Run From Row" />
+			<comment>A second row, whose link is clicked by the row's number: both rows have run</comment>
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL second link row {run}" />
+			<zoomOut />
 			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+			<dataGridLink binding="rows" row="1" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="2" maxRows="2" />
 			<captureCell binding="rows" rowContaining="SAIL link row {run}" column="outcome" variable="outcome" pattern="Run From (\w+) ran" />
-			<testGridRows binding="rows" rowContaining="Run From {var:outcome} ran" minRows="1" maxRows="1" />
+			<testGridRows binding="rows" rowContaining="Run From {var:outcome} ran" minRows="2" maxRows="2" />
 		</method>
 	</interaction>
 	<after>

@@ -3,7 +3,6 @@ package util;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
@@ -134,12 +133,6 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	 */
 	protected void sailSuiteFile(@Nonnull String file) {
 		SailSuite.file(file, workflow).run();
-	}
-
-	/** Stops any browser a suite left open (a suite stops its own, so this is for a test that ended early). */
-	@AfterEach
-	void closeBrowser() {
-		workflow.closeBrowser();
 	}
 
 	@AfterAll

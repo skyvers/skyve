@@ -7,8 +7,8 @@
 	The bracket, across both renderers: 00-precondition.xml (PrimeFaces) checks that no earlier run left its restore
 	marker; 00-backup.xml (a workflow) clears the completed jobs list and backs up in PrimeFaces, then clears it again and
 	backs up in SmartClient; 00-marker.xml (SmartClient) leaves the marker that the restore must remove. Every member
-	requires the set-ups, so when one fails nothing else runs. 99-restore.xml (a workflow) restores the newest backup
-	(SmartClient's) once, checks the marker has gone in both renderers, and each renderer deletes one backup; it runs
+	requires the set-ups, so when one fails nothing else runs. 99-restore.xml (a workflow) first restores the newest backup
+	(SmartClient's), once; then both renderers check the marker has gone and each deletes its backup; it runs
 	last, after failures too, but only when the precondition and the backup passed (otherwise the newest backup could be
 	another one).
 
@@ -17,7 +17,8 @@
 	list, and the 98-destructive.xml members clear that list, so the destructive members run after every other one, and
 	sc/99-truncate.xml (SmartClient's Truncate) runs last, just before the restore.
 
-	-Dsail.suite.only=pf/ or sc/ runs one renderer (the bracket always runs); -Dsail.suite.only=03 runs both 03 members.
+	-Dsail.suite.only=pf/ or sc/ chooses one renderer's members, and -Dsail.suite.only=03 both 03 members; the bracket
+	always runs, in both renderers.
 	Each member's strategy is its own (Assert); -Dsail.testStrategy=Verify applies to the ordinary members, while the set-ups
 	and the restore stay locked to theirs.
 -->

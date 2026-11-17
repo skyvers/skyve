@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	Admin suite (admin.suite.xml), the restore, as a workflow across both renderers. There is one real restore, of the
-	newest backup (SmartClient's, from 00-backup.xml), which puts back the data as it was before the suite (and before
-	sc/99-truncate.xml); then each renderer deletes one of the two backups 00-backup.xml made:
-	- PrimeFaces selects the newest backup and declines its Restore;
-	- SmartClient declines it too, then confirms it, waits for the job, signs in again, checks that 00-marker.xml's marker
-	  has gone, deletes the newest backup (its own) and saves Update My Details;
-	- PrimeFaces signs in, checks the marker has gone, deletes the newest backup (now its own) and saves Update My Details.
+	Admin suite (admin.suite.xml), the restore, as a workflow across both renderers. The one real restore comes first, so
+	that nothing can fail before the data is back (sc/99-truncate.xml may have just truncated it):
+	- SmartClient restores the newest backup (its own, from 00-backup.xml), declining it once first, waits for the job,
+	  signs in again, checks that 00-marker.xml's marker has gone, and deletes its backup;
+	- PrimeFaces checks that the marker has gone, selects its own backup, declines its Restore, and deletes it;
+	- then, with both backups gone, each renderer saves Update My Details.
 	The suite runs this even when members fail (sc/99-truncate.xml too), but only once 00-precondition.xml and
 	00-backup.xml passed.
 -->
@@ -14,33 +13,6 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<automation uxui="tablet" userAgentType="tablet">
-		<before>
-			<login user="admin" password="admin" />
-			<testSuccess />
-		</before>
-		<interaction name="Choose the backup to restore, and decline the restore (PrimeFaces)">
-			<method>
-				<navigateEdit module="admin" document="DataMaintenance" />
-				<tabSelect path="Backup/Restore" />
-				<action name="RefreshBackupList" />
-				<testGridRows module="admin" query="BackupsModel" minRows="2" />
-				<comment>Backups are listed newest first, so the first is the one 00-backup.xml made last, in SmartClient</comment>
-				<listGridSelect module="admin" query="BackupsModel" row="0" />
-				<comment>Restore options: error on orphaned content, reindex both, delete the existing data first</comment>
-				<dataEnter binding="contentRestoreOption" value="2" />
-				<testValue binding="contentRestoreOption" value="error" />
-				<dataEnter binding="restoreIndexingOption" value="2" />
-				<testValue binding="restoreIndexingOption" value="both" />
-				<dataEnter binding="restorePreProcess" value="8" />
-				<testValue binding="restorePreProcess" value="deleteData" />
-				<action name="Restore" confirm="false" />
-			</method>
-		</interaction>
-		<after>
-			<logout />
-		</after>
-	</automation>
 	<automation uxui="desktop" userAgentType="desktop">
 		<before>
 			<login user="admin" password="admin" />
@@ -53,7 +25,9 @@
 				<tabSelect path="Backup/Restore" />
 				<comment>The SmartClient view has no Refresh Backup List button: testGridRows fetches the list</comment>
 				<testGridRows module="admin" query="BackupsModel" minRows="2" />
+				<comment>Backups are listed newest first, so the first is the one 00-backup.xml made last, in SmartClient</comment>
 				<listGridSelect module="admin" query="BackupsModel" row="0" />
+				<comment>Restore options: error on orphaned content, reindex both, delete the existing data first</comment>
 				<dataEnter binding="contentRestoreOption" value="2" />
 				<testValue binding="contentRestoreOption" value="error" />
 				<dataEnter binding="restoreIndexingOption" value="2" />
@@ -85,16 +59,6 @@
 				<testWidget action="DeleteBackup" enabled="false" />
 			</method>
 		</interaction>
-		<interaction name="Home: Update My Details after the restore (SmartClient)">
-			<method>
-				<comment>Runtime issue P4: the restore wrote the tables behind Hibernate's shared cache, so this save failed with an optimistic lock. It leaves admin's mobile number changed; nothing depends on it.</comment>
-				<navigateEdit module="admin" document="UserDashboard" />
-				<dataEnter binding="currentUser.contact.mobile" value="0400 003 {run}" />
-				<action name="UpdateMyDetails" />
-				<navigateEdit module="admin" document="UserDashboard" />
-				<testValue binding="currentUser.contact.mobile" value="0400 003 {run}" />
-			</method>
-		</interaction>
 		<after>
 			<logout />
 		</after>
@@ -104,7 +68,7 @@
 			<login user="admin" password="admin" />
 			<testSuccess />
 		</before>
-		<interaction name="Check the restore, and delete PrimeFaces' backup">
+		<interaction name="Check the restore, decline a restore of PrimeFaces' backup, and delete it">
 			<method>
 				<comment>The marker left after the backups has gone</comment>
 				<navigateMenu module="admin" item="Security Admin/Data Groups" />
@@ -115,18 +79,45 @@
 				<action name="RefreshBackupList" />
 				<testGridRows module="admin" query="BackupsModel" minRows="1" />
 				<listGridSelect module="admin" query="BackupsModel" row="0" />
+				<dataEnter binding="contentRestoreOption" value="2" />
+				<testValue binding="contentRestoreOption" value="error" />
+				<dataEnter binding="restoreIndexingOption" value="2" />
+				<testValue binding="restoreIndexingOption" value="both" />
+				<dataEnter binding="restorePreProcess" value="8" />
+				<testValue binding="restorePreProcess" value="deleteData" />
+				<action name="Restore" confirm="false" />
 				<action name="DeleteBackup" confirm="true" />
 				<testWidget action="DeleteBackup" enabled="false" />
 			</method>
 		</interaction>
 		<interaction name="Home: Update My Details after the restore (PrimeFaces)">
 			<method>
-				<comment>Runtime issue P4, as above, in PrimeFaces. It runs after the last backup's delete, so a failure here leaves no backup behind.</comment>
+				<comment>Runtime issue P4: the restore wrote the tables behind Hibernate's shared cache, so this save failed with an optimistic lock. It runs after both backups' deletes, so a failure here leaves no backup behind. It leaves admin's mobile number changed; nothing depends on it.</comment>
 				<navigateEdit module="admin" document="UserDashboard" />
 				<dataEnter binding="currentUser.contact.mobile" value="0400 002 {run}" />
 				<action name="UpdateMyDetails" />
 				<navigateEdit module="admin" document="UserDashboard" />
 				<testValue binding="currentUser.contact.mobile" value="0400 002 {run}" />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+	<automation uxui="desktop" userAgentType="desktop">
+		<before>
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+		</before>
+		<interaction name="Home: Update My Details after the restore (SmartClient)">
+			<method>
+				<comment>Runtime issue P4, as above, in SmartClient</comment>
+				<navigateEdit module="admin" document="UserDashboard" />
+				<dataEnter binding="currentUser.contact.mobile" value="0400 003 {run}" />
+				<action name="UpdateMyDetails" />
+				<navigateEdit module="admin" document="UserDashboard" />
+				<testValue binding="currentUser.contact.mobile" value="0400 003 {run}" />
 			</method>
 		</interaction>
 		<after>
