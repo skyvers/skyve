@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -23,7 +25,6 @@ import org.skyve.impl.generate.DialectOptions;
 import org.skyve.toolchain.config.GenerateDefaultQueriesConfig;
 import org.skyve.toolchain.config.GenerateDomainConfig;
 import org.skyve.toolchain.config.GenerateEditViewConfig;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @SuppressWarnings("static-method")
@@ -144,8 +145,8 @@ class MojoExecutionSuccessTest {
 	@Test
 	void compileJasperReportCompilesEachMatchingReport() throws Exception {
 		RecordingCompileJasperReportMojo mojo = new RecordingCompileJasperReportMojo();
-		Prompter prompter = Mockito.mock(Prompter.class);
-		Mockito.when(prompter.prompt(anyString())).thenReturn("users");
+		Prompter prompter = mock(Prompter.class);
+		when(prompter.prompt(anyString())).thenReturn("users");
 		ReflectionTestUtils.setField(mojo, "prompter", prompter);
 		Path report = tempDir.resolve("users.jrxml");
 		Files.writeString(report, "<jasperReport/>");
@@ -161,8 +162,8 @@ class MojoExecutionSuccessTest {
 	@Test
 	void compileJasperReportFailsWhenNoReportsMatch() throws Exception {
 		RecordingCompileJasperReportMojo mojo = new RecordingCompileJasperReportMojo();
-		Prompter prompter = Mockito.mock(Prompter.class);
-		Mockito.when(prompter.prompt(anyString())).thenReturn("users");
+		Prompter prompter = mock(Prompter.class);
+		when(prompter.prompt(anyString())).thenReturn("users");
 		ReflectionTestUtils.setField(mojo, "prompter", prompter);
 		mojo.reports = java.util.List.of();
 

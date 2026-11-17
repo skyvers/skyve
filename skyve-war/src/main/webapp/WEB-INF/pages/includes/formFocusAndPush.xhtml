@@ -1,6 +1,6 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:p="http://primefaces.org/ui" xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
    	<!-- Focus the first input only when the page is loaded (a GET), never after an ajax response or other postback:
-   		a response must not move the page or take the focus from where the user is (docs/sail-runtime-issues.md, P11) -->
+   		a response must not move the page or take the focus from where the user is -->
    	<p:focus rendered="#{not facesContext.postback}" />
 	<p:remoteCommand name="pushRerender" actionListener="#{bean.rerender('push', false)}" process="@this" update="@form" />
 </ui:composition>

@@ -1,8 +1,10 @@
 package org.skyve.impl.web.filter.rest;
 
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -335,7 +337,7 @@ class BasicAuthFilterTest {
 		verify(chain, never()).doFilter(request, response);
 		verify(persistence).begin();
 		verify(persistence).setUser(user);
-		verify(persistence, org.mockito.Mockito.times(2)).rollback();
+		verify(persistence, times(2)).rollback();
 		verify(persistence).commit(true);
 	}
 
@@ -369,7 +371,7 @@ class BasicAuthFilterTest {
 		when(persistence.newSQL(org.mockito.ArgumentMatchers.anyString())).thenReturn(sql);
 		when(sql.putParameter(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyBoolean())).thenReturn(sql);
 		when(sql.scalarResult(String.class)).thenReturn(EXT.hashPassword(password));
-		org.mockito.Mockito.doThrow(new RuntimeException("boom")).when(chain).doFilter(request, response);
+		doThrow(new RuntimeException("boom")).when(chain).doFilter(request, response);
 
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ThreadLocal<AbstractPersistence> threadLocal = getPersistenceThreadLocal();
@@ -391,7 +393,7 @@ class BasicAuthFilterTest {
 		}
 
 		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		verify(persistence, org.mockito.Mockito.times(2)).rollback();
+		verify(persistence, times(2)).rollback();
 		verify(persistence).commit(true);
 	}
 

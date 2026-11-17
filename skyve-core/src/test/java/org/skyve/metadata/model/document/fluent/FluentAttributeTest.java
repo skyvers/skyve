@@ -359,6 +359,7 @@ class FluentAttributeTest {
 		Text text = new Text();
 		WidgetReference ref = new WidgetReference();
 		ref.setWidget(new InputWidget() {
+			private static final long serialVersionUID = 1L;
 			// intentionally empty unknown widget for error-path coverage
 		});
 		text.setDefaultWidgetReference(ref);

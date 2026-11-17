@@ -43,12 +43,8 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	}
 
 	public void step(String id) {
-		String xpath = String.format("//a[contains(@href, '#%s')]", id);
-		WebElement element = byXpath(xpath);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			click(element);
-			waitForAjaxResponse();
-		}
+		// a wizard step is selected by its link, like a tab
+		tab(id);
 	}
 
 	public void login(String username, String password) {
@@ -153,53 +149,51 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 
 	public void radio(String id, int index) {
 		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Look for prime faces disabled style
-			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
-				element = byXpath("//label[@for='" + id + ":" + index + "']");
-				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-					click(element);
-					waitForAjaxResponse();
-				}
+		// Look for prime faces disabled style
+		if ((element != null) && element.isDisplayed() && element.isEnabled() &&
+				(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
+			element = byXpath("//label[@for='" + id + ":" + index + "']");
+			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
+				click(element);
+				waitForAjaxResponse();
 			}
 		}
 	}
 
 	public void selectOne(String id, int index) {
 		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Look for prime faces disabled style
-			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
-				element = byId(String.format("%s_label", id));
-				if ((element != null) && element.isEnabled() && element.isDisplayed()) {
+		// Look for prime faces disabled style
+		if ((element != null) && element.isDisplayed() && element.isEnabled() &&
+				(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
+			element = byId(String.format("%s_label", id));
+			if ((element != null) && element.isEnabled() && element.isDisplayed()) {
+				click(element);
+
+				// Wait for pick list drop down
+				By panelXpath = By.id(String.format("%s_panel", id));
+				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
+													ExpectedConditions.visibilityOfElementLocated(panelXpath),
+													ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
+
+				// Value here should be an index in the drop down starting from 0
+				element = byId(String.format("%s_%s", id, String.valueOf(index)));
+				if ((element != null) && element.isEnabled()) { // NB it may not be displayed
+					// Scroll the drop down panel so the item is visible
+					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
+
+					// Wait for pick list element to scroll into view
+					wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+					wait.until(ExpectedConditions.visibilityOf(element));
+
 					click(element);
 
-					// Wait for pick list drop down
-					By panelXpath = By.id(String.format("%s_panel", id));
-					WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+					// Wait for pick list drop down to disappear (opacity is taken into account)
+					wait = new WebDriverWait(driver, Duration.ofSeconds(1));
 					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
-														ExpectedConditions.visibilityOfElementLocated(panelXpath),
-														ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
+														ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
 
-					// Value here should be an index in the drop down starting from 0
-					element = byId(String.format("%s_%s", id, String.valueOf(index)));
-					if ((element != null) && element.isEnabled()) { // NB it may not be displayed
-						// Scroll the drop down panel so the item is visible
-						((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
-
-						// Wait for pick list element to scroll into view
-						wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-						wait.until(ExpectedConditions.visibilityOf(element));
-
-						click(element);
-
-						// Wait for pick list drop down to disappear (opacity is taken into account)
-						wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-						wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
-															ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
-
-						waitForAjaxResponse();
-					}
+					waitForAjaxResponse();
 				}
 			}
 		}
@@ -228,22 +222,21 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 
 	public void redirectButton(String id, boolean confirm) {
 		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Look for prime faces disabled style
-			if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
-				String viewState = getViewState();
-				click(element);
-				if (confirm) {
-					confirm();
-				}
-				try {
-					Thread.sleep(250);
-				}
-				catch (@SuppressWarnings("unused") InterruptedException e) {
-					// nothing to do here
-				}
-				waitForFullPageResponse(viewState);
+		// Look for prime faces disabled style
+		if ((element != null) && element.isDisplayed() && element.isEnabled() &&
+				(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
+			String viewState = getViewState();
+			click(element);
+			if (confirm) {
+				confirm();
 			}
+			try {
+				Thread.sleep(250);
+			}
+			catch (@SuppressWarnings("unused") InterruptedException e) {
+				// nothing to do here
+			}
+			waitForFullPageResponse(viewState);
 		}
 	}
 
@@ -306,18 +299,17 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// data grid button is present
 			element = byId(buttonId);
-			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-				// Look for prime faces disabled style on data grid button
-				if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
-					// All good, continue with the button click
-					String viewState = getViewState();
-					click(element);
-					if (ajax) {
-						waitForAjaxResponse();
-					}
-					else {
-						waitForFullPageResponse(viewState);
-					}
+			// Look for prime faces disabled style on data grid button
+			if ((element != null) && element.isDisplayed() && element.isEnabled() &&
+					(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
+				// All good, continue with the button click
+				String viewState = getViewState();
+				click(element);
+				if (ajax) {
+					waitForAjaxResponse();
+				}
+				else {
+					waitForFullPageResponse(viewState);
 				}
 			}
 		}
@@ -340,18 +332,17 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
 			// list grid button is present
 			element = byId(buttonId);
-			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-				// Look for prime faces disabled style on list grid button
-				if (! element.getDomAttribute("class").contains("ui-state-disabled")) {
-					// All good, continue with the button click
-					String viewState = getViewState();
-					click(element);
-					if (ajax) {
-						waitForAjaxResponse();
-					}
-					else {
-						waitForFullPageResponse(viewState);
-					}
+			// Look for prime faces disabled style on list grid button
+			if ((element != null) && element.isDisplayed() && element.isEnabled() &&
+					(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
+				// All good, continue with the button click
+				String viewState = getViewState();
+				click(element);
+				if (ajax) {
+					waitForAjaxResponse();
+				}
+				else {
+					waitForFullPageResponse(viewState);
 				}
 			}
 		}
@@ -393,10 +384,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		if ((messages != null) && messages.isDisplayed()) {
 			String innerHTML = messages.getDomProperty("innerHTML");
 			if (innerHTML.contains("ui-messages-error") || innerHTML.contains("ui-messages-fatal")) {
-				if (messageToCheck == null) {
-					return true;
-				}
-				else if (innerHTML.contains(messageToCheck)) {
+				if ((messageToCheck == null) || innerHTML.contains(messageToCheck)) {
 					return true;
 				}
 

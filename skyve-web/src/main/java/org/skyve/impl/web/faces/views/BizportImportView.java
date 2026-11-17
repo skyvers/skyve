@@ -61,7 +61,7 @@ public class BizportImportView extends AbstractUploadView {
 	/**
 	 * The callback parameter that tells a SmartClient import window that the import succeeded without problems:
 	 * bizImport.xhtml's {@code skyveAfterBizImport} (the upload's {@code oncomplete}) refreshes the view, and then shows
-	 * the page's messages ({@link #MESSAGES_PARAM}) in the view's growl and closes the window (runtime issue P3).
+	 * the page's messages ({@link #MESSAGES_PARAM}) in the view's growl and closes the window.
 	 */
 	private static final String BIZ_IMPORT_SUCCEEDED_PARAM = "bizImportSucceeded";
 

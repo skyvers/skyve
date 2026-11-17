@@ -47,13 +47,13 @@ class SelectItemsBeanConverterArrayIteratorTest {
 	@Test
 	void nextThrowsWhenExhausted() {
 		SelectItemsBeanConverter.ArrayIterator it = new SelectItemsBeanConverter.ArrayIterator(new SelectItem[0]);
-		assertThrows(NoSuchElementException.class, () -> it.next());
+		assertThrows(NoSuchElementException.class, it::next);
 	}
 
 	@Test
 	void removeThrowsUnsupportedOperation() {
 		SelectItem item = new SelectItem("v", "l");
 		SelectItemsBeanConverter.ArrayIterator it = new SelectItemsBeanConverter.ArrayIterator(new SelectItem[]{item});
-		assertThrows(UnsupportedOperationException.class, () -> it.remove());
+		assertThrows(UnsupportedOperationException.class, it::remove);
 	}
 }

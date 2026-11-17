@@ -207,7 +207,7 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void getCachedConversationRestoresConversationForMatchingSession() throws Exception {
+	void getCachedConversationRestoresConversationForMatchingSession() {
 		DynamicBean bean = bean("bean-id");
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
 		context.setCurrentBean(bean);
@@ -221,7 +221,7 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void getCachedConversationRestoresConversationWhenNoRequestIsSupplied() throws Exception {
+	void getCachedConversationRestoresConversationWhenNoRequestIsSupplied() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", null);
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -233,7 +233,7 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void getCachedConversationThrowsWhenRequestHasNoSession() throws Exception {
+	void getCachedConversationThrowsWhenRequestHasNoSession() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -244,7 +244,7 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void getCachedConversationThrowsWhenSessionIdDiffers() throws Exception {
+	void getCachedConversationThrowsWhenSessionIdDiffers() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -255,7 +255,7 @@ class SessionTrackingTest {
 	}
 
 	@Test
-	void getCachedConversationThrowsWhenStoredConversationHasNoSessionId() throws Exception {
+	void getCachedConversationThrowsWhenStoredConversationHasNoSessionId() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", null);
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);

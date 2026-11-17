@@ -604,7 +604,8 @@ class WebUtilTest {
 	private static Executable downloadUrlMatchesGrant(String name, String viewBinding, String dataWidgetBinding, String elementBizId) {
 		return () -> {
 			HttpServletRequest request = mock(HttpServletRequest.class);
-			when(request.getSession(false)).thenReturn(mock(HttpSession.class));
+			HttpSession session = mock(HttpSession.class);
+			when(request.getSession(false)).thenReturn(session);
 			SmartClientWebContext webContext = new SmartClientWebContext("webId", request);
 			webContext.recordPreparedDownload("ExportAction", "admin", "User", viewBinding, dataWidgetBinding, elementBizId);
 			String url = WebUtil.getDownloadActionUrl("ExportAction", "admin", "User", "webId", viewBinding, dataWidgetBinding, elementBizId);

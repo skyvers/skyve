@@ -4,8 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -423,7 +424,7 @@ class RestoreJobTest {
 		verify(statement).setObject(1, null);
 		verify(statement).setString(2, "bean-1");
 		verify(statement).setString(2, "bean-2");
-		verify(statement, org.mockito.Mockito.times(2)).executeUpdate();
+		verify(statement, times(2)).executeUpdate();
 		verify(connection).commit();
 		assertEquals("    restored foreign keys for table demo with 2 rows.", job.getLog().get(job.getLog().size() - 1));
 	}

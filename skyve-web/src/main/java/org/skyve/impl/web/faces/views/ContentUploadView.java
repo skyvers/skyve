@@ -776,7 +776,7 @@ public class ContentUploadView extends AbstractUploadView {
 			PrimeFaces primeFaces = PrimeFaces.current();
 			PrimeFaces.Ajax ajax = primeFaces.ajax();
 			if (success) {
-				// The page closes: its messages are shown in the view's growl instead (runtime issue P3)
+				// The page closes: its messages are shown in the view's growl instead
 				String messages = messagesJSON(fc);
 				primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, "true," + messages));
 				ajax.addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);

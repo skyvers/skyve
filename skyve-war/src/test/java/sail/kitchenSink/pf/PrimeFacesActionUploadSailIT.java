@@ -6,7 +6,7 @@ import util.AbstractInterpretedSailWorkflow;
 
 /**
  * An action upload that succeeds closes its upload page, which refreshes the view, and shows the page's messages in the
- * view's growl: the upload's success and the upload action's own growl (runtime issue P3, docs/sail-runtime-issues.md),
+ * view's growl: the upload's success and the upload action's own growl,
  * in each PrimeFaces UX/UI: an overlay for {@code tablet} and {@code external}, a full-screen dialog for {@code phone}.
  * The messages and pushed growls are added to the growls showing: a growl pushed just before them, or after them, does
  * not remove them, nor they it.
@@ -16,16 +16,19 @@ import util.AbstractInterpretedSailWorkflow;
  */
 class PrimeFacesActionUploadSailIT extends AbstractInterpretedSailWorkflow {
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void tablet() {
 		sailWorkflowString(automation("tablet", "tablet"));
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void phone() {
 		sailWorkflowString(automation("phone", "phone"));
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void external() {
 		sailWorkflowString(automation("external", "desktop"));
 	}

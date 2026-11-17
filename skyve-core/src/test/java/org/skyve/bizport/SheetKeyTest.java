@@ -95,7 +95,7 @@ class SheetKeyTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S3415"}) // the object under test goes first so that its equals() is the one called
 	void notEqualToNonSheetKey() {
 		SheetKey k1 = new SheetKey("admin", "User");
 		assertNotEquals(k1, "not a SheetKey");

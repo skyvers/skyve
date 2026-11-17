@@ -154,7 +154,8 @@ class TwoFactorAuthPushFilterTest {
 
 		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
 		filter.setAuthenticationManager(authenticationManager);
-		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(mock(Authentication.class));
+		Authentication authentication = mock(Authentication.class);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
 
 		HttpServletRequest request = loginRequest(CUSTOMER);
 		when(request.getParameter("username")).thenReturn(USERNAME);

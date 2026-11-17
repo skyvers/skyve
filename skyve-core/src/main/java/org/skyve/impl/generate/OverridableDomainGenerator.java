@@ -2193,7 +2193,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		// toLocalisedDescription()
 		enums.append("\t\t@Override\n");
 		enums.append("\t\tpublic String toLocalisedDescription() {\n");
-		enums.append("\t\t\treturn Util.i18n(description);\n");
+		enums.append("\t\t\treturn Util.nullSafeI18n(description);\n");
 		enums.append("\t\t}\n\n");
 
 		// toDomainValue()

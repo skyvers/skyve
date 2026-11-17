@@ -154,7 +154,8 @@ class ViewGeneratorTest {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
 		when(customer.getModule("mod")).thenReturn(module);
-		when(module.getDocumentDefaultQuery(customer, "Doc")).thenReturn(mock(MetaDataQueryDefinition.class));
+		MetaDataQueryDefinition defaultQuery = mock(MetaDataQueryDefinition.class);
+		when(module.getDocumentDefaultQuery(customer, "Doc")).thenReturn(defaultQuery);
 
 		DocumentImpl document = newDocument();
 		document.setOwningModuleName("mod");

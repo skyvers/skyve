@@ -5074,7 +5074,7 @@ class OverridableDomainGeneratorMoreTest {
 	// ----- null-safety invariants -------------------------------------------
 
 	@Test
-	void generateThrowsWhenACustomerDisappearsAfterPopulatingDataStructures() throws Exception {
+	void generateThrowsWhenACustomerDisappearsAfterPopulatingDataStructures() {
 		OverridableDomainGenerator gen = generator();
 		ProvidedRepository repo = mock(ProvidedRepository.class);
 		gen.repository = repo;

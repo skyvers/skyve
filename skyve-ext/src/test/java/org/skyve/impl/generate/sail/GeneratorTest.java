@@ -153,7 +153,7 @@ class GeneratorTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void visitModuleSkipsAbstractChildInaccessibleAndForeignDocumentRefs() throws Exception {
+	void visitModuleSkipsAbstractChildInaccessibleAndForeignDocumentRefs() {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -214,7 +214,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenusOverloadsOmitModulesWithEmptyMenus() throws Exception {
+	void visitMenusOverloadsOmitModulesWithEmptyMenus() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -236,7 +236,7 @@ class GeneratorTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void visitMenusPasswordOverloadAddsLoginForNonEmptyMenuAutomation() throws Exception {
+	void visitMenusPasswordOverloadAddsLoginForNonEmptyMenuAutomation() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -453,7 +453,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuCreatesGroupedListInteraction() throws Exception {
+	void visitMenuCreatesGroupedListInteraction() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -487,7 +487,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithNamedQuerySetsQueryName() throws Exception {
+	void visitMenuListItemWithNamedQuerySetsQueryName() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -524,7 +524,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithDefaultQueryUsesDocumentName() throws Exception {
+	void visitMenuListItemWithDefaultQueryUsesDocumentName() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -561,7 +561,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithModelNameUsesDrivingDocumentForCreateAccess() throws Exception {
+	void visitMenuListItemWithModelNameUsesDrivingDocumentForCreateAccess() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -599,7 +599,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuListItemWithModelWithoutDrivingDocumentThrows() throws Exception {
+	void visitMenuListItemWithModelWithoutDrivingDocumentThrows() {
 		UserImpl user = mock(UserImpl.class);
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -674,7 +674,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuEditItemCreatesNavigateEditInteraction() throws Exception {
+	void visitMenuEditItemCreatesNavigateEditInteraction() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -708,7 +708,7 @@ class GeneratorTest {
 	}
 
 	@Test
-	void visitMenuEditItemAddsSaveStepsForPersistentDocumentActions() throws Exception {
+	void visitMenuEditItemAddsSaveStepsForPersistentDocumentActions() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");
@@ -745,7 +745,7 @@ class GeneratorTest {
 
 	@SuppressWarnings("null") // a null here fails the test
 	@Test
-	void visitMenuPasswordOverloadAddsLoginAndLogout() throws Exception {
+	void visitMenuPasswordOverloadAddsLoginAndLogout() {
 		UserImpl user = mock(UserImpl.class);
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = module("sales");

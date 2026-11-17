@@ -125,8 +125,7 @@ class RouterTest implements TaggingUxUiSelector {
 		Router router = routerWithUxUi("desktop");
 		router.getDirects().add(direct("/missing.xhtml", "missing"));
 
-		MetaDataException exception = assertThrows(MetaDataException.class,
-				() -> router.validateDirectTargets());
+		MetaDataException exception = assertThrows(MetaDataException.class, router::validateDirectTargets);
 
 		assertTrue(exception.getMessage().contains("unknown UX/UI missing"));
 	}

@@ -72,8 +72,10 @@ class OverridableDomainGeneratorTest {
 
 		when(ordered.isComplexOrdering()).thenReturn(Boolean.FALSE);
 		when(ordered.getOrdering()).thenReturn(List.of(ascending, descendingAssociation));
-		when(referencedDocument.getAttribute("title")).thenReturn(mock(Attribute.class));
-		when(referencedDocument.getAttribute("owner")).thenReturn(mock(Association.class));
+		Attribute title = mock(Attribute.class);
+		when(referencedDocument.getAttribute("title")).thenReturn(title);
+		Association owner = mock(Association.class);
+		when(referencedDocument.getAttribute("owner")).thenReturn(owner);
 
 		String result = (String) declaredMethod("orderBy", OrderedAttribute.class, Document.class)
 				.invoke(null, ordered, referencedDocument);

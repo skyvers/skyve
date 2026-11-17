@@ -10,7 +10,7 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 /** Unit tests for integer converter classes. */
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S5976"}) // one named test per invalid input reads more clearly than a parameterized table
 class IntegerConvertersTest {
 
 	// ---- IntegerConverter ----

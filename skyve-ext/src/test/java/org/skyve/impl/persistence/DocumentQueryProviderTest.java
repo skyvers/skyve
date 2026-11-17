@@ -66,7 +66,8 @@ class DocumentQueryProviderTest {
 	@Test
 	void existsReflectsWhetherGetReturnsBean() {
 		TestProvider provider = provider();
-		when(provider.query.beanResult()).thenReturn(mock(PersistentBean.class)).thenReturn(null);
+		PersistentBean bean = mock(PersistentBean.class);
+		when(provider.query.beanResult()).thenReturn(bean).thenReturn(null);
 
 		assertTrue(provider.exists("BIZ-1"));
 		assertFalse(provider.exists("BIZ-2"));

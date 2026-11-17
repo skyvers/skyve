@@ -220,15 +220,20 @@ class InterpretedWebDriverExecutorTest {
 		CaptureCell cell = new CaptureCell();
 		CaptureTitle title = new CaptureTitle();
 		DataGridLink gridLink = new DataGridLink();
-		assertAll(() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridFilter(filter("name", "x", null))),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridClearFilter(new ListGridClearFilter())),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridSort(sort("amount"))),
-					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeCaptureValue(capture("b", "v"))),
+		ListGridFilter listGridFilter = filter("name", "x", null);
+		ListGridClearFilter clearFilter = new ListGridClearFilter();
+		ListGridSort listGridSort = sort("amount");
+		CaptureValue captureValue = capture("b", "v");
+		LookupDescriptionPick pick = new LookupDescriptionPick();
+		LookupDescriptionAutoComplete autoComplete = new LookupDescriptionAutoComplete();
+		assertAll(() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridFilter(listGridFilter)),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridClearFilter(clearFilter)),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeListGridSort(listGridSort)),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.executeCaptureValue(captureValue)),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.enterOption(dataEnter, "x", Match.code)),
+					() -> assertThrows(UnsupportedOperationException.class, () -> executor.pickLookupDescriptionRowContaining(pick, "x")),
 					() -> assertThrows(UnsupportedOperationException.class,
-										() -> executor.pickLookupDescriptionRowContaining(new LookupDescriptionPick(), "x")),
-					() -> assertThrows(UnsupportedOperationException.class,
-										() -> executor.autoCompleteLookupDescriptionAndPick(new LookupDescriptionAutoComplete(), "x", "y")),
+										() -> executor.autoCompleteLookupDescriptionAndPick(autoComplete, "x", "y")),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.clickLinkContaining(link, "x")),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readGridCell(cell)),
 					() -> assertThrows(UnsupportedOperationException.class, () -> executor.readViewTitle(title)),
@@ -432,7 +437,8 @@ class InterpretedWebDriverExecutorTest {
 	void anUnknownRegisteredRoleFailsTheLogin() {
 		executor.useViewRoles(new SailViewRoles().register("client", "todo.Nope"));
 
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> executor.executeLogin(login("client")));
+		Login clientLogin = login("client");
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> executor.executeLogin(clientLogin));
 		assertTrue(e.getMessage().contains("todo.Nope"), e.getMessage());
 	}
 

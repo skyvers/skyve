@@ -21,6 +21,7 @@ class PrimeFacesAdminPhoneSailIT extends AbstractPrimeFacesInterpretedSail {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void test() {
 		sailResource("sail/admin/pf/admin-phone-smoke.xml");
 	}

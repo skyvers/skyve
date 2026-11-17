@@ -307,7 +307,6 @@ class ExportDocumentsToArchiveJobTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void jobSubstancePrepareForArchiveUsesMatchingConverterOnly() throws Exception {
 		ExportDocumentsToArchiveJob job = newJob();
 		DocumentConverter other = mock(DocumentConverter.class);
@@ -352,7 +351,6 @@ class ExportDocumentsToArchiveJobTest {
 		try {
 			setField(job, "logger", LogManager.getLogger(ExportDocumentsToArchiveJob.class));
 			setSuperclassField(job, "log", new ArrayList<>());
-			@SuppressWarnings("unchecked")
 			Instance<DocumentConverter> noConverters = mock(Instance.class);
 			when(noConverters.stream()).thenAnswer(invocation -> Stream.empty());
 			setField(job, "documentConverters", noConverters);

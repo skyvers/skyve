@@ -3,6 +3,7 @@ package org.skyve.impl.web.filter;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -76,7 +77,7 @@ class RequestLoggingAndStatisticsFilterTest {
 
 		when(request.getServletPath()).thenReturn("/smartedit");
 		when(request.getSession(false)).thenReturn(null);
-		org.mockito.Mockito.doThrow(failure).when(chain).doFilter(request, response);
+		doThrow(failure).when(chain).doFilter(request, response);
 
 		ServletException thrown = assertThrows(ServletException.class, () -> filter.doFilter(request, response, chain));
 

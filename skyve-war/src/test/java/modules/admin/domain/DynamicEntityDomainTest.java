@@ -18,8 +18,8 @@ class DynamicEntityDomainTest {
 
 	@BeforeEach
 	void setUp() {
-		entity = new DynamicEntity() { /* test stub */ };
-		relation = new DynamicRelation() { /* test stub */ };
+		entity = new DynamicEntity() { private static final long serialVersionUID = 1L; };
+		relation = new DynamicRelation() { private static final long serialVersionUID = 1L; };
 	}
 
 	@Test
@@ -141,7 +141,7 @@ class DynamicEntityDomainTest {
         @Test
         void setRelationsElementByIdReplaces() {
                 entity.addRelationsElement(relation);
-				DynamicRelation replacement = new DynamicRelation() { /* test stub */ };
+				DynamicRelation replacement = new DynamicRelation() { private static final long serialVersionUID = 1L; };
                 replacement.setBizId(relation.getBizId());
                 entity.setRelationsElementById(relation.getBizId(), replacement);
                 assertTrue(entity.getRelations().contains(replacement));

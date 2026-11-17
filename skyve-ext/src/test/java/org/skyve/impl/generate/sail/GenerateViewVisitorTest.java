@@ -137,7 +137,8 @@ class GenerateViewVisitorTest {
 	void visitDataGridThrowsForAnAddableGridWithoutABinding() {
 		GenerateViewVisitor visitor = visitor();
 
-		MetaDataException e = assertThrows(MetaDataException.class, () -> visitor.visitDataGrid(new DataGrid(), true, true));
+		DataGrid grid = new DataGrid();
+		MetaDataException e = assertThrows(MetaDataException.class, () -> visitor.visitDataGrid(grid, true, true));
 		assertEquals("A data grid in view create of document Order has no binding", e.getMessage());
 		assertEquals(1, visitor.getPopulateSteps().size());
 	}

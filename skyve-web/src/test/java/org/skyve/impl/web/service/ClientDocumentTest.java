@@ -3,6 +3,7 @@ package org.skyve.impl.web.service;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.mock;
 
 import java.util.Map;
 
@@ -21,7 +22,7 @@ class ClientDocumentTest {
 	@Test
 	void setAndGetDocumentRoundtrip() {
 		ClientDocument cd = new ClientDocument();
-		org.skyve.metadata.model.document.Document doc = org.mockito.Mockito.mock(org.skyve.metadata.model.document.Document.class);
+		org.skyve.metadata.model.document.Document doc = mock(org.skyve.metadata.model.document.Document.class);
 		cd.setDocument(doc);
 		assertSame(doc, cd.getDocument());
 	}

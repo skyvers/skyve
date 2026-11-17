@@ -126,6 +126,7 @@ class AzureBlobStorageBackupTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // each connection string shape is a named scenario; separate tests read better than a parameter table
 	void copySourceUrlCarriesTheSharedAccessSignatureFromTheConnectionString() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
@@ -253,7 +254,6 @@ class AzureBlobStorageBackupTest {
 
 	private static final class CopyFixture {
 		private final BlobClient dest = mock(BlobClient.class);
-		@SuppressWarnings("unchecked")
 		private final SyncPoller<BlobCopyInfo, Void> poller = mock(SyncPoller.class);
 
 		private CopyFixture() {

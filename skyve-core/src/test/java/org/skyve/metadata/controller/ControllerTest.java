@@ -188,6 +188,8 @@ class ControllerTest {
 	void roleGetLocalisedDescriptionWithNullDescriptionReturnsNull() {
 		@SuppressWarnings("null") // passes null on purpose
 		Role role = new Role() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String getName() {
 				return "TestRole";

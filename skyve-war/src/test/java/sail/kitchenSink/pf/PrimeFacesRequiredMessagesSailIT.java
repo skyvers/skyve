@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import util.AbstractInterpretedSailWorkflow;
 
 /**
- * When PrimeFaces shows required-field messages (runtime issue P5, docs/sail-runtime-issues.md), in each PrimeFaces
+ * When PrimeFaces shows required-field messages, in each PrimeFaces
  * UX/UI: never when a view first renders, nor after a rerender without client validation, nor for an action whose
  * {@code clientValidation} is false; only when an action with client validation is run, which they then stop.
  * <p>
@@ -14,16 +14,19 @@ import util.AbstractInterpretedSailWorkflow;
  */
 class PrimeFacesRequiredMessagesSailIT extends AbstractInterpretedSailWorkflow {
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void tablet() {
 		sailWorkflowString(automation("tablet", "tablet"));
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void phone() {
 		sailWorkflowString(automation("phone", "phone"));
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void external() {
 		sailWorkflowString(automation("external", "desktop"));
 	}

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -231,11 +232,11 @@ class SQLDataAccessImplTest {
 	}
 
 	private static void doThrowOnCommit(Connection connection) throws SQLException {
-		org.mockito.Mockito.doThrow(new SQLException("commit failed")).when(connection).commit();
+		doThrow(new SQLException("commit failed")).when(connection).commit();
 	}
 
 	private static void doThrowOnRollback(Connection connection) throws SQLException {
-		org.mockito.Mockito.doThrow(new SQLException("rollback failed")).when(connection).rollback();
+		doThrow(new SQLException("rollback failed")).when(connection).rollback();
 	}
 
 	private static void setConnection(SQLDataAccessImpl dataAccess, Connection connection) throws Exception {

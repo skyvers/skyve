@@ -380,7 +380,7 @@ public class PersistenceInjectable implements Persistence {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public @Nullable <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Function<Persistence, R> function) {
+	public <R> R withDocumentPermissionScopes(@Nonnull DocumentPermissionScope scope, @Nonnull Function<Persistence, R> function) {
 		return CORE.getPersistence().withDocumentPermissionScopes(scope, function);
 	}
 

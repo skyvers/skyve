@@ -357,7 +357,8 @@ class QuartzJobSchedulerTest {
 		JobExecutionContext matchingContext = context(customerJob, "customer", "fire-1", currentUser);
 		JobExecutionContext otherCustomerContext = context(new TestQuartzJob(), "other", "fire-2", currentUser);
 		JobExecutionContext nonSkyveContext = mock(JobExecutionContext.class);
-		when(nonSkyveContext.getJobInstance()).thenReturn(mock(org.quartz.Job.class));
+		org.quartz.Job nonSkyveJob = mock(org.quartz.Job.class);
+		when(nonSkyveContext.getJobInstance()).thenReturn(nonSkyveJob);
 		when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of(matchingContext, otherCustomerContext, nonSkyveContext));
 
 		List<JobDescription> result = new QuartzJobScheduler().getCustomerRunningJobs();
@@ -571,7 +572,8 @@ class QuartzJobSchedulerTest {
 			ProvidedRepositoryFactory.set(repository);
 
 			// the unloadable job class stops startup before any internal jobs are scheduled
-			IllegalStateException e = assertThrows(IllegalStateException.class, () -> new QuartzJobScheduler().startup());
+			QuartzJobScheduler quartzJobScheduler = new QuartzJobScheduler();
+			IllegalStateException e = assertThrows(IllegalStateException.class, quartzJobScheduler::startup);
 
 			assertThat(e.getMessage(), is("Could not schedule jobs"));
 			assertThat(e.getCause() instanceof ClassNotFoundException, is(true));

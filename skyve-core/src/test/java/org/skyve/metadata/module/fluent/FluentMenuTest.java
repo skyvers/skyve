@@ -406,6 +406,8 @@ class FluentMenuTest {
         void menuFromWithUnknownItemTypeThrowsIllegalState() {
                 MenuImpl source = new MenuImpl();
                 source.getItems().add(new MenuItem() {
+                        private static final long serialVersionUID = 1L;
+
                         @Override public String getName() { return "unknown"; }
                         @Override public Map<String, String> getProperties() { return new TreeMap<>(); }
                         @Override public Set<String> getRoleNames() { return Set.of(); }

@@ -62,6 +62,8 @@ class SelectItemsBeanConverterTest {
 	@Test
 	void getAsStringUsesToCodeForEnumeration() {
 		Enumeration e = new Enumeration() {
+			private static final long serialVersionUID = 1L;
+
 			@Override
 			public String toCode() {
 				return "TEST_CODE";

@@ -32,14 +32,34 @@ public class Truncate {
 
     private static final String DELETE_FROM = "delete from ";
 
-	public static void truncate(@Nullable String schemaName, boolean database, boolean content) 
+	/**
+	 * Deletes the current customer's rows from every table in the schema, and empties its content index. When the
+	 * rows are deleted, Hibernate's shared (second-level) cache is evicted afterwards, whether the truncate succeeds
+	 * or fails.
+	 *
+	 * @param schemaName the schema to truncate, or null to find the tables in every schema
+	 * @param database whether to delete the rows
+	 * @param content whether to empty the content index
+	 * @throws Exception if the truncate fails
+	 */
+	public static void truncate(@Nullable String schemaName, boolean database, boolean content)
 	throws Exception {
 		String customerName = CORE.getUser().getCustomerName();
 		if (customerName == null) { // truncation is scoped to the customer
 			throw new IllegalStateException("Cannot truncate as the user has no customer");
 		}
 		Collection<Table> tables = getTables(schemaName);
-		truncate(tables, customerName, database, content);
+		try {
+			truncate(tables, customerName, database, content);
+		}
+		finally {
+			if (database) {
+				// The rows are deleted with SQL, committing table by table, so Hibernate's shared (second-level)
+				// cache still holds the beans from before the truncate, even when it fails partway. A retrieve
+				// would return a deleted bean, and a save of one would fail as its row is gone.
+				CORE.getPersistence().evictAllSharedCache();
+			}
+		}
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK

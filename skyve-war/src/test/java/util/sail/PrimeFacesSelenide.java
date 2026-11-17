@@ -6,18 +6,17 @@ import static com.codeborne.selenide.Condition.exist;
 import static com.codeborne.selenide.Condition.hidden;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byId;
-import static com.codeborne.selenide.Selectors.byName;
 import static com.codeborne.selenide.Selectors.byXpath;
 import static com.codeborne.selenide.Selenide.$;
 
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -26,7 +25,6 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.StaleElementReferenceException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.codeborne.selenide.SelenideElement;
 
@@ -76,6 +74,9 @@ public class PrimeFacesSelenide extends Selenide<
 	private static final String ALL_MESSAGES_SELECTOR = "#messages .ui-messages-info, #messages .ui-messages-warn, " +
 															"#growl .ui-growl-item-container, #pushGrowl .ui-growl-item-container, " +
 															ERROR_MESSAGES_SELECTOR;
+
+	/** Matches a run of white space, to collapse it to one space. */
+	private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
 
 	@Override
@@ -754,7 +755,7 @@ public class PrimeFacesSelenide extends Selenide<
 		org.openqa.selenium.Rectangle track = slider.getRect();
 		double fraction = (max > min) ? Math.max(0, Math.min(1, (target - min) / (max - min))) : 0;
 		@SuppressWarnings("unchecked")
-		List<Number> origin = (List<Number>) js("var r = arguments[0].getBoundingClientRect(); return [r.left, r.top, r.width, r.height];", slider);
+		List<Number> origin = (List<Number>) Objects.requireNonNull(js("var r = arguments[0].getBoundingClientRect(); return [r.left, r.top, r.width, r.height];", slider));
 		double left = origin.get(0).doubleValue();
 		double top = origin.get(1).doubleValue();
 		double width = origin.get(2).doubleValue();
@@ -766,7 +767,7 @@ public class PrimeFacesSelenide extends Selenide<
 
 		// The drag lands on the nearest pixel: press the arrow keys for the steps it missed
 		for (int presses = 0; presses < 1000; presses++) {
-			double current = ((Number) js("return PrimeFaces.getWidgetById(arguments[0]).jq.slider('value');", sliderId)).doubleValue();
+			double current = ((Number) Objects.requireNonNull(js("return PrimeFaces.getWidgetById(arguments[0]).jq.slider('value');", sliderId))).doubleValue();
 			long steps = Math.round((target - current) / step);
 			if (steps == 0) {
 				break;
@@ -774,7 +775,7 @@ public class PrimeFacesSelenide extends Selenide<
 			handle.sendKeys((steps > 0) ? Keys.ARROW_RIGHT : Keys.ARROW_LEFT);
 		}
 		waitForAjaxResponse();
-		double current = ((Number) js("return PrimeFaces.getWidgetById(arguments[0]).jq.slider('value');", sliderId)).doubleValue();
+		double current = ((Number) Objects.requireNonNull(js("return PrimeFaces.getWidgetById(arguments[0]).jq.slider('value');", sliderId))).doubleValue();
 		if (Math.abs(current - target) > (step / 2)) {
 			throw new IllegalStateException(String.format("Could not set slider %s to %s (range %s to %s, step %s): it shows %s",
 															sliderId, value, Double.valueOf(min), Double.valueOf(max), Double.valueOf(step), Double.valueOf(current)));
@@ -875,7 +876,7 @@ public class PrimeFacesSelenide extends Selenide<
 				break;
 			}
 			WebElement item = move.get(0);
-			String label = item.getText().replaceAll("\\s+", " ").trim();
+			String label = WHITESPACE.matcher(item.getText()).replaceAll(" ").trim();
 			trace("    move " + label);
 			click($(item));
 			click($(move.get(1)));
@@ -1057,7 +1058,6 @@ public class PrimeFacesSelenide extends Selenide<
 								"return s || e.title || '';", id);
 	}
 
-	/** The data rows of a data table (the empty message row excluded), from its client id. */
 	/** Defines {@code rows}: the data rows of the grid {@code arguments[0]}, a PrimeFaces data table or a Vue list grid. */
 	private static final String ROWS_JS = "var t = document.getElementById(arguments[0]); if (! t) return null;" +
 											"var body = t.querySelector('tbody.ui-datatable-data') || t.querySelector('tbody.p-datatable-tbody');" +
@@ -1239,13 +1239,13 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public enum VueFilterInput {
 		/** Typed into a text input (text and numeric columns). */
-		text,
+		TEXT,
 		/** Chosen from a drop down by its label (enum columns). */
-		option,
+		OPTION,
 		/** A tri-state check box clicked until it shows True or False (boolean columns). */
-		check,
+		CHECK,
 		/** Typed into a calendar's input in the calendar's format, then Enter (date, date time, time and timestamp columns). */
-		calendar
+		CALENDAR
 	}
 
 	/**
@@ -1322,28 +1322,28 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	private void enterVueFilterValue(@Nonnull String overlayId, @Nonnull String what, @Nonnull String value, @Nonnull VueFilterInput input) {
 		String selector = switch (input) {
-			case text -> "input.p-column-filter";
-			case option -> ".p-dropdown:not(.p-column-filter-matchmode-dropdown)";
-			case check -> ".p-tristatecheckbox";
-			case calendar -> ".p-calendar input";
+			case TEXT -> "input.p-column-filter";
+			case OPTION -> ".p-dropdown:not(.p-column-filter-matchmode-dropdown)";
+			case CHECK -> ".p-tristatecheckbox";
+			case CALENDAR -> ".p-calendar input";
 		};
 		WebElement element = (WebElement) js("return document.getElementById(arguments[0]).querySelector('.p-column-filter-constraint ' + arguments[1]);",
 												overlayId, selector);
 		if (element == null) {
-			throw new IllegalStateException(String.format("The filter menu of %s has no %s input", what, input));
+			throw new IllegalStateException(String.format("The filter menu of %s has no %s input", what, input.name().toLowerCase()));
 		}
 		switch (input) {
-			case text -> {
+			case TEXT -> {
 				trace("    type " + value);
 				click($(element));
 				element.sendKeys(Keys.chord(selectAllKey(), "a"));
 				element.sendKeys(value);
 			}
-			case option -> {
+			case OPTION -> {
 				trace("    choose " + value);
 				chooseVueDropdownOption(element, value);
 			}
-			case check -> {
+			case CHECK -> {
 				// The check box cycles through Not Selected, True and False; its status says which it shows
 				String wanted = Boolean.parseBoolean(value) ? "True" : "False";
 				for (int clicks = 0; clicks <= 3; clicks++) {
@@ -1358,7 +1358,7 @@ public class PrimeFacesSelenide extends Selenide<
 					click($(element));
 				}
 			}
-			case calendar -> {
+			case CALENDAR -> {
 				trace("    type " + value + " into the calendar, then Enter");
 				click($(element));
 				element.sendKeys(Keys.chord(selectAllKey(), "a"));
@@ -1372,6 +1372,7 @@ public class PrimeFacesSelenide extends Selenide<
 																	what, value, element.getDomProperty("value")), e);
 				}
 			}
+			default -> throw new IllegalArgumentException("Unknown filter input " + input);
 		}
 	}
 
@@ -1783,7 +1784,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	@SuppressWarnings("unchecked")
 	public @Nonnull List<Boolean> widgetState(@Nonnull String id) {
-		return (List<Boolean>) js("var e = document.getElementById(arguments[0]) || document.getElementById(arguments[0] + '_input');" +
+		return (List<Boolean>) Objects.requireNonNull(js("var e = document.getElementById(arguments[0]) || document.getElementById(arguments[0] + '_input');" +
 									"if (! e) return [false, false];" +
 									"var shown = (e.offsetParent !== null) || (e.getClientRects().length > 0);" +
 									"if ((! shown) && e.type === 'hidden') {var p = e.parentElement; shown = !! p && ((p.offsetParent !== null) || (p.getClientRects().length > 0));}" +
@@ -1791,7 +1792,7 @@ public class PrimeFacesSelenide extends Selenide<
 									"var disabled = e.disabled || input.disabled || e.classList.contains('ui-state-disabled') || " +
 									"  !! e.querySelector('.ui-state-disabled:not(.ui-fileupload-upload):not(.ui-fileupload-cancel)') || " +
 									"  input.readOnly && (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') && input.type !== 'hidden' && ! input.classList.contains('ui-chkbox') && ! /_input$/.test(input.id);" +
-									"return [shown, shown && ! disabled];", id);
+									"return [shown, shown && ! disabled];", id));
 	}
 
 	/**
@@ -1802,12 +1803,12 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	@SuppressWarnings("unchecked")
 	public @Nonnull List<Boolean> tabState(@Nonnull String panelId) {
-		return (List<Boolean>) js("var href = '#' + arguments[0], a = null;" +
+		return (List<Boolean>) Objects.requireNonNull(js("var href = '#' + arguments[0], a = null;" +
 									"var as = document.querySelectorAll('a[href]'); for (var i = 0; i < as.length; i++) {if (as[i].getAttribute('href') === href) {a = as[i]; break;}}" +
 									"if (! a) return [false, false];" +
 									"var li = a.closest('li') || a;" +
 									"var shown = (li.offsetParent !== null) || (li.getClientRects().length > 0);" +
-									"return [shown, shown && ! li.classList.contains('ui-state-disabled')];", panelId);
+									"return [shown, shown && ! li.classList.contains('ui-state-disabled')];", panelId));
 	}
 
 	/**
@@ -2330,7 +2331,7 @@ public class PrimeFacesSelenide extends Selenide<
 		}
 		trace("    upload pressed");
 		// Wait for the upload's response: the page closes the upload page when the upload has succeeded; if it does not
-		// (a refusal, or a Skyve without runtime issue P3's fix), the upload page's growl says how it went. The growl of a
+		// (a refusal, or an older Skyve that leaves the page open), the upload page's growl says how it went. The growl of a
 		// success shows while the page closes, so a page that is closing is waited for until it has closed. The response
 		// shows the growl and starts the close in one go, so the growl is read first, then the page's state in one script:
 		// a growl with the page shown and not closing means that the page stays open.
@@ -2355,7 +2356,7 @@ public class PrimeFacesSelenide extends Selenide<
 			return outcome.get(1);
 		}
 		if ("info".equals(outcome.get(0))) {
-			// A Skyve without runtime issue P3's fix (such as master, which Apps' A/B runs drive with this harness) leaves
+			// An older Skyve (such as master, which Apps' A/B runs drive with this harness) leaves
 			// an action upload's page open after it succeeds. A user closes it with its close icon, so press that; with no
 			// close icon the step fails. The kitchen sinks' Skyve closes the page itself, so this is not reached there.
 			trace("    the upload page stayed open, saying: " + outcome.get(1) + " - close it with its close icon");

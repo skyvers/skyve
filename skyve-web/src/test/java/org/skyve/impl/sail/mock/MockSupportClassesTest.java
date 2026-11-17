@@ -31,7 +31,7 @@ class MockSupportClassesTest {
 
 	@Test
 	@SuppressWarnings("null")
-	void mockWebContextNoOpsAndCollectionsAreStable() throws Exception {
+	void mockWebContextNoOpsAndCollectionsAreStable() {
 		MockWebContext context = new MockWebContext();
 
 		assertNotNull(context.getSessionId());

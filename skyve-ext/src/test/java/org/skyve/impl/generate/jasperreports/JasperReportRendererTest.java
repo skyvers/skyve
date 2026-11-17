@@ -282,7 +282,8 @@ class JasperReportRendererTest {
 	@Test
 	void getListModelWithoutAQueryOrDocumentNameThrowsIllegalArgument() throws Exception {
 		Customer customer = mock(Customer.class);
-		when(customer.getModule("sales")).thenReturn(mock(Module.class));
+		Module module = mock(Module.class);
+		when(customer.getModule("sales")).thenReturn(module);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		when(persistence.getUser()).thenReturn(user);

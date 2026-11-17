@@ -1921,7 +1921,7 @@ isc.BizListGrid.addMethods({
 	 * Refreshes the list view by deselecting all records, invalidating the cache,
 	 * applying the appropriate filter criteria, and scrolling to the top row.
 	 * The selected event does not run for the refresh, as the user selected nothing: a selected event that rerenders the
-	 * view refreshes its list grids, so it would run again for ever (runtime issue SC-10). Once the rows are in, the row
+	 * view refreshes its list grids, so it would run again for ever. Once the rows are in, the row
 	 * of the view's selectedIdBinding is selected again, as a data grid's is on a scatter, so a refresh keeps the user's
 	 * selection; if that row has gone, the binding is cleared, so that it holds no row the grid does not show. On a paged
 	 * list whose rows are not all fetched, a row that is not among them may be on another page, so the binding is kept.

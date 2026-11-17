@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 @SuppressWarnings("static-method")
 class DeployedItStructureTest {
 	private static final Path REPOSITORY = Path.of("..").toAbsolutePath().normalize();
+	private static final Pattern COMMIT_SHA = Pattern.compile("[0-9a-f]{40}");
 	private static final Pattern ACTION = Pattern.compile("uses:\\s*[^@\\s]+@([^\\s#]+)");
 
 	@Test
@@ -153,7 +154,7 @@ class DeployedItStructureTest {
 		}
 		assertFalse(versions.isEmpty());
 		for (String version : versions) {
-			assertTrue(version.matches("[0-9a-f]{40}"), version);
+			assertTrue(COMMIT_SHA.matcher(version).matches(), version);
 		}
 	}
 

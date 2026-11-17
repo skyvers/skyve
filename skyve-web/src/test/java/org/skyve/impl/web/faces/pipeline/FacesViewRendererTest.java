@@ -1060,8 +1060,9 @@ class FacesViewRendererTest {
 				assertProducesNo("text", r -> r.renderFormTextField(new TextField())),
 				() -> {
 					FacesViewRenderer renderer = newRenderer(createView(null), null, mock(ComponentBuilder.class), mock(LayoutBuilder.class));
+					ContentSignature signature = new ContentSignature();
 					IllegalStateException e = assertThrows(IllegalStateException.class,
-															() -> renderer.renderFormContentSignature(new ContentSignature()),
+															() -> renderer.renderFormContentSignature(signature),
 															"contentSignatureLayout");
 					assertEquals("The layout builder produced no contentSignatureLayout component", e.getMessage());
 				});

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.Map;
@@ -45,7 +46,8 @@ class DataBuilderTest {
 
 	private static DataBuilder newBuilderWithMockUser() {
 		User user = mock(User.class);
-		when(user.getCustomer()).thenReturn(mock(org.skyve.metadata.customer.Customer.class));
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
 		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
 		persistence.setForThread();
@@ -731,22 +733,24 @@ class DataBuilderTest {
 			DataBuilder.setTrace(true);
 			assertThat(getField(DataBuilder.class, "trace"), is((Object) Boolean.TRUE));
 
-				Method method = DataBuilder.class.getDeclaredMethod("trace", StringBuilder.class, int.class);
-				method.setAccessible(true);
+			Method method = DataBuilder.class.getDeclaredMethod("trace", StringBuilder.class, int.class);
+			method.setAccessible(true);
 
-				PrintStream originalOut = System.out;
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				try (PrintStream printStream = new PrintStream(out)) {
-					System.setOut(printStream);
-					method.invoke(null, new StringBuilder("line"), Integer.valueOf(2));
-				}
-				finally {
+			PrintStream originalOut = System.out;
+			String output;
+			try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+					PrintStream printStream = new PrintStream(out)) {
+				System.setOut(printStream);
+				method.invoke(null, new StringBuilder("line"), Integer.valueOf(2));
+				output = out.toString();
+			}
+			finally {
 				System.setOut(originalOut);
 			}
 
-			assertThat(out.toString(), is("        line\n"));
+			assertThat(output, is("        line\n"));
 		}
-		catch (ReflectiveOperationException e) {
+		catch (ReflectiveOperationException | IOException e) {
 			throw new AssertionError(e);
 		}
 		finally {

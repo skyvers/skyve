@@ -2306,7 +2306,7 @@ isc.BizTabPane.addMethods({
 	 * Handles the selection of a tab.
 	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record tabSelect when the user selects a tab.
 	 * The tab number goes into the view's values at the selectedTabIndexBinding, if there is one, so that the next request
-	 * sends it and the response, which selects the bound tab, keeps the user's tab (runtime issue SC-7). A tab that a
+	 * sends it and the response, which selects the bound tab, keeps the user's tab. A tab that a
 	 * response selects is the bound tab already. Selecting a tab does not make an unchanged view dirty, as selecting a
 	 * list grid row with a selectedIdBinding does not.
 	 *

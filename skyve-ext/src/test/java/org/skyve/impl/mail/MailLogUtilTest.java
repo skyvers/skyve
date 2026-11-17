@@ -6,8 +6,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,7 +26,6 @@ import java.util.zip.ZipInputStream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.MimeType;
 import org.skyve.domain.app.admin.MailLog;
@@ -434,9 +435,9 @@ class MailLogUtilTest {
 	@SuppressWarnings("static-method")
 	@Test
 	void testCreateMailLogUserUsesCurrentUserId() throws Exception {
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.getId()).thenReturn("user-1");
-		Mockito.when(user.getCustomerName()).thenReturn("customer-1");
+		User user = mock(User.class);
+		when(user.getId()).thenReturn("user-1");
+		when(user.getCustomerName()).thenReturn("customer-1");
 
 		SuperUser result = (SuperUser) invokePrivate("createMailLogUser", new Class<?>[] { User.class }, user);
 
@@ -451,9 +452,9 @@ class MailLogUtilTest {
 		String originalCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = "fallback-customer";
-			User user = Mockito.mock(User.class);
-			Mockito.when(user.getId()).thenReturn(null);
-			Mockito.when(user.getCustomerName()).thenReturn(null);
+			User user = mock(User.class);
+			when(user.getId()).thenReturn(null);
+			when(user.getCustomerName()).thenReturn(null);
 
 			SuperUser result = (SuperUser) invokePrivate("createMailLogUser", new Class<?>[] { User.class }, user);
 
@@ -472,9 +473,9 @@ class MailLogUtilTest {
 		String originalCustomer = UtilImpl.CUSTOMER;
 		try {
 			UtilImpl.CUSTOMER = null;
-			User user = Mockito.mock(User.class);
-			Mockito.when(user.getId()).thenReturn(null);
-			Mockito.when(user.getCustomerName()).thenReturn(null);
+			User user = mock(User.class);
+			when(user.getId()).thenReturn(null);
+			when(user.getCustomerName()).thenReturn(null);
 
 			Object result = invokePrivate("createMailLogUser", new Class<?>[] { User.class }, user);
 
@@ -683,12 +684,12 @@ class MailLogUtilTest {
 	}
 
 	private static MailLog mockMailLog() {
-		MailLog log = Mockito.mock(MailLog.class);
-		Mockito.when(log.getBizCustomer()).thenReturn("demo");
-		Mockito.when(log.getBizModule()).thenReturn("admin");
-		Mockito.when(log.getBizDocument()).thenReturn("MailLog");
-		Mockito.when(log.getBizUserId()).thenReturn("user-1");
-		Mockito.when(log.getBizId()).thenReturn("log-1");
+		MailLog log = mock(MailLog.class);
+		when(log.getBizCustomer()).thenReturn("demo");
+		when(log.getBizModule()).thenReturn("admin");
+		when(log.getBizDocument()).thenReturn("MailLog");
+		when(log.getBizUserId()).thenReturn("user-1");
+		when(log.getBizId()).thenReturn("log-1");
 		return log;
 	}
 

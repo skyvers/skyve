@@ -1,8 +1,10 @@
 package org.skyve.impl.web.filter.rest;
 
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -190,11 +192,11 @@ class SessionFilterTest {
 		when(request.getLocale()).thenReturn(Locale.ENGLISH);
 		when(session.getId()).thenReturn("session-rest-2");
 		StateUtil.addSession(USER_ID, session);
-		org.mockito.Mockito.doThrow(new ServletException("boom")).when(chain).doFilter(request, response);
+		doThrow(new ServletException("boom")).when(chain).doFilter(request, response);
 
 		filter.doFilter(request, response, chain);
 
-		verify(persistence, org.mockito.Mockito.times(2)).rollback();
+		verify(persistence, times(2)).rollback();
 		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		verify(persistence).commit(true);
 	}
@@ -225,7 +227,7 @@ class SessionFilterTest {
 
 		verify(chain, never()).doFilter(request, response);
 		verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-		verify(persistence, org.mockito.Mockito.times(2)).rollback();
+		verify(persistence, times(2)).rollback();
 		verify(persistence).commit(true);
 	}
 

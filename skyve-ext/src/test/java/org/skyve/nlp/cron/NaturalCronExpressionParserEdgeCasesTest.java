@@ -27,7 +27,8 @@ class NaturalCronExpressionParserEdgeCasesTest {
 	@SuppressWarnings("static-method")
 	void testParseUnparsableThrowsException() {
 		// unparsable string → throws CronParserException (covers L140)
-		assertThrows(CronParserException.class, () -> new NaturalCronExpressionParser().parse("xyz abc 123 qrs"));
+		NaturalCronExpressionParser parser = new NaturalCronExpressionParser();
+		assertThrows(CronParserException.class, () -> parser.parse("xyz abc 123 qrs"));
 	}
 
 	@Test

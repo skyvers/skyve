@@ -294,6 +294,7 @@ class SailLanguageXmlTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // one named test per schema rule reads more clearly than a parameterized table of XML snippets
 	void unknownFilterOperatorIsRejectedByTheSchema() {
 		String xml = HEAD + "<listGridFilter query=\"q\" column=\"c\" value=\"v\" operator=\"like\"/>" + TAIL;
 		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(xml));
@@ -498,11 +499,14 @@ class SailLanguageXmlTest {
 	void navigateLinkNeedsExactlyOneOfHrefAndText() {
 		String xml = HEAD + "<navigateLink/><navigateLink href=\"?a=l\" text=\"Open\"/><navigateLink text=\"Open\"/>" + TAIL;
 		List<Step> steps = XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps();
+		Step neither = steps.get(0);
+		Step both = steps.get(1);
+		Step textOnly = steps.get(2);
 		Executor executor = mock(Executor.class);
-		assertAll(() -> assertThrows(MetaDataException.class, () -> steps.get(0).execute(executor)),
-					() -> assertThrows(MetaDataException.class, () -> steps.get(1).execute(executor)),
-					() -> assertDoesNotThrow(() -> steps.get(2).execute(executor)));
-		verify(executor).executeNavigateLink((NavigateLink) steps.get(2));
+		assertAll(() -> assertThrows(MetaDataException.class, () -> neither.execute(executor)),
+					() -> assertThrows(MetaDataException.class, () -> both.execute(executor)),
+					() -> assertDoesNotThrow(() -> textOnly.execute(executor)));
+		verify(executor).executeNavigateLink((NavigateLink) textOnly);
 	}
 
 	private static final String WINDOWS_AND_TOOLS = HEAD +
@@ -606,8 +610,8 @@ class SailLanguageXmlTest {
 	}
 
 	private static String resource(String name) throws java.io.IOException {
-		try (java.io.InputStream in = SailLanguageXmlTest.class.getResourceAsStream(name)) {
-			return new String(java.util.Objects.requireNonNull(in, name).readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+		try (java.io.InputStream in = java.util.Objects.requireNonNull(SailLanguageXmlTest.class.getResourceAsStream(name), name)) {
+			return new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
 		}
 	}
 

@@ -564,7 +564,8 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 
 		SaveAction action = new SaveAction(facesView, false);
 		assertThrows(ClassCastException.class, action::callback);
@@ -735,7 +736,8 @@ class FacesActionsCoverageTest {
 		currentBean = bean;
 		currentFacesView = mock(FacesView.class);
 		when(currentFacesView.getBean()).thenReturn(bean);
-		when(currentFacesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(currentFacesView.getWebContext()).thenReturn(webContext);
 		return persistence;
 	}
 
@@ -763,7 +765,8 @@ class FacesActionsCoverageTest {
 
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 
 		SaveAction action = new SaveAction(facesView, true);
 		assertThrows(ClassCastException.class, action::callback);
@@ -1044,7 +1047,8 @@ class FacesActionsCoverageTest {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(rootBean);
 		when(facesView.getViewBinding()).thenReturn("child");
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 
 		RemoveAction action = new RemoveAction(facesView, null, null, null);
 		assertThrows(ClassCastException.class, action::callback);
@@ -1081,7 +1085,8 @@ class FacesActionsCoverageTest {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getBean()).thenReturn(rootBean);
 		when(facesView.getViewBinding()).thenReturn("child");
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 
 		RemoveAction action = new RemoveAction(facesView, null, null, null);
 		assertThrows(NullPointerException.class, action::callback);
@@ -1145,7 +1150,8 @@ class FacesActionsCoverageTest {
 	@Test
 	void executeActionActionRefusesAnImplicitAction() {
 		View view = mockActionView();
-		when(view.getAction("myAction")).thenReturn(mock(Action.class));
+		Action viewAction = mock(Action.class);
+		when(view.getAction("myAction")).thenReturn(viewAction);
 
 		assertRefusedWithASecurityException(new ExecuteActionAction(currentFacesView, "myAction", null, null)::callback);
 	}
@@ -1163,7 +1169,8 @@ class FacesActionsCoverageTest {
 	@Test
 	void executeDownloadActionRefusesAnImplicitAction() {
 		View view = mockActionView();
-		when(view.getAction("myAction")).thenReturn(mock(Action.class));
+		Action viewAction = mock(Action.class);
+		when(view.getAction("myAction")).thenReturn(viewAction);
 
 		assertRefusedWithASecurityException(new ExecuteDownloadAction(currentFacesView, "myAction", null, null)::callback);
 	}
@@ -1341,7 +1348,8 @@ class FacesActionsCoverageTest {
 	void executeActionActionRefusesAViewWhoseBeanIsGoneBeforeExecuting() throws Exception {
 		Bean bean = mock(Bean.class);
 		FacesView facesView = mockExecutableActionView(bean);
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 		when(facesView.getBean()).thenReturn(bean, (Bean) null);
 
 		assertIllegalState("Cannot execute action myAction as the FacesView has no bean",
@@ -1471,7 +1479,8 @@ class FacesActionsCoverageTest {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getCurrentBean()).thenReturn(new BeanMapAdapter(null, null));
 		when(facesView.getZoomInBindings()).thenReturn(zoomInBindings);
-		when(facesView.getUser()).thenReturn(mock(User.class));
+		User user = mock(User.class);
+		when(facesView.getUser()).thenReturn(user);
 
 		assertIllegalState("Cannot instantiate itemsElementById(e1) as the FacesView has no parent bean",
 							new ZoomInAction(facesView, "items", "e1")::callback);
@@ -1523,7 +1532,8 @@ class FacesActionsCoverageTest {
 		FacesView facesView = mock(FacesView.class);
 		when(facesView.getZoomInBindings()).thenReturn(new ArrayDeque<>());
 		when(facesView.getBean()).thenReturn(bean);
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 
 		assertIllegalState("Cannot zoom out as the FacesView has no view binding", new ZoomOutAction(facesView)::callback);
 		verify(facesView).setBean(bean);
@@ -1572,7 +1582,8 @@ class FacesActionsCoverageTest {
 	void addActionRefusesAViewWithNoWebContext() {
 		setThreadPersistenceWithAUser();
 		FacesView facesView = mock(FacesView.class);
-		when(facesView.getBean()).thenReturn(mock(Bean.class));
+		Bean bean = mock(Bean.class);
+		when(facesView.getBean()).thenReturn(bean);
 		when(facesView.getCurrentBean()).thenReturn(new BeanMapAdapter(mock(Bean.class), null));
 
 		assertIllegalState("Cannot add to items as the FacesView has no web context", new AddAction(facesView, "items", true)::callback);
@@ -1585,9 +1596,11 @@ class FacesActionsCoverageTest {
 		when(user.getCustomer()).thenThrow(adding);
 		bindPersistenceForUser(user);
 		FacesView facesView = mock(FacesView.class);
-		when(facesView.getBean()).thenReturn(mock(Bean.class));
+		Bean bean = mock(Bean.class);
+		when(facesView.getBean()).thenReturn(bean);
 		when(facesView.getCurrentBean()).thenReturn(new BeanMapAdapter(mock(Bean.class), null));
-		when(facesView.getWebContext()).thenReturn(mock(AbstractWebContext.class));
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		when(facesView.getWebContext()).thenReturn(webContext);
 
 		// WebUtil.addNewElement() starts by resolving the user's customer
 		IllegalStateException e = assertThrows(IllegalStateException.class, new AddAction(facesView, "items", true)::callback);
@@ -1670,7 +1683,8 @@ class FacesActionsCoverageTest {
 		when(externalContext.getSessionMap()).thenReturn(sessionMap);
 		FacesContext context = mock(FacesContext.class);
 		when(context.getExternalContext()).thenReturn(externalContext);
-		when(context.getViewRoot()).thenReturn(mock(UIViewRoot.class));
+		UIViewRoot viewRoot = mock(UIViewRoot.class);
+		when(context.getViewRoot()).thenReturn(viewRoot);
 		FacesContextBridge.setCurrent(context);
 		WebContainer.setHttpServletRequestResponse(request, mock(HttpServletResponse.class));
 	}

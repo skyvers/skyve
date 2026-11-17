@@ -5,6 +5,8 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -12,7 +14,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.customer.Customer;
@@ -63,11 +64,11 @@ class UserAttributesExpressionEvaluatorTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void evaluateReturnsAttributeValue() throws Exception {
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.getAttributes()).thenReturn(Map.of("region", "EMEA"));
+		User user = mock(User.class);
+		when(user.getAttributes()).thenReturn(Map.of("region", "EMEA"));
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			UserAttributesExpressionEvaluator evaluator = new UserAttributesExpressionEvaluator();
@@ -82,13 +83,13 @@ class UserAttributesExpressionEvaluatorTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void formatReturnsDisplayValueForUserAttribute() throws Exception {
-		User user = Mockito.mock(User.class);
-		Mockito.when(user.getAttributes()).thenReturn(Map.of("region", "APAC"));
-		Customer c = Mockito.mock(Customer.class);
-		Mockito.when(user.getCustomer()).thenReturn(c);
+		User user = mock(User.class);
+		when(user.getAttributes()).thenReturn(Map.of("region", "APAC"));
+		Customer c = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(c);
 
-		AbstractPersistence persistence = Mockito.mock(AbstractPersistence.class);
-		Mockito.when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		when(persistence.getUser()).thenReturn(user);
 		ThreadLocalPersistenceTestUtil.setThreadLocalPersistence(persistence);
 		try {
 			UserAttributesExpressionEvaluator evaluator = new UserAttributesExpressionEvaluator();

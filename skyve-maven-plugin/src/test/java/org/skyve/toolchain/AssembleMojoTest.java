@@ -1,6 +1,8 @@
 package org.skyve.toolchain;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.impl.create.MavenSkyveProject;
 import org.skyve.impl.create.MavenSkyveProject.MavenSkyveProjectCreator;
 
@@ -62,13 +63,13 @@ class AssembleMojoTest {
 	@Test
 	void assembleDelegatesToMavenSkyveProject() throws Exception {
 		AssembleMojo mojo = new AssembleMojo();
-		MavenSkyveProject project = Mockito.mock(MavenSkyveProject.class);
+		MavenSkyveProject project = mock(MavenSkyveProject.class);
 
 		mojo.clearBeforeAssemble(project);
 		mojo.assemble(project);
 
-		Mockito.verify(project).clearBeforeAssemble();
-		Mockito.verify(project).assemble();
+		verify(project).clearBeforeAssemble();
+		verify(project).assemble();
 	}
 
 

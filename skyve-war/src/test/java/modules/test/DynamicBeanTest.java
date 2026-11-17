@@ -53,13 +53,7 @@ class DynamicBeanTest extends AbstractSkyveTest {
 		Assertions.assertTrue(contact.isDynamic(ONE), "Is a dynamic property");
 		contact.setDynamic(ONE, THREE);
 		Assertions.assertEquals(THREE, contact.getDynamic(ONE), "Dynamic Property set correctly");
-		try {
-			contact.getDynamic(THREE);
-			Assertions.fail("Not a property");
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing
-		}
+		Assertions.assertThrows(IllegalArgumentException.class, () -> contact.getDynamic(THREE), "Not a property");
 		Assertions.assertFalse(contact.isDynamic(THREE), "Not a property");
 	}
 

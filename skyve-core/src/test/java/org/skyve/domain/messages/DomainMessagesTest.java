@@ -462,6 +462,7 @@ class DomainMessagesTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S3415") // the object under test goes first so that its equals() is the one called
 	void uploadExceptionProblemEqualsReturnsFalseForNonProblem() {
 		UploadException.Problem p = new UploadException.Problem("broken", "line 5");
 		assertNotEquals(p, "notAProblem");

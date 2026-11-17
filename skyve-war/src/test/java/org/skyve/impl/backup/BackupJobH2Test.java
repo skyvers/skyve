@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.Map;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
@@ -85,7 +86,7 @@ class BackupJobH2Test extends AbstractSkyveTest {
 			dateAttribute.setSensitivity(Sensitivity.secret);
 			timeAttribute.setSensitivity(Sensitivity.secret);
 			AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
-			bean.setDate(new DateOnly(LocalDate.of(2024, 3, 15)));
+			bean.setDate(new DateOnly(LocalDate.of(2024, Month.MARCH, 15)));
 			bean.setTime(new TimeOnly(10, 37, 42));
 			bean = p.save(bean);
 			String bizId = bean.getBizId();

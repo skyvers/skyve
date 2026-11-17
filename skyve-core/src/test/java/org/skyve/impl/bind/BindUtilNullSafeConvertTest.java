@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -318,7 +319,7 @@ class BindUtilNullSafeConvertTest {
 	@Test
 	void nullSafeConvertGeometryFromNonStringReturnsSameObject() {
 		// When value is not a String, the geometry branch does nothing – returns as-is
-		Geometry mockGeometry = org.mockito.Mockito.mock(Geometry.class);
+		Geometry mockGeometry = mock(Geometry.class);
 		Object result = BindUtil.nullSafeConvert(Geometry.class, mockGeometry);
 		assertSame(mockGeometry, result);
 	}

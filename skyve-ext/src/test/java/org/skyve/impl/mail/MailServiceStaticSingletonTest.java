@@ -36,12 +36,12 @@ class MailServiceStaticSingletonTest {
 
 	@Test
 	void getThrowsWhenNotInitialised() {
-		assertThrows(IllegalStateException.class, () -> MailServiceStaticSingleton.get());
+		assertThrows(IllegalStateException.class, MailServiceStaticSingleton::get);
 	}
 
 	@Test
 	void getEffectiveThrowsWhenNotInitialised() {
-		assertThrows(IllegalStateException.class, () -> MailServiceStaticSingleton.getEffective());
+		assertThrows(IllegalStateException.class, MailServiceStaticSingleton::getEffective);
 	}
 
 	@Test

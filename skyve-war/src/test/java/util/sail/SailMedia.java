@@ -634,7 +634,6 @@ public final class SailMedia {
 		private final List<Frame> frames;
 		private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
 		/** Writes frames in order, off the test thread and off the CDP connection's thread. */
-		@SuppressWarnings("resource") // shut down by stop()
 		private final ExecutorService worker = Executors.newSingleThreadExecutor(r -> {
 			Thread result = new Thread(r, "sail-screencast");
 			result.setDaemon(true);

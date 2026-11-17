@@ -5,8 +5,8 @@ import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
@@ -46,13 +46,8 @@ class JobTest {
 		parent.setBean(bean);
 		parent.getLog().add("seed");
 
-		try {
-			parent.execute(child);
-			fail("Expected injection failure without CDI container");
-		}
-		catch (Exception e) {
-			assertTrue(e instanceof IllegalStateException);
-		}
+		// injection fails without a CDI container
+		assertThrows(IllegalStateException.class, () -> parent.execute(child));
 
 		assertThat(child.getBean(), is(sameInstance(bean)));
 		assertThat(child.getLog(), is(sameInstance(parent.getLog())));

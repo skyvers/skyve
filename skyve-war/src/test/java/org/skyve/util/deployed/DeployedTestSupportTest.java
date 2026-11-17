@@ -35,8 +35,8 @@ class DeployedTestSupportTest {
 		assertEquals(URI.create("https://example.test/app/"), configuration.getBaseUrl());
 		assertEquals(Duration.ofSeconds(45), configuration.getTimeout());
 		assertFalse(configuration.isHeadless());
-		assertThrows(IllegalArgumentException.class,
-				() -> DeployedTestConfiguration.from(Map.of("SKYVE_DEPLOYED_IT_BASE_URL", "file:/tmp/app")));
+		Map<String, String> unsafe = Map.of("SKYVE_DEPLOYED_IT_BASE_URL", "file:/tmp/app");
+		assertThrows(IllegalArgumentException.class, () -> DeployedTestConfiguration.from(unsafe));
 	}
 
 	@Test

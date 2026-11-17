@@ -630,8 +630,9 @@ class ViewJSONManipulatorCoreTest {
 	@Test
 	void visitComparisonWithoutABindingIsAMetaDataError() {
 		ViewJSONManipulator manipulator = comparisonManipulator(false);
+		Comparison comparison = new Comparison();
 
-		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(new Comparison(), true, true));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> manipulator.visitComparison(comparison, true, true));
 
 		assertEquals("A comparison in view edit has no binding", e.getMessage());
 	}
@@ -1356,7 +1357,8 @@ class ViewJSONManipulatorCoreTest {
 		Reference reference = mock(Reference.class);
 		when(reference.getDocumentName()).thenReturn("RelatedDoc");
 		when(document.getNullSafeReferenceByName("association")).thenReturn(reference);
-		when(module.getDocument(customer, "RelatedDoc")).thenReturn(mock(DocumentImpl.class));
+		DocumentImpl relatedDocument = mock(DocumentImpl.class);
+		when(module.getDocument(customer, "RelatedDoc")).thenReturn(relatedDocument);
 		TestOwnerBean owner = new TestOwnerBean();
 		owner.setBizId("owner-1");
 		return new ViewJSONManipulator(user, module, document, testView(ViewType.edit.toString()), "external", owner, 0, 0, forApply);

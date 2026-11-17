@@ -80,6 +80,7 @@ class MockExternalContextTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5961") // one fixture checked through every view the external context offers onto it
 	void servletObjectsBackExternalContextState() throws Exception {
 		MockServletContext servletContext = new MockServletContext();
 		MockHttpServletRequest request = new MockHttpServletRequest(servletContext);

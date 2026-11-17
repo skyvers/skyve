@@ -44,12 +44,12 @@ class DocumentReportDesignGeneratorH2Test extends AbstractH2Test {
 		DocumentReportDesignGenerator gen = new DocumentReportDesignGenerator();
 		DesignSpecification result = gen.populateDesign(spec);
 
-		boolean hasSUBREPORT_DIR = result.getParameters().stream().anyMatch(p -> "SUBREPORT_DIR".equals(p.getName()));
-		boolean hasRESOURCE_DIR = result.getParameters().stream().anyMatch(p -> "RESOURCE_DIR".equals(p.getName()));
+		boolean hasSubreportDir = result.getParameters().stream().anyMatch(p -> "SUBREPORT_DIR".equals(p.getName()));
+		boolean hasResourceDir = result.getParameters().stream().anyMatch(p -> "RESOURCE_DIR".equals(p.getName()));
 		boolean hasID = result.getParameters().stream().anyMatch(p -> "ID".equals(p.getName()));
 
-		assertTrue(hasSUBREPORT_DIR, "missing SUBREPORT_DIR parameter");
-		assertTrue(hasRESOURCE_DIR, "missing RESOURCE_DIR parameter");
+		assertTrue(hasSubreportDir, "missing SUBREPORT_DIR parameter");
+		assertTrue(hasResourceDir, "missing RESOURCE_DIR parameter");
 		assertTrue(hasID, "missing ID parameter");
 	}
 
