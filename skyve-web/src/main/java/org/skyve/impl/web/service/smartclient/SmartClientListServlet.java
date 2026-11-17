@@ -961,11 +961,11 @@ public class SmartClientListServlet extends HttpServlet {
 		// empty InMemoryFilter's predicate is always true, so the OR would match every row).
 		for (Map<String, Object> criterion : criteria) {
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = {}", JSON.marshall(criterion));
-			String binding = (String) criterion.get("fieldName");
-			binding = BindUtil.unsanitiseBinding(binding);
+			// a criterion without a field name is a group (nested advanced criteria)
+			String fieldName = BindUtil.unsanitiseBinding((String) criterion.get("fieldName"));
 			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get(OPERATOR_FIELD));
 
-			if (binding == null) { // advanced criteria
+			if (fieldName == null) { // advanced criteria
 				Filter subFilter = nonNullFilter(model.newFilter(), model);
 				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 				@SuppressWarnings("unchecked")
@@ -1008,6 +1008,7 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 			else { // simple criteria
+				String binding = fieldName;
 				Object value = criterion.get(VALUE_FIELD);
 				String valueString = null;
 				if (value != null) {
@@ -1053,6 +1054,7 @@ public class SmartClientListServlet extends HttpServlet {
 							// Translate variant domain filters to a set of codes to search for
 							if (! parameter) {
 								if ((valueString != null) && (domainType == DomainType.variant)) {
+									// at most 100 codes: a negated filter by more matching descriptions lets the rest through
 									variantCodes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
 								}
 							}
@@ -1423,11 +1425,9 @@ public class SmartClientListServlet extends HttpServlet {
 	 * (betweenInclusive), at or before its start or at or after its end for an exclusive one (between). A missing end is
 	 * open, so it adds nothing on that side.
 	 *
-	 * @param binding the filtered binding
 	 * @param start the range's start, or null
 	 * @param end the range's end, or null
 	 * @param inclusive whether the range includes its ends
-	 * @param tagId optional tag identifier
 	 * @param filter the filter that gets the negation (ANDed)
 	 * @param model the list model, for a new filter
 	 */

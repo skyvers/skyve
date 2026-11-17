@@ -652,6 +652,8 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 				codes.add(value.getCode());
 			}
 		}
+		// At most 100 codes: a filter by more matching descriptions misses the rest, and a negated one ("not in" these
+		// codes, as SmartClient's Match None and notEqual are) lets the rest through
 		int length = Math.min(codes.size(), 100);
 		AttributeType attributeType = attribute.getAttributeType();
 		Class<?> implementingType = attribute.getImplementingType();
