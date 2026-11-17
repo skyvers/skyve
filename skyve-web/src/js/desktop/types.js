@@ -1668,47 +1668,101 @@ isc.SimpleType.create({
  */
 isc.ClassFactory.defineClass("BizDecimal2Item", "TextItem");
 
+isc.BizDecimal2Item.addClassProperties({
+	_numberFormats: {}, // Intl number formats by places and style, made as they are needed
+});
+
 isc.BizDecimal2Item.addClassMethods({
 	/**
-	 * Parses the input value into a decimal number.
+	 * Returns an Intl number format for a number of places (en-US, as Skyve's converters write numbers: 1,234.56): it
+	 * rounds half up (away from zero) from the number's shortest decimal (1.005 is 1.01, not the 1.00 of its binary
+	 * fraction), and a value that rounds to zero shows no sign (0.00, not -0.00).
+	 *
+	 * @param {number} places - the decimal places shown.
+	 * @param {boolean} percent - true for a percentage (the value times 100 with a %).
+	 * @returns {Intl.NumberFormat} - the format.
+	 */
+	numberFormat: function (places, percent) {
+		const key = places + (percent ? "%" : "");
+		let result = isc.BizDecimal2Item._numberFormats[key];
+		if (!result) {
+			result = new Intl.NumberFormat("en-US", {
+				style: percent ? "percent" : "decimal",
+				minimumFractionDigits: places,
+				maximumFractionDigits: places,
+				roundingMode: "halfExpand",
+				signDisplay: "negative",
+			});
+			isc.BizDecimal2Item._numberFormats[key] = result;
+		}
+		return result;
+	},
+
+	/**
+	 * Reads a decimal number as the Java converters do: an optional -, digits with optional , grouping (read leniently)
+	 * and an optional . with places; anything else (a +, an exponent, other text) is not a number.
+	 *
+	 * @param {string} text - the trimmed text.
+	 * @returns {string|null} - the number's text without grouping, or null if it is not a number.
+	 */
+	numberText: function (text) {
+		if (!/^-?(\d[\d,]*)?(\.\d*)?$/.test(text) || !/\d/.test(text)) {
+			return null;
+		}
+		return text.replace(/,/g, "");
+	},
+
+	/**
+	 * Rounds a number's text half up (away from zero) to a number of places, from its decimal digits.
+	 *
+	 * @param {string} text - the number's text, without grouping.
+	 * @param {number} places - the places to keep.
+	 * @returns {number} - the rounded number.
+	 */
+	roundText: function (text, places) {
+		const key = "round" + places;
+		let format = isc.BizDecimal2Item._numberFormats[key];
+		if (!format) {
+			format = new Intl.NumberFormat("en-US", { useGrouping: false, maximumFractionDigits: places, roundingMode: "halfExpand" });
+			isc.BizDecimal2Item._numberFormats[key] = format;
+		}
+		return Number(format.format(text)); // a string is formatted as its exact decimal
+	},
+
+	/**
+	 * Parses the input value into a decimal number as the Java converters read it (see numberText).
 	 *
 	 * @param {string|number|null} value - the input value, which can be a number or a string.
-	 * @returns {number|string} - the parsed float value, or an empty string if parsing fails.
+	 * @returns {number|string} - the parsed number, or an empty string if it is not a number.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
 		if (value) {
-			value = value.toString().trim().replace(/\$|\,/g, "");
-
-			if (isNaN(value)) {
+			const text = isc.BizDecimal2Item.numberText(value.toString().trim());
+			if (text === null) {
 				return "";
 			}
-
-			const result = parseFloat(value);
-
+			const result = parseFloat(text);
 			// Ensure the parsed number is within a reasonable range
-			return result >= 1e18 ? "" : result;
+			return Math.abs(result) >= 1e18 ? "" : result;
 		}
-
 		return "";
 	},
 
 	/**
-	 * Formats a given number to a localized string with the specified number of decimal places.
+	 * Formats a number with the specified number of decimal places, as the Java converters do (see numberFormat).
 	 *
 	 * @param {number|string|null} value - the value to format. If not a number, it is returned as is.
 	 * @param {number} decimalPlaces - the number of decimal places to format to.
-	 * @returns {string} - the formatted number as a localized string, or the original value if it's not a number.
+	 * @returns {string} - the formatted number, or the original value if it's not a number.
 	 */
 	format: function (value, decimalPlaces) {
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		return value.toLocalizedString(decimalPlaces, ".", ",", "-");
+		return isc.BizDecimal2Item.numberFormat(decimalPlaces, false).format(value);
 	},
 });
 
@@ -1733,7 +1787,7 @@ isc.BizDecimal2Item.addMethods({
 			return isc.emptyString;
 		}
 		if (!isc.isA.Number(value)) {
-			value = isc.BizDecimal2Item.parseInput(value);
+			value = this.getClass().parseInput(value);
 		}
 		return isc.BizDecimal2Item.format(value, this.decimalPlaces);
 	},
@@ -1748,7 +1802,7 @@ isc.BizDecimal2Item.addMethods({
 		if (isc.isAn.emptyString(value)) {
 			return null;
 		}
-		return isc.BizDecimal2Item.parseInput(value);
+		return this.getClass().parseInput(value);
 	},
 
 	/**
@@ -1771,7 +1825,7 @@ isc.BizDecimal2Item.addMethods({
 	 */
 	setValue: function (newValue) {
 		if (isc.isA.String(newValue)) {
-			newValue = isc.BizDecimal2Item.parseInput(newValue);
+			newValue = this.getClass().parseInput(newValue);
 		}
 		return this.Super("setValue", [newValue]);
 	},
@@ -2103,6 +2157,28 @@ isc.SimpleType.create({
  */
 isc.ClassFactory.defineClass("BizDollarsAndCentsItem", "BizDecimal2Item");
 
+isc.BizDollarsAndCentsItem.addClassMethods({
+	/**
+	 * Parses dollars as the Java converters read them: a number (see BizDecimal2Item.numberText), with or without a $
+	 * before it, or between a - and it ($1.00, $-1.00 and -$1.00).
+	 *
+	 * @param {string|number|null} value - the input value.
+	 * @returns {number|string} - the parsed number, or an empty string if it is not dollars.
+	 */
+	parseInput: function (value) {
+		if (isc.isA.Number(value) || !value) {
+			return isc.BizDecimal2Item.parseInput(value);
+		}
+		let text = value.toString().trim();
+		if (text.startsWith("-$")) {
+			text = "-" + text.substring(2).trim();
+		} else if (text.startsWith("$")) {
+			text = text.substring(1).trim();
+		}
+		return isc.BizDecimal2Item.parseInput(text);
+	},
+});
+
 isc.BizDollarsAndCentsItem.addProperties({
 	showHint: true,
 	showHintInField: true,
@@ -2259,50 +2335,42 @@ isc.ClassFactory.defineClass("BizIntegerPercentageItem", "TextItem");
 
 isc.BizIntegerPercentageItem.addClassMethods({
 	/**
-	 * Parses the input value as a percentage.
-	 * If the value is a string, it removes any leading/trailing whitespace and the '%' sign.
-	 * Then, it converts the value to a float, divides it by 100, and returns the result.
-	 * If the value is invalid or exceeds the maximum threshold, `null` is returned.
+	 * Parses a percentage as the Java converters read it: a number (see BizDecimal2Item.numberText), with or without a
+	 * % at its end, rounded half up to the 0 place(s) shown, then divided by 100 (12% is 0.12).
 	 *
-	 * @param {string|number} value - the value to parse, which could be a string or a number.
-	 * @returns {number|null} - the parsed percentage as a float, or `null` if the value is invalid.
+	 * @param {string|number} value - the value to parse.
+	 * @returns {number|null} - the fraction, or null if it is not a percentage.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			// without the thousands separators the format writes (1,234%)
-			value = value.toString().replace(/,/g, "").trim().trim("%");
-			if (isNaN(value)) {
-				return null;
-			} else {
-				let result = Math.round(parseFloat(value)) / 100;
-				// Ensure the result is not too large
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+		let text = value.toString().trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length - 1).trim();
+		}
+		text = isc.BizDecimal2Item.numberText(text);
+		if (text === null) {
+			return null;
+		}
+		const result = isc.BizDecimal2Item.roundText(text, 0) / 100;
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
-	 * Formats the value as a percentage.
-	 * The value is multiplied by 100 and localized for display, with a '%' symbol added at the end.
+	 * Formats the value as a percentage, as the Java converters do: times 100, 0 place(s), grouped, with a %.
 	 *
-	 * @param {number|string} value - the value to format as a percentage.
-	 * @returns {string} - the formatted percentage string, e.g., "12%" or "50.5%".
+	 * @param {number|string} value - the value to format.
+	 * @returns {string} - the formatted percentage, or the value if it is not a number.
 	 */
 	format: function (value) {
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		return (value * 100).toLocalizedString(0, ".", ",", "-") + "%";
+		return isc.BizDecimal2Item.numberFormat(0, true).format(value);
 	},
 });
 
@@ -2454,32 +2522,28 @@ isc.ClassFactory.defineClass(
 
 isc.BizSimplePercentageItem.addClassMethods({
 	/**
-	 * Parses the input value, converting it to a number (float) representation.
-	 * This method handles both strings (with or without the '%' sign) and numbers.
-	 * If the input is a valid percentage string, it converts it to a float and returns it.
+	 * Parses a whole number of percent as the Java converter (SimplePercentage) reads it: an optional + or - and digits,
+	 * with or without a % at the end (12% and 12 are 12); anything else is not a percentage.
 	 *
 	 * @param {string|number} value - the value to be parsed. Can be a string or a number.
-	 * @returns {number|null} - the parsed float value, or null if parsing fails.
+	 * @returns {number|null} - the number of percent, or null if it is not one.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			value = value.toString().trim(" ").trim("%");
-			if (isNaN(value)) {
-				return null;
-			} else {
-				let result = Math.round(parseFloat(value));
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+		let text = value.toString().trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length - 1).trim();
+		}
+		if (!/^[-+]?\d+$/.test(text)) {
+			return null;
+		}
+		const result = parseInt(text, 10);
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
@@ -2628,58 +2692,38 @@ isc.ClassFactory.defineClass("BizIntegerSeparatorItem", "TextItem");
 
 isc.BizIntegerSeparatorItem.addClassMethods({
 	/**
-	 * Parses the input value, ensuring that it is a valid number.
-	 * Removes commas and trims the string before converting it into a valid float.
+	 * Parses a whole number as the Java converters (IntegerSeparator, LongIntegerSeparator) read it: an optional + or -
+	 * and digits, with optional , grouping (read leniently); anything else is not a number.
 	 *
-	 * @param {string|number} value - the value to be parsed. Can be a string or a number.
-	 * @returns {number|null} - the parsed float or `null` if the value is invalid.
+	 * @param {string|number} value - the value to parse.
+	 * @returns {number|null} - the number, or null if it is not one.
 	 */
 	parseInput: function (value) {
-		// If the value is already a number, return it as is.
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		// If the value exists, process it.
-		if (value) {
-			// Remove commas and trim the string
-			value = value.toString().replace(/,/g, "").trim(" ");
-
-			// Check if the value is a valid number after removing commas.
-			if (isNaN(value)) {
-				return null;
-			} else {
-				// Round the parsed value and return it
-				let result = Math.round(parseFloat(value));
-
-				// If the result is too large, return null
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		}
-		// Return null if the value is empty
-		else {
+		if (!value) {
 			return null;
 		}
+		const text = value.toString().trim().replace(/,/g, "");
+		if (!/^[-+]?\d+$/.test(text)) {
+			return null;
+		}
+		const result = parseInt(text, 10);
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
-	 * Formats the value as a localized string with thousands separators.
-	 * If the value is a number, it is formatted and returned as a string.
+	 * Formats the number grouped in thousands, as the Java converters do (1,234,567).
 	 *
-	 * @param {number|string} value - the value to be formatted. Can be a number or a string.
-	 * @returns {string} - the formatted value as a string with thousands separators.
+	 * @param {number|string} value - the value to format.
+	 * @returns {string} - the formatted number, or the value if it is not a number.
 	 */
 	format: function (value) {
-		// If the value is not a number, return it as is.
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		// Format the value using a localized string with separators for thousands
-		return value.toLocalizedString(0, ".", ",", "-");
+		return isc.BizDecimal2Item.numberFormat(0, false).format(value);
 	},
 });
 
@@ -2842,50 +2886,42 @@ isc.ClassFactory.defineClass(
 
 isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
 	/**
-	 * Parses the input value, which can be a string or a number, and returns a float value.
-	 * The input string is trimmed, any percentage sign is removed, and the value is parsed as a float.
-	 * The result is rounded to two decimal places.
-	 * If the parsed value is too large or invalid, `null` is returned.
+	 * Parses a percentage as the Java converters read it: a number (see BizDecimal2Item.numberText), with or without a
+	 * % at its end, rounded half up to the 2 place(s) shown, then divided by 100 (12% is 0.12).
 	 *
-	 * @param {string|number} value - the input value to be parsed. It can be a string representing a percentage (e.g., "25%") or a number.
-	 * @returns {number|null} - the parsed float value, or `null` if the input is invalid or too large.
+	 * @param {string|number} value - the value to parse.
+	 * @returns {number|null} - the fraction, or null if it is not a percentage.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			// without the thousands separators the format writes (1,234.50%)
-			value = value.toString().replace(/,/g, "").trim(" ").trim("%");
-			if (isNaN(value)) {
-				return null;
-			} else {
-				let result = Math.round(parseFloat(value) * 100) / 10000;
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+		let text = value.toString().trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length - 1).trim();
+		}
+		text = isc.BizDecimal2Item.numberText(text);
+		if (text === null) {
+			return null;
+		}
+		const result = isc.BizDecimal2Item.roundText(text, 2) / 100;
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
-	 * Formats the value as a percentage, ensuring it's displayed with two decimal places.
-	 * If the value is a valid number, it's multiplied by 100 and formatted using `toLocalizedString` with two decimal places.
-	 * The formatted result includes a percentage sign ('%').
+	 * Formats the value as a percentage, as the Java converters do: times 100, 2 place(s), grouped, with a %.
 	 *
-	 * @param {string|number} value - the value to be formatted. It can be a number or a string representing a percentage.
-	 * @returns {string} - the formatted percentage string, or the original string if the value is not a valid number.
+	 * @param {number|string} value - the value to format.
+	 * @returns {string} - the formatted percentage, or the value if it is not a number.
 	 */
 	format: function (value) {
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		return (value * 100).toLocalizedString(2, ".", ",", "-") + "%";
+		return isc.BizDecimal2Item.numberFormat(2, true).format(value);
 	},
 });
 
