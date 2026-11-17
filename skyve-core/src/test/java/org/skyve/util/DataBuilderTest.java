@@ -3,6 +3,7 @@ package org.skyve.util;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
@@ -1006,9 +1008,12 @@ class DataBuilderTest {
 	public static final class WidgetFactory {
 		/** A bean of the customer's class, as factoryBuild() or newInstance() makes for the customer. */
 		static final WidgetExtension EXTENSION = (WidgetExtension) mock(WIDGET_OVERRIDE);
+		/** How many times DataBuilder invoked the factory method, so a test can show it was never chosen. */
+		static final AtomicInteger CALLS = new AtomicInteger();
 
 		@SkyveFixture(types = FixtureType.crud)
 		public static WidgetExtension crudInstance() {
+			CALLS.incrementAndGet();
 			return EXTENSION;
 		}
 	}
@@ -1023,8 +1028,12 @@ class DataBuilderTest {
 
 	/** A factory of admin.Widget whose only method returns beans of admin.Part, which Widget extends. */
 	public static final class PartReturningFactory {
+		/** How many times DataBuilder invoked the factory method, so a test can show it was never chosen. */
+		static final AtomicInteger CALLS = new AtomicInteger();
+
 		@SkyveFixture(types = FixtureType.crud)
 		public static Part crudInstance() {
+			CALLS.incrementAndGet();
 			return mock(Part.class);
 		}
 	}
@@ -1063,13 +1072,19 @@ class DataBuilderTest {
 
 	@Test
 	void dataFactoryMethodReturningTheBaseDocumentsClassIsNotUsedForACustomersOverrideClass() throws Exception {
-		assertThat(invokeWidgetDataFactory(new PartReturningFactory(), WIDGET_OVERRIDE), is((Bean) null));
+		PartReturningFactory.CALLS.set(0);
+		Bean result = invokeWidgetDataFactory(new PartReturningFactory(), WIDGET_OVERRIDE);
+		assertAll(() -> assertThat(result, is((Bean) null)),
+					() -> assertEquals(0, PartReturningFactory.CALLS.get(), "the factory method must not be chosen"));
 	}
 
 	/** Only a customer class reaches back to the vanilla class it extends. */
 	@Test
 	void dataFactoryReturningASuperclassOfAVanillaBeanClassIsNotUsed() throws Exception {
-		assertThat(invokeWidgetDataFactory(new WidgetFactory(), WidgetSubclass.class), is((Bean) null));
+		WidgetFactory.CALLS.set(0);
+		Bean result = invokeWidgetDataFactory(new WidgetFactory(), WidgetSubclass.class);
+		assertAll(() -> assertThat(result, is((Bean) null)),
+					() -> assertEquals(0, WidgetFactory.CALLS.get(), "the factory method must not be chosen"));
 	}
 
 	/**

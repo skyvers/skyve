@@ -1401,14 +1401,29 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	 * class itself, which the other side's accessors take.
 	 */
 	private static void assertAnInversePairWithACustomerExtensionCompiles(String extendedDocumentName, AbstractInverse rs) throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles(extendedDocumentName, rs, true);
+	}
+
+	/**
+	 * As {@link #assertAnInversePairWithACustomerExtensionCompiles(String, AbstractInverse)}, with or
+	 * without a vanilla extension of the document named. Without one, acme's extension is the only
+	 * extension, so a cast of this to it would name a class the override does not import.
+	 */
+	private static void assertAnInversePairWithACustomerExtensionCompiles(String extendedDocumentName,
+																			AbstractInverse rs,
+																			boolean withVanillaExtension)
+	throws Exception {
 		DocumentImpl r = document("R", "SALES_R", null, null, "code");
 		r.putRelation(association("t", "T"));
 		DocumentImpl t = document("T", "SALES_T", null, null, "code");
 		t.putRelation(inverse(rs, "rs", "R", "t", (rs instanceof InverseOne) ? InverseRelationship.oneToOne : InverseRelationship.oneToMany));
-		Map<String, String> files = assertConsistentMappings(new Fixture()
+		Fixture fixture = new Fixture()
 				.vanilla(document("R", "SALES_R", null, null, "code"))
-				.vanilla(document("T", "SALES_T", null, null, "code"))
-				.extension(extendedDocumentName)
+				.vanilla(document("T", "SALES_T", null, null, "code"));
+		if (withVanillaExtension) {
+			fixture.extension(extendedDocumentName);
+		}
+		Map<String, String> files = assertConsistentMappings(fixture
 				.acmeExtension(extendedDocumentName)
 				.acme(r)
 				.acme(t));
@@ -1436,6 +1451,26 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	@Test
 	void anInverseOneOfAnOverrideWithACustomerExtensionCompiles() throws Exception {
 		assertAnInversePairWithACustomerExtensionCompiles("T", new InverseOne());
+	}
+
+	@Test
+	void anAssociationOfAnOverrideWithOnlyACustomerExtensionToAnInverseManyCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("R", new InverseMany(), false);
+	}
+
+	@Test
+	void anAssociationOfAnOverrideWithOnlyACustomerExtensionToAnInverseOneCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("R", new InverseOne(), false);
+	}
+
+	@Test
+	void anInverseManyOfAnOverrideWithOnlyACustomerExtensionCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("T", new InverseMany(), false);
+	}
+
+	@Test
+	void anInverseOneOfAnOverrideWithOnlyACustomerExtensionCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("T", new InverseOne(), false);
 	}
 
 	/**

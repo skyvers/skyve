@@ -419,7 +419,7 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 		OverrideNarrowedExtendedExtension extension = assertInstanceOf(OverrideNarrowedExtendedExtension.class, result);
 		assertAll(() -> assertSame(OverrideNarrowedExtendedExtension.class, beanClass(TestDocument.OVERRIDE_NARROWED_EXTENDED, bizhub)),
 					() -> assertSame(OverrideNarrowedExtendedExtension.class, result.getClass()),
-					() -> assertTrue(extension instanceof OverrideNarrowedExtendedVanilla),
+					() -> assertEquals(OverrideNarrowedExtendedVanilla.class, OverrideNarrowedExtendedExtension.class.getSuperclass()),
 					() -> assertEquals("dropped", extension.getDropped()),
 					() -> assertEquals("Narrowed extended text", extension.describe()));
 	}
