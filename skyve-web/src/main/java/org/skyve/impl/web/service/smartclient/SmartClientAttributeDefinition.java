@@ -442,6 +442,11 @@ abstract class SmartClientAttributeDefinition {
 				break;
 			case date, dateTime, timestamp:
 				type = (converter == null) ? "DD_MMM_YYYY" : converter.getClass().getSimpleName();
+				// A date time or timestamp whose converter shows only the date is a date time with a date-only field
+				// (DD_MM_YYYY_DateTime), not a date, which SmartClient would send without its time
+				if ((attributeType != AttributeType.date) && (converter != null) && dateOnly(converter.getFormatPattern())) {
+					type += "_DateTime";
+				}
 				break;
 			case time:
 				type = (converter == null) ? "HH24_MI" : converter.getClass().getSimpleName();
@@ -958,6 +963,17 @@ abstract class SmartClientAttributeDefinition {
 	 * @param runtime whether runtime domain values should be resolved
 	 * @return ordered map of escaped domain codes to escaped localised descriptions
 	 */
+	/**
+	 * Indicates if a date or time format pattern has no time: a date time or timestamp converter with such a pattern shows
+	 * only the date (DD_MM_YYYY_DateTime, MM_DD_YYYY_Timestamp ...).
+	 *
+	 * @param pattern	the converter's format pattern, or null
+	 * @return true if the pattern has no hours
+	 */
+	private static boolean dateOnly(@Nullable String pattern) {
+		return (pattern != null) && (pattern.indexOf('H') < 0) && (pattern.indexOf('h') < 0);
+	}
+
 	private static @Nonnull Map<String, String> getConstantDomainValueMap(@Nonnull Customer customer,
 															@Nonnull Document document,
 															@Nonnull Attribute attribute,

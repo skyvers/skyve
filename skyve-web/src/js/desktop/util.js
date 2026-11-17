@@ -914,3 +914,83 @@ isc.BizUtil.addClassMethods({
 		}
 	},
 });
+
+/**
+ * Makes a filter on a date time or timestamp column whose converter shows only the date (a *_DateTime type) mean the
+ * whole local day, as the Vue list grid does: equals is from the day's start up to the next day's, notEqual is outside
+ * it, lessThan is before the day, greaterThan after it (lessOrEqual and greaterOrEqual likewise). The column's filter
+ * gives the day's local midnight; without this, the server compares that instant exactly.
+ */
+isc.RestDataSource.addMethods({
+	skyveTransformRequest: isc.RestDataSource.getPrototype().transformRequest,
+
+	/**
+	 * Turns the day filters of a fetch's criteria into ranges, then transforms the request as RestDataSource does.
+	 *
+	 * @param {Object} dsRequest - the request.
+	 * @returns {Object} - the transformed request data.
+	 */
+	transformRequest: function (dsRequest) {
+		if ((dsRequest.operationType === "fetch") && dsRequest.data && !isc.isAn.emptyObject(dsRequest.data)) {
+			const dayFields = (this.getFieldNames() || []).filter((name) => {
+				const type = this.getField(name).type;
+				return isc.isA.String(type) && type.endsWith("_DateTime");
+			});
+			if (dayFields.length > 0) {
+				dsRequest.data = isc.BizUtil.dayCriteria(dsRequest.data, dayFields, dsRequest.textMatchStyle);
+			}
+		}
+		return this.skyveTransformRequest(dsRequest);
+	},
+});
+
+isc.BizUtil.addClassMethods({
+	/**
+	 * Returns the criteria with each clause on a day field (see RestDataSource.transformRequest above) whose value is a
+	 * date made the range of that local day. Criteria without such a clause are returned as they are.
+	 *
+	 * @param {Object} criteria - simple or advanced criteria.
+	 * @param {Array} dayFields - the names of the fields filtered by the day.
+	 * @param {string} textMatchStyle - the request's text match style, for simple criteria.
+	 * @returns {Object} - the criteria.
+	 */
+	dayCriteria: function (criteria, dayFields, textMatchStyle) {
+		const onDay = (fieldName, value) => dayFields.includes(fieldName) && isc.isA.Date(value);
+		let advanced = criteria;
+		if (!isc.DataSource.isAdvancedCriteria(criteria)) {
+			if (!Object.keys(criteria).some((name) => onDay(name, criteria[name]))) {
+				return criteria;
+			}
+			advanced = isc.DataSource.convertCriteria(criteria, textMatchStyle || "substring");
+		}
+		const convert = (clause) => {
+			if (clause.criteria) {
+				return { ...clause, criteria: clause.criteria.map(convert) };
+			}
+			if (!onDay(clause.fieldName, clause.value)) {
+				return clause;
+			}
+			const day = clause.value;
+			const start = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+			const next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
+			const compare = (operator, value) => ({ fieldName: clause.fieldName, operator: operator, value: value });
+			switch (clause.operator) {
+				case "equals":
+					return { operator: "and", criteria: [compare("greaterOrEqual", start), compare("lessThan", next)] };
+				case "notEqual":
+					return { operator: "or", criteria: [compare("lessThan", start), compare("greaterOrEqual", next)] };
+				case "lessThan":
+					return compare("lessThan", start);
+				case "lessOrEqual":
+					return compare("lessThan", next);
+				case "greaterThan":
+					return compare("greaterOrEqual", next);
+				case "greaterOrEqual":
+					return compare("greaterOrEqual", start);
+				default:
+					return clause;
+			}
+		};
+		return convert(advanced);
+	},
+});

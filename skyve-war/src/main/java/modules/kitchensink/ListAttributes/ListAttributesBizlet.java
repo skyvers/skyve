@@ -24,13 +24,12 @@ public class ListAttributesBizlet extends Bizlet<ListAttributes> {
 	
 	/**
 	 * Keeps dateTimeAsDate equal to dateTime, so that it has a time that its column (a date-only converter) does not
-	 * show. It is deprecated only to keep it out of the generated edit view (see ListAttributes.xml).
+	 * show.
 	 *
 	 * @param bean the list attributes being saved
 	 * @throws Exception if the bean cannot be updated
 	 */
 	@Override
-	@SuppressWarnings("deprecation") // dateTimeAsDate is deprecated to keep it out of the generated edit view
 	public void preSave(@Nonnull ListAttributes bean) throws Exception {
 		bean.setDateTimeAsDate(bean.getDateTime());
 	}

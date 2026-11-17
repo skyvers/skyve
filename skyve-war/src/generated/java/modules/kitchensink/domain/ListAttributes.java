@@ -134,7 +134,6 @@ public class ListAttributes extends AbstractPersistentBean {
 	public static final String twelveHourTimePropertyName = "twelveHourTime";
 
 	/** @hidden */
-	@Deprecated
 	public static final String dateTimeAsDatePropertyName = "dateTimeAsDate";
 
 	/**
@@ -336,7 +335,6 @@ public class ListAttributes extends AbstractPersistentBean {
 	/**
 	 * Date Time As Date
 	 **/
-	@Deprecated
 	private DateTime dateTimeAsDate;
 
 	@Override
@@ -848,7 +846,6 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * {@link #dateTimeAsDate} accessor.
 	 * @return	The value.
 	 **/
-	@Deprecated
 	public DateTime getDateTimeAsDate() {
 		return dateTimeAsDate;
 	}
@@ -857,7 +854,6 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * {@link #dateTimeAsDate} mutator.
 	 * @param dateTimeAsDate	The new value.
 	 **/
-	@Deprecated
 	@XmlElement
 	@XmlSchemaType(name = "dateTime")
 	@XmlJavaTypeAdapter(DateTimeMapper.class)

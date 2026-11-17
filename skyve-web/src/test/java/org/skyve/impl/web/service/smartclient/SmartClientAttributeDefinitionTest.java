@@ -373,6 +373,34 @@ class SmartClientAttributeDefinitionTest {
 	}
 
 	@Test
+	void aDateTimeOrTimestampShownAsADateIsADateTimeType() {
+		DateTime dueAt = new DateTime();
+		dueAt.setName("dueAt");
+		dueAt.setDisplayName("Due At");
+		dueAt.setConverter(new org.skyve.domain.types.converters.datetime.MM_DD_YYYY());
+		assertEquals("MM_DD_YYYY_DateTime", definitionFor(dueAt).getType());
+
+		Timestamp stampedAt = new Timestamp();
+		stampedAt.setName("stampedAt");
+		stampedAt.setDisplayName("Stamped At");
+		stampedAt.setConverter(new org.skyve.domain.types.converters.timestamp.DD_MMM_YYYY());
+		assertEquals("DD_MMM_YYYY_DateTime", definitionFor(stampedAt).getType());
+
+		// with a time, and a date: the converter's own type, as before
+		DateTime twelveHour = new DateTime();
+		twelveHour.setName("twelveHour");
+		twelveHour.setDisplayName("Twelve Hour");
+		twelveHour.setConverter(new org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI());
+		assertEquals("MM_DD_YYYY_HH_MI", definitionFor(twelveHour).getType());
+
+		Date due = new Date();
+		due.setName("due");
+		due.setDisplayName("Due");
+		due.setConverter(new org.skyve.domain.types.converters.date.MM_DD_YYYY());
+		assertEquals("MM_DD_YYYY", definitionFor(due).getType());
+	}
+
+	@Test
 	void constructorMapsColourEnumerationGeometryAndAssociationStyleTypes() {
 		Colour colour = new Colour();
 		colour.setName("colour");

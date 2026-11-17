@@ -111,10 +111,8 @@
 			<converterName>HH_MI_SS</converterName>
 		</time>
 		<!-- A date time shown as a date, for the Vue list grid of column types: ListAttributesBizlet keeps it equal to
-			 dateTime when saved, so it has a time that the column does not show. Deprecated keeps it out of the generated
-			 edit view, where a date-only field would save it at midnight (and where SmartClient cannot save a date time
-			 with a date-only converter that has a value) -->
-		<dateTime name="dateTimeAsDate" deprecated="true">
+			 dateTime when saved, so it has a time that the column does not show -->
+		<dateTime name="dateTimeAsDate">
 			<displayName>Date Time As Date</displayName>
 			<converterName>MM_DD_YYYY_DateTime</converterName>
 		</dateTime>

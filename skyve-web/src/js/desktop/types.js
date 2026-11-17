@@ -1417,6 +1417,75 @@ isc.BizTimeItem.addMethods({
 	},
 });
 
+/**
+ * Implements BizDateOnlyDateTimeItem: the field of a date time (or timestamp) whose converter shows only the date
+ * (DD_MM_YYYY_DateTime, MM_DD_YYYY_Timestamp ...). Its value is a date time, so a value that is not changed keeps its
+ * time; a day typed or picked is that day's local midnight, and typing the day the value already has keeps its time.
+ * Extends BizDateTimeItem implemented above.
+ */
+isc.ClassFactory.defineClass("BizDateOnlyDateTimeItem", "BizDateTimeItem");
+
+isc.BizDateOnlyDateTimeItem.addProperties({
+	width: 100,
+	showPickerTimeItem: false,
+});
+
+isc.BizDateOnlyDateTimeItem.addMethods({
+	/**
+	 * Maps the text to a date time: the day's local midnight, or the current value when it is on that day.
+	 *
+	 * @param {string} value - the display value to map.
+	 * @returns {Date|null} - the date time, or null if the text is empty.
+	 */
+	mapDisplayToValue: function (value) {
+		const result = this.Super("mapDisplayToValue", arguments);
+		const current = this.getValue();
+		if (isc.isA.Date(result) && isc.isA.Date(current) &&
+				(result.getFullYear() === current.getFullYear()) &&
+				(result.getMonth() === current.getMonth()) &&
+				(result.getDate() === current.getDate())) {
+			return current;
+		}
+		return result;
+	},
+});
+
+// A date time type for each date-only converter: the type's name is the converter's date format and _DateTime (both the
+// date time and the timestamp converters of that format use it), see SmartClientAttributeDefinition
+[
+	["DD_MM_YYYY", "DD MM(M) YY(YY)"],
+	["DD_MMM_YYYY", "DD MM(M) YY(YY)"],
+	["MM_DD_YYYY", "MM(M) DD YY(YY)"],
+	["MMM_DD_YYYY", "MM(M) DD YY(YY)"],
+	["YYYY_MM_DD", "YY(YY) MM(M) DD"],
+].forEach(([format, hint]) => {
+	const itemClass = `${format}_DateTime_Item`;
+	isc.ClassFactory.defineClass(itemClass, "BizDateOnlyDateTimeItem");
+	isc[itemClass].addProperties({
+		hint: hint,
+		dateFormatter: `to${format}`,
+	});
+
+	isc.SimpleType.create({
+		name: `${format}_DateTime`,
+		inheritsFrom: "bizDateTime",
+		editorType: itemClass,
+
+		/**
+		 * Formats the internal date time value as its date only.
+		 *
+		 * @param {Date|string|null} internalValue - the value to be formatted.
+		 * @param {Object} field - the field definition.
+		 * @param {Object} component - the component displaying the value.
+		 * @param {Object} record - the record associated with the value.
+		 * @returns {string} - the formatted date.
+		 */
+		shortDisplayFormatter: function (internalValue, field, component, record) {
+			return isc.BizDateItem.format(internalValue, `to${format}`);
+		},
+	});
+});
+
 isc.SimpleType.create({
 	name: "bizTime",
 	inheritsFrom: "time",
