@@ -52,25 +52,23 @@ function _createNumberFormatter({ scale, style = 'decimal' }) {
 }
 
 /**
- * Formats decimal hours as the Java converter (TimeDurationFormatter) does: hours (truncated), a colon and the
- * minutes rounded half up to 2 digits, with a sign for a negative duration (1.5 is 1:30, -0.5 is -0:30).
+ * Formats decimal hours as the Java converter (TimeDurationFormatter) does: the hours truncated, a colon, then the
+ * minutes rounded once, half up, from the exact fraction of an hour, with a sign for a negative duration (1.5 is 1:30,
+ * 0.49166 is 0:29, 0.99999 is 1:00, -0.01 is -0:01). The value is a Decimal5, so it is taken as a whole number of
+ * hundred-thousandths of an hour, and the minutes are worked out in whole numbers, without binary fractions.
  */
 function Decimal5TimeDuration(numValue) {
 
-    let hours = Math.trunc(numValue);
-    // the minutes rounded half up (away from zero), from the hours' fraction rounded to 4 significant digits as Java does
-    const fraction = Number(((numValue - hours) * 60).toPrecision(4));
-    let minutes = Math.sign(fraction) * Math.round(Math.abs(fraction));
+    const units = Math.round(Math.abs(numValue) * 100000);
+    let hours = Math.trunc(units / 100000);
+    // (fraction * 60) / 100000 minutes, plus a half, rounded down: half up
+    let minutes = Math.floor((((units % 100000) * 60) + 50000) / 100000);
     if (minutes === 60) {
         minutes = 0;
         hours++;
     }
-    else if (minutes === -60) {
-        minutes = 0;
-        hours--;
-    }
-    const sign = ((hours < 0) || (minutes < 0)) ? '-' : '';
-    return `${sign}${Math.abs(hours)}:${String(Math.abs(minutes)).padStart(2, '0')}`;
+    const sign = ((numValue < 0) && ((hours > 0) || (minutes > 0))) ? '-' : '';
+    return `${sign}${hours}:${String(minutes).padStart(2, '0')}`;
 }
 
 function Decimal2DollarsAndCentsAbsolute(numValue) {

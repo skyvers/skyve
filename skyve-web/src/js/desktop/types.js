@@ -2852,52 +2852,43 @@ isc.ClassFactory.defineClass("BizTimeDurationItem", "TextItem");
 
 isc.BizTimeDurationItem.addClassMethods({
 	/**
-	 * Parses the input value and converts it to a float representing a time duration. It can handle:
-	 * - Decimal format (e.g., "2.5")
-	 * - time format with hours and minutes (e.g., "2:30" or "2 30")
+	 * Parses the input value as the Java converter (Decimal5TimeDuration) reads it: hours, a colon, then minutes, each
+	 * a decimal number (1:30 is 1.5 hours, 1:75 is 2.25 and -0:30 is -0.5: the sign is the hours' text's).
 	 *
 	 * @param {string|number} value - the input value to be parsed, either a string or a number.
-	 * @returns {number|null} - the parsed time duration as a float, or `null` if parsing fails.
+	 * @returns {number|null} - the parsed time duration in hours, or `null` if it is not a duration.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			// Look for a decimal formatted match (e.g., "2.5")
-			let match = /^\s*\s*([-+]?\d+)\s*\.\s*(\d?\d)?\s*$/.exec(value); // sign, 1 or more digits, a decimal point, 1 or 2 digits
-			if (match) {
-				let result = parseFloat(match[1] + "." + (match[2] | 0));
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-
-			// Look for a time formatted match (e.g., "2 30" or "2:30")
-			match = /^\s*\s*([-+]?\d+)\s*\D?\s*(\d?\d)?\s*$/.exec(value); // sign, 1 or more digits, any non digit, 1 or 2 digits
-			if (match) {
-				const hours = parseInt(match[1] | 0, 10);
-				const minutes = Math.min(parseInt(match[2] | 0, 10), 59);
-				// the sign is the text's: -0:30 is negative, although its hours are 0
-				if (match[1].charAt(0) !== "-") {
-					return hours + minutes / 60.0;
-				}
-				return hours - minutes / 60.0;
-			} else {
-				return null;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+
+		const text = value.toString().trim();
+		const colon = text.indexOf(":");
+		if (colon < 0) {
+			return null;
+		}
+		const hoursText = text.substring(0, colon).trim();
+		const minutesText = text.substring(colon + 1).trim();
+		const decimal = /^[-+]?(\d+\.?\d*|\.\d+)$/;
+		if (!decimal.test(hoursText) || !decimal.test(minutesText)) {
+			return null;
+		}
+
+		const hours = Number(hoursText);
+		const minutes = Number(minutesText) / 60.0;
+		const result = (hoursText.charAt(0) === "-") ? hours - minutes : hours + minutes;
+		return (Math.abs(result) >= 1000000000000000000.0) ? null : result;
 	},
 
 	/**
-	 * Formats the time duration value into a string with hours and minutes. It formats the value as:
-	 * - Positive values: "H:MM"
-	 * - Negative values: "-H:MM"
-	 * It ensures that the minutes part is always two digits (e.g., "02" instead of "2").
+	 * Formats the time duration value as the Java formatter (TimeDurationFormatter) does: the hours truncated, a colon,
+	 * then the minutes rounded once, half up, from the exact fraction of an hour, with a sign for a negative duration:
+	 * 1.26 is 1:16, 0.49166 is 0:29, 0.99999 is 1:00 and -0.01 is -0:01. The value is a Decimal5, so it is taken as a
+	 * whole number of hundred-thousandths of an hour, and the minutes are worked out in whole numbers.
 	 *
 	 * @param {number} value - the time duration to be formatted.
 	 * @returns {string} - the formatted time duration string (e.g., "2:30", "-2:30").
@@ -2907,26 +2898,17 @@ isc.BizTimeDurationItem.addClassMethods({
 			return value;
 		}
 
-		let decimalMinutes;
-		let hours;
-		if (value >= 0) {
-			hours = Math.floor(value);
-			decimalMinutes = value - hours;
-		} else {
-			hours = Math.ceil(value);
-			decimalMinutes = Math.abs(value - hours);
+		const units = Math.round(Math.abs(value) * 100000);
+		let hours = Math.trunc(units / 100000);
+		// (fraction * 60) / 100000 minutes, plus a half, rounded down: half up
+		let minutes = Math.floor(((units % 100000) * 60 + 50000) / 100000);
+		if (minutes === 60) {
+			minutes = 0;
+			hours++;
 		}
 
-		let stringMinutes = Math.round(decimalMinutes * 60).toString();
-		if (stringMinutes == "60") {
-			hours = value >= 0 ? hours + 1 : hours - 1;
-			stringMinutes = "00";
-		} else if (stringMinutes.length == 1) {
-			stringMinutes = "0" + stringMinutes;
-		}
-
-		// the sign is the value's: -0.5 is -0:30, although its hours are 0
-		return ((value < 0) && (hours === 0) && (stringMinutes !== "00") ? "-" : "") + hours + ":" + stringMinutes;
+		const sign = (value < 0) && ((hours > 0) || (minutes > 0)) ? "-" : "";
+		return sign + hours + ":" + String(minutes).padStart(2, "0");
 	},
 });
 
