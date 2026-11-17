@@ -34,7 +34,7 @@ import jakarta.annotation.Nullable;
 public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private String description;
 	
-	private Customer customer;
+	private Customer queryCustomer;
 	private Module module;
 	private Document drivingDocument;
 	private MetaDataQueryDefinition query;
@@ -60,7 +60,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 
 	@Override
 	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
-		this.customer = customer;
+		queryCustomer = customer;
 		description = query.getDescription();
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);
@@ -147,13 +147,13 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	 * rows with no association. The query's own columns may have joined them already.
 	 */
 	private void leftOuterJoinAssociations(@Nonnull String binding) {
-		if ((customer == null) || (binding.indexOf('.') < 0)) {
+		if ((queryCustomer == null) || (binding.indexOf('.') < 0)) {
 			return;
 		}
 		int dot = binding.indexOf('.');
 		while (dot > 0) {
 			String path = binding.substring(0, dot);
-			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, drivingDocument, path);
+			TargetMetaData target = Binder.getMetaDataForBinding(queryCustomer, module, drivingDocument, path);
 			if (! (target.getAttribute() instanceof Association)) {
 				return;
 			}
