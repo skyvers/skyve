@@ -2370,11 +2370,6 @@ other:
   with several users signing in as admin, the failed attempts lock admin out
   for all of them. `pf-kitchensink-sail.xml` does this on purpose, so
   `KitchenSinkLoadSailIT` leaves it out with `suiteOnly(...)`.
-- One user signing in from several browsers at the same moment can end some
-  of those sessions ("Your session has ended"): a server-side race (see
-  [Known Limitations](#known-limitations)). A ramp-up makes it rare.
-- Saving numbered documents at the same moment can fail to assign a document
-  number: another server-side race.
 - A script that changes the signed-in user's own details, such as admin's
   Update My Details, collides with the same script in another user.
 
@@ -2434,6 +2429,7 @@ that show it, relative to the repository root:
 | A click on a covered element | `skyve-war/src/test/java/util/sail/PrimeFacesSelenideClickSailIT.java` |
 | A load run | `skyve-war/src/test/java/sail/load/KitchenSinkLoadSailIT.java`; the runner's shape, thresholds and stopping: `skyve-war/src/test/java/util/sail/SailLoadTest.java`; its statistics and report: `skyve-war/src/test/java/util/sail/SailLoadReportTest.java` |
 | Java from the Control Panel | `skyve-war/src/test/java/modules/admin/ControlPanel/actions/DownloadSAILH2Test.java` and `ExecuteSAILH2Test.java` (the generated source compiles against the harness), `DownloadSAILTest.java`, `ExecuteSAILTest.java`; the generator: `skyve-web/src/test/java/org/skyve/impl/sail/execution/pf/PrimeFacesInlineWebDriverExecutorTest.java`; the generated test's gestures: `skyve-war/src/test/java/util/sail/PrimeFacesSeleniumTest.java` |
+| What generation leaves out, and the rollback | `skyve-ext/src/test/java/org/skyve/impl/generate/sail/GenerateViewVisitorTest.java`; `skyve-war/src/test/java/modules/admin/ControlPanel/actions/GenerateMenuSAILH2Test.java` and `GenerateSAILRollbackH2Test.java` |
 
 ## Synchronisation Rules
 
@@ -2839,18 +2835,15 @@ Java through `SailRunIT`, alone or as a member of a suite file
   `<save confirm="..."/>` presses the default one, which asks nothing. The
   kitchen sink's only confirming Save is such a one, so `save@confirm` is on
   `SailLanguageCoverageTest`'s allow-list.
-- **Generated menu SAIL for admin.** For module admin, the Control Panel's
-  generated menu SAIL names actions that their visibility conditions hide, such
-  as the recording's Start (`StartSAILRecording`), so the Java generated from it
-  fails ("not on the view"), and the external Control Panel's Download fails for
-  module admin. Other modules, such as the kitchen sink, work.
-- **Server-side races, found by load runs** (not fixed in the harness):
-  - one user signing in from several browsers at the same moment can lose
-    sessions: `StateUtil.addSession` updates the user's sessions without
-    locking, so simultaneous sign ins overwrite each other's and those
-    sessions end ("Your session has ended");
-  - saving numbered documents of one kind at the same moment can fail to
-    assign a document number (seen with the kitchen sink's lookup values).
+- **Generated SAIL decides conditions without running the script.** The
+  Control Panel's generator leaves out what the SAIL user cannot have, and
+  comments out each step that a non-constant condition may hide
+  ([What generation leaves out](#what-generation-leaves-out)). It judges
+  conditions on two unsaved test instances, so a condition on saved state is
+  decided as for an unsaved document, although action steps run after the
+  script's Save. Its test data is random, and session conditions read the
+  generating session, so the output can differ from one generation to the
+  next.
 - **Links in rows.** `dataGridLink` clicks links in data grid rows only, not in
   list grid rows.
 - **Unused attributes.** `dataEnter@navigateToWidget`,
@@ -2931,6 +2924,38 @@ the SAIL harness (`util.sail`) in its tests:
   mvn test -Dtest=Sail -Dsurefire.failIfNoSpecifiedTests=false -Dsail.baseUrl=http://localhost:8180/myapp/
   ```
 
+### What generation leaves out
+
+**Menu SAIL** and **Module SAIL** generate only what the SAIL user is shown,
+so that the script never names a widget its view lacks:
+
+- **Privileges and constant conditions.** A step the user's privileges do not
+  let the view show is left out without a word, as the renderers leave the
+  widget out: a custom or class-based action the user cannot execute, Save
+  without create or update, Delete without delete, a new data grid row without
+  create on the grid's document. So is a step that a constant condition
+  (`true` or `false`) hides or disables.
+- **Other conditions.** A step that any other condition hides or disables, or
+  could, on the step or on its button's containers, is never dropped
+  silently. The generator evaluates the condition on two test instances, the
+  new instance the script opens (the Bizlet's `newInstance`) and one holding
+  test data as `<testDataEnter/>` enters, and leaves the step out with a
+  comment naming the condition as the view declares it:
+  - `not generated: action Restore depends on disabled="notBackupSelected", which hides or disables it on both test instances`;
+  - `not generated: tab tab depends on visible="shown", which depends on what the script enters`,
+    when the two instances disagree; a condition on `persisted` or `changed`
+    "depends on what the script enters and saves", and one that throws
+    "cannot be evaluated here (...)".
+
+  The script's author decides whether to write the step by hand.
+- **Generation runs application code**: the Bizlets' `newInstance`, view
+  conditions and the test data builder. The Control Panel rolls back what
+  generation wrote, which also discards anything else the request wrote
+  before; work done in an autonomous transaction stays committed, so document
+  numbers taken while generating with `DocumentNumberAutonomousTransactionGenerator`
+  are used up.
+- Limits are under [Known Limitations](#known-limitations).
+
 The interpreted executors ([How the Interpreted Executors Work](#how-the-interpreted-executors-work))
 run the same SAIL without generating Java, with every op-code; prefer them for
 tests you keep.
@@ -2963,8 +2988,9 @@ other implementations, which generate test code instead of driving a browser:
   - With `confirm` absent or `true`, the generated code answers the action's
     confirmation when the action has confirmation text.
 - The SAIL generator (`org.skyve.impl.generate.sail.Generator`) writes menu and
-  view scripts. It adds `<switchMode/>` after the generated `<login/>` for
-  desktop automations.
+  view scripts, with `GenerateViewVisitor` deciding each view's steps
+  ([What generation leaves out](#what-generation-leaves-out)). It adds
+  `<switchMode/>` after the generated `<login/>` for desktop automations.
 
 ## Adding an Op-code
 
@@ -3129,6 +3155,29 @@ compiling and running:
   `AbstractH2TestForJUnit4` is kept.
 - `SailLoad` is new ([Load Testing](#load-testing)), with the `sail.load.*`
   settings. The `sail` profile leaves out ITs tagged `performance`.
+
+**Fixes found by load runs and generation.** These change behaviour outside
+SAIL:
+
+- `StateUtil.getSessions(userId)` now returns a read-only view, a snapshot
+  that later sign-ins and sign-outs do not change. Copy it before changing it.
+  Simultaneous sign-ins of one user now each keep their session.
+- On first use, a document number sequence now starts after the highest value
+  the numbered field already holds (for a text field, the highest numeric
+  suffix after the prefix, so `INV10` beats `INV9`), not at 1. Deleting a
+  `DocumentNumber` row restarts its sequence after that maximum. Increments
+  use `BigInteger`, so sequences past 2,147,483,647 work. Concurrent first
+  uses of a sequence no longer create duplicate numbers, at READ COMMITTED.
+- Skyve's unique constraints and document numbers need the READ COMMITTED
+  isolation level. Startup now logs a WARN when the datasource's connections
+  use another level, and `SQLServer2016HibernateContentPersistence` (the
+  `persistenceClass` setting), which switches to SQL Server's SNAPSHOT level,
+  warns when it is first used. See the datasource step in the
+  [README](../README.md).
+- The Control Panel's SAIL generation leaves out steps the user cannot have
+  and comments out steps conditions may hide
+  ([What generation leaves out](#what-generation-leaves-out)), so the menu
+  SAIL of module admin no longer names hidden actions.
 - Skyve's own SAIL tests were reorganised. The PF and SC admin suites are one
   suite, `sail/admin/admin.suite.xml`, whose members moved from
   `sail/admin/pf/suite/` and `sail/admin/sc/suite/` to `sail/admin/pf/` and
