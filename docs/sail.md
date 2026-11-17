@@ -575,8 +575,10 @@ takes). Values are written the same way in both renderers:
   value the column's converter refuses (`+5`, `1e3`, `$5` in a column that is
   not dollars) shows an error on the cell and the list is not filtered; in its
   advanced filter, such a value is cleared from the clause, which then does
-  not filter. `between` is exclusive at both ends and `betweenInclusive`
-  inclusive, as SmartClient defines them, on the server too.
+  not filter (except a range's start or end whose previous value was 0: it
+  shows 0 again and still filters by 0). `between` is exclusive at both ends
+  and `betweenInclusive` inclusive, as SmartClient defines them, on the server
+  too.
 
 A step whose operator the column cannot take fails and names the operators it
 can take. Filter, clear and sort steps fail if an error message shows
@@ -1317,8 +1319,11 @@ The rules the converters scripts check, and what changed for users:
   with more places than shown is kept to the type's scale by the converter, then
   stored as shown when its form is saved (see
   [Known Limitations](#known-limitations)). The symbols are English whatever the
-  JVM's locale. A BizPort import with one of these converters also reads the
-  number at the start of a cell (`1,234.50 kg` is 1234.50), as it did before.
+  JVM's locale. A data file import with one of these converters (the data file
+  loaders behind admin's Import Export, a tag's uploaded criteria and similar
+  uploads; not BizPort's own import, which reads number cells as numbers) also
+  reads the number at the start of a cell (`1,234.50 kg` is 1234.50), as it
+  did before.
 - **User-visible changes in SmartClient:** 12 hour times show `AM`/`PM` in upper
   case for every locale, as the converters write them and PrimeFaces' pickers
   show them (`02:47 PM`, not `2:47 pm`); a duration field refuses decimal hours
@@ -1331,8 +1336,10 @@ The rules the converters scripts check, and what changed for users:
 - **User-visible changes on the server:** a list's `between` and `iBetween`
   exclude their ends, as SmartClient defines them (`iBetween` included them, and
   `between` was not read); Match None of a range, a blank check or a variant
-  domain's description now matches the rows outside it; a spreadsheet imported
-  through BizPort is read as English text whatever the JVM's locale. The number
+  domain's description now matches the rows outside it that have a value (see
+  [Known Limitations](#known-limitations)), and Match None of a description that
+  matches nothing lists every row; a spreadsheet read by a data file import
+  (as above) is read as English text whatever the JVM's locale. The number
   converters (and `DecimalFormatter`, so the number formatters) write and read
   English numbers whatever the JVM's locale. Before, a German JVM showed
   `1.234,50` and read `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the
@@ -1834,10 +1841,16 @@ test:
 - **Inline cells in PF** are addressed by `dataEnter`, `testValue` and the
   lookup steps; `testWidget` and `captureValue` keep the row but address the
   view's widget.
-- **`notEquals` and rows with no value.** In SmartClient's advanced filter a
-  `notEquals` clause also matches rows whose column has no value; the Vue list
-  grid's does not. The converters scripts give every number column a value in
-  every record, so their counts do not depend on it.
+- **Negations and rows with no value.** A negation on the server leaves out rows
+  whose column has no value: `notEquals`, and every clause under Match None (a
+  range's outside, a variant domain's description, `not in`), as SQL compares
+  nulls. SmartClient's advanced filter matches them when it filters on the
+  client (a cached list), and so does an in-memory list model; the Vue list
+  grid's `notEquals` does not. The converters scripts give every number column
+  a value in every record, so their counts do not depend on it.
+- **A variant domain's description filter takes at most 100 matching codes.**
+  With more matching descriptions, a filter misses the rest, and a negated one
+  (Match None, `notEquals`, Not Contains) lets the rest through.
 - **Numbers beyond a browser's precision.** The server sends numbers to
   SmartClient and the Vue list grid as JSON numbers, so a value beyond 15
   significant digits (a Decimal10 with a large whole part, a Decimal5 above
