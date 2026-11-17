@@ -1325,12 +1325,20 @@ class OverridableDomainGeneratorMoreTest {
 		when(module.getName()).thenReturn("testMod");
 
 		StringBuilder contents = new StringBuilder();
-		declaredMethod("generateJava",
-				org.skyve.metadata.customer.Customer.class,
-				Module.class, Document.class, StringBuilder.class,
-				String.class, String.class, String.class, boolean.class)
-				.invoke(gen, null, module, doc, contents,
-						"modules.testMod.domain", "EnumDoc", null, Boolean.FALSE);
+		// a repository without the document's classes, as before the domain is first compiled
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+		try {
+			declaredMethod("generateJava",
+					org.skyve.metadata.customer.Customer.class,
+					Module.class, Document.class, StringBuilder.class,
+					String.class, String.class, String.class, boolean.class)
+					.invoke(gen, null, module, doc, contents,
+							"modules.testMod.domain", "EnumDoc", null, Boolean.FALSE);
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
 
 		String java = contents.toString();
 		assertTrue(java.contains("Status"), "Should contain Status enum name");

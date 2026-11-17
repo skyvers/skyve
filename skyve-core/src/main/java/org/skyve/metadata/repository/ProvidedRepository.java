@@ -146,11 +146,11 @@ public interface ProvidedRepository extends CachedRepository {
 	/**
 	 * Resolve a customer-specific vtable entry.
 	 *
-	 * @param customerName customer name
+	 * @param customerName customer name, or {@code null} to resolve the vanilla entry
 	 * @param key vtable key
 	 * @return resolved value; otherwise {@code null}
 	 */
-	@Nullable String vtable(@Nonnull String customerName, @Nonnull String key);
+	@Nullable String vtable(@Nullable String customerName, @Nonnull String key);
 
 	/**
 	 * Resolve a bizlet instance for a document.

@@ -2,10 +2,14 @@ package org.skyve.impl.metadata.model.document;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +17,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.ProvidedRepository;
 
@@ -67,7 +72,7 @@ class DocumentImplBeanClassTest {
 		// fixture
 	}
 
-	/** The abstract concrete vanilla class generated for the narrowed Receipt, which carries the narrowed-away properties. */
+	/** The abstract vanilla class generated for the narrowed Receipt, which carries the narrowed-away properties. */
 	public abstract static class ReceiptVanilla extends Receipt {
 		// fixture
 	}
@@ -118,14 +123,41 @@ class DocumentImplBeanClassTest {
 	/** The documents customer acme has its own hand-written extension of. */
 	private static final Set<String> ACME_EXTENDED = Set.of("Payment");
 
+	/**
+	 * Serves the fixture classes by the names Skyve looks them up by, and records the names in the
+	 * <code>modules</code> and <code>customers</code> packages it has no class for.
+	 */
+	private final class FixtureClassLoader extends ClassLoader {
+		private final Map<String, Class<?>> classes;
+
+		private FixtureClassLoader(ClassLoader parent, Map<String, Class<?>> classes) {
+			super(parent);
+			this.classes = classes;
+		}
+
+		@Override
+		public Class<?> loadClass(String name) throws ClassNotFoundException {
+			Class<?> result = classes.get(name);
+			if (result != null) {
+				return result;
+			}
+			if (name.startsWith("modules.") || name.startsWith("customers.")) {
+				missingClassNames.add(name);
+				throw new ClassNotFoundException(name);
+			}
+			return super.loadClass(name);
+		}
+	}
+
 	private ProvidedRepository previousRepository;
 	private ClassLoader previousClassLoader;
+	private final List<String> missingClassNames = new ArrayList<>();
 
 	@BeforeEach
 	void installRepository() {
 		previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
-		when(repository.vtable(anyString(), anyString())).thenAnswer(invocation -> {
+		when(repository.vtable(any(), anyString())).thenAnswer(invocation -> {
 			String customerName = invocation.getArgument(0);
 			String key = invocation.getArgument(1);
 			String[] parts = key.split("/");
@@ -136,24 +168,13 @@ class DocumentImplBeanClassTest {
 				}
 				return EXTENDED.contains(documentName) ? key : null;
 			}
-			return OVERRIDES.getOrDefault(customerName, Set.of()).contains(documentName) ? "customers/" + customerName + '/' + key : key;
+			boolean overridden = (customerName != null) && OVERRIDES.getOrDefault(customerName, Set.of()).contains(documentName);
+			return overridden ? "customers/" + customerName + '/' + key : key;
 		});
 		ProvidedRepositoryFactory.set(repository);
 
 		previousClassLoader = Thread.currentThread().getContextClassLoader();
-		Thread.currentThread().setContextClassLoader(new ClassLoader(previousClassLoader) {
-			@Override
-			public Class<?> loadClass(String name) throws ClassNotFoundException {
-				Class<?> result = CLASSES.get(name);
-				if (result != null) {
-					return result;
-				}
-				if (name.startsWith("modules.") || name.startsWith("customers.")) {
-					throw new ClassNotFoundException(name);
-				}
-				return super.loadClass(name);
-			}
-		});
+		Thread.currentThread().setContextClassLoader(new FixtureClassLoader(previousClassLoader, CLASSES));
 	}
 
 	@AfterEach
@@ -163,12 +184,20 @@ class DocumentImplBeanClassTest {
 	}
 
 	private static Class<?> beanClass(String customerName, String documentName) throws Exception {
-		DocumentImpl document = new DocumentImpl();
-		document.setName(documentName);
-		document.setOwningModuleName(MODULE);
-		Customer customer = mock(Customer.class);
-		when(customer.getName()).thenReturn(customerName);
-		return document.getBeanClass(customer);
+		return document(documentName).getBeanClass(customer(customerName));
+	}
+
+	private static DocumentImpl document(String documentName) {
+		DocumentImpl result = new DocumentImpl();
+		result.setName(documentName);
+		result.setOwningModuleName(MODULE);
+		return result;
+	}
+
+	private static Customer customer(String customerName) {
+		Customer result = mock(Customer.class);
+		when(result.getName()).thenReturn(customerName);
+		return result;
 	}
 
 	@Test
@@ -218,11 +247,74 @@ class DocumentImplBeanClassTest {
 	}
 
 	@Test
-	void aNarrowedVanillaDocumentWithAnExtensionUsesItsVanillaClass() throws Exception {
+	void aNarrowedVanillaDocumentWithAnExtensionUsesItsExtension() throws Exception {
 		// Receipt <- ReceiptVanilla <- ReceiptExtension: the extension has every vanilla property,
 		// through ReceiptVanilla
-		Class<?> result = beanClass("beta", "Receipt");
-		assertAll(() -> assertEquals(ReceiptExtension.class, result),
-					() -> assertEquals(ReceiptVanilla.class, result.getSuperclass()));
+		assertEquals(ReceiptExtension.class, beanClass("beta", "Receipt"));
+	}
+
+	@Test
+	void withoutACustomerADocumentUsesItsVanillaBeanClass() throws Exception {
+		assertAll(() -> assertEquals(OrderVanilla.class, document("Order").getBeanClass(null)),
+					() -> assertEquals(InvoiceExtension.class, document("Invoice").getBeanClass(null)));
+	}
+
+	/**
+	 * Customer beta overrides Invoice without an override class, so its bean class is the vanilla
+	 * extension, found after looking for the customer's override and domain classes.
+	 */
+	@Test
+	void theClassesACustomerDoesNotHaveAreLookedForOnce() throws Exception {
+		DocumentImpl invoice = document("Invoice");
+		Customer beta = customer("beta");
+		Class<?> first = invoice.getBeanClass(beta);
+		Class<?> second = invoice.getBeanClass(beta);
+
+		assertAll(() -> assertEquals(InvoiceExtension.class, first),
+					() -> assertSame(first, second),
+					() -> assertEquals(List.of("customers.beta.modules.beanclassfixture.domain.InvoiceOverride",
+												"customers.beta.modules.beanclassfixture.domain.Invoice"),
+										missingClassNames));
+	}
+
+	@Test
+	void eachCustomerGetsItsOwnBeanClass() throws Exception {
+		DocumentImpl order = document("Order");
+		Class<?> acme = order.getBeanClass(customer("acme"));
+		Class<?> beta = order.getBeanClass(customer("beta"));
+
+		assertAll(() -> assertEquals(OrderOverride.class, acme),
+					() -> assertEquals(OrderVanilla.class, beta),
+					() -> assertEquals(OrderOverride.class, order.getBeanClass(customer("acme"))));
+	}
+
+	/** Classes reloaded through another context class loader are not the ones resolved before. */
+	@Test
+	void anotherContextClassLoaderResolvesTheBeanClassAgain() throws Exception {
+		DocumentImpl item = document("Item");
+		Customer beta = customer("beta");
+		Class<?> before = item.getBeanClass(beta);
+		Thread.currentThread().setContextClassLoader(new FixtureClassLoader(previousClassLoader, Map.of("modules.beanclassfixture.domain.Item", Payment.class)));
+
+		assertAll(() -> assertEquals(Item.class, before),
+					() -> assertEquals(Payment.class, item.getBeanClass(beta)));
+	}
+
+	/** In dev mode the classes can be generated and reloaded, so nothing is cached. */
+	@Test
+	void devModeResolvesTheBeanClassEachTime() throws Exception {
+		DocumentImpl invoice = document("Invoice");
+		Customer beta = customer("beta");
+		boolean devMode = UtilImpl.DEV_MODE;
+		UtilImpl.DEV_MODE = true;
+		try {
+			invoice.getBeanClass(beta);
+			invoice.getBeanClass(beta);
+		}
+		finally {
+			UtilImpl.DEV_MODE = devMode;
+		}
+
+		assertEquals(4, missingClassNames.size(), missingClassNames::toString);
 	}
 }

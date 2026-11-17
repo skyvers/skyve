@@ -728,7 +728,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public @Nullable String vtable(@Nonnull String customerName, @Nonnull String key) {
+	public @Nullable String vtable(@Nullable String customerName, @Nonnull String key) {
 		for (ProvidedRepository delegate : delegates) {
 			String result = delegate.vtable(customerName, key);
 			if (result != null) {

@@ -3,8 +3,11 @@ package org.skyve.impl.metadata.repository;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -12,6 +15,7 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.Contact;
 import util.AbstractH2TestDispose;
 
@@ -43,6 +47,33 @@ class MetaDataEvictionH2Test extends AbstractH2TestDispose {
 		repository.evictCachedMetaData(null);
 
 		assertMetaDataResolves(repository);
+	}
+
+	/**
+	 * A document caches its bean classes, which go with it when eviction loads the document again.
+	 */
+	@Test
+	void customerEvictionLoadsTheDocumentAgainWithoutItsCachedBeanClasses() throws Exception {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
+		Customer customer = repository.getCustomer(CUSTOMER);
+		assertNotNull(customer, "customer");
+		DocumentImpl before = contact(repository, customer);
+		Class<?> beanClass = before.getBeanClass(customer);
+
+		repository.evictCachedMetaData(customer);
+
+		Customer evictedCustomer = repository.getCustomer(CUSTOMER);
+		assertNotNull(evictedCustomer, "customer");
+		DocumentImpl after = contact(repository, evictedCustomer);
+		assertAll(() -> assertSame(ContactExtension.class, beanClass),
+					() -> assertNotSame(before, after),
+					() -> assertSame(ContactExtension.class, after.getBeanClass(evictedCustomer)));
+	}
+
+	private static DocumentImpl contact(ProvidedRepository repository, Customer customer) {
+		Module module = repository.getModule(customer, Contact.MODULE_NAME);
+		assertNotNull(module, "module");
+		return (DocumentImpl) repository.getDocument(customer, module, Contact.DOCUMENT_NAME);
 	}
 
 	/**

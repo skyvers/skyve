@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -100,6 +101,36 @@ public class DocumentImpl extends ModelImpl implements Document {
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
     
 	private static final String DOCUMENT_PREFIX = "Document ";
+
+	/**
+	 * The suffix of the concrete vanilla class the domain generator generates when a customer's
+	 * override leaves out a vanilla attribute, and so makes the vanilla domain class abstract -
+	 * <code>modules.&lt;m&gt;.domain.&lt;Document&gt;Vanilla</code>.
+	 */
+	public static final String VANILLA_CLASS_SUFFIX = "Vanilla";
+
+	/**
+	 * The suffix of the class the domain generator generates for a customer's override of a vanilla
+	 * document - <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code>.
+	 */
+	public static final String OVERRIDE_CLASS_SUFFIX = "Override";
+
+	/**
+	 * A bean class, with the context class loader it was loaded through.
+	 *
+	 * @param classLoader	The context class loader.
+	 * @param beanClass	The bean class.
+	 */
+	private record LoadedBeanClass(@Nonnull ClassLoader classLoader, @Nonnull Class<?> beanClass) {
+	}
+
+	/**
+	 * The bean classes {@link #getBeanClass(Customer)} resolved outside dev mode, by customer name,
+	 * or "" for the vanilla bean class. Thread-safe. Evicting cached metadata loads the document
+	 * again, which drops them. A bean class loaded through another context class loader is resolved
+	 * again. Transient, as class loaders are not serializable - see {@link #readResolve()}.
+	 */
+	private transient Map<String, LoadedBeanClass> beanClasses = new ConcurrentHashMap<>();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	private long lastCheckedMillis = System.currentTimeMillis();
@@ -246,12 +277,17 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * documents this resolves generated domain and optional extension classes through the
 	 * repository vtable, including customer overrides.
 	 *
-	 * @param customer the customer context used for repository vtable resolution.
+	 * <p>Side effects: outside dev mode, caches the class for the customer, so that the classes
+	 * that do not exist are looked for once. Evicting cached metadata, which loads the document
+	 * again, or another context class loader, resolves it again.
+	 *
+	 * @param customer the customer context used for repository vtable resolution, or {@code null}
+	 * 			for the vanilla bean class, which a customer that does not override the document gets.
 	 * @return the concrete bean class.
 	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
 	 */
-	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
-	public @Nonnull <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
+	@SuppressWarnings("unchecked")
+	public @Nonnull <T extends Bean> Class<T> getBeanClass(@Nullable Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
 			Persistent persistent = getPersistent();
@@ -269,9 +305,33 @@ public class DocumentImpl extends ModelImpl implements Document {
 			return (persistent == null) ? (Class<T>) DynamicBean.class : (Class<T>) DynamicPersistentBean.class;
 		}
 		
+		String customerName = (customer == null) ? null : customer.getName();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (UtilImpl.DEV_MODE) { // classes can be regenerated and reloaded
+			return loadBeanClass(customerName, classLoader);
+		}
+		String key = (customerName == null) ? "" : customerName;
+		LoadedBeanClass result = beanClasses.get(key);
+		if ((result == null) || (result.classLoader() != classLoader)) {
+			result = new LoadedBeanClass(classLoader, loadBeanClass(customerName, classLoader));
+			beanClasses.put(key, result);
+		}
+		return (Class<T>) result.beanClass();
+	}
+
+	/**
+	 * Loads the bean class of this static document for a customer (see {@link #getBeanClass(Customer)}).
+	 *
+	 * @param customerName	The customer name, or {@code null} for the vanilla bean class.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if a mapped class cannot be loaded.
+	 */
+	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
+	private @Nonnull <T extends Bean> Class<T> loadBeanClass(@Nullable String customerName, @Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
 		Class<T> result = null;
 		
-		String customerName = customer.getName();
 		String documentName = getName();
 
 		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
@@ -290,7 +350,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 			boolean customerDocument = packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE);
 			if ((extensionKey != null) &&
 					((! customerDocument) || extensionKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE))) {
-				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
+				result = (Class<T>) classLoader.loadClass(extensionKey.replace('/', '.'));
 			}
 			else {
 				// Convert the vtable key to a package path
@@ -306,15 +366,15 @@ public class DocumentImpl extends ModelImpl implements Document {
 																			.append(documentName).toString();
 					try {
 						className.setLength(0);
-						className.append(customerClassName).append("Override");
-						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+						className.append(customerClassName).append(OVERRIDE_CLASS_SUFFIX);
+						result = (Class<T>) classLoader.loadClass(className.toString());
 					}
 					catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
 						// Look for the domain class in the customer area
 						try {
 							className.setLength(0);
 							className.append(customerClassName);
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+							result = (Class<T>) classLoader.loadClass(className.toString());
 						}
 						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
 							// Use the vanilla extension, or else the domain class in the modules area
@@ -325,7 +385,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 							else {
 								className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 							}
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+							result = (Class<T>) classLoader.loadClass(className.toString());
 						}
 					}
 				}
@@ -333,11 +393,11 @@ public class DocumentImpl extends ModelImpl implements Document {
 					// Look for domain class and if abstract, look for an override
 					className.setLength(0);
 					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+					result = (Class<T>) classLoader.loadClass(className.toString());
 					if (Modifier.isAbstract(result.getModifiers())) {
-						className.append("Vanilla");
+						className.append(VANILLA_CLASS_SUFFIX);
 						try {
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
+							result = (Class<T>) classLoader.loadClass(className.toString());
 						}
 						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
 							// stick with the domain class
@@ -354,6 +414,16 @@ public class DocumentImpl extends ModelImpl implements Document {
 		}
 		
 		return result;
+	}
+
+	/**
+	 * Creates the transient bean class cache again after deserialisation.
+	 *
+	 * @return	this document.
+	 */
+	private @Nonnull Object readResolve() {
+		beanClasses = new ConcurrentHashMap<>();
+		return this;
 	}
 
 	/**

@@ -738,7 +738,7 @@ public class SessionScopedDelegatingProvidedRepository extends ProvidedRepositor
 	 * @return the result
 	 */
 	@Override
-	public @Nullable String vtable(@Nonnull String customerName, @Nonnull String key) {
+	public @Nullable String vtable(@Nullable String customerName, @Nonnull String key) {
 		String result = null;
 		ProvidedRepository delegate = getSessionDelegate();
 		if (delegate != null) {
