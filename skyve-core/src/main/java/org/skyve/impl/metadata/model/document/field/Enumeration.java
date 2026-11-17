@@ -261,6 +261,8 @@ public class Enumeration extends ConstrainableField {
 	 * 			{@link ClassNotFoundException} when no class declares the enum, or the bean class
 	 * 			cannot be loaded, as before the domain is first compiled
 	 * 			(see {@link #isEnumClassLoadingFailure(Throwable)})
+	 * @throws IllegalStateException	if there is no repository and the enumeration references another
+	 * 			document's enumeration
 	 */
 	@Override
 	public @Nonnull Class<?> getImplementingType() {
@@ -295,7 +297,9 @@ public class Enumeration extends ConstrainableField {
 	 * leaves out - the vanilla bean class and its superclasses are looked in.
 	 *
 	 * <p>Without a repository, as in a unit test that installs none, the generated enum is loaded
-	 * from the vanilla domain class of the document that declares the attribute.
+	 * from the vanilla domain class of the document that declares the attribute. An enumeration that
+	 * references another document's, with <code>documentRef</code> or <code>moduleRef</code>, needs
+	 * the repository to resolve the reference, so it throws without one, as it always has.
 	 *
 	 * <p>Side effects: with a repository and outside dev mode, caches the enum class for the customer,
 	 * with the context class loader it was loaded through, so that each class is looked for once per
@@ -310,6 +314,8 @@ public class Enumeration extends ConstrainableField {
 	 * 			{@link ClassNotFoundException} when no class declares the enum, or the bean class
 	 * 			cannot be loaded, as before the domain is first compiled
 	 * 			(see {@link #isEnumClassLoadingFailure(Throwable)})
+	 * @throws IllegalStateException	if there is no repository and the enumeration references another
+	 * 			document's enumeration
 	 */
 	public @Nonnull Class<?> getImplementingType(@Nullable Customer customer) {
 		String customerName = (customer == null) ? null : customer.getName();

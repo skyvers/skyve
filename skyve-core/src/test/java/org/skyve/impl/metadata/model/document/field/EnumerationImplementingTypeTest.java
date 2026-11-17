@@ -501,6 +501,15 @@ class EnumerationImplementingTypeTest {
 					() -> assertTrue(Enumeration.isEnumClassLoadingFailure(e), e::toString));
 	}
 
+	/** A reference to another document's enumeration needs the repository to resolve the reference. */
+	@Test
+	void withoutARepositoryAReferenceToAnotherDocumentsEnumThrows() {
+		Enumeration reference = reference("UtReferrer", "keptReference", "kept");
+		ProvidedRepositoryFactory.set(null);
+
+		assertThrows(IllegalStateException.class, reference::getImplementingType);
+	}
+
 	@Test
 	void anUndeclaredEnumThrowsAnEnumClassLoadingFailure() {
 		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
