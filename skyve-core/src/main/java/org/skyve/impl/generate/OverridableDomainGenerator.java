@@ -872,13 +872,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						// for a new document definition, baseDocumentName == null
 						String vanillaDocumentName = documentClasses.containsKey(documentName) ? documentName : null;
 
-						// bug out if this document is an override but doesn't add any more properties
-						if (vanillaDocumentName != null) { // overridden document
-							TreeMap<String, AttributeType> extraProperties = getOverriddenDocumentExtraProperties(document);
-							if (extraProperties.isEmpty()) { // no extra properties in override
-								generateOverriddenORM(mappingFileContents, customer, module, document, filterDefinitions);
-								return;
-							}
+						// bug out if this document is an override that can use the vanilla class
+						if ((vanillaDocumentName != null) && (! overrideNeedsCustomerClass(document))) {
+							generateOverriddenORM(mappingFileContents, customer, module, document, filterDefinitions);
+							return;
 						}
 
 						// Generate extension
@@ -917,6 +914,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				generation.put(mappingFilePath, mappingFileContents);
 			}
 		}
+	}
+
+	/**
+	 * Determines whether a customer's override of a vanilla document needs its own concrete customer
+	 * class (<code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Ext</code>) rather than the
+	 * vanilla class: when it adds properties to the vanilla class, or when the vanilla class is abstract
+	 * because a customer's override - this one or another customer's - leaves out a vanilla attribute.
+	 *
+	 * @param overriddenDocument	The customer's override of a vanilla document.
+	 * @return	true if the override needs a customer class.
+	 */
+	private boolean overrideNeedsCustomerClass(@Nonnull Document overriddenDocument) {
+		DomainClass vanillaClass = moduleDocumentVanillaClasses.get(overriddenDocument.getOwningModuleName()).get(overriddenDocument.getName());
+		return vanillaClass.isAbstract || (! getOverriddenDocumentExtraProperties(overriddenDocument).isEmpty());
 	}
 
 	private @Nonnull TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(@Nonnull Document overriddenDocument) {
@@ -2169,9 +2180,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(moduleName);
 			String vanillaDocumentName = documentClasses.containsKey(documentName) ? documentName : null;
 			if (vanillaDocumentName != null) { // overridden document
-				// bug out if this document is an override but doesn't add any more properties
-				TreeMap<String, AttributeType> extraProperties = getOverriddenDocumentExtraProperties(document);
-				if (! extraProperties.isEmpty()) { // there exists extra properties in override
+				// map the customer class if the override has one
+				if (overrideNeedsCustomerClass(document)) {
 					packagePathPrefix = new StringBuilder(128).append(ProvidedRepository.CUSTOMERS_NAMESPACE)
 																.append(customer.getName())
 																.append('/')
@@ -4445,69 +4455,136 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Deletes the customer output of a previous run so it can be written afresh, mirroring the
-	 * treatment of the vanilla <code>modules/&lt;m&gt;/domain</code> directories. Below
-	 * <code>&lt;generatedSrcPath&gt;/customers/&lt;c&gt;/</code> it deletes:
+	 * Collects the customer output of a previous run so it can be deleted and written afresh, mirroring
+	 * the treatment of the vanilla <code>modules/&lt;m&gt;/domain</code> directories. Below
+	 * <code>&lt;generatedSrcPath&gt;/customers/&lt;c&gt;/</code> it collects every entry that is not a
+	 * directory:
 	 * <ul>
-	 * 	<li>every regular file in <code>modules/&lt;m&gt;/domain/</code> - module metadata enums,
+	 * 	<li>directly in <code>modules/&lt;m&gt;/domain/</code> - module metadata enums,
 	 * 		<code>&lt;Document&gt;Ext</code> classes and new customer document classes;</li>
-	 * 	<li>every regular file in <code>domain/</code> - the customer role enum;</li>
-	 * 	<li><code>modules/orm.hbm.xml</code> - the customer ORM mapping.</li>
+	 * 	<li>directly in <code>domain/</code> - the customer role enum;</li>
+	 * 	<li><code>modules/orm.hbm.xml</code> - the customer ORM mapping;</li>
+	 * 	<li><code>modules/metadata-enums-only.txt</code> - a marker an earlier generator wrote.</li>
 	 * </ul>
-	 * It then deletes the directories this leaves empty, up to and including
-	 * <code>customers/&lt;c&gt;/</code> and <code>customers/</code>. Nothing else is touched, so this is
-	 * safe when the generated source path is the source path, where <code>customers/&lt;c&gt;/</code> also
-	 * holds the customer metadata, resources and module overrides.
+	 * Symbolic links to directories are not followed. Nothing else is collected, so this is safe when
+	 * the generated source path is the source path, where <code>customers/&lt;c&gt;/</code> also holds the
+	 * customer metadata, resources and module overrides.
+	 *
+	 * @return	the files (and links) to delete.
+	 */
+	private @Nonnull List<Path> collectGeneratedCustomerOutput() {
+		final List<Path> result = new ArrayList<>();
+		for (Path customerDirectory : realSubdirectories(Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME))) {
+			final Path modulesDirectory = customerDirectory.resolve(ProvidedRepository.MODULES_NAME);
+			for (Path moduleDirectory : realSubdirectories(modulesDirectory)) {
+				collectNonDirectories(moduleDirectory.resolve(ProvidedRepository.DOMAIN_NAME), result);
+			}
+			if (Files.isDirectory(modulesDirectory, LinkOption.NOFOLLOW_LINKS)) {
+				for (String fileName : new String[] {"orm.hbm.xml", "metadata-enums-only.txt"}) {
+					Path file = modulesDirectory.resolve(fileName);
+					if (Files.exists(file, LinkOption.NOFOLLOW_LINKS) && (! Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS))) {
+						result.add(file);
+					}
+				}
+			}
+			collectNonDirectories(customerDirectory.resolve(ProvidedRepository.DOMAIN_NAME), result);
+		}
+		return result;
+	}
+
+	/**
+	 * Checks, before anything is deleted, that every customer file this run generates can be written:
+	 * a file already at its path must be one {@link #collectGeneratedCustomerOutput()} collected for
+	 * deletion. Otherwise - a directory or an entry behind a linked directory, say - writing it with
+	 * {@link StandardOpenOption#CREATE_NEW} would fail after the generated tree had been emptied.
+	 *
+	 * @param customerOutput	The customer output collected for deletion.
+	 * @throws IOException	if a customer file this run generates is blocked by an existing entry.
+	 */
+	private void checkCustomerGenerationTargets(@Nonnull List<Path> customerOutput) throws IOException {
+		final Path customersDirectory = Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME).toAbsolutePath().normalize();
+		final Set<Path> deletions = new TreeSet<>();
+		for (Path file : customerOutput) {
+			deletions.add(file.toAbsolutePath().normalize());
+		}
+		for (Path target : generation.keySet()) {
+			Path absoluteTarget = target.toAbsolutePath().normalize();
+			if (absoluteTarget.startsWith(customersDirectory) &&
+					Files.exists(target, LinkOption.NOFOLLOW_LINKS) &&
+					(! deletions.contains(absoluteTarget))) {
+				throw new IOException("Cannot generate " + target + " as something that is not generated output is in the way - move it and generate again");
+			}
+		}
+	}
+
+	/**
+	 * Deletes the customer output collected by {@link #collectGeneratedCustomerOutput()}, then the
+	 * directories this leaves empty, up to and including <code>customers/&lt;c&gt;/</code> and
+	 * <code>customers/</code>. A directory that is not empty, or is a symbolic link, is never deleted.
 	 *
 	 * <p>Side effects: deletes files and directories below the generated source directory.
 	 *
-	 * @throws IOException	if a directory cannot be read or a file or directory cannot be deleted.
+	 * @param customerOutput	The customer output to delete.
+	 * @throws IOException	if a file or directory cannot be deleted.
 	 */
-	private void deleteGeneratedCustomerOutput() throws IOException {
-		// src/generated/java/customers
-		final Path customersDirectory = Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME);
-		final File[] customerDirectories = customersDirectory.toFile().listFiles(File::isDirectory);
-		if (customerDirectories == null) {
-			return;
+	private void deleteGeneratedCustomerOutput(@Nonnull List<Path> customerOutput) throws IOException {
+		for (Path file : customerOutput) {
+			Files.deleteIfExists(file);
 		}
 
-		for (File customerDirectory : customerDirectories) {
-			final Path customerDirectoryPath = customerDirectory.toPath();
-			final Path modulesDirectory = customerDirectoryPath.resolve(ProvidedRepository.MODULES_NAME);
-			final File[] moduleDirectories = modulesDirectory.toFile().listFiles(File::isDirectory);
-			if (moduleDirectories != null) {
-				for (File moduleDirectory : moduleDirectories) {
-					final Path moduleDirectoryPath = moduleDirectory.toPath();
-					final Path domainDirectory = moduleDirectoryPath.resolve(ProvidedRepository.DOMAIN_NAME);
-					deleteRegularFiles(domainDirectory);
-					deleteEmptyDirectory(domainDirectory);
-					deleteEmptyDirectory(moduleDirectoryPath);
-				}
+		final Path customersDirectory = Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME);
+		for (Path customerDirectory : realSubdirectories(customersDirectory)) {
+			final Path modulesDirectory = customerDirectory.resolve(ProvidedRepository.MODULES_NAME);
+			for (Path moduleDirectory : realSubdirectories(modulesDirectory)) {
+				deleteEmptyDirectory(moduleDirectory.resolve(ProvidedRepository.DOMAIN_NAME));
+				deleteEmptyDirectory(moduleDirectory);
 			}
-			Files.deleteIfExists(modulesDirectory.resolve("orm.hbm.xml"));
 			deleteEmptyDirectory(modulesDirectory);
-
-			final Path customerDomainDirectory = customerDirectoryPath.resolve(ProvidedRepository.DOMAIN_NAME);
-			deleteRegularFiles(customerDomainDirectory);
-			deleteEmptyDirectory(customerDomainDirectory);
-
-			deleteEmptyDirectory(customerDirectoryPath);
+			deleteEmptyDirectory(customerDirectory.resolve(ProvidedRepository.DOMAIN_NAME));
+			deleteEmptyDirectory(customerDirectory);
 		}
 		deleteEmptyDirectory(customersDirectory);
 	}
 
 	/**
-	 * Deletes the regular files directly in a directory, if it exists. Subdirectories and their
-	 * contents are left untouched.
+	 * Lists the subdirectories of a directory that are not symbolic links.
 	 *
-	 * @param directory	The directory to delete the files of.
-	 * @throws IOException	if a file cannot be deleted.
+	 * @param directory	The directory to list.
+	 * @return	the subdirectories, or an empty list if the directory does not exist or is a link.
 	 */
-	private static void deleteRegularFiles(@Nonnull Path directory) throws IOException {
-		final File[] files = directory.toFile().listFiles(File::isFile);
-		if (files != null) {
-			for (File file : files) {
-				Files.delete(file.toPath());
+	private static @Nonnull List<Path> realSubdirectories(@Nonnull Path directory) {
+		final List<Path> result = new ArrayList<>();
+		if (Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+			final File[] children = directory.toFile().listFiles();
+			if (children != null) {
+				for (File child : children) {
+					Path childPath = child.toPath();
+					if (Files.isDirectory(childPath, LinkOption.NOFOLLOW_LINKS)) {
+						result.add(childPath);
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Adds the entries directly in a directory that are not directories - files and links - to the list.
+	 * Nothing is added if the directory does not exist or is a symbolic link.
+	 *
+	 * @param directory	The directory to collect from.
+	 * @param result	The list to add to.
+	 */
+	private static void collectNonDirectories(@Nonnull Path directory, @Nonnull List<Path> result) {
+		if (Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+			final File[] children = directory.toFile().listFiles();
+			if (children != null) {
+				for (File child : children) {
+					Path childPath = child.toPath();
+					if (! Files.isDirectory(childPath, LinkOption.NOFOLLOW_LINKS)) {
+						result.add(childPath);
+					}
+				}
 			}
 		}
 	}
@@ -4540,6 +4617,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private void replaceGenerated(@Nonnull List<String> moduleNames) throws IOException {
+		// src/generated/java/customers/* domain classes, metadata enums and ORM mappings - collected and
+		// checked before anything is deleted so a blocked customer file cannot leave the tree half emptied
+		final List<Path> customerOutput = collectGeneratedCustomerOutput();
+		checkCustomerGenerationTargets(customerOutput);
+
 		// src/main/java/generated/modules
 		final Path generatedDirectory = Paths.get(generatedSrcPath, ProvidedRepository.MODULES_NAMESPACE);
 
@@ -4571,8 +4653,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			}
 		}
 
-		// src/generated/java/customers/* domain classes, metadata enums and ORM mappings
-		deleteGeneratedCustomerOutput();
+		deleteGeneratedCustomerOutput(customerOutput);
 
 		// delete the generated test directory
 		final Path generatedTestDirectory = Paths.get(generatedTestPath);

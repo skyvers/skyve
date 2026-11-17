@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -5756,6 +5757,58 @@ class OverridableDomainGeneratorMoreTest {
 				() -> assertEquals("class OrderBizlet {}", Files.readString(bizlet)),
 				() -> assertFalse(Files.exists(src.resolve("customers/acme/modules/sales/domain"))),
 				() -> assertFalse(Files.exists(src.resolve("customers/acme/domain"))));
+	}
+
+	@Test
+	void generateDeletesAStaleMetadataEnumsOnlyMarker() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-marker");
+		generateInto(root, customerEnumRepository(salesOverride(), true));
+		Path marker = Files.writeString(root.resolve(CUSTOMER_MODULES).resolve("metadata-enums-only.txt"), "old marker");
+
+		generateInto(root, customerEnumRepository(salesOverride(), true));
+
+		assertFalse(Files.exists(marker), "The marker an earlier generator wrote is customer output");
+		assertTrue(Files.exists(root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java")));
+	}
+
+	@Test
+	void generateFailsBeforeDeletingAnythingWhenACustomerFileIsBlocked() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-blocked");
+		ProvidedRepository repo = customerEnumRepository(salesOverride(), true);
+		generateInto(root, repo);
+		Map<String, String> before = snapshot(root);
+		// a directory where the customer enum must be written
+		Path blocked = root.resolve(CUSTOMER_DOMAIN).resolve("SalesRole.java");
+		Files.delete(blocked);
+		Files.createDirectories(blocked.resolve("inside"));
+		Files.writeString(blocked.resolve("inside/file.txt"), "in the way");
+		before.remove(CUSTOMER_DOMAIN + "/SalesRole.java");
+		before.put(CUSTOMER_DOMAIN + "/SalesRole.java/inside/file.txt", "in the way");
+
+		IOException e = assertThrows(IOException.class, () -> generateInto(root, repo));
+
+		assertAll(
+				() -> assertTrue(e.getMessage().contains("SalesRole.java"), e.getMessage()),
+				() -> assertEquals(before, snapshot(root), "Nothing may be deleted when the run cannot complete"));
+	}
+
+	@Test
+	void generateDoesNotFollowLinkedCustomerDirectories() throws Exception {
+		Path root = Files.createTempDirectory("odg-customer-links");
+		Path elsewhere = Files.createTempDirectory("odg-customer-links-elsewhere");
+		Path linkedCustomerFile = write(elsewhere.resolve("customer/modules/sales/domain/Linked.java"), "class Linked {}");
+		Path linkedModuleFile = write(elsewhere.resolve("module/domain/Linked.java"), "class Linked {}");
+		Files.createDirectories(root.resolve("src/customers/other/modules"));
+		Files.createSymbolicLink(root.resolve("src/customers/linked"), elsewhere.resolve("customer"));
+		Files.createSymbolicLink(root.resolve("src/customers/other/modules/sales"), elsewhere.resolve("module"));
+
+		generateInto(root, customerEnumRepository(salesOverride(), false));
+
+		assertAll(
+				() -> assertTrue(Files.exists(linkedCustomerFile), "A linked customer directory is not cleaned"),
+				() -> assertTrue(Files.exists(linkedModuleFile), "A linked module directory is not cleaned"),
+				() -> assertTrue(Files.isSymbolicLink(root.resolve("src/customers/linked"))),
+				() -> assertTrue(Files.isSymbolicLink(root.resolve("src/customers/other/modules/sales"))));
 	}
 
 	private static Path write(Path file, String contents) throws Exception {
