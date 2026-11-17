@@ -1,18 +1,16 @@
 package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.skyve.impl.web.service.smartclient.ListServletCriteria.criterion;
+import static org.skyve.impl.web.service.smartclient.ListServletCriteria.group;
+import static org.skyve.impl.web.service.smartclient.ListServletCriteria.range;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.TreeSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,12 +21,7 @@ import org.skyve.impl.snapshot.CompoundFilterOperator;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.view.model.list.DocumentQueryListModel;
-import org.skyve.metadata.view.model.list.InMemoryFilter;
-import org.skyve.metadata.view.model.list.ListModel;
-import org.skyve.metadata.view.model.list.Page;
 import org.skyve.persistence.Persistence;
-import org.skyve.util.Binder;
 
 import modules.kitchensink.domain.ListAttributes;
 import util.AbstractH2Test;
@@ -46,6 +39,7 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 	private static final String DATE = ListAttributes.datePropertyName;
 	private static final String MEMO = ListAttributes.memoPropertyName;
 	private static final String VARIANT = ListAttributes.variantDomainPropertyName;
+	private static final String QUERY = "qListGridFixtureVueAttributes";
 	private static final Set<String> ALL = Set.of("NV a", "NV b", "NV c", "NV n");
 
 	private Customer customer;
@@ -145,37 +139,8 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 	@SafeVarargs
 	private void assertRows(Set<String> expected, CompoundFilterOperator operator, Map<String, Object>... criteria) throws Exception {
 		List<Map<String, Object>> list = List.of(criteria);
-		assertEquals(expected, fetch(operator, list), "database " + operator + " " + list);
-		assertEquals(expected, filterInMemory(operator, list), "in memory " + operator + " " + list);
-	}
-
-	private Set<String> fetch(CompoundFilterOperator operator, List<Map<String, Object>> criteria) throws Exception {
-		DocumentQueryListModel<Bean> model = new DocumentQueryListModel<>(module.getNullSafeMetaDataQuery("qListGridFixtureVueAttributes"));
-		model.postConstruct(customer, true);
-		model.setStartRow(0);
-		model.setEndRow(10);
-		SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module, document, CORE.getUser(), operator, criteria, null, model);
-		Page page = model.fetch();
-		return texts(Objects.requireNonNull(page.getRows()));
-	}
-
-	private Set<String> filterInMemory(CompoundFilterOperator operator, List<Map<String, Object>> criteria) throws Exception {
-		InMemoryFilter filter = new InMemoryFilter();
-		ListModel<Bean> model = mock(ListModel.class);
-		when(model.getFilter()).thenReturn(filter);
-		when(model.newFilter()).thenAnswer(invocation -> new InMemoryFilter());
-		SmartClientListServlet.addAdvancedFilterCriteriaToQuery(module, document, CORE.getUser(), operator, criteria, null, model);
-		List<Bean> filtered = new ArrayList<>(rows);
-		filter.filter(filtered);
-		return texts(filtered);
-	}
-
-	private static Set<String> texts(List<Bean> beans) {
-		Set<String> result = new TreeSet<>();
-		for (Bean bean : beans) {
-			result.add((String) Binder.get(bean, TEXT));
-		}
-		return result;
+		assertEquals(expected, ListServletCriteria.fetch(module, document, QUERY, TEXT, operator, list), "database " + operator + " " + list);
+		assertEquals(expected, ListServletCriteria.filterInMemory(module, document, rows, TEXT, operator, list), "in memory " + operator + " " + list);
 	}
 
 	private static ListAttributes row(String text, Integer number, LocalDate date, String memo, String variant) {
@@ -186,33 +151,5 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 		result.setMemo(memo);
 		result.setVariantDomain(variant);
 		return result;
-	}
-
-	/** A criterion as a list grid sends it, its value a string as in the request's JSON (or an array for inSet). */
-	private static Map<String, Object> criterion(String fieldName, String operator, String value, String... values) {
-		Map<String, Object> result = new HashMap<>();
-		result.put("fieldName", fieldName);
-		result.put("operator", operator);
-		if (value != null) {
-			result.put("value", value);
-		}
-		else if (values.length > 0) {
-			result.put("value", new ArrayList<>(List.of(values)));
-		}
-		return result;
-	}
-
-	/** A range criterion. */
-	private static Map<String, Object> range(String fieldName, String operator, String start, String end) {
-		Map<String, Object> result = criterion(fieldName, operator, null);
-		result.put("start", start);
-		result.put("end", end);
-		return result;
-	}
-
-	/** A nested group of criteria. */
-	@SafeVarargs
-	private static Map<String, Object> group(String operator, Map<String, Object>... criteria) {
-		return Map.of("operator", operator, "criteria", List.of(criteria));
 	}
 }
