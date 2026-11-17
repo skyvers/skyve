@@ -230,7 +230,7 @@ System.out.println(visitModules(args[0]));
 						steps.add(navigate);
 
 						Document d = m.getDocument(c, documentName);
-						edit(c, m, d, uxui, steps);
+						edit(u, c, m, d, uxui, steps);
 					}
 
 					interactions.add(interaction);
@@ -340,7 +340,7 @@ System.out.println(visitModules(args[0]));
 						navigate.setDocumentName(documentName);
 						steps.add(navigate);
 
-						edit(c, m, d, uxui, steps);
+						edit(user, c, m, d, uxui, steps);
 						
 						interactions.add(interaction);
 					}
@@ -369,8 +369,8 @@ System.out.println(visitModules(args[0]));
 		return result;
 	}
 
-	private static void edit(@Nonnull Customer c, @Nonnull Module m, @Nonnull Document d, @Nonnull String uxui, @Nonnull List<Step> steps) {
-		GenerateViewVisitor visitor = new GenerateViewVisitor(c, m, d, uxui);
+	private static void edit(@Nonnull User u, @Nonnull Customer c, @Nonnull Module m, @Nonnull Document d, @Nonnull String uxui, @Nonnull List<Step> steps) {
+		GenerateViewVisitor visitor = new GenerateViewVisitor(u, c, m, d, uxui);
 		visitor.visit();
 		steps.addAll(visitor.getPopulateSteps());
 		if (visitor.getHasSave()) {
@@ -394,7 +394,7 @@ System.out.println(visitModules(args[0]));
 			nu.setModelName(list.getModelName());
 			steps.add(nu);
 			
-			GenerateViewVisitor visitor = new GenerateViewVisitor(c, m, d, uxui);
+			GenerateViewVisitor visitor = new GenerateViewVisitor(u, c, m, d, uxui);
 			visitor.visit();
 			steps.addAll(visitor.getPopulateSteps());
 			if (visitor.getHasSave()) {
@@ -405,6 +405,9 @@ System.out.println(visitModules(args[0]));
 			steps.addAll(visitor.getActionSteps());
 			if (visitor.getHasDelete()) {
 				steps.add(new Delete());
+			}
+			else {
+				steps.addAll(visitor.getDeleteComments());
 			}
 		}
 	}

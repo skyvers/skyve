@@ -13,9 +13,11 @@ import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.Persistence;
 import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.ControlPanel.SailTestStrategy;
@@ -24,6 +26,9 @@ import modules.admin.domain.UserProxy;
 
 /**
  * Provides shared SAIL generation workflow used by Control Panel actions.
+ *
+ * <p>Side effects: generation runs as the SAIL user, and what it wrote is rolled back (see
+ * {@link #discardWrites(Persistence)}).
  */
 public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExtension> {
 	/**
@@ -119,13 +124,31 @@ public abstract class GenerateSAIL implements ServerSideAction<ControlPanelExten
 			bean.trapException(e);
 		}
 		finally {
+			// the user first, so that the rest of the request runs as its own user even if discarding fails
 			p.setUser(currentUser);
+			discardWrites(p);
 		}
 		bean.setTabIndex(Integer.valueOf(2));
 
 		return new ServerSideActionResult<>(bean);
 	}
 	
+	/**
+	 * Discards what SAIL generation wrote. Generation runs application code (the Bizlets' {@code newInstance}, view
+	 * conditions and test data), which can write; nothing that it wrote may persist.
+	 *
+	 * <p>Side effects: rolls back the persistence's transaction and begins another, so anything else the request wrote
+	 * before is discarded too (the Control Panel itself is not persistent). Work done in an autonomous transaction is
+	 * already committed and stays: document numbers taken while generating, when the number generator is
+	 * {@code DocumentNumberAutonomousTransactionGenerator}, are used up.
+	 *
+	 * @param p	the persistence that generation used
+	 */
+	static void discardWrites(@Nonnull Persistence p) {
+		p.rollback();
+		p.begin();
+	}
+
 	/**
 	 * Performs the single operation.
 	 * @param user the user value
