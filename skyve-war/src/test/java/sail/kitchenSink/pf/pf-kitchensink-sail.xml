@@ -4,12 +4,13 @@
 	SAIL can enter data into, checking values with testValue after data entry.
 	Not here, as PrimeFaces has no such UI (the executor fails them with a reason):
 	navigateTree and navigateCalendar (no a=t or a=c page), lookupDescriptionNew and lookupDescriptionEdit (the lookup is an
-	auto complete), dataGridEdit (no row edit gesture), listGridTool (no Refresh or Deselect tool: PrimeFacesKitchenSinkSailIT's
-	failure test checks the reason).
+	auto complete), dataGridEdit on a grid that is not inline (no row edit gesture), listGridTool (no Refresh or Deselect tool:
+	PrimeFacesKitchenSinkSailIT's failure test checks the reason).
 	listGridSelect needs a list grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces): the List Grid
 	Fixture has one of each PrimeFaces kind. dataGridSelect needs a data grid with a selectedIdBinding: the List Grid
 	Fixture's grid of rows has one (PrimeFacesRecorderRoundTripSailIT, pf-recorder-round-trip-more.xml).
-	Not here, as the language cannot express them yet: contentSignature, data entry into inline grid cells.
+	Not here, as the language cannot express it yet: contentSignature. Data entry into inline grid cells (dataGridNew or
+	dataGridEdit on an inline grid, then dataEnter and testValue) is in the converters scripts (pf-converters-*.xml).
 	dataGridLink is in pf-kitchensink-row-link.xml, run by its own test (rowLink).
 	Rows are found with rowContaining and {run}-unique values, so the suite can run in any order, and again, on the same server.
 -->
