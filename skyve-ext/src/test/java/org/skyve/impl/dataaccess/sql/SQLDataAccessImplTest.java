@@ -195,7 +195,7 @@ class SQLDataAccessImplTest {
 		assertEquals("sales", sql.getModuleName());
 		assertEquals("Order", sql.getDocumentName());
 		assertEquals(20, sql.getTimeoutInSeconds());
-		verify(fixture.module).getSQL("OpenOrders");
+		verify(fixture.module).getNullSafeSQL("OpenOrders");
 	}
 
 	@Test
@@ -212,7 +212,7 @@ class SQLDataAccessImplTest {
 		assertEquals("sales", sql.getModuleName());
 		assertEquals("Order", sql.getDocumentName());
 		assertEquals(30, sql.getTimeoutInSeconds());
-		verify(fixture.module).getSQL("ArchivedOrders");
+		verify(fixture.module).getNullSafeSQL("ArchivedOrders");
 		verify(fixture.module).getDocument(fixture.customer, "Order");
 	}
 
@@ -228,7 +228,7 @@ class SQLDataAccessImplTest {
 		assertInstanceOf(SQLDataAccessSQL.class, sql);
 		assertEquals("select count(*) from orders", sql.toQueryString());
 		assertEquals(45, sql.getTimeoutInSeconds());
-		verify(fixture.module).getSQL("OrderCount");
+		verify(fixture.module).getNullSafeSQL("OrderCount");
 	}
 
 	private static void doThrowOnCommit(Connection connection) throws SQLException {
@@ -255,9 +255,9 @@ class SQLDataAccessImplTest {
 		when(user.getCustomer()).thenReturn(customer);
 		when(customer.getModule("sales")).thenReturn(module);
 		when(module.getDocument(customer, "Order")).thenReturn(document);
-		when(module.getSQL("OpenOrders")).thenReturn(sqlDefinition);
-		when(module.getSQL("ArchivedOrders")).thenReturn(sqlDefinition);
-		when(module.getSQL("OrderCount")).thenReturn(sqlDefinition);
+		when(module.getNullSafeSQL("OpenOrders")).thenReturn(sqlDefinition);
+		when(module.getNullSafeSQL("ArchivedOrders")).thenReturn(sqlDefinition);
+		when(module.getNullSafeSQL("OrderCount")).thenReturn(sqlDefinition);
 		when(document.getOwningModuleName()).thenReturn("sales");
 		when(document.getName()).thenReturn("Order");
 		when(sqlDefinition.getQuery()).thenReturn(query);

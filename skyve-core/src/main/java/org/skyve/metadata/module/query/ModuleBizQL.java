@@ -3,7 +3,6 @@ package org.skyve.metadata.module.query;
 import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.ModuleMember;
 
 import jakarta.annotation.Nonnull;
@@ -43,13 +42,6 @@ public interface ModuleBizQL extends ModuleMember {
 	 * @throws MetaDataException if the module declares no such BizQL query for the customer
 	 */
 	default @Nonnull BizQLDefinition toBizQL(@Nonnull Customer customer) {
-		Module module = toModule(customer);
-		String queryName = queryName();
-		for (QueryDefinition query : module.getMetadataQueries()) {
-			if ((query instanceof BizQLDefinition result) && queryName.equals(query.getName())) {
-				return result;
-			}
-		}
-		throw new MetaDataException("BizQL query " + queryName + " does not exist in module " + module.getName());
+		return toModule(customer).getNullSafeBizQL(queryName());
 	}
 }

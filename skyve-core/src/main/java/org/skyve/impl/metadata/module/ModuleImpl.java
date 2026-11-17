@@ -339,15 +339,13 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	}
 
 	@Override
-	public @Nonnull SQLDefinition getSQL(@Nonnull String queryName) {
-		// NB Cannot throw if null as QueryCommand tests it
-		return (SQLDefinition) getMetaData(queryName);
+	public @Nullable SQLDefinition getSQL(@Nonnull String queryName) {
+		return (getMetaData(queryName) instanceof SQLDefinition result) ? result : null;
 	}
 
 	@Override
-	public @Nonnull BizQLDefinition getBizQL(@Nonnull String queryName) {
-		// NB Cannot throw if null as QueryCommand tests it
-		return (BizQLDefinition) getMetaData(queryName);
+	public @Nullable BizQLDefinition getBizQL(@Nonnull String queryName) {
+		return (getMetaData(queryName) instanceof BizQLDefinition result) ? result : null;
 	}
 
 	public void putQuery(@Nonnull QueryDefinition query) {

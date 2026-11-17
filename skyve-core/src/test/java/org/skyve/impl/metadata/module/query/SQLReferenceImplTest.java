@@ -19,7 +19,7 @@ class SQLReferenceImplTest {
 		Module module = mock(Module.class);
 		SQLDefinition target = mock(SQLDefinition.class);
 		when(repository.getModule(null, "admin")).thenReturn(module);
-		when(module.getSQL("ContactQuery")).thenReturn(target);
+		when(module.getNullSafeSQL("ContactQuery")).thenReturn(target);
 		when(target.getQuery()).thenReturn("SELECT 1");
 		SQLReferenceImpl ref = new SQLReferenceImpl(null, "admin", "ContactQuery");
 
