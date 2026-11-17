@@ -6,7 +6,9 @@ import static org.skyve.impl.web.service.smartclient.ListServletCriteria.group;
 import static org.skyve.impl.web.service.smartclient.ListServletCriteria.range;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.DateOnly;
+import org.skyve.domain.types.DateTime;
 import org.skyve.impl.snapshot.CompoundFilterOperator;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
@@ -37,6 +40,7 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 	private static final String TEXT = ListAttributes.textPropertyName;
 	private static final String NUMBER = ListAttributes.normalIntegerPropertyName;
 	private static final String DATE = ListAttributes.datePropertyName;
+	private static final String DATE_TIME = ListAttributes.dateTimePropertyName;
 	private static final String MEMO = ListAttributes.memoPropertyName;
 	private static final String VARIANT = ListAttributes.variantDomainPropertyName;
 	private static final String QUERY = "qListGridFixtureVueAttributes";
@@ -128,6 +132,21 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 					criterion(NUMBER, "notEqual", "5"));
 	}
 
+	/**
+	 * A date-only column's notEqual as SmartClient and the Vue list grid send it (BizUtil.dayCriteria, ListGrid.vue
+	 * dayCriteria): before the day, from the next day, or no value.
+	 */
+	@Test
+	void aDaysNotEqualIncludesNoValue() throws Exception {
+		LocalDateTime start = LocalDateTime.of(2026, Month.JUNE, 15, 0, 0);
+		assertRows(Set.of("NV a", "NV c", "NV n"),
+					CompoundFilterOperator.and,
+					group("or",
+							criterion(DATE_TIME, "lessThan", iso(start)),
+							criterion(DATE_TIME, "greaterOrEqual", iso(start.plusDays(1))),
+							criterion(DATE_TIME, "isNull", null)));
+	}
+
 	/** The positive conditions still leave out a row with no value. */
 	@Test
 	void positiveConditionsExcludeNoValue() throws Exception {
@@ -148,8 +167,14 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 		result.setText(text);
 		result.setNormalInteger(number);
 		result.setDate((date == null) ? null : new DateOnly(date));
+		result.setDateTime((date == null) ? null : new DateTime(date.atTime(14, 47).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()));
 		result.setMemo(memo);
 		result.setVariantDomain(variant);
 		return result;
+	}
+
+	/** An ISO 8601 instant in UTC, as JSON writes a Date. */
+	private static String iso(LocalDateTime local) {
+		return local.atZone(ZoneId.systemDefault()).toInstant().toString();
 	}
 }
