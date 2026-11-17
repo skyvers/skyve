@@ -153,6 +153,7 @@ class NumberConvertersRoundingTest {
 	 * first grouping, rounding repeats beyond it, and the half-way and random tests cover larger values.
 	 */
 	@Test
+	@SuppressWarnings("static-method")
 	void everyDecimal2WithinTwoThousand() {
 		Mismatches mismatches = new Mismatches();
 		for (Spec spec : DECIMALS) {
@@ -171,6 +172,7 @@ class NumberConvertersRoundingTest {
 	 * scale holds to 10^12, in every Decimal5 and Decimal10 converter, of both signs.
 	 */
 	@Test
+	@SuppressWarnings("static-method")
 	void halfWayPointsAndTheirNeighbours() {
 		Mismatches mismatches = new Mismatches();
 		for (Spec spec : DECIMALS) {
@@ -199,6 +201,7 @@ class NumberConvertersRoundingTest {
 	 * type's largest and smallest values.
 	 */
 	@Test
+	@SuppressWarnings("static-method")
 	void aMillionRandomValuesAndTheLimits() {
 		Random random = new Random(20261117L);
 		Mismatches mismatches = new Mismatches();
@@ -222,6 +225,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void namedDecimalsRoundHalfUpFromTheDecimal() {
 		assertAll(shows(ConverterName.Decimal5TwoDecimalPlaces, Decimal5::new, "1.005", "1.01"),
 					shows(ConverterName.Decimal5TwoDecimalPlaces, Decimal5::new, "1.015", "1.02"),
@@ -236,6 +240,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void aValueThatRoundsToZeroShowsNoSign() {
 		assertAll(shows(ConverterName.Decimal5TwoDecimalPlaces, Decimal5::new, "-0.001", "0.00"),
 					shows(ConverterName.Decimal5TwoDecimalPlaces, Decimal5::new, "-0.00499", "0.00"),
@@ -246,6 +251,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void percentagesOverAThousandAreGrouped() {
 		assertAll(shows(ConverterName.Decimal2IntegerPercentage, Decimal2::new, "10", "1,000%"),
 					shows(ConverterName.Decimal2IntegerPercentage, Decimal2::new, "12.5", "1,250%"),
@@ -254,6 +260,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void theAbsoluteConverterShowsTheMagnitude() {
 		assertAll(shows(ConverterName.Decimal2DollarsAndCentsAbsolute, Decimal2::new, "-7.5", "7.50"),
 					shows(ConverterName.Decimal2DollarsAndCentsAbsolute, Decimal2::new, "7.5", "7.50"),
@@ -273,6 +280,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void decimalsReadANumberAndNothingElse() {
 		ConverterName n = ConverterName.Decimal5TwoDecimalPlaces;
 		assertAll(reads(n, "1,234.56", "1234.56"),
@@ -295,6 +303,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void dollarsReadADollarSignBeforeTheNumberOrAfterItsMinus() {
 		ConverterName n = ConverterName.Decimal2DollarsAndCents;
 		assertAll(reads(n, "$1,234.56", "1234.56"),
@@ -312,6 +321,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void percentagesReadAPercentSignAtTheEndOnly() {
 		assertAll(reads(ConverterName.Decimal2IntegerPercentage, "12%", "0.12"),
 					reads(ConverterName.Decimal2IntegerPercentage, "12", "0.12"),
@@ -332,6 +342,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void integersReadTheirDigitsWithOptionalGrouping() {
 		assertAll(reads(ConverterName.IntegerSeparator, "1,234,567", "1234567"),
 					reads(ConverterName.IntegerSeparator, " -42 ", "-42"),
@@ -356,6 +367,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void wholeNumbersShowTheirDigitsGrouped() {
 		long[] ints = {0L, 1L, -1L, 999L, 1000L, -999L, -1000L, 999_999L, 1_000_000L, -1_000_000L,
 						Integer.MAX_VALUE, Integer.MIN_VALUE};
@@ -377,6 +389,7 @@ class NumberConvertersRoundingTest {
 	}
 
 	@Test
+	@SuppressWarnings("static-method")
 	void theLimitsShowAndReadBack() {
 		Mismatches mismatches = new Mismatches();
 		Stream.of(DECIMALS.toArray(new Spec[0])).forEach(spec -> {
