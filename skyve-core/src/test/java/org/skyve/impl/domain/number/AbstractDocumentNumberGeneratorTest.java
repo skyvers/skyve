@@ -75,6 +75,33 @@ class AbstractDocumentNumberGeneratorTest {
 		assertThat(result, is("ABC1"));
 	}
 
+	@Test
+	void incrementAlphaPassesTheIntegerLimit() {
+		assertThat(AbstractDocumentNumberGenerator.incrementAlpha(null, "2147483647", 0), is("2147483648"));
+	}
+
+	@Test
+	void incrementAlphaPassesTheIntegerLimitAfterAPrefix() {
+		assertThat(AbstractDocumentNumberGenerator.incrementAlpha("INV", "INV2147483647", 0), is("INV2147483648"));
+	}
+
+	@Test
+	void incrementAlphaPassesTheIntegerLimitAfterANumericPrefix() {
+		assertThat(AbstractDocumentNumberGenerator.incrementAlpha("10", "102147483647", 0), is("102147483648"));
+	}
+
+	@Test
+	void incrementAlphaKeepsZeroPaddingAtTheIntegerLimit() {
+		assertThat(AbstractDocumentNumberGenerator.incrementAlpha("INV", "INV002147483647", 15), is("INV002147483648"));
+	}
+
+	@Test
+	void incrementAlphaIncrementsAVeryLongDigitRun() {
+		String nines = "9".repeat(40);
+		assertThat(AbstractDocumentNumberGenerator.incrementAlpha("A", "A" + nines, 0), is("A1" + "0".repeat(40)));
+		assertThat(AbstractDocumentNumberGenerator.incrementAlpha(null, nines, 0), is("1" + "0".repeat(40)));
+	}
+
 	// ---- NumberGeneratorStaticSingleton tests ----
 
 	@Test

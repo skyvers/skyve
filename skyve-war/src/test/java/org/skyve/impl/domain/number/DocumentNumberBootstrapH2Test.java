@@ -75,6 +75,13 @@ class DocumentNumberBootstrapH2Test extends AbstractH2TestTruncate {
 	}
 
 	@Test
+	void aLongIntegerFieldAboveTheIntegerLimitStartsAfterItsHighestValue() throws Exception {
+		save(null, Long.valueOf(5000000000L), null);
+		save(null, Long.valueOf(2147483647L), null);
+		assertFirstNumbers("5000000001", null, AllAttributesPersistent.longIntegerPropertyName);
+	}
+
+	@Test
 	void aTextFieldStartsAfterItsHighestNumberAfterThePrefix() throws Exception {
 		save(null, null, "INV9");
 		save(null, null, "INV10"); // more digits than 9
@@ -91,7 +98,7 @@ class DocumentNumberBootstrapH2Test extends AbstractH2TestTruncate {
 	}
 
 	@Test
-	void aZeroPaddedTextFieldKeepsItsPadding() throws Exception {
+	void aTextFieldIsZeroPaddedToTheMinimumLength() throws Exception {
 		save(null, null, "INV0009");
 		save(null, null, "INV0010");
 		assertFirstNumbers("INV0011", "INV", AllAttributesPersistent.textPropertyName, 7); // the minimum length includes the prefix
@@ -128,6 +135,17 @@ class DocumentNumberBootstrapH2Test extends AbstractH2TestTruncate {
 		List<Executable> checks = new ArrayList<>(2);
 		for (NumberGenerator generator : generators()) {
 			String actual = generator.next(MODULE, "NoSuchDocument", "number");
+			checks.add(() -> assertEquals("1", actual, generator.getClass().getSimpleName()));
+			forgetSequences();
+		}
+		assertAll(checks);
+	}
+
+	@Test
+	void aSequenceOfAModuleTheCustomerDoesNotHaveStartsAtOne() {
+		List<Executable> checks = new ArrayList<>(2);
+		for (NumberGenerator generator : generators()) {
+			String actual = generator.next("noSuchModule", DOCUMENT, "number");
 			checks.add(() -> assertEquals("1", actual, generator.getClass().getSimpleName()));
 			forgetSequences();
 		}

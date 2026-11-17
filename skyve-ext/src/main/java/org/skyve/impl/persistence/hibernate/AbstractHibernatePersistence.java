@@ -514,13 +514,13 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	 * Logs a warning at startup when the data store's connections do not use READ COMMITTED.
 	 *
 	 * <p>Side effects: opens a session on the new session factory and reads one pooled connection's
-	 * isolation level; a failure to get a connection is logged, not thrown, so it never stops start-up.
+	 * isolation level; any failure is logged, not thrown, so it never stops start-up.
 	 */
 	private static void warnUnlessReadCommitted() {
 		try (Session session = sf.openSession()) {
 			session.doWork(AbstractHibernatePersistence::warnUnlessReadCommitted);
 		}
-		catch (HibernateException e) {
+		catch (RuntimeException e) { // never let the check stop the static initialiser
 			LOGGER.warn(ISOLATION_UNKNOWN, e.getLocalizedMessage());
 		}
 	}

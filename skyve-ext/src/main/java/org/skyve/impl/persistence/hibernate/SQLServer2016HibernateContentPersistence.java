@@ -21,15 +21,10 @@ import org.slf4j.Logger;
 public class SQLServer2016HibernateContentPersistence extends HibernateContentPersistence {
 	private static final long serialVersionUID = 3977869075169663549L;
 	
-	/**
-	 * SQL Server-specific constant for snapshot isolation.
-	 */
-	private static final int TRANSACTION_SNAPSHOT = Connection.TRANSACTION_READ_COMMITTED + 4094;
-
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SQLServer2016HibernateContentPersistence.class);
 
 	static {
-		LOGGER.warn(isolationWarning(TRANSACTION_SNAPSHOT));
+		LOGGER.warn(isolationWarning(SQL_SERVER_TRANSACTION_SNAPSHOT));
 	}
 	
 	/**
@@ -40,8 +35,8 @@ public class SQLServer2016HibernateContentPersistence extends HibernateContentPe
 	public SQLServer2016HibernateContentPersistence() throws SQLException {
 		@SuppressWarnings("resource")
 		Connection c = getConnection();
-		if (c.getTransactionIsolation() != TRANSACTION_SNAPSHOT) {
-			c.setTransactionIsolation(TRANSACTION_SNAPSHOT);
+		if (c.getTransactionIsolation() != SQL_SERVER_TRANSACTION_SNAPSHOT) {
+			c.setTransactionIsolation(SQL_SERVER_TRANSACTION_SNAPSHOT);
 		}
 	}
 }

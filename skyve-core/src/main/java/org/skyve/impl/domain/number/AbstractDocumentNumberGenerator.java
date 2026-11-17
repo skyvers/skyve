@@ -1,5 +1,6 @@
 package org.skyve.impl.domain.number;
 
+import java.math.BigInteger;
 import java.util.Formatter;
 import java.util.List;
 
@@ -9,13 +10,11 @@ import org.skyve.domain.app.admin.DocumentNumber;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.number.NumberGenerator;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
-import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.AutoClosingIterable;
@@ -75,6 +74,7 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	private static final String NUMERIC_PATTERN = "^\\d+$";
 	private static final String NO_NUMBER = "0";
 	private static final String MAX_ALIAS = "MaxNumber";
+	private static final String VALUE_ALIAS = "Value";
 
 	/**
 	 * Takes the next number of a sequence: increments its {@code DocumentNumber} row,
@@ -201,7 +201,10 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 * Returns the highest number the numbered document's {@code fieldName} column already holds,
 	 * the value a new sequence row starts from, so that its numbers never collide with existing data.
 	 *
-	 * <p>An integer or long integer field gives its maximum value. A text field gives the stored
+	 * <p>An integer or long integer field gives its maximum value, whatever {@code prefix} is: with a
+	 * numeric prefix the increment then keeps the maximum's digits after the prefix's length, so
+	 * prefix {@code 2026} over a column maximum of {@code 20250099} gives {@code 2026100}, padded to
+	 * the minimum length ({@code 20260100} at length 8). A text field gives the stored
 	 * value with the highest number after {@code prefix} (all values when {@code prefix} is
 	 * {@code null}), compared as a number of any length, so {@code INV10} beats {@code INV9} and
 	 * {@code INV0009}; values whose remainder after the prefix is not all digits are ignored.
@@ -212,8 +215,11 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 * data group or user scope does not hide other rows of the customer.
 	 *
 	 * <p>Complexity: one aggregate query for a numeric field; for a text field, one pass in Java
-	 * over the values that start with {@code prefix}, streamed, O(n) time and O(1) memory in the
-	 * number of those rows. It runs once in a sequence's life, when its row is created. The text
+	 * over the values that start with {@code prefix}, O(n) time in the number of those rows, and
+	 * O(1) memory where the driver streams the result (MySQL with {@code useCursorFetch=true}, as
+	 * Skyve's datasource template sets; PostgreSQL inside a transaction), otherwise O(n). It runs once
+	 * in a sequence's life, inside the first save that takes a number from it, which waits for the
+	 * scan. The text
 	 * comparison is in Java because no portable SQL takes the numeric value of a suffix across
 	 * the supported databases, and the lexicographic maximum is wrong for unpadded or mixed values.
 	 *
@@ -231,12 +237,18 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 															@Nonnull String moduleName,
 															@Nonnull String documentName,
 															@Nonnull String fieldName) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
-		Module numberedModule = repository.getModule(customer, moduleName);
-		// the repository throws for a document the module does not have, so check its references first
+		// the repository throws for a module the customer does not have, and for a document the module does
+		// not have, but a sequence's module and document names may be any keys: look them up without throwing
+		Module numberedModule = null;
+		for (Module candidate : customer.getModules()) {
+			if (candidate.getName().equals(moduleName)) {
+				numberedModule = candidate;
+				break;
+			}
+		}
 		Document numbered = ((numberedModule == null) || (! numberedModule.getDocumentRefs().containsKey(documentName))) ?
 								null :
-								repository.getDocument(customer, numberedModule, documentName);
+								numberedModule.getDocument(customer, documentName);
 		if ((numbered == null) || (! numbered.isPersistable())) {
 			return NO_NUMBER;
 		}
@@ -271,7 +283,7 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 												@Nonnull String documentName,
 												@Nonnull String fieldName) {
 		DocumentQuery query = p.newDocumentQuery(moduleName, documentName);
-		query.addBoundProjection(fieldName, MAX_ALIAS);
+		query.addBoundProjection(fieldName, VALUE_ALIAS);
 		if (prefix == null) {
 			query.getFilter().addNotNull(fieldName);
 		}
@@ -285,7 +297,7 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 		try (AutoClosingIterable<Bean> values = query.projectedIterable()) {
 			for (Bean row : values) {
 				@SuppressWarnings("null") // not null: the filter above leaves out null values
-				@Nonnull String text = (String) Binder.get(row, MAX_ALIAS);
+				@Nonnull String text = (String) Binder.get(row, VALUE_ALIAS);
 				String digits = significantDigits(text, prefix, prefixLength);
 				if ((digits != null) &&
 						((resultDigits == null) ||
@@ -337,11 +349,13 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 *        - the minimum length of the number when specified as a string
 	 *
 	 * @return - the next number
+	 *
+	 * <p>The digits are incremented as a {@link BigInteger}, so a run of digits of any length works.
 	 */
 	protected static @Nonnull String incrementAlpha(@Nullable String suppliedPrefix, @Nullable String lastNumber, int numberLength) {
 		String newNumber = "";
 		String nonNumeric = lastNumber;
-		Integer value = Integer.valueOf(1);
+		BigInteger value = BigInteger.ONE;
 		String prefix;
 		if (suppliedPrefix != null) {
 			prefix = suppliedPrefix;
@@ -357,18 +371,18 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 				String numberPart = lastNumber.substring(parts[0].length(), lastNumber.length());
 				nonNumeric = lastNumber.substring(0, parts[0].length());
 
-				value = Integer.valueOf(Integer.parseInt(numberPart) + 1);
+				value = new BigInteger(numberPart).add(BigInteger.ONE);
 
 				// cater for purely numeric prefix
 			} else if (prefix.matches(NUMERIC_PATTERN) && lastNumber.matches(NUMERIC_PATTERN) && !"0".equals(lastNumber)) {
 				int len = prefix.length();
-				value = Integer.valueOf(Integer.parseInt(lastNumber.substring(len)) + 1);
+				value = new BigInteger(lastNumber.substring(len)).add(BigInteger.ONE);
 				nonNumeric = prefix;
 
 				// cater for numeric only
 			} else if (lastNumber.matches(NUMERIC_PATTERN)) {
 				nonNumeric = prefix;
-				value = Integer.valueOf(Integer.parseInt(lastNumber) + 1);
+				value = new BigInteger(lastNumber).add(BigInteger.ONE);
 			}
 		} else {
 			nonNumeric = prefix;
