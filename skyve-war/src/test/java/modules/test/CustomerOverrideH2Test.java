@@ -5,21 +5,39 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
+import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.metadata.view.NoOpViewVisitor;
+import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.Persistence;
+import org.skyve.util.Binder;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -34,6 +52,7 @@ import customers.test.modules.test.domain.OverrideMappedSubOverride;
 import customers.test.modules.test.domain.OverrideNarrowedExtendedOverride;
 import customers.test.modules.test.domain.OverrideNarrowedLinkedOverride;
 import customers.test.modules.test.domain.OverrideNarrowedOverride;
+import customers.test.modules.test.domain.OverrideProxiedOverride;
 import customers.test.modules.test.domain.OverrideSingleSubOverride;
 import customers.test.modules.test.domain.TestRole;
 import modules.admin.Group.GroupExtension;
@@ -51,6 +70,7 @@ import modules.test.domain.OverrideEnumExtended;
 import modules.test.domain.OverrideEnumExtendedVanilla;
 import modules.test.domain.OverrideEnumJoinedBase;
 import modules.test.domain.OverrideEnumJoinedSub;
+import modules.test.domain.OverrideEnumJoinedSubVanilla;
 import modules.test.domain.OverrideExtended;
 import modules.test.domain.OverrideJoinedBase;
 import modules.test.domain.OverrideJoinedSub;
@@ -69,17 +89,27 @@ import modules.test.domain.OverrideRemoved;
 import modules.test.domain.OverrideSingleBase;
 import modules.test.domain.OverrideSingleSub;
 import modules.test.domain.TestDocument;
+
 /**
  * Exercises the test customer's document overrides against Hibernate: the vanilla mappings and the
- * test customer's <code>customers/test/modules/orm.hbm.xml</code> share one SessionFactory, so this
- * suite starting at all shows that they load together. The tests compare the test customer with
- * bizhub, the customer H2 tests normally run as, which has no overrides.
+ * test and test2 customers' <code>customers/&lt;customer&gt;/modules/orm.hbm.xml</code> share one
+ * SessionFactory, so this suite starting at all shows that they load together. The tests compare
+ * the test customer with bizhub, the customer H2 tests normally run as, which has no overrides,
+ * and with test2, whose overrides combine with the test customer's.
  * <p/>
  * The fixtures are the <code>Override*</code> documents of the test module and their overrides in
- * <code>customers/test/modules/test/</code>.
+ * <code>customers/test/modules/test/</code> and <code>customers/test2/modules/test/</code>.
  */
 @SuppressWarnings("static-method")
 class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
+	/** The second customer, whose overrides combine with the test customer's. */
+	private static final String TEST2_CUSTOMER = "test2";
+
+	/** The enum constant's code, read whatever class declares the enum. */
+	private static String code(Object enumeration) {
+		return (enumeration == null) ? null : ((Enumeration) enumeration).toCode();
+	}
+
 	@Test
 	void anOverrideThatAddsPropertiesUsesItsOverrideClassAndSavesThem() throws Exception {
 		Customer test = runAs(TEST_CUSTOMER);
@@ -537,5 +567,174 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 		assertAll(() -> assertSame(OverrideEnumExtendedExtension.class, beanClass(TestDocument.OVERRIDE_ENUM_EXTENDED, bizhub)),
 					() -> assertSame(OverrideEnumExtendedVanilla.Status.closed, extension.getStatus()),
 					() -> assertEquals("Enum extended text", extension.describe()));
+	}
+
+	/** Collects the bindings of a view's text fields, including default widgets of text attributes. */
+	private static final class TextBindings extends NoOpViewVisitor {
+		final Set<String> bindings = new TreeSet<>();
+
+		TextBindings(CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
+			super(customer, module, document, view, "desktop");
+		}
+
+		@Override
+		public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+			bindings.add(text.getBinding());
+		}
+	}
+
+	/** The customer's edit view of the document, and the bindings of its text fields. */
+	private static Map.Entry<View, Set<String>> editView(Customer customer, ModuleDocument document) {
+		Document d = document.toDocument(customer);
+		View view = d.getView(null, customer, ViewType.edit.toString());
+		assertNotNull(view, document.documentName());
+		TextBindings visitor = new TextBindings((CustomerImpl) customer,
+												(ModuleImpl) customer.getModule(d.getOwningModuleName()),
+												(DocumentImpl) d,
+												(ViewImpl) view);
+		visitor.visit();
+		return Map.entry(view, visitor.bindings);
+	}
+
+	/**
+	 * Outside dev mode, MutableCachedRepository caches a scaffolded view, so that the first customer to
+	 * scaffold a view would give it to every other customer if it were cached under the vanilla view
+	 * key. A customer's override can add or drop attributes - the test customer's OverrideAdds adds
+	 * customerText, and neither customer has an edit view of OverrideAdds or OverrideLength - so each
+	 * customer gets its own.
+	 */
+	@Test
+	void aScaffoldedViewIsNotSharedBetweenCustomers() {
+		Customer test = runAs(TEST_CUSTOMER);
+		Map.Entry<View, Set<String>> testLength = editView(test, TestDocument.OVERRIDE_LENGTH);
+		Map.Entry<View, Set<String>> testAdds = editView(test, TestDocument.OVERRIDE_ADDS);
+		Customer bizhub = runAs(CUSTOMER);
+		Map.Entry<View, Set<String>> bizhubLength = editView(bizhub, TestDocument.OVERRIDE_LENGTH);
+		Map.Entry<View, Set<String>> bizhubAdds = editView(bizhub, TestDocument.OVERRIDE_ADDS);
+
+		assertAll(() -> assertNotSame(testLength.getKey(), bizhubLength.getKey()),
+					() -> assertNotSame(testAdds.getKey(), bizhubAdds.getKey()),
+					() -> assertEquals(Set.of("text", "customerText"), testAdds.getValue()),
+					() -> assertEquals(Set.of("text"), bizhubAdds.getValue()));
+	}
+
+	/**
+	 * OverrideProxied extends the mapped OverrideProxy, which shares its table, and has the
+	 * hand-written OverrideProxiedExtension, as admin.User does with admin.UserProxy and
+	 * UserExtension. The test customer's override adds customerText, so the customer mapping maps the
+	 * generated OverrideProxiedOverride, which extends OverrideProxiedExtension.
+	 */
+	@Test
+	void anOverrideOfASubclassOfAMappedDocumentWithAnExtensionSavesItsAddedAttribute() throws Exception {
+		Customer test = runAs(TEST_CUSTOMER);
+		OverrideProxiedOverride bean = newInstance(TestDocument.OVERRIDE_PROXIED);
+		bean.setText("text");
+		bean.setSubText("sub");
+		bean.setCustomerText("customer");
+
+		OverrideProxied result = saveAndRetrieve(TestDocument.OVERRIDE_PROXIED, bean);
+
+		assertAll(() -> assertSame(OverrideProxiedOverride.class, beanClass(TestDocument.OVERRIDE_PROXIED, test)),
+					() -> assertSame(OverrideProxiedOverride.class, result.getClass()),
+					() -> assertEquals("customer", ((OverrideProxiedOverride) result).getCustomerText()));
+	}
+
+	/**
+	 * The test customer's OverrideProxied bean class is OverrideProxiedOverride, which extends the
+	 * OverrideProxiedExtension that OverrideProxiedFactory.crudInstance() returns, so DataBuilder uses
+	 * the vanilla factory for the test customer too, as it would UserFactory for a customer that
+	 * overrides admin.User.
+	 */
+	@Test
+	void aDataFactoryAppliesToACustomersOverrideClass() {
+		runAs(TEST_CUSTOMER);
+		OverrideProxied bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.OVERRIDE_PROXIED);
+
+		assertAll(() -> assertSame(OverrideProxiedOverride.class, bean.getClass()),
+					() -> assertEquals(OverrideProxiedFactory.CRUD_TEXT, bean.getText()));
+	}
+
+	/**
+	 * The test customer's override of the joined subclass OverrideEnumJoinedSub leaves out status, so
+	 * OverrideEnumJoinedSub is abstract and other customers get OverrideEnumJoinedSubVanilla, which
+	 * declares status and which the vanilla mapping maps.
+	 */
+	@Test
+	void aNarrowedSubclassKeepsTheDroppedEnumForOtherCustomers() throws Exception {
+		Customer bizhub = runAs(CUSTOMER);
+		OverrideEnumJoinedSub bean = newInstance(TestDocument.OVERRIDE_ENUM_JOINED_SUB);
+		bean.setText("base");
+		bean.setSubText("sub");
+
+		assertAll(() -> assertSame(OverrideEnumJoinedSubVanilla.class, beanClass(TestDocument.OVERRIDE_ENUM_JOINED_SUB, bizhub)),
+					() -> assertInstanceOf(OverrideEnumJoinedSubVanilla.class, bean));
+		((OverrideEnumJoinedSubVanilla) bean).setStatus(OverrideEnumJoinedSubVanilla.Status.closed);
+		OverrideEnumJoinedSub result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_JOINED_SUB, bean);
+		assertSame(OverrideEnumJoinedSubVanilla.Status.closed, ((OverrideEnumJoinedSubVanilla) result).getStatus());
+	}
+
+	/**
+	 * The test customer's override of OverrideNarrowedLinked leaves out dropped, so its vanilla class
+	 * is abstract and OverrideNarrowedLinkedVanilla declares dropped. The test2 customer overrides
+	 * OverrideLinkTarget, which OverrideNarrowedLinked references, so test2's mapping copies
+	 * OverrideNarrowedLinked, mapping OverrideNarrowedLinkedVanilla.
+	 */
+	@Test
+	void aNarrowedDocumentCopiedIntoAnotherCustomersMappingSavesItsDroppedAttribute() throws Exception {
+		runAs(TEST2_CUSTOMER);
+		Bean target = newInstance(TestDocument.OVERRIDE_LINK_TARGET);
+		Binder.set(target, "text", "target");
+		PersistentBean bean = newInstance(TestDocument.OVERRIDE_NARROWED_LINKED);
+		Binder.set(bean, "text", "text");
+		Binder.set(bean, "dropped", "dropped");
+		Binder.set(bean, "target", target);
+
+		PersistentBean result = saveAndRetrieve(TestDocument.OVERRIDE_NARROWED_LINKED, bean);
+
+		assertAll(() -> assertEquals("dropped", Binder.get(result, "dropped")),
+					() -> assertEquals("target", Binder.get(result, "target.text")));
+	}
+
+	/**
+	 * In the joined hierarchy OverrideEnumJoinedBase and OverrideEnumJoinedSub, the test customer's
+	 * override of OverrideEnumJoinedSub leaves out the enum status, and the test2 customer overrides
+	 * OverrideEnumJoinedBase without changes, so test2's mapping copies the hierarchy, mapping
+	 * OverrideEnumJoinedSubVanilla and its status enum.
+	 */
+	@Test
+	void aNarrowedJoinedSubclassCopiedIntoAnotherCustomersMappingSavesItsEnum() throws Exception {
+		runAs(TEST2_CUSTOMER);
+		PersistentBean bean = newInstance(TestDocument.OVERRIDE_ENUM_JOINED_SUB);
+		Binder.set(bean, "text", "base");
+		Binder.set(bean, "subText", "sub");
+		Binder.convertAndSet(bean, "status", "closed");
+
+		PersistentBean result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_JOINED_SUB, bean);
+		List<PersistentBean> polymorphic = CORE.getPersistence().newDocumentQuery(TestDocument.OVERRIDE_ENUM_JOINED_BASE).beanResults();
+
+		assertAll(() -> assertEquals("closed", code(Binder.get(result, "status"))),
+					() -> assertEquals(1, polymorphic.size(), polymorphic.toString()),
+					() -> assertEquals("closed", code(Binder.get(polymorphic.get(0), "status"))));
+	}
+
+	/**
+	 * The test customer's override of OverrideEnumExtended leaves out the enum status, so the
+	 * hand-written OverrideEnumExtendedExtension extends OverrideEnumExtendedVanilla, which declares
+	 * status. The test2 customer's override keeps status, and its generated
+	 * OverrideEnumExtendedOverride, which extends the extension, inherits status.
+	 */
+	@Test
+	void anOverrideKeepingAnEnumAnotherCustomerDropsSavesIt() throws Exception {
+		Customer test2 = runAs(TEST2_CUSTOMER);
+		PersistentBean bean = newInstance(TestDocument.OVERRIDE_ENUM_EXTENDED);
+		Binder.set(bean, "text", "text");
+		Binder.convertAndSet(bean, "status", "closed");
+
+		PersistentBean result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_EXTENDED, bean);
+
+		assertAll(() -> assertEquals("customers.test2.modules.test.domain.OverrideEnumExtendedOverride",
+										beanClass(TestDocument.OVERRIDE_ENUM_EXTENDED, test2).getName()),
+					() -> assertEquals("closed", code(Binder.get(result, "status"))),
+					() -> assertEquals("Enum extended text", ((OverrideEnumExtendedExtension) result).describe()));
 	}
 }
