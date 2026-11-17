@@ -2867,7 +2867,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								@Nullable Customer customer,
 								@Nonnull Module owningModule,
 								@Nonnull String owningDocumentName,
-								boolean owningDomainExtensionClassExists,
+								boolean castThisToExtension,
 								@Nonnull String packagePath,
 								@Nonnull Set<String> imports,
 								@Nonnull StringBuilder attributes,
@@ -3019,7 +3019,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 				methods.append("\t\tif (result) {\n");
 				methods.append("\t\t\telement.setParent(");
-				if (owningDomainExtensionClassExists) {
+				if (castThisToExtension) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
@@ -3030,7 +3030,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\tboolean result = ").append(name).append(".add(element);\n");
 				methods.append("\t\tif (result) {\n");
 				methods.append("\t\t\telement.get").append(inverseMethodName).append("().add(");
-				if (owningDomainExtensionClassExists) {
+				if (castThisToExtension) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
@@ -3052,14 +3052,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			methods.append("\t\t").append(name).append(".add(index, element);\n");
 			if (CollectionType.child.equals(type)) {
 				methods.append("\t\telement.setParent(");
-				if (owningDomainExtensionClassExists) {
+				if (castThisToExtension) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
 			}
 			else if (inverse != null) {
 				methods.append("\t\telement.get").append(inverseMethodName).append("().add(");
-				if (owningDomainExtensionClassExists) {
+				if (castThisToExtension) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
@@ -3153,7 +3153,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 				methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 				methods.append("\t\t\t\t").append(name).append(".setParent(");
-				if (owningDomainExtensionClassExists) {
+				if (castThisToExtension) {
 					methods.append("(").append(owningDocumentName).append("Extension) ");
 				}
 				methods.append("this);\n");
@@ -3165,7 +3165,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 					methods.append("\t\t\tif (").append(name).append(" != null) {\n");
 					methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append('(');
-					if (owningDomainExtensionClassExists) {
+					if (castThisToExtension) {
 						methods.append("(").append(owningDocumentName).append("Extension) ");
 					}
 					methods.append("this);\n");
@@ -3179,7 +3179,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 					methods.append("\t\t\tif ((").append(name).append(" != null) && (").append(name).append(".get").append(inverseMethodName).append("ElementById(getBizId()) == null)) {\n");
 					methods.append("\t\t\t\t").append(name).append(".get").append(inverseMethodName).append("().add(");
-					if (owningDomainExtensionClassExists) {
+					if (castThisToExtension) {
 						methods.append("(").append(owningDocumentName).append("Extension) ");
 					}
 					methods.append("this);\n");
@@ -3292,7 +3292,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								@Nullable Customer customer,
 								@Nonnull Module owningModule,
 								@Nonnull String owningDocumentName,
-								boolean owningDomainExtensionClassExists,
+								boolean castThisToExtension,
 								@Nonnull String packagePath,
 								@Nonnull Set<String> imports,
 								@Nonnull StringBuilder attributes,
@@ -3448,7 +3448,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t}\n");
 				methods.append("\t\telement.set").append(inverseMethodName).append("(");
 			}
-			if (owningDomainExtensionClassExists) {
+			if (castThisToExtension) {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
@@ -3472,7 +3472,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else {
 				methods.append("\t\telement.set").append(inverseMethodName).append("(");
 			}
-			if (owningDomainExtensionClassExists) {
+			if (castThisToExtension) {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
@@ -3541,7 +3541,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else {
 				methods.append("\t\t\t\t").append(name).append(".set").append(inverseMethodName).append("(");
 			}
-			if (owningDomainExtensionClassExists) {
+			if (castThisToExtension) {
 				methods.append('(').append(owningDocumentName).append("Extension) ");
 			}
 			methods.append("this);\n");
@@ -3823,6 +3823,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		boolean domainExtensionClassExists = ((customer != null) && overridden && (baseDocumentName != null)) ?
 												domainExtensionClassExists(ProvidedRepository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + modulePath, documentName) :
 												domainExtensionClassExists(modulePath, documentName);
+		// A vanilla class passes itself to the other side of a relationship as its extension, which the
+		// other side's vanilla accessors take. A customer class passes itself as it is, as the other
+		// side's accessors take a vanilla class it extends or the customer's override class itself,
+		// never the customer's own extension.
+		boolean castThisToExtension = (customer == null) && domainExtensionClassExists;
 
 		// Document and module names
 
@@ -3987,7 +3992,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 									customer,
 									module,
 									documentName,
-									domainExtensionClassExists,
+									castThisToExtension,
 									packagePath,
 									imports,
 									attributes,
@@ -4003,7 +4008,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								customer,
 								module,
 								documentName,
-								domainExtensionClassExists,
+								castThisToExtension,
 								packagePath,
 								imports,
 								attributes,

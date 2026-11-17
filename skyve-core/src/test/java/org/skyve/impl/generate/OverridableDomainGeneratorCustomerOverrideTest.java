@@ -1394,6 +1394,50 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		assertTrue(acmeMapping.contains("<many-to-one name=\"parent\" entity-name=\"acmesalesNote\""), acmeMapping);
 	}
 
+	/**
+	 * acme's override of R adds an association t to T, and acme's override of T adds its inverse rs.
+	 * The document named extends a vanilla extension and acme's own extension, so its override class
+	 * is abstract and the generated accessors keeping the other side up to date pass the override
+	 * class itself, which the other side's accessors take.
+	 */
+	private static void assertAnInversePairWithACustomerExtensionCompiles(String extendedDocumentName, AbstractInverse rs) throws Exception {
+		DocumentImpl r = document("R", "SALES_R", null, null, "code");
+		r.putRelation(association("t", "T"));
+		DocumentImpl t = document("T", "SALES_T", null, null, "code");
+		t.putRelation(inverse(rs, "rs", "R", "t", (rs instanceof InverseOne) ? InverseRelationship.oneToOne : InverseRelationship.oneToMany));
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("R", "SALES_R", null, null, "code"))
+				.vanilla(document("T", "SALES_T", null, null, "code"))
+				.extension(extendedDocumentName)
+				.acmeExtension(extendedDocumentName)
+				.acme(r)
+				.acme(t));
+		String override = files.get("customers/acme/modules/sales/domain/" + extendedDocumentName + "Override.java");
+		assertAll(
+				() -> assertFalse(override.contains("Extension) this"), override),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	@Test
+	void anAssociationOfAnOverrideWithACustomerExtensionToAnInverseManyCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("R", new InverseMany());
+	}
+
+	@Test
+	void anAssociationOfAnOverrideWithACustomerExtensionToAnInverseOneCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("R", new InverseOne());
+	}
+
+	@Test
+	void anInverseManyOfAnOverrideWithACustomerExtensionCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("T", new InverseMany());
+	}
+
+	@Test
+	void anInverseOneOfAnOverrideWithACustomerExtensionCompiles() throws Exception {
+		assertAnInversePairWithACustomerExtensionCompiles("T", new InverseOne());
+	}
+
 	// ----- generation with metadata validation off ------------------------------------
 
 	/**
