@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
@@ -349,7 +351,7 @@ class EnumerationImplementingTypeTest {
 	 * document and declares the enumeration again.
 	 */
 	@Test
-	void anEnumReferencedFromAVanillaClassLoadsFromTheReferencedDocumentsVanillaClasses() throws Exception {
+	void anEnumReferencedFromAVanillaClassLoadsFromTheReferencedDocumentsVanillaClasses() {
 		Enumeration reference = reference("UtReferrer", "keptReference", "kept");
 		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 		Class<?> overriding = reference.getImplementingType();
@@ -363,7 +365,7 @@ class EnumerationImplementingTypeTest {
 
 	/** A customer's override that inherits a reference from the vanilla class gets the vanilla classes' enum. */
 	@Test
-	void anEnumReferencedFromAPropertyAnOverrideInheritsLoadsFromTheReferencedDocumentsVanillaClasses() throws Exception {
+	void anEnumReferencedFromAPropertyAnOverrideInheritsLoadsFromTheReferencedDocumentsVanillaClasses() {
 		Enumeration reference = reference("UtInheritingReferrer", "keptReference", "kept");
 		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
@@ -375,7 +377,7 @@ class EnumerationImplementingTypeTest {
 
 	/** A customer's override that declares a reference itself gets the customer's classes' enum. */
 	@Test
-	void anEnumReferencedFromAnOverridesOwnPropertyLoadsFromTheReferencedDocumentsCustomerClasses() throws Exception {
+	void anEnumReferencedFromAnOverridesOwnPropertyLoadsFromTheReferencedDocumentsCustomerClasses() {
 		Enumeration reference = reference("UtOwnReferrer", "keptReference", "kept");
 		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
@@ -390,7 +392,7 @@ class EnumerationImplementingTypeTest {
 	 * document leaves out loads it from the vanilla classes, as only they declare it.
 	 */
 	@Test
-	void aNarrowedAwayEnumReferencedFromACustomerClassLoadsFromTheVanillaClass() throws Exception {
+	void aNarrowedAwayEnumReferencedFromACustomerClassLoadsFromTheVanillaClass() {
 		Enumeration reference = reference("UtOwnReferrer", "statusReference", "status");
 		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
@@ -430,6 +432,33 @@ class EnumerationImplementingTypeTest {
 					() -> assertSame(first, second),
 					() -> verify(user, never()).getCustomer(),
 					() -> verifyNoInteractions(repository));
+	}
+
+	/**
+	 * In dev mode the enum class is resolved each time, through the customer's bean class, as
+	 * classes can be regenerated and reloaded through the same class loader.
+	 */
+	@Test
+	void devModeResolvesTheEnumEachTime() {
+		Enumeration kept = enumeration("UtEnumDoc", "kept");
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+		User user = AbstractPersistence.get().getUser();
+		boolean devMode = UtilImpl.DEV_MODE;
+		UtilImpl.DEV_MODE = true;
+		try {
+			Class<?> first = kept.getImplementingType();
+			clearInvocations(user, repository);
+
+			Class<?> second = kept.getImplementingType();
+
+			assertAll(() -> assertSame(OverrideClassKept.class, first),
+						() -> assertSame(first, second),
+						() -> verify(user).getCustomer(),
+						() -> verify(repository, atLeastOnce()).vtable(any(), anyString()));
+		}
+		finally {
+			UtilImpl.DEV_MODE = devMode;
+		}
 	}
 
 	/** A class cached through one context class loader is looked for again through another. */

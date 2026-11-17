@@ -254,7 +254,7 @@ public class Enumeration extends ConstrainableField {
 	 * Returns the enum class that implements this enumeration for the current user's customer, or the
 	 * vanilla one without a user, as during domain generation (see {@link #getImplementingType(Customer)}).
 	 *
-	 * <p>Side effects: caches the enum class for the customer.
+	 * <p>Side effects: outside dev mode, caches the enum class for the customer.
 	 *
 	 * @return	the implementing type; never {@code null}
 	 * @throws MetaDataException	if the enum class cannot be loaded; its cause is a
@@ -297,8 +297,10 @@ public class Enumeration extends ConstrainableField {
 	 * <p>Without a repository, as in a unit test that installs none, the generated enum is loaded
 	 * from the vanilla domain class of the document that declares the attribute.
 	 *
-	 * <p>Side effects: with a repository, caches the enum class for the customer, with the context
-	 * class loader it was loaded through, so that each class is looked for once per customer. The
+	 * <p>Side effects: with a repository and outside dev mode, caches the enum class for the customer,
+	 * with the context class loader it was loaded through, so that each class is looked for once per
+	 * customer. In dev mode, as {@link DocumentImpl#getBeanClass(Customer)}, it is resolved each time,
+	 * as classes can be regenerated and reloaded through the same class loader. The
 	 * cache goes with the document when evicting cached metadata loads it again, and a class loaded
 	 * through another context class loader is resolved again.
 	 *
@@ -316,7 +318,7 @@ public class Enumeration extends ConstrainableField {
 			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 			boolean repository = (ProvidedRepositoryFactory.get() != null);
 			result = resolveImplementingType(customer, classLoader, repository);
-			if (repository) {
+			if (repository && (! UtilImpl.DEV_MODE)) { // classes can be regenerated and reloaded in dev mode
 				implementingTypes.put((customerName == null) ? "" : customerName, new LoadedType(classLoader, result));
 			}
 		}
@@ -325,12 +327,15 @@ public class Enumeration extends ConstrainableField {
 
 	/**
 	 * Returns the enum class cached for a customer, if it was loaded through the current context
-	 * class loader.
+	 * class loader, outside dev mode.
 	 *
 	 * @param customerName	the customer name, or {@code null} for the vanilla enum class
 	 * @return	the enum class, or {@code null} if it is to be resolved
 	 */
 	private @Nullable Class<?> cachedImplementingType(@Nullable String customerName) {
+		if (UtilImpl.DEV_MODE) {
+			return null;
+		}
 		LoadedType result = implementingTypes.get((customerName == null) ? "" : customerName);
 		return ((result == null) || (result.classLoader() != Thread.currentThread().getContextClassLoader())) ?
 					null :
