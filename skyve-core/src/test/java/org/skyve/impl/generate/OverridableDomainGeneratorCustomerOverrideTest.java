@@ -11,6 +11,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -168,6 +170,14 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 
 	/** Runs the generator over the fixture into {@code root/src}, returning the generated files by relative path. */
 	private static Map<String, String> generate(Fixture fixture) throws Exception {
+		return generate(fixture, true);
+	}
+
+	/**
+	 * Runs the generator, with metadata validation on or off, over the fixture into {@code root/src},
+	 * returning the generated files by relative path.
+	 */
+	private static Map<String, String> generate(Fixture fixture, boolean validate) throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-override");
 		Path src = root.resolve("source");
 		for (Map.Entry<String, String> entry : fixture.extended.entrySet()) {
@@ -241,6 +251,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 					root.resolve("test").toString() + '/',
 					new String[] {MODULE});
 			gen.repository = repo;
+			gen.validate = validate;
 			gen.generate();
 		}
 		finally {
@@ -561,6 +572,44 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
 		assertEquals("ReceiptExtension must extend Receipt because no customer's override of Receipt leaves out attributes, so ReceiptVanilla is not generated.",
 						e.getMessage());
+	}
+
+	@Test
+	void aWrongExtensionSuperclassOnlyWarnsWithValidationOff() throws Exception {
+		Fixture narrowed = new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "Receipt")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code"));
+		Fixture notNarrowed = new Fixture()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "ReceiptVanilla");
+
+		PrintStream previousErr = System.err;
+		ByteArrayOutputStream err = new ByteArrayOutputStream();
+		Map<String, Map<String, String>> results = new TreeMap<>();
+		System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
+		try {
+			results.put("narrowed", generate(narrowed, false));
+			results.put("notNarrowed", generate(notNarrowed, false));
+		}
+		finally {
+			System.setErr(previousErr);
+		}
+
+		String warnings = err.toString(StandardCharsets.UTF_8);
+		assertAll(
+				() -> assertTrue(warnings.contains("WARNING: ReceiptExtension must extend ReceiptVanilla because customer acme's override of Receipt leaves out attributes"), warnings),
+				() -> assertTrue(warnings.contains("WARNING: ReceiptExtension must extend Receipt because no customer's override of Receipt leaves out attributes"), warnings),
+				// generation carried on and wrote the output
+				() -> assertTrue(results.get("narrowed").containsKey("modules/sales/domain/ReceiptVanilla.java"), results.get("narrowed").keySet().toString()),
+				() -> assertTrue(results.get("narrowed").containsKey("customers/acme/modules/orm.hbm.xml"), results.get("narrowed").keySet().toString()),
+				() -> assertTrue(results.get("notNarrowed").containsKey("modules/sales/domain/sales_orm.hbm.xml"), results.get("notNarrowed").keySet().toString()));
+	}
+
+	@Test
+	void hierarchyRefusalsIgnoreTheValidationFlag() {
+		Fixture fixture = hierarchy(ExtensionStrategy.joined, true, true, false);
+		assertThrows(MetaDataException.class, () -> generate(fixture, false));
 	}
 
 	@Test

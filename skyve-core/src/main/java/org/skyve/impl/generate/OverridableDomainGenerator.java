@@ -990,7 +990,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @param documentName	The document name.
 	 * @param domainClass	The document's vanilla domain class metadata, or null.
 	 * @throws IOException	if the extension source cannot be read.
-	 * @throws MetaDataException	if the extension extends the wrong generated class.
+	 * @throws MetaDataException	if the extension extends the wrong generated class and {@link #validate} is on;
+	 * 									with it off, the problem is printed to {@link System#err} as a warning.
 	 */
 	private void checkExtensionSuperclass(@Nonnull String modulePath,
 											@Nonnull String documentName,
@@ -1011,14 +1012,24 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		superclassName = superclassName.substring(superclassName.lastIndexOf('.') + 1);
 		String narrowingCustomerName = ((domainClass != null) && domainClass.isAbstract) ? domainClass.narrowingCustomerName : null;
 		boolean narrowed = (narrowingCustomerName != null);
+		String problem = null;
 		if (narrowed && superclassName.equals(documentName)) {
-			throw new MetaDataException(extensionName + " must extend " + vanillaClassName + " because customer " +
-											narrowingCustomerName + "'s override of " + documentName +
-											" leaves out attributes, which only " + vanillaClassName + " declares.");
+			problem = extensionName + " must extend " + vanillaClassName + " because customer " +
+						narrowingCustomerName + "'s override of " + documentName +
+						" leaves out attributes, which only " + vanillaClassName + " declares.";
 		}
-		if ((! narrowed) && superclassName.equals(vanillaClassName)) {
-			throw new MetaDataException(extensionName + " must extend " + documentName + " because no customer's override of " +
-											documentName + " leaves out attributes, so " + vanillaClassName + " is not generated.");
+		else if ((! narrowed) && superclassName.equals(vanillaClassName)) {
+			problem = extensionName + " must extend " + documentName + " because no customer's override of " +
+						documentName + " leaves out attributes, so " + vanillaClassName + " is not generated.";
+		}
+		if (problem != null) {
+			// the generated domain is right either way - the extension needs fixing - so this is a
+			// validation, and only warns when validation is off
+			if (validate) {
+				throw new MetaDataException(problem);
+			}
+			System.err.println("WARNING: " + problem);
+			return;
 		}
 		if (debug && (! superclassName.equals(documentName)) && (! superclassName.equals(vanillaClassName))) {
 			LOGGER.info("{} extends {}, not {} - not checked", extensionName, superclassName, narrowed ? vanillaClassName : documentName);
