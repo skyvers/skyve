@@ -693,7 +693,7 @@ public abstract class AbstractDataFileLoader {
 									// a cell may have text after its number (1,234.50 kg), which the loader has always read
 									loadValue = leadingNumber(converter, displayValue.trim());
 									if (loadValue == null) {
-										LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, converter.toString());
+										LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, converter);
 									}
 								}
 								

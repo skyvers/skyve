@@ -955,15 +955,6 @@ abstract class SmartClientAttributeDefinition {
     }
 
 	/**
-	 * Builds a constant-domain code-to-description value map for client-side enumeration rendering.
-	 *
-	 * @param customer customer metadata context
-	 * @param document document metadata containing the attribute
-	 * @param attribute attribute whose constant domain values are required
-	 * @param runtime whether runtime domain values should be resolved
-	 * @return ordered map of escaped domain codes to escaped localised descriptions
-	 */
-	/**
 	 * Indicates if a date or time format pattern has no time: a date time or timestamp converter with such a pattern shows
 	 * only the date (DD_MM_YYYY_DateTime, MM_DD_YYYY_Timestamp ...).
 	 *
@@ -974,6 +965,15 @@ abstract class SmartClientAttributeDefinition {
 		return (pattern != null) && (pattern.indexOf('H') < 0) && (pattern.indexOf('h') < 0);
 	}
 
+	/**
+	 * Builds a constant-domain code-to-description value map for client-side enumeration rendering.
+	 *
+	 * @param customer customer metadata context
+	 * @param document document metadata containing the attribute
+	 * @param attribute attribute whose constant domain values are required
+	 * @param runtime whether runtime domain values should be resolved
+	 * @return ordered map of escaped domain codes to escaped localised descriptions
+	 */
 	private static @Nonnull Map<String, String> getConstantDomainValueMap(@Nonnull Customer customer,
 															@Nonnull Document document,
 															@Nonnull Attribute attribute,

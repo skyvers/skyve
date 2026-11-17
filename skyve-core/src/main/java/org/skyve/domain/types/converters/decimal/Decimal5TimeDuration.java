@@ -24,7 +24,7 @@ import jakarta.annotation.Nullable;
  */
 public class Decimal5TimeDuration implements Converter<Decimal5> {
 	/** The hours or the minutes: a decimal number with an optional sign (no exponent). */
-	private static final Pattern NUMBER = Pattern.compile("[-+]?(\\d+\\.?\\d*|\\.\\d+)");
+	private static final Pattern NUMBER = Pattern.compile("[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)");
 
 	/**
 	 * Returns the value type handled by this converter.
