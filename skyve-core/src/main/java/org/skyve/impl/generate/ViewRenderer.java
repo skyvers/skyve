@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.ViewActionPrivileges;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
@@ -911,8 +912,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	private boolean preProcessAction(@Nullable ImplicitActionName implicitName, @Nonnull Action action, @Nullable ActionShow showOverride) {
-		boolean result = true;
 		DocumentImpl actionDocument = document;
+		boolean result = ViewActionPrivileges.permitted(user, actionDocument, implicitName, action);
 		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
@@ -939,18 +940,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String actionConfirmationParam = null;
 		
 		if (implicitName == null) {
-			if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
-				result = false;
-			}
 			actionName = resourceName;
 		}
 		else {
 			actionName = implicitName.name();
 			switch (implicitName) {
 				case Add:
-					if (! user.canCreateDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_ADD;
 					}
@@ -959,9 +954,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case BizExport:
-					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_BIZ_EXPORT;
 					}
@@ -971,9 +963,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case BizImport:
-					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_BIZ_IMPORT;
 					}
@@ -983,9 +972,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case Download:
-					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_DOWNLOAD;
 					}
@@ -995,9 +981,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case Upload:
-					if (! user.canExecuteAction(actionDocument, getClassActionName(action, resourceName))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_UPLOAD;
 					}
@@ -1015,9 +998,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Delete:
-					if (! user.canDeleteDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_DELETE;
 					}
@@ -1030,9 +1010,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Edit:
-					if (! user.canReadDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_EDIT;
 					}
@@ -1041,9 +1018,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case New:
-					if (! user.canCreateDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_NEW;
 					}
@@ -1052,10 +1026,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case OK:
-					if ((! user.canUpdateDocument(actionDocument)) &&
-							(! user.canCreateDocument(actionDocument))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_OK;
 					}
@@ -1064,9 +1034,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Remove:
-					if (! user.canDeleteDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_REMOVE;
 					}
@@ -1086,10 +1053,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Save:
-					if ((! user.canUpdateDocument(actionDocument)) &&
-							(! user.canCreateDocument(actionDocument))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_SAVE;
 					}
@@ -3692,13 +3655,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @return the resource name; never {@code null}
 	 * @throws MetaDataException when the action has no resource name
 	 */
-	private static @Nonnull String getClassActionName(@Nonnull Action action, @Nullable String resourceName) {
-		if (resourceName == null) {
-			throw new MetaDataException("Action " + action.getName() + " has no class name");
-		}
-		return resourceName;
-	}
-
 	private static @Nonnull String staticImageToUrl(@Nullable String imagePath) {
 		return "images/" + imagePath;
 	}

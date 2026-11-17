@@ -406,6 +406,9 @@ System.out.println(visitModules(args[0]));
 			if (visitor.getHasDelete()) {
 				steps.add(new Delete());
 			}
+			else {
+				steps.addAll(visitor.getDeleteComments());
+			}
 		}
 	}
 	

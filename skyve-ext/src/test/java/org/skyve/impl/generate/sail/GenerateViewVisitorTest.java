@@ -10,8 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -52,6 +54,8 @@ import org.skyve.metadata.user.User;
 
 @SuppressWarnings("static-method")
 class GenerateViewVisitorTest {
+	private static final String LINE = "Line";
+
 	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
 
 	@AfterEach
@@ -125,11 +129,7 @@ class GenerateViewVisitorTest {
 		DocumentImpl line = document(null);
 		line.setName("Line");
 		ViewImpl orderView = view();
-		ViewImpl lineView = view();
-		CollectionImpl lines = new CollectionImpl();
-		lines.setName("lines");
-		lines.setDocumentName("Line");
-		order.putRelation(lines);
+		ViewImpl lineView = view(); // document() gives the order its "lines" collection of Lines
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		when(repository.getView("desktop", customer, order, "create")).thenReturn(orderView);
 		when(repository.getView("desktop", customer, order, "edit")).thenReturn(orderView);
@@ -354,9 +354,11 @@ class GenerateViewVisitorTest {
 										comments(visitor.getPopulateSteps())),
 					() -> assertEquals(List.of("not generated: tab Subscriptions depends on visible=\"persisted\"",
 												"not generated: action approve depends on visible=\"persisted\"",
-												"not generated: action archive depends on visible=\"changed\"",
-												"not generated: delete depends on disabled=\"notChanged\""),
+												"not generated: action archive depends on visible=\"changed\""),
 										comments(visitor.getActionSteps())),
+					// only a generator that deletes takes the Delete's comment
+					() -> assertEquals(List.of("not generated: delete depends on disabled=\"notChanged\""),
+										comments(visitor.getDeleteComments())),
 					() -> assertEquals(List.of(), actionNames(visitor.getActionSteps())),
 					() -> assertFalse(visitor.getHasSave()),
 					() -> assertFalse(visitor.getHasDelete()));
@@ -468,6 +470,104 @@ class GenerateViewVisitorTest {
 		assertEquals(1, visitor.getPopulateSteps().size());
 	}
 
+	/**
+	 * The renderers show a data grid's New only to a user who can create the grid's document, so no row is added for
+	 * one who cannot, and nothing says so.
+	 */
+	@Test
+	void aDataGridWhoseDocumentTheUserCannotCreateGetsNoNewRow() {
+		User user = user();
+		when(Boolean.valueOf(user.canCreateDocument(argThat(d -> LINE.equals(d.getName()))))).thenReturn(Boolean.FALSE);
+		GenerateViewVisitor visitor = visitor(document(null), view(), user);
+		DataGrid grid = new DataGrid();
+		grid.setBinding("lines");
+
+		visitor.visitDataGrid(grid, true, true);
+
+		assertEquals(1, visitor.getPopulateSteps().size());
+	}
+
+	/**
+	 * A button bound to a built-in action gets the renderers' privilege checks: a Delete button needs delete, a Save
+	 * button create or update; the same buttons are generated for a user who has them.
+	 */
+	@Test
+	void aButtonForABuiltInActionNeedsItsPrivilege() {
+		ViewImpl view = view();
+		ActionImpl delete = action("Delete", Boolean.FALSE, null);
+		delete.setImplicitName(ImplicitActionName.Delete);
+		view.putAction(delete);
+		ActionImpl save = action("Save", Boolean.FALSE, null);
+		save.setImplicitName(ImplicitActionName.Save);
+		view.putAction(save);
+		User readOnly = mock(User.class);
+		when(Boolean.valueOf(readOnly.canReadDocument(any(Document.class)))).thenReturn(Boolean.TRUE);
+		GenerateViewVisitor refused = visitor(document(null), view, readOnly);
+		GenerateViewVisitor permitted = visitor(document(null), view, user());
+
+		for (GenerateViewVisitor visitor : List.of(refused, permitted)) {
+			visitor.visitButton(button("Delete"), true, true);
+			visitor.visitButton(button("Save"), true, true);
+		}
+
+		assertAll(() -> assertEquals(List.of(), actionNames(refused.getActionSteps())),
+					() -> assertEquals(List.of("Delete", "Save"), actionNames(permitted.getActionSteps())));
+	}
+
+	/**
+	 * A toolbar Save or Delete that is not in the action panel is not on the toolbar, so it is not generated.
+	 */
+	@Test
+	void aSaveOrDeleteOutOfTheActionPanelIsNotGenerated() {
+		Persistent persistent = new Persistent();
+		persistent.setName("orders");
+		GenerateViewVisitor visitor = visitor(document(persistent));
+		ActionImpl save = new ActionImpl();
+		save.setInActionPanel(Boolean.FALSE);
+		ActionImpl delete = new ActionImpl();
+		delete.setInActionPanel(Boolean.FALSE);
+
+		visitor.visitSaveAction(save);
+		visitor.visitDeleteAction(delete);
+
+		assertAll(() -> assertFalse(visitor.getHasSave()),
+					() -> assertFalse(visitor.getHasDelete()));
+	}
+
+	/**
+	 * Conditions are evaluated only when a step needs deciding: a container whose contents generate nothing creates
+	 * no instances. Once creating them failed, it is not tried again, and a failure without a message gives a fixed
+	 * reason.
+	 */
+	@Test
+	void conditionsAreEvaluatedOnlyForStepsAndAFailureIsNotRetried() throws Exception {
+		ViewImpl view = view();
+		view.putAction(action("approve", Boolean.FALSE, null));
+		DocumentImpl document = spy(document(null));
+		doThrow(new IllegalStateException()).when(document).newInstance(any(User.class));
+		GenerateViewVisitor visitor = visitor(document, view);
+		Form empty = new Form();
+		empty.setXmlVisibleCondition("approvable");
+		Form holding = new Form();
+		holding.setXmlVisibleCondition("approving");
+		Form nested = new Form();
+		nested.setXmlEnabledCondition("open");
+
+		visitor.visitForm(empty, true, true);
+		visitor.visitedForm(empty, true, true);
+		verify(document, never()).newInstance(any(User.class));
+		visitor.visitForm(holding, true, true);
+		visitor.visitForm(nested, true, true);
+		visitor.visitButton(button("approve"), true, true);
+		visitor.visitedForm(nested, true, true);
+		visitor.visitedForm(holding, true, true);
+
+		assertAll(() -> assertEquals(List.of("not generated: action approve depends on visible=\"approving\", " +
+												"which cannot be evaluated here (IllegalStateException without a message)"),
+										comments(visitor.getActionSteps())),
+					() -> verify(document, times(1)).newInstance(any(User.class)));
+	}
+
 	private static Button button(String actionName) {
 		Button result = new Button();
 		result.setActionName(actionName);
@@ -499,6 +599,14 @@ class GenerateViewVisitorTest {
 		module.setName("sales");
 		when(repository.getView("desktop", customer, document, "create")).thenReturn(view);
 		when(repository.getView("desktop", customer, document, "edit")).thenReturn(view);
+		// the documents' "lines" collection holds Lines, for the data grid tests
+		DocumentImpl line = new DocumentImpl();
+		line.setName(LINE);
+		line.setOwningModuleName("sales");
+		when(repository.getModule(customer, "sales")).thenReturn(module);
+		when(repository.getDocument(customer, module, LINE)).thenReturn(line);
+		when(repository.getView("desktop", customer, line, "create")).thenReturn(view());
+		when(repository.getView("desktop", customer, line, "edit")).thenReturn(view());
 		ProvidedRepositoryFactory.set(repository);
 		return new GenerateViewVisitor(user, customer, module, document, "desktop");
 	}
@@ -512,6 +620,7 @@ class GenerateViewVisitorTest {
 		when(Boolean.valueOf(result.canCreateDocument(any(Document.class)))).thenReturn(Boolean.TRUE);
 		when(Boolean.valueOf(result.canUpdateDocument(any(Document.class)))).thenReturn(Boolean.TRUE);
 		when(Boolean.valueOf(result.canDeleteDocument(any(Document.class)))).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(result.canReadDocument(any(Document.class)))).thenReturn(Boolean.TRUE);
 		return result;
 	}
 
@@ -528,6 +637,10 @@ class GenerateViewVisitorTest {
 		result.setName("Order");
 		result.setOwningModuleName("sales");
 		result.setPersistent(persistent);
+		CollectionImpl lines = new CollectionImpl();
+		lines.setName("lines");
+		lines.setDocumentName(LINE);
+		result.putRelation(lines);
 		return result;
 	}
 

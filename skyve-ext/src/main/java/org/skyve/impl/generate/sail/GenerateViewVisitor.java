@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +16,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.ViewActionPrivileges;
 import org.skyve.impl.metadata.view.NoOpViewVisitor;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.container.HBox;
@@ -54,36 +56,38 @@ import jakarta.annotation.Nullable;
  * (Skyve Application Integration Language) test script: populate steps (test data, tab selections and new data grid
  * rows) and action steps (tab selections and actions), which {@link Generator} wraps in navigation, saves and deletes.
  *
- * <p>Only what the user is shown is generated, so that the script never names a widget that its view lacks:
- * <ul>
- * <li>Privileges, as the renderers apply them: a custom action, or a BizExport, BizImport, Download or Upload action,
- * that the user cannot execute is not generated, nor is a Save when the user can neither create nor update the
- * document, nor a Delete when the user cannot delete it.</li>
- * <li>Conditions: an action is generated when it is visible and enabled and so are the containers of its button (tab
+ * <p>Only what the user is shown is generated, so that the script never names a widget that its view lacks.
+ *
+ * <p>Privileges are decided as the renderers decide them ({@link ViewActionPrivileges}): an action the user's privileges do
+ * not let the view show is not generated, whether it is a toolbar action or a button's; nor is a new data grid row when
+ * the user cannot create the grid's document.
+ *
+ * <p>Conditions: an action is generated when it is visible and enabled and so are the containers of its button (tab
  * panes, tabs, forms, vboxes, hboxes and the sidebar); a tab selection when the tab and its containers are; a new data
- * grid row when the grid and its containers are and the grid can add. Each condition is decided as follows.
- * 	<ul>
- * 	<li>{@code true} and {@code false} are constants.</li>
- * 	<li>{@code persisted}, {@code notPersisted}, {@code changed} and {@code notChanged} change as the script enters data
- * 	and saves, so their values are not known.</li>
- * 	<li>Any other condition is evaluated against two instances of the document: the new instance that the script opens
- * 	({@link Document#newInstance(User)}) and one holding test data such as {@code <testDataEnter/>} enters (a
- * 	{@link DataBuilder} with the {@code sail} fixture). When both give the same value, the condition is taken not to
- * 	depend on what the script enters (it depends on the user, their roles, the configuration or the document's
- * 	defaults) and its value is used. When they differ, or it cannot be evaluated, its value is not known.</li>
- * 	</ul>
- * A step that a known condition hides or disables is not generated. A step that a condition whose value is not known
- * could hide or disable is not generated either: a comment naming the condition as the view declares it, such as
+ * grid row when the grid and its containers are and the grid can add; a toolbar action, Save or Delete when it is in the
+ * action panel. A condition is evaluated only when a step needs it, and each condition once.
+ *
+ * <p>{@code true} and {@code false} are constants. {@code persisted}, {@code notPersisted}, {@code changed} and
+ * {@code notChanged} change as the script enters data and saves, so their values are not known. Any other condition is
+ * evaluated against two instances of the document: the new instance that the script opens
+ * ({@link Document#newInstance(User)}) and one holding test data such as {@code <testDataEnter/>} enters (a
+ * {@link DataBuilder} with the {@code sail} fixture). When both give the same value, the condition is taken not to
+ * depend on what the script enters (it depends on the user, their roles, the configuration or the document's defaults)
+ * and its value is used. When they differ, or it cannot be evaluated, its value is not known.
+ *
+ * <p>A step that a known condition hides or disables is not generated. A step that a condition whose value is not
+ * known could hide or disable is not generated either: a comment naming the condition as the view declares it, such as
  * {@code not generated: tab Subscriptions depends on visible="persisted"}, stands in its place, for the author of the
- * script to decide.</li>
- * </ul>
- * Conditions are evaluated as the persistence's current user (the Control Panel sets it to the SAIL user while it
+ * script to decide.
+ *
+ * <p>Conditions are evaluated as the persistence's current user (the Control Panel sets it to the SAIL user while it
  * generates) in the current request, so a condition on the session, such as SAIL recording, reads the generating
  * session. A condition that depends on the saved state or on a random value can still take the same value on both
  * instances by chance; the script's own test data is random too, so such a step can still fail when the script runs.
  *
  * <p>Side effects: the first condition evaluated creates the two instances, which runs the document's Bizlet
- * {@code newInstance} and builds random test data; neither is saved. Conditions can run application code.
+ * {@code newInstance} and builds random test data; neither is saved. Conditions can run application code, which can
+ * write; the Control Panel rolls back what generation wrote.
  *
  * <p>Threading: not thread-safe; one instance per traversal.
  *
@@ -96,27 +100,25 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 																		Bean.CHANGED_KEY,
 																		Bean.NOT_CHANGED_KEY);
 
-	/** The implicit actions that the renderers show only to a user who can execute their class. */
-	private static final Set<ImplicitActionName> CLASS_ACTIONS = Set.of(ImplicitActionName.BizExport,
-																			ImplicitActionName.BizImport,
-																			ImplicitActionName.Download,
-																			ImplicitActionName.Upload);
-
 	private final @Nonnull User user;
 	private List<Step> populateSteps = new ArrayList<>();
 	private List<Step> actionSteps = new ArrayList<>();
+	/** The comments that stand in for Delete actions that are not generated, for a generator that would delete. */
+	private List<Step> deleteComments = new ArrayList<>();
 	private boolean hasSave = false;
 	private boolean hasOk = false;
 	private boolean hasCancel = false;
 	private boolean hasDelete = false;
 	// list of module.document.view.binding visit in data grids to stop infinite recursion
 	private Set<String> breadcrumbs;
-	/** What is known of each container being visited, innermost first; each includes its own containers. */
-	private final Deque<Availability> containers = new ArrayDeque<>();
+	/** The containers being visited, innermost first; their conditions are evaluated only when a step needs them. */
+	private final Deque<Object> containers = new ArrayDeque<>();
 	/** What is known of each condition evaluated so far (as a negative condition), by condition. */
 	private final Map<String, Availability> conditions = new HashMap<>();
-	/** The instances that conditions are evaluated against, or {@code null} before the first is evaluated. */
+	/** The instances that conditions are evaluated against, or {@code null} before they are first needed. */
 	private @Nullable Instances instances;
+	/** Why the instances could not be created, or {@code null} unless that failed; it is not tried again. */
+	private @Nullable String instancesFailure;
 
 	/**
 	 * Creates a visitor for the create view of a document, or its edit view when it has no create view of its own.
@@ -172,20 +174,19 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		if (title == null) {
 			throw new MetaDataException("A tab in view " + view.getName() + " of document " + document.getName() + " has no title to select it by");
 		}
-		enter(tab);
+		containers.push(tab);
 		Availability availability = enclosing();
 		if (availability.unusable()) {
 			return;
 		}
-		String dependsOn = availability.dependsOn();
 		Step step;
-		if (dependsOn == null) {
+		if (availability.condition() == null) {
 			TabSelect select = new TabSelect();
 			select.setTabPath(title);
 			step = select;
 		}
 		else {
-			step = notGenerated("tab " + title, dependsOn);
+			step = notGenerated("tab " + title, availability);
 		}
 		populateSteps.add(step);
 		actionSteps.add(step);
@@ -196,7 +197,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitedTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
-		leave();
+		containers.pop();
 	}
 
 	/**
@@ -204,7 +205,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitTabPane(@Nonnull TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
-		enter(tabPane);
+		containers.push(tabPane);
 	}
 
 	/**
@@ -212,7 +213,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitedTabPane(@Nonnull TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
-		leave();
+		containers.pop();
 	}
 
 	/**
@@ -220,7 +221,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitVBox(@Nonnull VBox vbox, boolean parentVisible, boolean parentEnabled) {
-		enter(vbox);
+		containers.push(vbox);
 	}
 
 	/**
@@ -228,7 +229,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitedVBox(@Nonnull VBox vbox, boolean parentVisible, boolean parentEnabled) {
-		leave();
+		containers.pop();
 	}
 
 	/**
@@ -236,7 +237,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitHBox(@Nonnull HBox hbox, boolean parentVisible, boolean parentEnabled) {
-		enter(hbox);
+		containers.push(hbox);
 	}
 
 	/**
@@ -244,7 +245,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitedHBox(@Nonnull HBox hbox, boolean parentVisible, boolean parentEnabled) {
-		leave();
+		containers.pop();
 	}
 
 	/**
@@ -252,7 +253,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitForm(@Nonnull Form form, boolean parentVisible, boolean parentEnabled) {
-		enter(form);
+		containers.push(form);
 	}
 
 	/**
@@ -260,7 +261,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitedForm(@Nonnull Form form, boolean parentVisible, boolean parentEnabled) {
-		leave();
+		containers.pop();
 	}
 
 	/**
@@ -268,7 +269,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		enter(sidebar);
+		containers.push(sidebar);
 	}
 
 	/**
@@ -276,12 +277,12 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	@Override
 	public void visitedSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
-		leave();
+		containers.pop();
 	}
 	
 	/**
-	 * Adds a new row to the populate steps, with the steps that populate it, when the grid can add a row; or a
-	 * comment when that depends on a condition whose value is not known.
+	 * Adds a new row to the populate steps, with the steps that populate it, when the user can create the grid's
+	 * document and the grid can add a row; or a comment when that depends on a condition whose value is not known.
 	 *
 	 * @throws MetaDataException if an addable grid has no binding
 	 */
@@ -297,6 +298,14 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			throw new MetaDataException("A data grid in view " + view.getName() + " of document " + document.getName() + " has no binding");
 		}
 
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		Relation relation = (Relation) target.getAttribute();
+		Document gridDocument = (relation == null) ? null : module.getDocument(customer, relation.getDocumentName());
+		// The renderers show the grid's New only to a user who can create its document
+		if ((gridDocument != null) && (! user.canCreateDocument(gridDocument))) {
+			return;
+		}
+
 		Availability availability = enclosing().and(availability(grid))
 										.and(negative(grid.getDisableAddCondition(),
 														authored("enableAdd",
@@ -306,9 +315,8 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		if (availability.unusable()) {
 			return;
 		}
-		String dependsOn = availability.dependsOn();
-		if (dependsOn != null) {
-			populateSteps.add(notGenerated("a new row in data grid " + binding, dependsOn));
+		if (availability.condition() != null) {
+			populateSteps.add(notGenerated("a new row in data grid " + binding, availability));
 			return;
 		}
 
@@ -322,10 +330,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		nu.setBinding(binding);
 		populateSteps.add(nu);
 		
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-		Relation relation = (Relation) target.getAttribute();
-		if (relation != null) { // should always be
-			Document gridDocument = module.getDocument(customer, relation.getDocumentName());
+		if (gridDocument != null) { // should always be
 			Module gridModule = customer.getModule(gridDocument.getOwningModuleName());
 			GenerateViewVisitor gridVisitor = new GenerateViewVisitor(user, customer, gridModule, gridDocument, currentUxUi, breadcrumbs);
 			gridVisitor.visit();
@@ -336,20 +341,17 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 	
 	/**
-	 * Records a Save, declared or expanded from {@code <defaults/>}, when the user can create or update the document
-	 * and the action can be used; or adds a comment to the populate steps when that depends on a condition whose value
-	 * is not known.
+	 * Records a toolbar Save, declared or expanded from {@code <defaults/>}, of a persistent document when the user can
+	 * create or update the document and the action is in the action panel and can be used; or adds a comment to the
+	 * populate steps when that depends on a condition whose value is not known.
 	 *
 	 * @param action the declaring action metadata, which may be the {@code <defaults/>} action
 	 */
 	@Override
 	public void visitSaveAction(@Nonnull ActionImpl action) {
 		if (document.isPersistable() &&
-				usable(action,
-						user.canCreateDocument(document) || user.canUpdateDocument(document),
-						Availability.USABLE,
-						"save",
-						populateSteps)) {
+				(! Boolean.FALSE.equals(action.getInActionPanel())) &&
+				usable(action, ImplicitActionName.Save, Known.USABLE, "save", populateSteps)) {
 			hasSave = true;
 		}
 	}
@@ -365,16 +367,17 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 
 	/**
-	 * Records a Delete, declared or expanded from {@code <defaults/>}, when the user can delete the document and the
-	 * action can be used; or adds a comment to the action steps when that depends on a condition whose value is not
-	 * known.
+	 * Records a toolbar Delete, declared or expanded from {@code <defaults/>}, of a persistent document when the user
+	 * can delete the document and the action is in the action panel and can be used; or keeps a comment for
+	 * {@link #getDeleteComments()} when that depends on a condition whose value is not known.
 	 *
 	 * @param action the declaring action metadata, which may be the {@code <defaults/>} action
 	 */
 	@Override
 	public void visitDeleteAction(@Nonnull ActionImpl action) {
 		if (document.isPersistable() &&
-				usable(action, user.canDeleteDocument(document), Availability.USABLE, "delete", actionSteps)) {
+				(! Boolean.FALSE.equals(action.getInActionPanel())) &&
+				usable(action, ImplicitActionName.Delete, Known.USABLE, "delete", deleteComments)) {
 			hasDelete = true;
 		}
 	}
@@ -385,7 +388,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	@Override
 	public void visitCustomAction(@Nonnull ActionImpl action) {
 		if (! Boolean.FALSE.equals(action.getInActionPanel())) {
-			addCustomAction(action, Availability.USABLE);
+			addAction(action, Known.USABLE);
 		}
 	}
 	
@@ -401,18 +404,18 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		if (action == null) { // validated when the view is loaded
 			throw new MetaDataException("Button action " + actionName + " does not exist in view " + view.getName() + " of document " + document.getName());
 		}
-		addCustomAction(action, enclosing());
+		addAction(action, enclosing());
 	}
 	
 	/**
-	 * Adds an action step when the user can execute the action and it can be used where it is, or a comment when that
-	 * depends on a condition whose value is not known.
+	 * Adds an action step when the user's privileges let the view show the action and it can be used where it is, or
+	 * a comment when that depends on a condition whose value is not known.
 	 *
-	 * @param action the action
+	 * @param action the action, custom or built-in
 	 * @param enclosing what is known of the containers of the action's trigger
 	 */
-	private void addCustomAction(@Nonnull ActionImpl action, @Nonnull Availability enclosing) {
-		if (! usable(action, executable(action), enclosing, "action " + action.getName(), actionSteps)) {
+	private void addAction(@Nonnull ActionImpl action, @Nonnull Availability enclosing) {
+		if (! usable(action, action.getImplicitName(), enclosing, "action " + action.getName(), actionSteps)) {
 			return;
 		}
 		Action step = new Action();
@@ -424,77 +427,49 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 
 	/**
-	 * Decides whether an action's step can be generated: the user is permitted it and neither the action's conditions
-	 * nor its containers' hide or disable it. When a condition whose value is not known could, adds a comment saying
-	 * so instead.
+	 * Decides whether an action's step can be generated: the user's privileges let the view show it and neither the
+	 * action's conditions nor its containers' hide or disable it. When a condition whose value is not known could,
+	 * adds a comment saying so instead.
 	 *
 	 * @param action the action
-	 * @param permitted whether the user's privileges permit the action
+	 * @param implicitName the built-in action it stands for, or {@code null} for a custom action
 	 * @param enclosing what is known of the containers of the action's trigger
 	 * @param step the step, as the comment names it
 	 * @param comments the steps to add the comment to
 	 * @return {@code true} if the step can be generated
 	 */
 	private boolean usable(@Nonnull ActionImpl action,
-							boolean permitted,
+							@Nullable ImplicitActionName implicitName,
 							@Nonnull Availability enclosing,
 							@Nonnull String step,
 							@Nonnull List<Step> comments) {
-		if (! permitted) {
+		if (! ViewActionPrivileges.permitted(user, document, implicitName, action)) {
 			return false;
 		}
 		Availability availability = enclosing.and(availability(action));
 		if (availability.unusable()) {
 			return false;
 		}
-		String dependsOn = availability.dependsOn();
-		if (dependsOn != null) {
-			comments.add(notGenerated(step, dependsOn));
+		if (availability.condition() != null) {
+			comments.add(notGenerated(step, availability));
 			return false;
 		}
 		return true;
 	}
 
 	/**
-	 * Decides whether the renderers would show the user an action: a custom action, or a BizExport, BizImport,
-	 * Download or Upload action, only when the user can execute its class; other implicit actions are not decided here.
+	 * Returns what is known of the containers being visited, evaluating their conditions, outermost first, until one is
+	 * known to hide or disable what they hold.
 	 *
-	 * @param action the action
-	 * @return {@code false} if the renderers would leave the action out for the user
-	 */
-	private boolean executable(@Nonnull ActionImpl action) {
-		ImplicitActionName implicitName = action.getImplicitName();
-		if ((implicitName != null) && (! CLASS_ACTIONS.contains(implicitName))) {
-			return true;
-		}
-		String resourceName = action.getResourceName();
-		return (resourceName == null) || user.canExecuteAction(document, resourceName);
-	}
-
-	/**
-	 * Enters a container, whose own conditions then apply, with its containers', to what it holds.
-	 *
-	 * @param container the container: a tab pane, tab, form, vbox, hbox or sidebar
-	 */
-	private void enter(@Nonnull Object container) {
-		containers.push(enclosing().and(availability(container)));
-	}
-
-	/**
-	 * Leaves the innermost container.
-	 */
-	private void leave() {
-		containers.pop();
-	}
-
-	/**
-	 * Returns what is known of the containers being visited.
-	 *
-	 * @return what is known of the innermost container, which includes its containers, or usable outside any
+	 * @return the first container known to be unusable, else the first whose condition is not known, else usable
 	 */
 	private @Nonnull Availability enclosing() {
-		Availability result = containers.peek();
-		return (result == null) ? Availability.USABLE : result;
+		Availability result = Known.USABLE;
+		Iterator<Object> outermostFirst = containers.descendingIterator();
+		while (outermostFirst.hasNext() && (! result.unusable())) {
+			result = result.and(availability(outermostFirst.next()));
+		}
+		return result;
 	}
 
 	/**
@@ -504,7 +479,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 * @return what is known of the metadata
 	 */
 	private @Nonnull Availability availability(@Nonnull Object metadata) {
-		Availability result = Availability.USABLE;
+		Availability result = Known.USABLE;
 		if (metadata instanceof Invisible invisible) {
 			result = negative(invisible.getInvisibleCondition(),
 								authored("visible",
@@ -512,7 +487,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 											"invisible",
 											invisible.getXmlInvisibleCondition()));
 		}
-		if (metadata instanceof Disableable disableable) {
+		if ((! result.unusable()) && (metadata instanceof Disableable disableable)) {
 			result = result.and(negative(disableable.getDisabledCondition(),
 											authored("enabled",
 														disableable.getXmlEnabledCondition(),
@@ -552,15 +527,13 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	private @Nonnull Availability negative(@Nullable String condition, @Nullable String declaration) {
 		if (condition == null) {
-			return Availability.USABLE;
+			return Known.USABLE;
 		}
 		Availability result = conditions.computeIfAbsent(condition, this::evaluateNegative);
-		String dependsOn = result.dependsOn();
-		if ((dependsOn == null) || (declaration == null)) {
+		if ((result.condition() == null) || (declaration == null)) {
 			return result;
 		}
-		// what is not known starts with the condition evaluated, in the negative sense: name it as the view declares it
-		return new Availability(false, declaration + dependsOn.substring(condition.length()));
+		return new Availability(false, declaration, result.reason());
 	}
 
 	/**
@@ -573,13 +546,13 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	private @Nonnull Availability evaluateNegative(@Nonnull String condition) {
 		if (String.valueOf(true).equals(condition)) {
-			return Availability.UNUSABLE;
+			return Known.UNUSABLE;
 		}
 		if (String.valueOf(false).equals(condition)) {
-			return Availability.USABLE;
+			return Known.USABLE;
 		}
 		if (SCRIPT_STATE_CONDITIONS.contains(condition)) {
-			return new Availability(false, condition);
+			return new Availability(false, condition, null);
 		}
 		boolean whenOpened;
 		boolean whenEntered;
@@ -590,46 +563,71 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		}
 		catch (Exception e) { // the step is left out with the reason, rather than failing the whole script
 			LOGGER.debug("Condition {} of {}.{} cannot be evaluated for SAIL generation", condition, module.getName(), document.getName(), e);
-			return new Availability(false, condition + ", which cannot be evaluated here (" + e.getMessage() + ")");
+			return new Availability(false, condition, reason(e));
 		}
 		if (whenOpened != whenEntered) {
-			return new Availability(false, condition);
+			return new Availability(false, condition, null);
 		}
-		return whenOpened ? Availability.UNUSABLE : Availability.USABLE;
+		return whenOpened ? Known.UNUSABLE : Known.USABLE;
 	}
 
 	/**
 	 * Returns the instances that conditions are evaluated against, creating them the first time.
 	 *
 	 * <p>Side effects: the first call creates a new instance as the user (running the document's Bizlet
-	 * {@code newInstance}) and builds a random instance with the {@code sail} fixture; neither is saved. A failed call
-	 * leaves none, so the next call tries again.
+	 * {@code newInstance}) and builds a random instance with the {@code sail} fixture; neither is saved. When that
+	 * fails, the failure is kept and every later call fails with its reason, without trying again.
 	 *
 	 * @return the instances
-	 * @throws Exception if an instance cannot be created
+	 * @throws IllegalStateException if the instances cannot be created, now or on an earlier call
 	 */
-	@SuppressWarnings("java:S112") // Document.newInstance throws Exception
-	private @Nonnull Instances instances() throws Exception {
+	private @Nonnull Instances instances() {
 		Instances result = instances;
 		if (result == null) {
-			Bean opened = document.newInstance(user);
-			Bean entered = new DataBuilder().fixture(FixtureType.sail).build(document);
-			result = new Instances(opened, entered);
+			if (instancesFailure != null) {
+				throw new IllegalStateException(instancesFailure);
+			}
+			try {
+				Bean opened = document.newInstance(user);
+				Bean entered = new DataBuilder().fixture(FixtureType.sail).build(document);
+				result = new Instances(opened, entered);
+			}
+			catch (Exception e) {
+				instancesFailure = reason(e);
+				throw new IllegalStateException(instancesFailure, e);
+			}
 			instances = result;
 		}
 		return result;
 	}
 
 	/**
+	 * Returns why something could not be evaluated, for a comment.
+	 *
+	 * @param e what was thrown
+	 * @return its message, or a fixed reason naming its type when it has none
+	 */
+	private static @Nonnull String reason(@Nonnull Exception e) {
+		String result = e.getMessage();
+		return (result == null) ? e.getClass().getSimpleName() + " without a message" : result;
+	}
+
+	/**
 	 * Returns a comment that stands in for a step that is not generated.
 	 *
 	 * @param step the step, such as {@code action Restore}
-	 * @param dependsOn the condition whose value is not known
+	 * @param availability what is known of the step, whose condition is not known
 	 * @return the comment
 	 */
-	private static @Nonnull Comment notGenerated(@Nonnull String step, @Nonnull String dependsOn) {
+	private static @Nonnull Comment notGenerated(@Nonnull String step, @Nonnull Availability availability) {
+		StringBuilder comment = new StringBuilder(128).append("not generated: ").append(step);
+		comment.append(" depends on ").append(availability.condition());
+		String reason = availability.reason();
+		if (reason != null) {
+			comment.append(", which cannot be evaluated here (").append(reason).append(')');
+		}
 		Comment result = new Comment();
-		result.setComment("not generated: " + step + " depends on " + dependsOn);
+		result.setComment(comment.toString());
 		return result;
 	}
 	
@@ -640,9 +638,19 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	@Nonnull List<Step> getActionSteps() {
 		return actionSteps;
 	}
+
+	/**
+	 * Returns the comments that stand in for Delete actions that are not generated, for a generator that would delete
+	 * when {@link #getHasDelete()} is {@code false}.
+	 *
+	 * @return the comments, empty when there are none
+	 */
+	@Nonnull List<Step> getDeleteComments() {
+		return deleteComments;
+	}
 	
 	boolean getHasSave() {
-		return hasSave && document.isPersistable();
+		return hasSave;
 	}
 	
 	boolean getHasOk() {
@@ -654,7 +662,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 	
 	boolean getHasDelete() {
-		return hasDelete && document.isPersistable();
+		return hasDelete;
 	}
 
 	/**
@@ -664,22 +672,17 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 * @param entered an instance holding test data, such as the script enters
 	 */
 	private record Instances(@Nonnull Bean opened, @Nonnull Bean entered) {
-		// values only
 	}
 
 	/**
 	 * What is known of whether a step's widget can be used.
 	 *
 	 * @param unusable whether a known condition hides or disables it
-	 * @param dependsOn when it is not unusable, a condition (with any reason it is not known) whose value is not known
-	 * 			and that could hide or disable it, or {@code null} when none could
+	 * @param condition when it is not unusable, a condition whose value is not known and that could hide or disable
+	 * 			it, or {@code null} when none could
+	 * @param reason why that condition could not be evaluated, or {@code null} when it was, or none could
 	 */
-	private record Availability(boolean unusable, @Nullable String dependsOn) {
-		/** Nothing hides or disables the widget. */
-		static final Availability USABLE = new Availability(false, null);
-		/** A known condition hides or disables the widget. */
-		static final Availability UNUSABLE = new Availability(true, null);
-
+	private record Availability(boolean unusable, @Nullable String condition, @Nullable String reason) {
 		/**
 		 * Returns what is known of a widget that both this and {@code other} apply to.
 		 *
@@ -687,10 +690,24 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		 * @return the first unusable, else the first whose condition is not known, else usable
 		 */
 		@Nonnull Availability and(@Nonnull Availability other) {
-			if (unusable || ((dependsOn != null) && (! other.unusable))) {
+			if (unusable || ((condition != null) && (! other.unusable))) {
 				return this;
 			}
 			return other;
+		}
+	}
+
+	/**
+	 * The availabilities that name no condition.
+	 */
+	private static final class Known {
+		/** Nothing hides or disables the widget. */
+		static final Availability USABLE = new Availability(false, null, null);
+		/** A known condition hides or disables the widget. */
+		static final Availability UNUSABLE = new Availability(true, null, null);
+
+		private Known() {
+			// constants only
 		}
 	}
 }

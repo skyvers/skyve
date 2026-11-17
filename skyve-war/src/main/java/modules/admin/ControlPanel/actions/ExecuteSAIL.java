@@ -73,7 +73,8 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 	 * Executes the Control Panel's SAIL with its executor, as its SAIL user, and returns what the executor generated.
 	 *
 	 * <p>Side effects: the persistence's user is the SAIL user during the execution, and is put back afterwards; a mock
-	 * Faces context replaces the thread's (a PrimeFaces request's) during it, and the thread's is put back afterwards.
+	 * Faces context replaces the thread's (a PrimeFaces request's) during it, and the thread's is put back afterwards;
+	 * what the execution wrote is rolled back (see {@link GenerateSAIL#discardWrites(org.skyve.persistence.Persistence)}).
 	 *
 	 * @param bean	the Control Panel
 	 * @return	the executor's output: the Java test methods
@@ -163,6 +164,7 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 				return executor.toString();
 			}
 			finally {
+				GenerateSAIL.discardWrites(p);
 				p.setUser(currentUser);
 			}
 		}
