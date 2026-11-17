@@ -281,6 +281,7 @@ isc.BizUtil.addClassMethods({
 			"bizDollarsAndCents",
 			"bizIntegerPercentage",
 			"bizIntegerSeparator",
+			"bizSimplePercentage",
 			"bizTwoDecimalPlacesPercentage",
 			"bizTimeDuration",
 		];
