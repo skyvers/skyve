@@ -281,12 +281,15 @@ public class DocumentImpl extends ModelImpl implements Document {
 			throw new ClassNotFoundException(key + " not found in the repository vtable");
 		}
 		
-		// Look for a hand-crafted extension first (in module or as a customer override)
+		// Look for a hand-crafted extension first (in module or as a customer override), unless the
+		// customer overrides the document - its generated override class extends the vanilla extension
 		StringBuilder className = new StringBuilder(128);
 		try {
 			key.append('/').append(documentName).append("Extension");
 			String extensionKey = repository.vtable(customerName, key.toString());
-			if (extensionKey != null) {
+			boolean customerDocument = packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE);
+			if ((extensionKey != null) &&
+					((! customerDocument) || extensionKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE))) {
 				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
 			}
 			else {
@@ -295,7 +298,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 				int lastDotIndex = packagePath.lastIndexOf('.');
 				packagePath = packagePath.substring(0, lastDotIndex + 1);
 	
-				if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
+				if (customerDocument) {
 					// Look for an override first and if not found look for a domain class
 					final String customerClassName = new StringBuilder(128).append(packagePath)
 																			.append(ProvidedRepository.DOMAIN_NAME)
@@ -314,9 +317,14 @@ public class DocumentImpl extends ModelImpl implements Document {
 							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 						}
 						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
-							// Look for the domain class in the modules area
+							// Use the vanilla extension, or else the domain class in the modules area
 							className.setLength(0);
-							className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
+							if (extensionKey != null) {
+								className.append(extensionKey.replace('/', '.'));
+							}
+							else {
+								className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
+							}
 							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 						}
 					}

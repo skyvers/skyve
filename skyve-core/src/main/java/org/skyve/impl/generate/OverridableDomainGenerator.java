@@ -3425,9 +3425,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(module.getName());
 		DomainClass documentClass = (documentClasses == null) ? null : documentClasses.get(documentName);
 
-		// Determine if there is an Extension class defined in the document package
+		// Determine if there is an Extension class defined in the document package - for a customer's
+		// override class, the customer's own; a vanilla extension is the override class's base class
 		String modulePath = ProvidedRepository.MODULES_NAMESPACE + module.getName();
-		boolean domainExtensionClassExists = domainExtensionClassExists(modulePath, documentName);
+		boolean domainExtensionClassExists = ((customer != null) && overridden && (baseDocumentName != null)) ?
+												domainExtensionClassExists(ProvidedRepository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + modulePath, documentName) :
+												domainExtensionClassExists(modulePath, documentName);
 
 		// Document and module names
 
