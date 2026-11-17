@@ -115,7 +115,8 @@ isc.BizListGrid.addMethods({
 				);
 			}
 
-			return criteria;
+			// These criteria go to the server other than through the data source's fetch: make a day filter the day's range
+			return isc.BizUtil.dataSourceDayCriteria(this._dataSource, criteria);
 		};
 
 		/**

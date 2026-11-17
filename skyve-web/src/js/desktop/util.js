@@ -132,13 +132,35 @@ isc.ResultSet.addMethods({
 	},
 
 	/**
-	 * Sets criteria and forces a fetch for spatial operators.
+	 * Checks if criteria filter a day field: a date time or timestamp shown as a date (see BizUtil.dayFields).
+	 * SmartClient would filter cached rows with them by comparing the day's midnight with each row's instant, so a
+	 * narrower filter on a fully cached list (the filter row's day added to a name) would drop the day's rows that have
+	 * a time; the server filters by the day's range (see RestDataSource.transformRequest).
+	 * @param {Object} criteria - the criteria to check
+	 * @returns {boolean} - True if criteria filter a day field
+	 */
+	hasDayField: function (criteria) {
+		const dataSource = this.getDataSource();
+		const dayFields = dataSource ? isc.BizUtil.dayFields(dataSource) : [];
+		if (dayFields.length === 0) return false;
+		const filters = (c) =>
+			!!c &&
+			(c.criteria
+				? c.criteria.some(filters)
+				: c.fieldName
+					? dayFields.includes(c.fieldName)
+					: Object.keys(c).some((name) => dayFields.includes(name)));
+		return filters(criteria);
+	},
+
+	/**
+	 * Sets criteria and forces a fetch for spatial operators and day fields.
 	 * @param {Object} newCriteria - the new criteria to set.
 	 * @returns {Object} - the result of the original `setCriteria` method.
 	 */
 	setCriteria: function (newCriteria) {
 		const result = this.skyveSetCriteria(newCriteria);
-		if (newCriteria && this.hasSpatialOperator(newCriteria)) {
+		if (newCriteria && (this.hasSpatialOperator(newCriteria) || this.hasDayField(newCriteria))) {
 			this.invalidateCache();
 		}
 		return result;
@@ -918,8 +940,9 @@ isc.BizUtil.addClassMethods({
 /**
  * Makes a filter on a date time or timestamp column whose converter shows only the date (a *_DateTime type) mean the
  * whole local day, as the Vue list grid does: equals is from the day's start up to the next day's, notEqual is outside
- * it, lessThan is before the day, greaterThan after it (lessOrEqual and greaterOrEqual likewise). The column's filter
- * gives the day's local midnight; without this, the server compares that instant exactly.
+ * it, lessThan is before the day, greaterThan after it (lessOrEqual and greaterOrEqual likewise), between is after the
+ * start day and before the end day, and betweenInclusive from the start day's start to the end day's end. The column's
+ * filter gives the day's local midnight; without this, the server compares that instant exactly.
  */
 isc.RestDataSource.addMethods({
 	skyveTransformRequest: isc.RestDataSource.getPrototype().transformRequest,
@@ -931,14 +954,8 @@ isc.RestDataSource.addMethods({
 	 * @returns {Object} - the transformed request data.
 	 */
 	transformRequest: function (dsRequest) {
-		if ((dsRequest.operationType === "fetch") && dsRequest.data && !isc.isAn.emptyObject(dsRequest.data)) {
-			const dayFields = (this.getFieldNames() || []).filter((name) => {
-				const type = this.getField(name).type;
-				return isc.isA.String(type) && type.endsWith("_DateTime");
-			});
-			if (dayFields.length > 0) {
-				dsRequest.data = isc.BizUtil.dayCriteria(dsRequest.data, dayFields, dsRequest.textMatchStyle);
-			}
+		if (dsRequest.operationType === "fetch") {
+			dsRequest.data = isc.BizUtil.dataSourceDayCriteria(this, dsRequest.data, dsRequest.textMatchStyle);
 		}
 		return this.skyveTransformRequest(dsRequest);
 	},
@@ -946,8 +963,42 @@ isc.RestDataSource.addMethods({
 
 isc.BizUtil.addClassMethods({
 	/**
-	 * Returns the criteria with each clause on a day field (see RestDataSource.transformRequest above) whose value is a
-	 * date made the range of that local day. Criteria without such a clause are returned as they are.
+	 * Returns the criteria with each clause on a day field of the data source (see RestDataSource.transformRequest
+	 * above) made the range of that local day. A request that sends a list grid's criteria other than through the data
+	 * source's fetch (export, chart, tag and untag) converts them with this too, so that it means the rows shown.
+	 *
+	 * @param {Object} dataSource - the data source.
+	 * @param {Object} criteria - simple or advanced criteria, or nothing.
+	 * @param {string} textMatchStyle - the text match style for simple criteria; "substring" when not given, as the
+	 *   export, chart and tag servlets match simple criteria.
+	 * @returns {Object} - the criteria.
+	 */
+	dataSourceDayCriteria: function (dataSource, criteria, textMatchStyle) {
+		if (!criteria || isc.isAn.emptyObject(criteria)) {
+			return criteria;
+		}
+		const dayFields = isc.BizUtil.dayFields(dataSource);
+		return dayFields.length > 0 ? isc.BizUtil.dayCriteria(criteria, dayFields, textMatchStyle) : criteria;
+	},
+
+	/**
+	 * Returns the names of a data source's day fields: its date times and timestamps whose converter shows only the
+	 * date (a *_DateTime type).
+	 *
+	 * @param {Object} dataSource - the data source.
+	 * @returns {Array} - the field names, empty when it has none.
+	 */
+	dayFields: function (dataSource) {
+		return (dataSource.getFieldNames() || []).filter((name) => {
+			const type = dataSource.getField(name).type;
+			return isc.isA.String(type) && type.endsWith("_DateTime");
+		});
+	},
+
+	/**
+	 * Returns the criteria with each clause on a day field (see RestDataSource.transformRequest above) whose value (or
+	 * start or end, for a between) is a date made the range of those local days. Criteria without such a clause are
+	 * returned as they are.
 	 *
 	 * @param {Object} criteria - simple or advanced criteria.
 	 * @param {Array} dayFields - the names of the fields filtered by the day.
@@ -955,38 +1006,59 @@ isc.BizUtil.addClassMethods({
 	 * @returns {Object} - the criteria.
 	 */
 	dayCriteria: function (criteria, dayFields, textMatchStyle) {
-		const onDay = (fieldName, value) => dayFields.includes(fieldName) && isc.isA.Date(value);
+		const ranges = ["between", "iBetween", "betweenInclusive", "iBetweenInclusive"];
+		const onDay = (clause) =>
+			dayFields.includes(clause.fieldName) &&
+			(ranges.includes(clause.operator)
+				? isc.isA.Date(clause.start) || isc.isA.Date(clause.end)
+				: isc.isA.Date(clause.value));
 		let advanced = criteria;
 		if (!isc.DataSource.isAdvancedCriteria(criteria)) {
-			if (!Object.keys(criteria).some((name) => onDay(name, criteria[name]))) {
+			if (!Object.keys(criteria).some((name) => onDay({ fieldName: name, value: criteria[name] }))) {
 				return criteria;
 			}
 			advanced = isc.DataSource.convertCriteria(criteria, textMatchStyle || "substring");
 		}
+		const startOf = (day) => new Date(day.getFullYear(), day.getMonth(), day.getDate());
+		const nextAfter = (day) => new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
 		const convert = (clause) => {
 			if (clause.criteria) {
 				return { ...clause, criteria: clause.criteria.map(convert) };
 			}
-			if (!onDay(clause.fieldName, clause.value)) {
+			if (!onDay(clause)) {
 				return clause;
 			}
-			const day = clause.value;
-			const start = new Date(day.getFullYear(), day.getMonth(), day.getDate());
-			const next = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
 			const compare = (operator, value) => ({ fieldName: clause.fieldName, operator: operator, value: value });
+			const day = clause.value;
 			switch (clause.operator) {
 				case "equals":
-					return { operator: "and", criteria: [compare("greaterOrEqual", start), compare("lessThan", next)] };
+					return { operator: "and", criteria: [compare("greaterOrEqual", startOf(day)), compare("lessThan", nextAfter(day))] };
 				case "notEqual":
-					return { operator: "or", criteria: [compare("lessThan", start), compare("greaterOrEqual", next)] };
+					return { operator: "or", criteria: [compare("lessThan", startOf(day)), compare("greaterOrEqual", nextAfter(day))] };
 				case "lessThan":
-					return compare("lessThan", start);
+					return compare("lessThan", startOf(day));
 				case "lessOrEqual":
-					return compare("lessThan", next);
+					return compare("lessThan", nextAfter(day));
 				case "greaterThan":
-					return compare("greaterOrEqual", next);
+					return compare("greaterOrEqual", nextAfter(day));
 				case "greaterOrEqual":
-					return compare("greaterOrEqual", start);
+					return compare("greaterOrEqual", startOf(day));
+				case "between":
+				case "iBetween":
+				case "betweenInclusive":
+				case "iBetweenInclusive": {
+					// As SmartClient compares a date column's days: between is after the start day and before the end day,
+					// betweenInclusive from the start of the start day to the end of the end day. A missing end is open.
+					const inclusive = clause.operator.endsWith("Inclusive");
+					const bounds = [];
+					if (isc.isA.Date(clause.start)) {
+						bounds.push(compare("greaterOrEqual", inclusive ? startOf(clause.start) : nextAfter(clause.start)));
+					}
+					if (isc.isA.Date(clause.end)) {
+						bounds.push(compare("lessThan", inclusive ? nextAfter(clause.end) : startOf(clause.end)));
+					}
+					return { operator: "and", criteria: bounds };
+				}
 				default:
 					return clause;
 			}
