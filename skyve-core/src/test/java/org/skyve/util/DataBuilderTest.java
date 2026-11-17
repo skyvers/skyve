@@ -21,6 +21,9 @@ import java.io.PrintStream;
 import java.util.Date;
 import java.util.Map;
 
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
+
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -42,6 +45,9 @@ import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.Bean;
+import org.skyve.util.DataBuilderFactoryClasses.Part;
+import org.skyve.util.DataBuilderFactoryClasses.WidgetExtension;
+import org.skyve.util.DataBuilderFactoryClasses.WidgetSubclass;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -981,5 +987,79 @@ class DataBuilderTest {
 		finally {
 			clearPersistenceThreadLocal();
 		}
+	}
+
+	/**
+	 * Stands in for the acme customer's generated override class of admin.Widget, which extends the
+	 * vanilla document's hand-written extension. It is in the customer's domain package, which is
+	 * made at run time, as a <code>customers</code> directory in the test classes would be taken for a
+	 * customer by the repository tests that load metadata from them.
+	 */
+	@SuppressWarnings("resource") // the made and loaded types only hold the class bytes in memory
+	private static final Class<?> WIDGET_OVERRIDE = new ByteBuddy().subclass(WidgetExtension.class)
+																		.name("customers.acme.modules.admin.domain.WidgetOverride")
+																		.make()
+																		.load(DataBuilderTest.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
+																		.getLoaded();
+
+	/** A factory of admin.Widget returning the extension, as UserFactory does. */
+	public static final class WidgetFactory {
+		static final WidgetExtension EXTENSION = mock(WidgetExtension.class);
+
+		@SkyveFixture(types = FixtureType.crud)
+		public static WidgetExtension crudInstance() {
+			return EXTENSION;
+		}
+	}
+
+	/** A factory of admin.Widget whose only method returns beans of admin.Part, which Widget extends. */
+	public static final class PartReturningFactory {
+		@SkyveFixture(types = FixtureType.crud)
+		public static Part crudInstance() {
+			return mock(Part.class);
+		}
+	}
+
+	/** Invokes the data factory for admin.Widget for a customer whose bean class is the given one. */
+	private static Bean invokeWidgetDataFactory(Object factory, Class<?> beanClass) throws Exception {
+		ProvidedRepository original = getProvidedRepository();
+		try {
+			DataBuilder builder = newBuilderWithMockUser().fixture(FixtureType.crud);
+			Customer customer = (Customer) getField(builder, "customer");
+			ProvidedRepository repository = mock(ProvidedRepository.class);
+			when(repository.getDataFactory(customer, "admin", "Widget")).thenReturn(factory);
+			setProvidedRepository(repository);
+
+			DocumentImpl document = spy(new DocumentImpl());
+			document.setOwningModuleName("admin");
+			document.setName("Widget");
+			doReturn(beanClass).when(document).getBeanClass(customer);
+
+			return invokeDataFactory(builder, document, 1);
+		}
+		finally {
+			setProvidedRepository(original);
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	/**
+	 * A customer that overrides a document with a hand-written extension has a generated
+	 * <code>&lt;Document&gt;Override</code> bean class, which extends the extension the factory returns.
+	 */
+	@Test
+	void dataFactoryReturningTheDocumentsExtensionAppliesToACustomersOverrideClass() throws Exception {
+		assertSame(WidgetFactory.EXTENSION, invokeWidgetDataFactory(new WidgetFactory(), WIDGET_OVERRIDE));
+	}
+
+	@Test
+	void dataFactoryMethodReturningTheBaseDocumentsClassIsNotUsedForACustomersOverrideClass() throws Exception {
+		assertThat(invokeWidgetDataFactory(new PartReturningFactory(), WIDGET_OVERRIDE), is((Bean) null));
+	}
+
+	/** Only a customer class reaches back to the vanilla class it extends. */
+	@Test
+	void dataFactoryReturningASuperclassOfAVanillaBeanClassIsNotUsed() throws Exception {
+		assertThat(invokeWidgetDataFactory(new WidgetFactory(), WidgetSubclass.class), is((Bean) null));
 	}
 }

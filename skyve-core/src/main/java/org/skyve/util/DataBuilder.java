@@ -1,7 +1,9 @@
 package org.skyve.util;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumMap;
@@ -34,6 +36,7 @@ import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.model.document.Reference;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.skyve.util.test.SkyveFixture;
@@ -59,6 +62,8 @@ import jakarta.annotation.Nullable;
  * By convention, a document can have a corresponding factory by defining a class called <Document-Name>Factory, similar to
  * Bizlets. DataBuilder will find these classes when it needs to construct an instance of the document.
  * It looks for public static or instance methods that take no arguments and returns the domain object type required.
+ * For a customer whose bean class is a customer class, such as a generated &lt;Document&gt;Override, methods returning
+ * the vanilla class it extends qualify too.
  * If there is more than one candidate method that can be called, DataBuilder will randomly call one of the methods.
  * </p>
  * 
@@ -725,7 +730,7 @@ public class DataBuilder {
 							for (FixtureType methodType : methodTypes) {
 								if (fixture.equals(methodType.toString()) && 
 										(method.getParameterCount() == 0) &&
-										beanType.isAssignableFrom(method.getReturnType())) {
+										returnsBeanOf(method, beanType, document)) {
 									methods.add(method);
 								}
 							}
@@ -735,7 +740,7 @@ public class DataBuilder {
 							for (String methodName : methodNames) {
 								if (fixture.equals(methodName) && 
 										(method.getParameterCount() == 0) &&
-										beanType.isAssignableFrom(method.getReturnType())) {
+										returnsBeanOf(method, beanType, document)) {
 									methods.add(method);
 								}
 							}
@@ -750,7 +755,7 @@ public class DataBuilder {
 				for (Method method : factory.getClass().getMethods()) {
 					if ((! method.isAnnotationPresent(SkyveFixture.class)) && 
 							(method.getParameterCount() == 0) && 
-							beanType.isAssignableFrom(method.getReturnType())) {
+							returnsBeanOf(method, beanType, document)) {
 						methods.add(method);
 					}
 				}
@@ -770,11 +775,64 @@ public class DataBuilder {
 				if (trace) { 
 					trace(new StringBuilder(128).append("Invoking method ").append(factory.getClass().getName()).append("::").append(method.getName()).append(" for fixture ").append(fixture), currentDepth);
 				}
-				result = (T) methods.get(RANDOM.nextInt(methods.size())).invoke(factory);
+				result = (T) method.invoke(factory);
 			}
 		}
 		
 		return result;
+	}
+
+	/**
+	 * Determines whether a data factory method returns beans of the document. It can return the
+	 * customer's bean class or a subclass of it. When the customer's bean class is a customer class -
+	 * a generated <code>&lt;Document&gt;Override</code> or the customer's own extension of it - it can
+	 * also return a class of the document between that and the vanilla class the customer class
+	 * extends, so a vanilla factory applies to the customer as it does to other customers: a factory
+	 * returning the document's hand-written extension, as UserFactory does, builds the beans of a
+	 * customer that overrides the document. A class is the document's when the <code>MODULE_NAME</code>
+	 * and <code>DOCUMENT_NAME</code> constants of its generated domain class name the document.
+	 *
+	 * @param method	The factory method.
+	 * @param beanType	The customer's bean class for the document.
+	 * @param document	The document.
+	 * @return	true if the method returns beans of the document.
+	 */
+	private static boolean returnsBeanOf(@Nonnull Method method, @Nonnull Class<?> beanType, @Nonnull Document document) {
+		Class<?> returnType = method.getReturnType();
+		if (beanType.isAssignableFrom(returnType)) {
+			return true;
+		}
+		if (! returnType.isAssignableFrom(beanType)) {
+			return false;
+		}
+
+		// the vanilla class the customer class extends
+		Class<?> vanillaType = beanType;
+		while ((vanillaType != null) && vanillaType.getName().startsWith(ProvidedRepository.CUSTOMERS_NAME + '.')) {
+			vanillaType = vanillaType.getSuperclass();
+		}
+		return (vanillaType != null) &&
+				(vanillaType != beanType) &&
+				vanillaType.isAssignableFrom(returnType) &&
+				document.getOwningModuleName().equals(staticFieldValue(returnType, "MODULE_NAME")) &&
+				document.getName().equals(staticFieldValue(returnType, "DOCUMENT_NAME"));
+	}
+
+	/**
+	 * The value of a public static field of a class or a class it extends.
+	 *
+	 * @param type	The class.
+	 * @param fieldName	The field.
+	 * @return	The value, or null if there is no such public static field.
+	 */
+	private static @Nullable Object staticFieldValue(@Nonnull Class<?> type, @Nonnull String fieldName) {
+		try {
+			Field field = type.getField(fieldName);
+			return Modifier.isStatic(field.getModifiers()) ? field.get(null) : null;
+		}
+		catch (@SuppressWarnings("unused") NoSuchFieldException | IllegalAccessException e) {
+			return null;
+		}
 	}
 	
 	/**

@@ -149,7 +149,6 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * gets random users from DataBuilder.
 	 */
 	@Test
-	@Disabled("DataBuilder bug: a data factory is skipped for a customer whose bean class is a generated Override — fix pending")
 	void aDataFactoryAppliesToACustomersOverrideClass() {
 		runAs(TEST_CUSTOMER);
 		OverrideProxied bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.OVERRIDE_PROXIED);
