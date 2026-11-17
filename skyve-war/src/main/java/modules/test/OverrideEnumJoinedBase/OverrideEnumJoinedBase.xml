@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideEnumJoinedBase"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Customer override fixture: the base of a joined hierarchy, which the test2 customer overrides without changes.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideEnumJoinedBase" strategy="joined" />
+	<singularAlias>Override Enum Joined Base</singularAlias>
+	<pluralAlias>Override Enum Joined Base</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

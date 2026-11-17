@@ -64,6 +64,12 @@ public enum TestDocument implements ModuleDocument {
 	OVERRIDE_ADDS("OverrideAdds"),
 	/** The "OverrideCustomerOnly" document. */
 	OVERRIDE_CUSTOMER_ONLY("OverrideCustomerOnly"),
+	/** The "OverrideEnumExtended" document. */
+	OVERRIDE_ENUM_EXTENDED("OverrideEnumExtended"),
+	/** The "OverrideEnumJoinedBase" document. */
+	OVERRIDE_ENUM_JOINED_BASE("OverrideEnumJoinedBase"),
+	/** The "OverrideEnumJoinedSub" document. */
+	OVERRIDE_ENUM_JOINED_SUB("OverrideEnumJoinedSub"),
 	/** The "OverrideExtended" document. */
 	OVERRIDE_EXTENDED("OverrideExtended"),
 	/** The "OverrideJoinedBase" document. */
@@ -72,6 +78,8 @@ public enum TestDocument implements ModuleDocument {
 	OVERRIDE_JOINED_SUB("OverrideJoinedSub"),
 	/** The "OverrideLength" document. */
 	OVERRIDE_LENGTH("OverrideLength"),
+	/** The "OverrideLinkTarget" document. */
+	OVERRIDE_LINK_TARGET("OverrideLinkTarget"),
 	/** The "OverrideMappedBase" document. */
 	OVERRIDE_MAPPED_BASE("OverrideMappedBase"),
 	/** The "OverrideMappedSub" document. */
@@ -80,6 +88,12 @@ public enum TestDocument implements ModuleDocument {
 	OVERRIDE_NARROWED("OverrideNarrowed"),
 	/** The "OverrideNarrowedExtended" document. */
 	OVERRIDE_NARROWED_EXTENDED("OverrideNarrowedExtended"),
+	/** The "OverrideNarrowedLinked" document. */
+	OVERRIDE_NARROWED_LINKED("OverrideNarrowedLinked"),
+	/** The "OverrideProxied" document. */
+	OVERRIDE_PROXIED("OverrideProxied"),
+	/** The "OverrideProxy" document. */
+	OVERRIDE_PROXY("OverrideProxy"),
 	/** The "OverrideReferrer" document. */
 	OVERRIDE_REFERRER("OverrideReferrer"),
 	/** The "OverrideSingleBase" document. */

@@ -149,6 +149,42 @@
 		<filter name="testtestOverrideCustomerOnlyUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="customers.test.modules.test.domain.OverrideEnumExtendedOverride" table="TEST_OverrideEnumExtended" entity-name="testtestOverrideEnumExtended">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<filter name="testtestOverrideEnumExtendedNoneFilter" condition="1=0"/>
+		<filter name="testtestOverrideEnumExtendedCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestOverrideEnumExtendedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestOverrideEnumExtendedUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.OverrideEnumJoinedBase" table="TEST_OverrideEnumJoinedBase" entity-name="testtestOverrideEnumJoinedBase">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<joined-subclass name="customers.test.modules.test.domain.OverrideEnumJoinedSubOverride" table="TEST_OverrideEnumJoinedSub" entity-name="testtestOverrideEnumJoinedSub">
+			<key column="bizId" />
+			<property name="subText" length="100" />
+		</joined-subclass>
+		<filter name="testtestOverrideEnumJoinedBaseNoneFilter" condition="1=0"/>
+		<filter name="testtestOverrideEnumJoinedBaseCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestOverrideEnumJoinedBaseDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestOverrideEnumJoinedBaseUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="customers.test.modules.test.domain.OverrideExtendedOverride" table="TEST_OverrideExtended" entity-name="testtestOverrideExtended">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
@@ -272,6 +308,56 @@
 		<filter name="testtestOverrideNarrowedExtendedUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
+	<class name="customers.test.modules.test.domain.OverrideNarrowedLinkedOverride" table="TEST_OverrideNarrowedLinked" entity-name="testtestOverrideNarrowedLinked">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<many-to-one name="target" entity-name="testOverrideLinkTarget" column="target_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_OverrideNarrowedLinked_target"/>
+		<filter name="testtestOverrideNarrowedLinkedNoneFilter" condition="1=0"/>
+		<filter name="testtestOverrideNarrowedLinkedCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestOverrideNarrowedLinkedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestOverrideNarrowedLinkedUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.domain.OverrideProxy" table="TEST_OverrideProxied" entity-name="testtestOverrideProxy">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<filter name="testtestOverrideProxyNoneFilter" condition="1=0"/>
+		<filter name="testtestOverrideProxyCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestOverrideProxyDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestOverrideProxyUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
+	<class name="modules.test.OverrideProxied.OverrideProxiedExtension" table="TEST_OverrideProxied" entity-name="testtestOverrideProxied">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<property name="subText" length="100" />
+		<filter name="testtestOverrideProxiedNoneFilter" condition="1=0"/>
+		<filter name="testtestOverrideProxiedCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestOverrideProxiedDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestOverrideProxiedUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
+
 	<class name="modules.test.domain.OverrideSingleBase" table="TEST_OverrideSingleBase" discriminator-value="OSB" entity-name="testtestOverrideSingleBase">
 		<id name="bizId" length="36" />
 		<discriminator column="bizDiscriminator" type="string" />
@@ -331,6 +417,26 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testtestOverrideCustomerOnlyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumExtendedNoneFilter" />
+	<filter-def name="testtestOverrideEnumExtendedCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumExtendedDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumExtendedUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumJoinedBaseNoneFilter" />
+	<filter-def name="testtestOverrideEnumJoinedBaseCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumJoinedBaseDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumJoinedBaseUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testtestOverrideExtendedNoneFilter" />
@@ -401,6 +507,36 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testtestOverrideNarrowedExtendedUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideNarrowedLinkedNoneFilter" />
+	<filter-def name="testtestOverrideNarrowedLinkedCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideNarrowedLinkedDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideNarrowedLinkedUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideProxyNoneFilter" />
+	<filter-def name="testtestOverrideProxyCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideProxyDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideProxyUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideProxiedNoneFilter" />
+	<filter-def name="testtestOverrideProxiedCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideProxiedDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideProxiedUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testtestOverrideSingleBaseNoneFilter" />

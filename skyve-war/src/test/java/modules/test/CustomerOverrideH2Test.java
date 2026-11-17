@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,23 +12,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
-import org.skyve.domain.Bean;
-import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ValidationException;
-import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
-import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.metadata.user.UserImpl;
-import org.skyve.impl.persistence.AbstractPersistence;
-import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.model.document.ModuleDocument;
-import org.skyve.metadata.view.View;
-import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
@@ -37,87 +25,60 @@ import org.skyve.util.test.SkyveFixture.FixtureType;
 import customers.test.domain.TestCustomerRole;
 import customers.test.modules.test.domain.OverrideAddsOverride;
 import customers.test.modules.test.domain.OverrideCustomerOnly;
+import customers.test.modules.test.domain.OverrideEnumExtendedOverride;
+import customers.test.modules.test.domain.OverrideEnumJoinedSubOverride;
 import customers.test.modules.test.domain.OverrideExtendedOverride;
 import customers.test.modules.test.domain.OverrideJoinedSubOverride;
 import customers.test.modules.test.domain.OverrideMappedSubOverride;
 import customers.test.modules.test.domain.OverrideNarrowedExtendedOverride;
+import customers.test.modules.test.domain.OverrideNarrowedLinkedOverride;
 import customers.test.modules.test.domain.OverrideNarrowedOverride;
 import customers.test.modules.test.domain.OverrideSingleSubOverride;
 import customers.test.modules.test.domain.TestRole;
-import modules.admin.ModulesUtil;
 import modules.admin.Group.GroupExtension;
+import modules.admin.ModulesUtil;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.AdminRole;
 import modules.admin.domain.User;
+import modules.test.OverrideEnumExtended.OverrideEnumExtendedExtension;
 import modules.test.OverrideExtended.OverrideExtendedExtension;
 import modules.test.OverrideNarrowedExtended.OverrideNarrowedExtendedExtension;
+import modules.test.OverrideProxied.OverrideProxiedExtension;
+import modules.test.OverrideProxied.OverrideProxiedFactory;
 import modules.test.domain.OverrideAdds;
+import modules.test.domain.OverrideEnumExtended;
+import modules.test.domain.OverrideEnumExtendedVanilla;
+import modules.test.domain.OverrideEnumJoinedBase;
+import modules.test.domain.OverrideEnumJoinedSub;
 import modules.test.domain.OverrideExtended;
 import modules.test.domain.OverrideJoinedBase;
 import modules.test.domain.OverrideJoinedSub;
 import modules.test.domain.OverrideLength;
+import modules.test.domain.OverrideLinkTarget;
 import modules.test.domain.OverrideMappedSub;
 import modules.test.domain.OverrideNarrowed;
 import modules.test.domain.OverrideNarrowedExtended;
 import modules.test.domain.OverrideNarrowedExtendedVanilla;
+import modules.test.domain.OverrideNarrowedLinked;
+import modules.test.domain.OverrideNarrowedLinkedVanilla;
 import modules.test.domain.OverrideNarrowedVanilla;
+import modules.test.domain.OverrideProxied;
 import modules.test.domain.OverrideReferrer;
 import modules.test.domain.OverrideRemoved;
 import modules.test.domain.OverrideSingleBase;
 import modules.test.domain.OverrideSingleSub;
 import modules.test.domain.TestDocument;
-import util.AbstractH2Test;
-
 /**
  * Exercises the test customer's document overrides against Hibernate: the vanilla mappings and the
  * test customer's <code>customers/test/modules/orm.hbm.xml</code> share one SessionFactory, so this
- * suite starting at all shows that they load together. Each test compares the test customer with
+ * suite starting at all shows that they load together. The tests compare the test customer with
  * bizhub, the customer H2 tests normally run as, which has no overrides.
  * <p/>
  * The fixtures are the <code>Override*</code> documents of the test module and their overrides in
  * <code>customers/test/modules/test/</code>.
  */
 @SuppressWarnings("static-method")
-class CustomerOverrideH2Test extends AbstractH2Test {
-	private static final String TEST_CUSTOMER = "test";
-
-	/**
-	 * Runs the rest of the test as a super user of the customer, in the current transaction.
-	 *
-	 * @param customerName	The customer.
-	 * @return	The customer.
-	 */
-	private static Customer runAs(String customerName) {
-		Customer result = ProvidedRepositoryFactory.getNullSafe().getCustomer(customerName);
-		assertNotNull(result, customerName);
-		SuperUser user = new SuperUser();
-		user.setCustomerName(customerName);
-		user.setName(USER);
-		user.setId(USER);
-		AbstractPersistence.get().setUser(user);
-		return result;
-	}
-
-	/** Creates a bean of the document for the current user's customer. */
-	private static <T extends Bean> T newInstance(ModuleDocument document) throws Exception {
-		return document.toDocument().newInstance(CORE.getUser());
-	}
-
-	/** The class beans of the document get for the customer. */
-	private static Class<?> beanClass(ModuleDocument document, Customer customer) throws Exception {
-		return ((DocumentImpl) document.toDocument(customer)).getBeanClass(customer);
-	}
-
-	/** Saves the bean, clears the first level cache, and retrieves the bean again from the data store. */
-	private static <T extends PersistentBean> T saveAndRetrieve(ModuleDocument document, T bean) {
-		Persistence p = CORE.getPersistence();
-		T saved = p.save(bean);
-		p.evictAllCached();
-		T result = p.retrieve(document, saved.getBizId());
-		assertNotNull(result, "retrieve " + document.documentName());
-		return result;
-	}
-
+class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 	@Test
 	void anOverrideThatAddsPropertiesUsesItsOverrideClassAndSavesThem() throws Exception {
 		Customer test = runAs(TEST_CUSTOMER);
@@ -160,11 +121,10 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 
 		OverrideCustomerOnly result = saveAndRetrieve(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY, bean);
 
-		Customer bizhub = ProvidedRepositoryFactory.getNullSafe().getCustomer(CUSTOMER);
-		assertNotNull(bizhub);
+		Customer bizhub = customer(CUSTOMER);
 		assertAll(() -> assertSame(OverrideCustomerOnly.class, beanClass(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY, test)),
 					() -> assertEquals("customer only", result.getText()),
-					// see toDocumentThrowsMetaDataExceptionForAMissingDocument for the exception type
+					// see CustomerOverridePendingH2Test for the exception type
 					() -> assertThrows(RuntimeException.class,
 										() -> customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY.toDocument(bizhub)));
 	}
@@ -295,8 +255,7 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 		OverrideMappedSub result = saveAndRetrieve(TestDocument.OVERRIDE_MAPPED_SUB, sub);
 
 		OverrideMappedSubOverride override = assertInstanceOf(OverrideMappedSubOverride.class, result);
-		Customer bizhub = ProvidedRepositoryFactory.getNullSafe().getCustomer(CUSTOMER);
-		assertNotNull(bizhub);
+		Customer bizhub = customer(CUSTOMER);
 		assertAll(() -> assertSame(OverrideMappedSubOverride.class, beanClass(TestDocument.OVERRIDE_MAPPED_SUB, test)),
 					() -> assertSame(OverrideMappedSub.class, beanClass(TestDocument.OVERRIDE_MAPPED_SUB, bizhub)),
 					() -> assertEquals("base", override.getText()),
@@ -465,50 +424,115 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 	@Test
 	void aDocumentTheModuleOverrideLeavesOutDoesNotResolveForTheCustomer() throws Exception {
 		Customer test = runAs(TEST_CUSTOMER);
-		Customer bizhub = ProvidedRepositoryFactory.getNullSafe().getCustomer(CUSTOMER);
-		assertNotNull(bizhub);
+		Customer bizhub = customer(CUSTOMER);
 
 		assertAll(() -> assertTrue(Arrays.stream(customers.test.modules.test.domain.TestDocument.values())
 												.noneMatch(d -> OverrideRemoved.DOCUMENT_NAME.equals(d.documentName()))),
-					// see toDocumentThrowsMetaDataExceptionForAMissingDocument for the exception type
+					// see CustomerOverridePendingH2Test for the exception type
 					() -> assertThrows(RuntimeException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test)),
 					() -> assertSame(OverrideRemoved.class, beanClass(TestDocument.OVERRIDE_REMOVED, bizhub)));
 		runAs(CUSTOMER);
 		assertSame(OverrideRemoved.class, newInstance(TestDocument.OVERRIDE_REMOVED).getClass());
 	}
 
-	/**
-	 * docs/typed-metadata-references.md says that the <code>toX()</code> methods throw
-	 * {@link MetaDataException} when the name does not resolve for the customer, but
-	 * {@link ModuleDocument#toDocument(Customer)} lets the repository's IllegalArgumentException through.
-	 */
 	@Test
-	@Disabled("toDocument throws IllegalArgumentException, not the documented MetaDataException - fix pending")
-	void toDocumentThrowsMetaDataExceptionForAMissingDocument() {
-		Customer test = runAs(TEST_CUSTOMER);
-		assertThrows(MetaDataException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test));
+	void aSubclassOfAMappedDocumentWithAnExtensionUsesItForOtherCustomers() throws Exception {
+		Customer bizhub = runAs(CUSTOMER);
+		OverrideProxiedExtension bean = newInstance(TestDocument.OVERRIDE_PROXIED);
+		bean.setText("text");
+		bean.setSubText("sub");
+
+		OverrideProxied result = saveAndRetrieve(TestDocument.OVERRIDE_PROXIED, bean);
+
+		assertAll(() -> assertSame(OverrideProxiedExtension.class, beanClass(TestDocument.OVERRIDE_PROXIED, bizhub)),
+					() -> assertSame(OverrideProxiedExtension.class, result.getClass()),
+					() -> assertEquals("sub", result.getSubText()),
+					() -> assertEquals("Proxied text", ((OverrideProxiedExtension) result).describe()),
+					() -> assertEquals(OverrideProxiedFactory.CRUD_TEXT,
+										new DataBuilder().fixture(FixtureType.crud).<OverrideProxied>build(TestDocument.OVERRIDE_PROXIED).getText()));
 	}
 
-	/**
-	 * Outside dev mode, MutableCachedRepository caches a scaffolded view under the vanilla key
-	 * <code>modules/&lt;module&gt;/&lt;document&gt;/views/&lt;view&gt;</code> whatever the customer, so
-	 * the first customer to scaffold a view gives it to every other customer - here the edit view of
-	 * OverrideLength, which the test customer overrides without a view of its own. When the override
-	 * adds or drops attributes, the other customer gets a view of attributes its document doesn't
-	 * have: generation validates customers in turn and fails that way
-	 * (<code>test.OverrideAdds @ customerText does not exist</code> for bizhub), which is why the test
-	 * customer's overrides that add or drop attributes have their own edit views.
-	 */
 	@Test
-	@Disabled("repository bug: a scaffolded view is cached for all customers - fix pending")
-	void aScaffoldedViewIsNotSharedBetweenCustomers() {
+	void aNarrowingOverrideWithAnAssociationSavesTheAssociation() throws Exception {
 		Customer test = runAs(TEST_CUSTOMER);
-		View testView = TestDocument.OVERRIDE_LENGTH.toDocument(test).getView(null, test, ViewType.edit.toString());
-		Customer bizhub = runAs(CUSTOMER);
-		View bizhubView = TestDocument.OVERRIDE_LENGTH.toDocument(bizhub).getView(null, bizhub, ViewType.edit.toString());
+		OverrideLinkTarget target = newInstance(TestDocument.OVERRIDE_LINK_TARGET);
+		target.setText("target");
+		OverrideNarrowedLinkedOverride bean = newInstance(TestDocument.OVERRIDE_NARROWED_LINKED);
+		bean.setText("text");
+		bean.setTarget(target);
 
-		assertAll(() -> assertNotNull(testView),
-					() -> assertNotNull(bizhubView),
-					() -> assertNotSame(testView, bizhubView));
+		OverrideNarrowedLinked result = saveAndRetrieve(TestDocument.OVERRIDE_NARROWED_LINKED, bean);
+
+		OverrideLinkTarget resultTarget = result.getTarget();
+		assertNotNull(resultTarget);
+		assertAll(() -> assertSame(OverrideNarrowedLinkedOverride.class, beanClass(TestDocument.OVERRIDE_NARROWED_LINKED, test)),
+					() -> assertSame(OverrideNarrowedLinkedOverride.class, result.getClass()),
+					() -> assertEquals("target", resultTarget.getText()));
+	}
+
+	@Test
+	void aNarrowedDocumentWithAnAssociationKeepsTheDroppedAttributeForOtherCustomers() throws Exception {
+		Customer bizhub = runAs(CUSTOMER);
+		OverrideLinkTarget target = newInstance(TestDocument.OVERRIDE_LINK_TARGET);
+		target.setText("target");
+		OverrideNarrowedLinkedVanilla bean = newInstance(TestDocument.OVERRIDE_NARROWED_LINKED);
+		bean.setText("text");
+		bean.setDropped("dropped");
+		bean.setTarget(target);
+
+		OverrideNarrowedLinked result = saveAndRetrieve(TestDocument.OVERRIDE_NARROWED_LINKED, bean);
+
+		OverrideNarrowedLinkedVanilla vanilla = assertInstanceOf(OverrideNarrowedLinkedVanilla.class, result);
+		OverrideLinkTarget resultTarget = vanilla.getTarget();
+		assertNotNull(resultTarget);
+		assertAll(() -> assertSame(OverrideNarrowedLinkedVanilla.class, beanClass(TestDocument.OVERRIDE_NARROWED_LINKED, bizhub)),
+					() -> assertEquals("dropped", vanilla.getDropped()),
+					() -> assertEquals("target", resultTarget.getText()));
+	}
+
+	@Test
+	void aNarrowingOverrideOfAJoinedSubclassSavesAndIsFoundThroughItsBase() throws Exception {
+		Customer test = runAs(TEST_CUSTOMER);
+		OverrideEnumJoinedSubOverride bean = newInstance(TestDocument.OVERRIDE_ENUM_JOINED_SUB);
+		bean.setText("base");
+		bean.setSubText("sub");
+
+		OverrideEnumJoinedSub result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_JOINED_SUB, bean);
+		List<OverrideEnumJoinedBase> polymorphic = CORE.getPersistence().newDocumentQuery(TestDocument.OVERRIDE_ENUM_JOINED_BASE).beanResults();
+
+		assertAll(() -> assertSame(OverrideEnumJoinedSubOverride.class, beanClass(TestDocument.OVERRIDE_ENUM_JOINED_SUB, test)),
+					() -> assertSame(OverrideEnumJoinedSubOverride.class, result.getClass()),
+					() -> assertEquals("sub", result.getSubText()),
+					() -> assertEquals(1, polymorphic.size(), polymorphic.toString()),
+					() -> assertSame(OverrideEnumJoinedSubOverride.class, polymorphic.get(0).getClass()));
+	}
+
+	@Test
+	void aNarrowingOverrideOfADocumentWithAnEnumAndAnExtensionExtendsTheExtension() throws Exception {
+		Customer test = runAs(TEST_CUSTOMER);
+		OverrideEnumExtendedOverride bean = newInstance(TestDocument.OVERRIDE_ENUM_EXTENDED);
+		bean.setText("text");
+
+		OverrideEnumExtended result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_EXTENDED, bean);
+
+		OverrideEnumExtendedOverride override = assertInstanceOf(OverrideEnumExtendedOverride.class, result);
+		assertAll(() -> assertSame(OverrideEnumExtendedOverride.class, beanClass(TestDocument.OVERRIDE_ENUM_EXTENDED, test)),
+					() -> assertEquals("text", override.getText()),
+					() -> assertEquals("Enum extended text", override.describe()));
+	}
+
+	@Test
+	void aNarrowedDocumentsExtensionKeepsTheDroppedEnumForOtherCustomers() throws Exception {
+		Customer bizhub = runAs(CUSTOMER);
+		OverrideEnumExtendedExtension bean = newInstance(TestDocument.OVERRIDE_ENUM_EXTENDED);
+		bean.setText("text");
+		bean.setStatus(OverrideEnumExtendedVanilla.Status.closed);
+
+		OverrideEnumExtended result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_EXTENDED, bean);
+
+		OverrideEnumExtendedExtension extension = assertInstanceOf(OverrideEnumExtendedExtension.class, result);
+		assertAll(() -> assertSame(OverrideEnumExtendedExtension.class, beanClass(TestDocument.OVERRIDE_ENUM_EXTENDED, bizhub)),
+					() -> assertSame(OverrideEnumExtendedVanilla.Status.closed, extension.getStatus()),
+					() -> assertEquals("Enum extended text", extension.describe()));
 	}
 }

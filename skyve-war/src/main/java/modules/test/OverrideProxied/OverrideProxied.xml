@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideProxied"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Customer override fixture: extends OverrideProxy and has a hand-written extension, as admin.User does; the test customer's override adds an attribute.
+		]]>
+	</documentation>
+	<extends document="OverrideProxy" />
+	<persistent name="TEST_OverrideProxied" />
+	<singularAlias>Override Proxied</singularAlias>
+	<pluralAlias>Override Proxied</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="subText">
+			<displayName>Sub Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>
