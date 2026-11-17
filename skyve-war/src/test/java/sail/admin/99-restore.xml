@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite, last step: restore the backup that 00-backup.xml made (the newest, so the first listed), which
-	puts back the data as it was before the suite, then delete that backup. PrimeFacesAdminSuiteSailIT runs this even when a
-	later file fails, but only once 00-precondition.xml and 00-backup.xml have passed.
+	Admin suite (admin.suite.xml), the restore: restore the backup that 00-backup.xml made (the newest, so the first listed),
+	which puts back the data as it was before the suite (and before sc/99-truncate.xml), then delete that backup. The suite
+	runs this even when members fail (sc/99-truncate.xml too), but only once 00-precondition.xml and 00-backup.xml passed.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
@@ -17,6 +17,7 @@
 			<navigateEdit module="admin" document="DataMaintenance" />
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
+			<testGridRows module="admin" query="BackupsModel" minRows="1" />
 			<comment>Backups are listed newest first, so the first is the one 00-backup.xml made</comment>
 			<listGridSelect module="admin" query="BackupsModel" row="0" />
 			<comment>Restore options: error on orphaned content, reindex both, delete the existing data first</comment>

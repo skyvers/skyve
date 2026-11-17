@@ -1,5 +1,6 @@
 package sail.kitchenSink.sc;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
@@ -8,30 +9,20 @@ import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
 
 /**
- * Runs automated SAIL tests for the kitchensink module (SmartClient).
+ * The SmartClient kitchen sink tests that need Java: the failure messages of the steps that cannot do what they say.
+ * The conformance scripts themselves ({@code sc-kitchensink-sail.xml}, {@code sc-kitchensink-sail-find.xml}) run in
+ * the kitchen sink suite ({@code KitchenSinkSuiteSailIT}).
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required),
  * headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
+@Tag("smoke")
 class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 
 	public SmartClientKitchenSinkSailIT() {
 		super(new BrowserConfiguration()
 				.browser(Browsers.chrome));
-	}
-
-	@Test
-	void test() {
-		Assertions.assertDoesNotThrow(() -> sailResource("sail/kitchenSink/sc/sc-kitchensink-sail.xml"));
-	}
-
-	/**
-	 * Finds by content: list grid filters and sorting, captured generated values, options by code or label,
-	 * and lookup description rows by their text.
-	 */
-	@Test
-	void find() {
-		Assertions.assertDoesNotThrow(() -> sailResource("sail/kitchenSink/sc/sc-kitchensink-sail-find.xml"));
 	}
 
 	/**

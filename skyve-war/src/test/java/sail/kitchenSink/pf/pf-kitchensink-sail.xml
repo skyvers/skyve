@@ -15,7 +15,6 @@
 -->
 <automation uxui="tablet"
 			userAgentType="tablet"
-			testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">

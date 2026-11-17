@@ -44,6 +44,9 @@
 			<comment>The Bizlet numbers the value when it is first saved: keep the number</comment>
 			<captureValue binding="number" variable="a" />
 			<testValue binding="number" value="{var:a}" />
+			<comment>A pattern keeps only part of the value: here the run token in the description</comment>
+			<captureValue binding="description" variable="runA" pattern="SAIL filter (\S+) a" />
+			<testValue binding="description" value="SAIL filter {var:runA} a" />
 			<ok />
 			<listGridNew module="kitchensink" document="LookupDescription" />
 			<dataEnter binding="description" value="SAIL filter {run} b" />

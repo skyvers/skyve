@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The kitchen sink conformance suite: the PrimeFaces and SmartClient conformance scripts, their find and row link scripts,
+	and a workflow that crosses renderers. Its members make and delete their own data, so it needs no bracket and can run
+	against any disposable server, again and again. KitchenSinkSuiteSailIT runs it; so can SailRunIT
+	(-Dsail.run=sail/kitchenSink/kitchensink.suite.xml -Dsail.var.password=admin).
+
+	What it shows of the suite language:
+	- testStrategy="Verify" is the default for the members whose automations state none (the two conformance scripts), so
+	  a run lists every failure; the find and row link scripts state their own Assert, which wins.
+	- evidence="failures" asks for a screenshot and page source of each failure, in target/sail/failures unless the run
+	  names a directory (-Dsail.failureDir) or asks for more (-Dsail.evidence=all).
+	- The workflow member is locked to its own strategy (lockTestStrategy): its second automation deletes the row it found,
+	  which must not carry on after a failed check, so -Dsail.testStrategy=Verify (or None) is not applied to it.
+	- The workflow signs in with {var:password}, which the run supplies (sail.var.password); kitchensink-workflow.xml's
+	  testStrategy is the default for its automations.
+	No member requires another: each is independent, so none declares requires.
+-->
+<suite testStrategy="Verify" evidence="failures"
+		xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+		xmlns="http://www.skyve.org/xml/sail"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<member file="pf/pf-kitchensink-sail.xml"/>
+	<member file="pf/pf-kitchensink-row-link.xml"/>
+	<member file="sc/sc-kitchensink-sail.xml"/>
+	<member file="sc/sc-kitchensink-sail-find.xml"/>
+	<member file="workflow/kitchensink-workflow.xml" lockTestStrategy="true"/>
+</suite>

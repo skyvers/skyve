@@ -524,9 +524,15 @@ public final class SailSettings {
 	private List<String> onlyPrefixes = List.of();
 	private List<String> runScripts = List.of();
 
-	private SailSettings(@Nonnull Environment environment, @Nonnull List<Layer> layers) {
+	/** Why the test strategy is locked to the scripts' own (e.g. {@code set-up}), or null if a run override applies. */
+	private final String lock;
+	/** The run override that a lock kept from applying, or null. */
+	private Setting ignoredOverride;
+
+	private SailSettings(@Nonnull Environment environment, @Nonnull List<Layer> layers, @Nullable String lock) {
 		this.environment = environment;
 		this.layers = layers;
+		this.lock = lock;
 	}
 
 	/**
@@ -609,8 +615,12 @@ public final class SailSettings {
 	 * 			properties file is missing or unreadable, or holds a key that is not a SAIL setting
 	 */
 	static @Nonnull SailSettings resolve(@Nonnull Environment environment, @Nonnull List<Layer> layers) {
+		return resolve(environment, layers, null);
+	}
+
+	private static @Nonnull SailSettings resolve(@Nonnull Environment environment, @Nonnull List<Layer> layers, @Nullable String lock) {
 		List<Layer> given = new ArrayList<>(layers);
-		SailSettings result = new SailSettings(environment, given);
+		SailSettings result = new SailSettings(environment, given, lock);
 		Layer system = result.systemLayer();
 		// the levels above the file name it; the environment's variables are bound once the file's keys are known too
 		List<Layer> above = new ArrayList<>(given.size() + 2);
@@ -630,6 +640,17 @@ public final class SailSettings {
 
 		for (String key : KEYS) {
 			Layer layer = first(ordered, key);
+			if ((lock != null) && (layer != null) && TEST_STRATEGY.equals(key) && layer.level().isRun()) {
+				// locked: the scripts' own strategy applies, and the run's override is noted
+				result.ignoredOverride = new Setting(key, String.valueOf(layer.get(key)).trim(), layer.sourceOf(key));
+				List<Layer> scripts = new ArrayList<>(ordered.size());
+				for (Layer candidate : ordered) {
+					if (! candidate.level().isRun()) {
+						scripts.add(candidate);
+					}
+				}
+				layer = first(scripts, key);
+			}
 			if (layer != null) {
 				result.settings.put(key, new Setting(key, String.valueOf(layer.get(key)).trim(), layer.sourceOf(key)));
 			}
@@ -669,7 +690,38 @@ public final class SailSettings {
 		List<Layer> all = new ArrayList<>(layers.size() + more.length);
 		all.addAll(layers);
 		all.addAll(Arrays.asList(more));
-		return resolve(environment, all);
+		return resolve(environment, all, lock);
+	}
+
+	/**
+	 * Returns these settings with the test strategy locked to the scripts' own: a run-level override ({@code -D}, the
+	 * environment, code or the properties file) does not apply, and is kept as {@link #ignoredOverride()}. For a suite's
+	 * locked members (its set-ups, its restore, and members with {@code lockTestStrategy="true"}). Later
+	 * {@link #with(Layer...)} calls keep the lock.
+	 *
+	 * @param reason	why, for messages, e.g. {@code set-up}
+	 * @return the settings
+	 */
+	@Nonnull SailSettings lockTestStrategy(@Nonnull String reason) {
+		return resolve(environment, layers, reason);
+	}
+
+	/**
+	 * Returns why the test strategy is locked.
+	 *
+	 * @return the reason, e.g. {@code set-up}, or null if a run override applies
+	 */
+	@Nullable String testStrategyLock() {
+		return lock;
+	}
+
+	/**
+	 * Returns the run's test strategy override that a lock kept from applying.
+	 *
+	 * @return the override with its source, or null if there was none or the settings are not locked
+	 */
+	@Nullable Setting ignoredOverride() {
+		return ignoredOverride;
 	}
 
 	/** Makes the system properties' layer, noting the {@code sail.*} properties that are not settings. */
@@ -1182,7 +1234,7 @@ public final class SailSettings {
 	 * Describes the settings that do not come from their defaults, each with its source, for the trace and the media
 	 * pages: e.g. {@code testStrategy=Verify (-Dsail.testStrategy)}. The settings come in the order of the keys, then
 	 * the directories an evidence request makes (with the request as their source), then the variables, by name, with
-	 * their values hidden.
+	 * their values hidden, then a test strategy override that a lock kept from applying.
 	 *
 	 * @return one line per setting; empty if every setting has its default
 	 */
@@ -1206,6 +1258,10 @@ public final class SailSettings {
 		}
 		for (Setting variable : variables.values()) {
 			result.add(variable.toString());
+		}
+		Setting kept = ignoredOverride;
+		if (kept != null) {
+			result.add("testStrategy override " + kept.value() + " from " + kept.source() + " not applied: locked (" + lock + ')');
 		}
 		return result;
 	}

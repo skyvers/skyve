@@ -4,9 +4,7 @@
 	and every kitchen sink widget that SAIL can enter data into, checking values with testValue.
 
 	Not covered here, and why:
-	- navigateTree, navigateMap, navigateCalendar: implemented in the shared executor base. The kitchen sink's
-	  Calendar, Map and Tree items are links; its Condition Node Tree, List Attribute Map and List Attribute Calendar items
-	  are navigated by SmartClientRecorderRoundTripSailIT (sc-recorder-round-trip-more.xml).
+	- navigateMap: implemented in the shared executor base; pf-kitchensink-sail.xml navigates the List Attribute Map.
 	- listMembership: the kitchen sink's only list membership is on ConditionsFixture; the SC admin suite covers it
 	  (group roles).
 	- contentSignature, checkMembership (not rendered by SmartClient), comparison, geometryMap, map, chart:
@@ -18,7 +16,6 @@
 	  sc-kitchensink-sail-find.xml.
 -->
 <automation uxui="desktop" userAgentType="desktop"
-	testStrategy="Assert"
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 	xmlns="http://www.skyve.org/xml/sail"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -40,6 +37,18 @@
 			<testWidget binding="text" />
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<testGridRows module="kitchensink" document="LookupDescription" minRows="0" />
+		</method>
+	</interaction>
+
+	<interaction name="A tree and a calendar">
+		<method>
+			<comment>The kitchen sink's Condition Node Tree and List Attribute Calendar menu items (SmartClient only): open each by its URL, as navigateTree and navigateCalendar do, and check that the page shows no error</comment>
+			<testMenu module="kitchensink" item="Condition Node Tree" />
+			<navigateTree module="kitchensink" query="qConditionsFixtureNodes" />
+			<testSuccess />
+			<testMenu module="kitchensink" item="List Attribute Calendar" />
+			<navigateCalendar module="kitchensink" document="ListAttributes" startBinding="dateTime" endBinding="dateTime" />
+			<testSuccess />
 		</method>
 	</interaction>
 

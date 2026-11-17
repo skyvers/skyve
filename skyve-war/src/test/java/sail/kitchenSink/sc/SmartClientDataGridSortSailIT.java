@@ -1,6 +1,7 @@
 package sail.kitchenSink.sc;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.sail.execution.sc.Locator;
 import org.skyve.impl.sail.execution.sc.Locator.Kind;
@@ -23,6 +24,7 @@ import util.sail.commands.impl.SmartClientButtonCommand;
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
 class SmartClientDataGridSortSailIT extends AbstractSmartClientInterpretedSail {
 
 	private static final String VIEW = "kitchensink.ActionsFixture";

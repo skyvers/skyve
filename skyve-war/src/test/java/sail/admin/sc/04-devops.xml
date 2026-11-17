@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	SmartClient admin suite: DevOps. Control Panel, Data Maintenance, Document Creator and Monitoring Dashboard, with their
+	Admin suite (admin.suite.xml), SmartClient: DevOps. Control Panel, Data Maintenance, Document Creator and Monitoring Dashboard, with their
 	safe actions. The destructive ones run in 98-destructive.xml.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
@@ -50,7 +50,7 @@
 			<testWidget action="Restore" enabled="true" />
 			<tabSelect path="Data Refresh" />
 			<testGridRows binding="refreshDocuments" minRows="1" />
-			<comment>SmartClient only: the Data tab's DDL actions only show the DDL; Truncate runs in 99-restore.xml</comment>
+			<comment>SmartClient only: the Data tab's DDL actions only show the DDL; Truncate runs in 99-truncate.xml</comment>
 			<tabSelect path="Data" />
 			<action name="Create" />
 			<action name="Drop" />
@@ -102,6 +102,19 @@
 		<method>
 			<navigateMenu module="admin" item="DevOps/Heap Dumps" />
 			<testWidget action="DownloadHeapDump" enabled="false" />
+		</method>
+	</interaction>
+	<interaction name="Document Creator: Submit refused without an output location">
+		<method>
+			<comment>From the retired single-file admin script: no script or output location has been entered, so Submit must refuse to run</comment>
+			<navigateEdit document="DocumentCreator" module="admin" />
+			<tabSelect path="Input" />
+			<tabSelect path="Markdown Preview" />
+			<tabSelect path="Document Preview" />
+			<tabSelect path="Help" />
+			<tabSelect path="Input" />
+			<action name="Submit" confirm="true" testSuccess="false" />
+			<testFailure message="Output location is required" />
 		</method>
 	</interaction>
 	<after>

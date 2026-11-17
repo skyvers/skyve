@@ -1,5 +1,6 @@
 package sail.kitchenSink.pf;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractInterpretedSailWorkflow;
@@ -12,6 +13,7 @@ import util.AbstractInterpretedSailWorkflow;
  * Each UX/UI runs in its own browser: an iPad's user agent for {@code tablet}, an iPhone's for {@code phone}, and a
  * desktop browser for {@code external}.
  */
+@Tag("sail")
 class PrimeFacesRequiredMessagesSailIT extends AbstractInterpretedSailWorkflow {
 	@Test
 	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails

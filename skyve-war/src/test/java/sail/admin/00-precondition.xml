@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite, first set up file: check that no SAIL restore marker is left over. A marker left over means an
+	Admin suite (admin.suite.xml), first set-up: check that no SAIL restore marker is left over. A marker left over means an
 	earlier run did not restore its backup, so the data may not be as the suite expects.
 	Other backups may exist: 99-restore.xml restores the first backup listed, the newest, which is the one 00-backup.xml
-	makes. PrimeFacesAdminSuiteSailIT restores only when this file and 00-backup.xml have passed (SailSuite).
+	makes. The suite restores only when this file and 00-backup.xml have passed (the restore's requires); when this fails,
+	nothing else runs (every member requires the set-ups).
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
@@ -15,7 +16,7 @@
 	</before>
 	<interaction name="Precondition: no restore marker left over">
 		<method>
-			<comment>A marker is left over when a run was interrupted or its restore failed, so the data may hold what that run did. If this fails, check the data (or restore that run's backup), delete the SAIL restore marker data group, and run again. PrimeFacesAdminSuiteSailIT then does not restore.</comment>
+			<comment>A marker is left over when a run was interrupted or its restore failed, so the data may hold what that run did. If this fails, check the data (or restore that run's backup), delete the SAIL restore marker data group, and run again. The suite then runs nothing else and does not restore.</comment>
 			<navigateMenu module="admin" item="Security Admin/Data Groups" />
 			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" maxRows="0" />
 		</method>

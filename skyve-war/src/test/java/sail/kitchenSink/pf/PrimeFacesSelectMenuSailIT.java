@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.JavascriptExecutor;
 
@@ -26,6 +27,7 @@ import util.sail.Devices;
  * that wait ended at once. Here the drop down's transitions are slowed, so that the item is clicked while it is
  * opening and the drop down is still closing when a step that ends too early returns.
  */
+@Tag("sail")
 class PrimeFacesSelectMenuSailIT extends AbstractPrimeFacesInterpretedSail {
 	public PrimeFacesSelectMenuSailIT() {
 		super(new BrowserConfiguration()

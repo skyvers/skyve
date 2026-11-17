@@ -1,15 +1,19 @@
 package sail.kitchenSink.workflow;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractInterpretedSailWorkflow;
 
 /**
- * Runs SAIL workflows against the kitchen sink: automations that cross renderers as one run, sharing {@code {run}} and
- * the captured variables (see {@link util.sail.SailWorkflow}).
+ * Runs a SAIL workflow against the kitchen sink whose legs are separate files: automations that cross renderers as one
+ * run, sharing {@code {run}} and the captured variables (see {@link util.sail.SailWorkflow}). A workflow in one file,
+ * {@code kitchensink-workflow.xml}, is a member of the kitchen sink suite ({@code KitchenSinkSuiteSailIT}).
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
+@Tag("smoke")
 class KitchenSinkWorkflowSailIT extends AbstractInterpretedSailWorkflow {
 	/**
 	 * Three script files: PrimeFaces (tablet) makes a lookup value and keeps its number, SmartClient finds it by the
@@ -22,15 +26,5 @@ class KitchenSinkWorkflowSailIT extends AbstractInterpretedSailWorkflow {
 		sailWorkflow("sail/kitchenSink/workflow/workflow-1-pf-create.xml",
 						"sail/kitchenSink/workflow/workflow-2-sc-change.xml",
 						"sail/kitchenSink/workflow/workflow-3-pf-delete.xml");
-	}
-
-	/**
-	 * One {@code <workflow>} file: PrimeFaces (external, desktop) makes a lookup value, then SmartClient, in the same
-	 * browser, finds it by its number and deletes it.
-	 */
-	@Test
-	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
-	void oneWorkflowFile() {
-		sailWorkflow("sail/kitchenSink/workflow/kitchensink-workflow.xml");
 	}
 }

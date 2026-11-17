@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- PrimeFaces admin phone smoke run: open each admin menu item the phone UX/UI shows, through the menu. -->
+<!-- Admin suite (admin.suite.xml), PrimeFaces phone: open each admin menu item the phone UX/UI shows, through the menu. The suite runs it in a phone browser (its userAgentType). -->
 <automation uxui="phone" userAgentType="phone" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>

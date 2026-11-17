@@ -55,7 +55,7 @@ class SailHarnessTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
 	void theSuiteRefusesTheTestStrategyOverride() {
 		List<String> ran = new ArrayList<>();
 		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").restore("99.xml", "00-pre.xml")
@@ -65,7 +65,7 @@ class SailHarnessTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
 	void theRestoreRunsAfterALaterFailureButNotAfterAFailedPrecondition() {
 		List<String> ran = new ArrayList<>();
 		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml", "00-backup.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml")
@@ -89,7 +89,7 @@ class SailHarnessTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
 	void onlyRunsTheChosenFilesBetweenTheSetUpAndTheRestore() {
 		List<String> ran = new ArrayList<>();
 		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml")
@@ -98,7 +98,7 @@ class SailHarnessTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
 	void theSuitesSettingsInCodeChooseTheFiles() {
 		List<String> ran = new ArrayList<>();
 		SailSettings.Code code = SailSettings.code().suiteOnly("01");
@@ -108,7 +108,7 @@ class SailHarnessTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
 	void theSuiteRefusesATestStrategyOverrideInCode() {
 		List<String> ran = new ArrayList<>();
 		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").environment(sources(Map.of()));

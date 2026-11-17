@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	Kitchen sink workflow in one file (KitchenSinkWorkflowSailIT.oneWorkflowFile): its automations share one run, so
-	{run} and the variables carry from one to the next. The first runs in PrimeFaces' external UX/UI and the second in
-	SmartClient, both as a desktop browser, so the second drives the first one's browser.
+	Kitchen sink workflow in one file, a member of kitchensink.suite.xml: its automations share one run, so {run} and the
+	variables carry from one to the next. The first runs in PrimeFaces' external UX/UI and the second in SmartClient, both
+	as a desktop browser, so the second drives the first one's browser.
+	The workflow's testStrategy is the default for its automations, which state none. Both sign in with {var:password}:
+	the run supplies it (KitchenSinkSuiteSailIT's settings().variable("password", ...), or -Dsail.var.password /
+	SAIL_VAR_PASSWORD), so no password is written here.
 -->
-<workflow xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+<workflow testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<automation uxui="external" userAgentType="desktop" testStrategy="Assert">
+	<automation uxui="external" userAgentType="desktop">
 		<before>
-			<login user="admin" password="admin" />
+			<login user="admin" password="{var:password}" />
 			<testSuccess />
 		</before>
 		<interaction name="PrimeFaces: make a lookup value and keep its number">
@@ -24,9 +28,9 @@
 			</method>
 		</interaction>
 	</automation>
-	<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert">
+	<automation uxui="desktop" userAgentType="desktop">
 		<before>
-			<login user="admin" password="admin" />
+			<login user="admin" password="{var:password}" />
 			<switchMode />
 		</before>
 		<interaction name="SmartClient: find the lookup value by its number and delete it">

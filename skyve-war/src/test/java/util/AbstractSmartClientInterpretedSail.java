@@ -112,7 +112,7 @@ public abstract class AbstractSmartClientInterpretedSail extends AbstractH2Test 
 	/**
 	 * Runs the SAIL script at the given test classpath resource.
 	 *
-	 * @param resourceName	the resource path, e.g. {@code sail/admin/sc/sc-admin-sail.xml}
+	 * @param resourceName	the resource path, e.g. {@code sail/kitchenSink/sc/sc-kitchensink-sail.xml}
 	 * @throws IllegalArgumentException if the resource is missing or unreadable
 	 */
 	protected void sailResource(@Nonnull String resourceName) {

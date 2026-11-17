@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- PrimeFaces admin suite: Reports, Audits, System Dashboard, Document Numbers and Jobs. -->
+<!-- Admin suite (admin.suite.xml), PrimeFaces: Reports, Audits, System Dashboard, Document Numbers and Jobs. -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
@@ -57,12 +57,25 @@
 			<navigateMenu module="admin" item="Jobs" />
 			<tabSelect path="Actual" />
 			<action name="Refresh" />
-			<comment>00-backup.xml (always run first, even with -Dsail.suite.only) cleared the list then backed up</comment>
+			<comment>00-backup.xml (a set-up, so it runs whatever sail.suite.only chooses) cleared the list then backed up; the 98-destructive.xml members, which clear it again, run after both 05 members</comment>
 			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" maxRows="1" />
 			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Backup" />
 			<cancel />
 			<tabSelect path="Schedule" />
 			<comment>The schedule is read only: the test server runs without the job scheduler</comment>
+		</method>
+	</interaction>
+	<interaction name="Document Numbers: generated data, from the document numbers query">
+		<method>
+			<comment>testDataEnter fills every field of the view with generated values (from the retired single-file admin script)</comment>
+			<navigateList module="admin" query="qDocumentNumbers" />
+			<listGridNew module="admin" query="qDocumentNumbers" />
+			<testDataEnter />
+			<save />
+			<comment>Generated values again, saved over the first: an update of the saved record</comment>
+			<testDataEnter />
+			<save />
+			<delete />
 		</method>
 	</interaction>
 	<after>

@@ -3,6 +3,7 @@ package sail;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
@@ -15,6 +16,7 @@ import util.sail.PrimeFacesSelenium;
  * It is replaced when a user places the Sail.jar as this jar is before test.jar in the classpath.
  */
 @Disabled("This is replaced")
+@Tag("sail")
 class SailIT extends PrimeFacesSelenium {
 	@BeforeEach
 	void setup() {

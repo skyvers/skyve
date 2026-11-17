@@ -9,6 +9,7 @@ import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SailServerLock;
 import util.sail.SailSettings;
+import util.sail.SailSuite;
 import util.sail.SailViewRoles;
 import util.sail.SailWorkflow;
 
@@ -25,7 +26,8 @@ import util.sail.SailWorkflow;
  * }
  * </pre>
  *
- * A script can also be a {@code <workflow>} that holds the automations itself.
+ * A script can also be a {@code <workflow>} that holds the automations itself, and a {@code <suite>} of independent
+ * workflows runs with {@link #sailSuite(String)}.
  * <p>
  * Unlike the single-renderer test bases, no browser is started before a test: the workflow starts the browser each
  * automation needs. The server lock ({@link SailServerLock}) is taken by the first workflow and held until the class has
@@ -89,6 +91,37 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	 */
 	protected void sailWorkflowString(@Nonnull String... scripts) {
 		workflow.runStrings(scripts);
+	}
+
+	/**
+	 * Runs SAIL script files, in order, as one run; see {@link #sailWorkflow(String...)}.
+	 *
+	 * @param files	the scripts' paths, absolute or relative to the working directory
+	 * @throws AssertionError	naming the automation that failed
+	 */
+	protected void sailWorkflowFile(@Nonnull String... files) {
+		workflow.runFiles(files);
+	}
+
+	/**
+	 * Runs a SAIL {@code <suite>} on the test classpath: its members, each a run of its own, with this test's settings,
+	 * view roles and browsers (see {@link SailSuite}).
+	 *
+	 * @param resourceName	the suite's resource path, e.g. {@code sail/admin/admin.suite.xml}
+	 * @throws AssertionError	with every failed member, after a summary
+	 */
+	protected void sailSuite(@Nonnull String resourceName) {
+		SailSuite.resource(resourceName, workflow).run();
+	}
+
+	/**
+	 * Runs a SAIL {@code <suite>} file; see {@link #sailSuite(String)}.
+	 *
+	 * @param file	the suite's path, absolute or relative to the working directory
+	 * @throws AssertionError	with every failed member, after a summary
+	 */
+	protected void sailSuiteFile(@Nonnull String file) {
+		SailSuite.file(file, workflow).run();
 	}
 
 	@AfterAll

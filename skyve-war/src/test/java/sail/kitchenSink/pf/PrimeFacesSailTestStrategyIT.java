@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractPrimeFacesInterpretedSail;
@@ -24,6 +25,8 @@ import util.sail.SailSuite;
  * headless unless {@code -Dsail.headless=false}. {@code -Dsail.testStrategy} is refused, as it would give every test
  * the same strategy.
  */
+@Tag("sail")
+@Tag("smoke")
 class PrimeFacesSailTestStrategyIT extends AbstractPrimeFacesInterpretedSail {
 	private static final String SCRIPT = """
 			<?xml version="1.0" encoding="UTF-8" standalone="yes"?>

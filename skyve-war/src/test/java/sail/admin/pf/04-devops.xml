@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite: DevOps. Control Panel, Data Maintenance, Document Creator and Monitoring Dashboard, with their
+	Admin suite (admin.suite.xml), PrimeFaces: DevOps. Control Panel, Data Maintenance, Document Creator and Monitoring Dashboard, with their
 	safe actions. The destructive ones run in 98-destructive.xml.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
@@ -80,6 +80,36 @@
 			-->
 			<tabSelect path="Requests" />
 			<testGridRows module="admin" query="RequestListModel" minRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Data Maintenance: save, and the upload backup page">
+		<method>
+			<comment>From the retired single-file admin script, with the values as they are rather than testDataEnter's: generated backup, restore and refresh options would change how the other members' jobs run. 99-restore.xml puts the row back.</comment>
+			<navigateEdit document="DataMaintenance" module="admin" />
+			<tabSelect path="Import/Export" />
+			<tabSelect path="Backup/Restore" />
+			<tabSelect path="Data Refresh" />
+			<save />
+			<tabSelect path="Backup/Restore" />
+			<action name="RefreshBackupList" />
+			<comment>UploadBackup opens the upload page; nothing is uploaded, so 00-backup.xml's backup stays the newest for 99-restore.xml</comment>
+			<action name="UploadBackup" />
+			<tabSelect path="Data Refresh" />
+			<save />
+		</method>
+	</interaction>
+	<interaction name="Document Creator: generated data, and Submit refused without a module">
+		<method>
+			<comment>From the retired single-file admin script: testDataEnter fills the output location (a text), so Submit gets past that check to the module check</comment>
+			<navigateEdit document="DocumentCreator" module="admin" />
+			<testDataEnter />
+			<tabSelect path="Input" />
+			<tabSelect path="Markdown Preview" />
+			<tabSelect path="Document Preview" />
+			<tabSelect path="Help" />
+			<tabSelect path="Input" />
+			<action name="Submit" confirm="true" testSuccess="false" />
+			<testFailure message="a default module is required" />
 		</method>
 	</interaction>
 	<after>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	SmartClient admin suite, restore bracket part 1 (SmartClient only): truncate all the data, keeping the bootstrap user.
-	SmartClientAdminSuiteSailIT runs this last of the suite's files, and 99-restore.xml after it even when this file fails,
-	so a failure after the truncate cannot leave the server without its data.
+	Admin suite (admin.suite.xml), SmartClient only: truncate all the data, keeping the bootstrap user. The suite runs this
+	last of its members, and 99-restore.xml after it even when this member fails, so a failure after the truncate cannot
+	leave the server without its data.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces admin suite, set up after 00-precondition.xml: back up the data before the suite changes it.
+	Admin suite (admin.suite.xml), set-up after 00-precondition.xml: back up the data before the suite changes it.
 	99-restore.xml restores the first backup listed, the newest, which is this one. The suite then leaves the server as it
-	found it (less the completed jobs list, see below) and can be rerun.
+	found it (less the completed jobs list, see below) and can be rerun. 00-marker.xml then leaves a marker the restore
+	must remove.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
-			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../../main/java/schemas/sail.xsd"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
@@ -31,6 +32,7 @@
 			<dataEnter binding="dataSensitivity" value="1" />
 			<testValue binding="dataSensitivity" value="none" />
 			<action name="Backup" />
+			<comment>The job's "Backup Completed" push message, which can arrive at once, is added to this growl, not put in its place</comment>
 			<testMessage contains="Backup Job has been started" type="info" />
 			<comment>The backup is a job: wait for it to finish</comment>
 			<navigateMenu module="admin" item="Jobs" />
@@ -39,16 +41,6 @@
 			<tabSelect path="Backup/Restore" />
 			<action name="RefreshBackupList" />
 			<testGridRows module="admin" query="BackupsModel" minRows="1" timeoutMillis="60000" />
-		</method>
-	</interaction>
-	<interaction name="Leave a marker that the restore must remove">
-		<method>
-			<navigateMenu module="admin" item="Security Admin/Data Groups" />
-			<listGridNew module="admin" document="DataGroup" />
-			<dataEnter binding="name" value="SAIL restore marker" />
-			<save />
-			<ok />
-			<testGridRows module="admin" document="DataGroup" rowContaining="SAIL restore marker" minRows="1" />
 		</method>
 	</interaction>
 	<after>

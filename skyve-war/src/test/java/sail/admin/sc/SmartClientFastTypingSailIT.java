@@ -1,6 +1,7 @@
 package sail.admin.sc;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
@@ -28,6 +29,8 @@ import util.sail.BrowserConfiguration.Browsers;
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
+@Tag("admin")
 class SmartClientFastTypingSailIT extends AbstractSmartClientInterpretedSail {
 
 	private static final String VIEW = "admin.User";
