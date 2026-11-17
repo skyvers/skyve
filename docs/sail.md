@@ -559,8 +559,8 @@ takes). Values are written the same way in both renderers:
   `11:11`; with others, for example `06/05/2026 02:47 PM` (`MM_DD_YYYY_HH_MI`)
   or `Jun-05-2026` (`MMM_DD_YYYY`). A date time or timestamp whose converter
   shows only the date (`*_DateTime`, `*_Timestamp`) is filtered by the whole
-  local day in both renderers: `equals` is that day, `notEquals` any other,
-  `lessThan` before it and `greaterThan` after it. In SmartClient's advanced
+  local day in both renderers: `equals` is that day, `notEquals` any other or
+  none, `lessThan` before it and `greaterThan` after it. In SmartClient's advanced
   filter, `between` is after the start day and before the end day,
   `betweenInclusive` from the start day to the end day, and Match Any and Match
   None (and groups within them) combine these days; export, charts and Tag or
@@ -574,11 +574,12 @@ takes). Values are written the same way in both renderers:
   [Known Limitations](#known-limitations)). In SmartClient's filter row, a
   value the column's converter refuses (`+5`, `1e3`, `$5` in a column that is
   not dollars) shows an error on the cell and the list is not filtered; in its
-  advanced filter, such a value is cleared from the clause, which then does
-  not filter (except a range's start or end whose previous value was 0: it
-  shows 0 again and still filters by 0). `between` is exclusive at both ends
-  and `betweenInclusive` inclusive, as SmartClient defines them, on the server
-  too.
+  advanced filter, such a value is not kept: the clause shows nothing and does
+  not filter, or, for a range's start or end, it can show its previous value
+  again and filter by that. `between` is exclusive at both ends and
+  `betweenInclusive` inclusive, as SmartClient defines them, on the server too.
+  A negation (`notEquals`, not contains, Match None) also lists the rows with
+  no value in the column.
 
 A step whose operator the column cannot take fails and names the operators it
 can take. Filter, clear and sort steps fail if an error message shows
@@ -1336,10 +1337,13 @@ The rules the converters scripts check, and what changed for users:
 - **User-visible changes on the server:** a list's `between` and `iBetween`
   exclude their ends, as SmartClient defines them (`iBetween` included them, and
   `between` was not read); Match None of a range, a blank check or a variant
-  domain's description now matches the rows outside it that have a value (see
-  [Known Limitations](#known-limitations)), and Match None of a description that
-  matches nothing lists every row; a spreadsheet read by a data file import
-  (as above) is read as English text whatever the JVM's locale. The number
+  domain's description now matches the rows outside it, and Match None of a
+  description that matches nothing lists every row; rows with no value now
+  appear under not-equal, not-contains (and not starts or ends with), not-in and
+  Match None filters, as SmartClient's own evaluation and in-memory lists have
+  them, in SmartClient and the Vue list grid alike; a spreadsheet read by a data
+  file import (as above) is read as English text whatever the JVM's locale. The
+  number
   converters (and `DecimalFormatter`, so the number formatters) write and read
   English numbers whatever the JVM's locale. Before, a German JVM showed
   `1.234,50` and read `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the
@@ -1841,13 +1845,6 @@ test:
 - **Inline cells in PF** are addressed by `dataEnter`, `testValue` and the
   lookup steps; `testWidget` and `captureValue` keep the row but address the
   view's widget.
-- **Negations and rows with no value.** A negation on the server leaves out rows
-  whose column has no value: `notEquals`, and every clause under Match None (a
-  range's outside, a variant domain's description, `not in`), as SQL compares
-  nulls. SmartClient's advanced filter matches them when it filters on the
-  client (a cached list), and so does an in-memory list model; the Vue list
-  grid's `notEquals` does not. The converters scripts give every number column
-  a value in every record, so their counts do not depend on it.
 - **A variant domain's description filter takes at most 100 matching codes.**
   With more matching descriptions, a filter misses the rest, and a negated one
   (Match None, `notEquals`, Not Contains) lets the rest through.
