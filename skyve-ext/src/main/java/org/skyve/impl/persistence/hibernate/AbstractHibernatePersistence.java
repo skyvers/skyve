@@ -2,6 +2,7 @@ package org.skyve.impl.persistence.hibernate;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -199,6 +200,13 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 	private static final String TYPE_COLUMN_SUFFIX = "_type";
 	private static final String VALUES_SQL = ") values (:";
 	private static final String WHERE_SQL = " where ";
+
+	/**
+	 * SQL Server's driver-specific SNAPSHOT isolation level.
+	 */
+	static final int SQL_SERVER_TRANSACTION_SNAPSHOT = Connection.TRANSACTION_READ_COMMITTED + 4094;
+
+	private static final String ISOLATION_UNKNOWN = "Could not read the data store's transaction isolation level, which Skyve needs to be READ COMMITTED: {}";
 
     /**
      * Shared Hibernate session factory for all persistence instances.
@@ -498,6 +506,75 @@ public abstract class AbstractHibernatePersistence extends AbstractPersistence {
 				LOGGER.error("Could not apply skyve extra schema updates", e);
 			}
 		}
+
+		warnUnlessReadCommitted();
+	}
+
+	/**
+	 * Logs a warning at startup when the data store's connections do not use READ COMMITTED.
+	 *
+	 * <p>Side effects: opens a session on the new session factory and reads one pooled connection's
+	 * isolation level; a failure to get a connection is logged, not thrown, so it never stops start-up.
+	 */
+	private static void warnUnlessReadCommitted() {
+		try (Session session = sf.openSession()) {
+			session.doWork(AbstractHibernatePersistence::warnUnlessReadCommitted);
+		}
+		catch (HibernateException e) {
+			LOGGER.warn(ISOLATION_UNKNOWN, e.getLocalizedMessage());
+		}
+	}
+
+	/**
+	 * Logs a warning when {@code connection}'s isolation level is not READ COMMITTED.
+	 *
+	 * <p>Side effects: reads the connection's isolation level; logs the warning, or that the level
+	 * could not be read, at WARN.
+	 *
+	 * @param connection the connection to check
+	 * @return the warning logged, or {@code null} at READ COMMITTED or if the level could not be read
+	 */
+	static @Nullable String warnUnlessReadCommitted(@Nonnull Connection connection) {
+		try {
+			String result = isolationWarning(connection.getTransactionIsolation());
+			if (result != null) {
+				LOGGER.warn(result);
+			}
+			return result;
+		}
+		catch (SQLException e) {
+			LOGGER.warn(ISOLATION_UNKNOWN, e.getLocalizedMessage());
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the warning for a connection isolation level other than READ COMMITTED.
+	 *
+	 * <p>Skyve's unique constraint checks (and so document number generation) wait for a
+	 * concurrent transaction's commit and then read committed data; they are correct only at
+	 * READ COMMITTED.
+	 *
+	 * @param isolation a {@link Connection} {@code TRANSACTION_*} level, or SQL Server's SNAPSHOT (4096)
+	 * @return the warning naming the level and how to set READ COMMITTED, or {@code null} for READ COMMITTED
+	 */
+	static @Nullable String isolationWarning(int isolation) {
+		if (isolation == Connection.TRANSACTION_READ_COMMITTED) {
+			return null;
+		}
+		String level = switch (isolation) {
+			case Connection.TRANSACTION_NONE -> "NONE";
+			case Connection.TRANSACTION_READ_UNCOMMITTED -> "READ UNCOMMITTED";
+			case Connection.TRANSACTION_REPEATABLE_READ -> "REPEATABLE READ";
+			case Connection.TRANSACTION_SERIALIZABLE -> "SERIALIZABLE";
+			case SQL_SERVER_TRANSACTION_SNAPSHOT -> "SNAPSHOT";
+			default -> "level " + isolation;
+		};
+		return "The data store's transaction isolation level is " + level + ", not READ COMMITTED. " +
+				"At this level Skyve's unique constraints and document numbers are not enforced between concurrent transactions: " +
+				"concurrent saves can store duplicate values and take duplicate document numbers. " +
+				"Set READ COMMITTED on the datasource, for example <transaction-isolation>TRANSACTION_READ_COMMITTED</transaction-isolation> " +
+				"in a WildFly datasource (as skyve-war/config/skyve-mysql-ds.xml does), and do not use SQLServer2016HibernateContentPersistence.";
 	}
 
 	/**
