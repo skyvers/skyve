@@ -3,6 +3,7 @@ package org.skyve.impl.sail.execution.pf;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -191,9 +192,9 @@ public class PrimeFacesAutomationContext extends AutomationContext<PrimeFacesGen
 
 		int lastColonIndex = id.lastIndexOf(':');
 		if (lastColonIndex > -1) {
-			id = String.format("%s:%d%s", id.substring(0, lastColonIndex), row, id.substring(lastColonIndex));
+			id = String.format(Locale.ENGLISH, "%s:%d%s", id.substring(0, lastColonIndex), row, id.substring(lastColonIndex)); // ASCII digits
 		} else {
-			id = String.format("%s:%d", id, row);
+			id = String.format(Locale.ENGLISH, "%s:%d", id, row);
 		}
 		
 		return id;

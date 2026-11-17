@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -5422,7 +5423,8 @@ public abstract class TabularComponentBuilder extends ComponentBuilder {
 		// Request a thumbnail sized to the box, rounded up so few sizes are cached per image
 		String contentUrl = contentUrlExpression(dataWidgetVar, binding, true);
 		int previewSize = contentPreviewSize(pixelWidth, pixelHeight);
-		expression = String.format("#{(empty %s) ? %s : %s.concat('&_w=%d&_h=%d')}",
+		expression = String.format(Locale.ENGLISH, // ASCII digits in the URL whatever the JVM's locale
+									"#{(empty %s) ? %s : %s.concat('&_w=%d&_h=%d')}",
 									contentValueExpression(dataWidgetVar, binding),
 									contentUrl,
 									contentUrl,

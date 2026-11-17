@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.actions;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.primefaces.model.charts.ChartData;
 import org.primefaces.model.charts.ChartModel;
@@ -281,13 +282,15 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param colour the color to convert
 	 * @return the CSS color string, or {@code null} when the color is {@code null}
 	 */
-	private static @Nullable String web(@Nullable Color colour) {
+	static @Nullable String web(@Nullable Color colour) {
 		if (colour == null) {
 			return null;
 		}
 		int alpha = colour.getAlpha();
 		if (alpha > 0) {
-			return String.format("rgba(%d,%d,%d,%.2f)",
+			// CSS: English digits and decimal point whatever the JVM's locale (a German JVM writes 0,50)
+			return String.format(Locale.ENGLISH,
+									"rgba(%d,%d,%d,%.2f)",
 									Integer.valueOf(colour.getRed()),
 									Integer.valueOf(colour.getGreen()),
 									Integer.valueOf(colour.getBlue()),

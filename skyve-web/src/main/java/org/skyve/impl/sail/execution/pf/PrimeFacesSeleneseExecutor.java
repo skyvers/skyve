@@ -1,6 +1,7 @@
 package org.skyve.impl.sail.execution.pf;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.primefaces.component.colorpicker.ColorPicker;
 import org.primefaces.component.datepicker.DatePicker;
@@ -732,7 +733,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 				// Wait for pick list drop down
 				command("waitForVisible", String.format("//div[@id='%s_panel']", clientId));
 				// Select the row
-				command("click", String.format("//div[@id='%s_panel']/ul/li[%d]", clientId, Integer.valueOf(row.intValue() + 1)));
+				command("click", String.format(Locale.ENGLISH, "//div[@id='%s_panel']/ul/li[%d]", clientId, Integer.valueOf(row.intValue() + 1)));
 			}
 			else {
 				if (search == null) { // auto complete always has a search
@@ -926,7 +927,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 						command("if", "${disabled} == false");
 						// All good, continue with the button click
 						if (step instanceof DataGridSelect) {
-							command("clickAndWait", String.format("//*[@id='%s']//tr[%d]/td", dataGridClientId, row));
+							command("clickAndWait", String.format(Locale.ENGLISH, "//*[@id='%s']//tr[%d]/td", dataGridClientId, row));
 							command("waitForNotVisible", "busy");
 						}
 						else if (step instanceof DataGridRemove) {
@@ -1072,7 +1073,7 @@ public class PrimeFacesSeleneseExecutor extends SeleneseExecutor<PrimeFacesAutom
 						command("if", "${disabled} == false");
 						// All good, continue with the button click
 						if (step instanceof ListGridSelect) {
-							command("clickAndWait", String.format("//tr[%d]/td", row)); // ClientIdCollector.clientId(component, select.getRow()));
+							command("clickAndWait", String.format(Locale.ENGLISH, "//tr[%d]/td", row)); // ClientIdCollector.clientId(component, select.getRow()));
 						}
 						else {
 							command("clickAndWait", buttonClientId);
