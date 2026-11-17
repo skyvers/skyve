@@ -16,22 +16,79 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.repository.ProvidedRepository;
 
-import customers.acme.modules.beanclassfixture.domain.InvoiceOverride;
-import customers.acme.modules.beanclassfixture.domain.OrderOverride;
-import modules.beanclassfixture.Invoice.InvoiceExtension;
-import modules.beanclassfixture.domain.Item;
-import modules.beanclassfixture.domain.OrderVanilla;
-import modules.beanclassfixture.domain.ReceiptVanilla;
-
 /**
  * Tests how {@link DocumentImpl#getBeanClass(Customer)} chooses between the generated domain classes,
  * the generated <code>&lt;Document&gt;Vanilla</code> and <code>&lt;Document&gt;Override</code> classes and
- * hand-written <code>&lt;Document&gt;Extension</code> classes, using the fixture classes in the
- * <code>modules.beanclassfixture</code> and <code>customers.acme.modules.beanclassfixture</code> packages.
+ * hand-written <code>&lt;Document&gt;Extension</code> classes. A context class loader serves the nested
+ * fixture classes under the names Skyve looks up, so no fixture packages sit on the test class path
+ * (a <code>customers</code> package there would look like a customer to the repository tests).
  */
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "unused"})
 class DocumentImplBeanClassTest {
 	private static final String MODULE = "beanclassfixture";
+
+	/** A concrete generated domain class. */
+	public static class Item {
+		// fixture
+	}
+
+	/** A generated domain class made abstract by a customer override that leaves out an attribute. */
+	public abstract static class Order {
+		// fixture
+	}
+
+	/** The concrete vanilla class generated for the narrowed Order. */
+	public static class OrderVanilla extends Order {
+		// fixture
+	}
+
+	/** The class generated for customer acme's override of Order. */
+	public static class OrderOverride extends Order {
+		// fixture
+	}
+
+	/** A generated domain class, abstract because it has a hand-written extension. */
+	public abstract static class Invoice {
+		// fixture
+	}
+
+	/** A hand-written extension. */
+	public static class InvoiceExtension extends Invoice {
+		// fixture
+	}
+
+	/** The class generated for customer acme's override of Invoice, which extends the hand-written extension. */
+	public static class InvoiceOverride extends InvoiceExtension {
+		// fixture
+	}
+
+	/** A generated domain class with a hand-written extension, narrowed by a customer override. */
+	public abstract static class Receipt {
+		// fixture
+	}
+
+	/** A hand-written extension of a narrowed document. */
+	public static class ReceiptExtension extends Receipt {
+		// fixture
+	}
+
+	/** The concrete vanilla class generated for the narrowed Receipt, which carries the narrowed-away properties. */
+	public static class ReceiptVanilla extends ReceiptExtension {
+		// fixture
+	}
+
+	/** The fixture classes by the names Skyve looks them up by. */
+	private static final Map<String, Class<?>> CLASSES = Map.ofEntries(
+			Map.entry("modules.beanclassfixture.domain.Item", Item.class),
+			Map.entry("modules.beanclassfixture.domain.Order", Order.class),
+			Map.entry("modules.beanclassfixture.domain.OrderVanilla", OrderVanilla.class),
+			Map.entry("customers.acme.modules.beanclassfixture.domain.OrderOverride", OrderOverride.class),
+			Map.entry("modules.beanclassfixture.domain.Invoice", Invoice.class),
+			Map.entry("modules.beanclassfixture.Invoice.InvoiceExtension", InvoiceExtension.class),
+			Map.entry("customers.acme.modules.beanclassfixture.domain.InvoiceOverride", InvoiceOverride.class),
+			Map.entry("modules.beanclassfixture.domain.Receipt", Receipt.class),
+			Map.entry("modules.beanclassfixture.Receipt.ReceiptExtension", ReceiptExtension.class),
+			Map.entry("modules.beanclassfixture.domain.ReceiptVanilla", ReceiptVanilla.class));
 
 	/** The documents each customer overrides - acme has generated override classes, beta none. */
 	private static final Map<String, Set<String>> OVERRIDES = Map.of("acme", Set.of("Item", "Order", "Invoice"),
@@ -41,6 +98,7 @@ class DocumentImplBeanClassTest {
 	private static final Set<String> EXTENDED = Set.of("Invoice", "Receipt");
 
 	private ProvidedRepository previousRepository;
+	private ClassLoader previousClassLoader;
 
 	@BeforeEach
 	void installRepository() {
@@ -57,10 +115,26 @@ class DocumentImplBeanClassTest {
 			return OVERRIDES.getOrDefault(customerName, Set.of()).contains(documentName) ? "customers/" + customerName + '/' + key : key;
 		});
 		ProvidedRepositoryFactory.set(repository);
+
+		previousClassLoader = Thread.currentThread().getContextClassLoader();
+		Thread.currentThread().setContextClassLoader(new ClassLoader(previousClassLoader) {
+			@Override
+			public Class<?> loadClass(String name) throws ClassNotFoundException {
+				Class<?> result = CLASSES.get(name);
+				if (result != null) {
+					return result;
+				}
+				if (name.startsWith("modules.") || name.startsWith("customers.")) {
+					throw new ClassNotFoundException(name);
+				}
+				return super.loadClass(name);
+			}
+		});
 	}
 
 	@AfterEach
 	void restoreRepository() {
+		Thread.currentThread().setContextClassLoader(previousClassLoader);
 		ProvidedRepositoryFactory.set(previousRepository);
 	}
 
