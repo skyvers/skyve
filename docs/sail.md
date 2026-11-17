@@ -171,11 +171,13 @@ A suite file lists the scripts to run:
 
   Paste each recording's `<automation>` element, with its contents, in place
   of one of these, and make the workflow file a member of the suite.
-- If a member only makes sense when another has passed, for example a check
-  that is pointless when the member before it already failed, say so with
-  `requires`, naming an earlier member's `file`:
-  `<member file="recordings/data-groups.xml" requires="recordings/contacts.xml"/>`.
+- Only where one member really needs another to have passed, say so with
+  `requires`, naming an earlier member's `file`. For example, a member that
+  signs in as a user whom an earlier member creates with a fixed name (no
+  `{run}`):
+  `<member file="recordings/clerk-work.xml" requires="recordings/make-clerk.xml"/>`.
   If the required member fails, this one is skipped, and the summary says why.
+  Most members need no `requires`.
 - A recording's header comment lists the recording user's roles as
   `viewRoles("clerk", "admin.BasicUser", ...)`. If that user is not an
   administrator, copy the roles into the suite, before the members:
@@ -238,16 +240,26 @@ sail.run=/Users/you/sail-tests/contacts.suite.xml
 sail.evidence=all
 ```
 
+Once, make the file readable only by you:
+
 ```bash
 chmod 600 ~/sail-tests/sail.properties
-export SAIL_PROPERTIES=$HOME/sail-tests/sail.properties
 ```
 
-Give the password without leaving it in your shell's history: `read` asks for
-it without showing it.
+In each new terminal, first name the file and give the password. `read` asks
+for the password without showing it, so it is not left in your shell's
+history. In zsh (the macOS default):
 
 ```bash
-read -rs SAIL_VAR_PASSWORD; export SAIL_VAR_PASSWORD
+export SAIL_PROPERTIES=$HOME/sail-tests/sail.properties
+read -rs '?Password: ' SAIL_VAR_PASSWORD; export SAIL_VAR_PASSWORD
+```
+
+or in bash:
+
+```bash
+export SAIL_PROPERTIES=$HOME/sail-tests/sail.properties
+read -rsp 'Password: ' SAIL_VAR_PASSWORD; export SAIL_VAR_PASSWORD
 ```
 
 The command is then always the same:
@@ -428,7 +440,7 @@ name in upper snake case ([Settings](#settings)):
 | Variable | For |
 |---|---|
 | `SAIL_BASE_URL` | The disposable server, for example `http://localhost:8180/skyve/`. Required. |
-| `SAIL_VAR_PASSWORD` | `{var:password}` in an application's own scripts; `SAIL_VAR_<NAME>` for any other variable. Skyve's own scripts sign in as `admin`/`admin`, and only `kitchensink-workflow.xml` uses `{var:password}`, which `KitchenSinkSuiteSailIT` supplies as `admin`: set it only for a server whose admin password differs. |
+| `SAIL_VAR_PASSWORD` | `{var:password}` in an application's own scripts; `SAIL_VAR_<NAME>` for any other variable. In Skyve's own tests, `{var:password}` is used only by `kitchensink-workflow.xml` (supplied by `KitchenSinkSuiteSailIT` and `KitchenSinkLoadSailIT`) and by the recorder round trips' recordings (supplied by `PrimeFacesRecorderRoundTripSailIT` and `SmartClientRecorderRoundTripSailIT`), all in code as `admin`. The other shipped scripts hard-code `admin`/`admin`, so Skyve's own tiers need a server whose admin password is `admin`. |
 | `SAIL_EVIDENCE`, `SAIL_KEEP_MEDIA` | What evidence to keep |
 | `SAIL_TIMEOUT_SECONDS` | The limit for each wait |
 | `SAIL_LOAD_USERS`, `SAIL_LOAD_DURATION`, ... | A load run's shape and thresholds ([Load Testing](#load-testing)) |
@@ -522,8 +534,9 @@ exit "$status"
 ```
 
 A pull request job in GitHub Actions. `TEST_SERVER_PASSWORD` is a placeholder
-for a secret you define, needed only when the test server's admin password is
-not `admin`:
+for a secret you define, for an application's own scripts that sign in with
+`{var:password}`; Skyve's own tiers need a server whose admin password is
+`admin`, as the shipped scripts hard-code it:
 
 ```yaml
 # Example: SAIL smoke tier on each pull request.
@@ -2388,12 +2401,12 @@ that show it, relative to the repository root:
 | Mechanism | Shown in |
 |---|---|
 | Every element and attribute of `sail.xsd`, or the reason one is unused | `skyve-war/src/test/java/sail/SailLanguageCoverageTest.java` (its allow-list, 33 entries, each with its reason) |
-| Op-codes: [Session](#session) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml` and `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: interactions "Login", "Switch mode" and "Logout" |
-| Op-codes: [Navigation](#navigation) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Windows, back and refresh", "Menus"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Windows, back, refresh and list grid tools", "A tree and a calendar", "Menus" |
+| Op-codes: [Session](#session) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Login", "Switch mode" and "Logout"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Login" (with `switchMode`) and "Logout" |
+| Op-codes: [Navigation](#navigation) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Windows, back and refresh", "Menus", "Contexts, links, maps and scripts" (`navigateMap`); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Windows, back, refresh and list grid tools", "A tree and a calendar", "Menus" |
 | Op-codes: [Contexts](#contexts-1) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Links: a link in page markup, and tokens in href and bizId" |
-| Op-codes: [Data entry](#data-entry) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Kitchen Sink: every widget", "Actions Fixture: actions, buttons and change events" (uploads); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Widgets", "Lookup descriptions"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Lookup description rows by their text" |
-| Op-codes: [Actions](#actions) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Actions Fixture: actions, buttons and change events"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml` and `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Ordered grid: drag rows into a new order, and keep it once saved" |
-| Op-codes: [Grids](#grids) | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Data grids", "Ordered inline grid and ordered list membership: keep their order once saved"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Ordered grid: drag rows into a new order, and keep it once saved"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-row-link.xml` (`dataGridLink`) |
+| Op-codes: [Data entry](#data-entry) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Kitchen Sink: every widget", "Kitchen Sink: generated test data" (`testDataEnter`), "Actions Fixture: actions, buttons and change events" (uploads); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Widgets", "Test data entry", "Lookup descriptions"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Lookup description rows by their text" |
+| Op-codes: [Actions](#actions) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Actions Fixture: actions, buttons and change events", "Kitchen Sink: every widget" (`cancel`, `remove`), "Escaping Fixture: zoom in" (`zoomIn`); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Zoom in"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml` and `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Ordered grid: drag rows into a new order, and keep it once saved" |
+| Op-codes: [Grids](#grids) | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Data grids", "Ordered inline grid and ordered list membership: keep their order once saved", "List grids in a view" (`listGridSelect`), "Windows, back, refresh and list grid tools" (`listGridTool`); `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Ordered grid: drag rows into a new order, and keep it once saved"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-row-link.xml` (`dataGridLink`) |
 | Op-codes: [Filtering lists](#filtering-lists) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "List Grid Fixture: filters on each column type", "List Grid Fixture: filters and sorts in a Vue list grid and a PrimeFaces data table"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "List filters and sorting"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "List grids in a view" |
 | Op-codes: [Assertions](#assertions) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Actions Fixture: actions, buttons and change events", "Menus"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Lookup values to pick" |
 | Op-codes: [Other steps](#other-steps) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts" (`execute`, `pause`), "Lookup values: generated numbers, filters and sorts" (captures); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Actions Fixture: a refused upload, a link in a row, a cell and the title" |
@@ -2767,11 +2780,11 @@ A recording replays as downloaded, but it is a first draft. It runs with no
 Java through `SailRunIT`, alone or as a member of a suite file
 ([For BAs and testers](#for-bas-and-testers)). To commit it as a test:
 
-1. Save it: a BA or tester in a folder of their own, and adds it to a suite
-   file ([For BAs and testers](#for-bas-and-testers)); a developer with the
-   other scripts ([Where scripts go](#where-scripts-go)), in a suite file or
-   with its own test on the base for its `uxui`: SmartClient for `desktop`,
-   otherwise PrimeFaces with that device.
+1. Save it. A BA or tester keeps it in a folder of their own and adds it to a
+   suite file ([For BAs and testers](#for-bas-and-testers)); a developer
+   saves it with the other scripts ([Where scripts go](#where-scripts-go)),
+   and adds it to a suite file or writes its test with the base for its
+   `uxui`: SmartClient for `desktop`, otherwise PrimeFaces with that device.
 2. Register the header's view roles: paste its `viewRoles(...)` line into the
    test, or write it as a `<viewRoles>` element of the suite. Supply the
    password from the run (`sail.var.password`), or with
