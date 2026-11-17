@@ -4900,8 +4900,9 @@ isc.SimpleType.create({
 /**
  * A number typed into a list grid's filter row that the Java converter would refuse (+5, $5 in a column that is not
  * dollars, 1e3, 1,000% for a whole percentage) is not dropped from the filter: the item keeps the text and remembers
- * it (_refusedText), and the grid shows an error and does not filter (see BizListGrid's filterEditorSubmit). Forms
- * are unchanged: a refused number there leaves the field empty.
+ * it (_refusedText), and the grid shows an error and does not filter (see BizListGrid's filterEditorSubmit). Elsewhere
+ * (forms, and the advanced filter's clauses, which would drop the clause while showing the text) a refused number
+ * leaves the field empty, as it is filtered.
  */
 [
 	"BizDecimal2Item",
@@ -4920,8 +4921,10 @@ isc.SimpleType.create({
 		mapDisplayToValue: function (value) {
 			const result = mapDisplayToValue.call(this, value);
 			const typed = value == null ? "" : String(value).trim();
-			this._refusedText =
-				this.form && this.form.isSearchForm && typed !== "" && !isc.isA.Number(result) ? typed : null;
+			// only in a list grid's filter row (a RecordEditor), which checks before it filters
+			const grid = this.grid || (this.form && this.form.grid);
+			const filterRow = !!grid && isc.isA.Function(grid.isAFilterEditor) && grid.isAFilterEditor();
+			this._refusedText = filterRow && typed !== "" && !isc.isA.Number(result) ? typed : null;
 			// no value (an empty string, not null, which would clear the item and its text)
 			return this._refusedText ? "" : result;
 		},
