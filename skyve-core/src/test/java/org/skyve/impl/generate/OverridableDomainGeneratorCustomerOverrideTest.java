@@ -54,13 +54,9 @@ import org.w3c.dom.NodeList;
  * subclass mapping is nested in or extends a class mapping, no entity name is defined twice and
  * every referenced entity name is defined.
  * <p/>
- * The disabled hierarchy tests reproduce bug 2: the customer mapping of an override inside a single or
- * joined hierarchy emits a top-level subclass mapping without <code>extends</code>, emits the subclass
- * twice when the base is overridden too, nests vanilla subclasses under a customer base class they do
- * not extend (mapped to customer classes that are never generated), and overriding a mapped base fails
- * generation outright. Fixing it needs a decision on how a customer hierarchy relates to the vanilla
- * one, because a generated customer subclass cannot extend both the vanilla subclass and the customer
- * base class.
+ * In an inheritance hierarchy the customer mapping copies the whole hierarchy from its top. Only a
+ * leaf can get its own customer class, as a generated subclass cannot extend both the vanilla class
+ * and a customer class of its base, so the generator refuses the cases that would need one.
  */
 @SuppressWarnings("static-method")
 class OverridableDomainGeneratorCustomerOverrideTest {
@@ -136,6 +132,35 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		return result;
 	}
 
+	/**
+	 * The sales module for the customer, or the vanilla one for null: it lists the vanilla documents and
+	 * the customer's new ones, and resolves a customer's document to its override.
+	 */
+	private static Module module(Fixture fixture, String customerName) {
+		Map<String, Module.DocumentRef> refs = new TreeMap<>();
+		Set<String> documentNames = new TreeSet<>(fixture.vanilla.keySet());
+		if (customerName != null) {
+			documentNames.addAll(fixture.overrides.get(customerName).keySet());
+		}
+		for (String documentName : documentNames) {
+			Module.DocumentRef ref = new Module.DocumentRef();
+			ref.setOwningModuleName(MODULE);
+			refs.put(documentName, ref);
+		}
+		Module result = mock(Module.class);
+		when(result.getName()).thenReturn(MODULE);
+		when(result.getDocumentRefs()).thenReturn(refs);
+		when(result.getDocument(any(), anyString())).thenAnswer(invocation -> {
+			Customer customer = invocation.getArgument(0);
+			String documentName = invocation.getArgument(1);
+			if ((customer != null) && fixture.overrides(customer.getName(), documentName)) {
+				return fixture.overrides.get(customer.getName()).get(documentName);
+			}
+			return fixture.vanilla.get(documentName);
+		});
+		return result;
+	}
+
 	/** Runs the generator over the fixture into {@code root/src}, returning the generated files by relative path. */
 	private static Map<String, String> generate(Fixture fixture) throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-override");
@@ -153,27 +178,20 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		beta.setName("beta");
 		beta.getModuleEntries().put(MODULE, null);
 
-		Map<String, Module.DocumentRef> refs = new TreeMap<>();
-		for (String documentName : fixture.vanilla.keySet()) {
-			Module.DocumentRef ref = new Module.DocumentRef();
-			ref.setOwningModuleName(MODULE);
-			refs.put(documentName, ref);
-		}
-		Module module = mock(Module.class);
-		when(module.getName()).thenReturn(MODULE);
-		when(module.getDocumentRefs()).thenReturn(refs);
-		when(module.getDocument(any(), anyString())).thenAnswer(invocation -> {
-			Customer customer = invocation.getArgument(0);
-			String documentName = invocation.getArgument(1);
-			if ((customer != null) && fixture.overrides(customer.getName(), documentName)) {
-				return fixture.overrides.get(customer.getName()).get(documentName);
-			}
-			return fixture.vanilla.get(documentName);
-		});
+		Module module = module(fixture, null);
+		Module acmeModule = module(fixture, "acme");
+		Module betaModule = module(fixture, "beta");
 
 		ProvidedRepository repo = mock(ProvidedRepository.class);
 		when(repo.getAllVanillaModuleNames()).thenReturn(List.of(MODULE));
-		when(repo.getModule(any(), anyString())).thenReturn(module);
+		when(repo.getModule(any(), anyString())).thenAnswer(invocation -> {
+			Customer customer = invocation.getArgument(0);
+			if (customer == null) {
+				return module;
+			}
+			return "acme".equals(customer.getName()) ? acmeModule : betaModule;
+		});
+
 		when(repo.getAllCustomerNames()).thenReturn(List.of("acme", "beta"));
 		when(repo.getCustomer("acme")).thenReturn(acme);
 		when(repo.getCustomer("beta")).thenReturn(beta);
@@ -509,8 +527,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	/**
 	 * Vanilla Base and Sub extends Base for the strategy. A mapped Base has no table; its Sub is then the
 	 * root of its own (joined) hierarchy. The joined Sub has its own table, the single Sub shares Base's.
+	 * acme's override of Base adds baseNotes when {@code changeBase}, and its override of Sub adds subNotes.
 	 */
-	private static Fixture hierarchy(ExtensionStrategy strategy, boolean overrideBase, boolean overrideSub) {
+	private static Fixture hierarchy(ExtensionStrategy strategy, boolean overrideBase, boolean changeBase, boolean overrideSub) {
 		boolean mapped = ExtensionStrategy.mapped.equals(strategy);
 		String baseTable = mapped ? null : "SALES_Base";
 		ExtensionStrategy subStrategy = mapped ? ExtensionStrategy.joined : strategy;
@@ -519,7 +538,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				.vanilla(document("Base", baseTable, strategy, null, "code"))
 				.vanilla(document("Sub", subTable, subStrategy, "Base", "sub"));
 		if (overrideBase) {
-			result.acme(document("Base", baseTable, strategy, null, "code", "baseNotes"));
+			result.acme(changeBase ?
+							document("Base", baseTable, strategy, null, "code", "baseNotes") :
+							document("Base", baseTable, strategy, null, "code"));
 		}
 		if (overrideSub) {
 			result.acme(document("Sub", subTable, subStrategy, "Base", "sub", "subNotes"));
@@ -527,70 +548,142 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		return result;
 	}
 
-	private static void assertConsistentMappings(Fixture fixture) throws Exception {
+	private static Map<String, String> assertConsistentMappings(Fixture fixture) throws Exception {
 		Map<String, String> files = generate(fixture);
 		assertEquals(List.of(), mappingProblems(files), String.valueOf(files.get("customers/acme/modules/orm.hbm.xml")));
+		return files;
+	}
+
+	/**
+	 * Asserts that overriding a subclass copies the hierarchy into acme's mapping from its top, with the
+	 * subclass's override class nested in the vanilla base class's mapping.
+	 */
+	private static void assertSubclassOverrideMapped(ExtensionStrategy strategy) throws Exception {
+		Map<String, String> files = assertConsistentMappings(hierarchy(strategy, false, false, true));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		String subOverride = files.get("customers/acme/modules/sales/domain/SubOverride.java");
+		assertAll(
+				() -> assertTrue(subOverride.contains("public class SubOverride extends Sub"), subOverride),
+				() -> assertTrue(acmeMapping.contains("name=\"customers.acme.modules.sales.domain.SubOverride\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("entity-name=\"acmesalesSub\""), acmeMapping),
+				() -> assertTrue(ExtensionStrategy.mapped.equals(strategy) ||
+									acmeMapping.contains("<class name=\"modules.sales.domain.Base\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("name=\"subNotes\""), acmeMapping));
+	}
+
+	private static void assertRefused(Fixture fixture, String... messageParts) {
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		for (String part : messageParts) {
+			assertTrue(e.getMessage().contains(part), e.getMessage());
+		}
 	}
 
 	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
 	void overridingAJoinedSubclassGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.joined, false, true));
+		assertSubclassOverrideMapped(ExtensionStrategy.joined);
 	}
 
 	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void overridingAJoinedBaseGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.joined, true, false));
-	}
-
-	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void overridingAJoinedBaseAndSubclassGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.joined, true, true));
-	}
-
-	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
 	void overridingASingleSubclassGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.single, false, true));
-	}
-
-	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void overridingASingleBaseGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.single, true, false));
-	}
-
-	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void overridingASingleBaseAndSubclassGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.single, true, true));
-	}
-
-	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void narrowingAJoinedBaseGivesConsistentVanillaMappings() throws Exception {
-		assertConsistentMappings(new Fixture()
-				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code", "description"))
-				.vanilla(document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub"))
-				.acme(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code")));
+		assertSubclassOverrideMapped(ExtensionStrategy.single);
 	}
 
 	@Test
 	void overridingAMappedSubclassGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.mapped, false, true));
+		assertSubclassOverrideMapped(ExtensionStrategy.mapped);
 	}
 
 	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void overridingAMappedBaseGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.mapped, true, false));
+	void overridingAJoinedBaseWithoutChangesGivesConsistentMappings() throws Exception {
+		Map<String, String> files = assertConsistentMappings(hierarchy(ExtensionStrategy.joined, true, false, false));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(acmeMapping.contains("<class name=\"modules.sales.domain.Base\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("<joined-subclass name=\"modules.sales.domain.Sub\""), acmeMapping));
 	}
 
 	@Test
-	@Disabled("Bug 2: customer overrides in a single or joined hierarchy - awaiting a design decision, see the class javadoc")
-	void overridingAMappedBaseAndSubclassGivesConsistentMappings() throws Exception {
-		assertConsistentMappings(hierarchy(ExtensionStrategy.mapped, true, true));
+	void overridingASingleBaseWithoutChangesGivesConsistentMappings() throws Exception {
+		assertConsistentMappings(hierarchy(ExtensionStrategy.single, true, false, false));
+	}
+
+	@Test
+	void overridingAMappedBaseWithoutChangesGivesConsistentMappings() throws Exception {
+		Map<String, String> files = assertConsistentMappings(hierarchy(ExtensionStrategy.mapped, true, false, false));
+		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("<class name=\"modules.sales.domain.Sub\""));
+	}
+
+	@Test
+	void overridingAJoinedBaseAndSubclassWithoutChangingTheBaseGivesConsistentMappings() throws Exception {
+		assertConsistentMappings(hierarchy(ExtensionStrategy.joined, true, false, true));
+	}
+
+	@Test
+	void overridingAJoinedBaseThatAddsPropertiesIsRefused() {
+		assertRefused(hierarchy(ExtensionStrategy.joined, true, true, false), "Customer acme overrides document sales.Base, which other documents extend");
+	}
+
+	@Test
+	void overridingAJoinedBaseAndSubclassThatAddsPropertiesIsRefused() {
+		assertRefused(hierarchy(ExtensionStrategy.joined, true, true, true), "Customer acme overrides document sales.Base", "Add the properties to the vanilla document");
+	}
+
+	@Test
+	void overridingASingleBaseThatAddsPropertiesIsRefused() {
+		assertRefused(hierarchy(ExtensionStrategy.single, true, true, false), "Customer acme overrides document sales.Base, which other documents extend");
+	}
+
+	@Test
+	void overridingASingleBaseAndSubclassThatAddsPropertiesIsRefused() {
+		assertRefused(hierarchy(ExtensionStrategy.single, true, true, true), "Customer acme overrides document sales.Base");
+	}
+
+	@Test
+	void overridingAMappedBaseThatAddsPropertiesIsRefused() {
+		assertRefused(hierarchy(ExtensionStrategy.mapped, true, true, false), "Customer acme overrides document sales.Base, which other documents extend");
+	}
+
+	@Test
+	void overridingAMappedBaseAndSubclassThatAddsPropertiesIsRefused() {
+		assertRefused(hierarchy(ExtensionStrategy.mapped, true, true, true), "Customer acme overrides document sales.Base");
+	}
+
+	@Test
+	void narrowingAJoinedBaseIsRefused() {
+		assertRefused(new Fixture()
+				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code", "description"))
+				.vanilla(document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub"))
+				.acme(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code")),
+				"Customer acme's override of document sales.Base leaves out description, but other documents extend Base",
+				"Keep description in the override");
+	}
+
+	@Test
+	void narrowingAJoinedSubclassGivesConsistentMappings() throws Exception {
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code"))
+				.vanilla(document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub", "description"))
+				.acme(document("Sub", "SALES_Sub", ExtensionStrategy.joined, "Base", "sub")));
+		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(vanillaMapping.contains("<joined-subclass name=\"modules.sales.domain.SubVanilla\""), vanillaMapping),
+				() -> assertTrue(acmeMapping.contains("<joined-subclass name=\"customers.acme.modules.sales.domain.SubOverride\""), acmeMapping));
+	}
+
+	@Test
+	void aNewCustomerDocumentExtendingAJoinedDocumentIsRefused() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Base", "SALES_Base", ExtensionStrategy.joined, null, "code"))
+				.acme(document("Extra", "SALES_Extra", ExtensionStrategy.joined, "Base", "extra"));
+		assertRefused(fixture, "Customer acme document sales.Extra extends document Base", "cannot join a vanilla inheritance hierarchy");
+	}
+
+	@Test
+	void aNewCustomerDocumentExtendingAMappedDocumentGivesConsistentMappings() throws Exception {
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Base", null, ExtensionStrategy.mapped, null, "code"))
+				.acme(document("Extra", "SALES_Extra", ExtensionStrategy.joined, "Base", "extra")));
+		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("<class name=\"customers.acme.modules.sales.domain.Extra\""));
 	}
 }
