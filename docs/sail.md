@@ -575,10 +575,15 @@ afterwards.
 **PF details.** The Vue list grid uses each column's filter menu. A new filter
 on a column that already has one presses Clear first. The step fails on a
 column the grid does not show (show it with the column chooser first) and on a
-grid whose toolbar shows Match Any, because its filters are ORed. The Vue
-grid's calendar takes `dd/mm/yyyy`, so the harness converts date values. A data
-table filters each column one way, chosen by the server; the step opens the
-filter row with Toggle filters when it is hidden.
+grid whose toolbar shows Match Any, because its filters are ORed. A date or
+time column's calendar takes the format of the column's converter, as its cells
+show it, so the value is typed as written (in full: `5/6/2026` is typed
+`05/06/2026` on an `MM_DD_YYYY` column). A date time or timestamp column whose
+converter shows only the date is filtered by that day: `equals` matches the
+whole day, `notEquals` anything outside it, `lessThan` before it starts and
+`greaterThan` after it ends. A data table filters each column one way, chosen
+by the server; the step opens the filter row with Toggle filters when it is
+hidden.
 
 **SC details.** The filter row is used for the operators it applies:
 `contains` on text, `equals` on anything else, and clearing. Other operators,
@@ -588,7 +593,9 @@ builder's API, as a saved snapshot sets them; the field, operator and value
 pickers are not clicked. The filter row's existing filters become clauses. The
 grid then stays in advanced filtering until the view is opened again, so later
 filters on it are clauses too. An association `equals` fails once the grid is
-in advanced filtering, because that hides the row.
+in advanced filtering, because that hides the row. A date time or timestamp
+column whose converter shows only the date compares with midnight UTC of the
+day typed, not with the day.
 
 ### Assertions
 
@@ -1201,6 +1208,16 @@ Kitchen sink fixtures for the newer steps:
   a new window", and "Open a PDF in a new window", which opens the kitchensink
   module's resource `sail-new-window.pdf`. Chrome shows a PDF in the new tab,
   headless or headed, and the tab closes like any other.
+- `ListAttributes` has dates and times on converters other than the defaults
+  (`monthFirstDate` MM_DD_YYYY, `twelveHourDateTime` MM_DD_YYYY_HH_MI,
+  `monthNameTimestamp` MMM_DD_YYYY_HH_MI_SS, `twelveHourTime` HH_MI_SS) and a
+  date time shown as a date (`dateTimeAsDate`, MM_DD_YYYY_DateTime; its Bizlet
+  keeps it equal to `dateTime`, and it is deprecated only to keep it out of the
+  generated edit view), listed by ListGridFixture's "Vue list grid of column
+  types". The PF kitchen sink filters each one with values written as their
+  cells show them, including `05/06/2026` against a `06/05/2026` that would
+  match if day and month were swapped, and `dateTimeAsDate` by day with each
+  operator; both recorder round trips record and replay such filters unedited.
 
 `KitchenSinkWorkflowSailIT` is the conformance for [workflows](#workflows):
 PrimeFaces makes a lookup value and keeps its number, then SmartClient finds it
@@ -1464,7 +1481,7 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
 | A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). In PrimeFaces, both a Vue list grid (its New, its View Detail or a zoomable row) and a PrimeFaces data table. |
 | Selecting a list grid row | `listGridSelect`, for a list grid whose selection does something (a `selectedIdBinding` or a selected action); a click on another list grid's row is not a gesture. In SmartClient the selection is written only if the next step does not act on the same grid. |
-| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date or time in Skyve's default converter format (`07-Nov-2025`, `07-Nov-2025 15:38`, `11:11`). SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers, and a PrimeFaces data table's column filters (typed text, a constant domain's combo by its label, a boolean's check box) and headers, whose operator is the one its filter makes (`contains` for text, `equals` otherwise). A data table sends a request for each change (a typed filter at each pause, a check box filter for each state it passes through, a header for each click), so its filters and its sort are written as they end up, once the user goes on to something else. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not) and a sort by more than one column are unmapped comments. |
+| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date or time as its column shows it, in the column's converter format (with the default converters `07-Nov-2025`, `07-Nov-2025 15:38`, `11:11`). SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers, and a PrimeFaces data table's column filters (typed text, a constant domain's combo by its label, a boolean's check box) and headers, whose operator is the one its filter makes (`contains` for text, `equals` otherwise). A data table sends a request for each change (a typed filter at each pause, a check box filter for each state it passes through, a header for each click), so its filters and its sort are written as they end up, once the user goes on to something else. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not) and a sort by more than one column are unmapped comments. |
 | A data grid's New, zoom, remove, select or row edit | `dataGridNew`, `dataGridZoom`, `dataGridRemove`, `dataGridSelect` and (SmartClient's inline grids) `dataGridEdit`, named by `binding` and the row as for list grids. A selection followed by a step on the same grid's row is written as that step only. |
 | Typing into an inline data grid's cells (SmartClient) | `dataEnter` into the grid's columns, after the `dataGridNew` or `dataGridEdit` that started the row's edit. An inline lookup's pick is `lookupDescriptionPick`. |
 | Dragging an ordered data grid's row | `dataGridMove` with the row and its new position, `to`. |
@@ -1534,7 +1551,8 @@ dropped silently.
   `skyve-web/src/js/sail/recorder-sc.js`, and is never merged into `skyve-min.js`.
 - Skyve's client code has no recorder checks. The recorder wraps a few of Skyve's SmartClient methods when it loads
   (each is marked in `skyve-web/src/js/desktop` with a comment) and listens to SmartClient's `ValuesManager.itemChanged()`
-  and to the DOM in the capture phase. It detaches when recording stops.
+  and to the DOM in the capture phase. It detaches when recording stops. A date or time filter value is written with
+  the column type's `shortDisplayFormatter`, as the grid's cells show it.
 - It sends its steps as JSON batches, one request at a time through SmartClient's RPC manager, to the `sailrecording`
   endpoint (`org.skyve.impl.sail.recording.SailRecordingServlet`). Each page gets the recording's CSRF token from the
   endpoint (issued once per recording, so the session's tokens do not grow with the pages), and the endpoint checks
@@ -1560,9 +1578,10 @@ dropped silently.
     entries (`FacesView.getSailRecordingState()`), so that the recorder and its panel start with no request.
   - `org.skyve.impl.sail.recording.PrimeFacesRecordingMap` builds the map: each element's client id (a data table's
     row index left out) and what a step calls it (a binding and widget kind, an action, a tab path, a grid and its
-    controls), and each grid's columns. It uses the executors' own mock render, as the signed-in user, under a mock
-    Faces context. `FacesView.getSailRecordingEditMap()` and `getSailRecordingListMap()` build it only while the
-    session records.
+    controls), and each grid's columns (a Vue list grid's projected columns, its date and time columns with their
+    converter's format pattern, `format`, in which the recorder writes their filters). It uses the executors' own mock
+    render, as the signed-in user, under a mock Faces context. `FacesView.getSailRecordingEditMap()` and
+    `getSailRecordingListMap()` build it only while the session records.
   - The adapter listens to the DOM in the capture phase and to PrimeFaces' `pfAjaxSend` and `pfAjaxComplete` events:
     data entry is flushed before each request, and each response's messages, growls, field errors and changed values
     become context. A gesture that loads the next page (a menu item, a list's New or zoom, OK) marks it in
@@ -1608,8 +1627,6 @@ dropped silently.
 - Back and Reload are read from the page that loads. Skyve's pages are never kept in the browser's back/forward cache
   (their responses are `Cache-Control: no-store`, and SmartClient has an unload listener), so a Back always loads the
   page; the recorder still handles a page shown from that cache (`pageshow` with `persisted`) as a page load.
-- A filter on a date or time column is written in Skyve's default converter format; an application with other
-  converters needs the value edited.
 - The kitchen sink has a tree and a calendar menu item (SmartClient only) and a map menu item: the SmartClient round
   trip navigates all three, and the PrimeFaces one the map.
 - A PrimeFaces list grid shows its first page of rows, and a replay finds a row only among them: a recording that zooms
