@@ -9,12 +9,16 @@ import org.skyve.domain.app.admin.DocumentNumber;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.number.NumberGenerator;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
+import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
@@ -29,11 +33,10 @@ import jakarta.annotation.Nullable;
  *
  * <p>The counter for a {@code (moduleName, documentName, fieldName)} triple is
  * persisted in the database, in a row created the first time a number is taken. The new
- * row starts from the maximum value of the {@code fieldName} column of the numbered
- * document only when {@code fieldName} is also the name of an attribute of the
- * {@code DocumentNumber} document itself (the check reads that document's attributes, not
- * the numbered document's); otherwise it starts from 0, so the first number is 1 even when
- * the numbered document's table already holds numbers.
+ * row starts from the highest number the numbered document's {@code fieldName} column
+ * already holds (across the customer, whatever the user's scope), so that generated numbers
+ * never collide with existing data; when {@code fieldName} is not an integer, long integer
+ * or text attribute of the numbered document, or no row holds a number, it starts from 0.
  *
  * <p>Threading: thread-safe, and safe across a cluster of servers sharing one database,
  * under the preconditions below. Instances hold no state; mutual exclusion is in the
@@ -70,6 +73,8 @@ import jakarta.annotation.Nullable;
  */
 public abstract class AbstractDocumentNumberGenerator implements NumberGenerator {
 	private static final String NUMERIC_PATTERN = "^\\d+$";
+	private static final String NO_NUMBER = "0";
+	private static final String MAX_ALIAS = "MaxNumber";
 
 	/**
 	 * Takes the next number of a sequence: increments its {@code DocumentNumber} row,
@@ -92,7 +97,7 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 * @param moduleName the module of the numbered document
 	 * @param documentName the numbered document
 	 * @param fieldName the field or sequence name
-	 * @param numberLength the minimum length of the number, zero-padded after the prefix
+	 * @param numberLength the minimum length of the value, prefix included, zero-padded after the prefix
 	 * @return the next number of the sequence
 	 * @throws UniqueConstraintViolationException if creating the sequence's row conflicts with
 	 *         another transaction's row a second time, as when the row is deleted while in use,
@@ -143,28 +148,8 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 			});
 
 			if (num.isEmpty()) {
-				// Check if sequence name is a field in that table
-				boolean isField = false;
-				for (Attribute attribute : document.getAttributes()) {
-					if (attribute.getName().equals(fieldName)) {
-						isField = true;
-						break;
-					}
-				}
-
-				if (isField) {
-					// first hit - go lookup max number from table
-					DocumentQuery query = pers.newDocumentQuery(moduleName, documentName);
-					query.addAggregateProjection(AggregateFunction.Max, fieldName, "MaxNumber");
-
-					List<Bean> beans = query.projectedResults();
-					if (! beans.isEmpty()) {
-						Object o = Binder.get(beans.get(0), "MaxNumber");
-						if (o != null) {
-							lastNumber = o.toString();
-						}
-					}
-				}
+				// first hit - start from the highest number the field already holds
+				lastNumber = highestExistingNumber(pers, customer, prefix, moduleName, documentName, fieldName);
 
 				// create a new document number record
 				try {
@@ -210,6 +195,135 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 		}
 
 		return nextNumber;
+	}
+
+	/**
+	 * Returns the highest number the numbered document's {@code fieldName} column already holds,
+	 * the value a new sequence row starts from, so that its numbers never collide with existing data.
+	 *
+	 * <p>An integer or long integer field gives its maximum value. A text field gives the stored
+	 * value with the highest number after {@code prefix} (all values when {@code prefix} is
+	 * {@code null}), compared as a number of any length, so {@code INV10} beats {@code INV9} and
+	 * {@code INV0009}; values whose remainder after the prefix is not all digits are ignored.
+	 * Any other field type, a sequence name that is not a persistent attribute of the numbered
+	 * document, or an unknown module or document gives {@code "0"}.
+	 *
+	 * <p>Side effects: reads the numbered document's rows with customer scope, so the user's
+	 * data group or user scope does not hide other rows of the customer.
+	 *
+	 * <p>Complexity: one aggregate query for a numeric field; for a text field, one pass in Java
+	 * over the values that start with {@code prefix}, streamed, O(n) time and O(1) memory in the
+	 * number of those rows. It runs once in a sequence's life, when its row is created. The text
+	 * comparison is in Java because no portable SQL takes the numeric value of a suffix across
+	 * the supported databases, and the lexicographic maximum is wrong for unpadded or mixed values.
+	 *
+	 * @param pers the persistence whose transaction takes the number
+	 * @param customer the user's customer
+	 * @param prefix the prefix of the sequence's values, or {@code null} for none
+	 * @param moduleName the module of the numbered document
+	 * @param documentName the numbered document
+	 * @param fieldName the field or sequence name
+	 * @return the highest existing value, as stored, or {@code "0"} if there is none
+	 */
+	private static @Nonnull String highestExistingNumber(@Nonnull Persistence pers,
+															@Nonnull Customer customer,
+															@Nullable String prefix,
+															@Nonnull String moduleName,
+															@Nonnull String documentName,
+															@Nonnull String fieldName) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
+		Module numberedModule = repository.getModule(customer, moduleName);
+		// the repository throws for a document the module does not have, so check its references first
+		Document numbered = ((numberedModule == null) || (! numberedModule.getDocumentRefs().containsKey(documentName))) ?
+								null :
+								repository.getDocument(customer, numberedModule, documentName);
+		if ((numbered == null) || (! numbered.isPersistable())) {
+			return NO_NUMBER;
+		}
+		Attribute attribute = numbered.getPolymorphicAttribute(customer, fieldName);
+		if ((attribute == null) || (! attribute.isPersistent())) {
+			return NO_NUMBER;
+		}
+		AttributeType type = attribute.getAttributeType();
+		String result = pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
+			if ((type == AttributeType.integer) || (type == AttributeType.longInteger)) {
+				DocumentQuery query = p.newDocumentQuery(moduleName, documentName);
+				query.addAggregateProjection(AggregateFunction.Max, fieldName, MAX_ALIAS);
+				List<Bean> beans = query.projectedResults();
+				Object max = beans.isEmpty() ? null : Binder.get(beans.get(0), MAX_ALIAS);
+				return (max == null) ? null : max.toString();
+			}
+			if (type == AttributeType.text) {
+				return highestText(p, prefix, moduleName, documentName, fieldName);
+			}
+			return null;
+		});
+		return (result == null) ? NO_NUMBER : result;
+	}
+
+	/**
+	 * Returns the stored text value with the highest all-digit number after {@code prefix}, or
+	 * {@code null} if no value qualifies; see {@link #highestExistingNumber}.
+	 */
+	private static @Nullable String highestText(@Nonnull Persistence p,
+												@Nullable String prefix,
+												@Nonnull String moduleName,
+												@Nonnull String documentName,
+												@Nonnull String fieldName) {
+		DocumentQuery query = p.newDocumentQuery(moduleName, documentName);
+		query.addBoundProjection(fieldName, MAX_ALIAS);
+		if (prefix == null) {
+			query.getFilter().addNotNull(fieldName);
+		}
+		else {
+			// a coarse filter only: the prefix is matched exactly below, so LIKE wildcards in it do no harm
+			query.getFilter().addLike(fieldName, prefix + '%');
+		}
+		int prefixLength = (prefix == null) ? 0 : prefix.length();
+		String result = null;
+		String resultDigits = null; // the significant digits of result's number
+		try (AutoClosingIterable<Bean> values = query.projectedIterable()) {
+			for (Bean row : values) {
+				Object value = Binder.get(row, MAX_ALIAS);
+				if (value instanceof String text) {
+					String digits = significantDigits(text, prefix, prefixLength);
+					if ((digits != null) &&
+							((resultDigits == null) ||
+								(digits.length() > resultDigits.length()) ||
+								((digits.length() == resultDigits.length()) && (digits.compareTo(resultDigits) > 0)))) {
+						result = text;
+						resultDigits = digits;
+					}
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new DomainException("Could not read the existing values of " + moduleName + '.' + documentName + '.' + fieldName, e);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the digits after {@code prefix} in {@code value} without leading zeros ({@code ""} for
+	 * zero), or {@code null} if {@code value} does not start with {@code prefix} followed by one or
+	 * more digits only.
+	 */
+	private static @Nullable String significantDigits(@Nonnull String value, @Nullable String prefix, int prefixLength) {
+		int length = value.length();
+		if ((length == prefixLength) || ((prefix != null) && (! value.startsWith(prefix)))) {
+			return null;
+		}
+		int firstSignificant = -1;
+		for (int i = prefixLength; i < length; i++) {
+			char c = value.charAt(i);
+			if ((c < '0') || (c > '9')) {
+				return null;
+			}
+			if ((firstSignificant < 0) && (c != '0')) {
+				firstSignificant = i;
+			}
+		}
+		return (firstSignificant < 0) ? "" : value.substring(firstSignificant);
 	}
 
 	/**
