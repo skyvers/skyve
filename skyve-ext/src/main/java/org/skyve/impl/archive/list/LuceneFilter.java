@@ -23,7 +23,6 @@ import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanQuery.Builder;
 import org.apache.lucene.search.FieldExistsQuery;
-import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermInSetQuery;
 import org.apache.lucene.search.TermQuery;
@@ -31,6 +30,7 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.BytesRef;
 import org.locationtech.jts.geom.Geometry;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.metadata.view.model.list.Filter;
 
@@ -61,10 +61,11 @@ public class LuceneFilter implements Filter {
             builder.add(clause);
             positive = positive || (clause.getOccur() != MUST_NOT);
         }
-        // Lucene matches nothing with only MUST_NOT clauses: exclude them from every document (each document of an
-        // archive index is an archived bean), so that a negation ("not equals", "null") matches what it does not exclude
+        // Lucene matches nothing with only MUST_NOT clauses: exclude them from every archived bean (a document with a
+        // bizId; an archive index also holds a progress document per archive file), so that a negation ("not equals",
+        // "null") matches the beans it does not exclude
         if ((! clauses.isEmpty()) && (! positive)) {
-            builder.add(new MatchAllDocsQuery(), FILTER);
+            builder.add(new FieldExistsQuery(Bean.DOCUMENT_ID), FILTER);
         }
 
         return builder.build();

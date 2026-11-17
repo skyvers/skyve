@@ -10,6 +10,7 @@ import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
@@ -19,6 +20,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,6 +37,7 @@ import org.apache.lucene.document.DoubleField;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -47,6 +50,7 @@ import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
@@ -1087,6 +1091,32 @@ class LuceneFilterTest {
         assertEquals(3, newIndexAndQuery(docs, filter).size());
     }
 
+    /** A negation alone matches no archive progress document, which has none of a bean's fields (bizId included). */
+    @Test
+    void testNegationsAloneSkipProgressDocuments() {
+        List<Document> docs = List.of(createDoc(2), createDoc("no number"));
+
+        LuceneFilter isNull = new LuceneFilter();
+        isNull.addNull(INT_FIELD);
+        LuceneFilter notEquals = new LuceneFilter();
+        notEquals.addNotEquals(INT_FIELD, Integer.valueOf(444));
+
+        List<Document> nulls = newIndexAndQuery(docs, isNull);
+        assertEquals(1, nulls.size());
+        assertThat(nulls.get(0).get(TEXT_FIELD), is("no number"));
+        List<Document> notEquals444 = newIndexAndQuery(docs, notEquals);
+        assertEquals(2, notEquals444.size());
+        assertTrue(notEquals444.stream().allMatch(d -> d.get(Bean.DOCUMENT_ID) != null));
+    }
+
+    /** An archive file's progress document, as IndexArchivesJob.updateProgress writes it. */
+    private static Document progressDoc() {
+        Document doc = new Document();
+        doc.add(new StringField("_progress_filename", "archive.txt", Store.YES));
+        doc.add(new LongField("_progress_offset", 100L, Store.YES));
+        return doc;
+    }
+
     /**
      * Create an index document with a string and double field
      * 
@@ -1208,10 +1238,13 @@ class LuceneFilterTest {
                         docsToInsert.forEach(d -> System.out.println("\t" + d));
                     }
 
+                    // as IndexArchivesJob indexes an archive: each archived bean has a bizId, and the same index
+                    // holds a progress document (no bizId) for each archive file
                     for (Document doc : docsToInsert) {
-
+                        doc.add(new TextField(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), Store.YES));
                         writer.addDocument(doc);
                     }
+                    writer.addDocument(progressDoc());
                 }
             }
 
