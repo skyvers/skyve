@@ -1042,6 +1042,58 @@ class LuceneFilterTest {
      * @param doub
      * @return
      */
+    /** A negation alone (only MUST_NOT clauses) matches the documents it does not exclude, not nothing. */
+    @Test
+    void testNotEqualsAlone() {
+        List<Document> docs = List.of(createDoc(2), createDoc(444), createDoc(3));
+
+        LuceneFilter filter = new LuceneFilter();
+        filter.addNotEquals(INT_FIELD, Integer.valueOf(444));
+
+        assertEquals(2, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** "No value, or not equal", as the list servlet builds a negation: the document without the field matches too. */
+    @Test
+    void testNullOrNotEquals() {
+        List<Document> docs = List.of(createDoc(2), createDoc(444), createDoc("no number"));
+
+        LuceneFilter criterion = new LuceneFilter();
+        criterion.addNotEquals(INT_FIELD, Integer.valueOf(444));
+        LuceneFilter filter = new LuceneFilter();
+        filter.addNull(INT_FIELD);
+        filter.addOr(criterion);
+
+        assertEquals(2, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** Not in an empty set matches every document. */
+    @Test
+    void testNotInEmptySet() {
+        List<Document> docs = List.of(createDoc("one"), createDoc("two"), createDoc("three"));
+
+        LuceneFilter filter = new LuceneFilter();
+        filter.addNotIn(TEXT_FIELD);
+
+        assertEquals(3, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** Match None of "greater than 3": no value, or at most 3 (as the list servlet negates a comparison). */
+    @Test
+    void testMatchNoneOfAComparison() {
+        List<Document> docs = List.of(createDoc(2), createDoc(3), createDoc(9), createDoc("no number"));
+
+        LuceneFilter criterion = new LuceneFilter();
+        criterion.addLessThanOrEqualTo(INT_FIELD, Integer.valueOf(3));
+        LuceneFilter nullOr = new LuceneFilter();
+        nullOr.addNull(INT_FIELD);
+        nullOr.addOr(criterion);
+        LuceneFilter filter = new LuceneFilter();
+        filter.addAnd(nullOr);
+
+        assertEquals(3, newIndexAndQuery(docs, filter).size());
+    }
+
     private Document createDoc(String text, double doub) {
 
         Document doc = new Document();
