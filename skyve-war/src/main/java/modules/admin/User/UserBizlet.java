@@ -19,7 +19,6 @@ import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.SecurityUtil;
@@ -29,6 +28,7 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Contact.ContactExtension;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.ChangePassword;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
@@ -263,8 +263,7 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			try {
 				org.skyve.metadata.user.User user = bean.toMetaDataUser();
 				Customer customer = user.getCustomer();
-				Module module = customer.getModule(ChangePassword.MODULE_NAME);
-				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
+				final JobMetaData passwordChangeNotificationJobMetadata = AdminJob.J_PASSWORD_CHANGE_NOTIFICATION.toJob(customer);
 				EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
 			} catch (Exception e) {
 				LOGGER.warn("Failed to kick off password change notification job", e);

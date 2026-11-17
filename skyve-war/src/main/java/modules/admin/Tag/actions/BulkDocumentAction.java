@@ -15,6 +15,7 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Tag.TagDefaultAction;
 import modules.admin.Tag.TagExtension;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.Tag;
 
 /**
@@ -76,8 +77,7 @@ public class BulkDocumentAction implements ServerSideAction<TagExtension> {
 
 	@SuppressWarnings("static-method") // test seam
 	protected JobMetaData getJob(Customer customer) {
-		Module module = customer.getModule(Tag.MODULE_NAME);
-		return module.getJob("jPerformDocumentActionForTag");
+		return AdminJob.J_PERFORM_DOCUMENT_ACTION_FOR_TAG.toJob(customer);
 	}
 
 	@SuppressWarnings("static-method") // test seam

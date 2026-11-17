@@ -7,13 +7,13 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.Audit;
 import modules.admin.domain.DataMaintenance;
 
@@ -35,8 +35,7 @@ public class TruncateAuditLog implements ServerSideAction<DataMaintenance> {
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(DataMaintenance.MODULE_NAME);
-		JobMetaData job = module.getJob("jTruncateAuditLog");
+		JobMetaData job = AdminJob.J_TRUNCATE_AUDIT_LOG.toJob(customer);
 		
 		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 	
