@@ -1,6 +1,7 @@
 package org.skyve.metadata.view.model.list;
 
 import java.util.Date;
+import java.util.function.Consumer;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
@@ -32,10 +33,20 @@ public class DocumentQueryFilter implements Filter {
 	// Indicates if the filter is empty - ie has no predicates added
 	private boolean empty = true;
 	
+	// told of a binding that "no value" is asked of, so that the query keeps the rows with no association on its path
+	private Consumer<String> noValueBindings;
+
 	DocumentQueryFilter(@Nonnull DocumentFilter detailFilter, @Nullable DocumentFilter summaryFilter) {
 		this.detailFilter = detailFilter;
 		this.summaryFilter = summaryFilter;
 		user = CORE.getUser();
+	}
+
+	DocumentQueryFilter(@Nonnull DocumentFilter detailFilter,
+							@Nullable DocumentFilter summaryFilter,
+							@Nonnull Consumer<String> noValueBindings) {
+		this(detailFilter, summaryFilter);
+		this.noValueBindings = noValueBindings;
 	}
 	
 	@Override
@@ -86,6 +97,9 @@ public class DocumentQueryFilter implements Filter {
 	public void addNull(@Nonnull String binding) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} is null", binding);
+		if (noValueBindings != null) {
+			noValueBindings.accept(binding);
+		}
 		detailFilter.addNull(binding);
 		if (summaryFilter != null) {
 			summaryFilter.addNull(binding);

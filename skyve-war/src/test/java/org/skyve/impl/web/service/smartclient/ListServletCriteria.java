@@ -17,6 +17,7 @@ import org.skyve.impl.snapshot.CompoundFilterOperator;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.model.list.DocumentQueryListModel;
 import org.skyve.metadata.view.model.list.InMemoryFilter;
 import org.skyve.metadata.view.model.list.ListModel;
@@ -74,7 +75,11 @@ final class ListServletCriteria {
 								List<Map<String, Object>> criteria)
 	throws Exception {
 		Customer customer = CORE.getCustomer();
-		DocumentQueryListModel<Bean> model = new DocumentQueryListModel<>(module.getNullSafeMetaDataQuery(queryName));
+		// a null query name is the document's default query
+		MetaDataQueryDefinition query = (queryName == null) ?
+											module.getDocumentDefaultQuery(customer, document.getName()) :
+											module.getNullSafeMetaDataQuery(queryName);
+		DocumentQueryListModel<Bean> model = new DocumentQueryListModel<>(query);
 		model.postConstruct(customer, true);
 		model.setStartRow(0);
 		model.setEndRow(100);

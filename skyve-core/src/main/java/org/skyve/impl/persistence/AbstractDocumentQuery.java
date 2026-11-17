@@ -2,6 +2,8 @@ package org.skyve.impl.persistence;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -47,6 +49,8 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private boolean distinct;
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
+	// the references left outer joined from the driving entity
+	private final Set<String> leftOuterJoins = new TreeSet<>();
 	private DocumentFilter filter = null;
 	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> insertedOrderings = new LinkedHashMap<>();
@@ -560,7 +564,19 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public @Nonnull DocumentQuery addLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
+		if (THIS_ALIAS.equals(entityAlias)) {
+			leftOuterJoins.add(referenceBinding);
+		}
 		return this;
+	}
+
+	/**
+	 * Indicates if a reference from the driving entity is left outer joined (without an alias).
+	 * @param referenceBinding	the reference's binding
+	 * @return true if {@link #addLeftOuterJoin(String)} added it
+	 */
+	public boolean isLeftOuterJoined(@Nonnull String referenceBinding) {
+		return leftOuterJoins.contains(referenceBinding);
 	}
 
 	/**

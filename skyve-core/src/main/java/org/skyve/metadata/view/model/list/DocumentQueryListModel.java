@@ -34,6 +34,7 @@ import jakarta.annotation.Nullable;
 public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private String description;
 	
+	private Customer customer;
 	private Module module;
 	private Document drivingDocument;
 	private MetaDataQueryDefinition query;
@@ -59,6 +60,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 
 	@Override
 	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
+		this.customer = customer;
 		description = query.getDescription();
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);
@@ -128,7 +130,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	public @Nonnull Filter getFilter() {
 		if (filter == null) {
 			establishQueries();
-			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter());
+			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter(), this::leftOuterJoinAssociations);
 		}
 		return filter;
 	}
@@ -136,7 +138,35 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	@Override
 	public @Nonnull Filter newFilter() {
 		establishQueries();
-		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter());
+		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter(), this::leftOuterJoinAssociations);
+	}
+
+	/**
+	 * Left outer joins the associations on a binding's path that a filter asks "no value" of (a negation also matches a
+	 * row with no value): a path through an association in a filter is an inner join in HQL, which would leave out the
+	 * rows with no association. The query's own columns may have joined them already.
+	 */
+	private void leftOuterJoinAssociations(@Nonnull String binding) {
+		if ((customer == null) || (binding.indexOf('.') < 0)) {
+			return;
+		}
+		int dot = binding.indexOf('.');
+		while (dot > 0) {
+			String path = binding.substring(0, dot);
+			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, drivingDocument, path);
+			if (! (target.getAttribute() instanceof Association)) {
+				return;
+			}
+			leftOuterJoin(detailQuery, path);
+			leftOuterJoin(summaryQuery, path);
+			dot = binding.indexOf('.', dot + 1);
+		}
+	}
+
+	private static void leftOuterJoin(@Nullable DocumentQuery query, @Nonnull String path) {
+		if ((query instanceof AbstractDocumentQuery documentQuery) && (! documentQuery.isLeftOuterJoined(path))) {
+			documentQuery.addLeftOuterJoin(path);
+		}
 	}
 	
 	@Override
