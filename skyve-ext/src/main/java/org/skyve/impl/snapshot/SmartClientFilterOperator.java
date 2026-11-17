@@ -33,6 +33,7 @@ public enum SmartClientFilterOperator {
 	iNotStartsWith, // Does not start with (case insensitive)
 	iNotEndsWith, // Does not end with (case insensitive)
 	iBetween, // shortcut for "greaterThan" + "and" + "lessThan" (case insensitive)
+	between, // shortcut for "greaterThan" + "lessThan" + "and". Specify criterion.start and criterion.end
 	matchesPattern, // Basic GLOB matching using wildcards (see DataSource.translatePatternOperators for more information on available patterns)
 	iMatchesPattern, // Basic GLOB matching using wildcards (case insensitive) (see DataSource.translatePatternOperators for more information on available patterns)
 	containsPattern, // GLOB matching using wildcards. Value is considered to meet the criterion if it contains the pattern. See DataSource.translatePatternOperators for more information on available patterns)
@@ -72,7 +73,7 @@ public enum SmartClientFilterOperator {
 	and, // all subcriteria (criterion.criteria) are true
 	not, // all subcriteria (criterion.criteria) are false
 	or, // at least one subcriteria (criterion.criteria) is true
-	betweenInclusive, // shortcut for "greaterThan" + "lessThan" + "and". Specify criterion.start and criterion.end
+	betweenInclusive, // shortcut for "greaterOrEqual" + "lessOrEqual" + "and". Specify criterion.start and criterion.end
 	iBetweenInclusive, // shortcut for "greaterOrEqual" + "lessOrEqual" + "and". Specify criterion.start and criterion.end
 	geoWithin, // the geometry field is within (contained by) the operand geometry
 	geoContains, // the operand geometry is within (contained by) the geometry field

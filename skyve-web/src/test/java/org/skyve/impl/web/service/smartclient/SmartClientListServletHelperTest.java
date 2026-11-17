@@ -409,10 +409,14 @@ class SmartClientListServletHelperTest {
 		invokeAddCriterionToFilter("amount", SmartClientFilterOperator.iBetweenInclusive, null, "10", "20", null, filter);
 		invokeAddCriterionToFilter("amount", SmartClientFilterOperator.iBetween, null, "30", null, null, filter);
 		invokeAddCriterionToFilter("amount", SmartClientFilterOperator.iBetween, null, null, "40", null, filter);
+		invokeAddCriterionToFilter("amount", SmartClientFilterOperator.between, null, "50", "60", null, filter);
 
+		// iBetweenInclusive is greaterOrEqual and lessOrEqual; iBetween and between greaterThan and lessThan (SmartClient's OperatorId)
 		verify(filter).addBetween("amount", "10", "20");
-		verify(filter).addGreaterThanOrEqualTo("amount", "30");
-		verify(filter).addLessThanOrEqualTo("amount", "40");
+		verify(filter).addGreaterThan("amount", "30");
+		verify(filter).addLessThan("amount", "40");
+		verify(filter).addGreaterThan("amount", "50");
+		verify(filter).addLessThan("amount", "60");
 	}
 
 	@Test
@@ -939,6 +943,11 @@ class SmartClientListServletHelperTest {
 		notNull.put("fieldName", "name");
 		notNull.put("operator", SmartClientFilterOperator.notNull.toString());
 
+		// not betweenInclusive is before the start or after the end, in a filter of its own
+		Filter outside = mock(Filter.class);
+		Filter after = mock(Filter.class);
+		when(model.newFilter()).thenReturn(outside, after);
+
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
 				user,
@@ -948,8 +957,10 @@ class SmartClientListServletHelperTest {
 				model,
 				filter);
 
-		verify(filter).addLessThanOrEqualTo("name", "A");
-		verify(filter).addGreaterThan("name", "Z");
+		verify(outside).addLessThan("name", "A");
+		verify(after).addGreaterThan("name", "Z");
+		verify(outside).addOr(after);
+		verify(filter).addAnd(outside);
 		verify(filter).addNotNull("name");
 		verify(filter).addNull("name");
 	}
@@ -1039,6 +1050,11 @@ class SmartClientListServletHelperTest {
 		iBetween.put("start", "A");
 		iBetween.put("end", "Z");
 
+		// not iBetween (exclusive) is at or before the start, or at or after the end, in a filter of its own
+		Filter outside = mock(Filter.class);
+		Filter after = mock(Filter.class);
+		when(model.newFilter()).thenReturn(outside, after);
+
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
 				user,
@@ -1052,8 +1068,10 @@ class SmartClientListServletHelperTest {
 		verify(filter).addLessThan("name", "11");
 		verify(filter).addGreaterThanOrEqualTo("name", "12");
 		verify(filter).addGreaterThan("name", "13");
-		verify(filter).addLessThanOrEqualTo("name", "A");
-		verify(filter).addGreaterThanOrEqualTo("name", "Z");
+		verify(outside).addLessThanOrEqualTo("name", "A");
+		verify(after).addGreaterThanOrEqualTo("name", "Z");
+		verify(outside).addOr(after);
+		verify(filter).addAnd(outside);
 	}
 
 	@Test

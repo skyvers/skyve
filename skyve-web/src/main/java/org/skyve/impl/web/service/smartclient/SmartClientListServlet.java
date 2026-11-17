@@ -1023,6 +1023,8 @@ public class SmartClientListServlet extends HttpServlet {
 
 				// Determine the type and converter of the filtered attribute
 				Customer customer = user.getCustomer();
+				// the codes of a variant domain whose descriptions match the filter, filtered as a set
+				Object[] variantCodes = null;
 				Converter<?> converter = null;
 				Class<?> type = String.class;
 
@@ -1051,9 +1053,7 @@ public class SmartClientListServlet extends HttpServlet {
 							// Translate variant domain filters to a set of codes to search for
 							if (! parameter) {
 								if ((valueString != null) && (domainType == DomainType.variant)) {
-									value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
-									filter.addIn(binding, (Object[]) value);
-									continue;
+									variantCodes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
 								}
 							}
 						}
@@ -1084,7 +1084,14 @@ public class SmartClientListServlet extends HttpServlet {
 					}
 				}
 
-				if (value instanceof List<?>) {
+				if (variantCodes != null) {
+					// in the set of codes, or not in it for a negative operator (transformWildcardFilterOperator gives notEqual)
+					value = variantCodes;
+					filterOperator = (filterOperator == SmartClientFilterOperator.notEqual) ?
+										SmartClientFilterOperator.notInSet :
+										SmartClientFilterOperator.inSet;
+				}
+				else if (value instanceof List<?>) {
 					@SuppressWarnings("unchecked")
 					List<Object> values = (List<Object>) value;
 					for (int i = 0, l = values.size(); i < l; i++) {
@@ -1230,21 +1237,11 @@ public class SmartClientListServlet extends HttpServlet {
 							case lessOrEqual:
 								addCriterionToFilter(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter);
 								break;
-							case betweenInclusive, iBetweenInclusive:
-								if (start != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
-								}
-								if (end != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.greaterThan, end, null, null, tagId, filter);
-								}
+							case betweenInclusive, iBetweenInclusive: // outside the range: before its start or after its end
+								addOutsideRange(binding, start, end, true, tagId, filter, model);
 								break;
-							case iBetween:
-								if (start != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
-								}
-								if (end != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.greaterOrEqual, end, null, null, tagId, filter);
-								}
+							case between, iBetween: // outside the range: at or before its start, or at or after its end
+								addOutsideRange(binding, start, end, false, tagId, filter, model);
 								break;
 							case isNull:
 								addCriterionToFilter(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter);
@@ -1256,7 +1253,7 @@ public class SmartClientListServlet extends HttpServlet {
 								addCriterionToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
 								break;
 							case notBlank:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
+								addCriterionToFilter(binding, SmartClientFilterOperator.isBlank, value, start, end, tagId, filter);
 								break;
 							case equalsField:
 								addCriterionToFilter(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter);
@@ -1421,6 +1418,49 @@ public class SmartClientListServlet extends HttpServlet {
 		return filterOperator;
 	}
 
+	/**
+	 * Adds a range's negation for Match None: before its start or after its end for an inclusive range
+	 * (betweenInclusive), at or before its start or at or after its end for an exclusive one (between). A missing end is
+	 * open, so it adds nothing on that side.
+	 *
+	 * @param binding the filtered binding
+	 * @param start the range's start, or null
+	 * @param end the range's end, or null
+	 * @param inclusive whether the range includes its ends
+	 * @param tagId optional tag identifier
+	 * @param filter the filter that gets the negation (ANDed)
+	 * @param model the list model, for a new filter
+	 */
+	private static void addOutsideRange(@Nonnull String binding,
+											@Nullable Object start,
+											@Nullable Object end,
+											boolean inclusive,
+											@Nullable String tagId,
+											@Nonnull Filter filter,
+											@Nonnull ListModel<?> model) {
+		Filter outside = nonNullFilter(model.newFilter(), model);
+		if (start != null) {
+			addCriterionToFilter(binding,
+									inclusive ? SmartClientFilterOperator.lessThan : SmartClientFilterOperator.lessOrEqual,
+									start, null, null, tagId, outside);
+		}
+		if (end != null) {
+			Filter after = nonNullFilter(model.newFilter(), model);
+			addCriterionToFilter(binding,
+									inclusive ? SmartClientFilterOperator.greaterThan : SmartClientFilterOperator.greaterOrEqual,
+									end, null, null, tagId, after);
+			if (outside.isEmpty()) {
+				outside.addAnd(after);
+			}
+			else {
+				outside.addOr(after);
+			}
+		}
+		if (! outside.isEmpty()) {
+			filter.addAnd(outside);
+		}
+	}
+
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
 	private static void addCriterionToFilter(@Nonnull String binding,
 												@Nullable SmartClientFilterOperator filterOperator,
@@ -1546,7 +1586,7 @@ public class SmartClientListServlet extends HttpServlet {
 							ListModel.addLessThanOrEqualTo(filter, binding, value);
 						}
 						break;
-					case iBetweenInclusive, betweenInclusive, iBetween:
+					case iBetweenInclusive, betweenInclusive: // greaterOrEqual and lessOrEqual, as SmartClient defines them
 						if ((start != null) && (end != null)) {
 							ListModel.addBetween(filter, binding, start, end);
 						}
@@ -1555,6 +1595,14 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						else if (end != null) {
 							ListModel.addLessThanOrEqualTo(filter, binding, end);
+						}
+						break;
+					case iBetween, between: // greaterThan and lessThan (exclusive), as SmartClient defines them
+						if (start != null) {
+							ListModel.addGreaterThan(filter, binding, start);
+						}
+						if (end != null) {
+							ListModel.addLessThan(filter, binding, end);
 						}
 						break;
 					case isNull, isBlank:
