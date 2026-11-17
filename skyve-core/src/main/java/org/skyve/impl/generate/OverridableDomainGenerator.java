@@ -287,6 +287,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							if (vanillaDocumentClass != null) {
 								TreeMap<String, AttributeType> vanillaDocumentProperties = vanillaDocumentClass.attributes;
 								TreeMap<String, AttributeType> thisDocumentProperties = generateDocumentPropertyNames(document);
+								checkOverridePropertyTypes(customerName, getRepositoryModule(null, moduleName).getDocument(null, documentName), thisDocumentProperties);
 								Iterator<String> i = vanillaDocumentProperties.keySet().iterator();
 								while (i.hasNext()) {
 									String vanillaPropertyName = i.next();
@@ -309,6 +310,34 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 
 				}.visit(customer, module);
+			}
+		}
+	}
+
+	/**
+	 * Checks that a customer's override of a vanilla document keeps the type of each vanilla property it
+	 * keeps. A customer's class inherits the vanilla property, with its Java type, and the customer's
+	 * mapping shares the vanilla document's table and columns, so a property of another type would not
+	 * fit the field or the column.
+	 *
+	 * @param customerName	The customer's name.
+	 * @param vanillaDocument	The vanilla document.
+	 * @param overrideProperties	The override's property types by name.
+	 * @throws MetaDataException	if the override gives a vanilla property another type.
+	 */
+	private static void checkOverridePropertyTypes(@Nonnull String customerName,
+													@Nonnull Document vanillaDocument,
+													@Nonnull Map<String, AttributeType> overrideProperties) {
+		for (Entry<String, AttributeType> vanillaProperty : generateDocumentPropertyNames(vanillaDocument).entrySet()) {
+			String propertyName = vanillaProperty.getKey();
+			AttributeType vanillaType = vanillaProperty.getValue();
+			AttributeType overrideType = overrideProperties.get(propertyName);
+			if ((overrideType != null) && (overrideType != vanillaType)) {
+				String documentName = vanillaDocument.getOwningModuleName() + '.' + vanillaDocument.getName();
+				throw new MetaDataException("Customer " + customerName + "'s override of document " + documentName +
+												" changes the type of " + propertyName + " from " + vanillaType + " to " + overrideType +
+												", but the customer's class inherits the vanilla property and its mapping shares the vanilla table." +
+												" Keep " + propertyName + " as " + vanillaType + " in the override, or add an attribute of another name.");
 			}
 		}
 	}

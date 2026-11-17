@@ -642,6 +642,28 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 						e.getMessage());
 	}
 
+	/**
+	 * A customer's class inherits the vanilla property and its mapping shares the vanilla table, so an
+	 * override cannot change a property's type, whether or not validation is on.
+	 */
+	@Test
+	void anOverrideThatChangesAPropertysTypeIsRefused() {
+		DocumentImpl acmeOrder = document("Order", "SALES_Order", null, null, "notes");
+		org.skyve.impl.metadata.model.document.field.Integer code = new org.skyve.impl.metadata.model.document.field.Integer();
+		code.setName("code");
+		code.setDisplayName("code");
+		acmeOrder.putAttribute(code);
+		Fixture fixture = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code", "notes"))
+				.acme(acmeOrder);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertEquals("Customer acme's override of document sales.Order changes the type of code from text to integer, " +
+						"but the customer's class inherits the vanilla property and its mapping shares the vanilla table. " +
+						"Keep code as text in the override, or add an attribute of another name.",
+						e.getMessage());
+	}
+
 	@Test
 	void aNarrowedEnumerationIsMappedToTheClassThatDeclaresIt() throws Exception {
 		DocumentImpl vanilla = document("Order", "SALES_Order", null, null, "code");
