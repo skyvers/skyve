@@ -127,6 +127,7 @@ class RelatedEnumerationTest {
 		when(result.toJavaIdentifier()).thenReturn(typeName);
 		when(result.getEncapsulatingClassName()).thenReturn("modules.test.domain." + owningDocumentName);
 		doReturn(enumClass).when(result).getImplementingType();
+		doReturn(enumClass).when(result).getImplementingType(any());
 		return result;
 	}
 
@@ -140,6 +141,7 @@ class RelatedEnumerationTest {
 		when(result.getValues()).thenReturn(List.of(value));
 		when(result.getEncapsulatingClassName()).thenReturn("modules.test.domain." + owningDocumentName);
 		when(result.getImplementingType()).thenThrow(new MetaDataException("Not generated", new ClassNotFoundException(typeName)));
+		when(result.getImplementingType(any())).thenThrow(new MetaDataException("Not generated", new ClassNotFoundException(typeName)));
 		return result;
 	}
 
@@ -215,6 +217,39 @@ class RelatedEnumerationTest {
 		document("B", second);
 		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
 		assertSame(first, ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
+	}
+
+	/**
+	 * The generated enum is the class the enumeration loads for the customer, which a customer's or a
+	 * narrowed document's generated class can declare, rather than the one named after the domain class
+	 * of the document that declares the enumeration.
+	 */
+	@Test
+	void enumerationsThatLoadTheSameClassAreNotAmbiguousWhateverTheirDocuments() {
+		document("A", enumeration("colour", "Colour", "A", Colour.class));
+		document("B", enumeration("colour", "Colour", "B", Colour.class));
+		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
+		assertNotNull(ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
+	}
+
+	/**
+	 * A vanilla document's and a customer class's references to the same enumeration load different
+	 * classes when the customer's override declares the enumeration again.
+	 */
+	@Test
+	void enumerationsOfTheSameDocumentThatLoadDifferentClassesAreAmbiguous() {
+		document("A", enumeration("colour", "Colour", "Shared", Colour.class));
+		document("B", enumeration("colour", "Colour", "Shared", Shade.class));
+		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
+		assertThrows(MetaDataException.class, () -> ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
+	}
+
+	@Test
+	void ungeneratedEnumerationsOfTheSameDocumentAreNotAmbiguous() {
+		document("A", ungeneratedEnumeration("colour", "Colour", "Shared", "red", "R"));
+		document("B", ungeneratedEnumeration("tint", "Colour", "Shared", "red", "R"));
+		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
+		assertNotNull(ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
 	}
 
 	@Test

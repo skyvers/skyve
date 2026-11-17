@@ -421,7 +421,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return	this document.
 	 */
-	private @Nonnull Object readResolve() {
+	protected @Nonnull Object readResolve() {
 		beanClasses = new ConcurrentHashMap<>();
 		return this;
 	}

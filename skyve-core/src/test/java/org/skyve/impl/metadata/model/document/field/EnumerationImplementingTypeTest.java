@@ -7,7 +7,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -19,10 +23,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.ModuleMemberTestSupport;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
@@ -174,6 +181,7 @@ class EnumerationImplementingTypeTest {
 	}
 
 	private ProvidedRepository previousRepository;
+	private ProvidedRepository repository;
 	private ClassLoader previousClassLoader;
 	private final Map<String, DocumentImpl> documents = new HashMap<>();
 
@@ -182,7 +190,7 @@ class EnumerationImplementingTypeTest {
 		ModuleMemberTestSupport.clearPersistenceThreadLocal();
 
 		previousRepository = ProvidedRepositoryFactory.get();
-		ProvidedRepository repository = mock(ProvidedRepository.class);
+		repository = mock(ProvidedRepository.class);
 		when(repository.vtable(any(), anyString())).thenAnswer(invocation -> {
 			String customerName = invocation.getArgument(0);
 			String key = invocation.getArgument(1);
@@ -390,6 +398,78 @@ class EnumerationImplementingTypeTest {
 
 		assertAll(() -> assertSame(VanillaClassStatus.class, result),
 					() -> assertSame(fieldType("customers.utcust.modules.utmod.domain.UtOwnReferrerOverride", "statusReference"), result));
+	}
+
+	/** A customer given explicitly resolves the enum whoever the current user is. */
+	@Test
+	void anEnumLoadsForTheCustomerGiven() {
+		Enumeration kept = enumeration("UtEnumDoc", "kept");
+		Customer overriding = mock(Customer.class);
+		when(overriding.getName()).thenReturn(OVERRIDING_CUSTOMER);
+		Class<?> withoutUser = kept.getImplementingType(overriding);
+		ModuleMemberTestSupport.bindCurrentCustomer("other");
+
+		assertAll(() -> assertSame(OverrideClassKept.class, withoutUser),
+					() -> assertSame(OverrideClassKept.class, kept.getImplementingType(overriding)),
+					() -> assertSame(VanillaClassKept.class, kept.getImplementingType(null)),
+					() -> assertSame(VanillaClassKept.class, kept.getImplementingType()));
+	}
+
+	/** The enum class is cached for the customer's name, so neither the customer nor its bean class is resolved again. */
+	@Test
+	void aCachedEnumIsFoundWithoutResolvingTheCustomer() {
+		Enumeration kept = enumeration("UtEnumDoc", "kept");
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+		Class<?> first = kept.getImplementingType();
+		User user = AbstractPersistence.get().getUser();
+		clearInvocations(user, repository);
+
+		Class<?> second = kept.getImplementingType();
+
+		assertAll(() -> assertSame(OverrideClassKept.class, first),
+					() -> assertSame(first, second),
+					() -> verify(user, never()).getCustomer(),
+					() -> verifyNoInteractions(repository));
+	}
+
+	/** A class cached through one context class loader is looked for again through another. */
+	@Test
+	void anEnumCachedThroughAnotherClassLoaderIsResolvedAgain() {
+		Enumeration kind = enumeration("UtEnumDoc", "kind");
+		Class<?> cached = kind.getImplementingType();
+		Thread.currentThread().setContextClassLoader(new ClassLoader(previousClassLoader) {
+			@Override
+			protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+				if (name.startsWith("modules.") || name.startsWith("customers.")) {
+					throw new ClassNotFoundException(name);
+				}
+				return super.loadClass(name, resolve);
+			}
+		});
+
+		MetaDataException e = assertThrows(MetaDataException.class, kind::getImplementingType);
+
+		assertAll(() -> assertSame(VanillaDomainClassKind.class, cached),
+					() -> assertTrue(Enumeration.isEnumClassLoadingFailure(e), e::toString));
+	}
+
+	/**
+	 * Without a repository, as in a unit test that installs none, the enum loads from the vanilla
+	 * domain class, and one that it does not declare is an enum class loading failure.
+	 */
+	@Test
+	void withoutARepositoryAnEnumLoadsFromTheVanillaDomainClass() {
+		Enumeration kind = enumeration("UtEnumDoc", "kind");
+		Enumeration status = enumeration("UtEnumDoc", "status");
+		ProvidedRepositoryFactory.set(null);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+
+		Class<?> result = kind.getImplementingType();
+		MetaDataException e = assertThrows(MetaDataException.class, status::getImplementingType);
+
+		assertAll(() -> assertSame(VanillaDomainClassKind.class, result),
+					() -> assertEquals("A problem was encountered loading enum modules.utmod.domain.UtEnumDoc$Status", e.getMessage()),
+					() -> assertTrue(Enumeration.isEnumClassLoadingFailure(e), e::toString));
 	}
 
 	@Test

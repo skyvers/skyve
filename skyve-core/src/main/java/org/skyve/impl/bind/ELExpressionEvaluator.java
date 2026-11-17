@@ -641,7 +641,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		for (Enumeration enumeration : staticEnumerations(customer, document)) {
 			String name = enumeration.toJavaIdentifier();
 			if (boundNames.add(name)) {
-				processor.defineBean(name, enumBean(enumeration));
+				processor.defineBean(name, enumBean(customer, enumeration));
 			}
 		}
 		return boundNames;
@@ -650,12 +650,13 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	/**
 	 * Determines what an enumeration name evaluates to during validation.
 	 *
+	 * @param customer the customer metadata context
 	 * @param enumeration the enumeration metadata
 	 * @return the generated enum class when it can be loaded, and the enumeration metadata otherwise
 	 * 			(during domain generation, before the class exists)
 	 */
-	private static @Nonnull Object enumBean(@Nonnull Enumeration enumeration) {
-		Class<?> enumClass = loadEnumClass(enumeration);
+	private static @Nonnull Object enumBean(@Nonnull Customer customer, @Nonnull Enumeration enumeration) {
+		Class<?> enumClass = loadEnumClass(customer, enumeration);
 		return (enumClass == null) ? enumeration : new ELClass(enumClass);
 	}
 
@@ -689,7 +690,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 						result = candidate;
 						resultDocumentName = qualifiedName(related);
 					}
-					else if (! enumClassName(result).equals(enumClassName(candidate))) {
+					else if (! enumClassName(customer, result).equals(enumClassName(customer, candidate))) {
 						throw new MetaDataException("Enumeration " + name + " is ambiguous for document " + qualifiedName(document) +
 														" as it is declared by both " + resultDocumentName + " and " + qualifiedName(related) +
 														", which are equally closely related to it");
@@ -764,12 +765,19 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	/**
-	 * Names the enum class that implements an enumeration, without loading it.
+	 * Names the enum class that implements an enumeration for a customer: the class it loads, which a
+	 * customer's or narrowed document's generated class can declare, or before the domain is compiled,
+	 * the hand-coded class or the vanilla domain class's enum.
 	 *
+	 * @param customer the customer metadata context
 	 * @param enumeration the enumeration metadata
 	 * @return the fully qualified name of the hand-coded or generated enum class
 	 */
-	private static @Nonnull String enumClassName(@Nonnull Enumeration enumeration) {
+	private static @Nonnull String enumClassName(@Nonnull Customer customer, @Nonnull Enumeration enumeration) {
+		Class<?> enumClass = loadEnumClass(customer, enumeration);
+		if (enumClass != null) {
+			return enumClass.getName();
+		}
 		String result = enumeration.getImplementingEnumClassName();
 		if (result == null) {
 			result = enumeration.getEncapsulatingClassName() + '$' + enumeration.toJavaIdentifier();
@@ -797,7 +805,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 		@Override
 		@Nullable Object find(@Nonnull String name) {
 			Enumeration enumeration = relatedEnumeration(customer, document, name);
-			return (enumeration == null) ? null : enumBean(enumeration);
+			return (enumeration == null) ? null : enumBean(customer, enumeration);
 		}
 	}
 
@@ -834,7 +842,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 			Customer customer = CORE.getCustomer();
 			Document document = customer.getModule(moduleName).getDocument(customer, documentName);
 			Enumeration enumeration = relatedEnumeration(customer, document, name);
-			Class<?> enumClass = (enumeration == null) ? null : loadEnumClass(enumeration);
+			Class<?> enumClass = (enumeration == null) ? null : loadEnumClass(customer, enumeration);
 			if (enumClass == null) {
 				return null;
 			}
@@ -872,14 +880,15 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	/**
-	 * Loads the generated enum class for the enumeration.
+	 * Loads the generated enum class for the enumeration and customer.
 	 *
+	 * @param customer the customer metadata context
 	 * @param enumeration the enumeration metadata
 	 * @return the enum class, or {@code null} if it has not been generated yet
 	 */
-	private static @Nullable Class<?> loadEnumClass(@Nonnull Enumeration enumeration) {
+	private static @Nullable Class<?> loadEnumClass(@Nonnull Customer customer, @Nonnull Enumeration enumeration) {
 		try {
-			return enumeration.getImplementingType();
+			return enumeration.getImplementingType(customer);
 		}
 		catch (MetaDataException e) {
 			if (! Enumeration.isEnumClassLoadingFailure(e)) {
