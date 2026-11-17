@@ -66,7 +66,9 @@ A customer module override (`customers/<customer>/modules/<module>/<module>.xml`
 - **Customer code** can import the customer enums. A reference to metadata that the override removed then fails to compile.
 - **Code shared across customers** should use the vanilla enums, and only for metadata every customer keeps.
 - **Clean regeneration.** Customer enums are regenerated on every run, and those of an override you remove are deleted.
-- **They don't switch on customer domain generation.** The generated customer `Ext` classes and ORM mapping are still produced only when you have opted in by creating `src/generated/java/customers/<customer>/modules/` yourself. If that directory holds nothing but generated enums, it doesn't count as opting in.
+- **They don't switch on customer domain generation.** The generated customer `Ext` classes and ORM mapping (`orm.hbm.xml`) are produced only for a customer that has opted in. When `generateDomain` has to create `src/generated/java/customers/<customer>/modules/` for the enums, it also writes `metadata-enums-only.txt` there, and while that file is present the customer is not opted in.
+- **Opting in.** Create `src/generated/java/customers/<customer>/modules/` yourself before the first run, or delete `metadata-enums-only.txt`. Customer domain generation is on whenever that directory exists without the marker, whatever else is in it.
+- **The marker is generator-owned.** `generateDomain` writes it, keeps it while it generates enums for a customer that hasn't opted in, and deletes it when the customer no longer overrides any module, together with the directory if nothing else is left in it. Don't edit it or add it by hand.
 
 ## When to use strings
 
