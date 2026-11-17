@@ -2,6 +2,8 @@ package org.skyve.impl.domain.number;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,6 +18,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.skyve.CORE;
@@ -24,6 +27,7 @@ import org.skyve.domain.app.admin.DocumentNumber;
 import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.persistence.hibernate.UniquenessEntity;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
@@ -45,6 +49,7 @@ class DocumentNumberConcurrencyH2Test extends AbstractH2TestTruncate {
 	private static final int USERS = 8;
 	private static final int ROUNDS = 10;
 	private static final long TIMEOUT_SECONDS = 60;
+	private static final String UNIQUE_SEQUENCE = "uniqueSequence";
 
 	@Test
 	void concurrentFirstUseOfASequenceInTheCallersTransaction() throws Exception {
@@ -86,8 +91,39 @@ class DocumentNumberConcurrencyH2Test extends AbstractH2TestTruncate {
 		persistence.preMerge(document, pending);
 
 		DocumentNumberGenerator generator = new DocumentNumberGenerator();
-		assertThrows(UniqueConstraintViolationException.class,
-						() -> generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, "pending"));
+		UniqueConstraintViolationException e = assertThrows(UniqueConstraintViolationException.class,
+				() -> generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, "pending"));
+		assertAll(() -> assertEquals(UNIQUE_SEQUENCE, e.getConstraintName()),
+					() -> assertNull(e.getCause(), "raised in Java, so it was retried once before being thrown"));
+	}
+
+	/**
+	 * A violation signalled by a database failure is thrown at once, not retried: the failure
+	 * (here the uniqueness key's insert failing on a committed key, as a timeout, deadlock or
+	 * serialisation failure would) may have rolled back or aborted the transaction. A retry would
+	 * end in the same transaction's own key, a violation with no cause.
+	 */
+	@Test
+	void aViolationFromADatabaseFailureIsNotRetried() {
+		Persistence persistence = CORE.getPersistence();
+		User user = persistence.getUser();
+		String sequence = "failing";
+		// the key AbstractHibernatePersistence.checkUniqueConstraints inserts for DocumentNumber's customer-scoped constraint
+		String key = AppConstants.ADMIN_MODULE_NAME + '|' + AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME + '|' +
+						user.getCustomerName() + '|' + UNIQUE_SEQUENCE + '|' +
+						LookupDescription.MODULE_NAME + '|' + LookupDescription.DOCUMENT_NAME + '|' + sequence + '|';
+		persistence.newSQL("insert into " + UniquenessEntity.TABLE_NAME + " (" + UniquenessEntity.HASH_COLUMN_NAME +
+							") values (:" + UniquenessEntity.HASH_COLUMN_NAME + ")")
+						.putParameter(UniquenessEntity.HASH_COLUMN_NAME, DigestUtils.sha256Hex(key), false)
+						.execute();
+		persistence.commit(false);
+		persistence.begin();
+
+		DocumentNumberGenerator generator = new DocumentNumberGenerator();
+		UniqueConstraintViolationException e = assertThrows(UniqueConstraintViolationException.class,
+				() -> generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, sequence));
+		assertAll(() -> assertEquals(UNIQUE_SEQUENCE, e.getConstraintName()),
+					() -> assertNotNull(e.getCause(), "the insert's failure, so the first attempt's violation, not a retry's"));
 	}
 
 	/**
@@ -176,17 +212,24 @@ class DocumentNumberConcurrencyH2Test extends AbstractH2TestTruncate {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		persistence.setUser(user);
 		persistence.begin();
-		ready.countDown();
-		start.await();
+		boolean committed = false;
 		try {
+			ready.countDown();
+			start.await();
 			String result = generator.next(LookupDescription.MODULE_NAME, LookupDescription.DOCUMENT_NAME, sequence);
 			persistence.commit(true);
+			committed = true;
 			return result;
 		}
-		catch (Exception e) {
-			persistence.rollback();
-			persistence.commit(true);
+		catch (RuntimeException e) {
 			return "failed: " + e;
+		}
+		finally {
+			// whatever ended the worker (a failure, an interrupt or an Error), release its persistence and connection
+			if (! committed) {
+				persistence.rollback();
+				persistence.commit(true);
+			}
 		}
 	}
 

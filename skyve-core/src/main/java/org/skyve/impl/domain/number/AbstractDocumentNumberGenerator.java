@@ -28,25 +28,38 @@ import jakarta.annotation.Nullable;
  * counters stored in the {@code DocumentNumber} admin document.
  *
  * <p>The counter for a {@code (moduleName, documentName, fieldName)} triple is
- * persisted in the database. On first access the implementation bootstraps from
- * the maximum value already present in the field's column so that generated numbers
- * never collide with existing data.
+ * persisted in the database, in a row created the first time a number is taken. The new
+ * row starts from the maximum value of the {@code fieldName} column of the numbered
+ * document only when {@code fieldName} is also the name of an attribute of the
+ * {@code DocumentNumber} document itself (the check reads that document's attributes, not
+ * the numbered document's); otherwise it starts from 0, so the first number is 1 even when
+ * the numbered document's table already holds numbers.
  *
- * <p>Threading: thread-safe, and safe across a cluster of servers sharing one database.
- * Instances hold no state; mutual exclusion is in the database, through the
- * {@link Persistence} supplied to {@link #getNextNumber}. An existing row is read with a
- * pessimistic write lock ({@link Persistence#retrieveAndLock}: {@code SELECT ... FOR UPDATE}
- * or the dialect's equivalent), so concurrent transactions increment it one at a time, each
- * from the number the previous one committed, and each holds the lock until its transaction
- * ends.
+ * <p>Threading: thread-safe, and safe across a cluster of servers sharing one database,
+ * under the preconditions below. Instances hold no state; mutual exclusion is in the
+ * database, through the {@link Persistence} supplied to {@link #getNextNumber}. An existing
+ * row is read with a pessimistic write lock ({@link Persistence#retrieveAndLock}:
+ * {@code SELECT ... FOR UPDATE} or the dialect's equivalent), so concurrent transactions
+ * increment it one at a time, each from the number the previous one committed, and each
+ * holds the lock until its transaction ends.
  *
  * <p>Two transactions that both find no row both try to create it. The {@code DocumentNumber}
- * document's {@code uniqueSequence} constraint makes the second wait (up to the database's
- * lock timeout) until the first ends; if the first committed, the second's check fails with a
- * {@link UniqueConstraintViolationException}, which is caught, and the second then locks and
- * increments the row the first created. The constraint check reads committed data, so this
- * holds at the READ COMMITTED isolation level, the default for H2, PostgreSQL, Oracle and
- * SQL Server.
+ * document's {@code uniqueSequence} constraint makes the second wait until the first ends;
+ * if the first committed, the second's check finds the first's row and fails with a
+ * {@link UniqueConstraintViolationException} raised in Java, with no database error, which
+ * is caught: the second then locks and increments the row the first created. A violation
+ * signalled by a database failure (one with a cause, such as a timeout, deadlock or
+ * serialisation failure, after which the transaction may be rolled back or aborted) is not
+ * retried but thrown.
+ *
+ * <p>Preconditions: the connection's isolation level is READ COMMITTED, as in the MySQL and
+ * PostgreSQL datasource templates Skyve ships and the default for H2, PostgreSQL, Oracle and
+ * SQL Server. At a snapshot isolation level (a hand-written MySQL datasource at InnoDB's
+ * default REPEATABLE READ, or the opt-in {@code SQLServer2016HibernateContentPersistence},
+ * which sets SNAPSHOT) the constraint check reads the transaction's snapshot and misses the
+ * other's row, so concurrent first uses of a sequence can silently create duplicate rows and
+ * return duplicate numbers. Every wait on a lock is bounded by the database's lock timeout
+ * and by Skyve's OLTP query timeout; a wait that times out fails the call.
  *
  * <p>Subclasses must implement {@link NumberGenerator#next} using the
  * {@link #getNextNumber} helper, supplying the appropriate
@@ -82,7 +95,8 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 * @param numberLength the minimum length of the number, zero-padded after the prefix
 	 * @return the next number of the sequence
 	 * @throws UniqueConstraintViolationException if creating the sequence's row conflicts with
-	 *         another transaction's row a second time, as when the row is deleted while in use
+	 *         another transaction's row a second time, as when the row is deleted while in use,
+	 *         or if the conflict was signalled by a database failure (its cause), which is not retried
 	 */
 	protected @Nonnull String getNextNumber(@Nonnull Persistence pers,
 											@Nullable String prefix,
@@ -97,8 +111,9 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 	 * Takes the next number of a sequence as {@link #getNextNumber(Persistence, String, String, String, String, int)}
 	 * does, the second attempt finding the row another transaction created first.
 	 *
-	 * @param retryCreation whether a conflicting creation is followed by a second attempt
-	 *        ({@code true} on the first attempt) or throws ({@code false} on the second)
+	 * @param retryCreation whether a creation conflict raised in Java (one with no cause) is
+	 *        followed by a second attempt ({@code true} on the first attempt) or thrown
+	 *        ({@code false} on the second)
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private @Nonnull String getNextNumber(@Nonnull Persistence pers,
@@ -177,8 +192,10 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 			catch (UniqueConstraintViolationException e) {
 				// A new row fails the check when another transaction created this sequence's row after
 				// the query above found none. The check waited for that transaction to commit, so the
-				// row can now be read and locked: take the number from it.
-				if (retryCreation) {
+				// row can now be read and locked: take the number from it. A violation with a cause
+				// is a database failure (timeout, deadlock, serialisation) that may have rolled back or
+				// aborted this transaction: retrying would lose that work silently, so it is thrown.
+				if (retryCreation && (e.getCause() == null)) {
 					return getNextNumber(pers, prefix, moduleName, documentName, fieldName, numberLength, false);
 				}
 				throw e;

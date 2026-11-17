@@ -17,6 +17,12 @@ import jakarta.annotation.Nullable;
  * <p>Threading: thread-safe; see {@link AbstractDocumentNumberGenerator}. The sequence's row is
  * locked only for the inner transaction, so concurrent callers wait for each other briefly; a
  * number taken by an outer transaction that later rolls back is not reused (a gap).
+ *
+ * <p>Precondition: READ COMMITTED isolation (as in Skyve's shipped MySQL and PostgreSQL
+ * datasource templates). At a snapshot isolation level (a hand-written MySQL datasource at
+ * REPEATABLE READ, or {@code SQLServer2016HibernateContentPersistence}, which sets SNAPSHOT)
+ * concurrent first uses of a sequence can silently produce duplicate rows and numbers. Waits
+ * are bounded by the database's lock timeout and Skyve's OLTP query timeout.
  */
 public class DocumentNumberAutonomousTransactionGenerator extends AbstractDocumentNumberGenerator {
 	@Override

@@ -19,6 +19,12 @@ import jakarta.annotation.Nullable;
  * gaps), and the sequence's row stays locked until the caller's transaction ends: concurrent
  * transactions numbering from one sequence wait for each other.
  *
+ * <p>Precondition: READ COMMITTED isolation (as in Skyve's shipped MySQL and PostgreSQL
+ * datasource templates). At a snapshot isolation level (a hand-written MySQL datasource at
+ * REPEATABLE READ, or {@code SQLServer2016HibernateContentPersistence}, which sets SNAPSHOT)
+ * concurrent first uses of a sequence can silently produce duplicate rows and numbers. Waits
+ * are bounded by the database's lock timeout and Skyve's OLTP query timeout.
+ *
  * @see AbstractDocumentNumberGenerator
  * @see NumberGeneratorStaticSingleton
  */

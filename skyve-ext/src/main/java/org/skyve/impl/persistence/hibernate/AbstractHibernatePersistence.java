@@ -2263,22 +2263,21 @@ if (document.isDynamic()) return;
 	
 						String hash = DigestUtils.sha256Hex(uniqueKey.toString());
 						if (! uniqueHashes.add(hash)) { // this transaction has this hash already
-							throwUniqueConstraintViolationException(constraint, document, bean);
+							throw newUniqueConstraintViolationException(constraint, document, bean, null);
 						}
-						else {
-							try {
-								final Persistent persistent = new Persistent();
-								persistent.setName(UniquenessEntity.TABLE_NAME);
-								String persistentIdentifier = persistent.getPersistentIdentifier();
-								StringBuilder sql = new StringBuilder(64);
-								sql.append(INSERT_INTO_SQL).append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
-								sql.append(VALUES_SQL).append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
-								newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
-							}
-							catch (@SuppressWarnings("unused") DomainException e) {
-								// Unique constraint violation caught here - within the same transaction
-								throwUniqueConstraintViolationException(constraint, document, bean);
-							}
+						try {
+							final Persistent persistent = new Persistent();
+							persistent.setName(UniquenessEntity.TABLE_NAME);
+							String persistentIdentifier = persistent.getPersistentIdentifier();
+							StringBuilder sql = new StringBuilder(64);
+							sql.append(INSERT_INTO_SQL).append(persistentIdentifier).append(" (").append(UniquenessEntity.HASH_COLUMN_NAME);
+							sql.append(VALUES_SQL).append(UniquenessEntity.HASH_COLUMN_NAME).append(')');
+							newSQL(sql.toString()).putParameter(UniquenessEntity.HASH_COLUMN_NAME, hash, false).execute();
+						}
+						catch (DomainException e) {
+							// Unique constraint violation caught here - within the same transaction.
+							// The insert failure (which may also be a timeout, deadlock or serialisation failure) is the cause.
+							throw newUniqueConstraintViolationException(constraint, document, bean, e);
 						}
 					}
 					
@@ -2407,7 +2406,7 @@ if (document.isDynamic()) return;
 							if ((! persistent) || // we are inserting and 1 already exists
 									results.next() || // more than 1 exists
 									(persistent && (! first.getBizId().equals(bean.getBizId())))) { // updating, and 1 exists that is not this ID
-								throwUniqueConstraintViolationException(constraint, document, bean);
+								throw newUniqueConstraintViolationException(constraint, document, bean, null);
 							}
 						}
 					}
@@ -2427,15 +2426,20 @@ if (document.isDynamic()) return;
 	}
 	
 	/**
-	 * Throw a formatted unique constraint violation exception.
+	 * Creates a formatted unique constraint violation exception, for the caller to throw.
 	 *
 	 * @param constraint The violated constraint.
 	 * @param document The document metadata.
 	 * @param bean The offending bean.
+	 * @param cause The database failure that signalled the violation, or {@code null} when the violation was
+	 *        detected in Java (a key this transaction already holds, or a committed duplicate found by the check
+	 *        query), in which case the transaction is still usable.
+	 * @return the exception, with {@code cause} as its cause when given
 	 */
-	private static void throwUniqueConstraintViolationException(@Nonnull UniqueConstraint constraint,
-																	@Nonnull Document document,
-																	@Nonnull Bean bean) {
+	private static @Nonnull UniqueConstraintViolationException newUniqueConstraintViolationException(@Nonnull UniqueConstraint constraint,
+																									@Nonnull Document document,
+																									@Nonnull Bean bean,
+																									@Nullable Throwable cause) {
 		String message = null;
 		try {
 			message = BindUtil.formatMessage(constraint.getMessage(), bean);
@@ -2446,7 +2450,11 @@ if (document.isDynamic()) return;
 							constraint.getName();
 		}
 
-		throw new UniqueConstraintViolationException(document, constraint.getName(), message);
+		UniqueConstraintViolationException result = new UniqueConstraintViolationException(document, constraint.getName(), message);
+		if (cause != null) {
+			result.initCause(cause);
+		}
+		return result;
 	}
 
 	/**
