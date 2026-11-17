@@ -52,9 +52,9 @@ class SmartClientListServletOperatorsH2Test extends AbstractH2Test {
 		module = customer.getModule(ListAttributes.MODULE_NAME);
 		document = module.getDocument(customer, ListAttributes.DOCUMENT_NAME);
 		Persistence persistence = CORE.getPersistence();
-		persistence.save(row("OP a", 1, null, "one"));
-		persistence.save(row("OP b", 5, "x", "two"));
-		persistence.save(row("OP c", 10, "y", "three"));
+		persistence.save(row("OP a", Integer.valueOf(1), null, "one"));
+		persistence.save(row("OP b", Integer.valueOf(5), "x", "two"));
+		persistence.save(row("OP c", Integer.valueOf(10), "y", "three"));
 		persistence.flush();
 	}
 
@@ -131,6 +131,44 @@ class SmartClientListServletOperatorsH2Test extends AbstractH2Test {
 						fetch(CompoundFilterOperator.and, List.of(criterion(TEXT, "iContains", "OP"), criterion(VARIANT, "iContains", "Two"))));
 	}
 
+	/** A variant's iNotContains that no description matches is every row (not in an empty set). */
+	@Test
+	void aVariantDomainNotContainsWithNoMatchIsEveryRow() throws Exception {
+		assertEquals(Set.of("OP a", "OP b", "OP c"), fetch(CompoundFilterOperator.and, List.of(criterion(VARIANT, "iNotContains", "zzz"))));
+	}
+
+	/** Match None on a variant's iContains that no description matches is every row. */
+	@Test
+	void matchNoneOfAVariantDomainContainsWithNoMatchIsEveryRow() throws Exception {
+		assertEquals(Set.of("OP a", "OP b", "OP c"), fetch(CompoundFilterOperator.not, List.of(criterion(VARIANT, "iContains", "zzz"))));
+	}
+
+	/** Match Any on [contains OP a] or [a variant's iNotContains that matches nothing]: every row. */
+	@Test
+	void aVariantDomainNotContainsWithNoMatchUnderOrIsEveryRow() throws Exception {
+		assertEquals(Set.of("OP a", "OP b", "OP c"),
+						fetch(CompoundFilterOperator.or, List.of(criterion(TEXT, "iContains", "OP a"), criterion(VARIANT, "iNotContains", "zzz"))));
+	}
+
+	/** A variant's notEqual is the codes whose descriptions do not match (notInSet). */
+	@Test
+	void aVariantDomainNotEqualIsNotInTheSet() throws Exception {
+		assertEquals(Set.of("OP a", "OP c"), fetch(CompoundFilterOperator.and, List.of(criterion(VARIANT, "notEqual", "Two"))));
+	}
+
+	/**
+	 * A row with no number and no variant under Match None: the server's negations (SQL NOT IN and the range's outside
+	 * comparisons) leave it out, where SmartClient's client side would include it. This pins the documented Known
+	 * Limitation ("negations and rows with no value"), not a wanted behaviour.
+	 */
+	@Test
+	void aRowWithNoValueIsLeftOutByTheServersNegations() throws Exception {
+		CORE.getPersistence().save(row("OP n", null, null, null));
+		CORE.getPersistence().flush();
+		assertEquals(Set.of("OP c"), fetch(CompoundFilterOperator.not, List.of(range("betweenInclusive", "1", "5"))));
+		assertEquals(Set.of("OP a", "OP c"), fetch(CompoundFilterOperator.not, List.of(criterion(VARIANT, "iContains", "Two"))));
+	}
+
 	/** Match None on [and: betweenInclusive 1 to 5, notBlank memo]: not b, so a and c. */
 	@Test
 	void aGroupOfRangeAndBlankUnderNotIsNegatedAsAWhole() throws Exception {
@@ -168,10 +206,10 @@ class SmartClientListServletOperatorsH2Test extends AbstractH2Test {
 		return result;
 	}
 
-	private static ListAttributes row(String text, int number, String memo, String variant) {
+	private static ListAttributes row(String text, Integer number, String memo, String variant) {
 		ListAttributes result = ListAttributes.newInstance();
 		result.setText(text);
-		result.setNormalInteger(Integer.valueOf(number));
+		result.setNormalInteger(number);
 		result.setMemo(memo);
 		result.setVariantDomain(variant);
 		return result;

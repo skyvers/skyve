@@ -23,6 +23,8 @@ public class DocumentQueryFilter implements Filter {
 	private static final String LESS_THAN_LOG = "{} lessThan {}";
 	private static final String LESS_THAN_EQUAL_LOG = "{} lessThanOrEqualTo {}";
 	private static final String BETWEEN_LOG = "{} between {} and {}";
+	// A predicate that holds for every row: "not in" an empty set (it still counts when ORed with another predicate)
+	private static final String EVERY_ROW = "1 = 1";
 	
 	private DocumentFilter detailFilter;
 	private DocumentFilter summaryFilter;
@@ -606,7 +608,6 @@ public class DocumentQueryFilter implements Filter {
 		in(binding, true, values);
 	}
 	
-	@SuppressWarnings("java:S3776") // Complexity OK
 	private void in(@Nonnull String binding, boolean not, @Nonnull Object... values) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) {
@@ -618,33 +619,31 @@ public class DocumentQueryFilter implements Filter {
 			sb.setLength(sb.length() - 2);
 			QUERY_LOGGER.info(sb.toString());
 		}
+		in(detailFilter, binding, not, values);
+		if (summaryFilter != null) {
+			in(summaryFilter, binding, not, values);
+		}
+	}
+
+	/**
+	 * Adds an in or not in predicate: in an empty set selects nothing, not in an empty set every row.
+	 */
+	private static void in(@Nonnull DocumentFilter filter, @Nonnull String binding, boolean not, @Nonnull Object... values) {
 		if (values.length > 0) {
 			if (not) {
-				detailFilter.addNotIn(binding, values);
+				filter.addNotIn(binding, values);
 			}
 			else {
-				detailFilter.addIn(binding, values);
+				filter.addIn(binding, values);
 			}
+		}
+		else if (not) {
+			filter.addExpression(EVERY_ROW);
 		}
 		else {
 			// select nothing
-			detailFilter.addNull(binding);
-			detailFilter.addNotNull(binding);
-		}
-		if (summaryFilter != null) {
-			if (values.length > 0) {
-				if (not) {
-					summaryFilter.addNotIn(binding, values);
-				}
-				else {
-					summaryFilter.addIn(binding, values);
-				}
-			}
-			else {
-				// select nothing
-				summaryFilter.addNull(binding);
-				summaryFilter.addNotNull(binding);
-			}
+			filter.addNull(binding);
+			filter.addNotNull(binding);
 		}
 	}
 	
