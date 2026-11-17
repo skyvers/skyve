@@ -1004,11 +1004,20 @@ class DataBuilderTest {
 
 	/** A factory of admin.Widget returning the extension, as UserFactory does. */
 	public static final class WidgetFactory {
-		static final WidgetExtension EXTENSION = mock(WidgetExtension.class);
+		/** A bean of the customer's class, as factoryBuild() or newInstance() makes for the customer. */
+		static final WidgetExtension EXTENSION = (WidgetExtension) mock(WIDGET_OVERRIDE);
 
 		@SkyveFixture(types = FixtureType.crud)
 		public static WidgetExtension crudInstance() {
 			return EXTENSION;
+		}
+	}
+
+	/** A factory of admin.Widget returning the extension, which makes a bean of the vanilla extension class itself. */
+	public static final class VanillaInstanceFactory {
+		@SkyveFixture(types = FixtureType.crud)
+		public static WidgetExtension crudInstance() {
+			return mock(WidgetExtension.class);
 		}
 	}
 
@@ -1061,5 +1070,15 @@ class DataBuilderTest {
 	@Test
 	void dataFactoryReturningASuperclassOfAVanillaBeanClassIsNotUsed() throws Exception {
 		assertThat(invokeWidgetDataFactory(new WidgetFactory(), WidgetSubclass.class), is((Bean) null));
+	}
+
+	/**
+	 * A factory method returning the vanilla extension qualifies for a customer whose bean class is
+	 * a customer class, but a bean it makes of the vanilla class itself is not the customer's, so
+	 * DataBuilder builds a random bean instead.
+	 */
+	@Test
+	void dataFactoryBeanOfTheVanillaClassIsNotUsedForACustomersOverrideClass() throws Exception {
+		assertThat(invokeWidgetDataFactory(new VanillaInstanceFactory(), WIDGET_OVERRIDE), is((Bean) null));
 	}
 }

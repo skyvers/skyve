@@ -775,7 +775,24 @@ public class DataBuilder {
 				if (trace) { 
 					trace(new StringBuilder(128).append("Invoking method ").append(factory.getClass().getName()).append("::").append(method.getName()).append(" for fixture ").append(fixture), currentDepth);
 				}
-				result = (T) method.invoke(factory);
+				Object bean = method.invoke(factory);
+				// A method returning a vanilla class that a customer's bean class extends qualifies, but
+				// it can still make a bean of that vanilla class, which is not the customer's
+				if ((bean != null) && (! beanType.isInstance(bean))) {
+					StringBuilder warning = new StringBuilder(256).append("WARNING: ").append(factory.getClass().getName()).append("::").append(method.getName())
+																	.append(" returned a ").append(bean.getClass().getName())
+																	.append(", not a ").append(beanType.getName())
+																	.append(" - building a random bean instead");
+					if (trace) {
+						trace(warning, currentDepth);
+					}
+					else if (LOGGER.isWarnEnabled()) {
+						LOGGER.warn(warning.toString());
+					}
+				}
+				else {
+					result = (T) bean;
+				}
 			}
 		}
 		
