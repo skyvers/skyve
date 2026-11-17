@@ -282,7 +282,7 @@
 			</columns>
 		</query>
 		<query name="qConvertersFixtures" documentName="ConvertersFixture">
-			<description>Converters fixtures, with a few of their dates, times and numbers on other converters than the defaults: a month name, 12 hour times, seconds, dollars and percentages.</description>
+			<description>Converters fixtures, with a few of their dates, times and numbers on other converters than the defaults: a month name, 12 hour times, seconds, dollars and percentages; and a decimal with no converter.</description>
 			<columns>
 				<column binding="name" sortOrder="ascending" />
 				<column binding="mmmDdYyyy" />
@@ -292,6 +292,7 @@
 				<column binding="decimal2DollarsAndCents" />
 				<column binding="decimal5TwoDecimalPlacesPercentage" />
 				<column binding="simplePercentage" />
+				<column binding="plainDecimal2" />
 			</columns>
 		</query>
 		<query name="qConvertersDates" documentName="ConvertersFixture">

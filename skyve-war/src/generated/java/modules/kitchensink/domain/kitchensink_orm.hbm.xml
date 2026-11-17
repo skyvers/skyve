@@ -151,6 +151,7 @@
 		<property name="simplePercentage" />
 		<property name="integerSeparator" />
 		<property name="longIntegerSeparator" />
+		<property name="plainDecimal2" type="Decimal2" precision="20" scale="2" />
 		<bag name="dateRows" table="KS_ConvertersFixture_dateRows" cascade="all-delete-orphan">
 			<key column="owner_id" foreign-key="FK_KS_ConvertersFixture_dateRows_owner_id" />
 			<many-to-many entity-name="kitchensinkConvertersFixtureRow" foreign-key="FK_KS_ConvertersFixture_dateRows_element_id" column="element_id" />

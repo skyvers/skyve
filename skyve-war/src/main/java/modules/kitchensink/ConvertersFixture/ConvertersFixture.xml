@@ -270,6 +270,10 @@
 			<displayName>LongIntegerSeparator</displayName>
 			<converterName>LongIntegerSeparator</converterName>
 		</longInteger>
+		<!-- A decimal with no converter (the default display), for list filters typed with separators -->
+		<decimal2 name="plainDecimal2">
+			<displayName>Decimal2 (no converter)</displayName>
+		</decimal2>
 		<collection name="dateRows" type="composition">
 			<displayName>Dates rows</displayName>
 			<description>Rows of the inline data grid of dates, for entering each converter's values in a grid cell.</description>

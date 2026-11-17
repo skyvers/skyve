@@ -170,10 +170,11 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 	}
 
 	/**
-	 * Data entry and Vue list grid filters on dates, times and numbers whose converters are not the defaults (the Converters
-	 * Fixtures list): a month name date, a month first 12 hour date time, a month name timestamp with seconds, a 12 hour
-	 * time, dollars and two percentages. Each value is written as the field or column shows it, so that the recording
-	 * replays unedited: see pf-recorder-round-trip-converters.xml.
+	 * Data entry and Vue list grid filters on dates, times and numbers whose converters are not the defaults (the
+	 * Converters Fixtures list): a month name date, a month first 12 hour date time, a month name timestamp with
+	 * seconds, a 12 hour time, dollars, two percentages (one over 1000%) and a decimal with no converter (greaterThan).
+	 * Each value is written as the field or column shows it, so that the recording replays unedited: see
+	 * pf-recorder-round-trip-converters.xml.
 	 */
 	@Test
 	void converters() {
@@ -185,15 +186,17 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 				"<dataEnter binding=\"ddMmmYyyyHhMiSs\" value=\"25-Dec-2026 12:00:59 AM\"/>",
 				"<dataEnter binding=\"hhMi\" value=\"12:00 PM\"/>",
 				"<dataEnter binding=\"decimal2DollarsAndCents\" value=\"1,234.56\"/>",
-				"<dataEnter binding=\"decimal5TwoDecimalPlacesPercentage\" value=\"12.50%\"/>",
+				"<dataEnter binding=\"decimal5TwoDecimalPlacesPercentage\" value=\"1,234.50%\"/>",
 				"<dataEnter binding=\"simplePercentage\" value=\"-5%\"/>",
+				"<dataEnter binding=\"plainDecimal2\" value=\"1234.56\"/>",
 				"<listGridFilter column=\"mmmDdYyyy\" value=\"Jun-05-2026\" operator=\"equals\"/>",
 				"<listGridFilter column=\"mmDdYyyyHhMi\" value=\"06/05/2026 02:47 PM\" operator=\"equals\"/>",
 				"<listGridFilter column=\"ddMmmYyyyHhMiSs\" value=\"25-Dec-2026 12:00:59 AM\" operator=\"equals\"/>",
 				"<listGridFilter column=\"hhMi\" value=\"12:00 PM\" operator=\"equals\"/>",
 				"<listGridFilter column=\"decimal2DollarsAndCents\" value=\"1,234.56\" operator=\"equals\"/>",
-				"<listGridFilter column=\"decimal5TwoDecimalPlacesPercentage\" value=\"12.50%\" operator=\"equals\"/>",
-				"<listGridFilter column=\"simplePercentage\" value=\"0%\" operator=\"lessThan\"/>");
+				"<listGridFilter column=\"decimal5TwoDecimalPlacesPercentage\" value=\"1,234.50%\" operator=\"equals\"/>",
+				"<listGridFilter column=\"simplePercentage\" value=\"0%\" operator=\"lessThan\"/>",
+				"<listGridFilter column=\"plainDecimal2\" value=\"1000.5\" operator=\"greaterThan\"/>");
 		replay(xml);
 	}
 

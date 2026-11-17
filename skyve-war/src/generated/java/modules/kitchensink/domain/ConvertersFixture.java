@@ -247,6 +247,9 @@ public class ConvertersFixture extends AbstractPersistentBean {
 	public static final String longIntegerSeparatorPropertyName = "longIntegerSeparator";
 
 	/** @hidden */
+	public static final String plainDecimal2PropertyName = "plainDecimal2";
+
+	/** @hidden */
 	public static final String dateRowsPropertyName = "dateRows";
 
 	/** @hidden */
@@ -568,6 +571,11 @@ public class ConvertersFixture extends AbstractPersistentBean {
 	 * LongIntegerSeparator
 	 **/
 	private Long longIntegerSeparator;
+
+	/**
+	 * Decimal2 (no converter)
+	 **/
+	private Decimal2 plainDecimal2;
 
 	/**
 	 * Dates rows
@@ -1838,6 +1846,25 @@ public class ConvertersFixture extends AbstractPersistentBean {
 	public void setLongIntegerSeparator(Long longIntegerSeparator) {
 		preset(longIntegerSeparatorPropertyName, longIntegerSeparator);
 		this.longIntegerSeparator = longIntegerSeparator;
+	}
+
+	/**
+	 * {@link #plainDecimal2} accessor.
+	 * @return	The value.
+	 **/
+	public Decimal2 getPlainDecimal2() {
+		return plainDecimal2;
+	}
+
+	/**
+	 * {@link #plainDecimal2} mutator.
+	 * @param plainDecimal2	The new value.
+	 **/
+	@XmlElement
+	@XmlJavaTypeAdapter(Decimal2Mapper.class)
+	public void setPlainDecimal2(Decimal2 plainDecimal2) {
+		preset(plainDecimal2PropertyName, plainDecimal2);
+		this.plainDecimal2 = plainDecimal2;
 	}
 
 	/**

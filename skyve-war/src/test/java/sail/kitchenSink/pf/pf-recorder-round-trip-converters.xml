@@ -3,10 +3,11 @@
 	The converters workflow that PrimeFacesRecorderRoundTripSailIT records and replays (tablet): data entry and Vue list
 	grid filters on dates, times and numbers whose converters are not the defaults (the Converters Fixtures list,
 	kitchensink.ConvertersFixture): a month name date, a month first 12 hour date time, a timestamp with a month name
-	and seconds, a 12 hour time at noon, dollars and two percentages. Each filter value is written as the column's
-	cells show it, which is also how it was typed, so that the recorder writes it as typed (a value the application
-	showed but the user did not type would be recorded as a capture). It has no login: it runs in a session that is
-	already signed in and recording. The fixture it makes sorts first ("0 ...") and is deleted again at the end.
+	and seconds, a 12 hour time at noon, dollars, two percentages (one over 1000%) and a decimal with no converter. Each
+	filter value is written as the column's cells show it, which is also how it was typed, so that the recorder writes
+	it as typed (a value the application showed but the user did not type would be recorded as a capture). It has no
+	login: it runs in a session that is already signed in and recording. The fixture it makes sorts first ("0 ...") and
+	is deleted again at the end.
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 	xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
@@ -22,8 +23,9 @@
 			<dataEnter binding="ddMmmYyyyHhMiSs" value="25-Dec-2026 12:00:59 AM" />
 			<dataEnter binding="hhMi" value="12:00 PM" />
 			<dataEnter binding="decimal2DollarsAndCents" value="1,234.56" />
-			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="1,234.50%" />
 			<dataEnter binding="simplePercentage" value="-5%" />
+			<dataEnter binding="plainDecimal2" value="1234.56" />
 			<save />
 			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
 			<ok />
@@ -33,8 +35,9 @@
 			<listGridFilter module="kitchensink" document="ConvertersFixture" column="ddMmmYyyyHhMiSs" value="25-Dec-2026 12:00:59 AM" operator="equals" />
 			<listGridFilter module="kitchensink" document="ConvertersFixture" column="hhMi" value="12:00 PM" operator="equals" />
 			<listGridFilter module="kitchensink" document="ConvertersFixture" column="decimal2DollarsAndCents" value="1,234.56" operator="equals" />
-			<listGridFilter module="kitchensink" document="ConvertersFixture" column="decimal5TwoDecimalPlacesPercentage" value="12.50%" operator="equals" />
+			<listGridFilter module="kitchensink" document="ConvertersFixture" column="decimal5TwoDecimalPlacesPercentage" value="1,234.50%" operator="equals" />
 			<listGridFilter module="kitchensink" document="ConvertersFixture" column="simplePercentage" value="0%" operator="lessThan" />
+			<listGridFilter module="kitchensink" document="ConvertersFixture" column="plainDecimal2" value="1000.5" operator="greaterThan" />
 			<testGridRows module="kitchensink" document="ConvertersFixture" rowContaining="0 SAIL converters {run}" minRows="1" maxRows="1" />
 			<listGridZoom module="kitchensink" document="ConvertersFixture" rowContaining="0 SAIL converters {run}" />
 			<delete />

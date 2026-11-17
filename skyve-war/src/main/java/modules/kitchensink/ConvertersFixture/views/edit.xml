@@ -13,6 +13,11 @@
 				<default binding="name" />
 			</item>
 		</row>
+		<row>
+			<item>
+				<default binding="plainDecimal2" />
+			</item>
+		</row>
 	</form>
 	<form border="true" borderTitle="Dates">
 		<column percentageWidth="30" responsiveWidth="4" />
