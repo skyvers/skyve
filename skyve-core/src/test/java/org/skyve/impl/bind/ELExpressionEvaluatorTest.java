@@ -586,7 +586,7 @@ import jakarta.el.ELProcessor;
 		Map<String, ELClass> first = ELExpressionEvaluator.ENUM_BEANS.get(ImportedEnumBean.class);
 		assertSame(first, ELExpressionEvaluator.ENUM_BEANS.get(ImportedEnumBean.class));
 		assertEquals(EnumBean.Choice.class, first.get("Choice").getKlass());
-		// each class has a map of its own, seeded from but separate to what is discovered for it
+		// each class has a map of its own
 		assertNotSame(ELExpressionEvaluator.ENUM_BEANS.get(EnumBean.class), first);
 		assertEquals(ELExpressionEvaluator.enumBeans(ImportedEnumBean.class).keySet(), first.keySet());
 	}

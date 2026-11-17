@@ -1,5 +1,6 @@
 package org.skyve.impl.bind;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -18,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.AfterEach;
@@ -39,6 +41,7 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 
+import jakarta.el.ELClass;
 import jakarta.el.ELProcessor;
 import jakarta.el.PropertyNotFoundException;
 
@@ -48,6 +51,7 @@ import jakarta.el.PropertyNotFoundException;
 @SuppressWarnings({"static-method", "java:S112"})
 class RelatedEnumerationTest {
 	private static final String MODULE = "test";
+	private static final String CUSTOMER = "demo";
 
 	public enum Colour { RED, BLUE }
 	public enum Shade { RED, DARK }
@@ -89,6 +93,9 @@ class RelatedEnumerationTest {
 		ELExpressionEvaluator.ENUM_BEANS.remove(RootBean.class);
 		ELExpressionEvaluator.ENUM_BEANS.remove(LocalEnumRootBean.class);
 		ELExpressionEvaluator.ENUM_BEANS.remove(DynamicBean.class);
+		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(RootBean.class);
+		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(LocalEnumRootBean.class);
+		ELExpressionEvaluator.RELATED_ENUM_BEANS.remove(DynamicBean.class);
 	}
 
 	// ---- metadata fixtures ----
@@ -250,6 +257,27 @@ class RelatedEnumerationTest {
 		document("B", ungeneratedEnumeration("tint", "Colour", "Shared", "red", "R"));
 		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
 		assertNotNull(ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
+	}
+
+	/**
+	 * Before the domain is compiled, an enumeration whose class loads - one a customer's or narrowed
+	 * document's generated class declares, named differently - is compared with one whose class does
+	 * not by the name of the vanilla domain class's enum.
+	 */
+	@Test
+	void aGeneratedAndAnUngeneratedEnumerationOfTheSameDocumentAreNotAmbiguous() {
+		document("A", enumeration("colour", "Colour", "Shared", Colour.class));
+		document("B", ungeneratedEnumeration("tint", "Colour", "Shared", "red", "R"));
+		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
+		assertNotNull(ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
+	}
+
+	@Test
+	void aGeneratedAndAnUngeneratedEnumerationOfDifferentDocumentsAreAmbiguous() {
+		document("A", enumeration("colour", "Colour", "A", Colour.class));
+		document("B", ungeneratedEnumeration("colour", "Colour", "B", "red", "R"));
+		DocumentImpl root = document("Root", relation("a", "A"), relation("b", "B"));
+		assertThrows(MetaDataException.class, () -> ELExpressionEvaluator.relatedEnumeration(customer, root, "Colour"));
 	}
 
 	@Test
@@ -434,10 +462,22 @@ class RelatedEnumerationTest {
 	}
 
 	private User bindUserOfCustomer() throws Exception {
+		return bindUserOf(customer, CUSTOMER);
+	}
+
+	private User bindUserOf(Customer userCustomer, String customerName) throws Exception {
 		User user = mock(User.class);
-		when(user.getCustomer()).thenReturn(customer);
+		when(user.getCustomer()).thenReturn(userCustomer);
+		when(user.getCustomerName()).thenReturn(customerName);
 		bindUser(user);
 		return user;
+	}
+
+	/**
+	 * The related enumerations remembered for the bean class and the demo customer.
+	 */
+	private static Map<String, ELClass> relatedEnumBeans(Class<?> beanClass) {
+		return ELExpressionEvaluator.RELATED_ENUM_BEANS.get(beanClass).getOrDefault(CUSTOMER, Map.of());
 	}
 
 	@Test
@@ -456,9 +496,10 @@ class RelatedEnumerationTest {
 		rootRelatedToColour();
 		User user = bindUserOfCustomer();
 		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
-		assertTrue(ELExpressionEvaluator.ENUM_BEANS.get(RootBean.class).isEmpty());
+		assertTrue(relatedEnumBeans(RootBean.class).isEmpty());
 		assertEquals(Colour.RED, evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean()));
-		assertEquals(Colour.class, ELExpressionEvaluator.ENUM_BEANS.get(RootBean.class).get("Colour").getKlass());
+		assertEquals(Colour.class, relatedEnumBeans(RootBean.class).get("Colour").getKlass());
+		assertTrue(ELExpressionEvaluator.ENUM_BEANS.get(RootBean.class).isEmpty());
 
 		clearInvocations(user, customer, module);
 		assertEquals(Colour.BLUE, evaluator.evaluateWithoutPrefixOrSuffix("Colour.BLUE", new RootBean()));
@@ -473,7 +514,7 @@ class RelatedEnumerationTest {
 		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
 		Bean bean = new DynamicBean(MODULE, "Root", new HashMap<>());
 		assertEquals(Colour.RED, evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", bean));
-		assertTrue(ELExpressionEvaluator.ENUM_BEANS.get(DynamicBean.class).isEmpty());
+		assertTrue(ELExpressionEvaluator.RELATED_ENUM_BEANS.get(DynamicBean.class).isEmpty());
 
 		// another dynamic document of the same class is searched for itself
 		document("Unrelated");
@@ -495,6 +536,7 @@ class RelatedEnumerationTest {
 		// the bean class's own enumeration is all that is known for it
 		assertEquals(1, ELExpressionEvaluator.ENUM_BEANS.get(LocalEnumRootBean.class).size());
 		assertEquals(LocalEnumRootBean.Colour.class, ELExpressionEvaluator.ENUM_BEANS.get(LocalEnumRootBean.class).get("Colour").getKlass());
+		assertTrue(relatedEnumBeans(LocalEnumRootBean.class).isEmpty());
 	}
 
 	@Test
@@ -518,7 +560,7 @@ class RelatedEnumerationTest {
 		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
 		Exception e = assertThrows(Exception.class, () -> evaluator.evaluateWithoutPrefixOrSuffix("Shade.RED", new RootBean()));
 		assertTrue(e.getMessage().contains("Shade"), e.getMessage());
-		assertTrue(ELExpressionEvaluator.ENUM_BEANS.get(RootBean.class).isEmpty());
+		assertTrue(relatedEnumBeans(RootBean.class).isEmpty());
 	}
 
 	@Test
@@ -528,7 +570,38 @@ class RelatedEnumerationTest {
 		bindUserOfCustomer();
 		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
 		assertUnresolved("Colour", () -> evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean()));
-		assertTrue(ELExpressionEvaluator.ENUM_BEANS.get(RootBean.class).isEmpty());
+		assertTrue(relatedEnumBeans(RootBean.class).isEmpty());
+	}
+
+	/**
+	 * A related enumeration is remembered for each customer, as a customer's classes can declare
+	 * an enum class of their own for it.
+	 */
+	@Test
+	void evaluationRemembersWhatItFoundForEachCustomer() throws Exception {
+		Customer other = mock(Customer.class);
+		when(other.getModule(MODULE)).thenReturn(module);
+		Enumeration colour = enumeration("colour", "Colour", "Other", Colour.class);
+		doReturn(Shade.class).when(colour).getImplementingType(other);
+		DocumentImpl related = document("Other", colour);
+		doReturn(List.of(colour)).when(related).getAllAttributes(other);
+		DocumentImpl root = document("Root", relation("other", "Other"));
+		when(module.getDocument(other, "Other")).thenReturn(related);
+		when(module.getDocument(other, "Root")).thenReturn(root);
+		ELExpressionEvaluator evaluator = new ELExpressionEvaluator(false);
+
+		bindUserOfCustomer();
+		Object demo = evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean());
+		bindUserOf(other, "other");
+		Object otherFirst = evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean());
+		Object otherSecond = evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean());
+		bindUserOfCustomer();
+		Object demoAgain = evaluator.evaluateWithoutPrefixOrSuffix("Colour.RED", new RootBean());
+
+		assertAll(() -> assertEquals(Colour.RED, demo),
+					() -> assertEquals(Shade.RED, otherFirst),
+					() -> assertEquals(Shade.RED, otherSecond),
+					() -> assertEquals(Colour.RED, demoAgain));
 	}
 
 	@Test

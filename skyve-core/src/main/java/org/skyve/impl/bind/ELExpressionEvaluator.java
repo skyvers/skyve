@@ -30,6 +30,7 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
@@ -37,6 +38,7 @@ import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.user.User;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
@@ -81,16 +83,27 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	private static final BindingELResolver BINDING_RESOLVER = new BindingELResolver();
 
 	/**
-	 * The enumerations an expression evaluated against a bean class can name, keyed by simple name.
-	 * The class's own enumerations are there from the start (see {@link #enumBeans(Class)}).
-	 * The enumerations of related documents are added as expressions name them; only names that
-	 * resolved are kept, so the map is bounded by the enumerations that can be reached.
-	 * ClassValue does not pin redeployed class loaders.
+	 * The bean class's own enumerations, which an expression evaluated against it can name, keyed by
+	 * simple name (see {@link #enumBeans(Class)}). ClassValue does not pin redeployed class loaders.
 	 */
 	static final ClassValue<Map<String, ELClass>> ENUM_BEANS = new ClassValue<>() {
 		@Override
 		protected @Nonnull Map<String, ELClass> computeValue(@SuppressWarnings("null") @Nonnull Class<?> type) {
-			return new ConcurrentHashMap<>(enumBeans(type));
+			return enumBeans(type);
+		}
+	};
+
+	/**
+	 * The enumerations of related documents that an expression evaluated against a bean class has
+	 * named, keyed by customer name and then simple name, as a customer's classes can declare an
+	 * enum class of their own. They are added as expressions name them; only names that resolved are
+	 * kept, so each map is bounded by the enumerations that can be reached.
+	 * ClassValue does not pin redeployed class loaders.
+	 */
+	static final ClassValue<Map<String, Map<String, ELClass>>> RELATED_ENUM_BEANS = new ClassValue<>() {
+		@Override
+		protected @Nonnull Map<String, Map<String, ELClass>> computeValue(@SuppressWarnings("null") @Nonnull Class<?> type) {
+			return new ConcurrentHashMap<>();
 		}
 	};
 
@@ -690,7 +703,7 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 						result = candidate;
 						resultDocumentName = qualifiedName(related);
 					}
-					else if (! enumClassName(customer, result).equals(enumClassName(customer, candidate))) {
+					else if (! sameEnumClass(customer, result, candidate)) {
 						throw new MetaDataException("Enumeration " + name + " is ambiguous for document " + qualifiedName(document) +
 														" as it is declared by both " + resultDocumentName + " and " + qualifiedName(related) +
 														", which are equally closely related to it");
@@ -765,19 +778,34 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	}
 
 	/**
-	 * Names the enum class that implements an enumeration for a customer: the class it loads, which a
-	 * customer's or narrowed document's generated class can declare, or before the domain is compiled,
-	 * the hand-coded class or the vanilla domain class's enum.
+	 * Determines whether two enumerations are implemented by the same enum class for a customer. The
+	 * classes they load are compared when both can be loaded. Otherwise, as before the domain is
+	 * compiled, the names of the hand-coded or vanilla domain classes' enums are compared for both, as a
+	 * loaded class can be one a customer's or narrowed document's generated class declares, whose name
+	 * differs from the name of the vanilla domain class's enum for the same enumeration.
 	 *
 	 * @param customer the customer metadata context
 	 * @param enumeration the enumeration metadata
+	 * @param other the other enumeration metadata
+	 * @return true if they are implemented by the same enum class
+	 */
+	private static boolean sameEnumClass(@Nonnull Customer customer, @Nonnull Enumeration enumeration, @Nonnull Enumeration other) {
+		Class<?> enumClass = loadEnumClass(customer, enumeration);
+		Class<?> otherEnumClass = loadEnumClass(customer, other);
+		if ((enumClass != null) && (otherEnumClass != null)) {
+			return enumClass.equals(otherEnumClass);
+		}
+		return unloadedEnumClassName(enumeration).equals(unloadedEnumClassName(other));
+	}
+
+	/**
+	 * Names the enum class that implements an enumeration before the domain is compiled: the
+	 * hand-coded class, or the vanilla domain class's enum.
+	 *
+	 * @param enumeration the enumeration metadata
 	 * @return the fully qualified name of the hand-coded or generated enum class
 	 */
-	private static @Nonnull String enumClassName(@Nonnull Customer customer, @Nonnull Enumeration enumeration) {
-		Class<?> enumClass = loadEnumClass(customer, enumeration);
-		if (enumClass != null) {
-			return enumClass.getName();
-		}
+	private static @Nonnull String unloadedEnumClassName(@Nonnull Enumeration enumeration) {
 		String result = enumeration.getImplementingEnumClassName();
 		if (result == null) {
 			result = enumeration.getEncapsulatingClassName() + '$' + enumeration.toJavaIdentifier();
@@ -812,22 +840,31 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 	/**
 	 * Resolves enumerations while an expression is evaluated against a bean: the bean class's own,
 	 * and those of related documents. A related enumeration that is found is remembered for the
-	 * bean's class, unless that class is one of the framework's dynamic bean classes, which are
-	 * shared by every dynamic document.
+	 * bean's class and the current user's customer, unless that class is one of the framework's
+	 * dynamic bean classes, which are shared by every dynamic document.
 	 */
 	private static final class EvaluationEnumELResolver extends EnumELResolver {
 		private final Bean bean;
-		private final Map<String, ELClass> enumBeans;
+		private final Map<String, ELClass> ownEnumBeans;
+		// the related enumerations remembered for the current user's customer, looked up when first needed
+		private Map<String, ELClass> relatedEnumBeans;
 
 		private EvaluationEnumELResolver(@Nonnull Bean bean) {
 			super(Set.of());
 			this.bean = bean;
-			enumBeans = ENUM_BEANS.get(bean.getClass());
+			ownEnumBeans = ENUM_BEANS.get(bean.getClass());
 		}
 
 		@Override
 		@Nullable Object remembered(@Nonnull String name) {
-			return enumBeans.get(name);
+			ELClass result = ownEnumBeans.get(name);
+			if (result == null) {
+				Map<String, ELClass> related = relatedEnumBeans();
+				if (related != null) {
+					result = related.get(name);
+				}
+			}
+			return result;
 		}
 
 		@Override
@@ -847,10 +884,34 @@ public class ELExpressionEvaluator extends ExpressionEvaluator {
 				return null;
 			}
 			ELClass result = new ELClass(enumClass);
-			if (! DynamicBean.class.getPackageName().equals(bean.getClass().getPackageName())) {
-				enumBeans.putIfAbsent(name, result);
+			Map<String, ELClass> related = relatedEnumBeans();
+			if (related != null) {
+				related.putIfAbsent(name, result);
 			}
 			return result;
+		}
+
+		/**
+		 * Returns the related enumerations remembered for the bean's class and the current user's customer.
+		 *
+		 * @return the map to remember them in, or {@code null} if they are not remembered: for a dynamic
+		 * 			bean class, or without a user's customer name
+		 */
+		private @Nullable Map<String, ELClass> relatedEnumBeans() {
+			if (relatedEnumBeans == null) {
+				Class<?> beanClass = bean.getClass();
+				if (DynamicBean.class.getPackageName().equals(beanClass.getPackageName())) {
+					return null;
+				}
+				User user = AbstractPersistence.get().getUser();
+				@SuppressWarnings("null") // a persistence has no user until one is set
+				String customerName = (user == null) ? null : user.getCustomerName();
+				if (customerName == null) {
+					return null;
+				}
+				relatedEnumBeans = RELATED_ENUM_BEANS.get(beanClass).computeIfAbsent(customerName, k -> new ConcurrentHashMap<>());
+			}
+			return relatedEnumBeans;
 		}
 	}
 
