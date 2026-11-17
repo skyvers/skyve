@@ -1197,11 +1197,12 @@ flowchart TD
 | `SystemDocumentationMojo` | Generates system documentation with PlantUML directives |
 | Scaffold mojos | Project generation and module scaffolding |
 
-### SAIL (Skyve Automated Integration Lifecycle)
+### SAIL (Skyve Application Integration Language)
 
-- Generated from view metadata — produces browser-automation test scripts.
-- Supports Selenese or WebDriver output formats.
-- Validates that rendered UI matches metadata expectations.
+- An XML language for what a user does: scripts are written, recorded in the browser, or generated from menu and view metadata.
+- Interpreted executors run scripts, workflows and suites in a real browser against a server, in PrimeFaces and SmartClient; `SailLoad` runs them as many virtual users.
+- The Control Panel generates a JUnit 5 WebDriver test (`Sail.java`) from a script.
+- Validates that rendered UI matches metadata expectations. See [sail.md](sail.md).
 
 ### Unit Test Generation
 

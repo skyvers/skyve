@@ -121,7 +121,8 @@
 - Workflow
 - SAIL
     - Generation from metadata
-    - Selenese or Web Driver
+    - Interpreted in a browser (PrimeFaces and SmartClient), as suites, workflows and load runs
+    - Recording, and Java (Web Driver) test generation from the Control Panel
 - Pluggable converters/validators
 - Unit test generation
     - CRUD Domain testing
