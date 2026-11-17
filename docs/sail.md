@@ -460,7 +460,7 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
 | `tabSelect` | `path`\* | Selects a tab by its title. | yes; title only, so nested tabs with the same title clash | yes; `Outer::Inner` selects each tab in turn |
-| `dataEnter` | `binding`\*, `value`\*, `navigateToWidget`, `match` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
+| `dataEnter` | `binding`\*, `value`\*, `navigateToWidget`, `match` | Enters the value into the first displayed, enabled widget for the binding; see [Values](#values). Fails if no widget can take it. `navigateToWidget` is accepted and ignored: the executors always scroll the target into view. | yes; after `dataGridNew` or `dataGridEdit` on an inline grid, a binding that is one of the grid's columns is that row's cell (see `dataGridEdit`) | yes; after `dataGridNew`/`dataGridEdit` on an inline grid, bindings are tried as the grid's columns first |
 | `dataEnter match` | `index` (default), `code`, `label` | How the value names a combo or radio option: its position, its code or its label. A code or label must name exactly one option. `code` and `label` fail on any other widget. Prefer `code`: labels change with the language, and positions change when options are added. | yes: the option's value or its label as the page shows them (a combo's empty first entry counts) | yes: the option's position is found from the item's options, then it is chosen as with an index |
 | `testDataEnter` | `fixture` | Builds a bean with `DataBuilder` (the named fixture, or the `sail` fixture), then enters its values into every scalar widget of the view. Membership widgets are skipped. | yes | yes |
 | `upload` | `binding` or `action` (exactly one), `file`\*, `testSuccess` | Uploads a file from the **test** classpath (for example `sail/files/sail-image.png` from `skyve-war/src/test/resources`). With `binding`, it uses the content widget's upload page, and the widget must hold content afterwards. With `action`, it presses the upload action's button, chooses the file and submits it; in SmartClient, `action` can also name a BizPort import action, whose import page (`bizImport.xhtml`) the step drives the same way. An upload action's page that succeeds, and an import page whose import has no problems, close themselves and show their messages in the view's growl, which `testMessage` can check; one with problems (warnings too) stays open, so an import that warns needs `testSuccess="false"`. When the upload page opens the chosen file in its image editor, as it does for an image field, the step presses the editor's Upload button (`#crop`), which uploads it. Otherwise it presses the file list's Upload button. With `testSuccess="false"`, the upload may be refused: the step does not check that the widget holds content or that no error shows. A refusal shown on the upload page is kept, and the upload page is closed with its close button, as a user does after reading it. A following `<testFailure message="..."/>` then checks the refusal, wherever it shows: on the upload page or in the view. | yes; in the image editor, it waits for the cropper before pressing Upload | yes |
@@ -515,9 +515,9 @@ of these defaults from the current context.
 
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
-| `dataGridNew` | `binding`\* | Adds a row. For a grid that is not inline, this opens the row's view and pushes its context. | yes; inline grids add in place | yes; inline grids start an inline edit |
+| `dataGridNew` | `binding`\* | Adds a row. For a grid that is not inline, this opens the row's view and pushes its context. | yes; inline grids add in place, and the steps that follow address the new row's cells (it is added last), as for `dataGridEdit` | yes; inline grids start an inline edit |
 | `dataGridZoom` | `binding`\*, `row` or `rowContaining` | Zooms into the row and pushes its context. | yes | yes |
-| `dataGridEdit` | `binding`\*, `row` or `rowContaining` | Starts an inline edit of the row. | no: PF grids have no row edit gesture; inline cells are inputs | yes; the following `dataEnter`, `testValue`, `testWidget`, `lookupDescriptionPick` and `lookupDescriptionAutoComplete` steps address the row's columns, and any other step ends the edit |
+| `dataGridEdit` | `binding`\*, `row` or `rowContaining` | Starts an inline edit of the row. | inline grids only, with no gesture (the cells are inputs). The following `dataEnter` (also with `match`), `testValue`, `lookupDescriptionPick` and `lookupDescriptionAutoComplete` steps address the row's cells: a binding that is one of the grid's columns means only the row's cell (a cell that is not on the page fails the step; the view's widget of the same binding is not used), and any other binding means the view's widget. Steps that do not touch the page (`comment`, `pause`, `captureValue`, `testWidget`, `testMessage`, `testSuccess`, `testFailure`, `testMenu`) keep the row; any other step ends it, as in SmartClient, including `captureCell` and `testGridRows` (which read the grid's saved rows), `captureTitle` and `testDataEnter`. `rowContaining` also reads the values of the row's inputs. A `row` past the grid's last row fails the step (a data grid shows all its rows: it has no pages). Other grids have no row edit gesture: use `dataGridZoom` | yes; the following `dataEnter`, `testValue`, `testWidget`, `lookupDescriptionPick` and `lookupDescriptionAutoComplete` steps address the row's columns, and any step that touches the page ends the edit |
 | `dataGridRemove` | `binding`\*, `row` or `rowContaining` | Removes the row from the collection. The record itself is not deleted. | yes | yes |
 | `dataGridSelect` | `binding`\*, `row` or `rowContaining` | Selects the row without zooming. | only on grids with a `selectedIdBinding`; on other grids a selection zooms | yes |
 | `dataGridMove` | `binding`\*, `row` or `rowContaining`, `to`\* | Drags the row of an ordered data grid to the zero-based position `to`, counted in the rows as shown, with a real drag-and-drop gesture. The rows are numbered again in their new order, which a save keeps. Fails on a grid that is not ordered (its rows cannot be dragged) and when `to` is past the last row. The context is unchanged. | yes: the row is dragged by its drag handle, and the server reorders the collection at once (`rowReorder`) | yes; it ends any inline edit first |
@@ -556,7 +556,24 @@ takes). Values are written the same way in both renderers:
 - **Date, dateTime, timestamp and time:** as `dataEnter` takes them for that
   field, which is the attribute's converter format. With the default
   converters: `07-Nov-2025`, `07-Nov-2025 15:38`, `07-Nov-2025 15:43:16` and
-  `11:11`.
+  `11:11`; with others, for example `06/05/2026 02:47 PM` (`MM_DD_YYYY_HH_MI`)
+  or `Jun-05-2026` (`MMM_DD_YYYY`). A date time or timestamp whose converter
+  shows only the date (`*_DateTime`, `*_Timestamp`) is filtered by the whole
+  local day in both renderers: `equals` is that day, `notEquals` any other,
+  `lessThan` before it and `greaterThan` after it. In SmartClient's advanced
+  filter, `between` is after the start day and before the end day,
+  `betweenInclusive` from the start day to the end day, and Match Any and Match
+  None (and groups within them) combine these days; export, charts and Tag or
+  Untag All use the same days as the rows shown.
+- **Numbers:** as the column's cells show them, which is the converter's
+  format: `1,234.56`, `12%` (a percentage converter reads it as 0.12, but
+  `SimplePercentage` as 12), `-0:30` (`Decimal5TimeDuration`). `equals`
+  compares the stored value exactly, so a value a cell shows rounded (`2.35`
+  for a stored 2.345) or as a magnitude (`Decimal2DollarsAndCentsAbsolute`)
+  is not found by what it shows: filter by what is stored (see
+  [Known Limitations](#known-limitations)). In SmartClient's filter row, a
+  value the column's converter refuses (`+5`, `1e3`, `$5` in a column that is
+  not dollars) shows an error on the cell and the list is not filtered.
 
 A step whose operator the column cannot take fails and names the operators it
 can take. Filter, clear and sort steps fail if an error message shows
@@ -565,25 +582,22 @@ afterwards.
 | Column type | PF Vue list grid | PF data table | SC list grid |
 |---|---|---|---|
 | Text | `contains`, `startsWith`, `equals`, `notEquals`; all ignore case | `contains` only, as the server decides (also for a variant domain's description and an association's business key) | `contains` in the filter row (ignores case); the others in the advanced filter (`contains` and `startsWith` ignore case) |
-| Number | `equals`, `notEquals`, `lessThan`, `greaterThan` | `equals` only | `equals` in the filter row; the others in the advanced filter |
+| Number | `equals`, `notEquals`, `lessThan`, `greaterThan` | `equals` only | `equals` in the filter row; the others in the advanced filter, where the value is read as the column's field reads what a user types (`1,234.56`, `12%`; signed dollars, `-7.50`, for `Decimal2DollarsAndCentsAbsolute`) |
 | Enum, constant domain | `equals`, `notEquals`, from the menu's drop-down | `equals`, from the filter's combo | `equals`, from the filter row's select |
 | Boolean | `equals`, `notEquals`, with the three-state check box | `equals`, with the filter's check box | `equals`, with the filter row's three-state check box |
-| Date, dateTime, timestamp | `equals`, `notEquals`, `lessThan` (Before), `greaterThan` (After) | `equals` only | `equals` in the filter row; `lessThan` and `greaterThan` in the advanced filter |
-| Time | `equals` | `equals` only | `equals` in the filter row when the list shows the column; `equals`, `lessThan` and `greaterThan` in the advanced filter, for a shown or hidden column |
+| Date, dateTime, timestamp | `equals`, `notEquals`, `lessThan` (Before), `greaterThan` (After) | `equals` only | `equals` in the filter row; `notEquals`, `lessThan` and `greaterThan` in the advanced filter |
+| Time | `equals` | `equals` only | `equals` in the filter row when the list shows the column; `equals`, `notEquals`, `lessThan` and `greaterThan` in the advanced filter, for a shown or hidden column |
 | Association | as text, on its business key | as text | `equals`, by the related record's description, from the filter row's select. Use a column through the association, such as `selection.description`, for `contains` |
 
 **PF details.** The Vue list grid uses each column's filter menu. A new filter
 on a column that already has one presses Clear first. The step fails on a
 column the grid does not show (show it with the column chooser first) and on a
-grid whose toolbar shows Match Any, because its filters are ORed. A date or
-time column's calendar takes the format of the column's converter, as its cells
-show it, so the value is typed as written (in full: `5/6/2026` is typed
-`05/06/2026` on an `MM_DD_YYYY` column). A date time or timestamp column whose
-converter shows only the date is filtered by that day: `equals` matches the
-whole day, `notEquals` anything outside it, `lessThan` before it starts and
-`greaterThan` after it ends. A data table filters each column one way, chosen
-by the server; the step opens the filter row with Toggle filters when it is
-hidden.
+grid whose toolbar shows Match Any, because its filters are ORed. A Vue grid's
+filter calendar takes the column's converter format, so the harness types the
+value as written (read and written again by the converter: `5/6/2026` is typed
+`05/06/2026`). A number column's filter is a text field that sends the text as
+typed. A data table filters each column one way, chosen by the server; the step
+opens the filter row with Toggle filters when it is hidden.
 
 **SC details.** The filter row is used for the operators it applies:
 `contains` on text, `equals` on anything else, and clearing. Other operators,
@@ -593,9 +607,7 @@ builder's API, as a saved snapshot sets them; the field, operator and value
 pickers are not clicked. The filter row's existing filters become clauses. The
 grid then stays in advanced filtering until the view is opened again, so later
 filters on it are clauses too. An association `equals` fails once the grid is
-in advanced filtering, because that hides the row. A date time or timestamp
-column whose converter shows only the date compares with midnight UTC of the
-day typed, not with the day.
+in advanced filtering, because that hides the row.
 
 ### Assertions
 
@@ -960,6 +972,7 @@ tests. The SAIL ITs are:
 | IT | Script | Renderer |
 |---|---|---|
 | `PrimeFacesKitchenSinkSailIT` | `sail/kitchenSink/pf/pf-kitchensink-sail.xml`, plus a test that switches to SmartClient with PrimeFaces' user menu and checks `<switchMode/>` back, one that checks the find steps' failures, one that checks the window steps' and `listGridTool`'s failures (`windowAndToolFailures`), and `rowLink` (`pf-kitchensink-row-link.xml`) | PF, tablet |
+| `PrimeFacesConvertersSailIT` | `sail/kitchenSink/pf/pf-converters-*.xml`, a test per group of converters: entry in fields and inline grid cells, then Vue list grid and data table filters | PF, tablet |
 | `PrimeFacesSailTestStrategyIT` | inline scripts, 3 tests | PF, tablet |
 | `PrimeFacesFocusSailIT` | where a page puts the focus: a rerender low in a long view keeps the scroll and the focus; a loaded view focuses its first input | PF, tablet |
 | `PrimeFacesRequiredMessagesSailIT` | when required-field messages show: not when a view first renders, after a rerender without client validation or for an action with `clientValidation="false"`; only for an action with client validation. One inline script per UX/UI | PF, tablet, phone and external |
@@ -969,6 +982,7 @@ tests. The SAIL ITs are:
 | `PrimeFacesAdminSailIT` | `sail/admin/pf/pf-admin-sail.xml` (the older single-file admin script) | PF, tablet |
 | `PrimeFacesAdminPhoneSailIT` | `sail/admin/pf/admin-phone-smoke.xml` | PF, phone |
 | `SmartClientKitchenSinkSailIT` | `sail/kitchenSink/sc/sc-kitchensink-sail.xml`, `sc-kitchensink-sail-find.xml` (`find`), and inline scripts that check the find steps' failures (`findFailures`) and the window steps' failures (`windowFailures`) | SC |
+| `SmartClientConvertersSailIT` | `sail/kitchenSink/sc/sc-converters-*.xml`, a test per group of converters: entry in fields and inline grid cells, then list grid filters | SC |
 | `SmartClientAdminSailIT` | `sail/admin/sc/sc-admin-sail.xml` | SC |
 | `SmartClientAdminSuiteSailIT` | `sail/admin/sc/suite/*.xml` | SC |
 | `SmartClientDataGridSortSailIT` | an inline script, then a column header sort of a data grid and a Save through `SmartClientSelenide` (no SAIL step sorts a data grid) | SC |
@@ -977,8 +991,8 @@ tests. The SAIL ITs are:
 | `SmartClientPushGrowlSailIT` | a growl, then a pushed growl: both stay showing | SC |
 | `SmartClientActionUploadSailIT` | a refused action upload leaves its window open showing why; a successful one closes its window, refreshes the view and shows the page's messages in the view's growl, the upload's and the action's own, with the close buttons hidden so that the upload step cannot close the window itself; a growl pushed as the page refreshes the view, and a growl in the refresh's response, leave the messages showing; a BizPort import that warns leaves its window open, and a clean one (an empty workbook into admin's Data Maintenance) closes it and shows "The import completed successfully." in the view | SC |
 | `SmartClientServerRolesSailIT` | `sail/admin/sc/suite/03-security-admin.xml` with no `viewRoles` registration: the new user's views are built with the roles the server reports. Needs `sail.recording` on. | SC |
-| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
-| `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters and a data table's filters and sorts, captures, questions), `pf-recorder-round-trip-windows.xml` (new windows, back and refresh), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
+| `SmartClientRecorderRoundTripSailIT` | records `sail/kitchenSink/sc/sc-recorder-round-trip.xml`, `sc-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters, captures, questions), `sc-recorder-round-trip-windows.xml` (new windows, list grid tools, back and refresh), `sc-recorder-round-trip-converters.xml` (dates, times and numbers on other converters than the defaults, and a decimal with no converter), an ordered list membership, an admin contacts workflow and checks added through the panel, and replays the recordings; also checks that the home page is unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | SC |
+| `PrimeFacesRecorderRoundTripSailIT` | records `sail/kitchenSink/pf/pf-recorder-round-trip.xml`, `pf-recorder-round-trip-more.xml` (grids, lookups, uploads, list filters and a data table's filters and sorts, captures, questions), `pf-recorder-round-trip-windows.xml` (new windows, back and refresh), `pf-recorder-round-trip-converters.xml` (dates, times and numbers on other converters than the defaults, and a decimal with no converter), an admin contacts workflow and checks added through the panel, and replays the recordings; also checks the sign out warning and that pages are unchanged unless recording. See [Recording](#recording). Needs `sail.recording` on. | PF, tablet |
 | `KitchenSinkWorkflowSailIT` | `sail/kitchenSink/workflow/`: three files (PF tablet, SC, PF tablet) and one `<workflow>` file (PF external, then SC in the same browser) | both |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
@@ -1179,8 +1193,10 @@ Kitchen sink fixtures for the newer steps:
     fixture from its list to check each row's position with `captureCell` and
     a `pattern`.
   - `lines`, an inline data grid. The SC kitchen sink adds lines inline, moves
-    one, edits one, saves and checks their positions once reopened (PF cannot
-    type into inline cells).
+    one, edits one, saves and checks their positions once reopened (the PF
+    kitchen sink types into the KitchenSink inline grid's cells, a combo by code
+    and by label, and a ModelLookupFixture inline row's lookups; the converters
+    scripts type into inline cells of every converter in both renderers).
   - `members`, an ordered list membership of lookup values. `dataEnter`
     assigns members in the order its value names them in SC, and in the
     candidates' order in PF. Both kitchen sinks then reorder them with
@@ -1212,16 +1228,108 @@ Kitchen sink fixtures for the newer steps:
   (`monthFirstDate` MM_DD_YYYY, `twelveHourDateTime` MM_DD_YYYY_HH_MI,
   `monthNameTimestamp` MMM_DD_YYYY_HH_MI_SS, `twelveHourTime` HH_MI_SS) and a
   date time shown as a date (`dateTimeAsDate`, MM_DD_YYYY_DateTime; its Bizlet
-  keeps it equal to `dateTime`, and it is deprecated only to keep it out of the
-  generated edit view), listed by ListGridFixture's "Vue list grid of column
-  types". The PF kitchen sink filters each one with values written as their
-  cells show them, including `05/06/2026` against a `06/05/2026` that would
-  match if day and month were swapped, and `dateTimeAsDate` by day with each
-  operator; both recorder round trips record and replay such filters unedited.
+  keeps it equal to `dateTime`), listed by ListGridFixture's "Vue list grid of
+  column types". The PF kitchen sink filters each one with values written as
+  their cells show them, including `05/06/2026` against a `06/05/2026` that
+  would match if day and month were swapped, and `dateTimeAsDate` by day with
+  each operator; both recorder round trips record and replay such filters
+  unedited.
 
 `KitchenSinkWorkflowSailIT` is the conformance for [workflows](#workflows):
 PrimeFaces makes a lookup value and keeps its number, then SmartClient finds it
 by the number and `{run}`, and so on back to PrimeFaces.
+
+**Converters.** `kitchensink.ConvertersFixture` has an attribute for each of the
+60 converters (`ConverterName`), named after it in lower camel case
+(`DD_MMM_YYYY_HH24_MI` is `ddMmmYyyyHh24Mi`) and labelled with the converter's
+name, of the type the converter takes, and `plainDecimal2`, a decimal with no
+converter. Its edit view groups them (dates, date times, timestamps, date times
+and timestamps shown as dates, times, numbers) in bordered forms, each with an
+inline data grid of `ConvertersFixtureRow` (the same attributes), and a query
+per group (`qConvertersDates`, `qConvertersDateTimes`, `qConvertersTimestamps`,
+`qConvertersDateOnly`, `qConvertersTimes`, `qConvertersNumbers`) lists its
+columns: the list views are the PF Vue list grid and the SC list grid, and
+`ConvertersDataTables` shows the same queries as PrimeFaces data tables. Its
+menu list, "Converters Fixtures", shows a few non-default converters and
+`plainDecimal2` (the recorder round trips' sample). `ConvertersFixtureBizlet`
+stores the absolute converter's value negated when a fixture is created with a
+name that ends with " negative", once, so that the scripts check both how a
+stored negative is shown and what a later save without typing stores: the record
+is saved again with OK, which stores its magnitude in PrimeFaces (the absolute
+column's `lessThan 0` filter finds no row) and keeps the negative in SmartClient
+(it finds the record, as does `equals -7.50`).
+
+`PrimeFacesConvertersSailIT` and `SmartClientConvertersSailIT` run a script per
+group (`pf/pf-converters-<group>.xml`, `sc/sc-converters-<group>.xml`): records
+a, b and c (and d and e in the numbers group) are typed into every field as a
+user types them, and into an inline grid row with the next record's values (so
+that a cell's value differs from its field's); both are checked with `testValue`
+after the save and once reopened from the list; then each list grid is filtered,
+column by column, with values written as the cells show them, and the rows each
+filter leaves are counted and named. The values catch a day and month swapped (a
+is 05 Jun, b 06 May), a day above 12, 12 hour times at PM, noon and midnight,
+month names, seconds, negatives, separators, `$` (typed, not shown), percentages
+typed with and without `%` and over 1000%, rounding past the shown places,
+durations rounded to the minute (`0:20` for 0.33333 hours, `0:29` for 0.49166,
+`2:30` for 2.4999, `-0:01`, `1:00` for 0.99999, typed with decimal minutes), the
+absolute converter's stored negative shown as its magnitude, and values half way
+between two shown values (1.005 is `1.01`, -2.345 is `-2.35`, 0.12345 is
+`12.35%`), a negative that rounds to zero (`0.00`) and the largest whole number
+a browser holds exactly (9,007,199,254,740,991). `ConvertersFixtureBizlet`
+stores the values a field does not keep when they are typed, for a fixture whose
+name ends with " half way". The rules they check are in [Converters](#converters).
+
+### Converters
+
+The rules the converters scripts check, and what changed for users:
+
+- **`Decimal2DollarsAndCentsAbsolute`** is for entering positive dollars, or for
+  showing a magnitude whose sign the label gives (an amount due, a balance
+  carried forward). Its fields show a value without its sign in every renderer.
+  In an editable field, a stored negative is saved as its magnitude: in
+  PrimeFaces on any save of the form, and in SmartClient once the field has been
+  focused (a click into it and out again is enough); a save in SmartClient
+  without focusing the field keeps the negative. Show a signed amount that must
+  keep its sign in a read-only field, or with the display-only `Absolute*`
+  formatters (`FormatterName.AbsoluteTwoDecimalPlaces` ...). Its list column is
+  filtered by signed dollars in SmartClient (`-7.50` is -7.5).
+- **`Decimal5TimeDuration`** shows hours and minutes: the hours truncated, the
+  minutes rounded once, half up, from the exact fraction of an hour (0.49166 is
+  `0:29`, 2.4999 is `2:30`, -0.01 is `-0:01`); a value that rounds to no minutes
+  is `0:00`. It reads hours, a colon and minutes, each a decimal number (`1:75`
+  is 2.25 hours, `-0:30` is -0.5); `1.5` (no colon) is not a duration, in any
+  renderer.
+- **The other number converters** show the value rounded once, half up, from the
+  decimal (1.005 is `1.01` in every renderer, not the `1.00` of its binary
+  fraction), grouped in thousands, with no sign on a value that rounds to zero
+  (`0.00`, not `-0.00`); a percentage converter shows the value times 100 with a
+  `%` (`1,250%`), `SimplePercentage` the whole number of percent without
+  grouping (`1000%`). They read the whole text, trimmed: an optional `-`, ASCII
+  digits with optional `,` grouping between them and an optional `.` with
+  places; a percentage with or without a `%` at its end (rounded to the places
+  shown); dollars with or without a `$` before the number or between a `-` and
+  it (`$-1.00`, `-$1.00`); whole numbers also an optional `+`. Anything else
+  (`12abc`, `1E3` or `1e3`, `12%3`, `1$2`, a `,` not between digits such as `1,`
+  or `,1`, other digits than 0-9) is refused in every renderer. A number typed
+  with more places than shown is kept to the type's scale by the converter, then
+  stored as shown when its form is saved (see
+  [Known Limitations](#known-limitations)). The symbols are English whatever the
+  JVM's locale. A BizPort import with one of these converters also reads the
+  number at the start of a cell (`1,234.50 kg` is 1234.50), as it did before.
+- **User-visible changes in SmartClient:** 12 hour times show `AM`/`PM` in upper
+  case for every locale, as the converters write them and PrimeFaces' pickers
+  show them (`02:47 PM`, not `2:47 pm`); a duration field refuses decimal hours
+  without a colon (`2.5`), as PrimeFaces does; a date-only date time field keeps
+  a value's time unless a different day is typed; a number the filter row cannot
+  read shows an error instead of being dropped; the absolute dollars column is
+  filtered by signed dollars; a list with a date-only column fetches from the
+  server when its filter changes.
+- **User-visible change on the server:** the number converters (and
+  `DecimalFormatter`, so the number formatters) write and read English numbers
+  whatever the JVM's locale. Before, a German JVM showed `1.234,50` and read
+  `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the Vue list grid
+  showed `1,234.50`), and whether `1E3` or `1e3` was read as 1000 depended on
+  the locale.
 
 ### Admin: application suite
 
@@ -1476,12 +1584,12 @@ customer only when the sign in page asks for one (no `environment.customer`).
 | The browser's Reload, or Back | `refresh` or `navigateBack`, read from how the page that loads was loaded (Navigation Timing's `reload` or `back_forward`; the Navigation API's activation says back from forward), followed by `pushEditContext` or `pushListContext` for the view the page's URL names, since the executors keep the context as it was (refresh) or drop its document (back). In SmartClient, menus, zooms and New do not change the URL, so Back returns to the last full page load (a navigate step, a link or a sign in) and Reload shows the URL's view, and that is what is pushed. Forward, or a move through the history whose direction the browser does not tell, is an unmapped comment before the page's `navigateEdit` or `navigateList`. |
 | A link that opens a new window (a `target` other than `_self`, `_top` or `_parent`, or a `window.open` from the link) | `navigateLink window="new"` with `text`, the link's visible text, when it finds the link (the first displayed link whose text contains it; with `exact="true"` the first whose text equals it), otherwise `href`, the URL relative to the application. Recording goes on in the new window if it shows a Skyve page (the recording is the session's): its first page is not loaded again, but becomes `pushEditContext` or `pushListContext`. A new window that no recorded link opened (a typed URL, the browser's "Open in new tab", a window a button opened) is `navigateLink href window="new"` with its first page's URL, opened from the window in front. |
 | Closing a new window, or coming back to the window that opened it | `closeWindow`, once for each window closed, before the first step made in (or the "in front again" signal of) a window under it. Each step carries its browser window's id, so a step from the opener is a reliable sign that the user left the windows above it; a window that opened one also says when its tab shows or it gets the focus again, which covers coming back from a page that records nothing (a PDF) and then stopping. A step made in a window the script has closed, or in one the recording did not see open, is an unmapped comment: SAIL cannot switch windows. |
-| Typing into or changing a field | `dataEnter` with the final value, written before the next step or server response. Combos and radios record the option's code with `match="code"`; check boxes `true` or `false`; dates and times the text as shown; rich text its plain text. New lines are written as `&#10;`. |
+| Typing into or changing a field | `dataEnter` with the final value, written before the next step or server response. Combos and radios record the option's code with `match="code"`; check boxes `true` or `false`; dates, times and numbers the text as shown (SmartClient: `12.50%`, `1,234.56`, not the field's value 0.125 or 1234.56); rich text its plain text. New lines are written as `&#10;`. |
 | Selecting a tab | `tabSelect`, with `::` for nested tabs. Selecting the tab already shown records nothing. |
 | A view's buttons | `ok`, `save`, `cancel`, `delete`, `zoomOut`, `remove`, or `action name="..."` for the view's own actions. A declined confirmation adds `confirm="false"`. |
 | A list grid's New, or zooming into a row | `listGridNew`, `listGridZoom`. A row is named with `rowContaining`: its bizKey when a cell shows it, otherwise the cell the fewest loaded rows show, the leftmost on a tie; `row` only when no text finds the row first. The list view's own grid is named by the context; a grid in a view by `module` and `query` (or `document` and `model`). In PrimeFaces, both a Vue list grid (its New, its View Detail or a zoomable row) and a PrimeFaces data table. |
 | Selecting a list grid row | `listGridSelect`, for a list grid whose selection does something (a `selectedIdBinding` or a selected action); a click on another list grid's row is not a gesture. In SmartClient the selection is written only if the next step does not act on the same grid. |
-| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date or time as its column shows it, in the column's converter format (with the default converters `07-Nov-2025`, `07-Nov-2025 15:38`, `11:11`). SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers, and a PrimeFaces data table's column filters (typed text, a constant domain's combo by its label, a boolean's check box) and headers, whose operator is the one its filter makes (`contains` for text, `equals` otherwise). A data table sends a request for each change (a typed filter at each pause, a check box filter for each state it passes through, a header for each click), so its filters and its sort are written as they end up, once the user goes on to something else. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not) and a sort by more than one column are unmapped comments. |
+| Filtering, clearing the filter of, or sorting a list grid | `listGridFilter` for each column whose filter changed (no `value` for a column the user cleared), `listGridClearFilter` when the user cleared them all, `listGridSort` with `descending="true"` for a descending sort. `operator` is written unless it is `contains`; an enum's value is its label; a date, time or number as the column shows it (its converter's format: `06/05/2026 02:47 PM`, `12.50%`, `1,234.56`); in PrimeFaces, a number column's filter as typed. SmartClient: the filter row and the advanced filter; PrimeFaces: a Vue list grid's column filters and headers, and a PrimeFaces data table's column filters (typed text, a constant domain's combo by its label, a boolean's check box) and headers, whose operator is the one its filter makes (`contains` for text, `equals` otherwise). A data table sends a request for each change (a typed filter at each pause, a check box filter for each state it passes through, a header for each click), so its filters and its sort are written as they end up, once the user goes on to something else. A filter SAIL cannot write as column filters ANDed together (an OR, two clauses on a column, an operator SAIL has not) and a sort by more than one column are unmapped comments. |
 | A data grid's New, zoom, remove, select or row edit | `dataGridNew`, `dataGridZoom`, `dataGridRemove`, `dataGridSelect` and (SmartClient's inline grids) `dataGridEdit`, named by `binding` and the row as for list grids. A selection followed by a step on the same grid's row is written as that step only. |
 | Typing into an inline data grid's cells (SmartClient) | `dataEnter` into the grid's columns, after the `dataGridNew` or `dataGridEdit` that started the row's edit. An inline lookup's pick is `lookupDescriptionPick`. |
 | Dragging an ordered data grid's row | `dataGridMove` with the row and its new position, `to`. |
@@ -1551,8 +1659,8 @@ dropped silently.
   `skyve-web/src/js/sail/recorder-sc.js`, and is never merged into `skyve-min.js`.
 - Skyve's client code has no recorder checks. The recorder wraps a few of Skyve's SmartClient methods when it loads
   (each is marked in `skyve-web/src/js/desktop` with a comment) and listens to SmartClient's `ValuesManager.itemChanged()`
-  and to the DOM in the capture phase. It detaches when recording stops. A date or time filter value is written with
-  the column type's `shortDisplayFormatter`, as the grid's cells show it.
+  and to the DOM in the capture phase. It detaches when recording stops. A date, time or number filter value is
+  written with the column type's `shortDisplayFormatter`, as the grid's cells show it.
 - It sends its steps as JSON batches, one request at a time through SmartClient's RPC manager, to the `sailrecording`
   endpoint (`org.skyve.impl.sail.recording.SailRecordingServlet`). Each page gets the recording's CSRF token from the
   endpoint (issued once per recording, so the session's tokens do not grow with the pages), and the endpoint checks
@@ -1627,6 +1735,8 @@ dropped silently.
 - Back and Reload are read from the page that loads. Skyve's pages are never kept in the browser's back/forward cache
   (their responses are `Cache-Control: no-store`, and SmartClient has an unload listener), so a Back always loads the
   page; the recorder still handles a page shown from that cache (`pageshow` with `persisted`) as a page load.
+- A filter on a date, time or number column is written as the column shows it (its converter's format). A value the
+  user types that equals one the application showed but the user did not type is recorded as a capture.
 - The kitchen sink has a tree and a calendar menu item (SmartClient only) and a map menu item: the SmartClient round
   trip navigates all three, and the PrimeFaces one the map.
 - A PrimeFaces list grid shows its first page of rows, and a replay finds a row only among them: a recording that zooms
@@ -1704,6 +1814,36 @@ test:
   selection without running its selected action, by design, so the PF
   executor clicks a row that already shows as selected twice (see
   `listGridSelect`).
+- **Equals on a rounded value.** `equals` compares the stored value exactly. A
+  value a cell shows rounded (`2.35` for a stored 2.345, `1,235` for 1,234.5) or
+  as a magnitude (`Decimal2DollarsAndCentsAbsolute`) is not found by what the
+  cell shows, in any renderer; filter by the stored value, or with
+  `lessThan`/`greaterThan`.
+- **Numbers and the browser's locale.** The Vue list grid formats numbers in the
+  browser's locale; the server's converters and SmartClient write English
+  numbers (`1,234.50`) whatever the JVM's or browser's locale. The suites run
+  the browser in English.
+- **Inline cells in PF** are addressed by `dataEnter`, `testValue` and the
+  lookup steps; `testWidget` and `captureValue` keep the row but address the
+  view's widget.
+- **`notEquals` and rows with no value.** In SmartClient's advanced filter a
+  `notEquals` clause also matched rows whose column has no value; the Vue list
+  grid's did not. The converters scripts give every number column a value in
+  every record, so their counts do not depend on it.
+- **Numbers beyond a browser's precision.** The server sends numbers to
+  SmartClient and the Vue list grid as JSON numbers, so a value beyond 15
+  significant digits (a Decimal10 with a large whole part, a Decimal5 above
+  10^10 with all its places) or a long beyond 2^53 (9,007,199,254,740,993 shows
+  as ...992) is shown as the nearest double there, and a value typed or filtered
+  in SmartClient is read as one. PrimeFaces forms and data tables, formatted on
+  the server, are exact.
+- **A number typed with more places than shown is stored as shown.** A number
+  field reads back what it shows when the form is saved again (OK after Save),
+  in both renderers: 2.345 typed into a two decimal places field is stored 2.35,
+  and -0.001 is stored 0. A value the server sets keeps its places in
+  SmartClient while the user does not edit it; PrimeFaces sends every field's
+  shown text on every save. This is by design: what is stored is what the user
+  saw.
 
 ## Runtime Bugs Found
 
