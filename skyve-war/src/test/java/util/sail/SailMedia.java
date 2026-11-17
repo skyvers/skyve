@@ -215,7 +215,8 @@ public final class SailMedia {
 		LocalDateTime now = LocalDateTime.now();
 		String test = testName();
 		String label = LABEL.get();
-		String name = sanitise(FOLDER_TIME.format(now) + '-' + test + ((label == null) ? "" : '-' + label), 120);
+		// a load run's virtual users start runs at the same time: their folders name the user and iteration
+		String name = sanitise(FOLDER_TIME.format(now) + '-' + SailLoadProbe.fileLabel() + test + ((label == null) ? "" : '-' + label), 120);
 		RunInfo info = new RunInfo(name, test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe());
 		try {
 			SailMedia result = new SailMedia(selenide,
@@ -403,7 +404,7 @@ public final class SailMedia {
 			if (filmStrip != null) {
 				String playerLink = (player == null) ? null : link(snapshotRun, player);
 				Files.writeString(filmStrip, filmStripHtml(info, steps, playerLink), StandardCharsets.UTF_8);
-				Files.writeString(snapshotRun.getParent().resolve("index.html"), runsIndexHtml(snapshotRun.getParent()), StandardCharsets.UTF_8);
+				writeRunsIndex(snapshotRun.getParent());
 			}
 			if (player != null) {
 				String filmStripLink = (filmStrip == null) ? null : link(videoRun, filmStrip);
@@ -413,7 +414,7 @@ public final class SailMedia {
 				}
 				Files.writeString(videoRun.resolve("video.js"), videoScript(info, written, steps, filmStripLink), StandardCharsets.UTF_8);
 				Files.writeString(player, playerHtml(info), StandardCharsets.UTF_8);
-				Files.writeString(videoRun.getParent().resolve("index.html"), runsIndexHtml(videoRun.getParent()), StandardCharsets.UTF_8);
+				writeRunsIndex(videoRun.getParent());
 			}
 			selenide.trace("SAIL media written: " + steps.size() + " steps" +
 							((videoRun == null) ? "" : ", " + frames.size() + " video frames") +
@@ -439,9 +440,8 @@ public final class SailMedia {
 		for (Path folder : folders) {
 			try {
 				org.skyve.util.FileUtil.delete(folder.toFile());
-				Path index = folder.getParent().resolve("index.html");
-				if (Files.exists(index)) {
-					Files.writeString(index, runsIndexHtml(folder.getParent()), StandardCharsets.UTF_8);
+				if (Files.exists(folder.getParent().resolve("index.html"))) {
+					writeRunsIndex(folder.getParent());
 				}
 			}
 			catch (IOException | RuntimeException e) {
@@ -450,6 +450,14 @@ public final class SailMedia {
 			}
 		}
 		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders);
+	}
+
+	/**
+	 * Rewrites a directory's list of runs. Synchronised: a load run's virtual users ({@link SailLoad}) end runs in one
+	 * directory at the same time, and two writers of one file would garble it.
+	 */
+	private static synchronized void writeRunsIndex(@Nonnull Path directory) throws IOException {
+		Files.writeString(directory.resolve("index.html"), runsIndexHtml(directory), StandardCharsets.UTF_8);
 	}
 
 	private static @Nonnull String link(@Nonnull Path from, @Nonnull Path to) {

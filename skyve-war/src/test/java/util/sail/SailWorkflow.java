@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
@@ -66,6 +67,8 @@ public final class SailWorkflow {
 	private final LegRunner legRunner;
 	/** The sources the legs' settings resolve from, or null for this JVM's. */
 	private final SailSettings.Environment environment;
+	/** True when no further leg or suite member may start (a load run is stopping); see {@link #stopWhen}. */
+	private BooleanSupplier stopping = () -> false;
 
 	/**
 	 * Starts a new browser: a {@link SmartClientSelenide} or {@link PrimeFacesSelenide}, started with the leg's settings.
@@ -352,6 +355,27 @@ public final class SailWorkflow {
 	}
 
 	/**
+	 * Stops the engine starting another leg, or (in a suite) another member, once a condition holds: a load run's
+	 * stopping flag ({@link SailLoad}).
+	 *
+	 * @param condition	true when nothing more may start
+	 * @return this runner
+	 */
+	@Nonnull SailWorkflow stopWhen(@Nonnull BooleanSupplier condition) {
+		stopping = condition;
+		return this;
+	}
+
+	/**
+	 * Indicates if nothing more may start; see {@link #stopWhen(BooleanSupplier)}.
+	 *
+	 * @return true once the condition holds
+	 */
+	boolean stopping() {
+		return stopping.getAsBoolean();
+	}
+
+	/**
 	 * Runs the legs in order with one shared run.
 	 *
 	 * @param member	the suite member the legs are, or null for a workflow on its own
@@ -368,6 +392,9 @@ public final class SailWorkflow {
 		SailMedia.beginUnit(); // with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
 		try {
 			for (Leg leg : legs) {
+				if (stopping()) {
+					throw new IllegalStateException("SAIL workflow: " + leg.name() + " did not start: the run is stopping");
+				}
 				Automation automation = leg.automation();
 				boolean smartClient = "desktop".equals(automation.getUxui());
 				BrowserConfiguration configuration = configuration(automation.getUserAgentType()).settings(settings);

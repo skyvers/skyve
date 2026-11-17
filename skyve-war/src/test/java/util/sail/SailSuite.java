@@ -397,6 +397,9 @@ public final class SailSuite {
 				Outcome outcome = Outcome.NOT_SELECTED;
 				if (selected.contains(member)) {
 					String skip = unmetRequirement(member, byMember, previousOrdinary);
+					if ((skip == null) && (engine != null) && engine.stopping()) {
+						skip = "the run is stopping";
+					}
 					if (skip == null) {
 						Throwable failure = runMember(member);
 						outcome = (failure == null) ? Outcome.PASSED : Outcome.FAILED;

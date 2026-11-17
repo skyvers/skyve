@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -20,6 +21,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Suite.Evidence;
@@ -96,6 +99,23 @@ public final class SailSettings {
 	public static final String VAR_PREFIX = "sail.var.";
 	/** The path of the user's properties file. */
 	public static final String PROPERTIES = "sail.properties";
+	/** The number of virtual users of a load run ({@link SailLoad}); set, it makes {@code SailRunIT} a load run. */
+	public static final String LOAD_USERS = "sail.load.users";
+	/** How long a load run takes to start all its virtual users, evenly spread (default none: all at once). */
+	public static final String LOAD_RAMP_UP = "sail.load.rampUp";
+	/** How long a load run starts new iterations for, from its start, ramp-up included. */
+	public static final String LOAD_DURATION = "sail.load.duration";
+	/** How many iterations each virtual user of a load run runs (default 1 when no duration is set). */
+	public static final String LOAD_ITERATIONS = "sail.load.iterations";
+	/**
+	 * The longest a load run may take, iterations in flight at its end included (default: its duration and 5 minutes;
+	 * none when only iterations are set, as each step's own timeout bounds them).
+	 */
+	public static final String LOAD_TIME_LIMIT = "sail.load.timeLimit";
+	/** The percentage of a load run's iterations that may fail before the run fails (default 0: any failure fails). */
+	public static final String LOAD_MAX_FAILURE_RATE = "sail.load.maxFailureRate";
+	/** The longest that any interaction's 95th percentile duration may be in a load run (default no limit). */
+	public static final String LOAD_MAX_P95 = "sail.load.maxP95";
 
 	/** The timeout for every wait on the browser when none is set. */
 	public static final long DEFAULT_TIMEOUT_SECONDS = 30L;
@@ -107,10 +127,14 @@ public final class SailSettings {
 	/** The settings a properties file or {@link Code#set(String, String)} may hold, besides variables, in display order. */
 	private static final List<String> KEYS = List.of(BASE_URL, HEADLESS, BROWSER, TIMEOUT_SECONDS, TEST_STRATEGY,
 														FAILURE_DIR, SNAPSHOT_DIR, SNAPSHOT_SOURCE, VIDEO_DIR, EVIDENCE,
-														KEEP_MEDIA, SUITE_ONLY, RUN, PROPERTIES);
+														KEEP_MEDIA, SUITE_ONLY, RUN, PROPERTIES, LOAD_USERS, LOAD_RAMP_UP,
+														LOAD_DURATION, LOAD_ITERATIONS, LOAD_TIME_LIMIT, LOAD_MAX_FAILURE_RATE,
+														LOAD_MAX_P95);
 	/** The {@code sail.*} system properties that other SAIL code reads, so that they are not listed as ignored. */
 	private static final Set<String> OTHER_SAIL_PROPERTIES = Set.of("sail.recording", "sail.personas", "sail.personaPassword", "sail.workflowData");
 	private static final String MASK = "********";
+	/** A duration as a whole number and a unit, e.g. {@code 30s}. */
+	private static final Pattern DURATION = Pattern.compile("(\\d+)\\s*(ms|s|m|h)", Pattern.CASE_INSENSITIVE);
 	/** The prefix of a SAIL environment variable. */
 	private static final String ENVIRONMENT_PREFIX = "SAIL_";
 	/** The prefix of a variable's environment variable. */
@@ -523,6 +547,13 @@ public final class SailSettings {
 	private KeepMedia mediaKept = KeepMedia.ALL;
 	private List<String> onlyPrefixes = List.of();
 	private List<String> runScripts = List.of();
+	private int virtualUsers;
+	private Duration rampUpTime = Duration.ZERO;
+	private Duration loadTime;
+	private int iterationCount;
+	private Duration loadLimit;
+	private double failureRate;
+	private Duration p95Limit;
 
 	/** Why the test strategy is locked to the scripts' own (e.g. {@code set-up}), or null if a run override applies. */
 	private final String lock;
@@ -936,6 +967,13 @@ public final class SailSettings {
 			case KEEP_MEDIA -> mediaKept = constant(value, KeepMedia.values());
 			case SUITE_ONLY -> onlyPrefixes = list(value);
 			case RUN -> runScripts = list(value);
+			case LOAD_USERS -> virtualUsers = count(value);
+			case LOAD_RAMP_UP -> rampUpTime = duration(value, true);
+			case LOAD_DURATION -> loadTime = duration(value, false);
+			case LOAD_ITERATIONS -> iterationCount = count(value);
+			case LOAD_TIME_LIMIT -> loadLimit = duration(value, false);
+			case LOAD_MAX_FAILURE_RATE -> failureRate = percent(value);
+			case LOAD_MAX_P95 -> p95Limit = duration(value, false);
 			default -> {
 				// PROPERTIES: read when the file was found
 			}
@@ -977,6 +1015,68 @@ public final class SailSettings {
 			// not a number: say what is valid below
 		}
 		throw new IllegalArgumentException("use a whole number of seconds above 0");
+	}
+
+	private static int count(@Nonnull String value) {
+		try {
+			int result = Integer.parseInt(value);
+			if (result > 0) {
+				return result;
+			}
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			// not a number: say what is valid below
+		}
+		throw new IllegalArgumentException("use a whole number above 0");
+	}
+
+	/**
+	 * Parses a duration: a whole number and a unit ({@code 500ms}, {@code 30s}, {@code 5m}, {@code 1h}) or ISO-8601
+	 * ({@code PT1M30S}).
+	 *
+	 * @param value	the setting's text
+	 * @param zero	true if zero is valid
+	 * @return the duration
+	 * @throws IllegalArgumentException	saying what is valid, if it is not a duration, is negative, or is zero when zero
+	 * 			is not valid
+	 */
+	private static @Nonnull Duration duration(@Nonnull String value, boolean zero) {
+		Duration result = null;
+		Matcher matcher = DURATION.matcher(value);
+		try {
+			if (matcher.matches()) {
+				long amount = Long.parseLong(matcher.group(1));
+				result = switch (matcher.group(2).toLowerCase()) {
+					case "ms" -> Duration.ofMillis(amount);
+					case "s" -> Duration.ofSeconds(amount);
+					case "m" -> Duration.ofMinutes(amount);
+					default -> Duration.ofHours(amount);
+				};
+			}
+			else {
+				result = Duration.parse(value);
+			}
+		}
+		catch (@SuppressWarnings("unused") ArithmeticException | DateTimeParseException | NumberFormatException e) {
+			// not a duration: say what is valid below
+		}
+		if ((result == null) || result.isNegative() || ((! zero) && result.isZero())) {
+			throw new IllegalArgumentException("use a duration " + (zero ? "of 0 or more" : "above 0") + " such as 30s, 5m, 1h, 500ms or PT1M30S");
+		}
+		return result;
+	}
+
+	private static double percent(@Nonnull String value) {
+		try {
+			double result = Double.parseDouble(value);
+			if ((result >= 0.0) && (result <= 100.0)) {
+				return result;
+			}
+		}
+		catch (@SuppressWarnings("unused") NumberFormatException e) {
+			// not a number: say what is valid below
+		}
+		throw new IllegalArgumentException("use a percentage from 0 to 100, such as 2.5");
 	}
 
 	/** Returns the constant named by a value in any case; the valid names are listed as the settings' values are written. */
@@ -1173,6 +1273,69 @@ public final class SailSettings {
 	 */
 	public @Nonnull List<String> run() {
 		return runScripts;
+	}
+
+	/**
+	 * Returns the number of virtual users of a load run.
+	 *
+	 * @return above 0, or 0 if none is set (not a load run)
+	 */
+	public int loadUsers() {
+		return virtualUsers;
+	}
+
+	/**
+	 * Returns how long a load run takes to start all its virtual users.
+	 *
+	 * @return zero unless set
+	 */
+	public @Nonnull Duration loadRampUp() {
+		return rampUpTime;
+	}
+
+	/**
+	 * Returns how long a load run starts new iterations for.
+	 *
+	 * @return the duration, or null if none is set
+	 */
+	public @Nullable Duration loadDuration() {
+		return loadTime;
+	}
+
+	/**
+	 * Returns how many iterations each virtual user of a load run runs.
+	 *
+	 * @return above 0, or 0 if none is set
+	 */
+	public int loadIterations() {
+		return iterationCount;
+	}
+
+	/**
+	 * Returns the longest a load run may take.
+	 *
+	 * @return the limit, or null if none is set
+	 */
+	public @Nullable Duration loadTimeLimit() {
+		return loadLimit;
+	}
+
+	/**
+	 * Returns the percentage of a load run's iterations that may fail before the run fails.
+	 *
+	 * @return 0 (any failure fails the run) unless set
+	 */
+	public double loadMaxFailureRate() {
+		return failureRate;
+	}
+
+	/**
+	 * Returns the longest that any interaction's 95th percentile duration may be in a load run.
+	 *
+	 * @return the limit, or null for none
+	 */
+	public @Nullable Duration loadMaxP95() {
+		return p95Limit;
 	}
 
 	/**
