@@ -56,6 +56,30 @@
 			<cancel />
 		</method>
 	</interaction>
+	<interaction name="Lookup description columns in an inline data grid">
+		<method>
+			<comment>After dataGridNew or dataGridEdit on an inline grid, dataEnter, testValue and the lookup description steps address the row's cells, not the form's lookups of the same bindings</comment>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<dataEnter binding="name" value="SAIL inline lookups {run}" />
+			<dataGridNew binding="rows" />
+			<lookupDescriptionAutoComplete binding="selection" search="SAIL lookup {run}" pick="SAIL lookup {run}" />
+			<testValue binding="selection" value="SAIL lookup {run}" />
+			<lookupDescriptionPick binding="singleSelection" rowContaining="SAIL lookup {run}" />
+			<testValue binding="singleSelection" value="SAIL lookup {run}" />
+			<save />
+			<comment>Save ended the row's steps, so this is the form's lookup of the same binding, which is untouched</comment>
+			<testValue binding="selection" value="" />
+			<comment>A row is found by the values its cells' inputs hold</comment>
+			<testGridRows binding="rows" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<dataGridEdit binding="rows" rowContaining="SAIL lookup {run}" />
+			<testValue binding="selection" value="SAIL lookup {run}" />
+			<testValue binding="singleSelection" value="SAIL lookup {run}" />
+			<comment>A view opened by URL has no Delete button, so delete from the zoomed-in view</comment>
+			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL inline lookups {run}" />
+			<delete />
+			<clearContext />
+		</method>
+	</interaction>
 	<interaction name="Lookup values: generated numbers, filters and sorts">
 		<method>
 			<comment>Each new lookup value gets the next number when it is first saved: keep each one in a variable</comment>
@@ -581,10 +605,15 @@
 			<remove confirm="false" />
 			<remove />
 			<testGridRows binding="orderedGrid" maxRows="0" />
-			<comment>An inline grid adds and removes rows in place</comment>
+			<comment>An inline grid adds and removes rows in place; the new row's cells take dataEnter and testValue, a combo's too</comment>
 			<testGridRows binding="inlineGrid" maxRows="0" />
 			<dataGridNew binding="inlineGrid" />
 			<testGridRows binding="inlineGrid" minRows="1" maxRows="1" />
+			<dataEnter binding="constantDomain" value="two" match="code" />
+			<comment>A comment does not touch the page, so the steps after it still address the row's cells</comment>
+			<testValue binding="constantDomain" value="two" />
+			<dataEnter binding="constantDomain" value="Three (3)!" match="label" />
+			<testValue binding="constantDomain" value="three" />
 			<dataGridRemove binding="inlineGrid" row="0" />
 			<testGridRows binding="inlineGrid" maxRows="0" />
 			<tabSelect path="List/Check Membership" />

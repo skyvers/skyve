@@ -3,6 +3,7 @@ package util.sail;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.colorpicker.ColorPicker;
@@ -40,7 +41,11 @@ import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.metadata.module.menu.MenuGroup;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestWidget;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
@@ -190,6 +195,32 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 
 	/** The inline grid row that cell steps address; see {@link #inlineRow()}. */
 	private InlineRow inlineRow;
+
+	/**
+	 * The steps that keep an inline row (see {@link #startingStep(Step)}): those that address its cells, and those that
+	 * do not touch the page. They are the steps that keep SmartClient's inline edit.
+	 */
+	private static final Set<Class<? extends Step>> KEEPS_INLINE_ROW = Set.of(DataEnter.class,
+																				TestValue.class,
+																				TestWidget.class,
+																				LookupDescriptionPick.class,
+																				LookupDescriptionAutoComplete.class,
+																				CaptureValue.class,
+																				Comment.class,
+																				Pause.class,
+																				TestMessage.class,
+																				TestSuccess.class,
+																				TestFailure.class,
+																				TestMenu.class);
+
+	/**
+	 * A widget to try for a binding, with its client id on the page.
+	 *
+	 * @param component	the collected component
+	 * @param clientId	its client id: in the inline row for one of the row's grid cells
+	 */
+	private record Target(@Nonnull UIComponent component, @Nonnull String clientId) {
+	}
 
 	public PrimeFacesInterpretedWebDriverExecutor(PrimeFacesSelenide selenide) {
 		this(selenide, new SkyveComponentBuilderChain(), new ResponsiveLayoutBuilder());
@@ -387,10 +418,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 		String singleLineValue = (multiLineValue == null) ? null : multiLineValue.replace('\n', ' ');
 
-		InlineRow row = inlineRow();
 		boolean success = false;
-		for (UIComponent component : cellsFirst(components, row)) {
-			String clientId = clientId(component, row);
+		for (Target target : targets(components)) {
+			UIComponent component = target.component();
+			String clientId = target.clientId();
 			String value = multiLine(component) ? multiLineValue : singleLineValue;
 			selenide.trace(String.format("set %s (%s) to %s", identifier, clientId, value));
 
@@ -450,57 +481,59 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	}
 
 	/**
-	 * Returns the inline grid row that the current {@code <dataEnter />} or {@code <testValue />} addresses: the one the
-	 * last {@code <dataGridNew />} or {@code <dataGridEdit />} on an inline grid set, in the current context, while
-	 * every step since then has been a {@code <dataEnter />} or a {@code <testValue />}. Any other step ends it, as it
-	 * ends SmartClient's inline edit.
+	 * Returns the inline grid row that cell steps address: the one the last {@code <dataGridNew />} or
+	 * {@code <dataGridEdit />} on an inline grid set, in the current context, until a step that ends it (see
+	 * {@link #startingStep(Step)}).
 	 *
 	 * @return the row, or null if the steps address the view's widgets
 	 */
 	private @Nullable InlineRow inlineRow() {
-		Step previous = getPreviousStep();
-		if ((inlineRow != null) &&
-				(inlineRow.context() == peek()) &&
-				((previous instanceof DataGridNew) || (previous instanceof DataGridEdit) ||
-					(previous instanceof DataEnter) || (previous instanceof TestValue))) {
-			return inlineRow;
+		if ((inlineRow != null) && (inlineRow.context() != peek())) {
+			inlineRow = null;
 		}
-		inlineRow = null;
-		return null;
+		return inlineRow;
 	}
 
 	/**
-	 * Orders the components for a binding so that an inline row's grid cells come first, as SmartClient tries an inline
-	 * edit's columns first.
+	 * Ends the inline row before a step that touches the page and does not address the row's cells, as SmartClient ends
+	 * its inline edit; the steps in {@link #KEEPS_INLINE_ROW} keep it.
+	 *
+	 * @param step	the step about to run
+	 */
+	@Override
+	protected void startingStep(@Nonnull Step step) {
+		if ((inlineRow != null) && (! KEEPS_INLINE_ROW.contains(step.getClass()))) {
+			selenide.trace("    the steps no longer address the cells of row " + inlineRow.row() + " of inline data grid [" + inlineRow.binding() + ']');
+			inlineRow = null;
+		}
+	}
+
+	/**
+	 * Lists the widgets to try for a binding, with their client ids. In an inline row, they are only the row's cells when
+	 * the binding is one of the grid's columns: a cell that is not on the page then fails the step, rather than the view's
+	 * widget of the same binding being used instead. Otherwise they are the binding's widgets, in page order.
 	 *
 	 * @param components	the binding's components, in page order
-	 * @param row	the inline row, or null
-	 * @return the components, the row's grid cells first
+	 * @return the widgets to try
 	 */
-	private static @Nonnull List<UIComponent> cellsFirst(@Nonnull List<UIComponent> components, @Nullable InlineRow row) {
-		if (row == null) {
-			return components;
-		}
-		List<UIComponent> result = new ArrayList<>(components.size());
-		for (UIComponent component : components) {
-			if (row.cellClientId(component) != null) {
-				result.add(component);
+	private @Nonnull List<Target> targets(@Nonnull List<UIComponent> components) {
+		InlineRow row = inlineRow();
+		List<Target> result = new ArrayList<>(components.size());
+		if (row != null) {
+			for (UIComponent component : components) {
+				String cell = row.cellClientId(component);
+				if (cell != null) {
+					result.add(new Target(component, cell));
+				}
+			}
+			if (! result.isEmpty()) {
+				return result;
 			}
 		}
 		for (UIComponent component : components) {
-			if (row.cellClientId(component) == null) {
-				result.add(component);
-			}
+			result.add(new Target(component, PrimeFacesAutomationContext.clientId(component)));
 		}
 		return result;
-	}
-
-	/**
-	 * Returns a component's client id: in the inline row when the component is one of its grid's cells.
-	 */
-	private static @Nonnull String clientId(@Nonnull UIComponent component, @Nullable InlineRow row) {
-		String cell = (row == null) ? null : row.cellClientId(component);
-		return (cell == null) ? PrimeFacesAutomationContext.clientId(component) : cell;
 	}
 
 	/**
@@ -576,10 +609,10 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		String multiLineExpected = (expectedValue == null) ? "" : substituteTokens(expectedValue).replace("\r\n", "\n").trim();
 		String singleLineExpected = multiLineExpected.replace('\n', ' ');
 
-		InlineRow row = inlineRow();
 		boolean found = false;
-		for (UIComponent component : cellsFirst(components, row)) {
-			String clientId = clientId(component, row);
+		for (Target target : targets(components)) {
+			UIComponent component = target.component();
+			String clientId = target.clientId();
 			if (component instanceof PickList) {
 				List<String> members = selenide.pickListMembers(clientId);
 				if (members == null) {
@@ -915,8 +948,8 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		}
 		
 		boolean success = false;
-		for (UIComponent lookupComponent : lookupComponents) {
-			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
+		for (Target target : targets(lookupComponents)) {
+			String clientId = target.clientId();
 			if (row != null) {
 				selenide.trace(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
 				success = success || selenide.lookupDescriptionByRow(new PrimeFacesLookupDescriptionByRowCommand(clientId, row.intValue()));
@@ -1098,6 +1131,11 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				String gridClientId = PrimeFacesAutomationContext.clientId(component);
 				Integer row = resolveRow(edit, gridClientId);
 				if (row != null) {
+					int rows = selenide.countRows(gridClientId, null);
+					if ((row.intValue() < 0) || (row.intValue() >= rows)) {
+						throw new DomainException(String.format("<dataGridEdit /> with binding [%s] has no row %d: the grid has %d row(s)",
+																	binding, row, Integer.valueOf(rows)));
+					}
 					selenide.trace(String.format("Address the cells of row %d of inline data grid [%s] (%s)", row, binding, gridClientId));
 					inlineRow = new InlineRow(context, binding, gridClientId, row.intValue());
 					return;
@@ -2027,13 +2065,14 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (components == null) {
 			throw new MetaDataException(String.format("<dataEnter /> with binding [%s] is not supported or is not on the view", identifier));
 		}
-		for (UIComponent component : components) {
+		for (Target target : targets(components)) {
+			UIComponent component = target.component();
 			boolean combo = (component instanceof SelectOneMenu);
 			if ((! combo) && (! (component instanceof SelectOneRadio))) {
 				throw new MetaDataException(String.format("<dataEnter match=\"%s\" /> with binding [%s] is a %s: match=\"%s\" chooses an option of a combo or radio",
 															match, identifier, component.getClass().getSimpleName(), match));
 			}
-			String clientId = PrimeFacesAutomationContext.clientId(component);
+			String clientId = target.clientId();
 			List<List<String>> options = combo ? selenide.selectOneOptions(clientId) : selenide.radioOptions(clientId);
 			if (options == null) { // not on the page
 				continue;
@@ -2086,8 +2125,8 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 		if (lookupComponents == null) {
 			throw new MetaDataException(String.format("<%s /> with binding [%s] is not on the view.", step.getClass().getSimpleName(), binding));
 		}
-		for (UIComponent lookupComponent : lookupComponents) {
-			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
+		for (Target target : targets(lookupComponents)) {
+			String clientId = target.clientId();
 			if (search == null) {
 				selenide.trace(String.format("Pick the row containing '%s' on lookup description [%s] (%s)", text, binding, clientId));
 			}

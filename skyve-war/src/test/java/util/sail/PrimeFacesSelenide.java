@@ -1066,7 +1066,18 @@ public class PrimeFacesSelenide extends Selenide<
 											"    (! r.classList.contains('p-datatable-emptymessage'));}) : [];";
 
 	/**
-	 * Finds the first data row of a grid with a cell whose text contains the given text (case-sensitively).
+	 * Defines cellText(cell): a grid cell's text, then the values of the inputs in it (an inline grid's cells are inputs,
+	 * whose values are not text), each on its own line.
+	 */
+	private static final String CELL_TEXT_JS = "var cellText = function(c) {" +
+												"  var result = c.textContent || '';" +
+												"  c.querySelectorAll('input:not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea').forEach(function(i) {" +
+												"    result += '\\n' + (i.value || '');});" +
+												"  return result;};";
+
+	/**
+	 * Finds the first data row of a grid with a cell whose text, or the value of an input in it, contains the given text
+	 * (case-sensitively).
 	 *
 	 * @param gridId	the data table's client id
 	 * @param text	the text
@@ -1074,9 +1085,10 @@ public class PrimeFacesSelenide extends Selenide<
 	 */
 	public int rowContaining(@Nonnull String gridId, @Nonnull String text) {
 		Number result = (Number) js(ROWS_JS +
+									CELL_TEXT_JS +
 									"for (var i = 0; i < rows.length; i++) {" +
 									"  var cells = rows[i].querySelectorAll('td');" +
-									"  for (var j = 0; j < cells.length; j++) {if ((cells[j].textContent || '').indexOf(arguments[1]) >= 0) return i;}" +
+									"  for (var j = 0; j < cells.length; j++) {if (cellText(cells[j]).indexOf(arguments[1]) >= 0) return i;}" +
 									"}" +
 									"return -1;", gridId, text);
 		return (result == null) ? -2 : result.intValue();
@@ -1148,18 +1160,19 @@ public class PrimeFacesSelenide extends Selenide<
 													"}).join('||');};";
 
 	/**
-	 * Counts the data rows of a grid, optionally only those with a cell containing the text.
+	 * Counts the data rows of a grid, optionally only those with a cell whose text, or the value of an input in it,
+	 * contains the text.
 	 *
 	 * @param gridId	the data table's client id
 	 * @param text	the text, or null to count every row
 	 * @return the count, or -1 if the grid is not on the page
 	 */
 	public int countRows(@Nonnull String gridId, @Nullable String text) {
-		Number result = (Number) js(ROWS_JS +
+		Number result = (Number) js(ROWS_JS + CELL_TEXT_JS +
 									"var wanted = arguments[1];" +
 									"if (wanted === null) return rows.length;" +
 									"return rows.filter(function(r) {return Array.from(r.querySelectorAll('td')).some(function(c) {" +
-									"  return (c.textContent || '').indexOf(wanted) >= 0;});}).length;", gridId, text);
+									"  return cellText(c).indexOf(wanted) >= 0;});}).length;", gridId, text);
 		return (result == null) ? -1 : result.intValue();
 	}
 

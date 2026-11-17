@@ -320,6 +320,7 @@ public abstract class InterpretedWebDriverExecutor<
 			stepFocus = (windowChanges == windowChangesAtStepStart) ? selenide.focusProbe() : null;
 			windowChangesAtStepStart = windowChanges;
 			try {
+				startingStep(step);
 				step.execute(this);
 			}
 			catch (SailFailure e) {
@@ -417,12 +418,13 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Returns the top-level step executed before the current one, in the same procedure.
+	 * Called before each top-level step runs, for a renderer that keeps state across steps (such as the inline grid row
+	 * that PrimeFaces' cell steps address). Does nothing here.
 	 *
-	 * @return the step, or null if the current step is the procedure's first
+	 * @param step	the step about to run
 	 */
-	protected final @Nullable Step getPreviousStep() {
-		return previousStep;
+	protected void startingStep(@Nonnull Step step) {
+		// nothing by default
 	}
 
 	private void record(@Nonnull String failure) {
