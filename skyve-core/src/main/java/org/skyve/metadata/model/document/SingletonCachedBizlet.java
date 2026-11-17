@@ -10,6 +10,7 @@ import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Caches singleton document instance identifiers for global/customer-scoped
@@ -48,10 +49,10 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 		DocumentPermissionScope scope = u.getScope(bizModule, bizDocument);
 		String key = null;
 		if (DocumentPermissionScope.customer.equals(scope)) {
-			key = new StringBuilder(128).append(bizModule).append('.').append(bizDocument).append('.').append(u.getCustomerName()).toString();
+			key = key(bizModule, bizDocument, u.getCustomerName());
 		}
 		else if (DocumentPermissionScope.global.equals(scope)) {
-			key = new StringBuilder(128).append(bizModule).append('.').append(bizDocument).toString();
+			key = key(bizModule, bizDocument, null);
 		}
 		
 		// not customer or global scoped, so no caching
@@ -112,15 +113,44 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	}
 
 	/**
-	 * Clear the cached details of the singleton document instance. 
+	 * Builds the key that caches the bizId of a singleton document instance.
+	 *
+	 * @param moduleName	the singleton document's module name
+	 * @param documentName	the singleton document's name
+	 * @param customerName	the customer name of a customer scoped instance, or {@code null} for a
+	 * 						global scoped instance
+	 * @return	<code>module.document</code>, or <code>module.document.customer</code> for a customer
+	 */
+	private static @Nonnull String key(@Nonnull String moduleName, @Nonnull String documentName, @Nullable String customerName) {
+		StringBuilder result = new StringBuilder(128).append(moduleName).append('.').append(documentName);
+		if (customerName != null) {
+			result.append('.').append(customerName);
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Clears the cached details of the singleton document instance, both the global scoped one and
+	 * the one scoped to the current user's customer.
+	 *
+	 * @param moduleName	the singleton document's module name
+	 * @param documentName	the singleton document's name
 	 */
 	public static void clear(@Nonnull String moduleName, @Nonnull String documentName) {
-		String key = new StringBuilder(128).append(moduleName).append('.').append(documentName).append(CORE.getCustomer().getName()).append('.').toString();
-		INSTANCES.remove(key);
-		key = new StringBuilder(128).append(moduleName).append('.').append(documentName).toString();
-		INSTANCES.remove(key);
+		INSTANCES.remove(key(moduleName, documentName, CORE.getUser().getCustomerName()));
+		INSTANCES.remove(key(moduleName, documentName, null));
 	}
 	
+	/**
+	 * Clears the cached details of the singleton document instance; a typed shortcut for
+	 * {@link #clear(String, String)}.
+	 *
+	 * @param document	the compile-time reference to the singleton document
+	 */
+	public static void clear(@Nonnull ModuleDocument document) {
+		clear(document.moduleName(), document.documentName());
+	}
+
 	/**
 	 * Clear all cached details.
 	 */

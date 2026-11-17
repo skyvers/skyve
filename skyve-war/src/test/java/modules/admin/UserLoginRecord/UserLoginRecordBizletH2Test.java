@@ -1,12 +1,18 @@
 package modules.admin.UserLoginRecord;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.CORE;
 import org.skyve.metadata.controller.ImplicitActionName;
+import org.skyve.metadata.module.JobMetaData;
 
+import modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob;
+import modules.admin.domain.AdminJob;
 import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
@@ -31,5 +37,14 @@ class UserLoginRecordBizletH2Test extends AbstractH2Test {
 		bean.setBizId("existing-login-record");
 
 		assertDoesNotThrow(() -> BIZLET.preSave(bean));
+	}
+
+	@Test
+	void differentCountryLoginNotificationJobResolvesForTheCurrentCustomer() {
+		// preSave schedules this job when a login comes from a new country
+		JobMetaData job = AdminJob.J_DIFFERENT_COUNTRY_LOGIN_NOTIFICATION.toJob(CORE.getCustomer());
+
+		assertAll(() -> assertEquals(DifferentCountryLoginNotificationJob.JOB_NAME, job.getName()),
+					() -> assertEquals(DifferentCountryLoginNotificationJob.class.getName(), job.getClassName()));
 	}
 }

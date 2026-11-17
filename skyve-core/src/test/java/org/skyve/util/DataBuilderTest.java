@@ -2,9 +2,13 @@ package org.skyve.util;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.withSettings;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doReturn;
@@ -15,8 +19,13 @@ import java.lang.reflect.Method;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -35,9 +44,14 @@ import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.model.Dynamic;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.model.document.Reference;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.metadata.user.User;
 import org.skyve.domain.Bean;
+import org.skyve.util.DataBuilderFactoryClasses.Part;
+import org.skyve.util.DataBuilderFactoryClasses.Widget;
+import org.skyve.util.DataBuilderFactoryClasses.WidgetExtension;
+import org.skyve.util.DataBuilderFactoryClasses.WidgetSubclass;
 import org.skyve.util.test.SkyveFixture;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -946,5 +960,184 @@ class DataBuilderTest {
 		finally {
 			clearPersistenceThreadLocal();
 		}
+	}
+
+	@Test
+	void typedBuildsDelegateToTheStringForms() {
+		try {
+			DataBuilder builder = spy(newBuilderWithMockUser());
+			Bean built = mock(Bean.class);
+			Bean factoryBuilt = mock(Bean.class);
+			doReturn(built).when(builder).build("admin", "Contact");
+			doReturn(factoryBuilt).when(builder).factoryBuild("admin", "Contact");
+
+			assertAll(() -> assertSame(built, builder.<Bean>build(TestDocument.CONTACT)),
+						() -> assertSame(factoryBuilt, builder.<Bean>factoryBuild(TestDocument.CONTACT)));
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	/**
+	 * Stands in for the acme customer's generated override class of admin.Widget, which extends the
+	 * vanilla document's hand-written extension. It is in the customer's domain package, which is
+	 * made at run time, as a <code>customers</code> directory in the test classes would be taken for a
+	 * customer by the repository tests that load metadata from them.
+	 */
+	@SuppressWarnings("resource") // the made and loaded types only hold the class bytes in memory
+	private static final Class<?> WIDGET_OVERRIDE = new ByteBuddy().subclass(WidgetExtension.class)
+																		.name("customers.acme.modules.admin.domain.WidgetOverride")
+																		.make()
+																		.load(DataBuilderTest.class.getClassLoader(), ClassLoadingStrategy.Default.WRAPPER)
+																		.getLoaded();
+
+	/** A factory of admin.Widget returning the extension, as UserFactory does. */
+	public static final class WidgetFactory {
+		/** A bean of the customer's class, as factoryBuild() or newInstance() makes for the customer. */
+		static final WidgetExtension EXTENSION = (WidgetExtension) mock(WIDGET_OVERRIDE);
+		/** How many times DataBuilder invoked the factory method, so a test can show it was never chosen. */
+		static final AtomicInteger CALLS = new AtomicInteger();
+
+		@SkyveFixture(types = FixtureType.crud)
+		public static WidgetExtension crudInstance() {
+			CALLS.incrementAndGet();
+			return EXTENSION;
+		}
+	}
+
+	/** A factory of admin.Widget returning the extension, which makes a bean of the vanilla extension class itself. */
+	public static final class VanillaInstanceFactory {
+		@SkyveFixture(types = FixtureType.crud)
+		public static WidgetExtension crudInstance() {
+			return mock(WidgetExtension.class);
+		}
+	}
+
+	/** A factory of admin.Widget whose only method returns beans of admin.Part, which Widget extends. */
+	public static final class PartReturningFactory {
+		/** How many times DataBuilder invoked the factory method, so a test can show it was never chosen. */
+		static final AtomicInteger CALLS = new AtomicInteger();
+
+		@SkyveFixture(types = FixtureType.crud)
+		public static Part crudInstance() {
+			CALLS.incrementAndGet();
+			return mock(Part.class);
+		}
+	}
+
+	/** A factory of admin.Widget returning the generated domain class, which the extension extends. */
+	public static final class DomainClassReturningFactory {
+		/** How many times DataBuilder invoked the factory method, so a test can show it was never chosen. */
+		static final AtomicInteger CALLS = new AtomicInteger();
+
+		@SkyveFixture(types = FixtureType.crud)
+		public static Widget crudInstance() {
+			CALLS.incrementAndGet();
+			return mock(Widget.class);
+		}
+	}
+
+	/** Invokes the data factory for admin.Widget for a customer whose bean class is the given one. */
+	private static Bean invokeWidgetDataFactory(Object factory, Class<?> beanClass) throws Exception {
+		ProvidedRepository original = getProvidedRepository();
+		try {
+			DataBuilder builder = newBuilderWithMockUser().fixture(FixtureType.crud);
+			Customer customer = (Customer) getField(builder, "customer");
+			ProvidedRepository repository = mock(ProvidedRepository.class);
+			when(repository.getDataFactory(customer, "admin", "Widget")).thenReturn(factory);
+			setProvidedRepository(repository);
+
+			DocumentImpl document = spy(new DocumentImpl());
+			document.setOwningModuleName("admin");
+			document.setName("Widget");
+			doReturn(beanClass).when(document).getBeanClass(customer);
+
+			return invokeDataFactory(builder, document, 1);
+		}
+		finally {
+			setProvidedRepository(original);
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	/**
+	 * A customer that overrides a document with a hand-written extension has a generated
+	 * <code>&lt;Document&gt;Override</code> bean class, which extends the extension the factory returns.
+	 */
+	@Test
+	void dataFactoryReturningTheDocumentsExtensionAppliesToACustomersOverrideClass() throws Exception {
+		assertSame(WidgetFactory.EXTENSION, invokeWidgetDataFactory(new WidgetFactory(), WIDGET_OVERRIDE));
+	}
+
+	@Test
+	void dataFactoryMethodReturningTheBaseDocumentsClassIsNotUsedForACustomersOverrideClass() throws Exception {
+		PartReturningFactory.CALLS.set(0);
+		Bean result = invokeWidgetDataFactory(new PartReturningFactory(), WIDGET_OVERRIDE);
+		assertAll(() -> assertThat(result, is((Bean) null)),
+					() -> assertEquals(0, PartReturningFactory.CALLS.get(), "the factory method must not be chosen"));
+	}
+
+	/** Only a customer class reaches back to the vanilla class it extends. */
+	@Test
+	void dataFactoryReturningASuperclassOfAVanillaBeanClassIsNotUsed() throws Exception {
+		WidgetFactory.CALLS.set(0);
+		Bean result = invokeWidgetDataFactory(new WidgetFactory(), WidgetSubclass.class);
+		assertAll(() -> assertThat(result, is((Bean) null)),
+					() -> assertEquals(0, WidgetFactory.CALLS.get(), "the factory method must not be chosen"));
+	}
+
+	/**
+	 * A factory method returning the domain class of a document whose bean class is its extension is
+	 * ignored, and DataBuilder warns about it once however many beans it builds.
+	 */
+	@Test
+	void dataFactoryMethodReturningTheDomainClassOfAnExtendedDocumentIsIgnoredWithOneWarning() throws Exception {
+		ProvidedRepository original = getProvidedRepository();
+		PrintStream originalOut = System.out;
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		DomainClassReturningFactory.CALLS.set(0);
+		Bean first;
+		Bean second;
+		try (PrintStream capture = new PrintStream(out, true, StandardCharsets.UTF_8)) {
+			DataBuilder builder = newBuilderWithMockUser().fixture(FixtureType.crud);
+			Customer customer = (Customer) getField(builder, "customer");
+			ProvidedRepository repository = mock(ProvidedRepository.class);
+			when(repository.getDataFactory(customer, "admin", "Widget")).thenReturn(new DomainClassReturningFactory());
+			setProvidedRepository(repository);
+			DocumentImpl document = spy(new DocumentImpl());
+			document.setOwningModuleName("admin");
+			document.setName("Widget");
+			doReturn(WidgetExtension.class).when(document).getBeanClass(customer);
+			DataBuilder.setTrace(true);
+			System.setOut(capture);
+
+			first = invokeDataFactory(builder, document, 1);
+			second = invokeDataFactory(builder, document, 1);
+		}
+		finally {
+			System.setOut(originalOut);
+			DataBuilder.setTrace(false);
+			setProvidedRepository(original);
+			clearPersistenceThreadLocal();
+		}
+
+		String output = out.toString(StandardCharsets.UTF_8);
+		String warning = "WARNING: " + DomainClassReturningFactory.class.getName() + "::crudInstance is ignored as it returns " +
+							Widget.class.getName() + ", not the bean class " + WidgetExtension.class.getName() + " of document admin.Widget";
+		assertAll(() -> assertThat(first, is((Bean) null)),
+					() -> assertThat(second, is((Bean) null)),
+					() -> assertEquals(0, DomainClassReturningFactory.CALLS.get(), "the factory method must not be chosen"),
+					() -> assertEquals(1, output.split(java.util.regex.Pattern.quote(warning), -1).length - 1, output));
+	}
+
+	/**
+	 * A factory method returning the vanilla extension qualifies for a customer whose bean class is
+	 * a customer class, but a bean it makes of the vanilla class itself is not the customer's, so
+	 * DataBuilder builds a random bean instead.
+	 */
+	@Test
+	void dataFactoryBeanOfTheVanillaClassIsNotUsedForACustomersOverrideClass() throws Exception {
+		assertThat(invokeWidgetDataFactory(new VanillaInstanceFactory(), WIDGET_OVERRIDE), is((Bean) null));
 	}
 }

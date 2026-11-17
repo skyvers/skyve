@@ -1976,7 +1976,7 @@ class AbstractHibernatePersistenceTest {
 			SQLDefinition sql = mock(SQLDefinition.class);
 			when(sql.getQuery()).thenReturn("select 1");
 			when(sql.getTimeoutInSeconds()).thenReturn(Integer.valueOf(7));
-			when(module.getSQL("namedSql")).thenReturn(sql);
+			when(module.getNullSafeSQL("namedSql")).thenReturn(sql);
 			persistence.setUser(userForModule(module));
 
 			Document document = mock(Document.class);
@@ -2001,7 +2001,7 @@ class AbstractHibernatePersistenceTest {
 			BizQLDefinition bizql = mock(BizQLDefinition.class);
 			when(bizql.getQuery()).thenReturn("from adminContact bean");
 			when(bizql.getTimeoutInSeconds()).thenReturn(Integer.valueOf(11));
-			when(module.getBizQL("namedBizql")).thenReturn(bizql);
+			when(module.getNullSafeBizQL("namedBizql")).thenReturn(bizql);
 			persistence.setUser(userForModule(module));
 
 			assertNotNull(persistence.newNamedBizQL(module, "namedBizql"));

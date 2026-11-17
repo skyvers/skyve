@@ -1,8 +1,11 @@
 package org.skyve.metadata.view.model.chart;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -14,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.metadata.SortDirection;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestQuery;
 import org.skyve.persistence.DocumentQuery.AggregateFunction;
 
 /**
@@ -145,5 +150,18 @@ class ChartBuilderTest {
 		Method method = ChartBuilder.class.getDeclaredMethod("minMax", List.class, boolean.class);
 		method.setAccessible(true);
 		return (Number) method.invoke(null, beans, Boolean.valueOf(min));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void typedWithAndWithQueryDelegateToTheStringForms() {
+		ChartBuilder builder = spy(new ChartBuilder());
+		ChartBuilder withResult = new ChartBuilder();
+		ChartBuilder withQueryResult = new ChartBuilder();
+		doReturn(withResult).when(builder).with("admin", "Contact");
+		doReturn(withQueryResult).when(builder).withQuery("admin", "qContacts");
+
+		assertAll(() -> assertSame(withResult, builder.with(TestDocument.CONTACT)),
+					() -> assertSame(withQueryResult, builder.withQuery(TestQuery.Q_CONTACTS)));
 	}
 }

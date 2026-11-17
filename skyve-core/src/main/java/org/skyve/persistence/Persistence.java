@@ -9,7 +9,11 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ReferentialConstraintViolationException;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.ModuleBizQL;
+import org.skyve.metadata.module.query.ModuleQuery;
+import org.skyve.metadata.module.query.ModuleSQL;
 import org.skyve.metadata.user.DocumentPermissionScope;
 import org.skyve.metadata.user.User;
 
@@ -103,6 +107,21 @@ public interface Persistence extends Serializable {
 									@Nonnull String documentName,
 									@Nonnull String collectionName,
 									@Nonnull String ownerBizId);
+
+	/**
+	 * Returns whether the specified collection is present in the second-level (shared) cache
+	 * for the given owner identified by bizId; a typed shortcut for
+	 * {@link #sharedCacheCollection(String, String, String, String)}.
+	 * @param document The compile-time reference to the owning document.
+	 * @param collectionName The collection attribute name.
+	 * @param ownerBizId The bizId of the owning bean.
+	 * @return {@code true} if the collection is in the shared cache.
+	 */
+	default boolean sharedCacheCollection(@Nonnull ModuleDocument document,
+											@Nonnull String collectionName,
+											@Nonnull String ownerBizId) {
+		return sharedCacheCollection(document.moduleName(), document.documentName(), collectionName, ownerBizId);
+	}
 	
 	/**
 	 * Returns whether the specified collection of the given owner bean is present in the
@@ -122,6 +141,17 @@ public interface Persistence extends Serializable {
 	 * @return {@code true} if the bean is in the shared cache.
 	 */
 	boolean sharedCacheBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId);
+
+	/**
+	 * Returns whether a bean identified by document and bizId is present in the second-level
+	 * (shared) cache; a typed shortcut for {@link #sharedCacheBean(String, String, String)}.
+	 * @param document The compile-time document reference.
+	 * @param bizId The bizId of the bean.
+	 * @return {@code true} if the bean is in the shared cache.
+	 */
+	default boolean sharedCacheBean(@Nonnull ModuleDocument document, @Nonnull String bizId) {
+		return sharedCacheBean(document.moduleName(), document.documentName(), bizId);
+	}
 
 	/**
 	 * Returns whether the given bean is present in the second-level (shared) cache.
@@ -151,6 +181,16 @@ public interface Persistence extends Serializable {
 										@Nonnull String collectionName);
 
 	/**
+	 * Evicts all cached entries for the specified collection across all owning beans; a typed
+	 * shortcut for {@link #evictSharedCacheCollections(String, String, String)}.
+	 * @param document The compile-time reference to the owning document.
+	 * @param collectionName The collection attribute name.
+	 */
+	default void evictSharedCacheCollections(@Nonnull ModuleDocument document, @Nonnull String collectionName) {
+		evictSharedCacheCollections(document.moduleName(), document.documentName(), collectionName);
+	}
+
+	/**
 	 * Evicts a specific collection entry from the second-level (shared) cache.
 	 * @param moduleName The module name of the owning document.
 	 * @param documentName The document name of the owning document.
@@ -161,6 +201,19 @@ public interface Persistence extends Serializable {
 										@Nonnull String documentName,
 										@Nonnull String collectionName,
 										@Nonnull String ownerBizId);
+
+	/**
+	 * Evicts a specific collection entry from the second-level (shared) cache; a typed shortcut
+	 * for {@link #evictSharedCacheCollection(String, String, String, String)}.
+	 * @param document The compile-time reference to the owning document.
+	 * @param collectionName The collection attribute name.
+	 * @param ownerBizId The bizId of the owning bean.
+	 */
+	default void evictSharedCacheCollection(@Nonnull ModuleDocument document,
+												@Nonnull String collectionName,
+												@Nonnull String ownerBizId) {
+		evictSharedCacheCollection(document.moduleName(), document.documentName(), collectionName, ownerBizId);
+	}
 
 	/**
 	 * Evicts a specific collection of the given owner bean from the second-level (shared) cache.
@@ -182,12 +235,31 @@ public interface Persistence extends Serializable {
 	void evictSharedCacheBeans(@Nonnull String moduleName, @Nonnull String documentName);
 
 	/**
+	 * Evicts all cached beans for the given document from the second-level (shared) cache; a
+	 * typed shortcut for {@link #evictSharedCacheBeans(String, String)}.
+	 * @param document The compile-time document reference.
+	 */
+	default void evictSharedCacheBeans(@Nonnull ModuleDocument document) {
+		evictSharedCacheBeans(document.moduleName(), document.documentName());
+	}
+
+	/**
 	 * Evicts a specific bean identified by module, document, and bizId from the second-level (shared) cache.
 	 * @param moduleName The module name.
 	 * @param documentName The document name.
 	 * @param bizId The bizId of the bean.
 	 */
 	void evictSharedCachedBean(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String bizId);
+
+	/**
+	 * Evicts a specific bean identified by document and bizId from the second-level (shared)
+	 * cache; a typed shortcut for {@link #evictSharedCachedBean(String, String, String)}.
+	 * @param document The compile-time document reference.
+	 * @param bizId The bizId of the bean.
+	 */
+	default void evictSharedCachedBean(@Nonnull ModuleDocument document, @Nonnull String bizId) {
+		evictSharedCachedBean(document.moduleName(), document.documentName(), bizId);
+	}
 
 	/**
 	 * Evicts the given bean from the second-level (shared) cache.
@@ -347,6 +419,17 @@ public interface Persistence extends Serializable {
 											@Nonnull String id);
 
 	/**
+	 * Retrieves a bean by its bizId for the given document; a typed shortcut for
+	 * {@link #retrieve(String, String, String)}.
+	 * @param document The compile-time document reference.
+	 * @param id The bizId of the bean to retrieve.
+	 * @return The bean, or {@code null} if not found.
+	 */
+	default @Nullable <T extends Bean> T retrieve(@Nonnull ModuleDocument document, @Nonnull String id) {
+		return retrieve(document.moduleName(), document.documentName(), id);
+	}
+
+	/**
 	 * Retrieves a bean by its bizId for the given module and document and places a pessimistic write lock on it.
 	 * @param moduleName The module name.
 	 * @param documentName The document name.
@@ -356,6 +439,17 @@ public interface Persistence extends Serializable {
 	@Nonnull <T extends Bean> T retrieveAndLock(@Nonnull String moduleName,
 													@Nonnull String documentName,
 													@Nonnull String id);
+
+	/**
+	 * Retrieves a bean by its bizId for the given document and places a pessimistic write lock
+	 * on it; a typed shortcut for {@link #retrieveAndLock(String, String, String)}.
+	 * @param document The compile-time document reference.
+	 * @param id The bizId of the bean to retrieve.
+	 * @return The bean (never {@code null}).
+	 */
+	default @Nonnull <T extends Bean> T retrieveAndLock(@Nonnull ModuleDocument document, @Nonnull String id) {
+		return retrieveAndLock(document.moduleName(), document.documentName(), id);
+	}
 
 
 	/**
@@ -405,6 +499,16 @@ public interface Persistence extends Serializable {
 	 * @return The SQL wrapper.
 	 */
 	@Nonnull SQL newNamedSQL(@Nonnull Module module, @Nonnull String queryName);
+
+	/**
+	 * Creates a new {@link SQL} wrapper from a named SQL query defined in a module; a typed
+	 * shortcut for {@link #newNamedSQL(String, String)}.
+	 * @param query The compile-time SQL query reference.
+	 * @return The SQL wrapper.
+	 */
+	default @Nonnull SQL newNamedSQL(@Nonnull ModuleSQL query) {
+		return newNamedSQL(query.moduleName(), query.queryName());
+	}
 
 	/**
 	 * Creates a new {@link SQL} wrapper for the given SQL query string with module and document context
@@ -469,6 +573,16 @@ public interface Persistence extends Serializable {
 	@Nonnull BizQL newNamedBizQL(@Nonnull Module module, @Nonnull String queryName);
 
 	/**
+	 * Creates a new {@link BizQL} wrapper from a named BizQL query defined in a module; a typed
+	 * shortcut for {@link #newNamedBizQL(String, String)}.
+	 * @param query The compile-time BizQL query reference.
+	 * @return The BizQL wrapper.
+	 */
+	default @Nonnull BizQL newNamedBizQL(@Nonnull ModuleBizQL query) {
+		return newNamedBizQL(query.moduleName(), query.queryName());
+	}
+
+	/**
 	 * Creates a new {@link DocumentQuery} from a named document query defined in the given module.
 	 * @param moduleName The module name containing the named document query definition.
 	 * @param queryName The name of the document query.
@@ -485,6 +599,16 @@ public interface Persistence extends Serializable {
 	@Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull Module module, @Nonnull String queryName);
 
 	/**
+	 * Creates a new {@link DocumentQuery} from a named document query defined in a module; a
+	 * typed shortcut for {@link #newNamedDocumentQuery(String, String)}.
+	 * @param query The compile-time metadata query reference.
+	 * @return The document query.
+	 */
+	default @Nonnull DocumentQuery newNamedDocumentQuery(@Nonnull ModuleQuery query) {
+		return newNamedDocumentQuery(query.moduleName(), query.queryName());
+	}
+
+	/**
 	 * Creates a new {@link DocumentQuery} for the given document.
 	 * @param document The document metadata to query.
 	 * @return The document query.
@@ -498,6 +622,16 @@ public interface Persistence extends Serializable {
 	 * @return The document query.
 	 */
 	@Nonnull DocumentQuery newDocumentQuery(@Nonnull String moduleName, @Nonnull String documentName);
+
+	/**
+	 * Creates a new {@link DocumentQuery} for the given document; a typed shortcut for
+	 * {@link #newDocumentQuery(String, String)}.
+	 * @param document The compile-time document reference.
+	 * @return The document query.
+	 */
+	default @Nonnull DocumentQuery newDocumentQuery(@Nonnull ModuleDocument document) {
+		return newDocumentQuery(document.moduleName(), document.documentName());
+	}
 
 	/**
 	 * Creates a new {@link DocumentQuery} for the given document with explicit JPQL clauses.

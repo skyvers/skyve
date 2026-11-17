@@ -3830,7 +3830,7 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		HibernateSQL result = new HibernateSQL(sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;
@@ -3845,7 +3845,7 @@ public void doWorkOnConnection(Session session) {
 	 */
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull Module module, @Nonnull String queryName) {
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		HibernateSQL result = new HibernateSQL(sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;
@@ -3887,7 +3887,7 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		HibernateSQL result = new HibernateSQL(moduleName, documentName, sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;
@@ -3903,7 +3903,7 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(document.getOwningModuleName());
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		HibernateSQL result = new HibernateSQL(document, sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;
@@ -3930,7 +3930,7 @@ public void doWorkOnConnection(Session session) {
 	@Override
 	public @Nonnull BizQL newNamedBizQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = user.getCustomer().getModule(moduleName);
-		BizQLDefinition bizql = module.getBizQL(queryName);
+		BizQLDefinition bizql = module.getNullSafeBizQL(queryName);
 		HibernateBizQL result = new HibernateBizQL(bizql.getQuery(), this);
 		result.setTimeoutInSeconds(bizql.getTimeoutInSeconds());
 		return result;
@@ -3945,7 +3945,7 @@ public void doWorkOnConnection(Session session) {
 	 */
 	@Override
 	public @Nonnull BizQL newNamedBizQL(@Nonnull Module module, @Nonnull String queryName) {
-		BizQLDefinition bizql = module.getBizQL(queryName);
+		BizQLDefinition bizql = module.getNullSafeBizQL(queryName);
 		HibernateBizQL result = new HibernateBizQL(bizql.getQuery(), this);
 		result.setTimeoutInSeconds(bizql.getTimeoutInSeconds());
 		return result;

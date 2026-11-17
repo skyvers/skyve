@@ -315,8 +315,8 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	
 	@Override
 	public @Nonnull JobMetaData getJob(@Nonnull String jobName) {
-		JobMetaData result = (JobMetaData) getMetaData(jobName);
-		if (result == null) { // no job defined
+		// another kind of metadata of the name is no job either
+		if (! (getMetaData(jobName) instanceof JobMetaData result)) { // no job defined
 			throw new MetaDataException("Job " + getName() + "." + jobName + " is not defined in the skyve metadata.");
 		}
 		return result;
@@ -335,19 +335,17 @@ ie Link from an external module to admin.User and domain generation will moan ab
 	@Override
 	public @Nullable MetaDataQueryDefinition getMetaDataQuery(@Nonnull String queryName) {
 		// NB Cannot throw if null as QueryCommand tests it
-		return (MetaDataQueryDefinition) getMetaData(queryName);
+		return (getMetaData(queryName) instanceof MetaDataQueryDefinition result) ? result : null;
 	}
 
 	@Override
-	public @Nonnull SQLDefinition getSQL(@Nonnull String queryName) {
-		// NB Cannot throw if null as QueryCommand tests it
-		return (SQLDefinition) getMetaData(queryName);
+	public @Nullable SQLDefinition getSQL(@Nonnull String queryName) {
+		return (getMetaData(queryName) instanceof SQLDefinition result) ? result : null;
 	}
 
 	@Override
-	public @Nonnull BizQLDefinition getBizQL(@Nonnull String queryName) {
-		// NB Cannot throw if null as QueryCommand tests it
-		return (BizQLDefinition) getMetaData(queryName);
+	public @Nullable BizQLDefinition getBizQL(@Nonnull String queryName) {
+		return (getMetaData(queryName) instanceof BizQLDefinition result) ? result : null;
 	}
 
 	public void putQuery(@Nonnull QueryDefinition query) {
@@ -362,7 +360,7 @@ ie Link from an external module to admin.User and domain generation will moan ab
 
 	@Override
 	public @Nullable Role getRole(@Nonnull String roleName) {
-		return (Role) getMetaData(roleName);
+		return (getMetaData(roleName) instanceof Role result) ? result : null;
 	}
 
 	public void putRole(@Nonnull Role role) {

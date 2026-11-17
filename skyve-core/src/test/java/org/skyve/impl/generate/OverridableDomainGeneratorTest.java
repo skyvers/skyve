@@ -344,7 +344,7 @@ class OverridableDomainGeneratorTest {
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	void shouldEmitGeneratedInsertOnScalarFieldProperty() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
@@ -367,14 +367,14 @@ class OverridableDomainGeneratorTest {
 
 		StringBuilder contents = new StringBuilder();
 		attributeMappingsMethod().invoke(generator, contents, null, module, document, persistent,
-				null, new TreeSet<>(), "Sample", false, "");
+				null, new TreeSet<>(), "Sample", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("generated=\"insert\""), "Expected generated=\"insert\" in: " + xml);
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	void shouldEmitGeneratedAlwaysOnScalarFieldProperty() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
@@ -397,14 +397,14 @@ class OverridableDomainGeneratorTest {
 
 		StringBuilder contents = new StringBuilder();
 		attributeMappingsMethod().invoke(generator, contents, null, module, document, persistent,
-				null, new TreeSet<>(), "Sample", false, "");
+				null, new TreeSet<>(), "Sample", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("generated=\"always\""), "Expected generated=\"always\" in: " + xml);
 	}
 
 	@Test
-	@SuppressWarnings({ "static-method", "boxing" })
+	@SuppressWarnings("static-method")
 	void shouldNotEmitGeneratedAttributeWhenGeneratedIsNull() throws Exception {
 		OverridableDomainGenerator generator = new OverridableDomainGenerator(false, false, false,
 				DialectOptions.H2_NO_INDEXES, "", "", "", "", null);
@@ -427,7 +427,7 @@ class OverridableDomainGeneratorTest {
 
 		StringBuilder contents = new StringBuilder();
 		attributeMappingsMethod().invoke(generator, contents, null, module, document, persistent,
-				null, new TreeSet<>(), "Sample", false, "");
+				null, new TreeSet<>(), "Sample", "");
 
 		String xml = contents.toString();
 		assertFalse(xml.contains("generated="), "generated attribute should be absent when not set, got: " + xml);
@@ -447,7 +447,7 @@ class OverridableDomainGeneratorTest {
 	private static Method attributeMappingsMethod() throws NoSuchMethodException {
 		return declaredMethod("generateAttributeMappings",
 				StringBuilder.class, Customer.class, Module.class, Document.class,
-				Persistent.class, String.class, Set.class, String.class, boolean.class, String.class);
+				Persistent.class, String.class, Set.class, String.class, String.class);
 	}
 
 	private static Method declaredMethod(String name, Class<?>... parameterTypes) throws NoSuchMethodException {

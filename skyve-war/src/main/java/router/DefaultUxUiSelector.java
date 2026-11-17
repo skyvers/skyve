@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import modules.admin.domain.Startup;
+import modules.admin.domain.AdminRole;
 
 /**
  * Selects the effective UX/UI profile for incoming web requests.
@@ -72,7 +72,7 @@ public class DefaultUxUiSelector implements UxUiSelector {
 
 		// check if this is the first login
 		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
-		if (user != null && user.isInRole(Startup.MODULE_NAME, "SecurityAdministrator") && UtilImpl.SHOW_SETUP) {
+		if (user != null && user.isInRole(AdminRole.SECURITY_ADMINISTRATOR) && UtilImpl.SHOW_SETUP) {
 			// check the user has not already dismissed the startup page this session
 			@SuppressWarnings("null") // session cannot be null here as user is not null
 			Object dismissed = session.getAttribute(DISMISS_STARTUP);

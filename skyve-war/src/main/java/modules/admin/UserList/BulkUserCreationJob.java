@@ -22,6 +22,7 @@ import org.skyve.web.WebContext;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.Group.GroupExtension;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.Contact;
 import modules.admin.domain.Contact.ContactType;
 import modules.admin.domain.Group;
@@ -119,8 +120,7 @@ public class BulkUserCreationJob extends Job {
 		Persistence persistence = CORE.getPersistence();
 		org.skyve.metadata.user.User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(UserList.MODULE_NAME);
-		JobMetaData job = module.getJob("jBulkUserCreation");
+		JobMetaData job = AdminJob.J_BULK_USER_CREATION.toJob(customer);
 
 		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 

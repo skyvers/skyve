@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -100,6 +101,33 @@ public class DocumentImpl extends ModelImpl implements Document {
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
     
 	private static final String DOCUMENT_PREFIX = "Document ";
+
+	/**
+	 * The suffix of the concrete vanilla class the domain generator generates when a customer's
+	 * override leaves out a vanilla attribute, and so makes the vanilla domain class abstract -
+	 * <code>modules.&lt;m&gt;.domain.&lt;Document&gt;Vanilla</code>.
+	 */
+	public static final String VANILLA_CLASS_SUFFIX = "Vanilla";
+
+	/**
+	 * The suffix of the class the domain generator generates for a customer's override of a vanilla
+	 * document - <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code>.
+	 */
+	public static final String OVERRIDE_CLASS_SUFFIX = "Override";
+
+	/**
+	 * A bean class, with the context class loader it was loaded through.
+	 */
+	private record LoadedBeanClass(@Nonnull ClassLoader classLoader, @Nonnull Class<?> beanClass) {
+	}
+
+	/**
+	 * The bean classes {@link #getBeanClass(Customer)} resolved outside dev mode, by customer name,
+	 * or "" for the vanilla bean class. Thread-safe. Evicting cached metadata loads the document
+	 * again, which drops them. A bean class loaded through another context class loader is resolved
+	 * again. Transient, as class loaders are not serializable - see {@link #readResolve()}.
+	 */
+	private transient Map<String, LoadedBeanClass> beanClasses = new ConcurrentHashMap<>();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	private long lastCheckedMillis = System.currentTimeMillis();
@@ -246,32 +274,66 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * documents this resolves generated domain and optional extension classes through the
 	 * repository vtable, including customer overrides.
 	 *
-	 * @param customer the customer context used for repository vtable resolution.
+	 * <p>Side effects: outside dev mode, caches the class for the customer, so that the classes
+	 * that do not exist are looked for once. Evicting cached metadata, which loads the document
+	 * again, or another context class loader, resolves it again.
+	 *
+	 * @param customer the customer context used for repository vtable resolution, or {@code null}
+	 * 			for the vanilla bean class, which a customer that does not override the document gets.
 	 * @return the concrete bean class.
 	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
 	 */
-	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
-	public @Nonnull <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
+	@SuppressWarnings("unchecked")
+	public @Nonnull <T extends Bean> Class<T> getBeanClass(@Nullable Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
-			Persistent persistent = getPersistent();
-			if (parentDocumentName != null) {
-				if (parentDocumentName.equals(getName())) { // hierarchical
-					return (persistent == null) ?
-								(Class<T>) DynamicHierarchicalBean.class : 
-								(Class<T>) DynamicPersistentHierarchicalBean.class;
-				}
-				// child
-				return (persistent == null) ?
-							(Class<T>) DynamicChildBean.class :
-							(Class<T>) DynamicPersistentChildBean.class;
-			}
-			return (persistent == null) ? (Class<T>) DynamicBean.class : (Class<T>) DynamicPersistentBean.class;
+			return (Class<T>) dynamicBeanClass();
 		}
 		
-		Class<T> result = null;
-		
-		String customerName = customer.getName();
+		String customerName = (customer == null) ? null : customer.getName();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (UtilImpl.DEV_MODE) { // classes can be regenerated and reloaded
+			return (Class<T>) loadBeanClass(customerName, classLoader);
+		}
+		String key = (customerName == null) ? "" : customerName;
+		LoadedBeanClass result = beanClasses.get(key);
+		if ((result == null) || (result.classLoader() != classLoader)) {
+			result = new LoadedBeanClass(classLoader, loadBeanClass(customerName, classLoader));
+			beanClasses.put(key, result);
+		}
+		return (Class<T>) result.beanClass();
+	}
+
+	/**
+	 * Returns the framework bean class of this dynamic document, by whether it is persistent and
+	 * whether it is hierarchical or a child.
+	 *
+	 * @return	the dynamic bean class.
+	 */
+	private @Nonnull Class<? extends Bean> dynamicBeanClass() {
+		boolean persistent = (getPersistent() != null);
+		if (parentDocumentName == null) {
+			return persistent ? DynamicPersistentBean.class : DynamicBean.class;
+		}
+		if (parentDocumentName.equals(getName())) { // hierarchical
+			return persistent ? DynamicPersistentHierarchicalBean.class : DynamicHierarchicalBean.class;
+		}
+		// child
+		return persistent ? DynamicPersistentChildBean.class : DynamicChildBean.class;
+	}
+
+	/**
+	 * Loads the bean class of this static document for a customer (see {@link #getBeanClass(Customer)}).
+	 * A hand-crafted extension is looked for first, in the module or as a customer override, unless the
+	 * customer overrides the document with the vanilla extension - its generated override class extends it.
+	 *
+	 * @param customerName	The customer name, or {@code null} for the vanilla bean class.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if a mapped class cannot be loaded.
+	 */
+	private @Nonnull Class<?> loadBeanClass(@Nullable String customerName, @Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
 		String documentName = getName();
 
 		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
@@ -281,57 +343,23 @@ public class DocumentImpl extends ModelImpl implements Document {
 			throw new ClassNotFoundException(key + " not found in the repository vtable");
 		}
 		
-		// Look for a hand-crafted extension first (in module or as a customer override)
 		StringBuilder className = new StringBuilder(128);
 		try {
 			key.append('/').append(documentName).append("Extension");
 			String extensionKey = repository.vtable(customerName, key.toString());
-			if (extensionKey != null) {
-				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
+			boolean customerDocument = packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE);
+			if ((extensionKey != null) &&
+					((! customerDocument) || extensionKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE))) {
+				className.append(extensionKey.replace('/', '.'));
+				return classLoader.loadClass(className.toString());
 			}
-			else {
-				// Convert the vtable key to a package path
-				packagePath = packagePath.replace('/', '.');
-				int lastDotIndex = packagePath.lastIndexOf('.');
-				packagePath = packagePath.substring(0, lastDotIndex + 1);
-	
-				if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
-					// Look for an override first and if not found look for a domain class
-					try {
-						className.setLength(0);
-						className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
-						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-					}
-					catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
-						// Look for the domain class in the customer area
-						try {
-							className.setLength(className.length() - 3); // remove "Ext"
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-						}
-						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
-							// Look for the domain class in the modules area
-							className.setLength(0);
-							className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-						}
-					}
-				}
-				else {
-					// Look for domain class and if abstract, look for an override
-					className.setLength(0);
-					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-					if (Modifier.isAbstract(result.getModifiers())) {
-						className.append("Ext");
-						try {
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-						}
-						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
-							// stick with the domain class
-						}
-					}
-				}
-			}
+
+			// Convert the vtable key to a package path
+			packagePath = packagePath.replace('/', '.');
+			packagePath = packagePath.substring(0, packagePath.lastIndexOf('.') + 1);
+			return customerDocument ?
+					loadCustomerBeanClass(packagePath, extensionKey, className, classLoader) :
+					loadVanillaBeanClass(packagePath, className, classLoader);
 		}
 		catch (ClassNotFoundException e) {
 			if (UtilImpl.DEV_MODE) {
@@ -339,8 +367,100 @@ public class DocumentImpl extends ModelImpl implements Document {
 			}
 			throw e;
 		}
-		
+	}
+
+	/**
+	 * Loads the bean class of a customer's override of this document, or of a new customer document:
+	 * the customer's <code>&lt;Document&gt;Override</code>, else the customer's domain class, else the
+	 * vanilla extension or the vanilla domain class.
+	 *
+	 * @param packagePath	The customer's package of the document, ending in '.'.
+	 * @param extensionKey	The vtable key of the vanilla extension, or {@code null} if there is none.
+	 * @param className	Set to the name of the class last looked for.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if no class can be loaded.
+	 */
+	private @Nonnull Class<?> loadCustomerBeanClass(@Nonnull String packagePath,
+														@Nullable String extensionKey,
+														@Nonnull StringBuilder className,
+														@Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
+		String documentName = getName();
+		String customerClassName = packagePath + ProvidedRepository.DOMAIN_NAME + '.' + documentName;
+		Class<?> result = loadClassIfPresent(customerClassName + OVERRIDE_CLASS_SUFFIX, className, classLoader);
+		if (result == null) {
+			result = loadClassIfPresent(customerClassName, className, classLoader);
+		}
+		if (result == null) { // no override or base class in customer area
+			// Use the vanilla extension, or else the domain class in the modules area
+			className.setLength(0);
+			if (extensionKey != null) {
+				className.append(extensionKey.replace('/', '.'));
+			}
+			else {
+				className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
+			}
+			result = classLoader.loadClass(className.toString());
+		}
 		return result;
+	}
+
+	/**
+	 * Loads the vanilla bean class of this document: its domain class, or <code>&lt;Document&gt;Vanilla</code>
+	 * if the domain class is abstract because a customer's override leaves out a vanilla attribute.
+	 *
+	 * @param packagePath	The module's package of the document, ending in '.'.
+	 * @param className	Set to the name of the class last looked for.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if the domain class cannot be loaded.
+	 */
+	private @Nonnull Class<?> loadVanillaBeanClass(@Nonnull String packagePath,
+													@Nonnull StringBuilder className,
+													@Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
+		className.setLength(0);
+		className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(getName());
+		Class<?> result = classLoader.loadClass(className.toString());
+		if (Modifier.isAbstract(result.getModifiers())) {
+			Class<?> vanillaClass = loadClassIfPresent(className + VANILLA_CLASS_SUFFIX, className, classLoader);
+			if (vanillaClass != null) { // otherwise stick with the domain class
+				result = vanillaClass;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Loads a class if it exists.
+	 *
+	 * @param name	The class name.
+	 * @param className	Set to the class name.
+	 * @param classLoader	The class loader to load it through.
+	 * @return	the class, or {@code null} if it does not exist.
+	 */
+	private static @Nullable Class<?> loadClassIfPresent(@Nonnull String name,
+															@Nonnull StringBuilder className,
+															@Nonnull ClassLoader classLoader) {
+		className.setLength(0);
+		className.append(name);
+		try {
+			return classLoader.loadClass(name);
+		}
+		catch (@SuppressWarnings("unused") ClassNotFoundException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Creates the transient bean class cache again after deserialisation.
+	 *
+	 * @return	this document.
+	 */
+	protected @Nonnull Object readResolve() {
+		beanClasses = new ConcurrentHashMap<>();
+		return this;
 	}
 
 	/**

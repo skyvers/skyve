@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideSingleSub"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			The test customer's override of OverrideSingleSub, adding customerText.
+		]]>
+	</documentation>
+	<extends document="OverrideSingleBase" />
+	<persistent name="TEST_OverrideSingleBase" strategy="single" discriminator="OSS" />
+	<singularAlias>Override Single Sub</singularAlias>
+	<pluralAlias>Override Single Sub</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="subText">
+			<displayName>Sub Text</displayName>
+			<length>100</length>
+		</text>
+		<text name="customerText">
+			<displayName>Customer Text</displayName>
+			<length>100</length>
+		</text>
+	</attributes>
+</document>

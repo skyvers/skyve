@@ -237,7 +237,8 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * 
 	 * @param customer The customer context, may be null to get the un-overridden document
 	 * @param documentName The name of the document to retrieve
-	 * @return The document
+	 * @return The document; never {@code null}
+	 * @throws MetaDataException if the module does not declare or reference a document of that name
 	 */
 	@Nonnull Document getDocument(@Nullable Customer customer, @Nonnull String documentName);
 	
@@ -245,7 +246,9 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * Returns the job metadata with the specified name.
 	 * 
 	 * @param jobName The name of the job to retrieve
-	 * @return The job metadata
+	 * @return The job metadata; never {@code null}
+	 * @throws MetaDataException if the module has no metadata of that name, or the metadata of that
+	 * 			name is not a job
 	 */
 	@Nonnull JobMetaData getJob(@Nonnull String jobName);
 	
@@ -260,7 +263,8 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * Returns the metadata query with the specified name.
 	 * 
 	 * @param queryName The name of the query to retrieve
-	 * @return The metadata query definition
+	 * @return The metadata query definition, or {@code null} if the module has no metadata of that
+	 * 			name, or the metadata of that name is not a metadata query
 	 */
 	@Nullable MetaDataQueryDefinition getMetaDataQuery(@Nonnull String queryName);
 	
@@ -276,17 +280,49 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * Returns the SQL query with the specified name.
 	 * 
 	 * @param queryName The name of the SQL query to retrieve
-	 * @return The SQL query definition
+	 * @return The SQL query definition, or {@code null} if the module has no metadata of that name,
+	 * 			or the metadata of that name is not a SQL query
 	 */
-	@Nonnull SQLDefinition getSQL(@Nonnull String queryName);
+	@Nullable SQLDefinition getSQL(@Nonnull String queryName);
+
+	/**
+	 * Returns the SQL query with the specified name, throwing if it does not exist.
+	 *
+	 * @param queryName the SQL query name; must not be {@code null}
+	 * @return the SQL query definition; never {@code null}
+	 * @throws MetaDataException if this module has no SQL query with that name
+	 */
+	default @Nonnull SQLDefinition getNullSafeSQL(@Nonnull String queryName) {
+		SQLDefinition result = getSQL(queryName);
+		if (result == null) {
+			throw new MetaDataException("SQL query " + queryName + " does not exist in module " + getName());
+		}
+		return result;
+	}
 
 	/**
 	 * Returns the BizQL query with the specified name.
 	 * 
 	 * @param queryName The name of the BizQL query to retrieve
-	 * @return The BizQL query definition
+	 * @return The BizQL query definition, or {@code null} if the module has no metadata of that name,
+	 * 			or the metadata of that name is not a BizQL query
 	 */
-	@Nonnull BizQLDefinition getBizQL(@Nonnull String queryName);
+	@Nullable BizQLDefinition getBizQL(@Nonnull String queryName);
+
+	/**
+	 * Returns the BizQL query with the specified name, throwing if it does not exist.
+	 *
+	 * @param queryName the BizQL query name; must not be {@code null}
+	 * @return the BizQL query definition; never {@code null}
+	 * @throws MetaDataException if this module has no BizQL query with that name
+	 */
+	default @Nonnull BizQLDefinition getNullSafeBizQL(@Nonnull String queryName) {
+		BizQLDefinition result = getBizQL(queryName);
+		if (result == null) {
+			throw new MetaDataException("BizQL query " + queryName + " does not exist in module " + getName());
+		}
+		return result;
+	}
 
 	/**
 	 * Returns a list of all metadata queries defined in this module.
@@ -299,7 +335,8 @@ public interface Module extends NamedMetaData, PersistentMetaData, ReloadableMet
 	 * Returns the role with the specified name.
 	 * 
 	 * @param roleName The name of the role to retrieve
-	 * @return The role
+	 * @return The role, or {@code null} if the module has no metadata of that name, or the metadata
+	 * 			of that name is not a role
 	 */
 	@Nullable Role getRole(@Nonnull String roleName);
 

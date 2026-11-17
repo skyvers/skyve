@@ -19,7 +19,7 @@ class BizQLReferenceImplTest {
 		Module module = mock(Module.class);
 		BizQLDefinition target = mock(BizQLDefinition.class);
 		when(repository.getModule(null, "admin")).thenReturn(module);
-		when(module.getBizQL("ContactQuery")).thenReturn(target);
+		when(module.getNullSafeBizQL("ContactQuery")).thenReturn(target);
 		when(target.getQuery()).thenReturn("SELECT bean FROM {admin.Contact} AS bean");
 		BizQLReferenceImpl ref = new BizQLReferenceImpl(null, "admin", "ContactQuery");
 

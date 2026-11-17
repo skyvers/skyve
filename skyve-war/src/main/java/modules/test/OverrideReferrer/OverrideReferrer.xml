@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideReferrer"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Customer override fixture: refers to the overridden subclasses of the joined, single table and mapped hierarchies.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideReferrer" />
+	<singularAlias>Override Referrer</singularAlias>
+	<pluralAlias>Override Referrer</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+		<association name="joinedSub" type="aggregation">
+			<displayName>Joined Sub</displayName>
+			<documentName>OverrideJoinedSub</documentName>
+		</association>
+		<association name="singleSub" type="aggregation">
+			<displayName>Single Sub</displayName>
+			<documentName>OverrideSingleSub</documentName>
+		</association>
+		<association name="mappedSub" type="aggregation">
+			<displayName>Mapped Sub</displayName>
+			<documentName>OverrideMappedSub</documentName>
+		</association>
+	</attributes>
+</document>

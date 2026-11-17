@@ -34,6 +34,6 @@ public class BizQLReferenceImpl extends QueryReferenceImpl implements BizQLDefin
 	@SuppressWarnings("unchecked")
 	protected @Nonnull BizQLDefinition getTarget() {
 		// TODO this should use the current customer (can't get customer during generate domain)
-		return ProvidedRepositoryFactory.getNullSafe().getModule(null, moduleRef).getBizQL(ref);
+		return ProvidedRepositoryFactory.getNullSafe().getModule(null, moduleRef).getNullSafeBizQL(ref);
 	}
 }

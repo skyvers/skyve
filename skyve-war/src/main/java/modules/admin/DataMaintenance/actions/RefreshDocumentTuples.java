@@ -9,11 +9,11 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.Persistence;
 import org.skyve.web.WebContext;
 
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.DataMaintenance;
 
 /**
@@ -38,8 +38,7 @@ public class RefreshDocumentTuples implements ServerSideAction<DataMaintenance> 
 		Persistence pers = CORE.getPersistence();
 		User user = pers.getUser();
 		Customer customer = user.getCustomer();
-		Module module = customer.getModule(DataMaintenance.MODULE_NAME);
-		JobMetaData job = module.getJob("jRefreshDocumentTuples");
+		JobMetaData job = AdminJob.J_REFRESH_DOCUMENT_TUPLES.toJob(customer);
 		
 		EXT.getJobScheduler().runOneShotJob(job, bean, user);
 	

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.CORE;
 import org.skyve.impl.generate.DomainGenerator;
@@ -75,6 +76,14 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	private Map<String, Optional<MetaData>> cache;
 
 	/**
+	 * Views scaffolded outside dev mode, by customer, module, document and view name - eg
+	 * bizhub/admin/Contact/edit. They are kept apart from the cache, as a customer's override of a
+	 * document can have other attributes, so each customer has its own, and as they come from no
+	 * metadata file, so the cache's keys stay those of the metadata that exists.
+	 */
+	private final Map<String, View> scaffoldedViews = new ConcurrentHashMap<>();
+
+	/**
 	 * Used to supply the Map implementation required by this repository.
 	 * Creates a mutable repository using the supplied cache implementation.
 	 *
@@ -85,11 +94,22 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 	
 	/**
-	 * Evicts cached metadata entries.
+	 * Evicts cached metadata entries, so that they are loaded again on next access.
 	 *
 	 * <p>When {@code customer} is {@code null}, the full cache is cleared. Otherwise,
 	 * customer overrides and cached module/document/view/action/bizlet entries for
-	 * the customer's accessible modules are removed.
+	 * the customer's accessible modules are removed, as are the customer's scaffolded views
+	 * and every customer's scaffolded views of documents in those modules.
+	 *
+	 * <p>The keys are then populated again with {@link #populateKeys()}, as lookups resolve only
+	 * the keys present. A repository whose keys come from a metadata store gets its evicted keys
+	 * back as unloaded placeholders, reflecting what the store now has, while one whose metadata
+	 * is added programmatically, and that has no keys to populate, is left without the evicted
+	 * metadata.
+	 *
+	 * <p>Complexity: O(k) in the number of cached keys, plus the cost of
+	 * {@link #populateKeys()}, which scans the whole metadata store of a file system repository.
+	 * A lookup that runs while the keys are evicted and not yet populated again can miss them.
 	 *
 	 * @param customer the customer scope to evict, or {@code null} for a full eviction
 	 */
@@ -99,34 +119,59 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		// Clear the lot
 		if (customer == null) {
 			cache.clear();
+			scaffoldedViews.clear();
 		}
 		else {
 			// Clear any customer overrides and any modules the customer has access to.
 			// NB moduleNames set is in insertion order
 			Set<String> moduleNames = ((CustomerImpl) customer).getModuleEntries().keySet();
-			List<String> modulePrefixes = new ArrayList<>(moduleNames.size());
+			List<String> moduleKeys = new ArrayList<>(moduleNames.size());
 			for (String moduleName : moduleNames) {
-				modulePrefixes.add(MODULES_NAMESPACE + moduleName);
+				moduleKeys.add(MODULES_NAMESPACE + moduleName);
 			}
 			
+			// Match a key itself or the keys below it, so that customer test2 or module admin2 is
+			// not evicted with test or admin
 			Iterator<String> i = cache.keySet().iterator();
-			final String customerOverridePrefix = CUSTOMERS_NAMESPACE + customer.getName();
+			final String customerKey = CUSTOMERS_NAMESPACE + customer.getName();
 			while (i.hasNext()) {
 				String key = i.next();
-				if (key.startsWith(customerOverridePrefix)) {
+				if (isOrIsBelow(key, customerKey)) {
 					i.remove();
 					continue;
 				}
-				for (String modulePrefix : modulePrefixes) {
-					if (key.startsWith(modulePrefix)) {
+				for (String moduleKey : moduleKeys) {
+					if (isOrIsBelow(key, moduleKey)) {
 						i.remove();
 						break;
 					}
 				}
 			}
+
+			// Clear the customer's scaffolded views, and every customer's of the evicted modules'
+			// documents, which are scaffolded from them
+			final String customerName = customer.getName();
+			scaffoldedViews.keySet().removeIf(key -> {
+				String[] parts = key.split("/", 3); // customer, module, rest
+				return customerName.equals(parts[0]) || moduleNames.contains(parts[1]);
+			});
 		}
+
+		populateKeys();
 	}
 	
+	/**
+	 * Determines whether a cache key is the given key or a key below it.
+	 *
+	 * @param key	The cache key.
+	 * @param parentKey	The key, such as <code>customers/test</code> or <code>modules/admin</code>.
+	 * @return	true if the key is the parent key or starts with the parent key and a '/'.
+	 */
+	private static boolean isOrIsBelow(@Nonnull String key, @Nonnull String parentKey) {
+		return key.startsWith(parentKey) &&
+				((key.length() == parentKey.length()) || (key.charAt(parentKey.length()) == '/'));
+	}
+
 	/**
 	 * Returns the cached global router, loading and converting it on first access.
 	 *
@@ -380,6 +425,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @param module the module declaring or referencing the document
 	 * @param documentName the document name
 	 * @return the resolved document, or {@code null} when not found in this repository
+	 * @throws MetaDataException if the module does not declare or reference the document
 	 */
 	@Override
 	public @Nullable Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
@@ -399,7 +445,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	private @Nullable Document getDocumentInternal(boolean customerOverride, @Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
-			throw new IllegalArgumentException(documentName + " does not exist for this module - " + module.getName());
+			throw new MetaDataException("Document " + documentName + " does not exist in module " + module.getName());
 		}
 
 		final String referencedModuleName = ref.getReferencedModuleName();
@@ -575,7 +621,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 *
 	 * <p>Lookup order is customer+uxui, customer default, vanilla+uxui, then vanilla
 	 * default. When enabled, scaffolded edit/pick/params views are generated if no
-	 * metadata view exists.
+	 * metadata view exists. Outside dev mode a scaffolded view is cached for the customer,
+	 * as a customer's override of the document can have other attributes.
 	 *
 	 * @param uxui the UX/UI variant key, or {@code null}
 	 * @param customer the customer context, or {@code null}
@@ -616,19 +663,23 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		
 		// scaffold
 		if ((result == null) && getUseScaffoldedViews()) {
-			if (UtilImpl.DEV_MODE) {
+			// No customer throws in scaffoldView()
+			if (UtilImpl.DEV_MODE || (customer == null)) {
 				result = scaffoldView(customer, owningModule, document, name, uxui);
 			}
 			else {
-				StringBuilder key = new StringBuilder(128);
-				key.append(MODULES_NAMESPACE).append(owningModule.getName()).append('/');
-				key.append(document.getName()).append('/').append(VIEWS_NAMESPACE).append(name);
-				String viewKey = key.toString();
-				Optional<MetaData> o = cache.get(viewKey);
-				if (o == null) { // key absent
+				String viewKey = new StringBuilder(128).append(customer.getName()).append('/')
+															.append(owningModule.getName()).append('/')
+															.append(document.getName()).append('/')
+															.append(name).toString();
+				result = scaffoldedViews.get(viewKey);
+				if (result == null) {
 					result = scaffoldView(customer, owningModule, document, name, uxui);
 					if (result != null) {
-						cache.putIfAbsent(viewKey, Optional.of(result));
+						View previous = scaffoldedViews.putIfAbsent(viewKey, result);
+						if (previous != null) {
+							result = previous;
+						}
 					}
 				}
 			}
