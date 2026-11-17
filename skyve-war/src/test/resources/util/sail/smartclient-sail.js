@@ -20,7 +20,7 @@
 (function () {
 	"use strict";
 
-	var VERSION = 13;
+	var VERSION = 14;
 	if (window._sail && window._sail.version === VERSION) {
 		return;
 	}
@@ -1348,8 +1348,15 @@
 			}
 			return { value: isc.Time.parseInput(text) };
 		}
-		if (kind === "number" && !isNaN(Number(text))) {
-			return { value: Number(text) };
+		if (kind === "number") {
+			// as the column's editor reads what a user types (1,234.56, $5, 12%: 0.12), else as a plain number
+			var numberType = isc.SimpleType.getType(field.type);
+			var numberEditor = numberType && numberType.editorType && isc[numberType.editorType];
+			var number = (numberEditor && isc.isA.Function(numberEditor.parseInput)) ? numberEditor.parseInput(text) : Number(text);
+			if (!isc.isA.Number(number) || isNaN(number)) {
+				return { error: "'" + text + "' is not a number the column reads" };
+			}
+			return { value: number };
 		}
 		return { value: text };
 	}
