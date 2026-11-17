@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces SAIL conformance suite: exercises every op-code that applies to PrimeFaces and every kitchen sink widget that
+	PrimeFaces SAIL conformance script, a member of kitchensink.suite.xml: exercises every op-code that applies to PrimeFaces and every kitchen sink widget that
 	SAIL can enter data into, checking values with testValue after data entry.
 	Not here, as PrimeFaces has no such UI (the executor fails them with a reason):
 	navigateTree and navigateCalendar (no a=t or a=c page), lookupDescriptionNew and lookupDescriptionEdit (the lookup is an
@@ -10,8 +10,8 @@
 	Fixture has one of each PrimeFaces kind. dataGridSelect needs a data grid with a selectedIdBinding: the List Grid
 	Fixture's grid of rows has one (PrimeFacesRecorderRoundTripSailIT, pf-recorder-round-trip-more.xml).
 	Not here, as the language cannot express them yet: contentSignature, data entry into inline grid cells.
-	dataGridLink is in pf-kitchensink-row-link.xml, run by its own test (rowLink).
-	Rows are found with rowContaining and {run}-unique values, so the suite can run in any order, and again, on the same server.
+	dataGridLink is in pf-kitchensink-row-link.xml, another member of the suite.
+	Rows are found with rowContaining and {run}-unique values, so the script can run in any order, and again, on the same server.
 -->
 <automation uxui="tablet"
 			userAgentType="tablet"
@@ -672,6 +672,13 @@
 			<navigateLink href="?a=l&amp;m=kitchensink&amp;q=LookupDescription" />
 			<pushListContext module="kitchensink" document="LookupDescription" />
 			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+			<popContext />
+			<comment>A query's list, opened by its URL: its context is named by the query</comment>
+			<navigateLink href="?a=l&amp;m=kitchensink&amp;q=qListGridFixtureVue" />
+			<pushListContext module="kitchensink" query="qListGridFixtureVue" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" />
 			<testValue binding="description" value="SAIL lookup {run}" />
 			<popContext />
 			<popContext />

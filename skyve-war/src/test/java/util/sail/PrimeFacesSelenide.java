@@ -2812,7 +2812,9 @@ public class PrimeFacesSelenide extends Selenide<
 		try {
 			// Wait for nothing to be over the element's centre (a header settling, an overlay closing).
 			// While it is covered, centre it again: the page can scroll itself after the first centring
-			// (e.g. a select menu focusing its input late), leaving the element under the fixed header.
+			// (e.g. a select menu focusing its input late), leaving the element under the fixed header. Centre it across
+			// too: a scrolled strip (a view's tabs wider than the window) can leave it at the strip's edge, under the side
+			// menu, where scrolling only to the nearest edge leaves it.
 			// In a Vue list grid, also wait for the element to stop moving: the grid lays its toolbar out again over the
 			// next animation frames when it is shown (e.g. its tab is selected), so it must be in the same place twice.
 			waitFor(d -> js(CENTRE_SCRIPT + "var e = arguments[0], r = e.getBoundingClientRect();" +
@@ -2823,7 +2825,7 @@ public class PrimeFacesSelenide extends Selenide<
 								"}" +
 								"var t = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);" +
 								"if ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) return true;" +
-								"centre(e); return null;",
+								"e.scrollIntoView({block: 'nearest', inline: 'center'}); centre(e); return null;",
 								element));
 		}
 		catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException | StaleElementReferenceException e) {

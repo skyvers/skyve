@@ -21,9 +21,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * What the PrimeFaces SAIL code generators ({@link PrimeFacesInlineWebDriverExecutor}, {@link PrimeFacesSeleneseExecutor})
- * share about the parts of the language they cannot generate: a grid or lookup row found by its text
- * ({@code rowContaining}), a combo or radio option named by its code or label ({@code match}), a lookup suggestion
+ * What the PrimeFaces SAIL code generator ({@link PrimeFacesInlineWebDriverExecutor}) knows about the parts of the
+ * language it cannot generate: a grid or lookup row found by its text ({@code rowContaining}), a combo or radio option named by its code or label ({@code match}), a lookup suggestion
  * found by its text ({@code pick}), a link clicked by its text ({@code navigateLink text}), and declining a confirmation
  * ({@code confirm="false"}). The generated code drives
  * the page with fixed row and option numbers and can only accept a client-side confirmation.

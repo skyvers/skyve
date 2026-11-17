@@ -154,7 +154,6 @@
 	</interaction>
 	<interaction name="Groups: generated data, with a role, saved twice">
 		<method>
-			<comment>testDataEnter fills every field of the view with generated values (from the retired single-file admin script)</comment>
 			<navigateList document="Group" module="admin" />
 			<listGridNew document="Group" module="admin" />
 			<testDataEnter />
@@ -175,12 +174,10 @@
 	</interaction>
 	<interaction name="Data Groups: generated data, saved twice">
 		<method>
-			<comment>testDataEnter fills every field of the view with generated values (from the retired single-file admin script)</comment>
 			<navigateList document="DataGroup" module="admin" />
 			<listGridNew document="DataGroup" module="admin" />
 			<testDataEnter />
 			<save />
-			<comment>Generated values again, saved over the first: an update of the saved record</comment>
 			<testDataEnter />
 			<save />
 			<delete />

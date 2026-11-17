@@ -2,9 +2,6 @@ package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -55,8 +52,9 @@ import jakarta.annotation.Nullable;
  * </ul>
  * When the suite ends, it prints a summary of the passed, failed, skipped and unselected members, and the test fails
  * with every failed member. The older builder ({@link #SailSuite(String)}) is kept for existing tests: it runs on the
- * same engine, its files in a chain (a file runs only after the earlier files passed), and it refuses a test strategy
- * override.
+ * same engine as it always ran: its files in a chain (a file runs only after the earlier files passed); a restore whose
+ * {@code requires} names a file that is not in the suite is held back; a {@value SailSettings#SUITE_ONLY} that matches
+ * no file runs the set-ups and the restore; and it refuses a test strategy override.
  * <p>
  * Not thread-safe.
  */
@@ -69,7 +67,8 @@ public final class SailSuite {
 	public static final String ONLY_PROPERTY = SailSettings.SUITE_ONLY;
 
 	/**
-	 * Runs one member of a suite.
+	 * Runs one member of a suite: by default the {@link SailWorkflow} engine, in a browser; a unit test gives its own, to
+	 * test the engine's order, requirements, selection and locks without a browser.
 	 */
 	@FunctionalInterface
 	interface MemberRunner {
@@ -201,13 +200,18 @@ public final class SailSuite {
 	 * @param resourceName	the suite file, e.g. {@code sail/admin/admin.suite.xml}; members are relative to its folder
 	 * @param engine	runs the members, with its settings, view roles and browsers
 	 * @return the suite, ready to {@link #run()}
-	 * @throws IllegalArgumentException	if the resource is missing or unreadable
+	 * @throws IllegalArgumentException	if the resource, or a member's file, is missing or unreadable
 	 * @throws org.skyve.metadata.MetaDataException	if the suite is invalid
 	 */
 	public static @Nonnull SailSuite resource(@Nonnull String resourceName, @Nonnull SailWorkflow engine) {
-		Suite suite = XMLMetaData.unmarshalSAILSuiteString(read(resourceName, true), resourceName);
+		return resource(resourceName, SailWorkflow.resource(resourceName), engine);
+	}
+
+	private static @Nonnull SailSuite resource(@Nonnull String resourceName, @Nonnull String xml, @Nonnull SailWorkflow engine) {
+		Suite suite = XMLMetaData.unmarshalSAILSuiteString(xml, resourceName);
 		int slash = resourceName.lastIndexOf('/');
-		return new SailSuite(suite, resourceName, (slash < 0) ? "" : resourceName.substring(0, slash + 1), true, false).engine(engine);
+		return new SailSuite(suite, resourceName, (slash < 0) ? "" : resourceName.substring(0, slash + 1), true, false)
+					.checkMembersExist().engine(engine);
 	}
 
 	/**
@@ -219,11 +223,70 @@ public final class SailSuite {
 	 * @param engine	runs the members, with its settings, view roles and browsers
 	 * @return the suite, ready to {@link #run()}
 	 * @throws org.skyve.metadata.MetaDataException	if the file is missing, unreadable or an invalid suite
+	 * @throws IllegalArgumentException	if a member's file is missing
 	 */
 	public static @Nonnull SailSuite file(@Nonnull String file, @Nonnull SailWorkflow engine) {
 		Suite suite = XMLMetaData.unmarshalSAILSuiteFile(file);
 		Path parent = Path.of(file).toAbsolutePath().getParent();
-		return new SailSuite(suite, file, (parent == null) ? "" : parent.toString(), false, false).engine(engine);
+		return new SailSuite(suite, file, (parent == null) ? "" : parent.toString(), false, false).checkMembersExist().engine(engine);
+	}
+
+	/**
+	 * Checks that every member's file exists, before anything runs.
+	 *
+	 * @throws IllegalArgumentException	naming the suite and each missing member file
+	 */
+	private @Nonnull SailSuite checkMembersExist() {
+		List<String> missing = new ArrayList<>();
+		ClassLoader loader = Thread.currentThread().getContextClassLoader();
+		for (SuiteMember member : suite.getAllMembers()) {
+			String path = path(member);
+			if (resources ? (loader.getResource(path) == null) : (! Files.isRegularFile(Path.of(path)))) {
+				missing.add(member.getFile());
+			}
+		}
+		if (! missing.isEmpty()) {
+			throw new IllegalArgumentException("SAIL suite " + name + " names member files that do not exist: " + missing);
+		}
+		return this;
+	}
+
+	/** Returns where a member's file is: a classpath resource or a file path. */
+	private @Nonnull String path(@Nonnull SuiteMember member) {
+		String file = member.getFile();
+		return resources ? folder + file : Path.of(folder).resolve(file).toString();
+	}
+
+	/**
+	 * Runs one SAIL entry as the kind of document it is: a {@code <suite>} as a suite, a {@code <workflow>} or an
+	 * {@code <automation>} as a workflow. The entry is a file path if such a file exists, else a test classpath resource;
+	 * a resource is read once.
+	 *
+	 * @param entry	a file path or a classpath resource
+	 * @param engine	runs the automations, with its settings, view roles and browsers
+	 * @throws AssertionError	if the suite or workflow fails
+	 * @throws IllegalArgumentException	if the entry is neither a file nor a resource, or a suite's member is missing
+	 */
+	public static void runEntry(@Nonnull String entry, @Nonnull SailWorkflow engine) {
+		if (Files.isRegularFile(Path.of(entry))) {
+			if (XMLMetaData.sailRootOfFile(entry) == XMLMetaData.SAILRoot.SUITE) {
+				file(entry, engine).run();
+			}
+			else {
+				engine.runFiles(entry);
+			}
+			return;
+		}
+		if (Thread.currentThread().getContextClassLoader().getResource(entry) == null) {
+			throw new IllegalArgumentException(entry + " is neither a file nor a resource on the test classpath");
+		}
+		String xml = SailWorkflow.resource(entry);
+		if (XMLMetaData.sailRootOfString(xml) == XMLMetaData.SAILRoot.SUITE) {
+			resource(entry, xml, engine).run();
+		}
+		else {
+			engine.runWorkflow(entry, XMLMetaData.unmarshalSAILWorkflowString(xml));
+		}
 	}
 
 	/**
@@ -264,14 +327,16 @@ public final class SailSuite {
 	/**
 	 * Uses a test's code-level settings, such as a test base's {@code settings()}.
 	 *
-	 * <p>Side effects: replaces the settings the suite had (for the selection and the override note; the engine's
-	 * settings run the members).
+	 * <p>Side effects: replaces the settings the suite had, and its engine's, which run the members.
 	 *
 	 * @param code	the test's settings; shared, so later changes to them apply
 	 * @return this suite
 	 */
 	public @Nonnull SailSuite settings(@Nonnull SailSettings.Code code) {
 		settings = code;
+		if (engine != null) {
+			engine.settings(code);
+		}
 		return this;
 	}
 
@@ -316,10 +381,10 @@ public final class SailSuite {
 		if (legacy) {
 			refuseTestStrategyOverride("A SAIL admin suite", resolved);
 		}
-		else {
-			noteLockedMembers(resolved, notes);
-		}
 		Set<SuiteMember> selected = select(resolved, notes);
+		if (! legacy) {
+			noteLockedMembers(resolved, selected, notes);
+		}
 
 		Map<String, Outcome> outcomes = new LinkedHashMap<>();
 		Map<String, Throwable> failures = new LinkedHashMap<>();
@@ -332,6 +397,9 @@ public final class SailSuite {
 				Outcome outcome = Outcome.NOT_SELECTED;
 				if (selected.contains(member)) {
 					String skip = unmetRequirement(member, byMember, previousOrdinary);
+					if ((skip == null) && (engine != null) && engine.stopping()) {
+						skip = "the run is stopping";
+					}
 					if (skip == null) {
 						Throwable failure = runMember(member);
 						outcome = (failure == null) ? Outcome.PASSED : Outcome.FAILED;
@@ -363,14 +431,15 @@ public final class SailSuite {
 	}
 
 	/**
-	 * Notes, in the trace and the summary, each locked member that a run's test strategy override does not apply to.
+	 * Notes, in the trace and the summary, each selected locked member that a run's test strategy override does not
+	 * apply to.
 	 */
-	private void noteLockedMembers(@Nonnull SailSettings resolved, @Nonnull List<String> notes) {
+	private void noteLockedMembers(@Nonnull SailSettings resolved, @Nonnull Set<SuiteMember> selected, @Nonnull List<String> notes) {
 		SailSettings.Setting override = resolved.runOverride(SailSettings.TEST_STRATEGY);
 		if (override == null) {
 			return;
 		}
-		for (SuiteMember member : suite.getAllMembers()) {
+		for (SuiteMember member : selected) {
 			String lock = SailWorkflow.lockOf(suite, member);
 			if (lock != null) {
 				String note = String.format("override %s from %s not applied to %s: locked (%s)",
@@ -399,7 +468,13 @@ public final class SailSuite {
 				chosen.add(member);
 			}
 		}
-		if (chosen.isEmpty()) {
+		if (chosen.isEmpty() && legacy) {
+			// the older builder runs its set-ups and restore, as it always did
+			String note = "only " + prefixes + " chooses no file: the set-ups and the restore run";
+			System.out.println("SAIL suite " + name + ": " + note);
+			notes.add(note);
+		}
+		else if (chosen.isEmpty()) {
 			throw new IllegalArgumentException(String.format("%s chooses no member of SAIL suite %s: its members are %s",
 																resolved.setting(SailSettings.SUITE_ONLY), name, files(suite.getMembers())));
 		}
@@ -449,13 +524,19 @@ public final class SailSuite {
 	}
 
 	/**
-	 * Returns why a member cannot run: a requirement that did not pass, or (for the older builder) an earlier file that
-	 * did not pass; or null if it can run.
+	 * Returns why a member cannot run: a requirement that did not pass, a {@code requires} name that is no member (only
+	 * the older builder's, which is not validated), or (for the older builder) an earlier file that did not pass; or
+	 * null if it can run.
 	 */
 	private @Nullable String unmetRequirement(@Nonnull SuiteMember member,
 												@Nonnull Map<SuiteMember, Outcome> byMember,
 												@Nullable SuiteMember previousOrdinary) {
-		List<SuiteMember> requirements = new ArrayList<>(suite.requirementsOf(member));
+		for (String required : member.getRequires()) {
+			if (suite.getMember(required) == null) {
+				return "requires " + required + ", which is not a file of this suite";
+			}
+		}
+		List<SuiteMember> requirements = suite.requirementsOf(member); // a new list
 		if (legacy && (member instanceof OrdinarySuiteMember) && (previousOrdinary != null)) {
 			requirements.add(previousOrdinary);
 		}
@@ -475,7 +556,7 @@ public final class SailSuite {
 	 */
 	private @Nullable Throwable runMember(@Nonnull SuiteMember member) {
 		String file = member.getFile();
-		String path = resources ? folder + file : Path.of(folder).resolve(file).toString();
+		String path = path(member);
 		System.out.println("SAIL suite " + name + ": " + file);
 		SailMedia.label(file); // names the member's snapshot and video folders, when they are on
 		try {
@@ -490,33 +571,11 @@ public final class SailSuite {
 		}
 	}
 
-	/** Runs a member's workflow file with the engine, keeping the browser for the next member. */
+	/** Runs a member's workflow file with the engine, which keeps the browser for the next member if it passes. */
 	private void runWithEngine(@Nonnull MemberRun run) {
-		SailWorkflow workflow = engine;
-		workflow.keepBrowser();
-		workflow.runMember(run.member().getFile(),
-							XMLMetaData.unmarshalSAILWorkflowString(read(run.path(), resources)),
-							new SailWorkflow.Member(suite, name, run.member()));
-	}
-
-	private static @Nonnull String read(@Nonnull String path, boolean resource) {
-		if (! resource) {
-			try {
-				return Files.readString(Path.of(path), StandardCharsets.UTF_8);
-			}
-			catch (IOException e) {
-				throw new IllegalArgumentException("Could not read SAIL file " + path, e);
-			}
-		}
-		try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(path)) {
-			if (stream == null) {
-				throw new IllegalArgumentException("SAIL resource " + path + " is not on the test classpath");
-			}
-			return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException("Could not read resource " + path, e);
-		}
+		String path = run.path();
+		Workflow workflow = resources ? XMLMetaData.unmarshalSAILWorkflowString(SailWorkflow.resource(path)) : XMLMetaData.unmarshalSAILWorkflowFile(path);
+		engine.runMember(run.member().getFile(), workflow, new SailWorkflow.Member(suite, name, run.member(), run.lock()));
 	}
 
 	// The older builder, kept for existing tests

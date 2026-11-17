@@ -68,7 +68,7 @@
 			<tabSelect path="Subscriptions" />
 			<tabSelect path="Contents" />
 			<action name="AddUnsubscribeLink" />
-			<comment>AddImage is an upload action: upload an image with it (from the retired single-file admin script)</comment>
+			<comment>AddImage is an upload action: upload an image with it</comment>
 			<upload action="AddImage" file="sail/files/sail-image.png" />
 			<comment>Press it again and leave its upload page open: the refusals below must still show their messages</comment>
 			<action name="AddImage" />
@@ -94,12 +94,10 @@
 	</interaction>
 	<interaction name="Contacts: generated data, from the contacts query">
 		<method>
-			<comment>testDataEnter fills every field of the view with generated values (from the retired single-file admin script)</comment>
 			<navigateList module="admin" query="qContacts" />
 			<listGridNew module="admin" query="qContacts" />
 			<testDataEnter />
 			<save />
-			<comment>Generated values again, saved over the first: an update of the saved record</comment>
 			<testDataEnter />
 			<save />
 			<delete />

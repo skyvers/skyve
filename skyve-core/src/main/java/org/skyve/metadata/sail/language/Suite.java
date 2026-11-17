@@ -324,9 +324,9 @@ public class Suite {
 		Set<String> users = new HashSet<>();
 		for (ViewRoles entry : viewRoles) {
 			String user = entry.getUser();
-			@SuppressWarnings("null") // getUser() is @Nonnull for a valid suite; its setter stores a blank user as null
+			@SuppressWarnings("null") // getUser() is @Nonnull for a valid suite; JAXB and its setter store a blank user as null before validate
 			boolean noUser = (user == null);
-			if (noUser) {
+			if (noUser) { // NOSONAR java:S2583 JAXB stores a blank user as null before validate, despite @Nonnull
 				throw new MetaDataException(prefix + "a <viewRoles> has no user");
 			}
 			if (! users.add(user)) {
@@ -352,9 +352,9 @@ public class Suite {
 		Map<String, Integer> result = new HashMap<>();
 		for (int i = 0, l = all.size(); i < l; i++) {
 			String file = all.get(i).getFile();
-			@SuppressWarnings("null") // getFile() is @Nonnull for a valid suite; its setter stores a blank file as null
+			@SuppressWarnings("null") // getFile() is @Nonnull for a valid suite; JAXB and its setter store a blank file as null before validate
 			boolean noFile = (file == null);
-			if (noFile) {
+			if (noFile) { // NOSONAR java:S2583 JAXB stores a blank file as null before validate, despite @Nonnull
 				throw new MetaDataException(prefix + "a <" + element(i) + "> has no file");
 			}
 			String problem = pathProblem(file);

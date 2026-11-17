@@ -2,8 +2,8 @@
 <!--
 	Admin suite (admin.suite.xml), first set-up: check that no SAIL restore marker is left over. A marker left over means an
 	earlier run did not restore its backup, so the data may not be as the suite expects.
-	Other backups may exist: 99-restore.xml restores the first backup listed, the newest, which is the one 00-backup.xml
-	makes. The suite restores only when this file and 00-backup.xml have passed (the restore's requires); when this fails,
+	Other backups may exist: 99-restore.xml restores the first backup listed, the newest, which is SmartClient's from
+	00-backup.xml (which backs up in each renderer). The suite restores only when this file and 00-backup.xml have passed (the restore's requires); when this fails,
 	nothing else runs (every member requires the set-ups).
 -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"

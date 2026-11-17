@@ -115,6 +115,17 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	}
 
 	/**
+	 * Runs a SAIL file or classpath resource as the kind of document it is: a {@code <suite>}, a {@code <workflow>} or an
+	 * {@code <automation>} (see {@link SailSuite#runEntry(String, util.sail.SailWorkflow)}).
+	 *
+	 * @param entry	a file path, or a classpath resource
+	 * @throws AssertionError	if it fails
+	 */
+	protected void sailRun(@Nonnull String entry) {
+		SailSuite.runEntry(entry, workflow);
+	}
+
+	/**
 	 * Runs a SAIL {@code <suite>} file; see {@link #sailSuite(String)}.
 	 *
 	 * @param file	the suite's path, absolute or relative to the working directory

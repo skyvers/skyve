@@ -4,8 +4,8 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.sail.mock.MockFacesContext;
 import org.skyve.impl.util.XMLMetaData;
-import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.repository.Repository;
@@ -13,6 +13,8 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
+
+import jakarta.annotation.Nonnull;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
 import modules.admin.domain.ControlPanel;
@@ -44,10 +46,43 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 		return new ServerSideActionResult<>(bean);
 	}
 
+	/**
+	 * Executes the Control Panel's SAIL with its executor for the Execute button: the generated output, or the
+	 * stack trace of what went wrong, goes into the results, and the Results tab is selected.
+	 *
+	 * @param bean	the Control Panel
+	 * @throws ValidationException	if a value the execution needs is not entered, a builder cannot be created or the
+	 * 									SAIL user cannot be found
+	 */
 	static void executeSAIL(ControlPanelExtension bean) {
 		bean.setResults(null);
 		bean.setTabIndex(null);
+		try {
+			bean.setResults(generate(bean));
+		}
+		catch (ValidationException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			bean.trapException(e);
+		}
+		bean.setTabIndex(Integer.valueOf(2));
+	}
 
+	/**
+	 * Executes the Control Panel's SAIL with its executor, as its SAIL user, and returns what the executor generated.
+	 *
+	 * <p>Side effects: the persistence's user is the SAIL user during the execution, and is put back afterwards; a mock
+	 * Faces context replaces the thread's (a PrimeFaces request's) during it, and the thread's is put back afterwards.
+	 *
+	 * @param bean	the Control Panel
+	 * @return	the executor's output: the Java test methods
+	 * @throws ValidationException	if a value the execution needs is not entered, a builder cannot be created or the
+	 * 									SAIL user cannot be found
+	 * @throws ReflectiveOperationException	if the executor cannot be created
+	 * @throws org.skyve.metadata.MetaDataException	if the SAIL is invalid, or names what the views do not have
+	 */
+	static @Nonnull String generate(@Nonnull ControlPanelExtension bean) throws ReflectiveOperationException {
 		UserProxy user = bean.getSailUser();
 		String baseUrl = bean.getSailBaseUrl();
 		SailExecutor executorClass = bean.getSailExecutor();
@@ -85,8 +120,9 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 			throw new ValidationException(message);
 		}
 
-		// Ensure we have a Mock FacesContext with which to generate the tests.
-		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
+		// Generate in a mock Faces context, even in a PrimeFaces request: in the request's own context the builders
+		// would number the components on from the Control Panel page's ids, not as the generated pages number them.
+		try (MockFacesContext ignored = MockFacesContext.replacingCurrent()) {
 			ClassLoader loader = Thread.currentThread().getContextClassLoader();
 			Object componentBuilder = null;
 			try {
@@ -124,16 +160,11 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 				Class<?> type = loader.loadClass(executorClass.toCode());
 				Executor executor = (Executor) type.getConstructors()[0].newInstance(componentBuilder, layoutBuilder);
 				automation.execute(executor);
-				bean.setResults(executor.toString());
-			}
-			catch (Exception e) {
-				bean.trapException(e);
+				return executor.toString();
 			}
 			finally {
 				p.setUser(currentUser);
 			}
 		}
-
-		bean.setTabIndex(Integer.valueOf(2));
 	}
 }

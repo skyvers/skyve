@@ -92,12 +92,10 @@
 	</interaction>
 	<interaction name="Contacts: generated data, from the contacts query">
 		<method>
-			<comment>testDataEnter fills every field of the view with generated values (from the retired single-file admin script)</comment>
 			<navigateList module="admin" query="qContacts" />
 			<listGridNew module="admin" query="qContacts" />
 			<testDataEnter />
 			<save />
-			<comment>Generated values again, saved over the first: an update of the saved record</comment>
 			<testDataEnter />
 			<save />
 			<delete />

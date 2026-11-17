@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	SmartClient SAIL conformance suite: exercises every op-code that applies to SmartClient
+	SmartClient SAIL conformance script, a member of kitchensink.suite.xml: exercises every op-code that applies to SmartClient
 	and every kitchen sink widget that SAIL can enter data into, checking values with testValue.
 
 	Not covered here, and why:
@@ -37,6 +37,8 @@
 			<testWidget binding="text" />
 			<navigateMenu module="kitchensink" item="Lookup values" />
 			<testGridRows module="kitchensink" document="LookupDescription" minRows="0" />
+			<comment>A list grid tool on a document's list, named by its document</comment>
+			<listGridTool module="kitchensink" document="LookupDescription" tool="refresh" />
 		</method>
 	</interaction>
 
@@ -515,6 +517,9 @@
 			<dataGridMove binding="lines" rowContaining="Third {run}" to="0" />
 			<dataGridEdit binding="lines" row="1" />
 			<dataEnter binding="name" value="First edited {run}" />
+			<comment>An inline edit of a row found by its text</comment>
+			<dataGridEdit binding="lines" rowContaining="Second {run}" />
+			<dataEnter binding="name" value="Second edited {run}" />
 			<comment>The ordered membership: SmartClient assigns members in the order the value names them, then they are dragged into a new order</comment>
 			<dataEnter binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
 			<listMembershipMove binding="members" rowContaining="SAIL member {run} b" to="0" />
@@ -527,7 +532,7 @@
 			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered lines {run}" />
 			<captureCell binding="lines" row="0" column="name" variable="line0" pattern="^Third " />
 			<captureCell binding="lines" row="1" column="name" variable="line1" pattern="^First edited " />
-			<captureCell binding="lines" row="2" column="name" variable="line2" pattern="^Second " />
+			<captureCell binding="lines" row="2" column="name" variable="line2" pattern="^Second edited " />
 			<testValue binding="members" value="SAIL member {run} b|SAIL member {run} a|SAIL member {run} c" />
 			<delete />
 			<navigateMenu module="kitchensink" item="Lookup values" />
