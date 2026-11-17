@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -23,7 +24,7 @@ import util.AbstractH2Test;
 
 /**
  * Tests the ExecuteSAIL action's validation, and that a failed execution goes into the results.
- * {@link DownloadSAILH2Test} executes real SAIL with each executor.
+ * {@link ExecuteSAILH2Test} executes real SAIL.
  */
 @SuppressWarnings("java:S120") // Module test packages mirror the generated document package.
 class ExecuteSAILTest extends AbstractH2Test {
@@ -211,8 +212,11 @@ class ExecuteSAILTest extends AbstractH2Test {
 
 		ExecuteSAIL.executeSAIL(controlPanel);
 
+		// the unmarshalling error the SAIL gives, which the results' stack trace starts with
+		Exception unmarshalling = assertThrows(Exception.class, () -> XMLMetaData.unmarshalSAILString("<notSail/>"));
 		String results = controlPanel.getUnescapedResults();
-		assertAll(() -> assertTrue((results != null) && results.contains("Exception"), () -> String.valueOf(results)),
+		assertAll(() -> assertTrue((results != null) && results.startsWith(unmarshalling.toString()),
+									() -> "expected " + unmarshalling + " but was " + results),
 					() -> assertEquals(Integer.valueOf(2), controlPanel.getTabIndex()));
 	}
 

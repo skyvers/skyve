@@ -9,6 +9,7 @@ import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
@@ -46,6 +47,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 *
 	 * @param comment Comment text, which may hold quotes, backslashes or line breaks (see {@link #literal(String)}).
 	 */
+	@Override
 	protected void comment(@Nullable String comment) {
 		indent().append("trace(").append(literal(comment)).append(");").newline();
 	}
@@ -62,21 +64,48 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	}
 	
 	/**
-	 * Starts a generated WebDriver test method for the supplied SAIL test heading.
+	 * Starts a generated WebDriver test method for the supplied SAIL test heading. The method is named from the heading,
+	 * numbered from 2 if an earlier method has the name, and the heading is its comment, with what could end the comment
+	 * or start a Unicode escape made inert.
 	 *
 	 * @param heading Test heading used to derive a Java-safe method name.
 	 */
 	@Override
 	protected void startTest(@Nonnull String heading) {
-		String testMethodName = BindUtil.toJavaTypeIdentifier(heading);
+		String name = BindUtil.toJavaTypeIdentifier(heading);
+		String testMethodName = name;
+		for (int i = 2; testMethodNames.contains(testMethodName); i++) {
+			testMethodName = name + i;
+		}
 		testMethodNames.add(testMethodName);
 		
 		indent().append("/**").newline();
-		indent().append(" * ").append(heading).newline();
+		indent().append(" * ").append(commentText(heading)).newline();
 		indent().append(" */").newline();
 		indent().append("private void test").append(testMethodName).append("() {").newline().in();
 	}
 	
+	/**
+	 * Returns text for a line of a Java comment: backslashes doubled (so none starts a Unicode escape, which Java reads
+	 * even in comments), a space put between the two characters that would end the comment, and line breaks as spaces.
+	 *
+	 * @param text	the text
+	 * @return	the text, inert in a Java comment
+	 */
+	private static @Nonnull String commentText(@Nonnull String text) {
+		return text.replace("\\", "\\\\").replace("*/", "* /").replace('\r', ' ').replace('\n', ' ');
+	}
+
+	/**
+	 * Emits a call to the harness's {@code execute(String)}, which runs the step's JavaScript in the page.
+	 *
+	 * @param execute the step
+	 */
+	@Override
+	public void executeExecute(@Nonnull Execute execute) {
+		indent().append("execute(").append(literal(execute.getScript())).append(");").newline();
+	}
+
 	/**
 	 * Ends the current generated WebDriver test method.
 	 */

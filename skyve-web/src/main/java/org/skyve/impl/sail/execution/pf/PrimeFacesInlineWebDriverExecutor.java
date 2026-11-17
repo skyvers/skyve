@@ -320,7 +320,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 			comment(String.format("click tab [%s]", tabSelect.getTabPath()));
-			indent().append("tab(\"").append(clientId).append("\");").newline();
+			indent().append("tab(").append(literal(clientId)).append(");").newline();
 		}
 	}
 
@@ -413,8 +413,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 				return;
 			}
 			
-			// if exists and is not disabled
-			comment(String.format("set %s (%s) if it exists and is not disabled", identifier, clientId));
+			comment(String.format("set %s (%s)", identifier, clientId));
 			
 			//replace newlines
 			String value = dataEnter.getValue();
@@ -427,28 +426,22 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 			}
 			
 			if (checkbox) {
-				if (Boolean.TRUE.toString().equals(value)) {
-					value = "Boolean.TRUE";
-				}
-				else if (Boolean.FALSE.toString().equals(value)) {
-					value = "Boolean.FALSE";
-				}
-				indent().append("checkbox(\"").append(clientId).append("\", ").append(value).append(");").newline();
+				indent().append("checkbox(").append(literal(clientId)).append(", ").append(checkBoxValue(dataEnter)).append(");").newline();
 			}
 			else if (text) {
-				indent().append("text(\"").append(clientId).append("\", ").append(literal(value)).append(");").newline();
+				indent().append("text(").append(literal(clientId)).append(", ").append(literal(value)).append(");").newline();
 			}
 			else if (_input) {
-				indent().append("_input(\"").append(clientId).append("\", ").append(literal(value)).append(");").newline();
+				indent().append("_input(").append(literal(clientId)).append(", ").append(literal(value)).append(");").newline();
 			}
 			else if (selectOne) {
 				if (! SailGeneratorSupport.optionMatchNotSupported(dataEnter, this::comment)) {
-					indent().append("selectOne(\"").append(clientId).append("\", ").append(value).append(");").newline();
+					indent().append("selectOne(").append(literal(clientId)).append(", ").append(optionNumber(dataEnter)).append(");").newline();
 				}
 			}
 			else if (radio) {
 				if (! SailGeneratorSupport.optionMatchNotSupported(dataEnter, this::comment)) {
-					indent().append("radio(\"").append(clientId).append("\", ").append(value).append(");").newline();
+					indent().append("radio(").append(literal(clientId)).append(", ").append(optionNumber(dataEnter)).append(");").newline();
 				}
 			}
 		}
@@ -479,8 +472,8 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			indent().append("button(\"").append(clientId).append("\", ").append(String.valueOf(ajax));
+			comment(String.format("click [%s] (%s)", tagName, clientId));
+			indent().append("button(").append(literal(clientId)).append(", ").append(String.valueOf(ajax));
 			append(", ").append(String.valueOf(confirm)).append(");").newline();
 
 			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
@@ -513,8 +506,8 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		for (UIComponent component : components) {
 			String clientId = PrimeFacesAutomationContext.clientId(component);
 
-			comment(String.format("click [%s] (%s) if it exists and is not disabled", tagName, clientId));
-			indent().append("redirectButton(\"").append(clientId).append("\", ");
+			comment(String.format("click [%s] (%s)", tagName, clientId));
+			indent().append("redirectButton(").append(literal(clientId)).append(", ");
 			append(String.valueOf(confirm)).append(");").newline();
 
 			if (! Boolean.FALSE.equals(testSuccess)) { // true or null (defaults on)
@@ -688,11 +681,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 			String clientId = PrimeFacesAutomationContext.clientId(lookupComponent);
 			if (row != null) {
 				comment(String.format("Pick on row %d on lookup description [%s] (%s)", row, binding, clientId));
-				indent().append("lookupDescription(\"").append(clientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+				indent().append("lookupDescription(").append(literal(clientId)).append(", ").append(String.valueOf(row)).append(");").newline();
 			}
 			else {
 				comment(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
-				indent().append("lookupDescription(\"").append(clientId).append("\", ").append(literal(search)).append(");").newline();
+				indent().append("lookupDescription(").append(literal(clientId)).append(", ").append(literal(search)).append(");").newline();
 			}
 		}
 	}
@@ -863,11 +856,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(dataGridClientId)) {
 						if (step instanceof DataGridSelect) {
-							indent().append("dataGridSelect(\"").append(dataGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+							indent().append("dataGridSelect(").append(literal(dataGridClientId)).append(", ").append(String.valueOf(row)).append(");").newline();
 						}
 						else {
-							indent().append("dataGridButton(\"").append(dataGridClientId).append("\", \"");
-							append(buttonClientId).append("\", ").append(String.valueOf(ajax)).append(");").newline();
+							indent().append("dataGridButton(").append(literal(dataGridClientId)).append(", ");
+							append(literal(buttonClientId)).append(", ").append(String.valueOf(ajax)).append(");").newline();
 						}
 					}
 				}
@@ -969,7 +962,12 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 				break;
 			}
 			List<UIComponent> buttonComponents = context.getFacesComponents(buttonIdentifier);
-			if (buttonComponents != null) { // button may not be shown
+			if (buttonComponents == null) {
+				// no gesture, so say so: the generated test cannot do what the script says
+				comment(String.format("<%s /> is not supported by this generator: the list grid [%s] has no button for it on the generated page (a list view's Vue list grid has none): not generated",
+										step.getClass().getSimpleName(), listGridIdentifier));
+			}
+			else {
 				String listGridClientId = PrimeFacesAutomationContext.clientId(listGridComponent);
 				if (row != null) {
 					if (step instanceof ListGridZoom) {
@@ -992,11 +990,11 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 												PrimeFacesAutomationContext.clientId(buttonComponent);
 					if (buttonClientId.startsWith(listGridClientId)) {
 						if (step instanceof ListGridSelect) {
-							indent().append("listGridSelect(\"").append(listGridClientId).append("\", ").append(String.valueOf(row)).append(");").newline();
+							indent().append("listGridSelect(").append(literal(listGridClientId)).append(", ").append(String.valueOf(row)).append(");").newline();
 						}
 						else {
-							indent().append("listGridButton(\"").append(listGridClientId).append("\", \"");
-							append(buttonClientId).append("\", false);").newline();
+							indent().append("listGridButton(").append(literal(listGridClientId)).append(", ");
+							append(literal(buttonClientId)).append(", false);").newline();
 						}
 					}
 				}
@@ -1153,11 +1151,57 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	}
 	
 	/**
+	 * Returns the Java for a check box entry's value.
+	 *
+	 * @param dataEnter	the step
+	 * @return	{@code Boolean.TRUE}, {@code Boolean.FALSE}, or {@code null} for a blank value
+	 * @throws MetaDataException	if the value is not true, false or blank
+	 */
+	private static @Nonnull String checkBoxValue(@Nonnull DataEnter dataEnter) {
+		String value = dataEnter.getValue();
+		@SuppressWarnings("null") // SAIL XML turns a blank value into null
+		boolean blank = (value == null);
+		if (blank) {
+			return "null";
+		}
+		if (Boolean.TRUE.toString().equals(value)) {
+			return "Boolean.TRUE";
+		}
+		if (Boolean.FALSE.toString().equals(value)) {
+			return "Boolean.FALSE";
+		}
+		throw new MetaDataException(entry(dataEnter) + " is not true, false or empty, as a check box needs");
+	}
+
+	/**
+	 * Returns the Java for a combo or radio entry's value, the option's zero-based number.
+	 *
+	 * @param dataEnter	the step
+	 * @return	the number
+	 * @throws MetaDataException	if the value is not a number
+	 */
+	private static @Nonnull String optionNumber(@Nonnull DataEnter dataEnter) {
+		try {
+			return Integer.toString(Integer.parseInt(dataEnter.getValue()));
+		}
+		catch (NumberFormatException e) {
+			throw new MetaDataException(entry(dataEnter) + " is not an option number, as this generator needs (match=\"index\")", e);
+		}
+	}
+
+	/**
+	 * Describes a data entry step for a message.
+	 */
+	private static @Nonnull String entry(@Nonnull DataEnter dataEnter) {
+		return String.format("<dataEnter binding=\"%s\" value=\"%s\" />", dataEnter.getBinding(), dataEnter.getValue());
+	}
+
+	/**
 	 * Emits a script-level GET navigation call for the supplied URL fragment.
 	 *
 	 * @param url the URL fragment to navigate to
 	 */
 	private void get(@Nonnull String url) {
-		indent().append("get(\"").append(url).append("\");").newline();
+		indent().append("get(").append(literal(url)).append(");").newline();
 	}
 }

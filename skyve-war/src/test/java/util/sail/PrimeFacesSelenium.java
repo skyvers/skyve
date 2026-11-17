@@ -4,7 +4,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.function.Function;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchElementException;
@@ -33,13 +33,16 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		waitForFullPageResponse(viewState);
 	}
 
+	/**
+	 * Selects a tab by its link.
+	 *
+	 * @param id	the tab's client id
+	 * @throws AssertionError	if the page has no such tab, or it is not displayed or is disabled
+	 */
 	public void tab(String id) {
 		String xpath = String.format("//a[contains(@href, '#%s')]", id);
-		WebElement element = byXpath(xpath);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			click(element);
-			waitForAjaxResponse();
-		}
+		click(usable(byXpath(xpath), "tab " + id));
+		waitForAjaxResponse();
 	}
 
 	public void step(String id) {
@@ -51,22 +54,30 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		login(null, username, password);
 	}
 	
+	/**
+	 * Signs in on the sign in page.
+	 *
+	 * @param customer	the customer, or null if the page asks for none
+	 * @param username	the user name
+	 * @param password	the password
+	 * @throws AssertionError	if the page has no field for a value given
+	 */
 	public void login(String customer, String username, String password) {
 		driver.get(baseUrl);
 
 		WebElement element = null;
 		if (customer != null) {
-			element = byName("customer");
+			element = usable(byName("customer"), "the customer field");
 			element.clear();
 			element.sendKeys(customer);
 		}
 
-		element = byName("user");
+		element = usable(byName("user"), "the user field");
 		element.click();
 		element.clear();
 		element.sendKeys(username);
 
-		element = byName("password");
+		element = usable(byName("password"), "the password field");
 		element.clear();
 		element.sendKeys(password);
 
@@ -79,39 +90,44 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
 	}
 
+	/**
+	 * Sets a check box, clicking it until it shows the value.
+	 *
+	 * @param id	the check box's client id
+	 * @param value	true, false, or null for a tri-state check box's unknown state
+	 * @throws AssertionError	if the page has no such check box, or it is not displayed or is disabled
+	 * @throws IllegalStateException	if two clicks do not set the value
+	 */
 	public void checkbox(String id, Boolean value) {
-		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			WebElement inputElement = byId(String.format("%s_input", id));
-			if ((inputElement != null) && element.isDisplayed() && element.isEnabled()) {
-				// don't need to check if checkbox is disabled coz we can still try to click it
-				// check the value and only click if we need a different value
-				String js = String.format("return window.SKYVE.PF.getCheckboxValue('%s')", id);
-				Boolean checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
-				if (value == null) {
-					for (int i = 0, l = 2; i < l; i++) { // try at most twice
-						if (checkboxValue != null) {
-							click(element);
-							waitForAjaxResponse();
-							checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
-						}
-					}
-					if (checkboxValue != null) {
-						throw new IllegalStateException("Could not set checkbox to null or unknown value");
-					}
+		WebElement element = usable(id);
+		if (byId(String.format("%s_input", id)) == null) {
+			Assertions.fail("#" + id + " is not a check box (it has no input) on " + driver.getCurrentUrl());
+		}
+		// check the value and only click if we need a different value
+		String js = String.format("return window.SKYVE.PF.getCheckboxValue('%s')", id);
+		Boolean checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
+		if (value == null) {
+			for (int i = 0, l = 2; i < l; i++) { // try at most twice
+				if (checkboxValue != null) {
+					click(element);
+					waitForAjaxResponse();
+					checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
 				}
-				else {
-					for (int i = 0, l = 2; i < l; i++) { // try at most twice
-						if ((checkboxValue == null) || (value.booleanValue() != checkboxValue.booleanValue())) {
-							click(element);
-							waitForAjaxResponse();
-							checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
-						}
-					}
-					if ((checkboxValue == null) || (value.booleanValue() != checkboxValue.booleanValue())) {
-						throw new IllegalStateException("Could not set checkbox to " + value);
-					}
+			}
+			if (checkboxValue != null) {
+				throw new IllegalStateException("Could not set checkbox to null or unknown value");
+			}
+		}
+		else {
+			for (int i = 0, l = 2; i < l; i++) { // try at most twice
+				if ((checkboxValue == null) || (value.booleanValue() != checkboxValue.booleanValue())) {
+					click(element);
+					waitForAjaxResponse();
+					checkboxValue = (Boolean) ((JavascriptExecutor) driver).executeScript(js);
 				}
+			}
+			if ((checkboxValue == null) || (value.booleanValue() != checkboxValue.booleanValue())) {
+				throw new IllegalStateException("Could not set checkbox to " + value);
 			}
 		}
 	}
@@ -120,243 +136,288 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		text(String.format("%s_input", id), value);
 	}
 
+	/**
+	 * Enters text in a field, replacing what it had.
+	 *
+	 * @param id	the field's client id
+	 * @param value	the text, or null to clear the field
+	 * @throws AssertionError	if the page has no such field, or it is not displayed, is disabled or is read only
+	 */
 	public void text(String id, String value) {
 		boolean success = false;
 		while (! success) {
-			WebElement element = byId(id);
-			if ((element != null) && 
-					element.isDisplayed() && 
-					element.isEnabled() &&
-					(element.getDomAttribute("disabled") == null) && 
-					(element.getDomAttribute("readonly") == null)) {
-				try {
-					element.clear();
-					element.sendKeys((value == null) ? "" : value);
-					success = true;
-				}
-				catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
-					// do nothing - we'll try again
-				}
-			}
-			else {
-				break;
-			}
-		}
-		if (success) {
-			waitForAjaxResponse();
-		}
-	}
-
-	public void radio(String id, int index) {
-		WebElement element = byId(id);
-		// Look for prime faces disabled style
-		if ((element != null) && element.isDisplayed() && element.isEnabled() &&
-				(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
-			element = byXpath("//label[@for='" + id + ":" + index + "']");
-			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-				click(element);
-				waitForAjaxResponse();
-			}
-		}
-	}
-
-	public void selectOne(String id, int index) {
-		WebElement element = byId(id);
-		// Look for prime faces disabled style
-		if ((element != null) && element.isDisplayed() && element.isEnabled() &&
-				(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
-			element = byId(String.format("%s_label", id));
-			if ((element != null) && element.isEnabled() && element.isDisplayed()) {
-				click(element);
-
-				// Wait for pick list drop down
-				By panelXpath = By.id(String.format("%s_panel", id));
-				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
-													ExpectedConditions.visibilityOfElementLocated(panelXpath),
-													ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
-
-				// Value here should be an index in the drop down starting from 0
-				element = byId(String.format("%s_%s", id, String.valueOf(index)));
-				if ((element != null) && element.isEnabled()) { // NB it may not be displayed
-					// Scroll the drop down panel so the item is visible
-					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
-
-					// Wait for pick list element to scroll into view
-					wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-					wait.until(ExpectedConditions.visibilityOf(element));
-
-					click(element);
-
-					// Wait for pick list drop down to disappear (opacity is taken into account)
-					wait = new WebDriverWait(driver, Duration.ofSeconds(1));
-					wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
-														ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
-
-					waitForAjaxResponse();
-				}
-			}
-		}
-	}
-
-	public void button(String id, boolean ajax, boolean confirm) {
-		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Look for prime faces disabled style
-			String classes = element.getDomAttribute("class");
-			if ((classes == null) || (! classes.contains("ui-state-disabled"))) {
-				String viewState = getViewState();
-				click(element);
-				if (confirm) {
-					confirm();
-				}
-				if (ajax) {
-					waitForAjaxResponse();
-				}
-				else {
-					waitForFullPageResponse(viewState);
-				}
-			}
-		}
-	}
-
-	public void redirectButton(String id, boolean confirm) {
-		WebElement element = byId(id);
-		// Look for prime faces disabled style
-		if ((element != null) && element.isDisplayed() && element.isEnabled() &&
-				(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
-			String viewState = getViewState();
-			click(element);
-			if (confirm) {
-				confirm();
+			WebElement element = usable(id);
+			if (element.getDomAttribute("readonly") != null) {
+				Assertions.fail("#" + id + " is read only on " + driver.getCurrentUrl());
 			}
 			try {
-				Thread.sleep(250);
+				element.clear();
+				element.sendKeys((value == null) ? "" : value);
+				success = true;
 			}
-			catch (@SuppressWarnings("unused") InterruptedException e) {
-				// nothing to do here
+			catch (@SuppressWarnings("unused") StaleElementReferenceException e) {
+				// do nothing - we'll try again
 			}
+		}
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Clicks a radio button's option.
+	 *
+	 * @param id	the radio button's client id
+	 * @param index	the option's zero-based position
+	 * @throws AssertionError	if the page has no such radio button or option, or it is not displayed or is disabled
+	 */
+	public void radio(String id, int index) {
+		usable(id);
+		click(usable(byXpath("//label[@for='" + id + ":" + index + "']"), "option " + index + " of #" + id));
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Picks a select menu's option.
+	 *
+	 * @param id	the select menu's client id
+	 * @param index	the option's zero-based position, counting an empty first option
+	 * @throws AssertionError	if the page has no such select menu or option, or it is not displayed or is disabled
+	 */
+	public void selectOne(String id, int index) {
+		usable(id);
+		click(usable(byId(String.format("%s_label", id)), "the label of #" + id));
+
+		// Wait for pick list drop down
+		By panelXpath = By.id(String.format("%s_panel", id));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
+											ExpectedConditions.visibilityOfElementLocated(panelXpath),
+											ExpectedConditions.attributeToBe(panelXpath, "opacity", "1")));
+
+		// Value here should be an index in the drop down starting from 0
+		WebElement element = byId(String.format("%s_%s", id, String.valueOf(index)));
+		if ((element == null) || (! element.isEnabled())) { // NB it may not be displayed
+			Assertions.fail("#" + id + " has no option " + index + " to pick on " + driver.getCurrentUrl());
+		}
+		// Scroll the drop down panel so the item is visible
+		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
+
+		// Wait for pick list element to scroll into view
+		wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		wait.until(ExpectedConditions.visibilityOf(element));
+
+		click(element);
+
+		// Wait for pick list drop down to disappear (opacity is taken into account)
+		wait = new WebDriverWait(driver, Duration.ofSeconds(1));
+		wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(panelXpath),
+											ExpectedConditions.invisibilityOfElementLocated(panelXpath)));
+
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Clicks a button, answers its confirmation, and waits for its response.
+	 *
+	 * @param id	the button's client id
+	 * @param ajax	true to wait for an AJAX response, false for a new page
+	 * @param confirm	true to accept a confirmation
+	 * @throws AssertionError	if the page has no such button, or it is not displayed or is disabled
+	 */
+	public void button(String id, boolean ajax, boolean confirm) {
+		WebElement element = usable(id);
+		String viewState = getViewState();
+		click(element);
+		if (confirm) {
+			confirm();
+		}
+		if (ajax) {
+			waitForAjaxResponse();
+		}
+		else {
 			waitForFullPageResponse(viewState);
 		}
 	}
 
+	/**
+	 * Clicks a button that goes to another page, answers its confirmation, and waits for the page.
+	 *
+	 * @param id	the button's client id
+	 * @param confirm	true to accept a confirmation
+	 * @throws AssertionError	if the page has no such button, or it is not displayed or is disabled
+	 */
+	public void redirectButton(String id, boolean confirm) {
+		WebElement element = usable(id);
+		String viewState = getViewState();
+		click(element);
+		if (confirm) {
+			confirm();
+		}
+		try {
+			Thread.sleep(250);
+		}
+		catch (@SuppressWarnings("unused") InterruptedException e) {
+			// nothing to do here
+		}
+		waitForFullPageResponse(viewState);
+	}
+
+	/**
+	 * Picks a row from a lookup description's drop down.
+	 *
+	 * @param id	the lookup description's client id
+	 * @param row	the row's zero-based position
+	 * @throws AssertionError	if the page has no such lookup, drop down button or row, or one is not displayed or is
+	 * 							disabled
+	 */
 	public void lookupDescription(String id, int row) {
-		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Find the drop down button
-			element = byXpath(String.format("//span[@id='%s']/button", id));
-			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-				// Click the drop down button
-//				Actions clicker = new Actions(driver);
-//				clicker.moveToElement(element).moveByOffset(10, 10).click().build().perform();
-				click(element);
+		usable(id);
+		// Click the drop down button
+		click(usable(byXpath(String.format("//span[@id='%s']/button", id)), "the drop down button of #" + id));
 
-				// Wait for pick list drop down - can be a span or div depending on theme
-				By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
-				WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-				wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
-													ExpectedConditions.visibilityOfElementLocated(xpath)));
+		// Wait for pick list drop down - can be a span or div depending on theme
+		By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
+											ExpectedConditions.visibilityOfElementLocated(xpath)));
 
-				// Select the row
-				// NB could be <div><div><ul><li> or <span><ul><li>
-				// in the middle means find the <ul> anywhere below
-				element = byXpath(String.format("//*[@id='%s_panel']//ul/li[%d]", id, Integer.valueOf(row + 1)));
-				if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-					// Scroll the drop down panel so the item is visible
-					((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
-					click(element);
-					waitForAjaxResponse();
-				}
-			}
-		}
+		// Select the row
+		// NB could be <div><div><ul><li> or <span><ul><li>
+		// in the middle means find the <ul> anywhere below
+		WebElement element = usable(byXpath(String.format("//*[@id='%s_panel']//ul/li[%d]", id, Integer.valueOf(row + 1))),
+									"row " + row + " of #" + id);
+		// Scroll the drop down panel so the item is visible
+		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView()", element);
+		click(element);
+		waitForAjaxResponse();
 	}
 
+	/**
+	 * Types a search into a lookup description and picks the first suggestion.
+	 *
+	 * @param id	the lookup description's client id
+	 * @param search	the search
+	 * @throws AssertionError	if the page has no such lookup, or it suggests nothing, or one is not displayed or is
+	 * 							disabled
+	 */
 	public void lookupDescription(String id, String search) {
-		WebElement element = byId(id);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			_input(id, search);
+		usable(id);
+		_input(id, search);
 
-			// Wait for pick list drop down - can be a span or div depending on theme
-			By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
-			WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
-			wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
-												ExpectedConditions.visibilityOfElementLocated(xpath)));
+		// Wait for pick list drop down - can be a span or div depending on theme
+		By xpath = By.xpath(String.format("//*[@id='%s_panel']", id));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+		wait.until(ExpectedConditions.and(ExpectedConditions.presenceOfElementLocated(xpath),
+											ExpectedConditions.visibilityOfElementLocated(xpath)));
 
-			// Select the first row
-			// NB could be <div><div><ul><li> or <span><ul><li>
-			// in the middle means find the <ul> anywhere below
-			element = byXpath(String.format("//*[@id='%s_panel']//ul/li", id));
-			if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-				click(element);
-				waitForAjaxResponse();
-			}
-		}
+		// Select the first row
+		// NB could be <div><div><ul><li> or <span><ul><li>
+		// in the middle means find the <ul> anywhere below
+		click(usable(byXpath(String.format("//*[@id='%s_panel']//ul/li", id)), "the first suggestion of #" + id));
+		waitForAjaxResponse();
 	}
 
+	/**
+	 * Clicks a data grid's button.
+	 *
+	 * @param dataGridId	the data grid's client id
+	 * @param buttonId	the button's client id
+	 * @param ajax	true to wait for an AJAX response, false for a new page
+	 * @throws AssertionError	if the page has no such data grid or button, or one is not displayed or is disabled
+	 */
 	public void dataGridButton(String dataGridId, String buttonId, boolean ajax) {
-		// check data grid is present
-		WebElement element = byId(dataGridId);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// data grid button is present
-			element = byId(buttonId);
-			// Look for prime faces disabled style on data grid button
-			if ((element != null) && element.isDisplayed() && element.isEnabled() &&
-					(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
-				// All good, continue with the button click
-				String viewState = getViewState();
-				click(element);
-				if (ajax) {
-					waitForAjaxResponse();
-				}
-				else {
-					waitForFullPageResponse(viewState);
-				}
-			}
-		}
+		usable(dataGridId);
+		gridButton(buttonId, ajax);
 	}
 
+	/**
+	 * Clicks a data grid's row.
+	 *
+	 * @param dataGridId	the data grid's client id
+	 * @param row	the row's zero-based position
+	 * @throws AssertionError	if the page has no such data grid, or it is not displayed or is disabled
+	 * @throws org.openqa.selenium.NoSuchElementException	if the grid has no such row
+	 */
 	public void dataGridSelect(String dataGridId, int row) {
-		// check list grid is present
-		WebElement element = byId(dataGridId);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Find the row
-			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
-			click(element);
-			waitForAjaxResponse();
-		}
+		gridRow(dataGridId, row);
 	}
 
+	/**
+	 * Clicks a list grid's button.
+	 *
+	 * @param listGridId	the list grid's client id
+	 * @param buttonId	the button's client id
+	 * @param ajax	true to wait for an AJAX response, false for a new page
+	 * @throws AssertionError	if the page has no such list grid or button, or one is not displayed or is disabled
+	 */
 	public void listGridButton(String listGridId, String buttonId, boolean ajax) {
-		// check list grid is present
-		WebElement element = byId(listGridId);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// list grid button is present
-			element = byId(buttonId);
-			// Look for prime faces disabled style on list grid button
-			if ((element != null) && element.isDisplayed() && element.isEnabled() &&
-					(! element.getDomAttribute("class").contains("ui-state-disabled"))) {
-				// All good, continue with the button click
-				String viewState = getViewState();
-				click(element);
-				if (ajax) {
-					waitForAjaxResponse();
-				}
-				else {
-					waitForFullPageResponse(viewState);
-				}
-			}
+		usable(listGridId);
+		gridButton(buttonId, ajax);
+	}
+
+	/**
+	 * Clicks a list grid's row.
+	 *
+	 * @param listGridId	the list grid's client id
+	 * @param row	the row's zero-based position
+	 * @throws AssertionError	if the page has no such list grid, or it is not displayed or is disabled
+	 * @throws org.openqa.selenium.NoSuchElementException	if the grid has no such row
+	 */
+	public void listGridSelect(String listGridId, int row) {
+		gridRow(listGridId, row);
+	}
+
+	private void gridButton(String buttonId, boolean ajax) {
+		WebElement element = usable(buttonId);
+		String viewState = getViewState();
+		click(element);
+		if (ajax) {
+			waitForAjaxResponse();
+		}
+		else {
+			waitForFullPageResponse(viewState);
 		}
 	}
 
-	public void listGridSelect(String listGridId, int row) {
-		// check list grid is present
-		WebElement element = byId(listGridId);
-		if ((element != null) && element.isDisplayed() && element.isEnabled()) {
-			// Find the row
-			element = element.findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
-			click(element);
-			waitForAjaxResponse();
+	private void gridRow(String gridId, int row) {
+		WebElement element = usable(gridId).findElement(By.xpath(String.format(".//tr[%s]/td", String.valueOf(row + 1))));
+		click(element);
+		waitForAjaxResponse();
+	}
+
+	/**
+	 * Returns the element with an id, for a gesture on it.
+	 *
+	 * @param id	the element's id
+	 * @return	the element
+	 * @throws AssertionError	if the page has no such element, or it is not displayed or is disabled
+	 */
+	private @Nonnull WebElement usable(@Nonnull String id) {
+		return usable(byId(id), "#" + id);
+	}
+
+	/**
+	 * Returns an element found for a gesture, failing the test if it was not found or cannot be used, so that a
+	 * generated test never passes without doing what its script says.
+	 *
+	 * @param element	the element found, or null
+	 * @param what	what the element is, for the failure message
+	 * @return	the element
+	 * @throws AssertionError	if the element is null, not displayed, or disabled (by its {@code disabled} attribute or
+	 * 							PrimeFaces' {@code ui-state-disabled} style)
+	 */
+	@Nonnull WebElement usable(@Nullable WebElement element, @Nonnull String what) {
+		if (element == null) {
+			return Assertions.fail(what + " is not on the page " + driver.getCurrentUrl());
 		}
+		if (! element.isDisplayed()) {
+			Assertions.fail(what + " is not displayed on " + driver.getCurrentUrl());
+		}
+		String classes = element.getDomAttribute("class");
+		if ((! element.isEnabled()) || (element.getDomAttribute("disabled") != null) ||
+				((classes != null) && classes.contains("ui-state-disabled"))) {
+			Assertions.fail(what + " is disabled on " + driver.getCurrentUrl());
+		}
+		return element;
 	}
 
 	/**
@@ -382,7 +443,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	}
 
 	public void assertSuccess() {
-		Assert.assertTrue("Not successful", verifySuccess());
+		Assertions.assertTrue(verifySuccess(), "Not successful");
 	}
 
 	public boolean verifyFailure(String messageToCheck) {
@@ -412,11 +473,11 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	}
 
 	public void assertFailure(String messageToCheck) {
-		Assert.assertTrue("Successful", verifyFailure(messageToCheck));
+		Assertions.assertTrue(verifyFailure(messageToCheck), "Successful");
 	}
 
 	public void assertFailure() {
-		Assert.assertTrue("Successful", verifyFailure());
+		Assertions.assertTrue(verifyFailure(), "Successful");
 	}
 
 	public void confirm() {
@@ -455,6 +516,16 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		}
 		wait = new WebDriverWait(driver, Duration.ofSeconds(5));
 		wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete") ? Boolean.TRUE : Boolean.FALSE);
+	}
+
+	/**
+	 * Runs JavaScript in the page, as a SAIL {@code <execute>} step does, and waits for any AJAX request it starts.
+	 *
+	 * @param script	the JavaScript
+	 */
+	public void execute(String script) {
+		((JavascriptExecutor) driver).executeScript(script);
+		waitForAjaxResponse();
 	}
 
 	@SuppressWarnings("static-method")

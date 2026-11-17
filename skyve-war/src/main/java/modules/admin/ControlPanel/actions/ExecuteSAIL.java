@@ -76,12 +76,13 @@ public class ExecuteSAIL implements ServerSideAction<ControlPanelExtension> {
 	 * Faces context replaces the thread's (a PrimeFaces request's) during it, and the thread's is put back afterwards.
 	 *
 	 * @param bean	the Control Panel
-	 * @return	the executor's output: Java test methods, or Selenese tables
+	 * @return	the executor's output: the Java test methods
 	 * @throws ValidationException	if a value the execution needs is not entered, a builder cannot be created or the
 	 * 									SAIL user cannot be found
-	 * @throws Exception	if the SAIL is invalid or the executor cannot be created or fails
+	 * @throws ReflectiveOperationException	if the executor cannot be created
+	 * @throws org.skyve.metadata.MetaDataException	if the SAIL is invalid, or names what the views do not have
 	 */
-	static @Nonnull String generate(@Nonnull ControlPanelExtension bean) throws Exception {
+	static @Nonnull String generate(@Nonnull ControlPanelExtension bean) throws ReflectiveOperationException {
 		UserProxy user = bean.getSailUser();
 		String baseUrl = bean.getSailBaseUrl();
 		SailExecutor executorClass = bean.getSailExecutor();

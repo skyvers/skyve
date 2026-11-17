@@ -81,14 +81,6 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void sailExecutorPrimeFacesSetAndGet() {
-		ControlPanel bean = ControlPanel.newInstance();
-		bean.setSailExecutor(ControlPanel.SailExecutor.primeFacesInlineSelenese);
-		assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese, bean.getSailExecutor());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
 	void sailUxUiSetAndGet() {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailUxUi("external");
@@ -338,8 +330,8 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void sailExecutorEnumFromCode() {
-		assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese,
-				ControlPanel.SailExecutor.fromCode("org.skyve.impl.sail.execution.pf.PrimeFacesSeleneseExecutor"));
+		assertEquals(ControlPanel.SailExecutor.primeFacesInlineWebDriver,
+				ControlPanel.SailExecutor.fromCode("org.skyve.impl.sail.execution.pf.PrimeFacesInlineWebDriverExecutor"));
 	}
 
 	/**
@@ -427,14 +419,14 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
         @Test
         @SuppressWarnings("static-method")
         void sailExecutorToLocalisedDescription() {
-                assertNotNull(ControlPanel.SailExecutor.primeFacesInlineSelenese.toLocalisedDescription());
+                assertNotNull(ControlPanel.SailExecutor.primeFacesInlineWebDriver.toLocalisedDescription());
         }
 
         @Test
         @SuppressWarnings("static-method")
         void sailExecutorFromLocalisedDescription() {
-                String desc = ControlPanel.SailExecutor.primeFacesInlineSelenese.toLocalisedDescription();
-                assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese,
+                String desc = ControlPanel.SailExecutor.primeFacesInlineWebDriver.toLocalisedDescription();
+                assertEquals(ControlPanel.SailExecutor.primeFacesInlineWebDriver,
                                 ControlPanel.SailExecutor.fromLocalisedDescription(desc));
         }
 

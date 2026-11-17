@@ -1,14 +1,36 @@
 package org.skyve.impl.sail.execution;
 
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
+
+import javax.tools.Diagnostic;
+import javax.tools.DiagnosticCollector;
+import javax.tools.JavaCompiler;
+import javax.tools.JavaFileObject;
+import javax.tools.SimpleJavaFileObject;
+import javax.tools.StandardJavaFileManager;
+import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
+import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
@@ -104,39 +126,11 @@ class SailExecutorTest {
 		assertThat(script, containsString("trace(null);"));
 	}
 
-	@Test
-	void seleneseExecutorRendersTablesCommandsAndComments() {
-		TestSeleneseExecutor executor = new TestSeleneseExecutor();
-		Comment comment = new Comment();
-		comment.setComment("hello");
-		Pause pause = new Pause();
-		pause.setMillis(250L);
-
-		executor.open("Menu Admin");
-		executor.row("click", "id=save", "Save");
-		executor.row("waitForPageToLoad", "30000");
-		executor.row("assertTextPresent");
-		executor.executeComment(comment);
-		executor.executePause(pause);
-		executor.close();
-
-		String script = executor.toString();
-		assertThat(script, containsString("<table>"));
-		assertThat(script, containsString("<tr><th>Menu Admin</th></tr>"));
-		assertThat(script, containsString("<tr><td>click</td><td>id=save</td><td>Save</td></tr>"));
-		assertThat(script, containsString("<tr><td>waitForPageToLoad</td><td>30000</td><td></td></tr>"));
-		assertThat(script, containsString("<tr><td>assertTextPresent</td><td></td><td></td></tr>"));
-		assertThat(script, containsString("<!-- hello -->"));
-		assertThat(script, not(containsString("250")));
-		assertThat(script, containsString("</table>"));
-	}
-
 	/**
-	 * The generated code cannot follow a new window, so a link into one says so, in both generators; a link in the same
-	 * window says nothing.
+	 * The generated code cannot follow a new window, so a link into one says so; a link in the same window says nothing.
 	 */
 	@Test
-	void bothGeneratorsCommentThatTheyDoNotFollowANewWindow() {
+	void theGeneratorCommentsThatItDoesNotFollowANewWindow() {
 		TestWebDriverExecutor webDriver = new TestWebDriverExecutor();
 		webDriver.open("Windows");
 		NavigateLink newWindow = new NavigateLink();
@@ -144,17 +138,83 @@ class SailExecutorTest {
 		newWindow.setWindow(NavigateLink.Window.newWindow);
 		webDriver.executeNavigateLink(newWindow);
 		webDriver.close();
-		TestSeleneseExecutor selenese = new TestSeleneseExecutor();
-		selenese.open("Windows");
-		selenese.executeNavigateLink(newWindow);
-		selenese.close();
 
 		assertThat(webDriver.toString(), containsString("trace(\"" + NEW_WINDOW_NOT_FOLLOWED + "\");"));
-		assertThat(selenese.toString(), containsString("<!-- " + NEW_WINDOW_NOT_FOLLOWED + " -->"));
 	}
 
 	private static final String NEW_WINDOW_NOT_FOLLOWED = "<navigateLink window=new/> not supported by this generator: " +
 															"the generated code does not follow the new window";
+
+	/**
+	 * Interaction names and script values cannot break or inject into the generated Java: a name that ends the method's
+	 * comment or holds a Unicode escape, two interactions with one name, a procedure inside an interaction, and an
+	 * {@code <execute>} script all give code that compiles.
+	 */
+	@Test
+	void hostileNamesAndScriptsGiveJavaThatCompiles() {
+		TestWebDriverExecutor executor = new TestWebDriverExecutor();
+		Interaction hostile = new Interaction();
+		hostile.setName("x */ static { } /**");
+		Procedure before = new Procedure();
+		Comment comment = new Comment();
+		comment.setComment("first");
+		before.getSteps().add(comment);
+		hostile.setBefore(before);
+		Procedure after = new Procedure();
+		after.getSteps().add(comment);
+		hostile.setAfter(after);
+		Execute execute = new Execute();
+		execute.setScript("document.title = \"x\"; // \\u002a/");
+		hostile.getSteps().add(execute);
+		executor.executeInteraction(hostile);
+		Interaction escape = new Interaction();
+		escape.setName("y \\u002a\\u002f class Z {} /\\u002a\\u002a");
+		executor.executeInteraction(escape);
+		Interaction same = new Interaction();
+		same.setName("Same");
+		executor.executeInteraction(same);
+		executor.executeInteraction(same);
+
+		String script = executor.toString();
+		assertAll(() -> assertEquals(List.of(), compile(script), script),
+					() -> assertTrue(script.contains("execute(\"document.title = \\\"x\\\"; // \\\\u002a/\");"), script),
+					() -> assertTrue(script.contains("trace(\"Before x */ static { } /**\");"), script),
+					() -> assertTrue(script.contains("trace(\"After x */ static { } /**\");"), script),
+					() -> assertTrue(script.contains("private void testSame() {") && script.contains("private void testSame2() {"), script));
+	}
+
+	/**
+	 * Compiles generated test methods inside a class with the harness methods they call.
+	 *
+	 * @return	the compiler's errors; empty when the code compiles
+	 */
+	private static List<String> compile(String methods) throws IOException {
+		String source = "class Generated {\n@interface Test {}\nvoid trace(String s) {}\nvoid pause(long millis) {}\n" +
+							"void execute(String script) {}\n" + methods + "}\n";
+		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+		DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
+		try (StandardJavaFileManager files = compiler.getStandardFileManager(diagnostics, Locale.ENGLISH, null)) {
+			JavaFileObject java = new SimpleJavaFileObject(URI.create("string:///Generated.java"), JavaFileObject.Kind.SOURCE) {
+				@Override
+				public CharSequence getCharContent(boolean ignoreEncodingErrors) {
+					return source;
+				}
+			};
+			Path classes = Files.createTempDirectory("sail-generated");
+			try {
+				compiler.getTask(null, files, diagnostics, List.of("-d", classes.toString(), "-proc:none"), null, List.of(java)).call();
+			}
+			finally {
+				try (Stream<Path> paths = Files.walk(classes)) {
+					paths.sorted(Comparator.reverseOrder()).forEach(path -> path.toFile().delete());
+				}
+			}
+		}
+		return diagnostics.getDiagnostics().stream()
+					.filter(d -> d.getKind() == Diagnostic.Kind.ERROR)
+					.map(d -> "line " + d.getLineNumber() + ": " + d.getMessage(Locale.ENGLISH))
+					.toList();
+	}
 
 	@Test
 	void webDriverExecutorCommentsTheStepsItCannotGenerate() {
@@ -167,20 +227,6 @@ class SailExecutorTest {
 		String script = executor.toString();
 		for (String element : UNSUPPORTED) {
 			assertThat(script, containsString("trace(\"<" + element + "/> not supported by this generator\");"));
-		}
-	}
-
-	@Test
-	void seleneseExecutorCommentsTheStepsItCannotGenerate() {
-		TestSeleneseExecutor executor = new TestSeleneseExecutor();
-
-		executor.open("Unsupported");
-		executeUnsupportedSteps(executor);
-		executor.close();
-
-		String script = executor.toString();
-		for (String element : UNSUPPORTED) {
-			assertThat(script, containsString("<!-- <" + element + "/> not supported by this generator -->"));
 		}
 	}
 
@@ -235,61 +281,6 @@ class SailExecutorTest {
 
 		private void close() {
 			endTest();
-		}
-
-		@Override public void executePushListContext(PushListContext push) { /* no-op */ }
-		@Override public void executePushEditContext(PushEditContext push) { /* no-op */ }
-		@Override public void executePopContext(PopContext pop) { /* no-op */ }
-		@Override public void executeClearContext(ClearContext clear) { /* no-op */ }
-		@Override public void executeLogin(Login login) { /* no-op */ }
-		@Override public void executeLogout(Logout logout) { /* no-op */ }
-		@Override public void executeTabSelect(TabSelect tabSelect) { /* no-op */ }
-		@Override public void executeTestDataEnter(TestDataEnter testDataEnter) { /* no-op */ }
-		@Override public void executeDataEnter(DataEnter dataEnter) { /* no-op */ }
-		@Override public void executeOk(Ok ok) { /* no-op */ }
-		@Override public void executeSave(Save save) { /* no-op */ }
-		@Override public void executeCancel(Cancel cancel) { /* no-op */ }
-		@Override public void executeDelete(Delete delete) { /* no-op */ }
-		@Override public void executeZoomOut(ZoomOut zoomOut) { /* no-op */ }
-		@Override public void executeRemove(Remove remove) { /* no-op */ }
-		@Override public void executeAction(Action action) { /* no-op */ }
-		@Override public void executeLookupDescriptionAutoComplete(LookupDescriptionAutoComplete complete) { /* no-op */ }
-		@Override public void executeLookupDescriptionPick(LookupDescriptionPick pick) { /* no-op */ }
-		@Override public void executeLookupDescriptionNew(LookupDescriptionNew nu) { /* no-op */ }
-		@Override public void executeLookupDescriptionEdit(LookupDescriptionEdit edit) { /* no-op */ }
-		@Override public void executeZoomIn(ZoomIn zoom) { /* no-op */ }
-		@Override public void executeDataGridNew(DataGridNew nu) { /* no-op */ }
-		@Override public void executeDataGridZoom(DataGridZoom zoom) { /* no-op */ }
-		@Override public void executeDataGridEdit(DataGridEdit edit) { /* no-op */ }
-		@Override public void executeDataGridRemove(DataGridRemove remove) { /* no-op */ }
-		@Override public void executeDataGridSelect(DataGridSelect select) { /* no-op */ }
-		@Override public void executeListGridNew(ListGridNew nu) { /* no-op */ }
-		@Override public void executeListGridZoom(ListGridZoom zoom) { /* no-op */ }
-		@Override public void executeListGridSelect(ListGridSelect select) { /* no-op */ }
-		@Override public void executeTestValue(TestValue test) { /* no-op */ }
-		@Override public void executeTestSuccess(TestSuccess test) { /* no-op */ }
-		@Override public void executeTestFailure(TestFailure test) { /* no-op */ }
-	}
-
-	private static final class TestSeleneseExecutor extends SeleneseExecutor<TestContext> {
-		private void open(String heading) {
-			startTest(heading);
-		}
-
-		private void close() {
-			endTest();
-		}
-
-		private void row(String command, String parameter1, String parameter2) {
-			command(command, parameter1, parameter2);
-		}
-
-		private void row(String command, String parameter1) {
-			command(command, parameter1);
-		}
-
-		private void row(String command) {
-			command(command);
 		}
 
 		@Override public void executePushListContext(PushListContext push) { /* no-op */ }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.primefaces.component.autocomplete.AutoComplete;
 import org.primefaces.component.inputtext.InputText;
+import org.primefaces.component.selectbooleancheckbox.SelectBooleanCheckbox;
 import org.primefaces.component.selectonemenu.SelectOneMenu;
 import org.primefaces.component.selectoneradio.SelectOneRadio;
 import org.primefaces.component.spinner.Spinner;
@@ -38,6 +39,7 @@ import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
@@ -270,6 +272,86 @@ class PrimeFacesInlineWebDriverExecutorTest {
 					() -> assertTrue(script.contains("text(\"form:status\", null);"), script),
 					() -> assertTrue(script.contains("_input(\"form:status\", \"1\\\"2\");"), script),
 					() -> assertTrue(script.contains("lookupDescription(\"form:status\", \"say \\\"x\\\"\");"), script));
+	}
+
+	/**
+	 * A combo or radio value is an option number and a check box value is true, false or empty, so that no value goes
+	 * into the generated code as Java: anything else fails the generation, naming the step.
+	 */
+	@Test
+	void optionAndCheckBoxValuesMustBeNumbersOrBooleans() {
+		TestPrimeFacesInlineWebDriverExecutor executor = new TestPrimeFacesInlineWebDriverExecutor();
+		executor.pushContextWith(inForm(new SelectOneMenu()));
+		MetaDataException person = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry("Person")));
+		MetaDataException combo = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry(HOSTILE)));
+		executor.executePopContext(new PopContext());
+		executor.pushContextWith(inForm(new SelectOneRadio()));
+		MetaDataException radio = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry(HOSTILE)));
+		executor.executePopContext(new PopContext());
+		executor.pushContextWith(inForm(new SelectBooleanCheckbox()));
+		MetaDataException checkBox = assertThrows(MetaDataException.class, () -> executor.executeDataEnter(entry(HOSTILE)));
+		executor.executeDataEnter(entry("true"));
+		executor.executeDataEnter(entry("false"));
+		executor.executeDataEnter(entry(null));
+
+		String script = executor.toString();
+		assertAll(() -> assertTrue(person.getMessage().contains("<dataEnter binding=\"status\" value=\"Person\" />"), person::getMessage),
+					() -> assertTrue(person.getMessage().contains("option number"), person::getMessage),
+					() -> assertTrue(combo.getMessage().contains(HOSTILE), combo::getMessage),
+					() -> assertTrue(radio.getMessage().contains("option number"), radio::getMessage),
+					() -> assertTrue(checkBox.getMessage().contains("true, false or empty"), checkBox::getMessage),
+					() -> assertFalse(script.contains("System.exit"), script),
+					() -> assertTrue(script.contains("checkbox(\"form:status\", Boolean.TRUE);"), script),
+					() -> assertTrue(script.contains("checkbox(\"form:status\", Boolean.FALSE);"), script),
+					() -> assertTrue(script.contains("checkbox(\"form:status\", null);"), script));
+	}
+
+	/**
+	 * A bizId goes into the generated URL as part of a Java literal.
+	 */
+	@Test
+	void aBizIdCannotInjectIntoTheGeneratedUrl() {
+		TestPrimeFacesInlineWebDriverExecutor executor = new TestPrimeFacesInlineWebDriverExecutor();
+		NavigateEdit edit = new NavigateEdit();
+		edit.setModuleName("sales");
+		edit.setDocumentName("Customer");
+		edit.setBizId("x\"); System.exit(1); //");
+		executor.executeNavigateEdit(edit);
+
+		String script = executor.toString();
+		assertTrue(script.contains("get(\"?a=e&m=sales&d=Customer&i=x\\\"); System.exit(1); //\");"), script);
+	}
+
+	/**
+	 * A list grid whose New button the generated page has none of (a PrimeFaces list view's Vue list grid) gets a "not
+	 * supported" comment rather than no gesture at all, so the generated test cannot pass without having pressed New.
+	 */
+	@Test
+	void aListGridNewWithNoButtonIsNotSupported() {
+		Module module = mock(Module.class);
+		DocumentRef ref = new DocumentRef();
+		ref.setOwningModuleName("sales");
+		when(module.getDocumentRefs()).thenReturn(Map.of("Customer", ref));
+		bindModule(module);
+		TestPrimeFacesInlineWebDriverExecutor executor = newEditExecutorWithListGrid("sales.Customer");
+		ListGridNew nu = new ListGridNew();
+		nu.setDocumentName("Customer");
+
+		executor.executeListGridNew(nu);
+
+		String script = executor.toString();
+		assertTrue(script.contains("<ListGridNew /> is not supported by this generator: the list grid [sales.Customer] has no button for it on the generated page"), script);
+	}
+
+	private static final String HOSTILE = "1); System.exit(1); //";
+
+	private static DataEnter entry(String value) {
+		DataEnter result = new DataEnter();
+		result.setBinding("status");
+		if (value != null) {
+			result.setValue(value);
+		}
+		return result;
 	}
 
 	private static DataEnter dataEnter(Match match) {

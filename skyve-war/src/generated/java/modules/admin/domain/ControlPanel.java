@@ -294,7 +294,6 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public enum SailExecutor implements Enumeration {
-		primeFacesInlineSelenese("org.skyve.impl.sail.execution.pf.PrimeFacesSeleneseExecutor", "PrimeFaces Inline Selenese"),
 		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.pf.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");
 
 		private String code;
