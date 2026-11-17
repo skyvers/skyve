@@ -403,4 +403,55 @@ class SingletonCachedBizletTest {
 		assertSame(second, bizlet.newInstance(new TestBean("admin", "Contact", "S2", "Seed2")));
 		verify(query, times(2)).beanResult();
 	}
+
+	/**
+	 * Caches a customer scoped singleton, clears it with {@code clearer} and asserts that the next
+	 * call looks the singleton up again rather than retrieving the cached bizId.
+	 */
+	private static void assertClearRemovesTheCachedCustomerInstance(Runnable clearer) throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn("custA");
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.getCustomerName()).thenReturn("custA");
+		when(user.getScope("admin", "Contact")).thenReturn(DocumentPermissionScope.customer);
+
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+
+		DocumentQuery query = mock(DocumentQuery.class);
+		when(persistence.newDocumentQuery("admin", "Contact")).thenReturn(query);
+
+		TestBean first = new TestBean("admin", "Contact", "P1", "First");
+		first.setBizVersion(Integer.valueOf(1));
+		TestBean second = new TestBean("admin", "Contact", "P2", "Second");
+		second.setBizVersion(Integer.valueOf(1));
+		when(query.beanResult()).thenReturn(first, second);
+
+		// a cached bizId that survives clearing retrieves the first instance again
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		when(customer.getModule("admin")).thenReturn(module);
+		when(module.getDocument(customer, "Contact")).thenReturn(document);
+		when(persistence.retrieve(document, "P1")).thenReturn(first);
+
+		TestSingletonCachedBizlet bizlet = new TestSingletonCachedBizlet();
+		bizlet.newInstance(new TestBean("admin", "Contact", "S1", "Seed1"));
+		clearer.run();
+
+		// with the cached bizId cleared, the singleton is looked up again rather than retrieved
+		assertSame(second, bizlet.newInstance(new TestBean("admin", "Contact", "S2", "Seed2")));
+		verify(query, times(2)).beanResult();
+	}
+
+	@Test
+	void clearRemovesTheCachedCustomerInstance() throws Exception {
+		assertClearRemovesTheCachedCustomerInstance(() -> SingletonCachedBizlet.clear("admin", "Contact"));
+	}
+
+	@Test
+	void clearWithModuleDocumentRemovesTheCachedCustomerInstance() throws Exception {
+		assertClearRemovesTheCachedCustomerInstance(() -> SingletonCachedBizlet.clear(TestDocument.CONTACT));
+	}
 }
