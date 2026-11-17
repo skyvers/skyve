@@ -1,8 +1,11 @@
 package org.skyve.impl.metadata.repository;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -408,6 +411,39 @@ class MutableCachedRepositoryTest {
 		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getView(null, null, document, "edit"));
 
 		assertEquals("Cannot scaffold view edit for document admin.User without a customer", e.getMessage());
+	}
+
+	private static CustomerImpl mockCustomer(String customerName, Module module) {
+		CustomerImpl result = mock(CustomerImpl.class);
+		when(result.getName()).thenReturn(customerName);
+		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
+		moduleEntries.put(module.getName(), null);
+		when(result.getModuleEntries()).thenReturn(moduleEntries);
+		when(result.getModule(module.getName())).thenReturn(module);
+		return result;
+	}
+
+	/**
+	 * A customer's override of a document can have other attributes, so a view scaffolded for one
+	 * customer must not be cached under the vanilla view key, where every other customer finds it.
+	 */
+	@Test
+	void aScaffoldedViewIsCachedPerCustomer() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl acme = mockCustomer("acme", module);
+		CustomerImpl beta = mockCustomer("beta", module);
+
+		View acmeView = repo.getView(null, acme, document, ViewType.edit.toString());
+		View betaView = repo.getView(null, beta, document, ViewType.edit.toString());
+
+		assertAll(() -> assertNotNull(acmeView),
+					() -> assertNotNull(betaView),
+					() -> assertNotSame(acmeView, betaView),
+					() -> assertSame(acmeView, repo.getView(null, acme, document, ViewType.edit.toString())),
+					() -> assertNull(repo.vtable(null, "modules/admin/User/views/edit")));
 	}
 
 	// ---- unnamed metadata ----

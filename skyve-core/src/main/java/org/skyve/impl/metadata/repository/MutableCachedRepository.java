@@ -575,7 +575,8 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 *
 	 * <p>Lookup order is customer+uxui, customer default, vanilla+uxui, then vanilla
 	 * default. When enabled, scaffolded edit/pick/params views are generated if no
-	 * metadata view exists.
+	 * metadata view exists. Outside dev mode a scaffolded view is cached for the customer,
+	 * as a customer's override of the document can have other attributes.
 	 *
 	 * @param uxui the UX/UI variant key, or {@code null}
 	 * @param customer the customer context, or {@code null}
@@ -616,11 +617,15 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 		
 		// scaffold
 		if ((result == null) && getUseScaffoldedViews()) {
-			if (UtilImpl.DEV_MODE) {
+			// No customer throws in scaffoldView()
+			if (UtilImpl.DEV_MODE || (customer == null)) {
 				result = scaffoldView(customer, owningModule, document, name, uxui);
 			}
 			else {
+				// Cache the scaffolded view as the customer's override of the view, as a customer's
+				// override of the document can have other attributes. The customer lookup above finds it.
 				StringBuilder key = new StringBuilder(128);
+				key.append(CUSTOMERS_NAMESPACE).append(customer.getName()).append('/');
 				key.append(MODULES_NAMESPACE).append(owningModule.getName()).append('/');
 				key.append(document.getName()).append('/').append(VIEWS_NAMESPACE).append(name);
 				String viewKey = key.toString();

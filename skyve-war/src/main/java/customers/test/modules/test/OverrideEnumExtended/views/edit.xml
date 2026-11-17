@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- The test customer's own edit view: a scaffolded one would be shared with other customers, whose document has other attributes -->
-<view name="edit"
-		title="OverrideEnumExtended (test)"
-		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../../schemas/view.xsd"
-		xmlns="http://www.skyve.org/xml/view"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-</view>

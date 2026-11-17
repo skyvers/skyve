@@ -9,6 +9,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -16,8 +19,15 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.types.Enumeration;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.view.NoOpViewVisitor;
+import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
@@ -60,27 +70,53 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 		assertThrows(MetaDataException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test));
 	}
 
+	/** Collects the bindings of a view's text fields, including default widgets of text attributes. */
+	private static final class TextBindings extends NoOpViewVisitor {
+		final Set<String> bindings = new TreeSet<>();
+
+		TextBindings(CustomerImpl customer, ModuleImpl module, DocumentImpl document, ViewImpl view) {
+			super(customer, module, document, view, "desktop");
+		}
+
+		@Override
+		public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+			bindings.add(text.getBinding());
+		}
+	}
+
+	/** The customer's edit view of the document, and the bindings of its text fields. */
+	private static Map.Entry<View, Set<String>> editView(Customer customer, ModuleDocument document) {
+		Document d = document.toDocument(customer);
+		View view = d.getView(null, customer, ViewType.edit.toString());
+		assertNotNull(view, document.documentName());
+		TextBindings visitor = new TextBindings((CustomerImpl) customer,
+												(ModuleImpl) customer.getModule(d.getOwningModuleName()),
+												(DocumentImpl) d,
+												(ViewImpl) view);
+		visitor.visit();
+		return Map.entry(view, visitor.bindings);
+	}
+
 	/**
-	 * Outside dev mode, MutableCachedRepository caches a scaffolded view under the vanilla key
-	 * <code>modules/&lt;module&gt;/&lt;document&gt;/views/&lt;view&gt;</code> whatever the customer, so
-	 * the first customer to scaffold a view gives it to every other customer - here the edit view of
-	 * OverrideLength, which the test customer overrides without a view of its own. When the override
-	 * adds or drops attributes, the other customer gets a view of attributes its document doesn't
-	 * have: generation validates customers in turn and fails that way
-	 * (<code>test.OverrideAdds @ customerText does not exist</code> for bizhub), which is why the test
-	 * customer's overrides that add or drop attributes have their own edit views.
+	 * Outside dev mode, MutableCachedRepository caches a scaffolded view, so that the first customer to
+	 * scaffold a view would give it to every other customer if it were cached under the vanilla view
+	 * key. A customer's override can add or drop attributes - the test customer's OverrideAdds adds
+	 * customerText, and neither customer has an edit view of OverrideAdds or OverrideLength - so each
+	 * customer gets its own.
 	 */
 	@Test
-	@Disabled("repository bug: a scaffolded view is cached for all customers — fix pending")
 	void aScaffoldedViewIsNotSharedBetweenCustomers() {
 		Customer test = runAs(TEST_CUSTOMER);
-		View testView = TestDocument.OVERRIDE_LENGTH.toDocument(test).getView(null, test, ViewType.edit.toString());
+		Map.Entry<View, Set<String>> testLength = editView(test, TestDocument.OVERRIDE_LENGTH);
+		Map.Entry<View, Set<String>> testAdds = editView(test, TestDocument.OVERRIDE_ADDS);
 		Customer bizhub = runAs(CUSTOMER);
-		View bizhubView = TestDocument.OVERRIDE_LENGTH.toDocument(bizhub).getView(null, bizhub, ViewType.edit.toString());
+		Map.Entry<View, Set<String>> bizhubLength = editView(bizhub, TestDocument.OVERRIDE_LENGTH);
+		Map.Entry<View, Set<String>> bizhubAdds = editView(bizhub, TestDocument.OVERRIDE_ADDS);
 
-		assertAll(() -> assertNotNull(testView),
-					() -> assertNotNull(bizhubView),
-					() -> assertNotSame(testView, bizhubView));
+		assertAll(() -> assertNotSame(testLength.getKey(), bizhubLength.getKey()),
+					() -> assertNotSame(testAdds.getKey(), bizhubAdds.getKey()),
+					() -> assertEquals(Set.of("text", "customerText"), testAdds.getValue()),
+					() -> assertEquals(Set.of("text"), bizhubAdds.getValue()));
 	}
 
 	/**
