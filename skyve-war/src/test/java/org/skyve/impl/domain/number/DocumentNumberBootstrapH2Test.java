@@ -77,13 +77,17 @@ class DocumentNumberBootstrapH2Test extends AbstractH2TestTruncate {
 	@Test
 	void aTextFieldStartsAfterItsHighestNumberAfterThePrefix() throws Exception {
 		save(null, null, "INV9");
-		save(null, null, "INV10");
-		save(null, null, "INV0008");
+		save(null, null, "INV10"); // more digits than 9
+		save(null, null, "INV0008"); // fewer significant digits than 10
+		save(null, null, "INV11"); // as many digits as 10, and higher
+		save(null, null, "INV0010"); // the same number as 10
+		save(null, null, "INV000"); // zero
 		save(null, null, "INVX99"); // not a number after the prefix
 		save(null, null, "INV12A"); // not all digits
+		save(null, null, "INV1-2"); // not all digits
 		save(null, null, "X99"); // another prefix
 		save(null, null, "INV"); // no digits
-		assertFirstNumbers("INV11", "INV", AllAttributesPersistent.textPropertyName);
+		assertFirstNumbers("INV12", "INV", AllAttributesPersistent.textPropertyName);
 	}
 
 	@Test

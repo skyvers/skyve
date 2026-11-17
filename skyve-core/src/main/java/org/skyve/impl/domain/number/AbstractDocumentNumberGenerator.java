@@ -284,16 +284,15 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 		String resultDigits = null; // the significant digits of result's number
 		try (AutoClosingIterable<Bean> values = query.projectedIterable()) {
 			for (Bean row : values) {
-				Object value = Binder.get(row, MAX_ALIAS);
-				if (value instanceof String text) {
-					String digits = significantDigits(text, prefix, prefixLength);
-					if ((digits != null) &&
-							((resultDigits == null) ||
-								(digits.length() > resultDigits.length()) ||
-								((digits.length() == resultDigits.length()) && (digits.compareTo(resultDigits) > 0)))) {
-						result = text;
-						resultDigits = digits;
-					}
+				@SuppressWarnings("null") // not null: the filter above leaves out null values
+				@Nonnull String text = (String) Binder.get(row, MAX_ALIAS);
+				String digits = significantDigits(text, prefix, prefixLength);
+				if ((digits != null) &&
+						((resultDigits == null) ||
+							(digits.length() > resultDigits.length()) ||
+							((digits.length() == resultDigits.length()) && (digits.compareTo(resultDigits) > 0)))) {
+					result = text;
+					resultDigits = digits;
 				}
 			}
 		}
