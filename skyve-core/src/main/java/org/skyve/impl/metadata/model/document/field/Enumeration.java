@@ -2,12 +2,14 @@ package org.skyve.impl.metadata.model.document.field;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.DomainGenerator;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
@@ -16,6 +18,7 @@ import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -40,7 +43,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * may extend or reorder the values for a given enumeration field.
  *
  * <p>Threading: not thread-safe.  Instances are populated during metadata loading
- * and are read-only once placed in the repository cache.
+ * and are read-only once placed in the repository cache, except for the thread-safe
+ * cache of generated enum classes that {@link #getImplementingType()} fills.
  *
  * @see ConstrainableField
  */
@@ -112,6 +116,9 @@ public class Enumeration extends ConstrainableField {
 	private String documentRef;
 	private String attributeRef;
 	private Document owningDocument;
+	// Generated enum classes by the name of the customer they were loaded for, or "" without a user, as
+	// a customer's override class can declare the enum - see getImplementingType()
+	private final ConcurrentHashMap<String, Class<?>> generatedImplementingTypes = new ConcurrentHashMap<>();
 	
 	@XmlTransient
 	public @Nullable String getTypeName() {
@@ -231,6 +238,24 @@ public class Enumeration extends ConstrainableField {
 		return result;
 	}
 	
+	/**
+	 * Returns the enum class that implements this enumeration: {@link String} for a dynamic
+	 * enumeration, the hand-written <code>implementingEnumClassName</code>, or the generated enum
+	 * nested in the class that declares the enumeration's attribute, as the domain generator declares
+	 * it. That is the vanilla domain class <code>modules.&lt;m&gt;.domain.&lt;Document&gt;</code>, or
+	 * for an attribute the vanilla domain class does not have, the current user's customer's
+	 * <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code> if it declares
+	 * the enum, otherwise <code>modules.&lt;m&gt;.domain.&lt;Document&gt;Vanilla</code>, which declares
+	 * the attributes a customer's override leaves out.
+	 *
+	 * <p>Side effects: caches a generated enum class by the current user's customer name, so that
+	 * classes are looked for once per customer.
+	 *
+	 * @return	the implementing type; never {@code null}
+	 * @throws MetaDataException	if the enum class cannot be loaded; its cause is a
+	 * 			{@link ClassNotFoundException} when no class declares the enum
+	 *			(see {@link #isEnumClassLoadingFailure(Throwable)})
+	 */
 	@Override
 	public @Nonnull Class<?> getImplementingType() {
 		Enumeration e = getTarget();
@@ -238,26 +263,69 @@ public class Enumeration extends ConstrainableField {
 			return String.class;
 		}
 		
-		String fullyQualifiedEnumName = null;
-
 		// NB Needs a method call to resolve the target
 		final String enumClassName = getImplementingEnumClassName();
 		if (enumClassName != null) { // hand-coded enum implementation
-			fullyQualifiedEnumName = enumClassName;
+			try {
+				return Thread.currentThread().getContextClassLoader().loadClass(enumClassName);
+			}
+			catch (Exception ex) {
+				throw new MetaDataException("A problem was encountered loading enum " + enumClassName, ex);
+			}
 		}
-		else { // generated implementation
-			// No enum overriding, but there might be referencing
-			String encapulatingClassName = getEncapsulatingClassName();
-			fullyQualifiedEnumName = new StringBuilder(64).append(encapulatingClassName).append('$').append(toJavaIdentifier()).toString();
+
+		// generated implementation
+		// NB a persistence has no user until one is set
+		User user = AbstractPersistence.isPresent() ? AbstractPersistence.get().getUser() : null;
+		String customerName = (user == null) ? null : user.getCustomerName();
+		String key = (customerName == null) ? "" : customerName;
+		Class<?> result = generatedImplementingTypes.get(key);
+		if (result == null) {
+			result = loadGeneratedImplementingType(customerName);
+			generatedImplementingTypes.putIfAbsent(key, result);
 		}
-		
+		return result;
+	}
+
+	/**
+	 * Loads the generated enum class that implements this enumeration from the class that declares
+	 * it (see {@link #getImplementingType()}).
+	 *
+	 * @param customerName	the current user's customer name, or {@code null} without a user
+	 * @return	the enum class
+	 * @throws MetaDataException	if no class declares the enum, caused by the
+	 * 			{@link ClassNotFoundException} for the vanilla domain class's enum
+	 */
+	private @Nonnull Class<?> loadGeneratedImplementingType(@Nullable String customerName) {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		// No enum overriding, but there might be referencing
+		String encapsulatingClassName = getEncapsulatingClassName();
+		String enumName = '$' + toJavaIdentifier();
+		String vanillaEnumName = encapsulatingClassName + enumName;
 		try {
-			@SuppressWarnings("unchecked")
-			Class<org.skyve.domain.types.Enumeration> result = (Class<org.skyve.domain.types.Enumeration>) Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedEnumName);
-			return result;
+			return classLoader.loadClass(vanillaEnumName);
 		}
-		catch (Exception ex) {
-			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName, ex);
+		catch (ClassNotFoundException vanillaFailure) {
+			// The vanilla domain class has no such attribute, so look in the class generated beside it
+			StringBuilder className = new StringBuilder(128);
+			if (customerName != null) {
+				className.append(ProvidedRepository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
+				className.append(encapsulatingClassName).append("Override").append(enumName);
+				try {
+					return classLoader.loadClass(className.toString());
+				}
+				catch (@SuppressWarnings("unused") ClassNotFoundException overrideFailure) {
+					// the customer's override does not declare it
+				}
+			}
+			className.setLength(0);
+			className.append(encapsulatingClassName).append("Vanilla").append(enumName);
+			try {
+				return classLoader.loadClass(className.toString());
+			}
+			catch (@SuppressWarnings("unused") ClassNotFoundException narrowedFailure) {
+				throw new MetaDataException("A problem was encountered loading enum " + vanillaEnumName, vanillaFailure);
+			}
 		}
 	}
 	

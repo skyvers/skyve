@@ -32,6 +32,8 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.view.View;
@@ -761,5 +763,35 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 										beanClass(TestDocument.OVERRIDE_ENUM_EXTENDED, test2).getName()),
 					() -> assertEquals("closed", code(Binder.get(result, "status"))),
 					() -> assertEquals("Enum extended text", ((OverrideEnumExtendedExtension) result).describe()));
+	}
+
+	/**
+	 * Asserts that the status enum of the customer's version of the document is the given enum type
+	 * and that its constant domain values come from it.
+	 */
+	private static void assertStatusEnum(Customer customer, ModuleDocument document, Class<?> expected) throws Exception {
+		Document customerDocument = document.toDocument(customer);
+		Attribute status = customerDocument.getAttribute("status");
+		assertNotNull(status, document.toString());
+		List<DomainValue> values = customer.getConstantDomainValues(null, customerDocument.getOwningModuleName(), customerDocument.getName(), status);
+		List<String> codes = values.stream().map(DomainValue::getCode).toList();
+		assertAll(() -> assertSame(expected, status.getImplementingType(), document.toString()),
+					() -> assertEquals(List.of("open", "closed"), codes, document.toString()));
+	}
+
+	/**
+	 * The test customer's overrides of OverrideEnumJoinedSub and OverrideEnumExtended leave out the
+	 * status enum, so only their <code>&lt;Document&gt;Vanilla</code> classes declare it, for the
+	 * customers with the vanilla documents and for test2, whose override of OverrideEnumExtended keeps
+	 * status and inherits it through the hand-written extension.
+	 */
+	@Test
+	void aNarrowedAwayEnumResolvesFromTheVanillaClass() throws Exception {
+		Customer bizhub = runAs(CUSTOMER);
+		assertStatusEnum(bizhub, TestDocument.OVERRIDE_ENUM_JOINED_SUB, OverrideEnumJoinedSubVanilla.Status.class);
+		assertStatusEnum(bizhub, TestDocument.OVERRIDE_ENUM_EXTENDED, OverrideEnumExtendedVanilla.Status.class);
+		Customer test2 = runAs(TEST2_CUSTOMER);
+		assertStatusEnum(test2, TestDocument.OVERRIDE_ENUM_JOINED_SUB, OverrideEnumJoinedSubVanilla.Status.class);
+		assertStatusEnum(test2, TestDocument.OVERRIDE_ENUM_EXTENDED, OverrideEnumExtendedVanilla.Status.class);
 	}
 }
