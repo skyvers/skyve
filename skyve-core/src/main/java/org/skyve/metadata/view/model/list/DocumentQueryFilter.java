@@ -34,19 +34,15 @@ public class DocumentQueryFilter implements Filter {
 	private boolean empty = true;
 	
 	// told of a binding that "no value" is asked of, so that the query keeps the rows with no association on its path
-	private Consumer<String> noValueBindings;
-
-	DocumentQueryFilter(@Nonnull DocumentFilter detailFilter, @Nullable DocumentFilter summaryFilter) {
-		this.detailFilter = detailFilter;
-		this.summaryFilter = summaryFilter;
-		user = CORE.getUser();
-	}
+	private final Consumer<String> noValueBindings;
 
 	DocumentQueryFilter(@Nonnull DocumentFilter detailFilter,
 							@Nullable DocumentFilter summaryFilter,
 							@Nonnull Consumer<String> noValueBindings) {
-		this(detailFilter, summaryFilter);
+		this.detailFilter = detailFilter;
+		this.summaryFilter = summaryFilter;
 		this.noValueBindings = noValueBindings;
+		user = CORE.getUser();
 	}
 	
 	@Override
@@ -97,9 +93,7 @@ public class DocumentQueryFilter implements Filter {
 	public void addNull(@Nonnull String binding) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} is null", binding);
-		if (noValueBindings != null) {
-			noValueBindings.accept(binding);
-		}
+		noValueBindings.accept(binding);
 		detailFilter.addNull(binding);
 		if (summaryFilter != null) {
 			summaryFilter.addNull(binding);
@@ -312,10 +306,7 @@ public class DocumentQueryFilter implements Filter {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notContains {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
-		detailFilter.addNullOrNotLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addNullOrNotLike(binding, operand);
-		}
+		addNullOrNotLike(binding, operand);
 	}
 
 	@Override
@@ -334,10 +325,7 @@ public class DocumentQueryFilter implements Filter {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notStartsWith {}", binding, value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
-		detailFilter.addNullOrNotLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addNullOrNotLike(binding, operand);
-		}
+		addNullOrNotLike(binding, operand);
 	}
 
 	@Override
@@ -356,6 +344,12 @@ public class DocumentQueryFilter implements Filter {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notEndsWith {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
+		addNullOrNotLike(binding, operand);
+	}
+
+	// "not like" also matches no value, so like addNull it tells noValueBindings
+	private void addNullOrNotLike(@Nonnull String binding, @Nonnull String operand) {
+		noValueBindings.accept(binding);
 		detailFilter.addNullOrNotLike(binding, operand);
 		if (summaryFilter != null) {
 			summaryFilter.addNullOrNotLike(binding, operand);

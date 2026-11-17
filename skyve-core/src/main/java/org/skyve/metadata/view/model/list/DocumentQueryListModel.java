@@ -11,9 +11,11 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -142,19 +144,23 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	/**
-	 * Left outer joins the associations on a binding's path that a filter asks "no value" of (a negation also matches a
-	 * row with no value): a path through an association in a filter is an inner join in HQL, which would leave out the
-	 * rows with no association. The query's own columns may have joined them already.
+	 * Left outer joins the associations and inverse ones on a binding's path that a filter asks "no value" of (a negation
+	 * also matches a row with no value): such a path in a filter is an inner join in HQL, which would leave out the rows
+	 * with nothing on it. The query's own columns may have joined them already. A metadata query whose from clause names
+	 * several documents gets the join after the last of them, where MySQL, SQL Server and PostgreSQL cannot see bean in
+	 * its on clause, as with the joins of its own optional association columns.
 	 */
 	private void leftOuterJoinAssociations(@Nonnull String binding) {
-		if ((queryCustomer == null) || (binding.indexOf('.') < 0)) {
+		// postConstruct may not have been called: the model can fetch with only its query
+		if (queryCustomer == null) {
 			return;
 		}
 		int dot = binding.indexOf('.');
 		while (dot > 0) {
 			String path = binding.substring(0, dot);
 			TargetMetaData target = Binder.getMetaDataForBinding(queryCustomer, module, drivingDocument, path);
-			if (! (target.getAttribute() instanceof Association)) {
+			Attribute attribute = target.getAttribute();
+			if (! ((attribute instanceof Association) || (attribute instanceof InverseOne))) {
 				return;
 			}
 			leftOuterJoin(detailQuery, path);

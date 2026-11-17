@@ -1,5 +1,6 @@
 package org.skyve.metadata.view.model.list;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -8,7 +9,10 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.function.Consumer;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,11 +32,13 @@ import org.skyve.persistence.DocumentFilter;
  */
 @SuppressWarnings({ "java:S4144", "java:S8692" }) // system clock OK
 class DocumentQueryFilterTest {
+	private static final Consumer<String> NO_JOINS = binding -> { /* no list model to join */ };
 
 	private DocumentFilter detailFilter;
 	private DocumentFilter summaryFilter;
 	private DocumentQueryFilter filter;
 	private DocumentQueryFilter filterNoSummary;
+	private List<String> noValueBindings;
 	private boolean originalQueryTrace;
 
 	@BeforeEach
@@ -45,10 +51,11 @@ class DocumentQueryFilterTest {
 		persistence.setUser(user);
 		persistence.setForThread();
 
+		noValueBindings = new ArrayList<>();
 		detailFilter = mock(DocumentFilter.class);
 		summaryFilter = mock(DocumentFilter.class);
-		filter = new DocumentQueryFilter(detailFilter, summaryFilter);
-		filterNoSummary = new DocumentQueryFilter(mock(DocumentFilter.class), null);
+		filter = new DocumentQueryFilter(detailFilter, summaryFilter, noValueBindings::add);
+		filterNoSummary = new DocumentQueryFilter(mock(DocumentFilter.class), null, NO_JOINS);
 
 		originalQueryTrace = UtilImpl.QUERY_TRACE;
 		UtilImpl.QUERY_TRACE = true; // enable to cover logger lines
@@ -82,7 +89,7 @@ class DocumentQueryFilterTest {
 	void addAndDelegatesToDetailAndSummaryFilters() {
 		DocumentFilter otherDetail = mock(DocumentFilter.class);
 		DocumentFilter otherSummary = mock(DocumentFilter.class);
-		DocumentQueryFilter other = new DocumentQueryFilter(otherDetail, otherSummary);
+		DocumentQueryFilter other = new DocumentQueryFilter(otherDetail, otherSummary, NO_JOINS);
 		filter.addAnd(other);
 		assertFalse(filter.isEmpty());
 	}
@@ -91,21 +98,21 @@ class DocumentQueryFilterTest {
 	void addOrDelegatesToDetailAndSummaryFilters() {
 		DocumentFilter otherDetail = mock(DocumentFilter.class);
 		DocumentFilter otherSummary = mock(DocumentFilter.class);
-		DocumentQueryFilter other = new DocumentQueryFilter(otherDetail, otherSummary);
+		DocumentQueryFilter other = new DocumentQueryFilter(otherDetail, otherSummary, NO_JOINS);
 		filter.addOr(other);
 		assertFalse(filter.isEmpty());
 	}
 
 	@Test
 	void addAndWithNoSummaryDoesNotThrow() {
-		DocumentQueryFilter other = new DocumentQueryFilter(mock(DocumentFilter.class), null);
+		DocumentQueryFilter other = new DocumentQueryFilter(mock(DocumentFilter.class), null, NO_JOINS);
 		filterNoSummary.addAnd(other);
 		assertFalse(filterNoSummary.isEmpty());
 	}
 
 	@Test
 	void addOrWithNoSummaryDoesNotThrow() {
-		DocumentQueryFilter other = new DocumentQueryFilter(mock(DocumentFilter.class), null);
+		DocumentQueryFilter other = new DocumentQueryFilter(mock(DocumentFilter.class), null, NO_JOINS);
 		filterNoSummary.addOr(other);
 		assertFalse(filterNoSummary.isEmpty());
 	}
@@ -278,6 +285,17 @@ class DocumentQueryFilterTest {
 	void addContainsStringDelegatesToFilters() {
 		filter.addContains("binding", "substring");
 		assertFalse(filter.isEmpty());
+	}
+
+	@Test
+	void theFiltersThatMatchNoValueTellTheirBindings() {
+		filter.addNull("a");
+		filter.addNotContains("b", "x");
+		filter.addNotStartsWith("c", "x");
+		filter.addNotEndsWith("d", "x");
+		filter.addContains("e", "x");
+		filter.addNotNull("f");
+		assertEquals(List.of("a", "b", "c", "d"), noValueBindings);
 	}
 
 	@Test
