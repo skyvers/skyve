@@ -117,9 +117,6 @@ public class DocumentImpl extends ModelImpl implements Document {
 
 	/**
 	 * A bean class, with the context class loader it was loaded through.
-	 *
-	 * @param classLoader	The context class loader.
-	 * @param beanClass	The bean class.
 	 */
 	private record LoadedBeanClass(@Nonnull ClassLoader classLoader, @Nonnull Class<?> beanClass) {
 	}

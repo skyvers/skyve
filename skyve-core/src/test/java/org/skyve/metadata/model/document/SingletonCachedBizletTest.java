@@ -362,46 +362,20 @@ class SingletonCachedBizletTest {
 
 	@Test
 	void clearWithModuleDocumentRemovesTheCachedGlobalInstance() throws Exception {
-		User user = mock(User.class);
-		Customer customer = mock(Customer.class);
-		when(customer.getName()).thenReturn("custA");
-		when(user.getCustomer()).thenReturn(customer);
-		when(user.getCustomerName()).thenReturn("custA");
-		when(user.getScope("admin", "Contact")).thenReturn(DocumentPermissionScope.global);
-
-		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
-		persistence.setUser(user);
-		persistence.setForThread();
-
-		DocumentQuery query = mock(DocumentQuery.class);
-		when(persistence.newDocumentQuery("admin", "Contact")).thenReturn(query);
-
-		TestBean first = new TestBean("admin", "Contact", "P1", "First");
-		first.setBizVersion(Integer.valueOf(1));
-		TestBean second = new TestBean("admin", "Contact", "P2", "Second");
-		second.setBizVersion(Integer.valueOf(1));
-		when(query.beanResult()).thenReturn(first, second);
-
-		TestSingletonCachedBizlet bizlet = new TestSingletonCachedBizlet();
-		bizlet.newInstance(new TestBean("admin", "Contact", "S1", "Seed1"));
-		SingletonCachedBizlet.clear(TestDocument.CONTACT);
-
-		// with the cached bizId cleared, the singleton is looked up again rather than retrieved
-		assertSame(second, bizlet.newInstance(new TestBean("admin", "Contact", "S2", "Seed2")));
-		verify(query, times(2)).beanResult();
+		assertClearRemovesTheCachedInstance(DocumentPermissionScope.global, () -> SingletonCachedBizlet.clear(TestDocument.CONTACT));
 	}
 
 	/**
-	 * Caches a customer scoped singleton, clears it with {@code clearer} and asserts that the next
-	 * call looks the singleton up again rather than retrieving the cached bizId.
+	 * Caches a singleton of the scope, clears it with {@code clearer} and asserts that the next call
+	 * looks the singleton up again rather than retrieving the cached bizId.
 	 */
-	private static void assertClearRemovesTheCachedCustomerInstance(Runnable clearer) throws Exception {
+	private static void assertClearRemovesTheCachedInstance(DocumentPermissionScope scope, Runnable clearer) throws Exception {
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
 		when(customer.getName()).thenReturn("custA");
 		when(user.getCustomer()).thenReturn(customer);
 		when(user.getCustomerName()).thenReturn("custA");
-		when(user.getScope("admin", "Contact")).thenReturn(DocumentPermissionScope.customer);
+		when(user.getScope("admin", "Contact")).thenReturn(scope);
 
 		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
@@ -434,11 +408,11 @@ class SingletonCachedBizletTest {
 
 	@Test
 	void clearRemovesTheCachedCustomerInstance() throws Exception {
-		assertClearRemovesTheCachedCustomerInstance(() -> SingletonCachedBizlet.clear("admin", "Contact"));
+		assertClearRemovesTheCachedInstance(DocumentPermissionScope.customer, () -> SingletonCachedBizlet.clear("admin", "Contact"));
 	}
 
 	@Test
 	void clearWithModuleDocumentRemovesTheCachedCustomerInstance() throws Exception {
-		assertClearRemovesTheCachedCustomerInstance(() -> SingletonCachedBizlet.clear(TestDocument.CONTACT));
+		assertClearRemovesTheCachedInstance(DocumentPermissionScope.customer, () -> SingletonCachedBizlet.clear(TestDocument.CONTACT));
 	}
 }

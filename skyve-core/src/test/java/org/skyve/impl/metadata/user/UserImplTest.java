@@ -24,6 +24,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.ModuleMemberTestSupport;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -930,8 +931,6 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleWithRoleDelegatesToOwningModuleAndRoleNames() {
-		// The User.isInRole(Role) default method must delegate to isInRole(String, String)
-		// with the role's owning module name and role name
 		UserImpl user = spy(new UserImpl());
 		doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
 
@@ -939,15 +938,6 @@ class UserImplTest {
 		// a role the user does not hold must not resolve through the same delegation
 		assertFalse(user.isInRole(metadataRole("admin", "SecurityAdministrator")));
 		assertFalse(user.isInRole(metadataRole("whosin", "AuditManager")));
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void testIsInRoleWithRoleReturnsFalseWhenRoleNotHeld() {
-		UserImpl user = spy(new UserImpl());
-		doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
-
-		assertFalse(user.isInRole(metadataRole("admin", "AuditManager")));
 	}
 
 	/** A compile-time role reference as the generated per-module role enums implement it. */
@@ -978,8 +968,6 @@ class UserImplTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void testIsInRoleWithModuleRoleDelegatesToModuleAndRoleNames() {
-		// The User.isInRole(ModuleRole) default method must delegate to isInRole(String, String)
-		// with the enum constant's module name and role name
 		UserImpl user = spy(new UserImpl());
 		doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
 
@@ -991,34 +979,10 @@ class UserImplTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void testIsInRoleWithModuleRoleReturnsFalseWhenRoleNotHeld() {
-		UserImpl user = spy(new UserImpl());
-		doReturn(Boolean.FALSE).when(user).isInRole("admin", "AuditManager");
-
-		assertFalse(user.isInRole(TestModuleRole.AUDIT_MANAGER));
-	}
-
-	/** A compile-time document reference as the generated per-module document enums implement it. */
-	private enum TestModuleDocument implements org.skyve.metadata.model.document.ModuleDocument {
-		CONTACT;
-
-		@Override
-		public String moduleName() {
-			return "admin";
-		}
-
-		@Override
-		public String documentName() {
-			return "Contact";
-		}
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
 	void testGetScopeWithModuleDocumentDelegatesToModuleAndDocumentNames() {
 		UserImpl user = spy(new UserImpl());
 		doReturn(DocumentPermissionScope.customer).when(user).getScope("admin", "Contact");
 
-		assertEquals(DocumentPermissionScope.customer, user.getScope(TestModuleDocument.CONTACT));
+		assertEquals(DocumentPermissionScope.customer, user.getScope(ModuleMemberTestSupport.TestDocument.CONTACT));
 	}
 }

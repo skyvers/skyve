@@ -809,9 +809,7 @@ public class DataBuilder {
 	 * customer that overrides the document. A class is the document's when the <code>MODULE_NAME</code>
 	 * and <code>DOCUMENT_NAME</code> constants of its generated domain class name the document.
 	 *
-	 * @param method	The factory method.
 	 * @param beanType	The customer's bean class for the document.
-	 * @param document	The document.
 	 * @return	true if the method returns beans of the document.
 	 */
 	private static boolean returnsBeanOf(@Nonnull Method method, @Nonnull Class<?> beanType, @Nonnull Document document) {
@@ -837,8 +835,6 @@ public class DataBuilder {
 	/**
 	 * Returns the value of a public static field of a class or a class it extends.
 	 *
-	 * @param type	The class.
-	 * @param fieldName	The field.
 	 * @return	The value, or null if there is no such public static field.
 	 */
 	private static @Nullable Object staticFieldValue(@Nonnull Class<?> type, @Nonnull String fieldName) {

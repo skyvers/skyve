@@ -107,10 +107,8 @@ public class Enumeration extends ConstrainableField {
 	}
 	
 	/**
-	 * An enum class, with the context class loader it was loaded through.
-	 *
-	 * @param classLoader	the context class loader
-	 * @param type	the enum class, or {@link String} for a dynamic enumeration
+	 * An enum class - or {@link String} for a dynamic enumeration - with the context class loader it
+	 * was loaded through.
 	 */
 	private record LoadedType(@Nonnull ClassLoader classLoader, @Nonnull Class<?> type) {
 	}

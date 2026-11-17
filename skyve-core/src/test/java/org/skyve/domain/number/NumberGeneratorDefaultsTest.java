@@ -14,7 +14,7 @@ import static org.mockito.Mockito.withSettings;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.skyve.metadata.model.document.ModuleDocument;
+import org.skyve.metadata.module.ModuleMemberTestSupport.TestDocument;
 
 class NumberGeneratorDefaultsTest {
 
@@ -58,37 +58,23 @@ class NumberGeneratorDefaultsTest {
 		// Intentionally empty.
 	}
 
-	private enum TestDocument implements ModuleDocument {
-		INVOICE;
-
-		@Override
-		public String moduleName() {
-			return "sales";
-		}
-
-		@Override
-		public String documentName() {
-			return "Invoice";
-		}
-	}
-
 	@Test
 	@SuppressWarnings("static-method")
 	void typedOverloadsDelegateToTheStringForms() {
 		NumberGenerator g = mock(NumberGeneratorDouble.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		doReturn("42").when(g).next(any(), anyString(), anyString(), anyString(), anyInt());
 
-		assertAll(() -> assertThat(g.nextInt(TestDocument.INVOICE, "number"), is(Integer.valueOf(42))),
-					() -> verify(g).nextInt("sales", "Invoice", "number"),
-					() -> assertThat(g.nextLong(TestDocument.INVOICE, "number"), is(Long.valueOf(42L))),
-					() -> verify(g).nextLong("sales", "Invoice", "number"),
-					() -> assertThat(g.next(TestDocument.INVOICE, "number"), is("42")),
-					() -> verify(g).next("sales", "Invoice", "number"),
-					() -> assertThat(g.next(TestDocument.INVOICE, "number", 5), is("42")),
-					() -> verify(g).next("sales", "Invoice", "number", 5),
-					() -> assertThat(g.next("INV", TestDocument.INVOICE, "number"), is("42")),
-					() -> verify(g).next("INV", "sales", "Invoice", "number"),
-					() -> assertThat(g.next("INV", TestDocument.INVOICE, "number", 5), is("42")),
-					() -> verify(g).next("INV", "sales", "Invoice", "number", 5));
+		assertAll(() -> assertThat(g.nextInt(TestDocument.CONTACT, "number"), is(Integer.valueOf(42))),
+					() -> verify(g).nextInt("admin", "Contact", "number"),
+					() -> assertThat(g.nextLong(TestDocument.CONTACT, "number"), is(Long.valueOf(42L))),
+					() -> verify(g).nextLong("admin", "Contact", "number"),
+					() -> assertThat(g.next(TestDocument.CONTACT, "number"), is("42")),
+					() -> verify(g).next("admin", "Contact", "number"),
+					() -> assertThat(g.next(TestDocument.CONTACT, "number", 5), is("42")),
+					() -> verify(g).next("admin", "Contact", "number", 5),
+					() -> assertThat(g.next("INV", TestDocument.CONTACT, "number"), is("42")),
+					() -> verify(g).next("INV", "admin", "Contact", "number"),
+					() -> assertThat(g.next("INV", TestDocument.CONTACT, "number", 5), is("42")),
+					() -> verify(g).next("INV", "admin", "Contact", "number", 5));
 	}
 }

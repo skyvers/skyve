@@ -130,7 +130,7 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	}
 
 	/**
-	 * Clear the cached details of the singleton document instance, both the global scoped one and
+	 * Clears the cached details of the singleton document instance, both the global scoped one and
 	 * the one scoped to the current user's customer.
 	 *
 	 * @param moduleName	the singleton document's module name
@@ -142,7 +142,7 @@ public abstract class SingletonCachedBizlet<T extends PersistentBean> extends Si
 	}
 	
 	/**
-	 * Clear the cached details of the singleton document instance; a typed shortcut for
+	 * Clears the cached details of the singleton document instance; a typed shortcut for
 	 * {@link #clear(String, String)}.
 	 *
 	 * @param document	the compile-time reference to the singleton document

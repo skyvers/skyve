@@ -103,11 +103,10 @@ class ModuleRoleTest {
 	 * Mocks the admin module, declaring only the AuditManager role, using the real
 	 * {@link Module#getNullSafeRole(String)}.
 	 */
-	private static Module mockModule(Customer customer, Role auditManager) {
+	private static void mockModule(Customer customer, Role auditManager) {
 		Module module = mock(ModuleMemberTestSupport.ModuleDouble.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		when(module.getName()).thenReturn("admin");
 		when(module.getRole("AuditManager")).thenReturn(auditManager);
 		when(customer.getModule("admin")).thenReturn(module);
-		return module;
 	}
 }

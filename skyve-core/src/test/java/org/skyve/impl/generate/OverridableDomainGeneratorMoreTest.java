@@ -5075,7 +5075,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	// ----- generateModuleMetadataEnums --------------------------------------
 
-	private static Module moduleConstantsModule(String moduleName,
+	private static Module metadataEnumsModule(String moduleName,
 													List<String> roleNames,
 													List<String> documentNames,
 													List<String> queryNames) {
@@ -5166,7 +5166,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void shouldGenerateModuleMetadataEnumsImplementingReferenceInterfaces() throws Exception {
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Read Only", "SecurityAdministrator"),
 				List.of("MyDetails"),
 				List.of("qActiveUsers"));
@@ -5194,7 +5194,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void shouldOmitEmptyModuleMetadataEnums() throws Exception {
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of(),
 				List.of("MyDetails"),
 				List.of());
@@ -5211,7 +5211,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void shouldSplitModuleQueriesIntoMetaDataBizQLAndSQLEnums() throws Exception {
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of(),
 				List.of("MyDetails"),
 				List.of());
@@ -5252,7 +5252,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void shouldGenerateModuleJobEnum() throws Exception {
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of(),
 				List.of("MyDetails"),
 				List.of());
@@ -5273,7 +5273,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void shouldSuffixNewModuleMetadataEnumNamesOnDocumentCollision() throws Exception {
 		// Documents claim the BizQL, SQL (differing by case) and job enum candidates
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of(),
 				List.of("StaffPortalBizQL", "StaffPortalSql", "StaffPortalJob"),
 				List.of());
@@ -5289,7 +5289,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	@Test
 	void shouldNameCustomerInCustomerModuleMetadataEnums() throws Exception {
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Manager"),
 				List.of("MyDetails"),
 				List.of());
@@ -5309,7 +5309,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void shouldSuffixModuleMetadataEnumNameOnDocumentCollision() throws Exception {
 		// A document named for the enum candidate claims the class name in the domain package
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Employee"),
 				List.of("StaffPortalRole"),
 				List.of());
@@ -5324,7 +5324,7 @@ class OverridableDomainGeneratorMoreTest {
 	void shouldSuffixModuleMetadataEnumNameOnCaseInsensitiveDocumentCollision() throws Exception {
 		// A document differing from the enum candidate only by case is the same file on a
 		// case-insensitive file system, so it must be dodged too.
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Employee"),
 				List.of("StaffPortalROLE"),
 				List.of());
@@ -5339,7 +5339,7 @@ class OverridableDomainGeneratorMoreTest {
 	void shouldSuffixModuleMetadataEnumNameUntilNoDocumentCollision() throws Exception {
 		// Documents claim both the enum candidate and its first fallback - the name must keep
 		// suffixing until it is free.
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Employee"),
 				List.of("StaffPortalRole", "StaffPortalRoleRole"),
 				List.of());
@@ -5353,7 +5353,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void shouldThrowWhenModuleMetadataEnumDocumentNamesCollideAfterMangling() {
 		// "My Details" and "MyDetails" both mangle to MY_DETAILS - the document enum must reject it
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Employee"),
 				List.of("My Details", "MyDetails"),
 				List.of());
@@ -5367,7 +5367,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void shouldEscapeModuleMetadataEnumValuesAsJavaStringLiterals() throws Exception {
 		// A quote or backslash in a metadata name must not break the generated enum
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Read \"Only\"", "Back\\Slash"),
 				List.of("MyDetails"),
 				List.of());
@@ -5383,7 +5383,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void shouldThrowWhenModuleMetadataEnumNamesCollideAfterMangling() {
 		// "Read Only" and "ReadOnly" both mangle to READ_ONLY
-		Module module = moduleConstantsModule("staffPortal",
+		Module module = metadataEnumsModule("staffPortal",
 				List.of("Read Only", "ReadOnly"),
 				List.of("MyDetails"),
 				List.of());
@@ -5410,7 +5410,7 @@ class OverridableDomainGeneratorMoreTest {
 	private static ProvidedRepository customerEnumRepository(Module salesOverride,
 																boolean overridden,
 																List<String> customerRoleNames) {
-		Module sales = moduleConstantsModule("sales", List.of("Clerk"), List.of("Order", "Invoice"), List.of());
+		Module sales = metadataEnumsModule("sales", List.of("Clerk"), List.of("Order", "Invoice"), List.of());
 
 		Customer customer = mock(Customer.class);
 		when(customer.getName()).thenReturn("acme");
@@ -5437,7 +5437,7 @@ class OverridableDomainGeneratorMoreTest {
 
 	/** The acme override of sales: adds the role Auditor and the document Refund, and drops Invoice. */
 	private static Module salesOverride() {
-		return moduleConstantsModule("sales", List.of("Clerk", "Auditor"), List.of("Order", "Refund"), List.of());
+		return metadataEnumsModule("sales", List.of("Clerk", "Auditor"), List.of("Order", "Refund"), List.of());
 	}
 
 	/**
@@ -5445,11 +5445,7 @@ class OverridableDomainGeneratorMoreTest {
 	 * The sales module is excluded from domain test generation.
 	 */
 	private static void generateInto(Path root, ProvidedRepository repo) throws Exception {
-		generateInto(root.resolve("src"), root.resolve("test"), repo);
-	}
-
-	private static void generateInto(Path generatedSrc, Path generatedTest, ProvidedRepository repo) throws Exception {
-		CustomerGenerationTestSupport.generate("", generatedSrc, generatedTest, repo, true);
+		CustomerGenerationTestSupport.generate("", root.resolve("src"), root.resolve("test"), repo, true);
 	}
 
 	/**
@@ -5548,7 +5544,7 @@ class OverridableDomainGeneratorMoreTest {
 	@Test
 	void generateDodgesCustomerDocumentNamesInCustomerModuleMetadataEnums() throws Exception {
 		Path root = Files.createTempDirectory("odg-customer-enums-dodge");
-		Module override = moduleConstantsModule("sales", List.of("Clerk"), List.of("Order", "SalesRole"), List.of());
+		Module override = metadataEnumsModule("sales", List.of("Clerk"), List.of("Order", "SalesRole"), List.of());
 
 		generateInto(root, customerEnumRepository(override, true));
 
@@ -5702,12 +5698,12 @@ class OverridableDomainGeneratorMoreTest {
 		Path bizlet = write(src.resolve("customers/acme/modules/sales/Order/OrderBizlet.java"), "class OrderBizlet {}");
 		ProvidedRepository repo = customerEnumRepository(salesOverride(), true, List.of("Manager"));
 
-		generateInto(src, root.resolve("test"), repo);
-		generateInto(src, root.resolve("test"), repo);
+		CustomerGenerationTestSupport.generate("", src, root.resolve("test"), repo, true);
+		CustomerGenerationTestSupport.generate("", src, root.resolve("test"), repo, true);
 		assertTrue(Files.exists(src.resolve("customers/acme/modules/sales/domain/SalesRole.java")));
 		assertTrue(Files.exists(src.resolve("customers/acme/domain/AcmeCustomerRole.java")));
 
-		generateInto(src, root.resolve("test"), customerEnumRepository(salesOverride(), false));
+		CustomerGenerationTestSupport.generate("", src, root.resolve("test"), customerEnumRepository(salesOverride(), false), true);
 
 		assertAll(
 				() -> assertEquals("<customer/>", Files.readString(customerXml)),

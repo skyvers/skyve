@@ -2,7 +2,6 @@ package org.skyve.metadata.module.query;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
@@ -79,9 +78,7 @@ class ModuleQueryTest {
 		module.putQuery(sql);
 		when(customer.getModule("admin")).thenReturn(module);
 
-		assertAll(() -> assertNull(module.getMetaDataQuery("qContacts")),
-					() -> assertNull(module.getMetaDataQuery("qMissing")),
-					() -> assertEquals("Query qContacts does not exist in module admin",
+		assertAll(() -> assertEquals("Query qContacts does not exist in module admin",
 										assertThrows(MetaDataException.class, () -> TestQuery.Q_CONTACTS.toQuery(customer)).getMessage()),
 					() -> assertEquals("Query qMissing does not exist in module admin",
 										assertThrows(MetaDataException.class, () -> TestQuery.MISSING.toQuery(customer)).getMessage()));
@@ -102,11 +99,10 @@ class ModuleQueryTest {
 	 * Mocks the admin module, declaring only the qContacts metadata query, using the real
 	 * {@link Module#getNullSafeMetaDataQuery(String)}.
 	 */
-	private static Module mockModule(Customer customer, MetaDataQueryDefinition qContacts) {
+	private static void mockModule(Customer customer, MetaDataQueryDefinition qContacts) {
 		Module module = mock(ModuleMemberTestSupport.ModuleDouble.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		when(module.getName()).thenReturn("admin");
 		when(module.getMetaDataQuery("qContacts")).thenReturn(qContacts);
 		when(customer.getModule("admin")).thenReturn(module);
-		return module;
 	}
 }

@@ -138,7 +138,8 @@ class DataBuilderH2Test extends AbstractH2Test {
 	}
 
 	/**
-	 * TagFactory's crud fixture builds the Tag, pointing its upload at Contact.
+	 * The trace shows that TagFactory's crud fixture made the Tag, as a random build makes a
+	 * TagExtension too.
 	 */
 	@Test
 	@SuppressWarnings("static-method")
@@ -153,7 +154,8 @@ class DataBuilderH2Test extends AbstractH2Test {
 	}
 
 	/**
-	 * JobFactory's crud fixture builds the Job.
+	 * The trace shows that JobFactory's crud fixture made the Job, as a random build makes a
+	 * JobExtension too.
 	 */
 	@Test
 	@SuppressWarnings("static-method")

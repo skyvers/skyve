@@ -1,4 +1,4 @@
-package modules.whosin;
+package modules.whosin.domain;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +10,6 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 
 import modules.admin.domain.Contact;
-import modules.whosin.domain.WhosinDocument;
 import util.AbstractH2Test;
 
 /**

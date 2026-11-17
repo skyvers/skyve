@@ -25,11 +25,7 @@ final class CustomerGenerationTestSupport {
 	 * Runs a writing generator over the repository.
 	 *
 	 * @param srcPath	The source path, where hand-written extensions are, ending with '/', or "".
-	 * @param generatedSrc	The generated source directory.
-	 * @param generatedTest	The generated test directory.
-	 * @param repo	The repository.
 	 * @param validate	Whether to validate the metadata.
-	 * @throws Exception	if generation fails.
 	 */
 	static void generate(String srcPath, Path generatedSrc, Path generatedTest, ProvidedRepository repo, boolean validate) throws Exception {
 		OverridableDomainGenerator gen = new OverridableDomainGenerator(true,
@@ -48,10 +44,6 @@ final class CustomerGenerationTestSupport {
 
 	/**
 	 * Returns every file below the directory, by relative path, with its contents.
-	 *
-	 * @param directory	The directory.
-	 * @return	The files.
-	 * @throws Exception	if a file cannot be read.
 	 */
 	static Map<String, String> snapshot(Path directory) throws Exception {
 		Map<String, String> result = new TreeMap<>();
@@ -65,9 +57,6 @@ final class CustomerGenerationTestSupport {
 
 	/**
 	 * Creates a text attribute displayed by its name.
-	 *
-	 * @param name	The attribute name.
-	 * @return	The attribute.
 	 */
 	static Text text(String name) {
 		Text result = new Text();

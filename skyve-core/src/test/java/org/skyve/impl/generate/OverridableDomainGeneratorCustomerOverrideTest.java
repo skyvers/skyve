@@ -900,11 +900,12 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 
 		PrintStream previousErr = System.err;
 		ByteArrayOutputStream err = new ByteArrayOutputStream();
-		Map<String, Map<String, String>> results = new TreeMap<>();
+		Map<String, String> narrowedFiles;
+		Map<String, String> notNarrowedFiles;
 		System.setErr(new PrintStream(err, true, StandardCharsets.UTF_8));
 		try {
-			results.put("narrowed", generate(narrowed, false));
-			results.put("notNarrowed", generate(notNarrowed, false));
+			narrowedFiles = generate(narrowed, false);
+			notNarrowedFiles = generate(notNarrowed, false);
 		}
 		finally {
 			System.setErr(previousErr);
@@ -915,9 +916,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertTrue(warnings.contains("WARNING: ReceiptExtension must extend ReceiptVanilla because customer acme's override of Receipt leaves out attributes"), warnings),
 				() -> assertTrue(warnings.contains("WARNING: ReceiptExtension must extend Receipt because no customer's override of Receipt leaves out attributes"), warnings),
 				// generation carried on and wrote the output
-				() -> assertTrue(results.get("narrowed").containsKey("modules/sales/domain/ReceiptVanilla.java"), results.get("narrowed").keySet().toString()),
-				() -> assertTrue(results.get("narrowed").containsKey("customers/acme/modules/orm.hbm.xml"), results.get("narrowed").keySet().toString()),
-				() -> assertTrue(results.get("notNarrowed").containsKey("modules/sales/domain/sales_orm.hbm.xml"), results.get("notNarrowed").keySet().toString()));
+				() -> assertTrue(narrowedFiles.containsKey("modules/sales/domain/ReceiptVanilla.java"), narrowedFiles.keySet().toString()),
+				() -> assertTrue(narrowedFiles.containsKey("customers/acme/modules/orm.hbm.xml"), narrowedFiles.keySet().toString()),
+				() -> assertTrue(notNarrowedFiles.containsKey("modules/sales/domain/sales_orm.hbm.xml"), notNarrowedFiles.keySet().toString()));
 	}
 
 	/**
@@ -1470,10 +1471,9 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 			System.setErr(previousErr);
 		}
 		String warnings = err.toString(StandardCharsets.UTF_8);
-		Map<String, String> result = files;
 		assertAll(
 				() -> assertTrue(warnings.contains("WARNING: Could not read"), warnings),
-				() -> assertTrue(result.containsKey("modules/sales/domain/ReceiptVanilla.java"), result.keySet().toString()));
+				() -> assertTrue(files.containsKey("modules/sales/domain/ReceiptVanilla.java"), files.keySet().toString()));
 	}
 
 	// ----- a customer's own extension ---------------------------------------------

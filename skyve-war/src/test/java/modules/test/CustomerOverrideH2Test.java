@@ -237,8 +237,9 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 		Customer bizhub = customer(CUSTOMER);
 		assertAll(() -> assertSame(OverrideCustomerOnly.class, beanClass(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY, test)),
 					() -> assertEquals("customer only", result.getText()),
-					() -> assertThrows(MetaDataException.class,
-										() -> customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY.toDocument(bizhub)));
+					() -> assertEquals("Document OverrideCustomerOnly does not exist in module test",
+										assertThrows(MetaDataException.class,
+														() -> customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY.toDocument(bizhub)).getMessage()));
 	}
 
 	@Test
@@ -494,17 +495,19 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 
 		Persistence p = CORE.getPersistence();
 		Persistent persistent = TestDocument.OVERRIDE_LENGTH.toDocument().getPersistent();
-		String tableName = (persistent == null) ? null : persistent.getPersistentIdentifier();
+		assertNotNull(persistent);
+		String tableName = persistent.getPersistentIdentifier();
 		Number columnLength = p.newSQL("select CHARACTER_MAXIMUM_LENGTH from INFORMATION_SCHEMA.COLUMNS " +
 											"where upper(TABLE_NAME) = upper(:tableName) and upper(COLUMN_NAME) = upper(:columnName)")
 								.putParameter("tableName", tableName, false)
 								.putParameter("columnName", OverrideLength.textPropertyName, false)
 								.scalarResult(Number.class);
+		assertNotNull(columnLength);
 		assertAll(() -> assertSame(OverrideLength.class, beanClass(TestDocument.OVERRIDE_LENGTH, test)),
 					() -> assertSame(OverrideLength.class, beanClass(TestDocument.OVERRIDE_LENGTH, bizhub)),
 					() -> assertEquals(longText, testResult.getText()),
 					() -> assertEquals(vanillaText, bizhubResult.getText()),
-					() -> assertEquals(200, (columnLength == null) ? 0 : columnLength.intValue()),
+					() -> assertEquals(200, columnLength.intValue()),
 					// the column is shared, but bizhub's metadata still has the shorter length
 					() -> assertThrows(ValidationException.class, () -> p.save(tooLong)));
 	}
@@ -522,12 +525,12 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 		user.getGroups().clear();
 		user.addGroupsElement(group);
 		Persistence p = CORE.getPersistence();
-		p.save(user);
+		UserExtension saved = p.save(user);
 		// sign-in reads the user's roles through its own connection
 		p.commit(false);
 		p.begin();
 
-		UserImpl signedIn = new LocalDataStoreRepository().retrieveUser(TEST_CUSTOMER + '/' + userName);
+		UserImpl signedIn = new LocalDataStoreRepository().retrieveUser(TEST_CUSTOMER + '/' + saved.getUserName());
 
 		assertNotNull(signedIn);
 		assertAll(() -> assertEquals(TEST_CUSTOMER, signedIn.getCustomerName()),
@@ -543,7 +546,8 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 
 		assertAll(() -> assertTrue(Arrays.stream(customers.test.modules.test.domain.TestDocument.values())
 												.noneMatch(d -> OverrideRemoved.DOCUMENT_NAME.equals(d.documentName()))),
-					() -> assertThrows(MetaDataException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test)),
+					() -> assertEquals("Document OverrideRemoved does not exist in module test",
+										assertThrows(MetaDataException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test)).getMessage()),
 					() -> assertSame(OverrideRemoved.class, beanClass(TestDocument.OVERRIDE_REMOVED, bizhub)));
 		runAs(CUSTOMER);
 		assertSame(OverrideRemoved.class, newInstance(TestDocument.OVERRIDE_REMOVED).getClass());

@@ -157,7 +157,6 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 			});
 		}
 
-		// Lookups find only the keys present, so put back those of the metadata that still exists
 		populateKeys();
 	}
 	
