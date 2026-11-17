@@ -47,7 +47,7 @@ class SmartClientListServletOperatorsH2Test extends AbstractH2Test {
 	 * "y", variant three).
 	 */
 	@BeforeEach
-	void makeRows() throws Exception {
+	void makeRows() {
 		customer = CORE.getCustomer();
 		module = customer.getModule(ListAttributes.MODULE_NAME);
 		document = module.getDocument(customer, ListAttributes.DOCUMENT_NAME);

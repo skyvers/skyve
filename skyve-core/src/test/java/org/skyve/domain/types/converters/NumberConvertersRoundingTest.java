@@ -209,7 +209,7 @@ class NumberConvertersRoundingTest {
 		for (int i = 0; i < 1_000_000; i++) {
 			Spec spec = specs.get(i % specs.size());
 			int digits = 1 + random.nextInt(spec.scale() + 15);
-			long unscaled = (long) (random.nextDouble() * Math.pow(10, Math.min(digits, 18)));
+			long unscaled = random.nextLong(BigDecimal.TEN.pow(Math.min(digits, 18)).longValueExact());
 			check(spec, BigDecimal.valueOf(random.nextBoolean() ? unscaled : -unscaled, spec.scale()), mismatches, true);
 		}
 		for (Spec spec : DECIMALS) {
@@ -276,7 +276,8 @@ class NumberConvertersRoundingTest {
 	}
 
 	private static Executable refuses(ConverterName name, String typed) {
-		return () -> assertThrows(ConversionException.class, () -> converter(name).fromDisplayValue(typed), name + " '" + typed + "'");
+		Converter converter = converter(name);
+		return () -> assertThrows(ConversionException.class, () -> converter.fromDisplayValue(typed), name + " '" + typed + "'");
 	}
 
 	@Test
@@ -292,8 +293,14 @@ class NumberConvertersRoundingTest {
 					reads(n, "2.345678", "2.34568"), // and HALF_UP beyond it
 					reads(n, "1.", "1"),
 					reads(n, ".5", "0.5"),
-					reads(ConverterName.Decimal2OneDecimalPlace, "2.345", "2.35"), // Decimal2 keeps 2 places
-					refuses(n, ""),
+					reads(ConverterName.Decimal2OneDecimalPlace, "2.345", "2.35")); // Decimal2 keeps 2 places
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void decimalsRefuseAnythingElse() {
+		ConverterName n = ConverterName.Decimal5TwoDecimalPlaces;
+		assertAll(refuses(n, ""),
 					refuses(n, "abc"),
 					refuses(n, "12abc"), // text after the number
 					refuses(n, "1E3"), // no exponent, in any case

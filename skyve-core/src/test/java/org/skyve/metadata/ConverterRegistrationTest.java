@@ -52,6 +52,8 @@ class ConverterRegistrationTest {
 	private static final Path FACES_CONFIG = Path.of("../skyve-web/src/main/resources/META-INF/faces-config.xml");
 	private static final Path VUE_CONVERTERS = Path.of("../skyve-vue/src/support/Converters.js");
 	private static final Path VUE_MAIN = Path.of("../skyve-vue/src/main.js");
+	/** Between the properties of a Vue calendar entry. */
+	private static final Pattern PROPERTY_SEPARATOR = Pattern.compile(", ");
 	private static final Path WAR_RESOURCES = Path.of("../skyve-war/src/main/java/resources");
 	private static final Path WEB_TEST_BUNDLE = Path.of("../skyve-web/src/test/java/resources/i18n.properties");
 	private static final String CONVERSION_KEY_PREFIX = "exception.conversion.";
@@ -209,10 +211,10 @@ class ConverterRegistrationTest {
 		Matcher matcher = entry.matcher(block);
 		while (matcher.find()) {
 			Map<String, String> props = new TreeMap<>();
-			for (String prop : matcher.group(2).split(", ")) {
+			for (String prop : PROPERTY_SEPARATOR.split(matcher.group(2))) {
 				Matcher p = property.matcher(prop);
 				assertTrue(p.matches(), matcher.group(1) + " calendar property " + prop);
-				props.put(p.group(1), (p.group(3) == null) ? p.group(2) : p.group(3));
+				props.put(p.group(1), p.group((p.group(3) == null) ? 2 : 3)); // a quoted value without its quotes
 			}
 			result.put(matcher.group(1), calendarPattern(matcher.group(1), props));
 		}

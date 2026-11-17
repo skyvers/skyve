@@ -780,7 +780,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 			cell.setCellValue(1234.5);
 			cell.setCellStyle(grouped);
 			cell = row.createCell(3);
-			cell.setCellValue(java.time.LocalDate.of(2026, 6, 5));
+			cell.setCellValue(java.time.LocalDate.of(2026, java.time.Month.JUNE, 5));
 			cell.setCellStyle(date);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			wb.write(baos);
@@ -798,7 +798,7 @@ class DataFileLoaderH2Test extends AbstractH2Test {
 			assertEquals(1, beans.size());
 			assertEquals(new Decimal2("0.5"), beans.get(0).getDecimal2(), "0.5");
 			assertEquals(new Decimal5("1234.5"), beans.get(0).getDecimal5(), "1,234.50");
-			assertEquals(new DateOnly(java.time.LocalDate.of(2026, 6, 5)), beans.get(0).getDate(), "05-Jun-2026");
+			assertEquals(new DateOnly(java.time.LocalDate.of(2026, java.time.Month.JUNE, 5)), beans.get(0).getDate(), "05-Jun-2026");
 		}
 		finally {
 			Locale.setDefault(locale);

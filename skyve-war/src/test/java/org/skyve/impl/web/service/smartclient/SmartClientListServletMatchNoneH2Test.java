@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +49,15 @@ class SmartClientListServletMatchNoneH2Test extends AbstractH2Test {
 	 * Three list attributes: "MN a" at 06-May-2026 14:47, "MN b" at 15-Jun-2021 12:30 and "MN c" at 25-Jun-2021 09:00.
 	 */
 	@BeforeEach
-	void makeRows() throws Exception {
+	void makeRows() {
 		customer = CORE.getCustomer();
 		module = customer.getModule(ListAttributes.MODULE_NAME);
 		document = module.getDocument(customer, ListAttributes.DOCUMENT_NAME);
 		Persistence persistence = CORE.getPersistence();
 		rows = new ArrayList<>(3);
-		rows.add(persistence.save(row("MN a", LocalDateTime.of(2026, 5, 6, 14, 47))));
-		rows.add(persistence.save(row("MN b", LocalDateTime.of(2021, 6, 15, 12, 30))));
-		rows.add(persistence.save(row("MN c", LocalDateTime.of(2021, 6, 25, 9, 0))));
+		rows.add(persistence.save(row("MN a", LocalDateTime.of(2026, Month.MAY, 6, 14, 47))));
+		rows.add(persistence.save(row("MN b", LocalDateTime.of(2021, Month.JUNE, 15, 12, 30))));
+		rows.add(persistence.save(row("MN c", LocalDateTime.of(2021, Month.JUNE, 25, 9, 0))));
 		persistence.flush();
 	}
 

@@ -22,16 +22,19 @@ class SmartClientConvertersSailIT extends AbstractSmartClientInterpretedSail {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void dates() {
 		sailResource("sail/kitchenSink/sc/sc-converters-dates.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void dateTimes() {
 		sailResource("sail/kitchenSink/sc/sc-converters-dateTimes.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void timestamps() {
 		sailResource("sail/kitchenSink/sc/sc-converters-timestamps.xml");
 	}
@@ -41,16 +44,19 @@ class SmartClientConvertersSailIT extends AbstractSmartClientInterpretedSail {
 	 * time to SmartClient, with a date-only field, filtered by the whole local day.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void dateOnly() {
 		sailResource("sail/kitchenSink/sc/sc-converters-dateOnly.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void times() {
 		sailResource("sail/kitchenSink/sc/sc-converters-times.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void numbers() {
 		sailResource("sail/kitchenSink/sc/sc-converters-numbers.xml");
 	}

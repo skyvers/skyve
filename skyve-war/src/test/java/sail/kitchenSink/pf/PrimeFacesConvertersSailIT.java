@@ -24,16 +24,19 @@ class PrimeFacesConvertersSailIT extends AbstractPrimeFacesInterpretedSail {
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void dates() {
 		sailResource("sail/kitchenSink/pf/pf-converters-dates.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void dateTimes() {
 		sailResource("sail/kitchenSink/pf/pf-converters-dateTimes.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void timestamps() {
 		sailResource("sail/kitchenSink/pf/pf-converters-timestamps.xml");
 	}
@@ -42,16 +45,19 @@ class PrimeFacesConvertersSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * Date times and timestamps whose converters show only the date ({@code *_DateTime}, {@code *_Timestamp}).
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void dateOnly() {
 		sailResource("sail/kitchenSink/pf/pf-converters-dateOnly.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void times() {
 		sailResource("sail/kitchenSink/pf/pf-converters-times.xml");
 	}
 
 	@Test
+	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
 	void numbers() {
 		sailResource("sail/kitchenSink/pf/pf-converters-numbers.xml");
 	}
