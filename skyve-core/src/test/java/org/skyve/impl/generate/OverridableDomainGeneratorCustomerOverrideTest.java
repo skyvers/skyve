@@ -797,7 +797,7 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	 * document, while a collection is resolved with the customer and maps.
 	 */
 	@Test
-	@Disabled("generator bug: an association to a new customer document is resolved without the customer - fix pending")
+	@Disabled("generator bug: an association to a new customer document is resolved without the customer — fix pending")
 	void anOverrideWithAnAssociationToANewCustomerDocumentGivesConsistentMappings() throws Exception {
 		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
 		AssociationImpl note = new AssociationImpl();
