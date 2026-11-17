@@ -28,7 +28,7 @@ Where to start:
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 			xmlns="http://www.skyve.org/xml/sail">
 	<before>
-		<login user="admin" password="admin" />
+		<login user="admin" password="{var:password}" />
 		<testSuccess />
 	</before>
 	<interaction name="Contacts: create and find">
@@ -47,10 +47,16 @@ Where to start:
 </automation>
 ```
 
+The run supplies `{var:password}` (`-Dsail.var.password` or
+`SAIL_VAR_PASSWORD`; see [The run token and variables](#the-run-token-and-variables)),
+so no password is written in the script. Skyve's own shipped scripts sign in
+with the bootstrap user's test login, `admin`/`admin`, as a disposable test
+server has it ([A disposable server](#a-disposable-server)).
+
 The schema is `skyve-war/src/main/java/schemas/sail.xsd`, with an identical copy
 in `skyve-core/src/test/resources/schemas/sail.xsd`. Both executors implement
-the whole language. A step that a renderer has no UI for fails with a reason; the PF and SC
-columns of the [op-code reference](#op-code-reference) say which.
+the whole language. A step that a renderer has no UI for fails with a reason;
+the PF and SC columns of the [op-code reference](#op-code-reference) say which.
 Code that implements `Executor` must be updated for Skyve 10; see
 [Upgrading](#upgrading).
 
@@ -72,19 +78,30 @@ From a developer:
 - **For recording:** the server needs `"recording": true` in the `sail`
   section of its `skyve.json`, and your user needs the `admin.SAILRecorder`
   role (see [The gate](#the-gate)).
-- **A checkout of the Skyve repository**, which has the generic runner
-  (`sail.SailRunIT`) and the `sail` Maven profile. An application built on
+- **A checkout of the application the test server runs, at the same
+  version**, with the generic runner (`sail.SailRunIT`) and the `sail` Maven
+  profile in it. Skyve's own repository has both; an application built on
   Skyve has them only if a developer has added them
-  ([Adding SAIL to an Application](#adding-sail-to-an-application)).
+  ([Adding SAIL to an Application](#adding-sail-to-an-application)). The
+  version matters because the test run builds each view from the checkout's
+  own copy of the application's metadata, to find the fields and buttons in
+  the page ([Metadata in the test JVM](#metadata-in-the-test-jvm)): a
+  checkout of another version builds other views, and steps fail on fields
+  the server does not show.
 - **Upload files:** a recorded upload names a file such as
   `sail/files/invoice.pdf`. A developer puts that file in
   `skyve-war/src/test/resources/sail/files/`.
 
-On your own machine:
+On your own machine, installed by you or by whoever looks after your machine
+(the developer can say which versions):
 
 - a JDK, version 17 or later;
 - Maven (the `mvn` command);
-- Google Chrome. SAIL runs it headless, so no window opens.
+- Google Chrome. SAIL runs it headless, so no window opens; add
+  `-Dsail.headless=false` to a command to watch it.
+- Network access to the Maven repositories the build uses: the first run
+  downloads the dependencies and builds the application, which takes several
+  minutes. Later runs are quicker.
 
 ### 1. Record a script
 
@@ -94,23 +111,28 @@ You get a file named like `sail-recording-20261117-1015.xml`. Add checks while
 you record with the panel's **Check** button. [Recording](#recording) describes
 the panel and what it writes.
 
+Record one journey per script: a script that makes a record and then finds
+it is one recording.
+
 ### 2. Save it
 
-Keep your scripts in a folder of your own, for example:
+Keep your scripts and your settings in a folder of your own, for example:
 
 ```text
 ~/sail-tests/
-  sail.properties              your settings (step 5)
+  sail.properties              your settings (step 5); never commit or share it
   contacts.suite.xml           which scripts to run, in order (step 3)
   recordings/
-    contacts-create.xml        a downloaded recording, renamed
-    contacts-find.xml
+    contacts.xml               a downloaded recording, renamed
+    data-groups.xml
 ```
 
 Rename each recording to say what it does. Before you rely on it, open it in a
 text editor and follow [From a recording to a test](#from-a-recording-to-a-test):
 put `{run}` into values that must be unique, so it can run again; deal with
-each `unmapped` and `unconfirmed` comment; and remove real people's data.
+each `unmapped` and `unconfirmed` comment, by writing the step by hand in SAIL
+XML (the [Op-code Reference](#op-code-reference) lists every step) or by
+removing it; and remove real people's data.
 
 Leave `password="{var:password}"` as it is. A password is never written in a
 script; the run supplies it (step 5).
@@ -121,18 +143,38 @@ A suite file lists the scripts to run:
 
 ```xml
 <suite xmlns="http://www.skyve.org/xml/sail">
-	<member file="recordings/contacts-create.xml"/>
-	<member file="recordings/contacts-find.xml"/>
+	<member file="recordings/contacts.xml"/>
+	<member file="recordings/data-groups.xml"/>
 </suite>
 ```
 
 - `file` is relative to the suite file's folder, with `/` between folders.
 - Members run in order, and each runs on its own: it signs in for itself, and
-  has its own `{run}` value, so one script cannot find what another made by
-  `{run}`. A member that fails does not stop the others.
-- If a member only makes sense after another has passed, say so with
+  has its own `{run}` value, so a member cannot find what another member made.
+  A member that fails does not stop the others.
+- A journey whose parts must share data, such as a record made in one
+  renderer and found in the other, is one recording, or one `<workflow>` file
+  that holds its scripts' `<automation>` elements in order. The automations of
+  a workflow share one `{run}` value and the values they capture
+  ([Workflows](#workflows)):
+
+  ```xml
+  <workflow xmlns="http://www.skyve.org/xml/sail">
+  	<automation uxui="tablet" userAgentType="tablet">
+  		<!-- the first recording's <before>, interactions and <after> -->
+  	</automation>
+  	<automation uxui="desktop" userAgentType="desktop">
+  		<!-- the second recording's -->
+  	</automation>
+  </workflow>
+  ```
+
+  Paste each recording's `<automation>` element, with its contents, in place
+  of one of these, and make the workflow file a member of the suite.
+- If a member only makes sense when another has passed, for example a check
+  that is pointless when the member before it already failed, say so with
   `requires`, naming an earlier member's `file`:
-  `<member file="recordings/contacts-find.xml" requires="recordings/contacts-create.xml"/>`.
+  `<member file="recordings/data-groups.xml" requires="recordings/contacts.xml"/>`.
   If the required member fails, this one is skipped, and the summary says why.
 - A recording's header comment lists the recording user's roles as
   `viewRoles("clerk", "admin.BasicUser", ...)`. If that user is not an
@@ -152,7 +194,7 @@ everything a suite file can say.
 
 ### 4. Run it
 
-From the folder of the Skyve checkout:
+From the folder of the checkout:
 
 ```bash
 mvn -pl skyve-war -am verify -Psail \
@@ -163,17 +205,23 @@ mvn -pl skyve-war -am verify -Psail \
 
 - `-Psail` turns on the SAIL profile; `-Dit.test=SailRunIT` and
   `-Dfailsafe.failIfNoSpecifiedTests=false` run only the generic runner.
-  Without them, the profile runs every SAIL test in Skyve but the load tests.
+  Without them, the profile runs every SAIL test in the checkout but the load
+  tests, the admin suite included, which backs up, truncates and restores the
+  server's data.
 - `sail.run` names what to run, comma separated. Each entry is a suite, a
   `<workflow>` or a single script. Give a full path: a relative path is taken
   from the `skyve-war` folder. An entry can also be a script that Skyve ships,
   such as `sail/kitchenSink/kitchensink.suite.xml`.
-- Maven builds the Skyve modules first, then runs the scripts.
+- Maven builds the modules first, then runs the scripts.
 
-At the end the output shows a summary for each suite, such as
-`SAIL suite /Users/you/sail-tests/contacts.suite.xml: 2 passed, 0 failed, 0 skipped`,
-and `BUILD SUCCESS`. When something fails, it shows each failed member with
-the interaction, the step and the reason, and `BUILD FAILURE`.
+The output is long. Search it for `SAIL suite` to find each suite's summary,
+such as
+`SAIL suite /Users/you/sail-tests/contacts.suite.xml: 2 passed, 0 failed, 0 skipped`.
+When something fails, the summary lists each failed member with the
+interaction, the step and the reason, and the build ends with
+`BUILD FAILURE`. With no `sail.run`, the runner is skipped
+(`Tests run: 1, ... Skipped: 1`) and the build still ends with
+`BUILD SUCCESS`: check that the summary is there.
 
 ### 5. Passwords and settings
 
@@ -181,23 +229,25 @@ The run supplies `{var:password}` from the setting `sail.var.password`. Any
 `{var:name}` that no step captures is supplied the same way, by
 `sail.var.<name>`. Never write a password into a script or a suite file.
 
-To avoid typing the password where others can see it, set it as an
-environment variable before you run:
-
-```bash
-export SAIL_VAR_PASSWORD='the test password'
-```
-
-or put it, with the options you always use, in a properties file. Skyve reads
-`~/.skyve/sail.properties` when it exists; name another file with
-`-Dsail.properties=$HOME/sail-tests/sail.properties` (or the environment
-variable `SAIL_PROPERTIES`):
+Put the options you always use in your own properties file, and name it in
+the environment before you run:
 
 ```properties
 sail.baseUrl=http://test-server:8180/skyve/
 sail.run=/Users/you/sail-tests/contacts.suite.xml
-sail.var.password=the test password
 sail.evidence=all
+```
+
+```bash
+chmod 600 ~/sail-tests/sail.properties
+export SAIL_PROPERTIES=$HOME/sail-tests/sail.properties
+```
+
+Give the password without leaving it in your shell's history: `read` asks for
+it without showing it.
+
+```bash
+read -rs SAIL_VAR_PASSWORD; export SAIL_VAR_PASSWORD
 ```
 
 The command is then always the same:
@@ -206,10 +256,16 @@ The command is then always the same:
 mvn -pl skyve-war -am verify -Psail -Dit.test=SailRunIT -Dfailsafe.failIfNoSpecifiedTests=false
 ```
 
+- A file is read only when it is named, by `SAIL_PROPERTIES` or
+  `-Dsail.properties=$HOME/sail-tests/sail.properties`, or when it is
+  `~/.skyve/sail.properties`, which is read when no file is named. Do not put
+  a base URL in `~/.skyve/sail.properties`: it applies to every SAIL run on
+  your machine, the destructive admin suite included.
+- If you keep the password in the file (`sail.var.password=...`) instead, the
+  `chmod 600` matters, and never commit the file or put it in a shared
+  folder.
 - An option on the command line (`-Dsail....`) or an environment variable beats
   the file, for that run.
-- `~/.skyve/sail.properties` applies to every SAIL run on your machine: name
-  only a disposable server in it.
 - A key the file does not know fails the run, as it is most likely a typing
   error. Write paths with `/`: in a properties file, `\` starts an escape.
 - Each script prints a `SAIL settings:` line as it starts, with every setting
@@ -235,8 +291,8 @@ could not put back, and a restore that failed must stop.
 
 ### 7. Run only some members
 
-`-Dsail.suite.only=recordings/contacts-find` runs only the members whose file
-starts with that text. A member's file name works too: `-Dsail.suite.only=contacts-f`.
+`-Dsail.suite.only=recordings/data` runs only the members whose file starts
+with that text. A member's file name works too: `-Dsail.suite.only=data-g`.
 Give several, comma separated. The members they require run as well, and the
 output lists them. A suite's set-up and restore members always run. A choice
 that matches no member fails, listing the members. The option applies to every
@@ -251,10 +307,10 @@ screenshots of every step, a video of each script and the failures, under the
 ```text
 skyve-war/target/sail/
   failures/                         a screenshot (.png) and page (.html) for each failure
-    recordings-contacts-create.xml-mwk2437ma-01-Contacts_create-step04.png
+    recordings-contacts.xml-mwk2437ma-01-Contacts_create-step04.png
   media/
     index.html                      every run, newest first: open this in a browser
-    20261117-101500-123-SailRunIT.run-recordings-contacts-create.xml/
+    20261117-101500-123-SailRunIT.run-recordings-contacts.xml/
       index.html                    the film strip: each step, how it went, its screenshot
       player.html                   the video, captioned with the step that was running
 ```
@@ -281,13 +337,16 @@ skyve-war/target/sail/
 
 The same command runs a script or a suite as many users at once when you add
 `-Dsail.load.users`: each virtual user has its own browser and runs the
-entries again and again, for example
+entries again and again. With `SAIL_PROPERTIES` naming your file from step 5
+(for the base URL and `sail.run`):
 
 ```bash
 mvn -pl skyve-war -am verify -Psail -Dit.test=SailRunIT -Dfailsafe.failIfNoSpecifiedTests=false \
-	-Dsail.run=$HOME/sail-tests/contacts.suite.xml \
 	-Dsail.load.users=5 -Dsail.load.rampUp=20s -Dsail.load.duration=5m
 ```
+
+or name them on the command line with `-Dsail.baseUrl=...` and
+`-Dsail.run=...`, as in step 4.
 
 Only do this against a disposable server that nobody else is using, and only
 with scripts that are safe to run at the same time
@@ -318,29 +377,38 @@ with `SAIL_BASE_URL` (or `-Dsail.baseUrl`) naming a disposable server. The
 
 The default build is unchanged: without `-Psail`, no SAIL test runs.
 
+The agent needs a JDK 17 or later, Maven, network access to the Maven
+repositories, and Chrome, or the browser `SAIL_BROWSER` names. The harness
+starts the browser through Selenium, whose Selenium Manager finds a matching
+driver, downloading it over the network if the agent has none.
+
 ### Tags and tiers
 
 | Tag | Tests |
 |---|---|
 | `sail` | Every SAIL IT |
-| `smoke` | Quick and non-destructive: the kitchen sink suite and ITs, the test strategy IT, the workflow IT |
+| `smoke` | Non-destructive: the kitchen sink suite and ITs, the test strategy IT, the workflow IT |
 | `admin` | The admin module: the admin suite, and the SmartClient admin ITs |
 | `destructive` | Backs up, truncates and restores the data: the admin suite (`AdminSuiteSailIT`) |
 | `recording` | Needs `"recording": true` in the server's `sail` section: the recorder round trips and `SmartClientServerRolesSailIT` |
 | `performance` | Load tests ([Load Testing](#load-testing)): `KitchenSinkLoadSailIT`. Never in the default selection. |
 
-| Tier | Server | Command |
-|---|---|---|
-| Pull request | disposable | `mvn -B -pl skyve-war -am verify -Psail -Dgroups=smoke` |
-| Nightly | fresh: a new database and content directory | `mvn -B -pl skyve-war -am verify -Psail -DexcludedGroups=recording` |
-| Recording | disposable, with `"recording": true` | `mvn -B -pl skyve-war -am verify -Psail -Dgroups=recording` |
-| Performance | disposable, its own, used by nothing else while it runs | `mvn -B -pl skyve-war -am verify -Psail -Dgroups=performance` |
+| Tier | Server | Command | Roughly |
+|---|---|---|---|
+| Pull request | disposable | `mvn -B -pl skyve-war -am verify -Psail -Dgroups=smoke` | 15 min (the kitchen sink suite alone about 11) |
+| Nightly | fresh: a new database and content directory | `mvn -B -pl skyve-war -am verify -Psail -DexcludedGroups=recording` | 30 min (the admin suite about 8) |
+| Recording | disposable, with `"recording": true` | `mvn -B -pl skyve-war -am verify -Psail -Dgroups=recording` | 12 min |
+| Performance | disposable, its own, used by nothing else while it runs | `mvn -B -pl skyve-war -am verify -Psail -Dgroups=performance` | 10 to 20 min (its time limit is 20) |
 
-`-Dgroups` replaces the profile's `sail & !performance`, and
-`-DexcludedGroups` removes tags from it. Run the performance tier as a
-separate job: a load test runs for minutes, its timings mean nothing on a
-server that other jobs are using, and its users would break another job's
-tests. Never point it at a shared server. A server with recording on can run every tier, as the other ITs do not
+The times are of the tests, measured headless on a developer's laptop with
+the modules already built; a first build and the dependency download add
+several minutes, and a slower agent takes longer.
+
+`-Dgroups` replaces the profile's `sail & !performance`, and `-DexcludedGroups`
+removes tags from it. Run the performance tier as a separate job: a load test
+runs for minutes, its timings mean nothing on a server that other jobs are
+using, and its users would break another job's tests. Never point it at a shared
+server. A server with recording on can run every tier, as the other ITs do not
 mind it. [The SAIL ITs](#the-sail-its) lists each IT with its tags. One IT by
 name:
 
@@ -360,7 +428,7 @@ name in upper snake case ([Settings](#settings)):
 | Variable | For |
 |---|---|
 | `SAIL_BASE_URL` | The disposable server, for example `http://localhost:8180/skyve/`. Required. |
-| `SAIL_VAR_PASSWORD` | `{var:password}` in the scripts; `SAIL_VAR_<NAME>` for any other variable |
+| `SAIL_VAR_PASSWORD` | `{var:password}` in an application's own scripts; `SAIL_VAR_<NAME>` for any other variable. Skyve's own scripts sign in as `admin`/`admin`, and only `kitchensink-workflow.xml` uses `{var:password}`, which `KitchenSinkSuiteSailIT` supplies as `admin`: set it only for a server whose admin password differs. |
 | `SAIL_EVIDENCE`, `SAIL_KEEP_MEDIA` | What evidence to keep |
 | `SAIL_TIMEOUT_SECONDS` | The limit for each wait |
 | `SAIL_LOAD_USERS`, `SAIL_LOAD_DURATION`, ... | A load run's shape and thresholds ([Load Testing](#load-testing)) |
@@ -378,6 +446,8 @@ name in upper snake case ([Settings](#settings)):
   should have none, or the job should name its own with `SAIL_PROPERTIES`.
 - Do not set `SAIL_TEST_STRATEGY` for a whole run: `PrimeFacesSailTestStrategyIT`
   runs each strategy on purpose and fails fast when any override is set.
+- Nor `SAIL_SUITE_ONLY`: it applies to every suite IT of the job, and a prefix
+  that matches no member of one suite fails that IT ("chooses no member").
 
 ### Evidence and reports
 
@@ -423,8 +493,8 @@ different agents against one server are not serialised, and break each other
 - give each job its own disposable server;
 - to shard, start several servers, and give each shard its own
   `SAIL_BASE_URL` and part of the tests, by tag or by name, for example
-  `-Dit.test=AdminSuiteSailIT` on one and
-  `-DexcludedGroups=destructive,recording` on another;
+  `-Dit.test=AdminSuiteSailIT -Dfailsafe.failIfNoSpecifiedTests=false` on one
+  and `-DexcludedGroups=destructive,recording` on another;
 - never point any tier, least of all `destructive`, at a shared server, or at
   one with data you need. The nightly tier wants a fresh server: the admin
   suite refuses to start when an interrupted run left its restore marker
@@ -451,8 +521,9 @@ mvn -B -pl skyve-war -am verify -Psail -DexcludedGroups=recording || status=$?
 exit "$status"
 ```
 
-A pull request job in GitHub Actions. `SAIL_TEST_PASSWORD` is a placeholder
-for a secret you define:
+A pull request job in GitHub Actions. `TEST_SERVER_PASSWORD` is a placeholder
+for a secret you define, needed only when the test server's admin password is
+not `admin`:
 
 ```yaml
 # Example: SAIL smoke tier on each pull request.
@@ -461,6 +532,7 @@ on: pull_request
 jobs:
   sail-smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -473,7 +545,7 @@ jobs:
       - name: SAIL smoke tests
         env:
           SAIL_BASE_URL: http://localhost:8180/skyve/
-          SAIL_VAR_PASSWORD: ${{ secrets.SAIL_TEST_PASSWORD }}
+          SAIL_VAR_PASSWORD: ${{ secrets.TEST_SERVER_PASSWORD }}
           SAIL_EVIDENCE: all
           SAIL_KEEP_MEDIA: failed
           SAIL_TIMEOUT_SECONDS: '60'
@@ -595,10 +667,10 @@ The trace says which roles it used, and leaves out a role the test's customer
 does not have. A registration always wins. If the server does not answer (the
 flag is off, or an older server), the views keep every role, as before.
 
-Without a registration, and without `sail.recording` on the server, a script that signs in as a less privileged user must
-keep to navigation and assertions that the full-permission view does not
-affect, as `03-security-admin.xml` does: menus, sign-in outcomes and screens
-where both users see the same thing.
+Without a registration, and without `sail.recording` on the server, a script
+that signs in as a less privileged user must keep to navigation and assertions
+that the full-permission view does not affect, as `03-security-admin.xml` does:
+menus, sign-in outcomes and screens where both users see the same thing.
 
 ### Renderer hooks
 
@@ -818,15 +890,18 @@ would invalidate, such as `PrimeFacesSailTestStrategyIT`: it fails fast,
 naming the override's source.
 
 **The summary.** When the suite ends, it prints a summary, and the test fails
-with every failed member, each as its own failure under the summary:
+with every failed member, each as its own failure under the summary (long
+lines are wrapped here; the summary has one per entry):
 
 ```text
 SAIL suite sail/admin/admin.suite.xml: 8 passed, 0 failed, 0 skipped, 10 not selected
-  passed: [00-precondition.xml, 00-backup.xml, 00-marker.xml, sc/05-reports-misc.xml, pf/98-destructive.xml, sc/98-destructive.xml, sc/99-truncate.xml, 99-restore.xml]
+  passed: [00-precondition.xml, 00-backup.xml, 00-marker.xml, sc/05-reports-misc.xml,
+           pf/98-destructive.xml, sc/98-destructive.xml, sc/99-truncate.xml, 99-restore.xml]
   not selected: [pf/01-session.xml, pf/02-contacts-communications.xml, ...]
+  only [sc/05, 98, sc/99] chooses [sc/05-reports-misc.xml, pf/98-destructive.xml,
+           sc/98-destructive.xml, sc/99-truncate.xml]
   override Verify from -Dsail.testStrategy not applied to 00-precondition.xml: locked (set-up)
   ...
-  only [sc/05, 98, sc/99] chooses [sc/05-reports-misc.xml, pf/98-destructive.xml, sc/98-destructive.xml, sc/99-truncate.xml]
 ```
 
 **Evidence.** With `sail.keepMedia=failed`, a member's snapshots and video are
@@ -860,12 +935,14 @@ files exist.
 `XMLMetaData.sailRootOfFile` and `sailRootOfString` say whether a SAIL
 document is a `SUITE`, a `WORKFLOW` or an `AUTOMATION`.
 
-**The older builder is deprecated.** `new SailSuite(folder).setUp(...).files(...).restore(file, requires...).run(Consumer)`
-still works as it did: it runs on the same engine; its files form a chain (a
-file runs only after the earlier ones passed); a restore whose `requires`
-names a file that is not in the suite is held back; a `sail.suite.only` that
-matches no file runs only the set-ups and the restore; and it refuses a test
-strategy override, since it cannot lock. Write a `<suite>` file instead.
+**The older builder is deprecated.** The builder
+`new SailSuite(folder).setUp(...).files(...).restore(file, requires...).run(Consumer)`
+still works as it did: it runs on the same engine;
+its files form a chain (a file runs only after the earlier ones passed); a
+restore whose `requires` names a file that is not in the suite is held back; a
+`sail.suite.only` that matches no file runs only the set-ups and the restore;
+and it refuses a test strategy override, since it cannot lock. Write a `<suite>`
+file instead.
 
 ### Interactions and procedures
 
@@ -930,11 +1007,11 @@ time in milliseconds in base 36: 8 or more lower-case letters and digits. It is
 the current time, unless an earlier run in the same JVM took that millisecond:
 then it is the millisecond after the last token's, so runs started at once (a
 load test's virtual users) get different tokens, and a token can be a few
-milliseconds ahead of the clock. A new token is made for each automation, which means once per script
-file, unless the automation is part of a [workflow](#workflows), whose
-automations share one token. Each member of a [suite](#suites) is a run of its
-own, so a value created with `{run}` in one member cannot be found with
-`{run}` in the next.
+milliseconds ahead of the clock. A new token is made for each automation, which
+means once per script file, unless the automation is part of a
+[workflow](#workflows), whose automations share one token. Each member of a
+[suite](#suites) is a run of its own, so a value created with `{run}` in one
+member cannot be found with `{run}` in the next.
 
 Use `{run}` to make the records a script creates unique, so a script can run
 again, or alongside another script, without clashing with leftovers.
@@ -1511,7 +1588,8 @@ class ContactsSailIT extends AbstractPrimeFacesInterpretedSail {
   `-D` option can be set there, for a quick change without touching the
   command, e.g. `settings().timeoutSeconds(60)` in the constructor.
 - Tag the class, as Skyve's ITs are: `@Tag("sail")`, and `smoke`, `admin`,
-  `destructive` or `recording` where they apply ([For CI](#for-ci)).
+  `destructive`, `recording` or `performance` (a load test) where they apply
+  ([For CI](#for-ci)).
 - A failed step throws an `AssertionError`, so the test needs no assertions of
   its own.
 - An app with its own `router.DefaultUxUiSelector` may route users by role.
@@ -1547,8 +1625,9 @@ development server.
    - `environment.showSetup`: `false`. Otherwise admin's first sign in goes to
      the setup page.
    - `environment.jobScheduler`: `false`. The suites expect it off.
-   - `sail.recording`: `true`, only for the ITs tagged `recording` (the two recorder round trips and
-     `SmartClientServerRolesSailIT`). The other ITs do not mind it.
+   - `sail.recording`: `true`, only for the ITs tagged `recording` (the two
+     recorder round trips and `SmartClientServerRolesSailIT`). The other ITs do
+     not mind it.
    - Keep `environment.identifier` non-null and the `bootstrap` section as it
      is (`admin`/`admin`, customer `demo`). The bootstrap user is not created
      in a production environment.
@@ -1651,7 +1730,7 @@ option in a test's code too, for a quick change without touching the command.
 | System property | the command | `-Dsail.timeoutSeconds=60` |
 | Environment variable | the shell or CI job | `SAIL_TIMEOUT_SECONDS=60` |
 | Test code | the test's `settings()` | `settings().timeoutSeconds(60)` |
-| Properties file | `~/.skyve/sail.properties` if it exists, or the file `sail.properties` names | `sail.timeoutSeconds=60` |
+| Properties file | the file `sail.properties` names, else `~/.skyve/sail.properties` if it exists; a named file replaces the home one, they are not merged | `sail.timeoutSeconds=60` |
 | Browser configuration | a `BrowserConfiguration`'s own browser, base URL and headless mode | `new BrowserConfiguration().browser(Browsers.chrome)` |
 | Script | an automation's `testStrategy`, else its workflow's, else its suite's; a suite's `evidence` | `<suite testStrategy="Verify" evidence="failures">` |
 | Default | the table below | |
@@ -1673,7 +1752,7 @@ key after `sail.`.
 
 | Key | Environment variable | Default | Values and meaning |
 |---|---|---|---|
-| `sail.baseUrl` | `SAIL_BASE_URL` | none: required | The server's base URL, an `http` or `https` URL with a host, ending in `/`, for example `http://localhost:8180/skyve/` |
+| `sail.baseUrl` | `SAIL_BASE_URL` | none: required | The server's base URL, for example `http://localhost:8180/skyve/`. It must be an `http` or `https` URL with a host, and should end in `/` (not checked). |
 | `sail.headless` | `SAIL_HEADLESS` | `true` | `false` shows the browser window |
 | `sail.browser` | `SAIL_BROWSER` | `chrome` | `chrome`, `firefox`, `safari` or `edge`, for every device of the run. Only Chromium browsers record video. |
 | `sail.timeoutSeconds` | `SAIL_TIMEOUT_SECONDS` | `30` | Whole seconds above 0: the limit for every wait on the browser, and for page loads unless the configuration sets its own. A limit, not a delay: waits end as soon as their event happens. |
@@ -1781,8 +1860,9 @@ class ContactsSailIT extends AbstractPrimeFacesInterpretedSail {
   `snapshotSource`, `videoDir`, `evidence`, `keepMedia`, `suiteOnly`, `run`,
   `variable` and `properties`, and `set(key, value)` for any key, where null
   clears it. The `sail.load.*` keys have no builder methods: `SailLoad`'s own
-  methods set them ([Load Testing](#load-testing)), or `set(SailSettings.LOAD_USERS, "5")`. Values are checked when the settings are resolved.
-  `settings().resolve()` returns the resolved settings.
+  methods set them ([Load Testing](#load-testing)), or
+  `set(SailSettings.LOAD_USERS, "5")`. Values are checked when the settings are
+  resolved. `settings().resolve()` returns the resolved settings.
 - **Where to set browser-level settings.** The PF and SC test bases start the
   browser before each test method, so set the browser, headless mode and base
   URL, and the configuration's user agent and window size, in the IT's
@@ -1817,10 +1897,10 @@ configuration), so a run must name its disposable server. A base URL in
 `~/.skyve/sail.properties` applies to every run on the machine: put only a
 disposable server there.
 
-<a id="one-test-per-server"></a>**One test per server.** SAIL ITs against one server share its data and
-its `admin` user. When the PF and SC admin suites once ran at the same time,
-they failed with `StaleObjectStateException` on the admin user. Worse, one
-suite's backup or restore would undo the other's work.
+<a id="one-test-per-server"></a>**One test per server.** SAIL ITs against one
+server share its data and its `admin` user. When the PF and SC admin suites once
+ran at the same time, they failed with `StaleObjectStateException` on the admin
+user. Worse, one suite's backup or restore would undo the other's work.
 
 The skyve-war pom sets `forkCount` to 2, so surefire runs two test classes at
 once in separate JVMs. To keep SAIL ITs serial anyway, the test bases and
@@ -1987,14 +2067,14 @@ messages. `KitchenSinkWorkflowSailIT` runs the workflow of three files.
 `sc-kitchensink-sail.xml` covers the same ground for SmartClient, except
 membership and ListGridFixture (`componentBuilderClass` only applies to
 PrimeFaces). It also clicks the ActionsFixture's Run From Row link in a row,
-declined and confirmed, which PF does in its separate row link script. It
-opens the kitchen sink's Condition Node Tree and List Attribute Calendar menu
-items by URL, with `navigateTree` and `navigateCalendar`, and checks that each
-page shows no error. The SC kitchen sink also covers ConditionsFixture's visible and enabled
-conditions: it enters a value in its slider, then turns Show and Allow off and
-on, checking with `testWidget` that a slider and a password field are hidden,
-disabled and enabled again. Its list membership (the kitchen sink's only one)
-is covered in SmartClient by the admin suite only.
+declined and confirmed, which PF does in its separate row link script. It opens
+the kitchen sink's Condition Node Tree and List Attribute Calendar menu items by
+URL, with `navigateTree` and `navigateCalendar`, and checks that each page shows
+no error. The SC kitchen sink also covers ConditionsFixture's visible and
+enabled conditions: it enters a value in its slider, then turns Show and Allow
+off and on, checking with `testWidget` that a slider and a password field are
+hidden, disabled and enabled again. Its list membership (the kitchen sink's only
+one) is covered in SmartClient by the admin suite only.
 
 The SmartClient windows interaction also presses the List Grid Fixture's list
 grid tools: Deselect, which clears the selected id, and Refresh, which shows
@@ -2131,14 +2211,14 @@ jobs list) and can be run again.
 
 **Which backup is restored.** The backups list shows the newest backup first,
 and 99-restore's SmartClient leg restores row 0: the second backup 00-backup
-made, SmartClient's. Other backups can be on the server: they are older, so
-they are not restored. A backup made by something else while a suite runs,
-such as a scheduled backup, would be newer and would be restored instead, so
-run the suite with the job scheduler off, as the test servers are. Each leg
-deletes row 0, its own backup (after SmartClient's delete, PrimeFaces' backup
-is the newest), and checks the delete by the backup being deselected, as
-other backups may be listed. The restore is held back unless 00-backup passed,
-so it never restores a backup that is not this run's. (Until a fix in 2026-11, the list showed the
+made, SmartClient's. Other backups can be on the server: they are older, so they
+are not restored. A backup made by something else while a suite runs, such as a
+scheduled backup, would be newer and would be restored instead, so run the suite
+with the job scheduler off, as the test servers are. Each leg deletes row 0, its
+own backup (after SmartClient's delete, PrimeFaces' backup is the newest), and
+checks the delete by the backup being deselected, as other backups may be
+listed. The restore is held back unless 00-backup passed, so it never restores a
+backup that is not this run's. (Until a fix in 2026-11, the list showed the
 oldest backup first, and 00-precondition asserted that no backup existed.)
 
 **The leftover-marker precondition.** 00-precondition asserts that no restore
@@ -2308,6 +2388,15 @@ that show it, relative to the repository root:
 | Mechanism | Shown in |
 |---|---|
 | Every element and attribute of `sail.xsd`, or the reason one is unused | `skyve-war/src/test/java/sail/SailLanguageCoverageTest.java` (its allow-list, 33 entries, each with its reason) |
+| Op-codes: [Session](#session) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml` and `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: interactions "Login", "Switch mode" and "Logout" |
+| Op-codes: [Navigation](#navigation) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Windows, back and refresh", "Menus"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Windows, back, refresh and list grid tools", "A tree and a calendar", "Menus" |
+| Op-codes: [Contexts](#contexts-1) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Links: a link in page markup, and tokens in href and bizId" |
+| Op-codes: [Data entry](#data-entry) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Kitchen Sink: every widget", "Actions Fixture: actions, buttons and change events" (uploads); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Widgets", "Lookup descriptions"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "Lookup description rows by their text" |
+| Op-codes: [Actions](#actions) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Actions Fixture: actions, buttons and change events"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml` and `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Ordered grid: drag rows into a new order, and keep it once saved" |
+| Op-codes: [Grids](#grids) | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Data grids", "Ordered inline grid and ordered list membership: keep their order once saved"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Ordered grid: drag rows into a new order, and keep it once saved"; `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-row-link.xml` (`dataGridLink`) |
+| Op-codes: [Filtering lists](#filtering-lists) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "List Grid Fixture: filters on each column type", "List Grid Fixture: filters and sorts in a Vue list grid and a PrimeFaces data table"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "List filters and sorting"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "List grids in a view" |
+| Op-codes: [Assertions](#assertions) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Actions Fixture: actions, buttons and change events", "Menus"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Lookup values to pick" |
+| Op-codes: [Other steps](#other-steps) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts" (`execute`, `pause`), "Lookup values: generated numbers, filters and sorts" (captures); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Actions Fixture: a refused upload, a link in a row, a cell and the title" |
 | PrimeFaces op-codes | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`; `pf-kitchensink-row-link.xml` (`dataGridLink`) |
 | SmartClient op-codes, with `navigateTree` and `navigateCalendar` | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml` |
 | Filters, sorting, captures with a `pattern`, `dataEnter match`, lookups by text | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml` |
@@ -2325,7 +2414,7 @@ that show it, relative to the repository root:
 | Refusing a test strategy override | `skyve-war/src/test/java/sail/kitchenSink/pf/PrimeFacesSailTestStrategyIT.java` (`refuseTestStrategyOverride`) |
 | A fixed browser configuration | `skyve-war/src/test/java/org/skyve/util/deployed/DeployedBrowser.java` (`fixed()`) |
 | The generic runner | `skyve-war/src/test/java/sail/SailRunIT.java` |
-| Tags | every `*SailIT` and `*IT` under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/admin/AdminSuiteSailIT.java` |
+| Tags | every `*SailIT` and `*IT` under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/admin/AdminSuiteSailIT.java`, and the two under `skyve-war/src/test/java/util/sail/`: `SelenideFocusProbeSailIT.java` and `PrimeFacesSelenideClickSailIT.java` |
 | The Maven profile | the `sail` profile in `pom.xml` |
 | Snapshots, the film strip, video, `keepMedia` and media units | `skyve-war/src/test/java/util/sail/SailMediaTest.java` |
 | A suite's browser lifecycle: handed on, stopped after a failure, closed at the end | `skyve-war/src/test/java/util/sail/SailWorkflowTest.java` |
@@ -2372,9 +2461,13 @@ The harness follows these rules, and changes to it must keep them.
    ([Settings](#settings)). The constant `Selenide.TIMEOUT` is deprecated: it is
    read once, when the class loads, from the settings outside code. The only other
    polling interval is the one an author asks for with `testGridRows@timeoutMillis`,
-   which checks every second. The one deliberate wait outside this mechanism is
+   which checks every second. The deliberate waits outside this mechanism are
    `SailServerLock`, which blocks while another JVM's SAIL test is using the
-   same server.
+   same server, and a [load run's](#load-testing) own: each virtual user's
+   start, delayed by its share of the ramp-up, and the test thread's wait for
+   the users to end, bounded by the time limit, then by the settings' timeout
+   for users that were interrupted. These are the load shape the test asked
+   for, not waits on the browser.
 3. **No script clicks for user gestures.** A click goes through WebDriver, after
    the target is scrolled to the centre of the window and nothing covers it. In
    PF, a covered target is also centred across, as a user would scroll a tab
@@ -2497,8 +2590,8 @@ does nothing):
 
 The password is never recorded. The login takes it from the variable `password`, so a run supplies it to run the script
 as downloaded: `-Dsail.var.password=...` or `SAIL_VAR_PASSWORD` (as a run through `SailRunIT` does), or
-`settings().variable("password", "...")` in a test (see [The run token and variables](#the-run-token-and-variables)). The login names the
-customer only when the sign in page asks for one (no `environment.customer`).
+`settings().variable("password", "...")` in a test (see [The run token and variables](#the-run-token-and-variables)).
+The login names the customer only when the sign in page asks for one (no `environment.customer`).
 
 | Gesture | Step |
 |---|---|
@@ -2674,9 +2767,11 @@ A recording replays as downloaded, but it is a first draft. It runs with no
 Java through `SailRunIT`, alone or as a member of a suite file
 ([For BAs and testers](#for-bas-and-testers)). To commit it as a test:
 
-1. Save it with the other scripts (see [Where scripts go](#where-scripts-go)),
-   and add it to a suite file, or write its test with the base for its
-   `uxui`: SmartClient for `desktop`, otherwise PrimeFaces with that device.
+1. Save it: a BA or tester in a folder of their own, and adds it to a suite
+   file ([For BAs and testers](#for-bas-and-testers)); a developer with the
+   other scripts ([Where scripts go](#where-scripts-go)), in a suite file or
+   with its own test on the base for its `uxui`: SmartClient for `desktop`,
+   otherwise PrimeFaces with that device.
 2. Register the header's view roles: paste its `viewRoles(...)` line into the
    test, or write it as a `<viewRoles>` element of the suite. Supply the
    password from the run (`sail.var.password`), or with
@@ -2732,10 +2827,10 @@ Java through `SailRunIT`, alone or as a member of a suite file
   kitchen sink's only confirming Save is such a one, so `save@confirm` is on
   `SailLanguageCoverageTest`'s allow-list.
 - **Generated menu SAIL for admin.** For module admin, the Control Panel's
-  generated menu SAIL names actions that their visibility conditions hide,
-  such as the recording's Start (`StartSAILRecording`), so the Java generated from it fails ("not on the
-  view"), and the external Control Panel's Download fails for module admin.
-  Other modules, such as the kitchen sink, work.
+  generated menu SAIL names actions that their visibility conditions hide, such
+  as the recording's Start (`StartSAILRecording`), so the Java generated from it
+  fails ("not on the view"), and the external Control Panel's Download fails for
+  module admin. Other modules, such as the kitchen sink, work.
 - **Server-side races, found by load runs** (not fixed in the harness):
   - one user signing in from several browsers at the same moment can lose
     sessions: `StateUtil.addSession` updates the user's sessions without
@@ -2880,10 +2975,11 @@ Rules the XSD cannot express, such as "exactly one of `row` and
 `MetaDataException`. Test the step class, the XML round trip
 (`SailLanguageXmlTest`) and any context change (`ContextualExecutorTest`).
 
-**2. Generators (skyve-ext).** `WebDriverExecutor` implements the method. Unless they generate code for it, they emit the "not
-supported by this generator" comment and move the contexts; see
-[Other Executors](#other-executors). Update `SailExecutorTest`, and
-`PrimeFacesInlineWebDriverExecutorTest` for PrimeFaces code.
+**2. Generators (skyve-ext).** `WebDriverExecutor` implements the method. Unless
+they generate code for it, they emit the "not supported by this generator"
+comment and move the contexts; see [Other Executors](#other-executors). Update
+`SailExecutorTest`, and `PrimeFacesInlineWebDriverExecutorTest` for PrimeFaces
+code.
 
 **3. Harness (skyve-war tests).** `InterpretedWebDriverExecutor` does what is
 the same for both renderers: `substituteTokens` on values, checking columns
@@ -3020,17 +3116,18 @@ compiling and running:
   `AbstractH2TestForJUnit4` is kept.
 - `SailLoad` is new ([Load Testing](#load-testing)), with the `sail.load.*`
   settings. The `sail` profile leaves out ITs tagged `performance`.
-- Skyve's own SAIL tests were reorganised. The PF and SC admin suites are one suite,
-  `sail/admin/admin.suite.xml`, whose members moved from `sail/admin/pf/suite/`
-  and `sail/admin/sc/suite/` to `sail/admin/pf/` and `sail/admin/sc/`, with
-  the bracket files in `sail/admin/`; `admin-phone-smoke.xml` is
-  `pf/10-phone-smoke.xml`. `pf-admin-sail.xml`, `sc-admin-sail.xml`,
-  `PrimeFacesAdminSailIT`, `SmartClientAdminSailIT`,
+- Skyve's own SAIL tests were reorganised. The PF and SC admin suites are one
+  suite, `sail/admin/admin.suite.xml`, whose members moved from
+  `sail/admin/pf/suite/` and `sail/admin/sc/suite/` to `sail/admin/pf/` and
+  `sail/admin/sc/`, with the bracket files in `sail/admin/`;
+  `admin-phone-smoke.xml` is `pf/10-phone-smoke.xml`. `pf-admin-sail.xml`,
+  `sc-admin-sail.xml`, `PrimeFacesAdminSailIT`, `SmartClientAdminSailIT`,
   `PrimeFacesAdminSuiteSailIT`, `SmartClientAdminSuiteSailIT`,
   `PrimeFacesAdminPhoneSailIT` and the legacy classes and scripts in
   `sail/admin/pf` (the generated admin menu test, the test preparation, the
-  consolidated test and the two performance ITs) are gone. The kitchen sink conformance scripts no longer
-  state a `testStrategy`: the kitchen sink suite's default applies.
+  consolidated test and the two performance ITs) are gone. The kitchen sink
+  conformance scripts no longer state a `testStrategy`: the kitchen sink suite's
+  default applies.
 
 ## Troubleshooting
 
