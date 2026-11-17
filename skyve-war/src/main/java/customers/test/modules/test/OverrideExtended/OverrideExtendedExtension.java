@@ -7,6 +7,7 @@ import customers.test.modules.test.domain.OverrideExtendedOverride;
  * use for its beans. It extends the generated <code>OverrideExtendedOverride</code>, which extends the
  * vanilla <code>modules.test.OverrideExtended.OverrideExtendedExtension</code>.
  */
+@SuppressWarnings("java:S110") // a customer's extension of an override of a document with a vanilla extension sits this deep by design
 public class OverrideExtendedExtension extends OverrideExtendedOverride {
 	private static final long serialVersionUID = -2614863705219473385L;
 

@@ -1099,7 +1099,7 @@ class DataBuilderTest {
 		DomainClassReturningFactory.CALLS.set(0);
 		Bean first;
 		Bean second;
-		try {
+		try (PrintStream capture = new PrintStream(out, true, StandardCharsets.UTF_8)) {
 			DataBuilder builder = newBuilderWithMockUser().fixture(FixtureType.crud);
 			Customer customer = (Customer) getField(builder, "customer");
 			ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -1110,7 +1110,7 @@ class DataBuilderTest {
 			document.setName("Widget");
 			doReturn(WidgetExtension.class).when(document).getBeanClass(customer);
 			DataBuilder.setTrace(true);
-			System.setOut(new PrintStream(out, true, StandardCharsets.UTF_8));
+			System.setOut(capture);
 
 			first = invokeDataFactory(builder, document, 1);
 			second = invokeDataFactory(builder, document, 1);
