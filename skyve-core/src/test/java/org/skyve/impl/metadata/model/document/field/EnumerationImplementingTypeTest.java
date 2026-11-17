@@ -7,10 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,17 +19,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
-import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
-import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.ModuleMemberTestSupport;
 import org.skyve.metadata.repository.ProvidedRepository;
-import org.skyve.metadata.user.User;
 
 import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.scaffold.TypeValidation;
 import net.bytebuddy.description.modifier.TypeManifestation;
 import net.bytebuddy.description.modifier.Visibility;
+import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
 
 /**
@@ -46,6 +43,10 @@ import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
  * 	<li>UtExtDoc is narrowed the same way and has a hand-written extension, so utcust's
  * 		UtExtDocOverride extends UtExtDocExtension, which extends UtExtDocVanilla.</li>
  * 	<li>UtOnlyDoc is a new document only utcust has.</li>
+ * 	<li>UtReferrer, UtInheritingReferrer and UtOwnReferrer reference UtEnumDoc's enumerations.
+ * 		utcust does not override UtReferrer. Its override of UtInheritingReferrer inherits the
+ * 		references from the vanilla class, and its override of UtOwnReferrer declares them in
+ * 		UtOwnReferrerOverride. Their fields have the enum types the generated classes would import.</li>
  * </ul>
  * The bean classes are made at run time, and a context class loader serves them and this test's
  * enums by the names of the generated classes, as classes in the <code>modules</code> and
@@ -57,37 +58,37 @@ class EnumerationImplementingTypeTest {
 
 	/** Stands in for <code>modules.utmod.domain.UtEnumDoc$Kind</code>. */
 	private enum VanillaDomainClassKind {
-		one
+		ONE
 	}
 
 	/** Stands in for <code>modules.utmod.domain.UtEnumDocVanilla$Status</code>. */
 	private enum VanillaClassStatus {
-		open
+		OPEN
 	}
 
 	/** Stands in for <code>modules.utmod.domain.UtEnumDocVanilla$Kept</code>. */
 	private enum VanillaClassKept {
-		open
+		OPEN
 	}
 
 	/** Stands in for <code>customers.utcust.modules.utmod.domain.UtEnumDocOverride$Added</code>. */
 	private enum OverrideClassAdded {
-		open
+		OPEN
 	}
 
 	/** Stands in for <code>customers.utcust.modules.utmod.domain.UtEnumDocOverride$Kept</code>. */
 	private enum OverrideClassKept {
-		open
+		OPEN
 	}
 
 	/** Stands in for <code>modules.utmod.domain.UtExtDocVanilla$Status</code>. */
 	private enum ExtendedVanillaClassStatus {
-		open
+		OPEN
 	}
 
 	/** Stands in for <code>customers.utcust.modules.utmod.domain.UtOnlyDoc$Kind</code>. */
 	private enum CustomerDocumentKind {
-		one
+		ONE
 	}
 
 	/** The classes by the names Skyve looks them up by. */
@@ -108,6 +109,17 @@ class EnumerationImplementingTypeTest {
 
 		put(make("customers.utcust.modules.utmod.domain.UtOnlyDoc", Object.class));
 
+		put(make("modules.utmod.domain.UtReferrer", Object.class, TypeManifestation.PLAIN,
+					Map.of("keptReference", VanillaClassKept.class, "statusReference", VanillaClassStatus.class)));
+		Class<?> inheritingReferrer = make("modules.utmod.domain.UtInheritingReferrer", Object.class, TypeManifestation.PLAIN,
+											Map.of("keptReference", VanillaClassKept.class));
+		put(inheritingReferrer);
+		put(make("customers.utcust.modules.utmod.domain.UtInheritingReferrerOverride", inheritingReferrer));
+		Class<?> ownReferrer = make("modules.utmod.domain.UtOwnReferrer", Object.class);
+		put(ownReferrer);
+		put(make("customers.utcust.modules.utmod.domain.UtOwnReferrerOverride", ownReferrer, TypeManifestation.PLAIN,
+					Map.of("keptReference", OverrideClassKept.class, "statusReference", VanillaClassStatus.class)));
+
 		CLASSES.put("modules.utmod.domain.UtEnumDoc$Kind", VanillaDomainClassKind.class);
 		CLASSES.put("modules.utmod.domain.UtEnumDocVanilla$Status", VanillaClassStatus.class);
 		CLASSES.put("modules.utmod.domain.UtEnumDocVanilla$Kept", VanillaClassKept.class);
@@ -118,13 +130,13 @@ class EnumerationImplementingTypeTest {
 	}
 
 	/** The documents utcust overrides or adds. */
-	private static final Set<String> OVERRIDDEN = Set.of("UtEnumDoc", "UtExtDoc", "UtOnlyDoc");
+	private static final Set<String> OVERRIDDEN = Set.of("UtEnumDoc", "UtExtDoc", "UtOnlyDoc", "UtInheritingReferrer", "UtOwnReferrer");
 
 	/**
 	 * Makes a class of the name that extends the superclass.
 	 */
 	private static Class<?> make(String name, Class<?> superclass) {
-		return make(name, superclass, TypeManifestation.PLAIN);
+		return make(name, superclass, TypeManifestation.PLAIN, Map.of());
 	}
 
 	/**
@@ -132,20 +144,29 @@ class EnumerationImplementingTypeTest {
 	 * domain class, and a generated class with a hand-written extension, are abstract.
 	 */
 	private static Class<?> makeAbstract(String name, Class<?> superclass) {
-		return make(name, superclass, TypeManifestation.ABSTRACT);
+		return make(name, superclass, TypeManifestation.ABSTRACT, Map.of());
 	}
 
+	/**
+	 * Makes a class of the name that extends the superclass and declares private fields of the
+	 * names and types, as a generated class declares a field for each property.
+	 */
 	@SuppressWarnings("resource") // the made and loaded types only hold the class bytes in memory
-	private static Class<?> make(String name, Class<?> superclass, TypeManifestation manifestation) {
+	private static Class<?> make(String name, Class<?> superclass, TypeManifestation manifestation, Map<String, Class<?>> fields) {
 		ClassLoader parent = (superclass.getClassLoader() == null) ?
 								EnumerationImplementingTypeTest.class.getClassLoader() :
 								superclass.getClassLoader();
-		return new ByteBuddy().subclass(superclass)
-								.name(name)
-								.modifiers(Visibility.PUBLIC, manifestation)
-								.make()
-								.load(parent, ClassLoadingStrategy.Default.WRAPPER)
-								.getLoaded();
+		// the field types are this test's private enums, which Byte Buddy would refuse as invisible
+		DynamicType.Builder<?> builder = new ByteBuddy().with(TypeValidation.DISABLED)
+															.subclass(superclass)
+															.name(name)
+															.modifiers(Visibility.PUBLIC, manifestation);
+		for (Map.Entry<String, Class<?>> field : fields.entrySet()) {
+			builder = builder.defineField(field.getKey(), field.getValue(), Visibility.PRIVATE);
+		}
+		return builder.make()
+						.load(parent, ClassLoadingStrategy.Default.WRAPPER)
+						.getLoaded();
 	}
 
 	private static void put(Class<?> type) {
@@ -204,20 +225,6 @@ class EnumerationImplementingTypeTest {
 	}
 
 	/**
-	 * Runs the rest of the test as a user of the customer.
-	 */
-	private static void runAs(String customerName) {
-		Customer customer = mock(Customer.class);
-		when(customer.getName()).thenReturn(customerName);
-		User user = mock(User.class);
-		when(user.getCustomerName()).thenReturn(customerName);
-		when(user.getCustomer()).thenReturn(customer);
-		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
-		persistence.setUser(user);
-		persistence.setForThread();
-	}
-
-	/**
 	 * An enumeration attribute of the document in the module utmod.
 	 */
 	private Enumeration enumeration(String documentName, String name) {
@@ -238,7 +245,7 @@ class EnumerationImplementingTypeTest {
 	void anEnumOfTheVanillaDomainClassLoadsFromIt() {
 		Enumeration kind = enumeration("UtEnumDoc", "kind");
 		Class<?> withoutCustomer = kind.getImplementingType();
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
 		assertAll(() -> assertSame(VanillaDomainClassKind.class, withoutCustomer),
 					() -> assertSame(VanillaDomainClassKind.class, kind.getImplementingType()));
@@ -248,7 +255,7 @@ class EnumerationImplementingTypeTest {
 	void aNarrowedAwayEnumLoadsFromTheVanillaClass() {
 		Enumeration status = enumeration("UtEnumDoc", "status");
 		Class<?> withoutCustomer = status.getImplementingType();
-		runAs("other");
+		ModuleMemberTestSupport.bindCurrentCustomer("other");
 
 		assertAll(() -> assertSame(VanillaClassStatus.class, withoutCustomer),
 					() -> assertSame(VanillaClassStatus.class, status.getImplementingType()));
@@ -261,14 +268,14 @@ class EnumerationImplementingTypeTest {
 	@Test
 	void aNarrowedAwayEnumLoadsThroughTheVanillaExtensionForTheOverride() {
 		Enumeration status = enumeration("UtExtDoc", "status");
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
 		assertSame(ExtendedVanillaClassStatus.class, status.getImplementingType());
 	}
 
 	@Test
 	void anEnumAnOverrideAddsLoadsFromTheCustomersOverrideClass() {
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
 		assertSame(OverrideClassAdded.class, enumeration("UtEnumDoc", "added").getImplementingType());
 	}
@@ -280,11 +287,11 @@ class EnumerationImplementingTypeTest {
 	@Test
 	void anEnumTheOverrideAndTheVanillaClassDeclareLoadsForEachCustomer() {
 		Enumeration kept = enumeration("UtEnumDoc", "kept");
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 		Class<?> overriding = kept.getImplementingType();
-		runAs("other");
+		ModuleMemberTestSupport.bindCurrentCustomer("other");
 		Class<?> other = kept.getImplementingType();
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
 		assertAll(() -> assertSame(OverrideClassKept.class, overriding),
 					() -> assertSame(VanillaClassKept.class, other),
@@ -294,46 +301,100 @@ class EnumerationImplementingTypeTest {
 	/** A new customer document's class is in the customer's package. */
 	@Test
 	void anEnumOfANewCustomerDocumentLoadsFromItsClass() {
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 
 		assertSame(CustomerDocumentKind.class, enumeration("UtOnlyDoc", "kind").getImplementingType());
 	}
 
-	/** A reference to another document's enumeration loads it through that document's bean class. */
-	@Test
-	void anEnumReferencedFromAnotherDocumentLoadsFromThatDocumentsClasses() {
-		enumeration("UtEnumDoc", "kept");
-		Enumeration reference = enumeration("UtReferrer", "keptReference");
-		reference.setModuleRef(MODULE);
-		reference.setDocumentRef("UtEnumDoc");
-		reference.setAttributeRef("kept");
-		runAs(OVERRIDING_CUSTOMER);
-		Class<?> overriding = reference.getImplementingType();
-		runAs("other");
-
-		assertAll(() -> assertSame(OverrideClassKept.class, overriding),
-					() -> assertSame(VanillaClassKept.class, reference.getImplementingType()));
+	/**
+	 * Makes an enumeration of the referring document that references UtEnumDoc's enumeration.
+	 */
+	private Enumeration reference(String documentName, String name, String attributeRef) {
+		enumeration("UtEnumDoc", attributeRef);
+		Enumeration result = enumeration(documentName, name);
+		result.setModuleRef(MODULE);
+		result.setDocumentRef("UtEnumDoc");
+		result.setAttributeRef(attributeRef);
+		return result;
 	}
 
 	/**
-	 * A vanilla document's reference to an enumeration that the customer's override leaves out
-	 * loads it from the vanilla classes, which the vanilla document's class uses.
+	 * The type of the field that declares a reference in the bean class of its document for the
+	 * customer or the classes it extends, as a generated class imports it.
+	 */
+	private static Class<?> fieldType(String beanClassName, String fieldName) throws NoSuchFieldException {
+		Class<?> type = CLASSES.get(beanClassName);
+		while (type != null) {
+			for (java.lang.reflect.Field field : type.getDeclaredFields()) {
+				if (field.getName().equals(fieldName)) {
+					return field.getType();
+				}
+			}
+			type = type.getSuperclass();
+		}
+		throw new NoSuchFieldException(beanClassName + '.' + fieldName);
+	}
+
+	/**
+	 * A vanilla class's reference to another document's enumeration loads it from that document's
+	 * vanilla classes, as the vanilla class imports it, even for a customer that overrides that
+	 * document and declares the enumeration again.
 	 */
 	@Test
-	void aNarrowedAwayEnumReferencedFromAnotherDocumentLoadsFromTheVanillaClassForTheOverridingCustomer() {
-		enumeration("UtEnumDoc", "status");
-		Enumeration reference = enumeration("UtReferrer", "statusReference");
-		reference.setModuleRef(MODULE);
-		reference.setDocumentRef("UtEnumDoc");
-		reference.setAttributeRef("status");
-		runAs(OVERRIDING_CUSTOMER);
+	void anEnumReferencedFromAVanillaClassLoadsFromTheReferencedDocumentsVanillaClasses() throws Exception {
+		Enumeration reference = reference("UtReferrer", "keptReference", "kept");
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+		Class<?> overriding = reference.getImplementingType();
+		ModuleMemberTestSupport.bindCurrentCustomer("other");
+		Class<?> other = reference.getImplementingType();
 
-		assertSame(VanillaClassStatus.class, reference.getImplementingType());
+		assertAll(() -> assertSame(VanillaClassKept.class, overriding),
+					() -> assertSame(VanillaClassKept.class, other),
+					() -> assertSame(fieldType("modules.utmod.domain.UtReferrer", "keptReference"), overriding));
+	}
+
+	/** A customer's override that inherits a reference from the vanilla class gets the vanilla classes' enum. */
+	@Test
+	void anEnumReferencedFromAPropertyAnOverrideInheritsLoadsFromTheReferencedDocumentsVanillaClasses() throws Exception {
+		Enumeration reference = reference("UtInheritingReferrer", "keptReference", "kept");
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+
+		Class<?> result = reference.getImplementingType();
+
+		assertAll(() -> assertSame(VanillaClassKept.class, result),
+					() -> assertSame(fieldType("customers.utcust.modules.utmod.domain.UtInheritingReferrerOverride", "keptReference"), result));
+	}
+
+	/** A customer's override that declares a reference itself gets the customer's classes' enum. */
+	@Test
+	void anEnumReferencedFromAnOverridesOwnPropertyLoadsFromTheReferencedDocumentsCustomerClasses() throws Exception {
+		Enumeration reference = reference("UtOwnReferrer", "keptReference", "kept");
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+
+		Class<?> result = reference.getImplementingType();
+
+		assertAll(() -> assertSame(OverrideClassKept.class, result),
+					() -> assertSame(fieldType("customers.utcust.modules.utmod.domain.UtOwnReferrerOverride", "keptReference"), result));
+	}
+
+	/**
+	 * A customer class's reference to an enumeration that the customer's override of the referenced
+	 * document leaves out loads it from the vanilla classes, as only they declare it.
+	 */
+	@Test
+	void aNarrowedAwayEnumReferencedFromACustomerClassLoadsFromTheVanillaClass() throws Exception {
+		Enumeration reference = reference("UtOwnReferrer", "statusReference", "status");
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
+
+		Class<?> result = reference.getImplementingType();
+
+		assertAll(() -> assertSame(VanillaClassStatus.class, result),
+					() -> assertSame(fieldType("customers.utcust.modules.utmod.domain.UtOwnReferrerOverride", "statusReference"), result));
 	}
 
 	@Test
 	void anUndeclaredEnumThrowsAnEnumClassLoadingFailure() {
-		runAs(OVERRIDING_CUSTOMER);
+		ModuleMemberTestSupport.bindCurrentCustomer(OVERRIDING_CUSTOMER);
 		Enumeration missing = enumeration("UtEnumDoc", "missing");
 
 		MetaDataException e = assertThrows(MetaDataException.class, missing::getImplementingType);

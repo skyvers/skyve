@@ -253,7 +253,10 @@ public class Enumeration extends ConstrainableField {
 	 * and then up its superclasses, as far as they are in the <code>modules</code> and
 	 * <code>customers</code> packages. The bean class is the current user's customer's (see
 	 * {@link DocumentImpl#getBeanClass(Customer)}), or the vanilla bean class without a user, as
-	 * during domain generation. For a customer's override of a document, the classes are
+	 * during domain generation. A reference has the enum type that the class declaring its property
+	 * sees, so the referenced document's vanilla bean class is used when a vanilla class declares the
+	 * property, even for a customer that overrides the referenced document. For a customer's override
+	 * of a document, the classes are
 	 * <code>&lt;Document&gt;Override</code>, the vanilla <code>&lt;Document&gt;Extension</code> if
 	 * there is one, <code>&lt;Document&gt;Vanilla</code> if a customer's override leaves out vanilla
 	 * attributes, and the domain class. If none of the customer's classes declares it - a vanilla
@@ -291,6 +294,10 @@ public class Enumeration extends ConstrainableField {
 		// NB a persistence has no user until one is set
 		User user = AbstractPersistence.isPresent() ? AbstractPersistence.get().getUser() : null;
 		Customer customer = ((user == null) || (user.getCustomerName() == null)) ? null : user.getCustomer();
+		// A reference has the enum type that the class declaring this enumeration's property sees
+		if ((customer != null) && (target != this) && (! declaredByCustomerClass(customer))) {
+			customer = null;
+		}
 		Class<?> beanClass = declaringBeanClass(target, customer);
 		Class<?> result = generatedImplementingTypes.get(beanClass);
 		if (result == null) {
@@ -335,6 +342,37 @@ public class Enumeration extends ConstrainableField {
 			throw new MetaDataException("A problem was encountered loading enum " + toJavaIdentifier() +
 											" of document " + document.getOwningModuleName() + '.' + document.getName(), e);
 		}
+	}
+
+	/**
+	 * Determines whether the class that declares this enumeration's property, in its document's bean
+	 * class for a customer and the classes it extends, is one of the customer's own classes - a new
+	 * customer document's class, a <code>&lt;Document&gt;Override</code> or the customer's extension -
+	 * rather than a vanilla class. A property that references another enumeration has the enum type
+	 * its declaring class sees, so a vanilla class's property has the vanilla classes' enum, even for
+	 * a customer that overrides the referenced document.
+	 *
+	 * @param customer	the customer
+	 * @return	true if a customer class declares the property, or no document class does, as for a
+	 * 			dynamic document
+	 * @throws MetaDataException	if the bean class cannot be loaded, caused by the
+	 * 			{@link ClassNotFoundException}
+	 */
+	private boolean declaredByCustomerClass(@Nonnull Customer customer) {
+		if (! (getOwningDocument() instanceof DocumentImpl)) { // a document made in code - resolve it for the customer
+			return true;
+		}
+		String name = getName();
+		Class<?> type = declaringBeanClass(this, customer);
+		while ((type != null) && isDocumentClass(type.getName())) {
+			for (java.lang.reflect.Field field : type.getDeclaredFields()) {
+				if (field.getName().equals(name)) {
+					return type.getName().startsWith(ProvidedRepository.CUSTOMERS_NAME + '.');
+				}
+			}
+			type = type.getSuperclass();
+		}
+		return true;
 	}
 
 	/**

@@ -1187,8 +1187,14 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * customer document's class, or a <code>&lt;Document&gt;Override</code> that does not inherit
 	 * the attribute - otherwise <code>&lt;Document&gt;Vanilla</code> for a narrowed-away attribute,
 	 * otherwise the vanilla domain class.
+	 * <p/>
+	 * A property that references another document's enumeration has the enum type that its own
+	 * declaring class sees: a customer's class sees the customer's classes of the referenced document,
+	 * and a vanilla class the vanilla ones, even in a customer's mapping (see
+	 * {@link #customerClassDeclares(Customer, Document, String)}).
 	 *
-	 * @param customer	The customer whose class or mapping is generated, or null for a vanilla one.
+	 * @param customer	The customer whose own class declares the property typed by the enum, or null
+	 * 					when a vanilla class declares it.
 	 * @param targetDocument	The document that declares the enumeration attribute.
 	 * @param attributeName	The enumeration attribute's name.
 	 * @return	the declaring class name.
@@ -1219,6 +1225,32 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			return domainClassName + VANILLA_CLASS_SUFFIX;
 		}
 		return domainClassName;
+	}
+
+	/**
+	 * Determines whether a customer's own class for a document - a new customer document's class, or a
+	 * <code>&lt;Document&gt;Override</code> - declares a property, rather than inheriting it from the
+	 * vanilla classes. The type of an enumeration property that references another enumeration is then
+	 * named from the customer's classes of the referenced document, and otherwise from the vanilla
+	 * ones, as the property's declaring class imports it.
+	 *
+	 * @param customer	The customer whose mapping is generated, or null for the vanilla mapping.
+	 * @param document	The customer's version of the document.
+	 * @param propertyName	The property name.
+	 * @return	true if the customer has its own class for the document and it declares the property.
+	 */
+	private boolean customerClassDeclares(@Nullable Customer customer, @Nonnull Document document, @Nonnull String propertyName) {
+		if (customer == null) {
+			return false;
+		}
+		String moduleName = document.getOwningModuleName();
+		if (! customerHasOwnClass(customer, moduleName, document)) {
+			return false;
+		}
+		String documentName = document.getName();
+		DomainClass vanillaClass = vanillaClass(moduleName, documentName);
+		return (vanillaClass == null) || // a new customer document
+				(! overrideInheritedPropertyNames(moduleName, documentName, vanillaClass).contains(propertyName));
 	}
 
 	private @Nonnull TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(@Nonnull Document overriddenDocument) {
@@ -2064,7 +2096,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (targetDocument == null) { // cannot happen as the owning document is set when the document is converted
 						throw new IllegalStateException("Enumeration " + target.getName() + " has no owning document");
 					}
-					contents.append(enumerationDeclaringClassName(customer, targetDocument, target.getName()));
+					// the property's type is resolved from the class that declares the property
+					Customer declaringCustomer = customerClassDeclares(customer, document, enumerationName) ? customer : null;
+					contents.append(enumerationDeclaringClassName(declaringCustomer, targetDocument, target.getName()));
 					contents.append('$').append(enumeration.toJavaIdentifier());
 				}
 				contents.append("</param>\n");

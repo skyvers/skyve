@@ -706,6 +706,80 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertEquals(List.of(), compilationErrors(files)));
 	}
 
+	/**
+	 * Acme's override leaves out Order's status, and beta's keeps it, so beta's OrderOverride declares
+	 * its own Status. A property referencing it has the type its declaring class imports: vanilla
+	 * Line's, mapped in beta's copy of Line, and the one beta's override of Memo inherits, have
+	 * OrderVanilla's Status, and the one beta's override of Memo adds has OrderOverride's.
+	 */
+	@Test
+	void anEnumerationReferencedFromAnotherDocumentIsMappedFromTheClassesItsDeclaringClassImportsFrom() throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		order.putAttribute(enumeration(order, "status"));
+		DocumentImpl betaOrder = document("Order", "SALES_Order", null, null, "code");
+		betaOrder.putAttribute(enumeration(betaOrder, "status"));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity");
+		line.putRelation(association("order", "Order"));
+		line.putAttribute(orderStatusReference(line, "orderStatus"));
+		DocumentImpl memo = document("Memo", "SALES_Memo", null, null, "text");
+		memo.putRelation(association("order", "Order"));
+		memo.putAttribute(orderStatusReference(memo, "orderStatus"));
+		DocumentImpl betaMemo = document("Memo", "SALES_Memo", null, null, "text");
+		betaMemo.putRelation(association("order", "Order"));
+		betaMemo.putAttribute(orderStatusReference(betaMemo, "orderStatus"));
+		betaMemo.putAttribute(orderStatusReference(betaMemo, "priorStatus"));
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(order)
+				.vanilla(line)
+				.vanilla(memo)
+				.acme(document("Order", "SALES_Order", null, null, "code"))
+				.beta(betaOrder)
+				.beta(betaMemo));
+
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		String betaMemoOverride = files.get("customers/beta/modules/sales/domain/MemoOverride.java");
+		assertAll(
+				() -> assertTrue(files.get("customers/beta/modules/sales/domain/OrderOverride.java").contains("public enum Status implements Enumeration"), "beta's override declares it again"),
+				() -> assertEquals("modules.sales.domain.OrderVanilla$Status", enumClass(betaMapping, "betasalesLine", "orderStatus")),
+				() -> assertEquals("modules.sales.domain.OrderVanilla$Status", enumClass(betaMapping, "betasalesMemo", "orderStatus")),
+				() -> assertEquals("customers.beta.modules.sales.domain.OrderOverride$Status", enumClass(betaMapping, "betasalesMemo", "priorStatus")),
+				() -> assertTrue(betaMemoOverride.contains("import customers.beta.modules.sales.domain.OrderOverride.Status;"), betaMemoOverride),
+				() -> assertFalse(betaMemoOverride.contains("private Status orderStatus"), "inherited: " + betaMemoOverride),
+				() -> assertEquals(List.of(), mappingProblems(files)),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/** An enumeration of the document that references Order's status. */
+	private static Enumeration orderStatusReference(Document owningDocument, String name) {
+		Enumeration result = new Enumeration();
+		result.setOwningDocument(owningDocument);
+		result.setName(name);
+		result.setDisplayName(name);
+		result.setDocumentRef("Order");
+		result.setAttributeRef("status");
+		return result;
+	}
+
+	/** The enum class a mapping's entity maps an enumeration property to. */
+	private static String enumClass(String mapping, String entityName, String propertyName) throws Exception {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+		org.w3c.dom.Document xml = factory.newDocumentBuilder().parse(new ByteArrayInputStream(mapping.getBytes(StandardCharsets.UTF_8)));
+		NodeList classes = xml.getElementsByTagName("class");
+		for (int i = 0, l = classes.getLength(); i < l; i++) {
+			Element entity = (Element) classes.item(i);
+			if (entityName.equals(entity.getAttribute("entity-name"))) {
+				for (Node child = entity.getFirstChild(); child != null; child = child.getNextSibling()) {
+					if ((child instanceof Element property) && propertyName.equals(property.getAttribute("name"))) {
+						return property.getElementsByTagName("param").item(0).getTextContent().trim();
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	private static Enumeration enumeration(Document owningDocument, String name) {
 		Enumeration result = new Enumeration();
 		result.setOwningDocument(owningDocument);

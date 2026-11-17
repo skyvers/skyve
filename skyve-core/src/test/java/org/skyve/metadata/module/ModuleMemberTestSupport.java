@@ -99,14 +99,27 @@ public final class ModuleMemberTestSupport {
 	}
 
 	/**
-	 * Binds a persistence to the thread whose user has the returned mocked customer. Call
-	 * {@link #clearPersistenceThreadLocal()} after each test that calls this.
+	 * Binds a persistence to the thread whose user has the returned mocked customer, named "demo".
+	 * Call {@link #clearPersistenceThreadLocal()} after each test that calls this.
 	 *
 	 * @return	the current user's mocked customer
 	 */
 	public static Customer bindCurrentCustomer() {
+		return bindCurrentCustomer("demo");
+	}
+
+	/**
+	 * Binds a persistence to the thread whose user has the returned mocked customer of the given name,
+	 * replacing any bound before. Call {@link #clearPersistenceThreadLocal()} after each test that calls this.
+	 *
+	 * @param customerName	the name the customer and the user's customer name return
+	 * @return	the current user's mocked customer
+	 */
+	public static Customer bindCurrentCustomer(String customerName) {
 		Customer customer = mock(Customer.class);
+		when(customer.getName()).thenReturn(customerName);
 		User user = mock(User.class);
+		when(user.getCustomerName()).thenReturn(customerName);
 		when(user.getCustomer()).thenReturn(customer);
 		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
 		persistence.setUser(user);
