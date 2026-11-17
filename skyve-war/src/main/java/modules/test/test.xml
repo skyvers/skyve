@@ -38,6 +38,7 @@
 		<document ref="OverrideEnumExtended" />
 		<document ref="OverrideEnumJoinedBase" />
 		<document ref="OverrideEnumJoinedSub" />
+		<document ref="OverrideEnumReferrer" />
 		<document ref="OverrideExtended" />
 		<document ref="OverrideJoinedBase" />
 		<document ref="OverrideJoinedSub" />

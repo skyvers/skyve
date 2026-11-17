@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			The test customer's override of OverrideExtended, adding customerText.
+			The test customer's override of OverrideExtended, adding customerText. The test customer's own OverrideExtendedExtension extends its generated class.
 		]]>
 	</documentation>
 	<persistent name="TEST_OverrideExtended" />

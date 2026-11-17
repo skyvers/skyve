@@ -68,6 +68,7 @@ import modules.admin.domain.AdminRole;
 import modules.admin.domain.User;
 import modules.test.OverrideEnumExtended.OverrideEnumExtendedExtension;
 import modules.test.OverrideExtended.OverrideExtendedExtension;
+import modules.test.OverrideExtended.OverrideExtendedFactory;
 import modules.test.OverrideNarrowedExtended.OverrideNarrowedExtendedExtension;
 import modules.test.OverrideProxied.OverrideProxiedExtension;
 import modules.test.OverrideProxied.OverrideProxiedFactory;
@@ -77,6 +78,7 @@ import modules.test.domain.OverrideEnumExtendedVanilla;
 import modules.test.domain.OverrideEnumJoinedBase;
 import modules.test.domain.OverrideEnumJoinedSub;
 import modules.test.domain.OverrideEnumJoinedSubVanilla;
+import modules.test.domain.OverrideEnumReferrer;
 import modules.test.domain.OverrideExtended;
 import modules.test.domain.OverrideJoinedBase;
 import modules.test.domain.OverrideJoinedSub;
@@ -419,8 +421,12 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 					() -> assertFalse(resultJoined instanceof OverrideJoinedSubOverride));
 	}
 
+	/**
+	 * The test customer's own OverrideExtendedExtension extends its generated OverrideExtendedOverride,
+	 * which extends the vanilla extension, and its beans and mapping are the customer's extension's.
+	 */
 	@Test
-	void anOverrideOfADocumentWithAnExtensionExtendsTheExtension() throws Exception {
+	void anOverrideWithItsOwnExtensionUsesItsExtension() throws Exception {
 		Customer test = runAs(TEST_CUSTOMER);
 		OverrideExtendedOverride bean = newInstance(TestDocument.OVERRIDE_EXTENDED);
 		bean.setText("text");
@@ -428,10 +434,26 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 
 		OverrideExtended result = saveAndRetrieve(TestDocument.OVERRIDE_EXTENDED, bean);
 
-		OverrideExtendedOverride override = assertInstanceOf(OverrideExtendedOverride.class, result);
-		assertAll(() -> assertSame(OverrideExtendedOverride.class, beanClass(TestDocument.OVERRIDE_EXTENDED, test)),
-					() -> assertEquals("customer", override.getCustomerText()),
-					() -> assertEquals("Extended text", override.describe()));
+		customers.test.modules.test.OverrideExtended.OverrideExtendedExtension extension =
+				assertInstanceOf(customers.test.modules.test.OverrideExtended.OverrideExtendedExtension.class, result);
+		assertAll(() -> assertSame(customers.test.modules.test.OverrideExtended.OverrideExtendedExtension.class,
+										beanClass(TestDocument.OVERRIDE_EXTENDED, test)),
+					() -> assertSame(customers.test.modules.test.OverrideExtended.OverrideExtendedExtension.class, bean.getClass()),
+					() -> assertEquals("customer", extension.getCustomerText()),
+					() -> assertEquals("Extended text for customer", extension.describe()));
+	}
+
+	/**
+	 * A vanilla data factory returning the vanilla extension builds the beans of the test customer's
+	 * own extension, which extends it through the generated OverrideExtendedOverride.
+	 */
+	@Test
+	void aDataFactoryAppliesToACustomersOwnExtension() {
+		runAs(TEST_CUSTOMER);
+		OverrideExtended bean = new DataBuilder().fixture(FixtureType.crud).build(TestDocument.OVERRIDE_EXTENDED);
+
+		assertAll(() -> assertSame(customers.test.modules.test.OverrideExtended.OverrideExtendedExtension.class, bean.getClass()),
+					() -> assertEquals(OverrideExtendedFactory.CRUD_TEXT, bean.getText()));
 	}
 
 	@Test
@@ -851,5 +873,52 @@ class CustomerOverrideH2Test extends AbstractH2Test {
 		Customer test2 = runAs(TEST2_CUSTOMER);
 		assertStatusEnum(test2, TestDocument.OVERRIDE_ENUM_JOINED_SUB, OverrideEnumJoinedSubVanilla.Status.class);
 		assertStatusEnum(test2, TestDocument.OVERRIDE_ENUM_EXTENDED, OverrideEnumExtendedVanilla.Status.class);
+	}
+
+	/**
+	 * The test customer's override of OverrideNarrowed leaves out status, so OverrideNarrowedVanilla
+	 * declares it, and the test2 customer's override keeps it, so test2's generated
+	 * OverrideNarrowedOverride declares its own Status. The vanilla OverrideEnumReferrer's
+	 * narrowedStatus references it, so its class has OverrideNarrowedVanilla's Status, which test2's
+	 * copy of OverrideEnumReferrer maps, and which it converts values to, at run time too.
+	 */
+	@Test
+	void aVanillaReferenceToAnEnumAnOverrideDeclaresAgainHasTheVanillaEnum() throws Exception {
+		Customer test2 = runAs(TEST2_CUSTOMER);
+		OverrideNarrowed narrowed = newInstance(TestDocument.OVERRIDE_NARROWED);
+		narrowed.setText("narrowed");
+		OverrideEnumReferrer bean = newInstance(TestDocument.OVERRIDE_ENUM_REFERRER);
+		bean.setText("referrer");
+		bean.setNarrowed(narrowed);
+		Binder.convertAndSet(bean, OverrideEnumReferrer.narrowedStatusPropertyName, "closed");
+
+		OverrideEnumReferrer result = saveAndRetrieve(TestDocument.OVERRIDE_ENUM_REFERRER, bean);
+
+		Attribute narrowedStatus = TestDocument.OVERRIDE_ENUM_REFERRER.toDocument(test2).getAttribute(OverrideEnumReferrer.narrowedStatusPropertyName);
+		assertNotNull(narrowedStatus);
+		assertAll(() -> assertEquals("customers.test2.modules.test.domain.OverrideNarrowedOverride",
+										beanClass(TestDocument.OVERRIDE_NARROWED, test2).getName()),
+					() -> assertSame(OverrideEnumReferrer.class.getMethod("getNarrowedStatus").getReturnType(), narrowedStatus.getImplementingType()),
+					() -> assertSame(OverrideNarrowedVanilla.Status.class, narrowedStatus.getImplementingType()),
+					() -> assertSame(OverrideNarrowedVanilla.Status.closed, result.getNarrowedStatus()),
+					() -> assertEquals("narrowed", result.getNarrowed().getText()));
+	}
+
+	/**
+	 * A customer's constant domain values come from its own enum whoever the current user is: the test2
+	 * customer's override of OverrideNarrowed adds the value pending to status, which the vanilla enum
+	 * that bizhub's users have does not.
+	 */
+	@Test
+	void aCustomersConstantDomainValuesComeFromItsOwnEnum() throws Exception {
+		runAs(CUSTOMER);
+		Customer test2 = customer(TEST2_CUSTOMER);
+		Document document = TestDocument.OVERRIDE_NARROWED.toDocument(test2);
+		Attribute status = document.getAttribute("status");
+		assertNotNull(status);
+
+		List<DomainValue> values = test2.getConstantDomainValues(null, document.getOwningModuleName(), document.getName(), status);
+
+		assertEquals(List.of("open", "closed", "pending"), values.stream().map(DomainValue::getCode).toList());
 	}
 }

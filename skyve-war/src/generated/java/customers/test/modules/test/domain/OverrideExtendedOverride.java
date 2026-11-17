@@ -9,14 +9,14 @@ import modules.test.OverrideExtended.OverrideExtendedExtension;
 /**
  * Override Extended
  * <br/>
- * The test customer's override of OverrideExtended, adding customerText.
+ * The test customer's override of OverrideExtended, adding customerText. The test customer's own OverrideExtendedExtension extends its generated class.
  * 
  * @stereotype "persistent"
  */
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public class OverrideExtendedOverride extends OverrideExtendedExtension {
+public abstract class OverrideExtendedOverride extends OverrideExtendedExtension {
 	/**
 	 * For Serialization
 	 * @hidden

@@ -191,7 +191,7 @@
 		<filter name="testtestOverrideEnumJoinedBaseUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="customers.test.modules.test.domain.OverrideExtendedOverride" table="TEST_OverrideExtended" entity-name="testtestOverrideExtended">
+	<class name="customers.test.modules.test.OverrideExtended.OverrideExtendedExtension" table="TEST_OverrideExtended" entity-name="testtestOverrideExtended">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
@@ -281,6 +281,28 @@
 			<filter name="testtestOverrideMappedSubDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
 			<filter name="testtestOverrideMappedSubUserIdFilter" condition="bizUserId=:userIdParam"/>
 		</class>
+
+	<class name="modules.test.domain.OverrideEnumReferrer" table="TEST_OverrideEnumReferrer" entity-name="testtestOverrideEnumReferrer">
+		<id name="bizId" length="36" />
+		<version name="bizVersion" unsaved-value="null" />
+		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />
+		<property name="bizKey" length="1024" not-null="true" />
+		<property name="bizCustomer" length="50" not-null="true" />
+		<property name="bizFlagComment" length="1024" />
+		<property name="bizDataGroupId" length="36" />
+		<property name="bizUserId" length="36" not-null="true" />
+		<property name="text" length="100" />
+		<many-to-one name="narrowed" entity-name="testtestOverrideNarrowed" column="narrowed_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_OverrideEnumReferrer_narrowed"/>
+		<property name="narrowedStatus" length="6">
+			<type name="Enum">
+				<param name="enumClass">modules.test.domain.OverrideNarrowedVanilla$Status</param>
+			</type>
+		</property>
+		<filter name="testtestOverrideEnumReferrerNoneFilter" condition="1=0"/>
+		<filter name="testtestOverrideEnumReferrerCustomerFilter" condition="bizCustomer=:customerParam"/>
+		<filter name="testtestOverrideEnumReferrerDataGroupIdFilter" condition="bizDataGroupId=:dataGroupIdParam"/>
+		<filter name="testtestOverrideEnumReferrerUserIdFilter" condition="bizUserId=:userIdParam"/>
+	</class>
 
 	<class name="customers.test.modules.test.domain.OverrideNarrowedOverride" table="TEST_OverrideNarrowed" entity-name="testtestOverrideNarrowed">
 		<id name="bizId" length="36" />
@@ -494,6 +516,16 @@
 		<filter-param name="dataGroupIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testtestOverrideMappedSubUserIdFilter">
+		<filter-param name="userIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumReferrerNoneFilter" />
+	<filter-def name="testtestOverrideEnumReferrerCustomerFilter">
+		<filter-param name="customerParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumReferrerDataGroupIdFilter">
+		<filter-param name="dataGroupIdParam" type="string"/>
+	</filter-def>
+	<filter-def name="testtestOverrideEnumReferrerUserIdFilter">
 		<filter-param name="userIdParam" type="string"/>
 	</filter-def>
 	<filter-def name="testtestOverrideNarrowedNoneFilter" />

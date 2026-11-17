@@ -12,8 +12,9 @@ import org.skyve.impl.domain.AbstractPersistentBean;
 /**
  * Override Narrowed
  * <br/>
- * Customer override fixture: the test customer's override leaves out dropped.
+ * Customer override fixture: the test customer's override leaves out dropped and status, and the test2 customer's keeps them and adds a value to status. OverrideEnumReferrer references status.
  * 
+ * @depend - - - Status
  * @stereotype "persistent"
  */
 @XmlType

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -17,6 +18,7 @@ import org.skyve.metadata.view.View.ViewType;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.Contact;
+import modules.admin.domain.Contact.ContactType;
 import util.AbstractH2TestDispose;
 
 /**
@@ -68,6 +70,29 @@ class MetaDataEvictionH2Test extends AbstractH2TestDispose {
 		assertAll(() -> assertSame(ContactExtension.class, beanClass),
 					() -> assertNotSame(before, after),
 					() -> assertSame(ContactExtension.class, after.getBeanClass(evictedCustomer)));
+	}
+
+	/**
+	 * An enumeration caches its enum classes, which go with its document when eviction loads it again.
+	 */
+	@Test
+	void customerEvictionLoadsTheEnumerationsAgainWithoutTheirCachedEnumClasses() {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
+		Customer customer = repository.getCustomer(CUSTOMER);
+		assertNotNull(customer, "customer");
+		Enumeration before = (Enumeration) contact(repository, customer).getAttribute(Contact.contactTypePropertyName);
+		assertNotNull(before, "before");
+		Class<?> enumClass = before.getImplementingType(customer);
+
+		repository.evictCachedMetaData(customer);
+
+		Customer evictedCustomer = repository.getCustomer(CUSTOMER);
+		assertNotNull(evictedCustomer, "customer");
+		Enumeration after = (Enumeration) contact(repository, evictedCustomer).getAttribute(Contact.contactTypePropertyName);
+		assertNotNull(after, "after");
+		assertAll(() -> assertSame(ContactType.class, enumClass),
+					() -> assertNotSame(before, after),
+					() -> assertSame(ContactType.class, after.getImplementingType(evictedCustomer)));
 	}
 
 	private static DocumentImpl contact(ProvidedRepository repository, Customer customer) {

@@ -78,6 +78,8 @@ public enum TestDocument implements ModuleDocument {
 	OVERRIDE_ENUM_JOINED_BASE("OverrideEnumJoinedBase"),
 	/** The "OverrideEnumJoinedSub" document. */
 	OVERRIDE_ENUM_JOINED_SUB("OverrideEnumJoinedSub"),
+	/** The "OverrideEnumReferrer" document. */
+	OVERRIDE_ENUM_REFERRER("OverrideEnumReferrer"),
 	/** The "OverrideExtended" document. */
 	OVERRIDE_EXTENDED("OverrideExtended"),
 	/** The "OverrideJoinedBase" document. */
