@@ -10,7 +10,7 @@ import org.skyve.impl.metadata.user.SuperUser;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.RDBMSDynamicPersistence;
 import org.skyve.impl.persistence.hibernate.HibernateContentPersistence;
-import org.skyve.impl.sail.execution.pf.PrimeFacesSeleneseExecutor;
+import org.skyve.impl.sail.execution.pf.PrimeFacesInlineWebDriverExecutor;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.pipeline.component.SkyveComponentBuilderChain;
@@ -76,18 +76,10 @@ public class Interpreter {
 			}
 */
 			Automation automation = XMLMetaData.unmarshalSAILString("/Users/mike/dtf/skyve/skyve-tools/test.xml");
-			PrimeFacesSeleneseExecutor executor = new PrimeFacesSeleneseExecutor(new SkyveComponentBuilderChain(),
-																					new ResponsiveLayoutBuilder());
+			PrimeFacesInlineWebDriverExecutor executor = new PrimeFacesInlineWebDriverExecutor(new SkyveComponentBuilderChain(),
+																								new ResponsiveLayoutBuilder());
 			automation.execute(executor);
 			System.out.println(executor);
-/*
-			PrimeFacesInlineSeleneseExecutor executor = new PrimeFacesInlineSeleneseExecutor(new SkyveComponentBuilderChain(),
-																								new ResponsiveLayoutBuilder());
-			for (Automation automation : suite) {
-				automation.execute(executor);
-			}
-			System.out.println(executor);
-*/
 		}
 		finally {
 			if (weld != null) {
