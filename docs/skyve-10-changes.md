@@ -51,6 +51,18 @@ These notes collect release-ready framework changes introduced for Skyve 10.
   - Making thumbnails still takes CPU. Rate limit the `content` and `resources` URLs, and any app servlet that makes thumbnails, at your reverse proxy.
 - Image shape fixes: SmartClient list grid thumbnail columns keep tall images inside the column's size; a CSS typo let them overflow. SmartClient data grid dynamic images take their width from their pixel width, not their pixel height. Contact images in the PrimeFaces templates and the SmartClient header now fill the round avatar, cropped, instead of being stretched.
 - The thin environment banners, shown when `environment.identifier` is set, now also appear on the sign-in, error and other JSP pages, as well as on PrimeFaces and SmartClient views. The identifier is HTML-escaped. A blank identifier shows no banner.
+- Number converters, list filters and date filters now agree across Java, SmartClient, the Vue list grid and PrimeFaces. See the Converters subsection of [SAIL](sail.md) for the rules.
+  - Behaviour change: the number converters read the whole text, trimmed. Text after the number (`12abc`), an exponent (`1E3`), a `+` on a decimal, digits other than 0-9 and a `,` that is not between digits (`1,`, `,1`) are refused, where the start of the text was read before. A value that rounds to zero shows no sign (`0.00`, not `-0.00`).
+  - Behaviour change: the number converters, `DecimalFormatter` and so the number formatters write and read English numbers (`1,234.50`) whatever the JVM's locale. A German JVM wrote `1.234,50` and read `1.5` as 15.
+  - Behaviour change: a data file import (admin's Import Export, a tag's uploaded criteria and similar uploads) with a decimal converter still reads the number at the start of a cell (`1,234.50 kg` is 1234.50), and reads a spreadsheet's cells as English text.
+  - Behaviour change: `Decimal5TimeDuration` and `TimeDurationFormatter` round the minutes once, half up, from the exact fraction of an hour (2.4999 hours is `2:30`, -0.01 is `-0:01`), and `-0:30` reads as -0.5.
+  - Behaviour change: list filters' negations (not equal, not contains, not starts or ends with, not in, and Match None of a positive condition) now list the rows with no value in the column, as SmartClient's own evaluation does, including through an optional association and in archived (Lucene) lists. Match None negates a nested group as a whole, and not in an empty set lists every row.
+  - Behaviour change: `between` is supported and, like `iBetween`, excludes both ends, as SmartClient defines them; `iBetween` included them. A range under Match None lists the rows outside it.
+  - Behaviour change: in SmartClient, 12 hour times show `AM`/`PM` in upper case for every locale (`02:47 PM`), and a duration field refuses decimal hours without a colon (`2.5`).
+  - Behaviour change: in SmartClient, a date time or timestamp whose converter shows only the date is filtered by the whole local day (also between days, and in exports, charts and Tag All), keeps its time when saved untyped, and a list that filters by such a column always fetches from the server.
+  - Behaviour change: in SmartClient, the `Decimal2DollarsAndCentsAbsolute` column is filtered by signed dollars (`-7.50`), and the filter row shows an error for a number its converter refuses rather than dropping it.
+  - Behaviour change: PrimeFaces date pickers read a typed `am` or `pm` in either case, and write 12 hour times as the converters do.
+  - Behaviour change: the Vue list grid's date and time filter calendars take the column's converter format, a date-only date time column is filtered by the day, and a negative that rounds to zero shows `0.00`.
 
 ## Model-backed Lookup Descriptions
 

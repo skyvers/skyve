@@ -575,11 +575,12 @@ takes). Values are written the same way in both renderers:
   value the column's converter refuses (`+5`, `1e3`, `$5` in a column that is
   not dollars) shows an error on the cell and the list is not filtered; in its
   advanced filter, such a value is not kept: the clause shows nothing and does
-  not filter, or, for a range's start or end, it can show its previous value
-  again and filter by that. `between` is exclusive at both ends and
+  not filter, or, for a range's start, it can show its previous value again
+  and filter by that. `between` is exclusive at both ends and
   `betweenInclusive` inclusive, as SmartClient defines them, on the server too.
-  A negation (`notEquals`, not contains, Match None) also lists the rows with
-  no value in the column.
+  A negation (`notEquals`, not contains, not in, and Match None of a positive
+  condition) also lists the rows with no value in the column; Match None of a
+  negation, or of `isBlank`, does not.
 
 A step whose operator the column cannot take fails and names the operators it
 can take. Filter, clear and sort steps fail if an error message shows
@@ -1340,15 +1341,15 @@ The rules the converters scripts check, and what changed for users:
   domain's description now matches the rows outside it, and Match None of a
   description that matches nothing lists every row; rows with no value now
   appear under not-equal, not-contains (and not starts or ends with), not-in and
-  Match None filters, as SmartClient's own evaluation and in-memory lists have
-  them, in SmartClient and the Vue list grid alike; a spreadsheet read by a data
-  file import (as above) is read as English text whatever the JVM's locale. The
-  number
-  converters (and `DecimalFormatter`, so the number formatters) write and read
-  English numbers whatever the JVM's locale. Before, a German JVM showed
-  `1.234,50` and read `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the
-  Vue list grid showed `1,234.50`), and whether `1E3` or `1e3` was read as 1000
-  depended on the locale.
+  Match None of a positive condition, as SmartClient's own evaluation and
+  in-memory lists have them, in SmartClient, the Vue list grid and archived
+  lists alike; a spreadsheet read by a data file import (as above) is read as
+  English text whatever the JVM's locale. The number converters (and
+  `DecimalFormatter`, so the number formatters) write and read English numbers
+  whatever the JVM's locale. Before, a German JVM showed `1.234,50` and read
+  `1.5` as 15 and `12.5%` as 1.25 (while SmartClient and the Vue list grid
+  showed `1,234.50`), and whether `1E3` or `1e3` was read as 1000 depended on
+  the locale.
 
 ### Admin: application suite
 
