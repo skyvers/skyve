@@ -60,6 +60,29 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		closeable.close();
 	}
 
+	/** A date parameter's name has ASCII digits in a JVM whose locale writes other digits (ar-EG writes ١ for 1). */
+	@Test
+	void testGetSubstitutedQueryParameterNameIsAsciiInAnArabicJvm() {
+		java.util.Locale display = java.util.Locale.getDefault(java.util.Locale.Category.DISPLAY);
+		java.util.Locale format = java.util.Locale.getDefault(java.util.Locale.Category.FORMAT);
+		java.util.Locale locale = java.util.Locale.getDefault();
+		java.util.Locale.setDefault(java.util.Locale.forLanguageTag("ar-EG"));
+		try {
+			when(bean.getQuery()).thenReturn("SELECT * FROM ADM_SecurityUser where createdDateTime < {DATE}");
+
+			SubstitutedQueryResult result = bean.getSubstitutedQuery();
+
+			String name = result.getParameters().keySet().iterator().next();
+			assertTrue(name.matches("d_\\d{12}_1") && name.chars().allMatch(c -> c < 128), name);
+			assertThat(result.getQuery(), containsString(":" + name));
+		}
+		finally {
+			java.util.Locale.setDefault(locale);
+			java.util.Locale.setDefault(java.util.Locale.Category.DISPLAY, display);
+			java.util.Locale.setDefault(java.util.Locale.Category.FORMAT, format);
+		}
+	}
+
 	@Test
 	void testGetSubstitutedQueryOneParameter() {
 		// setup the test data
