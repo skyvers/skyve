@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	PrimeFaces conformance for dataGridLink: the Actions Fixture's Run From Row link in a row of its rows grid, declined and
-	confirmed, run by PrimeFacesKitchenSinkSailIT.rowLink. The grid zooms into a row when the row is selected, so this also
-	checks that clicking the link does not select its row.
+	PrimeFaces conformance script for dataGridLink, a member of kitchensink.suite.xml: the Actions Fixture's Run From Row
+	link in a row of its rows grid, declined and confirmed, by the row's text and by its number. The grid zooms into a row
+	when the row is selected, so this also checks that clicking the link does not select its row.
 -->
 <automation uxui="tablet"
 			userAgentType="tablet"
@@ -25,6 +25,9 @@
 			<dataGridLink binding="rows" rowContaining="SAIL link row {run}" text="Run From Row" confirm="false" />
 			<testGridRows binding="rows" rowContaining="Run From Row ran" maxRows="0" />
 			<dataGridLink binding="rows" rowContaining="SAIL link row {run}" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+			<comment>The same link, by the row's number</comment>
+			<dataGridLink binding="rows" row="0" text="Run From Row" />
 			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
 			<captureCell binding="rows" rowContaining="SAIL link row {run}" column="outcome" variable="outcome" pattern="Run From (\w+) ran" />
 			<testGridRows binding="rows" rowContaining="Run From {var:outcome} ran" minRows="1" maxRows="1" />

@@ -295,6 +295,9 @@
 			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="selection" value="SAIL filter {run} b" operator="equals" />
 			<testGridRows module="kitchensink" query="qModelLookupFixtures" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL association {run}" minRows="1" maxRows="1" />
+			<comment>A cell of a list grid named by its query</comment>
+			<captureCell module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL association {run}" column="name" variable="association" />
+			<testGridRows module="kitchensink" query="qModelLookupFixtures" rowContaining="{var:association}" minRows="1" maxRows="1" />
 			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="selection" />
 			<comment>contains on the description through the association is typed into the filter row</comment>
 			<listGridFilter module="kitchensink" query="qModelLookupFixtures" column="selection.description" value="{run} b" />
@@ -305,7 +308,11 @@
 			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" minRows="3" maxRows="3" />
 			<listGridFilter module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" column="description" value="SAIL filter {run} c" operator="equals" />
 			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" minRows="1" maxRows="1" />
+			<captureCell module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" row="0" column="description" variable="modelRow" />
 			<listGridClearFilter module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" />
+			<listGridSort module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" column="description" descending="true" />
+			<listGridSelect module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" row="0" />
+			<listGridTool module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" tool="refresh" />
 			<comment>A view opened by URL has no Delete button, so delete from the zoomed-in view</comment>
 			<listGridZoom module="kitchensink" query="qModelLookupFixtures" rowContaining="SAIL association {run}" />
 			<delete />

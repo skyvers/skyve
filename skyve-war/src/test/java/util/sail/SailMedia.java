@@ -325,6 +325,15 @@ public final class SailMedia {
 	}
 
 	/**
+	 * Returns the script that the runs started on this thread come from (see {@link #label(String)}).
+	 *
+	 * @return the label, or null outside a suite
+	 */
+	static @Nullable String label() {
+		return LABEL.get();
+	}
+
+	/**
 	 * Starts a unit of automation runs on this thread, such as a workflow, whose media is kept or deleted together: with
 	 * {@value SailSettings#KEEP_MEDIA}{@code =failed}, a passed run's folders are deleted only when the whole unit
 	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself.

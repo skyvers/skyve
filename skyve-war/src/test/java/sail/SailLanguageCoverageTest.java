@@ -52,19 +52,12 @@ class SailLanguageCoverageTest {
 			Map.entry("abstractAction@testSuccess", "the abstract base type's attribute; used on the concrete action steps"),
 			Map.entry("procedure", "the type of <before> and <after>, not an element a script writes"),
 			// suite features that the shipped suites do not need
-			Map.entry("member@requires", "no shipped member depends on another (Mike: never fake one); SailSuiteTest shows it"),
+			Map.entry("member@requires", "no shipped member depends on another, and a requirement must be genuine; SailSuiteTest shows it"),
 			Map.entry("setUp@requires", "each set-up requires the earlier ones without naming them; no shipped set-up needs more"),
 			// the test server's data and configuration
 			Map.entry("login@customer", "the test server has a default customer, so its sign in page has no customer field"),
-			Map.entry("testDataEnter@fixture", "names a custom DataBuilder fixture; the kitchen sink and admin modules define none"),
-			Map.entry("navigateMap@refreshTimeInSeconds", "the kitchen sink's map shows fixed data, so it has nothing to refresh"),
-			Map.entry("navigateMap@showRefreshControls", "the kitchen sink's map shows fixed data, so it has nothing to refresh"),
-			// list models: the kitchen sink and admin menus list documents and queries; a model shows only inside a view
-			Map.entry("captureCell@model", "no menu item lists a list model; a model's grid in a view is named by binding"),
-			Map.entry("listGridNew@model", "no menu item lists a list model; a model's grid in a view is named by binding"),
-			Map.entry("listGridSelect@model", "no menu item lists a list model; a model's grid in a view is named by binding"),
-			Map.entry("listGridSort@model", "no menu item lists a list model; a model's grid in a view is named by binding"),
-			Map.entry("listGridTool@model", "no menu item lists a list model; a model's grid in a view is named by binding"),
+			// list models: no kitchen sink or admin menu item lists a model; ModelLookupFixture's view shows one
+			Map.entry("listGridNew@model", "the kitchen sink's only list model grid (ModelLookupFixture) has showAdd=\"false\""),
 			Map.entry("navigateCalendar@model", "the kitchen sink's calendar is of a document; no menu item lists a list model"),
 			Map.entry("navigateMap@model", "the kitchen sink's map is of a document; no menu item lists a list model"),
 			Map.entry("navigateTree@model", "the kitchen sink's tree is of a query; no menu item lists a list model"),
@@ -74,8 +67,6 @@ class SailLanguageCoverageTest {
 			Map.entry("navigateCalendar@query", "the kitchen sink's calendar menu item is of a document"),
 			Map.entry("navigateMap@query", "the kitchen sink's map menu item is of a document"),
 			Map.entry("navigateTree@document", "the kitchen sink's tree menu item is of a query"),
-			Map.entry("captureCell@query", "the shipped captures name their grid by document or by binding"),
-			Map.entry("listGridTool@document", "the shipped list grid tools name their grid by query"),
 			Map.entry("pushListContext@query", "the shipped list contexts are pushed by document"),
 			Map.entry("pushEditContext@createView", "the context steps are written by the SAIL generator for compiled executors;"
 													+ " a shipped script's contexts come from its navigate steps"),
@@ -83,8 +74,6 @@ class SailLanguageCoverageTest {
 			Map.entry("pushEditContext@userAgentType", "a pushed context takes the automation's user agent unless a generated script says otherwise"),
 			Map.entry("pushListContext@uxui", "a pushed context takes the automation's UX/UI unless a generated script says otherwise"),
 			Map.entry("pushListContext@userAgentType", "a pushed context takes the automation's user agent unless a generated script says otherwise"),
-			Map.entry("dataGridLink@row", "the shipped row links pick their row by its text (rowContaining)"),
-			Map.entry("dataGridEdit@rowContaining", "the shipped data grid edits pick their row by number"),
 			Map.entry("dataEnter@navigateToWidget", "no executor reads it (the interpreted ones find the widget wherever it is); kept for older scripts"),
 			// defaults that the kitchen sink has no reason to state
 			Map.entry("ok@confirm", "the kitchen sink's OK buttons ask for no confirmation"),

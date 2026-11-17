@@ -3,6 +3,7 @@ package util;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.skyve.web.UserAgentType;
 
 import jakarta.annotation.Nonnull;
@@ -115,6 +116,17 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	}
 
 	/**
+	 * Runs a SAIL file or classpath resource as the kind of document it is: a {@code <suite>}, a {@code <workflow>} or an
+	 * {@code <automation>} (see {@link SailSuite#runEntry(String, util.sail.SailWorkflow)}).
+	 *
+	 * @param entry	a file path, or a classpath resource
+	 * @throws AssertionError	if it fails
+	 */
+	protected void sailRun(@Nonnull String entry) {
+		SailSuite.runEntry(entry, workflow);
+	}
+
+	/**
 	 * Runs a SAIL {@code <suite>} file; see {@link #sailSuite(String)}.
 	 *
 	 * @param file	the suite's path, absolute or relative to the working directory
@@ -122,6 +134,12 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	 */
 	protected void sailSuiteFile(@Nonnull String file) {
 		SailSuite.file(file, workflow).run();
+	}
+
+	/** Stops any browser a suite left open (a suite stops its own, so this is for a test that ended early). */
+	@AfterEach
+	void closeBrowser() {
+		workflow.closeBrowser();
 	}
 
 	@AfterAll

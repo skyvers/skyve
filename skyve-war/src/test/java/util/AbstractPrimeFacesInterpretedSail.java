@@ -49,7 +49,7 @@ public abstract class AbstractPrimeFacesInterpretedSail extends AbstractH2Test {
 
 	/**
 	 * Returns the test's code-level settings, to change in a test or its constructor, e.g.
-	 * {@code settings().testStrategy(TestStrategy.Verify).evidence(SailSettings.Evidence.ALL)}.
+	 * {@code settings().testStrategy(TestStrategy.Verify).evidence(org.skyve.metadata.sail.language.Suite.Evidence.all)}.
 	 *
 	 * @return the settings builder, shared by every script this test runs
 	 */

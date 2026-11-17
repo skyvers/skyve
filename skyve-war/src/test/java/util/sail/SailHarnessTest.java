@@ -6,6 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -36,7 +39,7 @@ class SailHarnessTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void theTestStrategyOverrideIgnoresCaseAndRejectsUnknownNames() {
-		assertNull(InterpretedWebDriverExecutor.testStrategyOverride(sources(Map.of())));
+		assertNull(InterpretedWebDriverExecutor.testStrategyOverride(SailSettings.Environment.none()));
 		assertEquals(TestStrategy.Verify, InterpretedWebDriverExecutor.testStrategyOverride(sources(Map.of(SailSettings.TEST_STRATEGY, " verify "))));
 		SailSettings.Environment check = sources(Map.of(SailSettings.TEST_STRATEGY, "Check"));
 		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> InterpretedWebDriverExecutor.testStrategyOverride(check));
@@ -69,7 +72,7 @@ class SailHarnessTest {
 	void theRestoreRunsAfterALaterFailureButNotAfterAFailedPrecondition() {
 		List<String> ran = new ArrayList<>();
 		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml", "00-backup.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml")
-										.environment(sources(Map.of()));
+										.environment(SailSettings.Environment.none());
 		assertThrows(AssertionError.class, () -> suite.run(file -> {
 			ran.add(file);
 			if (file.endsWith("01.xml")) {
@@ -103,7 +106,7 @@ class SailHarnessTest {
 		List<String> ran = new ArrayList<>();
 		SailSettings.Code code = SailSettings.code().suiteOnly("01");
 		new SailSuite("s/").setUp("00-pre.xml").files("01.xml", "02.xml").restore("99.xml", "00-pre.xml").settings(code)
-							.environment(sources(Map.of())).run(ran::add);
+							.environment(SailSettings.Environment.none()).run(ran::add);
 		assertEquals(List.of("s/00-pre.xml", "s/01.xml", "s/99.xml"), ran);
 	}
 
@@ -111,7 +114,7 @@ class SailHarnessTest {
 	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
 	void theSuiteRefusesATestStrategyOverrideInCode() {
 		List<String> ran = new ArrayList<>();
-		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").environment(sources(Map.of()));
+		SailSuite suite = new SailSuite("s/").setUp("00-pre.xml").files("01.xml").environment(SailSettings.Environment.none());
 		suite.settings().testStrategy(TestStrategy.Verify);
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> suite.run(ran::add));
 		assertAll(() -> assertTrue(e.getMessage().contains("unset sail.testStrategy (it is Verify, from code)"), e.getMessage()),
@@ -155,15 +158,38 @@ class SailHarnessTest {
 	void onlyABrowserLevelChangeRestartsTheBrowser() {
 		BrowserConfiguration configuration = new BrowserConfiguration().baseUrl("http://localhost:1/skyve/");
 		PrimeFacesSelenide selenide = new PrimeFacesSelenide();
-		selenide.settings = configuration.resolve(sources(Map.of()));
-		SailSettings longer = configuration.settings(SailSettings.code().timeoutSeconds(90)).resolve(sources(Map.of()));
+		selenide.settings = configuration.resolve(SailSettings.Environment.none());
+		org.openqa.selenium.WebDriver driver = mock(org.openqa.selenium.WebDriver.class, RETURNS_DEEP_STUBS);
+		selenide.driver = driver;
+		SailSettings longer = configuration.settings(SailSettings.code().timeoutSeconds(90)).resolve(SailSettings.Environment.none());
 		String sameBrowser = selenide.browserChange(longer, configuration);
 		selenide.useSettings(longer, configuration); // no change: no browser is started or stopped
-		SailSettings headed = configuration.settings(SailSettings.code().headless(false)).resolve(sources(Map.of()));
+		SailSettings headed = configuration.settings(SailSettings.code().headless(false)).resolve(SailSettings.Environment.none());
 		String change = selenide.browserChange(headed, configuration.userAgentString("UA").resolution(10, 20));
 		assertAll(() -> assertNull(sameBrowser),
 					() -> assertEquals(java.time.Duration.ofSeconds(90), selenide.timeout()),
+					() -> verify(driver.manage().timeouts()).pageLoadTimeout(java.time.Duration.ofSeconds(90)),
 					() -> assertEquals("headless true -> false, user agent null -> UA, resolution null -> (10, 20)", change));
+	}
+
+	/** The older builder holds the restore back when its requires names a file that is not in the suite, as it did. */
+	@Test
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
+	void theOlderBuildersRestoreRequiringAnUnknownFileIsHeldBack() {
+		List<String> ran = new ArrayList<>();
+		new SailSuite("s/").setUp("00-pre.xml").files("01.xml").restore("99.xml", "00-typo.xml")
+							.environment(SailSettings.Environment.none()).run(ran::add);
+		assertEquals(List.of("s/00-pre.xml", "s/01.xml"), ran);
+	}
+
+	/** The older builder runs its set-ups and restore when sail.suite.only matches no file, as it did. */
+	@Test
+	@SuppressWarnings({"static-method", "deprecation"}) // the older SailSuite builder, kept working on the new engine
+	void theOlderBuilderRunsItsBracketWhenOnlyMatchesNoFile() {
+		List<String> ran = new ArrayList<>();
+		new SailSuite("s/").setUp("00-pre.xml").files("01.xml").restore("99.xml", "00-pre.xml")
+							.environment(sources(Map.of(SailSettings.SUITE_ONLY, "07"))).run(ran::add);
+		assertEquals(List.of("s/00-pre.xml", "s/99.xml"), ran);
 	}
 
 	/** Sources with only the given system properties: no environment variables or properties file. */
