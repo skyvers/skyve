@@ -1017,7 +1017,9 @@ public class SmartClientListServlet extends HttpServlet {
 	 * Adds a simple criterion (a field name, an operator and a value or range) to the filter, combined with the
 	 * criteria before it by the compound operator (a negation under not, see {@link #addNegation}).
 	 */
-	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // the criterion and the criteria method's context; complexity OK
+	// S2637: Sonar flags the calls with the criterion's binding, a local made from the @Nonnull field name (and
+	// non-null after each change), as possibly null; S112: it throws what the criteria method throws
+	@SuppressWarnings({"java:S107", "java:S112", "java:S2637", "java:S3776", "java:S6541"}) // the criterion and the criteria method's context; complexity OK
 	private static void addSimpleCriterion(@Nonnull String fieldName,
 											@Nonnull Map<String, Object> criterion,
 											@Nonnull Module module,

@@ -1035,13 +1035,6 @@ class LuceneFilterTest {
                   .longValue();
     }
 
-    /**
-     * Create an index document with a string and double field
-     * 
-     * @param text
-     * @param doub
-     * @return
-     */
     /** A negation alone (only MUST_NOT clauses) matches the documents it does not exclude, not nothing. */
     @Test
     void testNotEqualsAlone() {
@@ -1094,6 +1087,13 @@ class LuceneFilterTest {
         assertEquals(3, newIndexAndQuery(docs, filter).size());
     }
 
+    /**
+     * Create an index document with a string and double field
+     * 
+     * @param text
+     * @param doub
+     * @return
+     */
     private Document createDoc(String text, double doub) {
 
         Document doc = new Document();
