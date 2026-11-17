@@ -46,7 +46,6 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 	private static final String QUERY = "qListGridFixtureVueAttributes";
 	private static final Set<String> ALL = Set.of("NV a", "NV b", "NV c", "NV n");
 
-	private Customer customer;
 	private Module module;
 	private Document document;
 	private List<Bean> rows;
@@ -57,7 +56,7 @@ class SmartClientListServletNullsH2Test extends AbstractH2Test {
 	 */
 	@BeforeEach
 	void makeRows() {
-		customer = CORE.getCustomer();
+		Customer customer = CORE.getCustomer();
 		module = customer.getModule(ListAttributes.MODULE_NAME);
 		document = module.getDocument(customer, ListAttributes.DOCUMENT_NAME);
 		Persistence persistence = CORE.getPersistence();

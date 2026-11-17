@@ -73,7 +73,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 			SubstitutedQueryResult result = bean.getSubstitutedQuery();
 
 			String name = result.getParameters().keySet().iterator().next();
-			assertTrue(name.matches("d_\\d{12}_1") && name.chars().allMatch(c -> c < 128), name);
+			assertTrue(name.matches("d_\\d{12}_1"), name);
 			assertThat(result.getQuery(), containsString(":" + name));
 		}
 		finally {

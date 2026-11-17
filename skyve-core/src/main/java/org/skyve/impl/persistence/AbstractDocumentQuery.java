@@ -49,7 +49,6 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private boolean distinct;
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
-	// the references left outer joined from the driving entity
 	private final Set<String> leftOuterJoins = new TreeSet<>();
 	private DocumentFilter filter = null;
 	// projection (bean.<binding> or projectedAlias) -> order

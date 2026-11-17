@@ -30,7 +30,6 @@ import org.skyve.util.Binder;
  */
 final class ListServletCriteria {
 	private ListServletCriteria() {
-		// static methods only
 	}
 
 	/**
