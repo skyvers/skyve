@@ -881,13 +881,19 @@
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="2" maxRows="2" />
+			<comment>Record c's -7.50 (stored when it was created) became 7.50 when it was saved again without typing (OK): PrimeFaces sends every field's shown text, and an absolute field shows the magnitude</comment>
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="0" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" maxRows="0" />
 			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="3" maxRows="3" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="7.50" operator="equals" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
-			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="greaterThan" />
-			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
-			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
-			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
 			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" />
 			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" value="3" operator="equals" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />

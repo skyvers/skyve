@@ -882,6 +882,13 @@
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="2" maxRows="2" />
+			<comment>Record c's -7.50 (stored when it was created) was kept when it was saved again without typing (OK), as its field was not focused. The filter row edits signed dollars: -7.50 is -7.5</comment>
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="0" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="-7.50" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
 			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="lessThan" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
 			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
