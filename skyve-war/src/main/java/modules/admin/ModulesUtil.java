@@ -26,6 +26,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Time;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import modules.admin.Group.GroupExtension;
 import modules.admin.domain.Group;
 import modules.admin.domain.GroupRole;
@@ -807,7 +808,7 @@ public class ModulesUtil {
 	 * @param moreRoles	any further roles the group must have
 	 * @return	the configured group
 	 */
-	public static GroupExtension configureGroup(String name, AssignableRole role, AssignableRole... moreRoles) {
+	public static @Nonnull GroupExtension configureGroup(@Nonnull String name, @Nonnull AssignableRole role, @Nonnull AssignableRole... moreRoles) {
 		String[] roleNames = new String[moreRoles.length + 1];
 		roleNames[0] = role.assignedRoleName();
 		for (int i = 0, l = moreRoles.length; i < l; i++) {

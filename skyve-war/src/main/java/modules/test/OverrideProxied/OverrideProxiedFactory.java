@@ -9,6 +9,7 @@ import modules.test.domain.OverrideProxied;
 /**
  * Creates test fixtures for {@link OverrideProxied}, returning the extension class as UserFactory does.
  */
+@SuppressWarnings("java:S1118") // DataBuilder instantiates data factories through their public no-argument constructor
 public class OverrideProxiedFactory {
 	/** The text every CRUD fixture has. */
 	public static final String CRUD_TEXT = "factory";

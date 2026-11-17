@@ -1,5 +1,6 @@
 package modules.admin.UserLoginRecord;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -43,6 +44,7 @@ class UserLoginRecordBizletH2Test extends AbstractH2Test {
 		// preSave schedules this job when a login comes from a new country
 		JobMetaData job = AdminJob.J_DIFFERENT_COUNTRY_LOGIN_NOTIFICATION.toJob(CORE.getCustomer());
 
-		assertEquals(DifferentCountryLoginNotificationJob.class.getName(), job.getClassName());
+		assertAll(() -> assertEquals(DifferentCountryLoginNotificationJob.JOB_NAME, job.getName()),
+					() -> assertEquals(DifferentCountryLoginNotificationJob.class.getName(), job.getClassName()));
 	}
 }
