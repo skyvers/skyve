@@ -942,7 +942,9 @@ public class SmartClientListServlet extends HttpServlet {
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
-	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
+	// S2637: a simple criterion's binding is its field name, not null in that branch, but Sonar's flow analysis does not
+	// carry that through this method (it flagged the calls even with Objects.requireNonNull)
+	@SuppressWarnings({"java:S107", "java:S2637", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
 	private static void addAdvancedFilterCriteriaToQueryInternal(@Nonnull Module module,
 																	@Nonnull Document document,
 																	@Nonnull User user,
@@ -1009,7 +1011,7 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 			else { // simple criteria
-				String binding = fieldName;
+				String binding = fieldName; // not null: a criterion without a field name is a group (above)
 				Object value = criterion.get(VALUE_FIELD);
 				String valueString = null;
 				if (value != null) {
@@ -1348,24 +1350,11 @@ public class SmartClientListServlet extends HttpServlet {
 			case regexp, iregexp:
 				// nothing to do
 				break;
-			case containsPattern:
-			case iContainsPattern:
-			case matchesPattern:
-			case iMatchesPattern:
-			case startsWithPattern:
-			case iStartsWithPattern:
-			case endsWithPattern:
-			case iEndsWithPattern:
+			case containsPattern, iContainsPattern, matchesPattern, iMatchesPattern,
+					startsWithPattern, iStartsWithPattern, endsWithPattern, iEndsWithPattern:
 				// nothing to do
 				break;
-			case geoContains:
-			case geoCrosses:
-			case geoDisjoint:
-			case geoEquals:
-			case geoIntersects:
-			case geoOverlaps:
-			case geoTouches:
-			case geoWithin:
+			case geoContains, geoCrosses, geoDisjoint, geoEquals, geoIntersects, geoOverlaps, geoTouches, geoWithin:
 				// not negated yet: a geometry criterion under Match None adds nothing
 				break;
 			case and, or, not:
