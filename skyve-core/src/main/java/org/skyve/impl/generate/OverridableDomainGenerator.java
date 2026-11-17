@@ -1,5 +1,8 @@
 package org.skyve.impl.generate;
 
+import static org.skyve.impl.metadata.model.document.DocumentImpl.OVERRIDE_CLASS_SUFFIX;
+import static org.skyve.impl.metadata.model.document.DocumentImpl.VANILLA_CLASS_SUFFIX;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -101,20 +104,6 @@ import jakarta.annotation.Nullable;
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate fragments of generated source and mapping output.
 public final class OverridableDomainGenerator extends DomainGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(OverridableDomainGenerator.class);
-
-	/**
-	 * The suffix of the concrete vanilla class generated when a customer override leaves out a vanilla
-	 * attribute and so makes the vanilla domain class abstract - <code>modules.&lt;m&gt;.domain.&lt;Document&gt;Vanilla</code>.
-	 * {@link DocumentImpl#getBeanClass} relies on it.
-	 */
-	private static final String VANILLA_CLASS_SUFFIX = "Vanilla";
-
-	/**
-	 * The suffix of the class generated for a customer's override of a vanilla document -
-	 * <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code>.
-	 * {@link DocumentImpl#getBeanClass} relies on it.
-	 */
-	private static final String OVERRIDE_CLASS_SUFFIX = "Override";
 
 	/**
 	 * Simple container for generated document class metadata.
@@ -455,8 +444,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				
 				String documentName = document.getName();
-				TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
-				DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
+				DomainClass domainClass = vanillaClass(moduleName, documentName);
 
 				// Generate base
 				Path javaFilePath = Paths.get(generatedSrcPath, packagePath, documentName + ".java");
@@ -1152,38 +1140,45 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Returns the fully qualified name of the class that declares a generated enumeration: the vanilla
-	 * domain class, or - for an enumeration attribute the vanilla domain class does not have - the class
-	 * generated beside it: the mapping customer's <code>&lt;Document&gt;Override</code> if it declares it,
-	 * otherwise <code>&lt;Document&gt;Vanilla</code>, which declares the narrowed-away attributes.
+	 * Returns the fully qualified name of the class that declares a generated enumeration, as
+	 * {@link Enumeration#getImplementingType()} finds it at run time: the first class, from the
+	 * document's class for the customer up, that declares the enumeration attribute. That is the
+	 * customer's class if it has its own class for the document and declares the attribute - a new
+	 * customer document's class, or a <code>&lt;Document&gt;Override</code> that does not inherit
+	 * the attribute - otherwise <code>&lt;Document&gt;Vanilla</code> for a narrowed-away attribute,
+	 * otherwise the vanilla domain class.
 	 *
-	 * @param customer	The customer whose mapping this is, or null for the vanilla mapping.
+	 * @param customer	The customer whose class or mapping is generated, or null for a vanilla one.
 	 * @param targetDocument	The document that declares the enumeration attribute.
 	 * @param attributeName	The enumeration attribute's name.
-	 * @param encapsulatingClassName	The vanilla domain class name the enumeration would be nested in.
 	 * @return	the declaring class name.
 	 */
 	private @Nonnull String enumerationDeclaringClassName(@Nullable Customer customer,
 															@Nonnull Document targetDocument,
-															@Nonnull String attributeName,
-															@Nonnull String encapsulatingClassName) {
+															@Nonnull String attributeName) {
 		String moduleName = targetDocument.getOwningModuleName();
 		String documentName = targetDocument.getName();
-		TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
-		DomainClass vanillaClass = (domainClasses == null) ? null : domainClasses.get(documentName);
-		if ((vanillaClass == null) || vanillaClass.attributes.containsKey(attributeName)) {
-			return encapsulatingClassName;
+		DomainClass vanillaClass = vanillaClass(moduleName, documentName);
+		if ((customer != null) && customerHasOwnClass(customer, moduleName, targetDocument)) {
+			String customerClassName = customerDomainClassName(customer.getName(), moduleName, documentName);
+			if (vanillaClass == null) { // a new customer document
+				return customerClassName;
+			}
+			// the target document can be the vanilla one, for an enumeration referenced from elsewhere
+			Document customerDocument = customer.getModule(moduleName).getDocument(customer, documentName);
+			if ((customerDocument.getAttribute(attributeName) != null) &&
+					(! overrideInheritedPropertyNames(moduleName, documentName, vanillaClass).contains(attributeName))) {
+				return customerClassName + OVERRIDE_CLASS_SUFFIX;
+			}
 		}
-		boolean narrowedAway = vanillaClass.narrowedAwayPropertyNames.contains(attributeName);
-		if ((customer != null) &&
-				customerPackagePathPrefix(customer, moduleName, targetDocument).startsWith(ProvidedRepository.CUSTOMERS_NAME) &&
-				((! narrowedAway) || (! overrideInheritedPropertyNames(moduleName, documentName, vanillaClass).contains(attributeName)))) {
-			return new StringBuilder(128).append(ProvidedRepository.CUSTOMERS_NAME).append('.')
-											.append(customer.getName()).append('.')
-											.append(encapsulatingClassName)
-											.append(OVERRIDE_CLASS_SUFFIX).toString();
+		String domainClassName = new StringBuilder(128).append(ProvidedRepository.MODULES_NAME).append('.')
+														.append(moduleName).append('.')
+														.append(ProvidedRepository.DOMAIN_NAME).append('.')
+														.append(documentName).toString();
+		if ((vanillaClass != null) && vanillaClass.narrowedAwayPropertyNames.contains(attributeName)) {
+			return domainClassName + VANILLA_CLASS_SUFFIX;
 		}
-		return encapsulatingClassName + VANILLA_CLASS_SUFFIX;
+		return domainClassName;
 	}
 
 	private @Nonnull TreeMap<String, AttributeType> getOverriddenDocumentExtraProperties(@Nonnull Document overriddenDocument) {
@@ -2036,7 +2031,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					if (targetDocument == null) { // cannot happen as the owning document is set when the document is converted
 						throw new IllegalStateException("Enumeration " + target.getName() + " has no owning document");
 					}
-					contents.append(enumerationDeclaringClassName(customer, targetDocument, target.getName(), enumeration.getEncapsulatingClassName()));
+					contents.append(enumerationDeclaringClassName(customer, targetDocument, target.getName()));
 					contents.append('$').append(enumeration.toJavaIdentifier());
 				}
 				contents.append("</param>\n");
@@ -2461,8 +2456,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// A document in an inheritance hierarchy is mapped within the whole hierarchy, which is copied
 			// into the customer mapping from the document at its top, as the vanilla mapping does
-			TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
-			DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
+			DomainClass domainClass = vanillaClass(moduleName, documentName);
 			Extends inherits = document.getExtends();
 			if ((inherits != null) && (domainClass != null) && (document.getPersistent() != null)) { // a vanilla derivation
 				Document baseDocument = module.getDocument(customer, inherits.getDocumentName());
@@ -2528,18 +2522,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @return	<code>customers.&lt;c&gt;.modules.</code> or <code>modules.</code>.
 	 */
 	private @Nonnull String customerPackagePathPrefix(@Nonnull Customer customer, @Nonnull String moduleName, @Nonnull Document document) {
-		String documentName = document.getName();
-		String key = new StringBuilder(64).append(ProvidedRepository.MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).toString();
-		String newKey = repository.vtable(customer.getName(), key);
-		boolean customerClass = false;
-		if ((newKey != null) && newKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) {
-			// this is either an override or a totally new document
-			TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(moduleName);
-			boolean overridden = (documentClasses != null) && documentClasses.containsKey(documentName);
-			// map the customer class if the override has one
-			customerClass = (! overridden) || overrideNeedsCustomerClass(customer, document);
-		}
-		if (customerClass) {
+		if (customerHasOwnClass(customer, moduleName, document)) {
 			return new StringBuilder(64).append(ProvidedRepository.CUSTOMERS_NAME)
 										.append('.')
 										.append(customer.getName())
@@ -2551,6 +2534,58 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
+	 * Determines whether a customer has its own class for a document, which its mapping maps and its
+	 * classes refer to: a new customer document's class, or the <code>&lt;Document&gt;Override</code>
+	 * of an override that needs one (see {@link #overrideNeedsCustomerClass(Customer, Document)}).
+	 *
+	 * @param customer	The customer.
+	 * @param moduleName	The name of the module the document is in.
+	 * @param document	The customer's version of the document.
+	 * @return	true if the customer has its own class for the document.
+	 */
+	private boolean customerHasOwnClass(@Nonnull Customer customer, @Nonnull String moduleName, @Nonnull Document document) {
+		String documentName = document.getName();
+		String key = new StringBuilder(64).append(ProvidedRepository.MODULES_NAMESPACE).append(moduleName).append('/').append(documentName).toString();
+		String newKey = repository.vtable(customer.getName(), key);
+		if ((newKey == null) || (! newKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE))) {
+			return false;
+		}
+		// this is either an override or a totally new document
+		return (vanillaClass(moduleName, documentName) == null) || overrideNeedsCustomerClass(customer, document);
+	}
+
+	/**
+	 * Names the class generated for a customer's new document,
+	 * <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;</code>, which with
+	 * {@link DocumentImpl#OVERRIDE_CLASS_SUFFIX} names the class generated for a customer's override.
+	 *
+	 * @param customerName	The customer name.
+	 * @param moduleName	The module name.
+	 * @param documentName	The document name.
+	 * @return	the fully qualified class name.
+	 */
+	private static @Nonnull String customerDomainClassName(@Nonnull String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
+		return new StringBuilder(128).append(ProvidedRepository.CUSTOMERS_NAME).append('.')
+										.append(customerName).append('.')
+										.append(ProvidedRepository.MODULES_NAME).append('.')
+										.append(moduleName).append('.')
+										.append(ProvidedRepository.DOMAIN_NAME).append('.')
+										.append(documentName).toString();
+	}
+
+	/**
+	 * Returns the vanilla domain class metadata of a document.
+	 *
+	 * @param moduleName	The document's module name.
+	 * @param documentName	The document name.
+	 * @return	the vanilla domain class, or null for a new customer document or a module with no domain classes.
+	 */
+	private @Nullable DomainClass vanillaClass(@Nonnull String moduleName, @Nonnull String documentName) {
+		TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
+		return (domainClasses == null) ? null : domainClasses.get(documentName);
+	}
+
+	/**
 	 * Determines whether the vanilla domain class of a document is abstract because a customer
 	 * override leaves out one of its attributes - so it is mapped as <code>&lt;Document&gt;Vanilla</code>.
 	 *
@@ -2559,8 +2594,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * @return	true if the vanilla class is narrowed.
 	 */
 	private boolean isNarrowed(@Nonnull String moduleName, @Nonnull String documentName) {
-		TreeMap<String, DomainClass> domainClasses = moduleDocumentVanillaClasses.get(moduleName);
-		DomainClass domainClass = (domainClasses == null) ? null : domainClasses.get(documentName);
+		DomainClass domainClass = vanillaClass(moduleName, documentName);
 		return (domainClass != null) && domainClass.isAbstract;
 	}
 
@@ -3246,23 +3280,11 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		String moduleName = document.getOwningModuleName();
 		String documentName = document.getName();
-		Map<String, DomainClass> documentVanillaClasses = moduleDocumentVanillaClasses.get(moduleName);
-		if ((documentVanillaClasses == null) || (! documentVanillaClasses.containsKey(documentName))) {
-			return null; // a new customer document has no override class
-		}
-		String key = ProvidedRepository.MODULES_NAMESPACE + moduleName + '/' + documentName;
-		String documentPackagePath = repository.vtable(customer.getName(), key);
-		if ((documentPackagePath == null) ||
-				(! documentPackagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE)) ||
-				(! overrideNeedsCustomerClass(customer, document))) {
+		if ((vanillaClass(moduleName, documentName) == null) || // a new customer document has no override class
+				(! customerHasOwnClass(customer, moduleName, document))) {
 			return null;
 		}
-		return new StringBuilder(128).append(ProvidedRepository.CUSTOMERS_NAME).append('.')
-										.append(customer.getName()).append('.')
-										.append(ProvidedRepository.MODULES_NAME).append('.')
-										.append(moduleName).append('.')
-										.append(ProvidedRepository.DOMAIN_NAME).append('.')
-										.append(documentName).append(OVERRIDE_CLASS_SUFFIX).toString();
+		return customerDomainClassName(customer.getName(), moduleName, documentName) + OVERRIDE_CLASS_SUFFIX;
 	}
 
 	/**
@@ -3829,8 +3851,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		StringBuilder attributes = new StringBuilder(1024);
 		StringBuilder methods = new StringBuilder(2048);
 
-		TreeMap<String, DomainClass> documentClasses = moduleDocumentVanillaClasses.get(module.getName());
-		DomainClass documentClass = (documentClasses == null) ? null : documentClasses.get(documentName);
+		DomainClass documentClass = vanillaClass(module.getName(), documentName);
 		// the properties the class being generated inherits from the vanilla classes it extends
 		final Set<String> baseClassPropertyNames = (documentClass == null) ?
 														Collections.emptySet() :
@@ -3985,10 +4006,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	
 						if (enumeration.getAttributeRef() != null) { // this is a reference
 							if (enumeration.getDocumentRef() != null) { // references a different document
-								StringBuilder fullyQualifiedEnumName = new StringBuilder(64);
-								fullyQualifiedEnumName.append(enumeration.getEncapsulatingClassName());
-								fullyQualifiedEnumName.append('.').append(propertySimpleClassName);
-								imports.add(fullyQualifiedEnumName.toString());
+								// import the enum from the class that declares it
+								Enumeration target = enumeration.getTarget();
+								Document targetDocument = target.getOwningDocument();
+								if (targetDocument == null) { // cannot happen as the owning document is set when the document is converted
+									throw new IllegalStateException("Enumeration " + target.getName() + " has no owning document");
+								}
+								imports.add(enumerationDeclaringClassName(customer, targetDocument, target.getName()) + '.' + propertySimpleClassName);
 							}
 						}
 						else { // this is an inline definition

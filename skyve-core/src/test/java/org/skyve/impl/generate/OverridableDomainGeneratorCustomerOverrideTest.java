@@ -674,6 +674,57 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertTrue(betaMapping.contains("customers.beta.modules.sales.domain.OrderOverride$Status"), betaMapping));
 	}
 
+	@Test
+	void aNewCustomerDocumentsEnumerationIsMappedToItsClass() throws Exception {
+		DocumentImpl quote = document("Quote", "SALES_Quote", null, null, "code");
+		quote.putAttribute(enumeration(quote, "status"));
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(quote));
+
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(files.get("customers/acme/modules/sales/domain/Quote.java").contains("public enum Status implements Enumeration"), "the new document's class declares it"),
+				() -> assertTrue(acmeMapping.contains("<param name=\"enumClass\">customers.acme.modules.sales.domain.Quote$Status</param>"), acmeMapping),
+				() -> assertEquals(List.of(), mappingProblems(files)),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/**
+	 * Line's status references Order's, which acme's override leaves out, so the vanilla OrderVanilla
+	 * declares it, for Line's class and for acme's copy of Line, which refers to the overridden Order.
+	 */
+	@Test
+	void anEnumerationReferencedFromAnotherDocumentIsImportedAndMappedFromTheClassThatDeclaresIt() throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		order.putAttribute(enumeration(order, "status"));
+		DocumentImpl line = document("Line", "SALES_Line", null, null, "quantity");
+		line.putRelation(association("order", "Order"));
+		Enumeration lineStatus = new Enumeration();
+		lineStatus.setOwningDocument(line);
+		lineStatus.setName("orderStatus");
+		lineStatus.setDisplayName("orderStatus");
+		lineStatus.setDocumentRef("Order");
+		lineStatus.setAttributeRef("status");
+		line.putAttribute(lineStatus);
+
+		Map<String, String> files = generate(new Fixture()
+				.vanilla(order)
+				.vanilla(line)
+				.acme(document("Order", "SALES_Order", null, null, "code")));
+
+		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(files.get("modules/sales/domain/Line.java").contains("import modules.sales.domain.OrderVanilla.Status;"), files.get("modules/sales/domain/Line.java")),
+				() -> assertTrue(vanillaMapping.contains("<param name=\"enumClass\">modules.sales.domain.OrderVanilla$Status</param>"), vanillaMapping),
+				() -> assertTrue(acmeMapping.contains("entity-name=\"acmesalesLine\""), acmeMapping),
+				() -> assertFalse(acmeMapping.contains("OrderOverride$Status"), acmeMapping),
+				() -> assertEquals(List.of(), mappingProblems(files)),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
 	private static Enumeration enumeration(Document owningDocument, String name) {
 		Enumeration result = new Enumeration();
 		result.setOwningDocument(owningDocument);
@@ -808,7 +859,24 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 	@Test
 	void hierarchyRefusalsIgnoreTheValidationFlag() {
 		Fixture fixture = hierarchy(ExtensionStrategy.joined, true, true, false);
-		assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture, false));
+		assertTrue(e.getMessage().contains("Customer acme overrides document sales.Base, which other documents extend"), e.getMessage());
+	}
+
+	/**
+	 * Validation checks the metadata and the extensions' superclasses, so generating without it
+	 * writes exactly the same files.
+	 */
+	@Test
+	void validationOnAndOffGenerateTheSameFiles() throws Exception {
+		Fixture fixture = narrowedOrder()
+				.vanilla(document("Receipt", "SALES_Receipt", null, null, "code", "description"))
+				.extension("Receipt", "ReceiptVanilla")
+				.acme(document("Receipt", "SALES_Receipt", null, null, "code"));
+		fixture.useBetaLine();
+
+		Map<String, String> validated = generate(fixture, true);
+		assertEquals(validated, generate(fixture, false));
 	}
 
 	@Test
