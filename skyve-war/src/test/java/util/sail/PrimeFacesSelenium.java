@@ -359,6 +359,12 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		}
 	}
 
+	/**
+	 * Indicates whether the page shows no error or fatal message. The messages element is always on a view, and shows
+	 * information messages such as "Saved" too, so only its error and fatal messages count.
+	 *
+	 * @return	false if the page shows an error or fatal message (printed to standard error)
+	 */
 	public boolean verifySuccess() {
 		WebElement messages = byId("messages");
 		if ((messages != null) && messages.isDisplayed()) {
@@ -368,8 +374,8 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 				System.err.println("Not successful");
 				System.err.println(innerHTML);
 				System.err.println("**************");
+				return false;
 			}
-			return false;
 		}
 
 		return true;

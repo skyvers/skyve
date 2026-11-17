@@ -79,9 +79,29 @@ class SailExecutorTest {
 		String script = executor.toString();
 		assertThat(script, containsString("private void testCreateContact()"));
 		assertThat(script, containsString("trace(\"hello\");"));
-		assertThat(script, containsString("pause(\"250\");"));
+		assertThat(script, containsString("pause(250L);"));
 		assertThat(script, containsString("@Test"));
 		assertThat(script, containsString("testCreateContact();"));
+	}
+
+	/**
+	 * A comment goes into a generated string literal, so its quotes, backslashes and line breaks are escaped; no
+	 * comment is a null literal.
+	 */
+	@Test
+	void webDriverExecutorCommentsAreJavaLiterals() {
+		TestWebDriverExecutor executor = new TestWebDriverExecutor();
+		Comment comment = new Comment();
+		comment.setComment("say \"hi\" \\ to\nall");
+
+		executor.open("Comments");
+		executor.executeComment(comment);
+		executor.executeComment(new Comment());
+		executor.close();
+
+		String script = executor.toString();
+		assertThat(script, containsString("trace(\"say \\\"hi\\\" \\\\ to\\nall\");"));
+		assertThat(script, containsString("trace(null);"));
 	}
 
 	@Test

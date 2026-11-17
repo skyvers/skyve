@@ -1,5 +1,6 @@
 package modules.admin.ControlPanel.actions;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,13 +22,8 @@ import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 
 /**
- * Tests for the ExecuteSAIL action validation logic.
- * 
- * Note: The full execution logic is not tested here because it involves:
- * - FacesUtil.withSailFacesContextIfNeeded() (FacesContext setup)
- * - CORE.getPersistence() and CORE.getRepository() (static calls)
- * - XMLMetaData.unmarshalSAILString() (XML parsing)
- * - Dynamic class loading and instantiation
+ * Tests the ExecuteSAIL action's validation, and that a failed execution goes into the results.
+ * {@link DownloadSAILH2Test} executes real SAIL with each executor.
  */
 @SuppressWarnings("java:S120") // Module test packages mirror the generated document package.
 class ExecuteSAILTest extends AbstractH2Test {
@@ -198,6 +194,26 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName));
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName));
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName));
+	}
+
+	/**
+	 * The Execute button shows what went wrong in the results, on the Results tab, rather than as an error message.
+	 */
+	@Test
+	void anExecutionThatFailsPutsItsStackTraceInTheResults() {
+		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		controlPanel.setSailUser(user);
+		controlPanel.setSailBaseUrl(BASE_URL);
+		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
+		controlPanel.setSailComponentBuilder(COMPONENT_BUILDER);
+		controlPanel.setSailLayoutBuilder(LAYOUT_BUILDER);
+		controlPanel.setSail("<notSail/>");
+
+		ExecuteSAIL.executeSAIL(controlPanel);
+
+		String results = controlPanel.getUnescapedResults();
+		assertAll(() -> assertTrue((results != null) && results.contains("Exception"), () -> String.valueOf(results)),
+					() -> assertEquals(Integer.valueOf(2), controlPanel.getTabIndex()));
 	}
 
 	/**

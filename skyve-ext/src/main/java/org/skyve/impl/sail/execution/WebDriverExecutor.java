@@ -3,6 +3,7 @@ package org.skyve.impl.sail.execution;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
@@ -43,10 +44,21 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	/**
 	 * Emits a trace comment statement into generated test code.
 	 *
-	 * @param comment Comment text.
+	 * @param comment Comment text, which may hold quotes, backslashes or line breaks (see {@link #literal(String)}).
 	 */
 	protected void comment(@Nullable String comment) {
-		indent().append("trace(\"").append(comment).append("\");").newline();
+		indent().append("trace(").append(literal(comment)).append(");").newline();
+	}
+
+	/**
+	 * Returns a Java string literal for a value from a SAIL script, so that the value's quotes, backslashes, line breaks
+	 * and other special characters cannot break the generated code.
+	 *
+	 * @param value	the value, as the script has it
+	 * @return	the value in double quotes, escaped as Java source; or {@code null} (unquoted) for a null value
+	 */
+	protected static @Nonnull String literal(@Nullable String value) {
+		return (value == null) ? "null" : ('"' + StringEscapeUtils.escapeJava(value) + '"');
 	}
 	
 	/**
@@ -84,13 +96,13 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	}
 	
 	/**
-	 * Emits a pause call for a SAIL pause step.
+	 * Emits a pause call for a SAIL pause step, as the harness's {@code pause(long)}.
 	 *
 	 * @param pause The pause step containing delay duration.
 	 */
 	@Override
 	public void executePause(@Nonnull Pause pause) {
-		indent().append("pause(\"").append(Long.toString(pause.getMillis())).append("\");").newline();
+		indent().append("pause(").append(Long.toString(pause.getMillis())).append("L);").newline();
 	}
 	
 	/**

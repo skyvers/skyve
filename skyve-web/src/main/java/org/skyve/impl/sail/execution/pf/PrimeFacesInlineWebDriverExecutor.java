@@ -167,15 +167,9 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		else {
 			comment("Login as " + customer + "/" + user);
 		}
-		indent().append("login(");
-		if (customer == null) {
-			append("null, ");
-		}
-		else {
-			append("\"").append(customer).append("\", ");
-		}
-		append("\"").append(user).append("\", ");
-		append("\"").append(login.getPassword()).append("\");").newline();
+		indent().append("login(").append(literal(customer)).append(", ");
+		append(literal(user)).append(", ");
+		append(literal(login.getPassword())).append(");").newline();
 	}
 	
 	/**
@@ -442,16 +436,10 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 				indent().append("checkbox(\"").append(clientId).append("\", ").append(value).append(");").newline();
 			}
 			else if (text) {
-				if (value != null) {
-					value = value.replace("\\", "\\\\").replace("\"", "\\\"");
-				}
-				indent().append("text(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
+				indent().append("text(\"").append(clientId).append("\", ").append(literal(value)).append(");").newline();
 			}
 			else if (_input) {
-				if (value != null) {
-					value = value.replace("\\", "\\\\").replace("\"", "\\\"");
-				}
-				indent().append("_input(\"").append(clientId).append("\", \"").append(value).append("\");").newline();
+				indent().append("_input(\"").append(clientId).append("\", ").append(literal(value)).append(");").newline();
 			}
 			else if (selectOne) {
 				if (! SailGeneratorSupport.optionMatchNotSupported(dataEnter, this::comment)) {
@@ -704,7 +692,7 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 			}
 			else {
 				comment(String.format("Auto complete with search '%s' on lookup description [%s] (%s)", search, binding, clientId));
-				indent().append("lookupDescription(\"").append(clientId).append("\", \"").append(search).append("\");").newline();
+				indent().append("lookupDescription(\"").append(clientId).append("\", ").append(literal(search)).append(");").newline();
 			}
 		}
 	}
@@ -1155,10 +1143,10 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 			else {
 				comment(String.format("Test Failure with message '%s'", message));
 				if (TestStrategy.Verify.equals(strategy)) {
-					indent().append("verifyFailure(\"").append(message).append("\"").newline();
+					indent().append("verifyFailure(").append(literal(message)).append(");").newline();
 				}
 				else {
-					indent().append("assertFailure(\"").append(message).append("\"").newline();
+					indent().append("assertFailure(").append(literal(message)).append(");").newline();
 				}
 			}
 		}
