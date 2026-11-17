@@ -13,6 +13,8 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.JobMetaDataImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -75,6 +77,21 @@ class ModuleRoleTest {
 	void toRoleThrowsWhenTheModuleHasNoSuchRole() {
 		Customer customer = mock(Customer.class);
 		mockModule(customer, mock(Role.class));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> TestRole.MISSING.toRole(customer));
+		assertEquals("Role Missing does not exist in module admin", e.getMessage());
+	}
+
+	/** A module keeps all its metadata by name, so the name can be another kind of metadata's. */
+	@Test
+	void toRoleThrowsWhenTheNameIsAJobsName() {
+		Customer customer = mock(Customer.class);
+		ModuleImpl module = new ModuleImpl();
+		module.setName("admin");
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("Missing");
+		module.putJob(job);
+		when(customer.getModule("admin")).thenReturn(module);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> TestRole.MISSING.toRole(customer));
 		assertEquals("Role Missing does not exist in module admin", e.getMessage());

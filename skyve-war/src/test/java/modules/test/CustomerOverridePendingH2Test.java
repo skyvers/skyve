@@ -64,7 +64,6 @@ class CustomerOverridePendingH2Test extends AbstractCustomerOverrideH2Test {
 	 * lets the repository's IllegalArgumentException through.
 	 */
 	@Test
-	@Disabled("toDocument throws IllegalArgumentException, not the documented MetaDataException — fix pending")
 	void toDocumentThrowsMetaDataExceptionForAMissingDocument() {
 		Customer test = runAs(TEST_CUSTOMER);
 		assertThrows(MetaDataException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test));

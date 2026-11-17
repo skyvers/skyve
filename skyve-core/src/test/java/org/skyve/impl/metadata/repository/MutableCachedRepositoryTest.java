@@ -287,7 +287,8 @@ class MutableCachedRepositoryTest {
 		ModuleMetaData mmd = minimalModule("admin", "User");
 		Module module = repo.putModule(mmd);
 		// "NonExistent" is not in the module's documentRefs — should throw
-		assertThrows(IllegalArgumentException.class, () -> repo.getDocument(null, module, "NonExistent"));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getDocument(null, module, "NonExistent"));
+		assertEquals("Document NonExistent does not exist in module admin", e.getMessage());
 	}
 
 	@Test

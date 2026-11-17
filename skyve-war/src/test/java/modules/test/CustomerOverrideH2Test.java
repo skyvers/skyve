@@ -17,6 +17,7 @@ import org.skyve.CORE;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.repository.LocalDataStoreRepository;
 import org.skyve.impl.metadata.user.UserImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.DataBuilder;
@@ -128,8 +129,7 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 		Customer bizhub = customer(CUSTOMER);
 		assertAll(() -> assertSame(OverrideCustomerOnly.class, beanClass(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY, test)),
 					() -> assertEquals("customer only", result.getText()),
-					// see CustomerOverridePendingH2Test for the exception type
-					() -> assertThrows(RuntimeException.class,
+					() -> assertThrows(MetaDataException.class,
 										() -> customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY.toDocument(bizhub)));
 	}
 
@@ -432,8 +432,7 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 
 		assertAll(() -> assertTrue(Arrays.stream(customers.test.modules.test.domain.TestDocument.values())
 												.noneMatch(d -> OverrideRemoved.DOCUMENT_NAME.equals(d.documentName()))),
-					// see CustomerOverridePendingH2Test for the exception type
-					() -> assertThrows(RuntimeException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test)),
+					() -> assertThrows(MetaDataException.class, () -> TestDocument.OVERRIDE_REMOVED.toDocument(test)),
 					() -> assertSame(OverrideRemoved.class, beanClass(TestDocument.OVERRIDE_REMOVED, bizhub)));
 		runAs(CUSTOMER);
 		assertSame(OverrideRemoved.class, newInstance(TestDocument.OVERRIDE_REMOVED).getClass());

@@ -13,6 +13,8 @@ import java.lang.reflect.Field;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.metadata.module.JobMetaDataImpl;
+import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -71,6 +73,21 @@ class ModuleQueryTest {
 	void toQueryThrowsWhenTheModuleHasNoSuchMetaDataQuery() {
 		Customer customer = mock(Customer.class);
 		mockModule(customer, mock(MetaDataQueryDefinition.class));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> TestQuery.MISSING.toQuery(customer));
+		assertEquals("Query qMissing does not exist in module admin", e.getMessage());
+	}
+
+	/** A module keeps all its metadata by name, so the name can be another kind of metadata's. */
+	@Test
+	void toQueryThrowsWhenTheNameIsAJobsName() {
+		Customer customer = mock(Customer.class);
+		ModuleImpl module = new ModuleImpl();
+		module.setName("admin");
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("qMissing");
+		module.putJob(job);
+		when(customer.getModule("admin")).thenReturn(module);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> TestQuery.MISSING.toQuery(customer));
 		assertEquals("Query qMissing does not exist in module admin", e.getMessage());

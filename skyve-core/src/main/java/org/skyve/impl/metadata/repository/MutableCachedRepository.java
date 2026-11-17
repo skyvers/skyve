@@ -380,6 +380,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	 * @param module the module declaring or referencing the document
 	 * @param documentName the document name
 	 * @return the resolved document, or {@code null} when not found in this repository
+	 * @throws MetaDataException if the module does not declare or reference the document
 	 */
 	@Override
 	public @Nullable Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
@@ -399,7 +400,7 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	private @Nullable Document getDocumentInternal(boolean customerOverride, @Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		DocumentRef ref = module.getDocumentRefs().get(documentName);
 		if (ref == null) {
-			throw new IllegalArgumentException(documentName + " does not exist for this module - " + module.getName());
+			throw new MetaDataException("Document " + documentName + " does not exist in module " + module.getName());
 		}
 
 		final String referencedModuleName = ref.getReferencedModuleName();

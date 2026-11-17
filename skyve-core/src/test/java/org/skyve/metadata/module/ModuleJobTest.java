@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
@@ -58,6 +59,21 @@ class ModuleJobTest {
 		Customer customer = mock(Customer.class);
 		ModuleImpl module = new ModuleImpl();
 		module.setName("admin");
+		when(customer.getModule("admin")).thenReturn(module);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> TestJob.J_BULK_USER_CREATION.toJob(customer));
+		assertEquals("Job admin.jBulkUserCreation is not defined in the skyve metadata.", e.getMessage());
+	}
+
+	/** A module keeps all its metadata by name, so the name can be another kind of metadata's. */
+	@Test
+	void toJobThrowsWhenTheNameIsAQuerysName() {
+		Customer customer = mock(Customer.class);
+		ModuleImpl module = new ModuleImpl();
+		module.setName("admin");
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		query.setName("jBulkUserCreation");
+		module.putQuery(query);
 		when(customer.getModule("admin")).thenReturn(module);
 
 		MetaDataException e = assertThrows(MetaDataException.class, () -> TestJob.J_BULK_USER_CREATION.toJob(customer));

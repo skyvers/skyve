@@ -10,9 +10,12 @@ import static org.mockito.Mockito.withSettings;
 
 import java.lang.reflect.Field;
 
+import java.nio.file.Path;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.metadata.module.ModuleImpl;
+import org.skyve.impl.metadata.repository.LocalDesignRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.MetaDataException;
@@ -64,6 +67,24 @@ class ModuleDocumentTest {
 		when(customer.getModule("admin")).thenReturn(module);
 		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
+		try {
+			MetaDataException e = assertThrows(MetaDataException.class, () -> TestDocument.CONTACT.toDocument(customer));
+			assertEquals("Document Contact does not exist in module admin", e.getMessage());
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
+	}
+
+	/** The repository refuses a document the module does not list, which must surface as MetaDataException. */
+	@Test
+	void toDocumentThrowsWhenTheModuleDoesNotListTheDocument(@TempDir Path tempDir) {
+		Customer customer = mock(Customer.class);
+		ModuleImpl module = new ModuleImpl();
+		module.setName("admin");
+		when(customer.getModule("admin")).thenReturn(module);
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(new LocalDesignRepository(tempDir.toString()));
 		try {
 			MetaDataException e = assertThrows(MetaDataException.class, () -> TestDocument.CONTACT.toDocument(customer));
 			assertEquals("Document Contact does not exist in module admin", e.getMessage());
