@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 	SmartClient SAIL conformance for converters: date times (kitchensink.ConvertersFixture, an attribute per converter).
-	Records a, b and c are entered in each field and in an inline grid row, typed as a user types them, then checked
-	with testValue after the save and once reopened from the list. Then each column of the list view's grid is
-	filtered with values written as the cells show them, and the rows each filter leaves are checked. The values catch
-	day and month swapped, 12 hour times at PM, noon and midnight, month names, seconds, negatives, separators, $ and
-	percentages, and rounding.
+	Records a, b and c (and d and e for the duration) are typed into each field, and into an inline grid row with the
+	next record's values, then checked with testValue after the save and once reopened from the list. Then each
+	column of the list view's grid is filtered with values written as the cells show them, and the rows each filter
+	leaves are checked. The values catch day and month swapped, 12 hour times at PM, noon and midnight, month names,
+	seconds, negatives, separators, $, percentages (over 1000% too), rounding, durations rounded to the minute, and
+	the absolute converter of a stored negative. Equals compares the stored value exactly, so a value shown rounded is
+	not filtered by what it shows.
 	Run by SmartClientConvertersSailIT.
 -->
 <automation uxui="desktop"
@@ -33,18 +35,18 @@
 			<dataEnter binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
 			<dataEnter binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
 			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
-			<comment>An inline grid row: its cells take the same values</comment>
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
 			<dataGridNew binding="dateTimeRows" />
-			<dataEnter binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
-			<dataEnter binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
-			<dataEnter binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
-			<dataEnter binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
-			<dataEnter binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
-			<dataEnter binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
-			<dataEnter binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
-			<dataEnter binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
-			<dataEnter binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
-			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<dataEnter binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<dataEnter binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
 			<save />
 			<testSuccess />
 			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
@@ -57,17 +59,18 @@
 			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
 			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
 			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="dateTimeRows" row="0" />
-			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
-			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
-			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
-			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
-			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
-			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
-			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
-			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
-			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
-			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
 			<ok />
 			<comment>Reopened from the list</comment>
 			<listGridZoom module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} a" />
@@ -81,17 +84,18 @@
 			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
 			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
 			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="dateTimeRows" row="0" />
-			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
-			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
-			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
-			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
-			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
-			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
-			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
-			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
-			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
-			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
+			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
+			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
 			<cancel />
 		</method>
 	</interaction>
@@ -110,18 +114,18 @@
 			<dataEnter binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
 			<dataEnter binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
 			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
-			<comment>An inline grid row: its cells take the same values</comment>
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
 			<dataGridNew binding="dateTimeRows" />
-			<dataEnter binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
-			<dataEnter binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
-			<dataEnter binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
-			<dataEnter binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
-			<dataEnter binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
-			<dataEnter binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
-			<dataEnter binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
-			<dataEnter binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
-			<dataEnter binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
-			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<dataEnter binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<dataEnter binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
 			<save />
 			<testSuccess />
 			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
@@ -134,17 +138,18 @@
 			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
 			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
 			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="dateTimeRows" row="0" />
-			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
-			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
-			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
-			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
-			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
-			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
-			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
-			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
-			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
-			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
 			<ok />
 			<comment>Reopened from the list</comment>
 			<listGridZoom module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} b" />
@@ -158,17 +163,18 @@
 			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
 			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
 			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="dateTimeRows" row="0" />
-			<testValue binding="ddMmYyyyHhMi" value="06/05/2026 12:00 PM" />
-			<testValue binding="ddMmYyyyHh24Mi" value="06/05/2026 12:00" />
-			<testValue binding="ddMmmYyyyHhMi" value="06-May-2026 12:00 PM" />
-			<testValue binding="ddMmmYyyyHh24Mi" value="06-May-2026 12:00" />
-			<testValue binding="mmDdYyyyHhMi" value="05/06/2026 12:00 PM" />
-			<testValue binding="mmDdYyyyHh24Mi" value="05/06/2026 12:00" />
-			<testValue binding="mmmDdYyyyHhMi" value="May-06-2026 12:00 PM" />
-			<testValue binding="mmmDdYyyyHh24Mi" value="May-06-2026 12:00" />
-			<testValue binding="yyyyMmDdHhMi" value="2026/05/06 12:00 PM" />
-			<testValue binding="yyyyMmDdHh24Mi" value="2026/05/06 12:00" />
+			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
+			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
+			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
+			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
 			<cancel />
 		</method>
 	</interaction>
@@ -187,18 +193,18 @@
 			<dataEnter binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
 			<dataEnter binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
 			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
-			<comment>An inline grid row: its cells take the same values</comment>
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
 			<dataGridNew binding="dateTimeRows" />
-			<dataEnter binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
-			<dataEnter binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
-			<dataEnter binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
-			<dataEnter binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
-			<dataEnter binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
-			<dataEnter binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
-			<dataEnter binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
-			<dataEnter binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
-			<dataEnter binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
-			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<dataEnter binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<dataEnter binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<dataEnter binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<dataEnter binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<dataEnter binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<dataEnter binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<dataEnter binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<dataEnter binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<dataEnter binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
 			<save />
 			<testSuccess />
 			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
@@ -211,17 +217,18 @@
 			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
 			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
 			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="dateTimeRows" row="0" />
-			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
-			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
-			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
-			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
-			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
-			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
-			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
-			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
-			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
-			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
 			<ok />
 			<comment>Reopened from the list</comment>
 			<listGridZoom module="kitchensink" query="qConvertersDateTimes" rowContaining="SAIL dateTimes {run} c" />
@@ -235,17 +242,18 @@
 			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
 			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
 			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="dateTimeRows" row="0" />
-			<testValue binding="ddMmYyyyHhMi" value="25/12/2026 12:00 AM" />
-			<testValue binding="ddMmYyyyHh24Mi" value="25/12/2026 00:00" />
-			<testValue binding="ddMmmYyyyHhMi" value="25-Dec-2026 12:00 AM" />
-			<testValue binding="ddMmmYyyyHh24Mi" value="25-Dec-2026 00:00" />
-			<testValue binding="mmDdYyyyHhMi" value="12/25/2026 12:00 AM" />
-			<testValue binding="mmDdYyyyHh24Mi" value="12/25/2026 00:00" />
-			<testValue binding="mmmDdYyyyHhMi" value="Dec-25-2026 12:00 AM" />
-			<testValue binding="mmmDdYyyyHh24Mi" value="Dec-25-2026 00:00" />
-			<testValue binding="yyyyMmDdHhMi" value="2026/12/25 12:00 AM" />
-			<testValue binding="yyyyMmDdHh24Mi" value="2026/12/25 00:00" />
+			<testValue binding="ddMmYyyyHhMi" value="05/06/2026 02:47 PM" />
+			<testValue binding="ddMmYyyyHh24Mi" value="05/06/2026 14:47" />
+			<testValue binding="ddMmmYyyyHhMi" value="05-Jun-2026 02:47 PM" />
+			<testValue binding="ddMmmYyyyHh24Mi" value="05-Jun-2026 14:47" />
+			<testValue binding="mmDdYyyyHhMi" value="06/05/2026 02:47 PM" />
+			<testValue binding="mmDdYyyyHh24Mi" value="06/05/2026 14:47" />
+			<testValue binding="mmmDdYyyyHhMi" value="Jun-05-2026 02:47 PM" />
+			<testValue binding="mmmDdYyyyHh24Mi" value="Jun-05-2026 14:47" />
+			<testValue binding="yyyyMmDdHhMi" value="2026/06/05 02:47 PM" />
+			<testValue binding="yyyyMmDdHh24Mi" value="2026/06/05 14:47" />
 			<cancel />
 		</method>
 	</interaction>

@@ -36,6 +36,15 @@ class SmartClientConvertersSailIT extends AbstractSmartClientInterpretedSail {
 		sailResource("sail/kitchenSink/sc/sc-converters-timestamps.xml");
 	}
 
+	/**
+	 * Date times and timestamps whose converters show only the date ({@code *_DateTime}, {@code *_Timestamp}): a date
+	 * time to SmartClient, with a date-only field, filtered by the whole local day.
+	 */
+	@Test
+	void dateOnly() {
+		sailResource("sail/kitchenSink/sc/sc-converters-dateOnly.xml");
+	}
+
 	@Test
 	void times() {
 		sailResource("sail/kitchenSink/sc/sc-converters-times.xml");

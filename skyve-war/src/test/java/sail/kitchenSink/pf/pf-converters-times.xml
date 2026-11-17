@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
 	PrimeFaces SAIL conformance for converters: times (kitchensink.ConvertersFixture, an attribute per converter).
-	Records a, b and c are entered in each field and in an inline grid row, typed as a user types them, then checked
-	with testValue after the save and once reopened from the list. Then each column is filtered in the Vue list grid
-	(the list view) and in the PrimeFaces data table (ConvertersDataTables), with values written as the cells show
-	them, and the rows each filter leaves are checked. The values catch day and month swapped, 12 hour times at PM,
-	noon and midnight, month names, seconds, negatives, separators, $ and percentages, and rounding.
+	Records a, b and c (and d and e for the duration) are typed into each field, and into an inline grid row with the
+	next record's values, then checked with testValue after the save and once reopened from the list. Then each
+	column is filtered in the Vue list grid (the list view) and in the PrimeFaces data table (ConvertersDataTables),
+	with values written as the cells show them, and the rows each filter leaves are checked. The values catch day and
+	month swapped, 12 hour times at PM, noon and midnight, month names, seconds, negatives, separators, $, percentages
+	(over 1000% too), rounding, durations rounded to the minute, and the absolute converter of a stored negative.
+	Equals compares the stored value exactly, so a value shown rounded is not filtered by what it shows.
 	Run by PrimeFacesConvertersSailIT.
 -->
 <automation uxui="tablet"
@@ -26,23 +28,24 @@
 			<dataEnter binding="hh24Mi" value="14:47" />
 			<dataEnter binding="hhMiSs" value="02:47:25 PM" />
 			<dataEnter binding="hh24MiSs" value="14:47:25" />
-			<comment>An inline grid row: its cells take the same values</comment>
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
 			<dataGridNew binding="timeRows" />
-			<dataEnter binding="hhMi" value="02:47 PM" />
-			<dataEnter binding="hh24Mi" value="14:47" />
-			<dataEnter binding="hhMiSs" value="02:47:25 PM" />
-			<dataEnter binding="hh24MiSs" value="14:47:25" />
+			<dataEnter binding="hhMi" value="12:00 PM" />
+			<dataEnter binding="hh24Mi" value="12:00" />
+			<dataEnter binding="hhMiSs" value="12:00:00 PM" />
+			<dataEnter binding="hh24MiSs" value="12:00:00" />
 			<save />
 			<testSuccess />
 			<testValue binding="hhMi" value="02:47 PM" />
 			<testValue binding="hh24Mi" value="14:47" />
 			<testValue binding="hhMiSs" value="02:47:25 PM" />
 			<testValue binding="hh24MiSs" value="14:47:25" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="timeRows" row="0" />
-			<testValue binding="hhMi" value="02:47 PM" />
-			<testValue binding="hh24Mi" value="14:47" />
-			<testValue binding="hhMiSs" value="02:47:25 PM" />
-			<testValue binding="hh24MiSs" value="14:47:25" />
+			<testValue binding="hhMi" value="12:00 PM" />
+			<testValue binding="hh24Mi" value="12:00" />
+			<testValue binding="hhMiSs" value="12:00:00 PM" />
+			<testValue binding="hh24MiSs" value="12:00:00" />
 			<ok />
 			<comment>Reopened from the list</comment>
 			<listGridZoom module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} a" />
@@ -50,11 +53,12 @@
 			<testValue binding="hh24Mi" value="14:47" />
 			<testValue binding="hhMiSs" value="02:47:25 PM" />
 			<testValue binding="hh24MiSs" value="14:47:25" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="timeRows" row="0" />
-			<testValue binding="hhMi" value="02:47 PM" />
-			<testValue binding="hh24Mi" value="14:47" />
-			<testValue binding="hhMiSs" value="02:47:25 PM" />
-			<testValue binding="hh24MiSs" value="14:47:25" />
+			<testValue binding="hhMi" value="12:00 PM" />
+			<testValue binding="hh24Mi" value="12:00" />
+			<testValue binding="hhMiSs" value="12:00:00 PM" />
+			<testValue binding="hh24MiSs" value="12:00:00" />
 			<cancel />
 		</method>
 	</interaction>
@@ -67,23 +71,24 @@
 			<dataEnter binding="hh24Mi" value="12:00" />
 			<dataEnter binding="hhMiSs" value="12:00:00 PM" />
 			<dataEnter binding="hh24MiSs" value="12:00:00" />
-			<comment>An inline grid row: its cells take the same values</comment>
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
 			<dataGridNew binding="timeRows" />
-			<dataEnter binding="hhMi" value="12:00 PM" />
-			<dataEnter binding="hh24Mi" value="12:00" />
-			<dataEnter binding="hhMiSs" value="12:00:00 PM" />
-			<dataEnter binding="hh24MiSs" value="12:00:00" />
+			<dataEnter binding="hhMi" value="12:00 AM" />
+			<dataEnter binding="hh24Mi" value="00:00" />
+			<dataEnter binding="hhMiSs" value="12:00:59 AM" />
+			<dataEnter binding="hh24MiSs" value="00:00:59" />
 			<save />
 			<testSuccess />
 			<testValue binding="hhMi" value="12:00 PM" />
 			<testValue binding="hh24Mi" value="12:00" />
 			<testValue binding="hhMiSs" value="12:00:00 PM" />
 			<testValue binding="hh24MiSs" value="12:00:00" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="timeRows" row="0" />
-			<testValue binding="hhMi" value="12:00 PM" />
-			<testValue binding="hh24Mi" value="12:00" />
-			<testValue binding="hhMiSs" value="12:00:00 PM" />
-			<testValue binding="hh24MiSs" value="12:00:00" />
+			<testValue binding="hhMi" value="12:00 AM" />
+			<testValue binding="hh24Mi" value="00:00" />
+			<testValue binding="hhMiSs" value="12:00:59 AM" />
+			<testValue binding="hh24MiSs" value="00:00:59" />
 			<ok />
 			<comment>Reopened from the list</comment>
 			<listGridZoom module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} b" />
@@ -91,11 +96,12 @@
 			<testValue binding="hh24Mi" value="12:00" />
 			<testValue binding="hhMiSs" value="12:00:00 PM" />
 			<testValue binding="hh24MiSs" value="12:00:00" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="timeRows" row="0" />
-			<testValue binding="hhMi" value="12:00 PM" />
-			<testValue binding="hh24Mi" value="12:00" />
-			<testValue binding="hhMiSs" value="12:00:00 PM" />
-			<testValue binding="hh24MiSs" value="12:00:00" />
+			<testValue binding="hhMi" value="12:00 AM" />
+			<testValue binding="hh24Mi" value="00:00" />
+			<testValue binding="hhMiSs" value="12:00:59 AM" />
+			<testValue binding="hh24MiSs" value="00:00:59" />
 			<cancel />
 		</method>
 	</interaction>
@@ -108,23 +114,24 @@
 			<dataEnter binding="hh24Mi" value="00:00" />
 			<dataEnter binding="hhMiSs" value="12:00:59 AM" />
 			<dataEnter binding="hh24MiSs" value="00:00:59" />
-			<comment>An inline grid row: its cells take the same values</comment>
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
 			<dataGridNew binding="timeRows" />
-			<dataEnter binding="hhMi" value="12:00 AM" />
-			<dataEnter binding="hh24Mi" value="00:00" />
-			<dataEnter binding="hhMiSs" value="12:00:59 AM" />
-			<dataEnter binding="hh24MiSs" value="00:00:59" />
+			<dataEnter binding="hhMi" value="02:47 PM" />
+			<dataEnter binding="hh24Mi" value="14:47" />
+			<dataEnter binding="hhMiSs" value="02:47:25 PM" />
+			<dataEnter binding="hh24MiSs" value="14:47:25" />
 			<save />
 			<testSuccess />
 			<testValue binding="hhMi" value="12:00 AM" />
 			<testValue binding="hh24Mi" value="00:00" />
 			<testValue binding="hhMiSs" value="12:00:59 AM" />
 			<testValue binding="hh24MiSs" value="00:00:59" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="timeRows" row="0" />
-			<testValue binding="hhMi" value="12:00 AM" />
-			<testValue binding="hh24Mi" value="00:00" />
-			<testValue binding="hhMiSs" value="12:00:59 AM" />
-			<testValue binding="hh24MiSs" value="00:00:59" />
+			<testValue binding="hhMi" value="02:47 PM" />
+			<testValue binding="hh24Mi" value="14:47" />
+			<testValue binding="hhMiSs" value="02:47:25 PM" />
+			<testValue binding="hh24MiSs" value="14:47:25" />
 			<ok />
 			<comment>Reopened from the list</comment>
 			<listGridZoom module="kitchensink" query="qConvertersTimes" rowContaining="SAIL times {run} c" />
@@ -132,11 +139,12 @@
 			<testValue binding="hh24Mi" value="00:00" />
 			<testValue binding="hhMiSs" value="12:00:59 AM" />
 			<testValue binding="hh24MiSs" value="00:00:59" />
+			<comment>The saved row's cells</comment>
 			<dataGridEdit binding="timeRows" row="0" />
-			<testValue binding="hhMi" value="12:00 AM" />
-			<testValue binding="hh24Mi" value="00:00" />
-			<testValue binding="hhMiSs" value="12:00:59 AM" />
-			<testValue binding="hh24MiSs" value="00:00:59" />
+			<testValue binding="hhMi" value="02:47 PM" />
+			<testValue binding="hh24Mi" value="14:47" />
+			<testValue binding="hhMiSs" value="02:47:25 PM" />
+			<testValue binding="hh24MiSs" value="14:47:25" />
 			<cancel />
 		</method>
 	</interaction>
