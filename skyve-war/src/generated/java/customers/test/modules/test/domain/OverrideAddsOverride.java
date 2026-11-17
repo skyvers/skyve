@@ -12,8 +12,9 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 /**
  * Override Adds
  * <br/>
- * The test customer's override of OverrideAdds, adding customerText, customerOnlyItems and the customerTextSet condition.
+ * The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems and the customerTextSet condition.
  * 
+ * @navhas n customerOnlyItem 0..1 OverrideCustomerOnly
  * @navhas n customerOnlyItems 0..n OverrideCustomerOnly
  * @stereotype "persistent"
  */
@@ -31,12 +32,20 @@ public class OverrideAddsOverride extends OverrideAdds {
 	public static final String customerTextPropertyName = "customerText";
 
 	/** @hidden */
+	public static final String customerOnlyItemPropertyName = "customerOnlyItem";
+
+	/** @hidden */
 	public static final String customerOnlyItemsPropertyName = "customerOnlyItems";
 
 	/**
 	 * Customer Text
 	 **/
 	private String customerText;
+
+	/**
+	 * Customer Only Item
+	 **/
+	private OverrideCustomerOnly customerOnlyItem = null;
 
 	/**
 	 * Customer Only Items
@@ -59,6 +68,26 @@ public class OverrideAddsOverride extends OverrideAdds {
 	public void setCustomerText(String customerText) {
 		preset(customerTextPropertyName, customerText);
 		this.customerText = customerText;
+	}
+
+	/**
+	 * {@link #customerOnlyItem} accessor.
+	 * @return	The value.
+	 **/
+	public OverrideCustomerOnly getCustomerOnlyItem() {
+		return customerOnlyItem;
+	}
+
+	/**
+	 * {@link #customerOnlyItem} mutator.
+	 * @param customerOnlyItem	The new value.
+	 **/
+	@XmlElement
+	public void setCustomerOnlyItem(OverrideCustomerOnly customerOnlyItem) {
+		if (this.customerOnlyItem != customerOnlyItem) {
+			preset(customerOnlyItemPropertyName, customerOnlyItem);
+			this.customerOnlyItem = customerOnlyItem;
+		}
 	}
 
 	/**

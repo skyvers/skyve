@@ -1454,7 +1454,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			// map the parent property, if parent document is persistent
 			String parentDocumentName = document.getParentDocumentName();
 			if (parentDocumentName != null) {
-				Document parentDocument = document.getParentDocument(null);
+				Document parentDocument = document.getParentDocument(customer);
 				if ((parentDocument != null) && (parentDocument.getPersistent() != null)) {
 					if (parentDocumentName.equals(documentName)) { // hierarchical
 						contents.append(indent).append("\t\t<property name=\"").append(HierarchicalBean.PARENT_ID).append("\" length=\"36\"");
@@ -1470,7 +1470,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 						}
 
 						// Add parent reference ORM
-						String parentModuleName = module.getDocument(null, parentDocumentName).getOwningModuleName();
+						String parentModuleName = module.getDocument(customer, parentDocumentName).getOwningModuleName();
 						contents.append(indent).append("\t\t<many-to-one name=\"").append(ChildBean.PARENT_NAME).append("\" entity-name=\"");
 						// reference overridden document if applicable
 						if (overriddenORMDocumentsPerCustomer.contains(parentModuleName + '.' + parentDocumentName)) {
@@ -1796,7 +1796,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			else if (attribute instanceof Association association) {
 				String associationName = association.getName();
 				String referencedDocumentName = association.getDocumentName();
-				Document referencedDocument = module.getDocument(null, referencedDocumentName);
+				Document referencedDocument = module.getDocument(customer, referencedDocumentName);
 				Persistent referencedPersistent = referencedDocument.getPersistent();
 				String referencedModuleName = referencedDocument.getOwningModuleName();
 
@@ -2053,7 +2053,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				
 				// determine the inverse target metadata
 				String inverseDocumentName = inverse.getDocumentName();
-				Document inverseDocument = module.getDocument(null, inverseDocumentName);
+				Document inverseDocument = module.getDocument(customer, inverseDocumentName);
 				Persistent inversePersistent = inverseDocument.getPersistent();				
 				String inverseReferenceName = inverse.getReferenceName();
 				String inverseModuleName = inverseDocument.getOwningModuleName();

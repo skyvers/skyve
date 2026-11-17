@@ -123,6 +123,7 @@
 		<property name="bizUserId" length="36" not-null="true" />
 		<property name="text" length="100" />
 		<property name="customerText" length="100" />
+		<many-to-one name="customerOnlyItem" entity-name="testtestOverrideCustomerOnly" column="customerOnlyItem_id" cascade="persist,save-update,refresh,merge" foreign-key="FK_TEST_OverrideAdds_customerOnlyItem"/>
 		<bag name="customerOnlyItems" table="TEST_OverrideAdds_customerOnlyItems" cascade="persist,save-update,refresh,merge">
 			<key column="owner_id" foreign-key="FK_TEST_OverrideAdds_customerOnlyItems_owner_id" />
 			<many-to-many entity-name="testtestOverrideCustomerOnly" foreign-key="FK_TEST_OverrideAdds_customerOnlyItems_element_id" column="element_id" />

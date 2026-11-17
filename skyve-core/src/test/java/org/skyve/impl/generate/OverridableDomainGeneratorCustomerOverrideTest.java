@@ -38,13 +38,16 @@ import javax.tools.ToolProvider;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.customer.ExportedReference;
+import org.skyve.impl.metadata.model.document.AbstractInverse;
+import org.skyve.impl.metadata.model.document.AbstractInverse.InverseRelationship;
 import org.skyve.impl.metadata.model.document.AssociationImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.InverseMany;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.metadata.model.document.field.Enumeration;
 import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Text;
@@ -1284,26 +1287,81 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				() -> assertEquals(List.of(), compilationErrors(files)));
 	}
 
+	// ----- references to a new customer document ------------------------------------
+
 	/**
 	 * An association from a customer document to a new customer document, found by the skyve-war test
-	 * customer fixtures: generateAttributeMappings resolves the association's document without the
-	 * customer (<code>module.getDocument(null, ...)</code>), which does not find a new customer
-	 * document, while a collection is resolved with the customer and maps.
+	 * customer fixtures: the association's document has to be resolved for the customer, as the vanilla
+	 * module does not have it.
 	 */
 	@Test
-	@Disabled("generator bug: an association to a new customer document is resolved without the customer — fix pending")
 	void anOverrideWithAnAssociationToANewCustomerDocumentGivesConsistentMappings() throws Exception {
 		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
-		AssociationImpl note = new AssociationImpl();
-		note.setName("note");
-		note.setDisplayName("note");
-		note.setDocumentName("Note");
-		note.setType(AssociationType.aggregation);
-		order.putAttribute(note);
+		order.putAttribute(association("note", "Note"));
 		Map<String, String> files = assertConsistentMappings(new Fixture()
 				.vanilla(document("Order", "SALES_Order", null, null, "code"))
 				.acme(order)
 				.acme(document("Note", "SALES_Note", null, null, "text")));
-		assertTrue(files.get("customers/acme/modules/orm.hbm.xml").contains("entity-name=\"acmesalesNote\""));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(acmeMapping.contains("<many-to-one name=\"note\" entity-name=\"acmesalesNote\""), acmeMapping),
+				() -> assertEquals(List.of(), compilationErrors(files)));
+	}
+
+	/**
+	 * An inverse with the relationship that metadata validation works out before generation.
+	 */
+	private static AbstractInverse inverse(AbstractInverse result, String name, String documentName, String referenceName, InverseRelationship relationship) {
+		result.setName(name);
+		result.setDisplayName(name);
+		result.setDocumentName(documentName);
+		result.setReferenceName(referenceName);
+		result.setRelationship(relationship);
+		return result;
+	}
+
+	/**
+	 * Generates acme's override of Order with an inverse of a new customer document Note's association
+	 * to Order, returning the generated files.
+	 */
+	private static Map<String, String> generateInverseToANewCustomerDocument(AbstractInverse inverse) throws Exception {
+		DocumentImpl order = document("Order", "SALES_Order", null, null, "code");
+		order.putAttribute(inverse);
+		DocumentImpl note = document("Note", "SALES_Note", null, null, "text");
+		note.putAttribute(association("order", "Order"));
+		return assertConsistentMappings(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(order)
+				.acme(note));
+	}
+
+	@Test
+	void anOverrideWithAnInverseManyOfANewCustomerDocumentGivesConsistentMappings() throws Exception {
+		Map<String, String> files = generateInverseToANewCustomerDocument(inverse(new InverseMany(), "notes", "Note", "order", InverseRelationship.oneToMany));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(acmeMapping.contains("<bag name=\"notes\""), acmeMapping),
+				() -> assertTrue(acmeMapping.contains("<one-to-many entity-name=\"acmesalesNote\""), acmeMapping));
+	}
+
+	@Test
+	void anOverrideWithAnInverseOneOfANewCustomerDocumentGivesConsistentMappings() throws Exception {
+		Map<String, String> files = generateInverseToANewCustomerDocument(inverse(new InverseOne(), "note", "Note", "order", InverseRelationship.oneToOne));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertTrue(acmeMapping.contains("<one-to-one name=\"note\" entity-name=\"acmesalesNote\" property-ref=\"order\""), acmeMapping);
+	}
+
+	@Test
+	void aNewCustomerChildOfANewCustomerDocumentMapsItsParent() throws Exception {
+		DocumentImpl noteLine = document("NoteLine", "SALES_NoteLine", null, null, "text");
+		noteLine.setParentDocumentName("Note");
+		DocumentImpl note = document("Note", "SALES_Note", null, null, "text");
+		note.putAttribute(childCollection("lines", "NoteLine"));
+		Map<String, String> files = assertConsistentMappings(new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.acme(note)
+				.acme(noteLine));
+		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
+		assertTrue(acmeMapping.contains("<many-to-one name=\"parent\" entity-name=\"acmesalesNote\""), acmeMapping);
 	}
 }

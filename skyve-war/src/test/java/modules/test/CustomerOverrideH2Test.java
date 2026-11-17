@@ -84,9 +84,12 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 		Customer test = runAs(TEST_CUSTOMER);
 		OverrideCustomerOnly item = newInstance(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY);
 		item.setText("item");
+		OverrideCustomerOnly associated = newInstance(customers.test.modules.test.domain.TestDocument.OVERRIDE_CUSTOMER_ONLY);
+		associated.setText("associated");
 		OverrideAddsOverride bean = newInstance(TestDocument.OVERRIDE_ADDS);
 		bean.setText("text");
 		bean.setCustomerText("customer");
+		bean.setCustomerOnlyItem(associated);
 		bean.addCustomerOnlyItemsElement(item);
 
 		OverrideAdds result = saveAndRetrieve(TestDocument.OVERRIDE_ADDS, bean);
@@ -96,6 +99,7 @@ class CustomerOverrideH2Test extends AbstractCustomerOverrideH2Test {
 					() -> assertEquals("text", override.getText()),
 					() -> assertEquals("customer", override.getCustomerText()),
 					() -> assertTrue(override.isCustomerTextSet()),
+					() -> assertEquals("associated", override.getCustomerOnlyItem().getText()),
 					() -> assertEquals(1, override.getCustomerOnlyItems().size()),
 					() -> assertEquals("item", override.getCustomerOnlyItems().get(0).getText()));
 	}

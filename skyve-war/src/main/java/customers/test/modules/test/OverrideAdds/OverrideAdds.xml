@@ -5,7 +5,7 @@
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<documentation>
 		<![CDATA[
-			The test customer's override of OverrideAdds, adding customerText, customerOnlyItems and the customerTextSet condition.
+			The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems and the customerTextSet condition.
 		]]>
 	</documentation>
 	<persistent name="TEST_OverrideAdds" />
@@ -21,7 +21,10 @@
 			<displayName>Customer Text</displayName>
 			<length>100</length>
 		</text>
-		<!-- A collection, as an association to a customer document cannot be mapped yet -->
+		<association name="customerOnlyItem" type="aggregation">
+			<displayName>Customer Only Item</displayName>
+			<documentName>OverrideCustomerOnly</documentName>
+		</association>
 		<collection name="customerOnlyItems" type="aggregation">
 			<displayName>Customer Only Items</displayName>
 			<documentName>OverrideCustomerOnly</documentName>
