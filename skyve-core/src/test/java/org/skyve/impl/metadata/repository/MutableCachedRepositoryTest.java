@@ -494,20 +494,41 @@ class MutableCachedRepositoryTest {
 	}
 
 	/**
-	 * Evicting a customer removes its own keys and those of its modules, not those of a customer or
-	 * module whose name starts with the same characters.
+	 * A repository that populates fixed keys, as a file system repository populates those of its
+	 * metadata files, and that loads no metadata for them.
+	 */
+	private static final class KeyPopulatingRepository extends UnsynchronisedDynamicRepository {
+		private final String[] keys;
+
+		private KeyPopulatingRepository(String... keys) {
+			this.keys = keys;
+		}
+
+		@Override
+		public void populateKeys() {
+			for (String key : keys) {
+				addKey(key);
+			}
+		}
+	}
+
+	/**
+	 * Evicting a customer resets its own keys and those of its modules to unloaded placeholders, as
+	 * lookups resolve only the keys present, and leaves the metadata of a customer or module whose
+	 * name starts with the same characters loaded.
 	 */
 	@Test
+	@SuppressWarnings("static-method")
 	void evictingACustomerLeavesCustomersAndModulesWithLongerNames() {
-		NullLoadingRepository repo = newNullLoadingRepository();
 		String[] evicted = {"customers/test", "customers/test/modules/test/Doc", "modules/admin", "modules/admin/User"};
 		String[] kept = {"customers/test2", "customers/test2/modules/test/Doc", "modules/admin2", "modules/admin2/User"};
-		for (String key : evicted) {
-			repo.addEmptyKey(key);
-		}
-		for (String key : kept) {
-			repo.addEmptyKey(key);
-		}
+		String[] keys = new String[evicted.length + kept.length];
+		System.arraycopy(evicted, 0, keys, 0, evicted.length);
+		System.arraycopy(kept, 0, keys, evicted.length, kept.length);
+		KeyPopulatingRepository repo = new KeyPopulatingRepository(keys);
+		repo.populateKeys();
+		repo.putModule(minimalModule("admin", "User"));
+		Module admin2 = repo.putModule(minimalModule("admin2", "User"));
 		CustomerImpl customer = mock(CustomerImpl.class);
 		when(customer.getName()).thenReturn("test");
 		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
@@ -516,8 +537,42 @@ class MutableCachedRepositoryTest {
 
 		repo.evictCachedMetaData(customer);
 
-		assertAll(() -> assertAll(java.util.Arrays.stream(evicted).map(key -> () -> assertNull(repo.vtable(null, key), key))),
-					() -> assertAll(java.util.Arrays.stream(kept).map(key -> () -> assertEquals(key, repo.vtable(null, key)))));
+		assertAll(() -> assertAll(java.util.Arrays.stream(keys).map(key -> () -> assertEquals(key, repo.vtable(null, key), key))),
+					() -> assertNull(repo.getModule(null, "admin"), "evicted module is loaded again"),
+					() -> assertSame(admin2, repo.getModule(null, "admin2"), "kept module stays loaded"));
+	}
+
+	/**
+	 * A full eviction puts back every populated key as an unloaded placeholder.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void fullEvictionPutsBackThePopulatedKeysUnloaded() {
+		String[] keys = {MutableCachedRepository.ROUTER_KEY, "customers/test", "modules/admin", "modules/admin/User", "modules/admin/User/views/edit"};
+		KeyPopulatingRepository repo = new KeyPopulatingRepository(keys);
+		repo.populateKeys();
+		repo.putModule(minimalModule("admin", "User"));
+
+		repo.evictCachedMetaData(null);
+
+		assertAll(() -> assertAll(java.util.Arrays.stream(keys).map(key -> () -> assertEquals(key, repo.vtable(null, key), key))),
+					() -> assertNull(repo.getModule(null, "admin"), "evicted module is loaded again"));
+	}
+
+	/**
+	 * A dynamic repository has no keys to populate, so eviction leaves it without the metadata
+	 * added to it, which nothing could load again.
+	 */
+	@Test
+	void evictingADynamicRepositoryRemovesItsMetaData() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		CustomerImpl customer = mockCustomer("test", module);
+
+		repo.evictCachedMetaData(customer);
+
+		assertAll(() -> assertNull(repo.vtable(null, "modules/admin")),
+					() -> assertNull(repo.getModule(null, "admin")));
 	}
 
 	// ---- unnamed metadata ----

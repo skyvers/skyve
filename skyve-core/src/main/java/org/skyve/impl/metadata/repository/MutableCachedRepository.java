@@ -94,12 +94,22 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 	}
 	
 	/**
-	 * Evicts cached metadata entries.
+	 * Evicts cached metadata entries, so that they are loaded again on next access.
 	 *
 	 * <p>When {@code customer} is {@code null}, the full cache is cleared. Otherwise,
 	 * customer overrides and cached module/document/view/action/bizlet entries for
 	 * the customer's accessible modules are removed, as are the customer's scaffolded views
 	 * and every customer's scaffolded views of documents in those modules.
+	 *
+	 * <p>The keys are then populated again with {@link #populateKeys()}, as lookups resolve only
+	 * the keys present. A repository whose keys come from a metadata store gets its evicted keys
+	 * back as unloaded placeholders, reflecting what the store now has, while one whose metadata
+	 * is added programmatically, and that has no keys to populate, is left without the evicted
+	 * metadata.
+	 *
+	 * <p>Complexity: O(k) in the number of cached keys, plus the cost of
+	 * {@link #populateKeys()}, which scans the whole metadata store of a file system repository.
+	 * A lookup that runs while the keys are evicted and not yet populated again can miss them.
 	 *
 	 * @param customer the customer scope to evict, or {@code null} for a full eviction
 	 */
@@ -146,6 +156,9 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 				return customerName.equals(parts[0]) || moduleNames.contains(parts[1]);
 			});
 		}
+
+		// Lookups find only the keys present, so put back those of the metadata that still exists
+		populateKeys();
 	}
 	
 	/**
