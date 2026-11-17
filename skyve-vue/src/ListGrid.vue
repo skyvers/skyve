@@ -19,8 +19,8 @@ function defaultMatchMode(columnType) {
 /**
  * The criteria for a filter on a date time or timestamp column whose converter shows only the date (its filter
  * calendar takes a day): the day the user sees, as the server compares date times exactly.
- * Equals is the whole day (from its start to the next day's), Not Equals outside it, Before before it starts and
- * After after it ends; any other match mode compares with the day's start.
+ * Equals is the whole day (from its start to the next day's), Not Equals outside it (or no value), Before before it
+ * starts and After after it ends; any other match mode compares with the day's start.
  *
  * @param {String} fieldName the column's field
  * @param {String} matchMode the filter's match mode (see MatchModes.js)
@@ -34,8 +34,8 @@ function dayCriteria(fieldName, matchMode, day) {
     switch (matchMode) {
         case MatchModes.MODES.EQUALS:
             return { _constructor: 'AdvancedCriteria', operator: 'and', criteria: [compare('greaterOrEqual', start), compare('lessThan', end)] };
-        case MatchModes.MODES.NOT_EQUALS:
-            return { _constructor: 'AdvancedCriteria', operator: 'or', criteria: [compare('lessThan', start), compare('greaterOrEqual', end)] };
+        case MatchModes.MODES.NOT_EQUALS: // also a row with no value, as a negation is
+            return { _constructor: 'AdvancedCriteria', operator: 'or', criteria: [compare('lessThan', start), compare('greaterOrEqual', end), { fieldName, operator: 'isNull' }] };
         case MatchModes.MODES.GREATER_THAN:
             return compare('greaterOrEqual', end);
         default:

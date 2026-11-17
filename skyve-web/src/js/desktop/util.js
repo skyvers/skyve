@@ -942,9 +942,10 @@ isc.BizUtil.addClassMethods({
 /**
  * Makes a filter on a date time or timestamp column whose converter shows only the date (a *_DateTime type) mean the
  * whole local day, as the Vue list grid does: equals is from the day's start up to the next day's, notEqual is outside
- * it, lessThan is before the day, greaterThan after it (lessOrEqual and greaterOrEqual likewise), between is after the
- * start day and before the end day, and betweenInclusive from the start day's start to the end day's end. The column's
- * filter gives the day's local midnight; without this, the server compares that instant exactly.
+ * it (or no value), lessThan is before the day, greaterThan after it (lessOrEqual and greaterOrEqual likewise),
+ * between is after the start day and before the end day, and betweenInclusive from the start day's start to the end
+ * day's end. The column's filter gives the day's local midnight; without this, the server compares that instant
+ * exactly.
  */
 isc.RestDataSource.addMethods({
 	skyveTransformRequest: isc.RestDataSource.getPrototype().transformRequest,
@@ -1035,8 +1036,15 @@ isc.BizUtil.addClassMethods({
 			switch (clause.operator) {
 				case "equals":
 					return { operator: "and", criteria: [compare("greaterOrEqual", startOf(day)), compare("lessThan", nextAfter(day))] };
-				case "notEqual":
-					return { operator: "or", criteria: [compare("lessThan", startOf(day)), compare("greaterOrEqual", nextAfter(day))] };
+				case "notEqual": // also a row with no value, as a negation is
+					return {
+						operator: "or",
+						criteria: [
+							compare("lessThan", startOf(day)),
+							compare("greaterOrEqual", nextAfter(day)),
+							{ fieldName: clause.fieldName, operator: "isNull" },
+						],
+					};
 				case "lessThan":
 					return compare("lessThan", startOf(day));
 				case "lessOrEqual":

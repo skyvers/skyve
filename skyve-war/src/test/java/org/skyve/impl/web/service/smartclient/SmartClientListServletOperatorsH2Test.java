@@ -157,16 +157,15 @@ class SmartClientListServletOperatorsH2Test extends AbstractH2Test {
 	}
 
 	/**
-	 * A row with no number and no variant under Match None: the server's negations (SQL NOT IN and the range's outside
-	 * comparisons) leave it out, where SmartClient's client side would include it. This pins the documented Known
-	 * Limitation ("negations and rows with no value"), not a wanted behaviour.
+	 * A row with no number and no variant under Match None: like SmartClient's own evaluation, a negation matches it
+	 * (see SmartClientListServletNullsH2Test).
 	 */
 	@Test
-	void aRowWithNoValueIsLeftOutByTheServersNegations() throws Exception {
+	void aRowWithNoValueIsMatchedByTheNegations() throws Exception {
 		CORE.getPersistence().save(row("OP n", null, null, null));
 		CORE.getPersistence().flush();
-		assertEquals(Set.of("OP c"), fetch(CompoundFilterOperator.not, List.of(range("betweenInclusive", "1", "5"))));
-		assertEquals(Set.of("OP a", "OP c"), fetch(CompoundFilterOperator.not, List.of(criterion(VARIANT, "iContains", "Two"))));
+		assertEquals(Set.of("OP c", "OP n"), fetch(CompoundFilterOperator.not, List.of(range("betweenInclusive", "1", "5"))));
+		assertEquals(Set.of("OP a", "OP c", "OP n"), fetch(CompoundFilterOperator.not, List.of(criterion(VARIANT, "iContains", "Two"))));
 	}
 
 	/** Match None on [and: betweenInclusive 1 to 5, notBlank memo]: not b, so a and c. */

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1053,7 +1054,8 @@ public class SmartClientListServlet extends HttpServlet {
 							filterOperator = transformWildcardFilterOperator(filterOperator);
 							// Translate variant domain filters to a set of codes to search for
 							if (! parameter) {
-								if ((valueString != null) && (domainType == DomainType.variant)) {
+								// a typed description (a list's values are codes already)
+								if ((valueString != null) && (domainType == DomainType.variant) && (! (value instanceof List<?>))) {
 									// at most 100 codes: a negated filter by more matching descriptions lets the rest through
 									variantCodes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
 								}
@@ -1163,15 +1165,15 @@ public class SmartClientListServlet extends HttpServlet {
 
 				switch (compoundFilterOperator) {
 					case and:
-						addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
+						addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
 						break;
 					case or:
 						if (filter.isEmpty()) {
-							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
+							addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
 						}
 						else {
 							Filter orFilter = nonNullFilter(model.newFilter(), model);
-							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, orFilter);
+							addCriterion(binding, filterOperator, value, start, end, tagId, orFilter, model);
 							if (! orFilter.isEmpty()) {
 								filter.addOr(orFilter);
 							}
@@ -1180,64 +1182,64 @@ public class SmartClientListServlet extends HttpServlet {
 					case not:
 						switch (filterOperator) {
 							case substring, contains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notContains, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notContains, value, start, end, tagId, filter, model);
 								break;
 							case iContains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotContains, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotContains, value, start, end, tagId, filter, model);
 								break;
 							case notContains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.contains, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.contains, value, start, end, tagId, filter, model);
 								break;
 							case iNotContains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iContains, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iContains, value, start, end, tagId, filter, model);
 								break;
 							case startsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notStartsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notStartsWith, value, start, end, tagId, filter, model);
 								break;
 							case iStartsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, tagId, filter, model);
 								break;
 							case notStartsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.startsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.startsWith, value, start, end, tagId, filter, model);
 								break;
 							case iNotStartsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iStartsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iStartsWith, value, start, end, tagId, filter, model);
 								break;
 							case endsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEndsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notEndsWith, value, start, end, tagId, filter, model);
 								break;
 							case iEndsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, tagId, filter, model);
 								break;
 							case notEndsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.endsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.endsWith, value, start, end, tagId, filter, model);
 								break;
 							case iNotEndsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter, model);
 								break;
 							case exact, equals:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEqual, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notEqual, value, start, end, tagId, filter, model);
 								break;
 							case iEquals:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEqual, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotEqual, value, start, end, tagId, filter, model);
 								break;
 							case notEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.equals, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.equals, value, start, end, tagId, filter, model);
 								break;
 							case iNotEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEquals, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iEquals, value, start, end, tagId, filter, model);
 								break;
 							case greaterThan:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.lessOrEqual, value, start, end, tagId, filter, model);
 								break;
 							case greaterOrEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessThan, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.lessThan, value, start, end, tagId, filter, model);
 								break;
 							case lessThan:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, tagId, filter, model);
 								break;
 							case lessOrEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter, model);
 								break;
 							case betweenInclusive, iBetweenInclusive: // outside the range: before its start or after its end
 								addOutsideRange(binding, start, end, true, tagId, filter, model);
@@ -1246,82 +1248,82 @@ public class SmartClientListServlet extends HttpServlet {
 								addOutsideRange(binding, start, end, false, tagId, filter, model);
 								break;
 							case isNull:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter, model);
 								break;
 							case notNull:
-								addCriterionToFilter(binding, SmartClientFilterOperator.isNull, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.isNull, value, start, end, tagId, filter, model);
 								break;
 							case isBlank:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter, model);
 								break;
 							case notBlank:
-								addCriterionToFilter(binding, SmartClientFilterOperator.isBlank, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.isBlank, value, start, end, tagId, filter, model);
 								break;
 							case equalsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter, model);
 								break;
 							case iEqualsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEqualField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotEqualField, value, start, end, tagId, filter, model);
 								break;
 							case notEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.equalsField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.equalsField, value, start, end, tagId, filter, model);
 								break;
 							case iNotEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEqualsField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iEqualsField, value, start, end, tagId, filter, model);
 								break;
 							case containsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notContainsField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notContainsField, value, start, end, tagId, filter, model);
 								break;
 							case iContainsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotContainsField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotContainsField, value, start, end, tagId, filter, model);
 								break;
 							case notContainsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.containsField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.containsField, value, start, end, tagId, filter, model);
 								break;
 							case iNotContainsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iContainsField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iContainsField, value, start, end, tagId, filter, model);
 								break;
 							case startsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notStartsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notStartsWithField, value, start, end, tagId, filter, model);
 								break;
 							case iStartsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotStartsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotStartsWithField, value, start, end, tagId, filter, model);
 								break;
 							case notStartsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.startsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.startsWithField, value, start, end, tagId, filter, model);
 								break;
 							case iNotStartsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iStartsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iStartsWithField, value, start, end, tagId, filter, model);
 								break;
 							case endsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEndsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notEndsWithField, value, start, end, tagId, filter, model);
 								break;
 							case iEndsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEndsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iNotEndsWithField, value, start, end, tagId, filter, model);
 								break;
 							case notEndsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.endsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.endsWithField, value, start, end, tagId, filter, model);
 								break;
 							case iNotEndsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEndsWithField, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.iEndsWithField, value, start, end, tagId, filter, model);
 								break;
 							case greaterThanField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, tagId, filter, model);
 								break;
 							case greaterOrEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessThanField, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.lessThanField, value, start, end, tagId, filter, model);
 								break;
 							case lessThanField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, tagId, filter, model);
 								break;
 							case lessOrEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterThanField, value, start, end, tagId, filter);
+								addNullOr(binding, SmartClientFilterOperator.greaterThanField, value, start, end, tagId, filter, model);
 								break;
 							case inSet:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notInSet, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.notInSet, value, start, end, tagId, filter, model);
 								break;
 							case notInSet:
-								addCriterionToFilter(binding, SmartClientFilterOperator.inSet, value, start, end, tagId, filter);
+								addCriterion(binding, SmartClientFilterOperator.inSet, value, start, end, tagId, filter, model);
 								break;
 							case regexp, iregexp:
 								// nothing to do
@@ -1421,6 +1423,81 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	/**
+	 * The operators that negate a condition. Like SmartClient's own evaluation of criteria (and InMemoryFilter), each
+	 * matches a row whose column has no value, which SQL's comparisons would leave out.
+	 */
+	private static final Set<SmartClientFilterOperator> NEGATIVE_OPERATORS = EnumSet.of(SmartClientFilterOperator.notEqual,
+																						SmartClientFilterOperator.iNotEqual,
+																						SmartClientFilterOperator.notContains,
+																						SmartClientFilterOperator.iNotContains,
+																						SmartClientFilterOperator.notStartsWith,
+																						SmartClientFilterOperator.iNotStartsWith,
+																						SmartClientFilterOperator.notEndsWith,
+																						SmartClientFilterOperator.iNotEndsWith,
+																						SmartClientFilterOperator.notInSet,
+																						SmartClientFilterOperator.notEqualField,
+																						SmartClientFilterOperator.iNotEqualField,
+																						SmartClientFilterOperator.notContainsField,
+																						SmartClientFilterOperator.iNotContainsField,
+																						SmartClientFilterOperator.notStartsWithField,
+																						SmartClientFilterOperator.iNotStartsWithField,
+																						SmartClientFilterOperator.notEndsWithField,
+																						SmartClientFilterOperator.iNotEndsWithField);
+
+	/**
+	 * Adds a criterion; a negative one (see {@link #NEGATIVE_OPERATORS}) also matches a row with no value.
+	 */
+	private static void addCriterion(@Nonnull String binding,
+										@Nullable SmartClientFilterOperator filterOperator,
+										@Nullable Object value,
+										@Nullable Object start,
+										@Nullable Object end,
+										@Nullable String tagId,
+										@Nonnull Filter filter,
+										@Nonnull ListModel<?> model) {
+		if ((filterOperator != null) && NEGATIVE_OPERATORS.contains(filterOperator)) {
+			addNullOr(binding, filterOperator, value, start, end, tagId, filter, model);
+		}
+		else {
+			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
+		}
+	}
+
+	/**
+	 * Adds a negation that also matches a row with no value: the column is null, or the criterion holds. The tagged
+	 * and tree parent pseudo-bindings are not columns, so their criteria are added as they are.
+	 */
+	private static void addNullOr(@Nonnull String binding,
+									@Nonnull SmartClientFilterOperator filterOperator,
+									@Nullable Object value,
+									@Nullable Object start,
+									@Nullable Object end,
+									@Nullable String tagId,
+									@Nonnull Filter filter,
+									@Nonnull ListModel<?> model) {
+		if (PersistentBean.TAGGED_NAME.equals(binding) || HierarchicalBean.PARENT_ID.equals(binding)) {
+			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
+			return;
+		}
+		Filter criterion = nonNullFilter(model.newFilter(), model);
+		addCriterionToFilter(binding, filterOperator, value, start, end, tagId, criterion);
+		addNullOr(binding, criterion, filter, model);
+	}
+
+	/**
+	 * ANDs "the column is null, or the criterion holds" onto the filter, when the criterion adds anything.
+	 */
+	private static void addNullOr(@Nonnull String binding, @Nonnull Filter criterion, @Nonnull Filter filter, @Nonnull ListModel<?> model) {
+		if (criterion.isEmpty()) {
+			return;
+		}
+		Filter nullOr = nonNullFilter(model.newFilter(), model);
+		nullOr.addNull(binding);
+		nullOr.addOr(criterion);
+		filter.addAnd(nullOr);
+	}
+
+	/**
 	 * Adds a range's negation for Match None: before its start or after its end for an inclusive range
 	 * (betweenInclusive), at or before its start or at or after its end for an exclusive one (between). A missing end is
 	 * open, so it adds nothing on that side.
@@ -1456,9 +1533,7 @@ public class SmartClientListServlet extends HttpServlet {
 				outside.addOr(after);
 			}
 		}
-		if (! outside.isEmpty()) {
-			filter.addAnd(outside);
-		}
+		addNullOr(binding, outside, filter, model);
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK

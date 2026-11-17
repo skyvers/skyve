@@ -899,6 +899,10 @@ class SmartClientListServletHelperTest {
 		notInSet.put("operator", SmartClientFilterOperator.notInSet.toString());
 		notInSet.put("value", new java.util.ArrayList<>(java.util.List.of("X", "Y")));
 
+		// a negation also matches a row with no value: (null or the negation), built in filters of its own
+		Filter child = mock(Filter.class);
+		when(model.newFilter()).thenReturn(child);
+
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
 				user,
@@ -908,10 +912,12 @@ class SmartClientListServletHelperTest {
 				model,
 				filter);
 
-		verify(filter).addNotContains("name", "abc");
+		verify(child).addNotContains("name", "abc");
 		verify(filter).addContains("name", "def");
-		verify(filter).addNotIn("name", "A", "B");
+		verify(child).addNotIn("name", "A", "B");
 		verify(filter).addIn("name", "X", "Y");
+		verify(child, times(2)).addNull("name");
+		verify(filter, times(2)).addAnd(child);
 	}
 
 	@Test
@@ -943,10 +949,11 @@ class SmartClientListServletHelperTest {
 		notNull.put("fieldName", "name");
 		notNull.put("operator", SmartClientFilterOperator.notNull.toString());
 
-		// not betweenInclusive is before the start or after the end, in a filter of its own
+		// not betweenInclusive is no value, before the start or after the end, in filters of their own
 		Filter outside = mock(Filter.class);
 		Filter after = mock(Filter.class);
-		when(model.newFilter()).thenReturn(outside, after);
+		Filter nullOr = mock(Filter.class);
+		when(model.newFilter()).thenReturn(outside, after, nullOr);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
@@ -960,7 +967,9 @@ class SmartClientListServletHelperTest {
 		verify(outside).addLessThan("name", "A");
 		verify(after).addGreaterThan("name", "Z");
 		verify(outside).addOr(after);
-		verify(filter).addAnd(outside);
+		verify(nullOr).addNull("name");
+		verify(nullOr).addOr(outside);
+		verify(filter).addAnd(nullOr);
 		verify(filter).addNotNull("name");
 		verify(filter).addNull("name");
 	}
@@ -992,6 +1001,8 @@ class SmartClientListServletHelperTest {
 		java.util.Map<String, Object> iEquals = criterion("name", SmartClientFilterOperator.iEquals, "r");
 		java.util.Map<String, Object> notEqual = criterion("name", SmartClientFilterOperator.notEqual, "s");
 		java.util.Map<String, Object> iNotEqual = criterion("name", SmartClientFilterOperator.iNotEqual, "t");
+		Filter child = mock(Filter.class);
+		when(model.newFilter()).thenReturn(child);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
@@ -1013,18 +1024,21 @@ class SmartClientListServletHelperTest {
 				model,
 				filter);
 
-		verify(filter).addNotStartsWith("name", "ab");
-		verify(filter).addNotStartsWith("name", "cd");
+		// the negations (also matching no value) are in filters of their own
+		verify(child).addNotStartsWith("name", "ab");
+		verify(child).addNotStartsWith("name", "cd");
 		verify(filter).addStartsWith("name", "ef");
 		verify(filter).addStartsWith("name", "gh");
-		verify(filter).addNotEndsWith("name", "ij");
-		verify(filter).addNotEndsWith("name", "kl");
+		verify(child).addNotEndsWith("name", "ij");
+		verify(child).addNotEndsWith("name", "kl");
 		verify(filter).addEndsWith("name", "mn");
 		verify(filter).addEndsWith("name", "op");
-		verify(filter).addNotEquals("name", "q");
-		verify(filter).addNotEqualsIgnoreCase("name", "r");
+		verify(child).addNotEquals("name", "q");
+		verify(child).addNotEqualsIgnoreCase("name", "r");
 		verify(filter).addEquals("name", "s");
 		verify(filter).addEqualsIgnoreCase("name", "t");
+		verify(child, times(6)).addNull("name");
+		verify(filter, times(6)).addAnd(child);
 	}
 
 	@Test
@@ -1050,10 +1064,10 @@ class SmartClientListServletHelperTest {
 		iBetween.put("start", "A");
 		iBetween.put("end", "Z");
 
-		// not iBetween (exclusive) is at or before the start, or at or after the end, in a filter of its own
-		Filter outside = mock(Filter.class);
-		Filter after = mock(Filter.class);
-		when(model.newFilter()).thenReturn(outside, after);
+		// each negation (also matching no value) and not iBetween (exclusive: at or before the start, or at or after the
+		// end) are in filters of their own
+		Filter child = mock(Filter.class);
+		when(model.newFilter()).thenReturn(child);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
@@ -1064,14 +1078,14 @@ class SmartClientListServletHelperTest {
 				model,
 				filter);
 
-		verify(filter).addLessThanOrEqualTo("name", "10");
-		verify(filter).addLessThan("name", "11");
-		verify(filter).addGreaterThanOrEqualTo("name", "12");
-		verify(filter).addGreaterThan("name", "13");
-		verify(outside).addLessThanOrEqualTo("name", "A");
-		verify(after).addGreaterThanOrEqualTo("name", "Z");
-		verify(outside).addOr(after);
-		verify(filter).addAnd(outside);
+		verify(child).addLessThanOrEqualTo("name", "10");
+		verify(child).addLessThan("name", "11");
+		verify(child).addGreaterThanOrEqualTo("name", "12");
+		verify(child).addGreaterThan("name", "13");
+		verify(child).addLessThanOrEqualTo("name", "A");
+		verify(child).addGreaterThanOrEqualTo("name", "Z");
+		verify(child, times(5)).addNull("name");
+		verify(filter, times(5)).addAnd(child);
 	}
 
 	@Test
@@ -1130,6 +1144,11 @@ class SmartClientListServletHelperTest {
 		java.util.Map<String, Object> and = criterion("name", SmartClientFilterOperator.and, "x");
 		java.util.Map<String, Object> or = criterion("name", SmartClientFilterOperator.or, "x");
 		java.util.Map<String, Object> not = criterion("name", SmartClientFilterOperator.not, "x");
+
+		// the field operators add nothing, so their negations add nothing either
+		Filter child = mock(Filter.class);
+		when(child.isEmpty()).thenReturn(Boolean.TRUE);
+		when(model.newFilter()).thenReturn(child);
 
 		invokeAddAdvancedFilterCriteriaToQueryInternal(module,
 				document,
