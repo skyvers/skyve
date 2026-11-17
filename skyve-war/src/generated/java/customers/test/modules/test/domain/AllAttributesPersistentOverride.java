@@ -23,7 +23,7 @@ import modules.test.domain.AllAttributesPersistent;
 @XmlType
 @XmlRootElement
 @Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
-public class AllAttributesPersistentExt extends AllAttributesPersistent {
+public class AllAttributesPersistentOverride extends AllAttributesPersistent {
 	/**
 	 * For Serialization
 	 * @hidden

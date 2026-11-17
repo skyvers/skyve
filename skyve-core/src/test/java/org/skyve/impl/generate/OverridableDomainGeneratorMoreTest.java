@@ -1048,7 +1048,7 @@ class OverridableDomainGeneratorMoreTest {
 		}
 
 		assertTrue(gen.generation.containsKey(customerModulesPath.resolve("orm.hbm.xml")));
-		assertFalse(gen.generation.containsKey(generatedSrc.resolve("customers/acme/modules/sales/domain/OrderExt.java")));
+		assertFalse(gen.generation.containsKey(generatedSrc.resolve("customers/acme/modules/sales/domain/OrderOverride.java")));
 	}
 
 	@Test
@@ -5487,7 +5487,7 @@ class OverridableDomainGeneratorMoreTest {
 	/**
 	 * A repository with vanilla module "sales" declaring the persistent document Order (code), and
 	 * CustomerImpl "acme" with the sales module. When {@code overridden}, acme overrides Order with an
-	 * extra property (notes), so it gets an OrderExt class and a customer ORM mapping. The repository
+	 * extra property (notes), so it gets an OrderOverride class and a customer ORM mapping. The repository
 	 * is installed in {@link ProvidedRepositoryFactory} for the duration of {@code action}.
 	 */
 	private static void withDocumentOverrideRepository(boolean overridden, RepositoryAction action) throws Exception {
@@ -5637,12 +5637,12 @@ class OverridableDomainGeneratorMoreTest {
 
 		withDocumentOverrideRepository(true, repo -> generateInto(root, repo));
 
-		String ext = Files.readString(root.resolve(CUSTOMER_DOMAIN).resolve("OrderExt.java"));
+		String ext = Files.readString(root.resolve(CUSTOMER_DOMAIN).resolve("OrderOverride.java"));
 		String orm = Files.readString(root.resolve(CUSTOMER_ORM));
 		assertAll(
 				() -> assertTrue(ext.contains("package customers.acme.modules.sales.domain;"), ext),
 				() -> assertTrue(ext.contains("notes"), ext),
-				() -> assertTrue(orm.contains("customers.acme.modules.sales.domain.OrderExt"), orm));
+				() -> assertTrue(orm.contains("customers.acme.modules.sales.domain.OrderOverride"), orm));
 	}
 
 	@Test
@@ -5677,7 +5677,7 @@ class OverridableDomainGeneratorMoreTest {
 		Map<String, String> first = snapshots.get("first");
 		assertAll(
 				() -> assertTrue(first.containsKey(CUSTOMER_ORM), first.keySet().toString()),
-				() -> assertTrue(first.containsKey(CUSTOMER_DOMAIN + "/OrderExt.java"), first.keySet().toString()),
+				() -> assertTrue(first.containsKey(CUSTOMER_DOMAIN + "/OrderOverride.java"), first.keySet().toString()),
 				() -> assertEquals(first, snapshots.get("second")));
 	}
 
@@ -5702,7 +5702,7 @@ class OverridableDomainGeneratorMoreTest {
 
 		withDocumentOverrideRepository(false, repo -> generateInto(root, repo));
 
-		assertFalse(Files.exists(root.resolve("src/customers")), "The stale OrderExt, mapping and directories should be removed");
+		assertFalse(Files.exists(root.resolve("src/customers")), "The stale OrderOverride, mapping and directories should be removed");
 	}
 
 	@Test

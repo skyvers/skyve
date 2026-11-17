@@ -100,6 +100,20 @@ public final class OverridableDomainGenerator extends DomainGenerator {
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(OverridableDomainGenerator.class);
 
 	/**
+	 * The suffix of the concrete vanilla class generated when a customer override leaves out a vanilla
+	 * attribute and so makes the vanilla domain class abstract - <code>modules.&lt;m&gt;.domain.&lt;Document&gt;Vanilla</code>.
+	 * {@link DocumentImpl#getBeanClass} relies on it.
+	 */
+	private static final String VANILLA_CLASS_SUFFIX = "Vanilla";
+
+	/**
+	 * The suffix of the class generated for a customer's override of a vanilla document -
+	 * <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code>.
+	 * {@link DocumentImpl#getBeanClass} relies on it.
+	 */
+	private static final String OVERRIDE_CLASS_SUFFIX = "Override";
+
+	/**
 	 * Simple container for generated document class metadata.
 	 */
 	private static class DomainClass {
@@ -445,8 +459,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 
 				if ((domainClass != null) && domainClass.isAbstract) {
-					// Generate extension
-					javaFilePath = Paths.get(generatedSrcPath, packagePath, documentName + "Ext.java");
+					// Generate the concrete vanilla class
+					String vanillaClassName = documentName + VANILLA_CLASS_SUFFIX;
+					checkGeneratedClassName(module, documentName, vanillaClassName);
+					javaFilePath = Paths.get(generatedSrcPath, packagePath, vanillaClassName + ".java");
 					javaFileContents = new StringBuilder(4096);
 					generateJava(null,
 									module,
@@ -878,11 +894,12 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 							return;
 						}
 
-						// Generate extension
+						// Generate the override class, or the new document's class
 						StringBuilder javaFileName = new StringBuilder(256);
 						javaFileName.append(generatedSrcPath).append(packagePath).append('/').append(documentName);
 						if (vanillaDocumentName != null) {
-							javaFileName.append("Ext");
+							checkGeneratedClassName(module, documentName, documentName + OVERRIDE_CLASS_SUFFIX);
+							javaFileName.append(OVERRIDE_CLASS_SUFFIX);
 						}
 						javaFileName.append(".java");
 						Path javaFilePath = Paths.get(javaFileName.toString());
@@ -917,8 +934,30 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
+	 * Checks that a class generated for a document - its concrete vanilla class or a customer's override
+	 * class - does not take the name of a document in the module, compared case-insensitively because
+	 * the generated files must coexist on case-insensitive file systems. The generated name cannot be
+	 * dodged, as {@link DocumentImpl#getBeanClass} looks the class up by it.
+	 *
+	 * @param module	The module whose domain package the class is generated into - vanilla, or the
+	 * 					customer's override.
+	 * @param documentName	The document the class is generated for.
+	 * @param className	The generated class's simple name.
+	 * @throws MetaDataException	if a document in the module has the class's name.
+	 */
+	private static void checkGeneratedClassName(@Nonnull Module module, @Nonnull String documentName, @Nonnull String className) {
+		for (String name : module.getDocumentRefs().keySet()) {
+			if (name.equalsIgnoreCase(className)) {
+				throw new MetaDataException("Document " + name + " in module " + module.getName() +
+												" has the name of the class " + className + " generated for document " + documentName +
+												". Rename the document.");
+			}
+		}
+	}
+
+	/**
 	 * Determines whether a customer's override of a vanilla document needs its own concrete customer
-	 * class (<code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Ext</code>) rather than the
+	 * class (<code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code>) rather than the
 	 * vanilla class: when it adds properties to the vanilla class, or when the vanilla class is abstract
 	 * because a customer's override - this one or another customer's - leaves out a vanilla attribute.
 	 *
@@ -1100,7 +1139,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				else {
 					contents.append(packagePathPrefix).append(moduleName).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 					if (forExt) {
-						contents.append("Ext");
+						contents.append(packagePathPrefix.startsWith(ProvidedRepository.CUSTOMERS_NAME) ? OVERRIDE_CLASS_SUFFIX : VANILLA_CLASS_SUFFIX);
 					}
 				}
 				contents.append("\" ");
@@ -1805,12 +1844,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 					boolean requiresExtension = forExt &&
 													(! moduleDocumentVanillaClasses.get(targetDocument.getOwningModuleName()).get(targetDocument.getName()).attributes.containsKey(target.getName()));
-					if (requiresExtension) {
+					// the enumeration is declared in the override class, or in the concrete vanilla class
+					if (requiresExtension && (customerName != null)) {
 						contents.append(ProvidedRepository.CUSTOMERS_NAME).append('.').append(customerName).append('.');
 					}
 					contents.append(enumeration.getEncapsulatingClassName());
 					if (requiresExtension) {
-						contents.append("Ext");
+						contents.append((customerName == null) ? VANILLA_CLASS_SUFFIX : OVERRIDE_CLASS_SUFFIX);
 					}
 					contents.append('$').append(enumeration.toJavaIdentifier());
 				}
@@ -4138,7 +4178,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		contents.append("class ").append(documentName);
 		if (baseDocumentName != null) { // extension
 			if (overridden) {
-				contents.append("Ext");
+				contents.append((customer == null) ? VANILLA_CLASS_SUFFIX : OVERRIDE_CLASS_SUFFIX);
 			}
 
 			if (baseDocumentExtensionClassExists) {
@@ -4461,7 +4501,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * directory:
 	 * <ul>
 	 * 	<li>directly in <code>modules/&lt;m&gt;/domain/</code> - module metadata enums,
-	 * 		<code>&lt;Document&gt;Ext</code> classes and new customer document classes;</li>
+	 * 		<code>&lt;Document&gt;Override</code> classes and new customer document classes;</li>
 	 * 	<li>directly in <code>domain/</code> - the customer role enum;</li>
 	 * 	<li><code>modules/orm.hbm.xml</code> - the customer ORM mapping;</li>
 	 * 	<li><code>modules/metadata-enums-only.txt</code> - a marker an earlier generator wrote.</li>

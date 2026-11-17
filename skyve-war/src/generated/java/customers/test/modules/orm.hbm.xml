@@ -37,7 +37,7 @@
 		<filter name="testtestReachabilityUserIdFilter" condition="bizUserId=:userIdParam"/>
 	</class>
 
-	<class name="customers.test.modules.test.domain.AllAttributesPersistentExt" table="TEST_AllAttributesPersistent" entity-name="testtestAllAttributesPersistent">
+	<class name="customers.test.modules.test.domain.AllAttributesPersistentOverride" table="TEST_AllAttributesPersistent" entity-name="testtestAllAttributesPersistent">
 		<id name="bizId" length="36" />
 		<version name="bizVersion" unsaved-value="null" />
 		<property name="bizLock" type="OptimisticLock" length="271" not-null="true" />

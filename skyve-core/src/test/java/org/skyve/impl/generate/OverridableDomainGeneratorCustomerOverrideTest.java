@@ -3,6 +3,7 @@ package org.skyve.impl.generate;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -30,8 +31,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.metadata.model.document.field.Enumeration;
+import org.skyve.impl.metadata.model.document.field.Enumeration.EnumeratedValue;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
@@ -310,14 +314,14 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				.acme(document("Order", "SALES_Order", null, null, "code")));
 
 		String vanillaOrder = files.get("modules/sales/domain/Order.java");
-		String acmeExt = files.get("customers/acme/modules/sales/domain/OrderExt.java");
+		String acmeOverride = files.get("customers/acme/modules/sales/domain/OrderOverride.java");
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
 		assertAll(
 				() -> assertTrue(vanillaOrder.contains("public abstract class Order"), "acme's narrowing makes the vanilla class abstract"),
-				() -> assertTrue(acmeExt != null, "acme needs a concrete class for its Order, got " + files.keySet()),
-				() -> assertTrue((acmeExt != null) && acmeExt.contains("public class OrderExt extends Order"), String.valueOf(acmeExt)),
-				() -> assertTrue((acmeExt != null) && (! acmeExt.contains("description")), "acme dropped description"),
-				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.OrderExt\""), acmeMapping),
+				() -> assertTrue(acmeOverride != null, "acme needs a concrete class for its Order, got " + files.keySet()),
+				() -> assertTrue((acmeOverride != null) && acmeOverride.contains("public class OrderOverride extends Order"), String.valueOf(acmeOverride)),
+				() -> assertTrue((acmeOverride != null) && (! acmeOverride.contains("description")), "acme dropped description"),
+				() -> assertTrue(acmeMapping.contains("<class name=\"customers.acme.modules.sales.domain.OrderOverride\""), acmeMapping),
 				() -> assertFalse(acmeMapping.contains("<class name=\"modules.sales.domain.Order\""), "acme must not map the abstract class"),
 				() -> assertEquals(List.of(), mappingProblems(files)));
 	}
@@ -328,12 +332,12 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				.vanilla(document("Order", "SALES_Order", null, null, "code", "description"))
 				.acme(document("Order", "SALES_Order", null, null, "code")));
 
-		String vanillaExt = files.get("modules/sales/domain/OrderExt.java");
+		String vanillaClass = files.get("modules/sales/domain/OrderVanilla.java");
 		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
 		assertAll(
-				() -> assertTrue(vanillaExt.contains("public class OrderExt extends Order"), vanillaExt),
-				() -> assertTrue(vanillaExt.contains("description"), "the vanilla extension keeps what acme dropped"),
-				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.domain.OrderExt\""), vanillaMapping),
+				() -> assertTrue(vanillaClass.contains("public class OrderVanilla extends Order"), vanillaClass),
+				() -> assertTrue(vanillaClass.contains("description"), "the vanilla extension keeps what acme dropped"),
+				() -> assertTrue(vanillaMapping.contains("<class name=\"modules.sales.domain.OrderVanilla\""), vanillaMapping),
 				() -> assertTrue(vanillaMapping.contains("name=\"description\""), vanillaMapping),
 				() -> assertFalse(files.containsKey("customers/beta/modules/orm.hbm.xml"), "beta overrides nothing"));
 	}
@@ -345,13 +349,13 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 				.acme(document("Order", "SALES_Order", null, null, "code"))
 				.beta(document("Order", "SALES_Order", null, null, "code", "description")));
 
-		String betaExt = files.get("customers/beta/modules/sales/domain/OrderExt.java");
+		String betaOverride = files.get("customers/beta/modules/sales/domain/OrderOverride.java");
 		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
 		assertAll(
-				() -> assertTrue(betaExt != null, "beta's override adds nothing, but the vanilla class is abstract, got " + files.keySet()),
-				() -> assertTrue((betaExt != null) && betaExt.contains("public class OrderExt extends Order"), String.valueOf(betaExt)),
-				() -> assertTrue((betaExt != null) && betaExt.contains("description"), "beta keeps what acme dropped"),
-				() -> assertTrue(betaMapping.contains("<class name=\"customers.beta.modules.sales.domain.OrderExt\""), betaMapping),
+				() -> assertTrue(betaOverride != null, "beta's override adds nothing, but the vanilla class is abstract, got " + files.keySet()),
+				() -> assertTrue((betaOverride != null) && betaOverride.contains("public class OrderOverride extends Order"), String.valueOf(betaOverride)),
+				() -> assertTrue((betaOverride != null) && betaOverride.contains("description"), "beta keeps what acme dropped"),
+				() -> assertTrue(betaMapping.contains("<class name=\"customers.beta.modules.sales.domain.OrderOverride\""), betaMapping),
 				() -> assertTrue(betaMapping.contains("name=\"description\""), betaMapping),
 				() -> assertEquals(List.of(), mappingProblems(files)));
 	}
@@ -365,9 +369,69 @@ class OverridableDomainGeneratorCustomerOverrideTest {
 		String acmeMapping = files.get("customers/acme/modules/orm.hbm.xml");
 		assertAll(
 				() -> assertTrue(files.get("modules/sales/domain/Order.java").contains("public class Order"), "nothing narrows Order"),
-				() -> assertFalse(files.containsKey("customers/acme/modules/sales/domain/OrderExt.java"), files.keySet().toString()),
+				() -> assertFalse(files.containsKey("customers/acme/modules/sales/domain/OrderOverride.java"), files.keySet().toString()),
 				() -> assertTrue(acmeMapping.contains("<class name=\"modules.sales.domain.Order\""), acmeMapping),
 				() -> assertEquals(List.of(), mappingProblems(files)));
+	}
+
+	@Test
+	void aDocumentNamedLikeTheConcreteVanillaClassIsRefused() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code", "description"))
+				.vanilla(document("Ordervanilla", "SALES_OrderVanilla", null, null, "code"))
+				.acme(document("Order", "SALES_Order", null, null, "code"));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Document Ordervanilla in module sales has the name of the class OrderVanilla generated for document Order. Rename the document.",
+						e.getMessage());
+	}
+
+	@Test
+	void aDocumentNamedLikeTheOverrideClassIsRefused() {
+		Fixture fixture = new Fixture()
+				.vanilla(document("Order", "SALES_Order", null, null, "code"))
+				.vanilla(document("OrderOverride", "SALES_OrderOverride", null, null, "code"))
+				.acme(document("Order", "SALES_Order", null, null, "code", "notes"));
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> generate(fixture));
+		assertEquals("Document OrderOverride in module sales has the name of the class OrderOverride generated for document Order. Rename the document.",
+						e.getMessage());
+	}
+
+	@Test
+	void aNarrowedEnumerationIsMappedToTheClassThatDeclaresIt() throws Exception {
+		DocumentImpl vanilla = document("Order", "SALES_Order", null, null, "code");
+		vanilla.putAttribute(enumeration(vanilla, "status"));
+		DocumentImpl acme = document("Order", "SALES_Order", null, null, "code");
+		DocumentImpl beta = document("Order", "SALES_Order", null, null, "code", "notes");
+		beta.putAttribute(enumeration(beta, "status"));
+		beta.putAttribute(enumeration(beta, "priority"));
+
+		Map<String, String> files = generate(new Fixture().vanilla(vanilla).acme(acme).beta(beta));
+
+		String vanillaMapping = files.get("modules/sales/domain/sales_orm.hbm.xml");
+		String betaMapping = files.get("customers/beta/modules/orm.hbm.xml");
+		assertAll(
+				() -> assertTrue(files.get("modules/sales/domain/OrderVanilla.java").contains("public enum Status implements Enumeration"), "the dropped enumeration moves to the vanilla class"),
+				() -> assertTrue(vanillaMapping.contains("modules.sales.domain.OrderVanilla$Status"), vanillaMapping),
+				() -> assertFalse(vanillaMapping.contains("customers."), vanillaMapping),
+				() -> assertTrue(files.get("customers/beta/modules/sales/domain/OrderOverride.java").contains("public enum Priority implements Enumeration"), "beta's own enumeration"),
+				() -> assertTrue(betaMapping.contains("customers.beta.modules.sales.domain.OrderOverride$Priority"), betaMapping),
+				() -> assertTrue(betaMapping.contains("customers.beta.modules.sales.domain.OrderOverride$Status"), betaMapping));
+	}
+
+	private static Enumeration enumeration(Document owningDocument, String name) {
+		Enumeration result = new Enumeration();
+		result.setOwningDocument(owningDocument);
+		result.setName(name);
+		result.setDisplayName(name);
+		for (String code : List.of("low", "high")) {
+			EnumeratedValue value = new EnumeratedValue();
+			value.setCode(code);
+			value.setDescription(code);
+			result.getXmlValues().add(value);
+		}
+		return result;
 	}
 
 	// ----- overrides in an inheritance hierarchy -------------------------------

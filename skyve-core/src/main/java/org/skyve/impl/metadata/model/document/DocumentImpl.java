@@ -297,15 +297,20 @@ public class DocumentImpl extends ModelImpl implements Document {
 	
 				if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
 					// Look for an override first and if not found look for a domain class
+					final String customerClassName = new StringBuilder(128).append(packagePath)
+																			.append(ProvidedRepository.DOMAIN_NAME)
+																			.append('.')
+																			.append(documentName).toString();
 					try {
 						className.setLength(0);
-						className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
+						className.append(customerClassName).append("Override");
 						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 					}
 					catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
 						// Look for the domain class in the customer area
 						try {
-							className.setLength(className.length() - 3); // remove "Ext"
+							className.setLength(0);
+							className.append(customerClassName);
 							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 						}
 						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
@@ -322,7 +327,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
 					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 					if (Modifier.isAbstract(result.getModifiers())) {
-						className.append("Ext");
+						className.append("Vanilla");
 						try {
 							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
 						}
