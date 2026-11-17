@@ -520,7 +520,10 @@ class ListModelTest {
 
 		int count = operators.size();
 		verify(newFilter).addEquals(Bean.BIZ_KEY, "value");
-		verify(newFilter, times(4)).addGreaterThan(Bean.BIZ_KEY, "value");
+		verify(newFilter).addGreaterThan(Bean.BIZ_KEY, "value");
+		verify(newFilter).addGreaterThanOrEqualTo(Bean.BIZ_KEY, "value");
+		verify(newFilter).addLessThan(Bean.BIZ_KEY, "value");
+		verify(newFilter).addLessThanOrEqualTo(Bean.BIZ_KEY, "value");
 		verify(newFilter).addContains(Bean.BIZ_KEY, "value");
 		verify(newFilter).addNotEquals(Bean.BIZ_KEY, "value");
 		verify(newFilter).addNotContains(Bean.BIZ_KEY, "value");

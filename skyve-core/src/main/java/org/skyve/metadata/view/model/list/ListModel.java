@@ -224,21 +224,21 @@ public abstract class ListModel<T extends Bean> implements ViewModel {
 					case nullOrGreaterEqual:
 						if (value != null) {
 							Filter greaterEqualFilter = newNonNullFilter();
-							addGreaterThan(greaterEqualFilter, parameterName, value);
+							addGreaterThanOrEqualTo(greaterEqualFilter, parameterName, value);
 							addNullOrSomething(filter, greaterEqualFilter, parameterName);
 						}
 						break;
 					case nullOrLess:
 						if (value != null) {
 							Filter lessFilter = newNonNullFilter();
-							addGreaterThan(lessFilter, parameterName, value);
+							addLessThan(lessFilter, parameterName, value);
 							addNullOrSomething(filter, lessFilter, parameterName);
 						}
 						break;
 					case nullOrLessEqual:
 						if (value != null) {
 							Filter lessEqualFilter = newNonNullFilter();
-							addGreaterThan(lessEqualFilter, parameterName, value);
+							addLessThanOrEqualTo(lessEqualFilter, parameterName, value);
 							addNullOrSomething(filter, lessEqualFilter, parameterName);
 						}
 						break;
