@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.LongSupplier;
@@ -497,24 +499,36 @@ class SailLoadTest {
 								// fake users need no persistence
 							});
 
-		SailLoadReport report = load.execute("test", user -> threads.add(Thread.currentThread().getName() + ' ' + user.name()));
+		CountDownLatch bothRunning = new CountDownLatch(2);
+		boolean[] together = {true, true};
+		long timeout = SailSettings.DEFAULT_TIMEOUT_SECONDS;
 
-		assertAll(() -> assertEquals(2, threads.size(), threads.toString()),
+		SailLoadReport report = load.execute("test", user -> {
+			threads.add(Thread.currentThread().getName() + ' ' + user.name());
+			bothRunning.countDown();
+			// the event: the other user's iteration is running at the same time as this one
+			together[user.number() - 1] = bothRunning.await(timeout, TimeUnit.SECONDS);
+		});
+
+		assertAll(() -> assertTrue(together[0] && together[1], "both users ran at once"),
+					() -> assertEquals(2, threads.size(), threads.toString()),
 					() -> assertTrue(threads.stream().allMatch(t -> t.matches("sail-load-[12] user 0[12]")), threads.toString()),
 					() -> assertEquals(List.of(new UserStats(1, 1, 0), new UserStats(2, 1, 0)), report.users()));
 	}
 
 	@Test
-	void settingsGivenOutBeforeATestsSettingsAreRefusedNotLost() {
-		SailLoad given = SailLoad.users(1);
-		given.settings().variable("password", "x");
+	void settingsSetOnTheRunsOwnBuilderBeforeATestsSettingsAreRefusedNotLost() {
+		SailLoad used = SailLoad.users(1).rampUp(Duration.ofSeconds(5));
+		used.settings().variable("password", "x");
+		SailLoad read = SailLoad.users(1).rampUp(Duration.ofSeconds(5));
+		SailSettings.Code own = read.settings(); // read, not used
 		SailSettings.Code tests = SailSettings.code();
-		SailLoad first = SailLoad.users(1).settings(tests);
 
-		IllegalStateException e = assertThrows(IllegalStateException.class, () -> given.settings(tests));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> used.settings(tests));
 
 		assertAll(() -> assertTrue(e.getMessage().contains("call settings(Code) first"), e.getMessage()),
-					() -> assertSame(tests, first.settings()));
+					() -> assertSame(tests, read.settings(tests).settings(), "only the load settings were set, which are kept"),
+					() -> assertNotNull(own));
 	}
 
 	@Test
@@ -583,6 +597,17 @@ class SailLoadTest {
 		}
 
 		assertFalse(interruptedWhileQuitting[0], "the driver quits with no interrupt, so its requests can be made");
+	}
+
+	@Test
+	void aUsersEngineStartsNothingOnceTheRunIsStopping() {
+		AtomicBoolean stopping = new AtomicBoolean();
+		SailWorkflow engine = SailLoad.users(1).engine(stopping);
+
+		boolean before = engine.stopping();
+		stopping.set(true);
+
+		assertAll(() -> assertFalse(before), () -> assertTrue(engine.stopping()));
 	}
 
 	private static List<String> messages(MultipleFailuresError e) {

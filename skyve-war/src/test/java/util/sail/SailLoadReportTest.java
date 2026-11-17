@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.opentest4j.MultipleFailuresError;
@@ -97,6 +98,15 @@ class SailLoadReportTest {
 		SailLoadReport report = new SailLoadReport("x", plan(2), List.of(), List.of(new Iteration(1, 1, 0L, 10L, null)), 10L, List.of());
 
 		assertEquals(List.of("user 02 ran no iteration"), report.violations().stream().map(SailLoadReport.Violation::message).toList());
+	}
+
+	@Test
+	void aUserThatNeverStartedIsSaidToHaveNeverStartedOnly() {
+		SailLoadReport report = new SailLoadReport("x", plan(2), List.of(), List.of(new Iteration(1, 1, 0L, 10L, null)), 10L,
+													List.of("user 02 never started: the run stopped first"), Set.of(Integer.valueOf(2)));
+
+		assertEquals(List.of("user 02 never started: the run stopped first"),
+						report.violations().stream().map(SailLoadReport.Violation::message).toList());
 	}
 
 	@Test

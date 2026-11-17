@@ -23,9 +23,9 @@ import util.sail.SailSettings;
  * 	-Dsail.baseUrl=http://localhost:8080/skyve/ \
  * 	-Dsail.run=sail/kitchenSink/kitchensink.suite.xml,/home/me/recorded.xml -Dsail.var.password=admin
  * </pre>
- * ({@code -Psail} alone runs every SAIL IT, the destructive admin suite included.) Entries run in order, each
- * independent of the others: the test fails with every entry that failed. Skipped (not failed) when
- * {@value SailSettings#RUN} is not set. Runs against {@code -Dsail.baseUrl} (required); the other settings, such as
+ * ({@code -Psail} alone runs every SAIL IT but the load ones (tag {@code performance}), the destructive admin suite
+ * included.) Entries run in order, each independent of the others: the test fails with every entry that failed.
+ * Skipped (not failed) when {@value SailSettings#RUN} is not set. Runs against {@code -Dsail.baseUrl} (required); the other settings, such as
  * {@code sail.var.<name>} for a script's {@code {var:name}}, apply as usual.
  * <p>
  * With {@value SailSettings#LOAD_USERS} set, it is a load run ({@link SailLoad}): that many virtual users run the entries

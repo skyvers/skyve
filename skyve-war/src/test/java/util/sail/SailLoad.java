@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -424,8 +425,6 @@ public final class SailLoad {
 	private UserThread userThread;
 	/** Stops a user's browser at the end of each iteration. */
 	private Consumer<SailWorkflow> browserCloser = SailWorkflow::closeBrowser;
-	/** True once {@link #settings()} gave this run's own builder out, which {@link #settings(SailSettings.Code)} would drop. */
-	private boolean ownSettingsGiven;
 
 	private SailLoad() {
 		// see the factories
@@ -525,29 +524,42 @@ public final class SailLoad {
 	 * @return the settings builder
 	 */
 	public @Nonnull SailSettings.Code settings() {
-		if (settings == load) {
-			ownSettingsGiven = true;
-		}
 		return settings;
 	}
 
 	/**
 	 * Runs the virtual users with a test's code-level settings, such as a test base's {@code settings()}. The load
-	 * settings given to this run's own methods beat the test's.
+	 * settings given to this run's own methods beat the test's. A later call replaces an earlier test's builder: what was
+	 * set on that one does not carry over.
 	 *
 	 * @param code	the test's settings; shared, so they must not change while the run lasts
 	 * @return this run
-	 * @throws IllegalStateException	if {@link #settings()} gave out this run's own builder already, whose values the
-	 * 			virtual users would then not run with
+	 * @throws IllegalStateException	if a setting other than the load settings was set on this run's own builder (through
+	 * 			{@link #settings()}), which the virtual users would then not run with
 	 */
 	public @Nonnull SailLoad settings(@Nonnull SailSettings.Code code) {
-		if (ownSettingsGiven && (code != load)) {
-			throw new IllegalStateException("SAIL load: settings() gave out this run's own settings before settings(Code) " +
-											"replaced them, so what was set there would be lost: call settings(Code) first, " +
-											"and set those values on the test's settings");
+		if ((settings == load) && (code != load) && ownSettingsUsed()) {
+			throw new IllegalStateException("SAIL load: settings were set on this run's own settings() before settings(Code) " +
+											"replaced them, so they would be lost: call settings(Code) first, and set them " +
+											"on the test's settings");
 		}
 		settings = code;
 		return this;
+	}
+
+	/** Indicates if this run's own builder holds anything but the load settings, such as a variable. */
+	private boolean ownSettingsUsed() {
+		try {
+			for (String setting : SailSettings.resolve(SailSettings.Environment.none(), List.of(load.layer())).describe()) {
+				if (! setting.startsWith("load.")) {
+					return true;
+				}
+			}
+			return false;
+		}
+		catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+			return true; // something invalid was set: it is set, and the run would report it
+		}
 	}
 
 	/**
@@ -790,13 +802,16 @@ public final class SailLoad {
 		finally {
 			System.setOut(out);
 		}
+		Set<Integer> neverStarted = new TreeSet<>();
 		for (int user = 1; user <= plan.users(); user++) {
 			if (! started.contains(Integer.valueOf(user))) {
+				neverStarted.add(Integer.valueOf(user));
 				problems.add(userName(user) + " never started: the run stopped first");
 			}
 		}
 		problems.addAll(recorder.problems());
-		SailLoadReport result = new SailLoadReport(name, plan, recorder.samples(), recorder.iterations(), clock.getAsLong() - start, problems);
+		SailLoadReport result = new SailLoadReport(name, plan, recorder.samples(), recorder.iterations(), clock.getAsLong() - start,
+													problems, neverStarted);
 		out.println(result.describe());
 		Path folder = ((reportDirectory == null) ? sources.workingDirectory().resolve(REPORT_DIR) : reportDirectory)
 						.resolve(SailMedia.sanitise(FOLDER_TIME.format(LocalDateTime.now()) + '-' + name, 120));
@@ -871,7 +886,7 @@ public final class SailLoad {
 		Runnable cleanUp = null;
 		try {
 			cleanUp = preparation.open();
-			VirtualUser user = new VirtualUser(number, engine(), clock, recorder, stopping);
+			VirtualUser user = new VirtualUser(number, engine(stopping), clock, recorder, stopping);
 			Duration duration = plan.duration();
 			long end = (duration == null) ? Long.MAX_VALUE : start + duration.toNanos();
 			for (int iteration = 1;
@@ -935,13 +950,18 @@ public final class SailLoad {
 											(failure == null) ? "passed" : "failed", Double.valueOf((ended - started) / 1e9)));
 	}
 
-	/** Makes a virtual user's engine, with the test's settings and this run's view roles and browsers. */
-	private @Nonnull SailWorkflow engine() {
+	/**
+	 * Makes a virtual user's engine, with the test's settings and this run's view roles and browsers, that starts no
+	 * further leg or suite member once the run is stopping.
+	 */
+	@Nonnull SailWorkflow engine(@Nonnull AtomicBoolean stopping) {
 		SailViewRoles roles = new SailViewRoles();
 		for (String[] registration : viewRoles) {
 			roles.register(registration[0], Arrays.copyOfRange(registration, 1, registration.length));
 		}
 		SailWorkflow result = new SailWorkflow(roles).settings(settings);
+		// a stopping run starts no further leg or suite member, and so no new browser
+		result.stopWhen(() -> stopping.get() || Thread.currentThread().isInterrupted());
 		for (Map.Entry<UserAgentType, Supplier<BrowserConfiguration>> browser : browsers.entrySet()) {
 			result.browser(browser.getKey(), browser.getValue());
 		}

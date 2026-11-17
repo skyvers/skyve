@@ -140,7 +140,8 @@ abstract class CrossBrowserSelenium {
 	/**
 	 * Quits the browser, if one started. A thread that was interrupted (a load run's user stopped at its time limit)
 	 * still quits it: the interrupt is set aside while the browser quits, as the driver's requests would fail at once
-	 * and leave the browser running, and then put back.
+	 * and leave the browser running, and then put back. So an interrupted thread can block here for up to the driver's
+	 * command timeout, if the browser does not answer.
 	 */
 	public void stopBrowser() {
 		if (driver != null) {

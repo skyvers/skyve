@@ -171,6 +171,7 @@ final class SailLoadReport {
 	private final List<UserStats> users;
 	private final List<FailureKind> failureKinds;
 	private final int failedIterations;
+	private final Set<Integer> neverStarted;
 
 	/**
 	 * Makes the report of a run.
@@ -188,6 +189,29 @@ final class SailLoadReport {
 					@Nonnull List<Iteration> iterations,
 					long elapsedNanos,
 					@Nonnull List<String> problems) {
+		this(name, plan, samples, iterations, elapsedNanos, problems, Set.of());
+	}
+
+	/**
+	 * Makes the report of a run in which some users never started.
+	 *
+	 * @param name	what ran, for the heading
+	 * @param plan	the run's plan, with its thresholds
+	 * @param samples	every interaction's sample
+	 * @param iterations	every ended iteration
+	 * @param elapsedNanos	how long the run took, from its start until its users ended
+	 * @param problems	what went wrong with the run itself, which fail it, a user that never started among them
+	 * @param neverStarted	the users that never started, which the problems name, and so are not also said to have run
+	 * 			no iteration
+	 */
+	SailLoadReport(@Nonnull String name,
+					@Nonnull SailLoad.Plan plan,
+					@Nonnull List<Sample> samples,
+					@Nonnull List<Iteration> iterations,
+					long elapsedNanos,
+					@Nonnull List<String> problems,
+					@Nonnull Set<Integer> neverStarted) {
+		this.neverStarted = Set.copyOf(neverStarted);
 		this.name = name;
 		this.plan = plan;
 		this.samples = new ArrayList<>(samples);
@@ -393,7 +417,7 @@ final class SailLoadReport {
 		}
 		else {
 			for (UserStats user : users) {
-				if ((user.passed() + user.failed()) == 0) {
+				if (((user.passed() + user.failed()) == 0) && (! neverStarted.contains(Integer.valueOf(user.user())))) {
 					result.add(new Violation(String.format("user %02d ran no iteration", Integer.valueOf(user.user())), null));
 				}
 			}
@@ -451,25 +475,26 @@ final class SailLoadReport {
 		for (InteractionStats interaction : interactions) {
 			width = Math.max(width, Math.min(interaction.name().length(), 60));
 		}
-		String row = "\n  %-" + width + "s %7s %7s %9s %9s %9s";
-		result.append(String.format(row, "interaction", "count", "failed", "median ms", "p95 ms", "max ms"));
+		// every line ends with \n, appended outside the format strings
+		String row = "  %-" + width + "s %7s %7s %9s %9s %9s";
+		result.append('\n').append(String.format(row, "interaction", "count", "failed", "median ms", "p95 ms", "max ms"));
 		for (InteractionStats interaction : interactions) {
 			String shown = interaction.name();
 			if (shown.length() > width) {
 				shown = shown.substring(0, width - 3) + "...";
 			}
-			result.append(String.format(row, shown, Integer.valueOf(interaction.count()), Integer.valueOf(interaction.failures()),
+			result.append('\n').append(String.format(row, shown, Integer.valueOf(interaction.count()), Integer.valueOf(interaction.failures()),
 										Long.valueOf(interaction.medianMillis()), Long.valueOf(interaction.p95Millis()),
 										Long.valueOf(interaction.maxMillis())));
 		}
 		for (UserStats user : users) {
-			result.append(String.format("\n  user %02d: %d passed, %d failed", Integer.valueOf(user.user()),
+			result.append('\n').append(String.format("  user %02d: %d passed, %d failed", Integer.valueOf(user.user()),
 											Integer.valueOf(user.passed()), Integer.valueOf(user.failed())));
 		}
 		if (! failureKinds.isEmpty()) {
 			result.append("\n  first failure of each kind:");
 			for (FailureKind kind : failureKinds) {
-				result.append(String.format("\n    %s (%d time(s); first in user %d iteration %d): %s", kind.kind(),
+				result.append('\n').append(String.format("    %s (%d time(s); first in user %d iteration %d): %s", kind.kind(),
 												Integer.valueOf(kind.count()), Integer.valueOf(kind.user()),
 												Integer.valueOf(kind.iteration()), kind.message()));
 			}

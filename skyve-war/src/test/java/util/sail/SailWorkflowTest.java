@@ -128,4 +128,34 @@ class SailWorkflowTest {
 		engine.closeBrowser();
 		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1", "start fails", "start 2", "run 2 c.xml", "stop 2"), events);
 	}
+
+
+	/** A load run that stops during a workflow: no further leg starts, so no new browser either. */
+	@Test
+	void aStoppingEngineStartsNoFurtherLeg() {
+		current = "w.xml";
+		engine.stopWhen(() -> ! events.isEmpty() && events.get(events.size() - 1).startsWith("run")); // stops after a leg ran
+		Workflow twoLegs = XMLMetaData.unmarshalSAILWorkflowString("<workflow xmlns=\"http://www.skyve.org/xml/sail\">" +
+																		AUTOMATION.replace(" xmlns=\"http://www.skyve.org/xml/sail\"", "").repeat(2) +
+																		"</workflow>");
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", twoLegs));
+
+		assertEquals("SAIL workflow: w.xml automation 2 of 2 did not start: the run is stopping", e.getMessage());
+		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events);
+	}
+
+	/** A load run that stops during a suite: its remaining members are skipped, and start no browser. */
+	@Test
+	void aStoppingEngineSkipsASuitesRemainingMembers() {
+		engine.stopWhen(() -> events.stream().anyMatch(event -> event.startsWith("run")));
+		SailSuite suite = SailSuite.resource("sail/kitchenSink/kitchensink.suite.xml", engine)
+									.environment(new SailSettings.Environment(Map.of(), Map.of(), null, Path.of("").toAbsolutePath()));
+
+		SailSuite.Summary summary = suite.execute();
+
+		assertEquals(List.of("start 1", "run 1 null", "stop 1"), events, "one member ran");
+		assertEquals(4, summary.members(SailSuite.Outcome.SKIPPED).size(), summary.describe("kitchensink"));
+		assertEquals(List.of("the run is stopping"), summary.skips().values().stream().distinct().toList());
+	}
 }
