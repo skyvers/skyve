@@ -734,11 +734,15 @@ class SmartClientAttributeDefinitionTest {
 		when(customisations.determineDefaultColumnWidth("desktop", attribute.getAttributeType()))
 				.thenReturn(Integer.valueOf(100));
 		Customisations previousCustomisations = CustomisationsStaticSingleton.get();
+		// a repository without the document's classes, so an enumeration's generated enum is not found
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
 		try {
 			CustomisationsStaticSingleton.set(customisations);
+			ProvidedRepositoryFactory.set(mock(ProvidedRepository.class));
 			return new TestDefinition(user, customer, module, document, attribute.getName(), null, false, false, false, "desktop");
 		}
 		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
 			CustomisationsStaticSingleton.set(previousCustomisations);
 		}
 	}
