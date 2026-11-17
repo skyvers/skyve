@@ -669,8 +669,6 @@ public abstract class MutableCachedRepository extends ProvidedRepositoryFactory 
 				result = scaffoldView(customer, owningModule, document, name, uxui);
 			}
 			else {
-				// Cache the scaffolded view for the customer, as a customer's override of the document
-				// can have other attributes
 				String viewKey = new StringBuilder(128).append(customer.getName()).append('/')
 															.append(owningModule.getName()).append('/')
 															.append(document.getName()).append('/')

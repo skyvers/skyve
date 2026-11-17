@@ -1129,9 +1129,9 @@ class OverridableDomainGeneratorMoreTest {
 		assertTrue(attributes.containsKey("code"));
 		assertFalse(attributes.containsKey("description"));
 
-		Field isAbstractField = domainClass.getClass().getDeclaredField("isAbstract");
-		isAbstractField.setAccessible(true);
-		assertEquals(Boolean.TRUE, isAbstractField.get(domainClass));
+		Method isAbstract = domainClass.getClass().getDeclaredMethod("isAbstract");
+		isAbstract.setAccessible(true);
+		assertEquals(Boolean.TRUE, isAbstract.invoke(domainClass));
 
 		Field propertyLengthsField = OverridableDomainGenerator.class.getDeclaredField("persistentPropertyLengths");
 		propertyLengthsField.setAccessible(true);
@@ -4018,9 +4018,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "OwnerDoc", false, "");
+						null, new TreeSet<>(), "OwnerDoc", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("<bag name=\"items\""), "Expected child bag element, got: " + xml);
@@ -4062,9 +4062,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "OwnerDoc2", false, "");
+						null, new TreeSet<>(), "OwnerDoc2", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("<bag name=\"tags\"") || xml.contains("<list name=\"tags\""),
@@ -4109,9 +4109,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "OwnerDoc3", false, "");
+						null, new TreeSet<>(), "OwnerDoc3", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("cascade=\"all-delete-orphan\""), "Expected compose cascade, got: " + xml);
@@ -4154,9 +4154,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "OwnerDoc4", false, "");
+						null, new TreeSet<>(), "OwnerDoc4", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("<list name=\"orderedItems\""), "Expected ordered list element, got: " + xml);
@@ -4196,9 +4196,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "OwnerDoc5", false, "");
+						null, new TreeSet<>(), "OwnerDoc5", "");
 
 		// Transient collection should be skipped - no bag/list elements
 		String xml = contents.toString();
@@ -4242,9 +4242,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "OwnerAssocDoc", false, "");
+						null, new TreeSet<>(), "OwnerAssocDoc", "");
 
 		String xml = contents.toString();
 		assertTrue(xml.contains("<many-to-one name=\"myRef\""), "Expected many-to-one for association, got: " + xml);
@@ -4554,9 +4554,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "CatOwnerDoc", false, "");
+						null, new TreeSet<>(), "CatOwnerDoc", "");
 
 		assertTrue(contents.toString().contains("catalog=\"mydb\""),
 				"Expected catalog attribute in output, got: " + contents);
@@ -4598,9 +4598,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "SchOwnerDoc", false, "");
+						null, new TreeSet<>(), "SchOwnerDoc", "");
 
 		assertTrue(contents.toString().contains("schema=\"myschema\""),
 				"Expected schema attribute in output, got: " + contents);
@@ -4644,9 +4644,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "CacheOwnerDoc", false, "");
+						null, new TreeSet<>(), "CacheOwnerDoc", "");
 
 		assertTrue(contents.toString().contains("<cache usage=\"read-write\" region=\"myRegion\""),
 				"Expected cache element in output, got: " + contents);
@@ -4690,9 +4690,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "IdxOwnerDoc", false, "");
+						null, new TreeSet<>(), "IdxOwnerDoc", "");
 
 		// Indexed key uses <key ...> with <column name=... index=... />
 		String xml = contents.toString();
@@ -4738,9 +4738,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "ElIdxOwnerDoc", false, "");
+						null, new TreeSet<>(), "ElIdxOwnerDoc", "");
 
 		// elementDatabaseIndex=true → many-to-many with <column name=... index=.../>
 		String xml = contents.toString();
@@ -4787,9 +4787,9 @@ class OverridableDomainGeneratorMoreTest {
 				StringBuilder.class,
 				org.skyve.metadata.customer.Customer.class,
 				Module.class, Document.class, Persistent.class,
-				String.class, Set.class, String.class, boolean.class, String.class)
+				String.class, Set.class, String.class, String.class)
 				.invoke(gen, contents, null, module, ownerDoc, ownerPersistent,
-						null, new TreeSet<>(), "DynOwnerDoc", false, "");
+						null, new TreeSet<>(), "DynOwnerDoc", "");
 
 		// Dynamic referenced document → collection is skipped
 		String xml = contents.toString();
@@ -4836,9 +4836,9 @@ class OverridableDomainGeneratorMoreTest {
 						StringBuilder.class,
 						org.skyve.metadata.customer.Customer.class,
 						Module.class, Document.class, Persistent.class,
-						String.class, Set.class, String.class, boolean.class, String.class)
+						String.class, Set.class, String.class, String.class)
 						.invoke(gen, new StringBuilder(), null, module, ownerDoc, ownerPersistent,
-								null, new TreeSet<>(), "PolyOwnerDoc", false, ""));
+								null, new TreeSet<>(), "PolyOwnerDoc", ""));
 		assertTrue(((InvocationTargetException) caught).getCause() instanceof MetaDataException,
 				"Expected MetaDataException for child collection with polymorphic target");
 	}

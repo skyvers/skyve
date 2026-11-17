@@ -109,13 +109,21 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * Simple container for generated document class metadata.
 	 */
 	private static class DomainClass {
-		private boolean isAbstract = false;
 		// the first customer whose override leaves out a vanilla attribute, making the class abstract
 		private String narrowingCustomerName = null;
 		// the vanilla properties customers' overrides leave out - removed from attributes, declared by <Document>Vanilla
 		private TreeSet<String> narrowedAwayPropertyNames = new TreeSet<>();
 		// attribute name -> attribute type
 		private TreeMap<String, AttributeType> attributes = new TreeMap<>();
+
+		/**
+		 * Determines whether the class is abstract, as a customer's override leaves out a vanilla attribute.
+		 *
+		 * @return	true if a customer's override narrows the class.
+		 */
+		private boolean isAbstract() {
+			return (narrowingCustomerName != null);
+		}
 	}
 
 	/**
@@ -291,7 +299,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										}
 										i.remove();
 										vanillaDocumentClass.narrowedAwayPropertyNames.add(vanillaPropertyName);
-										vanillaDocumentClass.isAbstract = true;
 										if (vanillaDocumentClass.narrowingCustomerName == null) {
 											vanillaDocumentClass.narrowingCustomerName = customerName;
 										}
@@ -465,7 +472,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 				checkExtensionSuperclass(modulePath, documentName, domainClass);
 
-				if ((domainClass != null) && domainClass.isAbstract) {
+				if ((domainClass != null) && domainClass.isAbstract()) {
 					// Generate the concrete vanilla class
 					String vanillaClassName = documentName + VANILLA_CLASS_SUFFIX;
 					checkGeneratedClassName(module, documentName, vanillaClassName);
@@ -489,7 +496,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								module,
 								document,
 								ProvidedRepository.MODULES_NAME + '.',
-								(domainClass != null) && domainClass.isAbstract,
+								(domainClass != null) && domainClass.isAbstract(),
 								null,
 								filterDefinitions);
 
@@ -750,7 +757,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 										final @Nonnull String nameAccessor,
 										final @Nonnull String kind,
 										final @Nonnull List<String> names) {
-		final String packageName = packagePath.replaceAll("\\\\|\\/", ".");
+		final String packageName = packagePath.replaceAll("[\\\\/]", ".");
 		final String interfaceSimpleName = interfaceClassName.substring(interfaceClassName.lastIndexOf('.') + 1);
 
 		StringBuilder contents = new StringBuilder(2048);
@@ -986,16 +993,17 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 * extend the domain class, as <code>&lt;Document&gt;Vanilla</code> is not generated. An extension that
 	 * extends some other class - an intermediate class of the project's own - is not checked.
 	 *
-	 * @param modulePath	The module's path (<code>modules/&lt;m&gt;</code>).
-	 * @param documentName	The document name.
 	 * <p>The source is read leniently - as ISO-8859-1, which decodes any bytes and leaves the ASCII of the
 	 * declaration intact - and comments and literals are ignored. A source that cannot be read is skipped
 	 * with a warning; it never fails generation.
 	 *
+	 * @param modulePath	The module's path (<code>modules/&lt;m&gt;</code>).
+	 * @param documentName	The document name.
 	 * @param domainClass	The document's vanilla domain class metadata, or null.
 	 * @throws MetaDataException	if the extension extends the wrong generated class and {@link #validate} is on;
 	 * 									with it off, the problem is printed to {@link System#err} as a warning.
 	 */
+	@SuppressWarnings("java:S106") // the generator runs from the command line, where its warnings must reach the console without a logging binding
 	private void checkExtensionSuperclass(@Nonnull String modulePath,
 											@Nonnull String documentName,
 											@Nullable DomainClass domainClass) {
@@ -1012,7 +1020,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			return;
 		}
 		String extensionName = documentName + "Extension";
-		String vanillaClassName = documentName + VANILLA_CLASS_SUFFIX;
 		Matcher matcher = Pattern.compile("\\bclass\\s+" + extensionName + "\\b[^{]*?\\bextends\\s+([\\w.]+)")
 									.matcher(stripCommentsAndLiterals(source));
 		if (! matcher.find()) {
@@ -1020,18 +1027,8 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 		String superclassName = matcher.group(1);
 		superclassName = superclassName.substring(superclassName.lastIndexOf('.') + 1);
-		String narrowingCustomerName = ((domainClass != null) && domainClass.isAbstract) ? domainClass.narrowingCustomerName : null;
-		boolean narrowed = (narrowingCustomerName != null);
-		String problem = null;
-		if (narrowed && superclassName.equals(documentName)) {
-			problem = extensionName + " must extend " + vanillaClassName + " because customer " +
-						narrowingCustomerName + "'s override of " + documentName +
-						" leaves out attributes, which only " + vanillaClassName + " declares.";
-		}
-		else if ((! narrowed) && superclassName.equals(vanillaClassName)) {
-			problem = extensionName + " must extend " + documentName + " because no customer's override of " +
-						documentName + " leaves out attributes, so " + vanillaClassName + " is not generated.";
-		}
+		String narrowingCustomerName = (domainClass == null) ? null : domainClass.narrowingCustomerName;
+		String problem = extensionSuperclassProblem(documentName, superclassName, narrowingCustomerName);
 		if (problem != null) {
 			// the generated domain is right either way - the extension needs fixing - so this is a
 			// validation, and only warns when validation is off
@@ -1039,11 +1036,40 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				throw new MetaDataException(problem);
 			}
 			System.err.println("WARNING: " + problem);
-			return;
 		}
-		if (debug && (! superclassName.equals(documentName)) && (! superclassName.equals(vanillaClassName))) {
-			LOGGER.info("{} extends {}, not {} - not checked", extensionName, superclassName, narrowed ? vanillaClassName : documentName);
+		else if (debug && (! superclassName.equals(documentName)) && (! superclassName.equals(documentName + VANILLA_CLASS_SUFFIX))) {
+			LOGGER.info("{} extends {}, not {} - not checked",
+							extensionName,
+							superclassName,
+							documentName + ((narrowingCustomerName == null) ? "" : VANILLA_CLASS_SUFFIX));
 		}
+	}
+
+	/**
+	 * Determines what is wrong with the superclass of a vanilla document's hand-written extension.
+	 *
+	 * @param documentName	The document name.
+	 * @param superclassName	The simple name of the class the extension extends.
+	 * @param narrowingCustomerName	The first customer whose override leaves out a vanilla attribute,
+	 * 									or null if no override does.
+	 * @return	the problem, or null if the extension extends the right generated class or a class of
+	 * 			the project's own.
+	 */
+	private static @Nullable String extensionSuperclassProblem(@Nonnull String documentName,
+																@Nonnull String superclassName,
+																@Nullable String narrowingCustomerName) {
+		String extensionName = documentName + "Extension";
+		String vanillaClassName = documentName + VANILLA_CLASS_SUFFIX;
+		if ((narrowingCustomerName != null) && superclassName.equals(documentName)) {
+			return extensionName + " must extend " + vanillaClassName + " because customer " +
+					narrowingCustomerName + "'s override of " + documentName +
+					" leaves out attributes, which only " + vanillaClassName + " declares.";
+		}
+		if ((narrowingCustomerName == null) && superclassName.equals(vanillaClassName)) {
+			return extensionName + " must extend " + documentName + " because no customer's override of " +
+					documentName + " leaves out attributes, so " + vanillaClassName + " is not generated.";
+		}
+		return null;
 	}
 
 	/**
@@ -1060,39 +1086,53 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		final StringBuilder result = new StringBuilder(length);
 		int i = 0;
 		while (i < length) {
-			char c = source.charAt(i);
-			char next = (i + 1 < length) ? source.charAt(i + 1) : '\0';
-			int end;
-			if ((c == '/') && (next == '/')) { // line comment
-				end = source.indexOf('\n', i);
-				end = (end < 0) ? length : end;
-			}
-			else if ((c == '/') && (next == '*')) { // block or javadoc comment
-				end = source.indexOf("*/", i + 2);
-				end = (end < 0) ? length : end + 2;
-			}
-			else if (source.startsWith("\"\"\"", i)) { // text block
-				end = source.indexOf("\"\"\"", i + 3);
-				end = (end < 0) ? length : end + 3;
-			}
-			else if ((c == '"') || (c == '\'')) { // string or character literal
-				end = i + 1;
-				while ((end < length) && (source.charAt(end) != c) && (source.charAt(end) != '\n')) {
-					end += (source.charAt(end) == '\\') ? 2 : 1;
-				}
-				end = Math.min(end + 1, length);
+			int end = commentOrLiteralEnd(source, i);
+			if (end < 0) {
+				result.append(source.charAt(i));
+				i++;
 			}
 			else {
-				result.append(c);
-				i++;
-				continue;
+				for (int j = i; j < end; j++) {
+					result.append((source.charAt(j) == '\n') ? '\n' : ' ');
+				}
+				i = end;
 			}
-			for (int j = i; j < end; j++) {
-				result.append((source.charAt(j) == '\n') ? '\n' : ' ');
-			}
-			i = end;
 		}
 		return result.toString();
+	}
+
+	/**
+	 * Finds the end of the comment or literal that starts at an index of Java source.
+	 *
+	 * @param source	The Java source.
+	 * @param start	The index.
+	 * @return	the index after the comment or literal - or the source length if it is not closed - or -1
+	 * 			if no comment or literal starts at the index.
+	 */
+	private static int commentOrLiteralEnd(@Nonnull String source, int start) {
+		final int length = source.length();
+		char c = source.charAt(start);
+		char next = (start + 1 < length) ? source.charAt(start + 1) : '\0';
+		if ((c == '/') && (next == '/')) { // line comment
+			int end = source.indexOf('\n', start);
+			return (end < 0) ? length : end;
+		}
+		if ((c == '/') && (next == '*')) { // block or javadoc comment
+			int end = source.indexOf("*/", start + 2);
+			return (end < 0) ? length : end + 2;
+		}
+		if (source.startsWith("\"\"\"", start)) { // text block
+			int end = source.indexOf("\"\"\"", start + 3);
+			return (end < 0) ? length : end + 3;
+		}
+		if ((c == '"') || (c == '\'')) { // string or character literal
+			int end = start + 1;
+			while ((end < length) && (source.charAt(end) != c) && (source.charAt(end) != '\n')) {
+				end += (source.charAt(end) == '\\') ? 2 : 1;
+			}
+			return Math.min(end + 1, length);
+		}
+		return -1;
 	}
 
 	/**
@@ -1110,7 +1150,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String moduleName = overriddenDocument.getOwningModuleName();
 		String documentName = overriddenDocument.getName();
 		DomainClass vanillaClass = moduleDocumentVanillaClasses.get(moduleName).get(documentName);
-		return vanillaClass.isAbstract ||
+		return vanillaClass.isAbstract() ||
 				(! getOverriddenDocumentExtraProperties(overriddenDocument).isEmpty()) ||
 				domainExtensionClassExists(ProvidedRepository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + ProvidedRepository.MODULES_NAMESPACE + moduleName,
 											documentName);
@@ -1131,7 +1171,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	private @Nonnull Set<String> overrideInheritedPropertyNames(@Nonnull String moduleName,
 																@Nonnull String documentName,
 																@Nonnull DomainClass vanillaClass) {
-		if (vanillaClass.isAbstract && domainExtensionClassExists(ProvidedRepository.MODULES_NAMESPACE + moduleName, documentName)) {
+		if (vanillaClass.isAbstract() && domainExtensionClassExists(ProvidedRepository.MODULES_NAMESPACE + moduleName, documentName)) {
 			Set<String> result = new TreeSet<>(vanillaClass.attributes.keySet());
 			result.addAll(vanillaClass.narrowedAwayPropertyNames);
 			return result;
@@ -1269,10 +1309,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								@Nonnull Module module,
 								@Nonnull Document document,
 								@Nonnull String packagePathPrefix,
-								boolean forExt,
+								boolean mapsGeneratedSubclass,
 								@Nullable Customer customer,
 								@Nonnull StringBuilder filterDefinitions) {
-		generateORM(contents, module, document, packagePathPrefix, forExt, false, customer, filterDefinitions, "");
+		generateORM(contents, module, document, packagePathPrefix, mapsGeneratedSubclass, false, customer, filterDefinitions, "");
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541", "java:S107"}) // complexity OK
@@ -1280,7 +1320,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								@Nonnull Module module,
 								@Nonnull Document document,
 								@Nonnull String packagePathPrefix,
-								boolean forExt, // indicates if we are processing a customer override
+								boolean mapsGeneratedSubclass, // maps a generated <Document>Vanilla or <Document>Override class
 								boolean recursive,
 								@Nullable Customer customer,
 								@Nonnull StringBuilder filterDefinitions,
@@ -1354,7 +1394,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 				else {
 					contents.append(packagePathPrefix).append(moduleName).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-					if (forExt) {
+					if (mapsGeneratedSubclass) {
 						contents.append(packagePathPrefix.startsWith(ProvidedRepository.CUSTOMERS_NAME) ? OVERRIDE_CLASS_SUFFIX : VANILLA_CLASS_SUFFIX);
 					}
 				}
@@ -1483,7 +1523,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				}
 			}
 
-			generateAttributeMappings(contents, customer, module, document, persistent, null, new TreeSet<>(), null, forExt, indent);
+			generateAttributeMappings(contents, customer, module, document, persistent, null, new TreeSet<>(), null, indent);
 		}
 
 		TreeMap<String, Document> derivations = modocDerivations.get(moduleName + '.' + documentName);
@@ -1545,7 +1585,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 											@Nullable String columnPrefix,
 											@Nonnull Set<String> columnNames,
 											@Nullable String owningDocumentName,
-											boolean forExt,
 											@Nonnull String indentation) {
 		Extends inherits = document.getExtends();
 		if (inherits != null) {
@@ -1563,7 +1602,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												columnPrefix,
 												columnNames,
 												owningDocumentName,
-												forExt,
 												indentation);
 				}
 			}
@@ -1876,7 +1914,6 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 												association.getEmbeddedColumnsPrefix(),
 												columnNames,
 												documentName,
-												forExt,
 												indentation + "\t");
 
 					contents.append(indentation).append("\t\t</component>\n");
@@ -2016,11 +2053,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				contents.append(indentation).append("\t\t\t<type name=\"Enum\">\n");
 				contents.append(indentation).append("\t\t\t\t<param name=\"enumClass\">");
 
-				// for extension and the enumeration attribute doesn't exist in the vanilla document.
-				// NB - There a 2 scenarios here...
-				// 1) The enumeration is defined here - forExt is true and there is no enum in the vanilla document
-				// 2) The enumeration is a reference to a definition elsewhere - in this case, forExt is true
-				// and the enumeration is not defined in the enumeration target vanilla document
+				// the enum is nested in the class that declares the target enumeration's attribute
 				Enumeration target = enumeration.getTarget();
 				String implementingEnumClassName = target.getImplementingEnumClassName();
 				if (implementingEnumClassName != null) {
@@ -2064,7 +2097,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					continue;
 				}
 
-				InverseRelationship inverseRelationship = inverseRelationship(inverse, inverseDocument);
+				InverseRelationship inverseRelationship = resolveInverseRelationship(inverse, inverseDocument);
 				
 				if (InverseRelationship.oneToOne.equals(inverseRelationship)) {
 					contents.append("\t\t<one-to-one name=\"").append(inverse.getName());
@@ -2473,7 +2506,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 								packagePathPrefix,
 								// a generated subclass is mapped for a customer override with its own class, and for a
 								// narrowed vanilla document - copied here for a customer that does not override it
-								(domainClass != null) && (packagePathPrefix.startsWith(ProvidedRepository.CUSTOMERS_NAME) || domainClass.isAbstract),
+								(domainClass != null) && (packagePathPrefix.startsWith(ProvidedRepository.CUSTOMERS_NAME) || domainClass.isAbstract()),
 								true,
 								customer,
 								filterDefinitions,
@@ -2595,7 +2628,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private boolean isNarrowed(@Nonnull String moduleName, @Nonnull String documentName) {
 		DomainClass domainClass = vanillaClass(moduleName, documentName);
-		return (domainClass != null) && domainClass.isAbstract;
+		return (domainClass != null) && domainClass.isAbstract();
 	}
 
 	/**
@@ -2623,13 +2656,13 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			derivedDocument = derivedModule.getDocument(customer, derivation.getName());
 			derivedPackagePathPrefix = customerPackagePathPrefix(customer, derivedModuleName, derivedDocument);
 		}
-		boolean derivedForExt = derivedPackagePathPrefix.startsWith(ProvidedRepository.CUSTOMERS_NAME) ||
-									isNarrowed(derivedModuleName, derivation.getName());
+		boolean derivedMapsGeneratedSubclass = derivedPackagePathPrefix.startsWith(ProvidedRepository.CUSTOMERS_NAME) ||
+												isNarrowed(derivedModuleName, derivation.getName());
 		generateORM(contents,
 						derivedModule,
 						derivedDocument,
 						derivedPackagePathPrefix,
-						derivedForExt,
+						derivedMapsGeneratedSubclass,
 						true,
 						customer,
 						filterDefinitions,
@@ -3194,7 +3227,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 				methods.append("\t\t\t}\n\n");
 			}
 			else if (inverse != null) {
-				if (InverseRelationship.oneToOne.equals(inverseRelationship(inverse, reference))) {
+				if (InverseRelationship.oneToOne.equals(resolveInverseRelationship(inverse, reference))) {
 					methods.append("\t\t\t").append(referenceClassName).append(" old").append(methodName).append(" = this.").append(name).append(";\n");
 					methods.append("\t\t\tthis.").append(name).append(" = ").append(name).append(";\n");
 					methods.append("\t\t\tif (").append(name).append(" != null) {\n");
@@ -3231,7 +3264,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 
 			// if 1 to 1 inverse add null methods
 			if (inverse != null) {
-				InverseRelationship relationship = inverseRelationship(inverse, reference);
+				InverseRelationship relationship = resolveInverseRelationship(inverse, reference);
 				if (relationship != InverseRelationship.manyToMany) { // 1:1 or 1:many
 					methods.append("\tpublic void null").append(methodName).append("() {\n");
 					methods.append("\t\tthis.").append(name).append(" = null;\n");
@@ -3263,7 +3296,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * The customer's generated override class of a document, which the customer's beans of the
+	 * Returns the customer's generated override class of a document, which the customer's beans of the
 	 * document are, for a reference or inverse a customer class declares - a new customer document's
 	 * class or a <code>&lt;Document&gt;Override</code>, which declare their own properties. The
 	 * override class has the properties the customer's override of the document adds, such as the
@@ -3288,39 +3321,43 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * The relationship of an inverse to the reference it inverts in its document. Metadata
+	 * Resolves the relationship of an inverse to the reference it inverts in its document. Metadata
 	 * validation works the relationship out before generation; with validation off it is worked
 	 * out here, the same way.
+	 *
+	 * <p>Side effects: sets the relationship on the inverse if it is not set.
 	 *
 	 * @param inverse	The inverse.
 	 * @param inverseDocument	The document the inverse names, which declares the reference it inverts.
 	 * @return	The relationship.
 	 * @throws MetaDataException	if the relationship is not set and the document has no such reference.
 	 */
-	private static @Nonnull InverseRelationship inverseRelationship(@Nonnull AbstractInverse inverse, @Nonnull Document inverseDocument) {
+	private static @Nonnull InverseRelationship resolveInverseRelationship(@Nonnull AbstractInverse inverse, @Nonnull Document inverseDocument) {
 		InverseRelationship result = inverse.getRelationship();
-		if (result == null) {
-			String referenceName = inverse.getReferenceName();
-			Reference targetReference = inverseDocument.getReferenceByName(referenceName);
-			if (targetReference == null) {
-				throw new MetaDataException("The inverse " + inverse.getName() + " names the reference " + referenceName +
-												", which document " + inverseDocument.getOwningModuleName() + '.' + inverseDocument.getName() +
-												" does not have.");
-			}
-			result = inverseRelationship(inverse, targetReference);
+		if (result != null) {
+			return result;
 		}
-		return result;
+		String referenceName = inverse.getReferenceName();
+		Reference targetReference = inverseDocument.getReferenceByName(referenceName);
+		if (targetReference == null) {
+			throw new MetaDataException("The inverse " + inverse.getName() + " names the reference " + referenceName +
+											", which document " + inverseDocument.getOwningModuleName() + '.' + inverseDocument.getName() +
+											" does not have.");
+		}
+		return resolveInverseRelationship(inverse, targetReference);
 	}
 
 	/**
-	 * The relationship of an inverse to the reference it inverts, worked out from the reference when
-	 * metadata validation has not set it.
+	 * Resolves the relationship of an inverse to the reference it inverts, working it out from the
+	 * reference when metadata validation has not set it.
+	 *
+	 * <p>Side effects: sets the relationship on the inverse if it is not set.
 	 *
 	 * @param inverse	The inverse.
 	 * @param targetReference	The reference the inverse inverts.
 	 * @return	The relationship.
 	 */
-	private static @Nonnull InverseRelationship inverseRelationship(@Nonnull AbstractInverse inverse, @Nonnull Reference targetReference) {
+	private static @Nonnull InverseRelationship resolveInverseRelationship(@Nonnull AbstractInverse inverse, @Nonnull Reference targetReference) {
 		InverseRelationship result = inverse.getRelationship();
 		if (result == null) {
 			result = inverse.relationshipTo(targetReference);
@@ -3349,7 +3386,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		String inverseReferenceName = inverse.getReferenceName();
 		String propertyPackageName = propertyDocument.getOwningModuleName();
 		String name = inverse.getName();
-		InverseRelationship relationship = inverseRelationship(inverse, propertyDocument);
+		InverseRelationship relationship = resolveInverseRelationship(inverse, propertyDocument);
 		boolean toMany = (! InverseRelationship.oneToOne.equals(relationship));
 		boolean many = InverseRelationship.manyToMany.equals(relationship);
 		boolean deprecated = inverse.isDeprecated();
@@ -3852,19 +3889,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		StringBuilder methods = new StringBuilder(2048);
 
 		DomainClass documentClass = vanillaClass(module.getName(), documentName);
+		// the customer whose <Document>Override class this is, or null for any other class
+		final Customer overrideCustomer = (overridden && (baseDocumentName != null)) ? customer : null;
 		// the properties the class being generated inherits from the vanilla classes it extends
-		final Set<String> baseClassPropertyNames = (documentClass == null) ?
-														Collections.emptySet() :
-														(((customer != null) && overridden && (baseDocumentName != null)) ?
-															overrideInheritedPropertyNames(module.getName(), documentName, documentClass) :
-															documentClass.attributes.keySet());
+		final Set<String> baseClassPropertyNames;
+		if (documentClass == null) {
+			baseClassPropertyNames = Collections.emptySet();
+		}
+		else if (overrideCustomer != null) {
+			baseClassPropertyNames = overrideInheritedPropertyNames(module.getName(), documentName, documentClass);
+		}
+		else {
+			baseClassPropertyNames = documentClass.attributes.keySet();
+		}
 
 		// Determine if there is an Extension class defined in the document package - for a customer's
 		// override class, the customer's own; a vanilla extension is the override class's base class
 		String modulePath = ProvidedRepository.MODULES_NAMESPACE + module.getName();
-		boolean domainExtensionClassExists = ((customer != null) && overridden && (baseDocumentName != null)) ?
-												domainExtensionClassExists(ProvidedRepository.CUSTOMERS_NAMESPACE + customer.getName() + '/' + modulePath, documentName) :
-												domainExtensionClassExists(modulePath, documentName);
+		boolean domainExtensionClassExists = domainExtensionClassExists((overrideCustomer == null) ?
+																			modulePath :
+																			ProvidedRepository.CUSTOMERS_NAMESPACE + overrideCustomer.getName() + '/' + modulePath,
+																		documentName);
 		// A vanilla class passes itself to the other side of a relationship as its extension, which the
 		// other side's vanilla accessors take. A customer class passes itself as it is, as the other
 		// side's accessors take a vanilla class it extends or the customer's override class itself,
@@ -4954,10 +4999,10 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	 */
 	private @Nonnull List<Path> collectGeneratedCustomerOutput() {
 		final List<Path> result = new ArrayList<>();
-		for (Path customerDirectory : realSubdirectories(Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME))) {
+		for (Path customerDirectory : entries(Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME), true)) {
 			final Path modulesDirectory = customerDirectory.resolve(ProvidedRepository.MODULES_NAME);
-			for (Path moduleDirectory : realSubdirectories(modulesDirectory)) {
-				collectNonDirectories(moduleDirectory.resolve(ProvidedRepository.DOMAIN_NAME), result);
+			for (Path moduleDirectory : entries(modulesDirectory, true)) {
+				result.addAll(entries(moduleDirectory.resolve(ProvidedRepository.DOMAIN_NAME), false));
 			}
 			if (Files.isDirectory(modulesDirectory, LinkOption.NOFOLLOW_LINKS)) {
 				for (String fileName : new String[] {"orm.hbm.xml", "metadata-enums-only.txt"}) {
@@ -4967,7 +5012,7 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 					}
 				}
 			}
-			collectNonDirectories(customerDirectory.resolve(ProvidedRepository.DOMAIN_NAME), result);
+			result.addAll(entries(customerDirectory.resolve(ProvidedRepository.DOMAIN_NAME), false));
 		}
 		return result;
 	}
@@ -4995,20 +5040,36 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 			if (! absoluteTarget.startsWith(customersDirectory)) {
 				continue;
 			}
-			Path directory = absoluteTarget.getParent();
-			while ((directory != null) && directory.startsWith(customersDirectory)) {
-				if (Files.isSymbolicLink(directory)) {
-					throw new IOException("Cannot generate " + target + " through the linked directory " + directory + " - replace the link with a directory and generate again");
-				}
-				if (Files.exists(directory, LinkOption.NOFOLLOW_LINKS) && (! Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS))) {
-					throw new IOException("Cannot generate " + target + " as " + directory + " is a file, not a directory - move it and generate again");
-				}
-				directory = directory.getParent();
-			}
+			checkCustomerGenerationDirectories(target, absoluteTarget, customersDirectory);
 			if (Files.exists(absoluteTarget, LinkOption.NOFOLLOW_LINKS) &&
 					(! deletions.contains(absoluteTarget.toString().toLowerCase(Locale.ROOT)))) {
 				throw new IOException("Cannot generate " + target + " as something that is not generated output is in the way - move it and generate again");
 			}
+		}
+	}
+
+	/**
+	 * Checks that no directory on the path of a customer file this run generates, from
+	 * <code>customers/</code> down, is a symbolic link or a file.
+	 *
+	 * @param target	The customer file, as generated.
+	 * @param absoluteTarget	The customer file's normalised absolute path.
+	 * @param customersDirectory	The normalised absolute path of <code>customers/</code> below the generated source path.
+	 * @throws IOException	if a directory on the way is a symbolic link or a file.
+	 */
+	private static void checkCustomerGenerationDirectories(@Nonnull Path target,
+															@Nonnull Path absoluteTarget,
+															@Nonnull Path customersDirectory)
+	throws IOException {
+		Path directory = absoluteTarget.getParent();
+		while ((directory != null) && directory.startsWith(customersDirectory)) {
+			if (Files.isSymbolicLink(directory)) {
+				throw new IOException("Cannot generate " + target + " through the linked directory " + directory + " - replace the link with a directory and generate again");
+			}
+			if (Files.exists(directory, LinkOption.NOFOLLOW_LINKS) && (! Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS))) {
+				throw new IOException("Cannot generate " + target + " as " + directory + " is a file, not a directory - move it and generate again");
+			}
+			directory = directory.getParent();
 		}
 	}
 
@@ -5028,9 +5089,9 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 		}
 
 		final Path customersDirectory = Paths.get(generatedSrcPath, ProvidedRepository.CUSTOMERS_NAME);
-		for (Path customerDirectory : realSubdirectories(customersDirectory)) {
+		for (Path customerDirectory : entries(customersDirectory, true)) {
 			final Path modulesDirectory = customerDirectory.resolve(ProvidedRepository.MODULES_NAME);
-			for (Path moduleDirectory : realSubdirectories(modulesDirectory)) {
+			for (Path moduleDirectory : entries(modulesDirectory, true)) {
 				deleteEmptyDirectory(moduleDirectory.resolve(ProvidedRepository.DOMAIN_NAME));
 				deleteEmptyDirectory(moduleDirectory);
 			}
@@ -5042,46 +5103,27 @@ public final class OverridableDomainGenerator extends DomainGenerator {
 	}
 
 	/**
-	 * Lists the subdirectories of a directory that are not symbolic links.
+	 * Lists the entries directly in a directory: its subdirectories that are not symbolic links, or
+	 * the other entries - files and links.
 	 *
 	 * @param directory	The directory to list.
-	 * @return	the subdirectories, or an empty list if the directory does not exist or is a link.
+	 * @param directories	true for the subdirectories, false for the other entries.
+	 * @return	the entries, or an empty list if the directory does not exist or is a symbolic link.
 	 */
-	private static @Nonnull List<Path> realSubdirectories(@Nonnull Path directory) {
+	private static @Nonnull List<Path> entries(@Nonnull Path directory, boolean directories) {
 		final List<Path> result = new ArrayList<>();
 		if (Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
 			final File[] children = directory.toFile().listFiles();
 			if (children != null) {
 				for (File child : children) {
 					Path childPath = child.toPath();
-					if (Files.isDirectory(childPath, LinkOption.NOFOLLOW_LINKS)) {
+					if (Files.isDirectory(childPath, LinkOption.NOFOLLOW_LINKS) == directories) {
 						result.add(childPath);
 					}
 				}
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Adds the entries directly in a directory that are not directories - files and links - to the list.
-	 * Nothing is added if the directory does not exist or is a symbolic link.
-	 *
-	 * @param directory	The directory to collect from.
-	 * @param result	The list to add to.
-	 */
-	private static void collectNonDirectories(@Nonnull Path directory, @Nonnull List<Path> result) {
-		if (Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
-			final File[] children = directory.toFile().listFiles();
-			if (children != null) {
-				for (File child : children) {
-					Path childPath = child.toPath();
-					if (! Files.isDirectory(childPath, LinkOption.NOFOLLOW_LINKS)) {
-						result.add(childPath);
-					}
-				}
-			}
-		}
 	}
 
 	/**

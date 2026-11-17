@@ -825,18 +825,17 @@ public class DataBuilder {
 
 		// the vanilla class the customer class extends
 		Class<?> vanillaType = beanType;
-		while ((vanillaType != null) && vanillaType.getName().startsWith(ProvidedRepository.CUSTOMERS_NAME + '.')) {
+		while (vanillaType.getName().startsWith(ProvidedRepository.CUSTOMERS_NAME + '.')) {
 			vanillaType = vanillaType.getSuperclass();
 		}
-		return (vanillaType != null) &&
-				(vanillaType != beanType) &&
+		return (vanillaType != beanType) &&
 				vanillaType.isAssignableFrom(returnType) &&
 				document.getOwningModuleName().equals(staticFieldValue(returnType, "MODULE_NAME")) &&
 				document.getName().equals(staticFieldValue(returnType, "DOCUMENT_NAME"));
 	}
 
 	/**
-	 * The value of a public static field of a class or a class it extends.
+	 * Returns the value of a public static field of a class or a class it extends.
 	 *
 	 * @param type	The class.
 	 * @param fieldName	The field.
