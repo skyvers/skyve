@@ -28,7 +28,9 @@ function _createDateFormatter(format) {
 
 /**
  * Creates a function which can be used to format display values in
- * a row.
+ * a row, as the Java converters do: rounded half up (away from zero) from the
+ * number's shortest decimal, and with no sign on a value that rounds to zero
+ * (0.00, not -0.00).
  * 
  * Returns a lambda with signature: (number) => string
  */
@@ -37,7 +39,9 @@ function _createNumberFormatter({ scale, style = 'decimal' }) {
     const numberFormat = new Intl.NumberFormat(undefined, {
         style,
         minimumFractionDigits: scale,
-        maximumFractionDigits: scale
+        maximumFractionDigits: scale,
+        roundingMode: 'halfExpand',
+        signDisplay: 'negative'
     });
 
     return (numValue) => {
