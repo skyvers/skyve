@@ -160,7 +160,7 @@ isc.ResultSet.addMethods({
 	 * @returns {Object} - the result of the original `setCriteria` method.
 	 */
 	setCriteria: function (newCriteria) {
-		const changed = isc.JSON.encode(newCriteria || {}) !== isc.JSON.encode(this.getCriteria() || {});
+		const changed = this.compareCriteria(newCriteria || {}, this.getCriteria() || {}) !== 0;
 		const result = this.skyveSetCriteria(newCriteria);
 		if (newCriteria && (this.hasSpatialOperator(newCriteria) || (changed && this.hasDayField(newCriteria)))) {
 			this.invalidateCache();

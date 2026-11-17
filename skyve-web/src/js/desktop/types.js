@@ -4923,7 +4923,7 @@ isc.SimpleType.create({
 			const typed = value == null ? "" : String(value).trim();
 			// only in a list grid's filter row (a RecordEditor), which checks before it filters
 			const grid = this.grid || (this.form && this.form.grid);
-			const filterRow = !!grid && isc.isA.Function(grid.isAFilterEditor) && grid.isAFilterEditor();
+			const filterRow = isc.isA.RecordEditor(grid) && grid.isAFilterEditor();
 			this._refusedText = filterRow && typed !== "" && !isc.isA.Number(result) ? typed : null;
 			// no value (an empty string, not null, which would clear the item and its text)
 			return this._refusedText ? "" : result;
