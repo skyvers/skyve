@@ -659,7 +659,7 @@ public final class SailSettings {
 		above.add(result.environmentLayer(given, null, false));
 		above.addAll(given);
 		above.sort(Comparator.comparing(Layer::level)); // stable: a level's layers keep their order
-		Layer file = result.fileLayer(first(above, PROPERTIES));
+		Layer file = result.fileLayer(first(above, PROPERTIES, false));
 		List<Layer> ordered = new ArrayList<>(given.size() + 3);
 		ordered.add(system);
 		ordered.add(result.environmentLayer(given, file, true));
@@ -670,20 +670,14 @@ public final class SailSettings {
 		ordered.sort(Comparator.comparing(Layer::level));
 
 		for (String key : KEYS) {
-			Layer layer = first(ordered, key);
-			if ((lock != null) && (layer != null) && TEST_STRATEGY.equals(key) && layer.level().isRun()) {
+			Setting setting = first(ordered, key, false);
+			if ((lock != null) && (setting != null) && TEST_STRATEGY.equals(key) && setting.source().level().isRun()) {
 				// locked: the scripts' own strategy applies, and the run's override is noted
-				result.ignoredOverride = new Setting(key, String.valueOf(layer.get(key)).trim(), layer.sourceOf(key));
-				List<Layer> scripts = new ArrayList<>(ordered.size());
-				for (Layer candidate : ordered) {
-					if (! candidate.level().isRun()) {
-						scripts.add(candidate);
-					}
-				}
-				layer = first(scripts, key);
+				result.ignoredOverride = setting;
+				setting = first(ordered, key, true);
 			}
-			if (layer != null) {
-				result.settings.put(key, new Setting(key, String.valueOf(layer.get(key)).trim(), layer.sourceOf(key)));
+			if (setting != null) {
+				result.settings.put(key, setting);
 			}
 		}
 		for (Layer layer : ordered) {
@@ -699,11 +693,17 @@ public final class SailSettings {
 		return result;
 	}
 
-	/** Returns the highest of the ordered layers that gives a key a value, or null. */
-	private static @Nullable Layer first(@Nonnull List<Layer> ordered, @Nonnull String key) {
+	/**
+	 * Returns a key's value, trimmed, from the highest of the ordered layers that gives it one.
+	 *
+	 * @param scriptsOnly	true to look at the script levels only (for a locked test strategy)
+	 * @return the setting, or null if no layer gives the key a value
+	 */
+	private static @Nullable Setting first(@Nonnull List<Layer> ordered, @Nonnull String key, boolean scriptsOnly) {
 		for (Layer layer : ordered) {
-			if (layer.get(key) != null) {
-				return layer;
+			String value = layer.get(key);
+			if ((value != null) && ((! scriptsOnly) || (! layer.level().isRun()))) {
+				return new Setting(key, value.trim(), layer.sourceOf(key));
 			}
 		}
 		return null;
@@ -735,15 +735,6 @@ public final class SailSettings {
 	 */
 	@Nonnull SailSettings lockTestStrategy(@Nonnull String reason) {
 		return resolve(environment, layers, reason);
-	}
-
-	/**
-	 * Returns why the test strategy is locked.
-	 *
-	 * @return the reason, e.g. {@code set-up}, or null if a run override applies
-	 */
-	@Nullable String testStrategyLock() {
-		return lock;
 	}
 
 	/**
@@ -878,12 +869,12 @@ public final class SailSettings {
 	 *
 	 * <p>Side effects: reads the file.
 	 *
-	 * @param naming	the highest layer above the file that names a file, or null
+	 * @param named	the file a level above names, or null
 	 * @throws IllegalArgumentException	if a named file is missing or unreadable, or holds a key that is not a setting
 	 */
-	private @Nullable Layer fileLayer(@Nullable Layer naming) {
+	private @Nullable Layer fileLayer(@Nullable Setting named) {
 		Path file;
-		if (naming == null) {
+		if (named == null) {
 			Path home = environment.userHome();
 			if (home == null) {
 				return null;
@@ -894,7 +885,6 @@ public final class SailSettings {
 			}
 		}
 		else {
-			Setting named = new Setting(PROPERTIES, String.valueOf(naming.get(PROPERTIES)).trim(), naming.sourceOf(PROPERTIES));
 			try {
 				file = path(named.value());
 			}

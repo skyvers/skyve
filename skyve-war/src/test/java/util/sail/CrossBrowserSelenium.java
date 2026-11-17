@@ -56,19 +56,18 @@ abstract class CrossBrowserSelenium {
 		this.settings = resolved;
 		startedUserAgent = configuration.getUserAgentString();
 		startedResolution = configuration.getResolution();
-		boolean headless = resolved.headless();
 		switch (resolved.browser()) {
 			case chrome:
-				setupChrome(configuration, headless);
+				setupChrome(configuration, resolved);
 				break;
 			case firefox:
-				setupFirefox(configuration, headless);
+				setupFirefox(configuration, resolved);
 				break;
 			case safari:
-				setupSafari(configuration);
+				setupSafari(configuration, resolved);
 				break;
 			case edge:
-				setupEdge(configuration, headless);
+				setupEdge(configuration, resolved);
 				break;
 			default:
 				throw new IllegalStateException("Browser not supported");
@@ -148,9 +147,9 @@ abstract class CrossBrowserSelenium {
 	 * Starts Chrome with the configuration's user agent and window size.
 	 *
 	 * @param config	the user agent, window size and timeouts
-	 * @param headless	whether to run headless
+	 * @param resolved	the settings: headless mode and the timeout
 	 */
-	private void setupChrome(BrowserConfiguration config, boolean headless) {
+	private void setupChrome(BrowserConfiguration config, SailSettings resolved) {
 		List<String> arguments = new ArrayList<>(6);
 		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
 		arguments.add("--disable-backgrounding-occluded-windows");
@@ -160,7 +159,7 @@ abstract class CrossBrowserSelenium {
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
-		if (headless) {
+		if (resolved.headless()) {
 			arguments.add("--headless");
 			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
 			if (config.getResolution() == null) {
@@ -172,18 +171,18 @@ abstract class CrossBrowserSelenium {
 		options.addArguments(arguments);
 		driver = new ChromeDriver(options);
 		
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 
 	/**
 	 * Starts Firefox with the configuration's window size.
 	 *
 	 * @param config	the user agent, window size and timeouts
-	 * @param headless	whether to run headless
+	 * @param resolved	the settings: headless mode and the timeout
 	 */
-	private void setupFirefox(BrowserConfiguration config, boolean headless) {
+	private void setupFirefox(BrowserConfiguration config, SailSettings resolved) {
 		FirefoxOptions options = new FirefoxOptions();
-		if (headless) {
+		if (resolved.headless()) {
 			options.addArguments("-headless");
 		}
 		FirefoxProfile profile = new FirefoxProfile();
@@ -194,29 +193,30 @@ abstract class CrossBrowserSelenium {
 		options.setProfile(profile);
 		driver = new FirefoxDriver(options);
 
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 	
 	/**
 	 * run "safaridriver --enable" in a terminal.
 	 * Safari does not have a headless option.
 	 * 
-	 * @param config
+	 * @param config	the user agent, window size and timeouts
+	 * @param resolved	the settings: the timeout
 	 */
-	private void setupSafari(BrowserConfiguration config) {
+	private void setupSafari(BrowserConfiguration config, SailSettings resolved) {
 		SafariOptions options = new SafariOptions();
 		driver = new SafariDriver(options);
 		
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 
-	private void setupEdge(BrowserConfiguration config, boolean headless) {
+	private void setupEdge(BrowserConfiguration config, SailSettings resolved) {
 		List<String> arguments = new ArrayList<>(2);
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
-		if (headless) {
+		if (resolved.headless()) {
 			arguments.add("headless");
 		}
 		
@@ -224,16 +224,15 @@ abstract class CrossBrowserSelenium {
 		options.addArguments(arguments);
 		driver = new EdgeDriver(options);
 		
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 	
-	private void setupBrowser(BrowserConfiguration config) {
+	private void setupBrowser(BrowserConfiguration config, SailSettings resolved) {
 		Options manage = driver.manage();
 		
 		Timeouts timeouts = manage.timeouts();
 		Duration duration = config.getPageLoadTimeout();
-		SailSettings resolved = settings;
-		timeouts.pageLoadTimeout((duration != null) ? duration : ((resolved == null) ? Duration.ofSeconds(SailSettings.DEFAULT_TIMEOUT_SECONDS) : resolved.timeout()));
+		timeouts.pageLoadTimeout((duration == null) ? resolved.timeout() : duration);
 		duration = config.getImplicitlyWait();
 		timeouts.implicitlyWait((duration == null) ? Duration.ofMillis(0) : duration);
 		duration = config.getScriptTimeout();

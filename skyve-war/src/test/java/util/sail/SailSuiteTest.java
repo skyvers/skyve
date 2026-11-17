@@ -3,9 +3,12 @@ package util.sail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.MultipleFailuresError;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
@@ -125,7 +129,7 @@ class SailSuiteTest {
 			if (member.path().endsWith("01-session.xml")) {
 				throw new IllegalArgumentException("not a valid script");
 			}
-		}).environment(new SailSettings.Environment(Map.of(), Map.of(), null, Path.of("").toAbsolutePath()));
+		}).environment(SailSettings.Environment.none());
 		MultipleFailuresError e = assertThrows(MultipleFailuresError.class, sailSuite::run);
 		assertAll(() -> assertEquals(2, e.getFailures().size()),
 					() -> assertEquals("SAIL suite s.suite.xml: pf/01-session.xml failed: not a valid script", e.getFailures().get(0).getMessage()),
@@ -198,9 +202,9 @@ class SailSuiteTest {
 		workflow.getAutomations().add(automation);
 		SailSettings.Environment override = new SailSettings.Environment(Map.of(SailSettings.TEST_STRATEGY, "None"), Map.of(), null,
 																		Path.of("").toAbsolutePath());
-		SailSettings.Environment none = new SailSettings.Environment(Map.of(), Map.of(), null, Path.of("").toAbsolutePath());
-		SailWorkflow.Member ordinary = new SailWorkflow.Member(suite, "s.suite.xml", suite.getMembers().get(0));
-		SailWorkflow.Member locked = new SailWorkflow.Member(suite, "s.suite.xml", suite.getSetUps().get(0));
+		SailSettings.Environment none = SailSettings.Environment.none();
+		SailWorkflow.Member ordinary = new SailWorkflow.Member(suite, "s.suite.xml", suite.getMembers().get(0), null);
+		SailWorkflow.Member locked = new SailWorkflow.Member(suite, "s.suite.xml", suite.getSetUps().get(0), "set-up");
 
 		SailSettings suiteDefault = SailWorkflow.legSettings(SailSettings.resolve(none, List.of()), "pf/01-session.xml", workflow, automation, ordinary);
 		SailSettings overridden = SailWorkflow.legSettings(SailSettings.resolve(override, List.of()), "pf/01-session.xml", workflow, automation, ordinary);
@@ -218,5 +222,42 @@ class SailSuiteTest {
 										kept.describe().get(kept.describe().size() - 1)),
 					() -> assertEquals(TestStrategy.Verify, workflowDefault.testStrategy(), "the lock survives with(): the workflow's own default"),
 					() -> assertNull(SailWorkflow.lockOf(suite, suite.getMembers().get(0))));
+	}
+
+	/** Only the locked members that run are noted: a choice leaves out an unchosen locked member's note. */
+	@Test
+	void onlyTheChosenLockedMembersAreNoted() {
+		Summary summary = run(Map.of(SailSettings.TEST_STRATEGY, "None", SailSettings.SUITE_ONLY, "pf/01"));
+		assertEquals(List.of("only [pf/01] chooses [pf/01-session.xml]",
+								"override None from -Dsail.testStrategy not applied to 00-precondition.xml: locked (set-up)",
+								"override None from -Dsail.testStrategy not applied to 00-backup.xml: locked (set-up)",
+								"override None from -Dsail.testStrategy not applied to 99-restore.xml: locked (restore)"),
+						summary.notes());
+	}
+
+	/** A suite loaded with an engine checks that its member files exist before anything runs. */
+	@Test
+	void aSuiteNamingAMissingMemberFileFailsBeforeAnythingRuns(@TempDir Path folder) throws IOException {
+		Files.writeString(folder.resolve("01-here.xml"), "<automation/>");
+		Path file = Files.writeString(folder.resolve("s.suite.xml"), """
+				<suite xmlns="http://www.skyve.org/xml/sail">
+					<member file="01-here.xml"/>
+					<member file="pf/02-gone.xml"/>
+					<restore file="99-gone.xml"/>
+				</suite>
+				""");
+		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
+		String path = file.toString();
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> SailSuite.file(path, engine));
+		assertEquals("SAIL suite " + path + " names member files that do not exist: [pf/02-gone.xml, 99-gone.xml]", e.getMessage());
+	}
+
+	/** A test's settings given to an engine-loaded suite are the engine's too, which runs the members. */
+	@Test
+	void aSuitesSettingsAreItsEnginesToo() {
+		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
+		SailSettings.Code code = SailSettings.code();
+		SailSuite.resource("sail/kitchenSink/kitchensink.suite.xml", engine).settings(code);
+		assertSame(code, engine.settings());
 	}
 }

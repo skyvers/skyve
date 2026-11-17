@@ -106,7 +106,7 @@
 	</interaction>
 	<interaction name="Document Creator: Submit refused without an output location">
 		<method>
-			<comment>From the retired single-file admin script: no script or output location has been entered, so Submit must refuse to run</comment>
+			<comment>No script or output location has been entered, so Submit must refuse to run</comment>
 			<navigateEdit document="DocumentCreator" module="admin" />
 			<tabSelect path="Input" />
 			<tabSelect path="Markdown Preview" />

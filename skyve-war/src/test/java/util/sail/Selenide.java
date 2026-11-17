@@ -136,7 +136,8 @@ public abstract class Selenide<
 	/**
 	 * Applies the settings that the next script runs with. If they, or the configuration, ask for another browser than
 	 * the one started (another browser, headless mode, server, user agent or window size), the browser restarts with
-	 * them, taking the server lock for a new server; otherwise the browser carries on, with their timeout.
+	 * them, taking the server lock for a new server; otherwise the browser carries on, with their timeout (for its waits,
+	 * and for page loads unless the configuration gives a page load timeout).
 	 *
 	 * <p>Side effects: may stop and start the browser (which ends its session), and says so in the trace; sets
 	 * Selenide's timeout.
@@ -149,6 +150,10 @@ public abstract class Selenide<
 		if (change == null) {
 			settings = resolved;
 			com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
+			if ((driver != null) && (next.getPageLoadTimeout() == null)) {
+				// the page load timeout follows the settings' timeout, unless the configuration gives its own
+				driver.manage().timeouts().pageLoadTimeout(resolved.timeout());
+			}
 		}
 		else {
 			trace("SAIL: the browser's settings changed (" + change + "): starting a new browser");

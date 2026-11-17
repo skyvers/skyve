@@ -78,7 +78,7 @@ public class Workflow {
 	 *
 	 * @param automation	one of this workflow's automations
 	 * @return the strategy, or {@code null} if neither states one
-	 * @see Suite#getEffectiveTestStrategy(Workflow, Automation)
+	 * @see Suite#getEffectiveTestStrategy(SuiteMember, Workflow, Automation)
 	 */
 	public @Nullable TestStrategy getEffectiveTestStrategy(@Nonnull Automation automation) {
 		TestStrategy result = automation.getTestStrategy();

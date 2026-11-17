@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	Admin suite (admin.suite.xml), set-up after 00-backup.xml: leave a marker after the backup, which 99-restore.xml checks
-	that the restore removed (and 00-precondition.xml checks that no earlier run left behind).
+	Admin suite (admin.suite.xml), set-up after 00-backup.xml, in SmartClient: leave a marker after the backups, which
+	99-restore.xml checks that the restore removed (and 00-precondition.xml checks that no earlier run left behind).
 -->
-<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
+		<switchMode />
 	</before>
 	<interaction name="Leave a marker that the restore must remove">
 		<method>

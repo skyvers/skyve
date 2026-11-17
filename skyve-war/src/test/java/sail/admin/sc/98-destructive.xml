@@ -20,6 +20,7 @@
 			<comment>This member waits for its jobs by their rows in the completed jobs list: clear it first, so that a row left by another member (the other renderer's 98-destructive.xml, if it stopped early) cannot be taken for this member's. The admin suite runs both 05-reports-misc.xml members, which check the backup's row, before either 98-destructive.xml.</comment>
 			<navigateMenu module="admin" item="Jobs" />
 			<action name="DeleteCompletedJobs" />
+			<comment>SmartClient's testGridRows with a timeout fetches the list again until the count holds, so it needs no Refresh first</comment>
 			<testGridRows module="admin" query="qCompletedJobs" maxRows="0" timeoutMillis="10000" />
 		</method>
 	</interaction>

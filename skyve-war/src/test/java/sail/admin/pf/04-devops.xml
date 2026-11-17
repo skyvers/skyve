@@ -84,7 +84,7 @@
 	</interaction>
 	<interaction name="Data Maintenance: save, and the upload backup page">
 		<method>
-			<comment>From the retired single-file admin script, with the values as they are rather than testDataEnter's: generated backup, restore and refresh options would change how the other members' jobs run. 99-restore.xml puts the row back.</comment>
+			<comment>With the values as they are rather than testDataEnter's: generated backup, restore and refresh options would change how the other members' jobs run. 99-restore.xml puts the row back.</comment>
 			<navigateEdit document="DataMaintenance" module="admin" />
 			<tabSelect path="Import/Export" />
 			<tabSelect path="Backup/Restore" />
@@ -100,7 +100,7 @@
 	</interaction>
 	<interaction name="Document Creator: generated data, and Submit refused without a module">
 		<method>
-			<comment>From the retired single-file admin script: testDataEnter fills the output location (a text), so Submit gets past that check to the module check</comment>
+			<comment>testDataEnter fills the output location (a text), so Submit gets past that check to the module check</comment>
 			<navigateEdit document="DocumentCreator" module="admin" />
 			<testDataEnter />
 			<tabSelect path="Input" />

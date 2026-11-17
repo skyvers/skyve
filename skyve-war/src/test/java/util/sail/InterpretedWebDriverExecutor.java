@@ -626,7 +626,8 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Saves a screenshot and the page source when the settings give a failure directory.
+	 * Saves a screenshot and the page source when the settings give a failure directory, named by the suite member (if
+	 * any), the run token, the failure's number, the interaction and the step.
 	 */
 	private void diagnose() {
 		SailSettings resolved = automationSettings;
@@ -637,8 +638,12 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		try {
 			Files.createDirectories(path);
-			// a load run's virtual users share the directory: their files start with the user and iteration
-			String prefix = SailLoadProbe.fileLabel() + String.format("%02d-%s-step%02d", Integer.valueOf(++failureCount),
+			// the suite member and the run name the files, so that members and runs sharing the directory keep theirs
+			String label = SailMedia.label();
+			String prefix = String.format("%s%s-%02d-%s-step%02d",
+												(label == null) ? "" : SailMedia.sanitise(label, 60) + '-',
+												getRunToken(),
+												Integer.valueOf(++failureCount),
 												String.valueOf(procedureName).replaceAll("[^A-Za-z0-9]+", "_"),
 												Integer.valueOf(stepNumber));
 			Files.write(path.resolve(prefix + ".png"), ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));

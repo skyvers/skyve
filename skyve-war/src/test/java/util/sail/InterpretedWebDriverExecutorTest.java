@@ -24,14 +24,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InOrder;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.OutputType;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.execution.sc.SmartClientAutomationContext;
@@ -327,6 +335,35 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertTrue(e.getMessage().contains("There is no earlier page"), e.getMessage()),
 					() -> verify(executor.selenide, times(2)).closeWindowAndReturnTo("first"),
 					() -> assertThrows(MetaDataException.class, () -> executor.executeCloseWindow(close)));
+	}
+
+	/**
+	 * A failure's screenshot and page source are named by the suite member and the run, so that members and runs that
+	 * share the failure directory keep their own files.
+	 */
+	@Test
+	void failureFilesAreNamedByTheMemberAndTheRun(@TempDir Path directory) throws IOException {
+		WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(TakesScreenshot.class));
+		when(((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)).thenReturn(new byte[] {1});
+		when(driver.getPageSource()).thenReturn("<html/>");
+		executor.selenide.driver = driver;
+		executor.useSettings(SailSettings.resolve(SailSettings.Environment.none(), List.of(SailSettings.code().failureDir(directory).layer())));
+		doThrow(new IllegalStateException("There is no earlier page")).when(executor.selenide).back();
+		Automation automation = XMLMetaData.unmarshalSAILString("<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+																	"<interaction name=\"Go back\"><method><navigateBack/></method></interaction></automation>");
+		SailMedia.label("pf/01-session.xml");
+		try {
+			assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+		}
+		finally {
+			SailMedia.label(null);
+		}
+		List<String> files;
+		try (Stream<Path> listed = Files.list(directory)) {
+			files = listed.map(f -> f.getFileName().toString()).sorted().toList();
+		}
+		String stem = "pf-01-session.xml-" + executor.getRunToken() + "-01-Go_back-step01";
+		assertEquals(List.of(stem + ".html", stem + ".png"), files);
 	}
 
 	@Test

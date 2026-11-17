@@ -137,10 +137,10 @@ public class BrowserConfiguration {
 	 * @throws IllegalArgumentException	if a setting is invalid
 	 */
 	public @Nonnull SailSettings resolve() {
-		return resolve(fixed ? SailSettings.Environment.none() : SailSettings.Environment.current());
+		return resolve(SailSettings.Environment.current());
 	}
 
-	/** Resolves the settings from the given sources; see {@link #resolve()}. */
+	/** Resolves the settings from the given sources (none, for a {@link #fixed()} configuration); see {@link #resolve()}. */
 	@Nonnull SailSettings resolve(@Nonnull SailSettings.Environment environment) {
 		SailSettings.Layer own = values.layer(SailSettings.Level.CONFIGURATION, "BrowserConfiguration");
 		List<SailSettings.Layer> layers = ((settings == null) || fixed) ? List.of(own) : List.of(settings.layer(), own);
