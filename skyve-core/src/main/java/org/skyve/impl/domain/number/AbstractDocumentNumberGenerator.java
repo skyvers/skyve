@@ -237,33 +237,14 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 															@Nonnull String moduleName,
 															@Nonnull String documentName,
 															@Nonnull String fieldName) {
-		// the repository throws for a module the customer does not have, and for a document the module does
-		// not have, but a sequence's module and document names may be any keys: look them up without throwing
-		Module numberedModule = null;
-		for (Module candidate : customer.getModules()) {
-			if (candidate.getName().equals(moduleName)) {
-				numberedModule = candidate;
-				break;
-			}
-		}
-		Document numbered = ((numberedModule == null) || (! numberedModule.getDocumentRefs().containsKey(documentName))) ?
-								null :
-								numberedModule.getDocument(customer, documentName);
-		if ((numbered == null) || (! numbered.isPersistable())) {
-			return NO_NUMBER;
-		}
-		Attribute attribute = numbered.getPolymorphicAttribute(customer, fieldName);
-		if ((attribute == null) || (! attribute.isPersistent())) {
+		Attribute attribute = persistentAttribute(customer, moduleName, documentName, fieldName);
+		if (attribute == null) {
 			return NO_NUMBER;
 		}
 		AttributeType type = attribute.getAttributeType();
 		String result = pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			if ((type == AttributeType.integer) || (type == AttributeType.longInteger)) {
-				DocumentQuery query = p.newDocumentQuery(moduleName, documentName);
-				query.addAggregateProjection(AggregateFunction.Max, fieldName, MAX_ALIAS);
-				List<Bean> beans = query.projectedResults();
-				Object max = beans.isEmpty() ? null : Binder.get(beans.get(0), MAX_ALIAS);
-				return (max == null) ? null : max.toString();
+				return highestInteger(p, moduleName, documentName, fieldName);
 			}
 			if (type == AttributeType.text) {
 				return highestText(p, prefix, moduleName, documentName, fieldName);
@@ -271,6 +252,48 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 			return null;
 		});
 		return (result == null) ? NO_NUMBER : result;
+	}
+
+	/**
+	 * Returns the persistent attribute {@code fieldName} of a persistable document, or {@code null} if the
+	 * customer has no such module, document or persistent attribute. The repository throws for a module the
+	 * customer does not have, and for a document the module does not have, but a sequence's module and
+	 * document names may be any keys, so they are looked up without throwing.
+	 */
+	private static @Nullable Attribute persistentAttribute(@Nonnull Customer customer,
+															@Nonnull String moduleName,
+															@Nonnull String documentName,
+															@Nonnull String fieldName) {
+		Module numberedModule = null;
+		for (Module candidate : customer.getModules()) {
+			if (candidate.getName().equals(moduleName)) {
+				numberedModule = candidate;
+				break;
+			}
+		}
+		if ((numberedModule == null) || (! numberedModule.getDocumentRefs().containsKey(documentName))) {
+			return null;
+		}
+		Document numbered = numberedModule.getDocument(customer, documentName);
+		if (! numbered.isPersistable()) {
+			return null;
+		}
+		Attribute attribute = numbered.getPolymorphicAttribute(customer, fieldName);
+		return ((attribute == null) || (! attribute.isPersistent())) ? null : attribute;
+	}
+
+	/**
+	 * Returns the maximum of a numeric field as text, or {@code null} if no row has a value.
+	 */
+	private static @Nullable String highestInteger(@Nonnull Persistence p,
+													@Nonnull String moduleName,
+													@Nonnull String documentName,
+													@Nonnull String fieldName) {
+		DocumentQuery query = p.newDocumentQuery(moduleName, documentName);
+		query.addAggregateProjection(AggregateFunction.Max, fieldName, MAX_ALIAS);
+		List<Bean> beans = query.projectedResults();
+		Object max = beans.isEmpty() ? null : Binder.get(beans.get(0), MAX_ALIAS);
+		return (max == null) ? null : max.toString();
 	}
 
 	/**

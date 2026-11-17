@@ -24,7 +24,9 @@ public class SQLServer2016HibernateContentPersistence extends HibernateContentPe
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(SQLServer2016HibernateContentPersistence.class);
 
 	static {
-		LOGGER.warn(isolationWarning(SQL_SERVER_TRANSACTION_SNAPSHOT));
+		if (LOGGER.isWarnEnabled()) {
+			LOGGER.warn(isolationWarning(SQL_SERVER_TRANSACTION_SNAPSHOT));
+		}
 	}
 	
 	/**

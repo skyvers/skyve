@@ -87,6 +87,6 @@ class IsolationWarningH2Test extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
 	void theSnapshotPersistenceIsLoadedWithItsWarning() {
-		assertThrows(SQLException.class, () -> new SQLServer2016HibernateContentPersistence());
+		assertThrows(SQLException.class, SQLServer2016HibernateContentPersistence::new);
 	}
 }

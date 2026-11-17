@@ -57,7 +57,11 @@ class SailSuiteTest {
 
 	/** Returns where a test strategy came from, or "default". */
 	private static String strategySource(SailSettings settings) {
-		SailSettings.Setting setting = settings.setting(SailSettings.TEST_STRATEGY);
+		return source(settings, SailSettings.TEST_STRATEGY);
+	}
+
+	private static String source(SailSettings settings, String key) {
+		SailSettings.Setting setting = settings.setting(key);
 		return (setting == null) ? "default" : setting.source().toString();
 	}
 
@@ -218,6 +222,7 @@ class SailSuiteTest {
 					() -> assertEquals(TestStrategy.None, overridden.testStrategy()),
 					() -> assertEquals(TestStrategy.Assert, kept.testStrategy()),
 					() -> assertEquals("suite s.suite.xml (locked: set-up)", strategySource(kept)),
+					() -> assertEquals("suite s.suite.xml", source(kept, SailSettings.EVIDENCE), "only the strategy is locked"),
 					() -> assertEquals("testStrategy override None from -Dsail.testStrategy not applied: locked (set-up)",
 										kept.describe().get(kept.describe().size() - 1)),
 					() -> assertEquals(TestStrategy.Verify, workflowDefault.testStrategy(), "the lock survives with(): the workflow's own default"),

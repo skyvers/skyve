@@ -455,10 +455,12 @@ public final class SailWorkflow {
 		TestStrategy suiteStrategy = (workflow.getEffectiveTestStrategy(automation) == null) ?
 										suite.getEffectiveTestStrategy(member.member(), workflow, automation) :
 										null;
+		// the lock is named on the strategy's source only: the suite's other values are not locked
 		SailSettings result = resolved.with(workflowLayer,
 											SailSettings.suite(member.suiteName() + ((lock == null) ? "" : " (locked: " + lock + ')'),
 																suiteStrategy,
-																suite.getEvidence()));
+																null),
+											SailSettings.suite(member.suiteName(), null, suite.getEvidence()));
 		return (lock == null) ? result : result.lockTestStrategy(lock);
 	}
 
