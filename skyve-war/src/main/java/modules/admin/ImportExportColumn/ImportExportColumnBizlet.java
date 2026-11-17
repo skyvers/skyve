@@ -20,6 +20,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebContext;
 
+import modules.admin.ImportExport.ImportExportExtension;
 import modules.admin.ImportExport.ImportExportUtil;
 import modules.admin.domain.ImportExport.Mode;
 import modules.admin.domain.ImportExportColumn;
@@ -50,14 +51,15 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 				bindings = new ArrayList<>();
 			}
 
-			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null
+			ImportExportExtension parent = bean.getParent();
+			if (parent != null && parent.getModuleName() != null && parent.getDocumentName() != null
 					&& bindings.isEmpty()) {
 
 				Persistence pers = CORE.getPersistence();
 				User user = pers.getUser();
 				Customer customer = user.getCustomer();
-				Module module = customer.getModule(bean.getParent().getModuleName());
-				Document document = module.getDocument(customer, bean.getParent().getDocumentName());
+				Module module = customer.getModule(parent.getModuleName());
+				Document document = module.getDocument(customer, parent.getDocumentName());
 
 				for (Attribute a : document.getAllAttributes(customer)) {
 
@@ -100,12 +102,13 @@ public class ImportExportColumnBizlet extends Bizlet<ImportExportColumn> {
 		if (ImportExportColumn.bindingNamePropertyName.equals(attributeName)) {
 			List<String> bindingsList = new ArrayList<>();
 
-			if (bean.getParent() != null && bean.getParent().getModuleName() != null && bean.getParent().getDocumentName() != null
+			ImportExportExtension parent = bean.getParent();
+			if (parent != null && parent.getModuleName() != null && parent.getDocumentName() != null
 					&& bindingsList.isEmpty()) {
 
 				Customer customer = CORE.getCustomer();
-				Module module = customer.getModule(bean.getParent().getModuleName());
-				Document document = module.getDocument(customer, bean.getParent().getDocumentName());
+				Module module = customer.getModule(parent.getModuleName());
+				Document document = module.getDocument(customer, parent.getDocumentName());
 
 				for (Attribute a : document.getAllAttributes(customer)) {
 

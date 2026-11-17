@@ -32,7 +32,7 @@ public class DD_MM_YYYY_HH_MI_SS extends org.skyve.domain.types.converters.times
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
-				return fromDisplayValue(value);
+				return fromDisplayValue(processedValue);
 			}
 			catch (ConversionException e) {
 				String message = e.getMessages().get(0).getText();

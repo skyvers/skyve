@@ -35,6 +35,15 @@ class MMM_DD_YYYYTest {
 	}
 
 	@Test
+	void testGetAsObjectTrimsSurroundingSpaces() {
+		// setup the test data
+		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
+
+		// call the method under test with the value padded by spaces
+		assertThat(formatter.getAsObject(null, null, "  Mar-01-2020  "), is(testDate));
+	}
+
+	@Test
 	void testGetAsString() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));

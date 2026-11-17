@@ -241,8 +241,10 @@ public class UserService {
 			validateUserContact(adminUser, e);
 
 			// propose a new username
-			if (adminUser.getContact() != null && adminUser.getContact().getEmail1() != null) {
-				adminUser.setUserName(adminUser.getContact().getEmail1());
+			ContactExtension contact = adminUser.getContact();
+			String email = (contact == null) ? null : contact.getEmail1();
+			if (email != null) {
+				adminUser.setUserName(email);
 			} else {
 				adminUser.setUserName(GenerateUniqueUserName.generateUniqueUserNameFromContactName(adminUser));
 			}

@@ -138,7 +138,6 @@ public abstract class AbstractDocumentNumberGenerator implements NumberGenerator
 		DocumentNumber dN = null;
 		try {
 			// temporarily escalate access to the Document Number sequences
-			@SuppressWarnings("null") // always returns a list
 			@Nonnull List<DocumentNumber> num = pers.withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 				DocumentQuery qN = pers.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.DOCUMENT_NUMBER_DOCUMENT_NAME);
 				qN.getFilter().addEquals(AppConstants.MODULE_NAME_ATTRIBUTE_NAME, moduleName);

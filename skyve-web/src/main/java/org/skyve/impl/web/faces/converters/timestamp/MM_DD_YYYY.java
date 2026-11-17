@@ -32,7 +32,7 @@ public class MM_DD_YYYY extends org.skyve.domain.types.converters.timestamp.MM_D
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
-				return fromDisplayValue(value);
+				return fromDisplayValue(processedValue);
 			}
 			catch (ConversionException e) {
 				String message = e.getMessages().get(0).getText();
