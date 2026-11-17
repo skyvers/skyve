@@ -136,7 +136,7 @@ class DownloadSAILH2Test extends AbstractH2TestTruncate {
 						() -> assertFalse(sail.contains("DownloadSAILRecording"), sail),
 						() -> assertTrue(sail.contains("<ns2:action name=\"GenerateTestData\"/>"), sail),
 						() -> assertTrue(sail.contains("<ns2:action name=\"DownloadClientSAIL\"/>"), sail),
-						() -> assertTrue(sail.contains("<ns2:comment>not generated: tab Subscriptions depends on visible=\"persisted\"</ns2:comment>"), sail));
+						() -> assertTrue(sail.contains("<ns2:comment>not generated: tab Subscriptions depends on visible=\"persisted\", which depends on what the script enters and saves</ns2:comment>"), sail));
 
 			downloadClientSAIL.prepare(bean, webContext);
 			String source = text(downloadClientSAIL.download(bean, webContext));

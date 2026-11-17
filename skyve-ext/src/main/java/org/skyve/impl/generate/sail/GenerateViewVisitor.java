@@ -58,9 +58,9 @@ import jakarta.annotation.Nullable;
  *
  * <p>Only what the user is shown is generated, so that the script never names a widget that its view lacks.
  *
- * <p>Privileges are decided as the renderers decide them ({@link ViewActionPrivileges}): an action the user's privileges do
- * not let the view show is not generated, whether it is a toolbar action or a button's; nor is a new data grid row when
- * the user cannot create the grid's document.
+ * <p>Privileges are decided as the renderers decide them ({@link ViewActionPrivileges}): an action the user's
+ * privileges do not let the view show is not generated, whether it is a toolbar action or a button's; nor is a new
+ * data grid row when the user cannot create the grid's document.
  *
  * <p>Conditions: an action is generated when it is visible and enabled and so are the containers of its button (tab
  * panes, tabs, forms, vboxes, hboxes and the sidebar); a tab selection when the tab and its containers are; a new data
@@ -71,19 +71,25 @@ import jakarta.annotation.Nullable;
  * {@code notChanged} change as the script enters data and saves, so their values are not known. Any other condition is
  * evaluated against two instances of the document: the new instance that the script opens
  * ({@link Document#newInstance(User)}) and one holding test data such as {@code <testDataEnter/>} enters (a
- * {@link DataBuilder} with the {@code sail} fixture). When both give the same value, the condition is taken not to
- * depend on what the script enters (it depends on the user, their roles, the configuration or the document's defaults)
- * and its value is used. When they differ, or it cannot be evaluated, its value is not known.
+ * {@link DataBuilder} with the {@code sail} fixture).
  *
- * <p>A step that a known condition hides or disables is not generated. A step that a condition whose value is not
- * known could hide or disable is not generated either: a comment naming the condition as the view declares it, such as
- * {@code not generated: tab Subscriptions depends on visible="persisted"}, stands in its place, for the author of the
- * script to decide.
+ * <p>A step is generated when nothing hides or disables it, or when every condition that could is false on both test
+ * instances. Only a constant condition, or a privilege, leaves a step out without a word. A step that a non-constant
+ * condition hides or disables, or could, is left out with a comment naming the condition as the view declares it and
+ * what is known of it, for the author of the script to decide, such as
+ * {@code not generated: action Restore depends on disabled="notBackupSelected", which hides or disables it on both test
+ * instances} or {@code not generated: tab tab depends on visible="shown", which depends on what the script enters}
+ * (the instances disagree); a condition on {@code persisted} or {@code changed} "depends on what the script enters and
+ * saves", and one that throws "cannot be evaluated here".
  *
- * <p>Conditions are evaluated as the persistence's current user (the Control Panel sets it to the SAIL user while it
- * generates) in the current request, so a condition on the session, such as SAIL recording, reads the generating
- * session. A condition that depends on the saved state or on a random value can still take the same value on both
- * instances by chance; the script's own test data is random too, so such a step can still fail when the script runs.
+ * <p>Known limits. Conditions are evaluated as the persistence's current user (the Control Panel sets it to the SAIL
+ * user while it generates) in the current request, so a condition on the session, such as SAIL recording, reads the
+ * generating session, not the script's. A condition on saved state (a Java or EL condition that calls
+ * {@code isPersisted()}, a {@code created} condition, or one on fields that a Bizlet sets in {@code preSave}) always
+ * gives the same value on the two unsaved instances, while action steps run after the script's Save, so such a step
+ * is decided as for an unsaved document. Because the test data is random and session conditions read the generator's
+ * session, the output can differ from one generation to the next, and the script's own random test data can still
+ * hide a step that was generated.
  *
  * <p>Side effects: the first condition evaluated creates the two instances, which runs the document's Bizlet
  * {@code newInstance} and builds random test data; neither is saved. Conditions can run application code, which can
@@ -176,11 +182,11 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		}
 		containers.push(tab);
 		Availability availability = enclosing();
-		if (availability.unusable()) {
+		if (availability.silent()) {
 			return;
 		}
 		Step step;
-		if (availability.condition() == null) {
+		if (availability.generated()) {
 			TabSelect select = new TabSelect();
 			select.setTabPath(title);
 			step = select;
@@ -312,10 +318,10 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 																	grid.getXmlEnableAddCondition(),
 																	"disableAdd",
 																	grid.getXmlDisableAddCondition())));
-		if (availability.unusable()) {
+		if (availability.silent()) {
 			return;
 		}
-		if (availability.condition() != null) {
+		if (! availability.generated()) {
 			populateSteps.add(notGenerated("a new row in data grid " + binding, availability));
 			return;
 		}
@@ -447,10 +453,10 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			return false;
 		}
 		Availability availability = enclosing.and(availability(action));
-		if (availability.unusable()) {
+		if (availability.silent()) {
 			return false;
 		}
-		if (availability.condition() != null) {
+		if (! availability.generated()) {
 			comments.add(notGenerated(step, availability));
 			return false;
 		}
@@ -458,15 +464,15 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 
 	/**
-	 * Returns what is known of the containers being visited, evaluating their conditions, outermost first, until one is
-	 * known to hide or disable what they hold.
+	 * Returns what is known of the containers being visited, evaluating their conditions, outermost first, until a
+	 * constant condition hides or disables what they hold.
 	 *
-	 * @return the first container known to be unusable, else the first whose condition is not known, else usable
+	 * @return the most decisive of what is known of the containers (see {@link Availability#and(Availability)})
 	 */
 	private @Nonnull Availability enclosing() {
 		Availability result = Known.USABLE;
 		Iterator<Object> outermostFirst = containers.descendingIterator();
-		while (outermostFirst.hasNext() && (! result.unusable())) {
+		while (outermostFirst.hasNext() && (! result.silent())) {
 			result = result.and(availability(outermostFirst.next()));
 		}
 		return result;
@@ -487,7 +493,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 											"invisible",
 											invisible.getXmlInvisibleCondition()));
 		}
-		if ((! result.unusable()) && (metadata instanceof Disableable disableable)) {
+		if ((! result.silent()) && (metadata instanceof Disableable disableable)) {
 			result = result.and(negative(disableable.getDisabledCondition(),
 											authored("enabled",
 														disableable.getXmlEnabledCondition(),
@@ -522,8 +528,8 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 * @param condition the condition, or {@code null} when none was declared
 	 * @param declaration the condition as the view declares it, which a comment names, or {@code null} to name
 	 * 			{@code condition}
-	 * @return usable when there is no condition or it is known to be false, unusable when it is known to be true, or
-	 * 			usable unless the condition, whose value is not known
+	 * @return usable when there is no condition or it is false (a constant, or on both test instances), constant
+	 * 			unusable when it is the constant {@code true}, else what is known of it, naming it as {@code declaration}
 	 */
 	private @Nonnull Availability negative(@Nullable String condition, @Nullable String declaration) {
 		if (condition == null) {
@@ -533,7 +539,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		if ((result.condition() == null) || (declaration == null)) {
 			return result;
 		}
-		return new Availability(false, declaration, result.reason());
+		return new Availability(result.kind(), declaration, result.reason());
 	}
 
 	/**
@@ -552,7 +558,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			return Known.USABLE;
 		}
 		if (SCRIPT_STATE_CONDITIONS.contains(condition)) {
-			return new Availability(false, condition, null);
+			return new Availability(Kind.NOT_KNOWN, condition, "depends on what the script enters and saves");
 		}
 		boolean whenOpened;
 		boolean whenEntered;
@@ -563,13 +569,16 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 		}
 		catch (Exception e) { // the step is left out with the reason, rather than failing the whole script
 			LOGGER.debug("Condition {} of {}.{} cannot be evaluated for SAIL generation", condition, module.getName(), document.getName(), e);
-			return new Availability(false, condition, reason(e));
+			return new Availability(Kind.NOT_KNOWN, condition, "cannot be evaluated here (" + reason(e) + ')');
 		}
 		if (whenOpened != whenEntered) {
-			return new Availability(false, condition, null);
+			return new Availability(Kind.NOT_KNOWN, condition, "depends on what the script enters");
 		}
-		return whenOpened ? Known.UNUSABLE : Known.USABLE;
+		return whenOpened ?
+				new Availability(Kind.HIDDEN_ON_BOTH, condition, "hides or disables it on both test instances") :
+				Known.USABLE;
 	}
+
 
 	/**
 	 * Returns the instances that conditions are evaluated against, creating them the first time.
@@ -589,7 +598,7 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			}
 			try {
 				Bean opened = document.newInstance(user);
-				Bean entered = new DataBuilder().fixture(FixtureType.sail).build(document);
+				Bean entered = newTestDataInstance();
 				result = new Instances(opened, entered);
 			}
 			catch (Exception e) {
@@ -599,6 +608,18 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 			instances = result;
 		}
 		return result;
+	}
+
+	/**
+	 * Builds the instance holding test data, as {@code <testDataEnter/>} enters it.
+	 *
+	 * <p>Side effects: builds random data with a {@link DataBuilder} and the {@code sail} fixture, which can run
+	 * application code (data factories and Bizlets); the instance is not saved.
+	 *
+	 * @return the instance
+	 */
+	@Nonnull Bean newTestDataInstance() {
+		return new DataBuilder().fixture(FixtureType.sail).build(document);
 	}
 
 	/**
@@ -613,23 +634,19 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 
 	/**
-	 * Returns a comment that stands in for a step that is not generated.
+	 * Returns a comment that stands in for a step that is not generated, naming the condition and what is known of it.
 	 *
 	 * @param step the step, such as {@code action Restore}
-	 * @param availability what is known of the step, whose condition is not known
-	 * @return the comment
+	 * @param availability what is known of the step, which a non-constant condition hides or could hide
+	 * @return the comment, such as {@code not generated: tab Subscriptions depends on visible="persisted", which depends
+	 * 			on what the script enters and saves}
 	 */
 	private static @Nonnull Comment notGenerated(@Nonnull String step, @Nonnull Availability availability) {
-		StringBuilder comment = new StringBuilder(128).append("not generated: ").append(step);
-		comment.append(" depends on ").append(availability.condition());
-		String reason = availability.reason();
-		if (reason != null) {
-			comment.append(", which cannot be evaluated here (").append(reason).append(')');
-		}
 		Comment result = new Comment();
-		result.setComment(comment.toString());
+		result.setComment("not generated: " + step + " depends on " + availability.condition() + ", which " + availability.reason());
 		return result;
 	}
+
 	
 	@Nonnull List<Step> getPopulateSteps() {
 		return populateSteps;
@@ -675,25 +692,55 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	}
 
 	/**
+	 * What is known of a step's widget, from least to most decisive: {@link #and(Availability)} keeps the most decisive.
+	 */
+	private enum Kind {
+		/** Nothing hides or disables it. */
+		USABLE,
+		/** A condition could hide or disable it, but its value is not known. */
+		NOT_KNOWN,
+		/** A non-constant condition hides or disables it on both test instances. */
+		HIDDEN_ON_BOTH,
+		/** A constant condition hides or disables it, so nothing needs saying. */
+		CONSTANT_UNUSABLE
+	}
+
+	/**
 	 * What is known of whether a step's widget can be used.
 	 *
-	 * @param unusable whether a known condition hides or disables it
-	 * @param condition when it is not unusable, a condition whose value is not known and that could hide or disable
-	 * 			it, or {@code null} when none could
-	 * @param reason why that condition could not be evaluated, or {@code null} when it was, or none could
+	 * @param kind what is known
+	 * @param condition the condition that hides or could hide the widget, as a comment names it, or {@code null} when
+	 * 			the kind is {@link Kind#USABLE} or {@link Kind#CONSTANT_UNUSABLE}
+	 * @param reason what is known of the condition, completing "which ..." in a comment, or {@code null} when
+	 * 			{@code condition} is
 	 */
-	private record Availability(boolean unusable, @Nullable String condition, @Nullable String reason) {
+	private record Availability(@Nonnull Kind kind, @Nullable String condition, @Nullable String reason) {
 		/**
 		 * Returns what is known of a widget that both this and {@code other} apply to.
 		 *
 		 * @param other what else applies; must not be {@code null}
-		 * @return the first unusable, else the first whose condition is not known, else usable
+		 * @return the more decisive of the two, or this when they are as decisive
 		 */
 		@Nonnull Availability and(@Nonnull Availability other) {
-			if (unusable || ((condition != null) && (! other.unusable))) {
-				return this;
-			}
-			return other;
+			return (other.kind.ordinal() > kind.ordinal()) ? other : this;
+		}
+
+		/**
+		 * Returns whether the step is generated.
+		 *
+		 * @return {@code true} when nothing hides or disables the widget
+		 */
+		boolean generated() {
+			return (kind == Kind.USABLE);
+		}
+
+		/**
+		 * Returns whether the step is left out without a comment.
+		 *
+		 * @return {@code true} when a constant condition hides or disables the widget
+		 */
+		boolean silent() {
+			return (kind == Kind.CONSTANT_UNUSABLE);
 		}
 	}
 
@@ -702,9 +749,9 @@ public class GenerateViewVisitor extends NoOpViewVisitor {
 	 */
 	private static final class Known {
 		/** Nothing hides or disables the widget. */
-		static final Availability USABLE = new Availability(false, null, null);
-		/** A known condition hides or disables the widget. */
-		static final Availability UNUSABLE = new Availability(true, null, null);
+		static final Availability USABLE = new Availability(Kind.USABLE, null, null);
+		/** A constant condition hides or disables the widget. */
+		static final Availability UNUSABLE = new Availability(Kind.CONSTANT_UNUSABLE, null, null);
 
 		private Known() {
 			// constants only

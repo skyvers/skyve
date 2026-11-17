@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.CollectionImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
@@ -348,16 +350,16 @@ class GenerateViewVisitorTest {
 		visitor.visitSaveAction(save);
 		visitor.visitDeleteAction(delete);
 
-		assertAll(() -> assertEquals(List.of("not generated: tab Subscriptions depends on visible=\"persisted\"",
-												"not generated: a new row in data grid lines depends on enableAdd=\"persisted\"",
-												"not generated: save depends on visible=\"notPersisted\""),
+		assertAll(() -> assertEquals(List.of("not generated: tab Subscriptions depends on visible=\"persisted\", which depends on what the script enters and saves",
+												"not generated: a new row in data grid lines depends on enableAdd=\"persisted\", which depends on what the script enters and saves",
+												"not generated: save depends on visible=\"notPersisted\", which depends on what the script enters and saves"),
 										comments(visitor.getPopulateSteps())),
-					() -> assertEquals(List.of("not generated: tab Subscriptions depends on visible=\"persisted\"",
-												"not generated: action approve depends on visible=\"persisted\"",
-												"not generated: action archive depends on visible=\"changed\""),
+					() -> assertEquals(List.of("not generated: tab Subscriptions depends on visible=\"persisted\", which depends on what the script enters and saves",
+												"not generated: action approve depends on visible=\"persisted\", which depends on what the script enters and saves",
+												"not generated: action archive depends on visible=\"changed\", which depends on what the script enters and saves"),
 										comments(visitor.getActionSteps())),
 					// only a generator that deletes takes the Delete's comment
-					() -> assertEquals(List.of("not generated: delete depends on disabled=\"notChanged\""),
+					() -> assertEquals(List.of("not generated: delete depends on disabled=\"notChanged\", which depends on what the script enters and saves"),
 										comments(visitor.getDeleteComments())),
 					() -> assertEquals(List.of(), actionNames(visitor.getActionSteps())),
 					() -> assertFalse(visitor.getHasSave()),
@@ -568,6 +570,47 @@ class GenerateViewVisitorTest {
 					() -> verify(document, times(1)).newInstance(any(User.class)));
 	}
 
+	/**
+	 * The two-instance rule (M17): a condition false on both test instances lets the step be generated; one true on
+	 * both, or one the instances disagree on, leaves the step out with a comment saying which; only a constant condition
+	 * leaves a step out without a word.
+	 */
+	@Test
+	void nonConstantConditionsLeaveStepsOutWithAComment() throws Exception {
+		ViewImpl view = view();
+		view.putAction(conditioned("agreeShown", "hiddenOnNeither"));
+		view.putAction(conditioned("agreeHidden", "hiddenOnBoth"));
+		view.putAction(conditioned("disagree", "hiddenWhenOpened"));
+		ActionImpl constant = action("constant", Boolean.FALSE, null);
+		constant.setXmlVisibleCondition("false");
+		view.putAction(constant);
+		Bean opened = mock(Bean.class);
+		when(Boolean.valueOf(opened.evaluateCondition("hiddenOnBoth"))).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(opened.evaluateCondition("hiddenWhenOpened"))).thenReturn(Boolean.TRUE);
+		Bean entered = mock(Bean.class);
+		when(Boolean.valueOf(entered.evaluateCondition("hiddenOnBoth"))).thenReturn(Boolean.TRUE);
+		DocumentImpl document = spy(document(null));
+		doReturn(opened).when(document).newInstance(any(User.class));
+		GenerateViewVisitor visitor = visitor(document, view, user(), entered);
+
+		for (String action : List.of("agreeShown", "agreeHidden", "disagree", "constant")) {
+			visitor.visitButton(button(action), true, true);
+		}
+
+		assertAll(() -> assertEquals(List.of("agreeShown"), actionNames(visitor.getActionSteps())),
+					() -> assertEquals(List.of("not generated: action agreeHidden depends on invisible=\"hiddenOnBoth\", " +
+													"which hides or disables it on both test instances",
+												"not generated: action disagree depends on invisible=\"hiddenWhenOpened\", " +
+													"which depends on what the script enters"),
+										comments(visitor.getActionSteps())));
+	}
+
+	private static ActionImpl conditioned(String name, String invisibleCondition) {
+		ActionImpl result = action(name, Boolean.FALSE, null);
+		result.setXmlInvisibleCondition(invisibleCondition);
+		return result;
+	}
+
 	private static Button button(String actionName) {
 		Button result = new Button();
 		result.setActionName(actionName);
@@ -593,6 +636,13 @@ class GenerateViewVisitorTest {
 	}
 
 	private static GenerateViewVisitor visitor(DocumentImpl document, ViewImpl view, User user) {
+		return visitor(document, view, user, null);
+	}
+
+	/**
+	 * Returns a visitor whose test data instance is {@code entered}, or a built one when it is {@code null}.
+	 */
+	private static GenerateViewVisitor visitor(DocumentImpl document, ViewImpl view, User user, Bean entered) {
 		CustomerImpl customer = new CustomerImpl();
 		ModuleImpl module = new ModuleImpl();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -608,7 +658,15 @@ class GenerateViewVisitorTest {
 		when(repository.getView("desktop", customer, line, "create")).thenReturn(view());
 		when(repository.getView("desktop", customer, line, "edit")).thenReturn(view());
 		ProvidedRepositoryFactory.set(repository);
-		return new GenerateViewVisitor(user, customer, module, document, "desktop");
+		if (entered == null) {
+			return new GenerateViewVisitor(user, customer, module, document, "desktop");
+		}
+		return new GenerateViewVisitor(user, customer, module, document, "desktop") {
+			@Override
+			Bean newTestDataInstance() {
+				return entered;
+			}
+		};
 	}
 
 	/**

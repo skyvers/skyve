@@ -18,7 +18,6 @@ import org.skyve.metadata.user.User;
 /**
  * Tests {@link ViewActionPrivileges}: which privilege each kind of action needs before a view shows it.
  */
-@SuppressWarnings("static-method")
 class ViewActionPrivilegesTest {
 	private final Document document = new DocumentImpl();
 

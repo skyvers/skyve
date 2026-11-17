@@ -121,7 +121,7 @@ class GenerateSAILRollbackH2Test extends AbstractH2TestTruncate {
 		Map<String, Long> result = new TreeMap<>();
 		for (String table : tables) {
 			Number count = p.newSQL("select count(1) from \"" + table + '"').scalarResult(Number.class);
-			result.put(table, Long.valueOf(count.longValue()));
+			result.put(table, Long.valueOf((count == null) ? -1 : count.longValue())); // count(1) always gives a row
 		}
 		return result;
 	}
