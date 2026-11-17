@@ -296,7 +296,16 @@ class NumberConvertersRoundingTest {
 					refuses(n, ""),
 					refuses(n, "abc"),
 					refuses(n, "12abc"), // text after the number
-					refuses(n, "1E3"), // no exponent
+					refuses(n, "1E3"), // no exponent, in any case
+					refuses(n, "1e3"),
+					refuses(n, "1,"), // a grouping separator only between digits
+					refuses(n, "-1,"),
+					refuses(n, ",1"),
+					refuses(n, "-,5"),
+					refuses(n, "1,.5"),
+					refuses(n, "1.5,0"),
+					refuses(n, "\u0661\u0662"), // ASCII digits only (Arabic-Indic 12)
+					refuses(n, "\uFF11\uFF12"), // (fullwidth 12)
 					refuses(n, "+5"), // no + sign
 					refuses(n, "$5"), // no $ but for dollars
 					refuses(n, "5%")); // no % but for percentages
@@ -316,6 +325,8 @@ class NumberConvertersRoundingTest {
 					refuses(n, "1.00$"),
 					refuses(n, "$"),
 					refuses(n, "$$1"),
+					refuses(n, "$1,"),
+					refuses(n, "-$,5"),
 					reads(ConverterName.Decimal2DollarsAndCentsAbsolute, "7.50", "7.5"),
 					reads(ConverterName.Decimal2DollarsAndCentsAbsolute, "-7.50", "-7.5")); // read as typed, though shown 7.50
 	}
@@ -332,12 +343,17 @@ class NumberConvertersRoundingTest {
 					refuses(ConverterName.Decimal2IntegerPercentage, "12%3"),
 					refuses(ConverterName.Decimal2IntegerPercentage, "%12"),
 					refuses(ConverterName.Decimal2IntegerPercentage, "12%%"),
+					refuses(ConverterName.Decimal2IntegerPercentage, "1,%"),
+					refuses(ConverterName.Decimal2IntegerPercentage, ",5%"),
+					refuses(ConverterName.Decimal2IntegerPercentage, "1e3%"),
 					reads(ConverterName.SimplePercentage, "12%", "12"),
 					reads(ConverterName.SimplePercentage, "-5", "-5"),
 					reads(ConverterName.SimplePercentage, " 1000 % ", "1000"),
 					refuses(ConverterName.SimplePercentage, "12%3"),
 					refuses(ConverterName.SimplePercentage, "1,000%"),
 					refuses(ConverterName.SimplePercentage, "12.5%"),
+					refuses(ConverterName.SimplePercentage, "\u0661\u0662%"), // ASCII digits only
+					refuses(ConverterName.SimplePercentage, "1e3%"),
 					refuses(ConverterName.SimplePercentage, "99999999999%")); // beyond an int
 	}
 
@@ -354,7 +370,17 @@ class NumberConvertersRoundingTest {
 					reads(ConverterName.LongIntegerSeparator, "9,223,372,036,854,775,807", "9223372036854775807"),
 					reads(ConverterName.LongIntegerSeparator, "-9,223,372,036,854,775,808", "-9223372036854775808"),
 					refuses(ConverterName.LongIntegerSeparator, "9,223,372,036,854,775,808"),
-					refuses(ConverterName.LongIntegerSeparator, "12abc"));
+					refuses(ConverterName.LongIntegerSeparator, "12abc"),
+					refuses(ConverterName.IntegerSeparator, "1,"), // a grouping separator only between digits
+					refuses(ConverterName.IntegerSeparator, "-1,"),
+					refuses(ConverterName.IntegerSeparator, ",1"),
+					refuses(ConverterName.IntegerSeparator, "-,5"),
+					refuses(ConverterName.LongIntegerSeparator, "1,"),
+					refuses(ConverterName.LongIntegerSeparator, ",1"),
+					refuses(ConverterName.IntegerSeparator, "\u0661\u0662"), // ASCII digits only
+					refuses(ConverterName.IntegerSeparator, "\uFF11\uFF12"),
+					refuses(ConverterName.LongIntegerSeparator, "\u0661\u0662"),
+					refuses(ConverterName.IntegerSeparator, "1e3"));
 	}
 
 	/** The reference for the whole number converters. */

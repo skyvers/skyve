@@ -3,6 +3,7 @@ package org.skyve.domain.types.converters.integer;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.NumberText;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
@@ -15,7 +16,7 @@ import jakarta.annotation.Nullable;
  * {@code 1000%}).
  * <p>
  * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with or without a
- * {@code %} at the end ({@code 12%} and {@code 12} are 12). Anything else, or a value beyond an {@code int}, is refused.
+ * {@code %} at the end ({@code 12%} and {@code 12} are 12). Anything else (non-ASCII digits, grouping), or a value beyond an {@code int}, is refused.
  */
 public class SimplePercentage implements Converter<Integer> {
 	/**
@@ -38,6 +39,10 @@ public class SimplePercentage implements Converter<Integer> {
 		String noPercentage = displayValue.trim();
 		if (noPercentage.endsWith("%")) {
 			noPercentage = noPercentage.substring(0, noPercentage.length() - 1).trim();
+		}
+		// ASCII digits only (Integer.valueOf reads other digits)
+		if (! NumberText.isPlain(noPercentage)) {
+			throw new ConversionException(ConversionException.SIMPLE_PERCENTAGE_KEY);
 		}
 		try {
 			return Integer.valueOf(noPercentage);

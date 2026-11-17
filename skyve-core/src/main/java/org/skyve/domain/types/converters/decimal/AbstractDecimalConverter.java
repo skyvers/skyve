@@ -12,6 +12,7 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.NumberText;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
@@ -28,12 +29,23 @@ import jakarta.annotation.Nullable;
  * grouped in thousands with {@code ,}; with a {@code -} sign for a negative,
  * except for a value that rounds to zero, which shows no sign ({@code 0.00}).
  *
- * <p>Parsing reads the whole text, trimmed: an optional {@code -}, digits with
- * optional {@code ,} grouping (read leniently: {@code 1,23,4} is 1234), and an
- * optional {@code .} with decimal places. More places than the pattern shows are
- * kept to the scale of the decimal type (HALF_UP beyond it). Anything else, such
- * as a {@code +} sign, an exponent ({@code 1E3}), letters or other text after the
- * number ({@code 12abc}), or empty text, is refused.
+ * <p>The symbols are English whatever the JVM's locale (see
+ * {@link CORE#getDecimalFormat(String)}).
+ *
+ * <p>Parsing reads the whole text, trimmed: an optional {@code -}, ASCII digits
+ * with optional {@code ,} grouping between them (read leniently: {@code 1,23,4}
+ * is 1234), and an optional {@code .} with decimal places. More places than the
+ * pattern shows are kept to the scale of the decimal type (HALF_UP beyond it).
+ * Anything else, such as a {@code +} sign, an exponent ({@code 1E3} or
+ * {@code 1e3}), a {@code ,} not between digits ({@code 1,}, {@code ,1} or
+ * {@code 1,.5}), non-ASCII digits, letters or other text after the number
+ * ({@code 12abc}), or empty text, is refused (see {@link NumberText}).
+ *
+ * <p>A form field shows its value as this converter formats it, and sends what
+ * it shows when the form is saved, so a number typed with more places than the
+ * pattern shows is stored as shown: {@code 2.345} typed into a two decimal
+ * places field is stored 2.35, and {@code -0.001} is stored 0. A value set in
+ * code keeps its places until a form showing it is saved.
  *
  * <p>Any failure to format or parse, including a non-numeric parse result such as
  * {@code NaN}, is reported as a {@link ConversionException} carrying the
@@ -196,6 +208,10 @@ public abstract class AbstractDecimalConverter<T extends Decimal> implements Con
 	throws ParseException {
 		// the whole text must be the number: DecimalFormat stops at the first character it cannot read (12abc is 12)
 		String text = displayValue.trim();
+		// no exponent, non-ASCII digit or stray grouping separator, which DecimalFormat reads and the browsers refuse
+		if (! NumberText.isPlain(text)) {
+			throw new ParseException(displayValue, 0);
+		}
 		ParsePosition position = new ParsePosition(0);
 		Number result = format.parse(text, position);
 		if ((position.getErrorIndex() >= 0) || (position.getIndex() != text.length())) {

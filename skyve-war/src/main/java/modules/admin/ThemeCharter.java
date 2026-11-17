@@ -30,6 +30,7 @@ import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.PieDataset;
 import org.jfree.data.jdbc.JDBCCategoryDataset;
 import org.jfree.data.jdbc.JDBCPieDataset;
+import org.skyve.CORE;
 import org.skyve.EXT;
 
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class ThemeCharter {
 	private static final Logger LOGGER = SkyveLoggerFactory.getLogger(ThemeCharter.class);
 
 	private static final String EMPTY_STRING = "";
-	private static final DecimalFormat THEME_NUMERIC_FORMAT = new DecimalFormat("#,##0");
+	private static final DecimalFormat THEME_NUMERIC_FORMAT = CORE.getDecimalFormat("#,##0");
 	private static final String THEME_FONT_NAME = "Arial";
 	private static final int THEME_NORMAL_FONT_SIZE = 12;
 	private static final int THEME_HEADER_FONT_SIZE = 14;

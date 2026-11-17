@@ -1,8 +1,11 @@
 package org.skyve.domain.types.converters.integer;
 
+import java.util.Locale;
+
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.NumberText;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
@@ -14,7 +17,9 @@ import jakarta.annotation.Nullable;
  * Converts long values using grouped thousands separator formatting ({@code 12,345,678,901}).
  * <p>
  * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with optional {@code ,}
- * grouping (read leniently). Anything else, or a value beyond a {@code long}, is refused.
+ * grouping between digits (read leniently). Anything else (non-ASCII digits, a {@code ,} not between digits such as
+ * {@code 1,} or {@code ,1}), or a value beyond a {@code long}, is refused. The grouping is {@code ,} whatever the JVM's
+ * locale.
  */
 public class LongIntegerSeparator implements Converter<Long> {
 	/**
@@ -34,7 +39,12 @@ public class LongIntegerSeparator implements Converter<Long> {
 	@Override
 	public @Nonnull Long fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
-			String result = displayValue.trim().replace(",", "");
+			String text = displayValue.trim();
+			// ASCII digits only, each , between two digits (Integer.valueOf reads other digits)
+			if (! NumberText.isPlain(text)) {
+				throw new NumberFormatException(displayValue);
+			}
+			String result = text.replace(",", "");
 			return Long.valueOf(result);
 		}
 		catch (NumberFormatException e) {
@@ -59,7 +69,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	@Override
 	public @Nonnull String toDisplayValue(@Nonnull Long value) throws ConversionException {
 		try {
-			return String.format("%,d",value);
+			return String.format(Locale.ENGLISH, "%,d", value);
 		}
 		catch (Exception e) {
 			throw new ConversionException(ConversionException.LONG_INTEGER_SEPARATOR_KEY, e);

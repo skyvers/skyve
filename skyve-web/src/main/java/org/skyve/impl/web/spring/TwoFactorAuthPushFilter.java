@@ -6,10 +6,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.types.DateTime;
 import org.skyve.domain.types.Timestamp;
@@ -494,7 +494,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 	 */
 	@SuppressWarnings("static-method")
 	protected @Nonnull String generateTFACode() {
-		return new DecimalFormat("000000").format(RANDOM.nextDouble() * 1000000d);
+		return CORE.getDecimalFormat("000000").format(RANDOM.nextDouble() * 1000000d);
 	}
 	
 	/**

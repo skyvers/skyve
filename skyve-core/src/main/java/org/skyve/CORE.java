@@ -1,6 +1,7 @@
 package org.skyve;
 
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.SortedMap;
@@ -241,7 +242,9 @@ public class CORE {
 	}
 	
 	/**
-	 * Creates a new {@link DecimalFormat} for the given pattern.
+	 * Creates a new {@link DecimalFormat} for the given pattern, with English symbols ({@code ,} grouping, {@code .}
+	 * decimal separator, {@code -} minus and ASCII digits) whatever the JVM's locale, as the SmartClient and Vue
+	 * renderers write numbers.
 	 *
 	 * <p>{@link DecimalFormat} is not thread-safe; a new instance is returned on every
 	 * call. Callers should not share the returned instance across threads.
@@ -250,7 +253,7 @@ public class CORE {
 	 * @return a new {@link DecimalFormat}; never {@code null}
 	 */
 	public static @Nonnull DecimalFormat getDecimalFormat(@Nonnull String formatString) {
-		return new DecimalFormat(formatString);
+		return new DecimalFormat(formatString, DecimalFormatSymbols.getInstance(Locale.ENGLISH));
 	}
 	
 	/**
