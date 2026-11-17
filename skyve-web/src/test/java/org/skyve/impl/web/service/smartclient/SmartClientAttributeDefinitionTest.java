@@ -235,7 +235,7 @@ class SmartClientAttributeDefinitionTest {
 		absoluteCents.setName("absoluteCents");
 		absoluteCents.setDisplayName("Absolute Cents");
 		absoluteCents.setConverter(new Decimal2DollarsAndCentsAbsolute());
-		assertEquals("bizDollarsAndCents", definitionFor(absoluteCents).getType());
+		assertEquals("bizDollarsAndCentsAbsolute", definitionFor(absoluteCents).getType());
 
 		Decimal2 percentage = new Decimal2();
 		percentage.setName("percentage");

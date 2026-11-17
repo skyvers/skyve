@@ -2098,6 +2098,91 @@ isc.SimpleType.create({
 });
 
 /**
+ * Implements the BizDollarsAndCentsAbsoluteItem widget: dollars and cents shown without a sign, as the Java converter
+ * (Decimal2DollarsAndCentsAbsolute) writes them, for entering positive dollars or showing a magnitude.
+ * Extends BizDollarsAndCentsItem implemented above.
+ */
+isc.ClassFactory.defineClass("BizDollarsAndCentsAbsoluteItem", "BizDollarsAndCentsItem");
+
+isc.BizDollarsAndCentsAbsoluteItem.addProperties({
+	hint: "$$$$$.cc",
+});
+
+isc.BizDollarsAndCentsAbsoluteItem.addMethods({
+	/**
+	 * Formats the value without its sign, with 2 decimal places.
+	 *
+	 * @param {number|string|null} value - the value to format.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	mapValueToDisplay: function (value) {
+		if (value == null) {
+			return isc.emptyString;
+		}
+		if (!isc.isA.Number(value)) {
+			value = isc.BizDecimal2Item.parseInput(value);
+		}
+		return isc.BizDecimal2Item.format(isc.isA.Number(value) ? Math.abs(value) : value, this.decimalPlaces);
+	},
+});
+
+isc.SimpleType.create({
+	name: "bizDollarsAndCentsAbsolute",
+	inheritsFrom: "float",
+	editorType: "BizDollarsAndCentsAbsoluteItem",
+
+	/**
+	 * Formats the internal value for editing in the UI, without its sign.
+	 *
+	 * @param {number|null} internalValue - the raw currency value stored in the system.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} form - the form containing this field.
+	 * @param {Object} record - the record containing this field.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	editFormatter: function (internalValue, field, form, record) {
+		return this.shortDisplayFormatter(internalValue, field, form, record);
+	},
+
+	/**
+	 * Formats the internal value for normal (read-only) display in the UI, without its sign.
+	 *
+	 * @param {number|null} internalValue - the raw currency value stored in the system.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} component - the UI component displaying the field.
+	 * @param {Object} record - the record containing this field.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	normalDisplayFormatter: function (internalValue, field, component, record) {
+		return this.shortDisplayFormatter(internalValue, field, component, record);
+	},
+
+	/**
+	 * Converts the internal value to its magnitude with 2 decimal places (-1234.5 is "1,234.50").
+	 *
+	 * @param {number|null} internalValue - the raw currency value stored in the system.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} component - the UI component displaying the field.
+	 * @param {Object} record - the record containing this field.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	shortDisplayFormatter: function (internalValue, field, component, record) {
+		return isc.BizDollarsAndCentsItem.format(isc.isA.Number(internalValue) ? Math.abs(internalValue) : internalValue, 2);
+	},
+
+	/**
+	 * Validators to ensure the value is either null or a valid number.
+	 */
+	validators: [
+		{
+			type: "custom",
+			clientOnly: true,
+			condition: "(value == null) || isc.isA.Number(value)",
+		},
+	],
+});
+
+/**
  * Implements the BizIntegerPercentageItem widget.
  * Extends TextItem implemented above.
  */

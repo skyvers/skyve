@@ -365,7 +365,8 @@ abstract class SmartClientAttributeDefinition {
 					type = "bizDollarsAndCents";
 				}
 				else if (converter instanceof Decimal2DollarsAndCentsAbsolute) {
-					type = "bizDollarsAndCents";
+					// shown without its sign, as the converter writes it
+					type = "bizDollarsAndCentsAbsolute";
 				}
 				else if (converter instanceof Decimal2Integer) {
 					type = "bizDecimal0";

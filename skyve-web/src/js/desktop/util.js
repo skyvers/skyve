@@ -279,6 +279,7 @@ isc.BizUtil.addClassMethods({
 			"bizDecimal2",
 			"bizDecimal5",
 			"bizDollarsAndCents",
+			"bizDollarsAndCentsAbsolute",
 			"bizIntegerPercentage",
 			"bizIntegerSeparator",
 			"bizSimplePercentage",
