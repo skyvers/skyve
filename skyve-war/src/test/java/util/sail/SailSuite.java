@@ -32,9 +32,9 @@ import jakarta.annotation.Nullable;
  * <ul>
  * <li><b>Members.</b> The set-up members run first, in order, then the ordinary members, in order, then the restore.
  * 		Each member is run by the {@link SailWorkflow} engine: each automation in the renderer its {@code uxui} names and
- * 		the browser its {@code userAgentType} needs; the browser carries on from one member to the next when the
- * 		configuration matches, and each member signs in for itself. Each member is a run of its own: members share no
- * 		{@code {run}} token or variables.</li>
+ * 		the browser its {@code userAgentType} needs. Each member is a run of its own, in a browser of its own: members
+ * 		share no {@code {run}} token or variables, no cookies, storage or service workers, and each signs in for
+ * 		itself.</li>
  * <li><b>Requirements.</b> A member runs only if every member it requires passed (see
  * 		{@link Suite#requirementsOf(SuiteMember)}: what its {@code requires} names, and the set-ups). One that does not
  * 		run is reported as skipped, with the requirement that failed or was skipped. A failed ordinary member does not
@@ -368,7 +368,7 @@ public final class SailSuite {
 	/**
 	 * Runs the suite and prints its summary.
 	 *
-	 * <p>Side effects: runs the members (in a browser, with the engine); stops the browser when the suite ends.
+	 * <p>Side effects: runs the members (each in a browser of its own, with the engine).
 	 *
 	 * @return what each member did
 	 * @throws IllegalArgumentException	if a setting is invalid, or {@value SailSettings#SUITE_ONLY} chooses no member
@@ -391,39 +391,32 @@ public final class SailSuite {
 		Map<String, String> skips = new HashMap<>();
 		Map<SuiteMember, Outcome> byMember = new HashMap<>();
 		SuiteMember previousOrdinary = null;
-		try {
-			for (SuiteMember member : suite.getAllMembers()) {
-				String file = member.getFile();
-				Outcome outcome = Outcome.NOT_SELECTED;
-				if (selected.contains(member)) {
-					String skip = unmetRequirement(member, byMember, previousOrdinary);
-					if ((skip == null) && (engine != null) && engine.stopping()) {
-						skip = "the run is stopping";
-					}
-					if (skip == null) {
-						Throwable failure = runMember(member);
-						outcome = (failure == null) ? Outcome.PASSED : Outcome.FAILED;
-						if (failure != null) {
-							failures.put(file, failure);
-						}
-					}
-					else {
-						outcome = Outcome.SKIPPED;
-						skips.put(file, skip);
-						System.out.println("SAIL suite " + name + ": " + file + " skipped: " + skip);
-					}
-					if (legacy && (member instanceof OrdinarySuiteMember)) {
-						previousOrdinary = member;
+		for (SuiteMember member : suite.getAllMembers()) {
+			String file = member.getFile();
+			Outcome outcome = Outcome.NOT_SELECTED;
+			if (selected.contains(member)) {
+				String skip = unmetRequirement(member, byMember, previousOrdinary);
+				if ((skip == null) && (engine != null) && engine.stopping()) {
+					skip = "the run is stopping";
+				}
+				if (skip == null) {
+					Throwable failure = runMember(member);
+					outcome = (failure == null) ? Outcome.PASSED : Outcome.FAILED;
+					if (failure != null) {
+						failures.put(file, failure);
 					}
 				}
-				byMember.put(member, outcome);
-				outcomes.put(file, outcome);
+				else {
+					outcome = Outcome.SKIPPED;
+					skips.put(file, skip);
+					System.out.println("SAIL suite " + name + ": " + file + " skipped: " + skip);
+				}
+				if (legacy && (member instanceof OrdinarySuiteMember)) {
+					previousOrdinary = member;
+				}
 			}
-		}
-		finally {
-			if (engine != null) {
-				engine.closeBrowser();
-			}
+			byMember.put(member, outcome);
+			outcomes.put(file, outcome);
 		}
 		Summary result = new Summary(outcomes, failures, skips, notes);
 		System.out.println(result.describe(name));
@@ -571,7 +564,7 @@ public final class SailSuite {
 		}
 	}
 
-	/** Runs a member's workflow file with the engine, which keeps the browser for the next member if it passes. */
+	/** Runs a member's workflow file with the engine, which stops its browser when the member ends. */
 	private void runWithEngine(@Nonnull MemberRun run) {
 		String path = run.path();
 		Workflow workflow = resources ? XMLMetaData.unmarshalSAILWorkflowString(SailWorkflow.resource(path)) : XMLMetaData.unmarshalSAILWorkflowFile(path);

@@ -34,8 +34,8 @@ import org.skyve.web.UserAgentType;
 
 /**
  * Tests the browser's lifecycle in the workflow engine, without a browser: the browsers are mocks, and each leg only
- * records that it ran. A suite member that passes keeps its browser for the next; one that fails stops it; a workflow
- * on its own stops its browser when it ends; a browser that fails to start is never reused.
+ * records that it ran. A suite member, passed or failed, and a workflow on its own stop their browser when they end, so
+ * the next starts its own; a browser that fails to start is never reused.
  */
 @SuppressWarnings("java:S5960") // test-only assertions
 class SailWorkflowTest {
@@ -111,13 +111,18 @@ class SailWorkflowTest {
 		return result;
 	}
 
-	private void member(String file) {
-		member(file, AUTOMATION);
+	/** A workflow of the automations, which are written as files with their own root element. */
+	private static Workflow workflow(String... automations) {
+		StringBuilder xml = new StringBuilder("<workflow xmlns=\"http://www.skyve.org/xml/sail\">");
+		for (String automation : automations) {
+			xml.append(automation.replace(" xmlns=\"http://www.skyve.org/xml/sail\"", ""));
+		}
+		return XMLMetaData.unmarshalSAILWorkflowString(xml.append("</workflow>").toString());
 	}
 
-	private void member(String file, String automation) {
+	private void member(String file) {
 		current = file;
-		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(automation);
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION);
 		SuiteMember member = SUITE.getMember(file);
 		assertNotNull(member, file);
 		engine.runMember(file, workflow, new SailWorkflow.Member(SUITE, "s.suite.xml", member, null));
@@ -129,13 +134,12 @@ class SailWorkflowTest {
 		SailServerLock.releaseAll();
 	}
 
+	/** Members are independent runs: what a browser holds (cookies, storage, service workers) is not handed on. */
 	@Test
-	void aPassedMemberKeepsItsBrowserForTheNextUntilTheSuiteCloses() {
+	void aPassedMemberStopsItsBrowserSoTheNextMemberStartsItsOwn() {
 		member("a.xml");
 		member("b.xml");
-		engine.closeBrowser();
-		engine.closeBrowser(); // nothing is left to stop
-		assertEquals(List.of("start 1", "run 1 a.xml", "run 1 b.xml", "stop 1"), events);
+		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1", "start 2", "run 2 b.xml", "stop 2"), events);
 	}
 
 	@Test
@@ -143,7 +147,6 @@ class SailWorkflowTest {
 		failing.add("a.xml");
 		assertThrows(AssertionError.class, () -> member("a.xml"));
 		member("b.xml");
-		engine.closeBrowser();
 		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1", "start 2", "run 2 b.xml", "stop 2"), events);
 	}
 
@@ -151,36 +154,37 @@ class SailWorkflowTest {
 	void aWorkflowOnItsOwnStopsItsBrowserWhenItEnds() {
 		current = "w.xml";
 		engine.runWorkflow("w.xml", XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION));
-		engine.closeBrowser();
 		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events);
 	}
 
 	/**
-	 * When the next member needs another browser and it fails to start, the old one has been stopped and nothing is
-	 * kept: the member after that starts a browser of its own.
+	 * When the next leg needs another browser and it fails to start, the old one has been stopped: the run after that
+	 * starts a browser of its own.
 	 */
 	@Test
 	void aBrowserThatFailsToStartIsNeverReused() {
-		member("a.xml");
-		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> first = ids.keySet().iterator().next();
-		when(first.browserChange(any(), any())).thenReturn("headless true -> false");
-		startFails = true;
-		assertThrows(IllegalStateException.class, () -> member("b.xml"));
+		current = "w.xml";
+		step = browser -> {
+			when(browser.browserChange(any(), any())).thenReturn("headless true -> false");
+			startFails = true;
+		};
+		assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", workflow(AUTOMATION, AUTOMATION)));
 		startFails = false;
-		member("c.xml");
-		engine.closeBrowser();
-		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1", "start fails", "start 2", "run 2 c.xml", "stop 2"), events);
+		step = null;
+		engine.runWorkflow("w.xml", XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION));
+		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1", "start fails", "start 2", "run 2 w.xml", "stop 2"), events);
 	}
 
-	/** When carrying on with the kept browser fails (a new timeout cannot be applied), that browser is stopped. */
+	/** When carrying on with the browser fails (a new timeout cannot be applied), that browser is stopped. */
 	@Test
-	void aKeptBrowserThatCannotTakeTheNextMembersSettingsIsStopped() {
-		member("a.xml");
-		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> first = ids.keySet().iterator().next();
-		doThrow(new IllegalStateException("the browser has gone")).when(first).useSettings(any(), any());
-		assertThrows(IllegalStateException.class, () -> member("b.xml"));
-		engine.closeBrowser();
-		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1"), events);
+	void aBrowserThatCannotTakeTheNextLegsSettingsIsStopped() {
+		current = "w.xml";
+		step = browser -> {
+			doThrow(new IllegalStateException("the browser has gone")).when(browser).useSettings(any(), any());
+			step = null;
+		};
+		assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", workflow(AUTOMATION, AUTOMATION)));
+		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events);
 	}
 
 	/** Each call is a run of its own, so the run token differs between calls, unless the runner shares its run. */
@@ -201,7 +205,6 @@ class SailWorkflowTest {
 					() -> assertSame(runs.get(2), runs.get(3), "a shared run is the same in the next call"),
 					() -> assertSame(runs.get(2), runs.get(4), "and in a suite member"),
 					() -> assertNotSame(first, runs.get(2), "it is not one of the earlier runs"));
-		engine.closeBrowser();
 	}
 
 	/**
@@ -234,27 +237,18 @@ class SailWorkflowTest {
 						events);
 	}
 
-	/** A SmartClient member drives the PrimeFaces member's browser through SmartClient's Selenide, and stops it at the end. */
+	/** A SmartClient leg drives the PrimeFaces leg's browser through SmartClient's Selenide, and stops it at the end. */
 	@Test
-	void aSmartClientMemberDrivesTheBrowserThatAPrimeFacesMemberLeft() {
-		member("a.xml");
-		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> first = ids.keySet().iterator().next();
-		WebDriver driver = mock(WebDriver.class, RETURNS_DEEP_STUBS);
-		first.driver = driver;
-		member("b.xml", SMART_CLIENT_AUTOMATION);
-		engine.closeBrowser();
-		assertEquals(List.of("start 1", "run 1 a.xml", "run SmartClientSelenide b.xml"), events);
-		verify(driver).quit();
-	}
-
-	/** A workflow run after a suite member on the same engine carries on in the kept browser, then stops it. */
-	@Test
-	void aWorkflowAfterASuiteMemberUsesItsBrowserThenStopsIt() {
-		member("a.xml");
+	void aSmartClientLegDrivesTheBrowserThatAPrimeFacesLegLeft() {
 		current = "w.xml";
-		engine.runWorkflow("w.xml", XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION));
-		engine.closeBrowser();
-		assertEquals(List.of("start 1", "run 1 a.xml", "run 1 w.xml", "stop 1"), events);
+		WebDriver driver = mock(WebDriver.class, RETURNS_DEEP_STUBS);
+		step = browser -> {
+			browser.driver = driver;
+			step = null;
+		};
+		engine.runWorkflow("w.xml", workflow(AUTOMATION, SMART_CLIENT_AUTOMATION));
+		assertEquals(List.of("start 1", "run 1 w.xml", "run SmartClientSelenide w.xml"), events);
+		verify(driver).quit();
 	}
 
 	/** A load run that stops during a workflow: no further leg starts, so no new browser either. */

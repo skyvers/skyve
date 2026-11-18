@@ -410,18 +410,6 @@ class SailLoadTest {
 	}
 
 	@Test
-	void aBrowserThatWillNotStopFailsItsIteration() {
-		SailLoadReport report = fake(SailLoad.users(1).iterations(2))
-									.browserCloser(workflow -> {
-										throw new AssertionError("quit failed");
-									})
-									.execute("test", user -> clock.advance(Duration.ofSeconds(1)));
-
-		assertAll(() -> assertEquals(2, report.failedIterations()),
-					() -> assertEquals("quit failed", report.failureKinds().get(0).message()));
-	}
-
-	@Test
 	void anInterruptedTestThreadStopsTheUsersAndKeepsItsInterrupt() {
 		boolean[] interruptedWhileStopping = {true};
 		SailLoad load = fake(SailLoad.users(2)).scheduler(users -> scheduler = new FakeScheduler(clock) {

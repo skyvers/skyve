@@ -862,11 +862,11 @@ to it exactly as written. A file may be listed once.
 **Independence.** Each member is a run of its own: it has its own `{run}` token
 and starts with no captured variables, and it signs in for itself. Data that
 one member makes cannot be found by `{run}` in the next. A journey whose steps
-share data is one member: a [workflow](#workflows). A member that passes hands
-its browser to the next member when the next needs the same configuration, as
-a workflow's automations do; a member that fails has its browser stopped, so
-the next starts clean. The suite stops its last browser when it ends, even
-after a failure.
+share data is one member: a [workflow](#workflows). A member's browser is
+stopped when the member ends, whether it passed or failed, and the next member
+starts one of its own, so it finds none of the cookies, storage, service
+workers or caches that the member before it left. (A workflow's automations
+still share their browser.)
 
 **Requirements.** `requires` is a space-separated list of the files of earlier
 members. Without naming them, each set-up member requires every earlier set-up
@@ -1919,6 +1919,7 @@ ITs where you meant to run unit tests.
 | `SailRunIT` | the suites and scripts that `sail.run` names; skipped when it is not set. See [For BAs and testers](#for-bas-and-testers). | per script | `sail` |
 | `KitchenSinkLoadSailIT` (`sail/load`) | a [load run](#load-testing) of the kitchen sink suite: 5 virtual users over 20 seconds, one iteration each, a 20 minute time limit; leaves out `pf-kitchensink-sail.xml`, whose wrong-password sign in would lock admin out for every user | both | `sail` `performance` |
 | `PrimeFacesSelenideClickSailIT` (`util/sail`) | a click on a tab that a scrolled tab strip puts under a fixed side menu: the harness centres the covered element across as well as down, as a user would scroll it into view; on a `data:` page, so it needs Chrome but no server | none | `sail` |
+| `SailSuiteLoginSailIT` (`util/sail`) | a suite of two members in a real browser: the first signs in and out in several automations and leaves a cookie and a local storage entry, and the second signs in first and finds neither | PF, desktop | `sail` |
 | `LoginRememberSailIT` (`util/sail`) | `<login remember="true"/>` on a Chrome profile: after a restart on the profile the browser is still signed in; with `remember="false"` it is signed out, the next `navigateList` fails with the signed out message, and `<testSuccess/>` on the sign in page fails | PF, tablet | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
 
@@ -2814,7 +2815,7 @@ that show it, relative to the repository root:
 | Tags | every `*SailIT` and `*IT` under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/admin/AdminSuiteSailIT.java`, and the two under `skyve-war/src/test/java/util/sail/`: `SelenideFocusProbeSailIT.java` and `PrimeFacesSelenideClickSailIT.java` |
 | The Maven profile | the `sail` profile in `pom.xml` |
 | Snapshots, the film strip, video, `keepMedia` and media units | `skyve-war/src/test/java/util/sail/SailMediaTest.java` |
-| A suite's browser lifecycle: handed on, stopped after a failure, closed at the end | `skyve-war/src/test/java/util/sail/SailWorkflowTest.java` |
+| A browser's lifecycle: stopped when a suite member or a workflow ends, never reused after it failed to start | `skyve-war/src/test/java/util/sail/SailWorkflowTest.java` |
 | A click on a covered element | `skyve-war/src/test/java/util/sail/PrimeFacesSelenideClickSailIT.java` |
 | A load run | `skyve-war/src/test/java/sail/load/KitchenSinkLoadSailIT.java`; the runner's shape, thresholds and stopping: `skyve-war/src/test/java/util/sail/SailLoadTest.java`; its statistics and report: `skyve-war/src/test/java/util/sail/SailLoadReportTest.java` |
 | Java from the Control Panel | `skyve-war/src/test/java/modules/admin/ControlPanel/actions/DownloadSAILH2Test.java` and `ExecuteSAILH2Test.java` (the generated source compiles against the harness), `DownloadSAILTest.java`, `ExecuteSAILTest.java`; the generator: `skyve-web/src/test/java/org/skyve/impl/sail/execution/pf/PrimeFacesInlineWebDriverExecutorTest.java`; the generated test's gestures: `skyve-war/src/test/java/util/sail/PrimeFacesSeleniumTest.java` |

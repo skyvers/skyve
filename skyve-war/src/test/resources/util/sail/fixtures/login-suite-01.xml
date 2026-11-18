@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- The member that follows login-suite-00.xml: it signs in first, as the browser of an independent run, so it finds
+     nothing that member left in its browser. -->
+<automation uxui="external" userAgentType="desktop" xmlns="http://www.skyve.org/xml/sail">
+	<interaction name="Second member">
+		<method>
+			<login user="admin" password="admin" />
+			<testScript message="admin should be signed in"><![CDATA[ return ! document.querySelector('form[name=loginForm]'); ]]></testScript>
+			<testScript message="the first member's cookie and local storage entry should not be in this member's browser"><![CDATA[
+				return localStorage.getItem('sailLeak') === null && document.cookie.indexOf('sailLeak') < 0; ]]></testScript>
+			<logout />
+		</method>
+	</interaction>
+</automation>

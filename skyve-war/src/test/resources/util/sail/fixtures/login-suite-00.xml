@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- A set-up member of several automations, each ending in a logout, for SailSuiteLoginSailIT. It leaves a cookie and a
+     local storage entry in its browser, which the next member must not find: members are independent runs. -->
+<workflow xmlns="http://www.skyve.org/xml/sail">
+	<automation uxui="external" userAgentType="desktop">
+		<interaction name="Automation 1">
+			<method>
+				<login user="admin" password="admin" />
+				<testScript message="admin should be signed in"><![CDATA[ return ! document.querySelector('form[name=loginForm]'); ]]></testScript>
+				<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
+				<waitFor><![CDATA[ return document.readyState === 'complete'; ]]></waitFor>
+				<execute><![CDATA[ localStorage.setItem('sailLeak', '1'); document.cookie = 'sailLeak=1; path=/'; ]]></execute>
+				<logout />
+			</method>
+		</interaction>
+	</automation>
+	<automation uxui="external" userAgentType="desktop">
+		<interaction name="Automation 2">
+			<method>
+				<login user="admin" password="admin" />
+				<testScript message="admin should be signed in"><![CDATA[ return ! document.querySelector('form[name=loginForm]'); ]]></testScript>
+				<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
+				<waitFor><![CDATA[ return document.readyState === 'complete'; ]]></waitFor>
+				<logout />
+			</method>
+		</interaction>
+	</automation>
+	<automation uxui="external" userAgentType="desktop">
+		<interaction name="Automation 3">
+			<method>
+				<login user="admin" password="admin" />
+				<testScript message="admin should be signed in"><![CDATA[ return ! document.querySelector('form[name=loginForm]'); ]]></testScript>
+				<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
+				<waitFor><![CDATA[ return document.readyState === 'complete'; ]]></waitFor>
+				<logout />
+			</method>
+		</interaction>
+	</automation>
+</workflow>

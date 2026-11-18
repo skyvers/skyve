@@ -26,7 +26,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.function.LongSupplier;
 import java.util.function.Supplier;
@@ -423,8 +422,6 @@ public final class SailLoad {
 	private Path reportDirectory;
 	/** Prepares each user's thread, or null for a persistence with the test thread's user, as the test bases set it up. */
 	private UserThread userThread;
-	/** Stops a user's browser at the end of each iteration. */
-	private Consumer<SailWorkflow> browserCloser = SailWorkflow::closeBrowser;
 
 	private SailLoad() {
 		// see the factories
@@ -625,12 +622,6 @@ public final class SailLoad {
 	/** Prepares the users' threads another way, for tests whose fake users need no persistence. */
 	@Nonnull SailLoad userThread(@Nonnull UserThread preparation) {
 		userThread = preparation;
-		return this;
-	}
-
-	/** Stops the users' browsers another way, for tests. */
-	@Nonnull SailLoad browserCloser(@Nonnull Consumer<SailWorkflow> closer) {
-		browserCloser = closer;
 		return this;
 	}
 
@@ -934,15 +925,6 @@ public final class SailLoad {
 		}
 		finally {
 			SailLoadProbe.set(null);
-		}
-		try {
-			// a suite can leave its last browser open for the engine's next run: every iteration ends with none open
-			browserCloser.accept(user.workflow());
-		}
-		catch (Throwable t) { // NOSONAR java:S1181 a browser that would not stop fails the iteration, whatever it threw
-			if (failure == null) {
-				failure = t;
-			}
 		}
 		long ended = clock.getAsLong();
 		recorder.iteration(new Iteration(number, iteration, started, ended, failure));
