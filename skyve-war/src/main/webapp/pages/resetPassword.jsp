@@ -280,7 +280,8 @@
 									<tr>
 										<td style="width:50%" />
 										<td>
-											<div class="g-recaptcha" data-sitekey="<%=siteKey%>"></div>
+											<%-- min-width stops this shrink-to-fit cell collapsing Cloudflare Turnstile to 0px wide --%>
+											<div class="g-recaptcha" data-sitekey="<%=siteKey%>" style="min-width:300px"></div>
 										</td>
 										<td style="width:50%" />
 									</tr>
