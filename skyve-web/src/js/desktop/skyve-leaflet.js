@@ -264,13 +264,19 @@ isc.BizMap.addMethods({
 
 	/**
 	 * Handles click events on map layers.
+	 * The zoom button is shown only when the map item names a module, document and bizId to zoom to.
 	 * @param {Object} layer - the layer that was clicked.
 	 * @returns {string} - the HTML string for the popup content.
 	 */
 	click: function (layer) {
-		if (layer.zoomData) {
+		const zoomData = layer.zoomData;
+		if (zoomData) {
 			this._selectedLayer = layer;
-			return `${layer.zoomData.infoMarkup}<br/><br/><input type="button" value="Zoom" onclick="${this.ID}.zoom()"/>`;
+			let result = zoomData.infoMarkup;
+			if (zoomData.mod && zoomData.doc && zoomData.bizId) {
+				result += `<br/><br/><input type="button" value="Zoom" onclick="${this.ID}.zoom()"/>`;
+			}
+			return result;
 		}
 		return "";
 	},

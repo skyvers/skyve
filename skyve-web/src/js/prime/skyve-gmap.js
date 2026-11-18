@@ -152,8 +152,11 @@ SKYVE.BizMap = function() {
 			}
 			
 			var contents = overlay.infoMarkup;
-	    	contents += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
-			contents += '?a=e&m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
+			// Only offer zoom when the map item names a module, document and bizId to zoom to
+			if (overlay.mod && overlay.doc && overlay.bizId) {
+				contents += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
+				contents += '?a=e&m=' + overlay.mod + '&d=' + overlay.doc + '&i=' + overlay.bizId + "'\"/>";
+			}
 	    	if (overlay.getPosition) {
 				display.infoWindow.open(display.webmap, overlay);
 	    		display.infoWindow.setContent(contents);
