@@ -2560,11 +2560,11 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 				context.setViewType(null);
 			}
 		}
-		if (! selenide.menu(path.moduleTitle, path.groupLabels, path.itemLabel, true)) {
-			failIfSignedOut("<navigateMenu />"); // a signed out browser has no menu
+		boolean found = selenide.menu(path.moduleTitle, path.groupLabels, path.itemLabel, true);
+		failIfSignedOut("<navigateMenu />"); // a signed out browser has no menu
+		if (! found) {
 			throw new DomainException(String.format("<navigateMenu /> %s / %s is not in the menu", path.moduleTitle, String.join(" / ", path.labels())));
 		}
-		failIfSignedOut("<navigateMenu />");
 	}
 
 	/**

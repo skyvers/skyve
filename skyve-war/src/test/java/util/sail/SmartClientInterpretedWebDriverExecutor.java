@@ -1324,11 +1324,11 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 			throw new IllegalStateException(String.format("<navigateMenu /> %s / %s: %d window(s) are open over the menu (%s): close them first",
 															path.moduleTitle, String.join(" / ", path.labels()), Integer.valueOf(windows), selenide.state()));
 		}
-		if (! selenide.menu(path.moduleTitle, path.labels(), true)) {
-			failIfSignedOut("<navigateMenu />"); // a signed out browser has no menu
+		boolean found = selenide.menu(path.moduleTitle, path.labels(), true);
+		failIfSignedOut("<navigateMenu />"); // a signed out browser has no menu
+		if (! found) {
 			throw new DomainException(String.format("<navigateMenu /> %s / %s is not in the menu", path.moduleTitle, String.join(" / ", path.labels())));
 		}
-		failIfSignedOut("<navigateMenu />");
 		SmartClientAutomationContext context = peek();
 		if ((context != null) && (context.getViewType() != null)) {
 			awaitView(context);

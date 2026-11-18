@@ -1289,7 +1289,7 @@ so a script used to pass while signed out. The harness now checks:
   check, that the sign in succeeded.
 
 The sign in page is recognised by its form: `Selenide.isLoginPage()` is true
-when the page has `form[name=loginForm]`, which no other Skyve page has, so the
+when the page has `form[name=loginForm]`, which only Skyve's sign in page (`login.jsp`) has (checked there, not in an app's own pages), so the
 address is not needed (it is the address of the page that was asked for, after a
 redirect). A script that is meant to be on the sign in page, such as one that
 tests a rejected sign in, uses `<login/>` and `<testFailure/>`, which are not

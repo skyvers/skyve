@@ -76,7 +76,7 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	 * @throws AssertionError	if the page has no field for a value given
 	 * @throws IllegalStateException	if the box does not take the value
 	 */
-	public void login(String customer, String username, String password, Boolean remember) {
+	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password, @Nullable Boolean remember) {
 		driver.get(baseUrl);
 
 		WebElement element = null;
