@@ -1253,9 +1253,47 @@ Support: **yes** means implemented; **no** means the step fails with a reason
 
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
-| `login` | `user`\*, `password`\*, `customer` | Signs in and waits for the next page. If a session is still signed in, it signs out first. A rejected sign in fails the step, unless the next step is `<testFailure/>` (which then asserts the rejection) or the strategy is None. `<testSuccess/>` straight after a login asserts that it succeeded. Does not switch renderers. | yes | yes |
+| `login` | `user`\*, `password`\*, `customer`, `remember` | Signs in and waits for the next page. With `remember`, it sets the sign in page's Remember me box before submitting: `true` ticks it, `false` unticks it, and absent leaves it as the page shows it ([Remember me and signed out](#remember-me-and-signed-out)). If a session is still signed in, it signs out first. A rejected sign in fails the step, unless the next step is `<testFailure/>` (which then asserts the rejection) or the strategy is None. `<testSuccess/>` straight after a login asserts that it succeeded. Does not switch renderers. | yes | yes |
 | `logout` | | Signs out. | yes | yes |
 | `switchMode` | none | Switches to the renderer the automation's `uxui` targets by clicking the user-visible Switch Mode control: `desktop` means SmartClient, and any other UX/UI means PrimeFaces. Does nothing if the target renderer is already showing. Fails if the control is missing (`User.canSwitchMode()` is false). | yes: to PF only, from SmartClient's header menu. Fails for `uxui="desktop"`. | yes: to SC only, through PF's user menu (avatar, then Switch mode). Fails for other UX/UIs. |
+
+### Remember me and signed out
+
+`<login remember="true"/>` ticks the sign in page's Remember me box before it
+submits, so the browser gets Skyve's `remember` cookie. With a
+[browser profile](#devices-and-browser-profiles) that keeps cookies, a restarted
+browser then signs in again by itself when it opens a page. `remember="false"`
+unticks a box that the page shows ticked, and an absent `remember` leaves the
+box as the page shows it. The harness sets the box as a user does, by clicking
+its label: the box itself is hidden, and a script that set its `checked` would
+not fire the page's own `change` handling. It fails the step if the click does
+not set the box. Generated PrimeFaces code calls `login(customer, user,
+password, remember)` on `util.sail.PrimeFacesSelenium` when `remember` is set.
+
+A signed out browser is sent to the sign in page, which has no error messages,
+so a script used to pass while signed out. The harness now checks:
+
+- `navigateList`, `navigateEdit`, `navigateTree`, `navigateMap`,
+  `navigateCalendar`, `navigateMenu` and `navigateLink` fail when the page they
+  land on is the sign in page, with `<step /> landed on the login page: the
+  browser is signed out (session expired, or remember-me didn't sign it in)`.
+  The step could not do what it says, so it stops the interaction under every
+  test strategy, as a missing element does. A `navigateLink` whose `href` is
+  itself the sign in page (its last path segment, without the query, starts
+  with `login`, such as `login` or `pages/login.jsp`) may land there. A
+  `navigateLink` with `text` is checked once the click has returned, which may
+  be before a slow redirect: follow it with `<testSuccess/>`.
+- `<testSuccess/>` fails as an assertion, so it follows the test strategy, with
+  "expected success, but the browser is on the login page (signed out)". It does
+  not fail straight after a `<logout/>`, and after a `<login/>` it keeps its own
+  check, that the sign in succeeded.
+
+The sign in page is recognised by its form: `Selenide.isLoginPage()` is true
+when the page has `form[name=loginForm]`, which no other Skyve page has, so the
+address is not needed (it is the address of the page that was asked for, after a
+redirect). A script that is meant to be on the sign in page, such as one that
+tests a rejected sign in, uses `<login/>` and `<testFailure/>`, which are not
+checked.
 
 ### Navigation
 
@@ -1456,7 +1494,7 @@ JavaScript; see [Scripts and calls](#scripts-and-calls).
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
 | `testValue` | `binding`\*, `value`\* | Asserts that the widget shows the value; see [Values](#values). | yes | yes |
-| `testSuccess` | | Asserts that no error message, growl or field error is shown. Information messages do not count. Straight after a login, it asserts that the login succeeded; straight after an `upload testSuccess="false"`, that the upload was not refused. | yes | yes |
+| `testSuccess` | | Asserts that no error message, growl or field error is shown. Information messages do not count. Straight after a login, it asserts that the login succeeded; straight after an `upload testSuccess="false"`, that the upload was not refused. Anywhere else, it also fails when the browser shows the sign in page (signed out), except straight after a `<logout/>` ([Remember me and signed out](#remember-me-and-signed-out)). | yes | yes |
 | `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Only errors count: error messages and growls, field errors, and in SC the Problems dialog. Straight after a login, it asserts that the login was rejected. Straight after an `upload testSuccess="false"`, a refusal on the upload page counts too. | yes | yes |
 | `testMessage` | `contains`\*, `type` (`info`, `warning`, `error`) | Asserts that a growl or message containing the text, case-sensitively, is shown. With `type`, the message must have that severity. Unlike `testSuccess`/`testFailure`, it sees information and warning messages too. | yes: global messages, growls and field messages | yes: `isc.say` is info, `isc.warn` is warning, the Problems dialog and field errors are error, and growls go by their class |
 | `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, the grid is reloaded from the server and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. A timed step still waits under None. | yes; a Vue list grid refetches its rows as it does after an ajax update, and the step waits for that fetch | yes; only list grids are reloaded |
@@ -1881,6 +1919,7 @@ ITs where you meant to run unit tests.
 | `SailRunIT` | the suites and scripts that `sail.run` names; skipped when it is not set. See [For BAs and testers](#for-bas-and-testers). | per script | `sail` |
 | `KitchenSinkLoadSailIT` (`sail/load`) | a [load run](#load-testing) of the kitchen sink suite: 5 virtual users over 20 seconds, one iteration each, a 20 minute time limit; leaves out `pf-kitchensink-sail.xml`, whose wrong-password sign in would lock admin out for every user | both | `sail` `performance` |
 | `PrimeFacesSelenideClickSailIT` (`util/sail`) | a click on a tab that a scrolled tab strip puts under a fixed side menu: the harness centres the covered element across as well as down, as a user would scroll it into view; on a `data:` page, so it needs Chrome but no server | none | `sail` |
+| `LoginRememberSailIT` (`util/sail`) | `<login remember="true"/>` on a Chrome profile: after a restart on the profile the browser is still signed in; with `remember="false"` it is signed out, the next `navigateList` fails with the signed out message, and `<testSuccess/>` on the sign in page fails | PF, tablet | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -3571,6 +3610,18 @@ Existing scripts are unchanged, but code outside the language is affected:
   too, or it fails to compile against the new `Executor`.
 - The XSD's `execute` is now a complex type with simple content, to carry
   `variable`. Documents that validated before still validate.
+
+**Remember me and signed out.** `<login>` has a new optional `remember`
+([Remember me and signed out](#remember-me-and-signed-out)). Scripts that do not
+use it are unchanged, with one behaviour change: a script that passed while the
+browser was signed out now fails. The navigate steps fail on the sign in page,
+and `<testSuccess/>` fails on it unless it follows a `<logout/>` or a `<login/>`.
+Skyve's own scripts do not rely on it. An app that copies the `util/sail`
+harness needs `Selenide.login(customer, user, password, remember)` and
+`isLoginPage()`, `PrimeFacesSelenium.login(customer, user, password, remember)`
+and the executors' checks. `SmartClientSelenide` overrides the four-argument
+`login`, not the three-argument one that calls it, so a subclass that overrode
+the three-argument `login` must override the four-argument one.
 
 **Fixes found by load runs and generation.** These change behaviour outside
 SAIL:
