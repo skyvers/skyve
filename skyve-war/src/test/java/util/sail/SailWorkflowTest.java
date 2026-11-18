@@ -226,9 +226,7 @@ class SailWorkflowTest {
 			}
 		};
 		current = "w.xml";
-		Workflow threeLegs = XMLMetaData.unmarshalSAILWorkflowString("<workflow xmlns=\"http://www.skyve.org/xml/sail\">" +
-																		AUTOMATION.replace(" xmlns=\"http://www.skyve.org/xml/sail\"", "").repeat(3) +
-																		"</workflow>");
+		Workflow threeLegs = workflow(AUTOMATION, AUTOMATION, AUTOMATION);
 
 		engine.runWorkflow("w.xml", threeLegs);
 

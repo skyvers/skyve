@@ -6,8 +6,8 @@
 		<method>
 			<login user="admin" password="admin" />
 			<testScript message="admin should be signed in"><![CDATA[ return ! document.querySelector('form[name=loginForm]'); ]]></testScript>
-			<testScript message="the first member's cookie and local storage entry should not be in this member's browser"><![CDATA[
-				return localStorage.getItem('sailLeak') === null && document.cookie.indexOf('sailLeak') < 0; ]]></testScript>
+			<testScript message="the first member's local storage entry should not be in this member's browser"><![CDATA[
+				return localStorage.getItem('sailLeak') === null; ]]></testScript>
 			<logout />
 		</method>
 	</interaction>

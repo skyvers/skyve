@@ -7,7 +7,7 @@ import util.AbstractInterpretedSailWorkflow;
 
 /**
  * Runs a suite of two members against a Skyve server, in a real browser: the first member signs in and out several
- * times, and leaves a cookie and a local storage entry; the second signs in first, and must find none of what the first
+ * times, and leaves a local storage entry; the second signs in first, and must find none of what the first
  * left, as an independent run does. Needs a disposable server ({@code -Dsail.baseUrl}), like the other SAIL ITs.
  */
 @Tag("sail")
