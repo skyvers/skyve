@@ -130,8 +130,8 @@ public class Call implements Step {
 				throw new MetaDataException("<call className=\"" + className + "\" /> has more than one <parameter name=\"" + name + "\" />");
 			}
 		}
-		if ((variable != null) && (! variable.matches(CaptureStep.VARIABLE_NAME_PATTERN))) {
-			throw new MetaDataException("<call /> [variable] " + variable + " is not a variable name: use a letter, then letters, digits or underscores");
+		if (variable != null) {
+			CaptureStep.validateVariableName("call", variable);
 		}
 		executor.executeCall(this);
 	}

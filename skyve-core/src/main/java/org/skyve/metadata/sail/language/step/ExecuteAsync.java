@@ -108,8 +108,8 @@ public class ExecuteAsync implements Step {
 		if ((timeoutMillis != null) && (timeoutMillis.intValue() < 0)) {
 			throw new MetaDataException("<executeAsync /> [timeoutMillis] cannot be negative");
 		}
-		if ((variable != null) && (! variable.matches(CaptureStep.VARIABLE_NAME_PATTERN))) {
-			throw new MetaDataException("<executeAsync /> [variable] " + variable + " is not a variable name: use a letter, then letters, digits or underscores");
+		if (variable != null) {
+			CaptureStep.validateVariableName("executeAsync", variable);
 		}
 		executor.executeExecuteAsync(this);
 	}
@@ -121,7 +121,6 @@ public class ExecuteAsync implements Step {
 	 */
 	@Override
 	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
-		String line = (script == null) ? "" : script.split("\\R", 2)[0];
-		return "executeAsync " + ((line.length() > 60) ? line.substring(0, 60) : line);
+		return Execute.scriptIdentifier("executeAsync", script);
 	}
 }

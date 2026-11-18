@@ -1117,9 +1117,8 @@ class InterpretedWebDriverExecutorTest {
 		String timesOut = "<waitFor timeoutMillis=\"300\"><![CDATA[return window._sailReady;\nreturn false;]]></waitFor>";
 		List<AssertionError> errors = new ArrayList<>();
 		for (String strategy : new String[] {"Assert", "Verify", "None"}) {
-			errors.add(assertThrows(AssertionError.class,
-									() -> executor.executeAutomation(automation(strategy, "<interaction name=\"wait\"><method>" + timesOut + "</method></interaction>")),
-									strategy));
+			Automation automation = automation(strategy, "<interaction name=\"wait\"><method>" + timesOut + "</method></interaction>");
+			errors.add(assertThrows(AssertionError.class, () -> executor.executeAutomation(automation), strategy));
 		}
 		String reason = "IllegalStateException: <waitFor /> did not hold within 300 ms: return window._sailReady;" +
 							"; the last poll threw: JavascriptException: javascript error: not yet";
@@ -1136,9 +1135,11 @@ class InterpretedWebDriverExecutorTest {
 							"<testScript>return 0;\nreturn 1;</testScript>" +
 							"<comment>after the tests</comment>" +
 						"</method></interaction>";
-		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", fails)));
+		Automation assertFails = automation("Assert", fails);
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(assertFails));
 		String token = executor.getRunToken();
-		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", fails)));
+		Automation verifyFails = automation("Verify", fails);
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(verifyFails));
 		int runs = scripts.size();
 		executor.executeAutomation(automation("None", fails));
 
@@ -1181,9 +1182,12 @@ class InterpretedWebDriverExecutorTest {
 		String throwing = "<interaction name=\"scripts\"><method><execute>throw new Error('boom');</execute><comment>after execute</comment></method></interaction>" +
 							"<interaction name=\"async\"><method><executeAsync>throw new Error('boom');</executeAsync><comment>after executeAsync</comment></method></interaction>" +
 							"<interaction name=\"next\"><method><comment>next interaction</comment></method></interaction>";
-		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", throwing)));
-		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", throwing)));
-		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("None", throwing)));
+		Automation assertThrowing = automation("Assert", throwing);
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(assertThrowing));
+		Automation verifyThrowing = automation("Verify", throwing);
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(verifyThrowing));
+		Automation noneThrowing = automation("None", throwing);
+		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(noneThrowing));
 
 		assertAll(() -> assertTrue(asserted.getMessage().contains("JavascriptException: javascript error: boom"), asserted.getMessage()),
 					() -> assertTrue(verified.getMessage().contains("with 2 failure(s)"), verified.getMessage()),
@@ -1202,9 +1206,12 @@ class InterpretedWebDriverExecutorTest {
 						"<interaction name=\"error\"><method>" +
 							"<call className=\"sail.kitchenSink.EchoCall\"><parameter name=\"text\" value=\"e\"/><parameter name=\"fail\" value=\"error\"/></call>" +
 							"<comment>after the error</comment></method></interaction>";
-		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", calls)));
-		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", calls)));
-		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("None", calls)));
+		Automation verifyCalls = automation("Verify", calls);
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(verifyCalls));
+		Automation assertCalls = automation("Assert", calls);
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(assertCalls));
+		Automation noneCalls = automation("None", calls);
+		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(noneCalls));
 
 		assertAll(() -> assertTrue(verified.getMessage().contains("with 2 failure(s)"), verified.getMessage()),
 					() -> assertTrue(verified.getMessage().contains(": <call className=\"sail.kitchenSink.EchoCall\" /> failed: EchoCall was asked to fail an assertion on a"),
@@ -1253,9 +1260,11 @@ class InterpretedWebDriverExecutorTest {
 		String selenide = "<interaction name=\"selenide\"><method>" +
 							"<call className=\"" + className + "\"><parameter name=\"fail\" value=\"selenide\"/></call>" +
 							"<comment>after the Selenide failure</comment></method></interaction>";
-		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", selenide)));
+		Automation verifySelenide = automation("Verify", selenide);
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(verifySelenide));
 		String step = "<interaction name=\"step\"><method><call className=\"" + className + "\"/></method></interaction>";
-		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", step)));
+		Automation assertStep = automation("Assert", step);
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(assertStep));
 		String message = asserted.getMessage();
 
 		assertAll(() -> assertTrue(verified.getMessage().contains("> threw UIAssertionError: element not found"), verified.getMessage()),

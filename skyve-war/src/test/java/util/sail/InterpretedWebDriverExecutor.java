@@ -1264,16 +1264,7 @@ public abstract class InterpretedWebDriverExecutor<
 	public void executeExecute(@Nonnull Execute execute) {
 		String script = Objects.requireNonNull(execute.getScript(), "<execute /> has no script");
 		selenide.trace("Execute " + script.split("\\R", 2)[0]);
-		Object result = runScript(script, false, false, selenide.timeout());
-		String variable = execute.getVariable();
-		if (variable != null) {
-			if (result == null) {
-				throw new IllegalStateException(String.format("<execute variable=\"%s\" /> gave no value to keep in {var:%s}", variable, variable));
-			}
-			String value = String.valueOf(result);
-			putVariable(variable, value);
-			selenide.trace(String.format("Keep '%s' in {var:%s}", value, variable));
-		}
+		keepResult("execute", execute.getVariable(), runScript(script, false, false, selenide.timeout()));
 	}
 
 	@Override
@@ -1305,15 +1296,7 @@ public abstract class InterpretedWebDriverExecutor<
 		catch (ScriptTimeoutException e) {
 			throw new IllegalStateException(String.format("<executeAsync /> did not settle within %d ms", Long.valueOf(limit.toMillis())), e);
 		}
-		String variable = execute.getVariable();
-		if (variable != null) {
-			if (result == null) {
-				throw new IllegalStateException(String.format("<executeAsync variable=\"%s\" /> gave no value to keep in {var:%s}", variable, variable));
-			}
-			String value = String.valueOf(result);
-			putVariable(variable, value);
-			selenide.trace(String.format("Keep '%s' in {var:%s}", value, variable));
-		}
+		keepResult("executeAsync", execute.getVariable(), result);
 	}
 
 	/**
@@ -1335,19 +1318,7 @@ public abstract class InterpretedWebDriverExecutor<
 		String[] lastError = new String[1];
 		try {
 			// the author's condition, polled at the fixed interval: the one wait mechanism, bounded by the step's timeout
-			selenide.waitFor(limit, Duration.ofMillis(SCRIPT_POLLING_MILLIS), d -> {
-				try {
-					return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
-				}
-				catch (NoSuchSessionException | NoSuchWindowException e) {
-					// the browser is gone: fail now (the wait ignores a NotFoundException, which NoSuchWindowException is)
-					throw new IllegalStateException("The browser's window or session is gone: " + reason(e), e);
-				}
-				catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
-					lastError[0] = reason(e);
-					return null;
-				}
-			});
+			selenide.waitFor(limit, Duration.ofMillis(SCRIPT_POLLING_MILLIS), holds(script, limit, lastError));
 		}
 		catch (TimeoutException e) {
 			throw new IllegalStateException(String.format("<waitFor /> did not hold within %d ms: %s%s",
@@ -1377,19 +1348,7 @@ public abstract class InterpretedWebDriverExecutor<
 		String line = script.split("\\R", 2)[0];
 		selenide.trace("Test script " + line);
 		String[] lastError = new String[1];
-		Function<WebDriver, Boolean> holds = d -> {
-			try {
-				return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
-			}
-			catch (NoSuchSessionException | NoSuchWindowException e) {
-				// the browser is gone: fail now (the wait ignores a NotFoundException, which NoSuchWindowException is)
-				throw new IllegalStateException("The browser's window or session is gone: " + reason(e), e);
-			}
-			catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
-				lastError[0] = reason(e);
-				return null;
-			}
-		};
+		Function<WebDriver, Boolean> holds = holds(script, limit, lastError);
 		boolean held;
 		if (timeout == null) {
 			held = (holds.apply(selenide.driver) != null);
@@ -1488,15 +1447,57 @@ public abstract class InterpretedWebDriverExecutor<
 			}
 			throw new IllegalStateException(String.format("<call className=\"%s\" /> threw %s", className, reason(e)), e);
 		}
-		String variable = call.getVariable();
-		if (variable != null) {
-			if (result == null) {
-				throw new IllegalStateException(String.format("<call className=\"%s\" variable=\"%s\" /> gave no value to keep in {var:%s}",
-																className, variable, variable));
-			}
-			putVariable(variable, result);
-			selenide.trace(String.format("Keep '%s' in {var:%s}", result, variable));
+		keepResult("call className=\"" + className + '"', call.getVariable(), result);
+	}
+
+	/**
+	 * Keeps a script's or call's result, as text, in the step's variable, if the step names one.
+	 *
+	 * <p>Side effects: sets the variable, and says so in the trace.
+	 *
+	 * @param step	the step's element, and any attributes that tell it apart, for the message: {@code execute}
+	 * @param variable	the step's variable, or {@code null} to keep nothing
+	 * @param result	the result: kept as {@link String#valueOf(Object)}
+	 * @throws IllegalStateException	if the step names a variable and the result is {@code null} (or JavaScript's
+	 * 									{@code undefined})
+	 */
+	private void keepResult(@Nonnull String step, @Nullable String variable, @Nullable Object result) {
+		if (variable == null) {
+			return;
 		}
+		if (result == null) {
+			throw new IllegalStateException(String.format("<%s variable=\"%s\" /> gave no value to keep in {var:%s}", step, variable, variable));
+		}
+		String value = String.valueOf(result);
+		putVariable(variable, value);
+		selenide.trace(String.format("Keep '%s' in {var:%s}", value, variable));
+	}
+
+	/**
+	 * Makes the condition that {@code <waitFor/>} and {@code <testScript/>} poll: one run of the script (see
+	 * {@link #runScript(String, boolean, boolean, Duration)}), true when it gives a truthy value. A run that throws a
+	 * script error, times out or finds the page between documents counts as false, and is kept as the last error.
+	 *
+	 * @param script	the step's script
+	 * @param limit	the script timeout of each run
+	 * @param lastError	receives, at index 0, the reason the last run that threw gave
+	 * @return the condition: {@link Boolean#TRUE}, or {@code null} for false
+	 * @throws IllegalStateException	from the condition, if the browser's window or session is gone (a wait ignores a
+	 * 									{@code NotFoundException}, which {@code NoSuchWindowException} is, so it is wrapped)
+	 */
+	private @Nonnull Function<WebDriver, Boolean> holds(@Nonnull String script, @Nonnull Duration limit, @Nonnull String[] lastError) {
+		return d -> {
+			try {
+				return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
+			}
+			catch (NoSuchSessionException | NoSuchWindowException e) {
+				throw new IllegalStateException("The browser's window or session is gone: " + reason(e), e);
+			}
+			catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
+				lastError[0] = reason(e);
+				return null;
+			}
+		};
 	}
 
 	/**

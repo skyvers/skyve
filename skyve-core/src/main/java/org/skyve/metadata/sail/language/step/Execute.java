@@ -91,8 +91,8 @@ public class Execute implements Step {
 		if (script == null) {
 			throw new MetaDataException("<execute /> has no script");
 		}
-		if ((variable != null) && (! variable.matches(CaptureStep.VARIABLE_NAME_PATTERN))) {
-			throw new MetaDataException("<execute /> [variable] " + variable + " is not a variable name: use a letter, then letters, digits or underscores");
+		if (variable != null) {
+			CaptureStep.validateVariableName("execute", variable);
 		}
 		executor.executeExecute(this);
 	}
@@ -105,5 +105,18 @@ public class Execute implements Step {
 	@Override
 	public @Nullable String getIdentifier(@Nonnull AutomationContext context) {
 		return null;
+	}
+
+	/**
+	 * Returns the identifier of a script step: its element name and its script's first line, truncated to 60
+	 * characters. {@link ExecuteAsync}, {@link WaitFor} and {@link TestScript} use it.
+	 *
+	 * @param element	the element name, such as {@code waitFor}
+	 * @param script	the script, or {@code null} if it has none
+	 * @return the identifier
+	 */
+	static @Nonnull String scriptIdentifier(@Nonnull String element, @Nullable String script) {
+		String line = (script == null) ? "" : script.split("\\R", 2)[0];
+		return element + ' ' + ((line.length() > 60) ? line.substring(0, 60) : line);
 	}
 }

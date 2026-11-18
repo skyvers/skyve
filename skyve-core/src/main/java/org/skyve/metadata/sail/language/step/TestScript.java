@@ -119,7 +119,6 @@ public class TestScript implements Step {
 	 */
 	@Override
 	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
-		String line = (script == null) ? "" : script.split("\\R", 2)[0];
-		return "testScript " + ((line.length() > 60) ? line.substring(0, 60) : line);
+		return Execute.scriptIdentifier("testScript", script);
 	}
 }

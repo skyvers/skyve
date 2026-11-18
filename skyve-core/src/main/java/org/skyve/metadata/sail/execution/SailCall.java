@@ -44,5 +44,7 @@ public interface SailCall {
 	 * @throws AssertionError	if what the call checks does not hold
 	 * @throws Exception	if the call cannot do what it says
 	 */
+	// a handwritten step may fail in any way: the executor reports whatever it throws as the step's failure
+	@SuppressWarnings("java:S112")
 	@Nullable String call(@Nonnull Map<String, String> parameters, @Nonnull Executor executor) throws Exception;
 }
