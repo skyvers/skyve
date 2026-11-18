@@ -39,6 +39,12 @@ import util.sail.BrowserConfiguration.Browsers;
  * 		A new browser starts only when an automation needs another user agent or window size than the browser the
  * 		previous automation used; otherwise the next automation, even in the other renderer, drives the same browser,
  * 		and so the same session. Each automation signs in for itself, as usual.</li>
+ * <li>A step may restart the leg's browser, for example on another configuration with another
+ * 		{@linkplain BrowserConfiguration#profile(java.nio.file.Path) profile}, with
+ * 		{@code stopBrowser(); startBrowser(configuration)} on the leg's Selenide: the Selenide holds what its browser
+ * 		started with, so the next leg compares against, reuses or stops that browser. A step that stops the browser
+ * 		without starting it again is not supported. Two configurations are the same device only if their browser,
+ * 		headless mode, server, user agent, window size, profile and extra arguments are all the same.</li>
  * <li>The automations share one run: {@code {run}} is the same token in all of them, and a variable that one captures
  * 		can be used as {@code {var:name}} by the ones after it.</li>
  * <li>Views are built for the signed-in user's roles registered in the {@link SailViewRoles}, as the test bases do,
@@ -69,6 +75,10 @@ public final class SailWorkflow {
 	private final SailSettings.Environment environment;
 	/** True when no further leg or suite member may start (a load run is stopping); see {@link #stopWhen}. */
 	private BooleanSupplier stopping = () -> false;
+	/** True to keep one run for all of this runner's calls; see {@link #shareRunAcrossCalls()}. */
+	private boolean shareRun;
+	/** The run that the calls share, once the first call has made it; see {@link #shareRunAcrossCalls()}. */
+	private RunState sharedRun;
 
 	/**
 	 * Starts a new browser: a {@link SmartClientSelenide} or {@link PrimeFacesSelenide}, started with the leg's settings.
@@ -147,6 +157,20 @@ public final class SailWorkflow {
 	 */
 	public @Nonnull SailWorkflow browser(@Nonnull UserAgentType userAgentType, @Nonnull Supplier<BrowserConfiguration> configuration) {
 		browsers.put(userAgentType, configuration);
+		return this;
+	}
+
+	/**
+	 * Makes this runner's calls share one run, instead of each call (and each suite member) starting its own: the
+	 * {@code {run}} token and the variables that automations capture carry from one {@code runResources},
+	 * {@code runFiles} or {@code runStrings} call to the next. Without it, every call is a run of its own.
+	 *
+	 * <p>Side effects: the calls after this one keep the run that the first of them made.
+	 *
+	 * @return this runner
+	 */
+	public @Nonnull SailWorkflow shareRunAcrossCalls() {
+		shareRun = true;
 		return this;
 	}
 
@@ -385,7 +409,16 @@ public final class SailWorkflow {
 		if (legs.isEmpty()) {
 			throw new IllegalArgumentException("A SAIL workflow needs at least one automation");
 		}
-		RunState run = new RunState();
+		RunState run;
+		if (shareRun) {
+			if (sharedRun == null) {
+				sharedRun = new RunState();
+			}
+			run = sharedRun;
+		}
+		else {
+			run = new RunState();
+		}
 		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
 		kept = null;
 		boolean passed = false;

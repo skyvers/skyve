@@ -1,6 +1,9 @@
 package util.sail;
 
+import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.Dimension;
@@ -58,6 +61,8 @@ public class BrowserConfiguration {
 	private Duration pageLoadTimeout;
 	private Duration implicitlyWait;
 	private Duration scriptTimeout;
+	private Path profile;
+	private final List<String> arguments = new ArrayList<>();
 	
 	/**
 	 * Sets this configuration's own browser, which a run's {@value SailSettings#BROWSER} (from {@code -D}, the
@@ -147,6 +152,32 @@ public class BrowserConfiguration {
 		return SailSettings.resolve(fixed ? SailSettings.Environment.none() : environment, layers);
 	}
 	
+	/**
+	 * Sets the browser's profile directory, so that the browser is a device that keeps its IndexedDB, CacheStorage,
+	 * service worker registration and persistent cookies (not session cookies) when it is stopped and started again
+	 * on a configuration with the same profile. Two profiles are two devices. Chrome and Edge only.
+	 *
+	 * @param userDataDir	the directory, made absolute here (the caller owns and deletes it); or null for a fresh
+	 * 						temporary profile, the default
+	 * @return this configuration
+	 */
+	public @Nonnull BrowserConfiguration profile(@Nullable Path userDataDir) {
+		this.profile = (userDataDir == null) ? null : userDataDir.toAbsolutePath().normalize();
+		return this;
+	}
+
+	/**
+	 * Appends extra browser arguments, after the built-in ones, e.g. {@code --use-fake-device-for-media-stream}.
+	 * Chrome and Edge only.
+	 *
+	 * @param extra	the arguments, as the browser takes them on its command line
+	 * @return this configuration
+	 */
+	public @Nonnull BrowserConfiguration arguments(@Nonnull String... extra) {
+		Collections.addAll(arguments, extra);
+		return this;
+	}
+
 	public BrowserConfiguration resolution(int width, int height) {
 		this.resolution = new Dimension(width, height);
 		return this;
@@ -199,6 +230,22 @@ public class BrowserConfiguration {
 		return resolve().headless();
 	}
 	
+	/**
+	 * Returns the browser's profile directory.
+	 * @return	the absolute directory, or null for a fresh temporary profile
+	 */
+	public @Nullable Path getProfile() {
+		return profile;
+	}
+
+	/**
+	 * Returns the extra browser arguments.
+	 * @return	an unmodifiable view of the arguments given to {@link #arguments(String...)}, in order
+	 */
+	public @Nonnull List<String> getArguments() {
+		return Collections.unmodifiableList(arguments);
+	}
+
 	public Dimension getResolution() {
 		return resolution;
 	}

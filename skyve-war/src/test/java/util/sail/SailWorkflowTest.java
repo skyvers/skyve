@@ -1,7 +1,10 @@
 package util.sail;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -22,6 +25,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
+import org.skyve.impl.sail.execution.RunState;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.SuiteMember;
@@ -49,6 +53,8 @@ class SailWorkflowTest {
 	private final Set<String> failing = new HashSet<>();
 	/** True while starting a browser fails. */
 	private boolean startFails;
+	/** The run each leg ran in, in order. */
+	private final List<RunState> runs = new ArrayList<>();
 	/** The member running. */
 	private String current;
 
@@ -57,6 +63,7 @@ class SailWorkflowTest {
 															(automation, browser, run, settings) -> {
 																String which = ids.containsKey(browser) ? String.valueOf(ids.get(browser)) : browser.getClass().getSimpleName();
 																events.add("run " + which + ' ' + current);
+																runs.add(run);
 																if (failing.contains(current)) {
 																	throw new AssertionError(current + " failed its step");
 																}
@@ -149,6 +156,27 @@ class SailWorkflowTest {
 		assertThrows(IllegalStateException.class, () -> member("b.xml"));
 		engine.closeBrowser();
 		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1"), events);
+	}
+
+	/** Each call is a run of its own, so the run token differs between calls, unless the runner shares its run. */
+	@Test
+	void callsShareARunOnlyWhenTheRunnerIsToldTo() {
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION);
+		current = "w.xml";
+		engine.runWorkflow("w.xml", workflow);
+		engine.runWorkflow("w.xml", workflow);
+		RunState first = runs.get(0);
+		RunState second = runs.get(1);
+		assertNotSame(first, second, "without sharing, each call has its own run");
+		engine.shareRunAcrossCalls();
+		engine.runWorkflow("w.xml", workflow);
+		engine.runWorkflow("w.xml", workflow);
+		member("a.xml");
+		assertAll(() -> assertEquals(5, runs.size()),
+					() -> assertSame(runs.get(2), runs.get(3), "a shared run is the same in the next call"),
+					() -> assertSame(runs.get(2), runs.get(4), "and in a suite member"),
+					() -> assertNotSame(first, runs.get(2), "it is not one of the earlier runs"));
+		engine.closeBrowser();
 	}
 
 	/** A SmartClient member drives the PrimeFaces member's browser through SmartClient's Selenide, and stops it at the end. */

@@ -2035,6 +2035,48 @@ the browser showed, so a run against real data records real data: names,
 addresses, amounts. Keep such recordings out of shared places and out of
 the repository.
 
+## Devices and browser profiles
+
+A workflow can treat a device as a persistent browser profile. Give a
+`BrowserConfiguration` a profile directory and the browser keeps its state
+between runs of that configuration, so a leg on "phone 1" can stop, a desktop
+leg can run, and "phone 1" can start again as the same device. Two profiles are
+two devices.
+
+```java
+Path phone1 = Path.of("target/devices/phone-1");
+SailWorkflow workflow = new SailWorkflow(viewRoles)
+		.browser(UserAgentType.phone, () -> SailWorkflow.defaultBrowser(UserAgentType.phone)
+				.profile(phone1)
+				.arguments("--use-fake-device-for-media-stream"));
+```
+
+- `profile(Path)` sets Chrome's or Edge's `--user-data-dir` (made absolute);
+  `null`, the default, is a fresh temporary profile as before. `getProfile()`
+  returns it. The caller owns the directory and deletes it.
+- `arguments(String...)` appends extra browser arguments, after the built-in
+  ones and the profile's. `getArguments()` is an unmodifiable list.
+- Both are for Chrome and Edge. Firefox and Safari with a profile or extra
+  arguments throw an `IllegalArgumentException` before any browser starts.
+- Two configurations are the same device only if their browser, headless mode,
+  server, user agent, window size, profile and extra arguments are the same.
+  Otherwise the workflow stops the browser and starts another.
+
+What survives a stop and start on the same profile: IndexedDB, CacheStorage,
+the service worker registration, `localStorage` and persistent cookies. Session
+cookies do not survive, as on a real restart, so the user signs in again.
+
+A step may restart the leg's browser, for example to change device in the middle
+of a leg, with `stopBrowser(); startBrowser(configuration)` on the leg's
+Selenide. The Selenide remembers what its browser started with, so the next leg
+compares against, reuses or stops the restarted browser. A step that stops the
+browser without starting it again is not supported.
+
+Each `runResources`, `runFiles` or `runStrings` call, and each suite member,
+is a run of its own, with its own `{run}` token and variables. To carry them
+from one call to the next, call `SailWorkflow.shareRunAcrossCalls()` on the
+runner first.
+
 ## The Suites
 
 ### Kitchen sink: conformance

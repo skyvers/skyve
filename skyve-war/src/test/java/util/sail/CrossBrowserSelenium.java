@@ -1,5 +1,6 @@
 package util.sail;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +35,17 @@ abstract class CrossBrowserSelenium {
 	private String startedUserAgent;
 	/** The window size the browser was started with, to tell when a configuration asks for another; or null. */
 	private Dimension startedResolution;
+	/** The profile directory the browser was started with, to tell when a configuration asks for another; or null. */
+	private Path startedProfile;
+	/** The extra arguments the browser was started with, to tell when a configuration asks for others. */
+	private List<String> startedArguments = List.of();
 
 	/**
 	 * Starts the browser that the configuration's resolved settings name, with their headless mode.
 	 *
 	 * @param configuration	the browser's user agent, window size and timeouts, and its own settings
-	 * @throws IllegalArgumentException	if a setting is invalid (before any browser starts)
+	 * @throws IllegalArgumentException	if a setting is invalid, or the configuration has a profile or extra arguments
+	 * 									and the browser is not Chrome or Edge (before any browser starts)
 	 */
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
 		startBrowser(configuration, configuration.resolve());
@@ -52,10 +58,8 @@ abstract class CrossBrowserSelenium {
 	 * @param resolved	the settings resolved from it, which name the browser, its headless mode and the timeouts
 	 */
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration, @Nonnull SailSettings resolved) {
-		this.configuration = configuration;
-		this.settings = resolved;
-		startedUserAgent = configuration.getUserAgentString();
-		startedResolution = configuration.getResolution();
+		requireProfileSupport(resolved.browser(), configuration);
+		recordStart(configuration, resolved);
 		switch (resolved.browser()) {
 			case chrome:
 				setupChrome(configuration, resolved);
@@ -76,24 +80,41 @@ abstract class CrossBrowserSelenium {
 	}
 
 	/**
+	 * Records what the browser starts with, to tell later when a configuration asks for another browser.
+	 *
+	 * @param config	the configuration the browser starts with
+	 * @param resolved	the settings resolved from it
+	 */
+	void recordStart(@Nonnull BrowserConfiguration config, @Nonnull SailSettings resolved) {
+		this.configuration = config;
+		this.settings = resolved;
+		startedUserAgent = config.getUserAgentString();
+		startedResolution = config.getResolution();
+		startedProfile = config.getProfile();
+		startedArguments = List.copyOf(config.getArguments());
+	}
+
+	/**
 	 * Says how the browser that started differs from the one that settings and a configuration ask for: another
 	 * browser, headless mode, server, user agent or window size.
 	 *
 	 * @param resolved	the settings the next script runs with
 	 * @param next	the configuration the next script runs with
-	 * @return what differs, e.g. {@code headless false -> true}; or null if the same browser will do (or none started)
+	 * @return what differs (including the profile and extra arguments), e.g. {@code headless false -> true}; or null if the same browser will do (or none started)
 	 */
 	@Nullable String browserChange(@Nonnull SailSettings resolved, @Nonnull BrowserConfiguration next) {
 		SailSettings started = settings;
 		if (started == null) {
 			return null;
 		}
-		List<String> changes = new ArrayList<>(5);
+		List<String> changes = new ArrayList<>(7);
 		change(changes, "browser", started.browser(), resolved.browser());
 		change(changes, "headless", Boolean.valueOf(started.headless()), Boolean.valueOf(resolved.headless()));
 		change(changes, "baseUrl", started.baseUrl(), resolved.baseUrl());
 		change(changes, "user agent", startedUserAgent, next.getUserAgentString());
 		change(changes, "resolution", startedResolution, next.getResolution());
+		change(changes, "profile", startedProfile, next.getProfile());
+		change(changes, "arguments", startedArguments, next.getArguments());
 		return changes.isEmpty() ? null : String.join(", ", changes);
 	}
 
@@ -115,6 +136,8 @@ abstract class CrossBrowserSelenium {
 		this.settings = other.settings;
 		this.startedUserAgent = other.startedUserAgent;
 		this.startedResolution = other.startedResolution;
+		this.startedProfile = other.startedProfile;
+		this.startedArguments = other.startedArguments;
 		this.driver = other.driver;
 		this.actions = other.actions;
 	}
@@ -138,6 +161,79 @@ abstract class CrossBrowserSelenium {
 	}
 
 	/**
+	 * Refuses a profile or extra arguments for a browser that does not support them.
+	 *
+	 * @param browser	the browser to start
+	 * @param config	the configuration to start it with
+	 * @throws IllegalArgumentException	if the configuration has a profile or extra arguments and the browser is not
+	 * 									Chrome or Edge
+	 */
+	static void requireProfileSupport(@Nonnull BrowserConfiguration.Browsers browser, @Nonnull BrowserConfiguration config) {
+		boolean chromium = (browser == BrowserConfiguration.Browsers.chrome) || (browser == BrowserConfiguration.Browsers.edge);
+		if ((! chromium) && ((config.getProfile() != null) || (! config.getArguments().isEmpty()))) {
+			throw new IllegalArgumentException("A browser profile and extra browser arguments are supported on Chrome and Edge, not " + browser);
+		}
+	}
+
+	/**
+	 * Returns the command-line arguments to start Chrome with: the built-in ones, then the profile's
+	 * {@code --user-data-dir} (if any), then the configuration's extra arguments.
+	 *
+	 * @param config	the user agent, window size, profile and extra arguments
+	 * @param headless	true for a headless browser
+	 * @return the arguments
+	 */
+	static @Nonnull List<String> chromeArguments(@Nonnull BrowserConfiguration config, boolean headless) {
+		List<String> arguments = new ArrayList<>(8);
+		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
+		arguments.add("--disable-backgrounding-occluded-windows");
+		arguments.add("--disable-renderer-backgrounding");
+		arguments.add("--disable-background-timer-throttling");
+		String userAgentString = config.getUserAgentString();
+		if (userAgentString != null) {
+			arguments.add("--user-agent=" + userAgentString);
+		}
+		if (headless) {
+			arguments.add("--headless");
+			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
+			if (config.getResolution() == null) {
+				arguments.add("--window-size=1920,1080");
+			}
+		}
+		addProfileAndArguments(arguments, config);
+		return arguments;
+	}
+
+	/**
+	 * Returns the command-line arguments to start Edge with: the built-in ones, then the profile's
+	 * {@code --user-data-dir} (if any), then the configuration's extra arguments.
+	 *
+	 * @param config	the user agent, profile and extra arguments
+	 * @param headless	true for a headless browser
+	 * @return the arguments
+	 */
+	static @Nonnull List<String> edgeArguments(@Nonnull BrowserConfiguration config, boolean headless) {
+		List<String> arguments = new ArrayList<>(4);
+		String userAgentString = config.getUserAgentString();
+		if (userAgentString != null) {
+			arguments.add("--user-agent=" + userAgentString);
+		}
+		if (headless) {
+			arguments.add("headless");
+		}
+		addProfileAndArguments(arguments, config);
+		return arguments;
+	}
+
+	private static void addProfileAndArguments(@Nonnull List<String> arguments, @Nonnull BrowserConfiguration config) {
+		Path profile = config.getProfile();
+		if (profile != null) {
+			arguments.add("--user-data-dir=" + profile);
+		}
+		arguments.addAll(config.getArguments());
+	}
+
+	/**
 	 * Quits the browser, if one started. A thread that was interrupted (a load run's user stopped at its time limit)
 	 * still quits it: the interrupt is set aside while the browser quits, as the driver's requests would fail at once
 	 * and leave the browser running, and then put back. So an interrupted thread can block here for up to the driver's
@@ -158,28 +254,13 @@ abstract class CrossBrowserSelenium {
 	}
 
 	/**
-	 * Starts Chrome with the configuration's user agent and window size.
+	 * Starts Chrome with the configuration's user agent, window size, profile and extra arguments.
 	 *
 	 * @param config	the user agent, window size and timeouts
 	 * @param resolved	the settings: headless mode and the timeout
 	 */
 	private void setupChrome(BrowserConfiguration config, SailSettings resolved) {
-		List<String> arguments = new ArrayList<>(6);
-		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
-		arguments.add("--disable-backgrounding-occluded-windows");
-		arguments.add("--disable-renderer-backgrounding");
-		arguments.add("--disable-background-timer-throttling");
-		String userAgentString = config.getUserAgentString();
-		if (userAgentString != null) {
-			arguments.add("--user-agent=" + userAgentString);
-		}
-		if (resolved.headless()) {
-			arguments.add("--headless");
-			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
-			if (config.getResolution() == null) {
-				arguments.add("--window-size=1920,1080");
-			}
-		}
+		List<String> arguments = chromeArguments(config, resolved.headless());
 
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments(arguments);
@@ -225,14 +306,7 @@ abstract class CrossBrowserSelenium {
 	}
 
 	private void setupEdge(BrowserConfiguration config, SailSettings resolved) {
-		List<String> arguments = new ArrayList<>(2);
-		String userAgentString = config.getUserAgentString();
-		if (userAgentString != null) {
-			arguments.add("--user-agent=" + userAgentString);
-		}
-		if (resolved.headless()) {
-			arguments.add("headless");
-		}
+		List<String> arguments = edgeArguments(config, resolved.headless());
 		
 		EdgeOptions options = new EdgeOptions();
 		options.addArguments(arguments);
