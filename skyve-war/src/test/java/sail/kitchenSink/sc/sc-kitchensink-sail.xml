@@ -313,6 +313,32 @@
 			<testValue binding="outcome" value="Run From Tab Button ran" />
 			<testSuccess />
 			<execute><![CDATA[window._sailExecuted = true;]]></execute>
+			<comment>Script steps get the run token and the variables as sail, and keep a result with variable; this execute also starts a timer for waitFor</comment>
+			<execute variable="executed"><![CDATA[
+				window._sailTimerDone = false;
+				setTimeout(function () { window._sailTimerDone = true; }, 200);
+				return 'executed in ' + sail.run;
+			]]></execute>
+			<comment>waitFor polls until the timer has set its flag: a wait, not a test</comment>
+			<waitFor timeoutMillis="10000"><![CDATA[
+				return window._sailTimerDone === true;
+			]]></waitFor>
+			<comment>executeAsync awaits a promise: here a request for the page's own URL</comment>
+			<executeAsync variable="status" timeoutMillis="20000"><![CDATA[
+				const response = await fetch(location.href, {method: 'HEAD'});
+				return response.status;
+			]]></executeAsync>
+			<testScript message="execute and executeAsync should keep their results in run {run}" timeoutMillis="5000"><![CDATA[
+				return (sail.vars.executed === 'executed in ' + sail.run) && (sail.vars.status === '200');
+			]]></testScript>
+			<testScript><![CDATA[return window._sailExecuted === true && window._sailTimerDone === true;]]></testScript>
+			<comment>call runs a SailCall in the test JVM, with the run token and the variables substituted in its parameter values</comment>
+			<call className="sail.kitchenSink.EchoCall" variable="echo">
+				<parameter name="text" value="echoed {var:executed} in {run}" />
+			</call>
+			<testScript message="EchoCall should give back its text"><![CDATA[
+				return sail.vars.echo === 'echoed executed in ' + sail.run + ' in ' + sail.run;
+			]]></testScript>
 			<comment>Conformance for the pause op-code itself; the suites do not pause</comment>
 			<pause millis="100" />
 		</method>
