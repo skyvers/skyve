@@ -23,8 +23,8 @@ public class TagFactory {
 	 * @return A fixture suitable for standard CRUD tests.
 	 */
 	@SkyveFixture(types = FixtureType.crud)
-	public static Tag crudInstance() {
-		Tag tag = new DataBuilder().factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
+	public static TagExtension crudInstance() {
+		TagExtension tag = new DataBuilder().factoryBuild(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
 
 		tag.setUploadModuleName(Contact.MODULE_NAME);
 		tag.setUploadDocumentName(Contact.DOCUMENT_NAME);
@@ -39,8 +39,8 @@ public class TagFactory {
 	 */
 	@SuppressWarnings("static-method")
 	@SkyveFixture(types = FixtureType.sail)
-	public Tag sail() {
-		Tag result = crudInstance();
+	public TagExtension sail() {
+		TagExtension result = crudInstance();
 
 		result.setOperandTag(null);
 

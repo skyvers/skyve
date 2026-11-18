@@ -2,20 +2,26 @@ package org.skyve.impl.metadata.model.document.field;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.enumeration.DynamicEnumerationConverter;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.generate.DomainGenerator;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.SerializableMetaData;
+import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.repository.ProvidedRepository;
+import org.skyve.metadata.user.User;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -40,7 +46,8 @@ import jakarta.xml.bind.annotation.XmlType;
  * may extend or reorder the values for a given enumeration field.
  *
  * <p>Threading: not thread-safe.  Instances are populated during metadata loading
- * and are read-only once placed in the repository cache.
+ * and are read-only once placed in the repository cache, except for the thread-safe
+ * cache of enum classes that {@link #getImplementingType(Customer)} fills.
  *
  * @see ConstrainableField
  */
@@ -99,6 +106,13 @@ public class Enumeration extends ConstrainableField {
 		}
 	}
 	
+	/**
+	 * An enum class - or {@link String} for a dynamic enumeration - with the context class loader it
+	 * was loaded through.
+	 */
+	private record LoadedType(@Nonnull ClassLoader classLoader, @Nonnull Class<?> type) {
+	}
+
 	public Enumeration() {
 		setAttributeType(AttributeType.enumeration);
 	}
@@ -112,6 +126,11 @@ public class Enumeration extends ConstrainableField {
 	private String documentRef;
 	private String attributeRef;
 	private Document owningDocument;
+	// Enum classes by customer name, or "" for the vanilla ones - see getImplementingType(Customer). Kept as
+	// finding a generated one resolves bean classes and walks their superclasses, and a class that does not
+	// declare the enum, such as a hand-written extension, throws a ClassNotFoundException each time.
+	// Transient, so that deserialising does not resolve classes through another class loader - see readResolve().
+	private transient Map<String, LoadedType> implementingTypes = new ConcurrentHashMap<>();
 	
 	@XmlTransient
 	public @Nullable String getTypeName() {
@@ -231,34 +250,270 @@ public class Enumeration extends ConstrainableField {
 		return result;
 	}
 	
+	/**
+	 * Returns the enum class that implements this enumeration for the current user's customer, or the
+	 * vanilla one without a user, as during domain generation (see {@link #getImplementingType(Customer)}).
+	 *
+	 * <p>Side effects: outside dev mode, caches the enum class for the customer.
+	 *
+	 * @return	the implementing type; never {@code null}
+	 * @throws MetaDataException	if the enum class cannot be loaded; its cause is a
+	 * 			{@link ClassNotFoundException} when no class declares the enum, or the bean class
+	 * 			cannot be loaded, as before the domain is first compiled
+	 * 			(see {@link #isEnumClassLoadingFailure(Throwable)})
+	 * @throws IllegalStateException	if there is no repository and the enumeration references another
+	 * 			document's enumeration
+	 */
 	@Override
 	public @Nonnull Class<?> getImplementingType() {
-		Enumeration e = getTarget();
-		if (e.isDynamic()) {
+		// NB a persistence has no user until one is set
+		User user = AbstractPersistence.isPresent() ? AbstractPersistence.get().getUser() : null;
+		String customerName = (user == null) ? null : user.getCustomerName();
+		// look for the cached class before resolving the customer
+		Class<?> result = cachedImplementingType(customerName);
+		if (result == null) {
+			Customer customer = ((user == null) || (customerName == null)) ? null : user.getCustomer();
+			result = getImplementingType(customer);
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the enum class that implements this enumeration for a customer: {@link String} for a
+	 * dynamic enumeration, the hand-written <code>implementingEnumClassName</code>, or the generated enum.
+	 * The generated enum is nested in the class that declares the enumeration's attribute, so it is
+	 * found as Java finds an inherited nested type: in the bean class of the document that declares
+	 * the attribute - the referenced document, for a reference to another document's enumeration -
+	 * and then up its superclasses, as far as they are in the <code>modules</code> and
+	 * <code>customers</code> packages. The bean class is the customer's (see
+	 * {@link DocumentImpl#getBeanClass(Customer)}), or the vanilla bean class without a customer.
+	 * A reference has the enum type that the class declaring its property sees, so the referenced
+	 * document's vanilla bean class is used when a vanilla class declares the property, even for a
+	 * customer that overrides the referenced document. For a customer's override of a document, the
+	 * classes are <code>&lt;Document&gt;Override</code>, the vanilla <code>&lt;Document&gt;Extension</code>
+	 * if there is one, <code>&lt;Document&gt;Vanilla</code> if a customer's override leaves out vanilla
+	 * attributes, and the domain class. If none of the customer's classes declares it - a customer
+	 * class's reference to an enumeration that the customer's override of the referenced document
+	 * leaves out - the vanilla bean class and its superclasses are looked in.
+	 *
+	 * <p>Without a repository, as in a unit test that installs none, the generated enum is loaded
+	 * from the vanilla domain class of the document that declares the attribute. An enumeration that
+	 * references another document's, with <code>documentRef</code> or <code>moduleRef</code>, needs
+	 * the repository to resolve the reference, so it throws without one, as it always has.
+	 *
+	 * <p>Side effects: with a repository and outside dev mode, caches the enum class for the customer,
+	 * with the context class loader it was loaded through, so that each class is looked for once per
+	 * customer. In dev mode, as {@link DocumentImpl#getBeanClass(Customer)}, it is resolved each time,
+	 * as classes can be regenerated and reloaded through the same class loader. The
+	 * cache goes with the document when evicting cached metadata loads it again, and a class loaded
+	 * through another context class loader is resolved again.
+	 *
+	 * @param customer	the customer whose classes resolve the enum, or {@code null} for the vanilla ones
+	 * @return	the implementing type; never {@code null}
+	 * @throws MetaDataException	if the enum class cannot be loaded; its cause is a
+	 * 			{@link ClassNotFoundException} when no class declares the enum, or the bean class
+	 * 			cannot be loaded, as before the domain is first compiled
+	 * 			(see {@link #isEnumClassLoadingFailure(Throwable)})
+	 * @throws IllegalStateException	if there is no repository and the enumeration references another
+	 * 			document's enumeration
+	 */
+	public @Nonnull Class<?> getImplementingType(@Nullable Customer customer) {
+		String customerName = (customer == null) ? null : customer.getName();
+		Class<?> result = cachedImplementingType(customerName);
+		if (result == null) {
+			ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			boolean repository = (ProvidedRepositoryFactory.get() != null);
+			result = resolveImplementingType(customer, classLoader, repository);
+			if (repository && (! UtilImpl.DEV_MODE)) { // classes can be regenerated and reloaded in dev mode
+				implementingTypes.put((customerName == null) ? "" : customerName, new LoadedType(classLoader, result));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns the enum class cached for a customer, if it was loaded through the current context
+	 * class loader, outside dev mode.
+	 *
+	 * @param customerName	the customer name, or {@code null} for the vanilla enum class
+	 * @return	the enum class, or {@code null} if it is to be resolved
+	 */
+	private @Nullable Class<?> cachedImplementingType(@Nullable String customerName) {
+		if (UtilImpl.DEV_MODE) {
+			return null;
+		}
+		LoadedType result = implementingTypes.get((customerName == null) ? "" : customerName);
+		return ((result == null) || (result.classLoader() != Thread.currentThread().getContextClassLoader())) ?
+					null :
+					result.type();
+	}
+
+	/**
+	 * Resolves the enum class that implements this enumeration for a customer (see
+	 * {@link #getImplementingType(Customer)}).
+	 *
+	 * @param customer	the customer, or {@code null} for the vanilla enum class
+	 * @param classLoader	the context class loader to load it through
+	 * @param repository	whether there is a repository to resolve the bean classes
+	 * @return	the implementing type
+	 * @throws MetaDataException	if the enum class cannot be loaded
+	 */
+	private @Nonnull Class<?> resolveImplementingType(@Nullable Customer customer,
+														@Nonnull ClassLoader classLoader,
+														boolean repository) {
+		Enumeration target = getTarget();
+		if (target.isDynamic()) {
 			return String.class;
 		}
 		
-		String fullyQualifiedEnumName = null;
-
 		// NB Needs a method call to resolve the target
-		final String enumClassName = getImplementingEnumClassName();
-		if (enumClassName != null) { // hand-coded enum implementation
-			fullyQualifiedEnumName = enumClassName;
+		String enumClassName = getImplementingEnumClassName();
+		if (enumClassName == null) {
+			if (repository) {
+				return resolveGeneratedImplementingType(target, customer);
+			}
+			// the vanilla domain class's enum
+			enumClassName = getEncapsulatingClassName() + '$' + toJavaIdentifier();
 		}
-		else { // generated implementation
-			// No enum overriding, but there might be referencing
-			String encapulatingClassName = getEncapsulatingClassName();
-			fullyQualifiedEnumName = new StringBuilder(64).append(encapulatingClassName).append('$').append(toJavaIdentifier()).toString();
-		}
-		
 		try {
-			@SuppressWarnings("unchecked")
-			Class<org.skyve.domain.types.Enumeration> result = (Class<org.skyve.domain.types.Enumeration>) Thread.currentThread().getContextClassLoader().loadClass(fullyQualifiedEnumName);
-			return result;
+			return classLoader.loadClass(enumClassName);
 		}
 		catch (Exception ex) {
-			throw new MetaDataException("A problem was encountered loading enum " + fullyQualifiedEnumName, ex);
+			throw new MetaDataException("A problem was encountered loading enum " + enumClassName, ex);
 		}
+	}
+
+	/**
+	 * Resolves the generated enum class that implements this enumeration for a customer through the
+	 * bean classes (see {@link #getImplementingType(Customer)}).
+	 *
+	 * @param target	the enumeration that declares the values - this one, or the one it references
+	 * @param customer	the customer, or {@code null} for the vanilla enum class
+	 * @return	the enum class
+	 * @throws MetaDataException	if the enum class cannot be loaded
+	 */
+	private @Nonnull Class<?> resolveGeneratedImplementingType(@Nonnull Enumeration target, @Nullable Customer customer) {
+		Customer declaringCustomer = customer;
+		// A reference has the enum type that the class declaring this enumeration's property sees
+		if ((declaringCustomer != null) && (target != this) && (! declaredByCustomerClass(declaringCustomer))) {
+			declaringCustomer = null;
+		}
+		Class<?> beanClass = declaringBeanClass(target, declaringCustomer);
+		Class<?> result = findGeneratedImplementingType(beanClass);
+		if ((result == null) && (declaringCustomer != null)) {
+			// A customer class can reference an enumeration that the customer's override of the
+			// referenced document leaves out, which only the vanilla classes declare
+			try {
+				result = findGeneratedImplementingType(declaringBeanClass(target, null));
+			}
+			catch (@SuppressWarnings("unused") MetaDataException e) {
+				// there is no vanilla document - throw for the customer's below
+			}
+		}
+		if (result == null) {
+			String generatedEnumClassName = beanClass.getName() + '$' + toJavaIdentifier();
+			throw new MetaDataException("A problem was encountered loading enum " + generatedEnumClassName,
+											new ClassNotFoundException(generatedEnumClassName));
+		}
+		return result;
+	}
+
+	/**
+	 * Resolves the bean class of the document that declares an enumeration's attribute.
+	 *
+	 * @param target	the enumeration that declares the values - this one, or the one it references
+	 * @param customer	the current user's customer, or {@code null} for the vanilla bean class
+	 * @return	the bean class
+	 * @throws MetaDataException	if the bean class cannot be loaded, caused by the
+	 * 			{@link ClassNotFoundException}
+	 */
+	private @Nonnull Class<?> declaringBeanClass(@Nonnull Enumeration target, @Nullable Customer customer) {
+		if (! (target.getOwningDocument() instanceof DocumentImpl document)) { // cannot happen as the owning document is set when the document is converted
+			throw new IllegalStateException("Enumeration " + target.getName() + " has no owning document");
+		}
+		try {
+			return document.getBeanClass(customer);
+		}
+		catch (ClassNotFoundException e) {
+			throw new MetaDataException("A problem was encountered loading enum " + toJavaIdentifier() +
+											" of document " + document.getOwningModuleName() + '.' + document.getName(), e);
+		}
+	}
+
+	/**
+	 * Determines whether the class that declares this enumeration's property, in its document's bean
+	 * class for a customer and the classes it extends, is one of the customer's own classes - a new
+	 * customer document's class, a <code>&lt;Document&gt;Override</code> or the customer's extension -
+	 * rather than a vanilla class. A property that references another enumeration has the enum type
+	 * its declaring class sees, so a vanilla class's property has the vanilla classes' enum, even for
+	 * a customer that overrides the referenced document.
+	 *
+	 * @param customer	the customer
+	 * @return	true if a customer class declares the property, or no document class does, as for a
+	 * 			dynamic document
+	 * @throws MetaDataException	if the bean class cannot be loaded, caused by the
+	 * 			{@link ClassNotFoundException}
+	 */
+	private boolean declaredByCustomerClass(@Nonnull Customer customer) {
+		if (! (getOwningDocument() instanceof DocumentImpl)) { // a document made in code - resolve it for the customer
+			return true;
+		}
+		String name = getName();
+		Class<?> type = declaringBeanClass(this, customer);
+		while ((type != null) && isDocumentClass(type.getName())) {
+			for (java.lang.reflect.Field field : type.getDeclaredFields()) {
+				if (field.getName().equals(name)) {
+					return type.getName().startsWith(ProvidedRepository.CUSTOMERS_NAME + '.');
+				}
+			}
+			type = type.getSuperclass();
+		}
+		return true;
+	}
+
+	/**
+	 * Finds the generated enum class that implements this enumeration in the first class, from the
+	 * bean class up, that declares it (see {@link #getImplementingType()}).
+	 *
+	 * @param beanClass	the bean class of the document that declares the enumeration's attribute
+	 * @return	the enum class, or {@code null} if none of the document's classes declares it
+	 */
+	private @Nullable Class<?> findGeneratedImplementingType(@Nonnull Class<?> beanClass) {
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		String enumName = '$' + toJavaIdentifier();
+		Class<?> type = beanClass;
+		while ((type != null) && isDocumentClass(type.getName())) {
+			try {
+				return classLoader.loadClass(type.getName() + enumName);
+			}
+			catch (@SuppressWarnings("unused") ClassNotFoundException e) {
+				// not declared in this class
+			}
+			type = type.getSuperclass();
+		}
+		return null;
+	}
+
+	/**
+	 * Determines whether a class is one of a document's - generated or hand-written - which are in the
+	 * <code>modules</code> and <code>customers</code> packages, rather than a framework class it extends.
+	 *
+	 * @param className	the fully qualified class name
+	 * @return	true if the class is in the <code>modules</code> or <code>customers</code> packages
+	 */
+	private static boolean isDocumentClass(@Nonnull String className) {
+		return className.startsWith(ProvidedRepository.MODULES_NAME + '.') ||
+				className.startsWith(ProvidedRepository.CUSTOMERS_NAME + '.');
+	}
+
+	/**
+	 * Creates the transient cache of generated enum classes again after deserialisation.
+	 *
+	 * @return	this enumeration
+	 */
+	protected @Nonnull Object readResolve() {
+		implementingTypes = new ConcurrentHashMap<>();
+		return this;
 	}
 	
 	/**

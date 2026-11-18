@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OverrideAdds"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			The test customer's override of OverrideAdds, adding customerText, customerOnlyItem, customerOnlyItems, the ownedItems inverse of OverrideCustomerOnly.owner and the customerTextSet condition.
+		]]>
+	</documentation>
+	<persistent name="TEST_OverrideAdds" />
+	<singularAlias>Override Adds</singularAlias>
+	<pluralAlias>Override Adds</pluralAlias>
+	<bizKey expression="{text}" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+		<text name="customerText">
+			<displayName>Customer Text</displayName>
+			<length>100</length>
+		</text>
+		<association name="customerOnlyItem" type="aggregation">
+			<displayName>Customer Only Item</displayName>
+			<documentName>OverrideCustomerOnly</documentName>
+		</association>
+		<collection name="customerOnlyItems" type="aggregation">
+			<displayName>Customer Only Items</displayName>
+			<documentName>OverrideCustomerOnly</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<inverseMany name="ownedItems">
+			<displayName>Owned Items</displayName>
+			<documentName>OverrideCustomerOnly</documentName>
+			<referenceName>owner</referenceName>
+		</inverseMany>
+	</attributes>
+	<conditions>
+		<condition name="customerTextSet">
+			<expression>
+				<![CDATA[
+					customerText != null
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

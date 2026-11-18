@@ -189,6 +189,12 @@ public abstract class DomainGenerator {
 	
 	protected boolean write;
 	protected boolean debug;
+	/**
+	 * Whether metadata validation is on for this run - {@link #generate(boolean, boolean, boolean, DialectOptions, String, String, String, String, String...)}
+	 * sets it from its validate flag before generating. Checks that only validate, rather than being needed
+	 * to generate a working domain, warn instead of failing when it is off. Defaults to on.
+	 */
+	protected boolean validate = true;
 	protected boolean multiTenant;
 	protected String srcPath;
 	protected String generatedSrcPath;
@@ -417,6 +423,7 @@ public abstract class DomainGenerator {
 		ProvidedRepository repository = new LocalDesignRepository();
 		ProvidedRepositoryFactory.set(repository);
 		DomainGenerator jenny = newDomainGenerator(true, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		jenny.validate = validate;
 
 		if (validate) {
 			// validate all customers before generation

@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.ModuleMemberTestSupport;
 import org.skyve.metadata.module.menu.Menu;
 import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.repository.ProvidedRepository;
@@ -913,5 +916,73 @@ class UserImplTest {
 		user.callPutDocumentPermission("admin", "User", DocumentPermission.CR__G);
 		// After merging C____ with _R__G the user still has scope (merged permission)
 		assertNotNull(user.getScope("admin", "User"));
+	}
+
+	/** Builds a mock metadata Role owned by a mock module, for the isInRole(Role) default method. */
+	private static org.skyve.metadata.user.Role metadataRole(String moduleName, String roleName) {
+		Module module = mock(Module.class);
+		when(module.getName()).thenReturn(moduleName);
+		org.skyve.metadata.user.Role role = mock(org.skyve.metadata.user.Role.class);
+		when(role.getOwningModule()).thenReturn(module);
+		when(role.getName()).thenReturn(roleName);
+		return role;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleWithRoleDelegatesToOwningModuleAndRoleNames() {
+		UserImpl user = spy(new UserImpl());
+		doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
+
+		assertTrue(user.isInRole(metadataRole("admin", "AuditManager")));
+		// a role the user does not hold must not resolve through the same delegation
+		assertFalse(user.isInRole(metadataRole("admin", "SecurityAdministrator")));
+		assertFalse(user.isInRole(metadataRole("whosin", "AuditManager")));
+	}
+
+	/** A compile-time role reference as the generated per-module role enums implement it. */
+	private enum TestModuleRole implements org.skyve.metadata.user.ModuleRole {
+		AUDIT_MANAGER("admin", "AuditManager"),
+		SECURITY_ADMINISTRATOR("admin", "SecurityAdministrator"),
+		WHOSIN_AUDIT_MANAGER("whosin", "AuditManager");
+
+		private final String moduleName;
+		private final String roleName;
+
+		private TestModuleRole(String moduleName, String roleName) {
+			this.moduleName = moduleName;
+			this.roleName = roleName;
+		}
+
+		@Override
+		public String moduleName() {
+			return moduleName;
+		}
+
+		@Override
+		public String roleName() {
+			return roleName;
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testIsInRoleWithModuleRoleDelegatesToModuleAndRoleNames() {
+		UserImpl user = spy(new UserImpl());
+		doReturn(Boolean.TRUE).when(user).isInRole("admin", "AuditManager");
+
+		assertTrue(user.isInRole(TestModuleRole.AUDIT_MANAGER));
+		// a role the user does not hold must not resolve through the same delegation
+		assertFalse(user.isInRole(TestModuleRole.SECURITY_ADMINISTRATOR));
+		assertFalse(user.isInRole(TestModuleRole.WHOSIN_AUDIT_MANAGER));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void testGetScopeWithModuleDocumentDelegatesToModuleAndDocumentNames() {
+		UserImpl user = spy(new UserImpl());
+		doReturn(DocumentPermissionScope.customer).when(user).getScope("admin", "Contact");
+
+		assertEquals(DocumentPermissionScope.customer, user.getScope(ModuleMemberTestSupport.TestDocument.CONTACT));
 	}
 }

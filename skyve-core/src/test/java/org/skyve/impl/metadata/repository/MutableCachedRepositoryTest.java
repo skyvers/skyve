@@ -1,8 +1,11 @@
 package org.skyve.impl.metadata.repository;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -284,7 +287,8 @@ class MutableCachedRepositoryTest {
 		ModuleMetaData mmd = minimalModule("admin", "User");
 		Module module = repo.putModule(mmd);
 		// "NonExistent" is not in the module's documentRefs — should throw
-		assertThrows(IllegalArgumentException.class, () -> repo.getDocument(null, module, "NonExistent"));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getDocument(null, module, "NonExistent"));
+		assertEquals("Document NonExistent does not exist in module admin", e.getMessage());
 	}
 
 	@Test
@@ -408,6 +412,167 @@ class MutableCachedRepositoryTest {
 		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getView(null, null, document, "edit"));
 
 		assertEquals("Cannot scaffold view edit for document admin.User without a customer", e.getMessage());
+	}
+
+	private static CustomerImpl mockCustomer(String customerName, Module module) {
+		CustomerImpl result = mock(CustomerImpl.class);
+		when(result.getName()).thenReturn(customerName);
+		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
+		moduleEntries.put(module.getName(), null);
+		when(result.getModuleEntries()).thenReturn(moduleEntries);
+		when(result.getModule(module.getName())).thenReturn(module);
+		return result;
+	}
+
+	/**
+	 * A customer's override of a document can have other attributes, so a view scaffolded for one
+	 * customer must not be cached under the vanilla view key, where every other customer finds it.
+	 */
+	@Test
+	void aScaffoldedViewIsCachedPerCustomer() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl acme = mockCustomer("acme", module);
+		CustomerImpl beta = mockCustomer("beta", module);
+
+		View acmeView = repo.getView(null, acme, document, ViewType.edit.toString());
+		View betaView = repo.getView(null, beta, document, ViewType.edit.toString());
+
+		assertAll(() -> assertNotNull(acmeView),
+					() -> assertNotNull(betaView),
+					() -> assertNotSame(acmeView, betaView),
+					() -> assertSame(acmeView, repo.getView(null, acme, document, ViewType.edit.toString())),
+					() -> assertNull(repo.vtable(null, "modules/admin/User/views/edit")));
+	}
+
+	/**
+	 * A dynamic repository, whose eviction needs no persistence, that scaffolds views as a file
+	 * system repository does.
+	 */
+	private static final class ScaffoldingDynamicRepository extends UnsynchronisedDynamicRepository {
+		@Override
+		public boolean getUseScaffoldedViews() {
+			return true;
+		}
+	}
+
+	/**
+	 * Evicting a customer evicts the shared documents of its modules, which other customers' views
+	 * are scaffolded from too, so their scaffolded views of those documents go as well, while a
+	 * customer without those modules keeps its scaffolded views. A scaffolded view is no metadata
+	 * that the vtable finds.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void evictingACustomerEvictsEveryCustomersScaffoldedViewsOfItsModules() {
+		ScaffoldingDynamicRepository repo = new ScaffoldingDynamicRepository();
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl acme = mockCustomer("acme", module);
+		CustomerImpl beta = mockCustomer("beta", module);
+		View betaView = repo.getView(null, beta, document, ViewType.edit.toString());
+		CustomerImpl other = mock(CustomerImpl.class);
+		when(other.getName()).thenReturn("other");
+		Map<String, FormLabelLayout> otherModules = new HashMap<>();
+		otherModules.put("crm", null);
+		when(other.getModuleEntries()).thenReturn(otherModules);
+
+		repo.evictCachedMetaData(other);
+		View betaViewAfterOtherEviction = repo.getView(null, beta, document, ViewType.edit.toString());
+		repo.evictCachedMetaData(acme);
+		// re-put the evicted module and document, as a repository building its metadata does
+		module = repo.putModule(minimalModule("admin", "User"));
+		Document reloaded = repo.putDocument(module, minimalDocument("User"));
+		View betaViewAfterAcmeEviction = repo.getView(null, beta, reloaded, ViewType.edit.toString());
+
+		assertAll(() -> assertSame(betaView, betaViewAfterOtherEviction),
+					() -> assertNotSame(betaView, betaViewAfterAcmeEviction),
+					() -> assertNull(repo.vtable("beta", "modules/admin/User/views/edit")));
+	}
+
+	/**
+	 * A repository that populates fixed keys, as a file system repository populates those of its
+	 * metadata files, and that loads no metadata for them.
+	 */
+	private static final class KeyPopulatingRepository extends UnsynchronisedDynamicRepository {
+		private final String[] keys;
+
+		private KeyPopulatingRepository(String... keys) {
+			this.keys = keys;
+		}
+
+		@Override
+		public void populateKeys() {
+			for (String key : keys) {
+				addKey(key);
+			}
+		}
+	}
+
+	/**
+	 * Evicting a customer resets its own keys and those of its modules to unloaded placeholders, as
+	 * lookups resolve only the keys present, and leaves the metadata of a customer or module whose
+	 * name starts with the same characters loaded.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void evictingACustomerLeavesCustomersAndModulesWithLongerNames() {
+		String[] evicted = {"customers/test", "customers/test/modules/test/Doc", "modules/admin", "modules/admin/User"};
+		String[] kept = {"customers/test2", "customers/test2/modules/test/Doc", "modules/admin2", "modules/admin2/User"};
+		String[] keys = new String[evicted.length + kept.length];
+		System.arraycopy(evicted, 0, keys, 0, evicted.length);
+		System.arraycopy(kept, 0, keys, evicted.length, kept.length);
+		KeyPopulatingRepository repo = new KeyPopulatingRepository(keys);
+		repo.populateKeys();
+		repo.putModule(minimalModule("admin", "User"));
+		Module admin2 = repo.putModule(minimalModule("admin2", "User"));
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("test");
+		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
+		moduleEntries.put("admin", null);
+		when(customer.getModuleEntries()).thenReturn(moduleEntries);
+
+		repo.evictCachedMetaData(customer);
+
+		assertAll(() -> assertAll(java.util.Arrays.stream(keys).map(key -> () -> assertEquals(key, repo.vtable(null, key), key))),
+					() -> assertNull(repo.getModule(null, "admin"), "evicted module is loaded again"),
+					() -> assertSame(admin2, repo.getModule(null, "admin2"), "kept module stays loaded"));
+	}
+
+	/**
+	 * A full eviction puts back every populated key as an unloaded placeholder.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void fullEvictionPutsBackThePopulatedKeysUnloaded() {
+		String[] keys = {MutableCachedRepository.ROUTER_KEY, "customers/test", "modules/admin", "modules/admin/User", "modules/admin/User/views/edit"};
+		KeyPopulatingRepository repo = new KeyPopulatingRepository(keys);
+		repo.populateKeys();
+		repo.putModule(minimalModule("admin", "User"));
+
+		repo.evictCachedMetaData(null);
+
+		assertAll(() -> assertAll(java.util.Arrays.stream(keys).map(key -> () -> assertEquals(key, repo.vtable(null, key), key))),
+					() -> assertNull(repo.getModule(null, "admin"), "evicted module is loaded again"));
+	}
+
+	/**
+	 * A dynamic repository has no keys to populate, so eviction leaves it without the metadata
+	 * added to it, which nothing could load again.
+	 */
+	@Test
+	void evictingADynamicRepositoryRemovesItsMetaData() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		CustomerImpl customer = mockCustomer("test", module);
+
+		repo.evictCachedMetaData(customer);
+
+		assertAll(() -> assertNull(repo.vtable(null, "modules/admin")),
+					() -> assertNull(repo.getModule(null, "admin")));
 	}
 
 	// ---- unnamed metadata ----

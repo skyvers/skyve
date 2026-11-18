@@ -100,7 +100,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		SQLDataAccessSQL result = new SQLDataAccessSQL(moduleName, documentName, sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;
@@ -114,7 +114,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(document.getOwningModuleName());
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		SQLDataAccessSQL result = new SQLDataAccessSQL(document, sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;
@@ -128,7 +128,7 @@ public class SQLDataAccessImpl implements SQLDataAccess {
 	@Override
 	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName) {
 		Module module = CORE.getUser().getCustomer().getModule(moduleName);
-		SQLDefinition sql = module.getSQL(queryName);
+		SQLDefinition sql = module.getNullSafeSQL(queryName);
 		SQLDataAccessSQL result = new SQLDataAccessSQL(sql.getQuery(), this);
 		result.setTimeoutInSeconds(sql.getTimeoutInSeconds());
 		return result;

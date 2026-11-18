@@ -13,6 +13,15 @@
 		<module name="admin" />
 		<module name="test" />
 	</modules>
+	<roles allowModuleRoles="true">
+		<role name="TestManager">
+			<description>Manages the test module, bundling its override role with basic admin access</description>
+			<roles>
+				<role module="admin" name="BasicUser" />
+				<role module="test" name="TestRole" />
+			</roles>
+		</role>
+	</roles>
 	<interceptors>
 		<interceptor className="modules.admin.RDBMSAuditInterceptor" />
 	</interceptors>

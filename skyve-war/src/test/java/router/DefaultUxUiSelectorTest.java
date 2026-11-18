@@ -152,7 +152,7 @@ class DefaultUxUiSelectorTest {
 			when(request.getUserPrincipal()).thenReturn(principal);
 			when(request.getSession(false)).thenReturn(session);
 			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
-			doReturn(true).when(user).isInRole(modules.admin.domain.Startup.MODULE_NAME, "SecurityAdministrator");
+			doReturn(true).when(user).isInRole(modules.admin.domain.AdminRole.SECURITY_ADMINISTRATOR);
 			when(session.getAttribute(DefaultUxUiSelector.DISMISS_STARTUP)).thenReturn(null);
 
 			UxUi result = selector.select(UserAgentType.desktop, request);
@@ -176,7 +176,7 @@ class DefaultUxUiSelectorTest {
 			when(request.getUserPrincipal()).thenReturn(principal);
 			when(request.getSession(false)).thenReturn(session);
 			when(session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
-			doReturn(true).when(user).isInRole(modules.admin.domain.Startup.MODULE_NAME, "SecurityAdministrator");
+			doReturn(true).when(user).isInRole(modules.admin.domain.AdminRole.SECURITY_ADMINISTRATOR);
 			when(session.getAttribute(DefaultUxUiSelector.DISMISS_STARTUP)).thenReturn(Boolean.TRUE);
 			when(session.getAttribute(org.skyve.impl.web.AbstractWebContext.UXUI_SESSION_ATTRIBUTE_NAME)).thenReturn(null);
 

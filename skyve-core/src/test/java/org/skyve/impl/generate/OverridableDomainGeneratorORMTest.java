@@ -97,7 +97,7 @@ class OverridableDomainGeneratorORMTest {
 				Module.class,            // module
 				Document.class,          // document
 				String.class,            // packagePathPrefix
-				boolean.class,           // forExt
+				boolean.class,           // mapsGeneratedSubclass
 				boolean.class,           // recursive
 				org.skyve.metadata.customer.Customer.class, // customer
 				StringBuilder.class,     // filterDefinitions
@@ -118,7 +118,6 @@ class OverridableDomainGeneratorORMTest {
 				String.class,            // columnPrefix
 				Set.class,               // columnNames
 				String.class,            // owningDocumentName
-				boolean.class,           // forExt
 				String.class);           // indentation
 		m.setAccessible(true);
 		return m;
@@ -153,7 +152,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<property name=\"title\""), "Should have property element");
@@ -188,7 +187,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertFalse(result.contains("<property name=\"computed\""), "Transient field should be skipped");
@@ -232,7 +231,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<bag name=\"children\""), "Should have bag element for child collection");
@@ -276,7 +275,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("MOD_ArticleDoc_tags"), "Should have join table name for aggregation collection");
@@ -473,7 +472,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<many-to-one name=\"category\""), "Should have many-to-one for aggregation association");
@@ -517,7 +516,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<many-to-one name=\"homeAddress\""), "Should have many-to-one for composition association");
@@ -561,7 +560,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("cascade=\"all-delete-orphan\""), "Composition collection uses all-delete-orphan");
@@ -602,7 +601,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<property name=\"status\""), "Should have property element for enumeration");
@@ -646,7 +645,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertFalse(result.contains("<many-to-one"), "Transient association should be skipped");
@@ -715,7 +714,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertTrue(contents.toString().contains("<property name=\"birthDate\""), "Should have property");
 		assertTrue(contents.toString().contains("DateOnly"), "Should have DateOnly type");
@@ -738,7 +737,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertTrue(contents.toString().contains("DateTime"), "Should have DateTime type");
 	}
@@ -760,7 +759,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("precision=\"20\" scale=\"2\""), "Should have precision/scale for decimal2");
@@ -783,7 +782,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("precision=\"23\" scale=\"5\""), "Should have precision/scale for decimal5");
@@ -806,7 +805,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("precision=\"28\" scale=\"10\""), "Should have precision/scale for decimal10");
@@ -829,7 +828,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<property name=\"updatedAt\""), "Should have property");
@@ -853,7 +852,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("type=\"text\""), "Should have text type for memo");
@@ -876,7 +875,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("type=\"text\""), "Should have text type for markup");
@@ -899,7 +898,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertTrue(contents.toString().contains("<property name=\"active\""), "Should have property for boolean");
 	}
@@ -921,7 +920,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertTrue(contents.toString().contains("<property name=\"count\""), "Should have property for integer");
 	}
@@ -943,7 +942,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertTrue(contents.toString().contains("<property name=\"bigCount\""), "Should have property for long integer");
 	}
@@ -965,7 +964,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertTrue(contents.toString().contains("<property name=\"background\""), "Should have property for colour");
 	}
@@ -988,7 +987,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, doc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertFalse(contents.toString().contains("transientNotes"), "Transient memo should be skipped");
 	}
@@ -1027,7 +1026,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<bag name=\"orders\""), "Should have bag for inverse oneToMany");
@@ -1066,7 +1065,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<one-to-one name=\"profile\""), "Should have one-to-one for inverse oneToOne");
@@ -1104,7 +1103,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		String result = contents.toString();
 		assertTrue(result.contains("<bag name=\"tags\""), "Should have bag for manyToMany");
@@ -1141,7 +1140,7 @@ class OverridableDomainGeneratorORMTest {
 
 		StringBuilder contents = new StringBuilder();
 		attrMappingsMethod().invoke(gen, contents, null, module, ownerDoc, p,
-				null, new TreeSet<>(), null, false, "");
+				null, new TreeSet<>(), null, "");
 
 		assertFalse(contents.toString().contains("<bag name=\"orders\""), "Non-persistent referenced doc inverse should be skipped");
 	}
@@ -1178,7 +1177,7 @@ class OverridableDomainGeneratorORMTest {
 	private static String attributeMappings(OverridableDomainGenerator gen, Module module, Document doc, Persistent p)
 			throws Exception {
 		StringBuilder contents = new StringBuilder();
-		attrMappingsMethod().invoke(gen, contents, null, module, doc, p, null, new TreeSet<>(), null, false, "");
+		attrMappingsMethod().invoke(gen, contents, null, module, doc, p, null, new TreeSet<>(), null, "");
 		return contents.toString();
 	}
 

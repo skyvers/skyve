@@ -20,7 +20,7 @@ import org.skyve.impl.domain.ChangeTrackingArrayList;
 			a button in a form, a button in a tab, two named actions sharing a class, OK, Save and Delete,
 			a link in a data grid row, and a Download, BizExport, BizImport and Upload action.
 			Each Disable or Hide checkbox makes one trigger unavailable, and an action with no trigger is never available.
-			Outcome records which action ran last. The Upload action refuses a file named sail-refused.txt, as if it already existed, and one named sail-invalid.txt with a validation.
+			Outcome records which action ran last. The Upload action refuses a file named sail-refused.txt, as if it already existed, one named sail-invalid.txt with a validation, and one named sail-unavailable.txt as unavailable.
  * 
  * @navcomposed 1 rows 0..n ActionsFixtureRow
  * @stereotype "persistent"

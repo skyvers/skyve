@@ -8,7 +8,9 @@ import org.skyve.CORE;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.ModuleQuery;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -65,6 +67,17 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	public static @Nonnull UserAccess singular(@Nonnull String moduleName, @Nonnull String documentName) {
 		return new UserAccess('S', moduleName, documentName, null);
 	}
+
+	/**
+	 * Creates a {@code UserAccess} for a singular edit-view resource (one document instance); a
+	 * typed shortcut for {@link #singular(String, String)}.
+	 *
+	 * @param document  the compile-time document reference; must not be {@code null}
+	 * @return a new singular {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess singular(@Nonnull ModuleDocument document) {
+		return singular(document.moduleName(), document.documentName());
+	}
 	
 	/**
 	 * Creates a {@code UserAccess} for a document-driven aggregate list resource.
@@ -78,6 +91,18 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	}
 
 	/**
+	 * Creates a {@code UserAccess} for a document-driven aggregate list resource; a typed shortcut
+	 * for {@link #documentAggregate(String, String)}.
+	 *
+	 * @param document  the compile-time reference to the aggregate target document; must not be
+	 * 					{@code null}
+	 * @return a new document-aggregate {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess documentAggregate(@Nonnull ModuleDocument document) {
+		return documentAggregate(document.moduleName(), document.documentName());
+	}
+
+	/**
 	 * Creates a {@code UserAccess} for a named-query aggregate list resource.
 	 *
 	 * @param moduleName  the module that declares the query; must not be {@code null}
@@ -86,6 +111,17 @@ public class UserAccess implements Serializable, Comparable<UserAccess> {
 	 */
 	public static @Nonnull UserAccess queryAggregate(@Nonnull String moduleName, @Nonnull String queryName) {
 		return new UserAccess('Q', moduleName, null, queryName);
+	}
+
+	/**
+	 * Creates a {@code UserAccess} for a named-query aggregate list resource; a typed shortcut for
+	 * {@link #queryAggregate(String, String)}.
+	 *
+	 * @param query  the compile-time metadata query reference; must not be {@code null}
+	 * @return a new query-aggregate {@code UserAccess}; never {@code null}
+	 */
+	public static @Nonnull UserAccess queryAggregate(@Nonnull ModuleQuery query) {
+		return queryAggregate(query.moduleName(), query.queryName());
 	}
 
 	/**

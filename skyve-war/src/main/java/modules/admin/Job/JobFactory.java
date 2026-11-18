@@ -19,7 +19,7 @@ public class JobFactory {
 	 * @return a fixture-ready job bean
 	 */
 	@SkyveFixture(types = FixtureType.crud)
-	public static Job crudInstance() {
+	public static JobExtension crudInstance() {
 		return new DataBuilder().factoryBuild(Job.MODULE_NAME, Job.DOCUMENT_NAME);
 	}
 }

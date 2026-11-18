@@ -763,8 +763,8 @@ public class CustomerImpl implements Customer {
                     if (UtilImpl.BIZLET_TRACE) BIZLET_LOGGER.info("Exiting {}.getConstantDomainValues: {}", bizlet.getClass().getName(), result);
 					domainValueCache.put(key, result);
 				}
-				if ((result == null) && (attribute instanceof Enumeration e)) {
-					e = e.getTarget();
+				if ((result == null) && (attribute instanceof Enumeration enumeration)) {
+					Enumeration e = enumeration.getTarget();
 					if (e.isDynamic()) {
 						List<EnumeratedValue> values = e.getTarget().getValues();
 						result = new ArrayList<>(values.size());
@@ -778,7 +778,8 @@ public class CustomerImpl implements Customer {
 						}
 					}
 					else { // need to use the method if its available as it could be a hand implemented enumeration.
-						Class<?> domainEnum = attribute.getImplementingType();
+						// this customer's enum, whoever the current user is
+						Class<?> domainEnum = enumeration.getImplementingType(this);
 						result = (List<DomainValue>) domainEnum.getMethod(org.skyve.domain.types.Enumeration.TO_DOMAIN_VALUES_METHOD_NAME).invoke(null);
 					}
 					

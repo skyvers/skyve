@@ -8,6 +8,7 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.controller.Observer;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.ModuleDocument;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -186,13 +187,42 @@ public interface User extends NamedMetaData {
 
 	/**
 	 * Returns {@code true} if this user has been assigned the specified role.
+	 * <p/>
+	 * This is the primitive form that the typed overloads delegate to. Use it for dynamic domains,
+	 * roles added by customer overrides and role names held as data. For a role known when the
+	 * application is built, {@link #isInRole(ModuleRole)} with a generated per-module role enum
+	 * (e.g. {@code user.isInRole(AdminRole.AUDIT_MANAGER)}) checks the reference at compile time.
 	 *
 	 * @param moduleName  the module that declares the role; must not be {@code null}
 	 * @param roleName    the role name within the module; must not be {@code null}
 	 * @return {@code true} if the user holds the role
 	 */
 	boolean isInRole(@Nonnull String moduleName, @Nonnull String roleName);
-	
+
+	/**
+	 * Returns {@code true} if this user has been assigned the specified role.
+	 * Convenience overload for a role resolved from module metadata -
+	 * e.g. {@code user.isInRole(module.getRole("AuditManager"))}.
+	 *
+	 * @param role  the role, resolved from its owning module's metadata; must not be {@code null}
+	 * @return {@code true} if the user holds the role
+	 */
+	default boolean isInRole(@Nonnull Role role) {
+		return isInRole(role.getOwningModule().getName(), role.getName());
+	}
+
+	/**
+	 * Returns {@code true} if this user has been assigned the specified role.
+	 * Convenience overload for the generated per-module role enums -
+	 * e.g. {@code user.isInRole(AdminRole.AUDIT_MANAGER)}.
+	 *
+	 * @param role  the compile-time role reference; must not be {@code null}
+	 * @return {@code true} if the user holds the role
+	 */
+	default boolean isInRole(@Nonnull ModuleRole role) {
+		return isInRole(role.moduleName(), role.roleName());
+	}
+
 	/**
 	 * Returns the effective {@link DocumentPermissionScope} for the user on the given
 	 * document, computed as the union of all assigned role permissions.
@@ -202,6 +232,17 @@ public interface User extends NamedMetaData {
 	 * @return the effective scope; {@link DocumentPermissionScope#none} if no roles grant access
 	 */
 	@Nonnull DocumentPermissionScope getScope(@Nonnull String moduleName, @Nonnull String documentName);
+
+	/**
+	 * Returns the effective {@link DocumentPermissionScope} for the user on the given
+	 * document; a typed shortcut for {@link #getScope(String, String)}.
+	 *
+	 * @param document  the compile-time document reference; must not be {@code null}
+	 * @return the effective scope; {@link DocumentPermissionScope#none} if no roles grant access
+	 */
+	default @Nonnull DocumentPermissionScope getScope(@Nonnull ModuleDocument document) {
+		return getScope(document.moduleName(), document.documentName());
+	}
 	
 	/**
 	 * Returns {@code true} if this user can read the given bean, considering both the

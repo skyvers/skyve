@@ -9,11 +9,11 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.web.WebContext;
 
 import modules.admin.ControlPanel.ControlPanelExtension;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.ControlPanel;
 import modules.admin.domain.Tag;
 
@@ -36,8 +36,7 @@ public class DeleteTestData implements ServerSideAction<ControlPanelExtension> {
 			throw new ValidationException(new Message(ControlPanel.testTagNamePropertyName, "Enter a tag for the delete"));
 		}
 		Customer customer = CORE.getCustomer();
-		Module m = customer.getModule(ControlPanel.MODULE_NAME);
-		JobMetaData job = m.getJob("jDeleteAllTaggedDataForTag");
+		JobMetaData job = AdminJob.J_DELETE_ALL_TAGGED_DATA_FOR_TAG.toJob(customer);
 		
 		// Retrieve the Tag for the delete
 		DocumentQuery q = CORE.getPersistence().newDocumentQuery(Tag.MODULE_NAME, Tag.DOCUMENT_NAME);
