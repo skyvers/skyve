@@ -1,7 +1,10 @@
 package org.skyve.metadata.view.model.list;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -11,28 +14,39 @@ import java.util.function.Consumer;
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
+import org.skyve.impl.web.SortParameterImpl;
 import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.view.widget.FilterParameter;
+import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
+import org.skyve.web.SortParameter;
 
 import modules.kitchensink.domain.LookupDescription;
 import modules.kitchensink.domain.ModelLookupFixture;
+import modules.test.domain.AllAttributesEmbedded;
+import modules.test.domain.AllAttributesPersistent;
 import modules.test.domain.InverseOneToOnePersistent;
 import util.AbstractH2Test;
 
 /**
  * A document's default query (whose columns join nothing) filtered through an optional association or an inverse one:
- * the filters that also match a row with no value keep the rows with nothing on the path, rather than the inner join
- * of the path in HQL dropping them.
+ * the path is left outer joined, rather than inner joined implicitly in HQL, so the filters that also match a row with
+ * no value keep the rows with nothing on the path, and so does Match Any of another criterion they meet. A from clause
+ * of several documents gets no join.
  */
 @SuppressWarnings("static-method")
 class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	private static final String DESCRIPTION = ModelLookupFixture.selectionPropertyName + '.' + LookupDescription.descriptionPropertyName;
+	private static final String SELECTION_JOIN = "LEFT OUTER JOIN bean." + ModelLookupFixture.selectionPropertyName;
 	private static final String INVERSE_BIZ_KEY = InverseOneToOnePersistent.invAggAssociationPropertyName + '.' + Bean.BIZ_KEY;
 
 	/** A view's filter parameters on an attribute through an association, as ListModel.addParameters adds them. */
@@ -80,6 +94,123 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		assertEquals(Set.of(second.getBizId()), inverses(f -> f.addNotNull(INVERSE_BIZ_KEY)));
 	}
 
+	/**
+	 * Match Any of a positive condition through the association and one on the row itself keeps the row with no
+	 * association, counts what it lists, and sorts it by the association's attribute (no value last, descending on H2).
+	 */
+	@Test
+	void aMatchAnyThroughAnAssociationListsCountsAndSortsTheRowWithNoAssociation() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		LookupDescription alpha = persistence.save(lookup("alpha"));
+		LookupDescription beta = persistence.save(lookup("beta"));
+		persistence.save(fixture("AF a", alpha));
+		persistence.save(fixture("AF b", beta));
+		persistence.save(fixture("AF n", null));
+		persistence.flush();
+
+		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		SortParameterImpl sort = new SortParameterImpl();
+		sort.setBy(DESCRIPTION);
+		sort.setDirection(SortDirection.descending);
+		model.setSortParameters(new SortParameter[] {sort});
+		Page page = model.fetch();
+		List<String> names = new ArrayList<>();
+		for (Bean row : Objects.requireNonNull(page.getRows())) {
+			names.add((String) Binder.get(row, ModelLookupFixture.namePropertyName));
+		}
+		assertEquals(List.of("AF b", "AF n"), names);
+		assertEquals(2L, page.getTotalRows());
+	}
+
+	/**
+	 * A from clause of several documents gets no join appended, as the join would come after the last of them: such a
+	 * query keeps the implicit (inner) joins of the filter's paths, even for a filter that also matches no value.
+	 */
+	@Test
+	void aFromOfSeveralDocumentsGetsNoJoinFromTheFilter() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		LookupDescription alpha = persistence.save(lookup("alpha"));
+		persistence.save(fixture("AF a", alpha));
+		persistence.save(fixture("AF n", null));
+		persistence.flush();
+
+		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean, {" +
+						LookupDescription.MODULE_NAME + '.' + LookupDescription.DOCUMENT_NAME + "} as other";
+		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		matchAny(model, f -> f.addEquals(DESCRIPTION, "alpha"), f -> f.addNull(DESCRIPTION));
+		assertEquals(Set.of("AF a"), fetch(model, ModelLookupFixture.namePropertyName));
+		assertNoJoin(model.getDetailQuery());
+		assertNoJoin(model.getSummaryQuery());
+
+		// the same filters on one document's from join the path
+		DocumentQueryListModel<Bean> single = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		matchAny(single, f -> f.addEquals(DESCRIPTION, "alpha"), f -> f.addNull(DESCRIPTION));
+		assertEquals(Set.of("AF a", "AF n"), fetch(single, ModelLookupFixture.namePropertyName));
+		String hql = ((AbstractDocumentQuery) Objects.requireNonNull(single.getDetailQuery())).toQueryString();
+		assertTrue(hql.contains(SELECTION_JOIN), hql);
+	}
+
+	/**
+	 * A from clause that inner joins the association itself still gets the left outer join of a filter's path, but its
+	 * own inner join leaves out the rows with no association, as it is meant to.
+	 */
+	@Test
+	void anInnerJoinInTheFromStillLeavesOutTheRowsWithNoAssociation() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		LookupDescription beta = persistence.save(lookup("beta"));
+		persistence.save(fixture("AF b", beta));
+		persistence.save(fixture("AF n", null));
+		persistence.flush();
+
+		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean inner join bean." +
+						ModelLookupFixture.selectionPropertyName + " as s";
+		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		assertEquals(Set.of("AF b"), fetch(model, ModelLookupFixture.namePropertyName));
+		String hql = ((AbstractDocumentQuery) Objects.requireNonNull(model.getDetailQuery())).toQueryString();
+		assertTrue(hql.contains(SELECTION_JOIN), hql);
+	}
+
+	/** An embedded association's attributes are on the row: a filter through one joins nothing and keeps its rows. */
+	@Test
+	void aFilterThroughAnEmbeddedAssociationJoinsNothing() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		AllAttributesEmbedded embedded = AllAttributesEmbedded.newInstance();
+		embedded.setText("inside");
+		AllAttributesPersistent withEmbedded = AllAttributesPersistent.newInstance();
+		withEmbedded.setText("with");
+		withEmbedded.setEmbeddedAssociation(embedded);
+		persistence.save(withEmbedded);
+		AllAttributesPersistent withoutEmbedded = AllAttributesPersistent.newInstance();
+		withoutEmbedded.setText("without");
+		persistence.save(withoutEmbedded);
+		persistence.flush();
+
+		DocumentQueryListModel<Bean> model = defaultQueryModel(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+		matchAny(model,
+					f -> f.addEquals(AllAttributesPersistent.embeddedAssociationPropertyName + '.' + AllAttributesEmbedded.textPropertyName, "inside"),
+					f -> f.addEquals(AllAttributesPersistent.textPropertyName, "without"));
+		assertEquals(Set.of("with", "without"), fetch(model, AllAttributesPersistent.textPropertyName));
+		assertNoJoin(model.getDetailQuery());
+	}
+
+	private static void assertNoJoin(DocumentQuery query) {
+		String hql = ((AbstractDocumentQuery) Objects.requireNonNull(query)).toQueryString();
+		assertFalse(hql.contains("LEFT OUTER JOIN"), hql);
+	}
+
+	/** Ors the conditions, each in a filter of its own, into the model's filter, as Match Any does. */
+	@SafeVarargs
+	private static void matchAny(DocumentQueryListModel<Bean> model, Consumer<Filter>... conditions) {
+		Filter filter = model.getFilter();
+		for (Consumer<Filter> condition : conditions) {
+			Filter or = model.newFilter();
+			condition.accept(or);
+			filter.addOr(or);
+		}
+	}
+
 	private static Set<String> fixtures(FilterParameter parameter) throws Exception {
 		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
 		model.addParameters(model.getDrivingDocument(), List.of(parameter), null);
@@ -99,10 +230,19 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	private static DocumentQueryListModel<Bean> defaultQueryModel(String moduleName, String documentName) {
+		return defaultQueryModel(moduleName, documentName, null);
+	}
+
+	/** The document's default query, from the given from clause if there is one. */
+	private static DocumentQueryListModel<Bean> defaultQueryModel(String moduleName, String documentName, String from) {
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(moduleName);
 		Document document = module.getDocument(customer, documentName);
-		DocumentQueryListModel<Bean> result = new DocumentQueryListModel<>(module.getDocumentDefaultQuery(customer, document.getName()));
+		MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
+		if (from != null) {
+			((MetaDataQueryDefinitionImpl) query).setFromClause(from);
+		}
+		DocumentQueryListModel<Bean> result = new DocumentQueryListModel<>(query);
 		result.postConstruct(customer, true);
 		result.setStartRow(0);
 		result.setEndRow(100);

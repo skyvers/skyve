@@ -17,6 +17,7 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -144,11 +145,18 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	/**
-	 * Left outer joins the associations and inverse ones on a binding's path that a filter asks "no value" of (a negation
-	 * also matches a row with no value): such a path in a filter is an inner join in HQL, which would leave out the rows
-	 * with nothing on it. The query's own columns may have joined them already. A metadata query whose from clause names
-	 * several documents gets the join after the last of them, where MySQL, SQL Server and PostgreSQL cannot see bean in
-	 * its on clause, as with the joins of its own optional association columns.
+	 * Left outer joins the associations and inverse ones on the path of a binding that a filter puts a condition on.
+	 * Such a path in a filter is an implicit inner join in HQL, which would leave out the rows with nothing on it: a
+	 * negation also matches them, and under Match Any so does any other criterion. The joins are to-one, so they add
+	 * no rows, and a condition through the path still excludes the rows with nothing on it unless it matches no value.
+	 * The query's own columns may have joined them already. An embedded association is on the row, so it needs none.
+	 * <p>A query whose from clause declares several entities (a metadata query's {@code <from>} of
+	 * {@code {a.X} as bean, {a.Y} as y}) gets no joins: appended after the last entity, a join's on clause sees bean only
+	 * where the dialect renders the comma as a cross join (Hibernate 5.6's H2, MySQL, PostgreSQL and SQL Server dialects
+	 * do; its DB2 and Oracle 8i and 9i dialects do not). Such a query keeps the implicit inner joins, so its filters
+	 * through an optional association leave out the rows with none, even a filter that matches no value.
+	 * <p>Side effects: adds the joins to the detail and the summary query.
+	 * @param binding	the binding of the condition
 	 */
 	private void leftOuterJoinAssociations(@Nonnull String binding) {
 		// postConstruct may not have been called: the model can fetch with only its query
@@ -163,14 +171,18 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 			if (! ((attribute instanceof Association) || (attribute instanceof InverseOne))) {
 				return;
 			}
-			leftOuterJoin(detailQuery, path);
-			leftOuterJoin(summaryQuery, path);
+			if (! ((attribute instanceof Association association) && (association.getType() == AssociationType.embedded))) {
+				leftOuterJoin(detailQuery, path);
+				leftOuterJoin(summaryQuery, path);
+			}
 			dot = binding.indexOf('.', dot + 1);
 		}
 	}
 
 	private static void leftOuterJoin(@Nullable DocumentQuery query, @Nonnull String path) {
-		if ((query instanceof AbstractDocumentQuery documentQuery) && (! documentQuery.isLeftOuterJoined(path))) {
+		if ((query instanceof AbstractDocumentQuery documentQuery) &&
+				(! documentQuery.isFromSeveralEntities()) &&
+				(! documentQuery.isLeftOuterJoined(path))) {
 			documentQuery.addLeftOuterJoin(path);
 		}
 	}

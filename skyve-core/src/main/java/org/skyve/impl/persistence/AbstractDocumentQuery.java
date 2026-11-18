@@ -50,6 +50,8 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
 	private final Set<String> leftOuterJoins = new TreeSet<>();
+	// true if the from clause given to the constructor declares several entities (separated by a comma)
+	private boolean fromSeveralEntities = false;
 	private DocumentFilter filter = null;
 	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> insertedOrderings = new LinkedHashMap<>();
@@ -108,9 +110,42 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 		drivingDocument = document;
 		postConstruct(AbstractPersistence.get(), rdbms, filterClause, groupClause, orderClause);
 		if (fromClause != null) {
+			String resolvedFromClause = new AbstractBizQL(fromClause).toQueryString(false);
 			this.fromClause.setLength(0);
-			this.fromClause.append(new AbstractBizQL(fromClause).toQueryString(false));
+			this.fromClause.append(resolvedFromClause);
+			fromSeveralEntities = declaresSeveralEntities(resolvedFromClause);
 		}
+	}
+
+	/**
+	 * Indicates if a from clause declares several entities, as {@code X as bean, Y as y} does: HQL separates its range
+	 * declarations with commas, and a comma anywhere else is inside parentheses (a function's arguments or an in list)
+	 * or inside a string literal.
+	 * @param fromClause	the from clause, its document tokens resolved
+	 * @return true if it has a comma outside parentheses and string literals
+	 */
+	static boolean declaresSeveralEntities(@Nonnull String fromClause) {
+		int depth = 0;
+		boolean literal = false;
+		for (int i = 0, l = fromClause.length(); i < l; i++) {
+			char c = fromClause.charAt(i);
+			if (c == '\'') {
+				// an escaped quote ('') toggles twice
+				literal = ! literal;
+			}
+			else if (! literal) {
+				if (c == '(') {
+					depth++;
+				}
+				else if (c == ')') {
+					depth--;
+				}
+				else if ((c == ',') && (depth == 0)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -576,6 +611,16 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 */
 	public boolean isLeftOuterJoined(@Nonnull String referenceBinding) {
 		return leftOuterJoins.contains(referenceBinding);
+	}
+
+	/**
+	 * Indicates if the from clause given to the constructor declares several entities, as a metadata query's
+	 * {@code <from>} of {@code {a.X} as bean, {a.Y} as y} does: a join appended to the from clause comes after the last
+	 * of them.
+	 * @return true if the from clause has a comma between entities
+	 */
+	public boolean isFromSeveralEntities() {
+		return fromSeveralEntities;
 	}
 
 	/**
