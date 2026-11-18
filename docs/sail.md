@@ -1200,7 +1200,10 @@ only.
   step's failure), and a step that throws makes the call throw.
 - A handler that needs the browser casts the executor to
   `util.sail.InterpretedWebDriverExecutor` and calls its `getDriver()`, which
-  gives the `WebDriver`. That is the only accessor.
+  gives the `WebDriver`, or its `getSelenide()`, which gives the leg's Selenide,
+  to restart the browser on another device (see
+  [Devices and browser profiles](#devices-and-browser-profiles)). Those are the
+  only accessors.
 
 **Contexts.** None of these steps changes the contexts. A script or call that
 makes the browser show another view must be followed by a navigate or context
@@ -2201,9 +2204,13 @@ What survives a stop and start on the same profile: IndexedDB, CacheStorage,
 the service worker registration, `localStorage` and persistent cookies. Session
 cookies do not survive, as on a real restart, so the user signs in again.
 
-A step may restart the leg's browser, for example to change device in the middle
+A step may restart the leg's browser, for example to change device at the start
 of a leg, with `stopBrowser(); startBrowser(configuration)` on the leg's
-Selenide. The Selenide remembers what its browser started with, so the next leg
+Selenide. A `<call>` handler gets it from the executor:
+`((InterpretedWebDriverExecutor<?, ?>) executor).getSelenide()`. Restart with the
+leg's settings (`selenide.getSettings()`) if the run resolves its settings from
+anything but this JVM's, and follow the call with a navigation or sign-in, as the
+page contexts do not follow a restart. The Selenide remembers what its browser started with, so the next leg
 compares against, reuses or stops the restarted browser. A step that stops the
 browser without starting it again is not supported.
 
@@ -3552,7 +3559,11 @@ Existing scripts are unchanged, but code outside the language is affected:
 - An empty `<execute/>` now fails with a `MetaDataException`.
 - `RunState.variables()` is now public.
 - `InterpretedWebDriverExecutor.getDriver()` is new. It gives a `SailCall` the
-  `WebDriver`.
+  `WebDriver`. `getSelenide()` gives it the leg's Selenide.
+- The harness tests' `<call/>` fixture is `util.sail.EchoCall` (it was
+  `sail.kitchenSink.EchoCall`), and their suites are under
+  `src/test/resources/util/sail/fixtures/`, so an app that assembles `util/sail`
+  runs them without Skyve's kitchen sinks.
 - `PrimeFacesSelenide.runScript(String)` is now `runScript(Runnable)`: it runs
   the step (an `execute`, `executeAsync` or `call`), then waits for any
   request or page load the step started.
