@@ -1284,7 +1284,7 @@ class InterpretedWebDriverExecutorTest {
 		@Override
 		public String call(Map<String, String> parameters, Executor executor) {
 			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide = ((InterpretedWebDriverExecutor<?, ?>) executor).getSelenide();
-			SailSettings settings = selenide.getSettings();
+			SailSettings settings = java.util.Objects.requireNonNull(selenide.getSettings());
 			selenide.stopBrowser();
 			selenide.startBrowser(RESTART_ON, settings);
 			return null;
