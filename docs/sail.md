@@ -1920,6 +1920,7 @@ ITs where you meant to run unit tests.
 | `KitchenSinkLoadSailIT` (`sail/load`) | a [load run](#load-testing) of the kitchen sink suite: 5 virtual users over 20 seconds, one iteration each, a 20 minute time limit; leaves out `pf-kitchensink-sail.xml`, whose wrong-password sign in would lock admin out for every user | both | `sail` `performance` |
 | `PrimeFacesSelenideClickSailIT` (`util/sail`) | a click on a tab that a scrolled tab strip puts under a fixed side menu: the harness centres the covered element across as well as down, as a user would scroll it into view; on a `data:` page, so it needs Chrome but no server | none | `sail` |
 | `LoginRememberSailIT` (`util/sail`) | `<login remember="true"/>` on a Chrome profile: after a restart on the profile the browser is still signed in; with `remember="false"` it is signed out, the next `navigateList` fails with the signed out message, and `<testSuccess/>` on the sign in page fails | PF, tablet | `sail` |
+| `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -2146,6 +2147,18 @@ Chrome always runs with `--disable-backgrounding-occluded-windows`,
 `--disable-renderer-backgrounding` and `--disable-background-timer-throttling`.
 Without these flags, a locked screen or a window behind other apps stalls the
 page's timers.
+
+**Password manager prompts.** Chrome and Edge start with the password manager's
+prompts off (`profile.password_manager_leak_detection`,
+`credentials_enable_service` and `profile.password_manager_enabled` are false;
+preferences already set on the options win). A test user often has a password
+that Chrome knows as leaked, such as one that is the user's name (`setup` /
+`setup`). Chrome then shows its "Change your password" prompt about a second
+after the sign in. It is tab-modal browser UI, not part of the page, and while it
+is up every real key and mouse event to the tab is dropped, though scripts and
+`executeScript` still work. A run fails later, with no sign of the cause. A
+device's user agent and window size, and a profile, go through the same options.
+`PasswordPromptSailIT` shows it.
 
 **Reruns.** The root pom sets surefire's rerun count from the property
 `surefire.rerunFailingTestsCount`, which defaults to 2. The `sail` profile
