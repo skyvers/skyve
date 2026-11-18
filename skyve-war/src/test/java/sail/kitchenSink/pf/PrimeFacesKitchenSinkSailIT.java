@@ -210,6 +210,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * The {@code execute} failures, in this renderer: see {@link ScriptStepFailures#executeFailures()}.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
 	void executeFailures() {
 		scriptStepFailures().executeFailures();
 	}
@@ -218,6 +219,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * The {@code executeAsync} failures, in this renderer: see {@link ScriptStepFailures#executeAsyncFailures()}.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
 	void executeAsyncFailures() {
 		scriptStepFailures().executeAsyncFailures();
 	}
@@ -226,6 +228,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * The {@code waitFor} failures, in this renderer: see {@link ScriptStepFailures#waitForFailures()}.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
 	void waitForFailures() {
 		scriptStepFailures().waitForFailures();
 	}
@@ -234,6 +237,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * The {@code testScript} failures, in this renderer: see {@link ScriptStepFailures#testScriptFailures()}.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
 	void testScriptFailures() {
 		scriptStepFailures().testScriptFailures();
 	}
@@ -242,6 +246,7 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 	 * The {@code call} failures, in this renderer: see {@link ScriptStepFailures#callFailures()}.
 	 */
 	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
 	void callFailures() {
 		scriptStepFailures().callFailures();
 	}

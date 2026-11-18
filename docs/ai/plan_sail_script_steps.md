@@ -316,13 +316,13 @@ Update:
 
 ## Acceptance checklist
 
-- [ ] W0: promise awaiting, rejection and timeout behaviour recorded; approach chosen
-- [ ] W1: four new elements and `execute@variable` unmarshal and round-trip; both XSDs identical and validating; `Executor` has four new methods; generators emit comments; reactor compiles
-- [ ] W2: each step behaves as in the semantics table under Assert, Verify and None, proven by unit tests; existing `execute` scripts unchanged
-- [ ] W3: both kitchen sinks pass with every new element and attribute; inline failure tests pass; `SailLanguageCoverageTest` and `SailScriptsUnmarshalTest` pass
-- [ ] W4: `docs/sail.md` updated in every section listed
-- [ ] Gates (tests, red/green, coverage, Eclipse, Sonar, Javadoc, formatting) pass on changed lines
-- [ ] `mvn -o -B package` passes on the branch
+- [x] W0: promise awaiting, rejection and timeout behaviour recorded; approach chosen
+- [x] W1: four new elements and `execute@variable` unmarshal and round-trip; both XSDs identical and validating; `Executor` has four new methods; generators emit comments; reactor compiles
+- [x] W2: each step behaves as in the semantics table under Assert, Verify and None, proven by unit tests; existing `execute` scripts unchanged
+- [x] W3: both kitchen sinks pass with every new element and attribute; inline failure tests pass; `SailLanguageCoverageTest` and `SailScriptsUnmarshalTest` pass
+- [x] W4: `docs/sail.md` updated in every section listed
+- [x] Gates (tests, red/green, coverage, Eclipse, Sonar, Javadoc, formatting) pass on changed lines (formatting by hand, no Spotless; W3 headless only)
+- [x] `mvn -o -B package` passes on the branch
 
 ## Better engineering notes
 
@@ -375,6 +375,82 @@ A throwaway `util.sail.ScriptStepsSpikeTest` (deleted before W1) drove headless 
    as they already were in WebDriver's own function.
 
 **Approach:** locked decision 3 holds, so `executeScript` with the async wrapper is used. The fallback is not needed.
+
+### Work items (2026-11-18)
+
+Commits on `sail-script-steps`, none pushed:
+
+- `3c6b70f7d8` W1 language
+- `864fc8e3cc` W2 harness (with the `EchoCall` fixture, which W2's tests use)
+- `4db28acd5b` W3 conformance
+- `140a4efa1d` W4 documentation
+- `f96938dfd4` review fixes
+- `6a618a4e74` re-review fixes
+- `fc9f936af6` shared helpers, approved by Mike
+- the commit that adds this section (Sonar suppressions and these results)
+
+Per work item:
+
+- **W1.** `mvn -o -B -DskipTests compile` passed across the reactor. `test-compile` passed for `skyve-war`. The core tests (`ExecuteTest`, the four new step tests, `SailLanguageXmlTest`, `SuiteXmlTest` and `ContextualExecutorTest`: 114), ext's `SailExecutorTest` (6) and web's `PrimeFacesInlineWebDriverExecutorTest` (13) passed. Both `sail.xsd` copies are identical (`cmp`). Schemagen output (`XMLMetaData.main`) matches the new types and step choices exactly; the only differences are the existing suite types (`block`, `xs:token`, order).
+- **W2.** `InterpretedWebDriverExecutorTest` passed, with 56 tests at W2 and 62 after the fixes, and so did every `util.sail` unit test (195 at W2).
+- **W3.** `SailScriptsUnmarshalTest` and `SailLanguageCoverageTest` passed with no allow-list change. The disposable server was WildFly on port 8600, `SKYVE_RUN_DIR=~/skyve-sail-work/steps/run`, H2. Against it, headless Chrome, on the final code:
+  - `PrimeFacesKitchenSinkSailIT`: 8 of 8, including the five new `*Failures` tests;
+  - `SmartClientKitchenSinkSailIT`: 7 of 7;
+  - `KitchenSinkSuiteSailIT`: 5 of 5 members.
+
+  The first suite run failed only because a new `<comment>` named `{var:name}`. Comments are substituted, so it was reworded. The existing `execute` bodies passed unchanged in the wrapper (both kitchen sinks, the suite). **Not run:** the kitchen sinks headed, the other ITs that use `execute` (`PrimeFacesActionUploadSailIT`, `PrimeFacesSelectMenuSailIT`, `SmartClientListGridSelectedEventSailIT`, `SmartClientActionUploadSailIT`), and the admin suite.
+- **W4.** `docs/sail.md` was checked against the code after each fix round.
+
+### Gates (final commit)
+
+1. **Build and tests.** `mvn -o -B package` in a mirror of the tree: 23,796 tests, 0 failures, 0 errors, 52 skipped, no flakes (read from `*/target/surefire-reports/TEST-*.xml`). It ran on the tree after the shared helpers, before the S2699 suppressions, which are annotations only.
+2. **Red/green.** 16 mutations, each restored afterwards:
+   - core: `Execute`'s variable check, `ExecuteAsync`'s negative timeout, `Call`'s duplicate parameter, `TestScript`'s 60-character identifier, `Procedure`'s `WaitFor` ref;
+   - ext: the `execute variable` comment, the `call` comment;
+   - harness: the wrapper's newline, `waitFor` under None, the timeout restore, a poll that is between pages, the null-result check, `testScript` skipped under None, a call's `AssertionError` as an assertion, the `SailFailure` passthrough, the lost-window wrap.
+
+   Each turned its named test red. PF's inline row for `waitFor`/`testScript` and the PF/SC settling need a browser. They were exercised by the kitchen sinks, not by a mutation.
+3. **Coverage.** Aggregate JaCoCo over the targeted tests: changed production lines 104/104 (100%), branches 46/46 (100%). Each new class is at 100% of lines: `Call`, `CallParameter`, `ExecuteAsync`, `WaitFor`, `TestScript`. `Executor` and `SailCall` are interfaces, and `package-info` has no code. Harness and fixture code is exempt.
+4. **Eclipse.** Batch ECJ 3.41 (`--release 17`, core prefs, all source roots of core, ext, web and war): 0 warnings or errors on changed lines.
+5. **Sonar.** Local SonarQube, project `skyve-steps`: 0 issues on changed lines after the fixes. Suppressions:
+   - `java:S112` on `SailCall.call`: `throws Exception` is locked decision 5;
+   - `java:S2699` on the ten one-line kitchen sink tests that delegate to `ScriptStepFailures`, which holds the assertions.
+
+   The lambdas flagged by S5778 were fixed.
+6. **Javadoc.** Everything new or changed in `skyve-core` was checked by hand against `javadoc-standards.md`: the step classes, `CallParameter`, `SailCall`, the four `Executor` methods, `CaptureStep.validateVariableName`, `Execute.scriptIdentifier` and `RunState.variables()`. So were `WebDriverExecutor` and the harness's new methods.
+7. **Formatting.** Done by hand: tab indentation, and `git diff --check` is clean. Spotless was **not** run: Mike asked not to run it on skyve (2026-10-19).
+8. **Review.** PR review, rubric review and code-slop review, then one re-review. They found:
+   - a call's exception split: `SailFailure`, `UIAssertionError`, `InvocationTargetException`, `ExceptionInInitializerError` and `NoClassDefFoundError`;
+   - PF's inline row for `waitFor`/`testScript`;
+   - the `Executor` token list;
+   - a lost window being ignored by `WebDriverWait` (`NoSuchWindowException` is a `NotFoundException`);
+   - the None behaviour of `SailCall`;
+   - "Seven steps";
+   - interrupts, class initialisation and the docs on nested steps.
+
+   All of these were fixed and tested. Mike approved the duplication findings, which needed new helpers (`fc9f936af6`).
+
+   Waived:
+   - presized collections: the conventions ask for them;
+   - `requireNonNull` on the `@Nullable` `getScript()`: ECJ null analysis;
+   - the script timeout being set per poll: the approved helper sets it per run, a few local commands each 250 ms;
+   - the per-poll limit being the whole timeout, not what remains: a wait ends within about twice its timeout;
+   - a blank `parameter@value` counting as absent: as for other attributes, and the message says so;
+   - the static-initialiser and `NoClassDefFoundError` branches having no test: they need another fixture, and the harness is exempt from coverage.
+
+### Deviations from the plan
+
+- `RunState.variables()` is public, so the harness can build `sail.vars`. Mike confirmed it.
+- `PrimeFacesSelenide.runScript(String)` became `runScript(Runnable)`, so a `call` gets PF's settling as the scripts do. Mike confirmed it.
+- The rejection message gives the error's message, not its stack: WebDriver never returns the JavaScript stack (W0).
+- `waitFor` and `testScript` coerce the result with `.then(function (result) { return !! result; })` after the locked wrapper.
+- A call's Selenide `UIAssertionError` is a step that throws, as for a gesture, and a step the call runs through the executor fails as that step.
+- `InterpretedWebDriverExecutorTest` has two nested test-only `SailCall` classes, `ThrowingConstructorCall` and `HarnessFailureCall`, beyond `EchoCall`. Mike approved them.
+- Shared helpers beyond the one approved script helper, all approved by Mike:
+  - `CaptureStep.validateVariableName`;
+  - `Execute.scriptIdentifier`;
+  - the harness's `keepResult` and `holds`;
+  - `sail.kitchenSink.ScriptStepFailures`.
 
 ## User validation suggestions
 
