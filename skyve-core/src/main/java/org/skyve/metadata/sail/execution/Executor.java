@@ -92,6 +92,7 @@ import jakarta.annotation.Nonnull;
  * {@code dataEnter@value}, {@code testValue@value}, {@code lookupDescriptionAutoComplete@search},
  * {@code lookupDescriptionAutoComplete@pick}, {@code listGridFilter@value}, {@code login@user},
  * {@code login@password}, {@code login@customer}, {@code testFailure@message}, {@code testMessage@contains},
+ * {@code testScript@message}, {@code call}'s {@code parameter@value},
  * {@code navigateLink@href}, {@code navigateLink@text}, {@code dataGridLink@text}, {@code navigateEdit@bizId},
  * {@code comment} text and every {@code rowContaining}.
  *

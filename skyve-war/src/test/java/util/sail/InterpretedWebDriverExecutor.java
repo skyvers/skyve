@@ -2,6 +2,7 @@ package util.sail;
 
 import java.beans.Introspector;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
@@ -19,14 +20,16 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchSessionException;
+import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.ScriptTimeoutException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.WebDriverException;
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -107,6 +110,8 @@ import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.WebAction;
+
+import com.codeborne.selenide.ex.UIAssertionError;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -1334,7 +1339,10 @@ public abstract class InterpretedWebDriverExecutor<
 				try {
 					return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
 				}
-				catch (JavascriptException | ScriptTimeoutException e) {
+				catch (NoSuchSessionException | NoSuchWindowException e) {
+					throw e;
+				}
+				catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
 					lastError[0] = reason(e);
 					return null;
 				}
@@ -1372,7 +1380,10 @@ public abstract class InterpretedWebDriverExecutor<
 			try {
 				return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
 			}
-			catch (JavascriptException | ScriptTimeoutException e) {
+			catch (NoSuchSessionException | NoSuchWindowException e) {
+				throw e;
+			}
+			catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
 				lastError[0] = reason(e);
 				return null;
 			}
@@ -1425,7 +1436,8 @@ public abstract class InterpretedWebDriverExecutor<
 
 		Class<?> type;
 		try {
-			type = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+			// not initialised yet: a class that is not a SailCall never runs its static initialiser
+			type = Class.forName(className, false, Thread.currentThread().getContextClassLoader());
 		}
 		catch (ClassNotFoundException | LinkageError e) {
 			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class that cannot be loaded: %s", className, e), e);
@@ -1437,7 +1449,10 @@ public abstract class InterpretedWebDriverExecutor<
 		try {
 			handler = (SailCall) type.getConstructor().newInstance();
 		}
-		catch (ReflectiveOperationException e) {
+		catch (InvocationTargetException e) {
+			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class whose constructor threw %s", className, e.getCause()), e);
+		}
+		catch (ReflectiveOperationException | ExceptionInInitializerError e) {
 			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class that cannot be constructed with a public no-argument constructor: %s",
 														className, e),
 										e);
@@ -1447,11 +1462,25 @@ public abstract class InterpretedWebDriverExecutor<
 		try {
 			result = handler.call(values, this);
 		}
+		catch (SailFailure e) {
+			// a step that the call ran through this executor failed, and said so
+			throw e;
+		}
+		catch (UIAssertionError e) {
+			// a Selenide wait or check failed: a step that throws, as it is for a gesture
+			throw new IllegalStateException(String.format("<call className=\"%s\" /> threw %s", className, reason(e)), e);
+		}
 		catch (AssertionError e) {
-			check(false, () -> String.format("<call className=\"%s\" /> failed: %s", className, e.getMessage()));
+			// the failure message has no stack trace: the trace shows where the call's assertion failed
+			selenide.trace("    Cause: " + causes(e));
+			String message = e.getMessage();
+			check(false, () -> String.format("<call className=\"%s\" /> failed: %s", className, (message == null) ? e.toString() : message));
 			return;
 		}
 		catch (Exception e) {
+			if (e instanceof InterruptedException) {
+				Thread.currentThread().interrupt();
+			}
 			throw new IllegalStateException(String.format("<call className=\"%s\" /> threw %s", className, reason(e)), e);
 		}
 		String variable = call.getVariable();
@@ -1488,7 +1517,8 @@ public abstract class InterpretedWebDriverExecutor<
 	 *
 	 * @param body	the step's JavaScript
 	 * @param async	true to run the body as an {@code async} function
-	 * @param truthy	true to give whether the resolved value is truthy, as a {@link Boolean}; only with {@code async}
+	 * @param truthy	true to give whether the resolved value is truthy, as a {@link Boolean}; the body then runs as an
+	 * 					{@code async} function whatever {@code async} says
 	 * @param limit	the script timeout: how long the browser waits for the script, or its promise, to settle
 	 * @return the result as WebDriver gives it ({@code null} for {@code null} or {@code undefined})
 	 * @throws org.openqa.selenium.JavascriptException	if the script throws, or its promise rejects
@@ -1496,7 +1526,7 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	private @Nullable Object runScript(@Nonnull String body, boolean async, boolean truthy, @Nonnull Duration limit) {
 		Map<String, Object> sail = Map.of("run", getRunToken(), "vars", new HashMap<>(getRun().variables()));
-		String script = "return (" + (async ? "async function" : "function") + " (sail) { " + body + "\n}).apply(this, arguments)" +
+		String script = "return (" + ((async || truthy) ? "async function" : "function") + " (sail) { " + body + "\n}).apply(this, arguments)" +
 							(truthy ? ".then(function (result) { return !! result; });" : ";");
 		WebDriver driver = selenide.driver;
 		Timeouts timeouts = driver.manage().timeouts();

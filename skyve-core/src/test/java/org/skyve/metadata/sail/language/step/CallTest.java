@@ -72,8 +72,8 @@ class CallTest {
 		step.setVariable("1st");
 		MetaDataException badVariable = assertThrows(MetaDataException.class, () -> step.execute(executor));
 		assertAll(() -> assertThat(noClass.getMessage(), is("<call /> has no [className]")),
-					() -> assertThat(noName.getMessage(), is("<call className=\"C\" /> has a <parameter /> without a [name] or [value]")),
-					() -> assertThat(noValue.getMessage(), is("<call className=\"C\" /> has a <parameter /> without a [name] or [value]")),
+					() -> assertThat(noName.getMessage(), is("<call className=\"C\" /> has a <parameter /> without a [name] or [value]: a blank one counts as absent")),
+					() -> assertThat(noValue.getMessage(), is("<call className=\"C\" /> has a <parameter /> without a [name] or [value]: a blank one counts as absent")),
 					() -> assertThat(twice.getMessage(), is("<call className=\"C\" /> has more than one <parameter name=\"n\" />")),
 					() -> assertThat(badVariable.getMessage(), is("<call /> [variable] 1st is not a variable name: use a letter, then letters, digits or underscores")));
 		verifyNoInteractions(executor);

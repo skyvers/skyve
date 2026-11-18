@@ -36,9 +36,11 @@ import jakarta.xml.bind.annotation.XmlType;
  *
  * <p>The step fails when the class is missing, is not a {@code SailCall} or cannot be constructed, or when the call
  * throws. Under the {@code Verify} test strategy, an {@link AssertionError} from the call is recorded and the run
- * carries on, as a failed assertion is; any other exception is a step that throws.
+ * carries on, as a failed assertion is, and under {@code None} it is ignored. Any other exception, Selenide's
+ * {@code UIAssertionError} included, is a step that throws.
  *
- * <p>A missing {@code className}, a parameter without a name or value, a parameter name given twice, or a
+ * <p>A missing {@code className}, a parameter without a name or value (a blank one counts as absent, as for other
+ * attributes), a parameter name given twice, or a
  * {@code variable} that is not a variable name ({@value CaptureStep#VARIABLE_NAME_PATTERN}) fails the step with a
  * {@link MetaDataException} when it runs, as the XSD cannot express these rules.
  *
@@ -122,7 +124,7 @@ public class Call implements Step {
 		for (CallParameter parameter : parameters) {
 			String name = parameter.getName();
 			if ((name == null) || (parameter.getValue() == null)) {
-				throw new MetaDataException("<call className=\"" + className + "\" /> has a <parameter /> without a [name] or [value]");
+				throw new MetaDataException("<call className=\"" + className + "\" /> has a <parameter /> without a [name] or [value]: a blank one counts as absent");
 			}
 			if (! names.add(name)) {
 				throw new MetaDataException("<call className=\"" + className + "\" /> has more than one <parameter name=\"" + name + "\" />");

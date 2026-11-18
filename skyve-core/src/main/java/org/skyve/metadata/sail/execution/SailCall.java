@@ -17,9 +17,10 @@ import jakarta.annotation.Nullable;
  * after it. It may block, but nothing times it out.
  *
  * <p>Failures: an {@link AssertionError} is a failed assertion, which follows the test strategy: it stops the run under
- * {@code Assert}, and is recorded under {@code Verify}, where the run carries on with the next step. Any other
- * exception fails the step as a step that cannot do what it says, which stops the interaction even under
- * {@code Verify}.
+ * {@code Assert}, is recorded under {@code Verify}, where the run carries on with the next step, and is ignored under
+ * {@code None}. Any other exception fails the step as a step that cannot do what it says, which stops the interaction
+ * even under {@code Verify}. So do the harness's own failures: Selenide's {@code UIAssertionError}, such as for an
+ * element that is missing, and the failure of a step that the call runs through the executor.
  *
  * <p>Contexts: the executor's contexts are not changed by a call. A call that makes the browser show another view must be
  * followed by a navigate or context step, as a {@code <navigateLink/>} to a page that is not Skyve's must.

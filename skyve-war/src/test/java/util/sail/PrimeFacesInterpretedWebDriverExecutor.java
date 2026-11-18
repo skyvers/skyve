@@ -42,6 +42,8 @@ import org.skyve.metadata.module.menu.MenuItem;
 import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestScript;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -200,7 +202,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 * The steps that keep an inline row (see {@link #startingStep(Step)}): those that address its cells, and those that
 	 * do not touch the page. They are exactly the steps that keep SmartClient's inline edit: there, {@code captureCell}
 	 * and {@code testGridRows} end the edit to read the grid's saved rows, {@code captureTitle} to read the view, and
-	 * {@code testDataEnter} to fill the view's fields, so they end the row here too.
+	 * {@code testDataEnter} to fill the view's fields, so they end the row here too. {@code waitFor} and
+	 * {@code testScript} only read the page, so they keep it in both; {@code execute}, {@code executeAsync} and
+	 * {@code call} end it.
 	 */
 	private static final Set<Class<? extends Step>> KEEPS_INLINE_ROW = Set.of(DataEnter.class,
 																				TestValue.class,
@@ -213,7 +217,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																				TestMessage.class,
 																				TestSuccess.class,
 																				TestFailure.class,
-																				TestMenu.class);
+																				TestMenu.class,
+																				WaitFor.class,
+																				TestScript.class);
 
 	/**
 	 * A widget to try for a binding, with its client id on the page.

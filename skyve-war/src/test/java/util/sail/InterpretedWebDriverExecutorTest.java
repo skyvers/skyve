@@ -32,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -44,9 +43,11 @@ import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InOrder;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchSessionException;
 import org.openqa.selenium.ScriptTimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -58,6 +59,8 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.execution.SailCall;
 import org.skyve.impl.sail.execution.RunState;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
@@ -90,6 +93,8 @@ import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink
 import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.user.User;
+
+import com.codeborne.selenide.ex.UIAssertionError;
 
 /**
  * Unit tests of what the interpreted executors share and need no browser: captured variables, the list grid step
@@ -944,7 +949,6 @@ class InterpretedWebDriverExecutorTest {
 	 * result is thrown); the last answers every later script. The script timeout starts at 30 seconds, and the settings'
 	 * timeout is 5 seconds. The executor's waits are real, polling the mocked browser.
 	 */
-	@SuppressWarnings("unchecked")
 	private JavascriptExecutor browser(Object... results) {
 		WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
 		WebDriver.Options options = mock(WebDriver.Options.class);
@@ -990,7 +994,6 @@ class InterpretedWebDriverExecutorTest {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
 	void eachScriptStepRunsItsBodyAsAFunctionOfACopyOfTheRunTokenAndVariables() {
 		browser(Boolean.TRUE);
 		executor.putVariable("who", "Jane");
@@ -1075,12 +1078,25 @@ class InterpretedWebDriverExecutorTest {
 
 	@Test
 	void waitForPollsUntilTheScriptHoldsAndCountsAThrowingPollAsFalse() {
-		browser(Boolean.FALSE, new JavascriptException("javascript error: not yet"), Boolean.TRUE);
+		browser(Boolean.FALSE, new JavascriptException("javascript error: not yet"), new WebDriverException("between pages"), Boolean.TRUE);
 		WaitFor wait = new WaitFor();
 		wait.setScript("return window._sailReady;");
 		wait.setTimeoutMillis(Integer.valueOf(5000));
 		wait.execute(executor);
-		assertEquals(3, scripts.size());
+		assertEquals(4, scripts.size());
+	}
+
+	@Test
+	void aLostBrowserFailsAWaitOrATestScriptAtOnce() {
+		browser(new NoSuchSessionException("invalid session id"));
+		WaitFor wait = new WaitFor();
+		wait.setScript("return true;");
+		wait.setTimeoutMillis(Integer.valueOf(5000));
+		TestScript test = new TestScript();
+		test.setScript("return true;");
+		assertAll(() -> assertThrows(NoSuchSessionException.class, () -> wait.execute(executor), "waitFor"),
+					() -> assertThrows(NoSuchSessionException.class, () -> test.execute(executor), "testScript"),
+					() -> assertEquals(2, scripts.size(), "one run each"));
 	}
 
 	@Test
@@ -1206,6 +1222,68 @@ class InterpretedWebDriverExecutorTest {
 									"not constructible"),
 					() -> assertEquals("<call className=\"sail.kitchenSink.EchoCall\" /> has more than one <parameter name=\"text\" />",
 										assertThrows(MetaDataException.class, () -> duplicate.execute(executor)).getMessage(), "duplicate parameter"));
+	}
+
+	@Test
+	void aCallWhoseConstructorThrowsFailsNamingTheConstructorsException() {
+		browser(Boolean.TRUE);
+		Call throwing = call(ThrowingConstructorCall.class.getName(), null);
+		MetaDataException e = assertThrows(MetaDataException.class, () -> throwing.execute(executor));
+		assertEquals("<call className=\"util.sail.InterpretedWebDriverExecutorTest$ThrowingConstructorCall\" /> names a class whose constructor threw " +
+						"java.lang.IllegalStateException: no call today",
+						e.getMessage());
+	}
+
+	@Test
+	void aHarnessFailureInACallIsAStepThatThrowsNotTheCallsAssertion() {
+		browser(Boolean.FALSE);
+		String className = HarnessFailureCall.class.getName();
+		String selenide = "<interaction name=\"selenide\"><method>" +
+							"<call className=\"" + className + "\"><parameter name=\"fail\" value=\"selenide\"/></call>" +
+							"<comment>after the Selenide failure</comment></method></interaction>";
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", selenide)));
+		String step = "<interaction name=\"step\"><method><call className=\"" + className + "\"/></method></interaction>";
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", step)));
+		String message = asserted.getMessage();
+
+		assertAll(() -> assertTrue(verified.getMessage().contains("> threw UIAssertionError: element not found"), verified.getMessage()),
+					() -> verify(executor.selenide, never()).trace("after the Selenide failure"),
+					() -> assertTrue(message.startsWith("Interaction \"step\" step 1 "), message),
+					() -> assertTrue(message.contains(": <testScript /> did not hold: return false;"), message),
+					() -> assertEquals(message.indexOf("Interaction \""), message.lastIndexOf("Interaction \""), "described once: " + message),
+					() -> assertFalse(message.contains("> failed: "), "not the call's own assertion: " + message));
+	}
+
+	/** A {@link SailCall} that cannot be constructed: its constructor throws. */
+	public static final class ThrowingConstructorCall implements SailCall {
+		/**
+		 * Throws.
+		 */
+		public ThrowingConstructorCall() {
+			throw new IllegalStateException("no call today");
+		}
+
+		@Override
+		public String call(Map<String, String> parameters, Executor executor) {
+			return null;
+		}
+	}
+
+	/**
+	 * A {@link SailCall} that fails as the harness does: a Selenide check with {@code fail="selenide"}, otherwise a
+	 * false {@code <testScript/>} that it runs through the executor.
+	 */
+	public static final class HarnessFailureCall implements SailCall {
+		@Override
+		public String call(Map<String, String> parameters, Executor executor) {
+			if ("selenide".equals(parameters.get("fail"))) {
+				throw new UIAssertionError("element not found", "visible", "absent");
+			}
+			TestScript test = new TestScript();
+			test.setScript("return false;");
+			test.execute(executor);
+			return "ran";
+		}
 	}
 
 	@Test
