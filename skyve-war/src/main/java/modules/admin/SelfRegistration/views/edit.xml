@@ -135,7 +135,7 @@
 								<tr>
 									<td style="width:50%" />
 									<td>
-										<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}"></div>
+										<div class="g-recaptcha" data-sitekey="{el:bean.siteKey}" style="min-width:300px"></div>
 									</td>
 									<td style="width:50%" />
 								</tr>
