@@ -1271,7 +1271,7 @@ public class PrimeFacesSelenide extends Selenide<
 		WebElement button = vueFilterButton(gridId, field);
 		if (vueFilterActive(button)) {
 			trace("    clear the column's filter");
-			clearVueFilter(button);
+			clearVueFilter(button, String.format("column %s of list grid %s", field, gridId));
 			if (value == null) {
 				return;
 			}
@@ -1288,7 +1288,7 @@ public class PrimeFacesSelenide extends Selenide<
 															gridId));
 		}
 
-		String overlayId = openVueFilterOverlay(button);
+		String overlayId = openVueFilterOverlay(button, String.format("column %s of list grid %s", field, gridId));
 		WebElement dropdown = (WebElement) js("var o = document.getElementById(arguments[0]);" +
 												"return o.querySelector('.p-column-filter-constraint .p-column-filter-matchmode-dropdown');", overlayId);
 		if (dropdown == null) {
@@ -1304,7 +1304,8 @@ public class PrimeFacesSelenide extends Selenide<
 		long fetches = markVueListGridFetch();
 		click($(apply));
 		// Wait for Apply to close the filter menu (after its closing transition)
-		waitFor(d -> (js("return document.getElementById(arguments[0]);", overlayId) == null) ? Boolean.TRUE : null);
+		waitFor(String.format("Apply to close the filter menu of column %s of list grid %s", field, gridId),
+				d -> (js("return document.getElementById(arguments[0]);", overlayId) == null) ? Boolean.TRUE : null);
 		waitForVueListGridFetch(fetches);
 		if (! vueFilterActive(vueFilterButton(gridId, field))) {
 			throw new IllegalStateException(String.format("Column %s of list grid %s does not show a filter after Apply", field, gridId));
@@ -1392,7 +1393,7 @@ public class PrimeFacesSelenide extends Selenide<
 			if (button == null) {
 				break;
 			}
-			clearVueFilter(button);
+			clearVueFilter(button, String.format("column %s of list grid %s", js("return arguments[0].closest('th').querySelector('.p-column-title').textContent.trim();", button), gridId));
 			result++;
 		}
 		return result;
@@ -1457,27 +1458,32 @@ public class PrimeFacesSelenide extends Selenide<
 	/**
 	 * Opens a column's filter menu with its button.
 	 *
+	 * @param filterButton	the button
+	 * @param what	the column and grid, for the messages (such as {@code column text of list grid g})
 	 * @return the menu's (overlay's) id
 	 */
-	private @Nonnull String openVueFilterOverlay(@Nonnull WebElement filterButton) {
+	private @Nonnull String openVueFilterOverlay(@Nonnull WebElement filterButton, @Nonnull String what) {
 		String result = Objects.requireNonNull(filterButton.getDomAttribute("aria-controls"), "filter menu id");
 		click($(filterButton));
 		// Wait for the filter menu to open and its opening transition to end
-		waitFor(d -> js("var o = document.getElementById(arguments[0]);" +
+		waitFor("the filter menu of " + what + " to open", d -> js("var o = document.getElementById(arguments[0]);" +
 							"return (o && (o.getClientRects().length > 0) && (! /-enter-/.test(o.className))) ? true : null;", result));
 		return result;
 	}
 
 	/**
 	 * Clears a column's filter with Clear in its filter menu, and waits for the grid's fetch.
+	 *
+	 * @param filterButton	the button
+	 * @param what	the column and grid, for the messages (such as {@code column text of list grid g})
 	 */
-	private void clearVueFilter(@Nonnull WebElement filterButton) {
-		String overlayId = openVueFilterOverlay(filterButton);
+	private void clearVueFilter(@Nonnull WebElement filterButton, @Nonnull String what) {
+		String overlayId = openVueFilterOverlay(filterButton, what);
 		WebElement clear = (WebElement) js("return document.getElementById(arguments[0]).querySelector('[data-pc-name=filterclearbutton]');", overlayId);
 		long fetches = markVueListGridFetch();
 		click($(clear));
 		// Wait for Clear to close the filter menu (after its closing transition)
-		waitFor(d -> (js("return document.getElementById(arguments[0]);", overlayId) == null) ? Boolean.TRUE : null);
+		waitFor("Clear to close the filter menu of " + what, d -> (js("return document.getElementById(arguments[0]);", overlayId) == null) ? Boolean.TRUE : null);
 		waitForVueListGridFetch(fetches);
 	}
 
@@ -2819,6 +2825,19 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
+	 * Waits for the browser to render a frame, which delivers the scroll events of any scrolling the harness has just done.
+	 * <p>
+	 * A browser queues a scroll's event for its next frame. A component that closes on a scroll (a PrimeVue filter menu or
+	 * drop down binds its scroll listener when the click opens it) would take that late event as the user scrolling and close
+	 * again, if the click came before the frame. A user's click always comes in a later frame than the scroll that brought its
+	 * target into view. One frame is enough: a frame's rendering update dispatches the pending scroll events before it runs
+	 * its animation frame callbacks, so when the callback runs the events have been delivered.
+	 */
+	private void waitForRenderedFrame() {
+		((JavascriptExecutor) driver).executeAsyncScript("var done = arguments[arguments.length - 1]; requestAnimationFrame(function() {done(true);});");
+	}
+
+	/**
 	 * Waits until the element's centre is not covered by another element, e.g. while a header settles or an overlay
 	 * animates away.
 	 */
@@ -2841,6 +2860,7 @@ public class PrimeFacesSelenide extends Selenide<
 								"if ((t === null) || (t === e) || e.contains(t) || t.contains(e) || (t.tagName === 'LABEL' && t.htmlFor === e.id)) return true;" +
 								"e.scrollIntoView({block: 'nearest', inline: 'center'}); centre(e); return null;",
 								element));
+			waitForRenderedFrame();
 		}
 		catch (@SuppressWarnings("unused") org.openqa.selenium.TimeoutException | StaleElementReferenceException e) {
 			// still covered (or gone): the click or typing reports the problem
