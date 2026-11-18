@@ -143,7 +143,9 @@ public class SingleCustomerBasicAuthenticationFilter extends BasicAuthentication
 		byte[] base64Token = header.substring(6).getBytes(StandardCharsets.UTF_8);
 		byte[] decoded;
 		try {
-			decoded = Base64.getDecoder().decode(base64Token);
+			// The MIME decoder doesn't use the HotSpot AVX-512 Base64 intrinsic that has
+			// CVE-2026-114938 (Java4Shell), and this header is decoded before login.
+			decoded = Base64.getMimeDecoder().decode(base64Token);
 		}
 		catch (@SuppressWarnings("unused") IllegalArgumentException e) {
 			throw new BadCredentialsException("Failed to decode basic authentication token");

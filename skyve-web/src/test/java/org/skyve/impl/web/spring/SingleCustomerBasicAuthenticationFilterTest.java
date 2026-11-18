@@ -137,6 +137,20 @@ class SingleCustomerBasicAuthenticationFilterTest {
 	}
 
 	@Test
+	void extractAndDecodeHeaderUsesMimeDecoder() throws Exception {
+		UtilImpl.CUSTOMER = "tenant";
+		SingleCustomerBasicAuthenticationFilter filter = new SingleCustomerBasicAuthenticationFilter(mock(AuthenticationManager.class));
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		// The basic decoder rejects a line break, the MIME decoder skips it
+		String encoded = base64("bob:pwd");
+		String header = "Basic " + encoded.substring(0, 4) + "\r\n" + encoded.substring(4);
+
+		String[] tokens = invokeExtractAndDecodeHeader(filter, header, request);
+
+		assertArrayEquals(new String[] {"tenant/bob", "pwd"}, tokens);
+	}
+
+	@Test
 	void extractAndDecodeHeaderRejectsTokenWithoutDelimiter() {
 		SingleCustomerBasicAuthenticationFilter filter = new SingleCustomerBasicAuthenticationFilter(mock(AuthenticationManager.class));
 		HttpServletRequest request = mock(HttpServletRequest.class);
