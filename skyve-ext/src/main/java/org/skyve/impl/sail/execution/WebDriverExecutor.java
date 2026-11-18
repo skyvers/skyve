@@ -5,15 +5,19 @@ import java.util.List;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
@@ -97,13 +101,17 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	}
 
 	/**
-	 * Emits a call to the harness's {@code execute(String)}, which runs the step's JavaScript in the page.
+	 * Emits a call to the harness's {@code execute(String)}, which runs the step's JavaScript in the page, and with
+	 * {@code variable}, a comment that the generated code keeps no result.
 	 *
 	 * @param execute the step
 	 */
 	@Override
 	public void executeExecute(@Nonnull Execute execute) {
 		indent().append("execute(").append(literal(execute.getScript())).append(");").newline();
+		if (execute.getVariable() != null) {
+			comment("<execute variable/> not supported by this generator: the generated code keeps no result");
+		}
 	}
 
 	/**
@@ -357,6 +365,50 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	@Override
 	public void executeListGridTool(@Nonnull ListGridTool tool) {
 		comment("<listGridTool/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <executeAsync/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param execute the step being skipped
+	 */
+	@Override
+	public void executeExecuteAsync(@Nonnull ExecuteAsync execute) {
+		comment("<executeAsync/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <waitFor/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param wait the step being skipped
+	 */
+	@Override
+	public void executeWaitFor(@Nonnull WaitFor wait) {
+		comment("<waitFor/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testScript/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestScript(@Nonnull TestScript test) {
+		comment("<testScript/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <call/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param call the step being skipped
+	 */
+	@Override
+	public void executeCall(@Nonnull Call call) {
+		comment("<call/> not supported by this generator");
 	}
 
 	/**

@@ -24,6 +24,7 @@ import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
@@ -31,10 +32,13 @@ import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
@@ -233,7 +237,8 @@ class SailExecutorTest {
 	private static final String[] UNSUPPORTED = {"upload", "testMessage", "testGridRows", "testWidget", "navigateMenu", "testMenu", "switchMode",
 													"listGridFilter", "listGridClearFilter", "listGridSort", "captureValue",
 													"captureCell", "captureTitle", "dataGridLink", "dataGridMove", "listMembershipMove",
-													"navigateBack", "refresh", "closeWindow", "listGridTool"};
+													"navigateBack", "refresh", "closeWindow", "listGridTool",
+													"executeAsync", "waitFor", "testScript", "call"};
 
 	private static void executeUnsupportedSteps(ScriptExecutor<?> executor) {
 		executor.executeUpload(new Upload());
@@ -260,6 +265,31 @@ class SailExecutorTest {
 		executor.executeNavigateLink(link); // opens a window for closeWindow to close
 		executor.executeCloseWindow(new CloseWindow());
 		executor.executeListGridTool(new ListGridTool());
+		executor.executeExecuteAsync(new ExecuteAsync());
+		executor.executeWaitFor(new WaitFor());
+		executor.executeTestScript(new TestScript());
+		executor.executeCall(new Call());
+	}
+
+	@Test
+	void anExecuteWithAVariableIsGeneratedWithACommentThatItKeepsNoResult() {
+		TestWebDriverExecutor executor = new TestWebDriverExecutor();
+		executor.open("Execute");
+		Execute plain = new Execute();
+		plain.setScript("window.x = 1;");
+		executor.executeExecute(plain);
+		Execute kept = new Execute();
+		kept.setScript("return document.title;");
+		kept.setVariable("title");
+		executor.executeExecute(kept);
+		executor.close();
+
+		String script = executor.toString();
+		String comment = "trace(\"<execute variable/> not supported by this generator: the generated code keeps no result\");";
+		assertAll(() -> assertTrue(script.contains("execute(\"window.x = 1;\");"), script),
+					() -> assertTrue(script.contains("execute(\"return document.title;\");"), script),
+					() -> assertEquals(script.indexOf(comment), script.lastIndexOf(comment), script),
+					() -> assertTrue(script.indexOf(comment) > script.indexOf("execute(\"return document.title;\");"), script));
 	}
 
 	private static final class TestContext extends AutomationContext<GenerateListContext, GenerateEditContext> {

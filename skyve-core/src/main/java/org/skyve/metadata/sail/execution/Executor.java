@@ -2,18 +2,22 @@ package org.skyve.metadata.sail.execution;
 
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -531,4 +535,44 @@ public interface Executor {
 	 * @param tool the list grid tool step
 	 */
 	public void executeListGridTool(@Nonnull ListGridTool tool);
+
+	/**
+	 * Runs the body of an {@code async} JavaScript function in the page, waits for its promise to settle, and keeps
+	 * the resolved value in the step's variable, if it names one.
+	 *
+	 * <p>Precondition: {@link ExecuteAsync#execute(Executor)} has checked the body, the timeout and the variable name.
+	 *
+	 * @param execute the execute async step
+	 */
+	public void executeExecuteAsync(@Nonnull ExecuteAsync execute);
+
+	/**
+	 * Waits, under every test strategy, until a JavaScript condition in the page holds, polling every 250 ms, and
+	 * fails the step when the timeout passes first.
+	 *
+	 * <p>Precondition: {@link WaitFor#execute(Executor)} has checked the body and the timeout.
+	 *
+	 * @param wait the wait for step
+	 */
+	public void executeWaitFor(@Nonnull WaitFor wait);
+
+	/**
+	 * Asserts, under the test strategy, that a JavaScript condition in the page holds: once, or by polling every
+	 * 250 ms until the step's timeout.
+	 *
+	 * <p>Precondition: {@link TestScript#execute(Executor)} has checked the body and the timeout.
+	 *
+	 * @param test the test script step
+	 */
+	public void executeTestScript(@Nonnull TestScript test);
+
+	/**
+	 * Runs a handwritten Java step: a new instance of the step's {@link SailCall} class, with its parameters, keeping
+	 * the string it returns in the step's variable, if it names one.
+	 *
+	 * <p>Precondition: {@link Call#execute(Executor)} has checked the class name, the parameters and the variable name.
+	 *
+	 * @param call the call step
+	 */
+	public void executeCall(@Nonnull Call call);
 }

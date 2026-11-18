@@ -47,18 +47,22 @@ import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureStep;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -1240,6 +1244,50 @@ public abstract class InterpretedWebDriverExecutor<
 	@Override
 	public void executePause(Pause pause) {
 		selenide.pause(pause.getMillis());
+	}
+
+	/**
+	 * Throws until the harness implements {@code <executeAsync/>}.
+	 *
+	 * @param execute the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeExecuteAsync(@Nonnull ExecuteAsync execute) {
+		throw notImplementedYet("<executeAsync/>");
+	}
+
+	/**
+	 * Throws until the harness implements {@code <waitFor/>}.
+	 *
+	 * @param wait the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeWaitFor(@Nonnull WaitFor wait) {
+		throw notImplementedYet("<waitFor/>");
+	}
+
+	/**
+	 * Throws until the harness implements {@code <testScript/>}.
+	 *
+	 * @param test the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeTestScript(@Nonnull TestScript test) {
+		throw notImplementedYet("<testScript/>");
+	}
+
+	/**
+	 * Throws until the harness implements {@code <call/>}.
+	 *
+	 * @param call the step
+	 * @throws UnsupportedOperationException always
+	 */
+	@Override
+	public void executeCall(@Nonnull Call call) {
+		throw notImplementedYet("<call/>");
 	}
 
 	/**
