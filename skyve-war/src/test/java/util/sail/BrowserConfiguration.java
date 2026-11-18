@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.Dimension;
 
@@ -154,7 +155,7 @@ public class BrowserConfiguration {
 	
 	/**
 	 * Sets the browser's profile directory, so that the browser is a device that keeps its IndexedDB, CacheStorage,
-	 * service worker registration and persistent cookies (not session cookies) when it is stopped and started again
+	 * localStorage, service worker registration and persistent cookies (not session cookies) when it is stopped and started again
 	 * on a configuration with the same profile. Two profiles are two devices. Chrome and Edge only.
 	 *
 	 * @param userDataDir	the directory, made absolute here (the caller owns and deletes it); or null for a fresh
@@ -170,11 +171,19 @@ public class BrowserConfiguration {
 	 * Appends extra browser arguments, after the built-in ones, e.g. {@code --use-fake-device-for-media-stream}.
 	 * Chrome and Edge only.
 	 *
-	 * @param extra	the arguments, as the browser takes them on its command line
+	 * @param extra	the arguments, as the browser takes them on its command line; none may be null or
+	 * 				{@code --user-data-dir}, which {@link #profile(Path)} sets
 	 * @return this configuration
+	 * @throws NullPointerException	if an argument is null
+	 * @throws IllegalArgumentException	if an argument sets the user data directory
 	 */
 	public @Nonnull BrowserConfiguration arguments(@Nonnull String... extra) {
-		Collections.addAll(arguments, extra);
+		for (String argument : extra) {
+			if (Objects.requireNonNull(argument, "browser argument").startsWith("--user-data-dir")) {
+				throw new IllegalArgumentException("Set the browser's user data directory with profile(), not the argument " + argument);
+			}
+			arguments.add(argument);
+		}
 		return this;
 	}
 
@@ -231,7 +240,6 @@ public class BrowserConfiguration {
 	}
 	
 	/**
-	 * Returns the browser's profile directory.
 	 * @return	the absolute directory, or null for a fresh temporary profile
 	 */
 	public @Nullable Path getProfile() {
@@ -239,7 +247,6 @@ public class BrowserConfiguration {
 	}
 
 	/**
-	 * Returns the extra browser arguments.
 	 * @return	an unmodifiable view of the arguments given to {@link #arguments(String...)}, in order
 	 */
 	public @Nonnull List<String> getArguments() {

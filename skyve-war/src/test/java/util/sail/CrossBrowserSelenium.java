@@ -91,6 +91,7 @@ abstract class CrossBrowserSelenium {
 		startedUserAgent = config.getUserAgentString();
 		startedResolution = config.getResolution();
 		startedProfile = config.getProfile();
+		// a snapshot: the configuration's own list can still grow
 		startedArguments = List.copyOf(config.getArguments());
 	}
 

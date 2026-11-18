@@ -30,6 +30,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Suite;
 import org.skyve.metadata.sail.language.SuiteMember;
 import org.skyve.metadata.sail.language.Workflow;
+import org.skyve.web.UserAgentType;
 
 /**
  * Tests the browser's lifecycle in the workflow engine, without a browser: the browsers are mocks, and each leg only
@@ -55,28 +56,52 @@ class SailWorkflowTest {
 	private boolean startFails;
 	/** The run each leg ran in, in order. */
 	private final List<RunState> runs = new ArrayList<>();
+	/** True to start fakes that remember their configuration, as a started browser does, instead of mocks. */
+	private boolean realSelenides;
+	/** What a leg's step does to its browser, e.g. restarts it; or null. */
+	private java.util.function.Consumer<Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> step;
 	/** The member running. */
 	private String current;
 
 	private final SailWorkflow engine = new SailWorkflow(new SailViewRoles(),
-															(smartClient, configuration, resolved) -> start(),
+															(smartClient, configuration, resolved) -> start(configuration, resolved),
 															(automation, browser, run, settings) -> {
 																String which = ids.containsKey(browser) ? String.valueOf(ids.get(browser)) : browser.getClass().getSimpleName();
 																events.add("run " + which + ' ' + current);
 																runs.add(run);
+																if (step != null) {
+																	step.accept(browser);
+																}
 																if (failing.contains(current)) {
 																	throw new AssertionError(current + " failed its step");
 																}
 															},
 															new SailSettings.Environment(Map.of(SailSettings.BASE_URL, "http://localhost:1/sail-workflow-test/"),
 																							Map.of(), null, Path.of("").toAbsolutePath()));
-	private Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> start() {
+	private Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> start(BrowserConfiguration configuration, SailSettings resolved) {
 		if (startFails) {
 			events.add("start fails");
 			throw new IllegalStateException("the browser did not start");
 		}
-		PrimeFacesSelenide result = mock(PrimeFacesSelenide.class);
 		Integer id = Integer.valueOf(ids.size() + 1);
+		if (realSelenides) {
+			PrimeFacesSelenide fake = new PrimeFacesSelenide() {
+				@Override
+				public void startBrowser(BrowserConfiguration c, SailSettings r) {
+					recordStart(c, r); // what a started browser remembers, without starting one
+					events.add("start " + id);
+				}
+
+				@Override
+				public void stopBrowser() {
+					events.add("stop " + id);
+				}
+			};
+			ids.put(fake, id);
+			fake.startBrowser(configuration, resolved);
+			return fake;
+		}
+		PrimeFacesSelenide result = mock(PrimeFacesSelenide.class);
 		ids.put(result, id);
 		doAnswer(i -> {
 			events.add("stop " + id);
@@ -177,6 +202,36 @@ class SailWorkflowTest {
 					() -> assertSame(runs.get(2), runs.get(4), "and in a suite member"),
 					() -> assertNotSame(first, runs.get(2), "it is not one of the earlier runs"));
 		engine.closeBrowser();
+	}
+
+	/**
+	 * A step that restarts the leg's browser on another device leaves the Selenide with that device: the next leg that
+	 * asks for it reuses the browser, and one that asks for the first device stops it and starts another.
+	 */
+	@Test
+	void aLegAfterAStepThatRestartedTheBrowserComparesWithTheRestartedDevice() {
+		realSelenides = true;
+		BrowserConfiguration a = new BrowserConfiguration().profile(Path.of("target", "a"));
+		BrowserConfiguration b = new BrowserConfiguration().profile(Path.of("target", "b"));
+		// the leg wanting a profile is the one that runs: leg 1 wants a, 2 wants b, 3 wants a
+		engine.browser(UserAgentType.tablet, () -> (runs.isEmpty() || (runs.size() == 2)) ? a : b);
+		step = browser -> {
+			if (runs.size() == 1) { // the first leg's step restarts its browser on b
+				SailSettings legSettings = browser.getSettings(); // the engine's test environment, which b would not resolve
+				browser.stopBrowser();
+				browser.startBrowser(b, legSettings);
+			}
+		};
+		current = "w.xml";
+		Workflow threeLegs = XMLMetaData.unmarshalSAILWorkflowString("<workflow xmlns=\"http://www.skyve.org/xml/sail\">" +
+																		AUTOMATION.replace(" xmlns=\"http://www.skyve.org/xml/sail\"", "").repeat(3) +
+																		"</workflow>");
+
+		engine.runWorkflow("w.xml", threeLegs);
+
+		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1", "start 1", "run 1 w.xml",
+								"stop 1", "start 2", "run 2 w.xml", "stop 2"),
+						events);
 	}
 
 	/** A SmartClient member drives the PrimeFaces member's browser through SmartClient's Selenide, and stops it at the end. */

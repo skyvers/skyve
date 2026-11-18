@@ -9,7 +9,6 @@ import static org.mockito.Mockito.mock;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
@@ -45,6 +44,14 @@ class DeviceProfileTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void anArgumentThatIsNullOrSetsTheProfileIsRefused() {
+		BrowserConfiguration configuration = new BrowserConfiguration();
+		assertAll(() -> assertThrows(NullPointerException.class, () -> configuration.arguments("--a", null), "null"),
+					() -> assertThrows(IllegalArgumentException.class, () -> configuration.arguments("--user-data-dir=/x"), "user data dir"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void chromeAndEdgeArgumentsHaveTheProfileThenTheExtrasAfterTheBuiltInOnes() {
 		BrowserConfiguration plain = new BrowserConfiguration();
 		BrowserConfiguration full = new BrowserConfiguration().userAgentString("UA").profile(DIR).arguments(FAKE, "--x");
@@ -67,10 +74,10 @@ class DeviceProfileTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void firefoxAndSafariRefuseAProfileOrExtraArguments() {
-		Stream<Executable> cases = Stream.of(Browsers.firefox, Browsers.safari).flatMap(browser -> Stream.of(
-			refused(browser, "profile", new BrowserConfiguration().browser(browser).fixed().profile(DIR)),
-			refused(browser, "arguments", new BrowserConfiguration().browser(browser).fixed().arguments(FAKE))));
-		assertAll(cases);
+		assertAll(refused(Browsers.firefox, "profile", new BrowserConfiguration().browser(Browsers.firefox).fixed().profile(DIR)),
+					refused(Browsers.firefox, "arguments", new BrowserConfiguration().browser(Browsers.firefox).fixed().arguments(FAKE)),
+					refused(Browsers.safari, "profile", new BrowserConfiguration().browser(Browsers.safari).fixed().profile(DIR)),
+					refused(Browsers.safari, "arguments", new BrowserConfiguration().browser(Browsers.safari).fixed().arguments(FAKE)));
 		assertAll(() -> CrossBrowserSelenium.requireProfileSupport(Browsers.firefox, new BrowserConfiguration()),
 					() -> CrossBrowserSelenium.requireProfileSupport(Browsers.chrome, new BrowserConfiguration().profile(DIR).arguments(FAKE)),
 					() -> CrossBrowserSelenium.requireProfileSupport(Browsers.edge, new BrowserConfiguration().profile(DIR).arguments(FAKE)));

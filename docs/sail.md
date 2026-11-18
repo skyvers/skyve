@@ -2057,7 +2057,9 @@ SailWorkflow workflow = new SailWorkflow(viewRoles)
 - `arguments(String...)` appends extra browser arguments, after the built-in
   ones and the profile's. `getArguments()` is an unmodifiable list.
 - Both are for Chrome and Edge. Firefox and Safari with a profile or extra
-  arguments throw an `IllegalArgumentException` before any browser starts.
+  arguments throw an `IllegalArgumentException` before any browser starts, also
+  when `-Dsail.browser` picks that browser at run time. `arguments` refuses
+  `--user-data-dir`, which is `profile`'s.
 - Two configurations are the same device only if their browser, headless mode,
   server, user agent, window size, profile and extra arguments are the same.
   Otherwise the workflow stops the browser and starts another.
@@ -2075,7 +2077,12 @@ browser without starting it again is not supported.
 Each `runResources`, `runFiles` or `runStrings` call, and each suite member,
 is a run of its own, with its own `{run}` token and variables. To carry them
 from one call to the next, call `SailWorkflow.shareRunAcrossCalls()` on the
-runner first.
+runner first. It covers suite members too, and is for one thread.
+
+`DeviceProfileSailIT` shows the persistence and isolation in a real headless
+Chrome, against a page that a JDK `HttpServer` serves, so it needs no Skyve
+server: `mvn -o -pl skyve-war -am test -Dtest=DeviceProfileSailIT
+-DskipUnitTests=false -DskipIntegrationTests=true -Dsurefire.failIfNoSpecifiedTests=false`.
 
 ## The Suites
 

@@ -75,9 +75,7 @@ public final class SailWorkflow {
 	private final SailSettings.Environment environment;
 	/** True when no further leg or suite member may start (a load run is stopping); see {@link #stopWhen}. */
 	private BooleanSupplier stopping = () -> false;
-	/** True to keep one run for all of this runner's calls; see {@link #shareRunAcrossCalls()}. */
-	private boolean shareRun;
-	/** The run that the calls share, once the first call has made it; see {@link #shareRunAcrossCalls()}. */
+	/** The run that all of this runner's calls share, or null if each call has its own; see {@link #shareRunAcrossCalls()}. */
 	private RunState sharedRun;
 
 	/**
@@ -165,12 +163,13 @@ public final class SailWorkflow {
 	 * {@code {run}} token and the variables that automations capture carry from one {@code runResources},
 	 * {@code runFiles} or {@code runStrings} call to the next. Without it, every call is a run of its own.
 	 *
-	 * <p>Side effects: the calls after this one keep the run that the first of them made.
+	 * <p>Side effects: the run is never reset, so it holds the variables of every earlier call, including a failed one.
+	 * Like the runner, it is for one thread: do not share such a runner between threads.
 	 *
 	 * @return this runner
 	 */
 	public @Nonnull SailWorkflow shareRunAcrossCalls() {
-		shareRun = true;
+		sharedRun = new RunState();
 		return this;
 	}
 
@@ -409,16 +408,7 @@ public final class SailWorkflow {
 		if (legs.isEmpty()) {
 			throw new IllegalArgumentException("A SAIL workflow needs at least one automation");
 		}
-		RunState run;
-		if (shareRun) {
-			if (sharedRun == null) {
-				sharedRun = new RunState();
-			}
-			run = sharedRun;
-		}
-		else {
-			run = new RunState();
-		}
+		RunState run = (sharedRun == null) ? new RunState() : sharedRun;
 		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
 		kept = null;
 		boolean passed = false;
