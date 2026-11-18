@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!-- A set-up member of several automations, each ending in a logout, for SailSuiteLoginSailIT. It leaves a local storage entry
-     in its browser, which the next member must not find: members are independent runs. -->
+     in its browser, which the next member must not find: a suite that opts in to browserPerMember() starts each member in a new browser. -->
 <workflow xmlns="http://www.skyve.org/xml/sail">
 	<automation uxui="external" userAgentType="desktop">
 		<interaction name="Automation 1">

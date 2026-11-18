@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- The member that follows login-suite-00.xml: it signs in first, as the browser of an independent run, so it finds
+<!-- The member that follows login-suite-00.xml: it signs in first, and with browserPerMember() it finds
      nothing that member left in its browser. -->
 <automation uxui="external" userAgentType="desktop" xmlns="http://www.skyve.org/xml/sail">
 	<interaction name="Second member">

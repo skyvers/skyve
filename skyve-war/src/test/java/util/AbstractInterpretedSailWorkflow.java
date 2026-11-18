@@ -126,6 +126,22 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	}
 
 	/**
+	 * Runs a SAIL {@code <suite>} on the test classpath, as {@link #sailSuite(String)} does, with each member in a
+	 * browser of its own if asked (see {@link SailSuite#browserPerMember()}).
+	 *
+	 * @param resourceName	the suite's resource path, e.g. {@code sail/admin/admin.suite.xml}
+	 * @param browserPerMember	true to start each member in a new browser; false to hand the browser on, as the default does
+	 * @throws AssertionError	with every failed member, after a summary
+	 */
+	protected void sailSuite(@Nonnull String resourceName, boolean browserPerMember) {
+		SailSuite suite = SailSuite.resource(resourceName, workflow);
+		if (browserPerMember) {
+			suite.browserPerMember();
+		}
+		suite.run();
+	}
+
+	/**
 	 * Runs a SAIL {@code <suite>} file; see {@link #sailSuite(String)}.
 	 *
 	 * @param file	the suite's path, absolute or relative to the working directory
