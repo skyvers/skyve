@@ -166,11 +166,7 @@ public class SpringSecurityConfig {
 		.sessionManagement(c -> c.sessionFixation().changeSessionId())
 		.rememberMe(c ->
 			c.key(REMEMBER_ME_PARAMETER)
-				.tokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60)
-				.rememberMeParameter(REMEMBER_ME_PARAMETER)
-				.rememberMeCookieName(REMEMBER_ME_PARAMETER)
-				.tokenRepository(tokenRepository())
-				.useSecureCookie(Util.isSecureUrl())
+				.rememberMeServices(rememberMeServices())
 		)
 		.formLogin(c -> 
 			c.authenticationDetailsSource(authenticationDetailsSource)
@@ -245,6 +241,23 @@ public class SpringSecurityConfig {
 		return skyve.passwordEncoder();
 	}
 	
+	/**
+	 * Builds the remember-me services, whose sign out ends Remember me in the signing-out browser only
+	 * (see {@link SkyveRememberMeServices}).
+	 *
+	 * @return the remember-me services, configured from the application's account settings
+	 */
+	private @Nonnull SkyveRememberMeServices rememberMeServices() {
+		SkyveRememberMeServices result = new SkyveRememberMeServices(REMEMBER_ME_PARAMETER,
+																		userDetailsManager(),
+																		tokenRepository());
+		result.setTokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60);
+		result.setParameter(REMEMBER_ME_PARAMETER);
+		result.setCookieName(REMEMBER_ME_PARAMETER);
+		result.setUseSecureCookie(Util.isSecureUrl());
+		return result;
+	}
+
 	/**
 	 * Exposes the remember-me token repository.
 	 *

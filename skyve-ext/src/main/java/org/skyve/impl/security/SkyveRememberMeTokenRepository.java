@@ -49,6 +49,12 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * SQL used to remove all remember-me tokens for a user principal name.
 	 */
 	private String removeUserTokensSql = "delete from ADM_UserToken where userName = ?";
+
+	/**
+	 * SQL used to remove one remember-me token series of a user principal name.
+	 * The user name is part of the match, so a series can only be removed by the user it was issued to.
+	 */
+	private String removeUserTokenSql = "delete from ADM_UserToken where userName = ? and series = ?";
 	
 	/**
 	 * Inserts a newly issued remember-me token.
@@ -167,6 +173,21 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	}
 
 	/**
+	 * Removes one remember-me token series, leaving the user's other series (other browsers and devices) in place.
+	 * Nothing is removed if the series belongs to another user.
+	 *
+	 * @param username The principal name the series was issued to, usually in the form customer-name/user-name.
+	 * @param series The series identifier, from the remember-me cookie of the browser that is signing out.
+	 */
+	public void removeUserToken(@Nonnull String username, @Nonnull String series) {
+		JdbcTemplate t = getJdbcTemplate();
+		if (t == null) {
+			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
+		}
+		t.update(removeUserTokenSql, username, series);
+	}
+
+	/**
 	 * Use the given Persistence to remove all the remember-me tokens for a user principal name.
 	 * This occurs within the Persistence transaction.
 	 *
@@ -231,6 +252,24 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 */
 	public void setUpdateTokenSql(@Nonnull String updateTokenSql) {
 		this.updateTokenSql = updateTokenSql;
+	}
+
+	/**
+	 * Returns the SQL used to remove one series of a user's token rows.
+	 *
+	 * @return The single series removal SQL, taking the user name and then the series.
+	 */
+	public @Nonnull String getRemoveUserTokenSql() {
+		return removeUserTokenSql;
+	}
+
+	/**
+	 * Sets the SQL used to remove one series of a user's token rows.
+	 *
+	 * @param removeUserTokenSql The single series removal SQL, taking the user name and then the series.
+	 */
+	public void setRemoveUserTokenSql(@Nonnull String removeUserTokenSql) {
+		this.removeUserTokenSql = removeUserTokenSql;
 	}
 
 	/**

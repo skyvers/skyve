@@ -1920,6 +1920,7 @@ ITs where you meant to run unit tests.
 | `KitchenSinkLoadSailIT` (`sail/load`) | a [load run](#load-testing) of the kitchen sink suite: 5 virtual users over 20 seconds, one iteration each, a 20 minute time limit; leaves out `pf-kitchensink-sail.xml`, whose wrong-password sign in would lock admin out for every user | both | `sail` `performance` |
 | `PrimeFacesSelenideClickSailIT` (`util/sail`) | a click on a tab that a scrolled tab strip puts under a fixed side menu: the harness centres the covered element across as well as down, as a user would scroll it into view; on a `data:` page, so it needs Chrome but no server | none | `sail` |
 | `LoginRememberSailIT` (`util/sail`) | `<login remember="true"/>` on a Chrome profile: after a restart on the profile the browser is still signed in; with `remember="false"` it is signed out, the next `navigateList` fails with the signed out message, and `<testSuccess/>` on the sign in page fails | PF, tablet | `sail` |
+| `RememberMePerDeviceSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; `<logout/>` on the PC; after a restart the phone is still signed in (signing out ends Remember me in that browser only) and the PC is signed out | PF | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:

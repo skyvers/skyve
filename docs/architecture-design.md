@@ -813,6 +813,7 @@ flowchart TD
 | `SkyveSpringSecurity` | skyve-web | Spring Security wiring: JDBC user details + OAuth client registrations |
 | `SkyveLegacyAuthenticationProvider` | skyve-ext | Direct-SQL credential authentication (legacy database auth) |
 | `SkyveRememberMeTokenRepository` | skyve-ext | JDBC remember-me token persistence |
+| `SkyveRememberMeServices` | skyve-web | Remember-me services whose sign out removes only the signing-out browser's token series, not the user's other devices' |
 
 ### Multi-Tenancy Model
 
