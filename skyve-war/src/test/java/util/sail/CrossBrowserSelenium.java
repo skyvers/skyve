@@ -3,7 +3,9 @@ package util.sail;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.openqa.selenium.By;
@@ -14,6 +16,7 @@ import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.chromium.ChromiumOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -228,6 +231,88 @@ abstract class CrossBrowserSelenium {
 		return arguments;
 	}
 
+	/**
+	 * Builds the options to start Chrome with: {@link #chromeArguments} and the browser preferences of
+	 * {@link #passwordPromptPreferences()}. A device's user agent and window size are arguments, so a mobile device
+	 * and a profile get the same preferences.
+	 *
+	 * @param config	the user agent, window size, profile and extra arguments
+	 * @param headless	true for a headless browser
+	 * @return the options
+	 */
+	static @Nonnull ChromeOptions chromeOptions(@Nonnull BrowserConfiguration config, boolean headless) {
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments(chromeArguments(config, headless));
+		turnOffPasswordPrompts(options);
+		return options;
+	}
+
+	/**
+	 * Builds the options to start Edge with: {@link #edgeArguments} and the browser preferences of
+	 * {@link #passwordPromptPreferences()}.
+	 *
+	 * @param config	the user agent, profile and extra arguments
+	 * @param headless	true for a headless browser
+	 * @return the options
+	 */
+	static @Nonnull EdgeOptions edgeOptions(@Nonnull BrowserConfiguration config, boolean headless) {
+		EdgeOptions options = new EdgeOptions();
+		options.addArguments(edgeArguments(config, headless));
+		turnOffPasswordPrompts(options);
+		return options;
+	}
+
+	/**
+	 * The Chromium preferences that turn off the password manager's prompts. A SAIL user often signs in with a
+	 * password that is in a leaked list (a test user whose password is its name, such as {@code admin}/{@code admin}
+	 * or {@code setup}/{@code setup}). Chrome then shows its "Change your password" prompt. That prompt is tab-modal
+	 * browser UI, not in the page, and while it is up every real key and mouse event to the tab is dropped, though
+	 * scripts, {@code executeScript} and {@code document.hasFocus()} carry on as normal. So the run fails later, and
+	 * far from the cause. A suite hands its browser from member to member, so the prompt would also carry over to the
+	 * next member's sign in. The preferences also stop the "Save password?" bubble.
+	 *
+	 * @return the preferences, by name
+	 */
+	static @Nonnull Map<String, Object> passwordPromptPreferences() {
+		Map<String, Object> preferences = new HashMap<>(4);
+		preferences.put("profile.password_manager_leak_detection", Boolean.FALSE);
+		preferences.put("credentials_enable_service", Boolean.FALSE);
+		preferences.put("profile.password_manager_enabled", Boolean.FALSE);
+		return preferences;
+	}
+
+	/**
+	 * The {@code prefs} already set on the options (Selenium has no getter for an experimental option), which are
+	 * under the options' own capability, {@code goog:chromeOptions} or {@code ms:edgeOptions}.
+	 *
+	 * @param options	the Chrome or Edge options
+	 * @return the preferences, or null if none are set
+	 */
+	static @Nullable Object chromiumPreferences(@Nonnull ChromiumOptions<?> options) {
+		for (Object value : options.asMap().values()) {
+			if ((value instanceof Map<?, ?> map) && map.containsKey("prefs")) {
+				return map.get("prefs");
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Adds {@link #passwordPromptPreferences()} to the options' {@code prefs}, keeping any other preference already
+	 * set, and the value already set for one of ours, so that a caller can choose differently.
+	 *
+	 * @param options	the Chrome or Edge options to add them to
+	 */
+	@SuppressWarnings("unchecked")
+	static void turnOffPasswordPrompts(@Nonnull ChromiumOptions<?> options) {
+		Map<String, Object> preferences = passwordPromptPreferences();
+		Object existing = chromiumPreferences(options);
+		if (existing instanceof Map) {
+			preferences.putAll((Map<String, Object>) existing);
+		}
+		options.setExperimentalOption("prefs", preferences);
+	}
+
 	private static void addProfileAndArguments(@Nonnull List<String> arguments, @Nonnull BrowserConfiguration config) {
 		Path profile = config.getProfile();
 		if (profile != null) {
@@ -281,11 +366,7 @@ abstract class CrossBrowserSelenium {
 	 * @param resolved	the settings: headless mode and the timeout
 	 */
 	private void setupChrome(BrowserConfiguration config, SailSettings resolved) {
-		List<String> arguments = chromeArguments(config, resolved.headless());
-
-		ChromeOptions options = new ChromeOptions();
-		options.addArguments(arguments);
-		driver = new ChromeDriver(options);
+		driver = new ChromeDriver(chromeOptions(config, resolved.headless()));
 		
 		setupBrowser(config, resolved);
 	}
@@ -327,11 +408,7 @@ abstract class CrossBrowserSelenium {
 	}
 
 	private void setupEdge(BrowserConfiguration config, SailSettings resolved) {
-		List<String> arguments = edgeArguments(config, resolved.headless());
-		
-		EdgeOptions options = new EdgeOptions();
-		options.addArguments(arguments);
-		driver = new EdgeDriver(options);
+		driver = new EdgeDriver(edgeOptions(config, resolved.headless()));
 		
 		setupBrowser(config, resolved);
 	}
