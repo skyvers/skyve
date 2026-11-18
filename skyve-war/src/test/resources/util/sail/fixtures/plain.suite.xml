@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- A suite without a bracket, for the harness's own tests: they need nothing of Skyve's kitchen sink. -->
+<suite xmlns="http://www.skyve.org/xml/sail">
+	<member file="m1.xml"/>
+	<member file="m2.xml"/>
+	<member file="m3.xml"/>
+	<member file="m4.xml"/>
+	<member file="m5.xml"/>
+</suite>

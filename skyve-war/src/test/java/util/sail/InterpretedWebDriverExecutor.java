@@ -1512,6 +1512,19 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
+	 * Returns the Selenide that drives this leg's browser, for a {@link SailCall}. Restarting the browser through it,
+	 * with {@code stopBrowser(); startBrowser(configuration)} at the start of a leg, is the supported way to change
+	 * devices from a step: the Selenide remembers what it started with, so the next leg compares against, reuses or
+	 * stops the restarted browser (see {@link SailWorkflow}). The executor's page contexts do not follow a restart, so
+	 * a navigation or sign-in step must come next. Stopping the browser without starting it again is not supported.
+	 *
+	 * @return the Selenide of the browser running the automation
+	 */
+	public final @Nonnull S getSelenide() {
+		return selenide;
+	}
+
+	/**
 	 * Runs a script step's body in the page, with one argument, {@code sail}: {@code {run: "<run token>", vars: {...}}},
 	 * a copy of the run token and the variables. The body is run as
 	 * {@code return (function (sail) { BODY }).apply(this, arguments);}, or with {@code async function}, so

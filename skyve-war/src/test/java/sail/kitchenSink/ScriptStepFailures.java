@@ -226,13 +226,13 @@ public final class ScriptStepFailures {
 				<interaction name="No value to keep">
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
-						<call className="sail.kitchenSink.EchoCall" variable="nothing" />
+						<call className="util.sail.EchoCall" variable="nothing" />
 					</method>
 				</interaction>
 				<interaction name="A failed assertion">
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
-						<call className="sail.kitchenSink.EchoCall">
+						<call className="util.sail.EchoCall">
 							<parameter name="text" value="the assertion's text" />
 							<parameter name="fail" value="assert" />
 						</call>
@@ -242,7 +242,7 @@ public final class ScriptStepFailures {
 				<interaction name="An error">
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
-						<call className="sail.kitchenSink.EchoCall">
+						<call className="util.sail.EchoCall">
 							<parameter name="text" value="the error's text" />
 							<parameter name="fail" value="error" />
 						</call>
@@ -252,7 +252,7 @@ public final class ScriptStepFailures {
 				<interaction name="A duplicate parameter">
 					<method>
 						<navigateEdit module="kitchensink" document="ActionsFixture" />
-						<call className="sail.kitchenSink.EchoCall">
+						<call className="util.sail.EchoCall">
 							<parameter name="text" value="one" />
 							<parameter name="text" value="two" />
 						</call>
@@ -271,10 +271,10 @@ public final class ScriptStepFailures {
 					() -> assertTrue(failureOf(message, "Cannot be constructed").contains("<call className=\"org.skyve.metadata.sail.execution.SailCall\" /> names a class that cannot be constructed"),
 										"Cannot be constructed: " + message),
 					() -> assertTrue(failureOf(message, "No value to keep").contains("gave no value to keep in {var:nothing}"), "No value to keep: " + message),
-					() -> assertTrue(assertion.contains("<call className=\"sail.kitchenSink.EchoCall\" /> failed: EchoCall was asked to fail an assertion on the assertion's text"),
+					() -> assertTrue(assertion.contains("<call className=\"util.sail.EchoCall\" /> failed: EchoCall was asked to fail an assertion on the assertion's text"),
 										"A failed assertion: " + message),
 					() -> assertTrue(assertion.contains("this ran after the call's failed assertion"), "A failed assertion: " + message),
-					() -> assertTrue(error.contains("<call className=\"sail.kitchenSink.EchoCall\" /> threw "), "An error: " + message),
+					() -> assertTrue(error.contains("<call className=\"util.sail.EchoCall\" /> threw "), "An error: " + message),
 					() -> assertTrue(error.contains("IllegalStateException: EchoCall was asked to throw on the error's text"), "An error: " + message),
 					() -> assertFalse(message.contains("this never runs after the call's error"), "An error: " + message),
 					() -> assertTrue(failureOf(message, "A duplicate parameter").contains("has more than one <parameter name=\"text\" />"),

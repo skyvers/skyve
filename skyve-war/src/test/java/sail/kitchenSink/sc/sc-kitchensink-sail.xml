@@ -333,7 +333,7 @@
 			]]></testScript>
 			<testScript><![CDATA[return window._sailExecuted === true && window._sailTimerDone === true;]]></testScript>
 			<comment>call runs a SailCall in the test JVM, with the run token and the variables substituted in its parameter values</comment>
-			<call className="sail.kitchenSink.EchoCall" variable="echo">
+			<call className="util.sail.EchoCall" variable="echo">
 				<parameter name="text" value="echoed {var:executed} in {run}" />
 			</call>
 			<testScript message="EchoCall should give back its text"><![CDATA[

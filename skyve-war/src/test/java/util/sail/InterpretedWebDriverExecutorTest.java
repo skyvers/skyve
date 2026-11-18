@@ -3,6 +3,7 @@ package util.sail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -1053,7 +1054,7 @@ class InterpretedWebDriverExecutorTest {
 		async.setScript("return true;");
 		async.setVariable("ok");
 		async.execute(executor);
-		call("sail.kitchenSink.EchoCall", "echo", "text", "made {run} for {var:answer}").execute(executor);
+		call("util.sail.EchoCall", "echo", "text", "made {run} for {var:answer}").execute(executor);
 		String token = executor.getRunToken();
 
 		Execute none = execute("return undefined;", "missing");
@@ -1062,7 +1063,7 @@ class InterpretedWebDriverExecutorTest {
 		noneAsync.setScript("return null;");
 		noneAsync.setVariable("missing");
 		IllegalStateException noAsyncValue = assertThrows(IllegalStateException.class, () -> noneAsync.execute(executor));
-		Call noText = call("sail.kitchenSink.EchoCall", "missing");
+		Call noText = call("util.sail.EchoCall", "missing");
 		IllegalStateException noCallValue = assertThrows(IllegalStateException.class, () -> noText.execute(executor));
 
 		assertAll(() -> assertEquals("42", executor.getVariable("answer"), "execute"),
@@ -1070,11 +1071,11 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertEquals("made " + token + " for 42", executor.getVariable("echo"), "call, with its parameter substituted"),
 					() -> assertEquals("<execute variable=\"missing\" /> gave no value to keep in {var:missing}", noScriptValue.getMessage(), "execute without a value"),
 					() -> assertEquals("<executeAsync variable=\"missing\" /> gave no value to keep in {var:missing}", noAsyncValue.getMessage(), "executeAsync without a value"),
-					() -> assertEquals("<call className=\"sail.kitchenSink.EchoCall\" variable=\"missing\" /> gave no value to keep in {var:missing}",
+					() -> assertEquals("<call className=\"util.sail.EchoCall\" variable=\"missing\" /> gave no value to keep in {var:missing}",
 										noCallValue.getMessage(), "call without a value"),
 					() -> assertNull(executor.getVariable("missing"), "nothing kept"),
 					() -> verify(executor.selenide).trace("Keep '42' in {var:answer}"),
-					() -> verify(executor.selenide).trace("Call sail.kitchenSink.EchoCall with the parameters [text]"));
+					() -> verify(executor.selenide).trace("Call util.sail.EchoCall with the parameters [text]"));
 	}
 
 	@Test
@@ -1201,10 +1202,10 @@ class InterpretedWebDriverExecutorTest {
 	void underVerifyACallsAssertionErrorIsRecordedAndTheInteractionGoesOnButAnyOtherExceptionEndsIt() {
 		browser(Boolean.TRUE);
 		String calls = "<interaction name=\"assert\"><method>" +
-							"<call className=\"sail.kitchenSink.EchoCall\"><parameter name=\"text\" value=\"a\"/><parameter name=\"fail\" value=\"assert\"/></call>" +
+							"<call className=\"util.sail.EchoCall\"><parameter name=\"text\" value=\"a\"/><parameter name=\"fail\" value=\"assert\"/></call>" +
 							"<comment>after the assertion</comment></method></interaction>" +
 						"<interaction name=\"error\"><method>" +
-							"<call className=\"sail.kitchenSink.EchoCall\"><parameter name=\"text\" value=\"e\"/><parameter name=\"fail\" value=\"error\"/></call>" +
+							"<call className=\"util.sail.EchoCall\"><parameter name=\"text\" value=\"e\"/><parameter name=\"fail\" value=\"error\"/></call>" +
 							"<comment>after the error</comment></method></interaction>";
 		Automation verifyCalls = automation("Verify", calls);
 		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(verifyCalls));
@@ -1214,9 +1215,9 @@ class InterpretedWebDriverExecutorTest {
 		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(noneCalls));
 
 		assertAll(() -> assertTrue(verified.getMessage().contains("with 2 failure(s)"), verified.getMessage()),
-					() -> assertTrue(verified.getMessage().contains(": <call className=\"sail.kitchenSink.EchoCall\" /> failed: EchoCall was asked to fail an assertion on a"),
+					() -> assertTrue(verified.getMessage().contains(": <call className=\"util.sail.EchoCall\" /> failed: EchoCall was asked to fail an assertion on a"),
 										verified.getMessage()),
-					() -> assertTrue(verified.getMessage().contains(": IllegalStateException: <call className=\"sail.kitchenSink.EchoCall\" /> threw IllegalStateException: EchoCall was asked to throw on e"),
+					() -> assertTrue(verified.getMessage().contains(": IllegalStateException: <call className=\"util.sail.EchoCall\" /> threw IllegalStateException: EchoCall was asked to throw on e"),
 										verified.getMessage()),
 					() -> assertTrue(asserted.getMessage().contains("failed: EchoCall was asked to fail an assertion on a"), asserted.getMessage()),
 					() -> assertTrue(none.getMessage().contains("threw IllegalStateException: EchoCall was asked to throw on e"), none.getMessage()),
@@ -1230,7 +1231,7 @@ class InterpretedWebDriverExecutorTest {
 		Call missing = call("sail.kitchenSink.NoSuchCall", null);
 		Call notACall = call("java.lang.String", null);
 		Call notConstructible = call("org.skyve.metadata.sail.execution.SailCall", null);
-		Call duplicate = call("sail.kitchenSink.EchoCall", null, "text", "a", "text", "b");
+		Call duplicate = call("util.sail.EchoCall", null, "text", "a", "text", "b");
 		assertAll(() -> assertTrue(assertThrows(MetaDataException.class, () -> missing.execute(executor)).getMessage()
 										.startsWith("<call className=\"sail.kitchenSink.NoSuchCall\" /> names a class that cannot be loaded: java.lang.ClassNotFoundException"),
 									"missing"),
@@ -1239,7 +1240,7 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertTrue(assertThrows(MetaDataException.class, () -> notConstructible.execute(executor)).getMessage()
 										.startsWith("<call className=\"org.skyve.metadata.sail.execution.SailCall\" /> names a class that cannot be constructed with a public no-argument constructor: java.lang.NoSuchMethodException"),
 									"not constructible"),
-					() -> assertEquals("<call className=\"sail.kitchenSink.EchoCall\" /> has more than one <parameter name=\"text\" />",
+					() -> assertEquals("<call className=\"util.sail.EchoCall\" /> has more than one <parameter name=\"text\" />",
 										assertThrows(MetaDataException.class, () -> duplicate.execute(executor)).getMessage(), "duplicate parameter"));
 	}
 
@@ -1273,6 +1274,52 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertTrue(message.contains(": <testScript /> did not hold: return false;"), message),
 					() -> assertEquals(message.indexOf("Interaction \""), message.lastIndexOf("Interaction \""), "described once: " + message),
 					() -> assertFalse(message.contains("> failed: "), "not the call's own assertion: " + message));
+	}
+
+	/** The configuration that {@link RestartCall} restarts the leg's browser on. */
+	private static final BrowserConfiguration RESTART_ON = new BrowserConfiguration().baseUrl("http://localhost:1/skyve/").profile(Path.of("target", "restart-on"));
+
+	/** A {@link SailCall} that restarts the leg's browser on {@link #RESTART_ON}, through the executor's Selenide. */
+	public static final class RestartCall implements SailCall {
+		@Override
+		public String call(Map<String, String> parameters, Executor executor) {
+			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide = ((InterpretedWebDriverExecutor<?, ?>) executor).getSelenide();
+			SailSettings settings = selenide.getSettings();
+			selenide.stopBrowser();
+			selenide.startBrowser(RESTART_ON, settings);
+			return null;
+		}
+	}
+
+	/** A call that restarts the leg's browser on another profile leaves the Selenide with it, for the next leg to compare with. */
+	@Test
+	void aCallRestartsTheLegsBrowserOnAnotherProfileThroughTheExecutorsSelenide() {
+		List<String> events = new ArrayList<>();
+		BrowserConfiguration first = new BrowserConfiguration().baseUrl("http://localhost:1/skyve/").profile(Path.of("target", "restart-from"));
+		SailSettings settings = first.resolve(SailSettings.Environment.none());
+		SmartClientSelenide fake = new SmartClientSelenide() {
+			@Override
+			public void startBrowser(BrowserConfiguration c, SailSettings r) {
+				recordStart(c, r);
+				events.add("start");
+			}
+
+			@Override
+			public void stopBrowser() {
+				events.add("stop");
+			}
+		};
+		fake.startBrowser(first, settings);
+		events.clear();
+		executor.selenide = fake;
+
+		call(RestartCall.class.getName(), null).execute(executor);
+
+		assertAll(() -> assertSame(fake, executor.getSelenide(), "the executor's Selenide"),
+					() -> assertEquals(List.of("stop", "start"), events),
+					() -> assertSame(RESTART_ON, fake.getConfiguration(), "restarted on the call's configuration"),
+					() -> assertNull(fake.browserChange(settings, RESTART_ON), "the next leg asking for it reuses the browser"),
+					() -> assertNotNull(fake.browserChange(settings, first), "the next leg asking for the first profile does not"));
 	}
 
 	/** A {@link SailCall} that cannot be constructed: its constructor throws. */

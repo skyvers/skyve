@@ -1111,7 +1111,7 @@ the table under [Other steps](#other-steps) says, except `waitFor` and
 `testScript`, which only read.
 
 ```xml
-<call className="sail.kitchenSink.EchoCall" variable="echo">
+<call className="util.sail.EchoCall" variable="echo">
 	<parameter name="text" value="made {run}" />
 </call>
 <executeAsync variable="status"><![CDATA[

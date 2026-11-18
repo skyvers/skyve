@@ -1,4 +1,4 @@
-package sail.kitchenSink;
+package util.sail;
 
 import java.util.Map;
 
@@ -9,7 +9,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * The kitchen sinks' {@code <call/>} fixture: it gives back its {@code text} parameter, so a script can check that the
+ * The harness tests' and kitchen sinks' {@code <call/>} fixture: it gives back its {@code text} parameter, so a script can check that the
  * call ran with its tokens substituted. With {@code fail="assert"} it throws an {@link AssertionError} instead, and
  * with {@code fail="error"} an {@link IllegalStateException}, each naming the text, so the inline failure tests can show
  * how the harness treats each.

@@ -569,11 +569,11 @@ class SailLoadTest {
 	void noEntryStartsOnceTheRunIsStopping() {
 		SailLoad.VirtualUser stopped = new SailLoad.VirtualUser(1, new SailWorkflow(new SailViewRoles()), clock,
 																new SailLoadReport.Recorder(), new AtomicBoolean(true));
-		List<String> entries = List.of("sail/kitchenSink/kitchensink.suite.xml", "sail/kitchenSink/workflow/kitchensink-workflow.xml");
+		List<String> entries = List.of("util/sail/fixtures/plain.suite.xml", "util/sail/fixtures/workflow.xml");
 
 		IllegalStateException e = assertThrows(IllegalStateException.class, () -> SailLoad.runEntries(stopped, entries));
 
-		assertAll(() -> assertEquals("SAIL load: sail/kitchenSink/kitchensink.suite.xml did not start: the run is stopping", e.getMessage()),
+		assertAll(() -> assertEquals("SAIL load: util/sail/fixtures/plain.suite.xml did not start: the run is stopping", e.getMessage()),
 					() -> assertTrue(stopped.stopping()));
 	}
 
@@ -773,9 +773,9 @@ class SailLoadTest {
 	void aSuiteWithABracketIsRefusedUnlessAllowed() {
 		SailLoad load = fake(SailLoad.users(2));
 
-		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> load.run("sail/admin/admin.suite.xml"));
+		IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> load.run("util/sail/fixtures/bracket.suite.xml"));
 
-		assertAll(() -> assertTrue(e.getMessage().startsWith("SAIL load: the suite sail/admin/admin.suite.xml has a bracket"), e.getMessage()),
+		assertAll(() -> assertTrue(e.getMessage().startsWith("SAIL load: the suite util/sail/fixtures/bracket.suite.xml has a bracket"), e.getMessage()),
 					() -> assertTrue(e.getMessage().contains("allowSuiteBracket()"), e.getMessage()),
 					() -> assertNull(scheduler, "refused before any user starts"));
 	}
@@ -804,9 +804,9 @@ class SailLoadTest {
 		SailLoad allowing = fake(SailLoad.users(1)).allowSuiteBracket().scheduler(users -> refusing);
 
 		assertAll(() -> assertSame(started, assertThrows(IllegalStateException.class,
-															() -> plain.run("sail/kitchenSink/kitchensink.suite.xml",
-																			"sail/kitchenSink/workflow/kitchensink-workflow.xml"))),
-					() -> assertSame(started, assertThrows(IllegalStateException.class, () -> allowing.run("sail/admin/admin.suite.xml"))));
+															() -> plain.run("util/sail/fixtures/plain.suite.xml",
+																			"util/sail/fixtures/workflow.xml"))),
+					() -> assertSame(started, assertThrows(IllegalStateException.class, () -> allowing.run("util/sail/fixtures/bracket.suite.xml"))));
 	}
 
 	@Test

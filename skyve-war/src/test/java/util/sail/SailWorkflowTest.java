@@ -276,7 +276,7 @@ class SailWorkflowTest {
 	@Test
 	void aStoppingEngineSkipsASuitesRemainingMembers() {
 		engine.stopWhen(() -> events.stream().anyMatch(event -> event.startsWith("run")));
-		SailSuite suite = SailSuite.resource("sail/kitchenSink/kitchensink.suite.xml", engine)
+		SailSuite suite = SailSuite.resource("util/sail/fixtures/plain.suite.xml", engine)
 									.environment(new SailSettings.Environment(Map.of(), Map.of(), null, Path.of("").toAbsolutePath()));
 
 		SailSuite.Summary summary = suite.execute();

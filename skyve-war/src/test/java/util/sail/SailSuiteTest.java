@@ -262,7 +262,7 @@ class SailSuiteTest {
 	void aSuitesSettingsAreItsEnginesToo() {
 		SailWorkflow engine = new SailWorkflow(new SailViewRoles());
 		SailSettings.Code code = SailSettings.code();
-		SailSuite.resource("sail/kitchenSink/kitchensink.suite.xml", engine).settings(code);
+		SailSuite.resource("util/sail/fixtures/plain.suite.xml", engine).settings(code);
 		assertSame(code, engine.settings());
 	}
 
