@@ -190,6 +190,24 @@ public abstract class Selenide<
 	}
 
 	/**
+	 * Waits for an asynchronous event in the browser, naming the event so that a timeout says what was waited for
+	 * (instead of the condition's class).
+	 *
+	 * @param <T> the condition's result type
+	 * @param what	what is waited for, e.g. {@code the filter menu of column text of list grid g to open}
+	 * @param condition	true (or non-null) when the event has happened
+	 * @return the condition's result
+	 * @throws org.openqa.selenium.TimeoutException	if the event does not happen within {@link #timeout()}; its message says
+	 * 													"waiting for" and {@code what}
+	 */
+	public <T> T waitFor(@Nonnull String what, @Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
+		return new WebDriverWait(driver, timeout(), Duration.ofMillis(100))
+					.ignoring(org.openqa.selenium.StaleElementReferenceException.class)
+					.withMessage("waiting for " + what)
+					.until(condition);
+	}
+
+	/**
 	 * Waits for an asynchronous event in the browser with a timeout and polling interval of the script author's choosing
 	 * (e.g. a {@code timeoutMillis} that polls a server job).
 	 *
