@@ -3,6 +3,7 @@ package util.sail;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
@@ -21,40 +22,87 @@ import org.openqa.selenium.safari.SafariOptions;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import util.sail.BrowserConfiguration.Browsers;
 
 abstract class CrossBrowserSelenium {
 	protected WebDriver driver;
 	protected BrowserConfiguration configuration;
 	protected Actions actions;
-	
+	/** The settings the browser was started with, resolved from its configuration; null before it starts. */
+	protected SailSettings settings;
+
+	/** The user agent the browser was started with, to tell when a configuration asks for another; or null. */
+	private String startedUserAgent;
+	/** The window size the browser was started with, to tell when a configuration asks for another; or null. */
+	private Dimension startedResolution;
+
+	/**
+	 * Starts the browser that the configuration's resolved settings name, with their headless mode.
+	 *
+	 * @param configuration	the browser's user agent, window size and timeouts, and its own settings
+	 * @throws IllegalArgumentException	if a setting is invalid (before any browser starts)
+	 */
 	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
+		startBrowser(configuration, configuration.resolve());
+	}
+
+	/**
+	 * Starts the browser with settings already resolved from the configuration.
+	 *
+	 * @param configuration	the browser's user agent, window size and timeouts
+	 * @param resolved	the settings resolved from it, which name the browser, its headless mode and the timeouts
+	 */
+	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration, @Nonnull SailSettings resolved) {
 		this.configuration = configuration;
-		Browsers browser = configuration.getBrowser();
-		if (browser == null) {
-			setupChrome(configuration);
-		}
-		else {
-			switch (browser) {
-				case chrome:
-					setupChrome(configuration);
-					break;
-				case firefox:
-					setupFirefox(configuration);
-					break;
-				case safari:
-					setupSafari(configuration);
-					break;
-				case edge:
-					setupEdge(configuration);
-					break;
-				default:
-					throw new IllegalStateException("Browser not supported");
-			}
+		this.settings = resolved;
+		startedUserAgent = configuration.getUserAgentString();
+		startedResolution = configuration.getResolution();
+		switch (resolved.browser()) {
+			case chrome:
+				setupChrome(configuration, resolved);
+				break;
+			case firefox:
+				setupFirefox(configuration, resolved);
+				break;
+			case safari:
+				setupSafari(configuration, resolved);
+				break;
+			case edge:
+				setupEdge(configuration, resolved);
+				break;
+			default:
+				throw new IllegalStateException("Browser not supported");
 		}
 		actions = new Actions(driver);
 	}
-	
+
+	/**
+	 * Says how the browser that started differs from the one that settings and a configuration ask for: another
+	 * browser, headless mode, server, user agent or window size.
+	 *
+	 * @param resolved	the settings the next script runs with
+	 * @param next	the configuration the next script runs with
+	 * @return what differs, e.g. {@code headless false -> true}; or null if the same browser will do (or none started)
+	 */
+	@Nullable String browserChange(@Nonnull SailSettings resolved, @Nonnull BrowserConfiguration next) {
+		SailSettings started = settings;
+		if (started == null) {
+			return null;
+		}
+		List<String> changes = new ArrayList<>(5);
+		change(changes, "browser", started.browser(), resolved.browser());
+		change(changes, "headless", Boolean.valueOf(started.headless()), Boolean.valueOf(resolved.headless()));
+		change(changes, "baseUrl", started.baseUrl(), resolved.baseUrl());
+		change(changes, "user agent", startedUserAgent, next.getUserAgentString());
+		change(changes, "resolution", startedResolution, next.getResolution());
+		return changes.isEmpty() ? null : String.join(", ", changes);
+	}
+
+	private static void change(@Nonnull List<String> changes, @Nonnull String what, @Nullable Object from, @Nullable Object to) {
+		if (! Objects.equals(from, to)) {
+			changes.add(what + ' ' + from + " -> " + to);
+		}
+	}
+
 	/**
 	 * Drives the browser that another instance started, instead of starting one: for example a SmartClient executor's
 	 * gestures in the browser that a PrimeFaces script used, when a workflow moves to SmartClient on the same device.
@@ -64,8 +112,20 @@ abstract class CrossBrowserSelenium {
 	 */
 	public void useBrowserOf(@Nonnull CrossBrowserSelenium other) {
 		this.configuration = other.configuration;
+		this.settings = other.settings;
+		this.startedUserAgent = other.startedUserAgent;
+		this.startedResolution = other.startedResolution;
 		this.driver = other.driver;
 		this.actions = other.actions;
+	}
+
+	/**
+	 * Returns the settings the browser was started with.
+	 *
+	 * @return the settings, or null before the browser starts
+	 */
+	public @Nullable SailSettings getSettings() {
+		return settings;
 	}
 
 	/**
@@ -77,18 +137,33 @@ abstract class CrossBrowserSelenium {
 		return configuration;
 	}
 
+	/**
+	 * Quits the browser, if one started. A thread that was interrupted (a load run's user stopped at its time limit)
+	 * still quits it: the interrupt is set aside while the browser quits, as the driver's requests would fail at once
+	 * and leave the browser running, and then put back. So an interrupted thread can block here for up to the driver's
+	 * command timeout, if the browser does not answer.
+	 */
 	public void stopBrowser() {
 		if (driver != null) {
-			driver.quit();
+			boolean interrupted = Thread.interrupted();
+			try {
+				driver.quit();
+			}
+			finally {
+				if (interrupted) {
+					Thread.currentThread().interrupt();
+				}
+			}
 		}
 	}
 
 	/**
-	 * 
-	 * @param config
-	 * @throws Exception
+	 * Starts Chrome with the configuration's user agent and window size.
+	 *
+	 * @param config	the user agent, window size and timeouts
+	 * @param resolved	the settings: headless mode and the timeout
 	 */
-	private void setupChrome(BrowserConfiguration config) {
+	private void setupChrome(BrowserConfiguration config, SailSettings resolved) {
 		List<String> arguments = new ArrayList<>(6);
 		// Chrome throttles windows it thinks are hidden (a locked screen, behind other apps): keep timers and rendering running
 		arguments.add("--disable-backgrounding-occluded-windows");
@@ -98,7 +173,7 @@ abstract class CrossBrowserSelenium {
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
-		if (config.isHeadless()) {
+		if (resolved.headless()) {
 			arguments.add("--headless");
 			// Headless Chrome opens at 800x600, which squeezes the layouts; size it like a desktop window.
 			if (config.getResolution() == null) {
@@ -110,17 +185,18 @@ abstract class CrossBrowserSelenium {
 		options.addArguments(arguments);
 		driver = new ChromeDriver(options);
 		
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 
 	/**
-	 * 
-	 * @param config
-	 * @throws Exception
+	 * Starts Firefox with the configuration's window size.
+	 *
+	 * @param config	the user agent, window size and timeouts
+	 * @param resolved	the settings: headless mode and the timeout
 	 */
-	private void setupFirefox(BrowserConfiguration config) {
+	private void setupFirefox(BrowserConfiguration config, SailSettings resolved) {
 		FirefoxOptions options = new FirefoxOptions();
-		if (config.isHeadless()) {
+		if (resolved.headless()) {
 			options.addArguments("-headless");
 		}
 		FirefoxProfile profile = new FirefoxProfile();
@@ -131,29 +207,30 @@ abstract class CrossBrowserSelenium {
 		options.setProfile(profile);
 		driver = new FirefoxDriver(options);
 
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 	
 	/**
 	 * run "safaridriver --enable" in a terminal.
 	 * Safari does not have a headless option.
 	 * 
-	 * @param config
+	 * @param config	the user agent, window size and timeouts
+	 * @param resolved	the settings: the timeout
 	 */
-	private void setupSafari(BrowserConfiguration config) {
+	private void setupSafari(BrowserConfiguration config, SailSettings resolved) {
 		SafariOptions options = new SafariOptions();
 		driver = new SafariDriver(options);
 		
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 
-	private void setupEdge(BrowserConfiguration config) {
+	private void setupEdge(BrowserConfiguration config, SailSettings resolved) {
 		List<String> arguments = new ArrayList<>(2);
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
 		}
-		if (config.isHeadless()) {
+		if (resolved.headless()) {
 			arguments.add("headless");
 		}
 		
@@ -161,15 +238,15 @@ abstract class CrossBrowserSelenium {
 		options.addArguments(arguments);
 		driver = new EdgeDriver(options);
 		
-		setupBrowser(config);
+		setupBrowser(config, resolved);
 	}
 	
-	private void setupBrowser(BrowserConfiguration config) {
+	private void setupBrowser(BrowserConfiguration config, SailSettings resolved) {
 		Options manage = driver.manage();
 		
 		Timeouts timeouts = manage.timeouts();
 		Duration duration = config.getPageLoadTimeout();
-		timeouts.pageLoadTimeout((duration == null) ? Duration.ofSeconds(30) : duration);
+		timeouts.pageLoadTimeout((duration == null) ? resolved.timeout() : duration);
 		duration = config.getImplicitlyWait();
 		timeouts.implicitlyWait((duration == null) ? Duration.ofMillis(0) : duration);
 		duration = config.getScriptTimeout();

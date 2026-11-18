@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.regex.Pattern;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
@@ -33,6 +34,8 @@ import util.sail.Devices;
  * Runs against the server named by {@code -Dsail.baseUrl} (required), whose {@code skyve.json} has
  * {@code sail.recording} on; headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
+@Tag("recording")
 class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSail {
 	private static final String HEAD = "<automation uxui=\"tablet\" userAgentType=\"tablet\" testStrategy=\"Assert\" xmlns=\"http://www.skyve.org/xml/sail\">";
 	private static final String TAIL = "</automation>";
@@ -472,7 +475,7 @@ class PrimeFacesRecorderRoundTripSailIT extends AbstractPrimeFacesInterpretedSai
 	private static final Pattern CONVERSATION_ID = Pattern.compile("_c=[0-9a-f-]+");
 
 	private @Nonnull String fetch(@Nonnull String relativeUrl) {
-		String url = new BrowserConfiguration().getBaseUrl() + relativeUrl;
+		String url = selenium.getBaseUrl() + relativeUrl;
 		Object result = selenium.waitFor(d -> ((JavascriptExecutor) d).executeAsyncScript(
 				"var done = arguments[arguments.length - 1];" +
 				"fetch(arguments[0], {credentials: 'same-origin'}).then(function (r) { return r.text(); })" +

@@ -1,6 +1,7 @@
 package sail.kitchenSink.sc;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.codeborne.selenide.Selenide;
@@ -25,6 +26,7 @@ import util.sail.BrowserConfiguration.Browsers;
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
 class SmartClientListGridSelectedEventSailIT extends AbstractSmartClientInterpretedSail {
 
 	/** Finds the PrimeFaces data table list grid of the current view, as the variable faces. */

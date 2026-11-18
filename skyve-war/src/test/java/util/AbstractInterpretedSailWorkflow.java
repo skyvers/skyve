@@ -8,6 +8,8 @@ import org.skyve.web.UserAgentType;
 import jakarta.annotation.Nonnull;
 import util.sail.BrowserConfiguration;
 import util.sail.SailServerLock;
+import util.sail.SailSettings;
+import util.sail.SailSuite;
 import util.sail.SailViewRoles;
 import util.sail.SailWorkflow;
 
@@ -24,11 +26,15 @@ import util.sail.SailWorkflow;
  * }
  * </pre>
  *
- * A script can also be a {@code <workflow>} that holds the automations itself.
+ * A script can also be a {@code <workflow>} that holds the automations itself, and a {@code <suite>} of independent
+ * workflows runs with {@link #sailSuite(String)}.
  * <p>
  * Unlike the single-renderer test bases, no browser is started before a test: the workflow starts the browser each
  * automation needs. The server lock ({@link SailServerLock}) is taken by the first workflow and held until the class has
  * finished.
+ * <p>
+ * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
+ * {@code settings().headless(false).timeoutSeconds(60)}, before the workflow runs.
  */
 public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	/** The roles the views are built with for the users the scripts sign in as. */
@@ -45,6 +51,16 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	 */
 	protected final void viewRoles(@Nonnull String userName, @Nonnull String... roleNames) {
 		viewRoles.register(userName, roleNames);
+	}
+
+	/**
+	 * Returns the test's code-level settings, to change before the workflow runs, e.g.
+	 * {@code settings().variable("password", "x")}.
+	 *
+	 * @return the settings builder of the workflow
+	 */
+	protected final @Nonnull SailSettings.Code settings() {
+		return workflow.settings();
 	}
 
 	/**
@@ -75,6 +91,48 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 	 */
 	protected void sailWorkflowString(@Nonnull String... scripts) {
 		workflow.runStrings(scripts);
+	}
+
+	/**
+	 * Runs SAIL script files, in order, as one run; see {@link #sailWorkflow(String...)}.
+	 *
+	 * @param files	the scripts' paths, absolute or relative to the working directory
+	 * @throws AssertionError	naming the automation that failed
+	 */
+	protected void sailWorkflowFile(@Nonnull String... files) {
+		workflow.runFiles(files);
+	}
+
+	/**
+	 * Runs a SAIL {@code <suite>} on the test classpath: its members, each a run of its own, with this test's settings,
+	 * view roles and browsers (see {@link SailSuite}).
+	 *
+	 * @param resourceName	the suite's resource path, e.g. {@code sail/admin/admin.suite.xml}
+	 * @throws AssertionError	with every failed member, after a summary
+	 */
+	protected void sailSuite(@Nonnull String resourceName) {
+		SailSuite.resource(resourceName, workflow).run();
+	}
+
+	/**
+	 * Runs a SAIL file or classpath resource as the kind of document it is: a {@code <suite>}, a {@code <workflow>} or an
+	 * {@code <automation>} (see {@link SailSuite#runEntry(String, util.sail.SailWorkflow)}).
+	 *
+	 * @param entry	a file path, or a classpath resource
+	 * @throws AssertionError	if it fails
+	 */
+	protected void sailRun(@Nonnull String entry) {
+		SailSuite.runEntry(entry, workflow);
+	}
+
+	/**
+	 * Runs a SAIL {@code <suite>} file; see {@link #sailSuite(String)}.
+	 *
+	 * @param file	the suite's path, absolute or relative to the working directory
+	 * @throws AssertionError	with every failed member, after a summary
+	 */
+	protected void sailSuiteFile(@Nonnull String file) {
+		SailSuite.file(file, workflow).run();
 	}
 
 	@AfterAll

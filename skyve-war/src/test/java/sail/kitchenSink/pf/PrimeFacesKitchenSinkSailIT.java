@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractPrimeFacesInterpretedSail;
@@ -13,34 +14,21 @@ import util.sail.BrowserConfiguration.Browsers;
 import util.sail.Devices;
 
 /**
- * Runs automated SAIL tests for the kitchensink module (PrimeFaces).
+ * The PrimeFaces kitchen sink tests that need Java: the switch back from SmartClient, and the failure messages of the
+ * steps that cannot do what they say. The conformance scripts themselves ({@code pf-kitchensink-sail.xml},
+ * {@code pf-kitchensink-row-link.xml}) run in the kitchen sink suite ({@code KitchenSinkSuiteSailIT}).
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required),
  * headless unless {@code -Dsail.headless=false}.
- * The script's test strategy decides how failures are reported; the test fails with an {@link AssertionError}
- * naming each failed interaction and step.
  */
+@Tag("sail")
+@Tag("smoke")
 class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	public PrimeFacesKitchenSinkSailIT() {
 		super(new BrowserConfiguration()
 				.browser(Browsers.chrome)
 				.userAgentString(Devices.ipad.userAgentString));
-	}
-
-	@Test
-	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
-	void test() {
-		sailResource("sail/kitchenSink/pf/pf-kitchensink-sail.xml");
-	}
-
-	/**
-	 * {@code <dataGridLink />}: the Actions Fixture's Run From Row link in a row, declined and confirmed.
-	 */
-	@Test
-	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails
-	void rowLink() {
-		sailResource("sail/kitchenSink/pf/pf-kitchensink-row-link.xml");
 	}
 
 	/**

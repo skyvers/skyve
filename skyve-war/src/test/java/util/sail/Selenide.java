@@ -67,25 +67,53 @@ public abstract class Selenide<
 		TXTC extends TextCommand,
 		SELC extends SelectOneCommand> extends CrossBrowserSelenium {
 
-	/** System property naming the timeout in seconds for every wait on the browser (default 30). */
-	public static final String TIMEOUT_PROPERTY = "sail.timeoutSeconds";
 	/**
-	 * The timeout for every wait on the browser, for an asynchronous event (a page or ajax response, an element
-	 * appearing). It is a limit, not a delay: waits end as soon as their event happens.
+	 * System property naming the timeout in seconds for every wait on the browser (default 30).
+	 * @deprecated	use {@link SailSettings#TIMEOUT_SECONDS}
 	 */
-	public static final Duration TIMEOUT = Duration.ofSeconds(Long.getLong(TIMEOUT_PROPERTY, 30L).longValue());
+	@Deprecated(since = "10")
+	public static final String TIMEOUT_PROPERTY = SailSettings.TIMEOUT_SECONDS;
+	/**
+	 * The timeout for every wait on the browser from the settings outside code ({@code -D}, the environment and the
+	 * properties file) when this class was loaded; the default if they were invalid then.
+	 * @deprecated	use {@link #timeout()}, the timeout of this browser's own settings, which code can set too
+	 */
+	@Deprecated(since = "10")
+	public static final Duration TIMEOUT = initialTimeout();
 
 	private String baseUrl;
 	private String loginError;
 
+	private static @Nonnull Duration initialTimeout() {
+		try {
+			return SailSettings.resolve().timeout();
+		}
+		catch (@SuppressWarnings("unused") IllegalArgumentException e) {
+			// an invalid setting fails the run when its browser starts, with the reason
+			return Duration.ofSeconds(SailSettings.DEFAULT_TIMEOUT_SECONDS);
+		}
+	}
+
+	/**
+	 * Returns the timeout for every wait on this browser, for an asynchronous event (a page or ajax response, an element
+	 * appearing): the browser's resolved {@value SailSettings#TIMEOUT_SECONDS}. It is a limit, not a delay: waits end
+	 * as soon as their event happens.
+	 *
+	 * @return the timeout; before the browser starts, the timeout of the settings outside code
+	 */
+	public @Nonnull Duration timeout() {
+		SailSettings resolved = settings;
+		return (resolved == null) ? TIMEOUT : resolved.timeout();
+	}
+
 	@Override
-	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration) {
-		super.startBrowser(configuration);
+	public void startBrowser(@SuppressWarnings("hiding") BrowserConfiguration configuration, @Nonnull SailSettings resolved) {
+		super.startBrowser(configuration, resolved);
 
 		WebDriverRunner.setWebDriver(driver);
 		// Selenide's should...() conditions share the one timeout
-		com.codeborne.selenide.Configuration.timeout = TIMEOUT.toMillis();
-		this.baseUrl = configuration.getBaseUrl();
+		com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
+		this.baseUrl = resolved.requireBaseUrl();
 	}
 
 	/**
@@ -98,11 +126,55 @@ public abstract class Selenide<
 	public void useBrowserOf(@Nonnull CrossBrowserSelenium other) {
 		super.useBrowserOf(other);
 		WebDriverRunner.setWebDriver(driver);
-		com.codeborne.selenide.Configuration.timeout = TIMEOUT.toMillis();
-		BrowserConfiguration shared = getConfiguration();
+		com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
+		SailSettings shared = settings;
 		if (shared != null) {
-			this.baseUrl = shared.getBaseUrl();
+			this.baseUrl = shared.requireBaseUrl();
 		}
+	}
+
+	/**
+	 * Applies the settings that the next script runs with. If they, or the configuration, ask for another browser than
+	 * the one started (another browser, headless mode, server, user agent or window size), the browser restarts with
+	 * them, taking the server lock for a new server; otherwise the browser carries on, with their timeout (for its waits,
+	 * and for page loads unless the configuration gives a page load timeout).
+	 *
+	 * <p>Side effects: may stop and start the browser (which ends its session), and says so in the trace; sets
+	 * Selenide's timeout.
+	 *
+	 * @param resolved	the next script's settings, resolved from the configuration
+	 * @param next	the next script's configuration
+	 */
+	public void useSettings(@Nonnull SailSettings resolved, @Nonnull BrowserConfiguration next) {
+		String change = browserChange(resolved, next);
+		if (change == null) {
+			settings = resolved;
+			com.codeborne.selenide.Configuration.timeout = timeout().toMillis();
+			if ((driver != null) && (next.getPageLoadTimeout() == null)) {
+				// the page load timeout follows the settings' timeout, unless the configuration gives its own
+				driver.manage().timeouts().pageLoadTimeout(resolved.timeout());
+			}
+		}
+		else {
+			trace("SAIL: the browser's settings changed (" + change + "): starting a new browser");
+			stopBrowser();
+			SailServerLock.acquire(resolved.requireBaseUrl());
+			startBrowser(next, resolved);
+		}
+	}
+
+	/**
+	 * Returns the base URL of the server this browser runs against.
+	 *
+	 * @return the URL, ending in {@code /}
+	 * @throws IllegalStateException	if the browser has not started
+	 */
+	public @Nonnull String getBaseUrl() {
+		String result = baseUrl;
+		if (result == null) {
+			throw new IllegalStateException("The browser has not started");
+		}
+		return result;
 	}
 
 	/**
@@ -111,10 +183,10 @@ public abstract class Selenide<
 	 * @param <T> the condition's result type
 	 * @param condition	true (or non-null) when the event has happened
 	 * @return the condition's result
-	 * @throws org.openqa.selenium.TimeoutException	if the event does not happen within {@link #TIMEOUT}
+	 * @throws org.openqa.selenium.TimeoutException	if the event does not happen within {@link #timeout()}
 	 */
 	public <T> T waitFor(@Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
-		return waitFor(TIMEOUT, Duration.ofMillis(100), condition);
+		return waitFor(timeout(), Duration.ofMillis(100), condition);
 	}
 
 	/**
@@ -411,7 +483,7 @@ public abstract class Selenide<
 			});
 		}
 		catch (org.openqa.selenium.TimeoutException e) {
-			throw new IllegalStateException(String.format("%s opened no new window in %d s", what, Long.valueOf(TIMEOUT.toSeconds())), e);
+			throw new IllegalStateException(String.format("%s opened no new window in %d s", what, Long.valueOf(timeout().toSeconds())), e);
 		}
 		if (opened.isEmpty()) {
 			throw new IllegalStateException(String.format("%s opened its page in this window, not a new one: %s", what, driver.getCurrentUrl()));
@@ -496,7 +568,7 @@ public abstract class Selenide<
 			});
 		}
 		catch (org.openqa.selenium.TimeoutException e) {
-			throw new IllegalStateException(String.format("The new window that %s opened loaded no page in %d s", what, Long.valueOf(TIMEOUT.toSeconds())), e);
+			throw new IllegalStateException(String.format("The new window that %s opened loaded no page in %d s", what, Long.valueOf(timeout().toSeconds())), e);
 		}
 		waitForPageToSettle();
 		trace(String.format("    In the new window: %s (%s, %s)", driver.getCurrentUrl(), driver.getTitle(),
@@ -543,7 +615,7 @@ public abstract class Selenide<
 		}
 		catch (org.openqa.selenium.TimeoutException e) {
 			throw new IllegalStateException(String.format("The browser did not go back from %s in %d s: is there an earlier page in this window's history?",
-															url, Long.valueOf(TIMEOUT.toSeconds())), e);
+															url, Long.valueOf(timeout().toSeconds())), e);
 		}
 		waitForPageToSettle();
 		trace(String.format("    Back at: %s (%s)", driver.getCurrentUrl(), driver.getTitle()));

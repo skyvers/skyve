@@ -748,6 +748,40 @@
 
 	<!-- To produce aggregate jacoco test coverage -->
 	<profiles>
+		<!--
+			SAIL browser ITs (docs/sail.md, Running the Tests): one command runs the tagged SAIL ITs against a disposable
+			server, with no upstream unit tests, one fork and no reruns (a rerun would hide a flake and repeat destructive
+			steps), e.g.
+				mvn -pl skyve-war -am verify -Psail -Dsail.baseUrl=http://localhost:8080/skyve/
+			narrowed with -Dgroups=smoke (or admin, recording, ...) and -DexcludedGroups=destructive. One IT by name needs
+			-Dit.test=SailRunIT -Dfailsafe.failIfNoSpecifiedTests=false, as the upstream modules have no such test.
+			Evidence that a suite or -Dsail.evidence asks for goes under skyve-war/target/sail/.
+		-->
+		<profile>
+			<id>sail</id>
+			<properties>
+				<skipUnitTests>true</skipUnitTests>
+				<skipIntegrationTests>false</skipIntegrationTests>
+				<surefire.rerunFailingTestsCount>0</surefire.rerunFailingTestsCount>
+				<!-- load runs (performance) only when asked for, e.g. -Dgroups=performance; never on a shared server -->
+				<groups>sail &amp; !performance</groups>
+			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-failsafe-plugin</artifactId>
+							<configuration>
+								<forkCount>1</forkCount>
+								<reuseForks>true</reuseForks>
+								<rerunFailingTestsCount>0</rerunFailingTestsCount>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
 		<profile>
 			<id>coverage</id>
 			<build>

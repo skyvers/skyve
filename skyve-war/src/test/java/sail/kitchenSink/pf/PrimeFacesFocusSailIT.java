@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -28,6 +29,7 @@ import util.sail.Devices;
  * The steps that SAIL has gestures for are SAIL steps. The rerender is made with the browser directly, because the
  * test needs to measure the page between the harness's scroll to the field and the response.
  */
+@Tag("sail")
 class PrimeFacesFocusSailIT extends AbstractPrimeFacesInterpretedSail {
 	/** The input PrimeFaces focuses: the first enabled, shown input with a name that is not a button (PrimeFaces.focus). */
 	private static final String FIRST_INPUT_JS = "return jQuery(':not(:submit):not(:button):input:visible:enabled[name]').get(0) || null;";

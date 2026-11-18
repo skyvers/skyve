@@ -432,6 +432,8 @@ class GeneratorTest {
 		when(user.getCustomer()).thenReturn(customer);
 		when(user.canAccessDocument(document)).thenReturn(true);
 		when(user.canCreateDocument(document)).thenReturn(true);
+		// the renderers show Delete only to a user who can delete
+		when(user.canDeleteDocument(document)).thenReturn(true);
 		when(repository.getModule(customer, "sales")).thenReturn(module);
 		when(repository.getDocument(customer, module, "Invoice")).thenReturn(document);
 		when(repository.getView("desktop", customer, document, "create")).thenReturn(view);
@@ -724,6 +726,8 @@ class GeneratorTest {
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		when(user.getCustomer()).thenReturn(customer);
 		when(user.getModuleMenu("sales")).thenReturn(menu);
+		// the renderers show Save only to a user who can create or update
+		when(user.canUpdateDocument(document)).thenReturn(true);
 		when(repository.getModule(customer, "sales")).thenReturn(module);
 		when(repository.getDocument(customer, module, "Settings")).thenReturn(document);
 		when(repository.getView("desktop", customer, document, "create")).thenReturn(view);

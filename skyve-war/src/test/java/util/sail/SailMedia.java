@@ -40,18 +40,21 @@ import jakarta.annotation.Nullable;
 /**
  * Step snapshots and a video of one automation run, for a person to look through what a SAIL run did.
  * <p>
- * Both are opt-in, by system property; without them {@link #start} returns null and the executor does nothing more.
+ * Both are opt-in, by {@link SailSettings} (a directory, or an evidence request); without them {@link #start} returns
+ * null and the executor does nothing more.
  * <ul>
- * <li>{@value #SNAPSHOT_DIRECTORY_PROPERTY}: after each step (and when a step fails, before the test strategy acts on
+ * <li>{@value SailSettings#SNAPSHOT_DIR}: after each step (and when a step fails, before the test strategy acts on
  * it), a screenshot named by sequence, interaction and step, and an {@code index.html} film strip of the steps: the
- * step as SAIL, its outcome and duration, and its screenshot. With {@value #SNAPSHOT_SOURCE_PROPERTY}{@code =true},
+ * step as SAIL, its outcome and duration, and its screenshot. With {@value SailSettings#SNAPSHOT_SOURCE}{@code =true},
  * also each page's source.</li>
- * <li>{@value #VIDEO_DIRECTORY_PROPERTY}: the browser's frames, from Chrome's DevTools screencast, with their times,
+ * <li>{@value SailSettings#VIDEO_DIR}: the browser's frames, from Chrome's DevTools screencast, with their times,
  * and a {@code player.html} that plays them at their real timing, captioned with the SAIL step that was running.</li>
  * </ul>
  * Each automation run gets its own folder under each directory, named by its time, test and (for a suite file) the
  * script, so suites, workflows and ITs with several tests keep every run. Each directory gets an {@code index.html}
- * listing its runs. Everything is static HTML that opens from the file system.
+ * listing its runs. Everything is static HTML that opens from the file system. The run's pages list its settings that
+ * do not come from their defaults, with their sources. With {@value SailSettings#KEEP_MEDIA}{@code =failed}, a run that
+ * passed deletes its folders when it ends.
  * <p>
  * Recordings show what the browser showed: a run against real data records real data.
  * <p>
@@ -60,12 +63,24 @@ import jakarta.annotation.Nullable;
  * test thread never waits for them until the run ends.
  */
 public final class SailMedia {
-	/** System property naming a directory for step snapshots and their film strip. */
-	public static final String SNAPSHOT_DIRECTORY_PROPERTY = "sail.snapshotDir";
-	/** System property that, when {@code true}, also saves each step's page source with its snapshot. */
-	public static final String SNAPSHOT_SOURCE_PROPERTY = "sail.snapshotSource";
-	/** System property naming a directory for the run's video. */
-	public static final String VIDEO_DIRECTORY_PROPERTY = "sail.videoDir";
+	/**
+	 * System property naming a directory for step snapshots and their film strip.
+	 * @deprecated	use {@link SailSettings#SNAPSHOT_DIR}
+	 */
+	@Deprecated(since = "10")
+	public static final String SNAPSHOT_DIRECTORY_PROPERTY = SailSettings.SNAPSHOT_DIR;
+	/**
+	 * System property that, when {@code true}, also saves each step's page source with its snapshot.
+	 * @deprecated	use {@link SailSettings#SNAPSHOT_SOURCE}
+	 */
+	@Deprecated(since = "10")
+	public static final String SNAPSHOT_SOURCE_PROPERTY = SailSettings.SNAPSHOT_SOURCE;
+	/**
+	 * System property naming a directory for the run's video.
+	 * @deprecated	use {@link SailSettings#VIDEO_DIR}
+	 */
+	@Deprecated(since = "10")
+	public static final String VIDEO_DIRECTORY_PROPERTY = SailSettings.VIDEO_DIR;
 
 	/** The screencast's image format, quality and largest frame: enough to read a page, small enough to keep many. */
 	static final String FRAME_FORMAT = "jpeg";
@@ -78,6 +93,12 @@ public final class SailMedia {
 	private static final Pattern METHOD_CONTENT = Pattern.compile("<(?:\\w+:)?method>(.*)</(?:\\w+:)?method>", Pattern.DOTALL);
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
+	/**
+	 * The runs of the unit (a workflow) running on this thread, whose media is kept or deleted together; null outside
+	 * a unit. Set by {@link #beginUnit()} and removed by {@link #endUnit(boolean)}, which its caller calls in a
+	 * {@code finally}.
+	 */
+	private static final ThreadLocal<List<SailMedia>> UNIT = new ThreadLocal<>();
 
 	/** One executed step: where it ran, what it was, when, how it went, and its snapshot. */
 	record StepRecord(int sequence,
@@ -99,8 +120,22 @@ public final class SailMedia {
 		// a value
 	}
 
-	/** What a run's pages say about the run. */
-	record RunInfo(@Nonnull String name, @Nonnull String test, @Nullable String label, @Nonnull String started, @Nonnull String uxui) {
+	/**
+	 * What a run's pages say about the run.
+	 *
+	 * @param name	the run's folder name
+	 * @param test	the test, as {@code Class.method}
+	 * @param label	the suite file, or null
+	 * @param started	when it started, as shown
+	 * @param uxui	the automation's UX/UI
+	 * @param settings	its settings that do not come from their defaults, each with its source (see {@link SailSettings#describe()})
+	 */
+	record RunInfo(@Nonnull String name,
+					@Nonnull String test,
+					@Nullable String label,
+					@Nonnull String started,
+					@Nonnull String uxui,
+					@Nonnull List<String> settings) {
 		// a value
 	}
 
@@ -110,6 +145,9 @@ public final class SailMedia {
 	private final Path snapshotRun;
 	private final Path videoRun;
 	private final boolean saveSource;
+	private final SailSettings.KeepMedia keepMedia;
+	/** Whether the run passed with no failed step, once it has finished. */
+	private boolean passed;
 	private final List<StepRecord> steps = new ArrayList<>();
 	private Screencast screencast;
 	/** The browser the screencast was last started for (or tried), so that it is restarted only for a new browser. */
@@ -130,13 +168,14 @@ public final class SailMedia {
 						@Nonnull RunInfo info,
 						@Nullable Path snapshotRun,
 						@Nullable Path videoRun,
-						boolean saveSource) {
+						@Nonnull SailSettings settings) {
 		this.selenide = selenide;
 		this.automation = automation;
 		this.info = info;
 		this.snapshotRun = snapshotRun;
 		this.videoRun = videoRun;
-		this.saveSource = saveSource;
+		this.saveSource = settings.snapshotSource();
+		this.keepMedia = settings.keepMedia();
 	}
 
 	/**
@@ -155,15 +194,20 @@ public final class SailMedia {
 	}
 
 	/**
-	 * Starts snapshots and video for an automation run, as the system properties ask.
+	 * Starts snapshots and video for an automation run, as the settings ask.
+	 *
+	 * <p>Side effects: makes the run's folders.
 	 *
 	 * @param selenide	the browser the automation drives
 	 * @param automation	the automation
-	 * @return the run's media, or null when neither property is set
+	 * @param settings	the run's settings
+	 * @return the run's media, or null when the settings give neither a snapshot nor a video directory
 	 */
-	static @Nullable SailMedia start(@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide, @Nonnull Automation automation) {
-		Path snapshotBase = directory(SNAPSHOT_DIRECTORY_PROPERTY);
-		Path videoBase = directory(VIDEO_DIRECTORY_PROPERTY);
+	static @Nullable SailMedia start(@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide,
+										@Nonnull Automation automation,
+										@Nonnull SailSettings settings) {
+		Path snapshotBase = settings.snapshotDir();
+		Path videoBase = settings.videoDir();
 		if ((snapshotBase == null) && (videoBase == null)) {
 			return null;
 		}
@@ -171,15 +215,16 @@ public final class SailMedia {
 		LocalDateTime now = LocalDateTime.now();
 		String test = testName();
 		String label = LABEL.get();
-		String name = sanitise(FOLDER_TIME.format(now) + '-' + test + ((label == null) ? "" : '-' + label), 120);
-		RunInfo info = new RunInfo(name, test, label, SHOWN_TIME.format(now), automation.getUxui());
+		// a load run's virtual users start runs at the same time: their folders name the user and iteration
+		String name = sanitise(FOLDER_TIME.format(now) + '-' + SailLoadProbe.fileLabel() + test + ((label == null) ? "" : '-' + label), 120);
+		RunInfo info = new RunInfo(name, test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe());
 		try {
 			SailMedia result = new SailMedia(selenide,
 												automation,
 												info,
 												(snapshotBase == null) ? null : Files.createDirectories(snapshotBase.resolve(name)),
 												(videoBase == null) ? null : Files.createDirectories(videoBase.resolve(name).resolve("frames")).getParent(),
-												Boolean.getBoolean(SNAPSHOT_SOURCE_PROPERTY));
+												settings);
 			selenide.trace("SAIL media for this run: " + ((snapshotBase == null) ? "" : "snapshots in " + result.snapshotRun + " ") +
 							((videoBase == null) ? "" : "video in " + result.videoRun));
 			return result;
@@ -188,11 +233,6 @@ public final class SailMedia {
 			selenide.trace("Could not make the SAIL media folders, so this run has none: " + e);
 			return null;
 		}
-	}
-
-	private static @Nullable Path directory(@Nonnull String property) {
-		String value = System.getProperty(property);
-		return ((value == null) || value.isBlank()) ? null : Path.of(value.trim()).toAbsolutePath();
 	}
 
 	/**
@@ -286,20 +326,85 @@ public final class SailMedia {
 	}
 
 	/**
-	 * Ends the run: stops the screencast, and writes the film strip, the player and each directory's list of runs.
+	 * Returns the script that the runs started on this thread come from (see {@link #label(String)}).
+	 *
+	 * @return the label, or null outside a suite
 	 */
-	void finish() {
+	static @Nullable String label() {
+		return LABEL.get();
+	}
+
+	/**
+	 * Starts a unit of automation runs on this thread, such as a workflow, whose media is kept or deleted together: with
+	 * {@value SailSettings#KEEP_MEDIA}{@code =failed}, a passed run's folders are deleted only when the whole unit
+	 * passed (see {@link #endUnit(boolean)}). Outside a unit, each run decides for itself.
+	 *
+	 * <p>Side effects: sets this thread's unit, which the caller must end in a {@code finally}.
+	 */
+	static void beginUnit() {
+		UNIT.set(new ArrayList<>());
+	}
+
+	/**
+	 * Ends this thread's unit: if it passed, and every run in it passed, deletes the folders of its runs whose settings
+	 * keep only failed runs' media.
+	 *
+	 * <p>Side effects: may delete the runs' folders and rewrite their directories' lists of runs; clears the unit.
+	 *
+	 * @param unitPassed	whether the unit passed
+	 */
+	static void endUnit(boolean unitPassed) {
+		List<SailMedia> runs = UNIT.get();
+		UNIT.remove();
+		if ((runs == null) || (! unitPassed)) {
+			return;
+		}
+		for (SailMedia run : runs) {
+			if (! run.passed) {
+				return;
+			}
+		}
+		for (SailMedia run : runs) {
+			if (run.keepMedia == SailSettings.KeepMedia.FAILED) {
+				run.delete();
+			}
+		}
+	}
+
+	/**
+	 * Ends the run: stops the screencast, and writes the film strip, the player and each directory's list of runs.
+	 * Then, when the run passed and {@value SailSettings#KEEP_MEDIA} is {@code failed}, deletes the run's folders:
+	 * at once, or when its unit ends (see {@link #beginUnit()}).
+	 *
+	 * <p>Side effects: writes, and may delete, files in the run's folders, and rewrites each directory's list of runs.
+	 *
+	 * @param automationPassed	whether the automation passed; a run with a failed step counts as failed even so
+	 */
+	void finish(boolean automationPassed) {
 		if (screencast != null) {
 			screencast.stop();
 			screencast = null;
 		}
+		passed = automationPassed && steps.stream().noneMatch(StepRecord::failed);
+		writePages();
+		List<SailMedia> unit = UNIT.get();
+		if (unit != null) {
+			unit.add(this);
+		}
+		else if (passed && (keepMedia == SailSettings.KeepMedia.FAILED)) {
+			delete();
+		}
+	}
+
+	/** Writes the film strip, the player and each directory's list of runs. */
+	private void writePages() {
 		try {
 			Path filmStrip = (snapshotRun == null) ? null : snapshotRun.resolve("index.html");
 			Path player = (videoRun == null) ? null : videoRun.resolve("player.html");
 			if (filmStrip != null) {
 				String playerLink = (player == null) ? null : link(snapshotRun, player);
 				Files.writeString(filmStrip, filmStripHtml(info, steps, playerLink), StandardCharsets.UTF_8);
-				Files.writeString(snapshotRun.getParent().resolve("index.html"), runsIndexHtml(snapshotRun.getParent()), StandardCharsets.UTF_8);
+				writeRunsIndex(snapshotRun.getParent());
 			}
 			if (player != null) {
 				String filmStripLink = (filmStrip == null) ? null : link(videoRun, filmStrip);
@@ -309,7 +414,7 @@ public final class SailMedia {
 				}
 				Files.writeString(videoRun.resolve("video.js"), videoScript(info, written, steps, filmStripLink), StandardCharsets.UTF_8);
 				Files.writeString(player, playerHtml(info), StandardCharsets.UTF_8);
-				Files.writeString(videoRun.getParent().resolve("index.html"), runsIndexHtml(videoRun.getParent()), StandardCharsets.UTF_8);
+				writeRunsIndex(videoRun.getParent());
 			}
 			selenide.trace("SAIL media written: " + steps.size() + " steps" +
 							((videoRun == null) ? "" : ", " + frames.size() + " video frames") +
@@ -319,6 +424,40 @@ public final class SailMedia {
 		catch (IOException | RuntimeException e) {
 			selenide.trace("Could not write the SAIL media pages: " + e);
 		}
+	}
+
+	/**
+	 * Deletes the run's folders, and lists the runs left in each directory that had a list.
+	 */
+	private void delete() {
+		List<Path> folders = new ArrayList<>(2);
+		if (snapshotRun != null) {
+			folders.add(snapshotRun);
+		}
+		if ((videoRun != null) && (! videoRun.equals(snapshotRun))) {
+			folders.add(videoRun);
+		}
+		for (Path folder : folders) {
+			try {
+				org.skyve.util.FileUtil.delete(folder.toFile());
+				if (Files.exists(folder.getParent().resolve("index.html"))) {
+					writeRunsIndex(folder.getParent());
+				}
+			}
+			catch (IOException | RuntimeException e) {
+				selenide.trace("Could not delete the SAIL media of a passed run (" + SailSettings.KEEP_MEDIA + "=failed) in " + folder + ": " + e);
+				return;
+			}
+		}
+		selenide.trace("SAIL media deleted, as the run passed (" + SailSettings.KEEP_MEDIA + "=failed): " + folders);
+	}
+
+	/**
+	 * Rewrites a directory's list of runs. Synchronised: a load run's virtual users ({@link SailLoad}) end runs in one
+	 * directory at the same time, and two writers of one file would garble it.
+	 */
+	private static synchronized void writeRunsIndex(@Nonnull Path directory) throws IOException {
+		Files.writeString(directory.resolve("index.html"), runsIndexHtml(directory), StandardCharsets.UTF_8);
 	}
 
 	private static @Nonnull String link(@Nonnull Path from, @Nonnull Path to) {
@@ -458,6 +597,9 @@ public final class SailMedia {
 			result.append(" &middot; <a href=\"").append(escape(playerLink)).append("\">video</a>");
 		}
 		result.append(" &middot; <a href=\"../index.html\">all runs</a></div>")
+				.append("<div class=\"meta settings\">Settings: ")
+				.append(info.settings().isEmpty() ? "all defaults" : String.join(" &middot; ", info.settings().stream().map(SailMedia::escape).toList()))
+				.append("</div>")
 				.append("<table><thead><tr><th>#</th><th>Interaction</th><th>Step</th><th>Outcome</th><th>Time</th><th>Screenshot</th></tr></thead><tbody>");
 		for (StepRecord step : steps) {
 			result.append("<tr id=\"step-").append(step.sequence()).append('"').append(step.failed() ? " class=\"fail\"" : "").append('>')
@@ -516,6 +658,7 @@ public final class SailMedia {
 		Map<String, Object> video = new java.util.LinkedHashMap<>();
 		video.put("title", info.test() + ((info.label() == null) ? "" : " · " + info.label()));
 		video.put("started", info.started());
+		video.put("settings", info.settings());
 		video.put("filmStrip", filmStripLink);
 		video.put("frames", frameData);
 		video.put("steps", stepData);
@@ -557,6 +700,8 @@ public final class SailMedia {
 				"var meta=document.getElementById('meta');meta.textContent='Started '+V.started+' \\u00b7 '+S.length+' steps \\u00b7 '+F.length+' frames';" +
 				"if(V.filmStrip){var a=document.createElement('a');a.href=V.filmStrip;a.textContent='film strip';meta.append(' \\u00b7 ',a);}" +
 				"var all=document.createElement('a');all.href='../index.html';all.textContent='all runs';meta.append(' \\u00b7 ',all);" +
+				"var st=document.createElement('div');st.className='meta settings';" +
+				"st.textContent='Settings: '+(V.settings.length?V.settings.join(' \\u00b7 '):'all defaults');meta.after(st);" +
 				"var t0=F.length?F[0][1]:0;seek.max=Math.max(F.length-1,0);" +
 				"S.forEach(function(s,k){var li=document.createElement('li');li.value=s.n;li.textContent=s.p+': '+s.x;" +
 				"if(s.f){li.className='fail';li.title=s.f;}li.onclick=function(){go(frameAt(s.s));};list.appendChild(li);});" +
@@ -684,7 +829,7 @@ public final class SailMedia {
 																											Map.of("targetId", driver.getWindowHandle(),
 																													"flatten", Boolean.TRUE),
 																											Json.MAP_TYPE),
-																		Selenide.TIMEOUT);
+																		selenide.timeout());
 				SessionID session = new SessionID(String.valueOf(attached.get("sessionId")));
 				Screencast result = new Screencast(connection, session, folder, frames, selenide);
 				connection.addListener(new Event<>("Page.screencastFrame", Screencast::readFrame), (sequence, frame) -> result.received(frame));
@@ -693,7 +838,7 @@ public final class SailMedia {
 																					"quality", Integer.valueOf(FRAME_QUALITY),
 																					"maxWidth", Integer.valueOf(FRAME_MAX_WIDTH),
 																					"maxHeight", Integer.valueOf(FRAME_MAX_HEIGHT))),
-										Selenide.TIMEOUT);
+										selenide.timeout());
 				selenide.trace(String.format("SAIL video: Chrome DevTools screencast over raw CDP, %s quality %d, at most %dx%d",
 												FRAME_FORMAT, Integer.valueOf(FRAME_QUALITY), Integer.valueOf(FRAME_MAX_WIDTH), Integer.valueOf(FRAME_MAX_HEIGHT)));
 				return result;
@@ -754,7 +899,7 @@ public final class SailMedia {
 		 */
 		void stop() {
 			try {
-				connection.sendAndWait(session, new Command<>("Page.stopScreencast", Map.of()), Selenide.TIMEOUT);
+				connection.sendAndWait(session, new Command<>("Page.stopScreencast", Map.of()), selenide.timeout());
 			}
 			catch (RuntimeException e) { // the browser has gone
 				selenide.trace("Could not stop the SAIL video screencast: " + e);
@@ -762,7 +907,7 @@ public final class SailMedia {
 			worker.shutdown();
 			try {
 				// Wait for the worker to write the frames it has (an event on another thread; bounded)
-				if (! worker.awaitTermination(Selenide.TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)) {
+				if (! worker.awaitTermination(selenide.timeout().toMillis(), TimeUnit.MILLISECONDS)) {
 					selenide.trace("SAIL video frames were still being written when the run ended");
 				}
 			}

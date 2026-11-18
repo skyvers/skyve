@@ -1,6 +1,7 @@
 package sail.kitchenSink.sc;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import com.codeborne.selenide.Selenide;
@@ -24,6 +25,7 @@ import util.sail.BrowserConfiguration.Browsers;
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
 class SmartClientActionUploadSailIT extends AbstractSmartClientInterpretedSail {
 
 	/** Has the windows opened from now on show no close button. */

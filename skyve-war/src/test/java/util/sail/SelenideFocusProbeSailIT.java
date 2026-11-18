@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
@@ -24,6 +25,7 @@ import jakarta.annotation.Nonnull;
  * the page or from one of its frames. The page is a {@code data:} URL with a same-origin ({@code srcdoc}) frame, so
  * these tests need no server; they need Chrome, like the other SAIL ITs. Headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
 class SelenideFocusProbeSailIT {
 
 	/** A page with a text field, and a frame with a text field and a button. */

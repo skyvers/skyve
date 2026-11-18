@@ -114,10 +114,13 @@ import jakarta.annotation.Nullable;
  * 		When the automation ends, an {@link AssertionError} lists every failure.</li>
  * <li>{@code None} makes no assertions. A step that throws still fails the automation.</li>
  * </ul>
- * Set the system property {@value #FAILURE_DIRECTORY_PROPERTY} to a directory to save a screenshot and the page source
- * for each failure, and {@value #TEST_STRATEGY_PROPERTY} to override the automation's test strategy (any case; an
- * invalid value fails before any step runs). Tests that the override would weaken (the admin suites, the strategy
- * conformance test) refuse it: see {@link SailSuite#refuseTestStrategyOverride(String)}.
+ * The executor runs with {@link SailSettings} (see {@link #useSettings(SailSettings)}): {@value SailSettings#FAILURE_DIR}
+ * (or an evidence request) names a directory to save a screenshot and the page source of each failure into, and
+ * {@value SailSettings#TEST_STRATEGY} overrides the automation's test strategy (any case). Settings are resolved, with the
+ * automation's own test strategy, when the automation starts: an invalid value fails before any step runs, and the
+ * trace lists the settings that do not come from their defaults, with their sources. Tests that the override would
+ * weaken (the admin suites, the strategy conformance test) refuse it: see
+ * {@link SailSuite#refuseTestStrategyOverride(String, SailSettings)}.
  * <p>
  * <b>Views for the signed-in user.</b> Given {@link #useViewRoles(SailViewRoles)}, each {@code <login/>} sets the
  * persistence user that builds the views for the rest of the run: a user with the registered roles of the user
@@ -164,10 +167,18 @@ public abstract class InterpretedWebDriverExecutor<
 	C extends AutomationContext<?, ?>,
 	S extends Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> extends WebDriverExecutor<C> {
 
-	/** System property naming a directory to save failure screenshots and page sources into. */
-	public static final String FAILURE_DIRECTORY_PROPERTY = "sail.failureDir";
-	/** System property that overrides the automation's test strategy (Assert, Verify or None), e.g. to list every failure. */
-	public static final String TEST_STRATEGY_PROPERTY = "sail.testStrategy";
+	/**
+	 * System property naming a directory to save failure screenshots and page sources into.
+	 * @deprecated	use {@link SailSettings#FAILURE_DIR}
+	 */
+	@Deprecated(since = "10")
+	public static final String FAILURE_DIRECTORY_PROPERTY = SailSettings.FAILURE_DIR;
+	/**
+	 * System property that overrides the automation's test strategy (Assert, Verify or None), e.g. to list every failure.
+	 * @deprecated	use {@link SailSettings#TEST_STRATEGY}
+	 */
+	@Deprecated(since = "10")
+	public static final String TEST_STRATEGY_PROPERTY = SailSettings.TEST_STRATEGY;
 
 	protected S selenide;
 
@@ -198,9 +209,13 @@ public abstract class InterpretedWebDriverExecutor<
 	private SailViewRoles viewRoles;
 	/** The persistence user when the first login of the run switched it, which the views are built from; or null. */
 	private User viewTemplateUser;
-	/** The variables each automation starts with, by name; see {@link #useVariables(Map)}. */
-	private final Map<String, String> startingVariables = new java.util.TreeMap<>();
-	/** The step snapshots and video of the running automation, when the system properties ask for them; or null. */
+	/** The variables given by {@link #useVariables(Map)}, as a code layer under the settings' variables; or null. */
+	private SailSettings.Layer startingVariables;
+	/** The settings given by {@link #useSettings(SailSettings)}, or null for the browser's. */
+	private SailSettings settings;
+	/** The settings of the running (or last) automation, with its own test strategy; or null before the first. */
+	private SailSettings automationSettings;
+	/** The step snapshots and video of the running automation, when the settings ask for them; or null. */
 	private SailMedia media;
 	/**
 	 * The handles of the windows that opened the windows the automation is in, the most recent opener first, in step
@@ -216,16 +231,28 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	@Override
 	public void executeAutomation(@Nonnull Automation automation) {
-		testStrategyOverride(); // an invalid override fails here, before any step runs
+		// an invalid setting fails here, before any step runs
+		SailSettings.Layer own = SailSettings.automation(null, automation.getTestStrategy());
+		SailSettings resolved = (startingVariables == null) ? settings().with(own) : settings().with(startingVariables, own);
+		automationSettings = resolved;
+		List<String> described = resolved.describe();
+		List<String> ignored = resolved.ignored();
+		selenide.trace("SAIL settings: " + (described.isEmpty() ? "all defaults" : String.join("; ", described)) +
+						(ignored.isEmpty() ? "" : "; ignored, as they are not SAIL settings: " + String.join(", ", ignored)));
 		initialiseAutomation(automation);
 		openerWindows.clear();
-		for (Map.Entry<String, String> variable : startingVariables.entrySet()) {
-			putVariable(variable.getKey(), variable.getValue());
+		for (Map.Entry<String, String> variable : resolved.variables().entrySet()) {
+			String name = variable.getKey();
+			// a run shared with earlier automations keeps what they captured
+			if (getVariable(name) == null) {
+				putVariable(name, variable.getValue());
+			}
 		}
 		failures.clear();
 		thrown.clear();
-		media = SailMedia.start(selenide, automation);
+		media = SailMedia.start(selenide, automation, resolved);
 
+		boolean passed = false;
 		try {
 			Procedure before = automation.getBefore();
 			if (before != null) {
@@ -238,12 +265,13 @@ public abstract class InterpretedWebDriverExecutor<
 			if (after != null) {
 				runSteps("After Automation", after.getSteps(), true);
 			}
+			passed = failures.isEmpty();
 		}
 		finally {
 			closeOpenWindows();
 			restoreViewUser();
 			if (media != null) {
-				media.finish();
+				media.finish(passed);
 				media = null;
 			}
 		}
@@ -265,12 +293,39 @@ public abstract class InterpretedWebDriverExecutor<
 
 	/**
 	 * Runs the interaction's before procedure, steps and after procedure. Under Verify, the after procedure
-	 * still runs when an earlier step throws.
+	 * still runs when an earlier step throws. In a load run's virtual user ({@link SailLoad}), the interaction's
+	 * duration and outcome go to the run's summary.
 	 *
 	 * @param interaction	the interaction to run
 	 */
 	@Override
 	public void executeInteraction(@Nonnull Interaction interaction) {
+		SailLoadProbe probe = SailLoadProbe.current();
+		if (probe == null) {
+			runInteraction(interaction);
+			return;
+		}
+		int failuresBefore = failures.size();
+		long started = probe.now();
+		boolean returned = false;
+		String failure = null;
+		try {
+			runInteraction(interaction);
+			returned = true;
+			// recorded under Verify: the first new failure
+			failure = (failures.size() > failuresBefore) ? failures.get(failuresBefore) : null;
+		}
+		catch (SailFailure e) { // thrown under Assert
+			failure = e.getMessage();
+			throw e;
+		}
+		finally {
+			probe.interaction(interaction.getName(), started, (! returned) || (failure != null), failure);
+		}
+	}
+
+	/** Runs an interaction, as {@link #executeInteraction(Interaction)} describes. */
+	private void runInteraction(@Nonnull Interaction interaction) {
 		String name = interaction.getName();
 		selenide.trace("Interaction: " + name);
 		LOGGER.info("Execute Interaction {}", name);
@@ -377,35 +432,61 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Returns the automation's test strategy, or the one the {@value #TEST_STRATEGY_PROPERTY} system property names.
+	 * Returns the automation's effective test strategy: the run's override ({@value SailSettings#TEST_STRATEGY} from
+	 * {@code -D}, the environment, code or the properties file), else the automation's own.
 	 *
 	 * @return the test strategy, or null if neither gives one
 	 */
 	@Override
 	public @Nullable TestStrategy getTestStrategy() {
-		TestStrategy override = testStrategyOverride();
-		return (override != null) ? override : super.getTestStrategy();
+		SailSettings resolved = automationSettings;
+		if (resolved != null) {
+			return resolved.testStrategy();
+		}
+		// no automation has started: steps run on their own
+		SailSettings current = settings();
+		return (current.runOverride(SailSettings.TEST_STRATEGY) != null) ? current.testStrategy() : super.getTestStrategy();
 	}
 
 	/**
-	 * Returns the test strategy that the {@value #TEST_STRATEGY_PROPERTY} system property names (ignoring case).
+	 * Returns the test strategy override of the settings outside code: {@value SailSettings#TEST_STRATEGY} from
+	 * {@code -D}, the environment or the properties file (ignoring case).
 	 *
-	 * @return the strategy, or null if the property is not set
-	 * @throws IllegalArgumentException	if the property names no strategy, saying which are valid
+	 * @return the strategy, or null if none of them sets it
+	 * @throws IllegalArgumentException	if a setting is invalid, saying which values are valid
 	 */
 	public static @Nullable TestStrategy testStrategyOverride() {
-		String override = System.getProperty(TEST_STRATEGY_PROPERTY);
-		if ((override == null) || override.isBlank()) {
-			return null;
+		return testStrategyOverride(SailSettings.Environment.current());
+	}
+
+	/** Returns the test strategy override of the given sources; see {@link #testStrategyOverride()}. */
+	static @Nullable TestStrategy testStrategyOverride(@Nonnull SailSettings.Environment environment) {
+		SailSettings resolved = SailSettings.resolve(environment, List.of());
+		return (resolved.runOverride(SailSettings.TEST_STRATEGY) == null) ? null : resolved.testStrategy();
+	}
+
+	/**
+	 * Runs the automations with these settings, instead of those the browser was started with. The test bases and
+	 * {@link SailWorkflow} give the settings of the test's code; the automation's own test strategy is added when it
+	 * starts.
+	 *
+	 * <p>Side effects: replaces the settings given before.
+	 *
+	 * @param runSettings	the run's settings, resolved from the test's code and the browser configuration
+	 */
+	public final void useSettings(@Nonnull SailSettings runSettings) {
+		settings = runSettings;
+	}
+
+	/**
+	 * Returns the settings the automations run with: those given, else the browser's, else the settings outside code.
+	 */
+	private @Nonnull SailSettings settings() {
+		SailSettings result = settings;
+		if (result == null) {
+			result = selenide.getSettings();
 		}
-		String name = override.trim();
-		for (TestStrategy strategy : TestStrategy.values()) {
-			if (strategy.name().equalsIgnoreCase(name)) {
-				return strategy;
-			}
-		}
-		throw new IllegalArgumentException(String.format("-D%s=%s is not a SAIL test strategy: use one of %s",
-															TEST_STRATEGY_PROPERTY, override, java.util.Arrays.toString(TestStrategy.values())));
+		return (result == null) ? SailSettings.resolve() : result;
 	}
 
 	/**
@@ -556,18 +637,24 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Saves a screenshot and the page source when {@value #FAILURE_DIRECTORY_PROPERTY} is set.
+	 * Saves a screenshot and the page source when the settings give a failure directory, named by the suite member (if
+	 * any), the run token, the failure's number, the interaction and the step.
 	 */
 	private void diagnose() {
-		String directory = System.getProperty(FAILURE_DIRECTORY_PROPERTY);
+		SailSettings resolved = automationSettings;
+		Path path = (resolved == null) ? settings().failureDir() : resolved.failureDir();
 		WebDriver driver = selenide.driver;
-		if ((directory == null) || directory.isBlank() || (driver == null)) {
+		if ((path == null) || (driver == null)) {
 			return;
 		}
 		try {
-			Path path = Path.of(directory);
 			Files.createDirectories(path);
-			String prefix = String.format("%02d-%s-step%02d", Integer.valueOf(++failureCount),
+			// the suite member and the run name the files, so that members and runs sharing the directory keep theirs
+			String label = SailMedia.label();
+			String prefix = String.format("%s%s-%02d-%s-step%02d",
+												(label == null) ? "" : SailMedia.sanitise(label, 60) + '-',
+												getRunToken(),
+												Integer.valueOf(++failureCount),
 												String.valueOf(procedureName).replaceAll("[^A-Za-z0-9]+", "_"),
 												Integer.valueOf(stepNumber));
 			Files.write(path.resolve(prefix + ".png"), ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES));
@@ -758,15 +845,22 @@ public abstract class InterpretedWebDriverExecutor<
 	 * Defines variables that every automation this executor runs starts with, for {@code {var:name}}, as if each had
 	 * been captured. A recorded script signs in with {@code password="{var:password}"}, because the recorder never
 	 * records a password: the test supplies it this way, and the script runs unedited. A {@code <captureValue/>} of the
-	 * same name replaces the value for the rest of that automation.
+	 * same name replaces the value for the rest of that automation, and a run shared with earlier automations keeps the
+	 * value they captured. They are code-level settings below the test's own, so {@code -Dsail.var.name} (and the test's
+	 * {@code settings().variable(...)}) beat them.
 	 *
 	 * <p>Side effects: replaces the variables given before.
 	 *
 	 * @param variables	the variables by name; copied
+	 * @deprecated	use {@link SailSettings.Code#variable(String, String)} in the test's {@code settings()}
 	 */
+	@Deprecated(since = "10")
 	public final void useVariables(@Nonnull Map<String, String> variables) {
-		startingVariables.clear();
-		startingVariables.putAll(variables);
+		SailSettings.Code code = SailSettings.code();
+		for (Map.Entry<String, String> variable : variables.entrySet()) {
+			code.variable(variable.getKey(), variable.getValue());
+		}
+		startingVariables = code.layer(SailSettings.Level.CODE, "code: useVariables");
 	}
 
 	@Override

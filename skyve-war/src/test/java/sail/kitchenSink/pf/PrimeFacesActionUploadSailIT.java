@@ -1,5 +1,6 @@
 package sail.kitchenSink.pf;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractInterpretedSailWorkflow;
@@ -14,6 +15,7 @@ import util.AbstractInterpretedSailWorkflow;
  * The upload step closes an upload page that stays open with its close icon, as a user would, for a Skyve without the
  * fix. So the script first hides the close icons: an upload page that does not close itself then fails the step.
  */
+@Tag("sail")
 class PrimeFacesActionUploadSailIT extends AbstractInterpretedSailWorkflow {
 	@Test
 	@SuppressWarnings("java:S2699") // the SAIL script's test steps are the assertions: the harness fails the test when one fails

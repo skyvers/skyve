@@ -70,7 +70,7 @@
 	</tabPane>
 	
 	<actions>
-		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downloadClientSail.toolTip" />
+		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadClientSail.toolTip" />
 		<action className="StartSAILRecording" displayName="admin.controlPanel.actions.startSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.startSailRecording.toolTip" clientValidation="false" invisible="sailRecording" />
 		<action className="StopSAILRecording" displayName="admin.controlPanel.actions.stopSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.stopSailRecording.toolTip" clientValidation="false" visible="sailRecording" />
 		<download className="DownloadSAILRecording" displayName="admin.controlPanel.actions.downloadSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSailRecording.toolTip" clientValidation="false" visible="sailRecordingDownloadable" />

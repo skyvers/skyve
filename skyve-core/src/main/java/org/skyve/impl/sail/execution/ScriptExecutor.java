@@ -4,7 +4,6 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.Execute;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
@@ -16,7 +15,7 @@ import jakarta.annotation.Nullable;
  * order of procedures ({@code before}, interactions, {@code after}) and translating
  * each step into client-generated script output.
  *
- * <p>Subclasses provide the target scripting language (Selenese, WebDriver Java, etc.)
+ * <p>Subclasses provide the target scripting language (such as WebDriver Java)
  * by implementing the abstract {@code startTest}, {@code endTest}, and step-specific
  * methods. The accumulated script is available via {@code getScript()}.
  *
@@ -61,7 +60,7 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 		startTest(interaction.getName());
 		Procedure before = interaction.getBefore();
 		if (before != null) {
-			indent().append("<!-- Before ").append(interaction.getName()).append(" -->").newline();
+			comment("Before " + interaction.getName());
 			for (Step step : before.getSteps()) {
 				step.execute(this);
 			}
@@ -71,13 +70,20 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 		}
 		Procedure after = interaction.getAfter();
 		if (after != null) {
-			indent().append("<!-- After ").append(interaction.getName()).append(" -->").newline();
+			comment("After " + interaction.getName());
 			for (Step step : after.getSteps()) {
 				step.execute(this);
 			}
 		}
 		endTest();
 	}
+
+	/**
+	 * Emits a comment into the script, such as the start of an interaction's before or after procedure.
+	 *
+	 * @param comment	the comment's text, as the script has it: the subclass makes it safe for its language
+	 */
+	protected abstract void comment(@Nullable String comment);
 
 	protected abstract void startTest(@Nonnull String heading);
 	protected abstract void endTest();
@@ -111,11 +117,6 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 		return this;
 	}
 
-	@Override
-	public void executeExecute(@Nonnull Execute execute) {
-		indent().append(execute.getScript()).newline();
-	}
-	
 	@Override
 	public @Nonnull String toString() {
 		return script.toString();

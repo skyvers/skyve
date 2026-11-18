@@ -105,9 +105,9 @@
 		</enum>
 		<enum name="sailExecutor">
 			<displayName>admin.controlPanel.sailExecutor.displayName</displayName>
+			<defaultValue>primeFacesInlineWebDriver</defaultValue>
 			<values>
-				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor" description="PrimeFaces Inline Selenese" />
-				<value code="org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor" description="PrimeFaces Inline Web Driver" />
+				<value code="org.skyve.impl.sail.execution.pf.PrimeFacesInlineWebDriverExecutor" description="PrimeFaces Inline Web Driver" />
 			</values>
 		</enum>
 		<text name="sailComponentBuilder">

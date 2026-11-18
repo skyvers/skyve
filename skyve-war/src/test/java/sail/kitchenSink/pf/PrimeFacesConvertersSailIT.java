@@ -1,5 +1,6 @@
 package sail.kitchenSink.pf;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractPrimeFacesInterpretedSail;
@@ -15,6 +16,7 @@ import util.sail.Devices;
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
 class PrimeFacesConvertersSailIT extends AbstractPrimeFacesInterpretedSail {
 
 	public PrimeFacesConvertersSailIT() {

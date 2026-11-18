@@ -1,5 +1,6 @@
 package sail.kitchenSink.sc;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import util.AbstractSmartClientInterpretedSail;
@@ -14,6 +15,7 @@ import util.sail.BrowserConfiguration.Browsers;
  * <p>
  * Runs against the server named by {@code -Dsail.baseUrl} (required), headless unless {@code -Dsail.headless=false}.
  */
+@Tag("sail")
 class SmartClientConvertersSailIT extends AbstractSmartClientInterpretedSail {
 
 	public SmartClientConvertersSailIT() {

@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
@@ -16,6 +17,9 @@ import org.skyve.impl.sail.execution.RunState;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.faces.FacesUtil;
 import org.skyve.metadata.sail.language.Automation;
+import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.Suite;
+import org.skyve.metadata.sail.language.SuiteMember;
 import org.skyve.metadata.sail.language.Workflow;
 import org.skyve.metadata.user.User;
 import org.skyve.web.UserAgentType;
@@ -42,13 +46,65 @@ import util.sail.BrowserConfiguration.Browsers;
  * <li>The server lock ({@link SailServerLock}) is taken once, before the first browser starts. The caller releases it
  * 		when the test class has finished (as the test bases do with {@link SailServerLock#releaseAll()}).</li>
  * <li>The run stops at the first automation that fails, as later ones build on earlier ones. The browser is stopped
- * 		when the workflow ends.</li>
+ * 		when the workflow ends (unless a suite keeps it for its next member).</li>
+ * <li>A workflow's {@code testStrategy} is the default for its automations that state none; in a suite, so is the
+ * 		suite's, unless the member is locked (see {@link SailSuite}).</li>
+ * <li>The settings ({@link SailSettings}) are resolved, and checked, before the first browser starts, with this
+ * 		workflow's code-level {@link #settings()}, which beat each browser configuration's own values. Their variables
+ * 		({@value SailSettings#VAR_PREFIX}{@code name}) start the run; a value captured later replaces them.</li>
  * </ul>
  * Not thread-safe.
  */
 public final class SailWorkflow {
 	private final SailViewRoles viewRoles;
 	private final Map<UserAgentType, Supplier<BrowserConfiguration>> browsers = new EnumMap<>(UserAgentType.class);
+	private SailSettings.Code settings = SailSettings.code();
+	/** The browser a suite member that passed left open for the next member, or null; see {@link #closeBrowser()}. */
+	private Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> kept;
+	/** Starts a new browser for a leg. */
+	private final BrowserStarter starter;
+	/** Runs a leg's automation in its browser. */
+	private final LegRunner legRunner;
+	/** The sources the legs' settings resolve from, or null for this JVM's. */
+	private final SailSettings.Environment environment;
+	/** True when no further leg or suite member may start (a load run is stopping); see {@link #stopWhen}. */
+	private BooleanSupplier stopping = () -> false;
+
+	/**
+	 * Starts a new browser: a {@link SmartClientSelenide} or {@link PrimeFacesSelenide}, started with the leg's settings.
+	 */
+	@FunctionalInterface
+	interface BrowserStarter {
+		/**
+		 * Starts a browser.
+		 *
+		 * @param smartClient	true for SmartClient's Selenide, false for PrimeFaces'
+		 * @param configuration	the leg's browser configuration
+		 * @param resolved	the leg's settings
+		 * @return the started browser
+		 */
+		@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> start(boolean smartClient, @Nonnull BrowserConfiguration configuration, @Nonnull SailSettings resolved);
+	}
+
+	/**
+	 * Runs a leg's automation in a browser, as one of the workflow's runs.
+	 */
+	@FunctionalInterface
+	interface LegRunner {
+		/**
+		 * Runs an automation.
+		 *
+		 * @param automation	the leg's automation
+		 * @param browser	the browser it runs in
+		 * @param run	the workflow's run, which the legs share
+		 * @param settings	the leg's settings
+		 * @throws AssertionError	if the automation fails
+		 */
+		void run(@Nonnull Automation automation,
+					@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser,
+					@Nonnull RunState run,
+					@Nonnull SailSettings settings);
+	}
 
 	/**
 	 * Creates a runner that builds views with the given registered roles.
@@ -57,6 +113,28 @@ public final class SailWorkflow {
 	 */
 	public SailWorkflow(@Nonnull SailViewRoles viewRoles) {
 		this.viewRoles = viewRoles;
+		this.starter = SailWorkflow::startBrowser;
+		this.legRunner = this::execute;
+		this.environment = null;
+	}
+
+	/**
+	 * Creates a runner that starts browsers and runs legs with the given functions, and resolves its settings from the
+	 * given sources, for tests of the browser's lifecycle.
+	 *
+	 * @param viewRoles	the roles of the users the scripts sign in as
+	 * @param starter	starts a new browser for a leg
+	 * @param legRunner	runs a leg's automation in its browser
+	 * @param environment	the sources the legs' settings resolve from, instead of this JVM's
+	 */
+	SailWorkflow(@Nonnull SailViewRoles viewRoles,
+					@Nonnull BrowserStarter starter,
+					@Nonnull LegRunner legRunner,
+					@Nonnull SailSettings.Environment environment) {
+		this.viewRoles = viewRoles;
+		this.starter = starter;
+		this.legRunner = legRunner;
+		this.environment = environment;
 	}
 
 	/**
@@ -69,6 +147,28 @@ public final class SailWorkflow {
 	 */
 	public @Nonnull SailWorkflow browser(@Nonnull UserAgentType userAgentType, @Nonnull Supplier<BrowserConfiguration> configuration) {
 		browsers.put(userAgentType, configuration);
+		return this;
+	}
+
+	/**
+	 * Returns the workflow's code-level settings, to change in a test, e.g. {@code settings().headless(false)}.
+	 *
+	 * @return the settings: a new builder, unless {@link #settings(SailSettings.Code)} gave the test's
+	 */
+	public @Nonnull SailSettings.Code settings() {
+		return settings;
+	}
+
+	/**
+	 * Uses a test's code-level settings, so that the workflow shares them with the rest of the test.
+	 *
+	 * <p>Side effects: replaces the settings the workflow had.
+	 *
+	 * @param code	the settings; shared, so later changes to them apply
+	 * @return this runner
+	 */
+	public @Nonnull SailWorkflow settings(@Nonnull SailSettings.Code code) {
+		settings = code;
 		return this;
 	}
 
@@ -104,7 +204,34 @@ public final class SailWorkflow {
 		for (String resourceName : resourceNames) {
 			legs.addAll(legs(resourceName, XMLMetaData.unmarshalSAILWorkflowString(resource(resourceName))));
 		}
-		run(legs);
+		run(legs, null, false);
+	}
+
+	/**
+	 * Runs the automations of SAIL script files, in order. Each script is a {@code <workflow>} of automations or a single
+	 * {@code <automation>}.
+	 *
+	 * @param files	the scripts' paths, absolute or relative to the working directory
+	 * @throws IllegalArgumentException	if a file is missing, unreadable or not a SAIL workflow or automation
+	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 */
+	public void runFiles(@Nonnull String... files) {
+		List<Leg> legs = new ArrayList<>();
+		for (String file : files) {
+			legs.addAll(legs(file, XMLMetaData.unmarshalSAILWorkflowFile(file)));
+		}
+		run(legs, null, false);
+	}
+
+	/**
+	 * Runs a workflow already loaded, as one run.
+	 *
+	 * @param name	where it came from, for messages
+	 * @param workflow	the workflow (a single automation's is a workflow of one)
+	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 */
+	void runWorkflow(@Nonnull String name, @Nonnull Workflow workflow) {
+		run(legs(name, workflow), null, false);
 	}
 
 	/**
@@ -119,16 +246,82 @@ public final class SailWorkflow {
 		for (int i = 0; i < scripts.length; i++) {
 			legs.addAll(legs("script " + (i + 1), XMLMetaData.unmarshalSAILWorkflowString(scripts[i])));
 		}
-		run(legs);
+		run(legs, null, false);
+	}
+
+	/**
+	 * A suite member that a workflow runs as: its suite's default test strategy, lock and evidence request apply.
+	 *
+	 * @param suite	the suite
+	 * @param suiteName	the suite's file or resource, for messages
+	 * @param member	the member, in the suite
+	 * @param lock	why the member's test strategy is locked (see {@link SailWorkflow#lockOf(Suite, SuiteMember)}), or null
+	 */
+	record Member(@Nonnull Suite suite, @Nonnull String suiteName, @Nonnull SuiteMember member, @Nullable String lock) {
+		// a value
+	}
+
+	/**
+	 * Returns why a suite member's test strategy is locked, by its place in the suite
+	 * ({@link Suite#isTestStrategyLocked(SuiteMember)}).
+	 *
+	 * @param suite	the suite
+	 * @param member	one of its members
+	 * @return {@code set-up}, {@code restore} or {@code lockTestStrategy}; or null for an unlocked member
+	 */
+	static @Nullable String lockOf(@Nonnull Suite suite, @Nonnull SuiteMember member) {
+		if (! suite.isTestStrategyLocked(member)) {
+			return null;
+		}
+		if (suite.isSetUp(member)) {
+			return "set-up";
+		}
+		return (member == suite.getRestore()) ? "restore" : "lockTestStrategy";
+	}
+
+	/**
+	 * Returns the roles views are built with, to register more users' roles (a suite's {@code viewRoles}).
+	 *
+	 * @return the registered roles, which this engine uses
+	 */
+	@Nonnull SailViewRoles viewRoles() {
+		return viewRoles;
+	}
+
+	/**
+	 * Runs a suite member's workflow as one run of its own, in the browser that the member before it left open if the
+	 * configuration matches. When the member passes, its browser is kept open for the next member (the suite stops it
+	 * with {@link #closeBrowser()} when it ends); when it fails, its browser is stopped, so the next member starts clean.
+	 *
+	 * @param name	the member's file, for messages
+	 * @param workflow	the member's workflow (a file's automation is a workflow of one)
+	 * @param member	the member and its suite
+	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 */
+	void runMember(@Nonnull String name, @Nonnull Workflow workflow, @Nonnull Member member) {
+		run(legs(name, workflow), member, true);
+	}
+
+	/**
+	 * Stops the browser that a suite member left open for the next, if any. A suite calls it when it ends, in a
+	 * {@code finally}, so no browser outlives its suite.
+	 */
+	void closeBrowser() {
+		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
+		kept = null;
+		if (browser != null) {
+			browser.stopBrowser();
+		}
 	}
 
 	/**
 	 * An automation and where it came from, for messages.
 	 *
 	 * @param name	the script and the automation's position in it
-	 * @param automation	the automation
+	 * @param workflow	the workflow it is in (a single automation's is a workflow of one), whose default applies
+	 * @param automation	the automation to run
 	 */
-	private record Leg(@Nonnull String name, @Nonnull Automation automation) {
+	private record Leg(@Nonnull String name, @Nonnull Workflow workflow, @Nonnull Automation automation) {
 	}
 
 	private static @Nonnull List<Leg> legs(@Nonnull String source, @Nonnull Workflow workflow) {
@@ -136,12 +329,20 @@ public final class SailWorkflow {
 		List<Leg> result = new ArrayList<>(automations.size());
 		for (int i = 0, l = automations.size(); i < l; i++) {
 			result.add(new Leg((l == 1) ? source : String.format("%s automation %d of %d", source, Integer.valueOf(i + 1), Integer.valueOf(l)),
+								workflow,
 								automations.get(i)));
 		}
 		return result;
 	}
 
-	private static @Nonnull String resource(@Nonnull String resourceName) {
+	/**
+	 * Reads a SAIL file from the test classpath.
+	 *
+	 * @param resourceName	the resource's path, e.g. {@code sail/admin/admin.suite.xml}
+	 * @return the file's text
+	 * @throws IllegalArgumentException	if the resource is missing or unreadable
+	 */
+	static @Nonnull String resource(@Nonnull String resourceName) {
 		try (InputStream stream = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
 			if (stream == null) {
 				throw new IllegalArgumentException("SAIL resource " + resourceName + " is not on the test classpath");
@@ -154,35 +355,113 @@ public final class SailWorkflow {
 	}
 
 	/**
-	 * Runs the legs in order with one shared run.
+	 * Stops the engine starting another leg, or (in a suite) another member, once a condition holds: a load run's
+	 * stopping flag ({@link SailLoad}).
+	 *
+	 * @param condition	true when nothing more may start
+	 * @return this runner
 	 */
-	private void run(@Nonnull List<Leg> legs) {
+	@Nonnull SailWorkflow stopWhen(@Nonnull BooleanSupplier condition) {
+		stopping = condition;
+		return this;
+	}
+
+	/**
+	 * Indicates if nothing more may start; see {@link #stopWhen(BooleanSupplier)}.
+	 *
+	 * @return true once the condition holds
+	 */
+	boolean stopping() {
+		return stopping.getAsBoolean();
+	}
+
+	/**
+	 * Runs the legs in order with one shared run.
+	 *
+	 * @param member	the suite member the legs are, or null for a workflow on its own
+	 * @param keepBrowser	true to keep the browser open for the next run if this one passes; false to stop it
+	 */
+	private void run(@Nonnull List<Leg> legs, @Nullable Member member, boolean keepBrowser) {
 		if (legs.isEmpty()) {
 			throw new IllegalArgumentException("A SAIL workflow needs at least one automation");
 		}
 		RunState run = new RunState();
-		Browser browser = null;
+		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
+		kept = null;
+		boolean passed = false;
+		SailMedia.beginUnit(); // with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
 		try {
 			for (Leg leg : legs) {
+				if (stopping()) {
+					throw new IllegalStateException("SAIL workflow: " + leg.name() + " did not start: the run is stopping");
+				}
 				Automation automation = leg.automation();
 				boolean smartClient = "desktop".equals(automation.getUxui());
-				BrowserConfiguration configuration = configuration(automation.getUserAgentType());
-				SailServerLock.acquire(configuration.getBaseUrl()); // once: this JVM holds it after the first time
-				browser = browserFor(browser, configuration, smartClient);
+				BrowserConfiguration configuration = configuration(automation.getUserAgentType()).settings(settings);
+				// an invalid setting fails here, before this leg's browser starts
+				SailSettings resolved = legSettings((environment == null) ? configuration.resolve() : configuration.resolve(environment),
+													leg.name(), leg.workflow(), automation, member);
+				SailServerLock.acquire(resolved.requireBaseUrl()); // once: this JVM holds it after the first time
+				Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> current = browser;
+				browser = null; // until the leg has its browser: one that fails to start is never kept or reused
+				browser = browserFor(current, configuration, resolved, smartClient);
 				System.out.println(String.format("SAIL workflow: %s in %s (run %s)", leg.name(), smartClient ? "SmartClient" : "PrimeFaces", run.getRunToken()));
 				try {
-					execute(automation, browser, run);
+					legRunner.run(automation, browser, run, resolved);
 				}
 				catch (AssertionError | RuntimeException e) { // a step failure, or an invalid script
 					throw new AssertionError("SAIL workflow: " + leg.name() + " failed: " + e.getMessage(), e);
 				}
 			}
+			passed = true;
 		}
 		finally {
+			SailMedia.endUnit(passed);
 			if (browser != null) {
-				browser.selenide().stopBrowser();
+				if (keepBrowser && passed) {
+					kept = browser;
+				}
+				else {
+					browser.stopBrowser();
+				}
 			}
 		}
+	}
+
+	/**
+	 * Adds a leg's script levels to its settings: its workflow's default test strategy and, for a suite member, its
+	 * suite's (see {@link Suite#getEffectiveTestStrategy(SuiteMember, Workflow, Automation)}) and evidence request, and
+	 * the member's lock. The executor adds the automation's own strategy.
+	 *
+	 * @param resolved	the leg's settings from the run and its browser configuration
+	 * @param name	the leg's script, for the sources
+	 * @param workflow	the leg's workflow
+	 * @param automation	the leg's automation, in the workflow
+	 * @param member	the suite member the workflow is, or null
+	 * @return the settings
+	 */
+	static @Nonnull SailSettings legSettings(@Nonnull SailSettings resolved,
+												@Nonnull String name,
+												@Nonnull Workflow workflow,
+												@Nonnull Automation automation,
+												@Nullable Member member) {
+		SailSettings.Layer workflowLayer = SailSettings.workflow(name, workflow.getTestStrategy());
+		if (member == null) {
+			return resolved.with(workflowLayer);
+		}
+		Suite suite = member.suite();
+		String lock = member.lock();
+		// the suite's level gives the strategy only when neither the automation nor its workflow states one
+		TestStrategy suiteStrategy = (workflow.getEffectiveTestStrategy(automation) == null) ?
+										suite.getEffectiveTestStrategy(member.member(), workflow, automation) :
+										null;
+		// the lock is named on the strategy's source only: the suite's other values are not locked
+		SailSettings result = resolved.with(workflowLayer,
+											SailSettings.suite(member.suiteName() + ((lock == null) ? "" : " (locked: " + lock + ')'),
+																suiteStrategy,
+																null),
+											SailSettings.suite(member.suiteName(), null, suite.getEvidence()));
+		return (lock == null) ? result : result.lockTestStrategy(lock);
 	}
 
 	private @Nonnull BrowserConfiguration configuration(@Nonnull UserAgentType userAgentType) {
@@ -191,62 +470,62 @@ public final class SailWorkflow {
 	}
 
 	/**
-	 * The browser in use: the renderer's Selenide that drives it, and the configuration it was started with.
-	 *
-	 * @param selenide	a {@link PrimeFacesSelenide} or {@link SmartClientSelenide}
-	 * @param configuration	the configuration the browser was started with
+	 * Returns the browser for the next leg: the current one if the leg's settings and configuration ask for the same
+	 * browser (driven by the leg's renderer's Selenide, with the leg's timeout), or else a new one, after the current
+	 * one is stopped. If carrying on with the current one fails, it is stopped.
 	 */
-	private record Browser(@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide, @Nonnull BrowserConfiguration configuration) {
-	}
-
-	/**
-	 * Returns the browser for the next leg: the current one if its device is the same (driven by the leg's renderer's
-	 * Selenide), or else a new one, after the current one is stopped.
-	 */
-	private static @Nonnull Browser browserFor(@Nullable Browser current, @Nonnull BrowserConfiguration configuration, boolean smartClient) {
-		if ((current != null) && sameDevice(current.configuration(), configuration)) {
-			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide = current.selenide();
-			if (smartClient == (selenide instanceof SmartClientSelenide)) {
-				return current;
+	private @Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browserFor(@Nullable Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> current,
+																				@Nonnull BrowserConfiguration configuration,
+																				@Nonnull SailSettings resolved,
+																				boolean smartClient) {
+		if ((current != null) && (current.browserChange(resolved, configuration) == null)) {
+			try {
+				Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> result = current;
+				if (smartClient != (current instanceof SmartClientSelenide)) {
+					result = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
+					result.useBrowserOf(current);
+				}
+				result.useSettings(resolved, configuration); // the same browser: applies the leg's timeout
+				return result;
 			}
-			Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> other = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
-			other.useBrowserOf(selenide);
-			return new Browser(other, current.configuration());
+			catch (RuntimeException e) {
+				current.stopBrowser();
+				throw e;
+			}
 		}
 		if (current != null) {
 			System.out.println("SAIL workflow: a new browser for another device");
-			current.selenide().stopBrowser();
+			current.stopBrowser();
 		}
-		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
-		selenide.startBrowser(configuration);
-		return new Browser(selenide, configuration);
+		return starter.start(smartClient, configuration, resolved);
 	}
 
-	/**
-	 * Indicates if two configurations give the same browser: the same browser, user agent, window size and headless mode.
-	 */
-	private static boolean sameDevice(@Nonnull BrowserConfiguration a, @Nonnull BrowserConfiguration b) {
-		return Objects.equals(a.getBrowser(), b.getBrowser()) &&
-				Objects.equals(a.getUserAgentString(), b.getUserAgentString()) &&
-				Objects.equals(a.getResolution(), b.getResolution()) &&
-				(a.isHeadless() == b.isHeadless()) &&
-				Objects.equals(a.getBaseUrl(), b.getBaseUrl());
+	private static @Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> startBrowser(boolean smartClient,
+																						@Nonnull BrowserConfiguration configuration,
+																						@Nonnull SailSettings resolved) {
+		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> result = smartClient ? new SmartClientSelenide() : new PrimeFacesSelenide();
+		result.startBrowser(configuration, resolved);
+		return result;
 	}
 
 	/**
 	 * Runs one automation as the test bases do: as a user with every role (or the signed-in user's registered roles),
-	 * sharing the workflow's run.
+	 * sharing the workflow's run, with the leg's settings.
 	 */
-	private void execute(@Nonnull Automation automation, @Nonnull Browser browser, @Nonnull RunState run) {
+	private void execute(@Nonnull Automation automation,
+							@Nonnull Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser,
+							@Nonnull RunState run,
+							@Nonnull SailSettings legSettings) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User testUser = persistence.getUser();
 		persistence.setUser(SailUsers.bootstrapLikeUser(testUser));
 		try (FacesUtil.SailFacesContextScope ignored = FacesUtil.withSailFacesContextIfNeeded()) {
-			InterpretedWebDriverExecutor<?, ?> executor = (browser.selenide() instanceof SmartClientSelenide sc) ?
+			InterpretedWebDriverExecutor<?, ?> executor = (browser instanceof SmartClientSelenide sc) ?
 															new SmartClientInterpretedWebDriverExecutor(sc) :
-															new PrimeFacesInterpretedWebDriverExecutor((PrimeFacesSelenide) browser.selenide());
+															new PrimeFacesInterpretedWebDriverExecutor((PrimeFacesSelenide) browser);
 			executor.useViewRoles(viewRoles);
 			executor.shareRun(run);
+			executor.useSettings(legSettings);
 			automation.execute(executor);
 		}
 		finally {

@@ -106,7 +106,7 @@ public class SmartClientSelenide extends Selenide<
 	 * @param what		the asynchronous event waited for, for the timeout message
 	 * @param condition	the condition: {@code null} or {@code false} keeps waiting; an exception it throws ends the wait
 	 * @return the condition's result
-	 * @throws IllegalStateException if the condition does not hold within {@link Selenide#TIMEOUT}
+	 * @throws IllegalStateException if the condition does not hold within {@link #timeout()}
 	 */
 	private @Nonnull <T> T until(@Nonnull String what, @Nonnull java.util.function.Function<org.openqa.selenium.WebDriver, T> condition) {
 		try {
@@ -114,7 +114,7 @@ public class SmartClientSelenide extends Selenide<
 		}
 		catch (org.openqa.selenium.TimeoutException e) {
 			throw new IllegalStateException(String.format("Waited %d s for %s%s (browser state %s)",
-															Long.valueOf(TIMEOUT.toSeconds()),
+															Long.valueOf(timeout().toSeconds()),
 															what,
 															(lastProblem == null) ? "" : ": " + lastProblem,
 															state()), e);

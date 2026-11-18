@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,12 +16,16 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.impl.util.XMLMetaData.SAILRoot;
+import org.skyve.metadata.sail.language.Suite;
+import org.skyve.metadata.sail.language.SuiteMember;
 import org.skyve.metadata.sail.language.Workflow;
 
 /**
  * Checks that every shipped SAIL script still validates against sail.xsd and unmarshals,
  * so that language changes stay backward compatible. A script whose root is {@code <workflow>} is unmarshalled as a
- * workflow of automations; any other script as an {@code <automation>}, as before.
+ * workflow of automations, a {@code <suite>} as a suite whose member files exist next to it, and an
+ * {@code <automation>} as before.
  */
 class SailScriptsUnmarshalTest {
 	private static final Path SCRIPTS = Paths.get("src/test/java/sail");
@@ -51,25 +54,24 @@ class SailScriptsUnmarshalTest {
 		assertAll(() -> assertEquals(2, workflow.getAutomations().size()),
 					() -> assertEquals("external", workflow.getAutomations().get(0).getUxui()),
 					() -> assertEquals("desktop", workflow.getAutomations().get(1).getUxui()),
-					() -> assertTrue(isWorkflow(Path.of(file))));
+					() -> assertEquals(SAILRoot.WORKFLOW, XMLMetaData.sailRootOfFile(file)));
 	}
 
-	private static void unmarshal(Path script) throws IOException {
-		if (isWorkflow(script)) {
-			assertFalse(XMLMetaData.unmarshalSAILWorkflowFile(script.toString()).getAutomations().isEmpty(), script.toString());
+	private static void unmarshal(Path script) {
+		String file = script.toString();
+		SAILRoot root = XMLMetaData.sailRootOfFile(file);
+		if (root == SAILRoot.SUITE) {
+			Suite suite = XMLMetaData.unmarshalSAILSuiteFile(file);
+			for (SuiteMember member : suite.getAllMembers()) {
+				Path memberFile = script.resolveSibling(member.getFile());
+				assertTrue(Files.isRegularFile(memberFile), file + " names " + member.getFile() + ", which does not exist");
+			}
+		}
+		else if (root == SAILRoot.WORKFLOW) {
+			assertFalse(XMLMetaData.unmarshalSAILWorkflowFile(file).getAutomations().isEmpty(), file);
 		}
 		else {
-			XMLMetaData.unmarshalSAILFile(script.toString());
+			XMLMetaData.unmarshalSAILFile(file);
 		}
-	}
-
-	/**
-	 * Indicates if a script's root element is a {@code <workflow>}.
-	 */
-	private static boolean isWorkflow(Path script) throws IOException {
-		String xml = Files.readString(script, StandardCharsets.UTF_8);
-		// the root is the first element after the declaration and any comments
-		String body = xml.replaceAll("(?s)<\\?.*?\\?>|<!--.*?-->", "").trim();
-		return body.startsWith("<workflow") || body.matches("(?s)^<[A-Za-z0-9_]+:workflow\\b.*");
 	}
 }
