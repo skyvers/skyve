@@ -474,6 +474,25 @@ class SailLanguageXmlTest {
 					() -> assertThat(steps.get(1), instanceOf(SwitchMode.class)));
 	}
 
+	/** {@code remember} is optional on {@code <login>}: absent it is null, and true and false survive a round trip. */
+	@Test
+	void loginRememberIsOptionalAndRoundTrips() {
+		String xml = HEAD + "<login user=\"a\" password=\"x\"/><login user=\"b\" password=\"x\" remember=\"true\"/>" +
+							"<login user=\"c\" password=\"x\" remember=\"false\"/>" + TAIL;
+		Automation automation = XMLMetaData.unmarshalSAILString(xml);
+		List<Step> steps = XMLMetaData.unmarshalSAILString(XMLMetaData.marshalSAIL(automation)).getInteractions().get(0).getSteps();
+		assertAll(() -> assertEquals(3, steps.size()),
+					() -> assertThat("absent", ((Login) steps.get(0)).getRemember(), is(nullValue())),
+					() -> assertEquals(Boolean.TRUE, ((Login) steps.get(1)).getRemember(), "true"),
+					() -> assertEquals(Boolean.FALSE, ((Login) steps.get(2)).getRemember(), "false"));
+	}
+
+	@Test
+	void loginRememberThatIsNotABooleanIsRejectedByTheSchema() {
+		String xml = HEAD + "<login user=\"a\" password=\"x\" remember=\"maybe\"/>" + TAIL;
+		assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(xml));
+	}
+
 	@Test
 	void switchModeWithAnAttributeIsRejectedByTheSchema() {
 		String xml = HEAD + "<switchMode uxui=\"desktop\"/>" + TAIL;

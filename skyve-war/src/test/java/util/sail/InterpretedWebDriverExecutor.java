@@ -740,7 +740,8 @@ public abstract class InterpretedWebDriverExecutor<
 	/**
 	 * Signs in and waits for the outcome. A failed sign in fails the step, unless the next step is a
 	 * {@code <testFailure />}, which then asserts that it failed. The tokens ({@code {run}}, {@code {var:name}}) of the
-	 * customer, user and password are substituted.
+	 * customer, user and password are substituted. With {@code remember}, the Remember me box is set before the sign in is
+	 * submitted.
 	 *
 	 * @param login	the login step
 	 */
@@ -759,7 +760,7 @@ public abstract class InterpretedWebDriverExecutor<
 		} else {
 			selenide.trace("Login as " + customer + "/" + user);
 		}
-		selenide.login(customer, user, password);
+		selenide.login(customer, user, password, login.getRemember());
 		loginError = selenide.getLoginError();
 
 		if ((loginError != null) && (! (nextStep instanceof TestFailure)) && (! isNoneStrategy())) {

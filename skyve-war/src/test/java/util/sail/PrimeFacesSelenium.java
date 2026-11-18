@@ -63,6 +63,20 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 	 * @throws AssertionError	if the page has no field for a value given
 	 */
 	public void login(String customer, String username, String password) {
+		login(customer, username, password, null);
+	}
+
+	/**
+	 * Signs in on the sign in page, setting the Remember me box first when asked.
+	 *
+	 * @param customer	the customer, or null if the page asks for none
+	 * @param username	the user name
+	 * @param password	the password
+	 * @param remember	true to tick the Remember me box, false to untick it, or null to leave it as the page shows it
+	 * @throws AssertionError	if the page has no field for a value given
+	 * @throws IllegalStateException	if the box does not take the value
+	 */
+	public void login(String customer, String username, String password, Boolean remember) {
 		driver.get(baseUrl);
 
 		WebElement element = null;
@@ -80,6 +94,10 @@ public class PrimeFacesSelenium extends CrossBrowserSelenium {
 		element = usable(byName("password"), "the password field");
 		element.clear();
 		element.sendKeys(password);
+
+		if (remember != null) {
+			setRememberMe(remember.booleanValue());
+		}
 
 		driver.findElement(By.cssSelector("input[type=\"submit\"]")).click();
 	}

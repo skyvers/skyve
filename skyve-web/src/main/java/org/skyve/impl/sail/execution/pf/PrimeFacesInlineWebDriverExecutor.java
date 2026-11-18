@@ -152,7 +152,8 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 	}
 	
 	/**
-	 * Emits login script statements for the supplied credentials.
+	 * Emits login script statements for the supplied credentials. A login that sets {@code remember} passes it as a
+	 * fourth argument ({@code login(customer, user, password, true)}); without it, the call is the three-argument one.
 	 *
 	 * @param login the login step containing authentication credentials
 	 */
@@ -169,7 +170,12 @@ public class PrimeFacesInlineWebDriverExecutor extends WebDriverExecutor<PrimeFa
 		}
 		indent().append("login(").append(literal(customer)).append(", ");
 		append(literal(user)).append(", ");
-		append(literal(login.getPassword())).append(");").newline();
+		append(literal(login.getPassword()));
+		Boolean remember = login.getRemember();
+		if (remember != null) {
+			append(", ").append(remember.toString());
+		}
+		append(");").newline();
 	}
 	
 	/**

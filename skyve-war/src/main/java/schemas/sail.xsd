@@ -284,6 +284,7 @@
     <xs:sequence/>
     <xs:attribute name="customer" type="xs:string"/>
     <xs:attribute name="password" type="xs:string" use="required"/>
+    <xs:attribute name="remember" type="xs:boolean"/>
     <xs:attribute name="user" type="xs:string" use="required"/>
   </xs:complexType>
 

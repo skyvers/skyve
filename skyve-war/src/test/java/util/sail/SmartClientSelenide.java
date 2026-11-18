@@ -122,12 +122,12 @@ public class SmartClientSelenide extends Selenide<
 	}
 
 	/**
-	 * Signs in and waits for the outcome (see {@link Selenide#login(String, String, String)}).
+	 * Signs in and waits for the outcome (see {@link Selenide#login(String, String, String, Boolean)}).
 	 * Signing in does not switch the UX/UI: {@code <switchMode/>} does.
 	 */
 	@Override
-	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password) {
-		super.login(customer, username, password);
+	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password, @Nullable Boolean remember) {
+		super.login(customer, username, password, remember);
 		if (getLoginError() != null) {
 			trace(String.format("    Sign in as %s failed: %s", username, getLoginError()));
 		}

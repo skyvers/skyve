@@ -247,6 +247,18 @@ public abstract class Selenide<
 	 * @param password login password
 	 */
 	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password) {
+		login(customer, username, password, null);
+	}
+
+	/**
+	 * Performs login as {@link #login(String, String, String)} does, setting the Remember me box first when asked.
+	 * 
+	 * @param customer optional customer identifier
+	 * @param username login username
+	 * @param password login password
+	 * @param remember true to tick the Remember me box, false to untick it, or null to leave it as the page shows it
+	 */
+	public void login(@Nullable String customer, @Nonnull String username, @Nonnull String password, @Nullable Boolean remember) {
 		loginError = null;
 		open(baseUrl);
 		if (! $(byName("user")).exists()) {
@@ -272,6 +284,10 @@ public abstract class Selenide<
 		if (! typed) {
 			// Submitting garbled credentials could make a sign in that should succeed fail (or a testFailure pass)
 			throw new IllegalStateException("The sign in fields did not take the typed values after 3 attempts");
+		}
+
+		if (remember != null) {
+			setRememberMe(remember.booleanValue());
 		}
 
 		SelenideElement submit = $("input[type=\"submit\"]");

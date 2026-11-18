@@ -27,6 +27,10 @@ import jakarta.xml.bind.annotation.XmlType;
  * <p>Login does not switch renderers; follow it with {@link SwitchMode} when the router may not
  * route the browser to the renderer that the automation's {@code uxui} targets.
  *
+ * <p>{@code remember} ticks (or, when false, unticks) the sign in page's Remember me box before the credentials are
+ * submitted, as a user's click would, so a browser that keeps its cookies stays signed in after it restarts. Absent, the
+ * box stays as the page shows it.
+ *
  * <p>{@code {run}} and {@code {var:name}} in {@code user} or {@code password} are replaced by the run token
  * and the captured variables, so a script can log in as a user that it created earlier in the same run.
  *
@@ -40,6 +44,7 @@ public class Login implements Step {
 	private String customer;
 	private String user;
 	private String password;
+	private Boolean remember;
 
 	/**
 	 * Returns the customer.
@@ -90,6 +95,23 @@ public class Login implements Step {
 	@XmlAttribute(required = true)
 	public void setPassword(@Nonnull String password) {
 		this.password = UtilImpl.processStringValue(password);
+	}
+
+	/**
+	 * Returns whether the sign in sets the Remember me box.
+	 * @return true to tick the box, false to untick it, or null to leave it as the sign in page shows it
+	 */
+	public @Nullable Boolean getRemember() {
+		return remember;
+	}
+
+	/**
+	 * Sets whether the sign in sets the Remember me box.
+	 * @param remember true to tick the box, false to untick it, or null to leave it as the sign in page shows it
+	 */
+	@XmlAttribute
+	public void setRemember(@Nullable Boolean remember) {
+		this.remember = remember;
 	}
 
 	/**

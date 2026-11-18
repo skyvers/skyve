@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Options;
 import org.openqa.selenium.WebDriver.Timeouts;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -232,6 +234,24 @@ abstract class CrossBrowserSelenium {
 			arguments.add("--user-data-dir=" + profile);
 		}
 		arguments.addAll(config.getArguments());
+	}
+
+	/**
+	 * Sets the sign in page's Remember me box, as a user's click on its label would. The box itself is hidden, so it
+	 * cannot be clicked; the page's own handler for the label sets it and fires its {@code change} event, which setting
+	 * {@code checked} from a script would not. The box is left alone if it already shows the value.
+	 *
+	 * @param remember	true to tick the box, false to untick it
+	 * @throws IllegalStateException	if the click does not set the box
+	 */
+	protected void setRememberMe(boolean remember) {
+		WebElement box = driver.findElement(By.id("remember"));
+		if (box.isSelected() != remember) {
+			driver.findElement(By.cssSelector("label[for=\"remember\"]")).click();
+		}
+		if (box.isSelected() != remember) {
+			throw new IllegalStateException("The Remember me box did not take the value " + remember);
+		}
 	}
 
 	/**

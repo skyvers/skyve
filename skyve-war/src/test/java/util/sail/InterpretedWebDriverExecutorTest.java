@@ -658,8 +658,25 @@ class InterpretedWebDriverExecutorTest {
 		executor.executeLogin(login);
 		executor.executeComment(comment);
 
-		assertAll(() -> verify(executor.selenide).login("demo", "admin", "x"),
+		assertAll(() -> verify(executor.selenide).login("demo", "admin", "x", null),
 					() -> verify(executor.selenide).trace("Run " + executor.getRunToken() + " for demo"));
+	}
+
+	/** The step's {@code remember} goes to the browser as it is written: true, false, or null when absent. */
+	@Test
+	void loginPassesRememberToTheBrowser() {
+		Login ticked = login("a");
+		ticked.setRemember(Boolean.TRUE);
+		Login unticked = login("b");
+		unticked.setRemember(Boolean.FALSE);
+
+		executor.executeLogin(ticked);
+		executor.executeLogin(unticked);
+		executor.executeLogin(login("c"));
+
+		assertAll(() -> verify(executor.selenide).login(null, "a", "x", Boolean.TRUE),
+					() -> verify(executor.selenide).login(null, "b", "x", Boolean.FALSE),
+					() -> verify(executor.selenide).login(null, "c", "x", null));
 	}
 
 	@Test
@@ -695,7 +712,7 @@ class InterpretedWebDriverExecutorTest {
 
 		executor.executeAutomation(XMLMetaData.unmarshalSAILString(script));
 
-		verify(executor.selenide).login(null, "jane" + run.getRunToken(), "7");
+		verify(executor.selenide).login(null, "jane" + run.getRunToken(), "7", null);
 	}
 
 	private static DataGridLink link(Boolean testSuccess) {

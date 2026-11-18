@@ -231,6 +231,25 @@ class PrimeFacesInlineWebDriverExecutorTest {
 					() -> assertTrue(asserted.contains("trace(\"Test Failure with message 'A \\\"required\\\" value'\");"), asserted));
 	}
 
+	/** A login with {@code remember} passes it to the generated {@code login}; without it, the call is unchanged. */
+	@Test
+	void loginRememberIsAFourthArgumentOnlyWhenSet() {
+		TestPrimeFacesInlineWebDriverExecutor executor = new TestPrimeFacesInlineWebDriverExecutor();
+		Login login = new Login();
+		login.setUser("u");
+		login.setPassword("p");
+		executor.executeLogin(login);
+		login.setRemember(Boolean.TRUE);
+		executor.executeLogin(login);
+		login.setCustomer("demo");
+		login.setRemember(Boolean.FALSE);
+		executor.executeLogin(login);
+		String script = executor.toString();
+		assertAll(() -> assertTrue(script.contains("login(null, \"u\", \"p\");"), script),
+					() -> assertTrue(script.contains("login(null, \"u\", \"p\", true);"), script),
+					() -> assertTrue(script.contains("login(\"demo\", \"u\", \"p\", false);"), script));
+	}
+
 	/**
 	 * The script's credentials, entered text (in a text field or a spinner) and searches go into the generated code as Java literals, so quotes,
 	 * backslashes and line breaks cannot break it; a blank value is null, which the harness's {@code text} clears.

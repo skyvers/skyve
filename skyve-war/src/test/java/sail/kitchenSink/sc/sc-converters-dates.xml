@@ -17,7 +17,7 @@
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<before>
-		<login user="admin" password="admin" />
+		<login user="admin" password="admin" remember="true" />
 		<switchMode />
 	</before>
 	<interaction name="Dates: record a, in each field and an inline grid row, checked when saved and reopened">
