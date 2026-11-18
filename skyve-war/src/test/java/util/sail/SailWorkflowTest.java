@@ -169,21 +169,47 @@ class SailWorkflowTest {
 		engine.runMember(file, workflow, new SailWorkflow.Member(SUITE, "s.suite.xml", member, null), true);
 	}
 
-	/** The suite's setting reaches the engine: by default a browser is handed on, with the opt-in each member has its own. */
-	@Test
-	void aSuiteHandsItsBrowserOnUnlessItOptsIn() {
+	private static final List<String> HANDED_ON = List.of("start 1", "stop 1");
+	private static final List<String> OWN_BROWSERS = List.of("start 1", "stop 1", "start 2", "stop 2");
+
+	/** Runs a suite of two members on the engine, and returns the browsers started and stopped. */
+	private List<String> browsersOfSuite(String resource, boolean optInInCode) {
 		SailSettings.Environment environment = new SailSettings.Environment(Map.of(SailSettings.BASE_URL, "http://localhost:1/sail-workflow-test/"),
 																			Map.of(), null, Path.of("").toAbsolutePath());
-		current = "suite";
-		SailSuite.resource("util/sail/fixtures/login.suite.xml", engine).environment(environment).run();
-		engine.closeBrowser();
-		List<String> handedOn = browserEvents();
 		events.clear();
 		ids.clear();
-		SailSuite.resource("util/sail/fixtures/login.suite.xml", engine).environment(environment).browserPerMember().run();
+		current = "suite";
+		SailSuite suite = SailSuite.resource(resource, engine).environment(environment);
+		if (optInInCode) {
+			suite.browserPerMember();
+		}
+		suite.run();
 		engine.closeBrowser();
-		assertAll(() -> assertEquals(List.of("start 1", "stop 1"), handedOn, "the default"),
-					() -> assertEquals(List.of("start 1", "stop 1", "start 2", "stop 2"), browserEvents(), "opted in"));
+		return browserEvents();
+	}
+
+	/** By default a suite hands its browser on. */
+	@Test
+	void aSuiteHandsItsBrowserOn() {
+		assertEquals(HANDED_ON, browsersOfSuite("util/sail/fixtures/login.suite.xml", false));
+	}
+
+	/** The suite's setting in code reaches the engine: each member has its own browser. */
+	@Test
+	void aSuiteThatOptsInInCodeHasABrowserPerMember() {
+		assertEquals(OWN_BROWSERS, browsersOfSuite("util/sail/fixtures/login.suite.xml", true));
+	}
+
+	/** The suite file's {@code browserPerMember="true"} does the same, with no code. */
+	@Test
+	void aSuiteFileThatOptsInHasABrowserPerMember() {
+		assertEquals(OWN_BROWSERS, browsersOfSuite("util/sail/fixtures/login-attribute.suite.xml", false));
+	}
+
+	/** Either turns it on: both asking is the same as one. */
+	@Test
+	void aSuiteFileAndCodeThatBothOptInHaveABrowserPerMember() {
+		assertEquals(OWN_BROWSERS, browsersOfSuite("util/sail/fixtures/login-attribute.suite.xml", true));
 	}
 
 	/** The browsers started and stopped, without the legs run in them. */

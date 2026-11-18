@@ -16,18 +16,29 @@ A `SailSuite` keeps handing its browser from member to member by default, as it 
 
 1. **`SailSuite.browserPerMember()`**, a builder method, off by default. A suite loaded with an engine (`resource`, `file`) passes it to `SailWorkflow.runMember(name, workflow, member, ownBrowser)`; with it, the member starts in a browser of its own (leaving alone any kept one) and stops it when it ends, passed or failed. The three-argument `runMember` is unchanged.
    - Why a builder method: it is a property of how a test runs a suite, like `settings(...)`; it needs no change to the SAIL language, the XSDs or skyve-core's `Suite`; and the harness is test code that a downstream app copies, so the smallest surface wins.
-   - Not done: a suite file attribute (e.g. `browserPerMember="true"`). It would let a BA opt in without Java (a `sail.run` suite). It needs a `Suite` property, both XSDs and tests in skyve-core, so it is left as the follow-up if a non-Java author needs it (Mike's decision: keep the builder method).
+   - The suite file attribute followed (Mike's decision): see decision 5.
    - Not done: a `sail.browserPerMember` setting in `SailSettings`; it would apply to every suite in a JVM, which is a coarser choice than the one suite that needs it.
 2. The test base gets `sailSuite(resourceName, boolean browserPerMember)`.
 3. The default is exactly master: this branch's earlier changes to `SailSuite`, `SailWorkflow`, `SailLoad` and their tests were taken back to master's, then the opt-in added.
 4. `docs/sail.md` says when to opt in, with Chrome's password prompt as an example of carried-over state, and that the password prompt change fixes that case.
+5. **`browserPerMember` on `<suite>`.** An optional `xs:boolean`, so that a non-Java author (a `sail.run` suite) can opt in.
+   - Name and placement: an attribute of `suite`, next to `testStrategy` and `evidence`, the other suite-wide settings. The name is the builder method's, so one word means one thing. Optional `xs:boolean` with "Default false" in its documentation, and a nullable `Boolean` `@XmlAttribute` in `Suite` (added to its `propOrder`), exactly as `lockTestStrategy` is on `member`: absent reads as `null`, which means false.
+   - Combining: either turns it on. `SailSuite` uses `browserPerMember() || Boolean.TRUE.equals(suite.getBrowserPerMember())`. Code cannot turn off what a file asks for, and `false` in a file does not stop code opting in. No third state is needed.
+   - Both `sail.xsd` copies are identical (checked with `cmp`). `SailLanguageCoverageTest` wants every attribute used by a shipped script, so `suite@browserPerMember` is on its allow-list: the shipped suites keep the faster default, and `SailWorkflowTest` and `SailSuiteLoginSailIT` use a fixture suite with the attribute.
 
 ## Tests
 
 - Unit (`SailWorkflowTest`, no browser): an opted-in member stops its browser when it ends; an opted-in failed member stops its browser; an opted-in member leaves a kept browser alone; a real `SailSuite` over the login fixture hands its browser on by default (one start, one stop) and starts one per member with `browserPerMember()`.
-- Browser (`SailSuiteLoginSailIT`): the two-member login suite, opted in; the second member finds nothing in local storage that the first left, and signs in first.
+- Attribute: `SuiteXmlTest` (unmarshals true, false and absent; the schema accepts true/false and rejects `yes`), `SuiteTest` (getter and setter), `SailWorkflowTest` (a suite file with the attribute has a browser per member; one without hands it on; file and code together).
+- Browser (`SailSuiteLoginSailIT`), not run: the two-member login suite, opted in; the second member finds nothing in local storage that the first left, and signs in first.
 
 ## AI validation results
+
+Attribute (follow-up commit):
+- Red/green: with `SailSuite` ignoring the attribute, `aSuiteFileThatOptsInHasABrowserPerMember` fails; without `@XmlAttribute` on the setter, `SuiteXmlTest.browserPerMemberUnmarshalsAndTheSchemaChecksIt` fails; with the attribute removed from the schema, the same test fails. Restored: `SuiteXmlTest` (17), `SuiteTest` (34), `SailWorkflowTest` (18), `SailLanguageCoverageTest` pass.
+- Gates for the attribute are listed under "Attribute gates" at the end.
+
+Original opt-in:
 
 - Red: with the suite's flag not passed to the engine, `aSuiteHandsItsBrowserOnUnlessItOptsIn` failed; with the engine ignoring `ownBrowser`, 7 of the tests failed. Green restored.
 - `SailWorkflowTest` (15), `SailSuiteTest` (14) and `SailLoadTest` (41) pass.
@@ -48,3 +59,12 @@ A `SailSuite` keeps handing its browser from member to member by default, as it 
 
 - The branch is rebased onto `sail-chrome-leak-detection`, so the docs' statement that SAIL's Chrome has the password prompts off holds.
 - Edge gets the same preferences in that change; it has not been run (no Edge here).
+
+## Attribute gates
+
+- Build: `mvn -o -B -pl skyve-core,skyve-war package` with the `util/sail` tests, `HarnessSelfContainedTest`, `SailLanguageCoverageTest` and the `org.skyve.metadata.sail` tests: 601 tests in skyve-core and 231 in skyve-war, 0 failures. It was `package` only; nothing was installed into `~/.m2`.
+- Eclipse (JDT 3.48) on the changed core and war files: no warnings. (The war's classpath needs `skyve-core/target/classes` first, or `~/.m2`'s older core hides the new getter.)
+- Sonar (local, project `skyve-local-suite`, core and war): no open issues on the changed files.
+- JaCoCo over `SailWorkflowTest`, `SuiteTest` and `SuiteXmlTest`: the changed lines of `Suite` and `SailSuite` are covered.
+- Spotless: skyve-core has no Spotless configuration, and in skyve-war it excludes `util/**` and `org/skyve/**`. The only file in scope, `SailLanguageCoverageTest` (one allow-list line), could not be checked: `spotless:check` stops with "Cannot find git repository" in a worktree. Formatted by hand.
+- Not run: `SailSuiteLoginSailIT`, including its new file-attribute test (no server was started).

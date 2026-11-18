@@ -17,4 +17,11 @@ class SailSuiteLoginSailIT extends AbstractInterpretedSailWorkflow {
 	void theSecondMemberStartsInABrowserOfItsOwnWhenTheSuiteOptsIn() {
 		sailSuite("util/sail/fixtures/login.suite.xml", true);
 	}
+
+	/** The same, with {@code browserPerMember="true"} in the suite file and no code. */
+	@Test
+	@SuppressWarnings("java:S2699") // a failed step or member throws an AssertionError, so the suite run is the assertion
+	void theSecondMemberStartsInABrowserOfItsOwnWhenTheSuiteFileOptsIn() {
+		sailSuite("util/sail/fixtures/login-attribute.suite.xml");
+	}
 }

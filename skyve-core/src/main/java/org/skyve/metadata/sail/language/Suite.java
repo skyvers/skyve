@@ -37,6 +37,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * &lt;/suite&gt;
  * </pre>
  *
+ * <p>{@code browserPerMember="true"} on the suite starts each member in a browser of its own; without it the browser
+ * is handed on from member to member.
+ *
  * <p>A suite runs its set-up members in order, then its ordinary members in order, then its optional restore. Each
  * member gets its own run: members share no {@code {run}} token and no {@code {var:name}} values. A member runs only if
  * every member it requires passed; without naming them, each set-up member requires every earlier set-up member, and
@@ -60,7 +63,7 @@ import jakarta.xml.bind.annotation.XmlType;
  * @see OrdinarySuiteMember
  * @see ViewRoles
  */
-@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"testStrategy", "evidence", "viewRoles", "setUps", "members", "restore"})
+@XmlType(namespace = XMLMetaData.SAIL_NAMESPACE, propOrder = {"testStrategy", "evidence", "browserPerMember", "viewRoles", "setUps", "members", "restore"})
 @XmlRootElement(namespace = XMLMetaData.SAIL_NAMESPACE)
 public class Suite {
 	/**
@@ -88,6 +91,7 @@ public class Suite {
 
 	private TestStrategy testStrategy;
 	private Evidence evidence;
+	private Boolean browserPerMember;
 	private final List<ViewRoles> viewRoles = new ArrayList<>();
 	private final List<SuiteMember> setUps = new ArrayList<>();
 	private final List<OrdinarySuiteMember> members = new ArrayList<>();
@@ -129,6 +133,27 @@ public class Suite {
 	@XmlAttribute(name = "evidence")
 	public void setEvidence(@Nullable Evidence evidence) {
 		this.evidence = evidence;
+	}
+
+	/**
+	 * Returns the {@code browserPerMember} attribute as written.
+	 *
+	 * @return {@code true} if each member must run in a browser of its own; {@code null} if the attribute is absent,
+	 * 			which means {@code false}: the browser is handed on from member to member
+	 */
+	public @Nullable Boolean getBrowserPerMember() {
+		return browserPerMember;
+	}
+
+	/**
+	 * Sets the {@code browserPerMember} attribute.
+	 *
+	 * @param browserPerMember	{@code true} to run each member in a browser of its own, stopped when the member ends;
+	 * 							{@code null} (absent) or {@code false} to hand the browser on
+	 */
+	@XmlAttribute(name = "browserPerMember")
+	public void setBrowserPerMember(@Nullable Boolean browserPerMember) {
+		this.browserPerMember = browserPerMember;
 	}
 
 	/**

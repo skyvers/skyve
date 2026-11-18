@@ -179,7 +179,7 @@ public final class SailSuite {
 	private final boolean legacy;
 	/** Runs each member. */
 	private MemberRunner runner;
-	/** True to run each member in a browser of its own; see {@link #browserPerMember()}. */
+	/** True to run each member in a browser of its own, as {@link #browserPerMember()} asks; the suite file can ask too. */
 	private boolean browserPerMember;
 	/** The engine that runs the members, or null when a test or the older builder gives the runner. */
 	private SailWorkflow engine;
@@ -350,6 +350,9 @@ public final class SailSuite {
 	 * browser prompt that is still up (Chrome's password manager prompts are off in SAIL's Chrome, but any other
 	 * browser state is carried over the same way). It costs a browser start per member. A suite of members with the
 	 * same configuration otherwise keeps one browser, as a workflow's automations do.
+	 *
+	 * <p>A suite file can ask for the same with {@code browserPerMember="true"} on its {@code <suite>}. Either turns it
+	 * on: this method cannot turn off what the file asks for, and a file with {@code false} or no attribute does not stop it.
 	 *
 	 * <p>It applies to a suite loaded with a workflow engine ({@link #resource}, {@link #file}); a suite given its own
 	 * member runner, and the older builder, have no browser to hand on.
@@ -596,7 +599,7 @@ public final class SailSuite {
 	private void runWithEngine(@Nonnull MemberRun run) {
 		String path = run.path();
 		Workflow workflow = resources ? XMLMetaData.unmarshalSAILWorkflowString(SailWorkflow.resource(path)) : XMLMetaData.unmarshalSAILWorkflowFile(path);
-		engine.runMember(run.member().getFile(), workflow, new SailWorkflow.Member(suite, name, run.member(), run.lock()), browserPerMember);
+		engine.runMember(run.member().getFile(), workflow, new SailWorkflow.Member(suite, name, run.member(), run.lock()), browserPerMember || Boolean.TRUE.equals(suite.getBrowserPerMember()));
 	}
 
 	// The older builder, kept for existing tests

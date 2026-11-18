@@ -875,8 +875,14 @@ Opt in to a new browser for each member when members must be independent of
 that, or when one member's leftovers make the next one's sign in fail (its
 fields "did not take the typed values"). The browser of each member is stopped
 when the member ends, passed or failed, and the next member starts another, so
-a suite pays a browser start per member. From code, call `browserPerMember()` on
-the suite before `run()`:
+a suite pays a browser start per member. Ask for it in the suite file, with no
+code:
+
+```xml
+<suite xmlns="http://www.skyve.org/xml/sail" browserPerMember="true">
+```
+
+or from code, call `browserPerMember()` on the suite before `run()`:
 
 ```java
 SailSuite.resource("sail/admin/admin.suite.xml", workflow).browserPerMember().run();
@@ -887,7 +893,9 @@ which blocks all input to the tab after a sign in with a leaked password (a
 user whose password is the user's name, for one). SAIL's Chrome now has the
 password manager's prompts off (see [Headless and headed](#running-the-tests)),
 so that case no longer needs the opt-in; other state in the browser still does.
-The default is unchanged, and there is no suite file attribute for it.
+Either turns it on: a suite that asks in its file and in code has it, and the
+code cannot turn off what the file asks for. Absent, or `false`, is the default,
+which is unchanged: the browser is handed on.
 
 **Requirements.** `requires` is a space-separated list of the files of earlier
 members. Without naming them, each set-up member requires every earlier set-up

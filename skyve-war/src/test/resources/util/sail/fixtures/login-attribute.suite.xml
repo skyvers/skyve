@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- login.suite.xml with browserPerMember="true", for SailWorkflowTest and SailSuiteLoginSailIT: each member has a browser of its own. -->
+<suite xmlns="http://www.skyve.org/xml/sail" browserPerMember="true">
+	<setUp file="login-suite-00.xml"/>
+	<member file="login-suite-01.xml"/>
+</suite>
