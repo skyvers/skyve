@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import sail.kitchenSink.ScriptStepFailures;
 import util.AbstractPrimeFacesInterpretedSail;
 import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
@@ -203,6 +204,58 @@ class PrimeFacesKitchenSinkSailIT extends AbstractPrimeFacesInterpretedSail {
 															"its Vue list grids and data tables have no Refresh tool"), message),
 					() -> assertTrue(message.contains("<listGridTool tool=\"clearSelection\" /> on [kitchensink.qListGridFixtureFaces] is not available in PrimeFaces: " +
 															"its Vue list grids and data tables have no Deselect tool"), message));
+	}
+
+	/**
+	 * The {@code execute} failures, in this renderer: see {@link ScriptStepFailures#executeFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void executeFailures() {
+		scriptStepFailures().executeFailures();
+	}
+
+	/**
+	 * The {@code executeAsync} failures, in this renderer: see {@link ScriptStepFailures#executeAsyncFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void executeAsyncFailures() {
+		scriptStepFailures().executeAsyncFailures();
+	}
+
+	/**
+	 * The {@code waitFor} failures, in this renderer: see {@link ScriptStepFailures#waitForFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void waitForFailures() {
+		scriptStepFailures().waitForFailures();
+	}
+
+	/**
+	 * The {@code testScript} failures, in this renderer: see {@link ScriptStepFailures#testScriptFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void testScriptFailures() {
+		scriptStepFailures().testScriptFailures();
+	}
+
+	/**
+	 * The {@code call} failures, in this renderer: see {@link ScriptStepFailures#callFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void callFailures() {
+		scriptStepFailures().callFailures();
+	}
+
+	/**
+	 * Returns the script and call steps' inline failure tests, signed in as this kitchen sink's scripts sign in.
+	 */
+	private ScriptStepFailures scriptStepFailures() {
+		return new ScriptStepFailures("tablet", "", this::sailString);
 	}
 
 	private static String automation(String steps) {

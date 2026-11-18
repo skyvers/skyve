@@ -589,7 +589,7 @@ script from the test classpath and runs it with an interpreted executor:
 | `util.sail.SailMedia` | Step snapshots, the film strip, and the video and its player; see [Snapshots and video](#snapshots-and-video). |
 | `util.sail.SailLoad` | Runs SAIL as many virtual users at once, with a summary, a report and thresholds; see [Load Testing](#load-testing). |
 | `sail.SailRunIT` | The generic runner: runs the suites and scripts that `sail.run` names, with no Java; see [For BAs and testers](#for-bas-and-testers). |
-| `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, `execute` and `pause`. It also keeps the [variables](#the-run-token-and-variables), checks the list grid steps' columns, and switches the [view roles](#the-test-user) at each login. |
+| `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, the [script and call steps](#scripts-and-calls) and `pause`. It also keeps the [variables](#the-run-token-and-variables), checks the list grid steps' columns, and switches the [view roles](#the-test-user) at each login. |
 | `util.sail.PrimeFacesInterpretedWebDriverExecutor`, `util.sail.SmartClientInterpretedWebDriverExecutor` | Renderer executors. They locate widgets and implement the remaining steps, and the base's renderer hooks; see [Renderer hooks](#renderer-hooks). |
 | `util.sail.SailUsers`, `util.sail.SailViewRoles` | The users the views are built as; see [The test user](#the-test-user). |
 | `util.sail.PrimeFacesSelenide`, `util.sail.SmartClientSelenide`, `util.sail.Selenide` | Browser gestures and waits. |
@@ -982,7 +982,9 @@ contexts, and OK, Cancel, Delete, Remove and ZoomOut pop them. Usually you never
 manage contexts yourself.
 
 The context steps are for when a script reaches a view in a way the executor
-cannot follow, for example through `<navigateLink/>` or `<execute>`:
+cannot follow, for example through `<navigateLink/>`, `<execute>` or `<call>`.
+None of the script and call steps changes the contexts: see
+[Scripts and calls](#scripts-and-calls). An example with `<navigateLink/>`:
 
 ```xml
 <navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
@@ -1029,9 +1031,11 @@ member cannot be found with `{run}` in the next.
 Use `{run}` to make the records a script creates unique, so a script can run
 again, or alongside another script, without clashing with leftovers.
 
-`{var:name}` is replaced with the value of a variable. Three steps set one:
+`{var:name}` is replaced with the value of a variable. Six steps set one:
 `<captureValue/>` from what a widget shows, `<captureCell/>` from a list or
-data grid cell, and `<captureTitle/>` from the view's title. Use them for values
+data grid cell, `<captureTitle/>` from the view's title, and `<execute/>`,
+`<executeAsync/>` and `<call/>`, which keep their result when they have a
+`variable` ([Scripts and calls](#scripts-and-calls)). Use them for values
 the application made, such as a generated number, that a later step must find
 again:
 
@@ -1081,11 +1085,134 @@ again:
 - every `rowContaining`, including `lookupDescriptionPick@rowContaining`;
 - `navigateEdit@bizId`, `navigateLink@href`, `navigateLink@text` and
   `dataGridLink@text`;
+- `testScript@message`;
+- `call`'s `parameter@value`;
 - `comment` text, which the trace then shows with the values.
 
 They are not substituted in attributes that name metadata, such as `module`,
 `binding`, `column` or a menu item, nor in numbers, flags, file names,
-`pattern`s or `execute` scripts (`{` is normal JavaScript).
+`pattern`s, `call`'s `className`, a `parameter`'s `name` or any `variable`, nor
+in any script body (`execute`, `executeAsync`, `waitFor` and `testScript`):
+`{` is normal JavaScript, and `{run}` is valid destructuring.
+
+Instead, every script body gets one argument, `sail`, which is
+`{run: "<the run token>", vars: {name: "value", ...}}`. It is also
+`arguments[0]`. It is a copy of the run's state: changing it changes nothing.
+In a script, `sail.run` is the token and `sail.vars.number` is the variable
+`number`.
+
+### Scripts and calls
+
+Five steps run code that SAIL has no gesture for. `execute` runs JavaScript in
+the page, and `executeAsync` runs JavaScript that waits. `waitFor` polls a
+script until it holds, and `testScript` asserts that it holds. `call` runs a
+handwritten Java class in the test JVM. All can keep a result in a variable, as
+the table under [Other steps](#other-steps) says, except `waitFor` and
+`testScript`, which only read.
+
+```xml
+<call className="sail.kitchenSink.EchoCall" variable="echo">
+	<parameter name="text" value="made {run}" />
+</call>
+<executeAsync variable="status"><![CDATA[
+	const response = await fetch(location.href, {method: 'HEAD'});
+	return response.status;
+]]></executeAsync>
+<waitFor timeoutMillis="20000"><![CDATA[
+	return document.readyState === 'complete' && ! document.querySelector('.ui-blockui');
+]]></waitFor>
+<testScript message="The page should answer 200 and the call should echo"><![CDATA[
+	return sail.vars.status === '200' && sail.vars.echo === 'made ' + sail.run;
+]]></testScript>
+```
+
+**The wrapper.** The script is the element's text, usually in CDATA. The
+executor runs it as the body of a function that takes `sail`:
+`return (function (sail) { BODY }).apply(this, arguments);` for `execute`, and
+the same with `async function` for `executeAsync`, `waitFor` and `testScript`.
+So `return` gives the result, `await` works in the three `async` steps, and a
+script that returned nothing before still returns nothing. The `async` steps use
+WebDriver's Execute Script, which waits for the returned promise.
+
+**Results.** With `variable`, the result is kept as `String.valueOf(result)`:
+JavaScript `42` is `"42"`, `true` is `"true"`. A `null` or `undefined` result
+fails the step, as a blank capture does. The name follows the capture steps'
+rule. For a `call`, the value is the string the call returns.
+
+**Time.** `waitFor` and `testScript` run the script every 250 ms until it
+returns a truthy value or `timeoutMillis` passes. A run that throws counts as
+false (a lost browser session or window fails the step at once), and the failure says what the last one threw. `testScript` without
+`timeoutMillis` runs once. `timeoutMillis` defaults to `sail.timeoutSeconds`.
+It is also the script timeout for each run, which the executor restores
+afterwards. `execute` and `call` take no `timeoutMillis`, so a script runs
+under the default. After `execute`, `executeAsync` and
+`call`, the executor settles the page as it does after a gesture (PF waits for
+the requests and page loads the step started; SC checks for open dialogs, then
+waits for SmartClient to settle). `waitFor` and `testScript` do not settle.
+
+**Strategies.** `execute`, `executeAsync` and `call` run under every strategy.
+`waitFor` runs under None too, as a timed `testGridRows` does. `testScript` is
+an assertion, so None skips it.
+
+**Failures.** The message has the usual interaction, step number, step as XML
+and URL. The reason contains:
+
+| Case | Result | Reason contains |
+|---|---|---|
+| `execute` or `executeAsync` throws or rejects | the step throws | `JavascriptException` and the error's message |
+| `executeAsync` does not settle in time | the step throws | `<executeAsync /> did not settle within N ms` |
+| `variable` set, and the result is `null` or `undefined` | the step throws | `gave no value to keep in {var:NAME}` |
+| `waitFor` times out | the step throws, under None too | `<waitFor /> did not hold within N ms:` and the script's first line, then `; the last poll threw: ...` if one threw |
+| `testScript` stays falsy | an assertion | the `message`, else `<testScript /> did not hold:` and the first line; then `; it threw: ...` if the last run threw |
+| `call`'s class is missing, is not a `SailCall`, or cannot be constructed | `MetaDataException` | `<call className="X" /> names a class that cannot be loaded`, `... that is not a org.skyve.metadata.sail.execution.SailCall`, `... that cannot be constructed`, `... whose constructor threw` or `... whose static initialiser threw` |
+| `call` throws an `AssertionError` | an assertion: recorded under Verify, and the run goes on; ignored under None | `<call className="X" /> failed:` and its message |
+| `call` throws anything else | the step throws; under Verify the interaction ends | `<call className="X" /> threw` the exception's class and message |
+| two `parameter`s with one `name` | `MetaDataException` | `has more than one <parameter name="N" />` |
+
+An empty script body also fails with a `MetaDataException`. WebDriver does not
+return the JavaScript stack, so a rejection's reason is the error's message
+only.
+
+**Calls.** `className` names a class that implements
+`org.skyve.metadata.sail.execution.SailCall`:
+
+```java
+@Nullable String call(@Nonnull Map<String, String> parameters, @Nonnull Executor executor) throws Exception;
+```
+
+- The class has a public no-argument constructor. The executor makes a new
+  instance for each step, from the thread context class loader, so an instance
+  keeps no state between steps. There is no registry.
+- `call` runs on the automation's thread, between the step before it and the
+  step after it. It may block, and nothing times it out.
+- `parameters` holds the `<parameter name value/>` children by name, with
+  `{run}` and `{var:name}` substituted in each value. It is a new map that the
+  call may change.
+- The return value is kept in `variable`. A call may return `null` when the step
+  has no `variable`.
+- Throw an `AssertionError` for what the call checks and finds wrong: it follows
+  the test strategy, so it stops the run under Assert, is recorded under Verify
+  and is ignored under None. Any other exception means the call could not do
+  what it says, so it stops the interaction, even under Verify. So does a
+  Selenide `UIAssertionError` (a missing element, a failed `should`). A step
+  the call runs through the executor fails as that step would: a failed
+  assertion follows the test strategy (under Assert it stops the run, as that
+  step's failure), and a step that throws makes the call throw.
+- A handler that needs the browser casts the executor to
+  `util.sail.InterpretedWebDriverExecutor` and calls its `getDriver()`, which
+  gives the `WebDriver`. That is the only accessor.
+
+**Contexts.** None of these steps changes the contexts. A script or call that
+makes the browser show another view must be followed by a navigate or context
+step, as `<navigateLink/>` to a page that is not Skyve's is today
+([Contexts](#contexts)).
+
+**Use them sparingly.** Use scripts and calls for what SAIL cannot express: a
+custom widget, client-side storage, an asynchronous browser API, browser
+DevTools, an extra window or a fixture in the test JVM. Keep the UI assertions
+in SAIL steps, which check what a user can do and see. A script that clicks or
+types hides exactly the faults SAIL exists to find (see
+[Synchronisation Rules](#synchronisation-rules)).
 
 ### Values
 
@@ -1320,7 +1447,8 @@ in advanced filtering, because that hides the row.
 ### Assertions
 
 Assertions follow the [test strategy](#test-strategies-and-failure-reports).
-Under None, they are skipped.
+Under None, they are skipped. `testScript` is an assertion written in
+JavaScript; see [Scripts and calls](#scripts-and-calls).
 
 | Element | Attributes | Semantics | PF | SC |
 |---|---|---|---|---|
@@ -1329,6 +1457,7 @@ Under None, they are skipped.
 | `testFailure` | `message` | Asserts that an error is shown and, if `message` is given, that the error contains it. Only errors count: error messages and growls, field errors, and in SC the Problems dialog. Straight after a login, it asserts that the login was rejected. Straight after an `upload testSuccess="false"`, a refusal on the upload page counts too. | yes | yes |
 | `testMessage` | `contains`\*, `type` (`info`, `warning`, `error`) | Asserts that a growl or message containing the text, case-sensitively, is shown. With `type`, the message must have that severity. Unlike `testSuccess`/`testFailure`, it sees information and warning messages too. | yes: global messages, growls and field messages | yes: `isc.say` is info, `isc.warn` is warning, the Problems dialog and field errors are error, and growls go by their class |
 | `testGridRows` | `binding`, or `module`/`document`/`query`/`model`; `rowContaining`, `minRows`, `maxRows`, `timeoutMillis` | Counts the rows, or only those containing the text, and asserts `minRows ≤ count ≤ maxRows`. An absent `minRows` means 0 and an absent `maxRows` means no maximum. With neither, the step asserts at least one row. `maxRows="0"` asserts absence. `binding` (a data grid) cannot be combined with the list attributes. With `timeoutMillis`, the grid is reloaded from the server and recounted every second until the bounds hold or time runs out. Use it to wait for a server job. A timed step still waits under None. | yes; a Vue list grid refetches its rows as it does after an ajax update, and the step waits for that fetch | yes; only list grids are reloaded |
+| `testScript` | script text; `message`, `timeoutMillis` | Asserts that the script returns a truthy value. The body is an `async` function body, polled every 250 ms until it holds or `timeoutMillis` passes. Without `timeoutMillis` it runs once. A run that throws counts as false. The failure is `message` (with `{run}` and `{var:name}` substituted), else `<testScript /> did not hold:` and the script's first line. It only reads: it does not wait for the page to settle. See [Scripts and calls](#scripts-and-calls). | yes | yes |
 | `testWidget` | exactly one of `binding`, `action`, `tab`; `visible`, `enabled` | `visible="true"` asserts the target is shown. `visible="false"` asserts it is hidden or not rendered. `enabled` asserts it is shown and is, or is not, enabled. With neither, the step asserts visible. `visible="false"` cannot be combined with `enabled`. `tab` is a tab path as for `tabSelect`. | yes | yes |
 
 `testMenu` is listed under [Navigation](#navigation).
@@ -1338,7 +1467,11 @@ Under None, they are skipped.
 | Element | Content or attributes | Semantics | PF | SC |
 |---|---|---|---|---|
 | `comment` | text | Written to the trace, with `{run}` and `{var:name}` substituted. Does nothing else. | yes | yes |
-| `execute` | JavaScript text | Runs the script in the browser page. Use it sparingly: it bypasses what SAIL is testing. | yes; then waits for any request or page load the script started | yes; checks for open dialogs first, then waits for SmartClient to settle |
+| `execute` | JavaScript text; `variable` | Runs the script in the browser page, as the body of a function that gets the `sail` argument. Use it sparingly: it bypasses what SAIL is testing. With `variable`, the result is kept for `{var:name}`. An empty body fails the step. See [Scripts and calls](#scripts-and-calls). | yes; then waits for any request or page load that `execute`, `executeAsync` or `call` started | yes; checks for open dialogs first, then waits for SmartClient to settle |
+| `executeAsync` | JavaScript text; `timeoutMillis`, `variable` | Runs the script as the body of an `async` function, so `await` works, and waits for it to settle, for up to `timeoutMillis` (default `sail.timeoutSeconds`). A rejection fails the step. With `variable`, the result is kept. | yes; then waits as `execute` does | yes; checks for open dialogs first, then waits for SmartClient to settle |
+| `waitFor` | JavaScript text; `timeoutMillis` | Polls the script, an `async` function body, every 250 ms until it returns a truthy value. A poll that throws counts as false. It is a wait, not an assertion: when `timeoutMillis` passes, the step throws, under every strategy, None included, as a timed `testGridRows` does. It only reads: it does not wait for the page to settle. | yes | yes |
+| `call` | `className`\*, `variable`; `<parameter name value/>` children | Runs the handwritten Java class, a `SailCall`, in the test JVM, for what a script cannot do in the page. See [Scripts and calls](#scripts-and-calls). | yes; then waits as `execute` does | yes; checks for open dialogs first, then waits for SmartClient to settle |
+| `testScript` | script text; `message`, `timeoutMillis` | An assertion written in JavaScript; it follows the test strategy and is listed under [Assertions](#assertions). | yes | yes |
 | `pause` | `millis`\* | Sleeps. This is a last resort, for when no observable condition exists: see [Synchronisation Rules](#synchronisation-rules). The kitchen sinks pause once, for 100 ms, only to test the op-code. | yes | yes |
 | `captureValue` | `binding`\*, `variable`\*, `pattern` | Keeps the value the widget shows in a variable for `{var:name}`; see [The run token and variables](#the-run-token-and-variables). It is not an assertion, so it runs under every strategy. | yes | yes |
 | `captureCell` | `variable`\*, `column`\*, `row` or `rowContaining`, `binding` or `module`/`document`/`query`/`model`, `pattern` | Keeps the text a grid cell shows: the cell in the column whose binding is `column`, of the row. The grid is a data grid named by `binding`, or a list grid named as the [grid steps](#grids) name it, each attribute defaulting from the context; `binding` cannot be combined with the list attributes. A list grid's column is checked against its query first. A cell's input (an inline grid) reads as its value. | yes: a data table's column by its header, a Vue list grid's by its title; the title a card layout repeats in a cell is left out | yes: the grid field of the sanitised binding |
@@ -1353,8 +1486,8 @@ Under None, they are skipped.
 | `None` | Assertions are not made | Stops the run | |
 
 Assertions are `testValue`, `testSuccess`, `testFailure`, `testMessage`,
-`testGridRows`, `testWidget`, `testMenu` and the implicit success check after
-actions. A step throws when it cannot do what it says: its widget is missing,
+`testGridRows`, `testWidget`, `testMenu`, `testScript`, a `call` that throws an
+`AssertionError`, and the implicit success check after actions. A step throws when it cannot do what it says: its widget is missing,
 disabled or covered, a row is missing, nothing asks for a `confirm="false"`
 step, or a wait times out. Steps the renderer does not support also throw.
 
@@ -2601,6 +2734,7 @@ that show it, relative to the repository root:
 | Op-codes: [Filtering lists](#filtering-lists) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "List Grid Fixture: filters on each column type", "List Grid Fixture: filters and sorts in a Vue list grid and a PrimeFaces data table"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml`: "List filters and sorting"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "List grids in a view" |
 | Op-codes: [Assertions](#assertions) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Actions Fixture: actions, buttons and change events", "Menus"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Lookup values to pick" |
 | Op-codes: [Other steps](#other-steps) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts" (`execute`, `pause`), "Lookup values: generated numbers, filters and sorts" (captures); `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Actions Fixture: a refused upload, a link in a row, a cell and the title" |
+| [Scripts and calls](#scripts-and-calls) (`execute@variable`, `executeAsync`, `waitFor`, `testScript`, `call`) | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`: "Contexts, links, maps and scripts"; `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml`: "Actions"; the failures in the `*Failures` tests of `PrimeFacesKitchenSinkSailIT` and `SmartClientKitchenSinkSailIT` |
 | PrimeFaces op-codes | `skyve-war/src/test/java/sail/kitchenSink/pf/pf-kitchensink-sail.xml`; `pf-kitchensink-row-link.xml` (`dataGridLink`) |
 | SmartClient op-codes, with `navigateTree` and `navigateCalendar` | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail.xml` |
 | Filters, sorting, captures with a `pattern`, `dataEnter match`, lookups by text | `skyve-war/src/test/java/sail/kitchenSink/sc/sc-kitchensink-sail-find.xml` |
@@ -2665,8 +2799,9 @@ The harness follows these rules, and changes to it must keep them.
    are bounded by the browser's resolved `sail.timeoutSeconds`
    ([Settings](#settings)). The constant `Selenide.TIMEOUT` is deprecated: it is
    read once, when the class loads, from the settings outside code. The only other
-   polling interval is the one an author asks for with `testGridRows@timeoutMillis`,
-   which checks every second. The deliberate waits outside this mechanism are
+   polling intervals are the ones an author asks for: `testGridRows@timeoutMillis`
+   checks every second, and `waitFor` and `testScript` poll every 250 ms, through
+   the same `Selenide.waitFor(timeout, polling, condition)`. The deliberate waits outside this mechanism are
    `SailServerLock`, which blocks while another JVM's SAIL test is using the
    same server, and a [load run's](#load-testing) own: each virtual user's
    start, delayed by its share of the ramp-up, and the test thread's wait for
@@ -3075,6 +3210,16 @@ Java through `SailRunIT`, alone or as a member of a suite file
 - **A variant domain's description filter takes at most 100 matching codes.**
   With more matching descriptions, a filter misses the rest, and a negated one
   (Match None, `notEquals`, Not Contains) lets the rest through.
+- **Script and call steps.** Scripts and calls are an escape hatch.
+  - No JavaScript stack: WebDriver does not return it, so a rejected
+    `executeAsync` or a failing `execute` reports the error's message only.
+  - No generated code for `call`. The Control Panel's generator emits a comment
+    for it, and for `executeAsync`, `waitFor` and `testScript`.
+  - No recorder support: there is nothing to record. The recorder never writes
+    these steps.
+  - Scripts and calls bypass what SAIL tests. They do not follow the gestures,
+    the settling or the contexts of the other steps
+    ([Scripts and calls](#scripts-and-calls)).
 - **Numbers beyond a browser's precision.** The server sends numbers to
   SmartClient and the Vue list grid as JSON numbers, so a value beyond 15
   significant digits (a Decimal10 with a large whole part, a Decimal5 above
@@ -3206,7 +3351,8 @@ other implementations, which generate test code instead of driving a browser:
     `switchMode`, `listGridFilter`, `listGridClearFilter`, `listGridSort`,
     `captureValue`, `captureCell`, `captureTitle`, `dataGridLink`,
     `dataGridMove`, `listMembershipMove`, `navigateBack`, `refresh`,
-    `closeWindow` and `listGridTool`, and for `navigateLink window="new"`,
+    `closeWindow`, `listGridTool`, `executeAsync`, `waitFor`, `testScript` and
+    `call`, and for `navigateLink window="new"`,
     whose new window the generated code does not follow. `navigateLink
     window="new"` and `closeWindow` still move the contexts as the
     interpreted executors do.
@@ -3215,6 +3361,10 @@ other implementations, which generate test code instead of driving a browser:
     for a combo or radio `dataEnter` with `match="code"` or `match="label"`,
     for `lookupDescriptionAutoComplete` with `pick`, and for `confirm="false"`.
     The context still follows.
+  - `execute` still becomes `execute("...")`. The generated call runs the body
+    raw, without the `sail` argument. With `variable`, the generator also emits
+    a comment, "the generated code keeps no result", as the variable is not
+    kept.
   - They do not substitute `{run}` or `{var:name}`: the generated code has
     them as written.
   - With `confirm` absent or `true`, the generated code answers the action's
@@ -3387,6 +3537,29 @@ compiling and running:
   `AbstractH2TestForJUnit4` is kept.
 - `SailLoad` is new ([Load Testing](#load-testing)), with the `sail.load.*`
   settings. The `sail` profile leaves out ITs tagged `performance`.
+
+**Script and call steps.** `executeAsync`, `waitFor`, `testScript` and `call`
+are new, and `execute` takes `variable` ([Scripts and calls](#scripts-and-calls)).
+Existing scripts are unchanged, but code outside the language is affected:
+
+- **Breaking:** `Executor` has 4 new abstract methods: `executeExecuteAsync`,
+  `executeWaitFor`, `executeTestScript` and `executeCall`. An executor outside
+  Skyve must implement them, even if only to fail or to emit a comment.
+  Executors that extend skyve-ext `WebDriverExecutor` inherit comment-emitting
+  implementations.
+- `execute` bodies now run inside a function wrapper with one argument, `sail`.
+  This is transparent for existing scripts.
+- An empty `<execute/>` now fails with a `MetaDataException`.
+- `RunState.variables()` is now public.
+- `InterpretedWebDriverExecutor.getDriver()` is new. It gives a `SailCall` the
+  `WebDriver`.
+- `PrimeFacesSelenide.runScript(String)` is now `runScript(Runnable)`: it runs
+  the step (an `execute`, `executeAsync` or `call`), then waits for any
+  request or page load the step started.
+- An app that copies the `util/sail` harness must copy these harness changes
+  too, or it fails to compile against the new `Executor`.
+- The XSD's `execute` is now a complex type with simple content, to carry
+  `variable`. Documents that validated before still validate.
 
 **Fixes found by load runs and generation.** These change behaviour outside
 SAIL:

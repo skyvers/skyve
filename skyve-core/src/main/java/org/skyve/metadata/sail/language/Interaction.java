@@ -6,18 +6,22 @@ import java.util.List;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -198,6 +202,10 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = TestFailure.class),
 						@XmlElementRef(type = Comment.class),
 						@XmlElementRef(type = Execute.class),
+						@XmlElementRef(type = ExecuteAsync.class),
+						@XmlElementRef(type = WaitFor.class),
+						@XmlElementRef(type = TestScript.class),
+						@XmlElementRef(type = Call.class),
 						@XmlElementRef(type = Pause.class),
 						@XmlElementRef(type = PushListContext.class),
 						@XmlElementRef(type = PushEditContext.class),

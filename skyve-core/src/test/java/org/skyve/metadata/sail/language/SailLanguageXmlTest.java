@@ -19,14 +19,20 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.CallParameter;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestMessage.MessageType;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter.Match;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
@@ -706,5 +712,110 @@ class SailLanguageXmlTest {
 		GridRowStep gridStep = (GridRowStep) step;
 		assertAll(() -> assertEquals(expected, gridStep.getRowContaining()),
 					() -> assertThat(gridStep.getRow(), is(nullValue())));
+	}
+
+	private static final String SCRIPTS_AND_CALLS = HEAD +
+			"<execute><![CDATA[const {run} = window.x; return run < 1 && run > -1;]]></execute>" +
+			"<execute variable=\"title\">return document.title;</execute>" +
+			"<executeAsync timeoutMillis=\"5000\" variable=\"status\"><![CDATA[const r = await fetch(location.href, {method: 'HEAD'});\nreturn r.status;]]></executeAsync>" +
+			"<executeAsync>await null;</executeAsync>" +
+			"<waitFor timeoutMillis=\"20000\"><![CDATA[return document.readyState === 'complete' && ! document.querySelector('.ui-blockui');]]></waitFor>" +
+			"<waitFor>return true;</waitFor>" +
+			"<testScript message=\"echo {run} {var:echo}\" timeoutMillis=\"1000\"><![CDATA[return sail.vars.echo === 'made ' + sail.run;]]></testScript>" +
+			"<testScript>return 1 &lt; 2;</testScript>" +
+			"<call className=\"sail.kitchenSink.EchoCall\" variable=\"echo\">" +
+			"<parameter name=\"text\" value=\"made {run}\"/><parameter name=\"fail\" value=\"{var:how}\"/></call>" +
+			"<call className=\"sail.kitchenSink.EchoCall\"/>" +
+			TAIL;
+
+	@Test
+	void unmarshalsTheScriptAndCallSteps() {
+		assertScriptsAndCalls(XMLMetaData.unmarshalSAILString(SCRIPTS_AND_CALLS).getInteractions().get(0).getSteps());
+	}
+
+	@Test
+	void marshalsAndUnmarshalsTheScriptAndCallSteps() {
+		String xml = XMLMetaData.marshalSAIL(XMLMetaData.unmarshalSAILString(SCRIPTS_AND_CALLS));
+		// the marshaller writes a body that needs escaping as an indented CDATA section, which unmarshalling trims
+		assertAll(() -> assertTrue(xml.matches("(?s).*<!\\[CDATA\\[\\s*const \\{run\\} = window\\.x; return run < 1 && run > -1;\\s*]]>.*"), xml),
+					() -> assertScriptsAndCalls(XMLMetaData.unmarshalSAILString(xml).getInteractions().get(0).getSteps()));
+	}
+
+	@Test
+	void theScriptAndCallStepsWithoutTheirRequiredAttributesOrWithOthersAreRejectedByTheSchema() {
+		assertAll(() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<call variable=\"v\"/>" + TAIL), "call without className"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<call className=\"C\"><parameter value=\"v\"/></call>" + TAIL), "parameter without name"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<call className=\"C\"><parameter name=\"n\"/></call>" + TAIL), "parameter without value"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<call className=\"C\">text</call>" + TAIL), "call with text"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<executeAsync timeoutMillis=\"soon\">x</executeAsync>" + TAIL), "a timeout that is not a number"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<waitFor variable=\"v\">x</waitFor>" + TAIL), "waitFor with a variable"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<testScript variable=\"v\">x</testScript>" + TAIL), "testScript with a variable"),
+					() -> assertThrows(MetaDataException.class, () -> XMLMetaData.unmarshalSAILString(HEAD + "<execute timeoutMillis=\"1\">x</execute>" + TAIL), "execute with a timeout"));
+	}
+
+	@Test
+	@SuppressWarnings("null") // before and after are present in the XML
+	void proceduresAcceptTheScriptAndCallSteps() {
+		String steps = "<executeAsync>await null;</executeAsync><waitFor>return true;</waitFor>" +
+						"<testScript>return true;</testScript><call className=\"C\"/>";
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
+						"<automation uxui=\"desktop\" userAgentType=\"desktop\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+						"<before>" + steps + "</before>" +
+						"<interaction name=\"i\"><before>" + steps + "</before><method/><after>" + steps + "</after></interaction>" +
+						"<after>" + steps + "</after></automation>";
+		Automation automation = XMLMetaData.unmarshalSAILString(xml);
+		Interaction interaction = automation.getInteractions().get(0);
+		assertAll(() -> assertEquals(4, automation.getBefore().getSteps().size()),
+					() -> assertEquals(4, automation.getAfter().getSteps().size()),
+					() -> assertEquals(4, interaction.getBefore().getSteps().size()),
+					() -> assertEquals(4, interaction.getAfter().getSteps().size()),
+					() -> assertThat(automation.getBefore().getSteps().get(0), instanceOf(ExecuteAsync.class)),
+					() -> assertThat(interaction.getAfter().getSteps().get(1), instanceOf(WaitFor.class)),
+					() -> assertThat(interaction.getBefore().getSteps().get(2), instanceOf(TestScript.class)),
+					() -> assertThat(automation.getAfter().getSteps().get(3), instanceOf(Call.class)));
+	}
+
+	private static void assertScriptsAndCalls(List<Step> steps) {
+		Execute plain = (Execute) steps.get(0);
+		Execute kept = (Execute) steps.get(1);
+		ExecuteAsync async = (ExecuteAsync) steps.get(2);
+		ExecuteAsync bareAsync = (ExecuteAsync) steps.get(3);
+		WaitFor wait = (WaitFor) steps.get(4);
+		WaitFor bareWait = (WaitFor) steps.get(5);
+		TestScript test = (TestScript) steps.get(6);
+		TestScript bareTest = (TestScript) steps.get(7);
+		Call call = (Call) steps.get(8);
+		Call bareCall = (Call) steps.get(9);
+		List<CallParameter> parameters = call.getParameters();
+		assertAll(() -> assertEquals(10, steps.size()),
+					() -> assertEquals("const {run} = window.x; return run < 1 && run > -1;", plain.getScript()),
+					() -> assertThat(plain.getVariable(), is(nullValue())),
+					() -> assertEquals("return document.title;", kept.getScript()),
+					() -> assertEquals("title", kept.getVariable()),
+					() -> assertEquals("const r = await fetch(location.href, {method: 'HEAD'});\nreturn r.status;", async.getScript()),
+					() -> assertEquals(Integer.valueOf(5000), async.getTimeoutMillis()),
+					() -> assertEquals("status", async.getVariable()),
+					() -> assertEquals("await null;", bareAsync.getScript()),
+					() -> assertThat(bareAsync.getTimeoutMillis(), is(nullValue())),
+					() -> assertThat(bareAsync.getVariable(), is(nullValue())),
+					() -> assertEquals("return document.readyState === 'complete' && ! document.querySelector('.ui-blockui');", wait.getScript()),
+					() -> assertEquals(Integer.valueOf(20000), wait.getTimeoutMillis()),
+					() -> assertThat(bareWait.getTimeoutMillis(), is(nullValue())),
+					() -> assertEquals("return sail.vars.echo === 'made ' + sail.run;", test.getScript()),
+					() -> assertEquals("echo {run} {var:echo}", test.getMessage()),
+					() -> assertEquals(Integer.valueOf(1000), test.getTimeoutMillis()),
+					() -> assertEquals("return 1 < 2;", bareTest.getScript()),
+					() -> assertThat(bareTest.getMessage(), is(nullValue())),
+					() -> assertThat(bareTest.getTimeoutMillis(), is(nullValue())),
+					() -> assertEquals("sail.kitchenSink.EchoCall", call.getClassName()),
+					() -> assertEquals("echo", call.getVariable()),
+					() -> assertEquals(2, parameters.size()),
+					() -> assertEquals("text", parameters.get(0).getName()),
+					() -> assertEquals("made {run}", parameters.get(0).getValue()),
+					() -> assertEquals("fail", parameters.get(1).getName()),
+					() -> assertEquals("{var:how}", parameters.get(1).getValue()),
+					() -> assertEquals("sail.kitchenSink.EchoCall", bareCall.getClassName()),
+					() -> assertThat(bareCall.getVariable(), is(nullValue())),
+					() -> assertTrue(bareCall.getParameters().isEmpty()));
 	}
 }

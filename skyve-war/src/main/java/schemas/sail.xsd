@@ -10,6 +10,17 @@
 
   <xs:element name="automation" type="tns:automation"/>
 
+  <xs:element name="call" type="tns:call">
+    <xs:annotation>
+      <xs:documentation>
+        Runs a handwritten Java step in the test JVM: a new instance of className, a SailCall with a public no-argument
+        constructor, given the parameters by name, with {run} and {var:name} substituted in their values. With variable,
+        the string it returns is kept for {var:name}; a null return then fails the step. An AssertionError from the call
+        is a failed assertion (recorded under Verify); any other exception fails the step. The contexts do not change.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
   <xs:element name="cancel" type="tns:cancel"/>
 
   <xs:element name="captureCell" type="tns:captureCell"/>
@@ -42,7 +53,25 @@
 
   <xs:element name="delete" type="tns:delete"/>
 
-  <xs:element name="execute" type="tns:execute"/>
+  <xs:element name="execute" type="tns:execute">
+    <xs:annotation>
+      <xs:documentation>
+        Runs JavaScript in the page: the body of a function of one argument, sail = {run, vars}, also arguments[0]. The
+        body is not token-substituted. With variable, the result (return) is kept as text for {var:name}; a null or
+        undefined result then fails the step. The contexts do not change.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="executeAsync" type="tns:executeAsync">
+    <xs:annotation>
+      <xs:documentation>
+        Runs the body of an async JavaScript function in the page, as execute does, so await works, and waits for it to
+        settle: within timeoutMillis, by default sail.timeoutSeconds. A rejection fails the step with the error's message.
+        With variable, the resolved value is kept as text for {var:name}; a null or undefined value then fails the step.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
 
   <xs:element name="interaction" type="tns:interaction"/>
 
@@ -133,6 +162,17 @@
 
   <xs:element name="testMessage" type="tns:testMessage"/>
 
+  <xs:element name="testScript" type="tns:testScript">
+    <xs:annotation>
+      <xs:documentation>
+        Asserts in JavaScript: the body of an async function, as executeAsync runs it, holds when it returns a truthy
+        value. It runs once, or with timeoutMillis every 250 ms until it holds; a run that throws counts as false. The
+        failure's message is message, with {run} and {var:name} substituted, or the script's first line. Follows the test
+        strategy: skipped under None.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
   <xs:element name="testSuccess" type="tns:testSuccess"/>
 
   <xs:element name="testValue" type="tns:testValue"/>
@@ -140,6 +180,16 @@
   <xs:element name="testWidget" type="tns:testWidget"/>
 
   <xs:element name="upload" type="tns:upload"/>
+
+  <xs:element name="waitFor" type="tns:waitFor">
+    <xs:annotation>
+      <xs:documentation>
+        Waits until JavaScript holds: the body of an async function, as executeAsync runs it, polled every 250 ms until it
+        returns a truthy value, within timeoutMillis, by default sail.timeoutSeconds. A poll that throws counts as false. A
+        wait, not a test: it runs under every test strategy, and a timeout fails the step.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
 
   <xs:element name="workflow" type="tns:workflow"/>
 
@@ -198,6 +248,10 @@
         <xs:element ref="tns:testFailure"/>
         <xs:element ref="tns:comment"/>
         <xs:element ref="tns:execute"/>
+        <xs:element ref="tns:executeAsync"/>
+        <xs:element ref="tns:waitFor"/>
+        <xs:element ref="tns:testScript"/>
+        <xs:element ref="tns:call"/>
         <xs:element ref="tns:pause"/>
         <xs:element ref="tns:pushEditContext"/>
         <xs:element ref="tns:popContext"/>
@@ -490,9 +544,113 @@
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
 
-  <xs:simpleType name="execute">
-    <xs:restriction base="xs:string"/>
-  </xs:simpleType>
+  <xs:complexType name="execute">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="variable" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              The variable that keeps the result, for {var:name}: a letter, then letters, digits or underscores.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="executeAsync">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="timeoutMillis" type="xs:int">
+          <xs:annotation>
+            <xs:documentation>
+              How long the promise may take to settle; by default sail.timeoutSeconds.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="variable" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              The variable that keeps the result, for {var:name}: a letter, then letters, digits or underscores.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="waitFor">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="timeoutMillis" type="xs:int">
+          <xs:annotation>
+            <xs:documentation>
+              How long to wait; by default sail.timeoutSeconds.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="testScript">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="message" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              The failure's message, with {run} and {var:name} substituted; by default the script's first line.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="timeoutMillis" type="xs:int">
+          <xs:annotation>
+            <xs:documentation>
+              How long to keep running the script until it holds; without it, it runs once.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="call">
+    <xs:sequence>
+      <xs:element name="parameter" type="tns:callParameter" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="className" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The fully qualified name of a SailCall class with a public no-argument constructor.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="variable" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          The variable that keeps the string the call returns, for {var:name}: a letter, then letters, digits or underscores.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="callParameter">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The parameter's name; each name only once in a call. Not substituted.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The parameter's value, with {run} and {var:name} substituted.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
 
   <xs:complexType name="pause">
     <xs:sequence/>
@@ -726,6 +884,10 @@
               <xs:element ref="tns:testFailure"/>
               <xs:element ref="tns:comment"/>
               <xs:element ref="tns:execute"/>
+              <xs:element ref="tns:executeAsync"/>
+              <xs:element ref="tns:waitFor"/>
+              <xs:element ref="tns:testScript"/>
+              <xs:element ref="tns:call"/>
               <xs:element ref="tns:pause"/>
               <xs:element ref="tns:pushEditContext"/>
               <xs:element ref="tns:popContext"/>

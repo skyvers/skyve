@@ -6,8 +6,17 @@
  * <ul>
  *   <li>{@link org.skyve.metadata.sail.language.step.Comment} — embeds a non-executable
  *       annotation in the script for human readers.
- *   <li>{@link org.skyve.metadata.sail.language.step.Execute} — runs an inline Groovy/script
- *       fragment during automation execution.
+ *   <li>{@link org.skyve.metadata.sail.language.step.Execute} — runs an inline JavaScript
+ *       fragment in the page, optionally keeping its result in a variable.
+ *   <li>{@link org.skyve.metadata.sail.language.step.ExecuteAsync} — runs the body of an
+ *       {@code async} JavaScript function in the page and waits for it to settle.
+ *   <li>{@link org.skyve.metadata.sail.language.step.WaitFor} — waits until a JavaScript
+ *       condition in the page holds.
+ *   <li>{@link org.skyve.metadata.sail.language.step.TestScript} — asserts, in JavaScript,
+ *       something about the page.
+ *   <li>{@link org.skyve.metadata.sail.language.step.Call} — runs a handwritten Java step, a
+ *       {@link org.skyve.metadata.sail.execution.SailCall}, with its
+ *       {@link org.skyve.metadata.sail.language.step.CallParameter}s.
  *   <li>{@link org.skyve.metadata.sail.language.step.Pause} — waits for the specified
  *       number of milliseconds before continuing.
  *   <li>{@link org.skyve.metadata.sail.language.step.TestSuccess} — asserts that no error

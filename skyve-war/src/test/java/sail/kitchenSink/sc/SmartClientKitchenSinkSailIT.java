@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
+import sail.kitchenSink.ScriptStepFailures;
 import util.AbstractSmartClientInterpretedSail;
 import util.sail.BrowserConfiguration;
 import util.sail.BrowserConfiguration.Browsers;
@@ -137,5 +138,57 @@ class SmartClientKitchenSinkSailIT extends AbstractSmartClientInterpretedSail {
 								() -> Assertions.assertTrue(message.contains("\"The failed interaction's window was closed\" step 3 <closeWindow />: MetaDataException: " +
 																				"<closeWindow /> has no window to close"), message),
 								() -> Assertions.assertEquals(2, message.split("has no window to close", -1).length - 1, message));
+	}
+
+	/**
+	 * The {@code execute} failures, in this renderer: see {@link ScriptStepFailures#executeFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void executeFailures() {
+		scriptStepFailures().executeFailures();
+	}
+
+	/**
+	 * The {@code executeAsync} failures, in this renderer: see {@link ScriptStepFailures#executeAsyncFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void executeAsyncFailures() {
+		scriptStepFailures().executeAsyncFailures();
+	}
+
+	/**
+	 * The {@code waitFor} failures, in this renderer: see {@link ScriptStepFailures#waitForFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void waitForFailures() {
+		scriptStepFailures().waitForFailures();
+	}
+
+	/**
+	 * The {@code testScript} failures, in this renderer: see {@link ScriptStepFailures#testScriptFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void testScriptFailures() {
+		scriptStepFailures().testScriptFailures();
+	}
+
+	/**
+	 * The {@code call} failures, in this renderer: see {@link ScriptStepFailures#callFailures()}.
+	 */
+	@Test
+	@SuppressWarnings("java:S2699") // the assertions are in ScriptStepFailures
+	void callFailures() {
+		scriptStepFailures().callFailures();
+	}
+
+	/**
+	 * Returns the script and call steps' inline failure tests, signed in as this kitchen sink's scripts sign in.
+	 */
+	private ScriptStepFailures scriptStepFailures() {
+		return new ScriptStepFailures("desktop", "<switchMode />", this::sailString);
 	}
 }

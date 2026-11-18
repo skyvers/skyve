@@ -28,10 +28,12 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.Module.DocumentRef;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.Call;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.TestMessage;
 import org.skyve.metadata.sail.language.step.TestWidget;
@@ -155,6 +157,26 @@ public class SmartClientInterpretedWebDriverExecutor extends InterpretedWebDrive
 	public void executeExecute(Execute execute) {
 		prepareForInteraction();
 		super.executeExecute(execute);
+		selenide.settle();
+	}
+
+	/**
+	 * Runs the script and waits for its promise, then lets SmartClient settle.
+	 */
+	@Override
+	public void executeExecuteAsync(ExecuteAsync execute) {
+		prepareForInteraction();
+		super.executeExecuteAsync(execute);
+		selenide.settle();
+	}
+
+	/**
+	 * Runs the call, then lets SmartClient settle.
+	 */
+	@Override
+	public void executeCall(Call call) {
+		prepareForInteraction();
+		super.executeCall(call);
 		selenide.settle();
 	}
 

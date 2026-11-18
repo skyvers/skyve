@@ -59,14 +59,9 @@ public interface CaptureStep extends Step {
 	 * @throws MetaDataException	if the variable name does not match {@value #VARIABLE_NAME_PATTERN}, or the pattern is not
 	 * 								a valid regular expression
 	 */
-	// The variable is null on a step built without one (its getter is @Nonnull for a validated step): this is the check
-	@SuppressWarnings({"null", "java:S2589"})
 	public static void validateCapture(@Nonnull CaptureStep step) {
-		String variable = step.getVariable();
 		String element = step.getClass().getSimpleName();
-		if ((variable == null) || (! variable.matches(VARIABLE_NAME_PATTERN))) {
-			throw new MetaDataException("<" + element + " /> [variable] " + variable + " is not a variable name: use a letter, then letters, digits or underscores");
-		}
+		validateVariableName(element, step.getVariable());
 		String pattern = step.getPattern();
 		if (pattern != null) {
 			try {
@@ -75,6 +70,22 @@ public interface CaptureStep extends Step {
 			catch (PatternSyntaxException e) {
 				throw new MetaDataException("<" + element + " /> [pattern] " + pattern + " is not a regular expression: " + e.getDescription(), e);
 			}
+		}
+	}
+
+	/**
+	 * Checks that a step's variable is a variable name, for the capture steps and for the other steps that keep a
+	 * result in a variable ({@link Execute}, {@link ExecuteAsync} and {@link Call}), which check it only when they name
+	 * one.
+	 *
+	 * @param element	the step's name for the message, such as {@code CaptureValue} or {@code execute}
+	 * @param variable	the variable; {@code null} on a capture step built without one, whose getter is {@code @Nonnull}
+	 * 					only for a validated step
+	 * @throws MetaDataException	if the variable is {@code null} or does not match {@value #VARIABLE_NAME_PATTERN}
+	 */
+	public static void validateVariableName(@Nonnull String element, @Nullable String variable) {
+		if ((variable == null) || (! variable.matches(VARIABLE_NAME_PATTERN))) {
+			throw new MetaDataException("<" + element + " /> [variable] " + variable + " is not a variable name: use a letter, then letters, digits or underscores");
 		}
 	}
 

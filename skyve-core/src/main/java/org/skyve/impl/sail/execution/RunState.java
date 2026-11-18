@@ -82,9 +82,9 @@ public final class RunState {
 	/**
 	 * Returns the variables, sorted by name.
 	 *
-	 * @return the variables (a live, sorted map)
+	 * @return the variables (a live, sorted map: copy it to keep a snapshot)
 	 */
-	@Nonnull Map<String, String> variables() {
+	public @Nonnull Map<String, String> variables() {
 		return variables;
 	}
 }

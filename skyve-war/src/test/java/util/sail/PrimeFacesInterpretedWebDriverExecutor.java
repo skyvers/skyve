@@ -39,7 +39,11 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestScript;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
@@ -198,7 +202,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 * The steps that keep an inline row (see {@link #startingStep(Step)}): those that address its cells, and those that
 	 * do not touch the page. They are exactly the steps that keep SmartClient's inline edit: there, {@code captureCell}
 	 * and {@code testGridRows} end the edit to read the grid's saved rows, {@code captureTitle} to read the view, and
-	 * {@code testDataEnter} to fill the view's fields, so they end the row here too.
+	 * {@code testDataEnter} to fill the view's fields, so they end the row here too. {@code waitFor} and
+	 * {@code testScript} only read the page, so they keep it in both; {@code execute}, {@code executeAsync} and
+	 * {@code call} end it.
 	 */
 	private static final Set<Class<? extends Step>> KEEPS_INLINE_ROW = Set.of(DataEnter.class,
 																				TestValue.class,
@@ -211,7 +217,9 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 																				TestMessage.class,
 																				TestSuccess.class,
 																				TestFailure.class,
-																				TestMenu.class);
+																				TestMenu.class,
+																				WaitFor.class,
+																				TestScript.class);
 
 	/**
 	 * A widget to try for a binding, with its client id on the page.
@@ -2604,7 +2612,27 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	@Override
 	public void executeExecute(org.skyve.metadata.sail.language.step.Execute execute) {
-		selenide.runScript(Objects.requireNonNull(execute.getScript(), "<execute /> has no script"));
+		selenide.runScript(() -> super.executeExecute(execute));
+	}
+
+	/**
+	 * Runs the script and waits for its promise, then waits for any request or page load it started.
+	 *
+	 * @param execute	the step
+	 */
+	@Override
+	public void executeExecuteAsync(ExecuteAsync execute) {
+		selenide.runScript(() -> super.executeExecuteAsync(execute));
+	}
+
+	/**
+	 * Runs the call, then waits for any request or page load it started.
+	 *
+	 * @param call	the step
+	 */
+	@Override
+	public void executeCall(Call call) {
+		selenide.runScript(() -> super.executeCall(call));
 	}
 
 	/**
