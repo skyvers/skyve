@@ -299,7 +299,7 @@ class DocumentQueryFilterTest {
 	 * drop the rows that the other criteria keep.
 	 */
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "java:S5961"}) // one check per Filter method, so a refactor cannot swap one
 	void everyConditionOnABindingReachesBothFiltersAndTellsTheBinding() {
 		Date date = new Date();
 		Decimal2 decimal = new Decimal2("1.5");
