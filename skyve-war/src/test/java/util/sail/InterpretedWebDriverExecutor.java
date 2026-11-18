@@ -7,19 +7,26 @@ import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
+import org.openqa.selenium.ScriptTimeoutException;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Timeouts;
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -42,12 +49,14 @@ import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
+import org.skyve.metadata.sail.execution.SailCall;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.CallParameter;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureStep;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
@@ -183,6 +192,9 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	@Deprecated(since = "10")
 	public static final String TEST_STRATEGY_PROPERTY = SailSettings.TEST_STRATEGY;
+
+	/** How often {@code <waitFor/>} and a timed {@code <testScript/>} run their script, in milliseconds: fixed, with no attribute. */
+	private static final long SCRIPT_POLLING_MILLIS = 250L;
 
 	protected S selenide;
 
@@ -1235,10 +1247,28 @@ public abstract class InterpretedWebDriverExecutor<
 		selenide.trace((text == null) ? "" : substituteTokens(text));
 	}
 
+	/**
+	 * Runs the step's script in the page (see {@link #runScript(String, boolean, boolean, Duration)}), and keeps its
+	 * result, as text, in the step's variable if it names one. It runs under every test strategy, as it is not an
+	 * assertion.
+	 *
+	 * @param execute	the step
+	 * @throws IllegalStateException	if the step names a variable and the script gives {@code null} or {@code undefined}
+	 */
 	@Override
-	public void executeExecute(Execute execute) {
-		JavascriptExecutor js = (JavascriptExecutor) selenide.driver;
-		js.executeScript(execute.getScript());
+	public void executeExecute(@Nonnull Execute execute) {
+		String script = Objects.requireNonNull(execute.getScript(), "<execute /> has no script");
+		selenide.trace("Execute " + script.split("\\R", 2)[0]);
+		Object result = runScript(script, false, false, selenide.timeout());
+		String variable = execute.getVariable();
+		if (variable != null) {
+			if (result == null) {
+				throw new IllegalStateException(String.format("<execute variable=\"%s\" /> gave no value to keep in {var:%s}", variable, variable));
+			}
+			String value = String.valueOf(result);
+			putVariable(variable, value);
+			selenide.trace(String.format("Keep '%s' in {var:%s}", value, variable));
+		}
 	}
 
 	@Override
@@ -1247,47 +1277,237 @@ public abstract class InterpretedWebDriverExecutor<
 	}
 
 	/**
-	 * Throws until the harness implements {@code <executeAsync/>}.
+	 * Runs the step's script in the page as an {@code async} function and waits for its promise to settle (see
+	 * {@link #runScript(String, boolean, boolean, Duration)}), within the step's timeout, by default the settings'.
+	 * Keeps the resolved value, as text, in the step's variable if it names one. It runs under every test strategy, as
+	 * it is not an assertion.
 	 *
-	 * @param execute the step
-	 * @throws UnsupportedOperationException always
+	 * @param execute	the step
+	 * @throws org.openqa.selenium.JavascriptException	if the promise rejects
+	 * @throws IllegalStateException	if the promise does not settle in time, or the step names a variable and the value is
+	 * 									{@code null} or {@code undefined}
 	 */
 	@Override
 	public void executeExecuteAsync(@Nonnull ExecuteAsync execute) {
-		throw notImplementedYet("<executeAsync/>");
+		String script = Objects.requireNonNull(execute.getScript(), "<executeAsync /> has no script");
+		Integer timeout = execute.getTimeoutMillis();
+		Duration limit = (timeout == null) ? selenide.timeout() : Duration.ofMillis(timeout.longValue());
+		selenide.trace("Execute async " + script.split("\\R", 2)[0]);
+		Object result;
+		try {
+			result = runScript(script, true, false, limit);
+		}
+		catch (ScriptTimeoutException e) {
+			throw new IllegalStateException(String.format("<executeAsync /> did not settle within %d ms", Long.valueOf(limit.toMillis())), e);
+		}
+		String variable = execute.getVariable();
+		if (variable != null) {
+			if (result == null) {
+				throw new IllegalStateException(String.format("<executeAsync variable=\"%s\" /> gave no value to keep in {var:%s}", variable, variable));
+			}
+			String value = String.valueOf(result);
+			putVariable(variable, value);
+			selenide.trace(String.format("Keep '%s' in {var:%s}", value, variable));
+		}
 	}
 
 	/**
-	 * Throws until the harness implements {@code <waitFor/>}.
+	 * Runs the step's script in the page as an {@code async} function every {@value #SCRIPT_POLLING_MILLIS} ms until it
+	 * gives a truthy value, within the step's timeout, by default the settings'. A run that throws, rejects or times out
+	 * counts as false. This is a wait, not an assertion, so it runs under every test strategy.
 	 *
-	 * @param wait the step
-	 * @throws UnsupportedOperationException always
+	 * @param wait	the step
+	 * @throws IllegalStateException	if the script does not hold in time; the message gives the timeout, the script's
+	 * 									first line and the last error a run threw
 	 */
 	@Override
 	public void executeWaitFor(@Nonnull WaitFor wait) {
-		throw notImplementedYet("<waitFor/>");
+		String script = Objects.requireNonNull(wait.getScript(), "<waitFor /> has no script");
+		Integer timeout = wait.getTimeoutMillis();
+		Duration limit = (timeout == null) ? selenide.timeout() : Duration.ofMillis(timeout.longValue());
+		String line = script.split("\\R", 2)[0];
+		selenide.trace("Wait for " + line);
+		String[] lastError = new String[1];
+		try {
+			// the author's condition, polled at the fixed interval: the one wait mechanism, bounded by the step's timeout
+			selenide.waitFor(limit, Duration.ofMillis(SCRIPT_POLLING_MILLIS), d -> {
+				try {
+					return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
+				}
+				catch (JavascriptException | ScriptTimeoutException e) {
+					lastError[0] = reason(e);
+					return null;
+				}
+			});
+		}
+		catch (TimeoutException e) {
+			throw new IllegalStateException(String.format("<waitFor /> did not hold within %d ms: %s%s",
+															Long.valueOf(limit.toMillis()),
+															line,
+															(lastError[0] == null) ? "" : "; the last poll threw: " + lastError[0]),
+												e);
+		}
 	}
 
 	/**
-	 * Throws until the harness implements {@code <testScript/>}.
+	 * Asserts, under the test strategy, that the step's script gives a truthy value when run in the page as an
+	 * {@code async} function: once, or with a timeout every {@value #SCRIPT_POLLING_MILLIS} ms until it does. A run that
+	 * throws, rejects or times out counts as false. The failure's reason is the step's message, with the tokens
+	 * substituted, or the script's first line, and then the last error a run threw. Skipped under None.
 	 *
-	 * @param test the step
-	 * @throws UnsupportedOperationException always
+	 * @param test	the step
 	 */
 	@Override
 	public void executeTestScript(@Nonnull TestScript test) {
-		throw notImplementedYet("<testScript/>");
+		if (isNoneStrategy()) {
+			return;
+		}
+		String script = Objects.requireNonNull(test.getScript(), "<testScript /> has no script");
+		Integer timeout = test.getTimeoutMillis();
+		Duration limit = (timeout == null) ? selenide.timeout() : Duration.ofMillis(timeout.longValue());
+		String line = script.split("\\R", 2)[0];
+		selenide.trace("Test script " + line);
+		String[] lastError = new String[1];
+		Function<WebDriver, Boolean> holds = d -> {
+			try {
+				return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
+			}
+			catch (JavascriptException | ScriptTimeoutException e) {
+				lastError[0] = reason(e);
+				return null;
+			}
+		};
+		boolean held;
+		if (timeout == null) {
+			held = (holds.apply(selenide.driver) != null);
+		}
+		else {
+			try {
+				// the author's condition, polled at the fixed interval: the one wait mechanism, bounded by the step's timeout
+				selenide.waitFor(limit, Duration.ofMillis(SCRIPT_POLLING_MILLIS), holds);
+				held = true;
+			}
+			catch (@SuppressWarnings("unused") TimeoutException e) {
+				held = false;
+			}
+		}
+		String message = test.getMessage();
+		check(held, () -> ((message == null) ? "<testScript /> did not hold: " + line : substituteTokens(message)) +
+							((lastError[0] == null) ? "" : "; it threw: " + lastError[0]));
 	}
 
 	/**
-	 * Throws until the harness implements {@code <call/>}.
+	 * Runs the step's {@link SailCall}: a new instance of the named class, from the thread context class loader, given
+	 * the parameters with the tokens substituted in their values and this executor. Keeps the string it returns in the
+	 * step's variable if it names one. An {@link AssertionError} from the call is a failed assertion, under the test
+	 * strategy; any other exception fails the step.
 	 *
-	 * @param call the step
-	 * @throws UnsupportedOperationException always
+	 * <p>Complexity: O(p) in the number of parameters, plus the call.
+	 *
+	 * @param call	the step
+	 * @throws MetaDataException	if the class cannot be loaded, is not a {@link SailCall}, or cannot be constructed with a
+	 * 								public no-argument constructor
+	 * @throws IllegalStateException	if the call throws anything but an {@link AssertionError}, or the step names a
+	 * 									variable and the call returns {@code null}
 	 */
 	@Override
 	public void executeCall(@Nonnull Call call) {
-		throw notImplementedYet("<call/>");
+		String className = call.getClassName();
+		List<CallParameter> parameters = call.getParameters();
+		Map<String, String> values = new HashMap<>(parameters.size() * 4 / 3 + 1);
+		List<String> names = new ArrayList<>(parameters.size());
+		for (CallParameter parameter : parameters) {
+			String name = parameter.getName();
+			values.put(name, substituteTokens(parameter.getValue()));
+			names.add(name);
+		}
+		selenide.trace(String.format("Call %s with the parameters %s", className, names));
+
+		Class<?> type;
+		try {
+			type = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
+		}
+		catch (ClassNotFoundException | LinkageError e) {
+			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class that cannot be loaded: %s", className, e), e);
+		}
+		if (! SailCall.class.isAssignableFrom(type)) {
+			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class that is not a %s", className, SailCall.class.getName()));
+		}
+		SailCall handler;
+		try {
+			handler = (SailCall) type.getConstructor().newInstance();
+		}
+		catch (ReflectiveOperationException e) {
+			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class that cannot be constructed with a public no-argument constructor: %s",
+														className, e),
+										e);
+		}
+
+		String result;
+		try {
+			result = handler.call(values, this);
+		}
+		catch (AssertionError e) {
+			check(false, () -> String.format("<call className=\"%s\" /> failed: %s", className, e.getMessage()));
+			return;
+		}
+		catch (Exception e) {
+			throw new IllegalStateException(String.format("<call className=\"%s\" /> threw %s", className, reason(e)), e);
+		}
+		String variable = call.getVariable();
+		if (variable != null) {
+			if (result == null) {
+				throw new IllegalStateException(String.format("<call className=\"%s\" variable=\"%s\" /> gave no value to keep in {var:%s}",
+																className, variable, variable));
+			}
+			putVariable(variable, result);
+			selenide.trace(String.format("Keep '%s' in {var:%s}", result, variable));
+		}
+	}
+
+	/**
+	 * Returns the browser this executor drives, for a {@link SailCall} that needs it, such as for DevTools or another
+	 * window. A call that changes what the page shows must be followed by a navigation or context step, as the
+	 * contexts do not follow it.
+	 *
+	 * @return the driver of the browser running the automation
+	 */
+	public final @Nonnull WebDriver getDriver() {
+		return selenide.driver;
+	}
+
+	/**
+	 * Runs a script step's body in the page, with one argument, {@code sail}: {@code {run: "<run token>", vars: {...}}},
+	 * a copy of the run token and the variables. The body is run as
+	 * {@code return (function (sail) { BODY }).apply(this, arguments);}, or with {@code async function}, so
+	 * {@code arguments[0]} is {@code sail} too, {@code return} gives the result, and WebDriver waits for a returned
+	 * promise. The body is not token-substituted. With {@code truthy}, the result is JavaScript's {@code !!} of the
+	 * async function's resolved value.
+	 *
+	 * <p>Side effects: sets the browser's script timeout to {@code limit} for the run, then restores the one before.
+	 *
+	 * @param body	the step's JavaScript
+	 * @param async	true to run the body as an {@code async} function
+	 * @param truthy	true to give whether the resolved value is truthy, as a {@link Boolean}; only with {@code async}
+	 * @param limit	the script timeout: how long the browser waits for the script, or its promise, to settle
+	 * @return the result as WebDriver gives it ({@code null} for {@code null} or {@code undefined})
+	 * @throws org.openqa.selenium.JavascriptException	if the script throws, or its promise rejects
+	 * @throws ScriptTimeoutException	if the script does not settle within the limit
+	 */
+	private @Nullable Object runScript(@Nonnull String body, boolean async, boolean truthy, @Nonnull Duration limit) {
+		Map<String, Object> sail = Map.of("run", getRunToken(), "vars", new HashMap<>(getRun().variables()));
+		String script = "return (" + (async ? "async function" : "function") + " (sail) { " + body + "\n}).apply(this, arguments)" +
+							(truthy ? ".then(function (result) { return !! result; });" : ";");
+		WebDriver driver = selenide.driver;
+		Timeouts timeouts = driver.manage().timeouts();
+		Duration before = timeouts.getScriptTimeout();
+		timeouts.scriptTimeout(limit);
+		try {
+			return ((JavascriptExecutor) driver).executeScript(script, sail);
+		}
+		finally {
+			timeouts.scriptTimeout(before);
+		}
 	}
 
 	/**

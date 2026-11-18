@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -29,8 +30,11 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -38,7 +42,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InOrder;
+import org.openqa.selenium.JavascriptException;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.ScriptTimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -53,10 +61,16 @@ import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.impl.sail.execution.RunState;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.CallParameter;
 import org.skyve.metadata.sail.language.step.CaptureCell;
 import org.skyve.metadata.sail.language.step.CaptureTitle;
 import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
+import org.skyve.metadata.sail.language.step.TestScript;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
@@ -917,5 +931,286 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertEquals(null, InterpretedWebDriverExecutor.focusNote(null, new Selenide.FocusProbe("p1", 9, false, true), "hint")),
 					() -> assertEquals("the browser window did not have the OS focus when this step failed; hint",
 										InterpretedWebDriverExecutor.focusNote(before, new Selenide.FocusProbe("p2", 0, true, false), "hint")));
+	}
+
+	/** The scripts the mocked browser was asked to run, with their {@code sail} argument, in order. */
+	private final List<String> scripts = new ArrayList<>();
+	private final List<Map<String, Object>> sailArguments = new ArrayList<>();
+	/** The mocked browser's script timeouts. */
+	private Timeouts timeouts;
+
+	/**
+	 * Gives the executor a mocked browser whose scripts answer, in turn, with the results given (a {@link RuntimeException}
+	 * result is thrown); the last answers every later script. The script timeout starts at 30 seconds, and the settings'
+	 * timeout is 5 seconds. The executor's waits are real, polling the mocked browser.
+	 */
+	@SuppressWarnings("unchecked")
+	private JavascriptExecutor browser(Object... results) {
+		WebDriver driver = mock(WebDriver.class, withSettings().extraInterfaces(JavascriptExecutor.class));
+		WebDriver.Options options = mock(WebDriver.Options.class);
+		timeouts = mock(Timeouts.class);
+		when(driver.manage()).thenReturn(options);
+		when(options.timeouts()).thenReturn(timeouts);
+		when(timeouts.getScriptTimeout()).thenReturn(Duration.ofSeconds(30));
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		int[] next = {0};
+		when(js.executeScript(anyString(), any())).thenAnswer(i -> {
+			scripts.add(i.getArgument(0));
+			sailArguments.add((Map<String, Object>) i.getArgument(1));
+			Object result = results[Math.min(next[0]++, results.length - 1)];
+			if (result instanceof RuntimeException e) {
+				throw e;
+			}
+			return result;
+		});
+		executor.selenide.driver = driver;
+		when(executor.selenide.timeout()).thenReturn(Duration.ofSeconds(5));
+		doCallRealMethod().when(executor.selenide).waitFor(any(Duration.class), any(Duration.class), any());
+		return js;
+	}
+
+	private static Execute execute(String script, String variable) {
+		Execute result = new Execute();
+		result.setScript(script);
+		result.setVariable(variable);
+		return result;
+	}
+
+	private static Call call(String className, String variable, String... namesAndValues) {
+		Call result = new Call();
+		result.setClassName(className);
+		result.setVariable(variable);
+		for (int i = 0; i < namesAndValues.length; i += 2) {
+			CallParameter parameter = new CallParameter();
+			parameter.setName(namesAndValues[i]);
+			parameter.setValue(namesAndValues[i + 1]);
+			result.getParameters().add(parameter);
+		}
+		return result;
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	void eachScriptStepRunsItsBodyAsAFunctionOfACopyOfTheRunTokenAndVariables() {
+		browser(Boolean.TRUE);
+		executor.putVariable("who", "Jane");
+		String token = executor.getRunToken();
+
+		execute("return sail.run;", null).execute(executor);
+		ExecuteAsync async = new ExecuteAsync();
+		async.setScript("await null; // ends with a line comment");
+		async.execute(executor);
+		WaitFor wait = new WaitFor();
+		wait.setScript("return sail.vars.who;");
+		wait.execute(executor);
+		TestScript test = new TestScript();
+		test.setScript("return {run} = 1;");
+		test.execute(executor);
+		Map<String, String> vars = (Map<String, String>) sailArguments.get(0).get("vars");
+		vars.put("who", "changed by the page");
+
+		assertAll(() -> assertEquals("return (function (sail) { return sail.run;\n}).apply(this, arguments);", scripts.get(0), "execute"),
+					() -> assertEquals("return (async function (sail) { await null; // ends with a line comment\n}).apply(this, arguments);", scripts.get(1), "executeAsync"),
+					() -> assertEquals("return (async function (sail) { return sail.vars.who;\n}).apply(this, arguments).then(function (result) { return !! result; });",
+										scripts.get(2), "waitFor"),
+					() -> assertEquals("return (async function (sail) { return {run} = 1;\n}).apply(this, arguments).then(function (result) { return !! result; });",
+										scripts.get(3), "testScript: the body is not substituted"),
+					() -> assertEquals(Map.of("run", token, "vars", Map.of("who", "Jane")), sailArguments.get(1), "the sail argument"),
+					() -> assertEquals("Jane", executor.getVariable("who"), "the page's change to its copy"),
+					() -> verify(executor.selenide).trace("Execute return sail.run;"),
+					() -> verify(executor.selenide).trace("Execute async await null; // ends with a line comment"),
+					() -> verify(executor.selenide).trace("Wait for return sail.vars.who;"),
+					() -> verify(executor.selenide).trace("Test script return {run} = 1;"));
+	}
+
+	@Test
+	void eachScriptRunSetsTheScriptTimeoutToTheStepsAndRestoresItEvenWhenItTimesOut() {
+		browser(null, new ScriptTimeoutException("script timeout"));
+		execute("window.x = 1;", null).execute(executor);
+		ExecuteAsync async = new ExecuteAsync();
+		async.setScript("await new Promise(() => {});");
+		async.setTimeoutMillis(Integer.valueOf(300));
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> async.execute(executor));
+
+		InOrder order = inOrder(timeouts);
+		assertAll(() -> assertEquals("<executeAsync /> did not settle within 300 ms", e.getMessage(), "message"),
+					() -> assertTrue(e.getCause() instanceof ScriptTimeoutException, "cause"),
+					() -> order.verify(timeouts).scriptTimeout(Duration.ofSeconds(5)),
+					() -> order.verify(timeouts).scriptTimeout(Duration.ofSeconds(30)),
+					() -> order.verify(timeouts).scriptTimeout(Duration.ofMillis(300)),
+					() -> order.verify(timeouts).scriptTimeout(Duration.ofSeconds(30)));
+	}
+
+	@Test
+	void executeExecuteAsyncAndCallKeepTheirResultAsTextAndFailWithoutOne() {
+		browser(Long.valueOf(42), Boolean.TRUE, null);
+		execute("return 42;", "answer").execute(executor);
+		ExecuteAsync async = new ExecuteAsync();
+		async.setScript("return true;");
+		async.setVariable("ok");
+		async.execute(executor);
+		call("sail.kitchenSink.EchoCall", "echo", "text", "made {run} for {var:answer}").execute(executor);
+		String token = executor.getRunToken();
+
+		Execute none = execute("return undefined;", "missing");
+		IllegalStateException noScriptValue = assertThrows(IllegalStateException.class, () -> none.execute(executor));
+		ExecuteAsync noneAsync = new ExecuteAsync();
+		noneAsync.setScript("return null;");
+		noneAsync.setVariable("missing");
+		IllegalStateException noAsyncValue = assertThrows(IllegalStateException.class, () -> noneAsync.execute(executor));
+		Call noText = call("sail.kitchenSink.EchoCall", "missing");
+		IllegalStateException noCallValue = assertThrows(IllegalStateException.class, () -> noText.execute(executor));
+
+		assertAll(() -> assertEquals("42", executor.getVariable("answer"), "execute"),
+					() -> assertEquals("true", executor.getVariable("ok"), "executeAsync"),
+					() -> assertEquals("made " + token + " for 42", executor.getVariable("echo"), "call, with its parameter substituted"),
+					() -> assertEquals("<execute variable=\"missing\" /> gave no value to keep in {var:missing}", noScriptValue.getMessage(), "execute without a value"),
+					() -> assertEquals("<executeAsync variable=\"missing\" /> gave no value to keep in {var:missing}", noAsyncValue.getMessage(), "executeAsync without a value"),
+					() -> assertEquals("<call className=\"sail.kitchenSink.EchoCall\" variable=\"missing\" /> gave no value to keep in {var:missing}",
+										noCallValue.getMessage(), "call without a value"),
+					() -> assertNull(executor.getVariable("missing"), "nothing kept"),
+					() -> verify(executor.selenide).trace("Keep '42' in {var:answer}"),
+					() -> verify(executor.selenide).trace("Call sail.kitchenSink.EchoCall with the parameters [text]"));
+	}
+
+	@Test
+	void waitForPollsUntilTheScriptHoldsAndCountsAThrowingPollAsFalse() {
+		browser(Boolean.FALSE, new JavascriptException("javascript error: not yet"), Boolean.TRUE);
+		WaitFor wait = new WaitFor();
+		wait.setScript("return window._sailReady;");
+		wait.setTimeoutMillis(Integer.valueOf(5000));
+		wait.execute(executor);
+		assertEquals(3, scripts.size());
+	}
+
+	@Test
+	void waitForFailsAtItsTimeoutWithTheFirstLineAndTheLastErrorAndRunsUnderEveryStrategy() {
+		browser(new JavascriptException("javascript error: not yet\n  (Session info: chrome=158)"));
+		String timesOut = "<waitFor timeoutMillis=\"300\"><![CDATA[return window._sailReady;\nreturn false;]]></waitFor>";
+		List<AssertionError> errors = new ArrayList<>();
+		for (String strategy : new String[] {"Assert", "Verify", "None"}) {
+			errors.add(assertThrows(AssertionError.class,
+									() -> executor.executeAutomation(automation(strategy, "<interaction name=\"wait\"><method>" + timesOut + "</method></interaction>")),
+									strategy));
+		}
+		String reason = "IllegalStateException: <waitFor /> did not hold within 300 ms: return window._sailReady;" +
+							"; the last poll threw: JavascriptException: javascript error: not yet";
+		assertAll(errors.stream().map(e -> () -> assertTrue(e.getMessage().contains(reason), e.getMessage())));
+	}
+
+	@Test
+	void testScriptFollowsTheStrategyWithItsMessageOrFirstLine() {
+		browser(Boolean.FALSE);
+		// each automation is a run of its own: the variable is supplied to every one
+		executor.useSettings(SailSettings.resolve(SailSettings.Environment.none(), List.of(SailSettings.code().variable("echo", "made").layer())));
+		String fails = "<interaction name=\"test\"><method>" +
+							"<testScript message=\"echo {var:echo} {run}\">return false;</testScript>" +
+							"<testScript>return 0;\nreturn 1;</testScript>" +
+							"<comment>after the tests</comment>" +
+						"</method></interaction>";
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", fails)));
+		String token = executor.getRunToken();
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", fails)));
+		int runs = scripts.size();
+		executor.executeAutomation(automation("None", fails));
+
+		assertAll(() -> assertTrue(asserted.getMessage().contains(": echo made " + token), asserted.getMessage()),
+					() -> assertTrue(verified.getMessage().contains("with 2 failure(s)"), verified.getMessage()),
+					() -> assertTrue(verified.getMessage().contains(": <testScript /> did not hold: return 0;"), verified.getMessage()),
+					() -> verify(executor.selenide, times(2)).trace("after the tests"),
+					() -> assertEquals(runs, scripts.size(), "None runs no test script"));
+	}
+
+	@Test
+	void testScriptRunsOnceWithoutATimeoutAndPollsWithOneAndCountsAThrowAsFalse() {
+		browser(Boolean.FALSE, Boolean.TRUE);
+		TestScript once = new TestScript();
+		once.setScript("return window._sailReady;");
+		assertThrows(AssertionError.class, () -> once.execute(executor));
+		int afterOnce = scripts.size();
+		scripts.clear();
+		browser(Boolean.FALSE, Boolean.TRUE);
+		TestScript polled = new TestScript();
+		polled.setScript("return window._sailReady;");
+		polled.setTimeoutMillis(Integer.valueOf(5000));
+		polled.execute(executor);
+		int afterPolling = scripts.size();
+		browser(new JavascriptException("javascript error: boom"));
+		TestScript throwing = new TestScript();
+		throwing.setScript("throw new Error('boom');");
+		throwing.setTimeoutMillis(Integer.valueOf(300));
+		AssertionError threw = assertThrows(AssertionError.class, () -> throwing.execute(executor));
+
+		assertAll(() -> assertEquals(1, afterOnce, "without a timeout"),
+					() -> assertEquals(2, afterPolling, "with a timeout"),
+					() -> assertTrue(threw.getMessage().contains(": <testScript /> did not hold: throw new Error('boom');; it threw: JavascriptException: javascript error: boom"),
+										threw.getMessage()));
+	}
+
+	@Test
+	void aScriptThatThrowsOrRejectsIsAStepThatThrowsUnderEveryStrategy() {
+		browser(new JavascriptException("javascript error: boom"));
+		String throwing = "<interaction name=\"scripts\"><method><execute>throw new Error('boom');</execute><comment>after execute</comment></method></interaction>" +
+							"<interaction name=\"async\"><method><executeAsync>throw new Error('boom');</executeAsync><comment>after executeAsync</comment></method></interaction>" +
+							"<interaction name=\"next\"><method><comment>next interaction</comment></method></interaction>";
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", throwing)));
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", throwing)));
+		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("None", throwing)));
+
+		assertAll(() -> assertTrue(asserted.getMessage().contains("JavascriptException: javascript error: boom"), asserted.getMessage()),
+					() -> assertTrue(verified.getMessage().contains("with 2 failure(s)"), verified.getMessage()),
+					() -> assertTrue(none.getMessage().contains("JavascriptException: javascript error: boom"), none.getMessage()),
+					() -> verify(executor.selenide, never()).trace("after execute"),
+					() -> verify(executor.selenide, never()).trace("after executeAsync"),
+					() -> verify(executor.selenide, times(1)).trace("next interaction"));
+	}
+
+	@Test
+	void underVerifyACallsAssertionErrorIsRecordedAndTheInteractionGoesOnButAnyOtherExceptionEndsIt() {
+		browser(Boolean.TRUE);
+		String calls = "<interaction name=\"assert\"><method>" +
+							"<call className=\"sail.kitchenSink.EchoCall\"><parameter name=\"text\" value=\"a\"/><parameter name=\"fail\" value=\"assert\"/></call>" +
+							"<comment>after the assertion</comment></method></interaction>" +
+						"<interaction name=\"error\"><method>" +
+							"<call className=\"sail.kitchenSink.EchoCall\"><parameter name=\"text\" value=\"e\"/><parameter name=\"fail\" value=\"error\"/></call>" +
+							"<comment>after the error</comment></method></interaction>";
+		AssertionError verified = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Verify", calls)));
+		AssertionError asserted = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("Assert", calls)));
+		AssertionError none = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation("None", calls)));
+
+		assertAll(() -> assertTrue(verified.getMessage().contains("with 2 failure(s)"), verified.getMessage()),
+					() -> assertTrue(verified.getMessage().contains(": <call className=\"sail.kitchenSink.EchoCall\" /> failed: EchoCall was asked to fail an assertion on a"),
+										verified.getMessage()),
+					() -> assertTrue(verified.getMessage().contains(": IllegalStateException: <call className=\"sail.kitchenSink.EchoCall\" /> threw IllegalStateException: EchoCall was asked to throw on e"),
+										verified.getMessage()),
+					() -> assertTrue(asserted.getMessage().contains("failed: EchoCall was asked to fail an assertion on a"), asserted.getMessage()),
+					() -> assertTrue(none.getMessage().contains("threw IllegalStateException: EchoCall was asked to throw on e"), none.getMessage()),
+					() -> verify(executor.selenide, times(2)).trace("after the assertion"),
+					() -> verify(executor.selenide, never()).trace("after the error"));
+	}
+
+	@Test
+	void aCallFailsForAClassThatCannotBeLoadedIsNotASailCallOrCannotBeConstructedOrADuplicateParameter() {
+		browser(Boolean.TRUE);
+		Call missing = call("sail.kitchenSink.NoSuchCall", null);
+		Call notACall = call("java.lang.String", null);
+		Call notConstructible = call("org.skyve.metadata.sail.execution.SailCall", null);
+		Call duplicate = call("sail.kitchenSink.EchoCall", null, "text", "a", "text", "b");
+		assertAll(() -> assertTrue(assertThrows(MetaDataException.class, () -> missing.execute(executor)).getMessage()
+										.startsWith("<call className=\"sail.kitchenSink.NoSuchCall\" /> names a class that cannot be loaded: java.lang.ClassNotFoundException"),
+									"missing"),
+					() -> assertEquals("<call className=\"java.lang.String\" /> names a class that is not a org.skyve.metadata.sail.execution.SailCall",
+										assertThrows(MetaDataException.class, () -> notACall.execute(executor)).getMessage(), "not a SailCall"),
+					() -> assertTrue(assertThrows(MetaDataException.class, () -> notConstructible.execute(executor)).getMessage()
+										.startsWith("<call className=\"org.skyve.metadata.sail.execution.SailCall\" /> names a class that cannot be constructed with a public no-argument constructor: java.lang.NoSuchMethodException"),
+									"not constructible"),
+					() -> assertEquals("<call className=\"sail.kitchenSink.EchoCall\" /> has more than one <parameter name=\"text\" />",
+										assertThrows(MetaDataException.class, () -> duplicate.execute(executor)).getMessage(), "duplicate parameter"));
+	}
+
+	@Test
+	void getDriverGivesTheBrowser() {
+		browser(Boolean.TRUE);
+		assertSame(executor.selenide.driver, executor.getDriver());
 	}
 }

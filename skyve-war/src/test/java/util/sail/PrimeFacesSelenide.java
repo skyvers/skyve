@@ -2168,13 +2168,14 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Runs a script (the SAIL {@code <execute>} step), then waits for any request or new page it started.
+	 * Runs a step that can change the page outside the gestures (the SAIL {@code <execute>}, {@code <executeAsync>} and
+	 * {@code <call>} steps), then waits for any request or new page it started.
 	 *
-	 * @param script	the JavaScript
+	 * @param step	runs the step: its script, or its call
 	 */
-	public void runScript(@Nonnull String script) {
+	public void runScript(@Nonnull Runnable step) {
 		markPage();
-		js(script);
+		step.run();
 		waitForAjaxResponse();
 		if (Boolean.TRUE.equals(js("return !! window.sailUnloading;"))) {
 			// Wait for the page the script navigated to (its window has no marker)

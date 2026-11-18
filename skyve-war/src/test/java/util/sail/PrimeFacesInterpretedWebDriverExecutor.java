@@ -39,6 +39,8 @@ import org.skyve.impl.metadata.module.menu.ListItem;
 import org.skyve.impl.metadata.module.menu.MapItem;
 import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.metadata.module.menu.MenuItem;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.TestGridRows;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Pause;
@@ -2604,7 +2606,27 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 	 */
 	@Override
 	public void executeExecute(org.skyve.metadata.sail.language.step.Execute execute) {
-		selenide.runScript(Objects.requireNonNull(execute.getScript(), "<execute /> has no script"));
+		selenide.runScript(() -> super.executeExecute(execute));
+	}
+
+	/**
+	 * Runs the script and waits for its promise, then waits for any request or page load it started.
+	 *
+	 * @param execute	the step
+	 */
+	@Override
+	public void executeExecuteAsync(ExecuteAsync execute) {
+		selenide.runScript(() -> super.executeExecuteAsync(execute));
+	}
+
+	/**
+	 * Runs the call, then waits for any request or page load it started.
+	 *
+	 * @param call	the step
+	 */
+	@Override
+	public void executeCall(Call call) {
+		selenide.runScript(() -> super.executeCall(call));
 	}
 
 	/**
