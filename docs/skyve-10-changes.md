@@ -32,6 +32,8 @@ These notes collect release-ready framework changes introduced for Skyve 10.
   - Behaviour change: SmartClient data grid columns no longer send their default value to the browser. The protected field `SmartClientDataGridFieldDefinition.defaultValueJavascriptExpression` has been removed, so a subclass that used it no longer compiles.
 - Thumbnail and dynamic image requests are capped by the new optional `thumbnail.maximumDimension` setting in the JSON configuration, which defaults to `2048`. A bigger thumbnail or dynamic image is shrunk to fit, keeping its shape.
 - The thin environment banners, shown when `environment.identifier` is set, now also appear on the sign-in, error and other JSP pages, as well as on PrimeFaces and SmartClient views. The identifier is HTML-escaped. A blank identifier shows no banner.
+- `SingleCustomerBasicAuthenticationFilter` now decodes the `Authorization` header with the MIME Base64 decoder, as `BasicAuthFilter` already does. The MIME decoder doesn't use the HotSpot AVX-512 Base64 routine affected by CVE-2026-114938 (Java4Shell), and this header is decoded before login. This doesn't protect the remember-me cookie, which Spring Security decodes with the affected decoder, so still run the JVM with `-XX:-UseBASE64Intrinsics` until it is on a fixed JDK.
+  - Behaviour change: characters outside the Base64 alphabet in the header, such as line breaks, are now skipped rather than rejected. The credentials are still checked as before.
 
 ## Model-backed Lookup Descriptions
 
