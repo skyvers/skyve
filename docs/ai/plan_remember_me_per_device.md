@@ -74,6 +74,7 @@ Signing out ends Remember me in the browser that signed out, and in no other bro
 - **Local Sonar** (`skyve-sonar`, project `skyve-local-remember-per-device`, started and stopped again): no issues on any changed file.
 - **JaCoCo** (`-Pcoverage`, focused tests): `SkyveRememberMeServices` fully covered (lines and branches); the new lines of `SkyveRememberMeTokenRepository` fully covered; `SpringSecurityConfig.rememberMeServices()` is exercised by `SpringSecurityConfigTest`.
 - **Not run:** the full SAIL IT suites, and a test on a database other than H2 (the SQL is standard `delete ... where userName = ? and series = ?`).
+- **Integration gate (2026-11-19, branch `integrate-2026-11-19`)**: full `mvn -o -B package` on JDK 21 green; local Sonar (`skyve-local-integrate`) found two issues on this branch's changed lines, both fixed: `java:S8924` in `UserBizletH2Test` (static import of `mock`) and `java:S5778` in `RememberMePerDeviceSailIT` (lambda with one throwing call).
 
 ## Acceptance
 

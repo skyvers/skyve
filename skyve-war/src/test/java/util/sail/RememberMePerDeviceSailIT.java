@@ -94,7 +94,8 @@ class RememberMePerDeviceSailIT extends AbstractPrimeFacesInterpretedSail {
 
 		// The PC restarts: it signed out, so it is signed out
 		useDevice(pc);
-		AssertionError pcNavigate = assertThrows(AssertionError.class, () -> sailString(automation(NAVIGATE)));
+		String pcNavigateSteps = automation(NAVIGATE);
+		AssertionError pcNavigate = assertThrows(AssertionError.class, () -> sailString(pcNavigateSteps));
 
 		assertAll(() -> assertFalse(phoneOnLoginPage, "the phone, which did not sign out, is still signed in"),
 					() -> assertTrue(pcNavigate.getMessage().contains(SIGNED_OUT), pcNavigate.getMessage()));

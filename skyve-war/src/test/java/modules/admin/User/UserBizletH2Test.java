@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import java.util.List;
 import java.util.Objects;
@@ -180,7 +181,7 @@ class UserBizletH2Test extends AbstractH2Test {
 		UserBizlet injected = new UserBizlet();
 		java.lang.reflect.Field userService = UserBizlet.class.getDeclaredField("userService");
 		userService.setAccessible(true);
-		userService.set(injected, org.mockito.Mockito.mock(UserService.class));
+		userService.set(injected, mock(UserService.class));
 
 		injected.postSave(bean);
 
