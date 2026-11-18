@@ -60,6 +60,8 @@ These notes collect release-ready framework changes introduced for Skyve 10.
   - Making thumbnails still takes CPU. Rate limit the `content` and `resources` URLs, and any app servlet that makes thumbnails, at your reverse proxy.
 - Image shape fixes: SmartClient list grid thumbnail columns keep tall images inside the column's size; a CSS typo let them overflow. SmartClient data grid dynamic images take their width from their pixel width, not their pixel height. Contact images in the PrimeFaces templates and the SmartClient header now fill the round avatar, cropped, instead of being stretched.
 - The thin environment banners, shown when `environment.identifier` is set, now also appear on the sign-in, error and other JSP pages, as well as on PrimeFaces and SmartClient views. The identifier is HTML-escaped. A blank identifier shows no banner.
+- `SingleCustomerBasicAuthenticationFilter` now decodes the `Authorization` header with the MIME Base64 decoder, as `BasicAuthFilter` already does. The MIME decoder doesn't use the HotSpot AVX-512 Base64 routine affected by CVE-2026-114938 (Java4Shell), and this header is decoded before login. This doesn't protect the remember-me cookie, which Spring Security decodes with the affected decoder, so still run the JVM with `-XX:-UseBASE64Intrinsics` until it is on a fixed JDK.
+  - Behaviour change: characters outside the Base64 alphabet in the header, such as line breaks, are now skipped rather than rejected. The credentials are still checked as before.
 
 ## Model-backed Lookup Descriptions
 
