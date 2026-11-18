@@ -9,13 +9,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.skyve.CORE;
+import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
+import org.skyve.persistence.Persistence;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -148,6 +153,46 @@ class UserBizletH2Test extends AbstractH2Test {
 
 		assertEquals("user-owned-id", bean.getBizUserId());
 		assertEquals("user-owned-id", contact.getBizUserId());
+	}
+
+	/**
+	 * A password change keeps removing every remember-me series of the user, on all devices, and no other user's.
+	 * (Signing out removes only one series: see {@code SkyveRememberMeServicesTest}.)
+	 */
+	@Test
+	void postSaveAfterAPasswordChangeRemovesAllTheUsersRememberMeTokens() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String userName = bean.getBizCustomer() + '/' + bean.getUserName();
+		String otherUserName = bean.getBizCustomer() + "/someoneElse";
+		for (String[] row : new String[][] { { userName, "phone" }, { userName, "tablet" }, { userName, "pc" },
+				{ otherUserName, "pc2" } }) {
+			p.newSQL(
+					"insert into ADM_UserToken (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, series, token, lastUsed) "
+							+ "values (:bizId, 0, '20260101000000000admin', :userName, :customer, 'SYSTEM', :userName, :series, 'token', :lastUsed)")
+					.putParameter("bizId", UUID.randomUUID().toString(), false)
+					.putParameter("userName", row[0], false)
+					.putParameter("customer", bean.getBizCustomer(), false)
+					.putParameter("series", row[1], false)
+					.putParameter("lastUsed", new Timestamp())
+					.execute();
+		}
+		CORE.getStash().put("passwordChanged", Boolean.TRUE);
+		UserBizlet injected = new UserBizlet();
+		java.lang.reflect.Field userService = UserBizlet.class.getDeclaredField("userService");
+		userService.setAccessible(true);
+		userService.set(injected, org.mockito.Mockito.mock(UserService.class));
+
+		injected.postSave(bean);
+
+		assertEquals(0, tokenCount(p, userName));
+		assertEquals(1, tokenCount(p, otherUserName));
+	}
+
+	private static int tokenCount(Persistence p, String userName) {
+		Number count = p.newSQL("select count(*) from ADM_UserToken where userName = :userName")
+				.putParameter("userName", userName, false)
+				.scalarResult(Number.class);
+		return Objects.requireNonNull(count).intValue();
 	}
 
 	@Test
