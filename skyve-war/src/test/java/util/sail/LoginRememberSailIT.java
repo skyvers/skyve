@@ -1,6 +1,7 @@
 package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -72,7 +73,7 @@ class LoginRememberSailIT extends AbstractPrimeFacesInterpretedSail {
 		sailString(automation("<login user=\"admin\" password=\"admin\" remember=\"true\" /><testSuccess />"));
 		restartBrowser();
 		sailString(automation("<navigateList module=\"admin\" document=\"User\" /><testSuccess />"));
-		assertTrue(! selenium.isLoginPage(), "the restarted browser is signed in");
+		assertFalse(selenium.isLoginPage(), "the restarted browser is signed in");
 	}
 
 	/** With {@code remember="false"} a restarted browser is signed out, and the next navigate says so. */
@@ -80,10 +81,10 @@ class LoginRememberSailIT extends AbstractPrimeFacesInterpretedSail {
 	void aBrowserThatIsNotRememberedIsSignedOutAfterARestart() {
 		sailString(automation("<login user=\"admin\" password=\"admin\" remember=\"false\" /><testSuccess />"));
 		restartBrowser();
-		AssertionError navigate = assertThrows(AssertionError.class,
-				() -> sailString(automation("<navigateList module=\"admin\" document=\"User\" />")));
-		AssertionError success = assertThrows(AssertionError.class,
-				() -> sailString(automation("<navigateLink href=\"login\" /><testSuccess />")));
+		String navigateList = automation("<navigateList module=\"admin\" document=\"User\" />");
+		String testSuccess = automation("<navigateLink href=\"login\" /><testSuccess />");
+		AssertionError navigate = assertThrows(AssertionError.class, () -> sailString(navigateList));
+		AssertionError success = assertThrows(AssertionError.class, () -> sailString(testSuccess));
 		assertAll(() -> assertTrue(navigate.getMessage().contains(SIGNED_OUT), navigate.getMessage()),
 					() -> assertTrue(success.getMessage().contains("expected success, but the browser is on the login page (signed out)"),
 										success.getMessage()));

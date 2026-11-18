@@ -67,11 +67,17 @@ Anything else needs Mike's approval: ask, with the reason and the smallest alter
 
 ## AI validation results
 
-(to be filled in by the implementing agent)
+- Build and tests: `mvn -o -B package` passed in all modules; after the review fixes the affected unit tests (util.sail, HarnessSelfContainedTest, language, generator) passed again.
+- Browser: `LoginRememberSailIT` passed against a disposable server (private WildFly 35 base, exploded war, H2): remember across a restart, and the signed-out failure and `testSuccess` failure without it. `PrimeFacesConvertersSailIT` and `SmartClientConvertersSailIT` passed with `remember="true"` in their dates scripts. Not run in a browser: SmartClient navigate steps on the login page, and `navigateMenu`'s signed-out check in either renderer.
+- Red/green: each new behaviour was broken in turn and a test failed (executor drops remember, navigateList, navigateEdit, navigateLink login exemption, testSuccess check, testSuccess logout exemption, setRememberMe, generator, `Login.remember`).
+- Coverage: JaCoCo agent over the util.sail tests. Uncovered changed lines are the browser-only ones: `Selenide.login`/`isLoginPage`, `SmartClientSelenide.login`, `PrimeFacesSelenium.login`, both `navigateMenu` checks (covered by the ITs, not measured). `Login.java` fully covered.
+- Eclipse (JDT 3.48): two warnings on changed lines, fixed. Sonar (`skyve-local-remember`): two issues on changed lines, fixed.
+- Spotless check on the changed skyve-war files: clean.
+- Assembly safety: `util.sail` tests pass with `src/test/java/{modules,org,resources,router,sail}` and `src/test/resources/sail` removed; `HarnessSelfContainedTest` guards it.
 
 ## Acceptance
 
-- [ ] Decisions 1–6 built and tested.
-- [ ] The browser test proves remember-me across a restart, and the signed-out failure.
-- [ ] No repo script relies on passing while signed out (or each exception is recorded).
-- [ ] Gates pass.
+- [x] Decisions 1–6 built and tested.
+- [x] The browser test proves remember-me across a restart, and the signed-out failure.
+- [x] No repo script relies on passing while signed out (or each exception is recorded).
+- [x] Gates pass.

@@ -320,6 +320,7 @@ public abstract class Selenide<
 	 * 
 	 * @return true if the page shows the sign in form
 	 */
+	@SuppressWarnings("static-method")
 	public boolean isLoginPage() {
 		return $("form[name=\"loginForm\"]").exists();
 	}

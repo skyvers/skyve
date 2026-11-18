@@ -720,7 +720,7 @@ class InterpretedWebDriverExecutorTest {
 					failsSignedOut("navigateLink by text", () -> executor.executeNavigateLink(byText)));
 	}
 
-	private Executable failsSignedOut(String name, Executable step) {
+	private static Executable failsSignedOut(String name, Executable step) {
 		return () -> {
 			IllegalStateException e = assertThrows(IllegalStateException.class, step, name);
 			String named = name.startsWith("navigateLink") ? "<navigateLink />" : "<" + name + " />";
