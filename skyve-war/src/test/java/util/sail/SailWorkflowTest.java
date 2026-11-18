@@ -168,7 +168,8 @@ class SailWorkflowTest {
 			when(browser.browserChange(any(), any())).thenReturn("headless true -> false");
 			startFails = true;
 		};
-		assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", workflow(AUTOMATION, AUTOMATION)));
+		Workflow twoLegs = workflow(AUTOMATION, AUTOMATION);
+		assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", twoLegs));
 		startFails = false;
 		step = null;
 		engine.runWorkflow("w.xml", XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION));
@@ -183,7 +184,8 @@ class SailWorkflowTest {
 			doThrow(new IllegalStateException("the browser has gone")).when(browser).useSettings(any(), any());
 			step = null;
 		};
-		assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", workflow(AUTOMATION, AUTOMATION)));
+		Workflow twoLegs = workflow(AUTOMATION, AUTOMATION);
+		assertThrows(IllegalStateException.class, () -> engine.runWorkflow("w.xml", twoLegs));
 		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events);
 	}
 

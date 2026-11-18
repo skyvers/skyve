@@ -13,6 +13,7 @@ import util.AbstractInterpretedSailWorkflow;
 @Tag("sail")
 class SailSuiteLoginSailIT extends AbstractInterpretedSailWorkflow {
 	@Test
+	@SuppressWarnings("java:S2699") // a failed step or member throws an AssertionError, so the suite run is the assertion
 	void theSecondMemberStartsInABrowserOfItsOwn() {
 		sailSuite("util/sail/fixtures/login.suite.xml");
 	}
