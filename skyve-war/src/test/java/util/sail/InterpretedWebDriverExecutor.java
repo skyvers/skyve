@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -973,6 +974,7 @@ public abstract class InterpretedWebDriverExecutor<
 			url += suffix;
 		}
 		selenide.get(url);
+		failIfSignedOut("<" + Introspector.decapitalize(list.getClass().getSimpleName()) + " />");
 	}
 
 	/**
@@ -1002,6 +1004,7 @@ public abstract class InterpretedWebDriverExecutor<
 			selenide.trace(String.format("Edit document [%s.%s] instance with bizId %s", moduleName, documentName, bizId));
 			selenide.get(String.format("?a=e&m=%s&d=%s&i=%s", moduleName, documentName, bizId));
 		}
+		failIfSignedOut("<navigateEdit />");
 	}
 
 	/**
@@ -1017,6 +1020,19 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	@Override
 	public void executeNavigateLink(NavigateLink link) {
+		followLink(link);
+		String href = link.getHref();
+		if ((href == null) || (! isLoginHref(substituteTokens(href)))) {
+			failIfSignedOut("<navigateLink />");
+		}
+	}
+
+	/**
+	 * Follows the link as {@link #executeNavigateLink(NavigateLink)} describes, without checking where it landed.
+	 *
+	 * @param link	the step
+	 */
+	private void followLink(@Nonnull NavigateLink link) {
 		if (NavigateLink.Window.newWindow == link.getWindow()) {
 			followLinkIntoNewWindow(link);
 			return;
@@ -1039,6 +1055,32 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		else {
 			selenide.get(relative);
+		}
+	}
+
+	/**
+	 * Says whether an {@code href} is itself the sign in page, which a link may then land on: its last path segment,
+	 * without the query or fragment, starts with {@code login} ({@code login}, {@code pages/login.jsp}).
+	 *
+	 * @param href	the href, with its tokens substituted
+	 * @return true if the href is the sign in page
+	 */
+	private static boolean isLoginHref(@Nonnull String href) {
+		String path = href.split("[?#]", 2)[0];
+		return path.substring(path.lastIndexOf('/') + 1).toLowerCase(Locale.ROOT).startsWith("login");
+	}
+
+	/**
+	 * Fails the step if the browser shows the sign in page, which is where a signed out browser lands: the step could not
+	 * do what it says, so it stops the interaction under every test strategy, as a missing element does.
+	 *
+	 * @param step	the step, as the message names it
+	 * @throws IllegalStateException	if the browser is on the sign in page
+	 */
+	protected final void failIfSignedOut(@Nonnull String step) {
+		if (selenide.isLoginPage()) {
+			throw new IllegalStateException(step + " landed on the login page: the browser is signed out " +
+												"(session expired, or remember-me didn't sign it in)");
 		}
 	}
 
@@ -1186,6 +1228,10 @@ public abstract class InterpretedWebDriverExecutor<
 		}
 		else {
 			selenide.trace("Test success");
+			if (! (previousStep instanceof Logout)) {
+				// the sign in page has no error messages, so a signed out browser would pass the check below
+				check(! selenide.isLoginPage(), () -> "expected success, but the browser is on the login page (signed out)");
+			}
 			checkSuccess("expected no error messages");
 		}
 	}

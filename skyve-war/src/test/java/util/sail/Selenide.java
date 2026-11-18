@@ -314,6 +314,17 @@ public abstract class Selenide<
 	}
 
 	/**
+	 * Says whether the current page is Skyve's sign in page, which is what a signed out browser is sent to: it is the
+	 * only page with the {@code loginForm} form, so the URL does not matter (it is the requested page's, after a
+	 * redirect). Does not wait.
+	 * 
+	 * @return true if the page shows the sign in form
+	 */
+	public boolean isLoginPage() {
+		return $("form[name=\"loginForm\"]").exists();
+	}
+
+	/**
 	 * Returns the error that the last {@link #login(String, String, String)} showed.
 	 * 
 	 * @return the error text, or null if the last sign in succeeded

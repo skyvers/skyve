@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -91,6 +92,10 @@ import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptio
 import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
@@ -679,6 +684,114 @@ class InterpretedWebDriverExecutorTest {
 					() -> verify(executor.selenide).login(null, "c", "x", null));
 	}
 
+	private static final String SIGNED_OUT = " landed on the login page: the browser is signed out " +
+													"(session expired, or remember-me didn't sign it in)";
+
+	/** Every navigate step that opens a URL fails, with the step named, when it lands on the sign in page. */
+	@Test
+	void navigateStepsFailOnTheLoginPage() {
+		doNothing().when(executor).executePushListContext(any());
+		doNothing().when(executor).executePushEditContext(any());
+		when(Boolean.valueOf(executor.selenide.isLoginPage())).thenReturn(Boolean.TRUE);
+		NavigateList list = new NavigateList();
+		NavigateTree tree = new NavigateTree();
+		NavigateCalendar calendar = new NavigateCalendar();
+		NavigateMap map = new NavigateMap();
+		map.setGeometryBinding("location");
+		for (NavigateList l : new NavigateList[] {list, tree, calendar, map}) {
+			l.setModuleName("admin");
+			l.setDocumentName("User");
+		}
+		NavigateEdit edit = new NavigateEdit();
+		edit.setModuleName("admin");
+		edit.setDocumentName("User");
+		NavigateLink link = new NavigateLink();
+		link.setHref("?a=l&m=admin&q=User");
+		NavigateLink byText = new NavigateLink();
+		byText.setText("Users");
+		doNothing().when(executor).clickLinkContaining(any(), anyString());
+
+		assertAll(failsSignedOut("navigateList", () -> executor.executeNavigateList(list)),
+					failsSignedOut("navigateTree", () -> executor.executeNavigateTree(tree)),
+					failsSignedOut("navigateCalendar", () -> executor.executeNavigateCalendar(calendar)),
+					failsSignedOut("navigateMap", () -> executor.executeNavigateMap(map)),
+					failsSignedOut("navigateEdit", () -> executor.executeNavigateEdit(edit)),
+					failsSignedOut("navigateLink", () -> executor.executeNavigateLink(link)),
+					failsSignedOut("navigateLink by text", () -> executor.executeNavigateLink(byText)));
+	}
+
+	private Executable failsSignedOut(String name, Executable step) {
+		return () -> {
+			IllegalStateException e = assertThrows(IllegalStateException.class, step, name);
+			String named = name.startsWith("navigateLink") ? "<navigateLink />" : "<" + name + " />";
+			assertEquals(named + SIGNED_OUT, e.getMessage(), name);
+		};
+	}
+
+	/** A link whose href is itself the sign in page may land there; any other href may not. */
+	@Test
+	void navigateLinkToTheLoginPageMayLandThere() {
+		when(Boolean.valueOf(executor.selenide.isLoginPage())).thenReturn(Boolean.TRUE);
+		String[] allowed = {"login", "login?customer=demo", "/pages/login.jsp", "https://example.com/app/login.jsp#x", "{run}/login"};
+		String[] refused = {"?a=l&m=admin&q=login", "/", "pages/requestPasswordReset.jsp"};
+		assertAll(Stream.concat(Stream.of(allowed).map(href -> (Executable) () -> {
+							NavigateLink link = new NavigateLink();
+							link.setHref(href);
+							executor.executeNavigateLink(link);
+						}),
+						Stream.of(refused).map(href -> (Executable) () -> {
+							NavigateLink link = new NavigateLink();
+							link.setHref(href);
+							assertThrows(IllegalStateException.class, () -> executor.executeNavigateLink(link), "href '" + href + "'");
+						})));
+	}
+
+	/** Without the sign in page showing, the navigate steps carry on as before. */
+	@Test
+	void navigateStepsCarryOnOffTheLoginPage() {
+		doNothing().when(executor).executePushEditContext(any());
+		NavigateEdit edit = new NavigateEdit();
+		edit.setModuleName("admin");
+		edit.setDocumentName("User");
+		executor.executeNavigateEdit(edit);
+		verify(executor.selenide).get("?a=e&m=admin&d=User");
+	}
+
+	/**
+	 * {@code <testSuccess/>} on the sign in page fails as an assertion (so a Verify run records it), except straight after
+	 * a logout, or after a login, which keeps its own check.
+	 */
+	@Test
+	void testSuccessFailsOnTheLoginPageExceptAfterLogoutOrLogin() {
+		when(Boolean.valueOf(executor.selenide.verifySuccess())).thenReturn(Boolean.TRUE);
+		when(Boolean.valueOf(executor.selenide.isLoginPage())).thenReturn(Boolean.TRUE);
+		when(executor.selenide.getLoginError()).thenReturn(null);
+		String head = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+						"<interaction name=\"i\"><method>";
+		String tail = "</method></interaction></automation>";
+		Automation afterLogout = XMLMetaData.unmarshalSAILString(head + "<logout/><testSuccess/>" + tail);
+		Automation afterLogin = XMLMetaData.unmarshalSAILString(head + "<login user=\"a\" password=\"x\"/><testSuccess/>" + tail);
+		Automation afterNavigateLink = XMLMetaData.unmarshalSAILString(head + "<navigateLink href=\"login\"/><testSuccess/>" + tail);
+
+		executor.executeAutomation(afterLogout);
+		executor.executeAutomation(afterLogin);
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(afterNavigateLink));
+
+		assertTrue(e.getMessage().contains("expected success, but the browser is on the login page (signed out)"), e.getMessage());
+	}
+
+	/** A signed out step stops the interaction under Verify too, as a missing element does. */
+	@Test
+	void aSignedOutNavigateStopsTheInteractionUnderVerify() {
+		when(Boolean.valueOf(executor.selenide.isLoginPage())).thenReturn(Boolean.TRUE);
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"i\"><method><navigateLink href=\"?a=l\"/><comment>never</comment></method></interaction></automation>";
+		Automation automation = XMLMetaData.unmarshalSAILString(script);
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+		assertAll(() -> assertTrue(e.getMessage().contains("<navigateLink />" + SIGNED_OUT), e.getMessage()),
+					() -> verify(executor.selenide, never()).trace("never"));
+	}
+
 	@Test
 	void testFailureAfterARefusedUploadChecksTheRefusal() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
@@ -1245,12 +1358,12 @@ class InterpretedWebDriverExecutorTest {
 	@Test
 	void aCallFailsForAClassThatCannotBeLoadedIsNotASailCallOrCannotBeConstructedOrADuplicateParameter() {
 		browser(Boolean.TRUE);
-		Call missing = call("sail.kitchenSink.NoSuchCall", null);
+		Call missing = call("util.sail.NoSuchCall", null);
 		Call notACall = call("java.lang.String", null);
 		Call notConstructible = call("org.skyve.metadata.sail.execution.SailCall", null);
 		Call duplicate = call("util.sail.EchoCall", null, "text", "a", "text", "b");
 		assertAll(() -> assertTrue(assertThrows(MetaDataException.class, () -> missing.execute(executor)).getMessage()
-										.startsWith("<call className=\"sail.kitchenSink.NoSuchCall\" /> names a class that cannot be loaded: java.lang.ClassNotFoundException"),
+										.startsWith("<call className=\"util.sail.NoSuchCall\" /> names a class that cannot be loaded: java.lang.ClassNotFoundException"),
 									"missing"),
 					() -> assertEquals("<call className=\"java.lang.String\" /> names a class that is not a org.skyve.metadata.sail.execution.SailCall",
 										assertThrows(MetaDataException.class, () -> notACall.execute(executor)).getMessage(), "not a SailCall"),
