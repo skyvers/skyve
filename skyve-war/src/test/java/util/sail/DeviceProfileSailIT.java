@@ -67,8 +67,9 @@ class DeviceProfileSailIT {
 			byte[] body = PAGE.getBytes(StandardCharsets.UTF_8);
 			exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
 			exchange.sendResponseHeaders(200, body.length);
-			exchange.getResponseBody().write(body);
-			exchange.close();
+			try (java.io.OutputStream out = exchange.getResponseBody()) {
+				out.write(body);
+			}
 		});
 		server.start();
 		url = "http://localhost:" + server.getAddress().getPort() + '/';

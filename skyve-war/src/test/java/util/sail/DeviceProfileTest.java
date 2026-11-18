@@ -64,6 +64,8 @@ class DeviceProfileTest {
 										chromeFull, "chrome, profile and extras"),
 					() -> assertEquals(List.of(CHROME_BUILT_IN.get(0), CHROME_BUILT_IN.get(1), CHROME_BUILT_IN.get(2), FAKE),
 										CrossBrowserSelenium.chromeArguments(extrasOnly, false), "chrome, extras only"),
+					() -> assertEquals(List.of(CHROME_BUILT_IN.get(0), CHROME_BUILT_IN.get(1), CHROME_BUILT_IN.get(2), "--headless"),
+										CrossBrowserSelenium.chromeArguments(new BrowserConfiguration().resolution(10, 20), true), "chrome, headless with its own size"),
 					() -> assertEquals(List.of(), CrossBrowserSelenium.edgeArguments(plain, false), "edge, plain"),
 					() -> assertEquals(List.of("--user-agent=UA", "headless", DATA_DIR, FAKE, "--x"),
 										CrossBrowserSelenium.edgeArguments(full, true), "edge, profile and extras"),

@@ -5,7 +5,6 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import org.openqa.selenium.Dimension;
 
@@ -179,7 +178,7 @@ public class BrowserConfiguration {
 	 */
 	public @Nonnull BrowserConfiguration arguments(@Nonnull String... extra) {
 		for (String argument : extra) {
-			if (Objects.requireNonNull(argument, "browser argument").startsWith("--user-data-dir")) {
+			if (argument.startsWith("--user-data-dir")) {
 				throw new IllegalArgumentException("Set the browser's user data directory with profile(), not the argument " + argument);
 			}
 			arguments.add(argument);

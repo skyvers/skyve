@@ -94,10 +94,22 @@ losing track of it.
 
 ## AI validation results
 
-(to be filled in by the implementing agent)
+- Master has no `Browser(selenide, configuration)` record or `sameDevice`.
+  The leg's Selenide holds what its browser started with (`recordStart`) and
+  `CrossBrowserSelenium.browserChange` is the comparison, so a step that
+  restarts the browser leaves the right state without a separate record.
+  Construct 4 became: `browserChange` compares the profile and extra
+  arguments; `SailWorkflowTest` drives a restart inside a leg and checks the
+  next legs reuse or replace it.
+- Construct 5: master's `SailWorkflow.run` makes a `new RunState()` for every
+  call and suite member, and `SailSuite` does not share one. Added
+  `shareRunAcrossCalls()`.
+- Gate 1: `mvn -o -B package` passed (one unrelated flake, `UniqueConstraintMultipleNavigableTest.testSaveVarArgCyclic`, passed alone).
+- `DeviceProfileSailIT` passes in headless Chrome 158 (`-Dtest=`, surefire).
+- Spotless excludes `skyve-war/src/test/java/util/**`, so it does not apply.
 
 ## Acceptance
 
-- [ ] Constructs 1–4 (and 5 if needed) are built and tested.
-- [ ] The browser test proves profile persistence and isolation.
-- [ ] Gates pass (see the prompt).
+- [x] Constructs 1–4 (and 5 if needed) are built and tested.
+- [x] The browser test proves profile persistence and isolation.
+- [x] Gates pass (see the prompt).

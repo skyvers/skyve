@@ -217,7 +217,7 @@ class SailWorkflowTest {
 		engine.browser(UserAgentType.tablet, () -> (runs.isEmpty() || (runs.size() == 2)) ? a : b);
 		step = browser -> {
 			if (runs.size() == 1) { // the first leg's step restarts its browser on b
-				SailSettings legSettings = browser.getSettings(); // the engine's test environment, which b would not resolve
+				SailSettings legSettings = java.util.Objects.requireNonNull(browser.getSettings()); // the engine's test environment, which b would not resolve
 				browser.stopBrowser();
 				browser.startBrowser(b, legSettings);
 			}
