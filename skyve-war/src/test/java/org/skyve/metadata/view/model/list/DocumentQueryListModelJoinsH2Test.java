@@ -40,8 +40,8 @@ import util.AbstractH2Test;
 /**
  * A document's default query (whose columns join nothing) filtered through an optional association or an inverse one:
  * the path is left outer joined, rather than inner joined implicitly in HQL, so the filters that also match a row with
- * no value keep the rows with nothing on the path, and so does Match Any of another criterion they meet. A from clause
- * of several documents gets no join.
+ * no value keep the rows with nothing on the path, and so does Match Any of another criterion they meet, whether the
+ * from clause declares one document or several.
  */
 @SuppressWarnings("static-method")
 class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
@@ -124,11 +124,12 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	/**
-	 * A from clause of several documents gets no join appended, as the join would come after the last of them: such a
-	 * query keeps the implicit (inner) joins of the filter's paths, even for a filter that also matches no value.
+	 * A from clause of several documents gets the left outer join of a filter's path too, appended after the last of
+	 * them (the dialect writes their separator as a cross join, so the join's on clause sees bean): a filter that also
+	 * matches no value keeps the row with no association, in the rows and in the count.
 	 */
 	@Test
-	void aFromOfSeveralDocumentsGetsNoJoinFromTheFilter() throws Exception {
+	void aFromOfSeveralDocumentsGetsTheJoinAndKeepsTheRowWithNoAssociation() throws Exception {
 		Persistence persistence = CORE.getPersistence();
 		LookupDescription alpha = persistence.save(lookup("alpha"));
 		persistence.save(fixture("AF a", alpha));
@@ -139,16 +140,18 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 						LookupDescription.MODULE_NAME + '.' + LookupDescription.DOCUMENT_NAME + "} as other";
 		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
 		matchAny(model, f -> f.addEquals(DESCRIPTION, "alpha"), f -> f.addNull(DESCRIPTION));
-		assertEquals(Set.of("AF a"), fetch(model, ModelLookupFixture.namePropertyName));
-		assertNoJoin(model.getDetailQuery());
-		assertNoJoin(model.getSummaryQuery());
-
-		// the same filters on one document's from join the path
-		DocumentQueryListModel<Bean> single = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
-		matchAny(single, f -> f.addEquals(DESCRIPTION, "alpha"), f -> f.addNull(DESCRIPTION));
-		assertEquals(Set.of("AF a", "AF n"), fetch(single, ModelLookupFixture.namePropertyName));
-		String hql = ((AbstractDocumentQuery) Objects.requireNonNull(single.getDetailQuery())).toQueryString();
-		assertTrue(hql.contains(SELECTION_JOIN), hql);
+		Page page = model.fetch();
+		Set<String> names = new TreeSet<>();
+		for (Bean row : Objects.requireNonNull(page.getRows())) {
+			names.add((String) Binder.get(row, ModelLookupFixture.namePropertyName));
+		}
+		// one other document (alpha), so one row per fixture
+		assertEquals(Set.of("AF a", "AF n"), names);
+		assertEquals(2L, page.getTotalRows());
+		for (DocumentQuery query : List.of(Objects.requireNonNull(model.getDetailQuery()), Objects.requireNonNull(model.getSummaryQuery()))) {
+			String hql = ((AbstractDocumentQuery) query).toQueryString();
+			assertTrue(hql.contains(SELECTION_JOIN), hql);
+		}
 	}
 
 	/**

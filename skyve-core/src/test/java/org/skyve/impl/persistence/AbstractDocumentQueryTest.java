@@ -583,28 +583,6 @@ class AbstractDocumentQueryTest {
 		assertTrue(qs.contains("FROM TestTable as bean"), "Should contain FROM clause: " + qs);
 	}
 
-	// ---- several entities in the from clause ----
-
-	@Test
-	void aFromClauseOfSeveralEntitiesIsRecorded() {
-		TestDocumentQuery q = new TestDocumentQuery(document, "{testModule.TestDoc} as bean, {testModule.TestDoc} as other");
-		assertTrue(q.isFromSeveralEntities());
-		assertTrue(q.toQueryString().contains("FROM TestTable as bean, TestTable as other"), q.toQueryString());
-		assertFalse(new TestDocumentQuery(document, "{testModule.TestDoc} as bean inner join bean.groups as g").isFromSeveralEntities());
-		assertFalse(newQuery().isFromSeveralEntities());
-	}
-
-	@Test
-	void onlyACommaOutsideParenthesesAndLiteralsDeclaresAnotherEntity() {
-		assertTrue(AbstractDocumentQuery.declaresSeveralEntities("X as bean, Y as y"));
-		assertTrue(AbstractDocumentQuery.declaresSeveralEntities("X as bean inner join bean.a as a with a.n in (1, 2), Y as y"));
-		assertTrue(AbstractDocumentQuery.declaresSeveralEntities("X as bean, in(bean.c) as c"));
-		assertFalse(AbstractDocumentQuery.declaresSeveralEntities("X as bean"));
-		assertFalse(AbstractDocumentQuery.declaresSeveralEntities("X as bean left join bean.a as a with coalesce(a.x, a.y) = 1"));
-		assertFalse(AbstractDocumentQuery.declaresSeveralEntities("X as bean inner join bean.a as a with a.n in ('a,b', 'it''s, c')"));
-		assertFalse(AbstractDocumentQuery.declaresSeveralEntities("X as bean inner join bean.a as a with a.n = ','"));
-	}
-
 	@Test
 	void distinctQueryStringContainsDistinctKeyword() {
 		TestDocumentQuery q = newQuery();

@@ -150,11 +150,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	 * negation also matches them, and under Match Any so does any other criterion. The joins are to-one, so they add
 	 * no rows, and a condition through the path still excludes the rows with nothing on it unless it matches no value.
 	 * The query's own columns may have joined them already. An embedded association is on the row, so it needs none.
-	 * <p>A query whose from clause declares several entities (a metadata query's {@code <from>} of
-	 * {@code {a.X} as bean, {a.Y} as y}) gets no joins: appended after the last entity, a join's on clause sees bean only
-	 * where the dialect renders the comma as a cross join (Hibernate 5.6's H2, MySQL, PostgreSQL and SQL Server dialects
-	 * do; its DB2 and Oracle 8i and 9i dialects do not). Such a query keeps the implicit inner joins, so its filters
-	 * through an optional association leave out the rows with none, even a filter that matches no value.
+	 * <p>After a from clause of several entities ({@code {a.X} as bean, {a.Y} as y}), the join relies on the dialect
+	 * writing their separator as a cross join, so that its on clause sees bean: every Skyve dialect does.
 	 * <p>Side effects: adds the joins to the detail and the summary query.
 	 * @param binding	the binding of the condition
 	 */
@@ -181,7 +178,6 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 
 	private static void leftOuterJoin(@Nullable DocumentQuery query, @Nonnull String path) {
 		if ((query instanceof AbstractDocumentQuery documentQuery) &&
-				(! documentQuery.isFromSeveralEntities()) &&
 				(! documentQuery.isLeftOuterJoined(path))) {
 			documentQuery.addLeftOuterJoin(path);
 		}
