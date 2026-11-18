@@ -52,6 +52,7 @@ class SailLanguageCoverageTest {
 			Map.entry("abstractAction@testSuccess", "the abstract base type's attribute; used on the concrete action steps"),
 			Map.entry("procedure", "the type of <before> and <after>, not an element a script writes"),
 			// suite features that the shipped suites do not need
+			Map.entry("suite@browserPerMember", "a shipped suite keeps the default, a browser handed on, as faster; SailWorkflowTest runs a suite with the attribute"),
 			Map.entry("member@requires", "no shipped member depends on another, and a requirement must be genuine; SailSuiteTest shows it"),
 			Map.entry("setUp@requires", "each set-up requires the earlier ones without naming them; no shipped set-up needs more"),
 			// the test server's data and configuration

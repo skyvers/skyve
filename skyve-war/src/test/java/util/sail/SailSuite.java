@@ -34,7 +34,8 @@ import jakarta.annotation.Nullable;
  * 		Each member is run by the {@link SailWorkflow} engine: each automation in the renderer its {@code uxui} names and
  * 		the browser its {@code userAgentType} needs; the browser carries on from one member to the next when the
  * 		configuration matches, and each member signs in for itself. Each member is a run of its own: members share no
- * 		{@code {run}} token or variables.</li>
+ * 		{@code {run}} token or variables. A suite can opt in to a browser of its own for each member with
+ * 		{@link #browserPerMember()}, so that no cookies, storage or other browser state carry over.</li>
  * <li><b>Requirements.</b> A member runs only if every member it requires passed (see
  * 		{@link Suite#requirementsOf(SuiteMember)}: what its {@code requires} names, and the set-ups). One that does not
  * 		run is reported as skipped, with the requirement that failed or was skipped. A failed ordinary member does not
@@ -178,6 +179,8 @@ public final class SailSuite {
 	private final boolean legacy;
 	/** Runs each member. */
 	private MemberRunner runner;
+	/** True to run each member in a browser of its own, as {@link #browserPerMember()} asks; the suite file can ask too. */
+	private boolean browserPerMember;
 	/** The engine that runs the members, or null when a test or the older builder gives the runner. */
 	private SailWorkflow engine;
 	private SailSettings.Code settings = SailSettings.code();
@@ -337,6 +340,27 @@ public final class SailSuite {
 		if (engine != null) {
 			engine.settings(code);
 		}
+		return this;
+	}
+
+	/**
+	 * Runs each member in a browser of its own, instead of handing the browser on from member to member. The browser
+	 * is stopped when the member ends, passed or failed, and the next member starts a new one. Opt in when the members
+	 * must not see what the one before left in the browser: cookies, local storage, service workers, caches, or a
+	 * browser prompt that is still up (Chrome's password manager prompts are off in SAIL's Chrome, but any other
+	 * browser state is carried over the same way). It costs a browser start per member. A suite of members with the
+	 * same configuration otherwise keeps one browser, as a workflow's automations do.
+	 *
+	 * <p>A suite file can ask for the same with {@code browserPerMember="true"} on its {@code <suite>}. Either turns it
+	 * on: this method cannot turn off what the file asks for, and a file with {@code false} or no attribute does not stop it.
+	 *
+	 * <p>It applies to a suite loaded with a workflow engine ({@link #resource}, {@link #file}); a suite given its own
+	 * member runner, and the older builder, have no browser to hand on.
+	 *
+	 * @return this suite
+	 */
+	public @Nonnull SailSuite browserPerMember() {
+		browserPerMember = true;
 		return this;
 	}
 
@@ -571,11 +595,11 @@ public final class SailSuite {
 		}
 	}
 
-	/** Runs a member's workflow file with the engine, which keeps the browser for the next member if it passes. */
+	/** Runs a member's workflow file with the engine, which keeps the browser for the next member if it passes, unless the suite gives each member its own. */
 	private void runWithEngine(@Nonnull MemberRun run) {
 		String path = run.path();
 		Workflow workflow = resources ? XMLMetaData.unmarshalSAILWorkflowString(SailWorkflow.resource(path)) : XMLMetaData.unmarshalSAILWorkflowFile(path);
-		engine.runMember(run.member().getFile(), workflow, new SailWorkflow.Member(suite, name, run.member(), run.lock()));
+		engine.runMember(run.member().getFile(), workflow, new SailWorkflow.Member(suite, name, run.member(), run.lock()), browserPerMember || Boolean.TRUE.equals(suite.getBrowserPerMember()));
 	}
 
 	// The older builder, kept for existing tests

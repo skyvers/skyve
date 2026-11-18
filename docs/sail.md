@@ -868,6 +868,35 @@ a workflow's automations do; a member that fails has its browser stopped, so
 the next starts clean. The suite stops its last browser when it ends, even
 after a failure.
 
+**A browser for each member.** A suite hands its browser on, so a member can
+start with what the member before it left in the browser: cookies, local
+storage, service workers, caches, and a prompt that the browser still shows.
+Opt in to a new browser for each member when members must be independent of
+that, or when one member's leftovers make the next one's sign in fail (its
+fields "did not take the typed values"). The browser of each member is stopped
+when the member ends, passed or failed, and the next member starts another, so
+a suite pays a browser start per member. Ask for it in the suite file, with no
+code:
+
+```xml
+<suite xmlns="http://www.skyve.org/xml/sail" browserPerMember="true">
+```
+
+or from code, call `browserPerMember()` on the suite before `run()`:
+
+```java
+SailSuite.resource("sail/admin/admin.suite.xml", workflow).browserPerMember().run();
+```
+
+An example of carried-over state is Chrome's "Change your password" prompt,
+which blocks all input to the tab after a sign in with a leaked password (a
+user whose password is the user's name, for one). SAIL's Chrome now has the
+password manager's prompts off (see [Headless and headed](#running-the-tests)),
+so that case no longer needs the opt-in; other state in the browser still does.
+Either turns it on: a suite that asks in its file and in code has it, and the
+code cannot turn off what the file asks for. Absent, or `false`, is the default,
+which is unchanged: the browser is handed on.
+
 **Requirements.** `requires` is a space-separated list of the files of earlier
 members. Without naming them, each set-up member requires every earlier set-up
 member, and every ordinary member requires every set-up member.
@@ -1919,6 +1948,7 @@ ITs where you meant to run unit tests.
 | `SailRunIT` | the suites and scripts that `sail.run` names; skipped when it is not set. See [For BAs and testers](#for-bas-and-testers). | per script | `sail` |
 | `KitchenSinkLoadSailIT` (`sail/load`) | a [load run](#load-testing) of the kitchen sink suite: 5 virtual users over 20 seconds, one iteration each, a 20 minute time limit; leaves out `pf-kitchensink-sail.xml`, whose wrong-password sign in would lock admin out for every user | both | `sail` `performance` |
 | `PrimeFacesSelenideClickSailIT` (`util/sail`) | a click on a tab that a scrolled tab strip puts under a fixed side menu: the harness centres the covered element across as well as down, as a user would scroll it into view; on a `data:` page, so it needs Chrome but no server | none | `sail` |
+| `SailSuiteLoginSailIT` (`util/sail`) | a suite of two members in a real browser, opted in with `browserPerMember()`: the first signs in and out in several automations and leaves a local storage entry, and the second signs in first and does not find it | PF, desktop | `sail` |
 | `LoginRememberSailIT` (`util/sail`) | `<login remember="true"/>` on a Chrome profile: after a restart on the profile the browser is still signed in; with `remember="false"` it is signed out, the next `navigateList` fails with the signed out message, and `<testSuccess/>` on the sign in page fails | PF, tablet | `sail` |
 | `RememberMePerDeviceSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; `<logout/>` on the PC; after a restart the phone is still signed in (signing out ends Remember me in that browser only) and the PC is signed out | PF | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |

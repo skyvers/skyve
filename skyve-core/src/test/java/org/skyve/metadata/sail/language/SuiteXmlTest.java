@@ -88,12 +88,22 @@ class SuiteXmlTest {
 		OrdinarySuiteMember member = suite.getMembers().get(0);
 		assertAll(() -> assertNull(suite.getTestStrategy()),
 					() -> assertNull(suite.getEvidence()),
+					() -> assertNull(suite.getBrowserPerMember(), "absent: the browser is handed on"),
 					() -> assertNull(suite.getRestore()),
 					() -> assertTrue(suite.getViewRoles().isEmpty()),
 					() -> assertTrue(suite.getSetUps().isEmpty()),
 					() -> assertTrue(member.getRequires().isEmpty()),
 					() -> assertNull(member.getLockTestStrategy()),
 					() -> assertFalse(suite.isTestStrategyLocked(member)));
+	}
+
+	@Test
+	void browserPerMemberUnmarshalsAndTheSchemaChecksIt() {
+		String head = "<suite xmlns=\"http://www.skyve.org/xml/sail\" browserPerMember=\"";
+		String tail = "\"><member file=\"a.xml\"/>" + TAIL;
+		assertAll(() -> assertEquals(Boolean.TRUE, XMLMetaData.unmarshalSAILSuiteString(head + "true" + tail, NAME).getBrowserPerMember()),
+					() -> assertEquals(Boolean.FALSE, XMLMetaData.unmarshalSAILSuiteString(head + "false" + tail, NAME).getBrowserPerMember()),
+					() -> assertSchemaRejects(head + "yes" + tail));
 	}
 
 	@Test

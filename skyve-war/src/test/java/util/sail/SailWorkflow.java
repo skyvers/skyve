@@ -227,7 +227,7 @@ public final class SailWorkflow {
 		for (String resourceName : resourceNames) {
 			legs.addAll(legs(resourceName, XMLMetaData.unmarshalSAILWorkflowString(resource(resourceName))));
 		}
-		run(legs, null, false);
+		run(legs, null, false, false);
 	}
 
 	/**
@@ -243,7 +243,7 @@ public final class SailWorkflow {
 		for (String file : files) {
 			legs.addAll(legs(file, XMLMetaData.unmarshalSAILWorkflowFile(file)));
 		}
-		run(legs, null, false);
+		run(legs, null, false, false);
 	}
 
 	/**
@@ -254,7 +254,7 @@ public final class SailWorkflow {
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
 	 */
 	void runWorkflow(@Nonnull String name, @Nonnull Workflow workflow) {
-		run(legs(name, workflow), null, false);
+		run(legs(name, workflow), null, false, false);
 	}
 
 	/**
@@ -269,7 +269,7 @@ public final class SailWorkflow {
 		for (int i = 0; i < scripts.length; i++) {
 			legs.addAll(legs("script " + (i + 1), XMLMetaData.unmarshalSAILWorkflowString(scripts[i])));
 		}
-		run(legs, null, false);
+		run(legs, null, false, false);
 	}
 
 	/**
@@ -322,7 +322,22 @@ public final class SailWorkflow {
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
 	 */
 	void runMember(@Nonnull String name, @Nonnull Workflow workflow, @Nonnull Member member) {
-		run(legs(name, workflow), member, true);
+		runMember(name, workflow, member, false);
+	}
+
+	/**
+	 * Runs a suite member's workflow as one run of its own; see {@link #runMember(String, Workflow, Member)}.
+	 *
+	 * @param name	the member's file, for messages
+	 * @param workflow	the member's workflow (a file's automation is a workflow of one)
+	 * @param member	the member and its suite
+	 * @param ownBrowser	true to start the member in a browser of its own and stop it when the member ends, whether it
+	 * 						passed or failed, so the next member finds no cookies, storage, service workers or caches
+	 * 						from this one; false to carry the browser on from member to member
+	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 */
+	void runMember(@Nonnull String name, @Nonnull Workflow workflow, @Nonnull Member member, boolean ownBrowser) {
+		run(legs(name, workflow), member, ! ownBrowser, ownBrowser);
 	}
 
 	/**
@@ -403,14 +418,18 @@ public final class SailWorkflow {
 	 *
 	 * @param member	the suite member the legs are, or null for a workflow on its own
 	 * @param keepBrowser	true to keep the browser open for the next run if this one passes; false to stop it
+	 * @param ownBrowser	true to start in a browser of its own, leaving a kept one alone; false to carry on in the kept one
 	 */
-	private void run(@Nonnull List<Leg> legs, @Nullable Member member, boolean keepBrowser) {
+	private void run(@Nonnull List<Leg> legs, @Nullable Member member, boolean keepBrowser, boolean ownBrowser) {
 		if (legs.isEmpty()) {
 			throw new IllegalArgumentException("A SAIL workflow needs at least one automation");
 		}
 		RunState run = (sharedRun == null) ? new RunState() : sharedRun;
-		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
-		kept = null;
+		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = null;
+		if (! ownBrowser) {
+			browser = kept;
+			kept = null;
+		}
 		boolean passed = false;
 		SailMedia.beginUnit(); // with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
 		try {

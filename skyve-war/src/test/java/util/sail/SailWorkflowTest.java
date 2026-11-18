@@ -34,8 +34,9 @@ import org.skyve.web.UserAgentType;
 
 /**
  * Tests the browser's lifecycle in the workflow engine, without a browser: the browsers are mocks, and each leg only
- * records that it ran. A suite member that passes keeps its browser for the next; one that fails stops it; a workflow
- * on its own stops its browser when it ends; a browser that fails to start is never reused.
+ * records that it ran. A suite member that passes keeps its browser for the next, unless the suite opts in to a browser
+ * per member, which stops it; one that fails stops it; a workflow on its own stops its browser when it ends; a browser
+ * that fails to start is never reused.
  */
 @SuppressWarnings("java:S5960") // test-only assertions
 class SailWorkflowTest {
@@ -127,6 +128,93 @@ class SailWorkflowTest {
 	@SuppressWarnings("static-method")
 	void releaseServer() {
 		SailServerLock.releaseAll();
+	}
+
+	/** Opting in: a member that passes stops its browser, so the next starts one of its own and finds no state. */
+	@Test
+	void aMemberThatOptsInStopsItsBrowserWhenItEnds() {
+		ownBrowserMember("a.xml");
+		ownBrowserMember("b.xml");
+		engine.closeBrowser(); // nothing is left to stop
+		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1", "start 2", "run 2 b.xml", "stop 2"), events);
+	}
+
+	/** Opting in: a failed member stops its browser too. */
+	@Test
+	void aFailedMemberThatOptsInStopsItsBrowser() {
+		failing.add("a.xml");
+		current = "a.xml";
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION);
+		SuiteMember a = SUITE.getMember("a.xml");
+		assertNotNull(a);
+		SailWorkflow.Member member = new SailWorkflow.Member(SUITE, "s.suite.xml", a, null);
+		assertThrows(AssertionError.class, () -> engine.runMember("a.xml", workflow, member, true));
+		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1"), events);
+	}
+
+	/** An opted-in member leaves alone a browser that an earlier member of the default kind kept. */
+	@Test
+	void aMemberThatOptsInDoesNotUseAKeptBrowser() {
+		member("a.xml");
+		ownBrowserMember("b.xml");
+		engine.closeBrowser();
+		assertEquals(List.of("start 1", "run 1 a.xml", "start 2", "run 2 b.xml", "stop 2", "stop 1"), events);
+	}
+
+	private void ownBrowserMember(String file) {
+		current = file;
+		Workflow workflow = XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION);
+		SuiteMember member = SUITE.getMember(file);
+		assertNotNull(member, file);
+		engine.runMember(file, workflow, new SailWorkflow.Member(SUITE, "s.suite.xml", member, null), true);
+	}
+
+	private static final List<String> HANDED_ON = List.of("start 1", "stop 1");
+	private static final List<String> OWN_BROWSERS = List.of("start 1", "stop 1", "start 2", "stop 2");
+
+	/** Runs a suite of two members on the engine, and returns the browsers started and stopped. */
+	private List<String> browsersOfSuite(String resource, boolean optInInCode) {
+		SailSettings.Environment environment = new SailSettings.Environment(Map.of(SailSettings.BASE_URL, "http://localhost:1/sail-workflow-test/"),
+																			Map.of(), null, Path.of("").toAbsolutePath());
+		events.clear();
+		ids.clear();
+		current = "suite";
+		SailSuite suite = SailSuite.resource(resource, engine).environment(environment);
+		if (optInInCode) {
+			suite.browserPerMember();
+		}
+		suite.run();
+		engine.closeBrowser();
+		return browserEvents();
+	}
+
+	/** By default a suite hands its browser on. */
+	@Test
+	void aSuiteHandsItsBrowserOn() {
+		assertEquals(HANDED_ON, browsersOfSuite("util/sail/fixtures/login.suite.xml", false));
+	}
+
+	/** The suite's setting in code reaches the engine: each member has its own browser. */
+	@Test
+	void aSuiteThatOptsInInCodeHasABrowserPerMember() {
+		assertEquals(OWN_BROWSERS, browsersOfSuite("util/sail/fixtures/login.suite.xml", true));
+	}
+
+	/** The suite file's {@code browserPerMember="true"} does the same, with no code. */
+	@Test
+	void aSuiteFileThatOptsInHasABrowserPerMember() {
+		assertEquals(OWN_BROWSERS, browsersOfSuite("util/sail/fixtures/login-attribute.suite.xml", false));
+	}
+
+	/** Either turns it on: both asking is the same as one. */
+	@Test
+	void aSuiteFileAndCodeThatBothOptInHaveABrowserPerMember() {
+		assertEquals(OWN_BROWSERS, browsersOfSuite("util/sail/fixtures/login-attribute.suite.xml", true));
+	}
+
+	/** The browsers started and stopped, without the legs run in them. */
+	private List<String> browserEvents() {
+		return events.stream().filter(event -> ! event.startsWith("run ")).toList();
 	}
 
 	@Test

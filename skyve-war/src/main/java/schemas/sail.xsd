@@ -981,6 +981,16 @@
         <xs:documentation>The evidence the suite asks its run to keep; the run can override it.</xs:documentation>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="browserPerMember" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          true to run each member in a browser of its own, stopped when the member ends, so that no cookies, storage or
+          other browser state carry over to the next member. Default false: a suite hands its browser on from member to
+          member when the configuration matches. A run that also asks for it in code (SailSuite.browserPerMember())
+          gets it if either asks.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 
   <xs:complexType name="viewRoles">

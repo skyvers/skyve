@@ -158,10 +158,12 @@ class SuiteTest {
 		Suite suite = new Suite();
 		assertAll(() -> assertNull(suite.getTestStrategy()),
 					() -> assertNull(suite.getEvidence()),
+					() -> assertNull(suite.getBrowserPerMember()),
 					() -> assertNull(suite.getRestore()),
 					() -> assertTrue(suite.getViewRoles().isEmpty()),
 					() -> assertTrue(suite.getSetUps().isEmpty()),
 					() -> assertTrue(suite.getMembers().isEmpty()));
+		suite.setBrowserPerMember(Boolean.TRUE);
 		suite.setTestStrategy(TestStrategy.Verify);
 		suite.setEvidence(Suite.Evidence.snapshots);
 		SuiteMember restore = member(new SuiteMember(), " 99.xml ");
@@ -169,6 +171,7 @@ class SuiteTest {
 		ViewRoles viewRoles = new ViewRoles();
 		viewRoles.setUser(" jane{run} ");
 		assertAll(() -> assertEquals(TestStrategy.Verify, suite.getTestStrategy()),
+					() -> assertEquals(Boolean.TRUE, suite.getBrowserPerMember()),
 					() -> assertEquals(Suite.Evidence.snapshots, suite.getEvidence()),
 					() -> assertSame(restore, suite.getRestore()),
 					() -> assertEquals("99.xml", restore.getFile()),
