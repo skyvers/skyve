@@ -55,6 +55,12 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * The user name is part of the match, so a series can only be removed by the user it was issued to.
 	 */
 	private String removeUserTokenSql = "delete from ADM_UserToken where userName = ? and series = ?";
+
+	/**
+	 * SQL used to remove all of a user's remember-me tokens but one series (this browser's).
+	 * Takes the user name then the series to keep.
+	 */
+	private String removeOtherUserTokensSql = "delete from ADM_UserToken where userName = ? and series <> ?";
 	
 	/**
 	 * Inserts a newly issued remember-me token.
@@ -201,6 +207,29 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	}
 	
 	/**
+	 * Use the given Persistence to remove all of a user's remember-me tokens except one series,
+	 * leaving that browser's Remember me in place ("sign out of all other sessions").
+	 * This occurs within the Persistence transaction.
+	 *
+	 * @param p The persistence to use.
+	 * @param username The user principal name, usually in the form customer-name/user-name.
+	 * @param keepSeries The series to keep, from this browser's remember-me cookie; {@code null} if the browser
+	 * 						has none, when all of the user's tokens are removed.
+	 * @return The number of token series removed.
+	 */
+	public int removeOtherUserTokens(@Nonnull Persistence p, @Nonnull String username, @Nullable String keepSeries) {
+		if (keepSeries == null) {
+			return p.newSQL(removeUserTokensSql.replace("?", ":userName"))
+						.putParameter("userName", username, false)
+						.execute();
+		}
+		return p.newSQL(removeOtherUserTokensSql.replaceFirst("\\?", ":userName").replaceFirst("\\?", ":series"))
+					.putParameter("userName", username, false)
+					.putParameter("series", keepSeries, false)
+					.execute();
+	}
+
+	/**
 	 * Returns the SQL used to load a token by series.
 	 *
 	 * @return The token lookup SQL.
@@ -270,6 +299,24 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 */
 	public void setRemoveUserTokenSql(@Nonnull String removeUserTokenSql) {
 		this.removeUserTokenSql = removeUserTokenSql;
+	}
+
+	/**
+	 * Returns the SQL used to remove all of a user's token rows but one series.
+	 *
+	 * @return The removal SQL, taking the user name and then the series to keep.
+	 */
+	public @Nonnull String getRemoveOtherUserTokensSql() {
+		return removeOtherUserTokensSql;
+	}
+
+	/**
+	 * Sets the SQL used to remove all of a user's token rows but one series.
+	 *
+	 * @param removeOtherUserTokensSql The removal SQL, taking the user name and then the series to keep.
+	 */
+	public void setRemoveOtherUserTokensSql(@Nonnull String removeOtherUserTokensSql) {
+		this.removeOtherUserTokensSql = removeOtherUserTokensSql;
 	}
 
 	/**

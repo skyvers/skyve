@@ -252,4 +252,39 @@ class SkyveRememberMeTokenRepositoryTest {
 		assertEquals(java.util.List.of("demo/other pc"),
 						jdbc.queryForList("select userName || ' ' || series from ADM_UserToken", String.class));
 	}
+
+	@Test
+	void testRemoveOtherUserTokensSqlSetter() {
+		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
+		assertEquals("delete from ADM_UserToken where userName = ? and series <> ?", repo.getRemoveOtherUserTokensSql());
+		repo.setRemoveOtherUserTokensSql("delete from custom where u = ? and s <> ?");
+		assertEquals("delete from custom where u = ? and s <> ?", repo.getRemoveOtherUserTokensSql());
+	}
+
+	@Test
+	void testRemoveOtherUserTokensPassesTheUserThenTheSeriesToKeep() {
+		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
+		Persistence p = mock(Persistence.class);
+		SQL sql = mock(SQL.class);
+		when(p.newSQL("delete from ADM_UserToken where userName = :userName and series <> :series")).thenReturn(sql);
+		when(sql.putParameter(anyString(), (String) any(), anyBoolean())).thenReturn(sql);
+		when(sql.execute()).thenReturn(2);
+
+		assertEquals(2, repo.removeOtherUserTokens(p, "demo/inspector", "pc"));
+
+		verify(sql).putParameter("userName", "demo/inspector", false);
+		verify(sql).putParameter("series", "pc", false);
+	}
+
+	@Test
+	void testRemoveOtherUserTokensWithoutASeriesRemovesAllTheUsersTokens() {
+		SkyveRememberMeTokenRepository repo = new SkyveRememberMeTokenRepository();
+		Persistence p = mock(Persistence.class);
+		SQL sql = mock(SQL.class);
+		when(p.newSQL("delete from ADM_UserToken where userName = :userName")).thenReturn(sql);
+		when(sql.putParameter(anyString(), (String) any(), anyBoolean())).thenReturn(sql);
+		when(sql.execute()).thenReturn(3);
+
+		assertEquals(3, repo.removeOtherUserTokens(p, "demo/inspector", null));
+	}
 }
