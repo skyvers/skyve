@@ -299,6 +299,7 @@ class DocumentQueryFilterTest {
 	 * drop the rows that the other criteria keep.
 	 */
 	@Test
+	@SuppressWarnings("static-method")
 	void everyConditionOnABindingReachesBothFiltersAndTellsTheBinding() {
 		Date date = new Date();
 		Decimal2 decimal = new Decimal2("1.5");
@@ -373,6 +374,7 @@ class DocumentQueryFilterTest {
 
 	/** In an empty set selects nothing (null and not null), not in an empty set every row; both tell the binding. */
 	@Test
+	@SuppressWarnings("static-method")
 	void anEmptyInOrNotInTellsTheBinding() {
 		assertAll(check("addIn none", f -> f.addIn(B), d -> d.addNull(B), d -> d.addNotNull(B)),
 				check("addNotIn none", f -> f.addNotIn(B), d -> d.addExpression("1 = 1")));
