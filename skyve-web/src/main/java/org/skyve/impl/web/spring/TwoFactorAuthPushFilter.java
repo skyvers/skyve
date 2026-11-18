@@ -210,7 +210,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			LOGGER.info("Sending 2fa code push notification "); 
 			
 			// save previous selected remember me token so it can be sent back
-			boolean rememberMe = request.getParameter(REMEMBER_PARAMETER) != null;
+			boolean rememberMe = isRememberMeRequested(request);
 			
 			String twoFactorCodeClearText = generateTFACode();
 			
@@ -289,7 +289,8 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 				handler.onAuthenticationFailure(request, response, e);
 				return true;
 			}
-			return forwardToTwoFactorPage(request, response, user);
+			// the code page is shown again with Remember me as the user left it, so a mistyped code does not lose the choice
+			return forwardToTwoFactorPage(request, response, user, isRememberMeRequested(request), true);
 		}
 		catch (AuthenticationException e) {
 			LOGGER.info("TFA authentication failed with {}", e.getClass().getSimpleName());
@@ -331,7 +332,7 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 			return true;
 		}
 
-		boolean rememberMe = request.getParameter(REMEMBER_PARAMETER) != null;
+		boolean rememberMe = isRememberMeRequested(request);
 		if (isResendOnCooldown(user)) {
 			LOGGER.info("Rejecting 2fa resend for user {} because cooldown is active.", username);
 			request.setAttribute(RESEND_COOLDOWN_ATTRIBUTE, Boolean.TRUE);
@@ -360,13 +361,6 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 
 	private static boolean forwardToTwoFactorPage(@Nonnull HttpServletRequest request,
 													@Nonnull HttpServletResponse response,
-													@Nonnull TwoFactorAuthUser user)
-	throws IOException, ServletException {
-		return forwardToTwoFactorPage(request, response, user, false, true);
-	}
-
-	private static boolean forwardToTwoFactorPage(@Nonnull HttpServletRequest request,
-													@Nonnull HttpServletResponse response,
 													@Nonnull TwoFactorAuthUser user,
 													boolean rememberMe,
 													boolean invalidCode)
@@ -380,6 +374,14 @@ public abstract class TwoFactorAuthPushFilter extends UsernamePasswordAuthentica
 		return true;
 	}
 	
+	/**
+	 * Says whether the user ticked Remember me. The code page carries the choice from the password step in its
+	 * Remember me box, so it is read from the same request parameter on every step (password, resend and code).
+	 */
+	private static boolean isRememberMeRequested(@Nonnull HttpServletRequest request) {
+		return request.getParameter(REMEMBER_PARAMETER) != null;
+	}
+
 	private void clearTFADetails(@Nonnull TwoFactorAuthUser user) {
 		boolean edited = false;
 		
