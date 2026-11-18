@@ -1340,7 +1340,8 @@ public abstract class InterpretedWebDriverExecutor<
 					return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
 				}
 				catch (NoSuchSessionException | NoSuchWindowException e) {
-					throw e;
+					// the browser is gone: fail now (the wait ignores a NotFoundException, which NoSuchWindowException is)
+					throw new IllegalStateException("The browser's window or session is gone: " + reason(e), e);
 				}
 				catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
 					lastError[0] = reason(e);
@@ -1381,7 +1382,8 @@ public abstract class InterpretedWebDriverExecutor<
 				return Boolean.TRUE.equals(runScript(script, true, true, limit)) ? Boolean.TRUE : null;
 			}
 			catch (NoSuchSessionException | NoSuchWindowException e) {
-				throw e;
+				// the browser is gone: fail now (the wait ignores a NotFoundException, which NoSuchWindowException is)
+				throw new IllegalStateException("The browser's window or session is gone: " + reason(e), e);
 			}
 			catch (WebDriverException e) { // a script error, a script timeout, or the page between documents
 				lastError[0] = reason(e);
@@ -1452,7 +1454,10 @@ public abstract class InterpretedWebDriverExecutor<
 		catch (InvocationTargetException e) {
 			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class whose constructor threw %s", className, e.getCause()), e);
 		}
-		catch (ReflectiveOperationException | ExceptionInInitializerError e) {
+		catch (ExceptionInInitializerError e) {
+			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class whose static initialiser threw %s", className, e.getCause()), e);
+		}
+		catch (ReflectiveOperationException | LinkageError e) { // NoClassDefFoundError: its initialiser failed before
 			throw new MetaDataException(String.format("<call className=\"%s\" /> names a class that cannot be constructed with a public no-argument constructor: %s",
 														className, e),
 										e);

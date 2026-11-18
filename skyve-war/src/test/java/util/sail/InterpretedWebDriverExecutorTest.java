@@ -44,6 +44,7 @@ import org.mockito.InOrder;
 import org.openqa.selenium.JavascriptException;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoSuchSessionException;
+import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.ScriptTimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
@@ -1094,9 +1095,20 @@ class InterpretedWebDriverExecutorTest {
 		wait.setTimeoutMillis(Integer.valueOf(5000));
 		TestScript test = new TestScript();
 		test.setScript("return true;");
-		assertAll(() -> assertThrows(NoSuchSessionException.class, () -> wait.execute(executor), "waitFor"),
-					() -> assertThrows(NoSuchSessionException.class, () -> test.execute(executor), "testScript"),
-					() -> assertEquals(2, scripts.size(), "one run each"));
+		IllegalStateException waitLost = assertThrows(IllegalStateException.class, () -> wait.execute(executor), "waitFor");
+		IllegalStateException testLost = assertThrows(IllegalStateException.class, () -> test.execute(executor), "testScript");
+		int afterSession = scripts.size();
+		// the wait ignores a NotFoundException, which NoSuchWindowException is: it must still fail at once
+		browser(new NoSuchWindowException("no such window"));
+		TestScript timed = new TestScript();
+		timed.setScript("return true;");
+		timed.setTimeoutMillis(Integer.valueOf(5000));
+		IllegalStateException windowLost = assertThrows(IllegalStateException.class, () -> timed.execute(executor), "timed testScript");
+		assertAll(() -> assertTrue(waitLost.getCause() instanceof NoSuchSessionException, "waitFor's cause"),
+					() -> assertTrue(testLost.getCause() instanceof NoSuchSessionException, "testScript's cause"),
+					() -> assertTrue(windowLost.getMessage().startsWith("The browser's window or session is gone: NoSuchWindowException"), windowLost.getMessage()),
+					() -> assertEquals(2, afterSession, "one run each"),
+					() -> assertEquals(3, scripts.size(), "one run of the timed testScript"));
 	}
 
 	@Test

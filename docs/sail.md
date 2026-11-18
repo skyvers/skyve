@@ -1164,7 +1164,7 @@ and URL. The reason contains:
 | `variable` set, and the result is `null` or `undefined` | the step throws | `gave no value to keep in {var:NAME}` |
 | `waitFor` times out | the step throws, under None too | `<waitFor /> did not hold within N ms:` and the script's first line, then `; the last poll threw: ...` if one threw |
 | `testScript` stays falsy | an assertion | the `message`, else `<testScript /> did not hold:` and the first line; then `; it threw: ...` if the last run threw |
-| `call`'s class is missing, is not a `SailCall`, or cannot be constructed | `MetaDataException` | `<call className="X" /> names a class that cannot be loaded`, `... that is not a org.skyve.metadata.sail.execution.SailCall`, `... that cannot be constructed` or `... whose constructor threw` |
+| `call`'s class is missing, is not a `SailCall`, or cannot be constructed | `MetaDataException` | `<call className="X" /> names a class that cannot be loaded`, `... that is not a org.skyve.metadata.sail.execution.SailCall`, `... that cannot be constructed`, `... whose constructor threw` or `... whose static initialiser threw` |
 | `call` throws an `AssertionError` | an assertion: recorded under Verify, and the run goes on; ignored under None | `<call className="X" /> failed:` and its message |
 | `call` throws anything else | the step throws; under Verify the interaction ends | `<call className="X" /> threw` the exception's class and message |
 | two `parameter`s with one `name` | `MetaDataException` | `has more than one <parameter name="N" />` |
@@ -1193,10 +1193,11 @@ only.
 - Throw an `AssertionError` for what the call checks and finds wrong: it follows
   the test strategy, so it stops the run under Assert, is recorded under Verify
   and is ignored under None. Any other exception means the call could not do
-  what it says, so it stops the interaction, even under Verify. So do the
-  harness's own failures: a Selenide `UIAssertionError` (a missing element, a
-  failed `should`), and the failure of a step the call runs through the
-  executor, which is reported as that step's failure.
+  what it says, so it stops the interaction, even under Verify. So does a
+  Selenide `UIAssertionError` (a missing element, a failed `should`). A step
+  the call runs through the executor fails as that step would: a failed
+  assertion follows the test strategy (under Assert it stops the run, as that
+  step's failure), and a step that throws makes the call throw.
 - A handler that needs the browser casts the executor to
   `util.sail.InterpretedWebDriverExecutor` and calls its `getDriver()`, which
   gives the `WebDriver`. That is the only accessor.
