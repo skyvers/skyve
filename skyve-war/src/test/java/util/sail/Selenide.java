@@ -668,6 +668,52 @@ public abstract class Selenide<
 	}
 
 	/**
+	 * The path, under the context, of the page that Skyve sends the browser to when a request fails unexpectedly
+	 * ({@code SkyveFacesFilter}'s {@code error} parameter in web.xml), with the failure's reference as a parameter.
+	 */
+	static final String SERVER_ERROR_PAGE = "/pages/error.jsp";
+
+	/**
+	 * Returns the window's URL if the window shows Skyve's error page, which the server sends the browser to when a
+	 * request fails unexpectedly. The page shows no error message that a step's success check looks for, so without
+	 * this check a step whose request failed would pass, and so would a following check that a widget is not shown.
+	 *
+	 * @return the error page's URL, with the failure's reference, or null if the window shows another page (or none)
+	 */
+	public @Nullable String serverErrorPage() {
+		try {
+			String url = driver.getCurrentUrl();
+			return isServerErrorPage(url) ? url : null;
+		}
+		catch (@SuppressWarnings("unused") org.openqa.selenium.WebDriverException e) {
+			return null; // between pages, or no window
+		}
+	}
+
+	/**
+	 * Indicates if a URL is Skyve's error page: its path, without parameters or a fragment, ends with
+	 * {@link #SERVER_ERROR_PAGE}.
+	 *
+	 * @param url	the URL, or null
+	 * @return true for the error page
+	 */
+	static boolean isServerErrorPage(@Nullable String url) {
+		if (url == null) {
+			return false;
+		}
+		int end = url.length();
+		int query = url.indexOf('?');
+		if (query >= 0) {
+			end = query;
+		}
+		int fragment = url.indexOf('#');
+		if ((fragment >= 0) && (fragment < end)) {
+			end = fragment;
+		}
+		return url.substring(0, end).endsWith(SERVER_ERROR_PAGE);
+	}
+
+	/**
 	 * Reloads the page, as the browser's Reload button does, and waits for the reloaded page, then for it to settle (see
 	 * {@link #waitForPageToSettle()}).
 	 */

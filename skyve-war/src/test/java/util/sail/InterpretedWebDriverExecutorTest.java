@@ -792,6 +792,23 @@ class InterpretedWebDriverExecutorTest {
 					() -> verify(executor.selenide, never()).trace("never"));
 	}
 
+	/**
+	 * A step after which the window shows the server's error page fails, naming the page and its reference, and stops
+	 * the interaction: the page has no error message for the step's own success check to find.
+	 */
+	@Test
+	void aStepThatEndsOnTheServerErrorPageFails() {
+		String errorPage = "http://localhost/skyve/pages/error.jsp?errorReference=r1";
+		when(executor.selenide.serverErrorPage()).thenReturn(errorPage);
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+							"<interaction name=\"i\"><method><comment>first</comment><comment>never</comment></method></interaction></automation>";
+		Automation automation = XMLMetaData.unmarshalSAILString(script);
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+		assertAll(() -> assertTrue(e.getMessage().contains("step 1 <comment comment=\"first\" />"), e.getMessage()),
+					() -> assertTrue(e.getMessage().contains("sent the browser to its error page " + errorPage), e.getMessage()),
+					() -> verify(executor.selenide, never()).trace("never"));
+	}
+
 	@Test
 	void testFailureAfterARefusedUploadChecksTheRefusal() {
 		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +

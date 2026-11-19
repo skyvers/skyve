@@ -1324,6 +1324,20 @@ redirect). A script that is meant to be on the sign in page, such as one that
 tests a rejected sign in, uses `<login/>` and `<testFailure/>`, which are not
 checked.
 
+### The server's error page
+
+When a request fails unexpectedly on the server, Skyve sends the browser to its
+error page, `pages/error.jsp`, with the failure's reference as the
+`errorReference` parameter. That page has no error messages either, so a step
+whose request failed used to pass, and so did a following check that a widget
+is not shown. The harness now checks, after every step, whether the window
+shows the error page. If it does, the step fails with `The server failed the
+request and sent the browser to its error page <its address>: the server log
+has the failure under that reference`, and the interaction stops under every
+test strategy. The page is recognised by its address
+(`Selenide.isServerErrorPage`): a path that ends with `/pages/error.jsp`, as
+`SkyveFacesFilter`'s `error` parameter in `web.xml` names it.
+
 ### Navigation
 
 | Element | Attributes | Semantics | PF | SC |

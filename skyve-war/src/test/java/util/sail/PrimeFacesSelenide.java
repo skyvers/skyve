@@ -684,6 +684,40 @@ public class PrimeFacesSelenide extends Selenide<
 		return true;
 	}
 
+	/**
+	 * Replaces the text of a spinner's input as a user does: clicks into it, goes to the end of its text and deletes it
+	 * with Backspace, types the new text, then leaves it with Tab, so that its change event fires once, with the new text.
+	 * A spinner cannot be cleared first, as {@link #text(PrimeFacesTextCommand)} does: it puts its value back after the
+	 * change event that clearing fires, so the new text was added to the old (5 then 7 gave 57). Nor can its text be
+	 * selected and typed over, as {@link #typeOver(String, String)} does: the spinner's key handler drops the select all
+	 * keys, so the new text went in front of the old (75).
+	 *
+	 * @param id	the spinner's client id
+	 * @param value	the text, or null or empty to delete the text
+	 * @return true if the input is shown, enabled and editable
+	 */
+	public boolean spinner(@Nonnull String id, @Nullable String value) {
+		SelenideElement element = $(byId(id + "_input"));
+		if ((! element.exists()) || (! element.isDisplayed()) || (! element.isEnabled()) ||
+				(element.attr("disabled") != null) || (element.attr("readonly") != null)) {
+			return false;
+		}
+		click(element);
+		String old = element.getValue();
+		int length = (old == null) ? 0 : old.length();
+		StringBuilder keys = new StringBuilder(Keys.END.toString());
+		for (int i = 0; i < length; i++) {
+			keys.append(Keys.BACK_SPACE);
+		}
+		if (value != null) {
+			keys.append(value);
+		}
+		element.sendKeys(keys);
+		element.sendKeys(Keys.TAB);
+		waitForAjaxResponse();
+		return true;
+	}
+
 	@Override
 	public boolean selectOne(PrimeFacesSelectOneCommand command) {
 		String id = command.id();

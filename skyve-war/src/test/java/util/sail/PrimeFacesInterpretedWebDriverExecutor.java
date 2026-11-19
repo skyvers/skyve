@@ -445,7 +445,8 @@ public class PrimeFacesInterpretedWebDriverExecutor extends InterpretedWebDriver
 			} else if (component instanceof DatePicker) {
 				success = selenide.typeOver(clientId + "_input", value);
 			} else if (component instanceof Spinner) {
-				success = selenide._input(clientId, value, false);
+				// the old text deleted with Backspace, then the new typed (see PrimeFacesSelenide.spinner)
+				success = selenide.spinner(clientId, value);
 			} else if (component instanceof SelectOneMenu) {
 				success = selenide.selectOne(new PrimeFacesSelectOneCommand(clientId, index(identifier, value)));
 			} else if (component instanceof SelectOneRadio) {

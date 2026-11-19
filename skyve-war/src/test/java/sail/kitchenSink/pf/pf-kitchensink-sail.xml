@@ -556,6 +556,9 @@
 			<testValue binding="normalInteger" value="42" />
 			<dataEnter binding="spinner" value="5" />
 			<testValue binding="spinner" value="5" />
+			<comment>A spinner that holds a value is typed over, not added to</comment>
+			<dataEnter binding="spinner" value="7" />
+			<testValue binding="spinner" value="7" />
 			<dataEnter binding="slider" value="30" />
 			<testValue binding="slider" value="30" />
 			<dataEnter binding="longInteger" value="111" />

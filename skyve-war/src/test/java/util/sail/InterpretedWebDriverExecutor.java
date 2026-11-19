@@ -399,6 +399,7 @@ public abstract class InterpretedWebDriverExecutor<
 			try {
 				startingStep(step);
 				step.execute(this);
+				failOnServerErrorPage();
 			}
 			catch (SailFailure e) {
 				// already described where it happened (Assert)
@@ -429,6 +430,22 @@ public abstract class InterpretedWebDriverExecutor<
 			previousStep = step;
 		}
 		return true;
+	}
+
+	/**
+	 * Fails the step that has just run if the window shows Skyve's error page: a request of the step failed on the
+	 * server, which sent the browser there. The page has no error message for the step's own success check to find,
+	 * so the step, and later checks that a widget is not shown, would otherwise pass.
+	 *
+	 * @throws AssertionError	if the window shows the error page
+	 */
+	private void failOnServerErrorPage() {
+		String errorPage = (selenide == null) ? null : selenide.serverErrorPage();
+		if (errorPage != null) {
+			throw new AssertionError(String.format("The server failed the request and sent the browser to its error page %s: " +
+													"the server log has the failure under that reference",
+													errorPage));
+		}
 	}
 
 	/**
