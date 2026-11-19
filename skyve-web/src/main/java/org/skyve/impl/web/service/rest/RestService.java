@@ -54,7 +54,13 @@ import jakarta.ws.rs.core.MediaType;
 /**
  * Implements generic Skyve REST endpoint.
  * Think carefully about the security ramifications of exposing this.
- * It is currently blocked in web.xml.
+ * It is currently blocked in web.xml ({@code ForbiddenFilter} on {@code /rest/*}).
+ *
+ * <p><b>Warning:</b> the insert, update and delete routes check no document permissions, and update copies every
+ * attribute, including collections. If {@code /rest/*} is enabled (by replacing {@code ForbiddenFilter} with an
+ * authenticating filter), any signed-in caller can change any bean in their data scope, for example add roles to
+ * their own {@code admin.User}. Only enable it for callers trusted with the whole data store, or add permission
+ * checks first. This is a known limitation (decision of 2026-11-19).
  */
 @Path("/api")
 @RequestScoped

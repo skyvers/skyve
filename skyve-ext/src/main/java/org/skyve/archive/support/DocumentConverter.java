@@ -22,6 +22,12 @@ import jakarta.annotation.Nonnull;
  * {@link #handles}) and must produce a consistent set of Lucene fields so that
  * search queries can be constructed against known field names.
  *
+ * <p>The document must index the bean's id in a field named {@link Bean#DOCUMENT_ID} with norms or doc values, for
+ * example as a {@link org.apache.lucene.document.TextField}, as Skyve's Audit and MailLog converters do; a
+ * {@link org.apache.lucene.document.StringField} omits norms. An archived list that is unfiltered, or whose filter has
+ * only negations, finds every archived bean with a {@link org.apache.lucene.search.FieldExistsQuery} on that field,
+ * which in Lucene 9.7 throws an {@link IllegalStateException} for a field indexed with neither.
+ *
  * <p>Utility methods {@link #dateToString}/{@link #stringToDate} and
  * {@link #toSortBinding} are provided to standardise field naming and date encoding
  * across implementations.

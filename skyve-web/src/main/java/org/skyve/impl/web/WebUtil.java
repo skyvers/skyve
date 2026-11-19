@@ -497,6 +497,22 @@ public class WebUtil {
 														@Nonnull String newPassword,
 														@Nonnull String confirmPassword) 
 	throws Exception {
+		return makePasswordChange(user, oldPassword, newPassword, confirmPassword, false);
+	}
+
+	/**
+	 * As {@link #makePasswordChange(User, String, String, String)}, optionally for a password reset by token, the only change
+	 * that does not give the old password.
+	 *
+	 * <p>The reset is marked for the action in the persistence's stash ({@link AppConstants#PASSWORD_RESET_STASH_KEY}),
+	 * which the action consumes; the mark is always removed here too so it cannot outlive this call on a pooled thread.
+	 */
+	private static @Nullable String makePasswordChange(@Nonnull User user,
+														@Nullable String oldPassword,
+														@Nonnull String newPassword,
+														@Nonnull String confirmPassword,
+														boolean tokenReset) 
+	throws Exception {
 		String errorMessage = null;
 		
 		Customer c = user.getCustomer();
@@ -511,6 +527,9 @@ public class WebUtil {
 		persistence.setUser(user); // user has not been set as this is called directly from changePassword.jsp
 		persistence.begin();
 		try {
+			if (tokenReset) {
+				persistence.getStash().put(AppConstants.PASSWORD_RESET_STASH_KEY, Boolean.TRUE);
+			}
 			changePassword.getServerSideAction(c, AppConstants.MAKE_PASSWORD_CHANGE_ACTION_NAME, true).execute(bean, null);
 		}
 		catch (ValidationException e) {
@@ -527,6 +546,7 @@ public class WebUtil {
 			persistence.rollback();
 		}
 		finally {
+			persistence.getStash().remove(AppConstants.PASSWORD_RESET_STASH_KEY);
 			persistence.commit(true);
 		}
 		
@@ -759,12 +779,20 @@ public class WebUtil {
 								}
 								if (! expired) {
 									Repository r = CORE.getRepository();
-									org.skyve.metadata.user.User u = r.retrieveUser(customerName + '/' + userName);
-									// // don't allow credential existence to leak
+									org.skyve.metadata.user.User u = null;
+									try {
+										u = r.retrieveUser(customerName + '/' + userName);
+									}
+									catch (@SuppressWarnings("unused") SecurityException e) {
+										// A disabled user (or one with no roles) is refused by the repository
+										// Answer as for an expired token so that no account detail leaks
+										return Util.nullSafeI18n("exception.passwordResetTokenExpired");
+									}
+									// retrieveUser is nullable by contract (another repository may answer null for an unknown user)
 									if (u == null) {
 										return Util.nullSafeI18n("exception.passwordResetTokenExpired");
 									}
-									errorMsg = makePasswordChange(u, null, newPassword, confirmPassword);
+									errorMsg = makePasswordChange(u, null, newPassword, confirmPassword, true);
 								}
 								else {
 									return Util.nullSafeI18n("exception.passwordResetTokenExpired");

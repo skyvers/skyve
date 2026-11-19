@@ -2,8 +2,8 @@ package org.skyve.impl.persistence;
 
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
@@ -37,6 +37,10 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
 	private static final String AS_ALIAS = " as ";
+	// A join of a path from bean, of any type, fetched or not ("left outer join fetch bean.a.b as x with ..." gives a.b)
+	private static final Pattern JOIN_FROM_THIS = Pattern.compile("(?i:\\bjoin\\s++(?:fetch\\s++)?)" + THIS_ALIAS + "\\.([\\w$]++(?:\\.[\\w$]++)*+)");
+	// A quoted literal, with any doubled quotes in it
+	private static final Pattern QUOTED_LITERAL = Pattern.compile("'[^']*+(?:''[^']*+)*+'");
 
 	/**
 	 * Metadata for the document that anchors the query's from-clause.
@@ -49,7 +53,6 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	private boolean distinct;
 	private StringBuilder projectionClause = new StringBuilder(128);
 	private StringBuilder fromClause = new StringBuilder(128);
-	private final Set<String> leftOuterJoins = new TreeSet<>();
 	private DocumentFilter filter = null;
 	// projection (bean.<binding> or projectedAlias) -> order
 	private LinkedHashMap<String, SortDirection> insertedOrderings = new LinkedHashMap<>();
@@ -563,19 +566,30 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	@Override
 	public @Nonnull DocumentQuery addLeftOuterJoinFromEntity(@Nonnull String entityAlias, @Nonnull String referenceBinding) {
 		fromClause.append(" LEFT OUTER JOIN ").append(entityAlias).append('.').append(referenceBinding);
-		if (THIS_ALIAS.equals(entityAlias)) {
-			leftOuterJoins.add(referenceBinding);
-		}
 		return this;
 	}
 
 	/**
-	 * Indicates if a reference from the driving entity is left outer joined (without an alias).
+	 * Indicates if the from clause joins a reference from the driving entity: the one the query was constructed with
+	 * or a join added since, of any type, fetched or not, with or without an alias and a with condition. Another join
+	 * of the same path would replace it for the rest of the query, as Hibernate keeps one join per path.
+	 * A join of {@code a.b} joins {@code a} too: Hibernate joins each reference on the way, with the same join type.
+	 * Quoted literals are not read, and a join through another alias is not this reference's.
 	 * @param referenceBinding	the reference's binding
-	 * @return true if {@link #addLeftOuterJoin(String)} added it
+	 * @return true if the from clause joins {@code bean.<referenceBinding>} or a path through it
 	 */
-	public boolean isLeftOuterJoined(@Nonnull String referenceBinding) {
-		return leftOuterJoins.contains(referenceBinding);
+	public boolean isJoined(@Nonnull String referenceBinding) {
+		String from = QUOTED_LITERAL.matcher(fromClause).replaceAll("''");
+		Matcher matcher = JOIN_FROM_THIS.matcher(from);
+		int length = referenceBinding.length();
+		while (matcher.find()) {
+			String joined = matcher.group(1);
+			if (joined.startsWith(referenceBinding) &&
+					((joined.length() == length) || (joined.charAt(length) == '.'))) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

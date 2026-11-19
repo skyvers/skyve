@@ -119,7 +119,9 @@
 				</document>
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="User" permission="_RU_U" />
-				<document name="UserAccount" permission="_____" />
+				<document name="UserAccount" permission="_____">
+					<action name="SignOutOtherSessions" />
+				</document>
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
@@ -197,7 +199,9 @@
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 				<document name="User" permission="_R__C" />
-				<document name="UserAccount" permission="_____" />
+				<document name="UserAccount" permission="_____">
+					<action name="SignOutOtherSessions" />
+				</document>
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
 				</document>
@@ -455,6 +459,7 @@
 					<action name="Next" />
 					<action name="Back" />
 					<action name="ResendActivation"/>
+					<action name="SignOutEverywhere" />
 				</document>
 				<document name="UserCandidateContact" permission="_____" />
 				<document name="UserList" permission="_____">
@@ -499,7 +504,9 @@
 					<action name="PrepareExplanation" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
-				<document name="UserAccount" permission="_____" />
+				<document name="UserAccount" permission="_____">
+					<action name="SignOutOtherSessions" />
+				</document>
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>

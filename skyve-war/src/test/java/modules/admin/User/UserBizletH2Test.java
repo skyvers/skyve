@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.skyve.CORE;
+import org.skyve.impl.cache.StateUtil;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.impl.sail.mock.MockWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
@@ -24,6 +25,7 @@ import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
+import org.springframework.mock.web.MockHttpSession;
 
 import modules.admin.Contact.ContactExtension;
 import modules.admin.domain.DataGroup;
@@ -167,15 +169,7 @@ class UserBizletH2Test extends AbstractH2Test {
 		String otherUserName = bean.getBizCustomer() + "/someoneElse";
 		for (String[] row : new String[][] { { userName, "phone" }, { userName, "tablet" }, { userName, "pc" },
 				{ otherUserName, "pc2" } }) {
-			p.newSQL(
-					"insert into ADM_UserToken (bizId, bizVersion, bizLock, bizKey, bizCustomer, bizUserId, userName, series, token, lastUsed) "
-							+ "values (:bizId, 0, '20260101000000000admin', :userName, :customer, 'SYSTEM', :userName, :series, 'token', :lastUsed)")
-					.putParameter("bizId", UUID.randomUUID().toString(), false)
-					.putParameter("userName", row[0], false)
-					.putParameter("customer", bean.getBizCustomer(), false)
-					.putParameter("series", row[1], false)
-					.putParameter("lastUsed", new Timestamp())
-					.execute();
+			RememberMeTokens.add(p, bean.getBizCustomer(), row[0], row[1]);
 		}
 		CORE.getStash().put("passwordChanged", Boolean.TRUE);
 		UserBizlet injected = new UserBizlet();
@@ -187,6 +181,129 @@ class UserBizletH2Test extends AbstractH2Test {
 
 		assertEquals(0, tokenCount(p, userName));
 		assertEquals(1, tokenCount(p, otherUserName));
+	}
+
+	/** Rows for the user on three devices and for another user on one, and a session for the user. */
+	private String givenTokensAndASession(Persistence p) {
+		String principal = bean.getBizCustomer() + '/' + bean.getUserName();
+		for (String series : new String[] { "phone", "tablet", "pc" }) {
+			RememberMeTokens.add(p, bean.getBizCustomer(), principal, series);
+		}
+		RememberMeTokens.add(p, bean.getBizCustomer(), bean.getBizCustomer() + "/someoneElse", "pc2");
+		StateUtil.addSession(bean.getBizId(), new MockHttpSession(null, "phoneSession"));
+		return principal;
+	}
+
+	private UserBizlet injectedBizlet() throws Exception {
+		UserBizlet result = new UserBizlet();
+		java.lang.reflect.Field userService = UserBizlet.class.getDeclaredField("userService");
+		userService.setAccessible(true);
+		userService.set(result, mock(UserService.class));
+		return result;
+	}
+
+	@Test
+	void postSaveOfADisabledUserRemovesAllTheirTokensAndSessions() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String principal = givenTokensAndASession(p);
+		bean.setInactive(Boolean.TRUE);
+
+		injectedBizlet().postSave(bean);
+
+		assertEquals(0, tokenCount(p, principal));
+		assertEquals(1, tokenCount(p, bean.getBizCustomer() + "/someoneElse"));
+		assertEquals(0, StateUtil.getSessionCount(bean.getBizId()));
+	}
+
+	@Test
+	void postSaveOfAUserWhoIsNotActivatedRemovesAllTheirTokensAndSessions() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String principal = givenTokensAndASession(p);
+		bean.setInactive(Boolean.FALSE);
+		bean.setActivated(Boolean.FALSE);
+
+		injectedBizlet().postSave(bean);
+
+		assertEquals(0, tokenCount(p, principal));
+		assertEquals(0, StateUtil.getSessionCount(bean.getBizId()));
+	}
+
+	@Test
+	void postSaveOfAnEnabledUserKeepsTheirTokensAndSessions() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String principal = givenTokensAndASession(p);
+		bean.setInactive(Boolean.FALSE);
+		bean.setActivated(Boolean.TRUE);
+
+		injectedBizlet().postSave(bean);
+
+		assertEquals(3, tokenCount(p, principal));
+		assertEquals(1, StateUtil.getSessionCount(bean.getBizId()));
+		StateUtil.removeSessions(bean.getBizId());
+	}
+
+	/** Re-enabling a user must not bring back the cookies they had before they were disabled. */
+	@Test
+	void reEnablingADisabledUserDoesNotResurrectTheirOldTokens() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String principal = givenTokensAndASession(p);
+		UserBizlet injected = injectedBizlet();
+		bean.setInactive(Boolean.TRUE);
+		injected.postSave(bean);
+
+		bean.setInactive(Boolean.FALSE);
+		injected.postSave(bean);
+
+		assertEquals(0, tokenCount(p, principal));
+		assertEquals(0, StateUtil.getSessionCount(bean.getBizId()));
+	}
+
+	@Test
+	void postDeleteRemovesAllTheUsersTokensAndSessionsButNoOneElses() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String principal = givenTokensAndASession(p);
+
+		injectedBizlet().postDelete(bean);
+
+		assertEquals(0, tokenCount(p, principal));
+		assertEquals(1, tokenCount(p, bean.getBizCustomer() + "/someoneElse"));
+		assertEquals(0, StateUtil.getSessionCount(bean.getBizId()));
+	}
+
+	/** The old name's rows would sign in a later user created with that name. */
+	@Test
+	void renamingAUserRemovesTheOldNamesTokens() throws Exception {
+		Persistence p = CORE.getPersistence();
+		String oldPrincipal = givenTokensAndASession(p);
+		String oldName = bean.getUserName();
+		CORE.getStash().put("previousUserName", oldName);
+		bean.setUserName("renamed" + oldName);
+		bean.setInactive(Boolean.FALSE);
+		bean.setActivated(Boolean.TRUE);
+		RememberMeTokens.add(p, bean.getBizCustomer(), bean.getBizCustomer() + '/' + bean.getUserName(), "new");
+
+		injectedBizlet().postSave(bean);
+
+		assertEquals(0, tokenCount(p, oldPrincipal));
+		assertEquals(1, tokenCount(p, bean.getBizCustomer() + '/' + bean.getUserName()));
+	}
+
+	/** The whole route: preSave notes the old name of a saved user, postSave removes its tokens. */
+	@Test
+	void renamingASavedUserThroughPreSaveAndPostSaveRemovesTheOldNamesTokens() throws Exception {
+		Persistence p = CORE.getPersistence();
+		bean.setInactive(Boolean.FALSE);
+		bean.setActivated(Boolean.TRUE);
+		UserExtension saved = p.save(bean);
+		String oldPrincipal = saved.getBizCustomer() + '/' + saved.getUserName();
+		RememberMeTokens.add(p, saved.getBizCustomer(), oldPrincipal, "oldPhone");
+		saved.setUserName("renamed" + saved.getUserName());
+		UserBizlet injected = injectedBizlet();
+
+		injected.preSave(saved);
+		injected.postSave(saved);
+
+		assertEquals(0, tokenCount(p, oldPrincipal));
 	}
 
 	private static int tokenCount(Persistence p, String userName) {

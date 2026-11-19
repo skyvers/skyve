@@ -1951,6 +1951,9 @@ ITs where you meant to run unit tests.
 | `SailSuiteLoginSailIT` (`util/sail`) | a suite of two members in a real browser, opted in with `browserPerMember()`: the first signs in and out in several automations and leaves a local storage entry, and the second signs in first and does not find it | PF, desktop | `sail` |
 | `LoginRememberSailIT` (`util/sail`) | `<login remember="true"/>` on a Chrome profile: after a restart on the profile the browser is still signed in; with `remember="false"` it is signed out, the next `navigateList` fails with the signed out message, and `<testSuccess/>` on the sign in page fails | PF, tablet | `sail` |
 | `RememberMePerDeviceSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; `<logout/>` on the PC; after a restart the phone is still signed in (signing out ends Remember me in that browser only) and the PC is signed out | PF | `sail` |
+| `TwoFactorRememberSailIT` (`util/sail`) | a two-factor (email) sign in as `admin` with Remember me, entering the code the server logged, is signed in after a restart with no code asked (also after a mistyped code); without Remember me it is signed out. Needs the server set up for email two-factor with bogus mail, and `-Dsail.serverLog` (or `SAIL_SERVER_LOG`) naming its log; skipped without it | PF | `sail` |
+| `SignOutOtherSessionsSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; on the PC, My Current Sessions, `SignOutOtherSessions` confirmed; after a restart the phone is signed out and the PC is still signed in. A second test does the same with the administrator's `SignOutEverywhere` on their own user (it keeps this browser) | PF | `sail` |
+| `SignOutOtherSessionsSmartClientSailIT` (`util/sail`) | the same two actions in SmartClient: the confirmation, the message and that this browser's own session carries on | SC | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
@@ -3292,8 +3295,9 @@ Java through `SailRunIT`, alone or as a member of a suite file
 - **Filters through an association.** A list built on a document query left
   outer joins the path of every filter condition through an association, so a
   negation, a "no value" check and Match Any keep the rows with no association.
-  A custom `from` that inner joins the association itself still leaves those
-  rows out; so do SQL based lists.
+  A custom `from` that joins the association itself keeps its own join, `with`
+  condition included, so an inner join there still leaves those rows out; so
+  do SQL based lists.
 - **Inline cells in PF** are addressed by `dataEnter`, `testValue` and the
   lookup steps; `testWidget` and `captureValue` keep the row but address the
   view's widget.

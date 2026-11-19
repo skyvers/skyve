@@ -290,6 +290,40 @@ public class StateUtil {
 	}
 	
 	/**
+	 * Ends all of a user's sessions except one, which stays signed in.
+	 *
+	 * <p>A session ends when it is no longer registered against its user: the next request it makes fails
+	 * {@link #checkSession(String, HttpSession)}, is invalidated and goes to the expired page. This unregisters
+	 * every session id of the user but {@code keep}'s. If {@code keep} is not registered it is not added,
+	 * so all the user's sessions end.
+	 *
+	 * <p>Side effects: writes or removes the user's entry in the session cache (unless nothing else is there).
+	 *
+	 * <p>Threading: atomic, as {@link #removeSession(String, HttpSession)}; a session registered by a sign in
+	 * that races with this call is either kept or ended whole, never lost from the cache.
+	 *
+	 * @param userId	the user's id
+	 * @param keep	the session to keep, normally the current request's
+	 * @return	the number of sessions ended
+	 */
+	public static int removeOtherSessions(@Nonnull String userId, @Nonnull HttpSession keep) {
+		String keepId = keep.getId();
+		int[] removed = new int[1];
+		updateSet(getSessions(), userId, true, (TreeSet<String> sessionIds) -> {
+			// NB the change can run again after a lost race, so count afresh each time
+			int before = sessionIds.size();
+			boolean keepRegistered = sessionIds.contains(keepId);
+			sessionIds.clear();
+			if (keepRegistered) {
+				sessionIds.add(keepId);
+			}
+			removed[0] = before - sessionIds.size();
+			return removed[0] > 0;
+		});
+		return removed[0];
+	}
+
+	/**
 	 * Returns the session ids registered against a user.
 	 *
 	 * @param userId	the user's id
