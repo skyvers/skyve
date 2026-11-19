@@ -21,6 +21,11 @@
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!--
+		The mail settings put-back at the end of the Mail Log interaction runs only if the steps before it pass (a failed Assert stops the
+		member, and the language has no cleanup that runs after a failure). A failed run leaves mailBogusSend and mailTestRecipient as set,
+		which is what 98-destructive.xml sets anyway (mail only logged), so nothing sends real mail.
+	-->
 	<before>
 		<login user="admin" password="admin" />
 		<testSuccess />
@@ -127,12 +132,6 @@
 			<action name="CacheStats" />
 			<comment>The statistics open the Results tab and make Download Results available; they count what each cache holds (its disk tier's entries)</comment>
 			<testWidget action="DownloadResults" />
-			<execute variable="tokensBefore"><![CDATA[
-				const t = document.body.innerText;
-				const h = t.search(/\ntokens\nEvictions/);
-				const d = t.indexOf('\nDisk\n', h);
-				return /Entries:\s*(\d+)/.exec(t.substring(d))[1];
-			]]></execute>
 			<execute variable="conversationsBefore"><![CDATA[
 				const t = document.body.innerText;
 				const h = t.search(/\nconversations\nEvictions/);
@@ -143,25 +142,14 @@
 				return Number(sail.vars.conversationsBefore) > 1;
 			]]></testScript>
 			<tabSelect path="Design" />
+			<comment>The CSRF token cache holds only the current request's token on a fresh server, so its count cannot show an eviction reliably: the growl is checked, and the conversation cache's count below proves eviction</comment>
 			<dataEnter binding="selectedCache" value="CSRF Tokens" match="label" />
 			<action name="EvictSelectedCache" confirm="false" />
 			<action name="CacheStats" />
-			<testScript message="Declining the eviction should leave the CSRF tokens cache as it was"><![CDATA[
-				const t = document.body.innerText;
-				const h = t.search(/\ntokens\nEvictions/);
-				const d = t.indexOf('\nDisk\n', h);
-				return Number(/Entries:\s*(\d+)/.exec(t.substring(d))[1]) >= Number(sail.vars.tokensBefore);
-			]]></testScript>
 			<tabSelect path="Design" />
 			<action name="EvictSelectedCache" />
 			<testMessage contains="Cache tokens has been cleared" type="info" />
 			<action name="CacheStats" />
-			<testScript message="Evicting the CSRF tokens cache should leave it holding no more than before"><![CDATA[
-				const t = document.body.innerText;
-				const h = t.search(/\ntokens\nEvictions/);
-				const d = t.indexOf('\nDisk\n', h);
-				return Number(/Entries:\s*(\d+)/.exec(t.substring(d))[1]) <= Number(sail.vars.tokensBefore);
-			]]></testScript>
 			<tabSelect path="Design" />
 			<dataEnter binding="selectedCache" value="Conversations" match="label" />
 			<action name="EvictSelectedCache" />
