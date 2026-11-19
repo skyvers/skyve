@@ -394,6 +394,56 @@ Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and wh
 - ECJ 3.41 (`--release 17`, skyve-war's JDT settings, `-d` a scratch folder) on the new and changed files gives one warning: "Unnecessary @SuppressWarnings("resource")" at `ChromiumBrowserControl` line 116. It was already there at `c7791dd042`, and no W3 line is involved.
 - Not verified: a headed run, Edge, and Safari.
 
+### W5
+
+- Built `SailProfiles` (`util.sail`), with the keys `sail.profiles.keep` (`SailSettings.KeepProfiles`: `failed`, the default, `all`, `none`) and `sail.profiles.keepHours` (default 12, a whole number above 0) beside `sail.profiles`, and a `SailSettingsTest` case.
+  - `SailProfiles.folder(settings, run, profile)` gives `<root>/<run token>/<profile>` and records, for the run, what it keeps when it ends (the last folder given out says). `end(run, passed)` (package-private) deletes `<root>/<run>` if the run passed, or keeps it and prints `SAIL device profiles kept for the failed run <run>: <folder>`; `all` keeps every run's (printing only a failed one's), `none` deletes every run's. A run with no folder does nothing, and a run ends once.
+  - The sweep runs before the first folder under a root is given out. It deletes a folder under the root only if it is a real folder (not a link) named `[0-9a-z]{8,13}` (a run token; `RunState`'s are 8 characters since 1973, and a name too big for a long is not one), isn't one of this JVM's runs, is older than `keepHours` by its token and by the newest last-modified time of anything in it (links included, not followed), and has no profile whose `SingletonLock` link names a live process (`ProcessHandle.of(pid)`). A folder that fails to delete, or to be checked, gets one line, `SAIL device profiles: could not delete <folder>: <exception>`, and is left; nothing is thrown.
+  - Root, clock and printer are injectable through a package-private constructor; the public entry point keeps one instance per root.
+  - `delete(Path)` is public, because `StartDevice` uses it for `remembered=false`, in place of its own copy.
+- `StartDevice` gets its folder from `SailProfiles.folder`, and its private `folder` and `delete` are gone. `RestartDevice` now asks `SailProfiles` for the run's folder of the profile's name and refuses a profile that isn't it (another run's, or one set outside `StartDevice`) with its existing message; `DeviceCallsTest` covers that.
+- `SailWorkflow implements AutoCloseable`.
+  - A run of its own (`runResources`, `runFiles`, `runStrings`, `runWorkflow`, a suite member) ends its profiles in the run's `finally`, after its browser has stopped.
+  - A suite member that passes and keeps its browser for the next member leaves its run waiting for that browser. The waiting runs move with the browser into the next run, and end, as passed, once it stops: at the end of a run that doesn't keep it, or in `closeBrowser()`, which the suite calls in its `finally`. A browser-per-member member has no kept browser, so it ends its run when it ends.
+  - `close()` calls `closeBrowser()`, then ends the shared run's profiles: failed if any of its calls threw (a skip counts as thrown). `shareRunAcrossCalls()` resets that flag with its new run.
+  - `AbstractInterpretedSailWorkflow` keeps its tests' workflows in a static queue. Its `@AfterAll`, `closeWorkflowsAndReleaseServer()` (was `releaseServer()`), closes them all and then releases the server lock. It needs a queue because JUnit makes an instance, and so a workflow, for each test unless a class asks for one instance.
+- `CrossBrowserSelenium`: Chrome (after the three backgrounding flags) and Edge (first) start with `--disable-component-update` and `--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints`. The features of any `--disable-features=` among a configuration's extra arguments are merged into that one argument (in order, each once, blanks dropped), and the extra itself is left out. `DeviceProfileTest`'s expected built-in arguments now include both.
+- **Fallout from `AutoCloseable`: ECJ resource warnings.** With skyve-war's annotation-based resource analysis, making `SailWorkflow` closeable gave 23 ECJ warnings at existing sites. They came from fluent setters returning the workflow, workflow fields ("mark as `@Owning`"), and engines handed to other objects. I fixed them the way the repo already does:
+  - `SailSuiteTest` (3) and `SailLoadTest` (2) now close their engines with try-with-resources;
+  - `@SuppressWarnings("resource") // <why>` went on `SailLoad.VirtualUser`, `runEntries`, `runUser`, `runIteration` and `engine`, on `SailSuite`'s `engine` field and `settings(Code)`, on `AbstractInterpretedSailWorkflow`, and on `SailWorkflowTest`.
+  - ECJ now reports none in any file that uses `SailWorkflow`. Mike may prefer another approach (see "Open").
+- `StandardCallsSailIT` now uses the default root (`skyve-war/target/sail-profiles`), not a temporary one. Its device test checks that no run folder newer than the test's start is left after the passed run. Before, the test checked the folder was still there: it is now deleted.
+- Tests (no `@TestFactory`):
+  - `SailProfilesTest` (6), on a `@TempDir` root with no browser:
+    - a passed run deleted and a failed one kept and printed once;
+    - `keep` all and none;
+    - a run without a folder;
+    - one sweep test: an old run deleted; old token with a fresh file kept; recent token with old files kept; `SingletonLock` naming this JVM's pid kept; naming a dead pid (a finished `true` process) deleted; a non-token name and a too-short name left; a link named like an old token left, and what it points to untouched; an old run with a link inside deleted without following it; this JVM's run never swept; the sweep runs once;
+    - a root that doesn't exist;
+    - unwritable folders (POSIX `r-x`) in an old run and in a passed run: two warnings and both left, with nothing thrown.
+    - The JDK can't set a dangling link's own time on macOS ("Bad file descriptor"), so the test ages links with `touch -h -t`.
+  - `CrossBrowserSeleniumTest` (2, new: there was no such class): the two arguments are in Chrome's and Edge's arguments and options, headed and headless, and `--disable-background-networking` isn't; two extra `--disable-features` merge into the one built-in argument without duplicates, and the other extra is kept.
+  - `SailWorkflowTest` (+4): a run of its own (passed deleted, failed kept); a shared run's folder survives two calls and is deleted on `close()`; a shared run with a failed call keeps it on `close()`; a passed member's folder waits for its kept browser through the next member and is deleted at `close()`, while a browser-per-member member's is deleted when it ends.
+- Gate:
+  - `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest' … -Dsurefire.rerunFailingTestsCount=0 -DforkCount=1`: 316 tests, 0 failures, errors or skips, no flakes.
+  - `StandardCallsSailIT`, Chrome headless: 6/6 passed. `skyve-war/target/sail-profiles` didn't exist before; afterwards it existed and was empty.
+  - Forced failure (a temporary `return false` test script at the end of the device test, then restored): it printed `SAIL device profiles kept for the failed run mwn3547s: …/skyve-war/target/sail-profiles/mwn3547s`. The folder held `phone1` (8.6 MB) and `phone2` (8.4 MB), with no `SingletonLock` left after the browser quit. I deleted it afterwards.
+  - `ChromiumBrowserControlIT`, headless: 18/18.
+- Red/green, each restored:
+  - With the delete in `endRun` removed, `SailProfilesTest` failed 3 (passed/failed, keep all/none, the unwritable-folder warnings) and `SailWorkflowTest` failed 3 (own run, shared run on close, kept browser).
+  - With a live lock's process treated as not alive, `theSweepDeletesOnlyOldUnusedRunFolders` failed: "a run whose lock names a live process is kept".
+  - Restored, both classes passed: 29/29.
+- ECJ 3.41 (`--release 17`, skyve-war's JDT settings, `-d` a scratch folder) on every changed file and every file that uses `SailWorkflow` (the SAIL ITs and `SailLoad` included): no warnings.
+- Choices made within the plan:
+  - The sweep runs once for each root in a JVM, not once per JVM, so a test on a temporary root doesn't use up the default root's sweep.
+  - `end` doesn't sweep, so the unit tests that run workflows without a profile never touch `target/sail-profiles`.
+  - A skipped run counts as not passed: its folder is kept, and the message says "failed run". A skip on a device only happens after `StartDevice`, and the sweep removes the folder later.
+  - A run folder in use is skipped silently: no warning, because nothing failed.
+- Open:
+  - **Mike:** keep the `@SuppressWarnings("resource")` fallout above, or another approach (for example `close()` without `AutoCloseable`, which decision 13 rules out)?
+  - The single-renderer test bases (`AbstractPrimeFacesInterpretedSail`, `AbstractSmartClientInterpretedSail`) don't run through `SailWorkflow`, so a `StartDevice` in one of their tests leaves its folder to the sweep.
+  - Not verified: Windows (the undeletable-folder path was exercised with POSIX permissions), Edge, a headed run.
+
 ## User validation suggestions
 
 - Run `StandardCallsSailIT` headed and watch the offline, hold and release, and dialog steps.

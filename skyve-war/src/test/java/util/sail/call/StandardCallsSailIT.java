@@ -11,7 +11,6 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,8 +40,8 @@ import util.AbstractInterpretedSailWorkflow;
  * {@code mvn -o -pl skyve-war -am test -Dtest=StandardCallsSailIT -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.rerunFailingTestsCount=0 -DforkCount=1},
  * and add {@code -Dsail.browser=firefox} for Firefox, or {@code -Dsail.headless=false} to watch.
  * <p>
- * Device profiles go in a temporary folder, deleted afterwards. The server counts the requests it gets by path, to show
- * which reached it.
+ * Device profiles go in the default {@code sail.profiles} folder ({@code target/sail-profiles}), and the run deletes its
+ * folder when it passes. The server counts the requests it gets by path, to show which reached it.
  */
 @Tag("sail")
 class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
@@ -51,7 +50,6 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 
 	private static HttpServer server;
 	private static String origin;
-	private static Path profiles;
 
 	@BeforeAll
 	static void startServer() throws IOException {
@@ -59,17 +57,11 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 		server.createContext("/", StandardCallsSailIT::serve);
 		server.start();
 		origin = "http://localhost:" + server.getAddress().getPort(); // localhost is a secure context, as workers need
-		profiles = Files.createTempDirectory("sail-standard-calls");
 	}
 
 	@AfterAll
-	static void stopServer() throws IOException {
+	static void stopServer() {
 		server.stop(0);
-		try (Stream<Path> files = Files.walk(profiles)) {
-			for (Path file : files.sorted(Comparator.reverseOrder()).toList()) {
-				Files.delete(file);
-			}
-		}
 	}
 
 	private static void serve(@Nonnull HttpExchange exchange) throws IOException {
@@ -122,7 +114,7 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 	@BeforeEach
 	void useTheLocalServer() {
 		HITS.clear();
-		settings().baseUrl(origin + '/').variable("origin", origin).profiles(profiles);
+		settings().baseUrl(origin + '/').variable("origin", origin);
 	}
 
 	/** Returns a script of one automation and interaction, in a PrimeFaces executor, that asserts. */
@@ -448,9 +440,13 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 				""".formatted(store)));
 	}
 
-	/** A device keeps its profile across a restart and another device, and can start afresh (Chrome and Edge only). */
+	/**
+	 * A device keeps its profile across a restart and another device, and can start afresh (Chrome and Edge only); the
+	 * run passed, so its profile folder is gone afterwards.
+	 */
 	@Test
 	void aDeviceKeepsItsProfileAcrossARestart() throws IOException {
+		long started = System.currentTimeMillis();
 		sailWorkflowString(automation("devices", """
 				<call className="util.sail.call.StartDevice" variable="device">
 					<parameter name="profile" value="phone1" />
@@ -490,15 +486,16 @@ class StandardCallsSailIT extends AbstractInterpretedSailWorkflow {
 				<navigateLink href="{var:origin}/" />
 				<testScript message="phone1 started afresh"><![CDATA[ return localStorage.getItem('device') === null; ]]></testScript>
 				"""));
-		List<Path> runs;
-		try (Stream<Path> list = Files.list(profiles)) {
-			runs = list.toList();
+		Path profiles = settings().resolve().profiles();
+		List<String> left = List.of();
+		if (Files.isDirectory(profiles)) {
+			try (Stream<Path> list = Files.list(profiles)) {
+				// the run folders of runs since this test started
+				left = list.map(p -> p.getFileName().toString())
+							.filter(name -> name.matches("[0-9a-z]{8,13}") && (Long.parseLong(name, Character.MAX_RADIX) >= started))
+							.toList();
+			}
 		}
-		List<String> devices;
-		try (Stream<Path> list = Files.list(runs.get(0))) {
-			devices = list.map(p -> p.getFileName().toString()).sorted().toList();
-		}
-		assertAll(() -> assertEquals(1, runs.size(), "one run folder: " + runs),
-					() -> assertEquals(List.of("phone1", "phone2"), devices, "a profile folder for each device"));
+		assertEquals(List.of(), left, "the passed run's profile folder is deleted from " + profiles);
 	}
 }

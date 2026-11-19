@@ -2,10 +2,12 @@ package util.sail;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
@@ -14,6 +16,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,6 +29,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.openqa.selenium.WebDriver;
 import org.opentest4j.TestAbortedException;
 import org.skyve.impl.sail.execution.RunState;
@@ -39,7 +45,7 @@ import org.skyve.web.UserAgentType;
  * per member, which stops it; one that fails stops it; a workflow on its own stops its browser when it ends; a browser
  * that fails to start is never reused.
  */
-@SuppressWarnings("java:S5960") // test-only assertions
+@SuppressWarnings({"java:S5960", "resource"}) // test-only assertions; each test has its own engine, whose setters return it
 class SailWorkflowTest {
 	private static final String AUTOMATION = "<automation uxui=\"tablet\" userAgentType=\"tablet\" xmlns=\"http://www.skyve.org/xml/sail\">" +
 												"<interaction name=\"i\"><method><comment>a step</comment></method></interaction></automation>";
@@ -66,6 +72,11 @@ class SailWorkflowTest {
 	private java.util.function.Consumer<Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>> step;
 	/** The member running. */
 	private String current;
+	/** True for each leg to make a device profile folder of its run, as a {@code StartDevice} step's browser does. */
+	private boolean makeProfile;
+	/** The root of the device profiles that the legs make. */
+	@TempDir
+	Path profiles;
 
 	private final SailWorkflow engine = new SailWorkflow(new SailViewRoles(),
 															(smartClient, configuration, resolved) -> start(configuration, resolved),
@@ -75,6 +86,9 @@ class SailWorkflowTest {
 																runs.add(run);
 																if (step != null) {
 																	step.accept(browser);
+																}
+																if (makeProfile) {
+																	makeProfile(run, settings);
 																}
 																if (failing.contains(current)) {
 																	throw new AssertionError(current + " failed its step");
@@ -116,6 +130,21 @@ class SailWorkflowTest {
 		}).when(result).stopBrowser();
 		events.add("start " + id);
 		return result;
+	}
+
+	/** Makes a device profile folder of a run, where {@code StartDevice} would put it. */
+	private static void makeProfile(RunState run, SailSettings settings) {
+		try {
+			Files.createDirectories(SailProfiles.folder(settings, run.getRunToken(), "phone1"));
+		}
+		catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/** Returns the device profile folder of the run of a leg, by the leg's place in the order the legs ran. */
+	private Path runFolder(int leg) {
+		return profiles.resolve(runs.get(leg).getRunToken());
 	}
 
 	private void member(String file) {
@@ -390,5 +419,81 @@ class SailWorkflowTest {
 		assertEquals(List.of("start 1", "run 1 null", "stop 1"), events, "one member ran");
 		assertEquals(4, summary.members(SailSuite.Outcome.SKIPPED).size(), summary.describe("kitchensink"));
 		assertEquals(List.of("the run is stopping"), summary.skips().values().stream().distinct().toList());
+	}
+
+	/** A run of its own ends its device profiles when its call returns: a passed run's are deleted, a failed run's kept. */
+	@Test
+	void aRunOfItsOwnEndsItsProfilesWhenItsCallReturns() {
+		engine.settings().profiles(profiles);
+		makeProfile = true;
+		current = "w.xml";
+		engine.runStrings(AUTOMATION);
+		failing.add("w.xml");
+		assertThrows(AssertionError.class, () -> engine.runStrings(AUTOMATION));
+		assertAll(() -> assertFalse(Files.exists(runFolder(0)), "the passed run's folder is deleted"),
+					() -> assertTrue(Files.isDirectory(runFolder(1).resolve("phone1")), "the failed run's folder is kept"));
+	}
+
+	/** A shared run's device profiles survive from call to call, and are deleted when the workflow closes after passing calls. */
+	@Test
+	void aSharedRunsProfilesSurviveItsCallsAndAreDeletedOnClose() {
+		engine.settings().profiles(profiles);
+		makeProfile = true;
+		current = "w.xml";
+		boolean afterFirst;
+		boolean afterSecond;
+		try (SailWorkflow shared = engine.shareRunAcrossCalls()) {
+			shared.runStrings(AUTOMATION);
+			afterFirst = Files.isDirectory(runFolder(0).resolve("phone1"));
+			shared.runStrings(AUTOMATION);
+			afterSecond = Files.isDirectory(runFolder(1).resolve("phone1"));
+		}
+		boolean kept = afterFirst;
+		boolean keptAgain = afterSecond;
+		assertAll(() -> assertSame(runs.get(0), runs.get(1), "one run"),
+					() -> assertTrue(kept, "kept after the first call"),
+					() -> assertTrue(keptAgain, "kept after the second call"),
+					() -> assertFalse(Files.exists(runFolder(0)), "deleted on close"));
+	}
+
+	/** A shared run with a call that failed keeps its device profiles when the workflow closes. */
+	@Test
+	void aSharedRunWithAFailedCallKeepsItsProfilesOnClose() {
+		engine.settings().profiles(profiles);
+		makeProfile = true;
+		current = "w.xml";
+		try (SailWorkflow shared = engine.shareRunAcrossCalls()) {
+			shared.runStrings(AUTOMATION);
+			failing.add("w.xml");
+			assertThrows(AssertionError.class, () -> shared.runStrings(AUTOMATION));
+			failing.clear();
+			shared.runStrings(AUTOMATION);
+		}
+		assertTrue(Files.isDirectory(runFolder(0).resolve("phone1")), "kept on close: a call failed");
+	}
+
+	/**
+	 * A suite member that passes keeps its browser for the next member, so its device profiles end only when that
+	 * browser stops; a member with a browser of its own ends them when it ends.
+	 */
+	@Test
+	void aPassedMembersProfilesWaitForTheBrowserItKept() {
+		engine.settings().profiles(profiles);
+		makeProfile = true;
+		member("a.xml");
+		boolean whileKept = Files.isDirectory(runFolder(0).resolve("phone1"));
+		member("b.xml");
+		boolean whileStillKept = Files.isDirectory(runFolder(0).resolve("phone1"));
+		ownBrowserMember("c.xml");
+		boolean ownEnded = ! Files.exists(runFolder(2));
+		boolean keptStill = Files.isDirectory(runFolder(1).resolve("phone1"));
+		engine.close();
+		assertAll(() -> assertTrue(whileKept, "a.xml's folder while its browser is kept"),
+					() -> assertTrue(whileStillKept, "and while b.xml carries on in it"),
+					() -> assertTrue(ownEnded, "c.xml, with a browser of its own, ends its folder when it ends"),
+					() -> assertTrue(keptStill, "b.xml's folder while its browser is kept"),
+					() -> assertFalse(Files.exists(runFolder(0)), "a.xml's folder once the kept browser stops"),
+					() -> assertFalse(Files.exists(runFolder(1)), "b.xml's folder too"),
+					() -> assertEquals(List.of("start 1", "run 1 a.xml", "run 1 b.xml", "start 2", "run 2 c.xml", "stop 2", "stop 1"), events));
 	}
 }

@@ -4,9 +4,11 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -30,6 +32,17 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 abstract class CrossBrowserSelenium {
+	/** The Chrome and Edge argument that turns features off, followed by their names, comma separated. */
+	static final String DISABLE_FEATURES = "--disable-features=";
+	/**
+	 * The Chrome and Edge features that SAIL turns off: the optimisation guide's model downloads and hints, which put
+	 * {@code optimization_guide_model_store} and {@code OnDeviceHeadSuggestModel} (about 55 MB) in every profile.
+	 */
+	static final List<String> DISABLED_FEATURES = List.of("OptimizationGuideModelDownloading",
+															"OptimizationHintsFetching",
+															"OptimizationTargetPrediction",
+															"OptimizationHints");
+
 	protected WebDriver driver;
 	protected BrowserConfiguration configuration;
 	protected Actions actions;
@@ -183,7 +196,8 @@ abstract class CrossBrowserSelenium {
 
 	/**
 	 * Returns the command-line arguments to start Chrome with: the built-in ones, then the profile's
-	 * {@code --user-data-dir} (if any), then the configuration's extra arguments.
+	 * {@code --user-data-dir} (if any), then the configuration's extra arguments. An extra {@code --disable-features}
+	 * is merged into the built-in one (see {@link #addDownloadFlags}).
 	 *
 	 * @param config	the user agent, window size, profile and extra arguments
 	 * @param headless	true for a headless browser
@@ -195,6 +209,7 @@ abstract class CrossBrowserSelenium {
 		arguments.add("--disable-backgrounding-occluded-windows");
 		arguments.add("--disable-renderer-backgrounding");
 		arguments.add("--disable-background-timer-throttling");
+		addDownloadFlags(arguments, config);
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
@@ -212,14 +227,16 @@ abstract class CrossBrowserSelenium {
 
 	/**
 	 * Returns the command-line arguments to start Edge with: the built-in ones, then the profile's
-	 * {@code --user-data-dir} (if any), then the configuration's extra arguments.
+	 * {@code --user-data-dir} (if any), then the configuration's extra arguments. An extra {@code --disable-features}
+	 * is merged into the built-in one (see {@link #addDownloadFlags}).
 	 *
 	 * @param config	the user agent, profile and extra arguments
 	 * @param headless	true for a headless browser
 	 * @return the arguments
 	 */
 	static @Nonnull List<String> edgeArguments(@Nonnull BrowserConfiguration config, boolean headless) {
-		List<String> arguments = new ArrayList<>(4);
+		List<String> arguments = new ArrayList<>(6);
+		addDownloadFlags(arguments, config);
 		String userAgentString = config.getUserAgentString();
 		if (userAgentString != null) {
 			arguments.add("--user-agent=" + userAgentString);
@@ -313,12 +330,48 @@ abstract class CrossBrowserSelenium {
 		options.setExperimentalOption("prefs", preferences);
 	}
 
+	/**
+	 * Adds the arguments that stop Chrome and Edge downloading components and models by themselves into every profile
+	 * (measured with Chrome 158: 139 MB of a 151 MB profile within four minutes of its start). Both are needed:
+	 * {@code --disable-component-update} stops the component updater ({@code component_crx_cache},
+	 * {@code WasmTtsEngine}, {@code CertificateRevocation} and others), and {@link #DISABLED_FEATURES} stop the model
+	 * downloads; each alone leaves the other's downloads. Not {@code --disable-background-networking}: ChromeDriver adds
+	 * it already, and the downloads happen anyway.
+	 * <p>
+	 * Chrome honours only the last {@code --disable-features}, so the features of any in the configuration's extra
+	 * arguments join the built-in list here, once each, and {@link #addProfileAndArguments} leaves those extras out.
+	 * (ChromeDriver merges its own {@code --disable-features} into ours.)
+	 *
+	 * @param arguments	the arguments so far, to add to
+	 * @param config	the configuration, whose extra arguments may turn off more features
+	 */
+	private static void addDownloadFlags(@Nonnull List<String> arguments, @Nonnull BrowserConfiguration config) {
+		arguments.add("--disable-component-update");
+		Set<String> features = new LinkedHashSet<>(DISABLED_FEATURES);
+		for (String argument : config.getArguments()) {
+			if (argument.startsWith(DISABLE_FEATURES)) {
+				for (String feature : argument.substring(DISABLE_FEATURES.length()).split(",")) {
+					if (! feature.isBlank()) {
+						features.add(feature.trim());
+					}
+				}
+			}
+		}
+		arguments.add(DISABLE_FEATURES + String.join(",", features));
+	}
+
+	/** Adds the profile's {@code --user-data-dir}, if any, then the extra arguments but {@code --disable-features}. */
 	private static void addProfileAndArguments(@Nonnull List<String> arguments, @Nonnull BrowserConfiguration config) {
 		Path profile = config.getProfile();
 		if (profile != null) {
 			arguments.add("--user-data-dir=" + profile);
 		}
-		arguments.addAll(config.getArguments());
+		for (String argument : config.getArguments()) {
+			// merged into the built-in one by addDownloadFlags
+			if (! argument.startsWith(DISABLE_FEATURES)) {
+				arguments.add(argument);
+			}
+		}
 	}
 
 	/**

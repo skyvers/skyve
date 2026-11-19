@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
@@ -24,9 +25,14 @@ class DeviceProfileTest {
 	private static final Path DIR = Path.of("target", "device-profile-test", "phone-1").toAbsolutePath();
 	private static final String DATA_DIR = "--user-data-dir=" + DIR;
 	private static final String FAKE = "--use-fake-device-for-media-stream";
-	private static final List<String> CHROME_BUILT_IN = List.of("--disable-backgrounding-occluded-windows",
-																"--disable-renderer-backgrounding",
-																"--disable-background-timer-throttling");
+	/** Edge's built-in arguments: no component or model downloads. */
+	private static final List<String> EDGE_BUILT_IN = List.of("--disable-component-update",
+																CrossBrowserSelenium.DISABLE_FEATURES + String.join(",", CrossBrowserSelenium.DISABLED_FEATURES));
+	/** Chrome's: no backgrounding, then Edge's. */
+	private static final List<String> CHROME_BUILT_IN = Stream.concat(Stream.of("--disable-backgrounding-occluded-windows",
+																				"--disable-renderer-backgrounding",
+																				"--disable-background-timer-throttling"),
+																		EDGE_BUILT_IN.stream()).toList();
 
 	@Test
 	@SuppressWarnings("static-method")
@@ -59,17 +65,20 @@ class DeviceProfileTest {
 		List<String> chromeHeaded = CrossBrowserSelenium.chromeArguments(plain, false);
 		List<String> chromeFull = CrossBrowserSelenium.chromeArguments(full, true);
 		assertAll(() -> assertEquals(CHROME_BUILT_IN, chromeHeaded, "chrome, plain"),
-					() -> assertEquals(List.of(CHROME_BUILT_IN.get(0), CHROME_BUILT_IN.get(1), CHROME_BUILT_IN.get(2),
-												"--user-agent=UA", "--headless", "--window-size=1920,1080", DATA_DIR, FAKE, "--x"),
+					() -> assertEquals(after(CHROME_BUILT_IN, "--user-agent=UA", "--headless", "--window-size=1920,1080", DATA_DIR, FAKE, "--x"),
 										chromeFull, "chrome, profile and extras"),
-					() -> assertEquals(List.of(CHROME_BUILT_IN.get(0), CHROME_BUILT_IN.get(1), CHROME_BUILT_IN.get(2), FAKE),
-										CrossBrowserSelenium.chromeArguments(extrasOnly, false), "chrome, extras only"),
-					() -> assertEquals(List.of(CHROME_BUILT_IN.get(0), CHROME_BUILT_IN.get(1), CHROME_BUILT_IN.get(2), "--headless"),
+					() -> assertEquals(after(CHROME_BUILT_IN, FAKE), CrossBrowserSelenium.chromeArguments(extrasOnly, false), "chrome, extras only"),
+					() -> assertEquals(after(CHROME_BUILT_IN, "--headless"),
 										CrossBrowserSelenium.chromeArguments(new BrowserConfiguration().resolution(10, 20), true), "chrome, headless with its own size"),
-					() -> assertEquals(List.of(), CrossBrowserSelenium.edgeArguments(plain, false), "edge, plain"),
-					() -> assertEquals(List.of("--user-agent=UA", "headless", DATA_DIR, FAKE, "--x"),
+					() -> assertEquals(EDGE_BUILT_IN, CrossBrowserSelenium.edgeArguments(plain, false), "edge, plain"),
+					() -> assertEquals(after(EDGE_BUILT_IN, "--user-agent=UA", "headless", DATA_DIR, FAKE, "--x"),
 										CrossBrowserSelenium.edgeArguments(full, true), "edge, profile and extras"),
-					() -> assertEquals(List.of(FAKE), CrossBrowserSelenium.edgeArguments(extrasOnly, false), "edge, extras only"));
+					() -> assertEquals(after(EDGE_BUILT_IN, FAKE), CrossBrowserSelenium.edgeArguments(extrasOnly, false), "edge, extras only"));
+	}
+
+	/** Returns the built-in arguments followed by others. */
+	private static List<String> after(List<String> builtIn, String... others) {
+		return Stream.concat(builtIn.stream(), Stream.of(others)).toList();
 	}
 
 	/** Firefox and Safari refuse before any browser starts: the real start throws, so no driver is made. */

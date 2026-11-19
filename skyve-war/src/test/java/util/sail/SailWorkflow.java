@@ -54,6 +54,10 @@ import util.sail.BrowserConfiguration.Browsers;
  * 		when the test class has finished (as the test bases do with {@link SailServerLock#releaseAll()}).</li>
  * <li>The run stops at the first automation that fails, as later ones build on earlier ones. The browser is stopped
  * 		when the workflow ends (unless a suite keeps it for its next member).</li>
+ * <li>When a run ends, after its browsers have quit, its device profiles end ({@link SailProfiles}): deleted if it
+ * 		passed, kept if it failed. A run of its own ends when its call returns (or, for a suite member that keeps its
+ * 		browser for the next, when that browser stops); a run shared across calls ends when the workflow is
+ * 		{@linkplain #close() closed}.</li>
  * <li>A workflow's {@code testStrategy} is the default for its automations that state none; in a suite, so is the
  * 		suite's, unless the member is locked (see {@link SailSuite}).</li>
  * <li>The settings ({@link SailSettings}) are resolved, and checked, before the first browser starts, with this
@@ -62,7 +66,7 @@ import util.sail.BrowserConfiguration.Browsers;
  * </ul>
  * Not thread-safe.
  */
-public final class SailWorkflow {
+public final class SailWorkflow implements AutoCloseable {
 	private final SailViewRoles viewRoles;
 	private final Map<UserAgentType, Supplier<BrowserConfiguration>> browsers = new EnumMap<>(UserAgentType.class);
 	private SailSettings.Code settings = SailSettings.code();
@@ -78,6 +82,10 @@ public final class SailWorkflow {
 	private BooleanSupplier stopping = () -> false;
 	/** The run that all of this runner's calls share, or null if each call has its own; see {@link #shareRunAcrossCalls()}. */
 	private RunState sharedRun;
+	/** True once a call in the shared run has thrown: the run failed, so {@link #close()} keeps its device profiles. */
+	private boolean sharedRunFailed;
+	/** The runs that passed whose device profiles end when the {@link #kept} browser stops, by run token. */
+	private final List<String> keptRuns = new ArrayList<>();
 
 	/**
 	 * Starts a new browser: a {@link SmartClientSelenide} or {@link PrimeFacesSelenide}, started with the leg's settings.
@@ -165,12 +173,14 @@ public final class SailWorkflow {
 	 * {@code runFiles} or {@code runStrings} call to the next. Without it, every call is a run of its own.
 	 *
 	 * <p>Side effects: the run is never reset, so it holds the variables of every earlier call, including a failed one.
-	 * Like the runner, it is for one thread: do not share such a runner between threads.
+	 * Like the runner, it is for one thread: do not share such a runner between threads. The run's device profiles end
+	 * only when the runner is {@linkplain #close() closed}, so close it when its calls are done (a test base does).
 	 *
 	 * @return this runner
 	 */
 	public @Nonnull SailWorkflow shareRunAcrossCalls() {
 		sharedRun = new RunState();
+		sharedRunFailed = false;
 		return this;
 	}
 
@@ -354,15 +364,47 @@ public final class SailWorkflow {
 	}
 
 	/**
-	 * Stops the browser that a suite member left open for the next, if any. A suite calls it when it ends, in a
-	 * {@code finally}, so no browser outlives its suite.
+	 * Stops the browser that a suite member left open for the next, if any, then ends the device profiles of the passed
+	 * runs that waited for it. A suite calls it when it ends, in a {@code finally}, so no browser outlives its suite.
 	 */
 	void closeBrowser() {
 		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = kept;
 		kept = null;
-		if (browser != null) {
-			browser.stopBrowser();
+		try {
+			if (browser != null) {
+				browser.stopBrowser();
+			}
 		}
+		finally {
+			endKeptRuns();
+		}
+	}
+
+	/**
+	 * Ends the workflow: stops the browser a suite member left open, if any, then ends the device profiles of the run
+	 * shared across calls ({@link #shareRunAcrossCalls()}), if there is one: the run failed if any of its calls threw
+	 * (see {@link SailProfiles}). A run of its own has ended already, when its call returned. A test that shares a run
+	 * closes its runner when its calls are done, e.g. with try-with-resources; a test base closes its own.
+	 */
+	@Override
+	public void close() {
+		try {
+			closeBrowser();
+		}
+		finally {
+			RunState run = sharedRun;
+			if (run != null) {
+				SailProfiles.end(run.getRunToken(), ! sharedRunFailed);
+			}
+		}
+	}
+
+	/** Ends the device profiles of the passed runs that waited for the kept browser, which has stopped. */
+	private void endKeptRuns() {
+		for (String run : keptRuns) {
+			SailProfiles.end(run, true);
+		}
+		keptRuns.clear();
 	}
 
 	/**
@@ -439,9 +481,13 @@ public final class SailWorkflow {
 		}
 		RunState run = (sharedRun == null) ? new RunState() : sharedRun;
 		Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> browser = null;
+		// the passed runs whose device profiles wait for the browser this run carries on in to stop
+		List<String> waiting = new ArrayList<>();
 		if (! ownBrowser) {
 			browser = kept;
 			kept = null;
+			waiting.addAll(keptRuns);
+			keptRuns.clear();
 		}
 		boolean passed = false;
 		SailMedia.beginUnit(); // with keepMedia=failed, the legs' media is deleted only if the whole workflow passed
@@ -475,14 +521,48 @@ public final class SailWorkflow {
 		}
 		finally {
 			SailMedia.endUnit(passed);
-			if (browser != null) {
-				if (keepBrowser && passed) {
+			boolean keeping = (browser != null) && keepBrowser && passed;
+			try {
+				if (keeping) {
 					kept = browser;
 				}
-				else {
+				else if (browser != null) {
 					browser.stopBrowser();
 				}
 			}
+			finally {
+				endProfiles(run, passed, waiting, keeping);
+			}
+		}
+	}
+
+	/**
+	 * Ends a run's device profiles once its browser has quit, with those of the passed runs that waited for that
+	 * browser; or, while the browser is kept for the next run, leaves them to end when it stops. A run shared across
+	 * calls ends only when the workflow is closed: this notes whether it failed.
+	 *
+	 * @param run	the run that ended
+	 * @param passed	true if it passed
+	 * @param waiting	the passed runs whose profiles waited for the browser the run carried on in
+	 * @param keeping	true if the run's browser is kept open for the next run
+	 */
+	private void endProfiles(@Nonnull RunState run, boolean passed, @Nonnull List<String> waiting, boolean keeping) {
+		boolean own = (run != sharedRun);
+		if ((! own) && (! passed)) {
+			sharedRunFailed = true;
+		}
+		if (keeping) { // so the run passed
+			keptRuns.addAll(waiting);
+			if (own) {
+				keptRuns.add(run.getRunToken());
+			}
+			return;
+		}
+		for (String token : waiting) {
+			SailProfiles.end(token, true);
+		}
+		if (own) {
+			SailProfiles.end(run.getRunToken(), passed);
 		}
 	}
 

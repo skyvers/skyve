@@ -1,5 +1,7 @@
 package util;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,15 +33,28 @@ import util.sail.SailWorkflow;
  * <p>
  * Unlike the single-renderer test bases, no browser is started before a test: the workflow starts the browser each
  * automation needs. The server lock ({@link SailServerLock}) is taken by the first workflow and held until the class has
- * finished.
+ * finished. When the class has finished, its tests' workflows are closed too ({@link SailWorkflow#close()}), which ends
+ * a shared run's device profiles.
  * <p>
  * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
  * {@code settings().headless(false).timeoutSeconds(60)}, before the workflow runs.
  */
+@SuppressWarnings("resource") // closeWorkflowsAndReleaseServer() closes the tests' workflows; their setters return the same workflow
 public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
+	/**
+	 * The workflows of the tests that have run, closed when the class has finished: each test has its own instance, and
+	 * so its own workflow, unless the class has one instance for all its tests.
+	 */
+	private static final Queue<SailWorkflow> WORKFLOWS = new ConcurrentLinkedQueue<>();
+
 	/** The roles the views are built with for the users the scripts sign in as. */
 	private final SailViewRoles viewRoles = new SailViewRoles();
 	private final SailWorkflow workflow = new SailWorkflow(viewRoles);
+
+	/** Creates the test, whose workflow is closed when the class has finished. */
+	protected AbstractInterpretedSailWorkflow() {
+		WORKFLOWS.add(workflow);
+	}
 
 	/**
 	 * Builds the views for a user that the scripts sign in as with the user's roles, instead of every role.
@@ -151,8 +166,19 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 		SailSuite.file(file, workflow).run();
 	}
 
+	/**
+	 * Closes the workflows of the class's tests, which stops a browser a suite left open and ends a shared run's device
+	 * profiles, then releases the server lock.
+	 */
 	@AfterAll
-	static void releaseServer() {
-		SailServerLock.releaseAll();
+	static void closeWorkflowsAndReleaseServer() {
+		try {
+			for (SailWorkflow closing = WORKFLOWS.poll(); closing != null; closing = WORKFLOWS.poll()) {
+				closing.close();
+			}
+		}
+		finally {
+			SailServerLock.releaseAll();
+		}
 	}
 }

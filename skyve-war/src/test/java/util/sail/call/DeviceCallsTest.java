@@ -116,6 +116,8 @@ class DeviceCallsTest {
 	@Test
 	void aDeviceRestartsOnTheSameProfile() throws Exception {
 		IllegalStateException noProfile = assertThrows(IllegalStateException.class, () -> run(new RestartDevice(), context));
+		configuration.profile(root.resolve("run0").resolve("phone1"));
+		IllegalStateException anotherRuns = assertThrows(IllegalStateException.class, () -> run(new RestartDevice(), context));
 		Path folder = root.resolve("run1").resolve("phone1");
 		configuration.profile(folder);
 		String restarted = run(new RestartDevice(), context, "offline", "true", "touch", "true");
@@ -126,6 +128,7 @@ class DeviceCallsTest {
 		order.verify(selenide).stopBrowser();
 		order.verify(selenide).startBrowser(configuration, settings);
 		assertAll(() -> assertEquals("RestartDevice needs the leg on a device profile: use StartDevice first", noProfile.getMessage()),
+					() -> assertEquals(noProfile.getMessage(), anotherRuns.getMessage(), "a profile that isn't this run's device"),
 					() -> assertEquals(folder.toString(), restarted),
 					() -> assertEquals(folder, configuration.getProfile(), "the same profile"),
 					() -> assertEquals(List.of("offline", "emulateTouch 5"), first),

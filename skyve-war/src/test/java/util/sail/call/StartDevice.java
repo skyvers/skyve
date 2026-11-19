@@ -1,12 +1,7 @@
 package util.sail.call;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Stream;
 
 import org.openqa.selenium.chromium.ChromiumDriver;
 import org.opentest4j.TestAbortedException;
@@ -14,6 +9,7 @@ import org.opentest4j.TestAbortedException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import util.sail.BrowserConfiguration;
+import util.sail.SailProfiles;
 import util.sail.SailSettings;
 import util.sail.Selenide;
 import util.sail.browser.Capability;
@@ -27,10 +23,11 @@ import util.sail.browser.TouchEmulation;
  * someone else on another device, and picked up again with its unsent work. Use it first in a device's leg; the next
  * step is a navigate step.
  * <p>
- * The profile is the folder {@code <root>/<run token>/<profile>}, with the root from {@code sail.profiles}
- * ({@code target/sail-profiles} under the working directory by default), so each run starts with new devices. If the
- * leg's browser isn't on that folder, it is stopped and started again on it, with the same settings; either way the
- * device's network and touch settings are applied afterwards, as a restarted browser has none.
+ * The profile is the folder {@code <root>/<run token>/<profile>} that {@link SailProfiles} gives, with the root from
+ * {@code sail.profiles} ({@code target/sail-profiles} under the working directory by default), so each run starts with
+ * new devices; the run's folder is deleted when the run passes, and kept when it fails. If the leg's browser isn't on
+ * that folder, it is stopped and started again on it, with the same settings; either way the device's network and touch
+ * settings are applied afterwards, as a restarted browser has none.
  * <ul>
  * <li>{@code profile}: the device's name: letters, digits, {@code -} or {@code _}, such as {@code phone1} (required)</li>
  * <li>{@code offline}: {@code true} to take the device offline before any page opens, as a phone in a basement; it is
@@ -70,43 +67,16 @@ public final class StartDevice extends AbstractSailCall {
 		if ((configuration == null) || (settings == null)) {
 			throw new IllegalStateException(name() + " runs in a leg whose browser has started");
 		}
-		Path folder = folder(settings, context.runToken(), profile);
+		Path folder = SailProfiles.folder(settings, context.runToken(), profile);
 		if ((! remembered) || (! folder.equals(configuration.getProfile()))) {
 			selenide.stopBrowser();
 			if (! remembered) {
-				delete(folder);
+				SailProfiles.delete(folder);
 			}
 			selenide.startBrowser(configuration.profile(folder), settings);
 		}
 		applyDevice(context, name(), offline, touch);
 		return folder.toString();
-	}
-
-	/**
-	 * Returns a device's profile folder: {@code <root>/<run token>/<profile>}, with the root from {@code sail.profiles}.
-	 * The one place the folder is worked out.
-	 *
-	 * @param settings	the leg's settings
-	 * @param run	the run token
-	 * @param profile	the device's name
-	 * @return the folder, absolute
-	 */
-	private static @Nonnull Path folder(@Nonnull SailSettings settings, @Nonnull String run, @Nonnull String profile) {
-		return settings.profiles().resolve(run).resolve(profile).toAbsolutePath().normalize();
-	}
-
-	/** Deletes a profile folder and everything in it, if it exists, following no links. */
-	private static void delete(@Nonnull Path folder) throws IOException {
-		if (! Files.exists(folder, LinkOption.NOFOLLOW_LINKS)) {
-			return;
-		}
-		List<Path> files;
-		try (Stream<Path> walk = Files.walk(folder)) {
-			files = walk.sorted(Comparator.reverseOrder()).toList();
-		}
-		for (Path file : files) {
-			Files.delete(file);
-		}
 	}
 
 	/**

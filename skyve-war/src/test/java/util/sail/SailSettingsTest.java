@@ -289,6 +289,27 @@ class SailSettingsTest {
 					() -> assertEquals(Path.of("/tmp/lane2"), fromEnvironment.profiles(), "SAIL_PROFILES"));
 	}
 
+	/** A failed run keeps its device profiles and a later run sweeps them after 12 hours, unless set otherwise. */
+	@Test
+	void theProfilesAreKeptForFailedRunsForTwelveHoursUnlessSet() {
+		SailSettings defaulted = resolve();
+		SailSettings set = resolve(SailSettings.code().profilesKeep(SailSettings.KeepProfiles.ALL).profilesKeepHours(2).layer());
+		env.put("SAIL_PROFILES_KEEP", "None");
+		env.put("SAIL_PROFILES_KEEP_HOURS", "48");
+		SailSettings fromEnvironment = resolve();
+		env.clear();
+		Layer invalid = SailSettings.code().set(SailSettings.PROFILES_KEEP, "passed").set(SailSettings.PROFILES_KEEP_HOURS, "0").layer();
+		String message = assertThrows(IllegalArgumentException.class, () -> resolve(invalid)).getMessage();
+		assertAll(() -> assertEquals(SailSettings.KeepProfiles.FAILED, defaulted.profilesKeep(), "the default keep"),
+					() -> assertEquals(12, defaulted.profilesKeepHours(), "the default hours"),
+					() -> assertEquals(SailSettings.KeepProfiles.ALL, set.profilesKeep(), "keep set in code"),
+					() -> assertEquals(2, set.profilesKeepHours(), "hours set in code"),
+					() -> assertEquals(SailSettings.KeepProfiles.NONE, fromEnvironment.profilesKeep(), "SAIL_PROFILES_KEEP, in any case"),
+					() -> assertEquals(48, fromEnvironment.profilesKeepHours(), "SAIL_PROFILES_KEEP_HOURS"),
+					() -> assertTrue(message.contains("sail.profiles.keep=passed (code): use one of failed, all, none"), message),
+					() -> assertTrue(message.contains("sail.profiles.keepHours=0 (code): use a whole number above 0"), message));
+	}
+
 	@Test
 	void theUserPropertiesFileIsReadFromTheHomeDirectory() throws IOException {
 		Path file = userFile("sail.headless=false\nsail.var.password=secret\n");

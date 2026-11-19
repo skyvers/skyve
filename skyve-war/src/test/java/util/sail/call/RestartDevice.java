@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import util.sail.BrowserConfiguration;
+import util.sail.SailProfiles;
 import util.sail.SailSettings;
 import util.sail.Selenide;
 
@@ -13,8 +14,8 @@ import util.sail.Selenide;
  * and then opened again: the device keeps its IndexedDB, CacheStorage, localStorage, service worker and persistent
  * cookies (a remember-me cookie), and loses its session cookies, its open pages and every setting made through the
  * browser's control (the network, request rules, init scripts). The device's network and touch settings are applied
- * again, as {@link StartDevice} does. The leg must be on a device profile already ({@link StartDevice}); the next step
- * is a navigate step.
+ * again, as {@link StartDevice} does. The leg must be on a device profile of this run already ({@link StartDevice}), the
+ * folder {@link SailProfiles} gives; the next step is a navigate step.
  * <ul>
  * <li>{@code offline}: {@code true} to start the device offline, before any page opens; online by default</li>
  * <li>{@code touch}: {@code true} for a touch screen; a mouse by default</li>
@@ -40,7 +41,8 @@ public final class RestartDevice extends AbstractSailCall {
 		BrowserConfiguration configuration = selenide.getConfiguration();
 		SailSettings settings = selenide.getSettings();
 		Path profile = (configuration == null) ? null : configuration.getProfile();
-		if ((configuration == null) || (settings == null) || (profile == null)) {
+		if ((configuration == null) || (settings == null) || (profile == null) ||
+				(! profile.equals(SailProfiles.folder(settings, context.runToken(), String.valueOf(profile.getFileName()))))) {
 			throw new IllegalStateException(name() + " needs the leg on a device profile: use StartDevice first");
 		}
 		selenide.stopBrowser();
