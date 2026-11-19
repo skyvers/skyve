@@ -50,7 +50,7 @@
 			<navigateMenu module="admin" item="Jobs" />
 			<tabSelect path="Actual" />
 			<action name="Refresh" />
-			<comment>00-backup.xml (a set-up, so it runs whatever sail.suite.only chooses) cleared the list then backed up; the 98-destructive.xml members, which clear it again, run after both 05 members</comment>
+			<comment>00-backup.xml (a set-up, so it runs whatever sail.suite.only chooses) cleared the list then backed up; the 11-user-list.xml and 98-destructive.xml members, which clear it again, run after both 05 members</comment>
 			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" maxRows="1" />
 			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Backup" />
 			<cancel />

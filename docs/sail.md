@@ -2601,8 +2601,13 @@ PrimeFaces (`pf/`, tablet, and one phone member) and SmartClient (`sc/`).
 | `pf/02-contacts-communications.xml`, `sc/02-…` | member | Contact create, find, change and delete, with an image upload and a declined delete; Communication Templates; Communications: every tab, attachments, and the send actions' refusals; generated contacts (`testDataEnter`) from the contacts query |
 | `pf/03-security-admin.xml`, `sc/03-…` | member | Data Groups; Groups (roles through list membership); the User wizard; the new user signs in, sees a role-filtered menu and changes their password; Sign In History; Security Log; Configuration tabs; Mail Log; generated data groups (and, in SC, a generated group with a role), each saved twice |
 | `pf/04-devops.xml`, `sc/04-…` | member | Control Panel (every tab, a query, cache statistics, generated SAIL); Data Maintenance (the backup list, import/export; in PF also a save and the upload backup page); Document Creator, and its Submit refused (PF without a module, SC without an output location); Monitoring Dashboard |
-| `pf/05-reports-misc.xml`, `sc/05-…` | member | Reports, Audits, System Dashboard, Document Numbers (and generated ones), and that the backup job completed |
+| `pf/05-reports-misc.xml`, `sc/05-…` | member | Audits, System Dashboard, Document Numbers (and generated ones), and that the backup job completed |
+| `pf/06-import-export.xml`, `sc/06-…` | member | Data Maintenance Import/Export for Contact: an import definition from an uploaded spreadsheet (`sail/files/sail-import-contacts.xlsx`), Clear Import and Run Import each declined then confirmed, the three imported contacts found in the Contacts list; an export definition, Reset Columns and Run Export; both definitions and the contacts deleted |
+| `pf/07-reports.xml` (a workflow: SC, PF, SC, PF, SC), `sc/07-…` | member | SC: the report tools in the menu; a report designed with constant and BizQL datasets, the BizQL parameter added for the query and refused until typed; a duplicate name refused; Test Query (and its refusal for a missing class), Test Report, the template download and specification export; Report Schedules following the enabled flag; Report Manager export (refused with nothing selected), validate-only import, an invalid file refused, import and re-import. PF (the Reports list and scheduling are PF only): the report listed and run with a parameter; scheduling refused while a parameter is required, then without Run As or a recipient; a schedule saved and read back. SC then finds it in Report Schedules and deletes it |
+| `pf/08-tags-communications.xml`, `sc/08-…` | member | Two tags loaded from a spreadsheet (`sail/files/sail-tags.xlsx`) and combined (intersect, union, except, an untagging upload, Clear), each count asserted; Tag All on a third tag; Copy Tag To User; a communication to a tag: Get Count, Get Results, Create Files, the batch listed, zipped, its delete declined then confirmed; a Bulk Document Action that deletes the tagged contacts. SC also: Snapshots made, reordered, copied and deleted. Tags and Snapshots are SC menu items; PF reaches Tags through the `qTags` list |
+| `pf/09-operations.xml`, `sc/09-…` | member | Data Refresh refused without an option, then run and read through its job; a refresh notification logged, not sent, in the Mail Log (mail settings restored afterwards); Control Panel cache eviction by its entry counts, and a built-in cache refusing to stop; Monitoring Dashboard Save and Purge. SC also: User Hits counting, a content item in the Content list, Reindex Data, Reindex Content and Reindex read through their jobs |
 | `pf/10-phone-smoke.xml` | member | The admin menu items the phone UX/UI shows, in a phone browser |
+| `pf/11-user-list.xml`, `sc/11-…` | member | Create Users refused without a group, without addresses and with a bad address; then run as a job whose log and the Users list show two users, one of whom signs in once given a password; Invite Users (with `mailBogusSend` on, which it leaves on) and its invitations in the Mail Log; the User wizard's Back steps and password mismatch; Generate Unique User Name and Generate Password, whose password signs in to the change password page |
 | `pf/98-destructive.xml`, `sc/98-…` | member | Clears the completed jobs list; Configuration saved with safe values (`mailBogusSend` on, so mail is only logged); a mail send that is refused; generate tagged test data, check that its job cannot be rerun, and delete the data; delete completed jobs (declined, then confirmed) |
 | `sc/99-truncate.xml` | member | Checks that a backup is listed, then truncates all data, keeping the bootstrap user, and checks the result |
 | `99-restore.xml` | restore, a workflow: SC, PF, SC | SC restores the newest backup, its own (declined, then confirmed), waits for the restore job, signs in again, checks that the marker has gone and deletes its backup. PF checks that the marker has gone, selects its own backup, declines a restore of it and deletes it, then uses Update My Details. SC then uses Update My Details. |
@@ -2611,6 +2616,21 @@ The SC members mirror the PF ones file by file and interaction by
 interaction. They also cover the menu items and actions that only SmartClient
 has, among them User Hits, Heap Dumps, Report Manager, Snapshots and Tags. SC's
 98 also drops the content index and reindexes, and truncates the audit log.
+Where a function is split between the renderers, a member is a workflow:
+report design is SmartClient only, and the Reports list and scheduling are
+PrimeFaces only, so `pf/07-reports.xml` moves between them.
+
+**How the functional members were written.** The metadata gives the steps:
+the menu (`admin.xml`), the documents' attributes and conditions, and the
+views' tabs, bindings and actions. The action and Bizlet Java gives the
+assertions: what each action changes, refuses and says. Each step that does
+something is followed by a check of what it did (a count, a value, a listed
+row, a job's status and log, or a sign in that works only if it worked), and
+refusals are covered where the Java has one. What could not be driven or
+checked is recorded in an XML comment where the step would be: downloads
+(no step reads one), job logs and mail log details (blurbs, read with
+`testScript`), Run Job Now (hidden while the job scheduler is off), a link
+that only an email carries, and Heap Dumps (nothing in the UI makes one).
 
 **The bracket.** The three set-up members run first, in this order: a marker
 made before the backups would be in them, so the restore could not show that
@@ -2626,9 +2646,13 @@ both backups are deleted.
 **Independent members, in an order.** Each member signs in, makes what it
 needs with its own run token, and cleans up; none requires another. The order
 still matters for one thing: both 05 members check the backup job's row in the
-completed jobs list, and both 98 members clear that list, so the destructive
-members run after every other member, and `sc/99-truncate.xml` runs last,
-just before the restore. Each 98 member clears the list first, so that a row
+completed jobs list, and both 11 and both 98 members clear that list, so the 11
+members run after both 05 members, the destructive members run after every
+other member, and `sc/99-truncate.xml` runs last, just before the restore. The
+08 members use fixed contact names (their spreadsheet cannot hold the run
+token) and assert that none is left over, and the 11 members a generated user
+name family, so a failed run of either, outside the suite's restore, leaves
+data that fails the next run; reset the server's data then. Each 98 member clears the list first, so that a row
 the other renderer's 98 left, if it stopped early, cannot satisfy its waits.
 
 **Running part of it.** `-Dsail.suite.only=pf/` or `sc/` chooses one
