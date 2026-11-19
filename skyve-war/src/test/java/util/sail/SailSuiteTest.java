@@ -18,6 +18,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.opentest4j.MultipleFailuresError;
+import org.opentest4j.TestAbortedException;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Automation.TestStrategy;
@@ -139,6 +140,46 @@ class SailSuiteTest {
 					() -> assertEquals("SAIL suite s.suite.xml: pf/01-session.xml failed: not a valid script", e.getFailures().get(0).getMessage()),
 					() -> assertEquals("SAIL suite s.suite.xml: sc/01-session.xml failed: not a valid script", e.getFailures().get(1).getMessage()),
 					() -> assertTrue(e.getMessage().startsWith("SAIL suite s.suite.xml: 7 passed, 2 failed, 0 skipped"), e.getMessage()));
+	}
+
+	/** Runs the suite with members that a step skips or that fail. */
+	private static SailSuite skippingSuite(String skipped, String failed) {
+		Suite suite = XMLMetaData.unmarshalSAILSuiteString(SUITE, "s.suite.xml");
+		return SailSuite.of(suite, "s.suite.xml", member -> {
+			if (member.path().equals(skipped)) {
+				throw new TestAbortedException("SAIL workflow: " + skipped + " skipped: Offline needs NETWORK_CONDITIONS, which firefox doesn't support");
+			}
+			if (member.path().equals(failed)) {
+				throw new AssertionError(failed + " failed its step");
+			}
+		}).environment(SailSettings.Environment.none());
+	}
+
+	/**
+	 * A member that a step skips is skipped, as are the members that require it, and when nothing failed the suite is
+	 * skipped too, headed by the summary.
+	 */
+	@Test
+	void aSkippedMemberWithOnlyPassedMembersSkipsTheSuite() {
+		SailSuite sailSuite = skippingSuite("pf/02-users.xml", null);
+		TestAbortedException e = assertThrows(TestAbortedException.class, sailSuite::run);
+		String message = e.getMessage();
+		assertAll(() -> assertTrue(message.startsWith("SAIL suite s.suite.xml: 6 passed, 0 failed, 3 skipped\n"), message),
+					() -> assertTrue(message.contains("\n  skipped: pf/02-users.xml: SAIL workflow: pf/02-users.xml skipped: Offline needs NETWORK_CONDITIONS"),
+										message),
+					() -> assertTrue(message.contains("\n  skipped: pf/03-uses-users.xml: requires pf/02-users.xml, which was skipped"), message),
+					() -> assertTrue(e.getCause() instanceof TestAbortedException, "the member's skip is the cause"));
+	}
+
+	/** A member that a step skips doesn't hide a failed one: the suite fails with the failed member only. */
+	@Test
+	void aSkippedMemberWithAFailedMemberFailsTheSuite() {
+		SailSuite sailSuite = skippingSuite("pf/02-users.xml", "sc/03-security.xml");
+		MultipleFailuresError e = assertThrows(MultipleFailuresError.class, sailSuite::run);
+		assertAll(() -> assertEquals(1, e.getFailures().size()),
+					() -> assertEquals("SAIL suite s.suite.xml: sc/03-security.xml failed: sc/03-security.xml failed its step", e.getFailures().get(0).getMessage()),
+					() -> assertTrue(e.getMessage().startsWith("SAIL suite s.suite.xml: 5 passed, 1 failed, 3 skipped"), e.getMessage()),
+					() -> assertTrue(e.getMessage().contains("\n  skipped: pf/02-users.xml: SAIL workflow: pf/02-users.xml skipped: "), e.getMessage()));
 	}
 
 	/**

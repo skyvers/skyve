@@ -1,5 +1,7 @@
 package util;
 
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,15 +33,27 @@ import util.sail.SailWorkflow;
  * <p>
  * Unlike the single-renderer test bases, no browser is started before a test: the workflow starts the browser each
  * automation needs. The server lock ({@link SailServerLock}) is taken by the first workflow and held until the class has
- * finished.
+ * finished. When the class has finished, its tests' workflows are closed too ({@link SailWorkflow#close()}), which ends
+ * a shared run's device profiles.
  * <p>
  * {@link #settings()} is the test's code level of {@link SailSettings}: every {@code -D} option can be set there, e.g.
  * {@code settings().headless(false).timeoutSeconds(60)}, before the workflow runs.
  */
 public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
+	/**
+	 * Closes the workflow of each test that has run ({@link SailWorkflow#close()}), when the class has finished: each
+	 * test has its own instance, and so its own workflow, unless the class has one instance for all its tests.
+	 */
+	static final Queue<Runnable> WORKFLOWS = new ConcurrentLinkedQueue<>();
+
 	/** The roles the views are built with for the users the scripts sign in as. */
 	private final SailViewRoles viewRoles = new SailViewRoles();
 	private final SailWorkflow workflow = new SailWorkflow(viewRoles);
+
+	/** Creates the test, whose workflow is closed when the class has finished. */
+	protected AbstractInterpretedSailWorkflow() {
+		WORKFLOWS.add(workflow::close);
+	}
 
 	/**
 	 * Builds the views for a user that the scripts sign in as with the user's roles, instead of every role.
@@ -151,8 +165,37 @@ public abstract class AbstractInterpretedSailWorkflow extends AbstractH2Test {
 		SailSuite.file(file, workflow).run();
 	}
 
+	/**
+	 * Closes the workflows of the class's tests, which stops a browser a suite left open and ends a shared run's device
+	 * profiles, then releases the server lock. Each workflow is closed even if closing another fails, and the lock is
+	 * released either way.
+	 *
+	 * @throws RuntimeException	what the first workflow that failed to close threw, with what the others threw
+	 * 								suppressed
+	 */
 	@AfterAll
-	static void releaseServer() {
-		SailServerLock.releaseAll();
+	static void closeWorkflowsAndReleaseServer() {
+		RuntimeException failure = null;
+		try {
+			for (Runnable close = WORKFLOWS.poll(); close != null; close = WORKFLOWS.poll()) {
+				try {
+					close.run();
+				}
+				catch (RuntimeException e) {
+					if (failure == null) {
+						failure = e;
+					}
+					else {
+						failure.addSuppressed(e);
+					}
+				}
+			}
+		}
+		finally {
+			SailServerLock.releaseAll();
+		}
+		if (failure != null) {
+			throw failure;
+		}
 	}
 }

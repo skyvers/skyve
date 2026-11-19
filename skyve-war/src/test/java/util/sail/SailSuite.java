@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import org.junit.jupiter.api.function.Executable;
+import org.opentest4j.TestAbortedException;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.OrdinarySuiteMember;
@@ -100,7 +101,10 @@ public final class SailSuite {
 		PASSED,
 		/** It ran and failed. */
 		FAILED,
-		/** It did not run, as a member it requires failed or was skipped. */
+		/**
+		 * It did not run, as a member it requires failed or was skipped; or a step skipped it (it threw a
+		 * {@link TestAbortedException}, such as a call that needs what the browser can't do).
+		 */
 		SKIPPED,
 		/** It was not chosen by {@value SailSettings#SUITE_ONLY}. */
 		NOT_SELECTED
@@ -110,8 +114,9 @@ public final class SailSuite {
 	 * What a suite run did.
 	 *
 	 * @param outcomes	each member's outcome, by file, in run order
-	 * @param failures	what each failed member threw, by file, in run order
-	 * @param skips	why each skipped member did not run, by file
+	 * @param failures	what each failed member threw, by file, in run order; and what each member that a step skipped
+	 * 					threw (a {@link TestAbortedException})
+	 * @param skips	why each skipped member did not run, or was skipped, by file
 	 * @param notes	the notes the summary ends with: the selection, overrides not applied to locked members
 	 */
 	record Summary(@Nonnull Map<String, Outcome> outcomes,
@@ -371,20 +376,34 @@ public final class SailSuite {
 	}
 
 	/**
-	 * Runs the suite, prints its summary, and fails with every failed member.
+	 * Runs the suite, prints its summary, and fails with every failed member. When no member failed and a step skipped
+	 * a member (such as a call that needs what the browser can't do), the suite is skipped.
 	 *
 	 * @throws AssertionError	with each failed member's failure, headed by the summary
+	 * @throws TestAbortedException	headed by the summary, with the first skipped member's skip as the cause, when no
+	 * 									member failed and a step skipped one
 	 * @throws IllegalArgumentException	if a setting is invalid, or {@value SailSettings#SUITE_ONLY} chooses no member
 	 */
 	public void run() {
 		Summary summary = execute();
 		List<Executable> outcomes = new ArrayList<>();
+		TestAbortedException aborted = null;
 		for (Map.Entry<String, Throwable> failure : summary.failures().entrySet()) {
 			String file = failure.getKey();
 			Throwable cause = failure.getValue();
+			if (cause instanceof TestAbortedException a) {
+				// skipped, not failed
+				if (aborted == null) {
+					aborted = a;
+				}
+				continue;
+			}
 			outcomes.add(() -> {
 				throw new AssertionError("SAIL suite " + name + ": " + file + " failed: " + cause.getMessage(), cause);
 			});
+		}
+		if (outcomes.isEmpty() && (aborted != null)) {
+			throw new TestAbortedException(summary.describe(name), aborted);
 		}
 		assertAll(summary.describe(name), outcomes);
 	}
@@ -426,8 +445,18 @@ public final class SailSuite {
 					}
 					if (skip == null) {
 						Throwable failure = runMember(member);
-						outcome = (failure == null) ? Outcome.PASSED : Outcome.FAILED;
-						if (failure != null) {
+						if (failure == null) {
+							outcome = Outcome.PASSED;
+						}
+						else if (failure instanceof TestAbortedException) {
+							// a step skipped it: the members that require it are skipped too
+							outcome = Outcome.SKIPPED;
+							failures.put(file, failure);
+							skips.put(file, failure.getMessage());
+							System.out.println("SAIL suite " + name + ": " + file + " skipped: " + failure.getMessage());
+						}
+						else {
+							outcome = Outcome.FAILED;
 							failures.put(file, failure);
 						}
 					}

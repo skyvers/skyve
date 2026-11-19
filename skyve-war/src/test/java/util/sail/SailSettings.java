@@ -95,6 +95,18 @@ public final class SailSettings {
 	public static final String SUITE_ONLY = "sail.suite.only";
 	/** The scripts and suites the generic runner runs: classpath resources or file paths, comma separated. */
 	public static final String RUN = "sail.run";
+	/**
+	 * The folder the device profiles of {@code StartDevice} go in, each at
+	 * {@code <folder>/<run token>-<pid>/<profile>} (default {@link #DEFAULT_PROFILES_DIR} under the working directory).
+	 */
+	public static final String PROFILES = "sail.profiles";
+	/** Which runs keep their device profiles when they end; see {@link KeepProfiles}. */
+	public static final String PROFILES_KEEP = "sail.profiles.keep";
+	/**
+	 * How many hours old a run's device profiles must be before a later run deletes them, whichever way the run ended
+	 * (default {@value #DEFAULT_PROFILES_KEEP_HOURS}); see {@link SailProfiles}.
+	 */
+	public static final String PROFILES_KEEP_HOURS = "sail.profiles.keepHours";
 	/** The prefix of a variable's key: {@code sail.var.password} is the value of {@code {var:password}}. */
 	public static final String VAR_PREFIX = "sail.var.";
 	/** The path of the user's properties file. */
@@ -123,12 +135,16 @@ public final class SailSettings {
 	public static final Path DEFAULT_FAILURE_DIR = Path.of("target", "sail", "failures");
 	/** Where snapshots and video go when an evidence request asks for them and no directory is given. */
 	public static final Path DEFAULT_MEDIA_DIR = Path.of("target", "sail", "media");
+	/** Where device profiles go when no folder is given. */
+	public static final Path DEFAULT_PROFILES_DIR = Path.of("target", "sail-profiles");
+	/** How many hours old a run's device profiles must be before a later run deletes them, when none is set. */
+	public static final int DEFAULT_PROFILES_KEEP_HOURS = 12;
 
 	/** The settings a properties file or {@link Code#set(String, String)} may hold, besides variables, in display order. */
 	private static final List<String> KEYS = List.of(BASE_URL, HEADLESS, BROWSER, TIMEOUT_SECONDS, TEST_STRATEGY,
 														FAILURE_DIR, SNAPSHOT_DIR, SNAPSHOT_SOURCE, VIDEO_DIR, EVIDENCE,
-														KEEP_MEDIA, SUITE_ONLY, RUN, PROPERTIES, LOAD_USERS, LOAD_RAMP_UP,
-														LOAD_DURATION, LOAD_ITERATIONS, LOAD_TIME_LIMIT, LOAD_MAX_FAILURE_RATE,
+														KEEP_MEDIA, SUITE_ONLY, RUN, PROFILES, PROFILES_KEEP, PROFILES_KEEP_HOURS,
+														PROPERTIES, LOAD_USERS, LOAD_RAMP_UP, LOAD_DURATION, LOAD_ITERATIONS, LOAD_TIME_LIMIT, LOAD_MAX_FAILURE_RATE,
 														LOAD_MAX_P95);
 	/** The {@code sail.*} system properties that other SAIL code reads, so that they are not listed as ignored. */
 	private static final Set<String> OTHER_SAIL_PROPERTIES = Set.of("sail.recording", "sail.personas", "sail.personaPassword", "sail.workflowData");
@@ -146,6 +162,16 @@ public final class SailSettings {
 		ALL,
 		/** A run that passed deletes them when the unit it belongs to (a test's script, a workflow) passed. */
 		FAILED
+	}
+
+	/** Which runs keep their device profile folders when they end ({@link SailProfiles}). */
+	public enum KeepProfiles {
+		/** A run that failed keeps its folder, and prints where it is; a run that passed deletes it. */
+		FAILED,
+		/** Every run keeps its folder. */
+		ALL,
+		/** Every run deletes its folder. */
+		NONE
 	}
 
 	/** Where a setting can come from, highest precedence first. */
@@ -482,6 +508,36 @@ public final class SailSettings {
 		}
 
 		/**
+		 * Sets the folder the device profiles go in.
+		 *
+		 * @param directory	absolute, or relative to the working directory
+		 * @return this builder
+		 */
+		public @Nonnull Code profiles(@Nonnull Path directory) {
+			return set(PROFILES, directory.toString());
+		}
+
+		/**
+		 * Sets which runs keep their device profiles when they end.
+		 *
+		 * @param keep	{@link KeepProfiles#ALL} to keep a passed run's too, e.g. to open a profile afterwards
+		 * @return this builder
+		 */
+		public @Nonnull Code profilesKeep(@Nonnull KeepProfiles keep) {
+			return set(PROFILES_KEEP, keep.name().toLowerCase());
+		}
+
+		/**
+		 * Sets how many hours old a run's device profiles must be before a later run deletes them.
+		 *
+		 * @param hours	above 0
+		 * @return this builder
+		 */
+		public @Nonnull Code profilesKeepHours(int hours) {
+			return set(PROFILES_KEEP_HOURS, String.valueOf(hours));
+		}
+
+		/**
 		 * Defines a variable that every automation starts with, for {@code {var:name}}, e.g. a password.
 		 *
 		 * @param name	the name after {@code var:}
@@ -547,6 +603,9 @@ public final class SailSettings {
 	private KeepMedia mediaKept = KeepMedia.ALL;
 	private List<String> onlyPrefixes = List.of();
 	private List<String> runScripts = List.of();
+	private Path profilesDirectory;
+	private KeepProfiles profilesKept = KeepProfiles.FAILED;
+	private int profilesHours = DEFAULT_PROFILES_KEEP_HOURS;
 	private int virtualUsers;
 	private Duration rampUpTime = Duration.ZERO;
 	private Duration loadTime;
@@ -967,6 +1026,9 @@ public final class SailSettings {
 			case KEEP_MEDIA -> mediaKept = constant(value, KeepMedia.values());
 			case SUITE_ONLY -> onlyPrefixes = list(value);
 			case RUN -> runScripts = list(value);
+			case PROFILES -> profilesDirectory = directory(value);
+			case PROFILES_KEEP -> profilesKept = constant(value, KeepProfiles.values());
+			case PROFILES_KEEP_HOURS -> profilesHours = count(value);
 			case LOAD_USERS -> virtualUsers = count(value);
 			case LOAD_RAMP_UP -> rampUpTime = duration(value, true);
 			case LOAD_DURATION -> loadTime = duration(value, false);
@@ -1273,6 +1335,34 @@ public final class SailSettings {
 	 */
 	public @Nonnull List<String> run() {
 		return runScripts;
+	}
+
+	/**
+	 * Returns the folder the device profiles go in.
+	 *
+	 * @return the absolute folder: the one set, else {@link #DEFAULT_PROFILES_DIR} under the working directory
+	 */
+	public @Nonnull Path profiles() {
+		Path result = profilesDirectory;
+		return (result == null) ? environment.workingDirectory().resolve(DEFAULT_PROFILES_DIR) : result;
+	}
+
+	/**
+	 * Returns which runs keep their device profiles when they end.
+	 *
+	 * @return {@link KeepProfiles#FAILED} unless set
+	 */
+	public @Nonnull KeepProfiles profilesKeep() {
+		return profilesKept;
+	}
+
+	/**
+	 * Returns how many hours old a run's device profiles must be before a later run deletes them.
+	 *
+	 * @return above 0: {@value #DEFAULT_PROFILES_KEEP_HOURS} unless set
+	 */
+	public int profilesKeepHours() {
+		return profilesHours;
 	}
 
 	/**

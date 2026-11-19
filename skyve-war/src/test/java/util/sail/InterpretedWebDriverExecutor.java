@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,6 +32,7 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebDriverException;
+import org.opentest4j.TestAbortedException;
 import org.skyve.CORE;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -249,7 +251,10 @@ public abstract class InterpretedWebDriverExecutor<
 	 * Runs the automation's before procedure, interactions and after procedure, applying the test strategy.
 	 *
 	 * @param automation	the automation to run
-	 * @throws AssertionError	at the first failure under Assert, or at the end under Verify when anything failed
+	 * @throws AssertionError	at the first failure under Assert, or at the end under Verify when anything failed,
+	 * 							including when a step then skipped the test: a failure recorded first wins
+	 * @throws TestAbortedException	when a step skips the test, such as a call that needs what the browser can't do,
+	 * 									under every strategy, and no later step runs
 	 */
 	@Override
 	public void executeAutomation(@Nonnull Automation automation) {
@@ -275,6 +280,7 @@ public abstract class InterpretedWebDriverExecutor<
 		media = SailMedia.start(selenide, automation, resolved);
 
 		boolean passed = false;
+		TestAbortedException skipped = null;
 		try {
 			Procedure before = automation.getBefore();
 			if (before != null) {
@@ -288,6 +294,13 @@ public abstract class InterpretedWebDriverExecutor<
 				runSteps("After Automation", after.getSteps(), true);
 			}
 			passed = failures.isEmpty();
+		}
+		catch (TestAbortedException e) {
+			// a failure recorded under Verify before the skip wins: the test fails with it, and says it was then skipped
+			if (failures.isEmpty()) {
+				throw e;
+			}
+			skipped = e;
 		}
 		finally {
 			closeOpenWindows();
@@ -304,10 +317,16 @@ public abstract class InterpretedWebDriverExecutor<
 			for (String failure : failures) {
 				message.append("\n  - ").append(failure);
 			}
+			if (skipped != null) {
+				message.append("\nThen a step skipped the test, so no later step ran: ").append(skipped.getMessage());
+			}
 			AssertionError error = new AssertionError(message.toString());
 			// each step that threw is attached, with its causes and stack trace, as it would be under Assert
 			for (SailFailure failure : thrown) {
 				error.addSuppressed(failure);
+			}
+			if (skipped != null) {
+				error.addSuppressed(skipped);
 			}
 			throw error;
 		}
@@ -405,6 +424,13 @@ public abstract class InterpretedWebDriverExecutor<
 				// already described where it happened (Assert)
 				if (media != null) {
 					media.stepEnded(e.getMessage());
+				}
+				throw e;
+			}
+			catch (TestAbortedException e) {
+				// skipped under every strategy: no later step runs
+				if (media != null) {
+					media.stepEnded("skipped: " + e.getMessage());
 				}
 				throw e;
 			}
@@ -712,7 +738,30 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	public static @Nonnull String describe(@Nonnull Step step) {
 		StringBuilder result = new StringBuilder(64);
-		result.append('<').append(Introspector.decapitalize(step.getClass().getSimpleName()));
+		result.append('<').append(opCode(step));
+		properties(step).forEach((property, value) -> result.append(' ').append(property).append("=\"").append(value).append('"'));
+		return result.append(" />").toString();
+	}
+
+	/**
+	 * Returns a step's op-code, as SAIL XML names it, e.g. {@code dataEnter}.
+	 *
+	 * @param step	the step
+	 * @return the op-code
+	 */
+	static @Nonnull String opCode(@Nonnull Step step) {
+		return Introspector.decapitalize(step.getClass().getSimpleName());
+	}
+
+	/**
+	 * Returns a step's simple properties (those with a value that is not a collection), as text, with any password
+	 * masked; {@link #describe(Step)} writes them as they are, and the SAIL media pages escape them as XML.
+	 *
+	 * @param step	the step
+	 * @return the properties, by name
+	 */
+	static @Nonnull Map<String, String> properties(@Nonnull Step step) {
+		Map<String, String> result = new LinkedHashMap<>();
 		for (Method method : step.getClass().getMethods()) {
 			String methodName = method.getName();
 			if ((method.getParameterCount() > 0) ||
@@ -735,14 +784,14 @@ public abstract class InterpretedWebDriverExecutor<
 				if ((value != null) && (! (value instanceof Collection<?>))) {
 					// never print a password into a failure message (they end up in test reports)
 					boolean secret = property.toLowerCase().contains("password");
-					result.append(' ').append(property).append("=\"").append(secret ? "****" : value).append('"');
+					result.put(property, secret ? "****" : value.toString());
 				}
 			}
 			catch (@SuppressWarnings("unused") ReflectiveOperationException | RuntimeException e) {
 				// not a simple property
 			}
 		}
-		return result.append(" />").toString();
+		return result;
 	}
 
 	@Override
@@ -1436,15 +1485,18 @@ public abstract class InterpretedWebDriverExecutor<
 	 * Runs the step's {@link SailCall}: a new instance of the named class, from the thread context class loader, given
 	 * the parameters with the tokens substituted in their values and this executor. Keeps the string it returns in the
 	 * step's variable if it names one. An {@link AssertionError} from the call is a failed assertion, under the test
-	 * strategy; any other exception fails the step.
+	 * strategy; a {@link TestAbortedException} skips the test, as it is; any other exception fails the step.
 	 *
 	 * <p>Complexity: O(p) in the number of parameters, plus the call.
 	 *
 	 * @param call	the step
 	 * @throws MetaDataException	if the class cannot be loaded, is not a {@link SailCall}, or cannot be constructed with a
 	 * 								public no-argument constructor
-	 * @throws IllegalStateException	if the call throws anything but an {@link AssertionError}, or the step names a
-	 * 									variable and the call returns {@code null}
+	 * @throws IllegalStateException	if the call throws anything but an {@link AssertionError} or a
+	 * 									{@link TestAbortedException}, or the step names a variable and the call returns
+	 * 									{@code null}
+	 * @throws TestAbortedException	what the call threw to skip the test, such as a
+	 * 									{@code util.sail.browser.SailCapabilityUnavailableException}
 	 */
 	@Override
 	public void executeCall(@Nonnull Call call) {
@@ -1490,8 +1542,9 @@ public abstract class InterpretedWebDriverExecutor<
 		try {
 			result = handler.call(values, this);
 		}
-		catch (SailFailure e) {
-			// a step that the call ran through this executor failed, and said so
+		catch (SailFailure | TestAbortedException e) {
+			// a step that the call ran through this executor failed, and said so; or the browser lacks what the call
+			// needs, so the test is skipped, not failed
 			throw e;
 		}
 		catch (UIAssertionError e) {

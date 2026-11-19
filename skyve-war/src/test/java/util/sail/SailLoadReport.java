@@ -586,21 +586,21 @@ final class SailLoadReport {
 		result.append("<!DOCTYPE html>\n<html lang=\"en\"><head><meta charset=\"utf-8\"><title>SAIL load</title>")
 				.append("<style>body{font-family:sans-serif;margin:16px}table{border-collapse:collapse;margin:8px 0}")
 				.append("td,th{border:1px solid #ccc;padding:2px 8px}td.n{text-align:right}.failed{color:#b00020}</style>")
-				.append("</head><body>\n<h1>SAIL load</h1>\n<p>").append(SailMedia.escape(headline())).append("</p>\n");
+				.append("</head><body>\n<h1>SAIL load</h1>\n<p>").append(SailMediaHtml.escape(headline())).append("</p>\n");
 		List<Violation> violations = violations();
 		result.append("<p class=\"").append(violations.isEmpty() ? "" : "failed").append("\">")
 				.append(violations.isEmpty() ? "Passed." : "Failed:").append("</p>\n");
 		if (! violations.isEmpty()) {
 			result.append("<ul>");
 			for (Violation violation : violations) {
-				result.append("<li>").append(SailMedia.escape(violation.message())).append("</li>");
+				result.append("<li>").append(SailMediaHtml.escape(violation.message())).append("</li>");
 			}
 			result.append("</ul>\n");
 		}
 		result.append("<h2>Interactions</h2>\n<table><tr><th>interaction</th><th>count</th><th>failed</th><th>median ms</th>")
 				.append("<th>p95 ms</th><th>max ms</th></tr>\n");
 		for (InteractionStats interaction : interactions) {
-			result.append("<tr><td>").append(SailMedia.escape(interaction.name())).append("</td>").append(cell(interaction.count()))
+			result.append("<tr><td>").append(SailMediaHtml.escape(interaction.name())).append("</td>").append(cell(interaction.count()))
 					.append(cell(interaction.failures())).append(cell(interaction.medianMillis())).append(cell(interaction.p95Millis()))
 					.append(cell(interaction.maxMillis())).append("</tr>\n");
 		}
@@ -612,9 +612,9 @@ final class SailLoadReport {
 		if (! failureKinds.isEmpty()) {
 			result.append("<h2>First failure of each kind</h2>\n<table><tr><th>kind</th><th>times</th><th>first</th><th>message</th></tr>\n");
 			for (FailureKind kind : failureKinds) {
-				result.append("<tr><td>").append(SailMedia.escape(kind.kind())).append("</td>").append(cell(kind.count()))
+				result.append("<tr><td>").append(SailMediaHtml.escape(kind.kind())).append("</td>").append(cell(kind.count()))
 						.append("<td>user ").append(kind.user()).append(" iteration ").append(kind.iteration()).append("</td><td>")
-						.append(SailMedia.escape(kind.message())).append("</td></tr>\n");
+						.append(SailMediaHtml.escape(kind.message())).append("</td></tr>\n");
 			}
 			result.append("</table>\n");
 		}
