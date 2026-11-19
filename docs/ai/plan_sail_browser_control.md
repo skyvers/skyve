@@ -345,6 +345,21 @@ Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and wh
 - Gate: `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest'` ran 267 tests: 0 failures, errors or skips, and no flakes. ECJ 3.41 with skyve-war's JDT settings on the changed files: no warnings.
 - Not verified: Edge, and a remote (grid) Chromium without a DevTools endpoint.
 
+### W4
+
+- Built `util.sail.SailTestFiles`, ported from basix's `Media` and `PlayableVideo`, with their comments. Files go under `target/sail-test-files/`, written under a unique temporary name and then moved into place, so a partly written file is never reused and JVMs sharing the folder don't collide.
+  - `photo(long bytes)`: exactly that many bytes. Seeded noise up to 12 megapixels fills most of it, and JPEG comment segments of seeded random bytes, inserted after the JFIF segment, pad it to the exact size. Reused if the size matches exactly.
+  - `photo(int width, int height)`: a labelled gradient (basix's `photo-small.jpg`). Reused if the dimensions in its header match.
+  - `oversizePhoto()`: basix's 9000 x 7000 gradient with a block of noise, over 10 MB (Skyve's default image upload limit), about 14 MB. Reused if over 10 MB.
+  - `video(WebDriver, long bytes)` and `video(WebDriver, long bytes, Duration timeout)`: a WebM of at least that many bytes, recorded in the page in front (canvas noise, `captureStream`, `MediaRecorder` VP8 at 24 Mbit/s, as basix), then read back in 1 MB pieces. Reused if at least that size. The two-argument form uses the SAIL timeout.
+- Choices within the plan:
+  - basix paced frames with a 66 ms `setTimeout`. Now frames are drawn on `requestAnimationFrame`. The recording stops on the `dataavailable` event that reaches the size, and the promise settles on the recorder's `stop` event. The bound is a page deadline of the timeout, with WebDriver's script timeout set a little past it and put back afterwards.
+  - Not ported: basix's `tooLarge(bytes)` file of zeros (`photo(bytes)` covers upload limits) and the non-playable `clip-20mb.mp4`.
+- `SailTestFilesTest` (7 tests, no browser): exact sizes (2,000 B to 20 MB + 3, either side of 4 and 10 MB) that decode with ImageIO; padding edge cases (a full 64 KB segment with 1 to 3 bytes left over); dimensions read back with ImageIO (800 x 600, 1 x 1, 3 x 2000, 4000 x 3000); the oversize photo's header dimensions and size; reuse, checked by an old modification time and the same file key being kept, including the video's, with no calls on the driver; a wrong-size file made again, and a short video sent back to the browser; refused sizes and dimensions. One bug found and fixed on the first run: the shrink loop never ended for a size under the smallest JPEG.
+- `SailTestFilesIT` (1 test, tagged `sail`, headless Chrome, JDK `HttpServer` on an ephemeral loopback port): records a 6 MB video (6,457,484 bytes) and checks the EBML header. It chooses the video in a file input, plays it in a `<video>`, and finds a duration of 3.7 s, 640 x 360, and a frame shown after seeking to the middle. The page then no longer holds the video. A second call reuses the file without writing it. The duration was `Infinity` at `loadedmetadata`, as expected for `MediaRecorder` output. Seeking past the end gave `durationchange` with the real duration.
+- Gate: `mvn -o -pl skyve-war -am test -Dtest='SailTestFilesTest,SailTestFilesIT,sail.HarnessSelfContainedTest' -DskipUnitTests=false -DskipIntegrationTests=true -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.rerunFailingTestsCount=0 -DforkCount=1` ran 9 tests: 0 failures, errors or skips, and no flakes. The IT also passed on its own once before that. ECJ 3.41 with skyve-war's JDT settings on the three files: no warnings.
+- Not verified: Firefox, Safari and Edge recording (`MediaRecorder` WebM support differs), and headed runs.
+
 ## User validation suggestions
 
 - Run `StandardCallsSailIT` headed and watch the offline, hold and release, and dialog steps.
