@@ -53,6 +53,7 @@ import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
+import org.opentest4j.TestAbortedException;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.execution.sc.SmartClientAutomationContext;
@@ -102,6 +103,10 @@ import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.user.User;
 
 import com.codeborne.selenide.ex.UIAssertionError;
+
+import util.sail.browser.FakeBrowserControl;
+import util.sail.browser.NetworkConditions;
+import util.sail.browser.SailCapabilityUnavailableException;
 
 /**
  * Unit tests of what the interpreted executors share and need no browser: captured variables, the list grid step
@@ -1355,6 +1360,60 @@ class InterpretedWebDriverExecutorTest {
 					() -> verify(executor.selenide, never()).trace("after the error"));
 	}
 
+	/** What {@link SkippingCall} skips the test with. */
+	private static final String SKIP = "SkippingCall needs NETWORK_CONDITIONS, which firefox doesn't support";
+
+	/**
+	 * A call that needs what the browser can't do skips the test under every strategy, with the call's own exception,
+	 * and nothing after it runs: not the rest of its interaction, nor the next interaction.
+	 */
+	@Test
+	void aCallThatSkipsTheTestSkipsItUnderEveryStrategyAndNoLaterStepRuns() {
+		browser(Boolean.TRUE);
+		String skipping = "<interaction name=\"skip\"><method>" +
+							"<call className=\"" + SkippingCall.class.getName() + "\"/>" +
+							"<comment>after the skip</comment></method></interaction>" +
+						"<interaction name=\"next\"><method><comment>next interaction</comment></method></interaction>";
+		List<Executable> checks = new ArrayList<>();
+		for (String strategy : new String[] {"Assert", "Verify", "None"}) {
+			Automation automation = automation(strategy, skipping);
+			TestAbortedException e = assertThrows(TestAbortedException.class, () -> executor.executeAutomation(automation), strategy);
+			checks.add(() -> assertSame(SailCapabilityUnavailableException.class, e.getClass(), strategy + ": the call's own exception"));
+			checks.add(() -> assertEquals(SKIP, e.getMessage(), strategy));
+		}
+		checks.add(() -> verify(executor.selenide, never()).trace("after the skip"));
+		checks.add(() -> verify(executor.selenide, never()).trace("next interaction"));
+		assertAll(checks.stream());
+	}
+
+	/**
+	 * Under Verify, a failure recorded before a call skips the test wins: the test fails with it, its message says the
+	 * test was then skipped, and nothing after the skip runs.
+	 */
+	@Test
+	void underVerifyAFailureRecordedBeforeASkipWinsAndNoLaterStepRuns() {
+		browser(Boolean.TRUE);
+		String calls = "<interaction name=\"fail then skip\"><method>" +
+							"<call className=\"util.sail.EchoCall\"><parameter name=\"text\" value=\"a\"/><parameter name=\"fail\" value=\"assert\"/></call>" +
+							"<comment>after the assertion</comment>" +
+							"<call className=\"" + SkippingCall.class.getName() + "\"/>" +
+							"<comment>after the skip</comment></method></interaction>" +
+						"<interaction name=\"next\"><method><comment>next interaction</comment></method></interaction>";
+		Automation automation = automation("Verify", calls);
+
+		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
+
+		String message = e.getMessage();
+		assertAll(() -> assertTrue(message.startsWith("SAIL automation failed with 1 failure(s):"), message),
+					() -> assertTrue(message.contains("> failed: EchoCall was asked to fail an assertion on a"), message),
+					() -> assertTrue(message.endsWith("\nThen a step skipped the test, so no later step ran: " + SKIP), message),
+					() -> assertTrue(Stream.of(e.getSuppressed()).anyMatch(SailCapabilityUnavailableException.class::isInstance),
+										"the skip is attached"),
+					() -> verify(executor.selenide, times(1)).trace("after the assertion"),
+					() -> verify(executor.selenide, never()).trace("after the skip"),
+					() -> verify(executor.selenide, never()).trace("next interaction"));
+	}
+
 	@Test
 	void aCallFailsForAClassThatCannotBeLoadedIsNotASailCallOrCannotBeConstructedOrADuplicateParameter() {
 		browser(Boolean.TRUE);
@@ -1450,6 +1509,18 @@ class InterpretedWebDriverExecutorTest {
 					() -> assertSame(RESTART_ON, fake.getConfiguration(), "restarted on the call's configuration"),
 					() -> assertNull(fake.browserChange(settings, RESTART_ON), "the next leg asking for it reuses the browser"),
 					() -> assertNotNull(fake.browserChange(settings, first), "the next leg asking for the first profile does not"));
+	}
+
+	/**
+	 * A {@link SailCall} that needs network conditions from a browser that has none (a fake control of a browser with no
+	 * capabilities), so it skips the test.
+	 */
+	public static final class SkippingCall implements SailCall {
+		@Override
+		public String call(Map<String, String> parameters, Executor executor) {
+			new FakeBrowserControl("firefox").require(NetworkConditions.class, "SkippingCall").offline();
+			return "ran";
+		}
 	}
 
 	/** A {@link SailCall} that cannot be constructed: its constructor throws. */

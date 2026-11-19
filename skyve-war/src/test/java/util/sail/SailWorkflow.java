@@ -12,6 +12,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import org.openqa.selenium.Dimension;
+import org.opentest4j.TestAbortedException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.sail.execution.RunState;
 import org.skyve.impl.util.XMLMetaData;
@@ -221,6 +222,8 @@ public final class SailWorkflow {
 	 * @param resourceNames	the scripts' resource paths, e.g. {@code sail/kitchenSink/workflow/workflow-1-pf.xml}
 	 * @throws IllegalArgumentException	if a resource is missing or unreadable
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 * @throws TestAbortedException	naming the automation that a step skipped (such as a call that needs what the browser
+	 * 									can't do), with the skip as the cause; no later step or automation runs
 	 */
 	public void runResources(@Nonnull String... resourceNames) {
 		List<Leg> legs = new ArrayList<>();
@@ -237,6 +240,8 @@ public final class SailWorkflow {
 	 * @param files	the scripts' paths, absolute or relative to the working directory
 	 * @throws IllegalArgumentException	if a file is missing, unreadable or not a SAIL workflow or automation
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 * @throws TestAbortedException	naming the automation that a step skipped (such as a call that needs what the browser
+	 * 									can't do), with the skip as the cause; no later step or automation runs
 	 */
 	public void runFiles(@Nonnull String... files) {
 		List<Leg> legs = new ArrayList<>();
@@ -252,6 +257,8 @@ public final class SailWorkflow {
 	 * @param name	where it came from, for messages
 	 * @param workflow	the workflow (a single automation's is a workflow of one)
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 * @throws TestAbortedException	naming the automation that a step skipped (such as a call that needs what the browser
+	 * 									can't do), with the skip as the cause; no later step or automation runs
 	 */
 	void runWorkflow(@Nonnull String name, @Nonnull Workflow workflow) {
 		run(legs(name, workflow), null, false, false);
@@ -263,6 +270,8 @@ public final class SailWorkflow {
 	 *
 	 * @param scripts	the scripts
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 * @throws TestAbortedException	naming the automation that a step skipped (such as a call that needs what the browser
+	 * 									can't do), with the skip as the cause; no later step or automation runs
 	 */
 	public void runStrings(@Nonnull String... scripts) {
 		List<Leg> legs = new ArrayList<>();
@@ -320,6 +329,8 @@ public final class SailWorkflow {
 	 * @param workflow	the member's workflow (a file's automation is a workflow of one)
 	 * @param member	the member and its suite
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 * @throws TestAbortedException	naming the automation that a step skipped (such as a call that needs what the browser
+	 * 									can't do), with the skip as the cause; no later step or automation runs
 	 */
 	void runMember(@Nonnull String name, @Nonnull Workflow workflow, @Nonnull Member member) {
 		runMember(name, workflow, member, false);
@@ -335,6 +346,8 @@ public final class SailWorkflow {
 	 * 						passed or failed, so the next member finds no cookies, storage, service workers or caches
 	 * 						from this one; false to carry the browser on from member to member
 	 * @throws AssertionError	naming the automation that failed, with its failure as the cause
+	 * @throws TestAbortedException	naming the automation that a step skipped (such as a call that needs what the browser
+	 * 									can't do), with the skip as the cause; no later step or automation runs
 	 */
 	void runMember(@Nonnull String name, @Nonnull Workflow workflow, @Nonnull Member member, boolean ownBrowser) {
 		run(legs(name, workflow), member, ! ownBrowser, ownBrowser);
@@ -450,6 +463,9 @@ public final class SailWorkflow {
 				System.out.println(String.format("SAIL workflow: %s in %s (run %s)", leg.name(), smartClient ? "SmartClient" : "PrimeFaces", run.getRunToken()));
 				try {
 					legRunner.run(automation, browser, run, resolved);
+				}
+				catch (TestAbortedException e) { // a call the browser can't run: skipped, not failed
+					throw new TestAbortedException("SAIL workflow: " + leg.name() + " skipped: " + e.getMessage(), e);
 				}
 				catch (AssertionError | RuntimeException e) { // a step failure, or an invalid script
 					throw new AssertionError("SAIL workflow: " + leg.name() + " failed: " + e.getMessage(), e);

@@ -186,6 +186,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
 - `SailSettings` keys `sail.profiles`, `sail.profiles.keep` and `sail.profiles.keepHours`;
 - `SailProfiles`, `SailWorkflow implements AutoCloseable` with `close()`, the `@AfterAll` close in `AbstractInterpretedSailWorkflow`, and the extra Chrome and Edge arguments (decisions 13 and 14);
 - the smallest `SailWorkflow`/`SailSuite` change for decision 4, if W0 shows it's needed;
+- the decision-4 change in `InterpretedWebDriverExecutor` (approved by Mike on 2026-11-19): `executeCall` and `runSteps` rethrow a `TestAbortedException` as it is, under every strategy, so no later step runs; under Verify, `executeAutomation` lets failures recorded before the skip win, naming the skip in the message;
 - test fixtures under `src/test/resources/util/sail/browser/**`.
 
 Anything else needs Mike's approval: ask, with the reason and the smallest alternative.
@@ -265,7 +266,53 @@ Anything else needs Mike's approval: ask, with the reason and the smallest alter
 
 ## AI validation results
 
-(filled in during execution)
+**Mike's decisions during the run (2026-11-19):** the decision-4 change may extend to `InterpretedWebDriverExecutor` (approved), and under Verify an earlier failure wins: if failures were recorded before a call skips, the test fails with them, the message mentions the skip, and no later step runs. Only with no recorded failures is the test skipped.
+
+### W0
+
+Spike on 2026-11-19, then deleted (nothing committed). Chrome 158.0.8127.37 (arm64), ChromeDriver 158.0.8127.36, Selenium 4.38.0 (from Selenide 7.12.1), JDK 21.0.2, headless, from skyve-war test code through surefire, with pages from a JDK `HttpServer` on a loopback port (no Skyve server).
+
+**(a) Raw CDP works.** `SeleniumCdpConnection.create(driver)` and `Connection.sendAndWait(sessionId, new Command<>(method, params, Json.MAP_TYPE), timeout)`, as basix does, ran `Browser.getVersion`, `Target.getTargets`, `Target.attachToTarget` (flatten), `Runtime.evaluate`, `Network.enable` and `Network.emulateNetworkConditions` (offline: `navigator.onLine` was false through CDP and WebDriver). No `selenium-devtools-vNNN` module was needed. `Target.getTargets` also lists a `browser_ui` target (`chrome://omnibox-popup.top-chrome/`), which W2's attach filters should leave out.
+
+**(b) A `TestAbortedException` from a `<call>` was reported as failed.** A control `@Test` that threw it directly was skipped, so JUnit and surefire are not the cause.
+- Assert and None: failed, wrapped three times: `InterpretedWebDriverExecutor.executeCall`'s `catch (Exception e)` made it an `IllegalStateException`, `runSteps` wrapped that in a `SailFailure`, and `SailWorkflow.run` in an `AssertionError`.
+- Verify: failed; the skip was recorded as an ordinary failure, and the next interaction still ran.
+- Suite: the member counted as failed (`SailSuite.runMember` catches `RuntimeException`), and the suite failed.
+- The smallest change, tried in the spike and reverted (it needs `InterpretedWebDriverExecutor` beyond the approved `SailWorkflow`/`SailSuite`): rethrow `TestAbortedException` in `executeCall` and `runSteps`; in `SailWorkflow.run`, rethrow it as `TestAbortedException("SAIL workflow: <leg> skipped: …")`; in `SailSuite`, count an aborted member as skipped, and when nothing else failed make `run()` throw `TestAbortedException` with the summary.
+- With the change: Assert, Verify and None each reported skipped, with no later step (or, under Verify, interaction) run. A suite of an aborting and a passing member reported skipped ("1 passed, 0 failed, 1 skipped"); an aborting and a failing member reported failed. `SailWorkflowTest` (18), `SailSuiteTest` (14), `InterpretedWebDriverExecutorTest` (66) and `HarnessSelfContainedTest` (1) still passed.
+- Open point, settled by Mike above: under Verify, the spike's change lost a failure recorded before the skip.
+
+**(c)** `HarnessSelfContainedTest` passed with throwaway classes in `util.sail.browser` (importing `org.openqa.selenium.devtools.*`) and `util.sail.call`.
+
+**(d) Profiles and the decision-14 flags.** Each profile was started through `CrossBrowserSelenium` on a `--user-data-dir`, loaded a page that registered a service worker, wrote IndexedDB and CacheStorage, and got a persistent cookie; the browser was kept open for a measured window (240 s, or 60 s for the single-flag runs) while the profile was polled for the five download folders, then restarted on the same folder.
+- Persistence: in all four configurations the restarted browser kept IndexedDB, the CacheStorage entry, the service worker registration (controlling the page) and the cookie. The flags break none of them.
+
+| Configuration | Profile total | `optimization_guide_model_store` | `component_crx_cache` | `WasmTtsEngine` | `CertificateRevocation` | `OnDeviceHeadSuggestModel` |
+|---|---|---|---|---|---|---|
+| No flags (240 s) | 151.2 MB | 46.7 MB, at about 14 s | 47.3 MB | 25.0 MB | 9.3 MB | 7.7 MB |
+| Both flags (240 s) | 12.3 MB | absent | 4 KB (`metadata.json`) | absent | absent | absent |
+| `--disable-component-update` only (60 s) | 54.1 MB | 46.7 MB, at about 12 s | 4 KB | absent | absent | absent |
+| `--disable-features=...` only (60 s) | 8.5 MB | absent | 140 KB | empty | empty | empty |
+
+- Both flags are needed: `--disable-component-update` alone leaves the model store, and `--disable-features` alone leaves the component updater on.
+- Chrome doesn't reject unknown `--disable-features` names, so the names are shown to work only by behaviour: with the list, the model store never appeared. Which name does the work was not isolated.
+- ChromeDriver adds `--disable-features=IgnoreDuplicateNavs,Prewarm` and merged ours into it (chrome://version). Whether it merges two user-supplied `--disable-features` was not tested; W5 merges them itself.
+- `--disable-background-networking` is not needed: ChromeDriver already adds it, and the downloads happened anyway.
+
+Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and which feature name stops the model store.
+
+### W1
+
+- Built `util.sail.browser`: `Capability` (each constant names its interface), the twelve interfaces of decision 2, the value types `RequestRule` (with its `Stage`, `ErrorReason` and actions `Fail`, `Fulfil`, `Hold` and `Headers`; a lost response is a `Fail` at the response stage, made by `RequestRule.loseResponse`), `LoggedRequest`, `Dialog` and `BrowserCookie`, `SailBrowserControl`, `SailCapabilityUnavailableException` and `WebDriverBrowserControl`; and the test helper `FakeBrowserControl` for W3.
+- `require` takes the interface and the step's name, `require(NetworkConditions.class, "Offline")`, so it returns the interface typed; the capability comes from the interface (`Capability.of`).
+- A control implements the interfaces of the capabilities it supports, and `supports` defaults to that, so `ChromiumBrowserControl` can extend `WebDriverBrowserControl` (cookies, tabs, keys and window by WebDriver, as the plan says) and add the rest.
+- `of` keeps one control per driver and drops those of drivers that have quit (a `RemoteWebDriver` with no session id) each time it is called. It picks by browser at one seam, `SailBrowserControl.create`: a `ChromiumDriver` gets `WebDriverBrowserControl` until W2.
+- The tab waits use a `WebDriverWait` polling every 100 ms, as `Selenide.waitFor` does, bounded by the caller's timeout; a tab that doesn't appear fails with an `AssertionError`.
+- `RequestRuleTest` is basix's `FetchRuleTest` for the value type (globs, matching, narrowing, checks, copying). Its `mergeHeaders` and DevTools-name cases belong with W2's port.
+- Decision 4 as approved: W0's change plus "an earlier failure wins" under Verify.
+- Gate: `mvn -o -pl skyve-war -am test -Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest' -DskipUnitTests=false -DskipIntegrationTests=true -Dsurefire.failIfNoSpecifiedTests=false`: 262 tests in 18 classes, 0 failures, 0 errors, 0 skipped, no flakes. New: `SailBrowserControlTest` (8), `WebDriverBrowserControlTest` (13), `RequestRuleTest` (6), and 2 in `InterpretedWebDriverExecutorTest`, 1 in `SailWorkflowTest` and 2 in `SailSuiteTest`.
+- Red/green on "unsupported means skipped": with the rethrow in `executeCall` removed, `InterpretedWebDriverExecutorTest` failed 2 of 68 (the skip became a `SailFailure` under Assert, and under Verify the skip was not attached); restored, 68 of 68 passed.
+- ECJ 3.41 with skyve-war's JDT settings on the changed files: no warnings.
 
 ## User validation suggestions
 

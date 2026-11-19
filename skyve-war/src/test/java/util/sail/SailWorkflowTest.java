@@ -25,6 +25,7 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
+import org.opentest4j.TestAbortedException;
 import org.skyve.impl.sail.execution.RunState;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.language.Suite;
@@ -53,6 +54,8 @@ class SailWorkflowTest {
 	private final Map<Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?>, Integer> ids = new IdentityHashMap<>();
 	/** The members whose leg fails. */
 	private final Set<String> failing = new HashSet<>();
+	/** The members whose leg a step skips. */
+	private final Set<String> skipping = new HashSet<>();
 	/** True while starting a browser fails. */
 	private boolean startFails;
 	/** The run each leg ran in, in order. */
@@ -75,6 +78,9 @@ class SailWorkflowTest {
 																}
 																if (failing.contains(current)) {
 																	throw new AssertionError(current + " failed its step");
+																}
+																if (skipping.contains(current)) {
+																	throw new TestAbortedException(current + " skipped its step");
 																}
 															},
 															new SailSettings.Environment(Map.of(SailSettings.BASE_URL, "http://localhost:1/sail-workflow-test/"),
@@ -241,6 +247,18 @@ class SailWorkflowTest {
 		engine.runWorkflow("w.xml", XMLMetaData.unmarshalSAILWorkflowString(AUTOMATION));
 		engine.closeBrowser();
 		assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events);
+	}
+
+	/** A leg that a step skips makes the workflow skipped, not failed, naming the leg; and its browser is stopped. */
+	@Test
+	void aSkippedLegSkipsTheWorkflowAndStopsItsBrowser() {
+		current = "w.xml";
+		skipping.add("w.xml");
+		TestAbortedException e = assertThrows(TestAbortedException.class, () -> engine.runStrings(AUTOMATION));
+		engine.closeBrowser(); // nothing is left to stop
+		assertAll(() -> assertEquals("SAIL workflow: script 1 skipped: w.xml skipped its step", e.getMessage()),
+					() -> assertEquals("w.xml skipped its step", e.getCause().getMessage(), "the skip is the cause"),
+					() -> assertEquals(List.of("start 1", "run 1 w.xml", "stop 1"), events));
 	}
 
 	/**
