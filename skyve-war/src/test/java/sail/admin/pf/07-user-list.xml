@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), PrimeFaces: Users, bulk creation. Users are created from a list of email addresses
+	(Create Users), checked in the Users list, and cleaned up.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="A group for the new users">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Groups" />
+			<listGridNew module="admin" document="Group" />
+			<tabSelect path="Group Details" />
+			<dataEnter binding="name" value="SAIL Bulk Group {run}" />
+			<dataEnter binding="description" value="A SAIL group for bulk users" />
+			<dataEnter binding="roles" value="Admin - BasicUser (General access to the administration module)|Admin - ContactViewer (View-only access to contact details)" />
+			<save />
+			<ok />
+			<testGridRows module="admin" document="Group" rowContaining="SAIL Bulk Group {run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Create Users is refused without a group, without addresses and with a bad address">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Invite Users" />
+			<action name="CreateUsers" testSuccess="false" />
+			<testFailure message="You must select at least one permission group" />
+			<dataEnter binding="userInvitationGroups" value="SAIL Bulk Group {run}" />
+			<action name="CreateUsers" testSuccess="false" />
+			<testFailure message="Enter one or more email addresses" />
+			<dataEnter binding="userInvitiationEmailList" value="bulk{run}a@example.com, not-an-address" />
+			<action name="CreateUsers" testSuccess="false" />
+			<testFailure message="'not-an-address' is not a valid Email Address" />
+			<tabSelect path="Users" />
+			<testGridRows module="admin" query="qUsers" rowContaining="bulk{run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Clear the completed jobs list">
+		<method>
+			<comment>This member waits for its jobs by their rows in the completed jobs list: clear it first, so that an earlier job's row cannot be taken for this member's. 05-reports-misc.xml checks the backup job's row, so this member runs after it (admin.suite.xml), and before 98-destructive.xml.</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<action name="DeleteCompletedJobs" />
+			<action name="Refresh" />
+			<testGridRows module="admin" query="qCompletedJobs" maxRows="0" timeoutMillis="10000" />
+		</method>
+	</interaction>
+	<interaction name="Create Users: two users from two addresses, as a job">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Invite Users" />
+			<dataEnter binding="userInvitationGroups" value="SAIL Bulk Group {run}" />
+			<dataEnter binding="userInvitiationEmailList" value="bulk{run}a@example.com; bulk{run}b@example.com" />
+			<dataEnter binding="defaultModuleName" value="admin" match="code" />
+			<action name="CreateUsers" />
+			<testMessage contains="The creation job has started" type="info" />
+			<comment>The users are made by a job: wait for its row in the completed jobs list</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Create Users" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Create Users" />
+			<testValue binding="status" value="complete" />
+			<testValue binding="percentComplete" value="100" />
+			<comment>LANGUAGE NEED: the job log is a blurb, not a widget with a binding, so testValue cannot read it: testScript reads the page's text (a script reads the run token as sail.run). The pattern allows for the missing space in the job's "'created ok" line.</comment>
+			<testScript message="The job log should say both users were created"><![CDATA[
+				var t = document.body.innerText;
+				return new RegExp("New user 'bulk" + sail.run + "a@example\\.com' ?created ok").test(t)
+					&& new RegExp("New user 'bulk" + sail.run + "b@example\\.com' ?created ok").test(t)
+					&& t.includes("Job to create new users has completed - 2 users created");
+			]]></testScript>
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="The created users are in the Users list, with the group, home module and an expired password">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Users" />
+			<testGridRows module="admin" query="qUsers" rowContaining="bulk{run}" minRows="2" maxRows="2" />
+			<testGridRows module="admin" query="qUsers" rowContaining="bulk{run}a@example.com" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" query="qUsers" rowContaining="bulk{run}a@example.com" />
+			<testValue binding="userName" value="bulk{run}a@example.com" />
+			<testValue binding="contact" value="bulk{run}a@example.com" />
+			<testValue binding="homeModule" value="admin" />
+			<tabSelect path="Groups" />
+			<testValue binding="groups" value="SAIL Bulk Group {run}" />
+			<tabSelect path="Password" />
+			<testValue binding="passwordExpired" value="true" />
+			<comment>The job gives no usable password (a random one, with a reset token that the invitation email carries), so the administrator sets one</comment>
+			<dataEnter binding="newPassword" value="Sail{run}Bulk1" />
+			<dataEnter binding="confirmPassword" value="Sail{run}Bulk1" />
+			<dataEnter binding="passwordExpired" value="false" />
+			<save />
+			<testSuccess />
+			<ok />
+			<logout />
+			<login user="bulk{run}a@example.com" password="Sail{run}Bulk1" />
+			<testSuccess />
+			<testMenu module="admin" item="Contacts" />
+			<testMenu module="admin" item="Security Admin/Users" present="false" />
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+		</method>
+	</interaction>
+	<interaction name="Mail is only logged: turn on bogus send">
+		<method>
+			<comment>Invitations send email. With mailBogusSend on the mail is written to the Mail Log and not sent (98-destructive.xml saves the same values). The setting is left on.</comment>
+			<navigateMenu module="admin" item="Security Admin/Configuration" />
+			<tabSelect path="Startup Configuration" />
+			<dataEnter binding="startup.mailBogusSend" value="true" />
+			<dataEnter binding="startup.mailTestRecipient" value="sail.test@example.com" />
+			<save />
+			<testSuccess />
+			<testValue binding="startup.mailBogusSend" value="true" />
+		</method>
+	</interaction>
+	<interaction name="Invite Users: two users from two addresses, and the invitations are logged, not sent">
+		<method>
+			<navigateMenu module="admin" item="Jobs" />
+			<action name="DeleteCompletedJobs" />
+			<action name="Refresh" />
+			<testGridRows module="admin" query="qCompletedJobs" maxRows="0" timeoutMillis="10000" />
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Invite Users" />
+			<dataEnter binding="userInvitationGroups" value="SAIL Bulk Group {run}" />
+			<dataEnter binding="userInvitiationEmailList" value="invite{run}a@example.com invite{run}b@example.com" />
+			<action name="InviteUsers" />
+			<testMessage contains="The creation job has started" type="info" />
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Create Users" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Create Users" />
+			<testValue binding="status" value="complete" />
+			<testScript message="The job log should say both users were created and emailed"><![CDATA[
+				var t = document.body.innerText;
+				return t.includes("New user 'invite" + sail.run + "a@example.com' created and emailed ok")
+					&& t.includes("New user 'invite" + sail.run + "b@example.com' created and emailed ok")
+					&& t.includes("Job to create new users has completed - 2 users created");
+			]]></testScript>
+			<cancel />
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Users" />
+			<testGridRows module="admin" query="qUsers" rowContaining="invite{run}" minRows="2" maxRows="2" />
+			<navigateMenu module="admin" item="Security Admin/Mail Log" />
+			<tabSelect path="Database Mail Logs" />
+			<comment>Bogus send redirects each mail to the test recipient, so the log names that address, not the invited one: a row for each invitation (at least: another run's may be listed)</comment>
+			<testGridRows module="admin" query="qMailLogs" rowContaining="Invitation to join" minRows="2" />
+			<testGridRows module="admin" query="qMailLogs" rowContaining="sail.test@example.com" minRows="2" />
+		</method>
+	</interaction>
+	<interaction name="User wizard: Back, refusals, a generated user name and a generated password">
+		<method>
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Users" />
+			<listGridNew module="admin" query="qUsers" createView="true" />
+			<dataEnter binding="searchContactName" value="Sailgen Person" />
+			<dataEnter binding="searchEmail" value="sailgen.{run}@example.com" />
+			<action name="Check" />
+			<action name="New" />
+			<testValue binding="contact.name" value="Sailgen Person" />
+			<comment>Back returns to the contact step, where Check is offered again; New carries on</comment>
+			<action name="Back" />
+			<testWidget action="Check" visible="true" />
+			<testWidget action="Back" visible="false" />
+			<action name="New" />
+			<testValue binding="contact.name" value="Sailgen Person" />
+			<dataEnter binding="userName" value="sx{run}" />
+			<dataEnter binding="newPassword" value="Sail{run}Gen1" />
+			<dataEnter binding="confirmPassword" value="Sail{run}Gen2" />
+			<action name="Next" testSuccess="false" />
+			<testFailure message="You did not type the same password" />
+			<dataEnter binding="confirmPassword" value="Sail{run}Gen1" />
+			<action name="Next" />
+			<comment>Step 3: groups; Back returns to the user name and password</comment>
+			<action name="Back" />
+			<testValue binding="userName" value="sx{run}" />
+			<action name="Next" />
+			<dataEnter binding="groups" value="SAIL Bulk Group {run}" />
+			<save createView="false" />
+			<testSuccess />
+			<testValue binding="userName" value="sx{run}" />
+		</method>
+	</interaction>
+	<interaction name="GenerateUniqueUserName and GeneratePassword on the new user, who signs in with them">
+		<method>
+			<tabSelect path="Profile" />
+			<comment>The user name comes from the contact's name: letters only, lower case, at most 9 characters; a trailing number makes it unique</comment>
+			<action name="GenerateUniqueUserName" />
+			<testValue binding="userName" value="sailgenpe" />
+			<save />
+			<testSuccess />
+			<action name="GenerateUniqueUserName" />
+			<testValue binding="userName" value="sailgenpe1" />
+			<save />
+			<testSuccess />
+			<tabSelect path="Password" />
+			<action name="GeneratePassword" />
+			<captureValue binding="generatedPassword" variable="generated" />
+			<testValue binding="passwordExpired" value="true" />
+			<save />
+			<testSuccess />
+			<ok />
+			<logout />
+			<login user="sailgenpe1" password="{var:generated}" />
+			<testSuccess />
+			<comment>The generated password is expired: the sign in is accepted, then the user must reset it (a JSP page that SAIL has no steps for)</comment>
+			<testScript message="An expired password should lead to the Reset Password page">return location.href.includes("changePassword.jsp");</testScript>
+			<logout />
+			<login user="admin" password="admin" />
+			<testSuccess />
+		</method>
+	</interaction>
+	<interaction name="Clean up: the users, their contacts and the group">
+		<method>
+			<comment>Deleting a user leaves the contact, so the contacts (their email addresses hold the run token) go too</comment>
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<tabSelect path="Users" />
+			<listGridZoom module="admin" query="qUsers" rowContaining="sailgenpe1" />
+			<delete />
+			<listGridZoom module="admin" query="qUsers" rowContaining="bulk{run}a@example.com" />
+			<delete />
+			<listGridZoom module="admin" query="qUsers" rowContaining="bulk{run}b@example.com" />
+			<delete />
+			<listGridZoom module="admin" query="qUsers" rowContaining="invite{run}a@example.com" />
+			<delete />
+			<listGridZoom module="admin" query="qUsers" rowContaining="invite{run}b@example.com" />
+			<delete />
+			<testGridRows module="admin" query="qUsers" rowContaining="{run}" maxRows="0" />
+			<testGridRows module="admin" query="qUsers" rowContaining="sailgenpe" maxRows="0" />
+			<navigateList module="admin" document="Contact" />
+			<listGridFilter module="admin" document="Contact" column="email1" value="{run}" />
+			<testGridRows module="admin" document="Contact" minRows="5" maxRows="5" />
+			<listGridZoom module="admin" document="Contact" rowContaining="{run}" />
+			<delete />
+			<listGridZoom module="admin" document="Contact" rowContaining="{run}" />
+			<delete />
+			<listGridZoom module="admin" document="Contact" rowContaining="{run}" />
+			<delete />
+			<listGridZoom module="admin" document="Contact" rowContaining="{run}" />
+			<delete />
+			<listGridZoom module="admin" document="Contact" rowContaining="{run}" />
+			<delete />
+			<testGridRows module="admin" document="Contact" maxRows="0" />
+			<navigateMenu module="admin" item="Security Admin/Groups" />
+			<listGridZoom module="admin" document="Group" rowContaining="SAIL Bulk Group {run}" />
+			<delete />
+			<testGridRows module="admin" document="Group" rowContaining="SAIL Bulk Group {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>
