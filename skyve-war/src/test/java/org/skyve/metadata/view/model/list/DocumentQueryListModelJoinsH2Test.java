@@ -51,8 +51,9 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	private static final String DESCRIPTION = ModelLookupFixture.selectionPropertyName + '.' + LookupDescription.descriptionPropertyName;
 	private static final String SELECTION_JOIN = "LEFT OUTER JOIN bean." + ModelLookupFixture.selectionPropertyName;
 	private static final String INVERSE_BIZ_KEY = InverseOneToOnePersistent.invAggAssociationPropertyName + '.' + Bean.BIZ_KEY;
-	private static final String AGGREGATED_AGGREGATED = AllAttributesPersistent.aggregatedAssociationPropertyName + '.' +
-															AllAttributesPersistent.aggregatedAssociationPropertyName;
+	private static final String TEXT = AllAttributesPersistent.textPropertyName;
+	private static final String AGGREGATED = AllAttributesPersistent.aggregatedAssociationPropertyName;
+	private static final String AGGREGATED_AGGREGATED = AGGREGATED + '.' + AGGREGATED;
 	private static final Pattern LEFT_OUTER_JOIN = Pattern.compile("LEFT OUTER JOIN bean\\.([\\w.]+)");
 
 	/** A view's filter parameters on an attribute through an association, as ListModel.addParameters adds them. */
@@ -213,6 +214,36 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	/**
+	 * A from clause's own join of one association leaves a filter through another one in the same query joined: Match
+	 * Any keeps the row with no such association that another criterion meets.
+	 */
+	@Test
+	void aJoinInTheFromLeavesAnotherPathJoined() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		LookupDescription alpha = persistence.save(lookup("alpha"));
+		LookupDescription beta = persistence.save(lookup("beta"));
+		ModelLookupFixture a = fixture("AF a", alpha);
+		a.setSingleSelection(beta);
+		persistence.save(a);
+		persistence.save(fixture("AF b", beta));
+		persistence.save(fixture("AF n", null));
+		persistence.flush();
+
+		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean left outer join bean." +
+						ModelLookupFixture.selectionPropertyName + " as s with s." + LookupDescription.descriptionPropertyName + " = 'alpha'";
+		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		matchAny(model,
+					f -> f.addEquals(DESCRIPTION, "beta"),
+					f -> f.addEquals(ModelLookupFixture.singleSelectionPropertyName + '.' + LookupDescription.descriptionPropertyName, "beta"),
+					f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		Page page = model.fetch();
+		// AF b's selection is not alpha, so the from's join has none for it; AF n has no single selection
+		assertEquals(Set.of("AF a", "AF n"), names(page, ModelLookupFixture.namePropertyName));
+		assertEquals(2L, page.getTotalRows());
+		assertJoins(model, ModelLookupFixture.singleSelectionPropertyName);
+	}
+
+	/**
 	 * A condition on an association's bizId compares the foreign key on the row, so it joins nothing, and lists the
 	 * rows it would with the join: Match Any keeps the row with no association that the other criterion meets.
 	 */
@@ -226,24 +257,31 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		persistence.save(fixture("AF n", null));
 		persistence.flush();
 
+		// the rows first, as they are the same with the join
 		String selectionBizId = ModelLookupFixture.selectionPropertyName + '.' + Bean.DOCUMENT_ID;
-		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
-		matchAny(model, f -> f.addEquals(selectionBizId, beta.getBizId()), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
-		Page page = model.fetch();
+		DocumentQueryListModel<Bean> matchAny = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		matchAny(matchAny, f -> f.addEquals(selectionBizId, beta.getBizId()), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		Page page = matchAny.fetch();
 		assertEquals(Set.of("AF b", "AF n"), names(page, ModelLookupFixture.namePropertyName));
 		assertEquals(2L, page.getTotalRows());
-		assertNoJoin(model.getDetailQuery());
-		assertNoJoin(model.getSummaryQuery());
 
-		model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
-		model.getFilter().addNotEquals(selectionBizId, alpha.getBizId());
-		assertEquals(Set.of("AF b"), fetch(model, ModelLookupFixture.namePropertyName));
-		assertNoJoin(model.getDetailQuery());
+		DocumentQueryListModel<Bean> notEquals = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		notEquals.getFilter().addNotEquals(selectionBizId, alpha.getBizId());
+		assertEquals(Set.of("AF b"), fetch(notEquals, ModelLookupFixture.namePropertyName));
 
-		model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
-		model.getFilter().addNull(selectionBizId);
-		assertEquals(Set.of("AF n"), fetch(model, ModelLookupFixture.namePropertyName));
-		assertNoJoin(model.getDetailQuery());
+		DocumentQueryListModel<Bean> isNull = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		isNull.getFilter().addNull(selectionBizId);
+		assertEquals(Set.of("AF n"), fetch(isNull, ModelLookupFixture.namePropertyName));
+
+		// the association's own attribute is on its table, so it is joined
+		DocumentQueryListModel<Bean> description = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		matchAny(description, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		assertEquals(Set.of("AF b", "AF n"), fetch(description, ModelLookupFixture.namePropertyName));
+
+		assertJoins(matchAny);
+		assertJoins(notEquals);
+		assertJoins(isNull);
+		assertJoins(description, ModelLookupFixture.selectionPropertyName);
 	}
 
 	/**
@@ -254,42 +292,107 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	void aConditionOnTheBizIdOfAnAssociationsAssociationJoinsOnlyTheFirst() throws Exception {
 		chain();
 
-		DocumentQueryListModel<Bean> model = defaultQueryModel(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+		DocumentQueryListModel<Bean> model = allAttributesModel(false);
 		model.getFilter().addNull(AGGREGATED_AGGREGATED + '.' + Bean.DOCUMENT_ID);
-		assertEquals(Set.of("b", "c"), fetch(model, AllAttributesPersistent.textPropertyName));
-		for (DocumentQuery query : List.of(Objects.requireNonNull(model.getDetailQuery()), Objects.requireNonNull(model.getSummaryQuery()))) {
-			assertEquals(List.of(AllAttributesPersistent.aggregatedAssociationPropertyName), joins(query));
-		}
+		assertEquals(Set.of("b", "c"), fetch(model, TEXT));
+		assertJoins(model, AGGREGATED);
+	}
+
+	/** A condition through an association joins it: Match Any keeps the row with none that another criterion meets. */
+	@Test
+	void aConditionThroughAnAssociationJoinsIt() throws Exception {
+		chain();
+
+		DocumentQueryListModel<Bean> model = allAttributesModel(false);
+		matchAny(model, f -> f.addEquals(AGGREGATED + '.' + TEXT, "b"), f -> f.addEquals(TEXT, "c"));
+		Page page = model.fetch();
+		assertEquals(Set.of("a", "c"), names(page, TEXT));
+		assertEquals(2L, page.getTotalRows());
+		assertJoins(model, AGGREGATED);
+	}
+
+	/**
+	 * A condition through two associations, with no column through them, joins both, the first first: a "no value"
+	 * check lists the row with an association that has none, and the row with none; so does Match Any of a criterion
+	 * the row with none meets.
+	 */
+	@Test
+	void aConditionThroughTwoAssociationsJoinsBothInOrder() throws Exception {
+		chain();
+
+		DocumentQueryListModel<Bean> model = allAttributesModel(false);
+		model.getFilter().addNull(AGGREGATED_AGGREGATED + '.' + TEXT);
+		assertEquals(Set.of("b", "c"), fetch(model, TEXT));
+		assertJoins(model, AGGREGATED, AGGREGATED_AGGREGATED);
+
+		model = allAttributesModel(false);
+		matchAny(model, f -> f.addEquals(AGGREGATED_AGGREGATED + '.' + TEXT, "c"), f -> f.addEquals(TEXT, "c"));
+		assertEquals(Set.of("a", "c"), fetch(model, TEXT));
+		assertJoins(model, AGGREGATED, AGGREGATED_AGGREGATED);
 	}
 
 	/**
 	 * A column through two associations left outer joins both of them (Hibernate joins the first implicitly, with the
-	 * same join type), so a filter through the first appends no second join of it, and lists the same rows:
-	 * Match Any keeps the row with no association that the other criterion meets.
+	 * same join type), so a condition through both appends no join, and lists the same rows: the row with an
+	 * association that has none, and the row with none.
+	 */
+	@Test
+	void aColumnThroughTwoAssociationsCoversAFilterThroughBoth() throws Exception {
+		chain();
+
+		// the rows first, as they are the same with the joins
+		DocumentQueryListModel<Bean> isNull = allAttributesModel(true);
+		isNull.getFilter().addNull(AGGREGATED_AGGREGATED + '.' + TEXT);
+		assertEquals(Set.of("b", "c"), fetch(isNull, TEXT));
+
+		DocumentQueryListModel<Bean> matchAny = allAttributesModel(true);
+		matchAny(matchAny, f -> f.addEquals(AGGREGATED_AGGREGATED + '.' + TEXT, "c"), f -> f.addEquals(TEXT, "c"));
+		Page page = matchAny.fetch();
+		assertEquals(Set.of("a", "c"), names(page, TEXT));
+		assertEquals(2L, page.getTotalRows());
+
+		assertJoins(isNull, AGGREGATED_AGGREGATED);
+		assertJoins(matchAny, AGGREGATED_AGGREGATED);
+	}
+
+	/**
+	 * A column through two associations covers a filter through the first, so it appends no second join of it, and
+	 * lists the same rows: Match Any and a negation keep the row with no association.
 	 */
 	@Test
 	void aColumnThroughTwoAssociationsCoversAFilterThroughTheFirst() throws Exception {
 		chain();
 
+		// the rows first, as they are the same with the joins
+		DocumentQueryListModel<Bean> matchAny = allAttributesModel(true);
+		matchAny(matchAny, f -> f.addEquals(AGGREGATED + '.' + TEXT, "b"), f -> f.addEquals(TEXT, "c"));
+		Page page = matchAny.fetch();
+		assertEquals(Set.of("a", "c"), names(page, TEXT));
+		assertEquals(2L, page.getTotalRows());
+
+		DocumentQueryListModel<Bean> notContains = allAttributesModel(true);
+		notContains.getFilter().addNotContains(AGGREGATED + '.' + TEXT, "b");
+		assertEquals(Set.of("b", "c"), fetch(notContains, TEXT));
+
+		assertJoins(matchAny, AGGREGATED_AGGREGATED);
+		assertJoins(notContains, AGGREGATED_AGGREGATED);
+	}
+
+	/** AllAttributesPersistent's default query, with a column through two associations if asked for. */
+	private static DocumentQueryListModel<Bean> allAttributesModel(boolean columnThroughTwoAssociations) {
 		Customer customer = CORE.getCustomer();
 		Module module = customer.getModule(AllAttributesPersistent.MODULE_NAME);
 		MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, AllAttributesPersistent.DOCUMENT_NAME);
-		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
-		column.setBinding(AGGREGATED_AGGREGATED + '.' + AllAttributesPersistent.textPropertyName);
-		query.getColumns().add(column);
-		DocumentQueryListModel<Bean> model = new DocumentQueryListModel<>(query);
-		model.postConstruct(customer, true);
-		model.setStartRow(0);
-		model.setEndRow(100);
-		matchAny(model,
-					f -> f.addEquals(AllAttributesPersistent.aggregatedAssociationPropertyName + '.' + AllAttributesPersistent.textPropertyName, "b"),
-					f -> f.addEquals(AllAttributesPersistent.textPropertyName, "c"));
-		Page page = model.fetch();
-		assertEquals(Set.of("a", "c"), names(page, AllAttributesPersistent.textPropertyName));
-		assertEquals(2L, page.getTotalRows());
-		for (DocumentQuery each : List.of(Objects.requireNonNull(model.getDetailQuery()), Objects.requireNonNull(model.getSummaryQuery()))) {
-			assertEquals(List.of(AGGREGATED_AGGREGATED), joins(each));
+		if (columnThroughTwoAssociations) {
+			MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
+			column.setBinding(AGGREGATED_AGGREGATED + '.' + TEXT);
+			query.getColumns().add(column);
 		}
+		DocumentQueryListModel<Bean> result = new DocumentQueryListModel<>(query);
+		result.postConstruct(customer, true);
+		result.setStartRow(0);
+		result.setEndRow(100);
+		return result;
 	}
 
 	/** Saves "a", which aggregates "b", which aggregates "c", which aggregates nothing. */
@@ -306,6 +409,13 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		result.setText(text);
 		result.setAggregatedAssociation(aggregated);
 		return result;
+	}
+
+	/** Asserts the paths of the detail and summary queries' left outer joins from bean, in order. */
+	private static void assertJoins(DocumentQueryListModel<Bean> model, String... paths) {
+		for (DocumentQuery query : List.of(Objects.requireNonNull(model.getDetailQuery()), Objects.requireNonNull(model.getSummaryQuery()))) {
+			assertEquals(List.of(paths), joins(query));
+		}
 	}
 
 	/** The paths of the query's left outer joins from bean, in order. */
