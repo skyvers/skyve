@@ -227,18 +227,20 @@ Anything else needs Mike's approval: ask, with the reason and the smallest alter
 
 ## Acceptance checklist
 
-- [ ] W0 results recorded. Decision 4 holds: an unsupported call reports skipped in a workflow, a suite and an IT.
-- [ ] Every interface in decision 2 exists with no CDP leakage. `ChromiumBrowserControl` supports all of them. `WebDriverBrowserControl` supports cookies, tabs, keys and window, and reports the rest unsupported.
-- [ ] `ChromiumBrowserControlIT` passes three runs in a row, headless, plus once headed.
-- [ ] Every call in Scope 4 exists, with Javadoc listing its parameters and variable, and passes its unit tests, including the skip path.
-- [ ] `StandardCallsSailIT` passes on Chrome three runs in a row. On Firefox, if installed, the Chromium-only calls skip with the message and the rest pass. If Firefox isn't installed, record that.
-- [ ] `SailTestFiles` produces each file type, and the video plays.
-- [ ] W0 (d) recorded: profiles still keep IndexedDB, CacheStorage, the service worker and cookies across a restart with the new flags, and a profile's size before and after.
-- [ ] After `StandardCallsSailIT` passes, its run's folder under `target/sail-profiles` is gone. After a forced failure, it is kept and its path printed.
-- [ ] `SailProfilesTest` covers every case in W5, and housekeeping never fails a test.
-- [ ] `HarnessSelfContainedTest` and every existing `util.sail` test pass.
+Ticked only where verified (see "Final gate" and the blocks it cites).
+
+- [x] W0 results recorded. Decision 4 holds: an unsupported call reports skipped in a workflow, a suite and an IT. (W0 recorded it for a workflow and a suite; since W1, `SailWorkflowTest` and `SailSuiteTest` cover those and `StandardCallsSailIT` on Firefox shows it in an IT: 5 skipped with the capability message.)
+- [x] Every interface in decision 2 exists with no CDP leakage. `ChromiumBrowserControl` supports all of them. `WebDriverBrowserControl` supports cookies, tabs, keys and window, and reports the rest unsupported. (CDP is used only in `ChromiumBrowserControl`; `SailBrowserControlTest`, `WebDriverBrowserControlTest` and the Firefox IT run.)
+- [x] `ChromiumBrowserControlIT` passes three runs in a row, headless, plus once headed. (Round 2: three headless runs, 21 tests each; final gate: headed, 21/21.)
+- [x] Every call in Scope 4 exists, with Javadoc listing its parameters and variable, and passes its unit tests, including the skip path. (25 calls checked by script in the final gate.)
+- [x] `StandardCallsSailIT` passes on Chrome three runs in a row. On Firefox, if installed, the Chromium-only calls skip with the message and the rest pass. If Firefox isn't installed, record that. (Firefox is installed: 1 passed, 5 skipped with the message.)
+- [x] `SailTestFiles` produces each file type, and the video plays. (`SailTestFilesTest`; `SailTestFilesIT` plays a 6 MB video; Chrome only.)
+- [x] W0 (d) recorded: profiles still keep IndexedDB, CacheStorage, the service worker and cookies across a restart with the new flags, and a profile's size before and after. (Chrome 158 only; Edge not measured.)
+- [x] After `StandardCallsSailIT` passes, its run's folder under `target/sail-profiles` is gone. After a forced failure, it is kept and its path printed. (The folder was gone after every IT run in every gate. The forced failure was run in the IT at W5, before the pid and marker layout; since then the kept-on-failure rule is covered by `SailProfilesTest` and `SailWorkflowTest`, not an IT.)
+- [x] `SailProfilesTest` covers every case in W5, and housekeeping never fails a test. (Passed in the full build. Its Windows guards and the rename-before-delete have never run on Windows.)
+- [x] `HarnessSelfContainedTest` and every existing `util.sail` test pass. (Full build: 23,966 tests, 0 failures, 0 flakes.)
 - [x] The docs describe the capabilities, the calls, skipping and the op-code rule.
-- [ ] Gates pass.
+- [x] Gates pass. (Build, ITs headless three times, headed and Firefox, ECJ and Sonar with 0 on changed lines, coverage listed, Javadoc, red/green by round. Exceptions: no Windows or Edge run, and the event-reordering guard for held requests, the request log and detach-before-attach has no red run, since Chrome 158 doesn't reorder; the plan's red/green list doesn't need it.)
 
 ## Better engineering notes
 
@@ -593,6 +595,57 @@ Sources: three re-reviews of `1c70d57880` (PR, rubric, slop), listed in `~/skyve
 - ECJ 3.46.200 (`--release 17`, skyve-war prefs, core, ext, web and war compiled together): 0 warnings on lines changed since base `8e9d436801`, and 0 on unchanged lines of changed files.
 - Sonar (`skyve-local-browser-control`, test-code rules): 0 issues on changed lines; the gate's 2 issues on unchanged lines of changed files remain.
 - Not verified: Windows, Edge, a headed run and Firefox in this round.
+
+### Final gate
+
+Measured at `2eb78241a8` (base `8e9d436801`), JDK 21.0.2, Chrome 158.0.8127.37, Firefox with geckodriver 0.36.0, serially, with `-DforkCount=1 -Dsurefire.rerunFailingTestsCount=0` for the ITs. Logs, scripts and the coverage data are in `~/skyve-sail-work/browser-control/` (`final-*`). Nothing was changed in the code.
+
+**1. Full build** (`mvn -o -B -pl skyve-war -am package`, BUILD SUCCESS, 5 min 28 s). The `surefire-reports` of every module were deleted first, so every report read is from this build.
+
+| Module | Tests | Failures | Errors | Skipped | Flaky |
+|---|---|---|---|---|---|
+| skyve-core | 11,625 | 0 | 0 | 1 | 0 |
+| skyve-ext | 3,483 | 0 | 0 | 6 | 0 |
+| skyve-web | 3,429 | 0 | 0 | 4 | 0 |
+| skyve-war | 5,318 | 0 | 0 | 44 | 0 |
+| skyve-maven-plugin | 111 | 0 | 0 | 0 | 0 |
+
+- 23,966 tests, no failure, no error, no flake (no "Flakes" line in the log, no `flakyFailure` in any report). The 55 skips are not in the harness: assumptions and `@Disabled("fix this")` in generated domain tests and a few older classes (`SmartClientCsrfTokenH2Test`, `ReactGeneratorTest`, `OWASPTest`, ...), the same kind as before the branch.
+- `util.AbstractInterpretedSailWorkflowTest` ran (1 test, passed), as did `HarnessSelfContainedTest` and every `util.sail` test class.
+
+**2. ITs** (`-Dtest=... -DskipUnitTests=false -DskipIntegrationTests=true`):
+- Headed (`-Dsail.headless=false`, under `~/skyve-sail-work/headed.lock`, released after; the settings line in the log says `headless=false`): `ChromiumBrowserControlIT` 21/21, `StandardCallsSailIT` 6/6, `SailTestFilesIT` 1/1; 28/28, 0 skips.
+- Firefox, `StandardCallsSailIT` only: 6 tests, 1 passed (`theCallsEveryBrowserHasRun`), 5 skipped, 0 failures. The skip messages are "SAIL workflow: script 1 skipped: ...":
+  - `StartDevice needs a device profile, which firefox doesn't support`;
+  - `FailRequests needs REQUEST_INTERCEPTION, which firefox doesn't support`;
+  - `RequestLog needs REQUEST_LOG, which firefox doesn't support`;
+  - `LowerQuota needs STORAGE_QUOTA, which firefox doesn't support`;
+  - `Online needs NETWORK_CONDITIONS, which firefox doesn't support`.
+- `skyve-war/target/sail-profiles` was empty after the headed run, the Firefox run and the coverage run.
+- The three headless runs of the same ITs on this commit (28/28 each) are the round 2 re-gate above.
+
+**3. Coverage** (JaCoCo 0.8.13, agent `includes=util.*`, one JVM, headless): `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest,util.AbstractInterpretedSailWorkflowTest,ChromiumBrowserControlIT,StandardCallsSailIT,SailTestFilesIT'`, 361 tests, 0 failures. Executable lines of the non-test files changed since base (not `*Test`, `*IT` or `FakeBrowserControl`): **1,470 of 1,554 covered (94.6%); branches 648 of 714 (90.8%)** (the first gate, before the fix rounds: 95.4% and 92.1%). By class:
+- Largest: `ChromiumBrowserControl` 481 executable lines, 90.6% lines, 163 of 200 branches; `SailProfiles` 139, 86.3%, 59/62; `SailTestFiles` 149, 89.9%, 57/70; `SailCallParameters` 60, 100%, 35/35; `RequestRule` 70, 100%, 44/44; `SailWorkflow` 42, 100%, 32/32; `AbstractInterpretedSailWorkflow` 15, 100%, 6/6.
+- Under 100% lines: `InterpretedWebDriverExecutor` 92.9%, `SailBrowserControl` 95.2%, `CheckRequests` 98.4%, `RewriteRequestHeaders` 96.0%.
+- Every other changed file is at 100% of its executable lines, and the interface-only files have none. The full table is in `final-coverage-summary.txt`.
+- 134 lines and branches are not fully covered (84 not run at all); each is listed with its reason in `~/skyve-sail-work/browser-control/final-uncovered.md`. Fault, race and protocol-defensive paths aside, these behaviours have no test, and none is public API:
+  - `ChromiumBrowserControl.toOwner` failing a request that Chrome refused (round 2 R1: checked once with a probe, no test);
+  - the order guards for held requests, the request log and detach-before-attach, which Chrome 158 never provokes;
+  - a skip with a `SailMedia` recorder attached (round 1 item 27);
+  - `FreezeTab` on a window with no attached page, and the `exactly` failure text of `CheckRequests`.
+- Covered since the first gate: `awaitHeld`'s wait, wake-up and timeout message, and `SailProfiles`' pid, marker and rename (but not the lost-rename race).
+
+**4. Javadoc** (`docs/ai/javadoc-standards.md`; the first gate's JavaParser checker over the 56 non-test harness files changed since base, and a script over the 25 calls):
+- The public API added in the fix rounds has a Javadoc with a verb lead, `@param`, `@return` and `@throws` where they apply: `watchingSince()` on `RequestLog` and `Dialogs`, `SailBrowserControl.POLLING`, `SailProfiles.runFolder(...)`, `SailCallParameters.requiredChoice(...)`, `AbstractSailCall.requireWatchingBefore` and `beganInStep`, `SailProfiles.MARKER`, `AbstractInterpretedSailWorkflow.WORKFLOWS`. `runFolder` names that it makes and sweeps nothing.
+- All 25 calls have a class Javadoc with each parameter as `{@code name}` (as given to `super(...)`), their variable, what they need, and a documented constructor.
+- No fix needed, and none made. What the checker still lists is as in the first gate: noun leads on types and constants (the neighbouring code's style, round 1 item 28), and two older members (`InterpretedWebDriverExecutor.selenide`, `SailSettings.Setting.toString()`). It also flags `DeleteCookies` as taking no parameters, a false positive since the parameter name became a constant.
+
+**Earlier results this gate relies on, not repeated:**
+- Red/green for the plan's list: the first gate (`gate-report.md` section 2); for behaviours added in the fix rounds: "Review round 1" and "Review round 2" above.
+- ECJ 3.46 (0 warnings on changed lines): round 1 and round 2 re-gates (`r2-ecj.log`). Sonar (0 issues on changed lines, test-code rules): round 1 (second scan) and round 2.
+- Headless ITs three times on this commit: round 2 re-gate (28/28 each); unit set 333 tests in the same re-gate.
+
+**Not verified:** Windows (the rename-before-delete and the `@DisabledOnOs` guards), Edge, a forced failure in the ITs since the pid and marker layout (the kept-on-failure rule is covered by `SailProfilesTest` and `SailWorkflowTest`, and the IT's forced failure was run at W5), and the order independence of the held-request rule (no red run is possible in Chrome 158).
 
 ## User validation suggestions
 
