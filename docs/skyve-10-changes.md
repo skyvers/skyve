@@ -18,6 +18,7 @@ These notes collect release-ready framework changes introduced for Skyve 10.
 - [Scheduled Backups and Azure Copies](#scheduled-backups-and-azure-copies)
 - [Custom Property Order and Fluent Builders](#custom-property-order-and-fluent-builders)
 - [Mail Log Body Excerpts and Attachments](#mail-log-body-excerpts-and-attachments)
+- [Known Security Notes](#known-security-notes)
 - Decimal10 converters `Decimal10Integer`, `Decimal10IntegerPercentage`, `Decimal10OneDecimalPlace` and `Decimal10TwoDecimalPlacesPercentage` are new, and `Decimal10DollarsAndCents` can now be named in metadata.
 - [Server-side Questions](#server-side-questions): server code can ask the user an OK/Cancel or Yes/No question with `EXT.getDialogs()`, in SmartClient and PrimeFaces.
 - [Typed Metadata References](typed-metadata-references.md): `generateDomain` writes enums of each module's roles, documents, metadata, BizQL and SQL queries and jobs, such as `AdminRole.SECURITY_ADMINISTRATOR`. Skyve APIs that take a module name and a metadata name, such as `User.isInRole` and `Persistence.newDocumentQuery`, now also take these, so a renamed or removed name fails the build. Customer module overrides get their own enums. The string forms are unchanged.
@@ -276,3 +277,14 @@ load, while the response renders, from `postRender`, list grids, jobs or backgro
 
 Try
 **Kitchen Sink → Dialogs Fixture**.
+
+## Known Security Notes
+
+- **REST write routes check no permissions.** `/rest/*` is forbidden by default (`ForbiddenFilter` in `web.xml`).
+  If you enable it by swapping in an authenticating filter, `RestService`'s insert, update and delete routes save
+  what the signed-in caller sends without any document-permission check, and update copies every attribute
+  including collections. A signed-in user could, for example, add roles to their own `admin.User`. Enable REST only
+  for callers you trust with the whole data store, or add permission checks to `RestService` first. Known; not
+  fixed (decision of 2026-11-19).
+- **SmartClient CSRF check is inactive.** `SmartClientListServlet.checkCsrfToken` has its body commented out, so SmartClient
+  add, update, remove and edit requests are not CSRF checked. Known; deferred (2026-11-19).
