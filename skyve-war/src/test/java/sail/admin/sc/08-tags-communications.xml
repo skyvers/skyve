@@ -17,9 +17,17 @@
 		<testSuccess />
 		<switchMode />
 	</before>
+	<interaction name="Jobs: clear the completed jobs list, so this member's job rows are its own">
+		<method>
+			<navigateMenu module="admin" item="Jobs" />
+			<action name="DeleteCompletedJobs" />
+			<testGridRows module="admin" query="qCompletedJobs" maxRows="0" timeoutMillis="10000" />
+		</method>
+	</interaction>
 	<interaction name="Contacts: four contacts for the tags, none left by an earlier run">
 		<method>
 			<navigateMenu module="admin" item="Contacts" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
 			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" maxRows="0" />
 			<listGridNew module="admin" document="Contact" />
 			<dataEnter binding="name" value="SAILTAGS Alpha" />
@@ -41,6 +49,7 @@
 			<dataEnter binding="email1" value="sailtags.delta.{run}@example.com" />
 			<save />
 			<ok />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
 			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" minRows="4" />
 		</method>
 	</interaction>
@@ -236,7 +245,15 @@
 			<testWidget action="DeleteBatch" enabled="false" />
 			<action name="CreateFiles" />
 			<testValue binding="results" value="3 communications for Contact will be created as a batch for download.&#10;The job has been commenced - check Admin->Jobs for the log." />
-			<comment>The job writes the files into a new batch folder: wait for it to be listed</comment>
+			<save />
+			<ok />
+			<comment>GetResults and CreateFiles each start a "Process the communication" job. The batch folder is listed as soon as its first file is written, so wait for both jobs to finish before using the batch</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Process the communication" minRows="2" timeoutMillis="60000" />
+			<navigateMenu module="admin" item="Communication/Communications" />
+			<listGridZoom module="admin" document="Communication" rowContaining="SAIL Bulk {run}" />
+			<tabSelect path="Manage" />
 			<testGridRows model="BatchesModel" minRows="1" maxRows="1" timeoutMillis="60000" />
 			<listGridSelect model="BatchesModel" row="0" />
 			<testWidget action="ZipBatch" enabled="true" />
@@ -267,9 +284,9 @@
 			<ok />
 			<comment>The job deletes Beta, Gamma and Delta (tag B), not Alpha: wait for it through the contacts list</comment>
 			<navigateMenu module="admin" item="Contacts" />
-			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS Delta" maxRows="0" timeoutMillis="60000" />
-			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS Beta" maxRows="0" />
-			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS Gamma" maxRows="0" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
+			<comment>The job deletes the beans one by one in no set order: wait once for the whole effect, one contact left</comment>
+			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" minRows="1" maxRows="1" timeoutMillis="60000" />
 			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS Alpha" minRows="1" maxRows="1" />
 		</method>
 	</interaction>
@@ -285,6 +302,7 @@
 			<navigateMenu module="admin" item="Contacts" />
 			<listGridZoom module="admin" document="Contact" rowContaining="SAILTAGS Alpha" />
 			<delete />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
 			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" maxRows="0" />
 		</method>
 	</interaction>
