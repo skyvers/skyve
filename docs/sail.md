@@ -2669,7 +2669,7 @@ Test what is in `run` itself, reading the parameters and the skip, in a SAIL IT,
 ### Test files
 
 `util.sail.SailTestFiles` makes files for upload steps, so a test does not need
-a fixture in the repository. It is separate from `SailMedia`, which writes a run's
+a fixture in the repository (JPEG photos, a file of zeros of any name and size, and a WebM video). It is separate from `SailMedia`, which writes a run's
 evidence. Every method returns the file's absolute `Path`.
 
 | Method | Makes | Reused when |
@@ -2677,6 +2677,7 @@ evidence. Every method returns the file's absolute `Path`.
 | `photo(long bytes)` | a JPEG of exactly that many bytes (`photo-<bytes>.jpg`); one byte over a limit tests the limit | the file is that size |
 | `photo(int width, int height)` | a small labelled gradient JPEG of that size in pixels (`photo-<w>x<h>.jpg`) | its header has those dimensions |
 | `oversizePhoto()` | a 9000 by 7000 JPEG of about 14 MB, over Skyve's 10 MB upload limit, which a page must redraw smaller | the file is over 10 MB |
+| `file(String name, long bytes)` | a file of the name you choose and exactly that many bytes, all zeros, that is not an image (so a page does not redraw it smaller), for a file a page must refuse, e.g. `file("too-large-12582912.bin", 12L * 1024 * 1024)`; 0 bytes is an empty file. The name must be a plain file name: no `/` or `\`, not empty, `.` or `..`, and not ending in `.partial` or starting with `photo-` or `video-` (`IllegalArgumentException`) | the file is that size |
 | `video(WebDriver, long bytes)`, `video(WebDriver, long bytes, Duration timeout)` | a playable WebM of at least that many bytes (`video-<bytes>.webm`), 640 by 360; the timeout defaults to `sail.timeoutSeconds` | the file is at least that size |
 
 The video is recorded in the browser the driver drives (a canvas of noise, `captureStream`,
