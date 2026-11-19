@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), PrimeFaces: Operations. What an administrator does to keep the system running, with a check after every
+	step that does something: a document data refresh and the job it starts (read from the completed jobs list), the mail that job sends
+	(read from the Mail Log, with mail only logged), the Control Panel's caches, and the Monitoring Dashboard's purge.
+
+	Order: this member never runs a Backup job and never deletes completed jobs, so it can run anywhere before the 98-destructive.xml
+	members (the 05-reports-misc.xml members expect exactly one Backup row in the completed jobs list). It leaves its own jobs in that list.
+
+	Not scripted, and why (details in the ops findings.md):
+	- JobSchedule's Run Job Now: its button and the schedules list are only available when the job scheduler runs (the jobScheduler
+	  condition), and the test server runs without it.
+	- Job's Cancel Job (only for a running job: the jobs here finish in well under a second, so there is nothing to catch) and Re-run Job
+	  (only for a job started without a bean, which the UI never does: a refresh, reindex or test data job is started with its bean).
+	- Control Panel's Evict All Cached Metadata (EvictFromCache): on this single customer server it leaves the application without a
+	  Hibernate session factory, so every later request fails; and Swap Customer, which shows no change in the menu or the module lists.
+	- Data Maintenance's Download Backup: SAIL has no step for downloads.
+	- The Startup view (Dismiss, Save Changes): it is only shown by the set-up page at first sign-in, which the test server turns off.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Data Refresh: refused without a refresh option">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data Refresh" />
+			<testGridRows binding="refreshDocuments" minRows="1" />
+			<dataGridEdit binding="refreshDocuments" rowContaining="DataGroup" />
+			<dataEnter binding="include" value="true" />
+			<testValue binding="include" value="true" />
+			<action name="RefreshDocumentTuples" testSuccess="false" />
+			<testFailure message="Value required" />
+		</method>
+	</interaction>
+	<interaction name="Data Refresh: refresh a document, read the job it ran">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data Refresh" />
+			<dataGridEdit binding="refreshDocuments" rowContaining="DataGroup" />
+			<dataEnter binding="include" value="true" />
+			<dataEnter binding="refreshOption" value="Upsert" match="label" />
+			<action name="RefreshDocumentTuples" confirm="false" />
+			<comment>Declined: the confirmation is answered No, so the refresh is not sent</comment>
+			<action name="RefreshDocumentTuples" />
+			<testMessage contains="Refresh Job has been started" type="info" />
+			<comment>The refresh is a job: wait for its row in the completed jobs list</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Refresh Persisted Document Data" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Refresh Persisted Document Data" />
+			<testValue binding="status" value="complete" />
+			<testValue binding="percentComplete" value="100" />
+			<comment>The job's log names the one document that was included, and that it finished</comment>
+			<testScript message="The job log should show the DataGroup refreshed, and no other document"><![CDATA[
+				const t = document.body.innerText;
+				return t.includes('Started Document Data Refresh Job')
+					&& t.includes('Document Data Refresh requested for [admin].[DataGroup] Completed')
+					&& t.includes('Finished Document Data Refresh Job')
+					&& ! t.includes('[admin].[Contact]');
+			]]></testScript>
+			<comment>The job was started with the Data Maintenance bean, which the job record does not keep, so it cannot be rerun; it has finished, so it cannot be cancelled</comment>
+			<testWidget action="RerunJob" visible="false" />
+			<testWidget action="CancelJob" visible="false" />
+			<cancel />
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<action name="Refresh" />
+			<testGridRows binding="runningJobs" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Mail Log: the mail a job sends is logged, not sent">
+		<method>
+			<comment>Mail is only logged: mailBogusSend is set here (98-destructive.xml sets it too) and put back at the end</comment>
+			<navigateMenu module="admin" item="Security Admin/Configuration" />
+			<tabSelect path="Startup Configuration" />
+			<captureValue binding="startup.mailBogusSend" variable="bogus" />
+			<captureValue binding="startup.mailTestRecipient" variable="recipient" />
+			<dataEnter binding="startup.mailBogusSend" value="true" />
+			<dataEnter binding="startup.mailTestRecipient" value="ops{run}@example.com" />
+			<save />
+			<testSuccess />
+			<testValue binding="startup.mailBogusSend" value="true" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data Refresh" />
+			<dataGridEdit binding="refreshDocuments" rowContaining="DataGroup" />
+			<dataEnter binding="include" value="true" />
+			<dataEnter binding="refreshOption" value="Upsert" match="label" />
+			<dataEnter binding="notification" value="true" />
+			<action name="RefreshDocumentTuples" />
+			<testMessage contains="Refresh Job has been started" type="info" />
+			<navigateMenu module="admin" item="Security Admin/Mail Log" />
+			<tabSelect path="Database Mail Logs" />
+			<testGridRows module="admin" query="qMailLogs" rowContaining="ops{run}@example.com" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qMailLogs" rowContaining="ops{run}@example.com" />
+			<comment>The mail was skipped by the bogus send, and says so; it went to the test recipient, not the contact</comment>
+			<testScript message="The mail log should show a skipped test bogus send to ops{run}@example.com about the refresh"><![CDATA[
+				const t = document.body.innerText;
+				return /Dispatch Status:\s*SKIPPED/.test(t)
+					&& /Relay Status:\s*skipped/.test(t)
+					&& /Relay Detail:\s*testBogusSend/.test(t)
+					&& t.includes('ops' + sail.run + '@example.com')
+					&& /Subject:\s*Perform Document Data Refresh - Complete/.test(t)
+					&& /Mail Count:\s*1\b/.test(t);
+			]]></testScript>
+			<cancel />
+			<comment>Put the mail settings back</comment>
+			<navigateMenu module="admin" item="Security Admin/Configuration" />
+			<tabSelect path="Startup Configuration" />
+			<testValue binding="startup.mailBogusSend" value="true" />
+			<dataEnter binding="startup.mailBogusSend" value="{var:bogus}" />
+			<dataEnter binding="startup.mailTestRecipient" value="{var:recipient}" />
+			<save />
+			<testSuccess />
+			<testValue binding="startup.mailBogusSend" value="{var:bogus}" />
+			<testValue binding="startup.mailTestRecipient" value="{var:recipient}" />
+		</method>
+	</interaction>
+	<interaction name="Control Panel: caches, evicting and statistics">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Control Panel" />
+			<tabSelect path="Design" />
+			<testWidget action="DownloadResults" visible="false" />
+			<action name="CacheStats" />
+			<comment>The statistics open the Results tab and make Download Results available; they count what each cache holds (its disk tier's entries)</comment>
+			<testWidget action="DownloadResults" />
+			<execute variable="tokensBefore"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\ntokens\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return /Entries:\s*(\d+)/.exec(t.substring(d))[1];
+			]]></execute>
+			<execute variable="conversationsBefore"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\nconversations\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return /Entries:\s*(\d+)/.exec(t.substring(d))[1];
+			]]></execute>
+			<testScript message="The conversation cache should hold the conversations opened so far"><![CDATA[
+				return Number(sail.vars.conversationsBefore) > 1;
+			]]></testScript>
+			<tabSelect path="Design" />
+			<dataEnter binding="selectedCache" value="CSRF Tokens" match="label" />
+			<action name="EvictSelectedCache" confirm="false" />
+			<action name="CacheStats" />
+			<testScript message="Declining the eviction should leave the CSRF tokens cache as it was"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\ntokens\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return Number(/Entries:\s*(\d+)/.exec(t.substring(d))[1]) >= Number(sail.vars.tokensBefore);
+			]]></testScript>
+			<tabSelect path="Design" />
+			<action name="EvictSelectedCache" />
+			<testMessage contains="Cache tokens has been cleared" type="info" />
+			<action name="CacheStats" />
+			<testScript message="Evicting the CSRF tokens cache should leave it holding no more than before"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\ntokens\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return Number(/Entries:\s*(\d+)/.exec(t.substring(d))[1]) <= Number(sail.vars.tokensBefore);
+			]]></testScript>
+			<tabSelect path="Design" />
+			<dataEnter binding="selectedCache" value="Conversations" match="label" />
+			<action name="EvictSelectedCache" />
+			<testMessage contains="Cache conversations has been cleared" type="info" />
+			<action name="CacheStats" />
+			<testScript message="Evicting the conversation cache should empty it"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\nconversations\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return Number(/Entries:\s*(\d+)/.exec(t.substring(d))[1]) < Number(sail.vars.conversationsBefore);
+			]]></testScript>
+			<tabSelect path="Design" />
+			<dataEnter binding="selectedCache" value="reference (Hibernate)" match="label" />
+			<action name="EvictSelectedCache" />
+			<testMessage contains="Cache reference has been cleared" type="info" />
+			<comment>Only application caches can be stopped and started; the built-in caches refuse</comment>
+			<dataEnter binding="selectedCache" value="GeoIPs" match="label" />
+			<action name="StopOrStartSelectedCache" testSuccess="false" />
+			<testMessage contains="Cant stop/start cache geoips" type="error" />
+			<comment>Not scripted: Evict All Cached Metadata (EvictFromCache). On a single customer server it disposes the persistence and leaves the application with no Hibernate session factory, so every later request fails: see findings.md</comment>
+			<action name="CacheStats" />
+			<testWidget action="DownloadResults" />
+		</method>
+	</interaction>
+	<interaction name="Monitoring Dashboard: settings are saved, purge forgets the requests">
+		<method>
+			<comment>Use a document nothing else in this member opens, so the purge's effect shows in the request list</comment>
+			<navigateMenu module="admin" item="DevOps/DocumentCreator" />
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Charts" />
+			<captureValue binding="topN" variable="topN" />
+			<comment>Changing a setting saves the dashboard (its Save action)</comment>
+			<dataEnter binding="topN" value="7" />
+			<testValue binding="topN" value="7" />
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Charts" />
+			<testValue binding="topN" value="7" />
+			<comment>Put the setting back</comment>
+			<dataEnter binding="topN" value="{var:topN}" />
+			<testValue binding="topN" value="{var:topN}" />
+			<tabSelect path="Requests" />
+			<testGridRows module="admin" query="RequestListModel" rowContaining="DocumentCreator" minRows="1" />
+			<action name="Purge" confirm="false" />
+			<comment>Declined: the requests are still listed</comment>
+			<testGridRows module="admin" query="RequestListModel" rowContaining="DocumentCreator" minRows="1" />
+			<action name="Purge" />
+			<comment>The dashboard shows the purge when it is opened again: only the requests since then are listed</comment>
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Requests" />
+			<testGridRows module="admin" query="RequestListModel" minRows="1" />
+			<testGridRows module="admin" query="RequestListModel" rowContaining="DocumentCreator" maxRows="0" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>
