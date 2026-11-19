@@ -3295,8 +3295,9 @@ Java through `SailRunIT`, alone or as a member of a suite file
 - **Filters through an association.** A list built on a document query left
   outer joins the path of every filter condition through an association, so a
   negation, a "no value" check and Match Any keep the rows with no association.
-  A custom `from` that inner joins the association itself still leaves those
-  rows out; so do SQL based lists.
+  A custom `from` that joins the association itself keeps its own join, `with`
+  condition included, so an inner join there still leaves those rows out; so
+  do SQL based lists.
 - **Inline cells in PF** are addressed by `dataEnter`, `testValue` and the
   lookup steps; `testWidget` and `captureValue` keep the row but address the
   view's widget.

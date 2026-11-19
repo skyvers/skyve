@@ -411,6 +411,52 @@ class AbstractDocumentQueryTest {
 	}
 
 	@Test
+	void isJoinedReadsEachJoinOfAPathFromBeanInTheConstructedFromClause() {
+		TestDocumentQuery q = new TestDocumentQuery(document,
+				"TestTable as bean inner join bean.a as x left join fetch bean.b LEFT OUTER JOIN bean.c.d as y with y.e = 'it''s join bean.f' " +
+				"right outer join other.g cross join TestTable as other JOIN\tbean.h");
+		assertTrue(q.isJoined("a"));
+		assertTrue(q.isJoined("b"));
+		assertTrue(q.isJoined("c.d"));
+		assertTrue(q.isJoined("h"));
+		// joined on the way to c.d
+		assertTrue(q.isJoined("c"));
+		assertFalse(q.isJoined("c.d.i"));
+		// in a quoted literal, through another alias, the alias itself and a reference no join names
+		assertFalse(q.isJoined("f"));
+		assertFalse(q.isJoined("g"));
+		assertFalse(q.isJoined("x"));
+		assertFalse(q.isJoined("e"));
+	}
+
+	@Test
+	void isJoinedSeesTheJoinsAddedFromBean() {
+		TestDocumentQuery q = newQuery();
+		assertFalse(q.isJoined("a"));
+		q.addLeftOuterJoin("a");
+		q.addInnerJoin("b", "bb");
+		q.addFetchedRightOuterJoin("c");
+		q.addLeftOuterJoinFromEntity("e", "d");
+		assertTrue(q.isJoined("a"));
+		assertTrue(q.isJoined("b"));
+		assertTrue(q.isJoined("c"));
+		assertFalse(q.isJoined("d"));
+		assertFalse(q.isJoined("ab"));
+	}
+
+	@Test
+	void isJoinedSeesEachReferenceOnTheWayToAJoinedPath() {
+		TestDocumentQuery q = newQuery();
+		q.addLeftOuterJoin("a.b.c");
+		assertTrue(q.isJoined("a"));
+		assertTrue(q.isJoined("a.b"));
+		assertTrue(q.isJoined("a.b.c"));
+		assertFalse(q.isJoined("a.b.c.d"));
+		assertFalse(q.isJoined("a.bc"));
+		assertFalse(q.isJoined("b"));
+	}
+
+	@Test
 	void addRightOuterJoinAppearsInFromClause() {
 		TestDocumentQuery q = newQuery();
 		q.addRightOuterJoin("relProp");

@@ -149,7 +149,10 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	 * Such a path in a filter is an implicit inner join in HQL, which would leave out the rows with nothing on it: a
 	 * negation also matches them, and under Match Any so does any other criterion. The joins are to-one, so they add
 	 * no rows, and a condition through the path still excludes the rows with nothing on it unless it matches no value.
-	 * The query's own columns may have joined them already. An embedded association is on the row, so it needs none.
+	 * A path the from clause joins already is not joined again: the query's own columns may have, and a custom from
+	 * may join it with an alias and a with condition, which another join of the path would replace for the filters and
+	 * the columns. An embedded association is on the row, so it needs none, and so is the foreign key that a condition
+	 * on an association's bizId compares, so that association needs none either.
 	 * <p>After a from clause of several entities ({@code {a.X} as bean, {a.Y} as y}), the join relies on the dialect
 	 * writing their separator as a cross join, so that its on clause sees bean: every Skyve dialect does.
 	 * <p>Side effects: adds the joins to the detail and the summary query.
@@ -168,7 +171,10 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 			if (! ((attribute instanceof Association) || (attribute instanceof InverseOne))) {
 				return;
 			}
-			if (! ((attribute instanceof Association association) && (association.getType() == AssociationType.embedded))) {
+			boolean onTheRow = (attribute instanceof Association association) &&
+									((association.getType() == AssociationType.embedded) ||
+										Bean.DOCUMENT_ID.equals(binding.substring(dot + 1)));
+			if (! onTheRow) {
 				leftOuterJoin(detailQuery, path);
 				leftOuterJoin(summaryQuery, path);
 			}
@@ -178,7 +184,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 
 	private static void leftOuterJoin(@Nullable DocumentQuery query, @Nonnull String path) {
 		if ((query instanceof AbstractDocumentQuery documentQuery) &&
-				(! documentQuery.isLeftOuterJoined(path))) {
+				(! documentQuery.isJoined(path))) {
 			documentQuery.addLeftOuterJoin(path);
 		}
 	}
