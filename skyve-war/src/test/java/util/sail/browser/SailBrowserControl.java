@@ -18,8 +18,8 @@ import jakarta.annotation.Nonnull;
  * {@link #require(Class, String)}, which skips the test when the browser hasn't got it.
  * <p>
  * Each implementation implements the interfaces of the capabilities it supports. Which implementation a browser gets
- * depends on the browser: Chromium browsers (Chrome and Edge) get the most, any other browser what plain WebDriver
- * can do ({@link WebDriverBrowserControl}).
+ * depends on the browser: Chromium browsers (Chrome and Edge) get every capability
+ * ({@link ChromiumBrowserControl}), any other browser what plain WebDriver can do ({@link WebDriverBrowserControl}).
  * <p>
  * Threading: {@link #of(WebDriver)} is thread-safe. A control is thread-confined, as its driver is.
  */
@@ -41,8 +41,8 @@ public abstract class SailBrowserControl {
 	/**
 	 * Returns the control of a browser, made the first time it is asked for, by browser.
 	 *
-	 * <p>Side effects: forgets the controls of drivers that have quit, so a browser started again (on the same profile,
-	 * say) gets a new control, with none of the old one's settings.
+	 * <p>Side effects: forgets (and releases) the controls of drivers that have quit, so a browser started again (on the
+	 * same profile, say) gets a new control, with none of the old one's settings.
 	 *
 	 * <p>Complexity: O(d) in the number of drivers with a control, which is the number of browsers open.
 	 *
@@ -51,7 +51,13 @@ public abstract class SailBrowserControl {
 	 */
 	public static @Nonnull SailBrowserControl of(@Nonnull WebDriver driver) {
 		synchronized (CONTROLS) {
-			CONTROLS.keySet().removeIf(SailBrowserControl::hasQuit);
+			CONTROLS.entrySet().removeIf(entry -> {
+				if (hasQuit(entry.getKey())) {
+					entry.getValue().release();
+					return true;
+				}
+				return false;
+			});
 			return CONTROLS.computeIfAbsent(driver, SailBrowserControl::create);
 		}
 	}
@@ -59,10 +65,20 @@ public abstract class SailBrowserControl {
 	/** Makes the control for a driver, chosen by its browser. */
 	private static @Nonnull SailBrowserControl create(@Nonnull WebDriver driver) {
 		if (driver instanceof ChromiumDriver) {
-			// Chrome and Edge: ChromiumBrowserControl replaces this (W2 of docs/ai/plan_sail_browser_control.md)
-			return new WebDriverBrowserControl(driver);
+			// Chrome and Edge
+			return new ChromiumBrowserControl(driver);
 		}
 		return new WebDriverBrowserControl(driver);
+	}
+
+	/**
+	 * Lets go of what this control holds in its browser beyond the driver, once the driver has quit: called when
+	 * {@link #of(WebDriver)} forgets it.
+	 *
+	 * @implSpec	The default holds nothing, so does nothing.
+	 */
+	void release() {
+		// plain WebDriver holds nothing beyond its driver
 	}
 
 	/** Indicates whether a driver has quit: a remote driver forgets its session id when it quits. */

@@ -14,7 +14,8 @@ import jakarta.annotation.Nullable;
  */
 public interface Dialogs {
 	/**
-	 * Returns the dialogs the pages have opened since the browser started or the last {@link #clearDialogs()}.
+	 * Returns the dialogs the pages have opened since the control began watching (at the latest, the first call to
+	 * this interface) or the last {@link #clearDialogs()}.
 	 *
 	 * @return the dialogs, oldest first; a copy the caller owns
 	 */

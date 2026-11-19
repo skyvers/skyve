@@ -58,16 +58,18 @@ class SailBrowserControlTest {
 					() -> assertNotSame(first, afterQuit, "a driver that has quit: its control was released"));
 	}
 
-	/** Until the Chromium control exists, Chrome and Edge get what plain WebDriver can do. */
+	/** Chrome and Edge get the Chromium control, which has every capability (a mock driver offers no DevTools to connect to). */
 	@Test
-	void aChromiumDriverGetsAControl() {
+	void aChromiumDriverGetsTheChromiumControl() {
 		ChromeDriver chrome = mock(ChromeDriver.class);
 		when(chrome.getSessionId()).thenReturn(new SessionId("s2"));
 		when(chrome.getCapabilities()).thenReturn(new ImmutableCapabilities("browserName", "chrome"));
 		SailBrowserControl control = SailBrowserControl.of(chrome);
 		assertAll(() -> assertEquals("chrome", control.browser()),
+					() -> assertSame(ChromiumBrowserControl.class, control.getClass()),
 					() -> assertSame(control, SailBrowserControl.of(chrome), "kept while the session is open"),
-					() -> assertTrue(control.supports(Capability.TABS)));
+					() -> assertAll(Stream.of(Capability.values())
+											.map(c -> (Executable) () -> assertTrue(control.supports(c), c.name()))));
 	}
 
 	@Test

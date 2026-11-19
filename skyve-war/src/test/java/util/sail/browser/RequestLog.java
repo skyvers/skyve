@@ -5,7 +5,8 @@ import java.util.List;
 import jakarta.annotation.Nonnull;
 
 /**
- * The requests that the browser's pages and workers made, since the browser started or the log was last cleared.
+ * The requests that the browser's pages and workers made, since the control began watching (at the latest, the first
+ * call to this interface) or the log was last cleared.
  * <p>
  * The capability {@link Capability#REQUEST_LOG}.
  */

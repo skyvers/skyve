@@ -314,6 +314,37 @@ Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and wh
 - Red/green on "unsupported means skipped": with the rethrow in `executeCall` removed, `InterpretedWebDriverExecutorTest` failed 2 of 68 (the skip became a `SailFailure` under Assert, and under Verify the skip was not attached); restored, 68 of 68 passed.
 - ECJ 3.41 with skyve-war's JDT settings on the changed files: no warnings.
 
+### W2
+
+- Built `ChromiumBrowserControl`, ported from basix's `SailDevTools` with its attach and routing rules and the comments explaining them. It extends `WebDriverBrowserControl`, so cookies, tabs, keys and window stay WebDriver, and adds the eight CDP-backed interfaces.
+  - It auto-attaches at browser level with `waitForDebuggerOnStart`, filtered to tab, service_worker and shared_worker, so `browser_ui` is left out. Pages attach under tabs, and workers and iframes under pages.
+  - A paused request is answered by trying each session.
+  - Rules and network conditions go to every page and worker session.
+  - The quota is set in a page session.
+  - Init scripts are de-duplicated.
+  - CDP stays private to the class. `SailBrowserControl.create` returns this control for any `ChromiumDriver` (Chrome and Edge).
+- Choices made within the plan:
+  - basix's two sleep-polls (waiting for the current targets to attach, and `awaitHeld`) became condition waits, woken by the attach and hold events and bounded as before.
+  - The control connects to DevTools when `of` makes it. With a lazy connection, the first IT run showed that a dialog already open when the control attaches is never reported. If it can't connect then, it tries again at the first DevTools use.
+  - `of` now calls a package-private `release()` on the control of a driver that has quit. This closes the connection and its thread.
+  - `Dialogs` and `RequestLog` now say they record from when the control began watching, not from the browser's start.
+  - A failed response paused at the response stage carries on through `Fetch.continueRequest`, because it has no status for `continueResponse`.
+- `ChromiumBrowserControlTest` (5 tests) is the rest of basix's `FetchRuleTest`: the DevTools names of stages, of errors (every constant) and of dialogs; `mergeHeaders`; and the command each rule answers a paused request with. `SailBrowserControlTest` now expects the Chromium control, with every capability, for a Chrome driver.
+- `ChromiumBrowserControlIT` (17 tests, tagged `sail`).
+  - Setup: a JDK `HttpServer` on an ephemeral loopback port serves `page.html` and `sw.js` (fixtures under `src/test/resources/util/sail/browser/`) and counts requests by path. The browser starts through `PrimeFacesSelenide` and `BrowserConfiguration` (headless unless `-Dsail.headless=false`), and is quit after each test.
+  - Network: offline for the page and the worker, and a worker that Chrome restarts stays offline; throttling; a new tab gets the settings.
+  - Interception: fail once, and fail by method; hold, then release or fail; fulfil at both stages; change request and response headers; a lost response that the server still handled; a worker-forwarded request fulfilled and held.
+  - Request log: the page's service-worker copy, the worker's own request, and a failed request.
+  - Also: init scripts across navigation and reload (added once); confirm and prompt answered; beforeunload recorded; cookies, HttpOnly included; quota on writes; freeze and resume (seen through the page's `freeze` and `resume` events); and touch.
+  - Waits are on named events (the page's promise, the held count, DevTools events reaching the control), bounded by the SAIL timeout.
+- Chrome 158.0.8127.37, ChromeDriver 158.0.8127.36, Selenium 4.38.0. Command: `mvn -o -pl skyve-war -am test -Dtest=ChromiumBrowserControlIT -DskipUnitTests=false -DskipIntegrationTests=true -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.rerunFailingTestsCount=0 -DforkCount=1`. Three headless runs in a row passed 17/17 each (about 13 s). One headed run (`-Dsail.headless=false`, under the headed lock) passed 17/17.
+- Red/green:
+  - With network conditions sent to page sessions only, `offlineReachesThePageAndTheServiceWorker` and `aServiceWorkerChromeStartsAgainStaysOffline` failed ("the worker's request: expected ERR but was 200 real").
+  - With `Fetch.enable` sent to page sessions only, `aWorkerForwardedRequestIsIntercepted` failed ("expected 503 busy but was 200 real"), while the page-level `fulfilAtTheRequestAndTheResponse` still passed.
+  - Restored, both passed.
+- Gate: `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest'` ran 267 tests: 0 failures, errors or skips, and no flakes. ECJ 3.41 with skyve-war's JDT settings on the changed files: no warnings.
+- Not verified: Edge, and a remote (grid) Chromium without a DevTools endpoint.
+
 ## User validation suggestions
 
 - Run `StandardCallsSailIT` headed and watch the offline, hold and release, and dialog steps.
