@@ -15,7 +15,7 @@ import util.AbstractH2Test;
 
 /**
  * The generated action test calls the action with no request, which it needs (the cookie and session to keep);
- * this one gives it a request. Its existence also stops generateDomain from generating that test.
+ * this one gives it a request. UserAccountFactory stops generateDomain from generating that test.
  * SignOutOtherSessionsH2Test covers the behaviour.
  */
 class SignOutOtherSessionsTest extends AbstractH2Test {
