@@ -44,7 +44,7 @@
 			<dataGridNew binding="datasets" />
 			<dataEnter binding="datasetName" value="users" />
 			<dataEnter binding="datasetType" value="BizQL" match="label" />
-			<dataEnter binding="query" value="select a from {admin.User} a where a.userName = :uname" />
+			<dataEnter binding="query" value="select a from {admin.ReportTemplate} a where a.name = :uname" />
 			<testGridRows binding="parent.parameters" minRows="1" maxRows="1" />
 			<zoomOut testSuccess="false" />
 			<testFailure message="Parameter Type is required" />
@@ -52,8 +52,8 @@
 			<testValue binding="name" value="uname" />
 			<dataEnter binding="description" value="The user name" />
 			<dataEnter binding="type" value="Text" match="label" />
-			<dataEnter binding="textDefaultValue" value="admin" />
-			<dataEnter binding="textTestValue" value="admin" />
+			<dataEnter binding="textDefaultValue" value="SAIL{run}" />
+			<dataEnter binding="textTestValue" value="SAIL{run}" />
 			<zoomOut />
 			<zoomOut />
 			<save createView="false" />
@@ -84,14 +84,14 @@
 			<testGridRows binding="datasets" minRows="2" maxRows="2" />
 			<dataGridZoom binding="datasets" rowContaining="users" />
 			<action name="TestQuery" />
-			<testValue binding="results" value="admin - admin (person)" />
+			<testValue binding="results" value="Report - SAIL{run}" />
 			<zoomOut />
 			<dataGridNew binding="datasets" />
 			<dataEnter binding="datasetName" value="missing" />
 			<dataEnter binding="datasetType" value="Class" match="label" />
 			<dataEnter binding="query" value="sail.NoSuchDataset" />
 			<action name="TestQuery" testSuccess="false" />
-			<comment>A DomainException: the user sees only the generic error and its reference, the server log has "Unable to create an instance of sail.NoSuchDataset"</comment>
+			<comment>Records current behaviour: TestQuery.java:162 throws a DomainException, so the user sees only the generic error and its reference (the server log has "Unable to create an instance of sail.NoSuchDataset"). If the product is fixed to refuse with a ValidationException, change this assertion to the real message.</comment>
 			<testFailure message="An error occurred while processing your request" />
 			<remove />
 			<testGridRows binding="datasets" minRows="2" maxRows="2" />
@@ -107,7 +107,7 @@
 			<action name="ExportReportSpecification" />
 			<dataEnter binding="description" value="A changed SAIL report" />
 			<action name="TestReport" testSuccess="false" />
-			<comment>A DomainException: the user sees only the generic error, the server log has "This report template has unsaved changes"</comment>
+			<comment>Records current behaviour: TestReport.java:45 throws a DomainException, so the user sees only the generic error (the server log has "This report template has unsaved changes. Please save the template then try again."). If the product is fixed to refuse with a ValidationException, change this assertion to that message.</comment>
 			<testFailure message="An error occurred while processing your request" />
 			<cancel />
 		</method>

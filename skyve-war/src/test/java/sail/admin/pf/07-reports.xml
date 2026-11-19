@@ -156,7 +156,9 @@
 			<method>
 				<navigateMenu module="admin" item="Reports/Report Schedules" />
 				<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
-				<testGridRows module="admin" query="qReportSchedules" rowContaining="03:00" minRows="1" />
+				<listGridFilter module="admin" query="qReportSchedules" column="name" value="SAIL{run}" />
+				<testGridRows module="admin" query="qReportSchedules" rowContaining="03:00" minRows="1" maxRows="1" />
+				<listGridClearFilter module="admin" query="qReportSchedules" />
 				<navigateMenu module="admin" item="Reports/Report Designer" />
 				<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
 				<delete />
