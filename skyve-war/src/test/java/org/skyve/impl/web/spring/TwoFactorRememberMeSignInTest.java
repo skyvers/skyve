@@ -85,8 +85,8 @@ class TwoFactorRememberMeSignInTest {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 
 		TwoFactorAuthUser user = new TwoFactorAuthUser(USERNAME, "ignored", true, true, true, true,
-														Collections.emptyList(), CUSTOMER, "bob",
-														"hashed-code", TOKEN, new Timestamp(), "bob@skyve.org", "hashed-password");
+				Collections.emptyList(), CUSTOMER, "bob",
+				"hashed-code", TOKEN, new Timestamp(), "bob@skyve.org", "hashed-password");
 		UserDetailsManager userDetailsManager = mock(UserDetailsManager.class);
 		when(userDetailsManager.loadUserByUsername(USERNAME)).thenReturn(user);
 		tokenRepository = new InMemoryTokenRepositoryImpl();
@@ -97,7 +97,7 @@ class TwoFactorRememberMeSignInTest {
 
 		// The code is the password of the second step: only the right one signs in
 		AuthenticationManager authenticationManager = authentication -> {
-			if (! CODE.equals(authentication.getCredentials())) {
+			if (!CODE.equals(authentication.getCredentials())) {
 				throw new BadCredentialsException("bad code");
 			}
 			return UsernamePasswordAuthenticationToken.authenticated(user, CODE, user.getAuthorities());
@@ -114,11 +114,20 @@ class TwoFactorRememberMeSignInTest {
 		applicationContext.refresh();
 		sharedObjects.put(org.springframework.context.ApplicationContext.class, applicationContext);
 		sharedObjects.put(UserDetailsService.class, userDetailsManager);
-		HttpSecurity http = new HttpSecurity(objectPostProcessor, new AuthenticationManagerBuilder(objectPostProcessor), sharedObjects);
+		HttpSecurity http = new HttpSecurity(objectPostProcessor, new AuthenticationManagerBuilder(objectPostProcessor),
+				sharedObjects);
 		http.authenticationManager(authenticationManager);
 		DefaultSecurityFilterChain chain = (DefaultSecurityFilterChain) new SpringSecurityConfig(skyve).filterChain(http);
-		twoFactorFilter = chain.getFilters().stream().filter(TwoFactorAuthPushEmailFilter.class::isInstance).findFirst().orElseThrow();
-		formLoginFilter = chain.getFilters().stream().filter(f -> f.getClass() == UsernamePasswordAuthenticationFilter.class).findFirst().orElseThrow();
+		twoFactorFilter = chain.getFilters()
+				.stream()
+				.filter(TwoFactorAuthPushEmailFilter.class::isInstance)
+				.findFirst()
+				.orElseThrow();
+		formLoginFilter = chain.getFilters()
+				.stream()
+				.filter(f -> f.getClass() == UsernamePasswordAuthenticationFilter.class)
+				.findFirst()
+				.orElseThrow();
 	}
 
 	@AfterEach
@@ -182,14 +191,17 @@ class TwoFactorRememberMeSignInTest {
 	}
 
 	private static String series(Cookie cookie) {
-		String decoded = new String(java.util.Base64.getDecoder().decode(cookie.getValue()), java.nio.charset.StandardCharsets.UTF_8);
+		String decoded = new String(java.util.Base64.getDecoder().decode(cookie.getValue()),
+				java.nio.charset.StandardCharsets.UTF_8);
 		return java.net.URLDecoder.decode(decoded.split(":")[0], java.nio.charset.StandardCharsets.UTF_8);
 	}
 
 	@SuppressWarnings("unchecked")
-	private static ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configurationMap() throws ReflectiveOperationException {
+	private static ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration> configurationMap()
+			throws ReflectiveOperationException {
 		Field field = TwoFactorAuthConfigurationSingleton.class.getDeclaredField("configuration");
 		field.setAccessible(true);
-		return (ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration>) field.get(TwoFactorAuthConfigurationSingleton.getInstance());
+		return (ConcurrentHashMap<String, TwoFactorAuthCustomerConfiguration>) field
+				.get(TwoFactorAuthConfigurationSingleton.getInstance());
 	}
 }
