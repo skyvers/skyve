@@ -1,6 +1,6 @@
 # Execute the SAIL browser control plan
 
-Carry out `docs/ai/plan_sail_browser_control.md` in Skyve: W0 to W5 in order, then the gates once at the end.
+Carry out `docs/ai/plan_sail_browser_control.md` in Skyve: W0 to W6 in order, then the gates once at the end.
 
 You can do the work yourself, or hand a work item to one subagent at a time. Never run two implementers or two builds at once, because the items share files. If you use subagents, give each one this prompt's hard rules and its work item, and keep only their summaries in your context.
 
@@ -30,9 +30,10 @@ For each item: implement it, run its tests (from the plan's "AI validation plan"
 - **W2:** `ChromiumBrowserControlIT` passes three runs in a row headless, and once headed (`-Dsail.headless=false`).
 - **W3:** `StandardCallsSailIT` passes three runs in a row on Chrome. If Firefox is installed, also run it with the Firefox browser setting (see `CrossBrowserSelenium` and `SailSettings`). Chromium-only calls must report skipped with the plan's message, and the rest must pass. If Firefox isn't installed, record that.
 - **W4:** `SailTestFiles` tests, including a video that plays.
-- **W5** is documentation. Check it against what was built.
+- **W5:** `SailProfilesTest`, the `CrossBrowserSeleniumTest` argument checks and the `SailWorkflow` close test pass. Then rerun `StandardCallsSailIT` once and check its run's folder under `target/sail-profiles` is gone. Only ever delete inside the test's own root: the sweep must never be pointed at a basix worktree's `target/sail-profiles`, whose lanes may be running.
+- **W6** is documentation. Check it against what was built.
 
-## Gates (once, after W5)
+## Gates (once, after W6)
 
 Run them on the lines changed since the base commit (`git diff -U0 <base>`), counting new files as wholly changed. The recipes are in "Gates" and "Environment" of `docs/ai/plan_m1_prompt.md`; run them against this worktree.
 
