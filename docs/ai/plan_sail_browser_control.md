@@ -152,7 +152,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
    - `CheckRequests`: `matching` (a regex over `METHOD url`), `failed`, `exactly`/`atLeast`/`atMost`, `waitMillis`, `clear`, `ignoreServiceWorkerCopies` (default true). Its variable is the count.
    - `RequestLog`: `matching`, `clear`. Its variable is the log as JSON.
    - basix's `CountRequests` (URL substring) is not ported: `CheckRequests` covers it.
-   - **Log start (Mike, review round 1):** the control begins watching the first time a step asks for it, not when the browser starts. `CheckRequests` and `CheckDialog` (any check that reads the request log or the record of dialogs) fail with a clear message when watching only began in their own step, telling the author to put an earlier call (such as `RequestLog clear=true`) before the steps to watch.
+   - **Log start (Mike, review round 1):** the control begins watching the first time a step asks for it, not when the browser starts. `CheckRequests` and `CheckDialog` (any check that reads the request log or the record of dialogs) fail with a clear message when watching only began in their own step, telling the author to put an earlier call (such as `RequestLog clear=true`) before the steps to watch. The `RequestLog` call follows the same rule (review round 2), except with `clear=true`, which starts the log: in that step its variable is an empty array.
 9. **Test files** live in `SailTestFiles` (`util.sail`), not `SailMedia`. Each file is reused if it's already there with the right size. The playable video needs a browser (the leg's driver); the rest don't.
 10. **No op-codes, and no `sail.xsd` change.** `docs/sail.md` records the promotion rule: a capability can become an op-code once it has Chromium and Firefox implementations. Scripts using op-codes then declare capabilities so unsupported browsers skip.
 11. **`SailMedia` is unchanged.**
@@ -163,7 +163,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
     - Read basix's `DeviceStart`, `RestartBrowser` and `RestartDevice`, and generalise away the basix-only property `bhm.sail.profiles`.
     - Both get their folder from `SailProfiles` (decision 13), not by building the path themselves.
 13. **Profile housekeeping.** `SailProfiles` owns the root (`sail.profiles`). Every profile folder is `<root>/<run token>-<pid>/<profile>`, the pid being the JVM's (Mike, review round 1: two JVMs can start a run in the same millisecond). `SailProfiles` writes a marker file (`.sail-run`) in each run folder it creates (Mike, review round 1).
-    - **When a run ends, after its browsers have quit:** delete `<root>/<run>` if the run passed. If it failed, keep it and print `SAIL device profiles kept for the failed run <run>: <folder>`.
+    - **When a run ends, after its browsers have quit:** delete `<root>/<run>-<pid>` if the run passed. If it failed, keep it and print `SAIL device profiles kept for the failed run <run>: <folder>`.
       - A run of its own ends when its `runResources`, `runFiles` or `runStrings` call returns, or when its suite member does.
       - A run shared with `shareRunAcrossCalls()` ends when the workflow is closed. `SailWorkflow` has a plain `close()`; it does not implement `AutoCloseable` (Mike, review round 1, amending the W5 design). `close()` stops any kept browser, then ends the shared run's profiles. The run failed if any of its calls threw.
       - `AbstractInterpretedSailWorkflow`'s `@AfterAll` closes its workflow. A test that builds its own shared workflow closes it itself, in a `finally`.
@@ -171,8 +171,8 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
     - **Sweep**, once per JVM, before the first profile folder is given out. It deletes each run folder under the root that is:
       - named like a run folder, `<run token>-<pid>` (base-36 letters and digits, a hyphen and digits), and holding the marker; anything else under the root is left alone and never followed through a link (Mike, review round 1: the marker too);
       - older than `sail.profiles.keepHours` (default 12) by both its token's start time and the newest last-modified time of any file inside it;
-      - not in use: no profile in it has a Chrome `SingletonLock` naming a live process. On macOS and Linux the lock is a symbolic link to `host-pid`; check the pid with `ProcessHandle.of(pid)`. On Windows, a profile in use can't be deleted: a folder that fails to delete is skipped.
-      - Before a run folder is deleted, it is renamed under the root to `<run token>-<pid>.deleting-<pid>` (the second pid the deleting JVM's), and its marker is deleted last. A folder that can't be renamed (on Windows, one in use) is left whole; a delete that stopped halfway is swept later.
+      - not in use: no profile in it has a Chrome `SingletonLock` naming a live process. On macOS and Linux the lock is a symbolic link to `host-pid`; check the pid with `ProcessHandle.of(pid)`. On Windows, a run folder with a profile in use can't be renamed, so it is left whole (see the rename below).
+      - Before a run folder is deleted, it is renamed under the root to `<run token>-<pid>.deleting-<pid>` (the second pid the deleting JVM's), and its marker is deleted last. A folder that can't be renamed (on Windows, one in use) is left whole; a delete that stopped halfway is swept later. A JVM whose rename comes second (another JVM renamed the folder first) leaves it to the other and says nothing (review round 2).
       - This catches runs that were killed, stopped with Ctrl-C or ended in a JVM that never reached `close()`, and the failed runs that were kept.
     - Housekeeping never fails or skips a test. A folder that can't be deleted gets a one-line warning naming it and the reason.
     - Several JVMs (parallel lanes) may share a root. A sweep only deletes runs past the keep time, never the current JVM's runs, and skips profiles in use, so it is safe beside another lane's run.
@@ -188,6 +188,7 @@ Give SAIL a browser-agnostic way to control the browser beyond WebDriver, and a 
 - `SailSettings` keys `sail.profiles`, `sail.profiles.keep` and `sail.profiles.keepHours`;
 - `SailProfiles`, `SailWorkflow.close()` (a plain method, not `AutoCloseable`: amended by Mike in review round 1), the `@AfterAll` close in `AbstractInterpretedSailWorkflow`, and the extra Chrome and Edge arguments (decisions 13 and 14);
 - the smallest `SailWorkflow`/`SailSuite` change for decision 4, if W0 shows it's needed;
+- approved by Mike on 2026-11-19 (re-review API sign-off): public `watchingSince()` on `RequestLog` and `Dialogs`, public `SailBrowserControl.POLLING`, public `SailProfiles.runFolder(...)`, `SailCallParameters.requiredChoice(...)`, and the package-private `SailProfiles.MARKER` and `AbstractInterpretedSailWorkflow.WORKFLOWS`;
 - the decision-4 change in `InterpretedWebDriverExecutor` (approved by Mike on 2026-11-19): `executeCall` and `runSteps` rethrow a `TestAbortedException` as it is, under every strategy, so no later step runs; under Verify, `executeAutomation` lets failures recorded before the skip win, naming the skip in the message;
 - test fixtures under `src/test/resources/util/sail/browser/**`.
 
@@ -552,6 +553,46 @@ No finding was shown to be wrong. PR2 was confirmed in the Selenium source. PR3'
 - Sonar (`skyve-local-browser-control`, test-code rules): the first re-scan found 2 new issues on changed lines (S6213, a parameter named `record`, and S5778 in the new IT case), both fixed. The second found 0 issues on changed lines against base `8e9d436801`, and the gate's 2 issues on unchanged lines of changed files remain.
 - After the Sonar fixes (a parameter rename and a hoisted `Duration`), the unit set plus `ChromiumBrowserControlIT` ran 351 tests, all passing, and ECJ again found 0 warnings on changed lines. `StandardCallsSailIT` and `SailTestFilesIT` weren't rerun, as those fixes don't touch them.
 - Not verified: Windows (the rename-before-delete and the `@DisabledOnOs` guards), Edge, a headed run and Firefox in this round.
+
+### Review round 2
+
+Sources: three re-reviews of `1c70d57880` (PR, rubric, slop), listed in `~/skyve-sail-work/browser-control/fix-list-r2.md` (items 1 to 13). Mike signed off the API the round-1 fixes added (see "Approved new constructs"). Fixed in one commit, "SAIL browser control: re-review fixes (round 2)". Chrome behaviour was checked with a throwaway probe against Chrome 158.0.8127.37 (deleted; output in `r2-probe.log`).
+
+**What the probe showed:**
+- `Fetch.requestPaused` carries `networkId` (the `Network.requestWillBeSent` request id) in sessions with the Network domain on, as the control's are, but no loader id. `Network.requestWillBeSent` carries `loaderId`, and `Page.frameNavigated` the frame's new `loaderId`. A navigation request's id is its loader id.
+- A new document's load-time script, 15 navigations of 15: `frameNavigated`, then the script's `requestWillBeSent`, then its `requestPaused`, 3 to 5 events apart. So in Chrome 158 the round-1 sequence scheme didn't drop it either; the concern (PR1, R2) is the order Selenium's thread pool hands the events on, which nothing guarantees.
+- A non-owner session with Fetch on answers a bad header ("Invalid header: X Bad") or status ("Invalid http status code or phrase") with the same error as the owner: Chrome checks them before the request id. So R1 holds: round 1's `toOwner` could fail a request through a session that didn't own it and stop looking.
+- No `Page.frameDetached` came for an iframe when its page navigated, nor when its tab closed (`Target.closeTarget`), and the iframe's held request stayed counted.
+
+**Fixed:**
+- `ChromiumBrowserControl`, held requests (PR1, R2, PR3): a held request records its frame, its network id and its document (loader id, from the request log's `requestWillBeSent`). Each frame's current document is kept from `Page.frameNavigated`, and the documents frames have left in a set. A navigation drops only the frame's held requests whose known document differs from the new one; one whose document isn't known is kept (it may be the new document's). A paused request of a document already left isn't held (no rule takes it, so it carries on). A closed page, or a session dropped as gone, leaves its document and drops its frame's held requests. The sequence numbers are gone from held requests.
+- PR3 (a): a session `forEachSession` drops as gone is recorded in `gone` (renamed from `detachedFirst`, which now holds both cases), so its later detach is ignored, and its held requests are dropped.
+- PR3 (b): the `heldCount` and `navigated`/`closed` Javadoc say only a page's (or frame's) own held requests go; an iframe's stay counted when its page navigates or closes (the probe found no event to drop them by).
+- `toOwner` (PR2, R1): every session is tried until one takes the command; the first refusal other than "not this session's request" is remembered. Only if none took it is the request failed, in every session (quietly, as the refusing one may not own it), and the remembered refusal printed. A timeout or a target that went now moves on to the next session.
+- Request log (PR4): a request's method and URL are set only by a `requestWillBeSent` later in Selenium's numbering than the one that set them, so a redirect handled out of order logs the URL it went to.
+- `RequestLog` call (PR5): fails in the step where watching began, unless `clear=true`, which starts the log and gives `[]`. `AbstractSailCall.beganInStep` (package-private) is shared with `requireWatchingBefore`.
+- `CheckRequests.pattern` (S1, R5): one `compile` helper, one read of the parameter, no `Objects.requireNonNull`.
+- `SailCallParameters.requiredChoice(name, type)` (S2, approved by Mike), used by `FreezeTab` and `SwitchTab`; `choice` and it share one matcher.
+- `SwitchTab` (S3): `require` once, then one `switch (action)` whose arms read their own parameters (ECJ's missing-default warning makes `CLOSE` the `default` arm).
+- `FreezeTab` (S4): prints the action as is (`FREEZE`); no `Locale`.
+- `SailProfiles` (R4): a `NoSuchFileException` on the rename means another JVM's rename came first, and is silent.
+- `SailWorkflow.shareRunAcrossCalls()` (R6) calls `close()` first, so a browser a suite member kept is stopped before the shared run ends.
+- Docs: decisions 8 and 13 (above), the approved API, and in `sail.md` the `RespondToRequests` status range, `RewriteRequestHeaders` token names and the `RequestLog` rule (also in `skyve-10-changes.md`).
+- Tests: `ChromiumBrowserControlIT.aRequestOfTheNewDocumentIsHeldAcrossItsNavigation` (the page goes from a document the control saw arrive to `/loads`, whose head script is held; `awaitHeld` sees it, release lets the page finish; it navigates itself 500 ms after the script returns, as ChromeDriver would otherwise wait on the held load), `RequestCallsTest.theRequestLogFailsWhenItBeganInItsStepUnlessItStartsIt`, `SailWorkflowTest.sharingARunStopsAKeptBrowser`, and `requiredChoice` cases in `SailCallParametersTest`. The existing hold, reload and clear case is kept.
+
+**Not shown wrong, but not provable in Chrome:** the order independence of the held-request rule. In Chrome 158 a new document's `frameNavigated` comes before its requests, so the IT can't produce the reordering PR1 and R2 describe: dropping every held request of a navigating frame regardless of document (round 1 without its sequence) still passes the new IT case. Not covered by a test: the silent lost rename (a race between two JVMs) and the redirect order.
+
+**Re-gate (JDK 21, Chrome 158.0.8127.37, `-DforkCount=1 -Dsurefire.rerunFailingTestsCount=0`):**
+- Unit: `-Dtest='util.sail.**.*Test,util.AbstractInterpretedSailWorkflowTest,sail.HarnessSelfContainedTest'` ran 333 tests, with 0 failures, errors or skips and no flakes.
+- ITs: `ChromiumBrowserControlIT` (21), `StandardCallsSailIT` (6) and `SailTestFilesIT` (1), in one JVM, headless, three runs in a row: 28/28 each, no flakes. `skyve-war/target/sail-profiles` was empty after every run.
+- Red/green, each restored byte for byte:
+  - The new document marked as left instead of the one before: `aRequestOfTheNewDocumentIsHeldAcrossItsNavigation` failed ("Expected 1 held request(s) within PT30S, but 0 were held").
+  - A navigation dropping nothing: `heldRequestsAreForgottenWhenThePageGivesUpOrTheRulesAreCleared` failed.
+  - A navigation dropping every held request of the frame, whatever its document: both cases passed (Chrome's order, above).
+  - `RequestLog` without its log-start check: `theRequestLogFailsWhenItBeganInItsStepUnlessItStartsIt` failed.
+- ECJ 3.46.200 (`--release 17`, skyve-war prefs, core, ext, web and war compiled together): 0 warnings on lines changed since base `8e9d436801`, and 0 on unchanged lines of changed files.
+- Sonar (`skyve-local-browser-control`, test-code rules): 0 issues on changed lines; the gate's 2 issues on unchanged lines of changed files remain.
+- Not verified: Windows, Edge, a headed run and Firefox in this round.
 
 ## User validation suggestions
 

@@ -129,11 +129,22 @@ public abstract class AbstractSailCall implements SailCall {
 	 * @throws IllegalStateException	if the record began in this step, telling the author to start watching earlier
 	 */
 	protected final void requireWatchingBefore(@Nonnull Context context, @Nonnull Instant since, @Nonnull String what) {
-		if (! since.isBefore(context.started)) {
+		if (beganInStep(context, since)) {
 			throw new IllegalStateException(name() + " reads the " + what + ", which only began in this step, as the browser's control" +
 												" began watching then: it holds nothing from the steps before. Put a call before the steps" +
 												" to watch, such as RequestLog with clear=true, so watching begins there");
 		}
+	}
+
+	/**
+	 * Indicates whether a record of the browser's control began in the step that is running.
+	 *
+	 * @param context	the leg, which knows when this step started
+	 * @param since	when the record began
+	 * @return true if it began as this step ran, or later
+	 */
+	static boolean beganInStep(@Nonnull Context context, @Nonnull Instant since) {
+		return ! since.isBefore(context.started);
 	}
 
 	/**

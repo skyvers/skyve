@@ -81,6 +81,11 @@ class SailCallParametersTest {
 					() -> assertEquals(ErrorReason.FAILED, of(Map.of()).choice("reason", ErrorReason.class, ErrorReason.FAILED), "the fallback"),
 					() -> assertTrue(message(() -> of(Map.of("reason", "Busy")).choice("reason", ErrorReason.class, ErrorReason.FAILED))
 										.startsWith("Step's reason must be one of [FAILED, ABORTED, TIMED_OUT"),
-										"lists the choices"));
+										"lists the choices"),
+					() -> assertEquals(ErrorReason.TIMED_OUT, of(Map.of("reason", "timedout")).requiredChoice("reason", ErrorReason.class), "required"),
+					() -> assertEquals("Step needs the parameter reason", message(() -> of(Map.of()).requiredChoice("reason", ErrorReason.class)), "required, left out"),
+					() -> assertTrue(message(() -> of(Map.of("reason", "Busy")).requiredChoice("reason", ErrorReason.class))
+										.startsWith("Step's reason must be one of [FAILED, ABORTED, TIMED_OUT"),
+										"required, lists the choices"));
 	}
 }

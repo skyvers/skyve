@@ -507,6 +507,16 @@ class SailWorkflowTest {
 					() -> assertFalse(Files.exists(runFolder(3)), "which ended when its call returned"));
 	}
 
+	/** Sharing a run stops a browser a suite member left open, as closing does, so no run ends under a live browser. */
+	@Test
+	void sharingARunStopsAKeptBrowser() {
+		member("a.xml");
+		engine.shareRunAcrossCalls();
+		List<String> afterSharing = List.copyOf(events);
+		engine.close();
+		assertEquals(List.of("start 1", "run 1 a.xml", "stop 1"), afterSharing);
+	}
+
 	/**
 	 * A suite member that passes keeps its browser for the next member, so its device profiles end only when that
 	 * browser stops; a member with a browser of its own ends them when it ends.

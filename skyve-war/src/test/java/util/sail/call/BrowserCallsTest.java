@@ -159,7 +159,7 @@ class BrowserCallsTest {
 		run(new FreezeTab(), context, "action", "freeze", "index", "1");
 		run(new FreezeTab(), context, "action", "resume", "index", "1");
 		assertAll(() -> assertEquals(List.of("freeze second", "resume second"), browser.calls()),
-					() -> assertEquals("FreezeTab can't freeze tab 2 (0 being the first): 2 tab(s) are open",
+					() -> assertEquals("FreezeTab can't FREEZE tab 2 (0 being the first): 2 tab(s) are open",
 										message(IllegalStateException.class, () -> run(new FreezeTab(), context, "action", "freeze", "index", "2"))),
 					() -> assertEquals("FreezeTab's action must be one of [FREEZE, RESUME], not thaw",
 										message(IllegalArgumentException.class, () -> run(new FreezeTab(), context, "action", "thaw", "index", "1"))),

@@ -35,19 +35,12 @@ public final class SwitchTab extends AbstractSailCall {
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
-		parameters.required(ACTION);
-		Action action = parameters.choice(ACTION, Action.class, Action.OPEN);
-		String url = (action == Action.OPEN) ? parameters.required("url").trim() : "";
-		int index = (action == Action.SWITCH) ? parameters.requiredInteger("index", 0) : 0;
+		Action action = parameters.requiredChoice(ACTION, Action.class);
 		Tabs tabs = require(context, Tabs.class);
-		if (action == Action.OPEN) {
-			tabs.openTab(absolute(url, context));
-		}
-		else if (action == Action.SWITCH) {
-			tabs.switchToTab(index, context.timeout());
-		}
-		else {
-			tabs.closeTab();
+		switch (action) {
+			case OPEN -> tabs.openTab(absolute(parameters.required("url").trim(), context));
+			case SWITCH -> tabs.switchToTab(parameters.requiredInteger("index", 0), context.timeout());
+			default -> tabs.closeTab(); // CLOSE
 		}
 		return String.valueOf(tabs.tabCount());
 	}

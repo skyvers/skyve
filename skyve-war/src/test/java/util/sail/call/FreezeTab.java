@@ -2,7 +2,6 @@ package util.sail.call;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -34,14 +33,13 @@ public final class FreezeTab extends AbstractSailCall {
 
 	@Override
 	protected @Nullable String run(@Nonnull SailCallParameters parameters, @Nonnull Context context) {
-		parameters.required(ACTION);
-		Action action = parameters.choice(ACTION, Action.class, Action.FREEZE);
+		Action action = parameters.requiredChoice(ACTION, Action.class);
 		int index = parameters.requiredInteger("index", 0);
 		PageLifecycle lifecycle = require(context, PageLifecycle.class);
 		List<String> handles = new ArrayList<>(context.driver().getWindowHandles());
 		if (index >= handles.size()) {
 			throw new IllegalStateException(String.format("%s can't %s tab %d (0 being the first): %d tab(s) are open",
-															name(), action.name().toLowerCase(Locale.ROOT), Integer.valueOf(index), Integer.valueOf(handles.size())));
+															name(), action, Integer.valueOf(index), Integer.valueOf(handles.size())));
 		}
 		String handle = handles.get(index);
 		if (action == Action.FREEZE) {

@@ -1,5 +1,6 @@
 package util.sail.call;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -14,9 +15,14 @@ import util.sail.browser.LoggedRequest;
  * watching, or the log was last cleared, for a script step to check what the page sent and in what order. A request
  * that a service worker answers for the page is logged as the page made it ({@code fromServiceWorker} true) and, when
  * the worker fetched it from the network, again as the worker made it (see {@link CheckRequests}).
+ * <p>
+ * The control begins watching the first time a step asks for it, so in the step where watching began this call fails,
+ * as the log would hold nothing from the steps before, unless {@code clear} is {@code true}: then it starts the log, and
+ * its variable is an empty array. So a script starts watching with this call and {@code clear=true} before the steps it
+ * checks.
  * <ul>
  * <li>{@code matching}: a regular expression searched for in {@code <METHOD> <url>}; every request by default</li>
- * <li>{@code clear}: {@code true} to forget the log after reading it</li>
+ * <li>{@code clear}: {@code true} to forget the log after reading it, or to start it</li>
  * </ul>
  * Its variable is the matching requests as a JSON array, in the order they started, of objects with {@code method},
  * {@code url}, {@code status} (null while a request has no answer, or when it failed), {@code failure} (the network
@@ -35,6 +41,13 @@ public final class RequestLog extends AbstractSailCall {
 		boolean clear = parameters.bool("clear", false);
 		// this class's name is the interface's too
 		util.sail.browser.RequestLog log = require(context, util.sail.browser.RequestLog.class);
+		Instant since = log.watchingSince();
+		if (clear && beganInStep(context, since)) {
+			// clear=true starts the log: watching began in this step, so what the log holds is from this step only
+			log.clearRequests();
+			return "[]";
+		}
+		requireWatchingBefore(context, since, "request log");
 		List<LoggedRequest> requests = log.requests();
 		StringBuilder json = new StringBuilder(2 + requests.size() * 128).append('[');
 		for (LoggedRequest request : requests) {

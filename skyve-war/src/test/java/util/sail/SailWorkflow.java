@@ -175,12 +175,13 @@ public final class SailWorkflow {
 	 * <p>Side effects: the run is never reset, so it holds the variables of every earlier call, including a failed one.
 	 * Like the runner, it is for one thread: do not share such a runner between threads. The run's device profiles end
 	 * only when the runner is {@linkplain #close() closed}, so close it when its calls are done (a test base does). A
-	 * second call ends the run shared so far, as {@link #close()} would, and starts a new one.
+	 * second call ends the run shared so far as {@link #close()} does, stopping a browser a suite member left open, and
+	 * starts a new one.
 	 *
 	 * @return this runner
 	 */
 	public @Nonnull SailWorkflow shareRunAcrossCalls() {
-		endSharedRun();
+		close();
 		sharedRun = new RunState();
 		return this;
 	}

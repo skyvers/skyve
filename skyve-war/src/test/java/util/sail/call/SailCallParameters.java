@@ -187,9 +187,26 @@ public final class SailCallParameters {
 	 */
 	public @Nonnull <E extends Enum<E>> E choice(@Nonnull String name, @Nonnull Class<E> type, @Nonnull E fallback) {
 		String value = optional(name);
-		if (value == null) {
-			return fallback;
-		}
+		return (value == null) ? fallback : constant(name, type, value);
+	}
+
+	/**
+	 * Returns a parameter the call can't do without that names one of an enum's constants, as {@link #choice} reads it.
+	 *
+	 * <p>Complexity: O(c) in the number of constants.
+	 *
+	 * @param <E>	the enum
+	 * @param name	the parameter's name
+	 * @param type	the enum's class
+	 * @return the constant
+	 * @throws IllegalArgumentException	if it is left out, or names none of them, listing them
+	 */
+	public @Nonnull <E extends Enum<E>> E requiredChoice(@Nonnull String name, @Nonnull Class<E> type) {
+		return constant(name, type, required(name));
+	}
+
+	/** Returns the enum constant a parameter's value names, or says which it could name. */
+	private @Nonnull <E extends Enum<E>> E constant(@Nonnull String name, @Nonnull Class<E> type, @Nonnull String value) {
 		String wanted = value.trim().replace("_", "");
 		E[] constants = type.getEnumConstants();
 		for (E constant : constants) {

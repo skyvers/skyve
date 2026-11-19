@@ -2368,9 +2368,11 @@ fallback.
 starts watching the browser (its request log and its record of dialogs), the first
 time a step asks for it: the first `<call>` of the leg that uses it, or Java code
 calling `SailBrowserControl.of`. Nothing from before then is recorded, not even a
-request the page sent as it loaded. So `CheckRequests` and `CheckDialog` fail when
-watching only began in their own step, saying so, rather than pass on an empty record:
-put an earlier call, such as `RequestLog` with `clear=true`, before the steps to watch.
+request the page sent as it loaded. So `CheckRequests`, `CheckDialog` and `RequestLog`
+fail when watching only began in their own step, saying so, rather than pass on an empty
+record: put an earlier call, such as `RequestLog` with `clear=true`, before the steps to
+watch. `RequestLog` with `clear=true` is the exception that starts it: in that step its
+variable is an empty array.
 A browser started again (`RestartDevice`) gets a new control, and watching begins again.
 
 ### Unsupported means skipped
@@ -2424,12 +2426,12 @@ character, `\` escapes), such as `*/api/orders/*`. Where a call waits, its
 | `HoldRequests` | `url` (required), `method`, `times` | none | `REQUEST_INTERCEPTION` |
 | `AwaitHeldRequests` | `count` (default 1), `timeoutMillis` (default `sail.timeoutSeconds`) | the number held | `REQUEST_INTERCEPTION` |
 | `ReleaseRequests` | `fail` (an error reason; default: let them carry on) | none | `REQUEST_INTERCEPTION` |
-| `RespondToRequests` | `url`, `status` (both required), `body`, `contentType` (default `application/json`), `atResponse`, `method`, `times` | none | `REQUEST_INTERCEPTION` |
+| `RespondToRequests` | `url`, `status` (100 to 599; both required), `body`, `contentType` (default `application/json`), `atResponse`, `method`, `times` | none | `REQUEST_INTERCEPTION` |
 | `LoseResponses` | `url` (required), `reason` (default `ConnectionReset`), `method`, `times` | none | `REQUEST_INTERCEPTION` |
-| `RewriteRequestHeaders` | `url` (required), `set` (`Name=value;...`), `remove` (comma separated), `method`, `times`; `set` or `remove` needed | none | `REQUEST_INTERCEPTION` |
+| `RewriteRequestHeaders` | `url` (required), `set` (`Name=value;...`), `remove` (comma separated), `method`, `times`; `set` or `remove` needed; header names are HTTP tokens | none | `REQUEST_INTERCEPTION` |
 | `ClearRequestRules` | none | none | `REQUEST_INTERCEPTION` |
 | `CheckRequests` | `matching` (a regex over `METHOD url`, required), `failed`, `exactly`, `atLeast`, `atMost` (at least 1 if none is given), `waitMillis` (default 0), `clear`, `ignoreServiceWorkerCopies` (default true) | the count | `REQUEST_LOG` |
-| `RequestLog` | `matching` (default every request), `clear` | the log as a JSON array | `REQUEST_LOG` |
+| `RequestLog` | `matching` (default every request), `clear` (also starts the log) | the log as a JSON array | `REQUEST_LOG` |
 | `CheckDialog` | `type` (`beforeunload` default, `alert`, `confirm`, `prompt`), `expected` (default true) | none | `DIALOGS` |
 | `DeleteCookies` | `names` (comma separated, required) | the number deleted | `COOKIES` |
 | `LowerQuota` | `headroomKb` (required unless `restore`), `restore` | the quota in bytes, or `restored` | `STORAGE_QUOTA` |

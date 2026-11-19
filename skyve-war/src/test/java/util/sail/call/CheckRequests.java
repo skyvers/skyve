@@ -3,7 +3,6 @@ package util.sail.call;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -146,9 +145,16 @@ public final class CheckRequests extends AbstractSailCall {
 	 */
 	static @Nullable Pattern optionalPattern(@Nonnull SailCallParameters parameters, @Nonnull String name) {
 		String value = parameters.optional(name);
-		if (value == null) {
-			return null;
-		}
+		return (value == null) ? null : compile(parameters, name, value);
+	}
+
+	/** Returns a required parameter that is a regular expression; see {@link #optionalPattern}. */
+	private static @Nonnull Pattern pattern(@Nonnull SailCallParameters parameters, @Nonnull String name) {
+		return compile(parameters, name, parameters.required(name));
+	}
+
+	/** Compiles a parameter's value as a regular expression, or says why it isn't one. */
+	private static @Nonnull Pattern compile(@Nonnull SailCallParameters parameters, @Nonnull String name, @Nonnull String value) {
 		try {
 			return Pattern.compile(value);
 		}
@@ -156,12 +162,6 @@ public final class CheckRequests extends AbstractSailCall {
 			throw new IllegalArgumentException(String.format("%s's %s must be a regular expression, not %s: %s",
 																parameters.call(), name, value, e.getDescription()), e);
 		}
-	}
-
-	/** Returns a required parameter that is a regular expression; see {@link #optionalPattern}. */
-	private static @Nonnull Pattern pattern(@Nonnull SailCallParameters parameters, @Nonnull String name) {
-		parameters.required(name);
-		return Objects.requireNonNull(optionalPattern(parameters, name));
 	}
 
 	/**

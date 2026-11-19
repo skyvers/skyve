@@ -5,6 +5,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Clock;
@@ -47,7 +48,7 @@ import util.sail.SailSettings.KeepProfiles;
  * <li><b>Deleting</b> a run folder first renames it under the root, to {@code <run token>-<pid>.deleting-<pid>} (the
  * 		second pid the deleting JVM's), then deletes it, its marker last. On Windows, where Chrome's lock is a file, a
  * 		folder with a profile in use can't be renamed, so it is left whole rather than partly deleted; and two JVMs can't
- * 		both delete one folder. A delete that stopped halfway leaves the renamed folder, with its marker, for a later
+ * 		both delete one folder (the one whose rename comes second leaves it to the other, saying nothing). A delete that stopped halfway leaves the renamed folder, with its marker, for a later
  * 		sweep.</li>
  * </ul>
  * Several JVMs (parallel lanes) may share a root: the sweep deletes only runs past the keep time, never this JVM's own,
@@ -349,9 +350,18 @@ public final class SailProfiles {
 		String name = folder.getFileName().toString();
 		int deleting = name.indexOf(DELETING);
 		Path renamed = root.resolve(((deleting < 0) ? name : name.substring(0, deleting)) + DELETING + pid);
-		Path current = folder;
+		Path current;
 		try {
 			current = Files.move(folder, renamed, StandardCopyOption.ATOMIC_MOVE);
+		}
+		catch (@SuppressWarnings("unused") NoSuchFileException e) {
+			return; // another JVM's rename came first: it claimed the folder, and deletes it
+		}
+		catch (IOException e) {
+			warn("could not delete", folder, e);
+			return;
+		}
+		try {
 			List<Path> files;
 			try (Stream<Path> list = Files.list(current)) {
 				files = list.toList();

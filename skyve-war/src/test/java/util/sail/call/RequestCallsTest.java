@@ -230,6 +230,26 @@ class RequestCallsTest {
 										e.getMessage()));
 	}
 
+	/**
+	 * The request log call follows the same rule: in the step where the log began it fails, unless it is told to clear
+	 * the log, which starts it there and gives an empty log.
+	 */
+	@Test
+	void theRequestLogFailsWhenItBeganInItsStepUnlessItStartsIt() throws Exception {
+		FakeBrowserControl browser = FakeBrowserControl.supportingAll().withRequests(PLAIN);
+		AbstractSailCall.Context step = context(browser);
+		browser.withWatchingSince(Instant.now()); // the control began watching as this step asked for it
+		RequestLog read = new RequestLog();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> run(read, step, "matching", "plain"));
+		String started = run(new RequestLog(), step, "clear", "true");
+		assertAll(() -> assertEquals("RequestLog reads the request log, which only began in this step, as the browser's control began watching then:"
+										+ " it holds nothing from the steps before. Put a call before the steps to watch, such as RequestLog with"
+										+ " clear=true, so watching begins there",
+										e.getMessage()),
+					() -> assertEquals("[]", started, "started"),
+					() -> assertEquals(List.of(), browser.requests(), "the log was cleared as it started"));
+	}
+
 	@Test
 	void theRequestLogIsJsonOfTheMatchingRequests() throws Exception {
 		FakeBrowserControl browser = FakeBrowserControl.supportingAll().withRequests(PAGE_COPY, FAILED, PLAIN);

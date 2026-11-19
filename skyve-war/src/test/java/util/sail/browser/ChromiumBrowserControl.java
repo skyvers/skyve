@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -73,10 +74,11 @@ import util.sail.browser.RequestRule.Stage;
  * Threading: methods may be called from any thread. Every DevTools command and event is handled in turn on one thread
  * of its own, so a target that attaches while a setting changes still ends up with the new setting. Selenium hands
  * each event to a pool of threads, though, so events can reach that thread in another order than Chrome sent them.
- * What depends on the order copes with that: a request's log entry is filled in as its events come, a target that
- * detaches before its attach is handled is not added, a setting sent to a session that has gone drops it, and a held
- * request is dropped by a navigation of its frame only if it was held before the navigation (Selenium numbers the
- * events as they arrive).
+ * What depends on the order copes with that: a request's log entry is filled in as its events come, its method and URL
+ * from the last redirect (Selenium numbers the events as they arrive); a target that detaches before its attach is
+ * handled is not added; a setting sent to a session that has gone drops it; and a held request belongs to the document
+ * that sent it (its loader id), not to a place in the order of events, so a navigation drops only the held requests of
+ * other documents, and a request of a document its frame has already left isn't held.
  */
 public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		implements RequestInterception, RequestLog, NetworkConditions, InitScripts, Dialogs, StorageQuota, PageLifecycle, TouchEmulation {
@@ -96,6 +98,10 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	private static final class RequestEntry {
 		private String method = "";
 		private String url = "";
+		/** Where the {@code Network.requestWillBeSent} that set the method and URL came in the order of events. */
+		private long sent = -1;
+		/** The document that sent it (its loader id), for a request held later; not logged. Null if not known. */
+		private String loaderId;
 		private Integer status;
 		private String failure;
 		private boolean fromServiceWorker;
@@ -106,10 +112,10 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	}
 
 	/**
-	 * A request a rule holds: the frame that sent it, and where its event came in the order Chrome sent the events, so
-	 * a navigation of that frame drops only the requests held before it.
+	 * A request a rule holds: the frame that sent it, its network request id, and the document that sent it (its loader
+	 * id, from {@code Network.requestWillBeSent}), or null if that event hadn't been handled when the request was held.
 	 */
-	private record HeldRequest(@Nonnull String frameId, long sequence) {
+	private record HeldRequest(@Nonnull String frameId, @Nonnull String networkId, @Nullable String loaderId) {
 	}
 
 	/** Sends one DevTools command to one session. */
@@ -149,8 +155,11 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	private Instant watchingSince;
 	/** The sessions by session id; changed only on the DevTools thread, read anywhere. */
 	private final Map<String, Target> sessions = new ConcurrentHashMap<>();
-	/** The sessions whose detach was handled before their attach, which is then ignored; only on the DevTools thread. */
-	private final Set<String> detachedFirst = new HashSet<>();
+	/**
+	 * The sessions that have gone with an event still to come, which is ignored: the attach of one whose detach was
+	 * handled first, or the detach of one dropped as Chrome said it had gone. Only on the DevTools thread.
+	 */
+	private final Set<String> gone = new HashSet<>();
 
 	// The settings, applied to each target as it attaches. Touched only on the DevTools thread.
 	private Map<String, Object> network = networkConditions(false, 0, -1, -1);
@@ -160,6 +169,13 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	private final List<int[]> ruleUses = new ArrayList<>(); // how many times each rule has applied
 	/** The requests held, by paused request id. */
 	private final Map<String, HeldRequest> held = new LinkedHashMap<>();
+	/** Each frame's document now, by frame id: its loader id, from {@code Page.frameNavigated}. */
+	private final Map<String, String> documents = new HashMap<>();
+	/**
+	 * The documents (loader ids) that frames have left, by navigating or closing: a request of one isn't held. One id per
+	 * navigation, for the browser's life.
+	 */
+	private final Set<String> leftDocuments = new HashSet<>();
 	private final List<Dialog> dialogs = new ArrayList<>();
 	private final Map<String, RequestEntry> requests = new LinkedHashMap<>();
 
@@ -450,17 +466,51 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	}
 
 	/**
-	 * Forgets the held requests of a frame that has gone to another document (it navigated or reloaded) or whose tab
-	 * has closed: they went with it, and DevTools reports nothing else of them (no {@code Network.loadingFailed}).
-	 * Runs on the DevTools thread.
-	 *
-	 * @param frameId	the frame, or for a whole page its target id, which is its main frame's id
-	 * @param sequence	where the navigation or detach came in the order of events: requests held after it are kept
+	 * Takes a frame's new document ({@code Page.frameNavigated}): the document it showed before is left, and the frame's
+	 * held requests from any document but the new one are forgotten. They went with their document, and DevTools reports
+	 * nothing else of them (no {@code Network.loadingFailed}). A held request whose document isn't known is kept, as it
+	 * may be the new document's (whose requests can be handled before its navigation). Only the frame's own requests go:
+	 * those of the iframes in it don't. Runs on the DevTools thread.
 	 */
-	private void dropHeld(@Nonnull String frameId, long sequence) {
-		if (held.values().removeIf(h -> h.frameId().equals(frameId) && (h.sequence() < sequence))) {
+	private void navigated(@Nonnull Map<String, Object> params) {
+		Map<String, Object> frame = map(params, "frame");
+		String frameId = string(frame, "id");
+		String loaderId = string(frame, "loaderId");
+		String before = documents.put(frameId, loaderId);
+		if ((before != null) && (! before.equals(loaderId))) {
+			leftDocuments.add(before);
+		}
+		dropHeld(h -> {
+			String document = (h.loaderId() == null) ? loaderId(h.networkId()) : h.loaderId();
+			return h.frameId().equals(frameId) && (document != null) && (! document.equals(loaderId));
+		});
+	}
+
+	/**
+	 * Forgets the held requests of a page that has closed (or a worker that has stopped), and the document it showed.
+	 * Only the page's own requests go: those of the iframes in it don't. Runs on the DevTools thread.
+	 *
+	 * @param targetId	the target's id, which for a page is its main frame's id
+	 */
+	private void closed(@Nonnull String targetId) {
+		String document = documents.remove(targetId);
+		if (document != null) {
+			leftDocuments.add(document);
+		}
+		dropHeld(h -> h.frameId().equals(targetId));
+	}
+
+	/** Forgets some held requests. Runs on the DevTools thread. */
+	private void dropHeld(@Nonnull Predicate<HeldRequest> which) {
+		if (held.values().removeIf(which)) {
 			heldChanged();
 		}
+	}
+
+	/** Returns the document (loader id) that sent a request, or null if it isn't known: the log was cleared, say. */
+	private @Nullable String loaderId(@Nonnull String networkId) {
+		RequestEntry logged = requests.get(networkId);
+		return (logged == null) ? null : logged.loaderId;
 	}
 
 	/** Publishes how many requests are held, and wakes a wait for them. Called on the DevTools thread. */
@@ -487,26 +537,31 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	/**
 	 * Takes a paused request: applies the first rule that matches and still has uses, or lets it carry on.
 	 *
-	 * @param sequence	where the event came in the order Chrome sent the events
 	 * @param params	the {@code Fetch.requestPaused} event
 	 */
-	private void paused(long sequence, @Nonnull Map<String, Object> params) {
+	private void paused(@Nonnull Map<String, Object> params) {
 		String requestId = string(params, REQUEST_ID);
 		Map<String, Object> request = map(params, REQUEST);
 		Stage stage = (params.containsKey("responseStatusCode") || params.containsKey("responseErrorReason")) ? Stage.RESPONSE : Stage.REQUEST;
+		String networkId = string(params, "networkId");
+		String loaderId = loaderId(networkId);
 		RequestRule rule = null;
-		for (int i = 0, l = rules.size(); i < l; i++) {
-			RequestRule candidate = rules.get(i);
-			int[] uses = ruleUses.get(i);
-			if (candidate.matches(string(request, "url"), string(request, METHOD), stage) &&
-					((candidate.times() == 0) || (uses[0] < candidate.times()))) {
-				uses[0]++;
-				rule = candidate;
-				break;
+		// A request of a document its frame has left was paused before the navigation, but handled after it: it went
+		// with its document, so no rule takes it, and it carries on rather than being held for nothing
+		if ((loaderId == null) || (! leftDocuments.contains(loaderId))) {
+			for (int i = 0, l = rules.size(); i < l; i++) {
+				RequestRule candidate = rules.get(i);
+				int[] uses = ruleUses.get(i);
+				if (candidate.matches(string(request, "url"), string(request, METHOD), stage) &&
+						((candidate.times() == 0) || (uses[0] < candidate.times()))) {
+					uses[0]++;
+					rule = candidate;
+					break;
+				}
 			}
 		}
 		if ((rule != null) && (rule.action() instanceof Hold)) {
-			held.put(requestId, new HeldRequest(string(params, "frameId"), sequence));
+			held.put(requestId, new HeldRequest(string(params, "frameId"), networkId, loaderId));
 			heldChanged();
 			return;
 		}
@@ -516,11 +571,12 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 
 	/**
 	 * Sends a command about a paused request to the session that paused it. The event doesn't say which session that
-	 * is, so each is tried: the others refuse the request id. If the session that paused it refuses the command itself
-	 * (a status or header Chrome won't take), the request is failed, so the page isn't left waiting for it, and that is
-	 * printed.
+	 * is, so each is tried until one takes it: the others refuse the request id. If none takes it and one refused the
+	 * command itself (a status or header Chrome won't take, which Chrome checks before the request id, so in every
+	 * session), the request is failed, so the page isn't left waiting for it, and the first such refusal is printed.
 	 */
 	private void toOwner(@Nonnull String requestId, @Nonnull String method, @Nonnull Map<String, Object> params) {
+		RuntimeException refusal = null;
 		for (Entry<String, Target> session : sessions.entrySet()) {
 			if (session.getValue().hasNetwork()) {
 				try {
@@ -528,17 +584,22 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 					return;
 				}
 				catch (RuntimeException e) {
-					if (! says(e, NOT_THIS_SESSIONS_REQUEST)) {
-						// this session's request, but it refused the command
-						System.out.println(PREFIX + "Chrome refused " + method + " for request " + requestId + ", so it fails: " + firstLine(e));
-						sendQuietly(session.getKey(), "Fetch.failRequest", Map.of(REQUEST_ID, requestId, "errorReason", devToolsName(ErrorReason.FAILED)));
-						return;
+					// another session's request, or this session couldn't answer (it went, or timed out): try the rest
+					if ((refusal == null) && (! says(e, NOT_THIS_SESSIONS_REQUEST))) {
+						refusal = e;
 					}
 				}
 			}
 		}
-		// none does if the request has gone, such as a page that gave up on it
-		System.out.println(PREFIX + "no session took " + method + " for request " + requestId);
+		if (refusal == null) {
+			// none does if the request has gone, such as a page that gave up on it
+			System.out.println(PREFIX + "no session took " + method + " for request " + requestId);
+			return;
+		}
+		System.out.println(PREFIX + "Chrome refused " + method + " for request " + requestId + ", so it fails: " + firstLine(refusal));
+		Map<String, Object> fail = Map.of(REQUEST_ID, requestId, "errorReason", devToolsName(ErrorReason.FAILED));
+		// the session that refused may not be the request's, so each is told; the others refuse the request id
+		forEachSession(Target::hasNetwork, sessionId -> sendQuietly(sessionId, "Fetch.failRequest", fail));
 	}
 
 	/**
@@ -756,26 +817,34 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	/** Listens for the browser's events, then attaches to its current and future targets. */
 	private void start() {
 		listen("Target.attachedToTarget", this::attached);
-		listen("Target.detachedFromTarget", (sequence, params) -> {
+		listen("Target.detachedFromTarget", params -> {
 			String sessionId = string(params, "sessionId");
-			Target gone = sessions.remove(sessionId);
-			if (gone == null) {
-				detachedFirst.add(sessionId); // its attach comes later
+			Target target = sessions.remove(sessionId);
+			if (target != null) {
+				closed(target.targetId());
 			}
-			else {
-				dropHeld(gone.targetId(), sequence.longValue());
+			else if (! gone.remove(sessionId)) {
+				gone.add(sessionId); // not dropped as gone already, so its attach comes later
 			}
 		});
-		listen("Fetch.requestPaused", (sequence, params) -> paused(sequence.longValue(), params));
-		listen("Page.frameNavigated", (sequence, params) -> dropHeld(string(map(params, "frame"), "id"), sequence.longValue()));
+		listen("Fetch.requestPaused", this::paused);
+		listen("Page.frameNavigated", this::navigated);
 		listen("Page.javascriptDialogOpening", params -> dialogs.add(new Dialog(dialogType(string(params, "type")),
 																				string(params, "message"),
 																				string(params, "url"))));
-		listen("Network.requestWillBeSent", params -> {
+		listen("Network.requestWillBeSent", (sequence, params) -> {
 			Map<String, Object> request = map(params, REQUEST);
 			RequestEntry logged = logged(params);
-			logged.method = string(request, METHOD);
-			logged.url = string(request, "url");
+			// a redirect sends the event again for the same request: the later one has the URL it went to
+			if (sequence.longValue() > logged.sent) {
+				logged.sent = sequence.longValue();
+				logged.method = string(request, METHOD);
+				logged.url = string(request, "url");
+			}
+			String loaderId = string(params, "loaderId");
+			if (! loaderId.isEmpty()) {
+				logged.loaderId = loaderId;
+			}
 		});
 		listen("Network.responseReceived", params -> {
 			Map<String, Object> response = map(params, "response");
@@ -848,7 +917,7 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 		Map<String, Object> info = map(params, "targetInfo");
 		Target target = new Target(string(info, "targetId"), string(info, "type"));
 		try {
-			if (detachedFirst.remove(sessionId)) {
+			if (gone.remove(sessionId)) {
 				return; // it has gone already
 			}
 			sessions.put(sessionId, target);
@@ -952,8 +1021,8 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 	}
 
 	/**
-	 * Sends a command to each session of a kind. A session that has gone is skipped and dropped: it detached meanwhile,
-	 * or its detach was handled before its attach. Runs on the DevTools thread.
+	 * Sends a command to each session of a kind. A session that has gone is skipped and dropped, as its detach would:
+	 * it detached meanwhile, and its detach event, still to come, is then ignored. Runs on the DevTools thread.
 	 */
 	private void forEachSession(@Nonnull Predicate<Target> which, @Nonnull SessionCommand command) {
 		for (Iterator<Entry<String, Target>> i = sessions.entrySet().iterator(); i.hasNext(); ) {
@@ -967,6 +1036,8 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 						throw e;
 					}
 					i.remove();
+					gone.add(session.getKey());
+					closed(session.getValue().targetId());
 				}
 			}
 		}

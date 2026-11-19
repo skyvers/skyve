@@ -94,9 +94,17 @@ class ChromiumBrowserControlIT {
 			type = "text/html; charset=utf-8";
 			body = fixture("page.html");
 		}
+		else if ("/loads".equals(path)) {
+			type = "text/html; charset=utf-8";
+			body = fixture("loads.html");
+		}
 		else if ("/sw.js".equals(path)) {
 			type = "text/javascript";
 			body = fixture("sw.js");
+		}
+		else if ("/head.js".equals(path)) {
+			type = "text/javascript";
+			body = "window.headLoaded = true;".getBytes(StandardCharsets.UTF_8);
 		}
 		else if (path.endsWith("/echo")) {
 			body = String.valueOf(exchange.getRequestHeaders().getFirst("X-Test")).getBytes(StandardCharsets.UTF_8);
@@ -328,6 +336,26 @@ class ChromiumBrowserControlIT {
 		assertAll(() -> assertEquals(0, control.heldCount(), "none held once the rules are cleared"),
 					() -> assertEquals("200 real", js("return window.pending;"), "the held request carried on"),
 					() -> assertEquals(1, hits("/data"), "only the second reached the server"));
+	}
+
+	/**
+	 * A request the new document makes as it loads (a script in its head) is held, though its frame navigated from a
+	 * document the control knew, and letting it go lets the page finish loading.
+	 */
+	@Test
+	void aRequestOfTheNewDocumentIsHeldAcrossItsNavigation() {
+		driver.get(origin + "/away"); // a document the control sees arrive, so the navigation below leaves a known one
+		control.addRule(RequestRule.hold("*/head.js*"));
+		// the page's own late action: it navigates after the script has returned, as ChromeDriver waits for a navigation
+		// that starts during its command, and this one can't finish while its script is held
+		js("setTimeout(() => { location.href = '/loads'; }, 500);");
+		control.awaitHeld(1, selenium.timeout());
+		assertAll(() -> assertEquals(1, control.heldCount(), "held"),
+					() -> assertEquals(0, hits("/head.js"), "held before it is sent"));
+		control.releaseHeld();
+		awaitScript("return window.headLoaded === true && document.readyState === 'complete';", Boolean.TRUE);
+		assertAll(() -> assertEquals(0, control.heldCount(), "none held once let go"),
+					() -> assertEquals(1, hits("/head.js"), "let go to the server"));
 	}
 
 	@Test
