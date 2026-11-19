@@ -10,11 +10,14 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.module.query.MetaDataQueryDefinitionImpl;
+import org.skyve.impl.metadata.module.query.MetaDataQueryProjectedColumnImpl;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.impl.metadata.view.widget.FilterParameterImpl;
 import org.skyve.impl.web.SortParameterImpl;
@@ -48,6 +51,9 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	private static final String DESCRIPTION = ModelLookupFixture.selectionPropertyName + '.' + LookupDescription.descriptionPropertyName;
 	private static final String SELECTION_JOIN = "LEFT OUTER JOIN bean." + ModelLookupFixture.selectionPropertyName;
 	private static final String INVERSE_BIZ_KEY = InverseOneToOnePersistent.invAggAssociationPropertyName + '.' + Bean.BIZ_KEY;
+	private static final String AGGREGATED_AGGREGATED = AllAttributesPersistent.aggregatedAssociationPropertyName + '.' +
+															AllAttributesPersistent.aggregatedAssociationPropertyName;
+	private static final Pattern LEFT_OUTER_JOIN = Pattern.compile("LEFT OUTER JOIN bean\\.([\\w.]+)");
 
 	/** A view's filter parameters on an attribute through an association, as ListModel.addParameters adds them. */
 	@Test
@@ -204,6 +210,113 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		assertEquals(1L, page.getTotalRows());
 		assertNoJoin(model.getDetailQuery(), SELECTION_JOIN);
 		assertNoJoin(model.getSummaryQuery(), SELECTION_JOIN);
+	}
+
+	/**
+	 * A condition on an association's bizId compares the foreign key on the row, so it joins nothing, and lists the
+	 * rows it would with the join: Match Any keeps the row with no association that the other criterion meets.
+	 */
+	@Test
+	void aConditionOnAnAssociationsBizIdJoinsNothing() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		LookupDescription alpha = persistence.save(lookup("alpha"));
+		LookupDescription beta = persistence.save(lookup("beta"));
+		persistence.save(fixture("AF a", alpha));
+		persistence.save(fixture("AF b", beta));
+		persistence.save(fixture("AF n", null));
+		persistence.flush();
+
+		String selectionBizId = ModelLookupFixture.selectionPropertyName + '.' + Bean.DOCUMENT_ID;
+		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		matchAny(model, f -> f.addEquals(selectionBizId, beta.getBizId()), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		Page page = model.fetch();
+		assertEquals(Set.of("AF b", "AF n"), names(page, ModelLookupFixture.namePropertyName));
+		assertEquals(2L, page.getTotalRows());
+		assertNoJoin(model.getDetailQuery());
+		assertNoJoin(model.getSummaryQuery());
+
+		model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		model.getFilter().addNotEquals(selectionBizId, alpha.getBizId());
+		assertEquals(Set.of("AF b"), fetch(model, ModelLookupFixture.namePropertyName));
+		assertNoJoin(model.getDetailQuery());
+
+		model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME);
+		model.getFilter().addNull(selectionBizId);
+		assertEquals(Set.of("AF n"), fetch(model, ModelLookupFixture.namePropertyName));
+		assertNoJoin(model.getDetailQuery());
+	}
+
+	/**
+	 * The bizId of an association through another joins only the first: a row with neither keeps no value, so a
+	 * "no value" check lists it along with the row whose first association has none.
+	 */
+	@Test
+	void aConditionOnTheBizIdOfAnAssociationsAssociationJoinsOnlyTheFirst() throws Exception {
+		chain();
+
+		DocumentQueryListModel<Bean> model = defaultQueryModel(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
+		model.getFilter().addNull(AGGREGATED_AGGREGATED + '.' + Bean.DOCUMENT_ID);
+		assertEquals(Set.of("b", "c"), fetch(model, AllAttributesPersistent.textPropertyName));
+		for (DocumentQuery query : List.of(Objects.requireNonNull(model.getDetailQuery()), Objects.requireNonNull(model.getSummaryQuery()))) {
+			assertEquals(List.of(AllAttributesPersistent.aggregatedAssociationPropertyName), joins(query));
+		}
+	}
+
+	/**
+	 * A column through two associations left outer joins both of them (Hibernate joins the first implicitly, with the
+	 * same join type), so a filter through the first appends no second join of it, and lists the same rows:
+	 * Match Any keeps the row with no association that the other criterion meets.
+	 */
+	@Test
+	void aColumnThroughTwoAssociationsCoversAFilterThroughTheFirst() throws Exception {
+		chain();
+
+		Customer customer = CORE.getCustomer();
+		Module module = customer.getModule(AllAttributesPersistent.MODULE_NAME);
+		MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, AllAttributesPersistent.DOCUMENT_NAME);
+		MetaDataQueryProjectedColumnImpl column = new MetaDataQueryProjectedColumnImpl();
+		column.setBinding(AGGREGATED_AGGREGATED + '.' + AllAttributesPersistent.textPropertyName);
+		query.getColumns().add(column);
+		DocumentQueryListModel<Bean> model = new DocumentQueryListModel<>(query);
+		model.postConstruct(customer, true);
+		model.setStartRow(0);
+		model.setEndRow(100);
+		matchAny(model,
+					f -> f.addEquals(AllAttributesPersistent.aggregatedAssociationPropertyName + '.' + AllAttributesPersistent.textPropertyName, "b"),
+					f -> f.addEquals(AllAttributesPersistent.textPropertyName, "c"));
+		Page page = model.fetch();
+		assertEquals(Set.of("a", "c"), names(page, AllAttributesPersistent.textPropertyName));
+		assertEquals(2L, page.getTotalRows());
+		for (DocumentQuery each : List.of(Objects.requireNonNull(model.getDetailQuery()), Objects.requireNonNull(model.getSummaryQuery()))) {
+			assertEquals(List.of(AGGREGATED_AGGREGATED), joins(each));
+		}
+	}
+
+	/** Saves "a", which aggregates "b", which aggregates "c", which aggregates nothing. */
+	private static void chain() {
+		Persistence persistence = CORE.getPersistence();
+		AllAttributesPersistent c = persistence.save(allAttributes("c", null));
+		AllAttributesPersistent b = persistence.save(allAttributes("b", c));
+		persistence.save(allAttributes("a", b));
+		persistence.flush();
+	}
+
+	private static AllAttributesPersistent allAttributes(String text, AllAttributesPersistent aggregated) {
+		AllAttributesPersistent result = AllAttributesPersistent.newInstance();
+		result.setText(text);
+		result.setAggregatedAssociation(aggregated);
+		return result;
+	}
+
+	/** The paths of the query's left outer joins from bean, in order. */
+	private static List<String> joins(DocumentQuery query) {
+		String hql = ((AbstractDocumentQuery) query).toQueryString();
+		List<String> result = new ArrayList<>();
+		Matcher matcher = LEFT_OUTER_JOIN.matcher(hql);
+		while (matcher.find()) {
+			result.add(matcher.group(1));
+		}
+		return result;
 	}
 
 	/** An embedded association's attributes are on the row: a filter through one joins nothing and keeps its rows. */

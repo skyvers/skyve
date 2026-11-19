@@ -573,15 +573,19 @@ public abstract class AbstractDocumentQuery extends AbstractQuery implements Doc
 	 * Indicates if the from clause joins a reference from the driving entity: the one the query was constructed with
 	 * or a join added since, of any type, fetched or not, with or without an alias and a with condition. Another join
 	 * of the same path would replace it for the rest of the query, as Hibernate keeps one join per path.
+	 * A join of {@code a.b} joins {@code a} too: Hibernate joins each reference on the way, with the same join type.
 	 * Quoted literals are not read, and a join through another alias is not this reference's.
 	 * @param referenceBinding	the reference's binding
-	 * @return true if the from clause joins {@code bean.<referenceBinding>}
+	 * @return true if the from clause joins {@code bean.<referenceBinding>} or a path through it
 	 */
 	public boolean isJoined(@Nonnull String referenceBinding) {
 		String from = QUOTED_LITERAL.matcher(fromClause).replaceAll("''");
 		Matcher matcher = JOIN_FROM_THIS.matcher(from);
+		int length = referenceBinding.length();
 		while (matcher.find()) {
-			if (referenceBinding.equals(matcher.group(1))) {
+			String joined = matcher.group(1);
+			if (joined.startsWith(referenceBinding) &&
+					((joined.length() == length) || (joined.charAt(length) == '.'))) {
 				return true;
 			}
 		}

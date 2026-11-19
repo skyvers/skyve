@@ -419,6 +419,9 @@ class AbstractDocumentQueryTest {
 		assertTrue(q.isJoined("b"));
 		assertTrue(q.isJoined("c.d"));
 		assertTrue(q.isJoined("h"));
+		// joined on the way to c.d
+		assertTrue(q.isJoined("c"));
+		assertFalse(q.isJoined("c.d.i"));
 		// in a quoted literal, through another alias, the alias itself and a reference no join names
 		assertFalse(q.isJoined("f"));
 		assertFalse(q.isJoined("g"));
@@ -439,6 +442,18 @@ class AbstractDocumentQueryTest {
 		assertTrue(q.isJoined("c"));
 		assertFalse(q.isJoined("d"));
 		assertFalse(q.isJoined("ab"));
+	}
+
+	@Test
+	void isJoinedSeesEachReferenceOnTheWayToAJoinedPath() {
+		TestDocumentQuery q = newQuery();
+		q.addLeftOuterJoin("a.b.c");
+		assertTrue(q.isJoined("a"));
+		assertTrue(q.isJoined("a.b"));
+		assertTrue(q.isJoined("a.b.c"));
+		assertFalse(q.isJoined("a.b.c.d"));
+		assertFalse(q.isJoined("a.bc"));
+		assertFalse(q.isJoined("b"));
 	}
 
 	@Test
