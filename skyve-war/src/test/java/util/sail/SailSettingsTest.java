@@ -277,6 +277,18 @@ class SailSettingsTest {
 		assertEquals(directory.resolve("b/c"), settings.failureDir());
 	}
 
+	/** Device profiles go under target/sail-profiles unless sail.profiles names another folder. */
+	@Test
+	void theProfilesFolderDefaultsUnderTheWorkingDirectory() {
+		SailSettings defaulted = resolve();
+		SailSettings set = resolve(SailSettings.code().profiles(Path.of("p/../profiles")).layer());
+		env.put("SAIL_PROFILES", "/tmp/lane2");
+		SailSettings fromEnvironment = resolve();
+		assertAll(() -> assertEquals(directory.resolve("target/sail-profiles"), defaulted.profiles(), "the default"),
+					() -> assertEquals(directory.resolve("profiles"), set.profiles(), "set in code, normalised"),
+					() -> assertEquals(Path.of("/tmp/lane2"), fromEnvironment.profiles(), "SAIL_PROFILES"));
+	}
+
 	@Test
 	void theUserPropertiesFileIsReadFromTheHomeDirectory() throws IOException {
 		Path file = userFile("sail.headless=false\nsail.var.password=secret\n");

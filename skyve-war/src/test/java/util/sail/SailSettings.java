@@ -95,6 +95,11 @@ public final class SailSettings {
 	public static final String SUITE_ONLY = "sail.suite.only";
 	/** The scripts and suites the generic runner runs: classpath resources or file paths, comma separated. */
 	public static final String RUN = "sail.run";
+	/**
+	 * The folder the device profiles of {@code StartDevice} go in, each at {@code <folder>/<run token>/<profile>}
+	 * (default {@link #DEFAULT_PROFILES_DIR} under the working directory).
+	 */
+	public static final String PROFILES = "sail.profiles";
 	/** The prefix of a variable's key: {@code sail.var.password} is the value of {@code {var:password}}. */
 	public static final String VAR_PREFIX = "sail.var.";
 	/** The path of the user's properties file. */
@@ -123,11 +128,13 @@ public final class SailSettings {
 	public static final Path DEFAULT_FAILURE_DIR = Path.of("target", "sail", "failures");
 	/** Where snapshots and video go when an evidence request asks for them and no directory is given. */
 	public static final Path DEFAULT_MEDIA_DIR = Path.of("target", "sail", "media");
+	/** Where device profiles go when no folder is given. */
+	public static final Path DEFAULT_PROFILES_DIR = Path.of("target", "sail-profiles");
 
 	/** The settings a properties file or {@link Code#set(String, String)} may hold, besides variables, in display order. */
 	private static final List<String> KEYS = List.of(BASE_URL, HEADLESS, BROWSER, TIMEOUT_SECONDS, TEST_STRATEGY,
 														FAILURE_DIR, SNAPSHOT_DIR, SNAPSHOT_SOURCE, VIDEO_DIR, EVIDENCE,
-														KEEP_MEDIA, SUITE_ONLY, RUN, PROPERTIES, LOAD_USERS, LOAD_RAMP_UP,
+														KEEP_MEDIA, SUITE_ONLY, RUN, PROFILES, PROPERTIES, LOAD_USERS, LOAD_RAMP_UP,
 														LOAD_DURATION, LOAD_ITERATIONS, LOAD_TIME_LIMIT, LOAD_MAX_FAILURE_RATE,
 														LOAD_MAX_P95);
 	/** The {@code sail.*} system properties that other SAIL code reads, so that they are not listed as ignored. */
@@ -482,6 +489,16 @@ public final class SailSettings {
 		}
 
 		/**
+		 * Sets the folder the device profiles go in.
+		 *
+		 * @param directory	absolute, or relative to the working directory
+		 * @return this builder
+		 */
+		public @Nonnull Code profiles(@Nonnull Path directory) {
+			return set(PROFILES, directory.toString());
+		}
+
+		/**
 		 * Defines a variable that every automation starts with, for {@code {var:name}}, e.g. a password.
 		 *
 		 * @param name	the name after {@code var:}
@@ -547,6 +564,7 @@ public final class SailSettings {
 	private KeepMedia mediaKept = KeepMedia.ALL;
 	private List<String> onlyPrefixes = List.of();
 	private List<String> runScripts = List.of();
+	private Path profilesDirectory;
 	private int virtualUsers;
 	private Duration rampUpTime = Duration.ZERO;
 	private Duration loadTime;
@@ -967,6 +985,7 @@ public final class SailSettings {
 			case KEEP_MEDIA -> mediaKept = constant(value, KeepMedia.values());
 			case SUITE_ONLY -> onlyPrefixes = list(value);
 			case RUN -> runScripts = list(value);
+			case PROFILES -> profilesDirectory = directory(value);
 			case LOAD_USERS -> virtualUsers = count(value);
 			case LOAD_RAMP_UP -> rampUpTime = duration(value, true);
 			case LOAD_DURATION -> loadTime = duration(value, false);
@@ -1273,6 +1292,16 @@ public final class SailSettings {
 	 */
 	public @Nonnull List<String> run() {
 		return runScripts;
+	}
+
+	/**
+	 * Returns the folder the device profiles go in.
+	 *
+	 * @return the absolute folder: the one set, else {@link #DEFAULT_PROFILES_DIR} under the working directory
+	 */
+	public @Nonnull Path profiles() {
+		Path result = profilesDirectory;
+		return (result == null) ? environment.workingDirectory().resolve(DEFAULT_PROFILES_DIR) : result;
 	}
 
 	/**

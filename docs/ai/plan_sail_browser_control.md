@@ -345,6 +345,55 @@ Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and wh
 - Gate: `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest'` ran 267 tests: 0 failures, errors or skips, and no flakes. ECJ 3.41 with skyve-war's JDT settings on the changed files: no warnings.
 - Not verified: Edge, and a remote (grid) Chromium without a DevTools endpoint.
 
+### W3
+
+- Built `util.sail.call`:
+  - `AbstractSailCall`: checks the step's parameters against the names the call takes, then runs it with a `Context` (the driver and control of the browser running now, so both follow a restart; the leg's Selenide; the base URL; the run token; the leg's timeout). A call gets interfaces only through `require(context, type)`, which is `SailBrowserControl.require` with the call's simple name.
+  - `SailCallParameters`, ported with `ParametersTest` (as `SailCallParametersTest`); "needs a n parameter" became "needs the parameter n".
+  - The 25 calls of Scope 4, each with Javadoc listing its parameters, its variable and what it needs.
+- `SailSettings`: the key `sail.profiles` (`PROFILES`, `DEFAULT_PROFILES_DIR` = `target/sail-profiles`, `Code.profiles(Path)`, `profiles()`), with a `SailSettingsTest` case. `StartDevice` builds `<root>/<run token>/<profile>` in one private method, `folder`, for W5's `SailProfiles` to replace.
+- Choices made within the plan:
+  - A call reads all its parameters before it asks for an interface, so a script's mistake fails in every browser, and only a valid step skips.
+  - Waits default to the leg's timeout (`sail.timeoutSeconds`): `AwaitHeldRequests` and `CheckOpenedTab` (both keep `timeoutMillis`), and `SwitchTab`'s wait for a tab. basix used 20 s, 30 s and 10 s.
+  - basix's sleep loops became condition waits. `CheckRequests` `waitMillis` is a `FluentWait` over the log every 100 ms, because the log raises no event to wait on. `CheckOpenedTab` waits for its script with a `WebDriverWait`, and a lost window or session fails at once.
+  - `RequestLog`'s variable is a JSON array of objects (`method`, `url`, `status`, `failure`, `fromServiceWorker`), escaped with `OWASP.escapeJsonString`. basix gave `[method, url, status]` arrays.
+  - `FreezeTab`'s actions are `freeze` and `resume`, as the interface names them. basix used `thaw`.
+  - `RewriteRequestHeaders` refuses a step with neither `set` nor `remove`.
+  - The `method` and `times` narrowing shared by the rule calls is a package-private `FailRequests.narrow`. basix's `Rules` class was not ported.
+  - Devices (decision 12):
+    - `remembered` keeps (`true`, the default) or clears the profile before the browser starts on it. basix's `DeviceStart` used `remembered` to check for a `remember` cookie; that check is not ported.
+    - `offline` and `touch` default to false (basix defaulted `touch` to true). The capability is required only to change the browser: `offline=true` needs `NETWORK_CONDITIONS` and `touch=true` needs `TOUCH`. Otherwise `online` and touch off are applied where the browser supports them, as a restarted browser has no settings.
+    - `RestartDevice` took in all that basix's `RestartBrowser` did (restart on the same profile, then apply the network and touch). It returns the folder.
+    - In a browser that can't take a profile (anything but Chrome or Edge), both skip with a plain `TestAbortedException`: "`StartDevice` needs a device profile, which firefox doesn't support". There is no `Capability` for profiles, so `SailCapabilityUnavailableException` can't be used. The message has decision 4's shape.
+- **A W2 fix: a tab the page opens itself never ran.** A `window.open` (or `target="_blank"`) page under `ChromiumBrowserControl` hung every driver command ("Timed out receiving message from renderer"). The page attaches with `waitingForDebugger=false`, but Chrome 158 holds it anyway. `attached` now sends `Runtime.runIfWaitingForDebugger` to every target, which does nothing to one that isn't waiting. `ChromiumBrowserControlIT.aTabThePageOpensRunsWithTheSettings` covers it. With the old condition it failed after 30 s with that timeout; restored, `ChromiumBrowserControlIT` passed 18/18 twice.
+- Unit tests, against `FakeBrowserControl` (35 tests in 6 classes, no `@TestFactory`):
+  - `AbstractSailCallTest`: a table of all 25 calls (`assertAll`, the call's name in each message). Each refuses an unknown parameter, naming itself and the names it takes. Each skips in a browser without what it needs, naming itself, the capability and the browser, and does nothing first. Also: a call needs a browser; the context follows a restart.
+  - `RequestCallsTest`, `BrowserCallsTest`, `TabCallsTest` and `DeviceCallsTest`: each call's happy path, defaults, parameter checks and variable.
+  - `TabCallsTest.switchTabWaitsForANewTab` runs `SwitchTab` on plain WebDriver's control over a mock driver whose new tab appears at the third look.
+- `StandardCallsSailIT` (6 tests, tagged `sail`; `AbstractInterpretedSailWorkflow`, a JDK `HttpServer` serving the W2 fixtures, no Skyve server, no sign-in). Each test is one `<automation>` of `<call className="util.sail.call.…">`, script and `navigateLink` steps.
+  - `theCallsEveryBrowserHasRun`: `DeleteCookies` (HttpOnly included), `ResizeWindow`, `PressKey` (trusted keys), and `SwitchTab` open, switch, close and wait for a tab the page opens 500 ms later. Then `CheckOpenedTab`.
+  - The other five each start with a call that needs a Chromium capability or a profile:
+    - network: `Online`, `Offline` (page and worker), `Throttle`;
+    - request rules: fail once, hold then release or fail, respond, lose, rewrite, clear, with the server's hit counts checked in Java;
+    - request checks: `RequestLog` clear and JSON, `CheckRequests` with and without service-worker copies, `waitMillis` for a request sent 500 ms later, `failed`;
+    - browser: `LowerQuota` and restore, `BlockIndexedDb` and `ShiftClock` from the next page, a `beforeunload` dialog after `PressKey` gave the page user activation (`CheckDialog`), `FreezeTab` freeze and resume;
+    - devices: `StartDevice` with touch, `RestartDevice` keeping localStorage and then offline, another device, back, and `remembered=false`. Profiles go under a temporary `sail.profiles`, deleted in `@AfterAll`; the run's folder held `phone1` and `phone2`.
+- Runs, with Chrome 158.0.8127.37, Firefox 159.0 and geckodriver 0.36.0. Command: `mvn -o -pl skyve-war -am test -Dtest=StandardCallsSailIT -DskipUnitTests=false -DskipIntegrationTests=true -Dsurefire.failIfNoSpecifiedTests=false -Dsurefire.rerunFailingTestsCount=0 -DforkCount=1`.
+  - Chrome headless: three runs in a row passed 6/6 each (about 17 s).
+  - Firefox headless (`-Dsail.browser=firefox -DargLine=-Dwebdriver.gecko.driver=~/.cache/selenium/geckodriver/mac-arm64/0.36.0/geckodriver`): 1 passed, 5 skipped. The skip messages: "SAIL workflow: script 1 skipped: …"
+    - "Online needs NETWORK_CONDITIONS, which firefox doesn't support";
+    - "FailRequests needs REQUEST_INTERCEPTION, which firefox doesn't support";
+    - "RequestLog needs REQUEST_LOG, which firefox doesn't support";
+    - "LowerQuota needs STORAGE_QUOTA, which firefox doesn't support";
+    - "StartDevice needs a device profile, which firefox doesn't support".
+- Red/green, each restored afterwards:
+  - An unknown parameter is rejected: with `SailCallParameters`' check disabled, `SailCallParametersTest.unknownParametersAreRefusedByName` and `AbstractSailCallTest.everyCallRefusesAParameterItDoesNotTake` (25 failures) failed, and so did `aCallNeedsABrowser`.
+  - `CheckRequests` `waitMillis`: with the wait never entered, `checkRequestsWaitsForARequestTheStepBeforeStarted` and `checkRequestsStopsWaitingAtTheTime` failed.
+  - `SwitchTab` waits for a new tab: with `WebDriverBrowserControl`'s wait given a zero timeout, `TabCallsTest.switchTabWaitsForANewTab` failed ("Tab 1 (0 being the first) did not open within PT7S: 1 tab(s) are open").
+- Gate: `-Dtest='util.sail.**.*Test,sail.HarnessSelfContainedTest'` ran 303 tests: 0 failures, errors or skips, and no flakes.
+- ECJ 3.41 (`--release 17`, skyve-war's JDT settings, `-d` a scratch folder) on the new and changed files gives one warning: "Unnecessary @SuppressWarnings("resource")" at `ChromiumBrowserControl` line 116. It was already there at `c7791dd042`, and no W3 line is involved.
+- Not verified: a headed run, Edge, and Safari.
+
 ## User validation suggestions
 
 - Run `StandardCallsSailIT` headed and watch the offline, hold and release, and dialog steps.

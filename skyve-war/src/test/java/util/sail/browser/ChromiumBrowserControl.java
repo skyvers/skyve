@@ -780,9 +780,11 @@ public final class ChromiumBrowserControl extends WebDriverBrowserControl
 			System.out.println(PREFIX + "could not set up " + target + ": " + firstLine(e));
 		}
 		finally {
-			if (Boolean.TRUE.equals(params.get("waitingForDebugger"))) {
-				sendQuietly(sessionId, "Runtime.runIfWaitingForDebugger", Map.of());
-			}
+			// A page that another page opens (window.open, a target="_blank" link) attaches saying it isn't waiting,
+			// yet it is held (Chrome 158), presumably by its opener's auto-attach, which waits for the debugger though
+			// its filter leaves the page out. So every target is told to run, which does nothing to one that isn't
+			// waiting.
+			sendQuietly(sessionId, "Runtime.runIfWaitingForDebugger", Map.of());
 			synchronized (attachSignal) {
 				attaches++;
 				attachSignal.notifyAll();

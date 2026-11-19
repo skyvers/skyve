@@ -247,6 +247,22 @@ class ChromiumBrowserControlIT {
 		assertEquals("ERR", fetch("/data"), "offline in the new tab");
 	}
 
+	/**
+	 * A tab the page opens itself (window.open, a link with target _blank) runs, and gets the settings: Chrome holds such
+	 * a page for the debugger though it attaches saying it isn't waiting.
+	 */
+	@Test
+	void aTabThePageOpensRunsWithTheSettings() {
+		control.addInitScript("window.probe = 'here';");
+		js("setTimeout(() => window.open('/away', '_blank'), 0);");
+		driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(5)); // a held page never answers: fail quickly
+		String opened = control.visitNewTab(selenium.timeout(), true, () -> {
+			awaitScript("return document.readyState;", "complete");
+			return js("return location.pathname + ' ' + window.probe;").toString();
+		});
+		assertEquals("/away here", opened);
+	}
+
 	// ---- request interception
 
 	@Test
