@@ -35,7 +35,7 @@ import org.openqa.selenium.WebDriver;
 import jakarta.annotation.Nonnull;
 
 /**
- * Tests the photos of {@link SailTestFiles} and the reuse of every file, without a browser. The video is recorded and
+ * Tests the photos and files of {@link SailTestFiles} and the reuse of every file, without a browser. The video is recorded and
  * played in {@code SailTestFilesIT}. Each test deletes the files it checks first, so it proves they are made, not
  * reused from an earlier run.
  */
@@ -196,5 +196,66 @@ class SailTestFilesTest {
 					() -> assertThrows(IllegalArgumentException.class, () -> SailTestFiles.photo(65_501, 10), "too wide for a JPEG"),
 					() -> assertThrows(IllegalArgumentException.class, () -> SailTestFiles.video(driver, 0L), "a video of 0 bytes"),
 					() -> verifyNoInteractions(driver));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void aFileHasExactlyTheSizeAndIsAllZeros() {
+		// empty, one byte, a piece either side, and 12 MB (over the 10 MB upload limit)
+		List<Long> sizes = List.of(Long.valueOf(0L), Long.valueOf(1L), Long.valueOf(65_535L), Long.valueOf(65_536L),
+									Long.valueOf(65_537L), Long.valueOf(12L * 1024 * 1024));
+		assertAll(sizes.stream().map(size -> (Executable) () -> {
+			String name = "test-zeros-" + size + ".bin";
+			Files.deleteIfExists(SailTestFiles.FOLDER.resolve(name));
+			Path file = SailTestFiles.file(name, size.longValue());
+			assertAll(() -> assertEquals(SailTestFiles.FOLDER.resolve(name), file, size + ": the path"),
+						() -> assertTrue(file.isAbsolute(), size + ": absolute"),
+						() -> assertEquals(size.longValue(), Files.size(file), size + ": the size"),
+						() -> assertTrue(allZeros(file), size + ": all zeros"),
+						() -> assertTrue(noPartials(), size + ": no temporary files are left"));
+		}));
+	}
+
+	private static boolean allZeros(@Nonnull Path file) throws IOException {
+		try (java.io.InputStream in = Files.newInputStream(file)) {
+			byte[] buffer = new byte[8192];
+			for (int read = in.read(buffer); read >= 0; read = in.read(buffer)) {
+				for (int i = 0; i < read; i++) {
+					if (buffer[i] != 0) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void aFileThatIsThereWithTheRightSizeIsReusedAndOneWithTheWrongSizeIsReplaced() throws IOException {
+		Path file = SailTestFiles.file("test-reuse.bin", 1000L);
+		Files.setLastModifiedTime(file, LONG_AGO);
+		Object key = key(file);
+		Path again = SailTestFiles.file("test-reuse.bin", 1000L);
+		assertAll(() -> assertEquals(file, again, "the same path"),
+					() -> assertEquals(LONG_AGO, Files.getLastModifiedTime(again), "not written again"),
+					() -> assertEquals(key, key(again), "the same file"));
+		// the same name at another size, and a file that is cut short, are made again
+		assertAll(() -> assertEquals(2000L, Files.size(SailTestFiles.file("test-reuse.bin", 2000L)), "a larger size"),
+					() -> assertTrue(allZeros(file), "still zeros"));
+		Files.writeString(file, "cut short", StandardCharsets.US_ASCII);
+		assertAll(() -> assertEquals(5000L, Files.size(SailTestFiles.file("test-reuse.bin", 5000L)), "a cut short file"),
+					() -> assertTrue(allZeros(file), "zeros, not the old text"),
+					() -> assertTrue(noPartials(), "no temporary files are left"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void aNameThatIsNotAPlainFileNameOrANegativeSizeIsRefused() {
+		assertAll(Stream.of("", ".", "..", "a/b.bin", "../a.bin", "/a.bin", "a\\b.bin", "a.bin.partial", "photo-1.bin", "video-1.bin", "a\0b")
+							.map(name -> (Executable) () -> assertThrows(IllegalArgumentException.class, () -> SailTestFiles.file(name, 1L),
+																			"the name '" + name + "'")));
+		assertAll(() -> assertThrows(IllegalArgumentException.class, () -> SailTestFiles.file("test-negative.bin", -1L), "-1 bytes"),
+					() -> assertTrue(Files.notExists(SailTestFiles.FOLDER.resolve("test-negative.bin")), "nothing is written"));
 	}
 }

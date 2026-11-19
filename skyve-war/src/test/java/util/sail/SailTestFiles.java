@@ -38,11 +38,13 @@ import jakarta.annotation.Nullable;
  * <li>{@link #photo(int, int)}: a JPEG of given pixel dimensions;</li>
  * <li>{@link #oversizePhoto()}: a JPEG that is too large both in pixels and in bytes, which a page must redraw smaller
  * 		before upload;</li>
+ * <li>{@link #file(String, long)}: a file of a given name and exactly a given number of bytes, all zeros, which is not
+ * 		an image, so a page does not redraw it smaller before upload;</li>
  * <li>{@link #video(WebDriver, long)}: a playable WebM video of at least a given number of bytes, recorded by the
  * 		browser itself, because no video encoder (such as ffmpeg) is assumed outside it.</li>
  * </ul>
  * Each file is reused while it is there with the right size, so a run makes it once. The photos are the same every time
- * (fixed seeds); the video is noise from the browser's own random numbers. A file is written under a temporary name and
+ * (fixed seeds), and the file is all zeros; the video is noise from the browser's own random numbers. A file is written under a temporary name and
  * then moved into place, so a file that was only partly written (a run stopped part way) is never reused.
  * <p>
  * Threading: thread-safe; the methods that make a file are synchronized on the class. JVMs sharing the folder (parallel
@@ -84,6 +86,10 @@ public final class SailTestFiles {
 	private static final int VIDEO_PIECE = 1 << 20;
 	/** How much longer WebDriver waits for the recording than the page's own deadline, so the page's message comes back. */
 	private static final Duration SCRIPT_MARGIN = Duration.ofSeconds(10);
+	/** The zeros of {@link #file(String, long)} are written in pieces of this many bytes. */
+	private static final int ZEROS_PIECE = 64 * 1024;
+	/** The ending of the temporary names {@link #make(Path, Content)} uses, which no file's own name may have. */
+	private static final String PARTIAL = ".partial";
 	private static final long SEED = 42L;
 	private static final long OVERSIZE_SEED = 7L;
 
@@ -254,6 +260,43 @@ public final class SailTestFiles {
 	}
 
 	/**
+	 * Returns a file of the given name and exactly the given number of bytes, all zeros, making it if it isn't there with
+	 * that size. It is not an image, so a page that redraws a large image smaller before upload does not change it:
+	 * use it to test an upload limit with a file the page must refuse (for example {@code too-large-12582912.bin}).
+	 * A file of 0 bytes is allowed (an empty file).
+	 *
+	 * @param name	its file name, chosen by the caller: a plain name with no path separator ({@code /} or {@code \}), not
+	 * 				empty, not {@code .} or {@code ..}, not ending in {@code .partial} (the temporary names), and not starting
+	 * 				with {@code photo-} or {@code video-} (the names of the other methods' files)
+	 * @param bytes	its size, 0 or more
+	 * @return its absolute path, under {@link #FOLDER}, with the given name
+	 * @throws IllegalArgumentException	if the name isn't one of those, or the size is negative
+	 * @throws UncheckedIOException	if the file can't be written
+	 */
+	public static synchronized @Nonnull Path file(@Nonnull String name, long bytes) {
+		if (name.isEmpty() || name.equals(".") || name.equals("..") || (name.indexOf('/') >= 0) || (name.indexOf('\\') >= 0)
+				|| name.indexOf('\0') >= 0 || name.endsWith(PARTIAL) || name.startsWith("photo-") || name.startsWith("video-")) {
+			throw new IllegalArgumentException("A SAIL test file can't be named '" + name + "': use a plain file name, not ending in "
+												+ PARTIAL + " or starting with photo- or video-");
+		}
+		if (bytes < 0) {
+			throw new IllegalArgumentException("A SAIL test file of " + bytes + " bytes can't be made: use 0 or more");
+		}
+		Path result = FOLDER.resolve(name);
+		if (size(result) == bytes) {
+			return result;
+		}
+		return make(result, path -> {
+			byte[] zeros = new byte[(int) Math.min(ZEROS_PIECE, Math.max(bytes, 1L))];
+			try (OutputStream out = Files.newOutputStream(path)) {
+				for (long left = bytes; left > 0; left -= zeros.length) {
+					out.write(zeros, 0, (int) Math.min(zeros.length, left));
+				}
+			}
+		});
+	}
+
+	/**
 	 * Returns a playable WebM video of at least the given number of bytes, recording it in the browser if it isn't there
 	 * with that size, within the SAIL timeout ({@value SailSettings#TIMEOUT_SECONDS}). The browser records about
 	 * 3 MB a second, so a large video may need {@link #video(WebDriver, long, Duration)} with a longer timeout.
@@ -334,7 +377,7 @@ public final class SailTestFiles {
 		Path partial = null;
 		try {
 			Files.createDirectories(FOLDER);
-			partial = Files.createTempFile(FOLDER, result.getFileName() + ".", ".partial");
+			partial = Files.createTempFile(FOLDER, result.getFileName() + ".", PARTIAL);
 			content.write(partial);
 			Files.move(partial, result, StandardCopyOption.REPLACE_EXISTING);
 			return result;
