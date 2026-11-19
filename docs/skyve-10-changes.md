@@ -286,5 +286,3 @@ Try
   including collections. A signed-in user could, for example, add roles to their own `admin.User`. Enable REST only
   for callers you trust with the whole data store, or add permission checks to `RestService` first. Known; not
   fixed (decision of 2026-11-19).
-- **SmartClient CSRF check is inactive.** `SmartClientListServlet.checkCsrfToken` has its body commented out, so SmartClient
-  add, update, remove and edit requests are not CSRF checked. Known; deferred (2026-11-19).
