@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), SmartClient: Import/Export (Data Maintenance, Import/Export tab). An import definition for Contacts: columns
+	read from a spreadsheet, the import run, the rows found in the Contacts list; then an export definition and the template.
+	Downloads (GetImportTemplate, RunExport): SAIL has no step that reads a download, so they are only pressed and checked for errors.
+	Cleans up the imported contacts and both definitions.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Import definition: choose the document, get the template, upload the spreadsheet">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Import/Export" />
+			<listGridNew module="admin" query="qImportExport" />
+			<testValue binding="mode" value="importData" />
+			<comment>Nothing can be uploaded until a document is chosen (UploadSimpleImportDataFile is enabled by contextSet)</comment>
+			<testWidget action="UploadSimpleImportDataFile" enabled="false" />
+			<dataEnter binding="moduleName" value="admin" match="code" />
+			<dataEnter binding="documentName" value="Contact" match="code" />
+			<testWidget action="UploadSimpleImportDataFile" enabled="true" />
+			<comment>LANGUAGE NEED: GetImportTemplate is a download and SAIL has no step that reads one: it is pressed and checked for errors only</comment>
+			<action name="GetImportTemplate" />
+			<upload action="UploadSimpleImportDataFile" file="sail/files/sail-import-contacts.xlsx" />
+			<testMessage contains="Successfully loaded definitions for 3 columns" type="info" />
+			<comment>The columns come from the file's header row, and each is bound to the Contact attribute with that name</comment>
+			<testGridRows binding="importExportColumns" minRows="3" maxRows="3" />
+			<testGridRows binding="importExportColumns" rowContaining="Name" minRows="1" />
+			<testGridRows binding="importExportColumns" rowContaining="Email" minRows="1" />
+			<testGridRows binding="importExportColumns" rowContaining="Mobile" minRows="1" />
+			<testWidget action="RunImport" enabled="true" />
+			<testWidget action="ClearImport" enabled="true" />
+		</method>
+	</interaction>
+	<interaction name="Import definition: clear the upload (declined, then confirmed) and upload again">
+		<method>
+			<action name="ClearImport" confirm="false" />
+			<comment>Declined: the file and its columns are still there</comment>
+			<testGridRows binding="importExportColumns" minRows="3" maxRows="3" />
+			<testWidget action="RunImport" enabled="true" />
+			<action name="ClearImport" />
+			<comment>Confirmed: the file is gone, so the upload action is back and the columns and import actions are hidden</comment>
+			<testWidget action="UploadSimpleImportDataFile" enabled="true" />
+			<testWidget action="RunImport" visible="false" />
+			<testWidget action="ClearImport" visible="false" />
+			<upload action="UploadSimpleImportDataFile" file="sail/files/sail-import-contacts.xlsx" />
+			<testMessage contains="Successfully loaded definitions for 3 columns" type="info" />
+			<testGridRows binding="importExportColumns" minRows="3" maxRows="3" />
+		</method>
+	</interaction>
+	<interaction name="Run the import: three contacts are created">
+		<method>
+			<comment>Declined first: no contacts are created</comment>
+			<action name="RunImport" confirm="false" />
+			<navigateList module="admin" document="Contact" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAIL Import" />
+			<testGridRows module="admin" document="Contact" maxRows="0" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Import/Export" />
+			<listGridZoom module="admin" query="qImportExport" rowContaining="Contact" />
+			<action name="RunImport" />
+			<testMessage contains="Successfully loaded 3 rows. 3 Contacts created." type="info" />
+			<ok />
+			<navigateList module="admin" document="Contact" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAIL Import" />
+			<testGridRows module="admin" document="Contact" minRows="3" maxRows="3" />
+			<testGridRows module="admin" document="Contact" rowContaining="SAIL Import Alpha" minRows="1" maxRows="1" />
+			<testGridRows module="admin" document="Contact" rowContaining="sail.import.beta@example.com" minRows="1" maxRows="1" />
+			<testGridRows module="admin" document="Contact" rowContaining="0400000003" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Export definition: columns from the document, reset, and run the export">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Import/Export" />
+			<testGridRows module="admin" query="qImportExport" rowContaining="Import Data" minRows="1" />
+			<listGridNew module="admin" query="qImportExport" />
+			<dataEnter binding="mode" value="exportData" match="code" />
+			<testWidget action="RunExport" enabled="false" />
+			<testWidget action="GetImportTemplate" visible="false" />
+			<dataEnter binding="moduleName" value="admin" match="code" />
+			<dataEnter binding="documentName" value="Contact" match="code" />
+			<testWidget action="RunExport" enabled="true" />
+			<comment>Changing the document generates a column for each persistent scalar attribute of Contact</comment>
+			<testGridRows binding="importExportColumns" minRows="4" />
+			<testGridRows binding="importExportColumns" rowContaining="Contact Type" minRows="1" />
+			<testGridRows binding="importExportColumns" rowContaining="Mobile" minRows="1" />
+			<action name="ResetColumns" />
+			<testGridRows binding="importExportColumns" minRows="4" />
+			<comment>LANGUAGE NEED: RunExport is a download too: pressed and checked for errors only</comment>
+			<action name="RunExport" />
+			<save />
+			<testSuccess />
+			<ok />
+			<testGridRows module="admin" query="qImportExport" rowContaining="Export Data" minRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Clean up: the imported contacts and both definitions">
+		<method>
+			<navigateList module="admin" document="Contact" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAIL Import" />
+			<listGridZoom module="admin" document="Contact" rowContaining="SAIL Import Alpha" />
+			<delete />
+			<listGridZoom module="admin" document="Contact" rowContaining="SAIL Import Beta" />
+			<delete />
+			<listGridZoom module="admin" document="Contact" rowContaining="SAIL Import Gamma" />
+			<delete />
+			<testGridRows module="admin" document="Contact" maxRows="0" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Import/Export" />
+			<listGridZoom module="admin" query="qImportExport" rowContaining="Export Data" />
+			<delete />
+			<listGridZoom module="admin" query="qImportExport" rowContaining="Import Data" />
+			<delete />
+			<testGridRows module="admin" query="qImportExport" rowContaining="Contact" maxRows="0" />
+		</method>
+	</interaction>
+</automation>
