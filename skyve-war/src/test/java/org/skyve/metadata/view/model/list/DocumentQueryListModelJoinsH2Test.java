@@ -41,7 +41,7 @@ import util.AbstractH2Test;
  * A document's default query (whose columns join nothing) filtered through an optional association or an inverse one:
  * the path is left outer joined, rather than inner joined implicitly in HQL, so the filters that also match a row with
  * no value keep the rows with nothing on the path, and so does Match Any of another criterion they meet, whether the
- * from clause declares one document or several.
+ * from clause declares one document or several. A path the from clause joins already keeps that join.
  */
 @SuppressWarnings("static-method")
 class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
@@ -155,8 +155,8 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	/**
-	 * A from clause that inner joins the association itself still gets the left outer join of a filter's path, but its
-	 * own inner join leaves out the rows with no association, as it is meant to.
+	 * A from clause that inner joins the association itself keeps its own join for a filter's path, so no left outer
+	 * join is appended, and its inner join leaves out the rows with no association, as it is meant to.
 	 */
 	@Test
 	void anInnerJoinInTheFromStillLeavesOutTheRowsWithNoAssociation() throws Exception {
@@ -171,8 +171,39 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
 		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
 		assertEquals(Set.of("AF b"), fetch(model, ModelLookupFixture.namePropertyName));
-		String hql = ((AbstractDocumentQuery) Objects.requireNonNull(model.getDetailQuery())).toQueryString();
-		assertTrue(hql.contains(SELECTION_JOIN), hql);
+		assertNoJoin(model.getDetailQuery(), SELECTION_JOIN);
+		assertNoJoin(model.getSummaryQuery(), SELECTION_JOIN);
+	}
+
+	/**
+	 * A from clause that joins the association with an alias and a with condition keeps its own join for a filter's
+	 * path: an appended left outer join on the same path would replace it for the rest of the query and lose the
+	 * condition. So a row whose association the condition leaves out does not match through it, under Match All or Any.
+	 */
+	@Test
+	void aJoinWithAConditionInTheFromIsTheOneTheFiltersUse() throws Exception {
+		Persistence persistence = CORE.getPersistence();
+		LookupDescription alpha = persistence.save(lookup("alpha"));
+		LookupDescription beta = persistence.save(lookup("beta"));
+		persistence.save(fixture("AF a", alpha));
+		persistence.save(fixture("AF b", beta));
+		persistence.save(fixture("AF n", null));
+		persistence.flush();
+
+		String from = '{' + ModelLookupFixture.MODULE_NAME + '.' + ModelLookupFixture.DOCUMENT_NAME + "} as bean left outer join bean." +
+						ModelLookupFixture.selectionPropertyName + " as s with s." + LookupDescription.descriptionPropertyName + " = 'alpha'";
+		DocumentQueryListModel<Bean> model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		model.getFilter().addEquals(DESCRIPTION, "beta");
+		assertEquals(Set.of(), fetch(model, ModelLookupFixture.namePropertyName));
+		assertNoJoin(model.getDetailQuery(), SELECTION_JOIN);
+
+		model = defaultQueryModel(ModelLookupFixture.MODULE_NAME, ModelLookupFixture.DOCUMENT_NAME, from);
+		matchAny(model, f -> f.addEquals(DESCRIPTION, "beta"), f -> f.addEquals(ModelLookupFixture.namePropertyName, "AF n"));
+		Page page = model.fetch();
+		assertEquals(Set.of("AF n"), names(page, ModelLookupFixture.namePropertyName));
+		assertEquals(1L, page.getTotalRows());
+		assertNoJoin(model.getDetailQuery(), SELECTION_JOIN);
+		assertNoJoin(model.getSummaryQuery(), SELECTION_JOIN);
 	}
 
 	/** An embedded association's attributes are on the row: a filter through one joins nothing and keeps its rows. */
@@ -199,8 +230,12 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	private static void assertNoJoin(DocumentQuery query) {
+		assertNoJoin(query, "LEFT OUTER JOIN");
+	}
+
+	private static void assertNoJoin(DocumentQuery query, String join) {
 		String hql = ((AbstractDocumentQuery) Objects.requireNonNull(query)).toQueryString();
-		assertFalse(hql.contains("LEFT OUTER JOIN"), hql);
+		assertFalse(hql.contains(join), hql);
 	}
 
 	/** Ors the conditions, each in a filter of its own, into the model's filter, as Match Any does. */
@@ -253,8 +288,12 @@ class DocumentQueryListModelJoinsH2Test extends AbstractH2Test {
 	}
 
 	private static Set<String> fetch(DocumentQueryListModel<Bean> model, String binding) throws Exception {
+		return names(model.fetch(), binding);
+	}
+
+	private static Set<String> names(Page page, String binding) {
 		Set<String> result = new TreeSet<>();
-		for (Bean row : Objects.requireNonNull(model.fetch().getRows())) {
+		for (Bean row : Objects.requireNonNull(page.getRows())) {
 			result.add((String) Binder.get(row, binding));
 		}
 		return result;
