@@ -40,6 +40,7 @@ public class CaptureMailService implements MailService {
 	 *
 	 * @throws IllegalStateException if this is already installed.
 	 */
+	@SuppressWarnings("java:S2696") // static manipulation is for config only
 	public void install() {
 		if (installed) {
 			throw new IllegalStateException("This CaptureMailService is already installed.");
@@ -57,6 +58,7 @@ public class CaptureMailService implements MailService {
 	 * Puts back what {@link #install()} replaced. If no mail service was configured before, a
 	 * {@link NoOpMailService} is configured, so nothing can be sent. Does nothing if this is not installed.
 	 */
+	@SuppressWarnings("java:S2696") // static manipulation is for config only
 	public void uninstall() {
 		if (! installed) {
 			return;
