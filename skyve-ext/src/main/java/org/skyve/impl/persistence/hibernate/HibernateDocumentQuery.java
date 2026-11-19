@@ -82,7 +82,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public DocumentQuery setFirstResult(int first) {
+	public @Nonnull DocumentQuery setFirstResult(int first) {
 		delegate.setFirstResult(first);
 		return this;
 	}
@@ -94,7 +94,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public DocumentQuery setMaxResults(int max) {
+	public @Nonnull DocumentQuery setMaxResults(int max) {
 		delegate.setMaxResults(max);
 		return this;
 	}
@@ -106,7 +106,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 * @return matching bean results
 	 */
 	@Override
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, true, false);
 	}
@@ -119,7 +119,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, true, false);
 	}
@@ -131,7 +131,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 * @return projected query results
 	 */
 	@Override
-	public <T extends Bean> List<T> projectedResults() {
+	public @Nonnull <T extends Bean> List<T> projectedResults() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, false, false, false);
 	}
@@ -144,7 +144,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, false, false, false);
 	}
@@ -157,7 +157,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 * @return scalar query results
 	 */
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
+	public @Nonnull <T> List<T> scalarResults(@Nonnull Class<T> type) {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, true, false);
 	}
@@ -171,7 +171,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+	public @Nonnull <T> AutoClosingIterable<T> scalarIterable(@Nonnull Class<T> type) {
 		Query<T> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, true, false);
 	}
@@ -182,7 +182,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 * @return tuple rows where each element represents a projected column value
 	 */
 	@Override
-	public List<Object[]> tupleResults() {
+	public @Nonnull List<Object[]> tupleResults() {
 		Query<Object[]> query = delegate.createHibernateQuery(this);
 		return delegate.list(query, true, false, true);
 	}
@@ -194,7 +194,7 @@ public class HibernateDocumentQuery extends AbstractDocumentQuery {
 	 */
 	@Override
 	@SuppressWarnings("resource") // Ownership of the returned AutoClosingIterable passes to the caller.
-	public AutoClosingIterable<Object[]> tupleIterable() {
+	public @Nonnull AutoClosingIterable<Object[]> tupleIterable() {
 		Query<Object[]> query = delegate.createHibernateQuery(this);
 		return delegate.iterate(query, true, false, true);
 	}

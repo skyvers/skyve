@@ -3,6 +3,8 @@ package org.skyve.impl.bizport;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.metadata.model.Attribute;
 
+import jakarta.annotation.Nullable;
+
 /**
  * FieldLoader is a definition of how a data field will be loaded 
  * 
@@ -38,27 +40,27 @@ public class DataFileField {
 	private Attribute attribute;
 	
 
-	public Attribute getAttribute() {
+	public @Nullable Attribute getAttribute() {
 		return attribute;
 	}
 
-	public void setAttribute(Attribute attribute) {
+	public void setAttribute(@Nullable Attribute attribute) {
 		this.attribute = attribute;
 	}
 
-	public Converter<?> getConverter() {
+	public @Nullable Converter<?> getConverter() {
 		return converter;
 	}
 
-	public void setConverter(Converter<?> converter) {
+	public void setConverter(@Nullable Converter<?> converter) {
 		this.converter = converter;
 	}
 
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = binding;
 	}
 
@@ -70,11 +72,11 @@ public class DataFileField {
 		this.treatEmptyNumericAsZero = treatEmptyNumericAsZero;
 	}
 
-	public LoadAction getLoadAction() {
+	public @Nullable LoadAction getLoadAction() {
 		return loadAction;
 	}
 	
-	public void setLoadAction(LoadAction loadAction){
+	public void setLoadAction(@Nullable LoadAction loadAction){
 		this.loadAction = loadAction;
 	}
 
@@ -82,11 +84,11 @@ public class DataFileField {
 		return required;
 	}
 	
-	public Integer getIndex() {
+	public @Nullable Integer getIndex() {
 		return index;
 	}
 
-	public void setIndex(Integer index) {
+	public void setIndex(@Nullable Integer index) {
 		this.index = index;
 	}
 
@@ -99,27 +101,27 @@ public class DataFileField {
 	}
 
 	//default constructor
-	public DataFileField(String binding) {
+	public DataFileField(@Nullable String binding) {
 		this.binding = binding;
 		this.loadAction = LoadAction.SET_VALUE;
 		this.required=  false;
 	}
 	
-	public DataFileField(String binding, int index){
+	public DataFileField(@Nullable String binding, int index){
 		this.binding = binding;
 		this.loadAction = LoadAction.SET_VALUE;
 		this.required=  false;
 		this.index = Integer.valueOf(index);
 	}
 	
-	public DataFileField(String binding, LoadAction loadAction, boolean required, int index) {
+	public DataFileField(@Nullable String binding, @Nullable LoadAction loadAction, boolean required, int index) {
 		this.binding = binding;
 		this.loadAction = loadAction;
 		this.required = required;
 		this.index = Integer.valueOf(index);
 	}
 
-	public DataFileField(String binding, LoadAction loadAction, boolean required, int index, Converter<?> converter) {
+	public DataFileField(@Nullable String binding, @Nullable LoadAction loadAction, boolean required, int index, @Nullable Converter<?> converter) {
 		this.binding = binding;
 		this.loadAction = loadAction;
 		this.required = required;

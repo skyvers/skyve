@@ -1,5 +1,7 @@
 package org.skyve.nlp.cron;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Signals that natural-language input cannot be transformed into a valid cron expression.
  */
@@ -11,7 +13,7 @@ public class CronParserException extends RuntimeException {
 	 *
 	 * @param message The parse failure reason.
 	 */
-	public CronParserException(String message) {
+	public CronParserException(@Nullable String message) {
 		super(message);
 	}
 }

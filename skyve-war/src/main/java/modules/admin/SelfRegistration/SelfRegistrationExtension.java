@@ -10,6 +10,7 @@ import org.skyve.util.Binder;
 import org.skyve.util.Util;
 
 import modules.admin.Configuration.ConfigurationExtension;
+import modules.admin.User.UserExtension;
 import modules.admin.domain.Configuration;
 import modules.admin.domain.Contact;
 import modules.admin.domain.SelfRegistration;
@@ -47,8 +48,11 @@ public class SelfRegistrationExtension extends SelfRegistration {
 	 * @return true if not-null and is valid, false otherwise
 	 */
 	public boolean emailInvalid() {
-		if (getUser() != null && getUser().getContact() != null && getUser().getContact().getEmail1() != null) {
-			return !validateEmailAddress(getUser().getContact().getEmail1());
+		UserExtension user = getUser();
+		Contact contact = (user == null) ? null : user.getContact();
+		String email = (contact == null) ? null : contact.getEmail1();
+		if (email != null) {
+			return !validateEmailAddress(email);
 		}
 		return false;
 	}

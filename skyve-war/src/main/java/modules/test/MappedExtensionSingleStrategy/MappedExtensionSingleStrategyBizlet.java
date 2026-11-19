@@ -2,6 +2,8 @@ package modules.test.MappedExtensionSingleStrategy;
 
 import org.skyve.metadata.model.document.Bizlet;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Records lifecycle callback execution for single-strategy mapped extension tests.
  */
@@ -13,7 +15,7 @@ public class MappedExtensionSingleStrategyBizlet extends Bizlet<MappedExtensionS
 	 * @throws Exception if callback handling fails
 	 */
 	@Override
-	public void preSave(MappedExtensionSingleStrategyExtension bean) throws Exception {
+	public void preSave(@Nonnull MappedExtensionSingleStrategyExtension bean) throws Exception {
 		bean.setPreSaveCalled(true);
 	}
 
@@ -24,7 +26,7 @@ public class MappedExtensionSingleStrategyBizlet extends Bizlet<MappedExtensionS
 	 * @throws Exception if callback handling fails
 	 */
 	@Override
-	public void postSave(MappedExtensionSingleStrategyExtension bean) throws Exception {
+	public void postSave(@Nonnull MappedExtensionSingleStrategyExtension bean) throws Exception {
 		bean.setPostSaveCalled(true);
 	}
 
@@ -35,7 +37,7 @@ public class MappedExtensionSingleStrategyBizlet extends Bizlet<MappedExtensionS
 	 * @throws Exception if callback handling fails
 	 */
 	@Override
-	public void preDelete(MappedExtensionSingleStrategyExtension bean) throws Exception {
+	public void preDelete(@Nonnull MappedExtensionSingleStrategyExtension bean) throws Exception {
 		bean.setPreDeleteCalled(true);
 	}
 
@@ -46,7 +48,7 @@ public class MappedExtensionSingleStrategyBizlet extends Bizlet<MappedExtensionS
 	 * @throws Exception if callback handling fails
 	 */
 	@Override
-	public void postDelete(MappedExtensionSingleStrategyExtension bean) throws Exception {
+	public void postDelete(@Nonnull MappedExtensionSingleStrategyExtension bean) throws Exception {
 		bean.setPostDeleteCalled(true);
 	}
 }

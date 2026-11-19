@@ -1,7 +1,6 @@
 package org.skyve.impl.web.service.smartclient;
 
 import org.skyve.impl.bind.BindUtil;
-import org.skyve.impl.metadata.model.document.field.Field;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -16,8 +15,10 @@ import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
-import org.skyve.util.OWASP;
 import org.skyve.util.Util;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * SmartClient data-grid field definition.
@@ -26,37 +27,36 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	protected boolean editable;
 	private boolean escapeTitle = true;
 
-	// for list grids, we need to convert the defaultValue into a JavaScript expression that can be evaluated on the client side, so we store it separately here.
-	protected String defaultValueJavascriptExpression;
-    
 	// when the field is a content upload, we need to generate a JavaScript formatter to render the content in the grid, so we store that separately here.
 	private String contentUploadFormatterJavascript;
 
 	/**
 	 * Builds a SmartClient data-grid field definition from widget and document metadata.
 	 *
-	 * @param user active user used for localisation and metadata rules
-	 * @param customer active customer metadata
-	 * @param module module containing the target document
-	 * @param document target document metadata
-	 * @param widget source widget metadata
-	 * @param dataGridBindingOverride optional binding override, or {@code null}
+	 * @param user active user
+	 * @param customer active customer
+	 * @param module binding context module
+	 * @param document binding context document
+	 * @param owningDocument enclosing view document that owns lookup models
+	 * @param widget widget metadata
+	 * @param dataGridBindingOverride optional collection binding
 	 * @param hasFormatter whether a display formatter is applied
-	 * @param runtime whether runtime domain values should be resolved
-	 * @param isField whether the definition is generated for a field context
-	 * @param uxui active UX/UI profile name
+	 * @param runtime whether runtime metadata is required
+	 * @param isField whether this is a form field
+	 * @param uxui active UX/UI
 	 */
-    @SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-    protected SmartClientDataGridFieldDefinition(User user,
-			    									Customer customer, 
-			                                        Module module, 
-			                                        Document document, 
-			                                        InputWidget widget,
-			                                        String dataGridBindingOverride,
-			                                        boolean hasFormatter,
-			                                        boolean runtime,
-			                                        boolean isField,
-			                                        String uxui) {
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Binding and model ownership are distinct in nested grids.
+	protected SmartClientDataGridFieldDefinition(@Nullable User user,
+													@Nonnull Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull Document owningDocument,
+													@Nonnull InputWidget widget,
+													@Nullable String dataGridBindingOverride,
+													boolean hasFormatter,
+													boolean runtime,
+													boolean isField,
+													@Nonnull String uxui) {
 		super(user,
 				customer,
 				module,
@@ -75,36 +75,16 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		}
         Attribute attribute = target.getAttribute();
 
-        if (attribute instanceof Field field) {
-            // determine the defaultValue expression for the list grid
-        	defaultValueJavascriptExpression = field.getDefaultValue();
-        	if (defaultValueJavascriptExpression != null) {
-        		AttributeType attributeType = attribute.getAttributeType();
-				if (AttributeType.date.equals(attributeType) || 
-						AttributeType.dateTime.equals(attributeType) || 
-						AttributeType.time.equals(attributeType) || 
-						AttributeType.timestamp.equals(attributeType)) {
-					defaultValueJavascriptExpression = new StringBuilder(128).append("isc.DateUtil.parseSchemaDate('").append(defaultValueJavascriptExpression).append("')").toString();
-				}
-				else if (! (AttributeType.bool.equals(attributeType) || 
-								AttributeType.integer.equals(attributeType) ||
-								AttributeType.longInteger.equals(attributeType))) {
-					defaultValueJavascriptExpression = new StringBuilder(128)
-																.append('\'')
-																.append(OWASP.escapeJsStringWithHtmlFormatting(defaultValueJavascriptExpression, false, false))
-																.append('\'')
-																.toString();
-				}
-        	}
-        }
-        
+        // No defaultValue is rendered: new data grid rows are created on the server (inline or zoomed),
+        // where default value expressions are evaluated.
+
         if ((attribute instanceof Relation relation) && (widget instanceof LookupDescription lookupDescription)) { // widget could be a combo for instance
         	editorType = "comboBox";
         	lookup = new SmartClientLookupDefinition(dataGridBindingOverride != null,
         												user,
         												customer,
         												module,
-        												document,
+														(lookupDescription.getModelName() == null) ? document : owningDocument,
         												relation,
         												lookupDescription,
         												runtime,
@@ -112,11 +92,10 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
         }
 
         // By default a SmartClientDataGridDefinition sets memo fields to a text area.
-		if ((attribute != null) && AttributeType.memo.equals(attribute.getAttributeType())) {
-			if ((widget instanceof RichText) ||
-					(widget instanceof HTML)) {
-				editorType = null;
-			}
+		if ((attribute != null) &&
+				AttributeType.memo.equals(attribute.getAttributeType()) &&
+				((widget instanceof RichText) || (widget instanceof HTML))) {
+			editorType = null;
 		}
 		
 		if (widget instanceof ContentUpload content) {
@@ -158,7 +137,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 	 *
 	 * @return SmartClient JavaScript field definition payload
 	 */
-	public String toJavascript() {
+	public @Nonnull String toJavascript() {
 		StringBuilder result = new StringBuilder(128);
 
 		result.append("name:'");
@@ -167,9 +146,6 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		result.append(SmartClientViewRenderer.escapeSmartClientText(title, escapeTitle));
 		result.append("',type:'");
 		result.append(type).append('\'');
-		if (defaultValueJavascriptExpression != null) {
-			result.append(",defaultValue:").append(defaultValueJavascriptExpression);
-		}
 		if (editorType != null) {
 			result.append(",editorType:'").append(editorType).append('\'');
 		}
@@ -205,13 +181,11 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		if (escape) {
 			result.append(",escapeHTML:true");
 		}
-//TODO fix this
-//result.append(",changed:'alert(item.grid.getSelectedRecord().bizId)'");
 
 		return result.toString();
 	}
 	
-	private String createContentUploadFormatter(ContentUpload content) {
+	private @Nonnull String createContentUploadFormatter(@Nonnull ContentUpload content) {
 		StringBuilder result = new StringBuilder(512);
 		ContentDisplay display = content.getResolvedDisplay();
 		Integer imageWidth = content.getPixelWidth();
@@ -227,21 +201,24 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 			result.append(",companion:'").append(companion).append('\'');
 		}
 		result.append(",showMarkup:").append(isContentMarkupAllowed(content, display));
-		result.append(",formatCellValue:function(v,rec,row,col){");
+		result.append(",formatCellValue:function(v,rec,row,col,grid){");
 		result.append("if(!v){return ''}");
 		result.append("var k='").append(display).append("';");
 		if (ContentDisplay.auto.equals(display)) {
 			result.append("k=(rec&&rec['").append(companion).append("'])||'link';");
 		}
 		result.append("var u='content?_n='+v+'&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(binding).append("';");
-		result.append("if(k==='image'){return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-		if (imageWidth != null) {
-			result.append("&_w=").append(imageWidth);
+		// A thumbnail sized to the box, rounded up so few sizes are cached, as for the form's content widget.
+		// Without a pixel width, the image is as wide as its column.
+		result.append("if(k==='image'){var s=SKYVE.Util.contentPreviewSize(");
+		if (imageWidth == null) {
+			result.append("grid&&grid.getFieldWidth?grid.getFieldWidth(col):null");
 		}
-		if (imageHeight != null) {
-			result.append("&_h=").append(imageHeight);
+		else {
+			result.append(imageWidth);
 		}
-		result.append("\" style=\"");
+		result.append(',').append(imageHeight).append(");");
+		result.append("return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'&_w='+s+'&_h='+s+'\" style=\"");
 		appendMediaStyle(result, imageWidth, imageHeight, "1 / 1");
 		result.append("object-fit:contain\"/></a>'}");
 		result.append("if(k==='video'){return '<video controls preload=\"metadata\" src=\"'+u+'\" style=\"");
@@ -251,7 +228,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		return result.toString();
 	}
 
-	private static void appendMediaStyle(StringBuilder result, Integer width, Integer height, String aspectRatio) {
+	private static void appendMediaStyle(@Nonnull StringBuilder result, @Nullable Integer width, @Nullable Integer height, @Nonnull String aspectRatio) {
 		if (width == null) {
 			result.append("width:100%;");
 		}
@@ -266,7 +243,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		}
 	}
 
-	private static String contentEmptyText(ContentDisplay display) {
+	private static @Nonnull String contentEmptyText(@Nonnull ContentDisplay display) {
 		if (ContentDisplay.image.equals(display)) {
 			return "No image";
 		}
@@ -279,7 +256,7 @@ public class SmartClientDataGridFieldDefinition extends SmartClientAttributeDefi
 		return "No content";
 	}
 
-	private static boolean isContentMarkupAllowed(ContentUpload content, ContentDisplay display) {
+	private static boolean isContentMarkupAllowed(@Nonnull ContentUpload content, @Nonnull ContentDisplay display) {
 		if (Boolean.FALSE.equals(content.getShowMarkup())) {
 			return false;
 		}

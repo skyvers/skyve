@@ -63,7 +63,7 @@ class DocumentQueryMapModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "null"}) // a null here fails the test
 	void getResultConstructsQueryOnceAndAddsItemsFromIterable() throws Exception {
 		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
 		DocumentQuery documentQuery = mock(DocumentQuery.class);
@@ -86,7 +86,7 @@ class DocumentQueryMapModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "null"}) // a null here fails the test
 	void setQueryAllowsPostConstructStyleConfiguration() throws Exception {
 		MetaDataQueryDefinition initialQuery = mock(MetaDataQueryDefinition.class);
 		MetaDataQueryDefinition replacementQuery = mock(MetaDataQueryDefinition.class);
@@ -105,7 +105,7 @@ class DocumentQueryMapModelTest {
 	}
 
 	@Test
-	@SuppressWarnings("resource")
+	@SuppressWarnings({"resource", "null"}) // a null here fails the test
 	void protectedNoArgConstructorSupportsPostConstructSetQuery() throws Exception {
 		MetaDataQueryDefinition query = mock(MetaDataQueryDefinition.class);
 		DocumentQuery documentQuery = mock(DocumentQuery.class);

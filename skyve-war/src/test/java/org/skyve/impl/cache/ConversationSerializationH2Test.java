@@ -84,7 +84,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void cachedConversationCanRetainValidationStateAfterDeliberateRollback() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
@@ -127,7 +127,7 @@ class ConversationSerializationH2Test extends AbstractH2TestTruncate {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void cacheConversationCommitsMutationAndKeepsConversationUsable() {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();

@@ -8,8 +8,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -18,6 +20,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,6 +37,7 @@ import org.apache.lucene.document.DoubleField;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -45,7 +49,8 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.domain.types.Decimal5;
@@ -58,7 +63,7 @@ import com.google.common.util.concurrent.AtomicDouble;
  * I've used addNotNull().
  */
 @SuppressWarnings({"boxing", "static-method", "null", "java:S8692"}) // system clock OK
-public class LuceneFilterTest {
+class LuceneFilterTest {
 
     private static final String DECIMAL_FIELD = "our_decimal";
     private static final String DOUBLE_FIELD = "our_doub";
@@ -78,7 +83,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContainsBasic() {
+    void testContainsBasic() {
 
         String testTextVal = "this is a test text field";
         List<Document> docs = List.of(createDoc(testTextVal, 1.1), createDoc("FOOBAR", 1.1));
@@ -97,7 +102,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContainsOr() {
+    void testContainsOr() {
 
         List<Document> docs = List.of(
                 createDoc("test baz", 1.1),
@@ -135,7 +140,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContainsAnd() {
+    void testContainsAnd() {
 
         List<Document> docs = List.of(
                 createDoc("test baz", 777),
@@ -169,7 +174,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
 
         Document target = new Document();
         target.add(new DoubleField(DOUBLE_FIELD, 4.4, Store.YES));
@@ -194,7 +199,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotNull() {
+    void testNotNull() {
 
         Document target = new Document();
         target.add(new DoubleField(DOUBLE_FIELD, 4.4, Store.YES));
@@ -218,7 +223,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsString() {
+    void testEqualsString() {
 
         // Make sure we get 0 results first
         {
@@ -251,7 +256,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsString() {
+    void testNotEqualsString() {
 
         List<Document> docs = List.of(
                 createDoc("FOOBAR", 1.1),
@@ -272,7 +277,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsDate() {
+    void testEqualsDate() {
 
         Date now = new Date();
         Date future = Date.from(Instant.now()
@@ -290,7 +295,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsDate() {
+    void testNotEqualsDate() {
 
         Date now = new Date();
         Date future = Date.from(Instant.now()
@@ -309,7 +314,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsInteger() {
+    void testEqualsInteger() {
 
         int targetValue = 4;
         List<Document> docs = List.of(createDoc(777), createDoc(targetValue), createDoc(555));
@@ -324,7 +329,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsInteger() {
+    void testNotEqualsInteger() {
 
         int targetValue = 444;
         List<Document> docs = List.of(createDoc(2), createDoc(targetValue), createDoc(3));
@@ -343,7 +348,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsLong() {
+    void testEqualsLong() {
 
         long targetValue = Long.MAX_VALUE;
         List<Document> docs = List.of(createDoc(Long.MIN_VALUE), createDoc(targetValue), createDoc(555l));
@@ -358,7 +363,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsLong() {
+    void testNotEqualsLong() {
 
         long targetValue = Long.MAX_VALUE;
         List<Document> docs = List.of(createDoc(Long.MIN_VALUE), createDoc(targetValue), createDoc(555l));
@@ -376,7 +381,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsDecimal() {
+    void testEqualsDecimal() {
 
         Decimal targetValue = new Decimal5("5.45");
 
@@ -401,7 +406,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsDecimal() {
+    void testNotEqualsDecimal() {
 
         Decimal targetValue = new Decimal5("5.45");
 
@@ -428,7 +433,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsBoolean() {
+    void testEqualsBoolean() {
 
         List<Document> docs = List.of(createDoc(true), createDoc(false), createDoc(true));
 
@@ -445,7 +450,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsBoolean() {
+    void testNotEqualsBoolean() {
 
         List<Document> docs = List.of(createDoc(true), createDoc(false), createDoc(true));
 
@@ -462,7 +467,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsEnum() {
+    void testEqualsEnum() {
 
         List<Document> docs = List.of(
                 createDoc(TestEnum.Y),
@@ -482,7 +487,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEqualsIn() {
+    void testEqualsIn() {
 
         List<Document> docs = List.of(
                 createDoc(TestEnum.Y),
@@ -499,7 +504,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotEqualsEnum() {
+    void testNotEqualsEnum() {
 
         List<Document> docs = List.of(
                 createDoc(TestEnum.Y),
@@ -523,7 +528,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testContains() {
+    void testContains() {
         List<Document> docs = List.of(
                 createDoc("some test* string", 9),
                 createDoc("shouldnt match TEST xyzz", 777),
@@ -543,7 +548,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testNotContains() {
+    void testNotContains() {
         List<Document> docs = List.of(
                 createDoc("some test? string", 999),
                 createDoc("shouldnt match TEST xyzz", 7),
@@ -564,7 +569,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testStartsWith() {
+    void testStartsWith() {
         List<Document> docs = List.of(
                 createDoc("the quick brown fox", 7),
                 createDoc("the slow grey slug", 7),
@@ -601,7 +606,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testEndsWith() {
+    void testEndsWith() {
         List<Document> docs = List.of(
                 createDoc("blue", 7),
                 createDoc("purple", 7),
@@ -638,7 +643,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testStringRangeQueries() {
+    void testStringRangeQueries() {
 
         List<Document> docs = List.of(
                 createDoc("Aqua"),
@@ -771,7 +776,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testDateRangeQueries() {
+    void testDateRangeQueries() {
 
         final Instant start = Instant.parse("2014-01-01T08:00:00Z");
         List<Document> docs = datesSeries(start, Duration.ofDays(1)).limit(10)
@@ -845,7 +850,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testIntRangeQueries() {
+    void testIntRangeQueries() {
 
         AtomicInteger i = new AtomicInteger(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
@@ -901,7 +906,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testLongRangeQueries() {
+    void testLongRangeQueries() {
 
         AtomicLong i = new AtomicLong(1);
         List<Document> docs = Stream.generate(() -> createDoc(i.getAndIncrement()))
@@ -957,7 +962,7 @@ public class LuceneFilterTest {
     }
 
     @Test
-    public void testDoubleRangeQueries() {
+    void testDoubleRangeQueries() {
 
         AtomicDouble i = new AtomicDouble(1.0);
         List<Document> docs = Stream.generate(() -> {
@@ -1032,6 +1037,84 @@ public class LuceneFilterTest {
         return doc.getField(LONG_FIELD)
                   .numericValue()
                   .longValue();
+    }
+
+    /** A negation alone (only MUST_NOT clauses) matches the documents it does not exclude, not nothing. */
+    @Test
+    void testNotEqualsAlone() {
+        List<Document> docs = List.of(createDoc(2), createDoc(444), createDoc(3));
+
+        LuceneFilter filter = new LuceneFilter();
+        filter.addNotEquals(INT_FIELD, Integer.valueOf(444));
+
+        assertEquals(2, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** "No value, or not equal", as the list servlet builds a negation: the document without the field matches too. */
+    @Test
+    void testNullOrNotEquals() {
+        List<Document> docs = List.of(createDoc(2), createDoc(444), createDoc("no number"));
+
+        LuceneFilter criterion = new LuceneFilter();
+        criterion.addNotEquals(INT_FIELD, Integer.valueOf(444));
+        LuceneFilter filter = new LuceneFilter();
+        filter.addNull(INT_FIELD);
+        filter.addOr(criterion);
+
+        assertEquals(2, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** Not in an empty set matches every document. */
+    @Test
+    void testNotInEmptySet() {
+        List<Document> docs = List.of(createDoc("one"), createDoc("two"), createDoc("three"));
+
+        LuceneFilter filter = new LuceneFilter();
+        filter.addNotIn(TEXT_FIELD);
+
+        assertEquals(3, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** Match None of "greater than 3": no value, or at most 3 (as the list servlet negates a comparison). */
+    @Test
+    void testMatchNoneOfAComparison() {
+        List<Document> docs = List.of(createDoc(2), createDoc(3), createDoc(9), createDoc("no number"));
+
+        LuceneFilter criterion = new LuceneFilter();
+        criterion.addLessThanOrEqualTo(INT_FIELD, Integer.valueOf(3));
+        LuceneFilter nullOr = new LuceneFilter();
+        nullOr.addNull(INT_FIELD);
+        nullOr.addOr(criterion);
+        LuceneFilter filter = new LuceneFilter();
+        filter.addAnd(nullOr);
+
+        assertEquals(3, newIndexAndQuery(docs, filter).size());
+    }
+
+    /** A negation alone matches no archive progress document, which has none of a bean's fields (bizId included). */
+    @Test
+    void testNegationsAloneSkipProgressDocuments() {
+        List<Document> docs = List.of(createDoc(2), createDoc("no number"));
+
+        LuceneFilter isNull = new LuceneFilter();
+        isNull.addNull(INT_FIELD);
+        LuceneFilter notEquals = new LuceneFilter();
+        notEquals.addNotEquals(INT_FIELD, Integer.valueOf(444));
+
+        List<Document> nulls = newIndexAndQuery(docs, isNull);
+        assertEquals(1, nulls.size());
+        assertThat(nulls.get(0).get(TEXT_FIELD), is("no number"));
+        List<Document> notEquals444 = newIndexAndQuery(docs, notEquals);
+        assertEquals(2, notEquals444.size());
+        assertTrue(notEquals444.stream().allMatch(d -> d.get(Bean.DOCUMENT_ID) != null));
+    }
+
+    /** An archive file's progress document, as IndexArchivesJob.updateProgress writes it. */
+    private static Document progressDoc() {
+        Document doc = new Document();
+        doc.add(new StringField("_progress_filename", "archive.txt", Store.YES));
+        doc.add(new LongField("_progress_offset", 100L, Store.YES));
+        return doc;
     }
 
     /**
@@ -1155,10 +1238,13 @@ public class LuceneFilterTest {
                         docsToInsert.forEach(d -> System.out.println("\t" + d));
                     }
 
+                    // as IndexArchivesJob indexes an archive: each archived bean has a bizId, and the same index
+                    // holds a progress document (no bizId) for each archive file
                     for (Document doc : docsToInsert) {
-
+                        doc.add(new TextField(Bean.DOCUMENT_ID, UUID.randomUUID().toString(), Store.YES));
                         writer.addDocument(doc);
                     }
+                    writer.addDocument(progressDoc());
                 }
             }
 
@@ -1214,53 +1300,63 @@ public class LuceneFilterTest {
 
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddTaggedThrowsUnsupportedOperationException() {
-        new LuceneFilter().addTagged("tag", true);
+    @Test
+    void testAddTaggedThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addTagged("tag", true));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddWithinGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addWithin("binding", null);
+    @Test
+    void testAddWithinGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addWithin("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddContainsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addContains("binding", (org.locationtech.jts.geom.Geometry) null);
+    @Test
+    void testAddContainsGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addContains("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddCrossesGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addCrosses("binding", null);
+    @Test
+    void testAddCrossesGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addCrosses("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddDisjointGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addDisjoint("binding", null);
+    @Test
+    void testAddDisjointGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addDisjoint("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddIntersectsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addIntersects("binding", null);
+    @Test
+    void testAddIntersectsGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addIntersects("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddOverlapsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addOverlaps("binding", null);
+    @Test
+    void testAddOverlapsGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addOverlaps("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddTouchesGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addTouches("binding", null);
+    @Test
+    void testAddTouchesGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addTouches("binding", null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddNotEqualsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null);
+    @Test
+    void testAddNotEqualsGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addNotEquals("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testAddEqualsGeometryThrowsUnsupportedOperationException() {
-        new LuceneFilter().addEquals("binding", (org.locationtech.jts.geom.Geometry) null);
+    @Test
+    void testAddEqualsGeometryThrowsUnsupportedOperationException() {
+        LuceneFilter filter = new LuceneFilter();
+        assertThrows(UnsupportedOperationException.class, () -> filter.addEquals("binding", (org.locationtech.jts.geom.Geometry) null));
     }
 }

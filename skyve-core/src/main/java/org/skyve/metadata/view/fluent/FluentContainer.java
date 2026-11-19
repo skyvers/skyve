@@ -33,6 +33,9 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base fluent builder for metadata containers that can hold nested widgets.
  *
@@ -59,7 +62,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *             if a contained widget type is not supported by the fluent adapter set
 	 */
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	protected T from(Container container) {
+	protected @Nonnull T from(@Nonnull Container container) {
 		for (SerializableMetaData widget : container.getContained()) {
 			if (widget instanceof StaticImage image) {
 				addStaticImage(new FluentStaticImage().from(image));
@@ -143,13 +146,13 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 		return (T) this;
 	}
 	
-	private <M extends MetaData> List<M> findWidgets(Class<M> widgetType) {
+	private @Nonnull <M extends MetaData> List<M> findWidgets(@Nonnull Class<M> widgetType) {
 		List<M> result = new ArrayList<>();
 		findWidgets(get().getContained(), widgetType, result);
 		return result;
 	}
 	
-	private static <M extends MetaData> void findWidgets(List<SerializableMetaData> contained, Class<M> widgetType, List<M> collect) {
+	private static <M extends MetaData> void findWidgets(@Nonnull List<SerializableMetaData> contained, @Nonnull Class<M> widgetType, @Nonnull List<M> collect) {
 		for (SerializableMetaData metadata : contained) {
 			if (widgetType.equals(metadata.getClass())) {
 				@SuppressWarnings("unchecked")
@@ -162,11 +165,11 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 		}
 	}
 
-	private MetaData findIdentifiable(String widgetId) {
+	private @Nullable MetaData findIdentifiable(@Nonnull String widgetId) {
 		return findIdentifiable(get().getContained(), widgetId);
 	}
 
-	private static SerializableMetaData findIdentifiable(List<SerializableMetaData> contained, String widgetId) {
+	private static @Nullable SerializableMetaData findIdentifiable(@Nonnull List<SerializableMetaData> contained, @Nonnull String widgetId) {
 		SerializableMetaData result = null;
 		for (SerializableMetaData metadata : contained) {
 			if ((metadata instanceof Identifiable identifiable) && widgetId.equals(identifiable.getWidgetId())) {
@@ -190,7 +193,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addStaticImage(FluentStaticImage image) {
+	public @Nonnull T addStaticImage(@Nonnull FluentStaticImage image) {
 		get().getContained().add(image.get());
 		return (T) this;
 	}
@@ -205,7 +208,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addStaticImage(int index, FluentStaticImage image) {
+	public @Nonnull T addStaticImage(int index, @Nonnull FluentStaticImage image) {
 		get().getContained().add(index, image.get());
 		return (T) this;
 	}
@@ -217,7 +220,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the static image wrapper
 	 */
-	public FluentStaticImage getStaticImage(int index) {
+	public @Nonnull FluentStaticImage getStaticImage(int index) {
 		StaticImage result = (StaticImage) get().getContained().get(index);
 		return new FluentStaticImage(result);
 	}
@@ -227,7 +230,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching static image wrappers; never {@code null}
 	 */
-	public List<FluentStaticImage> findStaticImages() {
+	public @Nonnull List<FluentStaticImage> findStaticImages() {
 		List<StaticImage> list = findWidgets(StaticImage.class);
 		List<FluentStaticImage> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentStaticImage(m)));
@@ -242,7 +245,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addVBox(FluentVBox vbox) {
+	public @Nonnull T addVBox(@Nonnull FluentVBox vbox) {
 		get().getContained().add(vbox.get());
 		return (T) this;
 	}
@@ -257,7 +260,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addVBox(int index, FluentVBox vbox) {
+	public @Nonnull T addVBox(int index, @Nonnull FluentVBox vbox) {
 		get().getContained().add(index, vbox.get());
 		return (T) this;
 	}
@@ -269,7 +272,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the vertical box wrapper
 	 */
-	public FluentVBox getVBox(int index) {
+	public @Nonnull FluentVBox getVBox(int index) {
 		VBox result = (VBox) get().getContained().get(index);
 		return new FluentVBox(result);
 	}
@@ -279,7 +282,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching vertical box wrappers; never {@code null}
 	 */
-	public List<FluentVBox> findVBoxes() {
+	public @Nonnull List<FluentVBox> findVBoxes() {
 		List<VBox> list = findWidgets(VBox.class);
 		List<FluentVBox> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentVBox(m)));
@@ -295,7 +298,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            the widget id to match
 	 * @return the fluent {@link FluentVBox} wrapper, or {@code null} if no match exists
 	 */
-	public FluentVBox findVBox(String widgetid) {
+	public @Nullable FluentVBox findVBox(@Nonnull String widgetid) {
 		VBox result = (VBox) findIdentifiable(widgetid);
 		if (result != null) {
 			return new FluentVBox(result);
@@ -311,7 +314,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addHBox(FluentHBox hbox) {
+	public @Nonnull T addHBox(@Nonnull FluentHBox hbox) {
 		get().getContained().add(hbox.get());
 		return (T) this;
 	}
@@ -326,7 +329,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addHBox(int index, FluentHBox hbox) {
+	public @Nonnull T addHBox(int index, @Nonnull FluentHBox hbox) {
 		get().getContained().add(index, hbox.get());
 		return (T) this;
 	}
@@ -338,7 +341,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the horizontal box wrapper
 	 */
-	public FluentHBox getHBox(int index) {
+	public @Nonnull FluentHBox getHBox(int index) {
 		HBox result = (HBox) get().getContained().get(index);
 		return new FluentHBox(result);
 	}
@@ -348,7 +351,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching horizontal box wrappers; never {@code null}
 	 */
-	public List<FluentHBox> findHBoxes() {
+	public @Nonnull List<FluentHBox> findHBoxes() {
 		List<HBox> list = findWidgets(HBox.class);
 		List<FluentHBox> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentHBox(m)));
@@ -362,7 +365,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            the widget id to match
 	 * @return the fluent {@link FluentHBox} wrapper, or {@code null} if no match exists
 	 */
-	public FluentHBox findHBox(String widgetid) {
+	public @Nullable FluentHBox findHBox(@Nonnull String widgetid) {
 		HBox result = (HBox) findIdentifiable(widgetid);
 		if (result != null) {
 			return new FluentHBox(result);
@@ -378,7 +381,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addForm(FluentForm form) {
+	public @Nonnull T addForm(@Nonnull FluentForm form) {
 		get().getContained().add(form.get());
 		return (T) this;
 	}
@@ -393,7 +396,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addForm(int index, FluentForm form) {
+	public @Nonnull T addForm(int index, @Nonnull FluentForm form) {
 		get().getContained().add(index, form.get());
 		return (T) this;
 	}
@@ -405,7 +408,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the form wrapper
 	 */
-	public FluentForm getForm(int index) {
+	public @Nonnull FluentForm getForm(int index) {
 		Form result = (Form) get().getContained().get(index);
 		return new FluentForm(result);
 	}
@@ -415,7 +418,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching form wrappers; never {@code null}
 	 */
-	public List<FluentForm> findForms() {
+	public @Nonnull List<FluentForm> findForms() {
 		List<Form> list = findWidgets(Form.class);
 		List<FluentForm> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentForm(m)));
@@ -429,7 +432,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            the widget id to match
 	 * @return the fluent {@link FluentForm} wrapper, or {@code null} if no match exists
 	 */
-	public FluentForm findForm(String widgetid) {
+	public @Nullable FluentForm findForm(@Nonnull String widgetid) {
 		Form result = (Form) findIdentifiable(widgetid);
 		if (result != null) {
 			return new FluentForm(result);
@@ -445,7 +448,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addTabPane(FluentTabPane tabPane) {
+	public @Nonnull T addTabPane(@Nonnull FluentTabPane tabPane) {
 		get().getContained().add(tabPane.get());
 		return (T) this;
 	}
@@ -460,7 +463,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addTabPane(int index, FluentTabPane tabPane) {
+	public @Nonnull T addTabPane(int index, @Nonnull FluentTabPane tabPane) {
 		get().getContained().add(index, tabPane.get());
 		return (T) this;
 	}
@@ -472,7 +475,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the tab pane wrapper
 	 */
-	public FluentTabPane getTabPane(int index) {
+	public @Nonnull FluentTabPane getTabPane(int index) {
 		TabPane result = (TabPane) get().getContained().get(index);
 		return new FluentTabPane(result);
 	}
@@ -482,7 +485,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching tab pane wrappers; never {@code null}
 	 */
-	public List<FluentTabPane> findTabPanes() {
+	public @Nonnull List<FluentTabPane> findTabPanes() {
 		List<TabPane> list = findWidgets(TabPane.class);
 		List<FluentTabPane> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentTabPane(m)));
@@ -496,7 +499,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            the widget id to match
 	 * @return the fluent {@link FluentTabPane} wrapper, or {@code null} if no match exists
 	 */
-	public FluentTabPane findTabPane(String widgetid) {
+	public @Nullable FluentTabPane findTabPane(@Nonnull String widgetid) {
 		TabPane result = (TabPane) findIdentifiable(widgetid);
 		if (result != null) {
 			return new FluentTabPane(result);
@@ -512,7 +515,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addButton(FluentButton button) {
+	public @Nonnull T addButton(@Nonnull FluentButton button) {
 		get().getContained().add(button.get());
 		return (T) this;
 	}
@@ -527,7 +530,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addButton(int index, FluentButton button) {
+	public @Nonnull T addButton(int index, @Nonnull FluentButton button) {
 		get().getContained().add(index, button.get());
 		return (T) this;
 	}
@@ -539,7 +542,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the button wrapper
 	 */
-	public FluentButton getButton(int index) {
+	public @Nonnull FluentButton getButton(int index) {
 		Button result = (Button) get().getContained().get(index);
 		return new FluentButton(result);
 	}
@@ -549,7 +552,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching button wrappers; never {@code null}
 	 */
-	public List<FluentButton> findButtons() {
+	public @Nonnull List<FluentButton> findButtons() {
 		List<Button> list = findWidgets(Button.class);
 		List<FluentButton> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentButton(m)));
@@ -564,7 +567,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addZoomIn(FluentZoomIn zoomIn) {
+	public @Nonnull T addZoomIn(@Nonnull FluentZoomIn zoomIn) {
 		get().getContained().add(zoomIn.get());
 		return (T) this;
 	}
@@ -579,7 +582,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addZoomIn(int index, FluentZoomIn zoomIn) {
+	public @Nonnull T addZoomIn(int index, @Nonnull FluentZoomIn zoomIn) {
 		get().getContained().add(index, zoomIn.get());
 		return (T) this;
 	}
@@ -591,7 +594,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the zoom-in wrapper
 	 */
-	public FluentZoomIn getZoomIn(int index) {
+	public @Nonnull FluentZoomIn getZoomIn(int index) {
 		ZoomIn result = (ZoomIn) get().getContained().get(index);
 		return new FluentZoomIn(result);
 	}
@@ -601,7 +604,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching zoom-in wrappers; never {@code null}
 	 */
-	public List<FluentZoomIn> findZoomIns() {
+	public @Nonnull List<FluentZoomIn> findZoomIns() {
 		List<ZoomIn> list = findWidgets(ZoomIn.class);
 		List<FluentZoomIn> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentZoomIn(m)));
@@ -616,7 +619,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addChart(FluentChart chart) {
+	public @Nonnull T addChart(@Nonnull FluentChart chart) {
 		get().getContained().add(chart.get());
 		return (T) this;
 	}
@@ -631,7 +634,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addChart(int index, FluentChart chart) {
+	public @Nonnull T addChart(int index, @Nonnull FluentChart chart) {
 		get().getContained().add(index, chart.get());
 		return (T) this;
 	}
@@ -643,7 +646,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the chart wrapper
 	 */
-	public FluentChart getChart(int index) {
+	public @Nonnull FluentChart getChart(int index) {
 		Chart result = (Chart) get().getContained().get(index);
 		return new FluentChart(result);
 	}
@@ -653,7 +656,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching chart wrappers; never {@code null}
 	 */
-	public List<FluentChart> findCharts() {
+	public @Nonnull List<FluentChart> findCharts() {
 		List<Chart> list = findWidgets(Chart.class);
 		List<FluentChart> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentChart(m)));
@@ -668,7 +671,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addMapDisplay(FluentMapDisplay map) {
+	public @Nonnull T addMapDisplay(@Nonnull FluentMapDisplay map) {
 		get().getContained().add(map.get());
 		return (T) this;
 	}
@@ -683,7 +686,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addMapDisplay(int index, FluentMapDisplay map) {
+	public @Nonnull T addMapDisplay(int index, @Nonnull FluentMapDisplay map) {
 		get().getContained().add(index, map.get());
 		return (T) this;
 	}
@@ -695,7 +698,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the map display wrapper
 	 */
-	public FluentMapDisplay getMapDisplay(int index) {
+	public @Nonnull FluentMapDisplay getMapDisplay(int index) {
 		MapDisplay result = (MapDisplay) get().getContained().get(index);
 		return new FluentMapDisplay(result);
 	}
@@ -705,7 +708,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching map display wrappers; never {@code null}
 	 */
-	public List<FluentMapDisplay> findMapDisplays() {
+	public @Nonnull List<FluentMapDisplay> findMapDisplays() {
 		List<MapDisplay> list = findWidgets(MapDisplay.class);
 		List<FluentMapDisplay> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentMapDisplay(m)));
@@ -720,7 +723,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDynamicImage(FluentDynamicImage image) {
+	public @Nonnull T addDynamicImage(@Nonnull FluentDynamicImage image) {
 		get().getContained().add(image.get());
 		return (T) this;
 	}
@@ -735,7 +738,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDynamicImage(int index, FluentDynamicImage image) {
+	public @Nonnull T addDynamicImage(int index, @Nonnull FluentDynamicImage image) {
 		get().getContained().add(index, image.get());
 		return (T) this;
 	}
@@ -747,7 +750,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the dynamic image wrapper
 	 */
-	public FluentDynamicImage getDynamicImage(int index) {
+	public @Nonnull FluentDynamicImage getDynamicImage(int index) {
 		DynamicImage result = (DynamicImage) get().getContained().get(index);
 		return new FluentDynamicImage(result);
 	}
@@ -757,7 +760,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching dynamic image wrappers; never {@code null}
 	 */
-	public List<FluentDynamicImage> findDynamicImages() {
+	public @Nonnull List<FluentDynamicImage> findDynamicImages() {
 		List<DynamicImage> list = findWidgets(DynamicImage.class);
 		List<FluentDynamicImage> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentDynamicImage(m)));
@@ -772,7 +775,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDialogButton(FluentDialogButton button) {
+	public @Nonnull T addDialogButton(@Nonnull FluentDialogButton button) {
 		get().getContained().add(button.get());
 		return (T) this;
 	}
@@ -787,7 +790,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDialogButton(int index, FluentDialogButton button) {
+	public @Nonnull T addDialogButton(int index, @Nonnull FluentDialogButton button) {
 		get().getContained().add(index, button.get());
 		return (T) this;
 	}
@@ -799,7 +802,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the dialog button wrapper
 	 */
-	public FluentDialogButton getDialogButton(int index) {
+	public @Nonnull FluentDialogButton getDialogButton(int index) {
 		DialogButton result = (DialogButton) get().getContained().get(index);
 		return new FluentDialogButton(result);
 	}
@@ -809,7 +812,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching dialog button wrappers; never {@code null}
 	 */
-	public List<FluentDialogButton> findDialogButtons() {
+	public @Nonnull List<FluentDialogButton> findDialogButtons() {
 		List<DialogButton> list = findWidgets(DialogButton.class);
 		List<FluentDialogButton> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentDialogButton(m)));
@@ -824,7 +827,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addLabel(FluentLabel label) {
+	public @Nonnull T addLabel(@Nonnull FluentLabel label) {
 		get().getContained().add(label.get());
 		return (T) this;
 	}
@@ -839,7 +842,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addLabel(int index, FluentLabel label) {
+	public @Nonnull T addLabel(int index, @Nonnull FluentLabel label) {
 		get().getContained().add(index, label.get());
 		return (T) this;
 	}
@@ -851,7 +854,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the label wrapper
 	 */
-	public FluentLabel getLabel(int index) {
+	public @Nonnull FluentLabel getLabel(int index) {
 		Label result = (Label) get().getContained().get(index);
 		return new FluentLabel(result);
 	}
@@ -861,7 +864,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching label wrappers; never {@code null}
 	 */
-	public List<FluentLabel> findLabels() {
+	public @Nonnull List<FluentLabel> findLabels() {
 		List<Label> list = findWidgets(Label.class);
 		List<FluentLabel> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentLabel(m)));
@@ -876,7 +879,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addBlurb(FluentBlurb blurb) {
+	public @Nonnull T addBlurb(@Nonnull FluentBlurb blurb) {
 		get().getContained().add(blurb.get());
 		return (T) this;
 	}
@@ -891,7 +894,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addBlurb(int index, FluentBlurb blurb) {
+	public @Nonnull T addBlurb(int index, @Nonnull FluentBlurb blurb) {
 		get().getContained().add(index, blurb.get());
 		return (T) this;
 	}
@@ -903,7 +906,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the blurb wrapper
 	 */
-	public FluentBlurb getBlurb(int index) {
+	public @Nonnull FluentBlurb getBlurb(int index) {
 		Blurb result = (Blurb) get().getContained().get(index);
 		return new FluentBlurb(result);
 	}
@@ -913,7 +916,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching blurb wrappers; never {@code null}
 	 */
-	public List<FluentBlurb> findBlurbs() {
+	public @Nonnull List<FluentBlurb> findBlurbs() {
 		List<Blurb> list = findWidgets(Blurb.class);
 		List<FluentBlurb> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentBlurb(m)));
@@ -928,7 +931,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addLink(FluentLink link) {
+	public @Nonnull T addLink(@Nonnull FluentLink link) {
 		get().getContained().add(link.get());
 		return (T) this;
 	}
@@ -943,7 +946,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addLink(int index, FluentLink link) {
+	public @Nonnull T addLink(int index, @Nonnull FluentLink link) {
 		get().getContained().add(index, link.get());
 		return (T) this;
 	}
@@ -955,7 +958,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the link wrapper
 	 */
-	public FluentLink getLink(int index) {
+	public @Nonnull FluentLink getLink(int index) {
 		Link result = (Link) get().getContained().get(index);
 		return new FluentLink(result);
 	}
@@ -965,7 +968,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching link wrappers; never {@code null}
 	 */
-	public List<FluentLink> findLinks() {
+	public @Nonnull List<FluentLink> findLinks() {
 		List<Link> list = findWidgets(Link.class);
 		List<FluentLink> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentLink(m)));
@@ -980,7 +983,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addSpacer(FluentSpacer spacer) {
+	public @Nonnull T addSpacer(@Nonnull FluentSpacer spacer) {
 		get().getContained().add(spacer.get());
 		return (T) this;
 	}
@@ -995,7 +998,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addSpacer(int index, FluentSpacer spacer) {
+	public @Nonnull T addSpacer(int index, @Nonnull FluentSpacer spacer) {
 		get().getContained().add(index, spacer.get());
 		return (T) this;
 	}
@@ -1007,7 +1010,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the spacer wrapper
 	 */
-	public FluentSpacer getSpacer(int index) {
+	public @Nonnull FluentSpacer getSpacer(int index) {
 		Spacer result = (Spacer) get().getContained().get(index);
 		return new FluentSpacer(result);
 	}
@@ -1017,7 +1020,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching spacer wrappers; never {@code null}
 	 */
-	public List<FluentSpacer> findSpacers() {
+	public @Nonnull List<FluentSpacer> findSpacers() {
 		List<Spacer> list = findWidgets(Spacer.class);
 		List<FluentSpacer> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentSpacer(m)));
@@ -1032,7 +1035,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addListMembership(FluentListMembership list) {
+	public @Nonnull T addListMembership(@Nonnull FluentListMembership list) {
 		get().getContained().add(list.get());
 		return (T) this;
 	}
@@ -1047,7 +1050,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addListMembership(int index, FluentListMembership list) {
+	public @Nonnull T addListMembership(int index, @Nonnull FluentListMembership list) {
 		get().getContained().add(index, list.get());
 		return (T) this;
 	}
@@ -1059,7 +1062,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the list-membership wrapper
 	 */
-	public FluentListMembership getListMembership(int index) {
+	public @Nonnull FluentListMembership getListMembership(int index) {
 		ListMembership result = (ListMembership) get().getContained().get(index);
 		return new FluentListMembership(result);
 	}
@@ -1069,7 +1072,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching list-membership wrappers; never {@code null}
 	 */
-	public List<FluentListMembership> findListMemberships() {
+	public @Nonnull List<FluentListMembership> findListMemberships() {
 		List<ListMembership> list = findWidgets(ListMembership.class);
 		List<FluentListMembership> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentListMembership(m)));
@@ -1084,7 +1087,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addCheckMembership(FluentCheckMembership check) {
+	public @Nonnull T addCheckMembership(@Nonnull FluentCheckMembership check) {
 		get().getContained().add(check.get());
 		return (T) this;
 	}
@@ -1099,7 +1102,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addCheckMembership(int index, FluentCheckMembership check) {
+	public @Nonnull T addCheckMembership(int index, @Nonnull FluentCheckMembership check) {
 		get().getContained().add(index, check.get());
 		return (T) this;
 	}
@@ -1111,7 +1114,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the check-membership wrapper
 	 */
-	public FluentCheckMembership getCheckMembership(int index) {
+	public @Nonnull FluentCheckMembership getCheckMembership(int index) {
 		CheckMembership result = (CheckMembership) get().getContained().get(index);
 		return new FluentCheckMembership(result);
 	}
@@ -1121,7 +1124,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching check-membership wrappers; never {@code null}
 	 */
-	public List<FluentCheckMembership> findCheckMemberships() {
+	public @Nonnull List<FluentCheckMembership> findCheckMemberships() {
 		List<CheckMembership> list = findWidgets(CheckMembership.class);
 		List<FluentCheckMembership> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentCheckMembership(m)));
@@ -1136,7 +1139,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addComparison(FluentComparison comparison) {
+	public @Nonnull T addComparison(@Nonnull FluentComparison comparison) {
 		get().getContained().add(comparison.get());
 		return (T) this;
 	}
@@ -1151,7 +1154,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addComparison(int index, FluentComparison comparison) {
+	public @Nonnull T addComparison(int index, @Nonnull FluentComparison comparison) {
 		get().getContained().add(index, comparison.get());
 		return (T) this;
 	}
@@ -1163,7 +1166,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the comparison wrapper
 	 */
-	public FluentComparison getComparison(int index) {
+	public @Nonnull FluentComparison getComparison(int index) {
 		Comparison result = (Comparison) get().getContained().get(index);
 		return new FluentComparison(result);
 	}
@@ -1173,7 +1176,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching comparison wrappers; never {@code null}
 	 */
-	public List<FluentComparison> findComparisons() {
+	public @Nonnull List<FluentComparison> findComparisons() {
 		List<Comparison> list = findWidgets(Comparison.class);
 		List<FluentComparison> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentComparison(m)));
@@ -1188,7 +1191,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDataGrid(FluentDataGrid grid) {
+	public @Nonnull T addDataGrid(@Nonnull FluentDataGrid grid) {
 		get().getContained().add(grid.get());
 		return (T) this;
 	}
@@ -1203,7 +1206,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDataGrid(int index, FluentDataGrid grid) {
+	public @Nonnull T addDataGrid(int index, @Nonnull FluentDataGrid grid) {
 		get().getContained().add(index, grid.get());
 		return (T) this;
 	}
@@ -1215,7 +1218,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the data-grid wrapper
 	 */
-	public FluentDataGrid getDataGrid(int index) {
+	public @Nonnull FluentDataGrid getDataGrid(int index) {
 		DataGrid result = (DataGrid) get().getContained().get(index);
 		return new FluentDataGrid(result);
 	}
@@ -1225,7 +1228,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching data-grid wrappers; never {@code null}
 	 */
-	public List<FluentDataGrid> findDataGrids() {
+	public @Nonnull List<FluentDataGrid> findDataGrids() {
 		List<DataGrid> list = findWidgets(DataGrid.class);
 		List<FluentDataGrid> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentDataGrid(m)));
@@ -1239,7 +1242,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            the widget id to match
 	 * @return the fluent {@link FluentDataGrid} wrapper, or {@code null} if no match exists
 	 */
-	public FluentDataGrid findDataGrid(String widgetid) {
+	public @Nullable FluentDataGrid findDataGrid(@Nonnull String widgetid) {
 		DataGrid result = (DataGrid) findIdentifiable(widgetid);
 		if (result != null) {
 			return new FluentDataGrid(result);
@@ -1255,7 +1258,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addListGrid(FluentListGrid grid) {
+	public @Nonnull T addListGrid(@Nonnull FluentListGrid grid) {
 		get().getContained().add(grid.get());
 		return (T) this;
 	}
@@ -1270,7 +1273,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addListGrid(int index, FluentListGrid grid) {
+	public @Nonnull T addListGrid(int index, @Nonnull FluentListGrid grid) {
 		get().getContained().add(index, grid.get());
 		return (T) this;
 	}
@@ -1282,7 +1285,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the list-grid wrapper
 	 */
-	public FluentListGrid getListGrid(int index) {
+	public @Nonnull FluentListGrid getListGrid(int index) {
 		ListGrid result = (ListGrid) get().getContained().get(index);
 		return new FluentListGrid(result);
 	}
@@ -1292,7 +1295,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching list-grid wrappers; never {@code null}
 	 */
-	public List<FluentListGrid> findListGrids() {
+	public @Nonnull List<FluentListGrid> findListGrids() {
 		List<ListGrid> list = findWidgets(ListGrid.class);
 		List<FluentListGrid> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentListGrid(m)));
@@ -1307,7 +1310,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addTreeGrid(FluentTreeGrid grid) {
+	public @Nonnull T addTreeGrid(@Nonnull FluentTreeGrid grid) {
 		get().getContained().add(grid.get());
 		return (T) this;
 	}
@@ -1322,7 +1325,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addTreeGrid(int index, FluentTreeGrid grid) {
+	public @Nonnull T addTreeGrid(int index, @Nonnull FluentTreeGrid grid) {
 		get().getContained().add(index, grid.get());
 		return (T) this;
 	}
@@ -1334,7 +1337,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the tree-grid wrapper
 	 */
-	public FluentTreeGrid getTreeGrid(int index) {
+	public @Nonnull FluentTreeGrid getTreeGrid(int index) {
 		TreeGrid result = (TreeGrid) get().getContained().get(index);
 		return new FluentTreeGrid(result);
 	}
@@ -1344,7 +1347,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching tree-grid wrappers; never {@code null}
 	 */
-	public List<FluentTreeGrid> findTreeGrids() {
+	public @Nonnull List<FluentTreeGrid> findTreeGrids() {
 		List<TreeGrid> list = findWidgets(TreeGrid.class);
 		List<FluentTreeGrid> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentTreeGrid(m)));
@@ -1359,7 +1362,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDataRepeater(FluentDataRepeater repeater) {
+	public @Nonnull T addDataRepeater(@Nonnull FluentDataRepeater repeater) {
 		get().getContained().add(repeater.get());
 		return (T) this;
 	}
@@ -1374,7 +1377,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addDataRepeater(int index, FluentDataRepeater repeater) {
+	public @Nonnull T addDataRepeater(int index, @Nonnull FluentDataRepeater repeater) {
 		get().getContained().add(index, repeater.get());
 		return (T) this;
 	}
@@ -1386,7 +1389,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the data-repeater wrapper
 	 */
-	public FluentDataRepeater getDataRepeater(int index) {
+	public @Nonnull FluentDataRepeater getDataRepeater(int index) {
 		DataRepeater result = (DataRepeater) get().getContained().get(index);
 		return new FluentDataRepeater(result);
 	}
@@ -1396,7 +1399,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching data-repeater wrappers; never {@code null}
 	 */
-	public List<FluentDataRepeater> findDataRepeaters() {
+	public @Nonnull List<FluentDataRepeater> findDataRepeaters() {
 		List<DataRepeater> list = findWidgets(DataRepeater.class);
 		List<FluentDataRepeater> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentDataRepeater(m)));
@@ -1410,7 +1413,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            the widget id to match
 	 * @return the fluent {@link FluentDataRepeater} wrapper, or {@code null} if no match exists
 	 */
-	public FluentDataRepeater findDataRepeater(String widgetid) {
+	public @Nullable FluentDataRepeater findDataRepeater(@Nonnull String widgetid) {
 		DataRepeater result = (DataRepeater) findIdentifiable(widgetid);
 		if (result != null) {
 			return new FluentDataRepeater(result);
@@ -1426,7 +1429,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addListRepeater(FluentListRepeater repeater) {
+	public @Nonnull T addListRepeater(@Nonnull FluentListRepeater repeater) {
 		get().getContained().add(repeater.get());
 		return (T) this;
 	}
@@ -1441,7 +1444,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addListRepeater(int index, FluentListRepeater repeater) {
+	public @Nonnull T addListRepeater(int index, @Nonnull FluentListRepeater repeater) {
 		get().getContained().add(index, repeater.get());
 		return (T) this;
 	}
@@ -1453,7 +1456,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the list-repeater wrapper
 	 */
-	public FluentListRepeater getListRepeater(int index) {
+	public @Nonnull FluentListRepeater getListRepeater(int index) {
 		ListRepeater result = (ListRepeater) get().getContained().get(index);
 		return new FluentListRepeater(result);
 	}
@@ -1463,7 +1466,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching list-repeater wrappers; never {@code null}
 	 */
-	public List<FluentListRepeater> findListRepeaters() {
+	public @Nonnull List<FluentListRepeater> findListRepeaters() {
 		List<ListRepeater> list = findWidgets(ListRepeater.class);
 		List<FluentListRepeater> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentListRepeater(m)));
@@ -1478,7 +1481,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addInject(FluentInject inject) {
+	public @Nonnull T addInject(@Nonnull FluentInject inject) {
 		get().getContained().add(inject.get());
 		return (T) this;
 	}
@@ -1493,7 +1496,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addInject(int index, FluentInject inject) {
+	public @Nonnull T addInject(int index, @Nonnull FluentInject inject) {
 		get().getContained().add(index, inject.get());
 		return (T) this;
 	}
@@ -1505,7 +1508,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the inject wrapper
 	 */
-	public FluentInject getInject(int index) {
+	public @Nonnull FluentInject getInject(int index) {
 		Inject result = (Inject) get().getContained().get(index);
 		return new FluentInject(result);
 	}
@@ -1515,7 +1518,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching inject wrappers; never {@code null}
 	 */
-	public List<FluentInject> findInjects() {
+	public @Nonnull List<FluentInject> findInjects() {
 		List<Inject> list = findWidgets(Inject.class);
 		List<FluentInject> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentInject(m)));
@@ -1530,7 +1533,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addComponent(FluentComponent component) {
+	public @Nonnull T addComponent(@Nonnull FluentComponent component) {
 		get().getContained().add(component.get());
 		return (T) this;
 	}
@@ -1545,7 +1548,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T addComponent(int index, FluentComponent component) {
+	public @Nonnull T addComponent(int index, @Nonnull FluentComponent component) {
 		get().getContained().add(index, component.get());
 		return (T) this;
 	}
@@ -1557,7 +1560,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *            zero-based index
 	 * @return the component wrapper
 	 */
-	public FluentComponent getComponent(int index) {
+	public @Nonnull FluentComponent getComponent(int index) {
 		Component result = (Component) get().getContained().get(index);
 		return new FluentComponent(result);
 	}
@@ -1567,7 +1570,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 *
 	 * @return matching component wrappers; never {@code null}
 	 */
-	public List<FluentComponent> findComponents() {
+	public @Nonnull List<FluentComponent> findComponents() {
 		List<Component> list = findWidgets(Component.class);
 		List<FluentComponent> result = new ArrayList<>(list.size());
 		list.forEach(m -> result.add(new FluentComponent(m)));
@@ -1582,7 +1585,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T removeContained(int index) {
+	public @Nonnull T removeContained(int index) {
 		get().getContained().remove(index);
 		return (T) this;
 	}
@@ -1593,7 +1596,7 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T clearContained() {
+	public @Nonnull T clearContained() {
 		get().getContained().clear();
 		return (T) this;
 	}
@@ -1604,5 +1607,5 @@ public abstract class FluentContainer<T extends FluentContainer<T>> extends Flue
 	 * @return the mutable container metadata
 	 */
 	@Override
-	public abstract Container get();
+	public abstract @Nonnull Container get();
 }

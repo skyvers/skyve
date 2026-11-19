@@ -23,6 +23,9 @@ import org.commonmark.renderer.html.HtmlNodeRendererContext;
 import org.commonmark.renderer.html.HtmlWriter;
 import org.skyve.util.Icons;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Renders Markdown nodes into Skyve document XML snippets for script-assisted document generation.
  */
@@ -54,7 +57,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 *
 	 * @param context HTML renderer context.
 	 */
-	public SkyveDocumentNodeRenderer(HtmlNodeRendererContext context) {
+	public SkyveDocumentNodeRenderer(@Nonnull HtmlNodeRendererContext context) {
 		this.html = context.getWriter();
 
 		this.documentAttributes = new HashMap<>();
@@ -72,7 +75,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @param context HTML renderer context.
 	 * @param htmlSpacing Whether indentation spacing should be emitted.
 	 */
-	public SkyveDocumentNodeRenderer(HtmlNodeRendererContext context, boolean htmlSpacing) {
+	public SkyveDocumentNodeRenderer(@Nonnull HtmlNodeRendererContext context, boolean htmlSpacing) {
 		this(context);
 		this.htmlSpacing = htmlSpacing;
 	}
@@ -83,7 +86,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @return Node classes that should be routed to this renderer.
 	 */
 	@Override
-	public Set<Class<? extends Node>> getNodeTypes() {
+	public @Nonnull Set<Class<? extends Node>> getNodeTypes() {
 		// return the node types we want to use this renderer for
 		Set<Class<? extends Node>> types = new HashSet<>();
 		types.add(Heading.class);
@@ -101,7 +104,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 */
 	@Override
 	@SuppressWarnings({"boxing", "java:S3776"}) // Complexity OK
-	public void render(Node node) {
+	public void render(@SuppressWarnings("null") @Nonnull Node node) {
 		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
 				if (heading.getFirstChild() instanceof Text text) {
@@ -200,7 +203,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		}
 	}
 
-	private void parseListItem(ListItem item) {
+	private void parseListItem(@Nonnull ListItem item) {
 		if (item.getFirstChild() != null
 				&& (item.getFirstChild() instanceof Text || item.getFirstChild() instanceof Paragraph)) {
 			if (item.getFirstChild() instanceof Paragraph) {
@@ -218,7 +221,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @param node The node to check for text
 	 * @return The text
 	 */
-	private static String getTextFromNode(Node node) {
+	private static @Nullable String getTextFromNode(@Nullable Node node) {
 		if (node instanceof Text text) {
 			return text.getLiteral();
 		}
@@ -226,7 +229,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		return null;
 	}
 
-	private void createAttribute(String[] parts, Node line) {
+	private void createAttribute(@Nullable String[] parts, @Nonnull Node line) {
 		// first we have to get the attribute name
 		if (parts != null && parts.length > 1) {
 			String attributeName = parts[0];
@@ -240,7 +243,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void createAttribute(String attributeName, String[] parts, boolean required, Node line) {
+	private void createAttribute(@Nonnull String attributeName, @Nonnull String[] parts, boolean required, @Nonnull Node line) {
 		// identify the type from the parts
 		String type = null;
 		if (parts.length == 1 || parts.length == 2) {
@@ -345,7 +348,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * @param parts The remaining tokens for the line
 	 * @return true if an association, false otherwise
 	 */
-	private static boolean isAssociationDefinition(Node line, String type, String[] parts) {
+	private static boolean isAssociationDefinition(@Nonnull Node line, @Nullable String type, @Nonnull String[] parts) {
 		if (isChildOfDashMarkerList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
@@ -361,7 +364,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * <ul>
 	 * ) specified with a -.
 	 */
-	private static boolean isChildOfDashMarkerList(Node node) {
+	private static boolean isChildOfDashMarkerList(@Nonnull Node node) {
 		if (node.getParent() != null) {
 			if (node.getParent() instanceof BulletList list) {
 				return list.getBulletMarker() == '-';
@@ -377,7 +380,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * <ul>
 	 * ) specified with a +.
 	 */
-	private static boolean isChildOfPlusMarkerList(Node node) {
+	private static boolean isChildOfPlusMarkerList(@Nonnull Node node) {
 		if (node.getParent() != null) {
 			if (node.getParent() instanceof BulletList list) {
 				return list.getBulletMarker() == '+';
@@ -397,7 +400,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * 
 	 * @return true if a collection, false otherwise
 	 */
-	private static boolean isCollectionDefinition(Node line, String type, String[] parts) {
+	private static boolean isCollectionDefinition(@Nonnull Node line, @Nullable String type, @Nonnull String[] parts) {
 		if (isChildOfPlusMarkerList(line)) {
 			if (type != null && Character.isUpperCase(type.charAt(0)) && parts.length == 1) {
 				return true;
@@ -411,7 +414,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * Returns true if the specified node is a Heading with level 2,
 	 * indicating a document definition.
 	 */
-	private static boolean isNodeHeading2(Node node) {
+	private static boolean isNodeHeading2(@Nonnull Node node) {
 		if (node instanceof Heading heading) {
 			if (heading.getLevel() == 2) {
 				return true;
@@ -435,7 +438,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	 * 
 	 * @param node The node which is assumed to be the start of the attribute definition
 	 */
-	private void parseAttribute(Node node) {
+	private void parseAttribute(@Nonnull Node node) {
 		if (node.getFirstChild() instanceof Emphasis em) {
 			// required attribute
 			String attributeName = getTextFromNode(em.getFirstChild());
@@ -460,7 +463,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 	/**
 	 * Outputs a tab to the writer
 	 */
-	private void tab(int... tabCount) {
+	private void tab(@Nullable int... tabCount) {
 		int numberOfTabs = 1;
 		if (tabCount != null && tabCount.length == 1) {
 			numberOfTabs = tabCount[0];
@@ -474,7 +477,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		}
 	}
 
-	private void writeAssociation(final String type, final String attributeName, final boolean required) {
+	private void writeAssociation(final @Nonnull String type, final @Nonnull String attributeName, final boolean required) {
 		// association start
 		if (required) {
 			tab(2);
@@ -499,7 +502,7 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		linebreak();
 	}
 
-	private void writeCollection(final String type, final String attributeName, final boolean required) {
+	private void writeCollection(final @Nonnull String type, final @Nonnull String attributeName, final boolean required) {
 		// collection start
 		tab(2);
 		html.text(String.format("<collection name=\"%s\" type=\"aggregation\">", attributeName));
@@ -536,13 +539,13 @@ public class SkyveDocumentNodeRenderer implements NodeRenderer {
 		linebreak();
 	}
 
-	private void writeScalarAttributeEnd(final String type) {
+	private void writeScalarAttributeEnd(final @Nonnull String type) {
 		tab(2);
 		html.text(String.format("</%s>", type));
 		linebreak();
 	}
 
-	private void writeScalarAttributeStart(final String type, final String attributeName, final boolean required) {
+	private void writeScalarAttributeStart(final @Nonnull String type, final @Nonnull String attributeName, final boolean required) {
 		if (required) {
 			tab(2);
 			html.text(String.format("<%s name=\"%s\" required=\"true\">", type, attributeName));

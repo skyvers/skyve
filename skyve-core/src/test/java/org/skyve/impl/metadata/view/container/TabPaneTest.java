@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.view.container;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -9,13 +10,13 @@ import org.junit.jupiter.api.Test;
 class TabPaneTest {
 
 	@Test
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		assertNull(new TabPane().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		assertNull(new TabPane().getXmlEnabledCondition());
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new TabPane().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new TabPane().getXmlVisibleCondition());
 	}
 
 	@Test
@@ -24,16 +25,16 @@ class TabPaneTest {
 	}
 
         @Test
-        void setEnabledConditionNameStoresNegatedCondition() {
+        void setEnabledConditionDerivesNegatedCondition() {
                 TabPane tabPane = new TabPane();
-                tabPane.setEnabledConditionName("active");
-                assertNotNull(tabPane.getDisabledConditionName());
+                tabPane.setXmlEnabledCondition("active");
+                assertEquals("notActive", tabPane.getDisabledCondition());
         }
 
         @Test
-        void setVisibleConditionNameStoresNegatedCondition() {
+        void setVisibleConditionDerivesNegatedCondition() {
                 TabPane tabPane = new TabPane();
-                tabPane.setVisibleConditionName("active");
-                assertNotNull(tabPane.getInvisibleConditionName());
+                tabPane.setXmlVisibleCondition("active");
+                assertEquals("notActive", tabPane.getInvisibleCondition());
         }
 }

@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -51,7 +53,7 @@ public interface Association extends Reference {
 	 * @return the association type; never {@code null}
 	 */
 	@Override
-	AssociationType getType();
+	@Nonnull AssociationType getType();
 	
 	/**
 	 * Used only for embedded associations to introduce a column prefix for all embedded document attributes
@@ -59,11 +61,11 @@ public interface Association extends Reference {
 	 * This allows columns that would otherwise have the same name to be created with unique names.
 	 * @return	The prefix (with no underscores).
 	 */
-	String getEmbeddedColumnsPrefix();
+	@Nullable String getEmbeddedColumnsPrefix();
 
 	/**
 	 * This determines whether to create an index on the association foreign key column.
 	 * Set to true if the database does not implement foreign keys with indexes - ie SQLServer.
 	 */
-	Boolean getDatabaseIndex();
+	@Nullable Boolean getDatabaseIndex();
 }

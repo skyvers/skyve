@@ -168,12 +168,25 @@
 					<boundColumn binding="memo1" title="Session ID" />
 				</dataGrid>
 			</hbox>
+			<hbox>
+				<vbox responsiveWidth="1" />
+				<vbox responsiveWidth="11">
+					<blurb>
+						Signing out here ends this device only. To sign out everywhere else, for example if you lost a device, use the button below.
+						This browser stays signed in.
+					</blurb>
+					<button action="SignOutOtherSessions" />
+				</vbox>
+			</hbox>
 		</tab>
 		<tab title="My Logins and Attempts" iconStyleClass="fa-solid fa-right-to-bracket">
-			<listGrid query="qMyLoginHistory" title="My Logins and Attempts" continueConversation="false" disabled="true" />
-		</tab>
-		<tab title="My Security Events" iconStyleClass="fa-solid fa-shield-virus">
-			<listGrid query="qMySecurityLogs" title="My Security Events" continueConversation="false" disabled="true" />
+			<!-- Don't allow zoom here as only some users have "singular" access to the UserLoginRecord -->
+			<listGrid query="qMyLoginHistory" title="My Logins and Attempts" continueConversation="false" disabled="true" showZoom="false" />
 		</tab>
 	</tabPane>
+	<actions>
+		<action className="SignOutOtherSessions" displayName="admin.userAccount.actions.signOutOtherSessions.actionName" inActionPanel="false"
+			iconStyleClass="fa-solid fa-right-from-bracket" clientValidation="false"
+			confirm="admin.userAccount.actions.signOutOtherSessions.confirm" />
+	</actions>
 </view>

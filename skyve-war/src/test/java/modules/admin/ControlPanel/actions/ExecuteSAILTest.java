@@ -1,5 +1,6 @@
 package modules.admin.ControlPanel.actions;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.ValidationException;
+import org.skyve.impl.util.XMLMetaData;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -21,13 +23,8 @@ import modules.admin.domain.UserProxy;
 import util.AbstractH2Test;
 
 /**
- * Tests for the ExecuteSAIL action validation logic.
- * 
- * Note: The full execution logic is not tested here because it involves:
- * - FacesUtil.withSailFacesContextIfNeeded() (FacesContext setup)
- * - CORE.getPersistence() and CORE.getRepository() (static calls)
- * - XMLMetaData.unmarshalSAILString() (XML parsing)
- * - Dynamic class loading and instantiation
+ * Tests the ExecuteSAIL action's validation, and that a failed execution goes into the results.
+ * {@link ExecuteSAILH2Test} executes real SAIL.
  */
 @SuppressWarnings("java:S120") // Module test packages mirror the generated document package.
 class ExecuteSAILTest extends AbstractH2Test {
@@ -72,8 +69,9 @@ class ExecuteSAILTest extends AbstractH2Test {
 		controlPanel.setSailLayoutBuilder(LAYOUT_BUILDER);
 		controlPanel.setSail(SAIL);
 
+		ExecuteSAIL action = new ExecuteSAIL();
 		ValidationException e = assertThrows(ValidationException.class,
-				() -> new ExecuteSAIL().execute(controlPanel, null));
+				() -> action.execute(controlPanel, null));
 
 		assertEquals(1, e.getMessages().size());
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailUserPropertyName));
@@ -197,6 +195,29 @@ class ExecuteSAILTest extends AbstractH2Test {
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailComponentBuilderPropertyName));
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailLayoutBuilderPropertyName));
 		assertTrue(hasBinding(e.getMessages().get(0).getBindings(), ControlPanel.sailPropertyName));
+	}
+
+	/**
+	 * The Execute button shows what went wrong in the results, on the Results tab, rather than as an error message.
+	 */
+	@Test
+	void anExecutionThatFailsPutsItsStackTraceInTheResults() {
+		UserProxyExtension user = db.build(UserProxy.MODULE_NAME, UserProxy.DOCUMENT_NAME);
+		controlPanel.setSailUser(user);
+		controlPanel.setSailBaseUrl(BASE_URL);
+		controlPanel.setSailExecutor(SailExecutor.primeFacesInlineWebDriver);
+		controlPanel.setSailComponentBuilder(COMPONENT_BUILDER);
+		controlPanel.setSailLayoutBuilder(LAYOUT_BUILDER);
+		controlPanel.setSail("<notSail/>");
+
+		ExecuteSAIL.executeSAIL(controlPanel);
+
+		// the unmarshalling error the SAIL gives, which the results' stack trace starts with
+		Exception unmarshalling = assertThrows(Exception.class, () -> XMLMetaData.unmarshalSAILString("<notSail/>"));
+		String results = controlPanel.getUnescapedResults();
+		assertAll(() -> assertTrue((results != null) && results.startsWith(unmarshalling.toString()),
+									() -> "expected " + unmarshalling + " but was " + results),
+					() -> assertEquals(Integer.valueOf(2), controlPanel.getTabIndex()));
 	}
 
 	/**

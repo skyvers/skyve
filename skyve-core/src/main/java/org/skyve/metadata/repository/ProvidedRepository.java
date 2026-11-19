@@ -146,11 +146,11 @@ public interface ProvidedRepository extends CachedRepository {
 	/**
 	 * Resolve a customer-specific vtable entry.
 	 *
-	 * @param customerName customer name
+	 * @param customerName customer name, or {@code null} to resolve the vanilla entry
 	 * @param key vtable key
 	 * @return resolved value; otherwise {@code null}
 	 */
-	@Nullable String vtable(@Nonnull String customerName, @Nonnull String key);
+	@Nullable String vtable(@Nullable String customerName, @Nonnull String key);
 
 	/**
 	 * Resolve a bizlet instance for a document.
@@ -492,7 +492,7 @@ public interface ProvidedRepository extends CachedRepository {
 	 * @param notifier The customer notification to invoke.
 	 */
 	static void notifyAllCustomersObservers(@Nonnull Consumer<Customer> notifier) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		if (UtilImpl.CUSTOMER != null) {
 			notifyObserver(repository, UtilImpl.CUSTOMER, "UtilImpl.CUSTOMER ", notifier);
 		}
@@ -503,10 +503,10 @@ public interface ProvidedRepository extends CachedRepository {
 		}
 	}
 
-	private static void notifyObserver(ProvidedRepository repository,
-										String customerName,
-										String errorPrefix,
-										Consumer<Customer> notifier) {
+	private static void notifyObserver(@Nonnull ProvidedRepository repository,
+										@Nonnull String customerName,
+										@Nonnull String errorPrefix,
+										@Nonnull Consumer<Customer> notifier) {
 		Customer customer = repository.getCustomer(customerName);
 		if (customer == null) {
 			throw new IllegalStateException(errorPrefix + customerName + " does not exist.");

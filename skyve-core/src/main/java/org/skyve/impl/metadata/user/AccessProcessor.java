@@ -47,7 +47,7 @@ class AccessProcessor {
 	private Map<String, Set<String>> accesses;
 	private Router router;
 
-	AccessProcessor(User user, Map<String, Menu> moduleMenuMap, Map<String, Set<String>> accesses) {
+	AccessProcessor(@Nonnull User user, @Nonnull Map<String, Menu> moduleMenuMap, @Nonnull Map<String, Set<String>> accesses) {
 		this.user = user;
 		this.customer = (CustomerImpl) user.getCustomer(); 
 		this.moduleMenuMap = moduleMenuMap;
@@ -86,28 +86,26 @@ class AccessProcessor {
 
 	private Set<String> processedUxUiViews = new TreeSet<>();
 
-	private void processModuleHome(final Module module, final String moduleName) {
+	private void processModuleHome(final @Nonnull Module module, final @Nonnull String moduleName) {
 		String homeDocumentName = module.getHomeDocumentName();
-		if (homeDocumentName != null) {
-			ViewType homeRef = module.getHomeRef();
-			if (homeRef == ViewType.list) {
-				DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
-				String queryName = ref.getDefaultQueryName();
-				if (queryName != null) {
-					addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
-				}
-				addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
+		ViewType homeRef = module.getHomeRef();
+		if (homeRef == ViewType.list) {
+			DocumentRef ref = module.getDocumentRefs().get(homeDocumentName);
+			String queryName = ref.getDefaultQueryName();
+			if (queryName != null) {
+				addAccessForUxUis(UserAccess.queryAggregate(moduleName, queryName), Collections.emptySet());
 			}
-			else if (homeRef == ViewType.edit) {
-				Document document = module.getDocument(customer, homeDocumentName);
-				addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
-				processViews(document);
-			}
+			addAccessForUxUis(UserAccess.documentAggregate(moduleName, homeDocumentName), Collections.emptySet());
+		}
+		else if (homeRef == ViewType.edit) {
+			Document document = module.getDocument(customer, homeDocumentName);
+			addAccessForUxUis(UserAccess.singular(document.getOwningModuleName(), homeDocumentName), Collections.emptySet());
+			processViews(document);
 		}
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void processMenuItems(final List<MenuItem> items, final Module module, final String moduleName) {
+	private void processMenuItems(final @Nonnull List<MenuItem> items, final @Nonnull Module module, final @Nonnull String moduleName) {
 		for (MenuItem item : items) {
 			// NB Disregard LinkItem as it is outside of accesses
 			if (item instanceof MenuGroup group) {
@@ -153,7 +151,7 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processViews(Document document) {
+	private void processViews(@Nonnull Document document) {
 		for (UxUiMetadata uxui : router.getUxUis()) {
 			String uxuiName = uxui.getName();
 			ViewImpl createView = (ViewImpl) document.getView(uxuiName, customer, ViewType.create.toString());
@@ -184,7 +182,7 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processRoles(final Module module, final String moduleName) {
+	private void processRoles(final @Nonnull Module module, final @Nonnull String moduleName) {
 		for (Role role : module.getRoles()) {
 			if (user.isInRole(moduleName, role.getName())) {
 				Map<UserAccess, Set<String>> roleAccesses = ((RoleImpl) role).getAccesses();
@@ -195,7 +193,7 @@ class AccessProcessor {
 		}
 	}
 	
-	private void processView(Document document, ViewImpl view, String uxui) {
+	private void processView(@Nonnull Document document, @Nonnull ViewImpl view, @Nullable String uxui) {
 		final String overriddenUxUi = view.getOverriddenUxUiName();
 		final Module module = customer.getModule(document.getOwningModuleName());
 		

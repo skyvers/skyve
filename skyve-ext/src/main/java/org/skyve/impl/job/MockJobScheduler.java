@@ -12,6 +12,9 @@ import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A no-op Job Scheduler to use in tests.
  */
@@ -31,17 +34,17 @@ public class MockJobScheduler implements JobScheduler {
 	}
 
 	@Override
-	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
+	public void runOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user) {
 		// no-op
 	}
 
 	@Override
-	public void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) {
+	public void runOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user, int sleepAtEndInSeconds) {
 		// no-op
 	}
 	
 	@Override
-	public <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId) {
+	public <T extends Bean> void runBackgroundTask(@Nonnull Class<? extends BackgroundTask<T>> taskClass, @Nonnull User user, @Nonnull String webId) {
 		// no-op
 	}
 	
@@ -51,37 +54,37 @@ public class MockJobScheduler implements JobScheduler {
 	}
 
 	@Override
-	public void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when) {
+	public void scheduleOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user, @Nonnull Date when) {
 		// no-op
 	}
 	
 	@Override
-	public void scheduleJob(JobSchedule jobSchedule, User user) {
+	public void scheduleJob(@Nonnull JobSchedule jobSchedule, @Nonnull User user) {
 		// no-op
 	}
 	
 	@Override
-	public void unscheduleJob(String uuid, String customerName) {
+	public void unscheduleJob(@Nonnull String uuid, @Nonnull String customerName) {
 		// no-op
 	}
 
 	@Override
-	public void scheduleReport(JobSchedule reportSchedule, User user) {
+	public void scheduleReport(@Nonnull JobSchedule reportSchedule, @Nonnull User user) {
 		// no-op
 	}
 
 	@Override
-	public void unscheduleReport(String uuid, String customerName) {
+	public void unscheduleReport(@Nonnull String uuid, @Nonnull String customerName) {
 		// no-op
 	}
 
 	@Override
-	public List<JobDescription> getCustomerRunningJobs() {
+	public @Nonnull List<JobDescription> getCustomerRunningJobs() {
 		return Collections.emptyList();
 	}
 
 	@Override
-	public boolean cancelJob(String instanceId) {
+	public boolean cancelJob(@Nonnull String instanceId) {
 		return true;
 	}
 	
@@ -96,7 +99,7 @@ public class MockJobScheduler implements JobScheduler {
 	}
 	
 	@Override
-	public void runRestoreJob(Bean restoreOptions) {
+	public void runRestoreJob(@Nonnull Bean restoreOptions) {
 		// no-op
 	}
 	

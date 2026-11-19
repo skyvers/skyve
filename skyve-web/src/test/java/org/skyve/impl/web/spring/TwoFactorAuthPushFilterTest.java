@@ -154,7 +154,8 @@ class TwoFactorAuthPushFilterTest {
 
 		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
 		filter.setAuthenticationManager(authenticationManager);
-		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(mock(Authentication.class));
+		Authentication authentication = mock(Authentication.class);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
 
 		HttpServletRequest request = loginRequest(CUSTOMER);
 		when(request.getParameter("username")).thenReturn(USERNAME);
@@ -556,6 +557,7 @@ class TwoFactorAuthPushFilterTest {
 		verify(chain, never()).doFilter(any(), any());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testResendInvalidatesOldCode() throws Exception {
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
@@ -663,6 +665,7 @@ class TwoFactorAuthPushFilterTest {
 
 	@Test
 	void testInvalidTwoFactorFormatStillAttemptsAuthentication() throws Exception {
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0; // not a lockout test (restored after each test)
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("abc");
 		HttpServletResponse response = responseWithForward(request);
@@ -679,6 +682,7 @@ class TwoFactorAuthPushFilterTest {
 
 	@Test
 	void testBadTwoFactorCodeStaysOnTwoFactorPage() throws Exception {
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0; // not a lockout test (restored after each test)
 		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
 		HttpServletRequest request = twoFactorCodeRequest("123456");
 		HttpServletResponse response = responseWithForward(request);
@@ -690,6 +694,53 @@ class TwoFactorAuthPushFilterTest {
 		filter.doFilter(request, response, chain);
 
 		verify(request).setAttribute(TwoFactorAuthForwardHandler.TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");
+		verify(chain, never()).doFilter(any(), any());
+	}
+
+	@Test
+	void testBadTwoFactorCodeKeepsRememberMeTicked() throws Exception {
+		verifyBadTwoFactorCodeForwardsRememberMe("on", Boolean.TRUE);
+	}
+
+	@Test
+	void testBadTwoFactorCodeKeepsRememberMeUnticked() throws Exception {
+		verifyBadTwoFactorCodeForwardsRememberMe(null, Boolean.FALSE);
+	}
+
+	@Test
+	void testGoodTwoFactorCodeContinuesChainWithRememberMeParameterIntact() throws Exception {
+		// The form login filter that follows signs the user in and issues the Remember me cookie from this parameter
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0; // not a lockout test (restored after each test)
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		HttpServletRequest request = twoFactorCodeRequest("123456");
+		when(request.getParameter(TwoFactorAuthPushFilter.REMEMBER_PARAMETER)).thenReturn("on");
+		HttpServletResponse response = responseWithForward(request);
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		Authentication authentication = mock(Authentication.class);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
+
+		filter.doFilter(request, response, chain);
+
+		verify(chain).doFilter(request, response);
+		verify(request, never()).setAttribute(eq(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE), any());
+	}
+
+	private void verifyBadTwoFactorCodeForwardsRememberMe(String rememberParameter, Boolean expected) throws Exception {
+		UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = 0; // not a lockout test (restored after each test)
+		configurationMap.put(CUSTOMER, new TwoFactorAuthCustomerConfiguration("EMAIL", 300, "subject", "body"));
+		HttpServletRequest request = twoFactorCodeRequest("123456");
+		when(request.getParameter(TwoFactorAuthPushFilter.REMEMBER_PARAMETER)).thenReturn(rememberParameter);
+		HttpServletResponse response = responseWithForward(request);
+		FilterChain chain = mock(FilterChain.class);
+		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
+		filter.setAuthenticationManager(authenticationManager);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenThrow(new BadCredentialsException("bad code"));
+
+		filter.doFilter(request, response, chain);
+
+		verify(request).setAttribute(TwoFactorAuthPushFilter.REMEMBER_ATTRIBUTE, expected);
 		verify(chain, never()).doFilter(any(), any());
 	}
 

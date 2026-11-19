@@ -6,15 +6,17 @@ import org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData;
 import org.skyve.impl.metadata.view.model.chart.NoBucketMetaData;
 
+import jakarta.annotation.Nonnull;
+
 public class MetaDataChartModel extends ChartModel<Bean> {
 	private ChartBuilderMetaData builder = null;
 	
-	public MetaDataChartModel(ChartBuilderMetaData builder) {
+	public MetaDataChartModel(@Nonnull ChartBuilderMetaData builder) {
 		this.builder = builder;
 	}
 	
 	@Override
-	public ChartData getChartData() {
+	public @Nonnull ChartData getChartData() {
 		Bucket bucket = builder.getCategoryBucket();
 		if (bucket instanceof NoBucketMetaData) {
 			bucket = null;

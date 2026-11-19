@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.context.ExceptionHandler;
 import jakarta.faces.context.ExceptionHandlerFactory;
 
@@ -12,7 +13,7 @@ public class SkyveExceptionHandlerFactory extends ExceptionHandlerFactory {
 	 *
 	 * @param base the JSF exception-handler factory being wrapped
 	 */
-	public SkyveExceptionHandlerFactory(ExceptionHandlerFactory base) {
+	public SkyveExceptionHandlerFactory(@Nonnull ExceptionHandlerFactory base) {
 		super(base);
 	}
 
@@ -22,7 +23,7 @@ public class SkyveExceptionHandlerFactory extends ExceptionHandlerFactory {
 	 * @return the wrapped Skyve-aware exception handler instance
 	 */
 	@Override
-	public ExceptionHandler getExceptionHandler() {
+	public @Nonnull ExceptionHandler getExceptionHandler() {
 		return new SkyveExceptionHandler(getWrapped().getExceptionHandler());
 	}
 }

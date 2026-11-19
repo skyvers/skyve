@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.module.menu;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for menu items that navigate to a specific document.
  *
@@ -18,10 +20,10 @@ public abstract class AbstractDocumentMenuItem extends AbstractMenuItem {
 
 	private String documentName;
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
 }

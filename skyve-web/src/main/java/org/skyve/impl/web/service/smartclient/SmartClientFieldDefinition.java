@@ -15,6 +15,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * SmartClient form field definition.
  * This is used for both edit and grid fields, with some differences in editorType and valueMap handling as described in the constructor.
@@ -36,14 +39,14 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	 * @param runtime whether runtime domain values should be resolved
 	 * @param uxui active UX/UI profile name
 	 */
-	protected SmartClientFieldDefinition(User user,
-											Customer customer, 
-											Module module, 
-											Document document, 
-											InputWidget widget,
+	protected SmartClientFieldDefinition(@Nullable User user,
+											@Nonnull Customer customer, 
+											@Nonnull Module module, 
+											@Nonnull Document document, 
+											@Nonnull InputWidget widget,
 											boolean runtime,
-											String uxui) {
-		super(user, customer, module, document, widget, null, false, runtime, true, uxui);
+											@Nonnull String uxui) {
+		super(user, customer, module, document, document, widget, null, false, runtime, true, uxui);
 		Attribute attribute = target.getAttribute();
 
 		if (attribute != null) {
@@ -70,7 +73,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	 *
 	 * @return help text, or {@code null}
 	 */
-	public String getHelpText() {
+	public @Nullable String getHelpText() {
 		return helpText;
 	}
 
@@ -79,7 +82,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	 *
 	 * @param helpText help text
 	 */
-	public void setHelpText(String helpText) {
+	public void setHelpText(@Nullable String helpText) {
 		this.helpText = helpText;
 	}
 
@@ -118,7 +121,7 @@ public class SmartClientFieldDefinition extends SmartClientDataGridFieldDefiniti
 	 */
 	@Override
     @SuppressWarnings("java:S3776") // Complexity OK
-    public String toJavascript() {
+    public @Nonnull String toJavascript() {
         StringBuilder result = new StringBuilder(128);
 
         result.append("name:'");

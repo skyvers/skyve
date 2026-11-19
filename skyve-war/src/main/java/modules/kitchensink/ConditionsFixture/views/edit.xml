@@ -1,0 +1,1616 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<view name="edit"
+		title="Conditions Fixture"
+		refreshTimeInSeconds="3600"
+		refreshIf="allowed"
+		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
+		xmlns="http://www.skyve.org/xml/view"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<form border="true" borderTitle="What the conditions depend on">
+		<column percentageWidth="30" responsiveWidth="4" />
+		<column />
+		<row>
+			<item showHelp="true">
+				<checkBox binding="show" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="allow" triState="false">
+					<onChangedHandlers>
+						<rerender clientValidation="false" />
+					</onChangedHandlers>
+				</checkBox>
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<textField binding="text" />
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<spinner binding="number" />
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<combo binding="choice" />
+			</item>
+		</row>
+		<row>
+			<item showHelp="true">
+				<checkBox binding="eventTarget" triState="false" />
+			</item>
+		</row>
+	</form>
+	<tabPane>
+		<tab title="Positive attributes, condition names">
+			<form border="true" borderTitle="Form items">
+				<column percentageWidth="30" responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="checkBox1" triState="false" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<colourPicker binding="colourPicker1" visible="shownByExpression" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="combo1" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<content binding="content1" visible="shownByExpression" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<contentSignature binding="contentSignature1" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometry binding="geometry1" visible="shownByExpression" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometryMap binding="geometryMap1" type="point" visible="shown" enabled="allowedByExpression">
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" enabled="allowed" />
+								<setInvisible binding="eventTarget" visible="shownByExpression" />
+							</onChangedHandlers>
+						</geometryMap>
+					</item>
+				</row>
+				<row>
+					<item>
+						<html binding="html1" pixelWidth="300" pixelHeight="100" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="lookupDescription1" descriptionBinding="description" visible="shownByExpression" enabled="allowed" enablePick="allowedByExpression" enableEdit="allowed" enableAdd="allowedByExpression" enableClear="allowed">
+							<onPickedHandlers>
+								<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+								<setInvisible binding="eventTarget" visible="shown" />
+							</onPickedHandlers>
+							<onClearedHandlers>
+								<setDisabled binding="eventTarget" enabled="allowed" />
+								<setInvisible binding="eventTarget" visible="shownByExpression" />
+							</onClearedHandlers>
+							<onEditedHandlers>
+								<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+								<setInvisible binding="eventTarget" visible="shown" />
+							</onEditedHandlers>
+							<onAddedHandlers>
+								<setDisabled binding="eventTarget" enabled="allowed" />
+								<setInvisible binding="eventTarget" visible="shownByExpression" />
+							</onAddedHandlers>
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="password1" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="radio1" visible="shownByExpression" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<richText binding="richText1" pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<slider binding="slider1" min="0" max="10" visible="shownByExpression" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="spinner1" visible="shown" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="textArea1" visible="shownByExpression" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="textField1" visible="shown" enabled="allowedByExpression">
+							<onFocusHandlers>
+								<setDisabled binding="eventTarget" enabled="allowed" />
+								<setInvisible binding="eventTarget" visible="shownByExpression" />
+							</onFocusHandlers>
+							<onBlurHandlers>
+								<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+								<setInvisible binding="eventTarget" visible="shown" />
+							</onBlurHandlers>
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" enabled="allowed" />
+								<setInvisible binding="eventTarget" visible="shownByExpression" />
+							</onChangedHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item label="blurb">
+						<blurb visible="shown">blurb</blurb>
+					</item>
+				</row>
+				<row>
+					<item label="label">
+						<label value="label" visible="shownByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="link">
+						<link value="link" visible="shown">
+							<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+						</link>
+					</item>
+				</row>
+				<row>
+					<item label="spacer">
+						<spacer visible="shownByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="staticImage">
+						<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" visible="shown" />
+					</item>
+				</row>
+				<row>
+					<item label="dialogButton">
+						<dialogButton displayName="dialogButton" dialogName="edit" visible="shownByExpression" enabled="allowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="zoomIn">
+						<zoomIn binding="zoomIn1" displayName="zoomIn" visible="shown" enabled="allowed" />
+					</item>
+				</row>
+				<row>
+					<item label="progressBar">
+						<progressBar binding="progressBar1" visible="shownByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="button">
+						<button action="ConditionsAction1" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="form" visible="shown" enabled="allowedByExpression">
+				<column />
+				<row>
+					<item>
+						<label value="in a conditional form" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="vbox" visible="shownByExpression">
+				<hbox border="true" borderTitle="hbox" visible="shown">
+					<blurb>in a conditional hbox in a conditional vbox</blurb>
+				</hbox>
+			</vbox>
+			<tabPane visible="shownByExpression" enabled="allowed">
+				<tab title="tab" visible="shown" enabled="allowedByExpression">
+					<blurb>in a conditional tab in a conditional tabPane</blurb>
+				</tab>
+			</tabPane>
+			<blurb visible="shownByExpression">blurb</blurb>
+			<label value="label" visible="shown" />
+			<link value="link" visible="shownByExpression">
+				<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+			</link>
+			<spacer visible="shown" />
+			<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" visible="shownByExpression" />
+			<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" visible="shown" />
+			<dialogButton displayName="dialogButton" dialogName="edit" visible="shownByExpression" enabled="allowed" />
+			<zoomIn binding="zoomInContainer1" displayName="zoomIn" visible="shown" enabled="allowedByExpression" />
+			<button action="ConditionsAction1" />
+			<checkMembership binding="checkMembership1" visible="shownByExpression" enabled="allowed" />
+			<listMembership binding="listMembership1" candidatesHeading="Candidates" membersHeading="Members" visible="shown" enabled="allowedByExpression">
+				<onChangedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowed" />
+					<setInvisible binding="eventTarget" visible="shownByExpression" />
+				</onChangedHandlers>
+			</listMembership>
+			<comparison binding="comparison1" modelName="ConditionsComparisonModel" visible="shown" enabled="allowedByExpression" />
+			<dataGrid binding="dataGrid1" title="dataGrid" visible="shownByExpression" enabled="allowedByExpression" enableAdd="allowed" enableZoom="allowedByExpression" enableEdit="allowed" enableRemove="allowedByExpression">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" visible="shownByExpression" />
+					<blurb visible="shown">blurb</blurb>
+					<link value="link" visible="shownByExpression">
+						<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+					</link>
+					<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="20" pixelHeight="20" visible="shown" />
+					<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" visible="shownByExpression" />
+					<content binding="content" visible="shown" enabled="allowed" />
+				</containerColumn>
+				<onAddedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowed" />
+					<setInvisible binding="eventTarget" visible="shown" />
+				</onAddedHandlers>
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+					<setInvisible binding="eventTarget" visible="shownByExpression" />
+				</onEditedHandlers>
+				<onRemovedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowed" />
+					<setInvisible binding="eventTarget" visible="shown" />
+				</onRemovedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+					<setInvisible binding="eventTarget" visible="shownByExpression" />
+				</onSelectedHandlers>
+			</dataGrid>
+			<dataGrid binding="inlineGrid1" title="dataGrid with bound column inputs" inline="true" visible="shown" enabled="allowed" enableAdd="allowedByExpression" enableZoom="allowed" enableEdit="allowedByExpression" enableRemove="allowed">
+				<boundColumn binding="flag" title="checkBox" editable="true">
+					<input>
+						<checkBox triState="false" visible="shown" enabled="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="colour" title="colourPicker" editable="true">
+					<input>
+						<colourPicker visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="choice" title="combo" editable="true">
+					<input>
+						<combo visible="shown" enabled="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="content" title="content" editable="true">
+					<input>
+						<content visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="geometry" title="geometry" editable="true">
+					<input>
+						<geometry visible="shown" enabled="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="html" title="html" editable="true">
+					<input>
+						<html pixelWidth="300" pixelHeight="100" visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="lookup" title="lookupDescription" editable="true">
+					<input>
+						<lookupDescription descriptionBinding="description" visible="shown" enabled="allowed" enablePick="allowedByExpression" enableEdit="allowed" enableAdd="allowedByExpression" enableClear="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="password" title="password" editable="true">
+					<input>
+						<password visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="radio" title="radio" editable="true">
+					<input>
+						<radio visible="shown" enabled="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="markup" title="richText" editable="true">
+					<input>
+						<richText pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="slider" title="slider" editable="true">
+					<input>
+						<slider min="0" max="10" visible="shown" enabled="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="number" title="spinner" editable="true">
+					<input>
+						<spinner visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="memo" title="textArea" editable="true">
+					<input>
+						<textArea visible="shown" enabled="allowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="text" title="textField" editable="true">
+					<input>
+						<textField visible="shownByExpression" enabled="allowedByExpression" />
+					</input>
+				</boundColumn>
+			</dataGrid>
+			<dataRepeater binding="dataRepeater1" title="dataRepeater" visible="shownByExpression">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" visible="shown" />
+					<blurb visible="shownByExpression">blurb</blurb>
+				</containerColumn>
+			</dataRepeater>
+			<listGrid query="qConditionsFixtureListAttributes" title="listGrid" continueConversation="false" visible="shown" enabled="allowedByExpression" enableAdd="allowed" enableZoom="allowedByExpression" enableEdit="allowed" enableRemove="allowedByExpression" postRefresh="allowed">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+					<setInvisible binding="eventTarget" visible="shownByExpression" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowed" />
+					<setInvisible binding="eventTarget" visible="shown" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+					<setInvisible binding="eventTarget" visible="shownByExpression" />
+				</onSelectedHandlers>
+			</listGrid>
+			<listRepeater query="qConditionsFixtureListAttributes" title="listRepeater" visible="shown" postRefresh="allowed" />
+			<treeGrid query="qConditionsFixtureNodes" title="treeGrid" continueConversation="false" visible="shownByExpression" enabled="allowedByExpression" enableAdd="allowed" enableZoom="allowedByExpression" enableEdit="allowed" enableRemove="allowedByExpression" postRefresh="allowed">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+					<setInvisible binding="eventTarget" visible="shown" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowed" />
+					<setInvisible binding="eventTarget" visible="shownByExpression" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" enabled="allowedByExpression" />
+					<setInvisible binding="eventTarget" visible="shown" />
+				</onSelectedHandlers>
+			</treeGrid>
+			<chart type="bar" visible="shownByExpression">
+				<model label="Values" moduleName="kitchensink" documentName="ListAttributes" categoryBinding="text" valueBinding="normalInteger" valueFunction="Sum">
+					<noBucket />
+				</model>
+			</chart>
+			<map modelName="ConditionsMapModel" visible="shown" />
+			<component name="_conditions" visible="shownByExpression" />
+		</tab>
+		<tab title="Positive attributes, inline expressions">
+			<form border="true" borderTitle="Form items">
+				<column percentageWidth="30" responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="checkBox2" triState="false" visible="{show}" enabled="{allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<colourPicker binding="colourPicker2" visible="{el:bean.show}" enabled="{el:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="combo2" visible="{rtel:bean.show}" enabled="{rtel:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<content binding="content2" visible="{el:bean.show eq true}" enabled="{el:bean.allow eq true}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<contentSignature binding="contentSignature2" visible="{show}" enabled="{allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometry binding="geometry2" visible="{el:bean.show}" enabled="{el:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometryMap binding="geometryMap2" type="point" visible="{rtel:bean.show}" enabled="{rtel:bean.allow}">
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" enabled="{el:bean.allow eq true}" />
+								<setInvisible binding="eventTarget" visible="{el:bean.show eq true}" />
+							</onChangedHandlers>
+						</geometryMap>
+					</item>
+				</row>
+				<row>
+					<item>
+						<html binding="html2" pixelWidth="300" pixelHeight="100" visible="{show}" enabled="{allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="lookupDescription2" descriptionBinding="description" visible="{el:bean.show}" enabled="{el:bean.allow}" enablePick="{rtel:bean.allow}" enableEdit="{el:bean.allow eq true}" enableAdd="{allow}" enableClear="{el:bean.allow}">
+							<onPickedHandlers>
+								<setDisabled binding="eventTarget" enabled="{rtel:bean.allow}" />
+								<setInvisible binding="eventTarget" visible="{rtel:bean.show}" />
+							</onPickedHandlers>
+							<onClearedHandlers>
+								<setDisabled binding="eventTarget" enabled="{el:bean.allow eq true}" />
+								<setInvisible binding="eventTarget" visible="{el:bean.show eq true}" />
+							</onClearedHandlers>
+							<onEditedHandlers>
+								<setDisabled binding="eventTarget" enabled="{allow}" />
+								<setInvisible binding="eventTarget" visible="{show}" />
+							</onEditedHandlers>
+							<onAddedHandlers>
+								<setDisabled binding="eventTarget" enabled="{el:bean.allow}" />
+								<setInvisible binding="eventTarget" visible="{el:bean.show}" />
+							</onAddedHandlers>
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="password2" visible="{rtel:bean.show}" enabled="{rtel:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="radio2" visible="{el:bean.show eq true}" enabled="{el:bean.allow eq true}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<richText binding="richText2" pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" visible="{show}" enabled="{allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<slider binding="slider2" min="0" max="10" visible="{el:bean.show}" enabled="{el:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="spinner2" visible="{rtel:bean.show}" enabled="{rtel:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="textArea2" visible="{el:bean.show eq true}" enabled="{el:bean.allow eq true}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="textField2" visible="{show}" enabled="{allow}">
+							<onFocusHandlers>
+								<setDisabled binding="eventTarget" enabled="{el:bean.allow}" />
+								<setInvisible binding="eventTarget" visible="{el:bean.show}" />
+							</onFocusHandlers>
+							<onBlurHandlers>
+								<setDisabled binding="eventTarget" enabled="{rtel:bean.allow}" />
+								<setInvisible binding="eventTarget" visible="{rtel:bean.show}" />
+							</onBlurHandlers>
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" enabled="{el:bean.allow eq true}" />
+								<setInvisible binding="eventTarget" visible="{el:bean.show eq true}" />
+							</onChangedHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item label="blurb">
+						<blurb visible="{show}">blurb</blurb>
+					</item>
+				</row>
+				<row>
+					<item label="label">
+						<label value="label" visible="{el:bean.show}" />
+					</item>
+				</row>
+				<row>
+					<item label="link">
+						<link value="link" visible="{rtel:bean.show}">
+							<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+						</link>
+					</item>
+				</row>
+				<row>
+					<item label="spacer">
+						<spacer visible="{el:bean.show eq true}" />
+					</item>
+				</row>
+				<row>
+					<item label="staticImage">
+						<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" visible="{show}" />
+					</item>
+				</row>
+				<row>
+					<item label="dialogButton">
+						<dialogButton displayName="dialogButton" dialogName="edit" visible="{el:bean.show}" enabled="{allow}" />
+					</item>
+				</row>
+				<row>
+					<item label="zoomIn">
+						<zoomIn binding="zoomIn2" displayName="zoomIn" visible="{rtel:bean.show}" enabled="{el:bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item label="progressBar">
+						<progressBar binding="progressBar2" visible="{el:bean.show eq true}" />
+					</item>
+				</row>
+				<row>
+					<item label="button">
+						<button action="ConditionsAction2" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="form" visible="{show}" enabled="{rtel:bean.allow}">
+				<column />
+				<row>
+					<item>
+						<label value="in a conditional form" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="vbox" visible="{el:bean.show}">
+				<hbox border="true" borderTitle="hbox" visible="{rtel:bean.show}">
+					<blurb>in a conditional hbox in a conditional vbox</blurb>
+				</hbox>
+			</vbox>
+			<tabPane visible="{el:bean.show eq true}" enabled="{el:bean.allow eq true}">
+				<tab title="tab" visible="{show}" enabled="{allow}">
+					<blurb>in a conditional tab in a conditional tabPane</blurb>
+				</tab>
+			</tabPane>
+			<blurb visible="{el:bean.show}">blurb</blurb>
+			<label value="label" visible="{rtel:bean.show}" />
+			<link value="link" visible="{el:bean.show eq true}">
+				<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+			</link>
+			<spacer visible="{show}" />
+			<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" visible="{el:bean.show}" />
+			<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" visible="{rtel:bean.show}" />
+			<dialogButton displayName="dialogButton" dialogName="edit" visible="{el:bean.show eq true}" enabled="{el:bean.allow}" />
+			<zoomIn binding="zoomInContainer2" displayName="zoomIn" visible="{show}" enabled="{rtel:bean.allow}" />
+			<button action="ConditionsAction2" />
+			<checkMembership binding="checkMembership2" visible="{el:bean.show}" enabled="{el:bean.allow eq true}" />
+			<listMembership binding="listMembership2" candidatesHeading="Candidates" membersHeading="Members" visible="{rtel:bean.show}" enabled="{allow}">
+				<onChangedHandlers>
+					<setDisabled binding="eventTarget" enabled="{el:bean.allow}" />
+					<setInvisible binding="eventTarget" visible="{el:bean.show eq true}" />
+				</onChangedHandlers>
+			</listMembership>
+			<comparison binding="comparison2" modelName="ConditionsComparisonModel" visible="{show}" enabled="{rtel:bean.allow}" />
+			<dataGrid binding="dataGrid2" title="dataGrid" visible="{el:bean.show eq true}" enabled="{allow}" enableAdd="{el:bean.allow}" enableZoom="{rtel:bean.allow}" enableEdit="{el:bean.allow eq true}" enableRemove="{allow}">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" visible="{el:bean.show}" />
+					<blurb visible="{rtel:bean.show}">blurb</blurb>
+					<link value="link" visible="{el:bean.show eq true}">
+						<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+					</link>
+					<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="20" pixelHeight="20" visible="{show}" />
+					<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" visible="{el:bean.show}" />
+					<content binding="content" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+				</containerColumn>
+				<onAddedHandlers>
+					<setDisabled binding="eventTarget" enabled="{el:bean.allow}" />
+					<setInvisible binding="eventTarget" visible="{show}" />
+				</onAddedHandlers>
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" enabled="{rtel:bean.allow}" />
+					<setInvisible binding="eventTarget" visible="{el:bean.show}" />
+				</onEditedHandlers>
+				<onRemovedHandlers>
+					<setDisabled binding="eventTarget" enabled="{el:bean.allow eq true}" />
+					<setInvisible binding="eventTarget" visible="{rtel:bean.show}" />
+				</onRemovedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" enabled="{allow}" />
+					<setInvisible binding="eventTarget" visible="{el:bean.show eq true}" />
+				</onSelectedHandlers>
+			</dataGrid>
+			<dataGrid binding="inlineGrid2" title="dataGrid with bound column inputs" inline="true" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" enableAdd="{allow}" enableZoom="{el:bean.allow}" enableEdit="{rtel:bean.allow}" enableRemove="{el:bean.allow eq true}">
+				<boundColumn binding="flag" title="checkBox" editable="true">
+					<input>
+						<checkBox triState="false" visible="{show}" enabled="{el:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="colour" title="colourPicker" editable="true">
+					<input>
+						<colourPicker visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="choice" title="combo" editable="true">
+					<input>
+						<combo visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="content" title="content" editable="true">
+					<input>
+						<content visible="{el:bean.show eq true}" enabled="{allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="geometry" title="geometry" editable="true">
+					<input>
+						<geometry visible="{show}" enabled="{el:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="html" title="html" editable="true">
+					<input>
+						<html pixelWidth="300" pixelHeight="100" visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="lookup" title="lookupDescription" editable="true">
+					<input>
+						<lookupDescription descriptionBinding="description" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" enablePick="{allow}" enableEdit="{el:bean.allow}" enableAdd="{rtel:bean.allow}" enableClear="{el:bean.allow eq true}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="password" title="password" editable="true">
+					<input>
+						<password visible="{el:bean.show eq true}" enabled="{allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="radio" title="radio" editable="true">
+					<input>
+						<radio visible="{show}" enabled="{el:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="markup" title="richText" editable="true">
+					<input>
+						<richText pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="slider" title="slider" editable="true">
+					<input>
+						<slider min="0" max="10" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="number" title="spinner" editable="true">
+					<input>
+						<spinner visible="{el:bean.show eq true}" enabled="{allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="memo" title="textArea" editable="true">
+					<input>
+						<textArea visible="{show}" enabled="{el:bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="text" title="textField" editable="true">
+					<input>
+						<textField visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+					</input>
+				</boundColumn>
+			</dataGrid>
+			<dataRepeater binding="dataRepeater2" title="dataRepeater" visible="{el:bean.show eq true}">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" visible="{show}" />
+					<blurb visible="{el:bean.show}">blurb</blurb>
+				</containerColumn>
+			</dataRepeater>
+			<listGrid query="qConditionsFixtureListAttributes" title="listGrid" continueConversation="false" visible="{rtel:bean.show}" enabled="{allow}" enableAdd="{el:bean.allow}" enableZoom="{rtel:bean.allow}" enableEdit="{el:bean.allow eq true}" enableRemove="{allow}" postRefresh="{el:bean.allow}">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" enabled="{rtel:bean.allow}" />
+					<setInvisible binding="eventTarget" visible="{el:bean.show eq true}" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" enabled="{el:bean.allow eq true}" />
+					<setInvisible binding="eventTarget" visible="{show}" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" enabled="{allow}" />
+					<setInvisible binding="eventTarget" visible="{el:bean.show}" />
+				</onSelectedHandlers>
+			</listGrid>
+			<listRepeater query="qConditionsFixtureListAttributes" title="listRepeater" visible="{rtel:bean.show}" postRefresh="{el:bean.allow}" />
+			<treeGrid query="qConditionsFixtureNodes" title="treeGrid" continueConversation="false" visible="{el:bean.show eq true}" enabled="{rtel:bean.allow}" enableAdd="{el:bean.allow eq true}" enableZoom="{allow}" enableEdit="{el:bean.allow}" enableRemove="{rtel:bean.allow}" postRefresh="{el:bean.allow eq true}">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" enabled="{allow}" />
+					<setInvisible binding="eventTarget" visible="{show}" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" enabled="{el:bean.allow}" />
+					<setInvisible binding="eventTarget" visible="{el:bean.show}" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" enabled="{rtel:bean.allow}" />
+					<setInvisible binding="eventTarget" visible="{rtel:bean.show}" />
+				</onSelectedHandlers>
+			</treeGrid>
+			<chart type="bar" visible="{el:bean.show eq true}">
+				<model label="Values" moduleName="kitchensink" documentName="ListAttributes" categoryBinding="text" valueBinding="normalInteger" valueFunction="Sum">
+					<noBucket />
+				</model>
+			</chart>
+			<map modelName="ConditionsMapModel" visible="{show}" />
+			<component name="_conditions" visible="{el:bean.show}" />
+		</tab>
+		<tab title="Negative attributes, condition names">
+			<form border="true" borderTitle="Form items">
+				<column percentageWidth="30" responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="checkBox3" triState="false" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<colourPicker binding="colourPicker3" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="combo3" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<content binding="content3" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<contentSignature binding="contentSignature3" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometry binding="geometry3" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometryMap binding="geometryMap3" type="point" invisible="notShown" disabled="notAllowed">
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+								<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+							</onChangedHandlers>
+						</geometryMap>
+					</item>
+				</row>
+				<row>
+					<item>
+						<html binding="html3" pixelWidth="300" pixelHeight="100" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="lookupDescription3" descriptionBinding="description" invisible="notShownByExpression" disabled="notAllowedByExpression" disablePick="notAllowed" disableEdit="notAllowedByExpression" disableAdd="notAllowed" disableClear="notAllowedByExpression">
+							<onPickedHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowed" />
+								<setInvisible binding="eventTarget" invisible="notShown" />
+							</onPickedHandlers>
+							<onClearedHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+								<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+							</onClearedHandlers>
+							<onEditedHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowed" />
+								<setInvisible binding="eventTarget" invisible="notShown" />
+							</onEditedHandlers>
+							<onAddedHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+								<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+							</onAddedHandlers>
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="password3" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="radio3" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<richText binding="richText3" pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<slider binding="slider3" min="0" max="10" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="spinner3" invisible="notShown" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="textArea3" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="textField3" invisible="notShown" disabled="notAllowed">
+							<onFocusHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+								<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+							</onFocusHandlers>
+							<onBlurHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowed" />
+								<setInvisible binding="eventTarget" invisible="notShown" />
+							</onBlurHandlers>
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+								<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+							</onChangedHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item label="blurb">
+						<blurb invisible="notShown">blurb</blurb>
+					</item>
+				</row>
+				<row>
+					<item label="label">
+						<label value="label" invisible="notShownByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="link">
+						<link value="link" invisible="notShown">
+							<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+						</link>
+					</item>
+				</row>
+				<row>
+					<item label="spacer">
+						<spacer invisible="notShownByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="staticImage">
+						<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" invisible="notShown" />
+					</item>
+				</row>
+				<row>
+					<item label="dialogButton">
+						<dialogButton displayName="dialogButton" dialogName="edit" invisible="notShownByExpression" disabled="notAllowed" />
+					</item>
+				</row>
+				<row>
+					<item label="zoomIn">
+						<zoomIn binding="zoomIn3" displayName="zoomIn" invisible="notShown" disabled="notAllowedByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="progressBar">
+						<progressBar binding="progressBar3" invisible="notShownByExpression" />
+					</item>
+				</row>
+				<row>
+					<item label="button">
+						<button action="ConditionsAction3" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="form" invisible="notShown" disabled="notAllowed">
+				<column />
+				<row>
+					<item>
+						<label value="in a conditional form" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="vbox" invisible="notShownByExpression">
+				<hbox border="true" borderTitle="hbox" invisible="notShown">
+					<blurb>in a conditional hbox in a conditional vbox</blurb>
+				</hbox>
+			</vbox>
+			<tabPane invisible="notShownByExpression" disabled="notAllowedByExpression">
+				<tab title="tab" invisible="notShown" disabled="notAllowed">
+					<blurb>in a conditional tab in a conditional tabPane</blurb>
+				</tab>
+			</tabPane>
+			<blurb invisible="notShownByExpression">blurb</blurb>
+			<label value="label" invisible="notShown" />
+			<link value="link" invisible="notShownByExpression">
+				<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+			</link>
+			<spacer invisible="notShown" />
+			<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" invisible="notShownByExpression" />
+			<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" invisible="notShown" />
+			<dialogButton displayName="dialogButton" dialogName="edit" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+			<zoomIn binding="zoomInContainer3" displayName="zoomIn" invisible="notShown" disabled="notAllowed" />
+			<button action="ConditionsAction3" />
+			<checkMembership binding="checkMembership3" invisible="notShownByExpression" disabled="notAllowedByExpression" />
+			<listMembership binding="listMembership3" candidatesHeading="Candidates" membersHeading="Members" invisible="notShown" disabled="notAllowed">
+				<onChangedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+					<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+				</onChangedHandlers>
+			</listMembership>
+			<comparison binding="comparison3" modelName="ConditionsComparisonModel" invisible="notShown" disabled="notAllowed" />
+			<dataGrid binding="dataGrid3" title="dataGrid" invisible="notShownByExpression" disabled="notAllowed" disableAdd="notAllowedByExpression" disableZoom="notAllowed" disableEdit="notAllowedByExpression" disableRemove="notAllowed">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" invisible="notShownByExpression" />
+					<blurb invisible="notShown">blurb</blurb>
+					<link value="link" invisible="notShownByExpression">
+						<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+					</link>
+					<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="20" pixelHeight="20" invisible="notShown" />
+					<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" invisible="notShownByExpression" />
+					<content binding="content" invisible="notShown" disabled="notAllowedByExpression" />
+				</containerColumn>
+				<onAddedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+					<setInvisible binding="eventTarget" invisible="notShown" />
+				</onAddedHandlers>
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowed" />
+					<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+				</onEditedHandlers>
+				<onRemovedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+					<setInvisible binding="eventTarget" invisible="notShown" />
+				</onRemovedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowed" />
+					<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+				</onSelectedHandlers>
+			</dataGrid>
+			<dataGrid binding="inlineGrid3" title="dataGrid with bound column inputs" inline="true" invisible="notShown" disabled="notAllowedByExpression" disableAdd="notAllowed" disableZoom="notAllowedByExpression" disableEdit="notAllowed" disableRemove="notAllowedByExpression">
+				<boundColumn binding="flag" title="checkBox" editable="true">
+					<input>
+						<checkBox triState="false" invisible="notShown" disabled="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="colour" title="colourPicker" editable="true">
+					<input>
+						<colourPicker invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="choice" title="combo" editable="true">
+					<input>
+						<combo invisible="notShown" disabled="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="content" title="content" editable="true">
+					<input>
+						<content invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="geometry" title="geometry" editable="true">
+					<input>
+						<geometry invisible="notShown" disabled="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="html" title="html" editable="true">
+					<input>
+						<html pixelWidth="300" pixelHeight="100" invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="lookup" title="lookupDescription" editable="true">
+					<input>
+						<lookupDescription descriptionBinding="description" invisible="notShown" disabled="notAllowedByExpression" disablePick="notAllowed" disableEdit="notAllowedByExpression" disableAdd="notAllowed" disableClear="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="password" title="password" editable="true">
+					<input>
+						<password invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="radio" title="radio" editable="true">
+					<input>
+						<radio invisible="notShown" disabled="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="markup" title="richText" editable="true">
+					<input>
+						<richText pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="slider" title="slider" editable="true">
+					<input>
+						<slider min="0" max="10" invisible="notShown" disabled="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="number" title="spinner" editable="true">
+					<input>
+						<spinner invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="memo" title="textArea" editable="true">
+					<input>
+						<textArea invisible="notShown" disabled="notAllowedByExpression" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="text" title="textField" editable="true">
+					<input>
+						<textField invisible="notShownByExpression" disabled="notAllowed" />
+					</input>
+				</boundColumn>
+			</dataGrid>
+			<dataRepeater binding="dataRepeater3" title="dataRepeater" invisible="notShownByExpression">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" invisible="notShown" />
+					<blurb invisible="notShownByExpression">blurb</blurb>
+				</containerColumn>
+			</dataRepeater>
+			<listGrid query="qConditionsFixtureListAttributes" title="listGrid" continueConversation="false" invisible="notShown" disabled="notAllowed" disableAdd="notAllowedByExpression" disableZoom="notAllowed" disableEdit="notAllowedByExpression" disableRemove="notAllowed" postRefresh="notAllowedByExpression">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowed" />
+					<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+					<setInvisible binding="eventTarget" invisible="notShown" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowed" />
+					<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+				</onSelectedHandlers>
+			</listGrid>
+			<listRepeater query="qConditionsFixtureListAttributes" title="listRepeater" invisible="notShown" postRefresh="notAllowedByExpression" />
+			<treeGrid query="qConditionsFixtureNodes" title="treeGrid" continueConversation="false" invisible="notShownByExpression" disabled="notAllowed" disableAdd="notAllowedByExpression" disableZoom="notAllowed" disableEdit="notAllowedByExpression" disableRemove="notAllowed" postRefresh="notAllowedByExpression">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowed" />
+					<setInvisible binding="eventTarget" invisible="notShown" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowedByExpression" />
+					<setInvisible binding="eventTarget" invisible="notShownByExpression" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" disabled="notAllowed" />
+					<setInvisible binding="eventTarget" invisible="notShown" />
+				</onSelectedHandlers>
+			</treeGrid>
+			<chart type="bar" invisible="notShownByExpression">
+				<model label="Values" moduleName="kitchensink" documentName="ListAttributes" categoryBinding="text" valueBinding="normalInteger" valueFunction="Sum">
+					<noBucket />
+				</model>
+			</chart>
+			<map modelName="ConditionsMapModel" invisible="notShown" />
+			<component name="_conditions" invisible="notShownByExpression" />
+		</tab>
+		<tab title="Negative attributes, inline expressions">
+			<form border="true" borderTitle="Form items">
+				<column percentageWidth="30" responsiveWidth="4" />
+				<column />
+				<row>
+					<item>
+						<checkBox binding="checkBox4" triState="false" invisible="{el:not bean.show}" disabled="{el:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<colourPicker binding="colourPicker4" invisible="{rtel:not bean.show}" disabled="{rtel:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<combo binding="combo4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<content binding="content4" invisible="{el:not bean.show}" disabled="{el:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<contentSignature binding="contentSignature4" invisible="{rtel:not bean.show}" disabled="{rtel:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometry binding="geometry4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<geometryMap binding="geometryMap4" type="point" invisible="{el:not bean.show}" disabled="{el:not bean.allow}">
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+								<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+							</onChangedHandlers>
+						</geometryMap>
+					</item>
+				</row>
+				<row>
+					<item>
+						<html binding="html4" pixelWidth="300" pixelHeight="100" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<lookupDescription binding="lookupDescription4" descriptionBinding="description" invisible="{el:not bean.show}" disabled="{el:not bean.allow}" disablePick="{rtel:not bean.allow}" disableEdit="{el:empty bean.allow or bean.allow eq false}" disableAdd="{el:not bean.allow}" disableClear="{rtel:not bean.allow}">
+							<onPickedHandlers>
+								<setDisabled binding="eventTarget" disabled="{el:empty bean.allow or bean.allow eq false}" />
+								<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+							</onPickedHandlers>
+							<onClearedHandlers>
+								<setDisabled binding="eventTarget" disabled="{el:not bean.allow}" />
+								<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+							</onClearedHandlers>
+							<onEditedHandlers>
+								<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+								<setInvisible binding="eventTarget" invisible="{el:not bean.show}" />
+							</onEditedHandlers>
+							<onAddedHandlers>
+								<setDisabled binding="eventTarget" disabled="{el:empty bean.allow or bean.allow eq false}" />
+								<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+							</onAddedHandlers>
+						</lookupDescription>
+					</item>
+				</row>
+				<row>
+					<item>
+						<password binding="password4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<radio binding="radio4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<richText binding="richText4" pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<slider binding="slider4" min="0" max="10" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<spinner binding="spinner4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textArea binding="textArea4" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<textField binding="textField4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}">
+							<onFocusHandlers>
+								<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+								<setInvisible binding="eventTarget" invisible="{el:not bean.show}" />
+							</onFocusHandlers>
+							<onBlurHandlers>
+								<setDisabled binding="eventTarget" disabled="{el:empty bean.allow or bean.allow eq false}" />
+								<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+							</onBlurHandlers>
+							<onChangedHandlers>
+								<setDisabled binding="eventTarget" disabled="{el:not bean.allow}" />
+								<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+							</onChangedHandlers>
+						</textField>
+					</item>
+				</row>
+				<row>
+					<item label="blurb">
+						<blurb invisible="{el:not bean.show}">blurb</blurb>
+					</item>
+				</row>
+				<row>
+					<item label="label">
+						<label value="label" invisible="{rtel:not bean.show}" />
+					</item>
+				</row>
+				<row>
+					<item label="link">
+						<link value="link" invisible="{el:empty bean.show or bean.show eq false}">
+							<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+						</link>
+					</item>
+				</row>
+				<row>
+					<item label="spacer">
+						<spacer invisible="{el:not bean.show}" />
+					</item>
+				</row>
+				<row>
+					<item label="staticImage">
+						<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" invisible="{rtel:not bean.show}" />
+					</item>
+				</row>
+				<row>
+					<item label="dialogButton">
+						<dialogButton displayName="dialogButton" dialogName="edit" invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}" />
+					</item>
+				</row>
+				<row>
+					<item label="zoomIn">
+						<zoomIn binding="zoomIn4" displayName="zoomIn" invisible="{el:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</item>
+				</row>
+				<row>
+					<item label="progressBar">
+						<progressBar binding="progressBar4" invisible="{rtel:not bean.show}" />
+					</item>
+				</row>
+				<row>
+					<item label="button">
+						<button action="ConditionsAction4" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="form" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}">
+				<column />
+				<row>
+					<item>
+						<label value="in a conditional form" />
+					</item>
+				</row>
+			</form>
+			<vbox border="true" borderTitle="vbox" invisible="{el:not bean.show}">
+				<hbox border="true" borderTitle="hbox" invisible="{rtel:not bean.show}">
+					<blurb>in a conditional hbox in a conditional vbox</blurb>
+				</hbox>
+			</vbox>
+			<tabPane invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}">
+				<tab title="tab" invisible="{el:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}">
+					<blurb>in a conditional tab in a conditional tabPane</blurb>
+				</tab>
+			</tabPane>
+			<blurb invisible="{rtel:not bean.show}">blurb</blurb>
+			<label value="label" invisible="{el:empty bean.show or bean.show eq false}" />
+			<link value="link" invisible="{el:not bean.show}">
+				<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+			</link>
+			<spacer invisible="{rtel:not bean.show}" />
+			<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="50" pixelHeight="50" invisible="{el:empty bean.show or bean.show eq false}" />
+			<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" invisible="{el:not bean.show}" />
+			<dialogButton displayName="dialogButton" dialogName="edit" invisible="{rtel:not bean.show}" disabled="{el:not bean.allow}" />
+			<zoomIn binding="zoomInContainer4" displayName="zoomIn" invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}" />
+			<button action="ConditionsAction4" />
+			<checkMembership binding="checkMembership4" invisible="{el:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+			<listMembership binding="listMembership4" candidatesHeading="Candidates" membersHeading="Members" invisible="{rtel:not bean.show}" disabled="{el:not bean.allow}">
+				<onChangedHandlers>
+					<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+				</onChangedHandlers>
+			</listMembership>
+			<comparison binding="comparison4" modelName="ConditionsComparisonModel" invisible="{el:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+			<dataGrid binding="dataGrid4" title="dataGrid" invisible="{rtel:not bean.show}" disabled="{rtel:not bean.allow}" disableAdd="{el:empty bean.allow or bean.allow eq false}" disableZoom="{el:not bean.allow}" disableEdit="{rtel:not bean.allow}" disableRemove="{el:empty bean.allow or bean.allow eq false}">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" invisible="{rtel:not bean.show}" />
+					<blurb invisible="{el:empty bean.show or bean.show eq false}">blurb</blurb>
+					<link value="link" invisible="{el:not bean.show}">
+						<resourceReference relativeFile="shared/images/UnknownContact.jpg" />
+					</link>
+					<staticImage relativeFile="shared/images/UnknownContact.jpg" pixelWidth="20" pixelHeight="20" invisible="{rtel:not bean.show}" />
+					<dynamicImage name="ConditionsImage" imageInitialPixelWidth="50" imageInitialPixelHeight="50" invisible="{el:empty bean.show or bean.show eq false}" />
+					<content binding="content" invisible="{el:not bean.show}" disabled="{el:not bean.allow}" />
+				</containerColumn>
+				<onAddedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+				</onAddedHandlers>
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:not bean.show}" />
+				</onEditedHandlers>
+				<onRemovedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+				</onRemovedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+				</onSelectedHandlers>
+			</dataGrid>
+			<dataGrid binding="inlineGrid4" title="dataGrid with bound column inputs" inline="true" invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}" disableAdd="{el:empty bean.allow or bean.allow eq false}" disableZoom="{el:not bean.allow}" disableEdit="{rtel:not bean.allow}" disableRemove="{el:empty bean.allow or bean.allow eq false}">
+				<boundColumn binding="flag" title="checkBox" editable="true">
+					<input>
+						<checkBox triState="false" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="colour" title="colourPicker" editable="true">
+					<input>
+						<colourPicker invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="choice" title="combo" editable="true">
+					<input>
+						<combo invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="content" title="content" editable="true">
+					<input>
+						<content invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="geometry" title="geometry" editable="true">
+					<input>
+						<geometry invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="html" title="html" editable="true">
+					<input>
+						<html pixelWidth="300" pixelHeight="100" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="lookup" title="lookupDescription" editable="true">
+					<input>
+						<lookupDescription descriptionBinding="description" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" disablePick="{el:empty bean.allow or bean.allow eq false}" disableEdit="{el:not bean.allow}" disableAdd="{rtel:not bean.allow}" disableClear="{el:empty bean.allow or bean.allow eq false}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="password" title="password" editable="true">
+					<input>
+						<password invisible="{rtel:not bean.show}" disabled="{el:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="radio" title="radio" editable="true">
+					<input>
+						<radio invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="markup" title="richText" editable="true">
+					<input>
+						<richText pixelWidth="400" pixelHeight="160" minPixelHeight="120" maxPixelHeight="260" invisible="{el:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="slider" title="slider" editable="true">
+					<input>
+						<slider min="0" max="10" invisible="{rtel:not bean.show}" disabled="{el:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="number" title="spinner" editable="true">
+					<input>
+						<spinner invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="memo" title="textArea" editable="true">
+					<input>
+						<textArea invisible="{el:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					</input>
+				</boundColumn>
+				<boundColumn binding="text" title="textField" editable="true">
+					<input>
+						<textField invisible="{rtel:not bean.show}" disabled="{el:not bean.allow}" />
+					</input>
+				</boundColumn>
+			</dataGrid>
+			<dataRepeater binding="dataRepeater4" title="dataRepeater" invisible="{el:not bean.show}">
+				<boundColumn binding="text" />
+				<containerColumn title="Container column">
+					<label value="label" invisible="{rtel:not bean.show}" />
+					<blurb invisible="{el:empty bean.show or bean.show eq false}">blurb</blurb>
+				</containerColumn>
+			</dataRepeater>
+			<listGrid query="qConditionsFixtureListAttributes" title="listGrid" continueConversation="false" invisible="{el:not bean.show}" disabled="{el:not bean.allow}" disableAdd="{rtel:not bean.allow}" disableZoom="{el:empty bean.allow or bean.allow eq false}" disableEdit="{el:not bean.allow}" disableRemove="{rtel:not bean.allow}" postRefresh="{el:empty bean.allow or bean.allow eq false}">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					<setInvisible binding="eventTarget" invisible="{el:not bean.show}" />
+				</onSelectedHandlers>
+			</listGrid>
+			<listRepeater query="qConditionsFixtureListAttributes" title="listRepeater" invisible="{rtel:not bean.show}" postRefresh="{el:not bean.allow}" />
+			<treeGrid query="qConditionsFixtureNodes" title="treeGrid" continueConversation="false" invisible="{el:empty bean.show or bean.show eq false}" disabled="{rtel:not bean.allow}" disableAdd="{el:empty bean.allow or bean.allow eq false}" disableZoom="{el:not bean.allow}" disableEdit="{rtel:not bean.allow}" disableRemove="{el:empty bean.allow or bean.allow eq false}" postRefresh="{el:not bean.allow}">
+				<onEditedHandlers>
+					<setDisabled binding="eventTarget" disabled="{rtel:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:not bean.show}" />
+				</onEditedHandlers>
+				<onDeletedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:empty bean.allow or bean.allow eq false}" />
+					<setInvisible binding="eventTarget" invisible="{rtel:not bean.show}" />
+				</onDeletedHandlers>
+				<onSelectedHandlers>
+					<setDisabled binding="eventTarget" disabled="{el:not bean.allow}" />
+					<setInvisible binding="eventTarget" invisible="{el:empty bean.show or bean.show eq false}" />
+				</onSelectedHandlers>
+			</treeGrid>
+			<chart type="bar" invisible="{el:not bean.show}">
+				<model label="Values" moduleName="kitchensink" documentName="ListAttributes" categoryBinding="text" valueBinding="normalInteger" valueFunction="Sum">
+					<noBucket />
+				</model>
+			</chart>
+			<map modelName="ConditionsMapModel" invisible="{rtel:not bean.show}" />
+			<component name="_conditions" invisible="{el:empty bean.show or bean.show eq false}">
+				<conditions>
+					<condition fromComponent="allowed" mappedTo="{el:bean.allow and bean.show}" />
+					<condition fromComponent="{el:bean.text eq 'mapped'}" mappedTo="shownByExpression" />
+				</conditions>
+			</component>
+		</tab>
+		<tab title="Condition forms">
+			<hbox>
+				<vbox border="true" borderTitle="visible">
+					<label value="visible = shown" visible="shown" />
+					<label value="visible = shownByExpression" visible="shownByExpression" />
+					<label value="visible = notShown" visible="notShown" />
+					<label value="visible = notShownByExpression" visible="notShownByExpression" />
+					<label value="visible = show" visible="{show}" />
+					<label value="visible = el:bean.show" visible="{el:bean.show}" />
+					<label value="visible = rtel:bean.show" visible="{rtel:bean.show}" />
+					<label value="visible = el:bean.show eq true" visible="{el:bean.show eq true}" />
+					<label value="visible = el:not bean.show" visible="{el:not bean.show}" />
+					<label value="visible = rtel:not bean.show" visible="{rtel:not bean.show}" />
+					<label value="visible = el:empty bean.show or bean.show eq false" visible="{el:empty bean.show or bean.show eq false}" />
+					<label value="visible = allowed" visible="allowed" />
+					<label value="visible = allowedByExpression" visible="allowedByExpression" />
+					<label value="visible = notAllowed" visible="notAllowed" />
+					<label value="visible = notAllowedByExpression" visible="notAllowedByExpression" />
+					<label value="visible = allow" visible="{allow}" />
+					<label value="visible = el:bean.allow" visible="{el:bean.allow}" />
+					<label value="visible = rtel:bean.allow" visible="{rtel:bean.allow}" />
+					<label value="visible = el:bean.allow eq true" visible="{el:bean.allow eq true}" />
+					<label value="visible = el:not bean.allow" visible="{el:not bean.allow}" />
+					<label value="visible = rtel:not bean.allow" visible="{rtel:not bean.allow}" />
+					<label value="visible = el:empty bean.allow or bean.allow eq false" visible="{el:empty bean.allow or bean.allow eq false}" />
+					<label value="visible = true" visible="true" />
+					<label value="visible = false" visible="false" />
+					<label value="visible = persisted" visible="persisted" />
+					<label value="visible = notPersisted" visible="notPersisted" />
+					<label value="visible = created" visible="created" />
+					<label value="visible = notCreated" visible="notCreated" />
+					<label value="visible = changed" visible="changed" />
+					<label value="visible = notChanged" visible="notChanged" />
+					<label value="visible = role:kitchensink.dev" visible="{role:kitchensink.dev}" />
+					<label value="visible = stash:conditionsFixture" visible="{stash:conditionsFixture}" />
+					<label value="visible = user:conditionsFixture" visible="{user:conditionsFixture}" />
+					<label value="visible = i18n:conditionsFixture" visible="{i18n:conditionsFixture}" />
+					<label value="visible = nested.show" visible="{nested.show}" />
+					<label value="visible = el:bean.nested.show" visible="{el:bean.nested.show}" />
+					<label value="visible = el:bean.show and bean.allow" visible="{el:bean.show and bean.allow}" />
+					<label value="visible = el:bean.show or bean.allow" visible="{el:bean.show or bean.allow}" />
+					<label value="visible = el:bean.text eq 'x'" visible="{el:bean.text eq 'x'}" />
+					<label value="visible = el:bean.number gt 5" visible="{el:bean.number gt 5}" />
+					<label value="visible = el:bean.choice eq Choice.one" visible="{el:bean.choice eq Choice.one}" />
+					<label value="visible = el:empty bean.dataGrid1" visible="{el:empty bean.dataGrid1}" />
+				</vbox>
+				<vbox border="true" borderTitle="invisible">
+					<label value="invisible = shown" invisible="shown" />
+					<label value="invisible = shownByExpression" invisible="shownByExpression" />
+					<label value="invisible = notShown" invisible="notShown" />
+					<label value="invisible = notShownByExpression" invisible="notShownByExpression" />
+					<label value="invisible = show" invisible="{show}" />
+					<label value="invisible = el:bean.show" invisible="{el:bean.show}" />
+					<label value="invisible = rtel:bean.show" invisible="{rtel:bean.show}" />
+					<label value="invisible = el:bean.show eq true" invisible="{el:bean.show eq true}" />
+					<label value="invisible = el:not bean.show" invisible="{el:not bean.show}" />
+					<label value="invisible = rtel:not bean.show" invisible="{rtel:not bean.show}" />
+					<label value="invisible = el:empty bean.show or bean.show eq false" invisible="{el:empty bean.show or bean.show eq false}" />
+					<label value="invisible = allowed" invisible="allowed" />
+					<label value="invisible = allowedByExpression" invisible="allowedByExpression" />
+					<label value="invisible = notAllowed" invisible="notAllowed" />
+					<label value="invisible = notAllowedByExpression" invisible="notAllowedByExpression" />
+					<label value="invisible = allow" invisible="{allow}" />
+					<label value="invisible = el:bean.allow" invisible="{el:bean.allow}" />
+					<label value="invisible = rtel:bean.allow" invisible="{rtel:bean.allow}" />
+					<label value="invisible = el:bean.allow eq true" invisible="{el:bean.allow eq true}" />
+					<label value="invisible = el:not bean.allow" invisible="{el:not bean.allow}" />
+					<label value="invisible = rtel:not bean.allow" invisible="{rtel:not bean.allow}" />
+					<label value="invisible = el:empty bean.allow or bean.allow eq false" invisible="{el:empty bean.allow or bean.allow eq false}" />
+					<label value="invisible = true" invisible="true" />
+					<label value="invisible = false" invisible="false" />
+					<label value="invisible = persisted" invisible="persisted" />
+					<label value="invisible = notPersisted" invisible="notPersisted" />
+					<label value="invisible = created" invisible="created" />
+					<label value="invisible = notCreated" invisible="notCreated" />
+					<label value="invisible = changed" invisible="changed" />
+					<label value="invisible = notChanged" invisible="notChanged" />
+					<label value="invisible = role:kitchensink.dev" invisible="{role:kitchensink.dev}" />
+					<label value="invisible = stash:conditionsFixture" invisible="{stash:conditionsFixture}" />
+					<label value="invisible = user:conditionsFixture" invisible="{user:conditionsFixture}" />
+					<label value="invisible = i18n:conditionsFixture" invisible="{i18n:conditionsFixture}" />
+					<label value="invisible = nested.show" invisible="{nested.show}" />
+					<label value="invisible = el:bean.nested.show" invisible="{el:bean.nested.show}" />
+					<label value="invisible = el:bean.show and bean.allow" invisible="{el:bean.show and bean.allow}" />
+					<label value="invisible = el:bean.show or bean.allow" invisible="{el:bean.show or bean.allow}" />
+					<label value="invisible = el:bean.text eq 'x'" invisible="{el:bean.text eq 'x'}" />
+					<label value="invisible = el:bean.number gt 5" invisible="{el:bean.number gt 5}" />
+					<label value="invisible = el:bean.choice eq Choice.one" invisible="{el:bean.choice eq Choice.one}" />
+					<label value="invisible = el:empty bean.dataGrid1" invisible="{el:empty bean.dataGrid1}" />
+				</vbox>
+			</hbox>
+			<component binding="nested" name="_conditions" />
+		</tab>
+	</tabPane>
+	<sidebar floatingPixelWidthBreakpoint="1024" floatingPixelWidth="300" percentageWidth="20" visible="shown">
+		<blurb>in a conditional sidebar</blurb>
+	</sidebar>
+	<actions>
+		<defaults name="Defaults1" visible="shownByExpression" enabled="allowed" />
+		<add name="Add1" displayName="Add1" visible="shown" enabled="allowedByExpression" />
+		<remove name="Remove1" displayName="Remove1" visible="shownByExpression" enabled="allowed" />
+		<zoomOut name="ZoomOut1" displayName="ZoomOut1" visible="shown" enabled="allowedByExpression" />
+		<ok name="Ok1" displayName="Ok1" visible="shownByExpression" enabled="allowed" />
+		<save name="Save1" displayName="Save1" visible="shown" enabled="allowedByExpression" />
+		<cancel name="Cancel1" displayName="Cancel1" visible="shownByExpression" enabled="allowed" />
+		<delete name="Delete1" displayName="Delete1" visible="shown" enabled="allowedByExpression" />
+		<new name="New1" displayName="New1" visible="shownByExpression" enabled="allowed" />
+		<print name="Print1" displayName="Print1" visible="shown" enabled="allowedByExpression" />
+		<action className="ConditionsAction1" displayName="ConditionsAction1" inActionPanel="false" visible="shownByExpression" enabled="allowed" />
+		<export className="ConditionsExport" name="Export1" displayName="Export1" visible="shown" enabled="allowedByExpression" />
+		<import className="ConditionsImport" name="Import1" displayName="Import1" visible="shownByExpression" enabled="allowed" />
+		<download className="ConditionsDownload" name="Download1" displayName="Download1" visible="shown" enabled="allowedByExpression" />
+		<upload className="ConditionsUpload" name="Upload1" displayName="Upload1" visible="shownByExpression" enabled="allowed" />
+		<report name="Report1" displayName="Report1" moduleName="kitchensink" documentName="ConditionsFixture" reportName="ConditionsReport" reportFormat="pdf" visible="shown" enabled="allowedByExpression" />
+		<defaults name="Defaults2" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+		<add name="Add2" displayName="Add2" visible="{el:bean.show eq true}" enabled="{allow}" />
+		<remove name="Remove2" displayName="Remove2" visible="{show}" enabled="{el:bean.allow}" />
+		<zoomOut name="ZoomOut2" displayName="ZoomOut2" visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+		<ok name="Ok2" displayName="Ok2" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+		<save name="Save2" displayName="Save2" visible="{el:bean.show eq true}" enabled="{allow}" />
+		<cancel name="Cancel2" displayName="Cancel2" visible="{show}" enabled="{el:bean.allow}" />
+		<delete name="Delete2" displayName="Delete2" visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+		<new name="New2" displayName="New2" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+		<print name="Print2" displayName="Print2" visible="{el:bean.show eq true}" enabled="{allow}" />
+		<action className="ConditionsAction2" displayName="ConditionsAction2" inActionPanel="false" visible="{show}" enabled="{el:bean.allow}" />
+		<export className="ConditionsExport" name="Export2" displayName="Export2" visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+		<import className="ConditionsImport" name="Import2" displayName="Import2" visible="{rtel:bean.show}" enabled="{el:bean.allow eq true}" />
+		<download className="ConditionsDownload" name="Download2" displayName="Download2" visible="{el:bean.show eq true}" enabled="{allow}" />
+		<upload className="ConditionsUpload" name="Upload2" displayName="Upload2" visible="{show}" enabled="{el:bean.allow}" />
+		<report name="Report2" displayName="Report2" moduleName="kitchensink" documentName="ConditionsFixture" reportName="ConditionsReport" reportFormat="pdf" visible="{el:bean.show}" enabled="{rtel:bean.allow}" />
+		<defaults name="Defaults3" invisible="notShown" disabled="notAllowedByExpression" />
+		<add name="Add3" displayName="Add3" invisible="notShownByExpression" disabled="notAllowed" />
+		<remove name="Remove3" displayName="Remove3" invisible="notShown" disabled="notAllowedByExpression" />
+		<zoomOut name="ZoomOut3" displayName="ZoomOut3" invisible="notShownByExpression" disabled="notAllowed" />
+		<ok name="Ok3" displayName="Ok3" invisible="notShown" disabled="notAllowedByExpression" />
+		<save name="Save3" displayName="Save3" invisible="notShownByExpression" disabled="notAllowed" />
+		<cancel name="Cancel3" displayName="Cancel3" invisible="notShown" disabled="notAllowedByExpression" />
+		<delete name="Delete3" displayName="Delete3" invisible="notShownByExpression" disabled="notAllowed" />
+		<new name="New3" displayName="New3" invisible="notShown" disabled="notAllowedByExpression" />
+		<print name="Print3" displayName="Print3" invisible="notShownByExpression" disabled="notAllowed" />
+		<action className="ConditionsAction3" displayName="ConditionsAction3" inActionPanel="false" invisible="notShown" disabled="notAllowedByExpression" />
+		<export className="ConditionsExport" name="Export3" displayName="Export3" invisible="notShownByExpression" disabled="notAllowed" />
+		<import className="ConditionsImport" name="Import3" displayName="Import3" invisible="notShown" disabled="notAllowedByExpression" />
+		<download className="ConditionsDownload" name="Download3" displayName="Download3" invisible="notShownByExpression" disabled="notAllowed" />
+		<upload className="ConditionsUpload" name="Upload3" displayName="Upload3" invisible="notShown" disabled="notAllowedByExpression" />
+		<report name="Report3" displayName="Report3" moduleName="kitchensink" documentName="ConditionsFixture" reportName="ConditionsReport" reportFormat="pdf" invisible="notShownByExpression" disabled="notAllowed" />
+		<defaults name="Defaults4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+		<add name="Add4" displayName="Add4" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+		<remove name="Remove4" displayName="Remove4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+		<zoomOut name="ZoomOut4" displayName="ZoomOut4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+		<ok name="Ok4" displayName="Ok4" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+		<save name="Save4" displayName="Save4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+		<cancel name="Cancel4" displayName="Cancel4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+		<delete name="Delete4" displayName="Delete4" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+		<new name="New4" displayName="New4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+		<print name="Print4" displayName="Print4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+		<action className="ConditionsAction4" displayName="ConditionsAction4" inActionPanel="false" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+		<export className="ConditionsExport" name="Export4" displayName="Export4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+		<import className="ConditionsImport" name="Import4" displayName="Import4" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+		<download className="ConditionsDownload" name="Download4" displayName="Download4" invisible="{rtel:not bean.show}" disabled="{el:empty bean.allow or bean.allow eq false}" />
+		<upload className="ConditionsUpload" name="Upload4" displayName="Upload4" invisible="{el:empty bean.show or bean.show eq false}" disabled="{el:not bean.allow}" />
+		<report name="Report4" displayName="Report4" moduleName="kitchensink" documentName="ConditionsFixture" reportName="ConditionsReport" reportFormat="pdf" invisible="{el:not bean.show}" disabled="{rtel:not bean.allow}" />
+	</actions>
+</view>

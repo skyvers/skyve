@@ -149,6 +149,7 @@ class SkyveSessionListenerTest {
 		HttpSession session = mock(HttpSession.class);
 		ServletContext servletContext = mock(ServletContext.class);
 		when(user.getId()).thenReturn(USER_ID);
+		when(session.getId()).thenReturn("shutdown-session");
 		when(session.getAttribute(org.skyve.web.WebContext.USER_SESSION_ATTRIBUTE_NAME)).thenReturn(user);
 		when(session.getServletContext()).thenReturn(servletContext);
 		when(servletContext.getAttribute(SkyveContextListener.SHUTTING_DOWN_ATTRIBUTE_NAME)).thenReturn(Boolean.TRUE);

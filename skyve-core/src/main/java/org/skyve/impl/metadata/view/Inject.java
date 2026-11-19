@@ -8,6 +8,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -26,18 +27,18 @@ public class Inject implements SerializableMetaData {
 	private String script;
 	private List<InjectBinding> bindings = new ArrayList<>();
 	
-	public String getScript() {
+	public @Nonnull String getScript() {
 		return script;
 	}
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, required = true)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setScript(String script) {
+	public void setScript(@Nonnull String script) {
 		this.script = UtilImpl.processStringValue(script);
 	}
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE, name = "accept")
-	public List<InjectBinding> getBindings() {
+	public @Nonnull List<InjectBinding> getBindings() {
 		return bindings;
 	}
 }

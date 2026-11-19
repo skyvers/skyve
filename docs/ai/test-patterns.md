@@ -135,6 +135,10 @@ Quick decision rules:
 
 > **JUnit version policy**: All new tests must use JUnit 5 (`org.junit.jupiter.api.Test`, package-private class, no `public` on test methods). `skyve-ext` contains older JUnit 4 tests — do not add new JUnit 4 tests there. JUnit 4 tests in `skyve-ext` are legacy; prefer extending or adding to existing JUnit 5 test files, or creating new JUnit 5 files.
 
+`skyve-war/src/test/java/util/` is copied into downstream projects by `skyve:assemble`.
+Keep only reusable test scaffolding there; put framework tests and internal test support
+under `org/skyve/` (including `org/skyve/util/deployed/` for the deployed harness).
+
 ### Detecting whether H2 is required
 
 Before writing a test, scan the class under test for these static singletons. If any are present the class cannot be exercised in a plain JUnit test — put the test in `skyve-war` and extend the appropriate H2 base class:

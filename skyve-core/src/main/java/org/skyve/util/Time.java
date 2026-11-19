@@ -9,6 +9,9 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.impl.util.TimeUtil;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides date/time utility operations used across Skyve runtime and tests.
  *
@@ -29,7 +32,7 @@ public class Time {
 	 *
 	 * @param date The date instance to mutate
 	 */
-	public static void clearTimeComponent(Date date) {
+	public static void clearTimeComponent(@Nonnull Date date) {
 		TimeUtil.clearTimeComponent(date);
 	}
 
@@ -38,7 +41,7 @@ public class Time {
 	 *
 	 * @param date The date instance to mutate
 	 */
-	public static void clearSecondAndMillisecondComponent(Date date) {
+	public static void clearSecondAndMillisecondComponent(@Nonnull Date date) {
 		TimeUtil.clearSecondAndMillisecondComponent(date);
 	}
 
@@ -47,7 +50,7 @@ public class Time {
 	 *
 	 * @param date The date instance to mutate
 	 */
-	public static final void clearMillisecondComponent(Date date) {
+	public static final void clearMillisecondComponent(@Nonnull Date date) {
 		TimeUtil.clearMillisecondComponent(date);
 	}
 
@@ -55,7 +58,7 @@ public class Time {
 	 * Clears the date component to epoch - 1/1/1970.
 	 * @param date	The date to clear
 	 */
-	public static void clearDateComponent(Date date) {
+	public static void clearDateComponent(@Nonnull Date date) {
 		TimeUtil.clearDateComponent(date);
 	}
 	
@@ -67,7 +70,7 @@ public class Time {
 	 * @param minutes Minute of hour (0-59)
 	 * @param seconds Second of minute (0-59)
 	 */
-	public static final void setTime(Date date, int hours24, int minutes, int seconds) {
+	public static final void setTime(@Nonnull Date date, int hours24, int minutes, int seconds) {
 		TimeUtil.setTime(date, hours24, minutes, seconds);
 	}
 
@@ -79,7 +82,7 @@ public class Time {
 	 * @param monthStartingAt1 Month of year (1-12)
 	 * @param year Year value
 	 */
-	public static final void setDate(Date date, int dayOfMonth, int monthStartingAt1, int year) {
+	public static final void setDate(@Nonnull Date date, int dayOfMonth, int monthStartingAt1, int year) {
 		TimeUtil.setDate(date, dayOfMonth, monthStartingAt1, year);
 	}
 
@@ -89,7 +92,7 @@ public class Time {
 	 * @param date Source date
 	 * @return Year component
 	 */
-	public static final int getYear(Date date) {
+	public static final int getYear(@Nonnull Date date) {
 		return TimeUtil.getYear(date);
 	}
 
@@ -99,7 +102,7 @@ public class Time {
 	 * @param date Source date
 	 * @return Month in range 1-12
 	 */
-	public static final int getMonthStartingFrom1(Date date) {
+	public static final int getMonthStartingFrom1(@Nonnull Date date) {
 		return TimeUtil.getMonthStartingFrom1(date);
 	}
 
@@ -109,7 +112,7 @@ public class Time {
 	 * @param date Source date
 	 * @return Month in range 0-11
 	 */
-	public static final int getMonthStartingFrom0(Date date) {
+	public static final int getMonthStartingFrom0(@Nonnull Date date) {
 		return TimeUtil.getMonthStartingFrom0(date);
 	}
 
@@ -119,7 +122,7 @@ public class Time {
 	 * @param date Source date
 	 * @return Day of month in range 1-31
 	 */
-	public static final int getDay(Date date) {
+	public static final int getDay(@Nonnull Date date) {
 		return TimeUtil.getDay(date);
 	}
 
@@ -149,7 +152,7 @@ public class Time {
 	 * @param date The date instance to mutate
 	 * @param numberOfHours The number of hours to add (may be negative)
 	 */
-	public static final void addHours(Date date, int numberOfHours) {
+	public static final void addHours(@Nonnull Date date, int numberOfHours) {
 		TimeUtil.addHours(date, numberOfHours);
 	}
 	
@@ -159,7 +162,7 @@ public class Time {
 	 * @param date The date to add minutes to
 	 * @param numberOfMinutes The number of minutes to add (this can be negative)
 	 */
-	public static final void addMinutes(Date date, int numberOfMinutes) {
+	public static final void addMinutes(@Nonnull Date date, int numberOfMinutes) {
 		TimeUtil.addMinutes(date, numberOfMinutes);
 	}
 
@@ -169,7 +172,7 @@ public class Time {
 	 * @param date The date to add seconds to
 	 * @param numberOfSeconds The number of seconds to add (this can be negative)
 	 */
-	public static final void addSeconds(Date date, int numberOfSeconds) {
+	public static final void addSeconds(@Nonnull Date date, int numberOfSeconds) {
 		TimeUtil.addSeconds(date, numberOfSeconds);
 	}
 
@@ -179,7 +182,7 @@ public class Time {
 	 * @param date	The date to add to.
 	 * @param numberOfDays The number of days to add (This can be negative).
 	 */
-	public static final void addDays(Date date, int numberOfDays) {
+	public static final void addDays(@Nonnull Date date, int numberOfDays) {
 		TimeUtil.addDays(date, numberOfDays);
 	}
 
@@ -189,7 +192,7 @@ public class Time {
 	 * @param date	The date to add months to.
 	 * @param numberOfMonths The number of months to add (This can be negative).
 	 */
-	public static final void addMonths(Date date, int numberOfMonths) {
+	public static final void addMonths(@Nonnull Date date, int numberOfMonths) {
 		TimeUtil.addMonths(date, numberOfMonths);
 	}
 
@@ -201,7 +204,7 @@ public class Time {
 	 * @param date Source date
 	 * @return Financial year number for the supplied date
 	 */
-	public static final int getFinancialYear(Date date) {
+	public static final int getFinancialYear(@Nonnull Date date) {
 		return TimeUtil.getFinancialYear(date);
 	}
 
@@ -213,7 +216,7 @@ public class Time {
 	 * @param date Source date
 	 * @return Financial year label (for example {@code 2025/26})
 	 */
-	public static final String getFinancialYearString(Date date) {
+	public static final @Nonnull String getFinancialYearString(@Nonnull Date date) {
 		return TimeUtil.getFinancialYearString(date);
 	}
 
@@ -223,7 +226,7 @@ public class Time {
 	 * @param end	Second time in the time range
 	 * @return	The number of hours between startTime and endTime {negative if startTime.after(endTime)}
 	 */
-	public static final Decimal5 numberOfHoursBetween(TimeOnly start, TimeOnly end) {
+	public static final @Nonnull Decimal5 numberOfHoursBetween(@Nonnull TimeOnly start, @Nonnull TimeOnly end) {
 		return TimeUtil.numberOfHoursBetween(start, end);
 	}
 
@@ -236,7 +239,7 @@ public class Time {
 	 * @param endDate Second date in date range
 	 * @return The number of days between startDate and endDate {negative if startDate.after(endDate)}
 	 */
-	public static final int numberOfDaysBetween(Date startDate, Date endDate) {
+	public static final int numberOfDaysBetween(@Nonnull Date startDate, @Nonnull Date endDate) {
 		return TimeUtil.numberOfDaysBetween(startDate, endDate);
 	}
 
@@ -249,7 +252,7 @@ public class Time {
 	 * @param endDate Second date in date range
 	 * @return The number of days in the range between startDate and endDate (negative if startDate.after(endDate).
 	 */
-	public static final int numberOfDaysInRange(Date startDate, Date endDate) {
+	public static final int numberOfDaysInRange(@Nonnull Date startDate, @Nonnull Date endDate) {
 		return TimeUtil.numberOfDaysInRange(startDate, endDate);
 	}
 
@@ -260,7 +263,7 @@ public class Time {
 	 * @param dayOfWeek Day-of-week constant from {@link Calendar} (for example {@link Calendar#MONDAY})
 	 * @return The same mutated date instance for chaining
 	 */
-	public static final Date findNextDayOfWeek(Date date, int dayOfWeek) {
+	public static final @Nonnull Date findNextDayOfWeek(@Nonnull Date date, int dayOfWeek) {
 		return TimeUtil.findNextDayOfWeek(date, dayOfWeek);
 	}
 	
@@ -272,7 +275,7 @@ public class Time {
 	 * @param date The date instance to mutate
 	 * @return The same mutated date instance for chaining
 	 */
-	public static final Date ensureWorkDay(Date date) {
+	public static final @Nonnull Date ensureWorkDay(@Nonnull Date date) {
 		return TimeUtil.ensureWorkDay(date);
 	}
 	
@@ -283,7 +286,7 @@ public class Time {
 	 * @param agoOrUntil The comparison date
 	 * @return Relative description such as "Today", "Yesterday", "Tomorrow", or day offsets
 	 */
-	public static final String daysBetweenDescription(Date now, Date agoOrUntil) {
+	public static final @Nonnull String daysBetweenDescription(@Nonnull Date now, @Nonnull Date agoOrUntil) {
 		return TimeUtil.daysBetweenDescription(now, agoOrUntil);
 	}
 	
@@ -293,7 +296,7 @@ public class Time {
 	 * @param date The date to add to.
 	 * @param numberOfDays The number of days to add (This can be negative).
 	 */
-	public static DateOnly addDaysToNew(final Date date, final int numberOfDays) {
+	public static @Nonnull DateOnly addDaysToNew(final @Nonnull Date date, final int numberOfDays) {
 		return TimeUtil.addDaysToNew(date, numberOfDays);
 	}
 
@@ -303,7 +306,7 @@ public class Time {
 	 * @param date The date to add to.
 	 * @param numberOfMonths The number of months to add (This can be negative).
 	 */
-	public static DateOnly addMonthsToNew(final Date date, final int numberOfMonths) {
+	public static @Nonnull DateOnly addMonthsToNew(final @Nonnull Date date, final int numberOfMonths) {
 		return TimeUtil.addMonthsToNew(date, numberOfMonths);
 	}
 
@@ -313,7 +316,7 @@ public class Time {
 	 * @param date The date to add to.
 	 * @param numberOfYears The number of years to add (This can be negative).
 	 */
-	public static DateOnly addYearsToNew(final Date date, final int numberOfYears) {
+	public static @Nonnull DateOnly addYearsToNew(final @Nonnull Date date, final int numberOfYears) {
 		return TimeUtil.addYearsToNew(date, numberOfYears);
 	}
 
@@ -323,7 +326,7 @@ public class Time {
 	 * @param localDate The local date to convert
 	 * @return A DateOnly from the local date, based on the System time zone
 	 */
-	public static DateOnly asDateOnly(LocalDate localDate) {
+	public static @Nonnull DateOnly asDateOnly(@Nonnull LocalDate localDate) {
 		return TimeUtil.asDateOnly(localDate);
 	}
 
@@ -333,7 +336,7 @@ public class Time {
 	 * @param date The date to convert
 	 * @return A LocalDate from the date, based on the System time zone
 	 */
-	public static LocalDate asLocalDate(final Date date) {
+	public static @Nonnull LocalDate asLocalDate(final @Nonnull Date date) {
 		return TimeUtil.asLocalDate(date);
 	}
 
@@ -344,7 +347,7 @@ public class Time {
 	 * @param ifNullValue Fallback value when {@code val} is null
 	 * @return {@code val} when non-null, otherwise {@code ifNullValue}
 	 */
-	public static DateOnly coalesce(DateOnly val, DateOnly ifNullValue) {
+	public static @Nullable DateOnly coalesce(@Nullable DateOnly val, @Nullable DateOnly ifNullValue) {
 		return TimeUtil.coalesce(val, ifNullValue);
 	}
 
@@ -354,7 +357,7 @@ public class Time {
 	 * @param dates Variable list of dates to compare
 	 * @return The earliest date
 	 */
-	public static DateOnly min(final DateOnly... dates) {
+	public static @Nonnull DateOnly min(final @Nonnull DateOnly... dates) {
 		return TimeUtil.min(dates);
 	}
 
@@ -364,7 +367,7 @@ public class Time {
 	 * @param dates Variable list of dates to compare
 	 * @return The latest date
 	 */
-	public static DateOnly max(final DateOnly... dates) {
+	public static @Nonnull DateOnly max(final @Nonnull DateOnly... dates) {
 		return TimeUtil.max(dates);
 	}
 
@@ -376,7 +379,7 @@ public class Time {
 	 * @param year The year
 	 * @return A new date with the day, month and year
 	 */
-	public static DateOnly withDate(int dayOfMonth, int monthStartingAt1, int year) {
+	public static @Nonnull DateOnly withDate(int dayOfMonth, int monthStartingAt1, int year) {
 		return TimeUtil.withDate(dayOfMonth, monthStartingAt1, year);
 	}
 }

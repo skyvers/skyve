@@ -3,6 +3,8 @@ package org.skyve.metadata.customer;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.Interceptor;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Metadata descriptor for a registered {@link Interceptor} implementation.
  *
@@ -19,12 +21,12 @@ public interface InterceptorMetaData extends SerializableMetaData {
 	 *
 	 * @return the class name; never {@code null}
 	 */
-	public String getClassName();
+	public @Nonnull String getClassName();
 
 	/**
 	 * Returns the singleton {@link Interceptor} instance, instantiating it if necessary.
 	 *
 	 * @return the interceptor instance; never {@code null}
 	 */
-	public Interceptor getInterceptor();
+	public @Nonnull Interceptor getInterceptor();
 }

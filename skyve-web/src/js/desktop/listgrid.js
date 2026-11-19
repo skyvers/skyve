@@ -115,7 +115,9 @@ isc.BizListGrid.addMethods({
 				);
 			}
 
-			return criteria;
+			// These criteria go to the server other than through the data source's fetch: as the fetch does, convert relative
+			// dates (such as today) to dates, then make a day filter the day's range
+			return isc.BizUtil.dataSourceDayCriteria(this._dataSource, this._dataSource.convertRelativeDates(criteria));
 		};
 
 		/**
@@ -148,7 +150,7 @@ isc.BizListGrid.addMethods({
 					let contConv = config.contConv || false;
 
 					if (contConv) {
-						const changedOnServer = this._view.gather(false)._changed;
+						const changedOnServer = this._view.gather(false, true)._changed;
 						if (changedOnServer || this._view._vm.valuesHaveChanged()) {
 							isc.say(
                                 isc.i18nMessages.bizListGrid_UnsavedChangesSay.replace(/(\$viewSingular)/g, this._view._singular),
@@ -194,7 +196,7 @@ isc.BizListGrid.addMethods({
 			 */
 			click: () => {
 				if (config && config.contConv) {
-					const changedOnServer = this._view.gather(false)._changed;
+					const changedOnServer = this._view.gather(false, true)._changed;
 
 					// Check for unsaved changes
 					if (changedOnServer || this._view._vm.valuesHaveChanged()) {
@@ -281,7 +283,7 @@ isc.BizListGrid.addMethods({
 					// in the same way as when zooming in
 					if (this._view) {
 						// this is an embedded list grid
-						const instance = this._view.gather(false); // don't validate
+						const instance = this._view.gather(false, true); // don't validate
 						if (config && config.contConv) {
 							if (instance._changed || this._view._vm.valuesHaveChanged()) {
 								isc.say(
@@ -1453,6 +1455,9 @@ isc.BizListGrid.addMethods({
 			minHeight: 100,
 			leaveScrollbarGap: true,
 			autoFetchData: false,
+			// Wait briefly before fetching uncached rows so fast scrolling through a large
+			// list does not send a page query (plus a count query) for every redraw.
+			dataFetchDelay: 100,
 			useAllDataSourceFields: true,
 			showHeader: true,
 			headerHeight: 30,
@@ -1465,6 +1470,8 @@ isc.BizListGrid.addMethods({
 			canShowFilterEditor: false, // Remove header context menu to show/hide filter row
 			allowFilterOperators: false, // Remove header context menu to allow selection of operators other than the default
 			filterByCell: false, // Ensure return/enter key or filter button click required to filter
+			// A number the Java converter refuses shows an error rather than being dropped (see the end of types.js)
+			filterEditorSubmit: () => isc.BizUtil.filterEditorAccepts(this.grid),
 			selectionType: "single",
 			alternateRecordStyles: true,
 			canEdit: true,
@@ -1589,19 +1596,7 @@ isc.BizListGrid.addMethods({
 			 */
 			selectionUpdated: (record, recordList) => {
 				if (this.selectedIdBinding) {
-					if (this.selectedIdTrackChanges) {
-						this._view._vm.setValue(
-							this.selectedIdBinding,
-							record ? record.bizId : null,
-						);
-					} else {
-						const changes = this._view._vm.valuesHaveChanged();
-						this._view._vm.setValue(
-							this.selectedIdBinding,
-							record ? record.bizId : null,
-						);
-						if (!changes) this._view._vm.rememberValues();
-					}
+					this._setSelectedId(record ? record.bizId : null);
 				}
 
 				if (this.bizSelected) {
@@ -1688,15 +1683,17 @@ isc.BizListGrid.addMethods({
 					: me.grid.getFilterEditorCriteria(true);
 				if (!editorCriteria) editorCriteria = {};
 
-				isc.BizUtil.convertFilterCriteria(result);
-
 				if (config && config.params) {
+					// Complete a copy: completeFilterCriteria() shares the editor criteria's clauses,
+					// and setFilterEditorCriteria() below needs them unconverted
 					result = isc.BizUtil.completeFilterCriteria(
-						editorCriteria,
+						isc.clone(editorCriteria),
 						config.params,
 						me._view,
 					);
 				}
+
+				isc.BizUtil.convertFilterCriteria(result);
 
 				this.Super("filterData", [result, callback, requestProperties]);
 
@@ -1907,13 +1904,44 @@ isc.BizListGrid.addMethods({
 	},
 
 	/**
+	 * Sets the view's value at the selectedIdBinding to the selected row's bizId. Unless the grid tracks changes to the
+	 * selection (selectedIdTrackChanges), this does not make an unchanged view dirty.
+	 * @param {string|null} bizId - the selected row's bizId, or null when no row is selected.
+	 */
+	_setSelectedId: function (bizId) {
+		if (this.selectedIdTrackChanges) {
+			this._view._vm.setValue(this.selectedIdBinding, bizId);
+		} else {
+			const changes = this._view._vm.valuesHaveChanged();
+			this._view._vm.setValue(this.selectedIdBinding, bizId);
+			if (!changes) this._view._vm.rememberValues();
+		}
+	},
+
+	/**
 	 * Refreshes the list view by deselecting all records, invalidating the cache,
 	 * applying the appropriate filter criteria, and scrolling to the top row.
+	 * The selected event does not run for the refresh, as the user selected nothing: a selected event that rerenders the
+	 * view refreshes its list grids, so it would run again for ever. Once the rows are in, the row
+	 * of the view's selectedIdBinding is selected again, as a data grid's is on a scatter, so a refresh keeps the user's
+	 * selection; if that row has gone, the binding is cleared, so that it holds no row the grid does not show. On a paged
+	 * list whose rows are not all fetched, a row that is not among them may be on another page, so the binding is kept.
 	 */
 	refresh: function () {
 		const topRowNum = this.grid.getVisibleRows()[0];
 
-		this.grid.deselectAllRecords();
+		// Changes the selection without running selectionUpdated, as EditView._handleGridSelection() does for a data grid
+		const selectQuietly = (change) => {
+			const method = this.grid.selectionUpdated;
+			try {
+				this.grid.selectionUpdated = null;
+				change();
+			} finally {
+				this.grid.selectionUpdated = method;
+			}
+		};
+
+		selectQuietly(() => this.grid.deselectAllRecords());
 		this._eventRowNum = null;
 		this._eventColumnNum = null;
 		this._eventRecord = null;
@@ -1925,7 +1953,30 @@ isc.BizListGrid.addMethods({
 		const filterCriteria = this._advancedFilter.toggleButton.selected
 			? this._advancedFilter.getCriteria()
 			: this.grid.getFilterEditorCriteria(true);
-		this.grid.filterData(filterCriteria);
+		let reselected = false;
+		const reselect = () => {
+			if (reselected) return;
+			reselected = true;
+			const selectedBizId = this.selectedIdBinding && this._view ? this._view._vm.getValue(this.selectedIdBinding) : null;
+			if (selectedBizId) {
+				const data = this.grid.data;
+				const index = data.findIndex("bizId", selectedBizId);
+				if (index >= 0) {
+					selectQuietly(() => this.grid.selectSingleRecord(index));
+				} else if (!isc.isA.ResultSet(data) || data.allMatchingRowsCached()) {
+					// The row has gone (all the list's rows are here). A paged list that has fetched only some of its rows
+					// may hold the row on a page not fetched: the binding is kept then.
+					this._setSelectedId(null);
+				}
+			}
+		};
+		// The callback runs when the fetch the filter needs completes
+		this.grid.filterData(filterCriteria, reselect);
+		// No fetch was needed, as the rows are in already
+		const data = this.grid.data;
+		if (!isc.isA.ResultSet(data) || data.lengthIsKnown()) {
+			reselect();
+		}
 
 		// Scroll to the top row for the refreshed data
 		this.grid.scrollToRow(topRowNum, "top");
@@ -2127,6 +2178,11 @@ isc.BizListGrid.addMethods({
 					if (dsField.canSave === false) {
 						gridField.canEdit = false;
 					}
+					// A type's own filter row editor, such as signed dollars for dollars shown as a magnitude
+					const filterEditorType = isc.BizUtil.filterEditorType(dsField.type);
+					if (filterEditorType) {
+						gridField.filterEditorType = filterEditorType;
+					}
 					if (!hasDetailFields && dsField.detail) {
 						hasDetailFields = true;
 					}
@@ -2261,6 +2317,7 @@ isc.BizListGrid.addMethods({
 	/**
 	 * Navigates to the edit view, either for a new or existing record, based on the specified parameters.
 	 * Handles the conversation continuation logic and ensures the proper context for zooming into the record.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record listGridNew and listGridZoom: keep its arguments and _eventRecord/_eventRowNum.
 	 *
 	 * @param {boolean} zoomToNew - indicates whether to navigate to a new record (true) or an existing one (false).
 	 * @param {boolean} contConv - specifies whether to continue the owning view's conversation (true) or start a new one (false).
@@ -2287,7 +2344,7 @@ isc.BizListGrid.addMethods({
 
 		isc.BizUtil.getEditView(module, document, (view) => {
 			if (_view) {
-				const instance = _view.gather(false); // Don't validate
+				const instance = _view.gather(false, true); // Don't validate
 
 				// If continuing the conversation
 				if (contConv) {

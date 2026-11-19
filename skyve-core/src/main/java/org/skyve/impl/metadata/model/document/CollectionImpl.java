@@ -9,6 +9,8 @@ import org.skyve.metadata.Ordering;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -66,62 +68,62 @@ public class CollectionImpl extends ReferenceImpl implements Collection, Ordered
 	}
 
 	@Override
-	public Boolean getOrdered() {
+	public @Nullable Boolean getOrdered() {
 		return ordered;
 	}
 
 	@XmlAttribute(required = false)
-	public void setOrdered(Boolean ordered) {
+	public void setOrdered(@Nullable Boolean ordered) {
 		this.ordered = ordered;
 	}
 
 	@Override
-	public CollectionType getType() {
+	public @Nonnull CollectionType getType() {
 		return type;
 	}
 
 	@XmlAttribute(required = true)
-	public void setType(CollectionType type) {
+	public void setType(@Nonnull CollectionType type) {
 		this.type = type;
 	}
 
 	@Override
-	public Boolean getOwnerDatabaseIndex() {
+	public @Nullable Boolean getOwnerDatabaseIndex() {
 		return ownerDatabaseIndex;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setOwnerDatabaseIndex(Boolean ownerDatabaseIndex) {
+	public void setOwnerDatabaseIndex(@Nullable Boolean ownerDatabaseIndex) {
 		this.ownerDatabaseIndex = ownerDatabaseIndex;
 	}
 
 	@Override
-	public Boolean getElementDatabaseIndex() {
+	public @Nullable Boolean getElementDatabaseIndex() {
 		return elementDatabaseIndex;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setElementDatabaseIndex(Boolean elementDatabaseIndex) {
+	public void setElementDatabaseIndex(@Nullable Boolean elementDatabaseIndex) {
 		this.elementDatabaseIndex = elementDatabaseIndex;
 	}
 
 	@Override
-	public String getCacheName() {
+	public @Nullable String getCacheName() {
 		return cacheName;
 	}
 
 	@XmlElement(name = "cache", namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setCacheName(String cacheName) {
+	public void setCacheName(@Nullable String cacheName) {
 		this.cacheName = cacheName;
 	}
 
 	@Override
-	public Integer getMaxCardinality() {
+	public @Nullable Integer getMaxCardinality() {
 		return maxCardinality;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setMaxCardinality(Integer maxCardinality) {
+	public void setMaxCardinality(@Nullable Integer maxCardinality) {
 		this.maxCardinality = maxCardinality;
 	}
 
@@ -138,7 +140,7 @@ public class CollectionImpl extends ReferenceImpl implements Collection, Ordered
 	@Override
 	@XmlElementWrapper(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "ordering")
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "order", type = OrderingImpl.class, required = false)
-	public List<Ordering> getOrdering() {
+	public @Nonnull List<Ordering> getOrdering() {
 		return ordering;
 	}
 
@@ -147,7 +149,7 @@ public class CollectionImpl extends ReferenceImpl implements Collection, Ordered
 					name = "unique",
 					type = UniqueConstraintImpl.class,
 					required = false)
-	public List<UniqueConstraint> getUniqueConstraints() {
+	public @Nonnull List<UniqueConstraint> getUniqueConstraints() {
 		return uniqueConstraints;
 	}
 

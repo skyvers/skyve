@@ -3,6 +3,8 @@ package org.skyve.impl.tools.javadoc.doctor;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Renders ordered or unordered HTML lists.
  */
@@ -16,7 +18,7 @@ public class DocList {
 	 *
 	 * @return mutable list of item HTML/text values
 	 */
-	public List<String> getItems(){
+	public @Nonnull List<String> getItems(){
 		return items;
 	}
 	
@@ -35,7 +37,7 @@ public class DocList {
 	 *
 	 * @return HTML string representation
 	 */
-	public String toHTML(){
+	public @Nonnull String toHTML(){
 		StringBuilder html = new StringBuilder();
 		html.append((this.numbered?"<ol>":"<ul>"));
 		for(String s : items){

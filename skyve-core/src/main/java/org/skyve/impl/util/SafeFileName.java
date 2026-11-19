@@ -3,6 +3,9 @@ package org.skyve.impl.util;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Utility class for sanitising file names to be safe for use in browser-accessible content paths.
  */
@@ -33,7 +36,7 @@ public class SafeFileName {
 	 * @param input the original file name string
 	 * @return a sanitised, safe file name string
 	 */
-	public static String sanitise(String input) {
+	public static @Nonnull String sanitise(@Nullable String input) {
 		if (input == null || input.isBlank()) {
 			return "unnamed";
 		}
@@ -102,7 +105,7 @@ public class SafeFileName {
 	 * @param ext the file extension (without dot)
 	 * @return a trimmed filename that respects length and encoding constraints
 	 */
-	private static String trimToMax(String name, String ext) {
+	private static @Nonnull String trimToMax(@Nonnull String name, @Nonnull String ext) {
 		if (name.length() <= MAX_LENGTH) {
 			return name;
 		}
@@ -131,7 +134,7 @@ public class SafeFileName {
 	 * @param maxChars maximum allowed length
 	 * @return a trimmed string respecting Unicode surrogate pairs
 	 */
-	private static String safeUnicodeTrim(String s, int maxChars) {
+	private static @Nonnull String safeUnicodeTrim(@Nonnull String s, int maxChars) {
 		if (s.length() <= maxChars) {
 			return s;
 		}

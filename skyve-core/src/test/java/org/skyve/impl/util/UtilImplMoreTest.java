@@ -60,7 +60,7 @@ class UtilImplMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S5976")
+	@SuppressWarnings({"java:S5976", "null"}) // a null here fails the test
 	void cleanupModuleDirectoryAddsModulesIfMissing() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/project/src/main/java");
 		assertTrue(result.endsWith("/"));
@@ -68,7 +68,7 @@ class UtilImplMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S5976")
+	@SuppressWarnings({"java:S5976", "null"}) // a null here fails the test
 	void cleanupModuleDirectoryAlreadyEndsWithModulesTrailingSlash() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/modules/");
 		assertTrue(result.endsWith("/"));
@@ -76,7 +76,7 @@ class UtilImplMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S5976")
+	@SuppressWarnings({"java:S5976", "null"}) // a null here fails the test
 	void cleanupModuleDirectoryAlreadyEndsWithModulesNoSlash() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/modules");
 		assertTrue(result.endsWith("/"));
@@ -90,7 +90,7 @@ class UtilImplMoreTest {
 	}
 
 	@Test
-	@SuppressWarnings("java:S5976")
+	@SuppressWarnings({"java:S5976", "null"}) // a null here fails the test
 	void cleanupModuleDirectoryStripsTrailingForwardSlash() {
 		String result = UtilImpl.cleanupModuleDirectory("/workspace/project/");
 		assertTrue(result.contains("modules"));

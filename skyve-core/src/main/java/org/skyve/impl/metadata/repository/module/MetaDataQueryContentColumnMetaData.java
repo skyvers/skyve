@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.repository.module;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -47,7 +49,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 *
 	 * @return the display mode, never {@code null} once metadata validation has completed
 	 */
-	public DisplayType getDisplay() {
+	public @Nonnull DisplayType getDisplay() {
 		return display;
 	}
 
@@ -57,7 +59,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 * @param display the display mode to apply
 	 */
 	@XmlAttribute(required = true)
-	public void setDisplay(DisplayType display) {
+	public void setDisplay(@Nonnull DisplayType display) {
 		this.display = display;
 	}
 
@@ -66,7 +68,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 *
 	 * @return the configured thumbnail height in pixels, or {@code null} to use the default height
 	 */
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -76,7 +78,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 * @param pixelHeight the thumbnail height in pixels, or {@code null} to use default rendering
 	 */
 	@XmlAttribute
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -85,7 +87,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 *
 	 * @return the fallback relative resource path, or {@code null} if none is configured
 	 */
-	public String getEmptyThumbnailRelativeFile() {
+	public @Nullable String getEmptyThumbnailRelativeFile() {
 		return emptyThumbnailRelativeFile;
 	}
 
@@ -98,7 +100,7 @@ public class MetaDataQueryContentColumnMetaData extends MetaDataQueryColumnMetaD
 	 * @param emptyThumbnailRelativeFile the fallback relative resource path; blank values become {@code null}
 	 */
 	@XmlAttribute
-	public void setEmptyThumbnailRelativeFile(String emptyThumbnailRelativeFile) {
+	public void setEmptyThumbnailRelativeFile(@Nullable String emptyThumbnailRelativeFile) {
 		this.emptyThumbnailRelativeFile = UtilImpl.processStringValue(emptyThumbnailRelativeFile);
 	}
 }

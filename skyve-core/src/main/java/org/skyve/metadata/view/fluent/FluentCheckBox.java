@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link CheckBox} widget metadata using a fluent API.
  */
@@ -21,22 +23,22 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 *
 	 * @param check the metadata instance to mutate
 	 */
-	public FluentCheckBox(CheckBox check) {
+	public FluentCheckBox(@Nonnull CheckBox check) {
 		this.check = check;
 	}
 
 	/**
 	 * Copies check-box metadata into this fluent builder.
 	 */
-	public FluentCheckBox from(@SuppressWarnings("hiding") CheckBox check) {
+	public @Nonnull FluentCheckBox from(@SuppressWarnings("hiding") @Nonnull CheckBox check) {
 		Boolean b = check.getTriState();
 		if (b != null) {
 			triState(b.booleanValue());
 		}
-
 		absoluteSize(check, this);
-
 		super.from(check);
+		check.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -47,7 +49,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentCheckBox pixelWidth(int width) {
+	public @Nonnull FluentCheckBox pixelWidth(int width) {
 		check.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -59,7 +61,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @return this builder
 	 */
 	@Override
-	public FluentCheckBox pixelHeight(int height) {
+	public @Nonnull FluentCheckBox pixelHeight(int height) {
 		check.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -70,8 +72,21 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @param triState true to allow indeterminate state, false for binary state only
 	 * @return this builder
 	 */
-	public FluentCheckBox triState(boolean triState) {
+	public @Nonnull FluentCheckBox triState(boolean triState) {
 		check.setTriState(triState ? Boolean.TRUE : Boolean.FALSE);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentCheckBox putProperty(@Nonnull String k, @Nonnull String v) {
+		check.getProperties().put(k, v);
 		return this;
 	}
 
@@ -81,7 +96,7 @@ public class FluentCheckBox extends FluentChangeableInputWidget<FluentCheckBox> 
 	 * @return the mutable check-box metadata being configured
 	 */
 	@Override
-	public CheckBox get() {
+	public @Nonnull CheckBox get() {
 		return check;
 	}
 

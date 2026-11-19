@@ -8,6 +8,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
@@ -139,9 +141,9 @@ class ExportedReferenceVisitorTest {
 
 		invokeAcceptReference(dereferencer, target, "target-id", ref, referenceDocument);
 
-		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
-		org.mockito.Mockito.verify(sql).putParameter(PersistentBean.OWNER_COLUMN_NAME, "replacement-owner", false);
-		org.mockito.Mockito.verify(sql).execute();
+		verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		verify(sql).putParameter(PersistentBean.OWNER_COLUMN_NAME, "replacement-owner", false);
+		verify(sql).execute();
 	}
 
 	@Test
@@ -155,8 +157,8 @@ class ExportedReferenceVisitorTest {
 
 		invokeAcceptReference(new ExportedReferenceVisitor.Dereferencer(), target, "target-id", ref, referenceDocument);
 
-		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
-		org.mockito.Mockito.verify(sql).execute();
+		verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		verify(sql).execute();
 	}
 
 	@Test
@@ -168,7 +170,7 @@ class ExportedReferenceVisitorTest {
 
 		invokeAcceptReference(new ExportedReferenceVisitor.Dereferencer(), target, "target-id", ref, referenceDocument);
 
-		org.mockito.Mockito.verifyNoInteractions(persistence);
+		verifyNoInteractions(persistence);
 	}
 
 	@Test
@@ -184,9 +186,9 @@ class ExportedReferenceVisitorTest {
 
 		invokeAcceptReference(dereferencer, target, "target-id", ref, referenceDocument);
 
-		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
-		org.mockito.Mockito.verify(sql).putParameter("newBizId", "replacement-reference", false);
-		org.mockito.Mockito.verify(sql).execute();
+		verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		verify(sql).putParameter("newBizId", "replacement-reference", false);
+		verify(sql).execute();
 	}
 
 	@Test
@@ -200,9 +202,9 @@ class ExportedReferenceVisitorTest {
 
 		invokeAcceptReference(new ExportedReferenceVisitor.Dereferencer(), target, "target-id", ref, referenceDocument);
 
-		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
-		org.mockito.Mockito.verify(sql).putParameter("newBizId", null, false);
-		org.mockito.Mockito.verify(sql).execute();
+		verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		verify(sql).putParameter("newBizId", null, false);
+		verify(sql).execute();
 	}
 
 	@Test
@@ -216,9 +218,9 @@ class ExportedReferenceVisitorTest {
 
 		invokeAcceptParent(dereferencer, node, "target-id", node);
 
-		org.mockito.Mockito.verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
-		org.mockito.Mockito.verify(sql).putParameter("newBizId", "replacement-parent", false);
-		org.mockito.Mockito.verify(sql).execute();
+		verify(sql).putParameter(Bean.DOCUMENT_ID, "target-id", false);
+		verify(sql).putParameter("newBizId", "replacement-parent", false);
+		verify(sql).execute();
 	}
 
 	private static void invokeVisitBean(ExportedReferenceVisitor visitor, CustomerImpl customer, Document document, String bizId) throws Exception {

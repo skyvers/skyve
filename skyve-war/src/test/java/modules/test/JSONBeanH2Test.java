@@ -89,6 +89,7 @@ class JSONBeanH2Test extends AbstractSkyveTest {
 		assertEquals(AllAttributesPersistent.DOCUMENT_NAME, resultBean.getBizDocument());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void unmarshallMarshalledBeanReturnsBeanWithSameModule() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);
@@ -107,6 +108,7 @@ class JSONBeanH2Test extends AbstractSkyveTest {
 		assertTrue(result instanceof AllAttributesPersistent);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void unmarshallMarshalledBeanPreservesBizCustomer() throws Exception {
 		AllAttributesPersistent bean = Util.constructRandomInstance(u, m, aapd, 1);

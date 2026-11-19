@@ -96,6 +96,7 @@ class DynamicClassMapAdapterTest {
 		original.put("B", "com.example.B");
 
 		DynamicClassMapType marshalled = adapter.marshal(original);
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Map<String, String> unmarshalled = adapter.unmarshal(marshalled);
 		assertEquals(2, unmarshalled.size());
 		assertThat(unmarshalled.get("A"), is("com.example.A"));

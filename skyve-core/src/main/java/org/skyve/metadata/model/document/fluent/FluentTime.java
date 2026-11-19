@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.Time;
 import org.skyve.impl.metadata.model.document.field.validator.DateValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentTime metadata.
  */
@@ -19,7 +22,7 @@ public class FluentTime extends FluentConvertibleField<FluentTime> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentTime(Time time) {
+	public FluentTime(@Nonnull Time time) {
 		this.time = time;
 	}
 
@@ -27,7 +30,7 @@ public class FluentTime extends FluentConvertibleField<FluentTime> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentTime from(@SuppressWarnings("hiding") Time time) {
+	public @Nonnull FluentTime from(@SuppressWarnings("hiding") @Nonnull Time time) {
 		super.from(time);
 		validator(time.getValidator());
 		return this;
@@ -35,7 +38,7 @@ public class FluentTime extends FluentConvertibleField<FluentTime> {
 	/**
 	 * Sets validation metadata used by this field definition.
 	 */
-	public FluentTime validator(DateValidator validator) {
+	public @Nonnull FluentTime validator(@Nullable DateValidator validator) {
 		time.setValidator(validator);
 		return this;
 	}
@@ -44,7 +47,7 @@ public class FluentTime extends FluentConvertibleField<FluentTime> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Time get() {
+	public @Nonnull Time get() {
 		return time;
 	}
 }

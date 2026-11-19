@@ -7,23 +7,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameter;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(value = Parameterized.class)
-public class NaturalCronExpressionParserTest {
+class NaturalCronExpressionParserTest {
 
-	@Parameter(value = 0)
-	public String expression;
-	@Parameter(value = 1)
-	public String expected;
-
-	@Parameters(name = "{index}: testParse({0}) = {1}")
-	public static Collection<String[]> data() {
+	static Collection<String[]> data() {
 		return Arrays.asList(new String[][] {
 				{ "yearly", "0 0 0 1 1 *" },
 				{ "annually", "0 0 0 1 1 *" },
@@ -80,16 +70,18 @@ public class NaturalCronExpressionParserTest {
 
 	private NaturalCronExpressionParser parser;
 
-	@Before
-	public void setup() {
+	@BeforeEach
+	void setup() {
 		parser = new NaturalCronExpressionParser();
 	}
 
 	/**
 	 * Tests that each input expression in the parameters list matches the expected result.
 	 */
-	@Test
-	public void testParseWithParameters() {
+	@SuppressWarnings("null") // a null here fails the test
+	@ParameterizedTest(name = "{index}: testParse({0}) = {1}")
+	@MethodSource("data")
+	void testParseWithParameters(String expression, String expected) {
 		// call the method under test
 		CronExpression result = parser.parse(expression);
 

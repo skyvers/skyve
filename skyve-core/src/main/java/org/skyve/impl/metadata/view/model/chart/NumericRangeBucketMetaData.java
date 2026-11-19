@@ -6,6 +6,7 @@ import java.util.List;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.model.chart.NumericRangeBucket;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -29,7 +30,7 @@ public class NumericRangeBucketMetaData extends NumericRangeBucket {
 		super();
 	}
 
-	public List<NumericRangeMetaData> getRanges() {
+	public @Nonnull List<NumericRangeMetaData> getRanges() {
 		return rangeList;
 	}
 	

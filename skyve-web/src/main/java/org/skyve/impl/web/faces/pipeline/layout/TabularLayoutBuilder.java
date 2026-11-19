@@ -21,6 +21,7 @@ import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.component.html.HtmlOutputText;
@@ -35,7 +36,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new view layout
 	 */
 	@Override
-	public UIComponent viewLayout(UIComponent component) {
+	public @Nullable UIComponent viewLayout(@Nullable UIComponent component) {
 		if (component != null) {
 			return component;
 		}
@@ -53,7 +54,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing components when provided, otherwise a new toolbar layout list
 	 */
 	@Override
-	public List<UIComponent> toolbarLayouts(List<UIComponent> components) {
+	public @Nullable List<UIComponent> toolbarLayouts(@Nullable List<UIComponent> components) {
 		if (components != null) {
 			return components;
 		}
@@ -73,7 +74,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param toolbarLayouts toolbar layout components
 	 */
 	@Override
-	public void addToolbarLayouts(List<UIComponent> toolbars, List<UIComponent> toolbarLayouts) {
+	public void addToolbarLayouts(@Nonnull List<UIComponent> toolbars, @Nonnull List<UIComponent> toolbarLayouts) {
 		for (int i = 0, s = toolbars.size(); i < s; i++) {
 			toolbars.get(i).getFacets().put("left", toolbarLayouts.get(i));
 /*		
@@ -92,7 +93,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param toolbarsOrLayouts toolbar or layout components
 	 */
 	@Override
-	public void addToolbarsOrLayouts(UIComponent view, List<UIComponent> toolbarsOrLayouts) {
+	public void addToolbarsOrLayouts(@Nonnull UIComponent view, @Nonnull List<UIComponent> toolbarsOrLayouts) {
 		view.getChildren().add(0, toolbarsOrLayouts.get(0));
 	}
 
@@ -103,7 +104,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new tab layout
 	 */
 	@Override
-	public UIComponent tabLayout(UIComponent component) {
+	public @Nullable UIComponent tabLayout(@Nullable UIComponent component) {
 		if (component != null) {
 			return component;
 		}
@@ -122,7 +123,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the tab layout
 	 */
 	@Override
-	public UIComponent addTabLayout(UIComponent component, UIComponent tab, UIComponent tabLayout) {
+	public @Nullable UIComponent addTabLayout(@Nullable UIComponent component, @Nonnull UIComponent tab, @Nonnull UIComponent tabLayout) {
 		if (component != null) {
 			return component;
 		}
@@ -138,7 +139,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param tab tab component
 	 */
 	@Override
-	public void addTab(UIComponent tabPane, UIComponent tab) {
+	public void addTab(@Nonnull UIComponent tabPane, @Nonnull UIComponent tab) {
 		tabPane.getChildren().add(tab);
 	}
 	
@@ -150,7 +151,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the parent context component
 	 */
 	@Override
-	public UIComponent addedTab(UIComponent component, UIComponent tab) {
+	public @Nullable UIComponent addedTab(@Nullable UIComponent component, @Nonnull UIComponent tab) {
 		if (component != null) {
 			return component;
 		}
@@ -166,7 +167,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param borderLayout border layout component
 	 */
 	@Override
-	public void addBorderLayout(UIComponent border, UIComponent borderLayout) {
+	public void addBorderLayout(@Nonnull UIComponent border, @Nonnull UIComponent borderLayout) {
 		border.getChildren().add(borderLayout);
 	}
 	
@@ -178,7 +179,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the border parent component
 	 */
 	@Override
-	public UIComponent addedBorderLayout(UIComponent component, UIComponent borderLayout) {
+	public @Nullable UIComponent addedBorderLayout(@Nullable UIComponent component, @Nonnull UIComponent borderLayout) {
 		if (component != null) {
 			return component;
 		}
@@ -194,7 +195,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new vbox layout
 	 */
 	@Override
-	public UIComponent vboxLayout(UIComponent component, VBox vbox) {
+	public @Nullable UIComponent vboxLayout(@Nullable UIComponent component, @Nonnull VBox vbox) {
 		if (component != null) {
 			return component;
 		}
@@ -205,7 +206,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 										null, // the parent container sets the percentage width
 										vbox.getPixelHeight(),
 										vbox.getPercentageHeight(),
-										vbox.getInvisibleConditionName(),
+										vbox.getInvisibleCondition(),
 										vbox.getWidgetId());
 		result.setColumns(1);
 		return result;
@@ -219,7 +220,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new hbox layout
 	 */
 	@Override
-	public UIComponent hboxLayout(UIComponent component, HBox hbox) {
+	public @Nullable UIComponent hboxLayout(@Nullable UIComponent component, @Nonnull HBox hbox) {
 		if (component != null) {
 			return component;
 		}
@@ -230,7 +231,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							null, // the parent container sets the percentage width
 							hbox.getPixelHeight(),
 							hbox.getPercentageHeight(),
-							hbox.getInvisibleConditionName(),
+							hbox.getInvisibleCondition(),
 							hbox.getWidgetId());
 	}
 
@@ -243,12 +244,12 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new sidebar layout
 	 */
 	@Override
-	public UIComponent sidebarLayout(UIComponent component, Sidebar sidebar, boolean createView) {
+	public @Nullable UIComponent sidebarLayout(@Nullable UIComponent component, @Nonnull Sidebar sidebar, boolean createView) {
 		if (component != null) {
 			return component;
 		}
 
-		HtmlPanelGroup result = panelGroup(false, false, true, sidebar.getInvisibleConditionName(), sidebar.getWidgetId());
+		HtmlPanelGroup result = panelGroup(false, false, true, sidebar.getInvisibleCondition(), sidebar.getWidgetId());
 		result.setStyleClass("sidebar" + (createView ? "Create" : "Edit"));
 		result.setStyle("display:none"); // shown by JS in SKYVE.PF.sidebar()
 		HtmlPanelGroup inner = panelGroup(false, false, true, null, null);
@@ -261,10 +262,9 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		rendered.append('(').append(managedBeanName).append(".currentBean ne null) and (");
 		rendered.append(managedBeanName).append(".currentBean.getBean() ne null) and (not ");
 		rendered.append(managedBeanName).append(".currentBean['").append(createView  ? "created" : "notCreated").append("'])");
-		String invisibleConditionName = sidebar.getInvisibleConditionName();
-		if (invisibleConditionName != null) {
-			rendered.append(" and (not ").append(managedBeanName).append(".currentBean['");
-			rendered.append(invisibleConditionName).append("'])");
+		String invisibleCondition = sidebar.getInvisibleCondition();
+		if (invisibleCondition != null) {
+			rendered.append(" and (not ").append(createConditionFragment(managedBeanName + ".currentBean", invisibleCondition)).append(')');
 		}
 		result.setValueExpression("rendered",
 									createValueExpressionFromFragment(null,
@@ -288,7 +288,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new form layout
 	 */
 	@Override
-	public UIComponent formLayout(UIComponent component, Form form) {
+	public @Nullable UIComponent formLayout(@Nullable UIComponent component, @Nonnull Form form) {
 		if (component != null) {
 			return component;
 		}
@@ -298,7 +298,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 							null, // the parent container sets the percentage width
 							form.getPixelHeight(), 
 							form.getPercentageHeight(),
-							form.getInvisibleConditionName(),
+							form.getInvisibleCondition(),
 							form.getWidgetId());
 	}
 	
@@ -310,7 +310,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new row component
 	 */
 	@Override
-	public UIComponent formRowLayout(UIComponent component, FormRow row) {
+	public @Nullable UIComponent formRowLayout(@Nullable UIComponent component, @Nonnull FormRow row) {
 		if (component != null) {
 			return component;
 		}
@@ -327,7 +327,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the row layout
 	 */
 	@Override
-	public UIComponent addFormRowLayout(UIComponent component, UIComponent formLayout, UIComponent rowLayout) {
+	public @Nullable UIComponent addFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent formLayout, @Nonnull UIComponent rowLayout) {
 		if (component != null) {
 			return component;
 		}
@@ -344,7 +344,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the row-layout parent
 	 */
 	@Override
-	public UIComponent addedFormRowLayout(UIComponent component, UIComponent rowLayout) {
+	public @Nullable UIComponent addedFormRowLayout(@Nullable UIComponent component, @Nonnull UIComponent rowLayout) {
 		if (component != null) {
 			return component;
 		}
@@ -370,17 +370,17 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param widgetHelpText widget help text
 	 */
 	@Override
-	public void layoutFormItemLabel(UIComponent formOrRowLayout,
-										UIComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemLabel(@Nonnull UIComponent formOrRowLayout,
+										@Nonnull UIComponent formItemComponent,
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem,
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText) {
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText) {
 		// The label
 		String label = currentFormItem.getLocalisedLabel();
 		if (label == null) {
@@ -426,20 +426,20 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param topLabel whether top-label mode is active
 	 */
 	@Override
-	public void layoutFormItemWidget(UIComponent formOrRowLayout,
-										UIComponent formItemComponent,
-										Form currentForm,
-										FormItem currentFormItem,
-										FormColumn currentFormColumn,
-										String widgetLabel,
+	public void layoutFormItemWidget(@Nonnull UIComponent formOrRowLayout,
+										@Nonnull UIComponent formItemComponent,
+										@Nonnull Form currentForm,
+										@Nonnull FormItem currentFormItem,
+										@Nonnull FormColumn currentFormColumn,
+										@Nullable String widgetLabel,
 										boolean widgetEscapeLabel,
 										int widgetColspan,
 										@Nullable String widgetRequiredMessage,
 										boolean widgetEscapeRequiredMessage,
-										String widgetInvisible,
-										String widgetHelpText,
+										@Nullable String widgetInvisible,
+										@Nullable String widgetHelpText,
 										boolean widgetEscapeHelp,
-										Integer widgetPixelWidth,
+										@Nullable Integer widgetPixelWidth,
 										boolean showLabel,
 										boolean topLabel) {
 		Integer rowspan = currentFormItem.getRowspan();
@@ -463,7 +463,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise a new signature layout
 	 */
 	@Override
-	public UIComponent contentSignatureLayout(UIComponent component, ContentSignature signature) {
+	public @Nullable UIComponent contentSignatureLayout(@Nullable UIComponent component, @Nonnull ContentSignature signature) {
 		if (component != null) {
 			return component;
 		}
@@ -472,7 +472,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 		HtmlPanelGrid result = (HtmlPanelGrid) a.createComponent(HtmlPanelGrid.COMPONENT_TYPE);
 		setId(result, null);
 		result.setColumns(1);
-		setInvisible(result, signature.getInvisibleConditionName(), null);
+		setInvisible(result, signature.getInvisibleCondition(), null);
 		return result;
 	}
 
@@ -494,18 +494,18 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the added component
 	 */
 	@Override
-	public UIComponent addToContainer(UIComponent component,
-										Container viewContainer,
-										UIComponent container, 
-										UIComponent componentToAdd, 
-										Integer pixelWidth, 
-										Integer responsiveWidth,
-										Integer percentageWidth,
-										Integer sm,
-										Integer md,
-										Integer lg,
-										Integer xl,
-										String widgetInvisible) {
+	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
+													@Nonnull Container viewContainer,
+													@Nonnull UIComponent container, 
+													@Nullable UIComponent componentToAdd, 
+													@Nullable Integer pixelWidth, 
+													@Nullable Integer responsiveWidth,
+													@Nullable Integer percentageWidth,
+													@Nullable Integer sm,
+													@Nullable Integer md,
+													@Nullable Integer lg,
+													@Nullable Integer xl,
+													@Nullable String widgetInvisible) {
 		if (component != null) {
 			return component;
 		}
@@ -546,7 +546,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @return existing component when provided, otherwise the parent context component
 	 */
 	@Override
-	public UIComponent addedToContainer(UIComponent component, Container viewContainer, UIComponent container) {
+	public @Nullable UIComponent addedToContainer(@Nullable UIComponent component, @Nonnull Container viewContainer, @Nonnull UIComponent container) {
 		if (component != null) {
 			return component;
 		}
@@ -576,7 +576,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param requiredMessage optional required-message text
 	 * @return configured output label
 	 */
-	protected OutputLabel label(String value, boolean escapeLabel, String forId, @Nullable String requiredMessage) {
+	protected @Nonnull OutputLabel label(@Nullable String value, boolean escapeLabel, @Nonnull String forId, @Nullable String requiredMessage) {
 		OutputLabel result = (OutputLabel) a.createComponent(OutputLabel.COMPONENT_TYPE);
 		result.setEscape(false);
 		setId(result, null);
@@ -602,19 +602,19 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param percentageWidth optional percentage width
 	 * @param pixelHeight optional pixel height
 	 * @param percentageHeight optional percentage height
-	 * @param invisibleConditionName invisible condition name
+	 * @param invisibleCondition invisible condition name
 	 * @param widgetId widget id
 	 * @return configured panel grid
 	 */
-	protected PanelGrid panelGrid(Integer pixelWidth, 
-									Integer responsiveWidth,
-									Integer percentageWidth, 
-									Integer pixelHeight,
-									Integer percentageHeight,
-									String invisibleConditionName,
-									String widgetId) {
+	protected @Nonnull PanelGrid panelGrid(@Nullable Integer pixelWidth, 
+											@Nullable Integer responsiveWidth,
+											@Nullable Integer percentageWidth, 
+											@Nullable Integer pixelHeight,
+											@Nullable Integer percentageHeight,
+											@Nullable String invisibleCondition,
+											@Nullable String widgetId) {
 		PanelGrid result = (PanelGrid) a.createComponent(PanelGrid.COMPONENT_TYPE);
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 		setSizeAndTextAlignStyle(result, 
 									null, 
 									pixelWidth, 
@@ -636,19 +636,19 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 * @param percentageWidth optional percentage width
 	 * @param pixelHeight optional pixel height
 	 * @param percentageHeight optional percentage height
-	 * @param invisibleConditionName invisible condition name
+	 * @param invisibleCondition invisible condition name
 	 * @param widgetId widget id
 	 * @return configured panel
 	 */
-	protected Panel panel(Integer pixelWidth, 
-							Integer responsiveWidth,
-							Integer percentageWidth, 
-							Integer pixelHeight,
-							Integer percentageHeight,
-							String invisibleConditionName,
-							String widgetId) {
+	protected @Nonnull Panel panel(@Nullable Integer pixelWidth, 
+									@Nullable Integer responsiveWidth,
+									@Nullable Integer percentageWidth, 
+									@Nullable Integer pixelHeight,
+									@Nullable Integer percentageHeight,
+									@Nullable String invisibleCondition,
+									@Nullable String widgetId) {
 		Panel result = (Panel) a.createComponent(Panel.COMPONENT_TYPE);
-		setInvisible(result, invisibleConditionName, null);
+		setInvisible(result, invisibleCondition, null);
 		setSizeAndTextAlignStyle(result, 
 									null, 
 									pixelWidth, 
@@ -666,7 +666,7 @@ public class TabularLayoutBuilder extends LayoutBuilder {
 	 *
 	 * @return configured row component
 	 */
-	private Row row() {
+	private @Nonnull Row row() {
 		Row result = (Row) a.createComponent(Row.COMPONENT_TYPE);
 		setId(result, null);
 		return result;

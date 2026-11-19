@@ -101,6 +101,8 @@ SKYVE.Util = (function () {
 		ckEditorConfigFileUrl: null,
 		mapCentre: null,
 		mapZoom: 1,
+		// The server's thumbnail.maximumDimension - the largest thumbnail side it will make
+		thumbnailMaximumDimension: 2048,
 		CONTEXT_URL: context,
 		allowedReportFormats: null,
 
@@ -111,6 +113,33 @@ SKYVE.Util = (function () {
 		 */
 		unsanitiseBinding: function (binding) {
 			return binding.replace(/\_(\d*)\_/g, "[$1]").replace(/\_/g, ".");
+		},
+
+		/**
+		 * Returns the thumbnail size to request for an image preview box.
+		 * The box's larger side, times the screen's pixel ratio so the image is sharp on high resolution
+		 * screens, is rounded up to a step that doubles from 64, where the last step is
+		 * thumbnailMaximumDimension, so the server caches only a few thumbnails per image, however the
+		 * box is sized. With the default of 2048 the steps are 64, 128, 256, 512, 1024 and 2048.
+		 * The server fits the image inside this square, keeping its aspect ratio.
+		 * This matches TabularComponentBuilder.contentPreviewSize() used by PrimeFaces, apart from the pixel ratio.
+		 * @param {number} [width] - box width in pixels; anything else counts as unknown.
+		 * @param {number} [height] - box height in pixels; anything else counts as unknown.
+		 * @returns {number} the step; 1024 (or the maximum if smaller) when neither side is known.
+		 */
+		contentPreviewSize: function (width, height) {
+			const maximum = SKYVE.Util.thumbnailMaximumDimension;
+			const known = [width, height].filter((n) => typeof n === "number" && n > 0);
+			if (known.length === 0) {
+				return Math.min(1024, maximum);
+			}
+			const ratio = window.devicePixelRatio > 1 ? window.devicePixelRatio : 1;
+			const side = Math.ceil(Math.max(...known) * ratio);
+			let step = 64;
+			while (step < side && step < maximum) {
+				step *= 2;
+			}
+			return Math.min(step, maximum);
 		},
 
 		/**

@@ -3,6 +3,7 @@ package org.skyve.impl.web.faces.actions;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import org.primefaces.model.charts.ChartData;
 import org.primefaces.model.charts.ChartModel;
@@ -46,6 +47,9 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Create a PF chart model from a Skyve model.
  */
@@ -64,18 +68,21 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param model the chart model name or metadata definition
 	 * @param type the target chart type
 	 */
-	public ChartAction(FacesView facesView, Object model, ChartType type) {
+	public ChartAction(@Nonnull FacesView facesView, @Nonnull Object model, @Nonnull ChartType type) {
 		this.facesView = facesView;
 		this.model = model;
 		this.type = type;
 	}
 
 	@Override
-	public ChartModel callback() throws Exception {
+	public @Nonnull ChartModel callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ChartAction - CHART {}", model);
 
 		AbstractPersistence persistence = AbstractPersistence.get();
 		Bean targetBean = ActionUtil.getTargetBeanForView(facesView);
+		if (targetBean == null) {
+			throw new IllegalStateException("Cannot chart " + model + " as the FacesView has no target bean");
+		}
     	User user = persistence.getUser();
     	Customer customer = user.getCustomer();
     	Module targetModule = customer.getModule(targetBean.getBizModule());
@@ -108,7 +115,7 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @return the PrimeFaces chart model
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static ChartModel pfChartModel(ChartType type, org.skyve.metadata.view.model.chart.ChartData data) {
+	public static @Nonnull ChartModel pfChartModel(@Nonnull ChartType type, @Nonnull org.skyve.metadata.view.model.chart.ChartData data) {
 		Title title = title(data);
 
 		ChartModel result = null;
@@ -258,7 +265,7 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param data the source chart data
 	 * @return the title configuration, or {@code null} when no title is defined
 	 */
-	private static Title title(org.skyve.metadata.view.model.chart.ChartData data) {
+	private static @Nullable Title title(@Nonnull org.skyve.metadata.view.model.chart.ChartData data) {
 		Title result = null;
 		String text = data.getTitle();
 		if (text != null) {
@@ -275,13 +282,15 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param colour the color to convert
 	 * @return the CSS color string, or {@code null} when the color is {@code null}
 	 */
-	private static String web(Color colour) {
+	static @Nullable String web(@Nullable Color colour) {
 		if (colour == null) {
 			return null;
 		}
 		int alpha = colour.getAlpha();
 		if (alpha > 0) {
-			return String.format("rgba(%d,%d,%d,%.2f)",
+			// CSS: English digits and decimal point whatever the JVM's locale (a German JVM writes 0,50)
+			return String.format(Locale.ENGLISH,
+									"rgba(%d,%d,%d,%.2f)",
 									Integer.valueOf(colour.getRed()),
 									Integer.valueOf(colour.getGreen()),
 									Integer.valueOf(colour.getBlue()),
@@ -296,7 +305,7 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param colours the colors to convert
 	 * @return the converted list, or {@code null} when the source list is {@code null}
 	 */
-	private static List<String> web(List<Color> colours) {
+	private static @Nullable List<String> web(@Nullable List<Color> colours) {
 		if (colours == null) {
 			return null;
 		}
@@ -313,8 +322,8 @@ public class ChartAction extends FacesAction<ChartModel> {
 	 * @param model the PrimeFaces model to post-process
 	 * @param data the source chart data that may specify a post-processor class
 	 */
-	private static void postProcess(ChartModel model,
-										org.skyve.metadata.view.model.chart.ChartData data) {
+	private static void postProcess(@Nonnull ChartModel model,
+										@Nonnull org.skyve.metadata.view.model.chart.ChartData data) {
 		String postProcessor = data.getPrimeFacesChartPostProcessorClassName();
 		if (postProcessor == null) {
 			Customer c = CORE.getCustomer();

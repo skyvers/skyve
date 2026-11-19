@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletConfig;
 import jakarta.servlet.ServletException;
@@ -30,7 +31,7 @@ public class DocsServlet extends HttpServlet {
 	 * @throws ServletException if servlet initialization fails
 	 */
 	@Override
-	public void init(ServletConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull ServletConfig config) throws ServletException {
 		super.init(config);
 
 		if (StringUtils.isNotBlank(config.getInitParameter("docsPath"))) {
@@ -47,7 +48,8 @@ public class DocsServlet extends HttpServlet {
 	 * @throws IOException if forwarding fails due to I/O errors
 	 */
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest req,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse resp) throws ServletException, IOException {
 		// redirect will show the docsUri in the browser url bar
 		// forward will keep the url the same as the mapped servlet path in the web.xml
 		RequestDispatcher dispatcher = getServletContext().getRequestDispatcher(docsUri);

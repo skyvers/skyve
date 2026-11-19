@@ -18,6 +18,8 @@ import org.skyve.report.Reporting;
 import org.skyve.util.MailAttachment;
 
 import freemarker.template.Template;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.inject.Alternative;
 import net.sf.jasperreports.engine.JasperPrint;
 
@@ -61,13 +63,13 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report execution fails.
 	 */
 	@Override
-	public JasperPrint runJasperBeanReport(User user,
-											Document document,
-											String reportName,
-											Map<String, Object> parameters,
-											Bean bean,
-											ReportFormat format,
-											OutputStream out)
+	public @Nullable JasperPrint runJasperBeanReport(@Nonnull User user,
+														@Nonnull Document document,
+														@Nonnull String reportName,
+														@Nonnull Map<String, Object> parameters,
+														@Nullable Bean bean,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperBeanReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -85,12 +87,12 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report execution fails.
 	 */
 	@Override
-	public JasperPrint runJasperSQLReport(User user,
-											Document document,
-											String reportName,
-											Map<String, Object> parameters,
-											ReportFormat format,
-											OutputStream out)
+	public @Nullable JasperPrint runJasperSQLReport(@Nonnull User user,
+														@Nonnull Document document,
+														@Nonnull String reportName,
+														@Nonnull Map<String, Object> parameters,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperSQLReport(user, document, reportName, parameters, format, out);
 	}
@@ -109,13 +111,13 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report execution fails.
 	 */
 	@Override
-	public JasperPrint runJasperReport(User user,
-										Document document,
-										String reportName,
-										Map<String, Object> parameters,
-										Bean bean,
-										ReportFormat format,
-										OutputStream out)
+	public @Nullable JasperPrint runJasperReport(@Nonnull User user,
+													@Nonnull Document document,
+													@Nonnull String reportName,
+													@Nonnull Map<String, Object> parameters,
+													@Nullable Bean bean,
+													@Nonnull ReportFormat format,
+													@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperBeanReport(user, document, reportName, parameters, bean, format, out);
 	}
@@ -131,10 +133,10 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report execution fails.
 	 */
 	@Override
-	public List<JasperPrint> runJasperReport(User user,
-												List<ReportParameters> reportParameters,
-												ReportFormat format,
-												OutputStream out)
+	public @Nonnull List<JasperPrint> runJasperReport(@Nonnull User user,
+														@Nonnull List<ReportParameters> reportParameters,
+														@Nonnull ReportFormat format,
+														@Nonnull OutputStream out)
 	throws Exception {
 		return EXT.getReporting().runJasperReport(user, reportParameters, format, out);
 	}
@@ -148,7 +150,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if rendering fails.
 	 */
 	@Override
-	public void runJasperReport(JasperPrint jasperPrint, ReportFormat format, OutputStream out) throws Exception {
+	public void runJasperReport(@Nonnull JasperPrint jasperPrint, @Nonnull ReportFormat format, @Nonnull OutputStream out) throws Exception {
 		EXT.getReporting().runJasperReport(jasperPrint, format, out);
 	}
 
@@ -161,7 +163,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if rendering fails.
 	 */
 	@Override
-	public void runJasperReport(List<JasperPrint> jasperPrintList, ReportFormat format, OutputStream out)
+	public void runJasperReport(@Nonnull List<JasperPrint> jasperPrintList, @Nonnull ReportFormat format, @Nonnull OutputStream out)
 	throws Exception {
 		EXT.getReporting().runJasperReport(jasperPrintList, format, out);
 	}
@@ -177,10 +179,10 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report generation fails.
 	 */
 	@Override
-	public MailAttachment getMailAttachmentFromJasperReport(String reportModuleName,
-																String reportDocumentName,
-																String reportName,
-																Map<String, Object> parameters)
+	public @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull String reportModuleName,
+																		@Nonnull String reportDocumentName,
+																		@Nonnull String reportName,
+																		@Nonnull Map<String, Object> parameters)
 	throws Exception {
 		return EXT.getReporting().getMailAttachmentFromJasperReport(reportModuleName, reportDocumentName, reportName, parameters);
 	}
@@ -193,7 +195,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report generation fails.
 	 */
 	@Override
-	public MailAttachment getMailAttachmentFromJasperReport(List<ReportParameters> reportParameters)
+	public @Nonnull MailAttachment getMailAttachmentFromJasperReport(@Nonnull List<ReportParameters> reportParameters)
 	throws Exception {
 		return EXT.getReporting().getMailAttachmentFromJasperReport(reportParameters);
 	}
@@ -205,7 +207,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @param templateMarkup the template markup content.
 	 */
 	@Override
-	public void addTemplate(String templateName, String templateMarkup) {
+	public void addTemplate(@Nonnull String templateName, @Nonnull String templateMarkup) {
 		EXT.getReporting().addTemplate(templateName, templateMarkup);
 	}
 
@@ -217,7 +219,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if template resolution fails.
 	 */
 	@Override
-	public Template getFreemarkerTemplate(String templateName) throws Exception {
+	public @Nonnull Template getFreemarkerTemplate(@Nonnull String templateName) throws Exception {
 		return EXT.getReporting().getFreemarkerTemplate(templateName);
 	}
 
@@ -229,7 +231,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if PDF generation fails.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTML(InputStream in, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTML(@Nonnull InputStream in, @Nonnull File outputFile) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(in, outputFile);
 	}
 
@@ -241,7 +243,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if PDF generation fails.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTML(String html, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTML(@Nonnull String html, @Nonnull File outputFile) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(html, outputFile);
 	}
 
@@ -253,7 +255,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if PDF generation fails.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTMLURL(String url, File outputFile) throws Exception {
+	public void generateFreemarkerPDFFromHTMLURL(@Nonnull String url, @Nonnull File outputFile) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(url, outputFile);
 	}
 
@@ -265,7 +267,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if PDF generation fails.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTML(InputStream in, OutputStream out) throws Exception {
+	public void generateFreemarkerPDFFromHTML(@Nonnull InputStream in, @Nonnull OutputStream out) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(in, out);
 	}
 
@@ -277,7 +279,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if PDF generation fails.
 	 */
 	@Override
-	public void generateFreemarkerPDFFromHTML(String html, OutputStream out) throws Exception {
+	public void generateFreemarkerPDFFromHTML(@Nonnull String html, @Nonnull OutputStream out) throws Exception {
 		EXT.getReporting().generateFreemarkerPDFFromHTML(html, out);
 	}
 
@@ -291,7 +293,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report creation fails.
 	 */
 	@Override
-	public String createFreemarkerBeanReport(Bean bean, String reportName, Map<String, Object> reportParameters)
+	public @Nonnull String createFreemarkerBeanReport(@Nonnull Bean bean, @Nonnull String reportName, @Nullable Map<String, Object> reportParameters)
 	throws Exception {
 		return EXT.getReporting().createFreemarkerBeanReport(bean, reportName, reportParameters);
 	}
@@ -307,10 +309,10 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report creation fails.
 	 */
 	@Override
-	public File createFreemarkerBeanReportPDF(Bean bean,
-												String reportName,
-												Map<String, Object> reportParameters,
-												String reportFilename)
+	public @Nonnull File createFreemarkerBeanReportPDF(@Nonnull Bean bean,
+														@Nonnull String reportName,
+														@Nullable Map<String, Object> reportParameters,
+														@Nonnull String reportFilename)
 	throws Exception {
 		return EXT.getReporting().createFreemarkerBeanReportPDF(bean, reportName, reportParameters, reportFilename);
 	}
@@ -324,7 +326,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report creation fails.
 	 */
 	@Override
-	public String createFreemarkerReport(String templateName, Map<String, Object> reportParameters) throws Exception {
+	public @Nonnull String createFreemarkerReport(@Nonnull String templateName, @Nullable Map<String, Object> reportParameters) throws Exception {
 		return EXT.getReporting().createFreemarkerReport(templateName, reportParameters);
 	}
 
@@ -338,9 +340,9 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report creation fails.
 	 */
 	@Override
-	public File createFreemarkerReportPDF(String templateName,
-											Map<String, Object> reportParameters,
-											String reportFilename)
+	public @Nonnull File createFreemarkerReportPDF(@Nonnull String templateName,
+													@Nullable Map<String, Object> reportParameters,
+													@Nonnull String reportFilename)
 	throws Exception {
 		return EXT.getReporting().createFreemarkerReportPDF(templateName, reportParameters, reportFilename);
 	}
@@ -356,10 +358,10 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report generation fails.
 	 */
 	@Override
-	public Download downloadFreemarkerReport(String reportName,
-												Map<String, Object> reportParameters,
-												ReportFormat format,
-												String downloadFilename)
+	public @Nonnull Download downloadFreemarkerReport(@Nonnull String reportName,
+														@Nullable Map<String, Object> reportParameters,
+														@Nonnull ReportFormat format,
+														@Nonnull String downloadFilename)
 	throws Exception {
 		return EXT.getReporting().downloadFreemarkerReport(reportName, reportParameters, format, downloadFilename);
 	}
@@ -373,7 +375,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if report execution fails.
 	 */
 	@Override
-	public String runFreemarkerReport(String reportName, Map<String, Object> reportParameters) throws Exception {
+	public @Nonnull String runFreemarkerReport(@Nonnull String reportName, @Nullable Map<String, Object> reportParameters) throws Exception {
 		return EXT.getReporting().runFreemarkerReport(reportName, reportParameters);
 	}
 
@@ -386,7 +388,7 @@ public class ReportingInjectable implements Reporting, Serializable {
 	 * @throws Exception if template resolution fails.
 	 */
 	@Override
-	public Template getBeanReport(Bean bean, String reportName) throws Exception {
+	public @Nonnull Template getBeanReport(@Nonnull Bean bean, @Nonnull String reportName) throws Exception {
 		return EXT.getReporting().getBeanReport(bean, reportName);
 	}
 }

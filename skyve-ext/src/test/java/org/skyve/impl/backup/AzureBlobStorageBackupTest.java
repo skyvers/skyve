@@ -2,8 +2,8 @@ package org.skyve.impl.backup;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,7 +18,7 @@ import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.HashMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.util.UtilImpl;
@@ -33,28 +33,28 @@ import com.azure.storage.blob.models.BlobCopyInfo;
 import com.azure.storage.blob.models.CopyStatusType;
 
 @SuppressWarnings("static-method")
-public class AzureBlobStorageBackupTest {
+class AzureBlobStorageBackupTest {
 
 	@Test
-	public void constructorCreatesInstance() {
+	void constructorCreatesInstance() {
 		AzureBlobStorageBackup backup = new AzureBlobStorageBackup();
 		assertNotNull(backup);
 	}
 
 	@Test
-	public void getConnectionStringThrowsWhenConfigurationIsMissing() throws Exception {
+	void getConnectionStringThrowsWhenConfigurationIsMissing() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		withBackupProperties(properties, () -> assertPrivateConfigThrows("getConnectionString"));
 	}
 
 	@Test
-	public void getContainerNameThrowsWhenConfigurationIsMissing() throws Exception {
+	void getContainerNameThrowsWhenConfigurationIsMissing() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		withBackupProperties(properties, () -> assertPrivateConfigThrows("getContainerName"));
 	}
 
 	@Test
-	public void privateConfigAccessorsReturnConfiguredValues() throws Exception {
+	void privateConfigAccessorsReturnConfiguredValues() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY, "UseDevelopmentStorage=true");
 		properties.put(AzureBlobStorageBackup.AZURE_CONTAINER_NAME_KEY, "skyve-backups");
@@ -66,7 +66,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void moveBackupCopiesThenDeletesSource() {
+	void moveBackupCopiesThenDeletesSource() {
 		RecordingAzureBlobStorageBackup backup = new RecordingAzureBlobStorageBackup();
 
 		backup.moveBackup("source.zip", "destination.zip");
@@ -77,7 +77,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copyStartsServerSideCopyFromTheSourceUrlAndWaitsForSuccess() throws Exception {
+	void copyStartsServerSideCopyFromTheSourceUrlAndWaitsForSuccess() throws Exception {
 		CopyFixture fixture = new CopyFixture();
 		when(fixture.poller.waitForCompletion(any(Duration.class)))
 				.thenReturn(new PollResponse<>(LongRunningOperationStatus.SUCCESSFULLY_COMPLETED, copyInfo(CopyStatusType.SUCCESS, null)));
@@ -90,7 +90,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copyDeletesPartialDestinationAndThrowsWhenTheCopyFails() {
+	void copyDeletesPartialDestinationAndThrowsWhenTheCopyFails() {
 		CopyFixture fixture = new CopyFixture();
 		when(fixture.poller.waitForCompletion(any(Duration.class)))
 				.thenReturn(new PollResponse<>(LongRunningOperationStatus.FAILED, copyInfo(CopyStatusType.FAILED, "server busy")));
@@ -104,7 +104,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copyAbortsAndDeletesPartialDestinationWhenTheCopyTimesOut() {
+	void copyAbortsAndDeletesPartialDestinationWhenTheCopyTimesOut() {
 		CopyFixture fixture = new CopyFixture();
 		when(fixture.poller.waitForCompletion(any(Duration.class))).thenThrow(new IllegalStateException("timed out"));
 
@@ -117,7 +117,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copySourceUrlIsThePlainBlobUrlForAnAccountKeyConnectionString() throws Exception {
+	void copySourceUrlIsThePlainBlobUrlForAnAccountKeyConnectionString() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
 				"DefaultEndpointsProtocol=https;AccountName=account;AccountKey=c2VjcmV0;EndpointSuffix=core.windows.net");
@@ -126,7 +126,8 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copySourceUrlCarriesTheSharedAccessSignatureFromTheConnectionString() throws Exception {
+	@SuppressWarnings("java:S5976") // each connection string shape is a named scenario; separate tests read better than a parameter table
+	void copySourceUrlCarriesTheSharedAccessSignatureFromTheConnectionString() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
 				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=sv=2024-11-04&ss=b&srt=sco&sp=rwdlac&sig=abc%2Fdef%3D");
@@ -135,7 +136,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copySourceUrlIgnoresASharedAccessSignatureKeyTheSdkWouldNotMatch() throws Exception {
+	void copySourceUrlIgnoresASharedAccessSignatureKeyTheSdkWouldNotMatch() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
 				"AccountName=account;AccountKey=c2VjcmV0;sharedaccesssignature=sv=2024-11-04&sig=abc");
@@ -144,7 +145,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copySourceUrlUsesTheLastSharedAccessSignatureLikeTheSdk() throws Exception {
+	void copySourceUrlUsesTheLastSharedAccessSignatureLikeTheSdk() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
 				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=sig=first;SharedAccessSignature=sig=second");
@@ -153,7 +154,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void copySourceUrlStripsALeadingQuestionMarkFromTheSharedAccessSignature() throws Exception {
+	void copySourceUrlStripsALeadingQuestionMarkFromTheSharedAccessSignature() throws Exception {
 		HashMap<String, Object> properties = new HashMap<>();
 		properties.put(AzureBlobStorageBackup.AZURE_CONNECTION_STRING_KEY,
 				"BlobEndpoint=https://account.blob.core.windows.net/;SharedAccessSignature=?sv=2024-11-04&sig=abc");
@@ -162,7 +163,7 @@ public class AzureBlobStorageBackupTest {
 	}
 
 	@Test
-	public void getDirectoryNameUsesLowerCaseCustomerName() throws Exception {
+	void getDirectoryNameUsesLowerCaseCustomerName() throws Exception {
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
 		Customer customer = mock(Customer.class);
@@ -253,7 +254,6 @@ public class AzureBlobStorageBackupTest {
 
 	private static final class CopyFixture {
 		private final BlobClient dest = mock(BlobClient.class);
-		@SuppressWarnings("unchecked")
 		private final SyncPoller<BlobCopyInfo, Void> poller = mock(SyncPoller.class);
 
 		private CopyFixture() {

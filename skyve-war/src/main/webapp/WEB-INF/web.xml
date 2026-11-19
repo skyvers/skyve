@@ -27,7 +27,6 @@
 				/leaflet/
 				/semantic24/
 				/skyve/
-				/skyvevue/
 				/sse/
 				/wicket/
 				/zxcvbn/
@@ -148,6 +147,7 @@
 					/jakarta.faces.resource/
 					/device.xhtml
 					/upload.xhtml
+					/imageMarkup.xhtml
         		]]>
         	</param-value>
         </init-param>
@@ -301,6 +301,14 @@
 		<dispatcher>ERROR</dispatcher>
 	</filter-mapping>
 
+    <!--
+    WARNING: /rest/* is forbidden by default (ForbiddenFilter answers 403).
+    Do not swap ForbiddenFilter for an authenticating filter (BasicAuthFilter, SessionFilter, ...) without reading this.
+    RestService's insert, update and delete routes check NO document permissions: they save whatever the signed-in
+    caller sends, and update copies every attribute (including collections). With REST enabled a signed-in user could,
+    for example, add roles to their own admin.User. Only enable REST for callers you trust with the whole data store,
+    or add document permission checks to RestService first (known; not fixed, decision of 2026-11-19).
+    -->
     <filter>
         <display-name>RestFilter</display-name>
         <filter-name>RestFilter</filter-name>
@@ -538,6 +546,17 @@
 	<servlet-mapping>
 		<servlet-name>SmartClientEditServlet</servlet-name>
 		<url-pattern>/smartedit</url-pattern>
+	</servlet-mapping>
+
+	<!-- Receives the steps of a SAIL recording, for sessions that are recording (see docs/sail.md, Recording) -->
+	<servlet>
+		<servlet-name>SailRecordingServlet</servlet-name>
+		<servlet-class>org.skyve.impl.sail.recording.SailRecordingServlet</servlet-class>
+		<async-supported>true</async-supported>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>SailRecordingServlet</servlet-name>
+		<url-pattern>/sailrecording</url-pattern>
 	</servlet-mapping>
 
 	<servlet>

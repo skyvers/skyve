@@ -34,6 +34,9 @@ import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.types.DateOnly;
 import org.skyve.metadata.customer.Customer;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Adapts an Excel workbook.
  * This class collects SheetData (adaption of Excel sheets).
@@ -84,7 +87,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @param customer	The current customer (for the logged in user).
 	 * @param workbook	The workbook.
 	 */
-	public POIWorkbook(Customer customer, Workbook workbook, UploadException e) {
+	public POIWorkbook(@Nonnull Customer customer, @Nonnull Workbook workbook, @Nonnull UploadException e) {
 		this.workbook = workbook;
 		ooxmlFormat = (workbook instanceof XSSFWorkbook);
 
@@ -119,7 +122,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public POISheet getSheet(SheetKey key) {
+	public @Nullable POISheet getSheet(@Nullable SheetKey key) {
 		return sheets.get(key);
 	}
 
@@ -127,7 +130,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void addSheet(SheetKey key, BizPortSheet sheet) {
+	public void addSheet(@Nonnull SheetKey key, @Nonnull BizPortSheet sheet) {
 		if (workbook != null) {
 			throw new IllegalStateException("Workbook has already been materialized");
 		}
@@ -141,7 +144,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public POISheet removeSheet(SheetKey key) {
+	public @Nullable POISheet removeSheet(@Nonnull SheetKey key) {
 		if (workbook != null) {
 			throw new IllegalStateException("Workbook has already been materialized");
 		}
@@ -153,7 +156,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public Set<SheetKey> getSheetKeys() {
+	public @Nonnull Set<SheetKey> getSheetKeys() {
 		return sheets.keySet();
 	}
 
@@ -223,7 +226,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void write(OutputStream out) throws IOException {
+	public void write(@Nonnull OutputStream out) throws IOException {
 		if (workbook == null) {
 			throw new IllegalStateException("Workbook has not been materialized");
 		}
@@ -233,6 +236,9 @@ public final class POIWorkbook implements BizPortWorkbook {
 			int i = 0;
 			for (String columnBinding : sheet.getColumnBindings()) {
 				BizPortColumn column = sheet.getColumn(columnBinding);
+				if (column == null) {
+					throw new IllegalStateException("Sheet " + sheet.getTitle() + " has no column for binding " + columnBinding);
+				}
 				if (column.getReferencedSheet() != null) {
 					sheet.sheet.autoSizeColumn(i);
 					i++;
@@ -249,11 +255,11 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public BizPortFormat getFormat() {
+	public @Nonnull BizPortFormat getFormat() {
 		return ooxmlFormat ? BizPortFormat.xlsx : BizPortFormat.xls;
 	}
 
-	private String generateValidUniqueSheetTitle(String proposedSheetTitle) {
+	private @Nonnull String generateValidUniqueSheetTitle(@Nonnull String proposedSheetTitle) {
 		String result = proposedSheetTitle;
 		if (proposedSheetTitle.length() > 29) {
 			result = proposedSheetTitle.substring(0, 29);
@@ -277,7 +283,7 @@ public final class POIWorkbook implements BizPortWorkbook {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value, boolean forceNumericNullToZero, boolean bold) {
+	public static void putPOICellValue(@Nonnull XSSFSheet sheet, int rowNum, int colNum, @Nonnull CellType cellType, @Nullable Object value, boolean forceNumericNullToZero, boolean bold) {
 		@SuppressWarnings("resource")
 		XSSFWorkbook workbook = sheet.getWorkbook();
 
@@ -350,14 +356,14 @@ public final class POIWorkbook implements BizPortWorkbook {
 	/**
 	 * Adds or replaces the pOICellValue value.
 	 */
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, Object value) {
+	public static void putPOICellValue(@Nonnull XSSFSheet sheet, int rowNum, int colNum, @Nonnull CellType cellType, @Nullable Object value) {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, false);
 	}
 
 	/**
 	 * Adds or replaces the pOICellValue value.
 	 */
-	public static void putPOICellValue(XSSFSheet sheet, int rowNum, int colNum, CellType cellType, String value, boolean bold) {
+	public static void putPOICellValue(@Nonnull XSSFSheet sheet, int rowNum, int colNum, @Nonnull CellType cellType, @Nullable String value, boolean bold) {
 		putPOICellValue(sheet, rowNum, colNum, cellType, value, false, bold);
 	}
 

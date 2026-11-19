@@ -8,6 +8,8 @@ import javax.xml.validation.SchemaFactory;
 import org.dom4j.io.SAXReader;
 import org.xml.sax.SAXException;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Utility for constructing securely configured XML parser components used by DOM4J.
  * <p>
@@ -56,7 +58,7 @@ public final class SecureDom4j {
 	 * @throws SAXException if the underlying XMLReader fails to apply a feature or
 	 *         a SAX-level error occurs during reader creation
 	 */
-	public static SAXReader newSAXReader() throws SAXException, ParserConfigurationException {
+	public static @Nonnull SAXReader newSAXReader() throws SAXException, ParserConfigurationException {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		factory.setNamespaceAware(true);
 		factory.setXIncludeAware(false);
@@ -88,7 +90,7 @@ public final class SecureDom4j {
 	 * @throws SAXException if the schema factory fails to apply a feature or property,
 	 *         or if a SAX-level configuration error occurs
 	 */
-	public static SchemaFactory newSchemaFactory() throws SAXException {
+	public static @Nonnull SchemaFactory newSchemaFactory() throws SAXException {
 		// Create factory
 		@SuppressWarnings("java:S2755")
 		SchemaFactory result = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);

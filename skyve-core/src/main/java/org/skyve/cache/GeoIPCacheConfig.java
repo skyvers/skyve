@@ -2,6 +2,8 @@ package org.skyve.cache;
 
 import org.skyve.util.IPGeolocation;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Configures the GeoIP lookup cache.
  *
@@ -55,7 +57,7 @@ public class GeoIPCacheConfig extends EHCacheConfig<String, IPGeolocation> {
 	 * @return config details in JSON-like form
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		StringBuilder sb = new StringBuilder(128);
 		sb.append("{heapSizeEntries:").append(getHeapSizeEntries());
 		sb.append(",offHeapSizeInMB:").append(getOffHeapSizeInMB());

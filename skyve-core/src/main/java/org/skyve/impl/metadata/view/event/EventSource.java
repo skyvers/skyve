@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.event;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Base interface for all view widgets that can declare client-side event
  * handler lists.
@@ -11,5 +13,5 @@ import org.skyve.metadata.SerializableMetaData;
  * list property for its event type.
  */
 public interface EventSource extends SerializableMetaData {
-	public String getSource();
+	public @Nullable String getSource();
 }

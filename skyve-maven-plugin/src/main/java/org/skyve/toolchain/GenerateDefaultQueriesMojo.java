@@ -11,6 +11,8 @@ import org.skyve.toolchain.config.GenerateDefaultQueriesConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates the default query metadata for a Skyve customer and module.
  *
@@ -52,7 +54,7 @@ public class GenerateDefaultQueriesMojo extends AbstractSkyveMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void generateDefaultQueries(String[] arguments) throws Exception {
+	void generateDefaultQueries(@Nonnull String[] arguments) throws Exception {
 		QueryGenerator.main(arguments);
 	}
 }

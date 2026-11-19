@@ -2,6 +2,9 @@ package org.skyve.domain;
 
 import java.util.Map;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A dynamic (schema-less) {@link Bean} that also implements {@link ChildBean}.
  *
@@ -21,7 +24,7 @@ public class DynamicChildBean extends DynamicBean implements ChildBean<Bean> {
 	 * @param bizDocument the bizDocument
 	 * @param properties the properties
 	 */
-	public DynamicChildBean(String bizModule, String bizDocument, Map<String, Object> properties) {
+	public DynamicChildBean(@Nonnull String bizModule, @Nonnull String bizDocument, @Nonnull Map<String, Object> properties) {
 		super(bizModule, bizDocument, properties);
 	}
 
@@ -30,7 +33,7 @@ public class DynamicChildBean extends DynamicBean implements ChildBean<Bean> {
 	 * @return the result
 	 */
 	@Override
-	public Bean getParent() {
+	public @Nullable Bean getParent() {
 		return (Bean) get(ChildBean.PARENT_NAME);
 	}
 
@@ -39,7 +42,7 @@ public class DynamicChildBean extends DynamicBean implements ChildBean<Bean> {
 	 * @param parent the parent
 	 */
 	@Override
-	public void setParent(Bean parent) {
+	public void setParent(@Nullable Bean parent) {
 		set(ChildBean.PARENT_NAME, parent);
 	}
 
@@ -48,7 +51,7 @@ public class DynamicChildBean extends DynamicBean implements ChildBean<Bean> {
 	 * @return the result
 	 */
 	@Override
-	public Integer getBizOrdinal() {
+	public @Nullable Integer getBizOrdinal() {
 		return (Integer) get(Bean.ORDINAL_NAME);
 	}
 
@@ -57,7 +60,7 @@ public class DynamicChildBean extends DynamicBean implements ChildBean<Bean> {
 	 * @param bizOrdinal the bizOrdinal
 	 */
 	@Override
-	public void setBizOrdinal(Integer bizOrdinal) {
+	public void setBizOrdinal(@Nullable Integer bizOrdinal) {
 		set(Bean.ORDINAL_NAME, bizOrdinal);
 	}
 }

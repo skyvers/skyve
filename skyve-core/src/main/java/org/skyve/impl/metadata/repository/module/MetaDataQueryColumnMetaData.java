@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository.module;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -12,6 +12,8 @@ import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -72,92 +74,92 @@ public abstract class MetaDataQueryColumnMetaData implements DecoratedMetaData {
 	
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
 	@XmlAttribute
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
 	@XmlAttribute
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
-	public FilterOperator getFilterOperator() {
+	public @Nullable FilterOperator getFilterOperator() {
 		return filterOperator;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
-	public void setFilterOperator(FilterOperator filterOperator) {
+	public void setFilterOperator(@Nullable FilterOperator filterOperator) {
 		this.filterOperator = filterOperator;
 	}
 
-	public String getFilterExpression() {
+	public @Nullable String getFilterExpression() {
 		return filterExpression;
 	}
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE)
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setFilterExpression(String filterExpression) {
+	public void setFilterExpression(@Nullable String filterExpression) {
 		this.filterExpression = UtilImpl.processStringValue(filterExpression);
 	}
 
-	public SortDirection getSortOrder() {
+	public @Nullable SortDirection getSortOrder() {
 		return sortOrder;
 	}
 
 	@XmlAttribute
-	public void setSortOrder(SortDirection sortOrder) {
+	public void setSortOrder(@Nullable SortDirection sortOrder) {
 		this.sortOrder = sortOrder;
 	}
 
-	public Boolean getHidden() {
+	public @Nullable Boolean getHidden() {
 		return hidden;
 	}
 
 	@XmlAttribute
-	public void setHidden(Boolean hidden) {
+	public void setHidden(@Nullable Boolean hidden) {
 		this.hidden = hidden;
 	}
 
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
 	@XmlAttribute
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
-	public HorizontalAlignment getAlignment() {
+	public @Nullable HorizontalAlignment getAlignment() {
 		return alignment;
 	}
 
 	@XmlAttribute
-	public void setAlignment(HorizontalAlignment alignment) {
+	public void setAlignment(@Nullable HorizontalAlignment alignment) {
 		this.alignment = alignment;
 	}
 	
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

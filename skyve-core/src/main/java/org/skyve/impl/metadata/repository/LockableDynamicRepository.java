@@ -14,6 +14,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.view.View;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extends the UnsynchronisedDynamicRepository to add Read/Write locking.
  * 
@@ -42,7 +45,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @param function the callback to execute in the critical section
 	 * @return the callback result
 	 */
-	public <R> R withLock(Function<LockableDynamicRepository, R> function) {
+	public @Nullable <R> R withLock(@Nonnull Function<LockableDynamicRepository, R> function) {
 		write.lock();
 		try {
 			return function.apply(this);
@@ -59,7 +62,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 *
 	 * @param consumer the callback to execute in the critical section
 	 */
-	public void withLock(Consumer<LockableDynamicRepository> consumer) {
+	public void withLock(@Nonnull Consumer<LockableDynamicRepository> consumer) {
 		write.lock();
 		try {
 			consumer.accept(this);
@@ -75,7 +78,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return the current router, or {@code null} when none has been configured
 	 */
 	@Override
-	public Router getRouter() {
+	public @Nullable Router getRouter() {
 		read.lock();
 		try {
 			return super.getRouter();
@@ -92,7 +95,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return the customer, or {@code null} if no matching customer is cached
 	 */
 	@Override
-	public Customer getCustomer(String customerName) {
+	public @Nullable Customer getCustomer(@Nonnull String customerName) {
 		read.lock();
 		try {
 			return super.getCustomer(customerName);
@@ -110,7 +113,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return the module, or {@code null} if no matching module is cached
 	 */
 	@Override
-	public Module getModule(Customer customer, String moduleName) {
+	public @Nullable Module getModule(@Nullable Customer customer, @Nonnull String moduleName) {
 		read.lock();
 		try {
 			return super.getModule(customer, moduleName);
@@ -129,7 +132,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return the document, or {@code null} if no matching document is cached
 	 */
 	@Override
-	public Document getDocument(Customer customer, Module module, String documentName) {
+	public @Nullable Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		read.lock();
 		try {
 			return super.getDocument(customer, module, documentName);
@@ -149,7 +152,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return the view, or {@code null} if no matching view is cached
 	 */
 	@Override
-	public View getView(String uxui, Customer customer, Document document, String name) {
+	public @Nullable View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull Document document, @Nonnull String name) {
 		read.lock();
 		try {
 			return super.getView(uxui, customer, document, name);
@@ -168,7 +171,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return action metadata, or {@code null} if no matching action is cached
 	 */
 	@Override
-	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+	public @Nullable ActionMetaData getMetaDataAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName) {
 		read.lock();
 		try {
 			return super.getMetaDataAction(customer, document, actionName);
@@ -186,7 +189,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return Bizlet metadata, or {@code null} if none is cached
 	 */
 	@Override
-	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+	public @Nullable BizletMetaData getMetaDataBizlet(@Nullable Customer customer, @Nonnull Document document) {
 		read.lock();
 		try {
 			return super.getMetaDataBizlet(customer, document);
@@ -204,7 +207,7 @@ public class LockableDynamicRepository extends UnsynchronisedDynamicRepository {
 	 * @return the resolved key, or {@code null} when no mapping exists
 	 */
 	@Override
-	public String vtable(String customerName, String key) {
+	public @Nullable String vtable(@Nullable String customerName, @Nonnull String key) {
 		read.lock();
 		try {
 			return super.vtable(customerName, key);

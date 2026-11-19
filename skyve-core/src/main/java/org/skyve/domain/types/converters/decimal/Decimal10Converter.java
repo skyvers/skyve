@@ -7,6 +7,9 @@ import org.skyve.domain.types.converters.Format;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Converts {@link Decimal10} values using plain string formatting/parsing.
  */
@@ -16,7 +19,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Decimal10> getValueType() {
+	public @Nonnull Class<Decimal10> getValueType() {
 		return Decimal10.class;
 	}
 	
@@ -26,7 +29,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Decimal10 fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Decimal10 fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			return new Decimal10(displayValue);
 		}
@@ -41,7 +44,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Decimal10 value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal10 value) throws ConversionException {
 		try {
 			return value.toString();
 		}
@@ -55,7 +58,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.decimal10;
 	}
 
@@ -64,7 +67,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Decimal10> getFormat() {
+	public @Nullable Format<Decimal10> getFormat() {
 		return null;
 	}
 
@@ -73,7 +76,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Decimal10> getValidator() {
+	public @Nullable Validator<Decimal10> getValidator() {
 		return null;
 	}
 	
@@ -82,7 +85,7 @@ public class Decimal10Converter implements Converter<Decimal10> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

@@ -5,7 +5,8 @@
  * against a Skyve application. The primary unit is an {@link Automation}, which
  * groups one or more named {@link Interaction} objects. Each interaction is a sequence
  * of {@link Step} objects that represent individual UI operations (navigate, enter data,
- * click buttons, assert values, etc.).
+ * click buttons, assert values, etc.). A {@link Workflow} runs several automations as one run, and a {@link Suite}
+ * runs workflow and automation files as independent members, each with its own run.
  *
  * <p>The language model is pure data — it is decoupled from execution via the
  * {@link Executor} visitor in {@code org.skyve.metadata.sail.execution}. This

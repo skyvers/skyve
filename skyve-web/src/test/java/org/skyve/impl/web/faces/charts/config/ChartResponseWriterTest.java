@@ -51,6 +51,7 @@ class ChartResponseWriterTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void writeTextNullThrowsNullPointerException() throws Exception {
 		try (ChartResponseWriter writer = new ChartResponseWriter()) {

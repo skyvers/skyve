@@ -3,6 +3,9 @@ package org.skyve.nlp.cron.elementprovider.hour;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Parses 12-hour clock values such as {@code 8:30am} and converts them to 24-hour cron fields.
  */
@@ -18,7 +21,7 @@ public class Base12Hour extends Base24Hour {
 	 * @return {@code true} when a matching time token is found.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -36,7 +39,7 @@ public class Base12Hour extends Base24Hour {
 	 * @return The converted hour token, or {@code null} when no hour was captured.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nullable String getHourElement() {
 		if (segments.size() > 3) {
 			if (segments.get(3).toLowerCase().equals("pm") && Integer.parseInt(segments.get(1)) < 12) {
 				return String.valueOf(Integer.parseInt(segments.get(1)) + 12);

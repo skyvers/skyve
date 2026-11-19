@@ -9,6 +9,7 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base converter for {@link DateOnly} attributes using a configured date
@@ -23,7 +24,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * @return the result value
 	 */
 	@Override
-	public final AttributeType getAttributeType() {
+	public final @Nonnull AttributeType getAttributeType() {
 		return AttributeType.date;
 	}
 	
@@ -32,7 +33,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<DateOnly> getValueType() {
+	public @Nonnull Class<DateOnly> getValueType() {
 		return DateOnly.class;
 	}
 
@@ -41,7 +42,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<DateOnly> getFormat() {
+	public @Nullable Format<DateOnly> getFormat() {
 		return null;
 	}
 
@@ -50,7 +51,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<DateOnly> getValidator() {
+	public @Nullable Validator<DateOnly> getValidator() {
 		return null;
 	}
 	
@@ -64,7 +65,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * The i18n key used to represent an error in conversion using this converter
 	 * @return	The i18n key.
 	 */
-	protected abstract String getI18nKey();
+	protected abstract @Nonnull String getI18nKey();
 	
 	/**
 	 * Converts a display representation to its domain value.
@@ -72,7 +73,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * @return the result value
 	 */
 	@Override
-	public DateOnly fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull DateOnly fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			return new DateOnly(CORE.getDateFormat(getFormatPattern()).parse(displayValue).getTime());
 		}
@@ -87,7 +88,7 @@ public abstract class AbstractDateConverter implements Converter<DateOnly> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(DateOnly value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull DateOnly value) throws ConversionException {
 		try {
 			return CORE.getDateFormat(getFormatPattern()).format(value);
 		}

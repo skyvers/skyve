@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.container;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
@@ -13,9 +13,12 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -48,57 +51,72 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	private Integer percentageWidth;
 	private Integer responsiveWidth;
 
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
-	 * Returns the invisible-condition expression for this sidebar.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible-condition expression, or {@code null} when not configured
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible-condition expression for this sidebar.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * <p>Side effects: trims and normalises the supplied value before storage.
+	 * <p>Side effects: clears any authored {@code visible} attribute.
 	 *
-	 * @param invisibleConditionName  invisible-condition expression; may be {@code null} or blank
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
-	// to enable JAXB XML marshaling
 	/**
-	 * Placeholder getter used only for JAXB compatibility of the synthetic visible attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Applies a positive visibility expression by storing its negated form.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * <p>Side effects: overwrites the value returned by {@link #getInvisibleConditionName()}.
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName  the visibility expression from metadata; may be {@code null}
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 	
 	/**
@@ -107,7 +125,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return widget identifier, or {@code null} when not configured
 	 */
 	@Override
-	public String getWidgetId() {
+	public @Nullable String getWidgetId() {
 		return widgetId;
 	}
 
@@ -119,7 +137,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param widgetId  widget identifier; may be {@code null} or blank
 	 */
 	@XmlAttribute(required = false)
-	public void setWidgetId(String widgetId) {
+	public void setWidgetId(@Nullable String widgetId) {
 		this.widgetId = UtilImpl.processStringValue(widgetId);
 	}
 
@@ -128,7 +146,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 *
 	 * @return the floating width in pixels, or {@code null} to use renderer defaults
 	 */
-	public Integer getFloatingPixelWidth() {
+	public @Nullable Integer getFloatingPixelWidth() {
 		return floatingPixelWidth;
 	}
 
@@ -138,16 +156,16 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param floatingPixelWidth  floating width in pixels; may be {@code null}
 	 */
 	@XmlAttribute(required = false)
-	public void setFloatingPixelWidth(Integer floatingPixelWidth) {
+	public void setFloatingPixelWidth(@Nullable Integer floatingPixelWidth) {
 		this.floatingPixelWidth = floatingPixelWidth;
 	}
 
 	/**
 	 * Returns the responsive breakpoint that activates floating sidebar behavior.
 	 *
-	 * @return a breakpoint width in pixels, or {@code null} when not configured
+	 * @return a breakpoint width in pixels
 	 */
-	public Integer getFloatingPixelWidthBreakpoint() {
+	public @Nonnull Integer getFloatingPixelWidthBreakpoint() {
 		return floatingPixelWidthBreakpoint;
 	}
 
@@ -157,7 +175,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @param floatingPixelWidthBreakpoint  breakpoint width in pixels
 	 */
 	@XmlAttribute(required = true)
-	public void setFloatingPixelWidthBreakpoint(Integer floatingPixelWidthBreakpoint) {
+	public void setFloatingPixelWidthBreakpoint(@Nonnull Integer floatingPixelWidthBreakpoint) {
 		this.floatingPixelWidthBreakpoint = floatingPixelWidthBreakpoint;
 	}
 
@@ -167,7 +185,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return pixel width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -178,7 +196,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -188,7 +206,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return percentage width, or {@code null} when unset
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -199,7 +217,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -209,7 +227,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return responsive width value, or {@code null} when unset
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -220,7 +238,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 	
@@ -230,7 +248,7 @@ public class Sidebar extends Container implements Identifiable, Invisible, Relat
 	 * @return a mutable property map; never {@code null}
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -5,11 +5,35 @@
 		xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../../schemas/view.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane selectedTabIndexBinding="tabIndex">
-		<tab title="admin.controlPanel.edit.design.tabTitle">
+		<tab title="admin.controlPanel.edit.design.tabTitle" visible="devOps">
 			<component name="_generateTestData" />
 		</tab>
 		<tab title="admin.controlPanel.edit.sail.tabTitle">
-			<form border="true">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.recording.borderTitle" visible="sailRecordingAllowed">
+				<column />
+				<column responsiveWidth="2" />
+				<column responsiveWidth="2" />
+				<row>
+					<item>
+						<label value="admin.controlPanel.edit.sail.recording.notRecording.label" invisible="sailRecording" />
+					</item>
+					<item align="right">
+						<button action="StartSAILRecording" />
+					</item>
+					<item align="right">
+						<button action="DownloadSAILRecording" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<label value="admin.controlPanel.edit.sail.recording.recording.label" visible="sailRecording" />
+					</item>
+					<item align="right">
+						<button action="StopSAILRecording" />
+					</item>
+				</row>
+			</form>
+			<form border="true" visible="devOps">
 				<column responsiveWidth="3" />
 				<column />
 				<column responsiveWidth="2" />
@@ -46,7 +70,10 @@
 	</tabPane>
 	
 	<actions>
-		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.action.downloadClientSail.toolTip" />
+		<download className="DownloadClientSAIL" displayName="admin.controlPanel.actions.downloadClientSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadClientSail.toolTip" />
+		<action className="StartSAILRecording" displayName="admin.controlPanel.actions.startSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.startSailRecording.toolTip" clientValidation="false" invisible="sailRecording" />
+		<action className="StopSAILRecording" displayName="admin.controlPanel.actions.stopSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.stopSailRecording.toolTip" clientValidation="false" visible="sailRecording" />
+		<download className="DownloadSAILRecording" displayName="admin.controlPanel.actions.downloadSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSailRecording.toolTip" clientValidation="false" visible="sailRecordingDownloadable" />
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-trash-can" clientValidation="false"/>
 	</actions>

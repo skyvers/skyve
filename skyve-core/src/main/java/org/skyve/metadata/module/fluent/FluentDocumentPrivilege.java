@@ -1,10 +1,15 @@
 package org.skyve.metadata.module.fluent;
 
+import java.util.Collections;
+import java.util.Map;
+
 import org.skyve.impl.metadata.repository.module.ActionPrivilegeMetaData;
 import org.skyve.impl.metadata.repository.module.ContentPermission;
 import org.skyve.impl.metadata.repository.module.ContentRestriction;
 import org.skyve.impl.metadata.repository.module.DocumentPrivilegeMetaData;
 import org.skyve.metadata.user.DocumentPermission;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Builds document privilege metadata, including action and content constraints.
@@ -24,7 +29,7 @@ public class FluentDocumentPrivilege {
 	 *
 	 * @param privilege The metadata to mutate.
 	 */
-	public FluentDocumentPrivilege(DocumentPrivilegeMetaData privilege) {
+	public FluentDocumentPrivilege(@Nonnull DocumentPrivilegeMetaData privilege) {
 		this.privilege = privilege;
 	}
 	
@@ -34,18 +39,20 @@ public class FluentDocumentPrivilege {
 	 * @param privilege The source privilege.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege from(@SuppressWarnings("hiding") DocumentPrivilegeMetaData privilege) {
+	public @Nonnull FluentDocumentPrivilege from(@SuppressWarnings("hiding") @Nonnull DocumentPrivilegeMetaData privilege) {
 		documentName(privilege.getDocumentName());
 		permission(privilege.getPermission());
 		for (ActionPrivilegeMetaData action : privilege.getActions()) {
-			addActionPrivilege(action.getActionName());
+			addActionPrivilege(action.getActionName(), action.getProperties());
 		}
 		for (ContentPermission permission : privilege.getContentPermissions()) {
-			addContentPermission(permission.getAttributeName());
+			addContentPermission(permission.getAttributeName(), permission.getProperties());
 		}
 		for (ContentRestriction restriction : privilege.getContentRestrictions()) {
-			addContentRestriction(restriction.getAttributeName());
+			addContentRestriction(restriction.getAttributeName(), restriction.getProperties());
 		}
+		privilege.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
@@ -55,7 +62,7 @@ public class FluentDocumentPrivilege {
 	 * @param documentName The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege documentName(String documentName) {
+	public @Nonnull FluentDocumentPrivilege documentName(@Nonnull String documentName) {
 		privilege.setDocumentName(documentName);
 		return this;
 	}
@@ -66,7 +73,7 @@ public class FluentDocumentPrivilege {
 	 * @param permission The permission value.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege permission(DocumentPermission permission) {
+	public @Nonnull FluentDocumentPrivilege permission(@Nonnull DocumentPermission permission) {
 		privilege.setPermission(permission);
 		return this;
 	}
@@ -77,9 +84,21 @@ public class FluentDocumentPrivilege {
 	 * @param actionName The action name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege addActionPrivilege(String actionName) {
+	public @Nonnull FluentDocumentPrivilege addActionPrivilege(@Nonnull String actionName) {
+		return addActionPrivilege(actionName, Collections.emptyMap());
+	}
+
+	/**
+	 * Adds an action-level privilege by action name, carrying its custom properties.
+	 *
+	 * @param actionName The action name.
+	 * @param properties The custom properties to copy onto the new privilege, in iteration order.
+	 * @return this fluent instance.
+	 */
+	@Nonnull FluentDocumentPrivilege addActionPrivilege(@Nonnull String actionName, @Nonnull Map<String, String> properties) {
 		ActionPrivilegeMetaData action = new ActionPrivilegeMetaData();
 		action.setActionName(actionName);
+		action.getProperties().putAll(properties);
 		privilege.getActions().add(action);
 		return this;
 	}
@@ -90,7 +109,7 @@ public class FluentDocumentPrivilege {
 	 * @param actionName The action name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege removeActionPrivilege(String actionName) {
+	public @Nonnull FluentDocumentPrivilege removeActionPrivilege(@Nonnull String actionName) {
 		privilege.getActions().removeIf(a -> actionName.equals(a.getActionName()));
 		return this;
 	}
@@ -100,7 +119,7 @@ public class FluentDocumentPrivilege {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege clearActionPrivileges() {
+	public @Nonnull FluentDocumentPrivilege clearActionPrivileges() {
 		privilege.getActions().clear();
 		return this;
 	}
@@ -111,9 +130,21 @@ public class FluentDocumentPrivilege {
 	 * @param attributeName The attribute name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege addContentPermission(String attributeName) {
+	public @Nonnull FluentDocumentPrivilege addContentPermission(@Nonnull String attributeName) {
+		return addContentPermission(attributeName, Collections.emptyMap());
+	}
+
+	/**
+	 * Adds a content permission for the specified attribute, carrying its custom properties.
+	 *
+	 * @param attributeName The attribute name.
+	 * @param properties The custom properties to copy onto the new permission, in iteration order.
+	 * @return this fluent instance.
+	 */
+	@Nonnull FluentDocumentPrivilege addContentPermission(@Nonnull String attributeName, @Nonnull Map<String, String> properties) {
 		ContentPermission content = new ContentPermission();
 		content.setAttributeName(attributeName);
+		content.getProperties().putAll(properties);
 		// NB No need to set documentName as this is done on ModuleMetaData.convert()
 		privilege.getContentPermissions().add(content);
 		return this;
@@ -125,7 +156,7 @@ public class FluentDocumentPrivilege {
 	 * @param attributeName The attribute name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege removeContentPermission(String attributeName) {
+	public @Nonnull FluentDocumentPrivilege removeContentPermission(@Nonnull String attributeName) {
 		privilege.getContentPermissions().removeIf(p -> attributeName.equals(p.getAttributeName()));
 		return this;
 	}
@@ -135,7 +166,7 @@ public class FluentDocumentPrivilege {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege clearContentPermissions() {
+	public @Nonnull FluentDocumentPrivilege clearContentPermissions() {
 		privilege.getContentPermissions().clear();
 		return this;
 	}
@@ -146,9 +177,21 @@ public class FluentDocumentPrivilege {
 	 * @param attributeName The attribute name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege addContentRestriction(String attributeName) {
+	public @Nonnull FluentDocumentPrivilege addContentRestriction(@Nonnull String attributeName) {
+		return addContentRestriction(attributeName, Collections.emptyMap());
+	}
+
+	/**
+	 * Adds a content restriction for the specified attribute, carrying its custom properties.
+	 *
+	 * @param attributeName The attribute name.
+	 * @param properties The custom properties to copy onto the new restriction, in iteration order.
+	 * @return this fluent instance.
+	 */
+	@Nonnull FluentDocumentPrivilege addContentRestriction(@Nonnull String attributeName, @Nonnull Map<String, String> properties) {
 		ContentRestriction content = new ContentRestriction();
 		content.setAttributeName(attributeName);
+		content.getProperties().putAll(properties);
 		// NB No need to set documentName as this is done on ModuleMetaData.convert()
 		privilege.getContentRestrictions().add(content);
 		return this;
@@ -160,7 +203,7 @@ public class FluentDocumentPrivilege {
 	 * @param attributeName The attribute name.
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege removeContentRestriction(String attributeName) {
+	public @Nonnull FluentDocumentPrivilege removeContentRestriction(@Nonnull String attributeName) {
 		privilege.getContentRestrictions().removeIf(r -> attributeName.equals(r.getAttributeName()));
 		return this;
 	}
@@ -170,8 +213,21 @@ public class FluentDocumentPrivilege {
 	 *
 	 * @return this fluent instance.
 	 */
-	public FluentDocumentPrivilege clearContentRestrictions() {
+	public @Nonnull FluentDocumentPrivilege clearContentRestrictions() {
 		privilege.getContentRestrictions().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDocumentPrivilege putProperty(@Nonnull String k, @Nonnull String v) {
+		privilege.getProperties().put(k, v);
 		return this;
 	}
 
@@ -180,7 +236,7 @@ public class FluentDocumentPrivilege {
 	 *
 	 * @return The document privilege metadata instance.
 	 */
-	public DocumentPrivilegeMetaData get() {
+	public @Nonnull DocumentPrivilegeMetaData get() {
 		return privilege;
 	}
 }

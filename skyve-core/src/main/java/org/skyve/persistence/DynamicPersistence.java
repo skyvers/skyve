@@ -8,6 +8,9 @@ import org.skyve.domain.DynamicPersistentBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.domain.messages.ReferentialConstraintViolationException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implemented for various types of data stores that can support dynamic domain persistence.
  */
@@ -15,12 +18,12 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	/**
 	 * Hook used to setup the state of this DynamicPersistence in relation to the Persistence which created it.
 	 */
-	void postConstruct(Persistence persistence);
+	void postConstruct(@Nonnull Persistence persistence);
 
 	/**
 	 * Recursively persist the given bean which may be totally dynamic (PersistentDynamicBean) or have some dynamic attributes (AbstractPersistentBean).
 	 */
-	void persist(PersistentBean bean);
+	void persist(@Nonnull PersistentBean bean);
 	
 	/**
 	 * This method should recursively delete the entire bean graph (including any detritus from schema evolution).
@@ -28,7 +31,7 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	 * @param bean
 	 * @throws ReferentialConstraintViolationException	When the bean cannot be deleted because something is referencing it.
 	 */
-	void delete(PersistentBean bean) throws ReferentialConstraintViolationException;
+	void delete(@Nonnull PersistentBean bean) throws ReferentialConstraintViolationException;
 
 	/**
 	 * This method should recursively retrieve a DynamicPersistentBean and its entire bean graph (excluding any detritus from schema evolution).
@@ -37,7 +40,7 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	 * NB Calling populate with the same bizId should yield exactly the same bean instance for this DynamicPersistence instance (through a first level cache)
 	 * @param bizId
 	 */
-	DynamicPersistentBean populate(String bizId);
+	@Nullable DynamicPersistentBean populate(@Nonnull String bizId);
 	
 	/**
 	 * This method should recursively retrieve the entire dynamic bean graph required to populate the given bean (excluding any detritus from schema evolution).
@@ -46,7 +49,7 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	 * NB Calling populate with the same bean should yield exactly the same bean instance for this DynamicPersistence instance (through a first level cache)
 	 * @param bean
 	 */
-	void populate(PersistentBean bean);
+	void populate(@Nonnull PersistentBean bean);
 		
 	// Persistence first level cache methods
 
@@ -59,14 +62,14 @@ public interface DynamicPersistence extends Serializable, Closeable {
 	 * Executes evictCached.
 	 * @param bean the bean
 	 */
-	public void evictCached(Bean bean);
+	public void evictCached(@Nonnull Bean bean);
 	
 	/**
 	 * Executes cached.
 	 * @param bean the bean
 	 * @return the result
 	 */
-	public boolean cached(Bean bean);
+	public boolean cached(@Nonnull Bean bean);
 	
 	// Persistence Transaction methods
 	

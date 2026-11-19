@@ -78,7 +78,14 @@ public class BackupJob extends Job {
 			log.add(trace);
 			LOGGER.warn(trace);
 			org.skyve.impl.backup.BackupJob backupJob = createBackupJob();
-			execute(backupJob);
+			try {
+				execute(backupJob);
+			} catch (Exception e) {
+				trace = "Skipped the DAILY rename, weekly, monthly and yearly copies and culling as the backup failed - " + e.getLocalizedMessage();
+				log.add(trace);
+				LOGGER.error(trace);
+				throw e;
+			}
 			backupZip = backupJob.getBackupZip();
 		} else {
 			trace = "No daily backup taken by the BackupJob as dailyBackupRetention in DataMaintenance is null or zero";

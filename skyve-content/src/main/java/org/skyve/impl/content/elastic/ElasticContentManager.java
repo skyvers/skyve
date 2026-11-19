@@ -10,6 +10,9 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implements the Elasticsearch-backed content manager integration.
  *
@@ -159,7 +162,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if indexing fails
 	 */
 	@Override
-	public void put(BeanContent content)
+	public void put(@Nonnull BeanContent content)
 	throws Exception {
 /*
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
@@ -207,7 +210,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if storage or indexing fails
 	 */
 	@Override
-	public void put(AttachmentContent attachment, boolean index)
+	public void put(@Nonnull AttachmentContent attachment, boolean index)
 	throws Exception {
 		put(attachment, index, true);
 	}
@@ -219,7 +222,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if update processing fails
 	 */
 	@Override
-	public void update(AttachmentContent content) throws Exception {
+	public void update(@Nonnull AttachmentContent content) throws Exception {
 		// needs implementation
 	}
 	
@@ -231,7 +234,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if indexing fails
 	 */
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) 
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) 
 	throws Exception {
 		put(attachment, index, false);
 	}
@@ -245,7 +248,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if writing fails
 	 */
 	@SuppressWarnings("unused")
-	private void put(AttachmentContent attachment, boolean index, boolean store)
+	private void put(@Nonnull AttachmentContent attachment, boolean index, boolean store)
 	throws Exception {
 /*
 		try (XContentBuilder source = XContentFactory.jsonBuilder().startObject()) {
@@ -396,7 +399,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if retrieval fails
 	 */
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		if (UtilImpl.CONTENT_FILE_STORAGE) {
 			StringBuilder absoluteContentStoreFolderPath = new StringBuilder(128);
 			absoluteContentStoreFolderPath.append(UtilImpl.CONTENT_DIRECTORY).append(FILE_STORE_NAME).append('/');
@@ -413,7 +416,7 @@ public class ElasticContentManager extends AbstractContentManager {
 	 * @throws Exception if retrieval fails
 	 */
 	@SuppressWarnings("static-method")
-	private AttachmentContent getFromElastic(@SuppressWarnings("unused") String contentId) throws Exception {
+	private @Nullable AttachmentContent getFromElastic(@SuppressWarnings("unused") @Nonnull String contentId) throws Exception {
 /*
 		GetRequestBuilder builder = client.prepareGet(ATTACHMENT_INDEX_NAME, ATTACHMENT_INDEX_TYPE, contentId);
 		builder.setFields(ATTACHMENT, 
@@ -496,7 +499,7 @@ return null;
 	 * @param bizId the business document identifier
 	 */
 	@Override
-	public void removeBean(String bizId) {
+	public void removeBean(@Nonnull String bizId) {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove({})", content.getBizId());
 		client.prepareDelete(BEAN_INDEX_NAME,
@@ -512,7 +515,7 @@ return null;
 	 * @throws IOException if removal fails
 	 */
 	@Override
-	public void removeAttachment(String contentId) throws IOException {
+	public void removeAttachment(@Nonnull String contentId) throws IOException {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.remove({})", contentId);
 		client.prepareDelete(ATTACHMENT_INDEX_NAME,
@@ -565,7 +568,7 @@ return null;
 	 * @throws Exception if truncation fails
 	 */
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncate({})", customerName);
 		client.prepareDeleteByQuery()
@@ -587,7 +590,7 @@ return null;
 	 * @throws Exception if truncation fails
 	 */
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateAttachments({})", customerName);
 		client.prepareDeleteByQuery()
@@ -609,7 +612,7 @@ return null;
 	 * @throws Exception if truncation fails
 	 */
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 /*
 		if (UtilImpl.CONTENT_TRACE) UtilImpl.LOGGER.info("ElasticContentManager.truncateBeans({})", customerName);
 		client.prepareDeleteByQuery()
@@ -633,7 +636,7 @@ return null;
 	 * @throws Exception if querying fails
 	 */
 	@Override
-	public SearchResults google(String search, int maxResults)
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults)
 	throws Exception {
 /*
 		QueryBuilder qb;
@@ -761,7 +764,7 @@ return new SearchResults();
 	 * @throws Exception if iteration cannot be initialized
 	 */
 	@Override
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 //		return new ElasticContentIterable(client);
 return new ElasticContentIterable();
 	}

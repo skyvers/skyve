@@ -1,17 +1,17 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
 import java.lang.reflect.Field;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
@@ -19,21 +19,21 @@ import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.user.User;
 
 @SuppressWarnings({"static-method", "resource"})
-public class ReindexJobSeamMethodsTest {
+class ReindexJobSeamMethodsTest {
 	@Test
-	public void attachmentsIsAbstractContentManagerSeamReturnsTrueForAbstractManager() {
+	void attachmentsIsAbstractContentManagerSeamReturnsTrueForAbstractManager() {
 		AttachmentsSeamHarness harness = new AttachmentsSeamHarness();
 		assertTrue(harness.callIsAbstractContentManager(mock(AbstractContentManager.class)));
 	}
 
 	@Test
-	public void attachmentsIsAbstractContentManagerSeamReturnsFalseForPlainManager() {
+	void attachmentsIsAbstractContentManagerSeamReturnsFalseForPlainManager() {
 		AttachmentsSeamHarness harness = new AttachmentsSeamHarness();
 		assertFalse(harness.callIsAbstractContentManager(mock(ContentManager.class)));
 	}
 
 	@Test
-	public void attachmentsSecureSqlSeamExecutes() {
+	void attachmentsSecureSqlSeamExecutes() {
 		AttachmentsSeamHarness harness = new AttachmentsSeamHarness();
 		StringBuilder sql = new StringBuilder("select * from ADM_TEST");
 		Table table = new Table("ADM_TEST", "ADM_TEST");
@@ -42,7 +42,7 @@ public class ReindexJobSeamMethodsTest {
 	}
 
 	@Test
-	public void attachmentsSeamsInvokeDefaultProviders() {
+	void attachmentsSeamsInvokeDefaultProviders() {
 		AttachmentsSeamHarness harness = new AttachmentsSeamHarness();
 		assertThrows(RuntimeException.class, harness::callGetCustomerName);
 		assertThrows(RuntimeException.class, harness::callGetTables);
@@ -69,7 +69,7 @@ public class ReindexJobSeamMethodsTest {
 	}
 
 	@Test
-	public void attachmentsSeamsCanUseConfiguredProviders() throws Exception {
+	void attachmentsSeamsCanUseConfiguredProviders() throws Exception {
 		AttachmentsSeamHarness harness = new AttachmentsSeamHarness();
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		User user = mock(User.class);
@@ -95,7 +95,7 @@ public class ReindexJobSeamMethodsTest {
 	}
 
 	@Test
-	public void beansSeamsInvokeDefaultProviders() {
+	void beansSeamsInvokeDefaultProviders() {
 		BeansSeamHarness harness = new BeansSeamHarness();
 
 		try {
@@ -150,6 +150,7 @@ public class ReindexJobSeamMethodsTest {
 			return super.getPersistence();
 		}
 
+		@SuppressWarnings("null") // passes null on purpose
 		public String callGetDynamicEntityPersistenceIdentifier() {
 			return super.getDynamicEntityPersistenceIdentifier(null);
 		}

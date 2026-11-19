@@ -8,12 +8,15 @@ import org.skyve.domain.messages.UniqueConstraintViolationException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.ValidationUtil;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Validates Skyve beans against document metadata constraints and Bizlet rules.
@@ -59,7 +62,7 @@ public class BeanValidator {
 	 * @param bean The bean to validate.
 	 * @throws ValidationException where the bean fails validation against its metadata
 	 */
-	public static void validateBeanAgainstDocument(Document document, Bean bean) {
+	public static void validateBeanAgainstDocument(@Nonnull Document document, @Nonnull Bean bean) {
 		ValidationUtil.validateBeanAgainstDocument(document, bean);
 	}
 
@@ -76,7 +79,7 @@ public class BeanValidator {
 	 * @param bean The bean to validate
 	 * @throws ValidationException where the bean fails validation against its metadata
 	 */
-	public static void validateBeanAgainstDocument(Bean bean) {
+	public static void validateBeanAgainstDocument(@Nonnull Bean bean) {
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
@@ -91,10 +94,10 @@ public class BeanValidator {
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
 	 */
-	public static void validateBeanPropertyAgainstAttribute(User user, 
-																Attribute attribute, 
-																Bean bean, 
-																ValidationException e) {
+	public static void validateBeanPropertyAgainstAttribute(@Nonnull User user, 
+																@Nonnull Attribute attribute, 
+																@Nonnull Bean bean, 
+																@Nonnull ValidationException e) {
 		ValidationUtil.validateBeanPropertyAgainstAttribute(user, attribute, bean, e);
 	}
 
@@ -105,7 +108,7 @@ public class BeanValidator {
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
 	 */
-	public static void validateBeanPropertyAgainstAttribute(Attribute attribute, Bean bean, ValidationException e) {
+	public static void validateBeanPropertyAgainstAttribute(@Nonnull Attribute attribute, @Nonnull Bean bean, @Nonnull ValidationException e) {
 		validateBeanPropertyAgainstAttribute(CORE.getUser(), attribute, bean, e);
 	}
 	
@@ -116,12 +119,16 @@ public class BeanValidator {
 	 * @param bean The bean to validate
 	 * @param e The exception to populate
 	 */
-	public static void validateBeanPropertyAgainstAttribute(String attributeName, Bean bean, ValidationException e) {
+	public static void validateBeanPropertyAgainstAttribute(@Nonnull String attributeName, @Nonnull Bean bean, @Nonnull ValidationException e) {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
 		Attribute a = d.getAttribute(attributeName);
+		if (a == null) {
+			throw new MetaDataException("Attribute " + attributeName + " does not exist in document " +
+											d.getOwningModuleName() + '.' + d.getName());
+		}
 		validateBeanPropertyAgainstAttribute(u, a, bean, e);
 	}
 	
@@ -136,7 +143,7 @@ public class BeanValidator {
 	 * @param bean The bean to validate
 	 * @throws ValidationException where the bean fails validation against the bizlet
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(Bizlet<T> bizlet, T bean) {
+	public static <T extends Bean> void validateBeanAgainstBizlet(@Nonnull Bizlet<T> bizlet, @Nonnull T bean) {
 		ValidationUtil.validateBeanAgainstBizlet(bizlet, bean);
 	}
 
@@ -151,7 +158,7 @@ public class BeanValidator {
 	 * @param bean The bean to validate
 	 * @throws ValidationException where the bean fails validation against the document's bizlet
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(Document document, T bean) {
+	public static <T extends Bean> void validateBeanAgainstBizlet(@Nonnull Document document, @Nonnull T bean) {
 		Bizlet<T> bizlet = ((DocumentImpl) document).getBizlet(CORE.getUser().getCustomer());
 		if (bizlet != null) { // has a bizlet
 			validateBeanAgainstBizlet(bizlet, bean);
@@ -167,7 +174,7 @@ public class BeanValidator {
 	 * @param bean The bean to be validated against its Bizlet
 	 * @throws ValidationException where the bean fails validation against its bizlet
 	 */
-	public static <T extends Bean> void validateBeanAgainstBizlet(T bean) {
+	public static <T extends Bean> void validateBeanAgainstBizlet(@Nonnull T bean) {
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(bean.getBizModule());
 		Document d = m.getDocument(c, bean.getBizDocument());
@@ -182,9 +189,9 @@ public class BeanValidator {
 	 * @param masterBean
 	 * @param validatedBean
 	 */
-	public static void processMessageBindings(Message m,
-												Bean masterBean,
-												Bean validatedBean) {
+	public static void processMessageBindings(@Nonnull Message m,
+												@Nonnull Bean masterBean,
+												@Nonnull Bean validatedBean) {
 		ValidationUtil.processMessageBindings(CORE.getCustomer(), m, masterBean, validatedBean);
 	}
 
@@ -196,9 +203,9 @@ public class BeanValidator {
 	 * @param masterBean
 	 * @param validatedBean
 	 */
-	public static void processMessageBindings(MessageException e,
-												Bean masterBean,
-												Bean validatedBean) {
+	public static void processMessageBindings(@Nonnull MessageException e,
+												@Nonnull Bean masterBean,
+												@Nonnull Bean validatedBean) {
 		Customer c = CORE.getCustomer();
 		for (Message m : e.getMessages()) {
 			ValidationUtil.processMessageBindings(c, m, masterBean, validatedBean);
@@ -211,7 +218,7 @@ public class BeanValidator {
 	 * @param e
 	 * @param bindingPrefix	Prefix to prepend (excluding the final '.')
 	 */
-	public static void processMessageBindings(MessageException e, String bindingPrefix) {
+	public static void processMessageBindings(@Nonnull MessageException e, @Nonnull String bindingPrefix) {
 		String bindingPrefixWithDot = bindingPrefix + '.';
 		for (Message m : e.getMessages()) {
 			m.setBindingPrefix(bindingPrefixWithDot);
@@ -228,7 +235,7 @@ public class BeanValidator {
 	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
 	 *         the defined constraints in any collection
 	 */
-	public static void checkCollectionUniqueConstraints(Customer customer, Document document, Bean bean) {
+	public static void checkCollectionUniqueConstraints(@Nonnull Customer customer, @Nonnull Document document, @Nonnull Bean bean) {
 		ValidationUtil.checkCollectionUniqueConstraints(customer, document, bean);
 	}
 	
@@ -241,7 +248,7 @@ public class BeanValidator {
 	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
 	 *         the defined constraints in any collection
 	 */
-	public static void checkCollectionUniqueConstraints(Customer customer, Bean bean) {
+	public static void checkCollectionUniqueConstraints(@Nonnull Customer customer, @Nonnull Bean bean) {
 		Module m = customer.getModule(bean.getBizModule());
 		Document d = m.getDocument(customer, bean.getBizDocument());
 		checkCollectionUniqueConstraints(customer, d, bean);
@@ -256,7 +263,7 @@ public class BeanValidator {
 	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
 	 *         the defined constraints in any collection
 	 */
-	public static void checkCollectionUniqueConstraints(Document document, Bean bean) {
+	public static void checkCollectionUniqueConstraints(@Nonnull Document document, @Nonnull Bean bean) {
 		checkCollectionUniqueConstraints(CORE.getUser().getCustomer(), document, bean);
 	}
 	
@@ -268,7 +275,7 @@ public class BeanValidator {
 	 * @throws UniqueConstraintViolationException if duplicate values are found to be violating
 	 *         the defined constraints in any collection
 	 */
-	public static void checkCollectionUniqueConstraints(Bean bean) {
+	public static void checkCollectionUniqueConstraints(@Nonnull Bean bean) {
 		checkCollectionUniqueConstraints(CORE.getUser().getCustomer(), bean);
 	}
 }

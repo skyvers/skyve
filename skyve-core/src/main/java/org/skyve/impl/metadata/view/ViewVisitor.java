@@ -527,7 +527,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 	/**
 	 * Visits the label in the current traversal context.
 	 *
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 * @param parentVisible whether all ancestor metadata is visible
 	 * @param parentEnabled whether all ancestor metadata is enabled
 	 */
@@ -1357,6 +1357,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 				for (FormItem item : row.getItems()) {
 					visitFormItem(item, formVisible, formEnabled);
 					MetaData itemWidget = item.getWidget();
+					if (itemWidget == null) { // a form item is required to have a widget
+						throw new MetaDataException("A form item in view " + view.getName() + " has no widget.");
+					}
 					if (itemWidget instanceof DefaultWidget defaultWidget) {
 						visitDefaultWidget(defaultWidget, formVisible, formEnabled);
 					}
@@ -1615,6 +1618,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 	 */
 	public void visitDefaultWidget(@Nonnull DefaultWidget widget, boolean parentVisible, boolean parentEnabled) {
 		String binding = widget.getBinding();
+		if (binding == null) { // a default widget is validated to be bound
+			throw new MetaDataException("A default widget in view " + view.getName() + " has no binding.");
+		}
 
 		// determine the widget to use
 		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
@@ -1725,6 +1731,9 @@ public abstract class ViewVisitor extends ActionVisitor {
 					String fullyQualifiedColumnBinding = columnBinding;
 					if (fullyQualifiedColumnBinding == null) {
 						fullyQualifiedColumnBinding = widget.getBinding();
+						if (fullyQualifiedColumnBinding == null) { // a data widget is validated to be bound
+							throw new MetaDataException("A data widget in view " + view.getName() + " has no binding.");
+						}
 					}
 					else {
 						fullyQualifiedColumnBinding = widgetBindingPrefix + fullyQualifiedColumnBinding;
@@ -1790,7 +1799,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		List<EventAction> actions = changeable.getChangedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnChangedEventHandler(changeable, parentVisible, parentEnabled);
 			visitActions(changeable, actions, parentVisible, parentEnabled);
 			visitedOnChangedEventHandler(changeable, parentVisible, parentEnabled);
@@ -1808,13 +1817,13 @@ public abstract class ViewVisitor extends ActionVisitor {
 									boolean parentVisible,
 									boolean parentEnabled) {
 		List<EventAction> actions = focusable.getFocusActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnFocusEventHandler(focusable, parentVisible, parentEnabled);
 			visitActions(focusable, actions, parentVisible, parentEnabled);
 			visitedOnFocusEventHandler(focusable, parentVisible, parentEnabled);
 		}
 		actions = focusable.getBlurActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnBlurEventHandler(focusable, parentVisible, parentEnabled);
 			visitActions(focusable, actions, parentVisible, parentEnabled);
 			visitedOnBlurEventHandler(focusable, parentVisible, parentEnabled);
@@ -1835,13 +1844,13 @@ public abstract class ViewVisitor extends ActionVisitor {
 		visitEditableActions(lookup, parentVisible, parentEnabled);
 
 		List<EventAction> actions = lookup.getPickedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnPickedEventHandler(lookup, parentVisible, parentEnabled);
 			visitActions(lookup, actions, parentVisible, parentEnabled);
 			visitedOnPickedEventHandler(lookup, parentVisible, parentEnabled);
 		}
 		actions = lookup.getClearedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnClearedEventHandler(lookup, parentVisible, parentEnabled);
 			visitActions(lookup, actions, parentVisible, parentEnabled);
 			visitedOnClearedEventHandler(lookup, parentVisible, parentEnabled);
@@ -1859,7 +1868,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 										boolean parentVisible,
 										boolean parentEnabled) {
 		List<EventAction> actions = addable.getAddedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnAddedEventHandler(addable, parentVisible, parentEnabled);
 			visitActions(addable, actions, parentVisible, parentEnabled);
 			visitedOnAddedEventHandler(addable, parentVisible, parentEnabled);
@@ -1877,7 +1886,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 										boolean parentVisible,
 										boolean parentEnabled) {
 		List<EventAction> actions = editable.getEditedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnEditedEventHandler(editable, parentVisible, parentEnabled);
 			visitActions(editable, actions, parentVisible, parentEnabled);
 			visitedOnEditedEventHandler(editable, parentVisible, parentEnabled);
@@ -1895,7 +1904,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 										boolean parentVisible,
 										boolean parentEnabled) {
 		List<EventAction> actions = removable.getRemovedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnRemovedEventHandler(removable, parentVisible, parentEnabled);
 			visitActions(removable, actions, parentVisible, parentEnabled);
 			visitedOnRemovedEventHandler(removable, parentVisible, parentEnabled);
@@ -1913,7 +1922,7 @@ public abstract class ViewVisitor extends ActionVisitor {
 											boolean parentVisible,
 											boolean parentEnabled) {
 		List<EventAction> actions = selectable.getSelectedActions();
-		if ((actions != null) && (! actions.isEmpty())) {
+		if (! actions.isEmpty()) {
 			visitOnSelectedEventHandler(selectable, parentVisible, parentEnabled);
 			visitActions(selectable, actions, parentVisible, parentEnabled);
 			visitedOnSelectedEventHandler(selectable, parentVisible, parentEnabled);

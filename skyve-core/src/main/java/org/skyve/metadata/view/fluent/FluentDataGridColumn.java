@@ -4,6 +4,9 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridColumn;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides shared fluent mutation for tabular column metadata.
  *
@@ -26,7 +29,7 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(DataGridColumn column) {
+	protected @Nonnull T from(@Nonnull DataGridColumn column) {
 		title(column.getTitle());
 		escapeTitle(column.getEscapeTitle());
 		alignment(column.getAlignment());
@@ -34,6 +37,8 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 		if (i != null) {
 			pixelWidth(i.intValue());
 		}
+		column.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -45,7 +50,7 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 *            the column title
 	 * @return this builder
 	 */
-	public T title(String title) {
+	public @Nonnull T title(@Nullable String title) {
 		get().setTitle(title);
 		return (T) this;
 	}
@@ -56,7 +61,7 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public T escapeTitle(boolean escapeTitle) {
+	public @Nonnull T escapeTitle(boolean escapeTitle) {
 		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -67,7 +72,7 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T escapeTitle(Boolean escapeTitle) {
+	public @Nonnull T escapeTitle(@Nullable Boolean escapeTitle) {
 		get().setEscapeTitle(escapeTitle);
 		return (T) this;
 	}
@@ -80,7 +85,7 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 *            the cell-content alignment
 	 * @return this builder
 	 */
-	public T alignment(HorizontalAlignment alignment) {
+	public @Nonnull T alignment(@Nullable HorizontalAlignment alignment) {
 		get().setAlignment(alignment);
 		return (T) this;
 	}
@@ -93,8 +98,22 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 *            the column width in pixels
 	 * @return this builder
 	 */
-	public T pixelWidth(int pixelWidth) {
+	public @Nonnull T pixelWidth(int pixelWidth) {
 		get().setPixelWidth(Integer.valueOf(pixelWidth));
+		return (T) this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 
@@ -103,5 +122,5 @@ public abstract class FluentDataGridColumn<T extends FluentDataGridColumn<T>> {
 	 *
 	 * @return the wrapped column metadata
 	 */
-	public abstract DataGridColumn get();
+	public abstract @Nonnull DataGridColumn get();
 }

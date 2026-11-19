@@ -1,9 +1,14 @@
 package org.skyve.util;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
@@ -12,7 +17,12 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 import javax.imageio.ImageIO;
 
@@ -108,6 +118,30 @@ class ThumbnailTest {
 	}
 
 	@Test
+	void storedFindsTheThumbnailTheInputStreamConstructorStored() throws IOException {
+		byte[] png = Files.readAllBytes(createPngFile("streamed.png", 400, 300).toPath());
+		assertNull(Thumbnail.stored("/images/streamed.png", "image/png", 128, 128));
+
+		Thumbnail made = new Thumbnail(new ByteArrayInputStream(png), "/images/streamed.png", "image/png", 128, 128);
+		Thumbnail stored = Thumbnail.stored("/images/streamed.png", "image/png", 128, 128);
+
+		assertNotNull(stored);
+		assertArrayEquals(made.getBytes(), stored.getBytes());
+		assertEquals(MimeType.png, stored.getMimeType());
+		// Another size still has to be made
+		assertNull(Thumbnail.stored("/images/streamed.png", "image/png", 256, 256));
+	}
+
+	@Test
+	void storedFindsNothingWithoutFileStorage() throws IOException {
+		UtilImpl.THUMBNAIL_FILE_STORAGE = false;
+		byte[] png = Files.readAllBytes(createPngFile("unstored.png", 400, 300).toPath());
+		assertNotNull(new Thumbnail(new ByteArrayInputStream(png), "/images/unstored.png", "image/png", 128, 128).getBytes());
+
+		assertNull(Thumbnail.stored("/images/unstored.png", "image/png", 128, 128));
+	}
+
+	@Test
 	void fileConstructorNonImageFileHasMimeTypeOrNull() throws IOException {
 		File txtFile = createTextFile();
 		Thumbnail t = new Thumbnail(txtFile);
@@ -181,6 +215,30 @@ class ThumbnailTest {
 		assertNotNull(first.getBytes());
 		assertEquals(MimeType.png, first.getMimeType());
 		assertArrayEquals(first.getBytes(), second.getBytes());
+	}
+
+	@Test
+	void contentConstructorWithDimensionsProducesPngThumbnailWithoutFileName() throws IOException {
+		AttachmentContent named = createPngContent();
+		AttachmentContent content = new AttachmentContent("testCustomer", "testModule", "testDocument", null, "testUser", "testId", "testAttr");
+		content.attachment(null, MimeType.png, named.getContentBytes());
+		content.setContentId("fedcba9876543210fedcba9876543210");
+
+		Thumbnail t = new Thumbnail(content, 4, 4);
+
+		assertNotNull(t.getBytes());
+		assertEquals(MimeType.png, t.getMimeType());
+	}
+
+	@Test
+	void contentConstructorWithDimensionsThrowsWhenTheContentHasNoContentId() throws IOException {
+		AttachmentContent named = createPngContent();
+		AttachmentContent content = new AttachmentContent("testCustomer", "testModule", "testDocument", null, "testUser", "testId", "testAttr");
+		content.attachment("unsaved.png", MimeType.png, named.getContentBytes());
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> new Thumbnail(content, 4, 4));
+
+		assertEquals("Attachment content has no content ID to cache its thumb nail against", e.getMessage());
 	}
 
 	@Test
@@ -266,6 +324,195 @@ class ThumbnailTest {
 		assertEquals(MimeType.svg, t.getMimeType());
 	}
 
+	/** Writes a red PNG of the given size to tempDir. */
+	private File createPngFile(String name, int width, int height) throws IOException {
+		BufferedImage img = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = img.createGraphics();
+		g.setColor(Color.RED);
+		g.fillRect(0, 0, width, height);
+		g.dispose();
+		File png = new File(tempDir, name);
+		ImageIO.write(img, "png", png);
+		return png;
+	}
+
+	private static String size(Thumbnail thumbnail) throws IOException {
+		BufferedImage image = ImageIO.read(new ByteArrayInputStream(thumbnail.getBytes()));
+		return image.getWidth() + "x" + image.getHeight();
+	}
+
+	@Test
+	void thumbnailShrinksToFitTheBoxKeepingItsShape() throws IOException {
+		assertEquals("100x75", size(new Thumbnail(createPngFile("landscape.png", 400, 300), 100, 100)));
+		assertEquals("75x100", size(new Thumbnail(createPngFile("portrait.png", 300, 400), 100, 100)));
+		assertEquals("67x50", size(new Thumbnail(createPngFile("wide-box.png", 400, 300), 100, 50)));
+	}
+
+	@Test
+	void thumbnailIsNotEnlargedPastTheImageSize() throws IOException {
+		assertEquals("10x10", size(new Thumbnail(createSmallPngFile(), 1024, 1024)));
+		assertEquals("40x30", size(new Thumbnail(createPngFile("fits-one-side.png", 40, 30), 40, 1024)));
+	}
+
+	private static long storedThumbnailCount() throws IOException {
+		try (Stream<Path> files = Files.walk(new File(UtilImpl.THUMBNAIL_DIRECTORY).toPath())) {
+			return files.filter(p -> p.toString().endsWith(".png")).count();
+		}
+	}
+
+	private static File storedThumbnail(String name) throws IOException {
+		try (Stream<Path> files = Files.walk(new File(UtilImpl.THUMBNAIL_DIRECTORY).toPath())) {
+			return files.filter(p -> p.getFileName().toString().equals(name)).findFirst().orElseThrow().toFile();
+		}
+	}
+
+	@Test
+	void aThumbnailIsStoredUnderItsSizeWithNoTemporaryFileLeft() throws IOException {
+		assertEquals("100x75", size(new Thumbnail(createPngFile("stored.png", 400, 300), 100, 100)));
+
+		File stored = storedThumbnail("100x100.png");
+		assertEquals("100x75", ImageIO.read(stored).getWidth() + "x" + ImageIO.read(stored).getHeight());
+		String[] files = stored.getParentFile().list();
+		assertNotNull(files);
+		assertArrayEquals(new String[] {"100x100.png"}, files);
+	}
+
+	@Test
+	void aThumbnailOfAFileChangedSinceItWasStoredIsMadeAgain() throws IOException {
+		File pngFile = createPngFile("changing.png", 400, 300);
+		assertEquals("100x75", size(new Thumbnail(pngFile, 100, 100)));
+
+		// Redeployed with a different image of the same name
+		BufferedImage tall = new BufferedImage(200, 400, BufferedImage.TYPE_INT_RGB);
+		ImageIO.write(tall, "png", pngFile);
+		assertTrue(pngFile.setLastModified(System.currentTimeMillis() + 10_000L));
+
+		assertEquals("50x100", size(new Thumbnail(pngFile, 100, 100)));
+		// and the new one is stored, over the old one
+		assertEquals("50x100", size(new Thumbnail(pngFile, 100, 100)));
+		assertEquals(1, storedThumbnailCount());
+	}
+
+	@Test
+	void deleteStoredThumbnailsOlderThanDeletesOnlyOldThumbnailsAndEmptyFolders() throws IOException {
+		Path root = new File(UtilImpl.THUMBNAIL_DIRECTORY).toPath();
+		Path oldFolder = Files.createDirectories(root.resolve("aa/bb/old"));
+		Path mixedFolder = Files.createDirectories(root.resolve("aa/cc/mixed"));
+		Path emptyFolder = Files.createDirectories(root.resolve("dd/ee/empty"));
+		Path oldFile = Files.createFile(oldFolder.resolve("128x128.png"));
+		Path oldMarker = Files.createFile(mixedFolder.resolve("NOT_AN_IMAGE.txt"));
+		Path newFile = Files.createFile(mixedFolder.resolve("256x256.png"));
+		long old = System.currentTimeMillis() - java.util.concurrent.TimeUnit.DAYS.toMillis(91);
+		for (Path path : new Path[] {oldFile, oldMarker, oldFolder, oldFolder.getParent(), root.resolve("aa"), mixedFolder, root.resolve("aa/cc")}) {
+			Files.setLastModifiedTime(path, java.nio.file.attribute.FileTime.fromMillis(old));
+		}
+
+		assertEquals(2, Thumbnail.deleteStoredThumbnailsOlderThan(90));
+
+		assertAll(() -> assertFalse(Files.exists(oldFolder.getParent()), "the old folders, emptied, are deleted"),
+					() -> assertFalse(Files.exists(oldMarker)),
+					() -> assertTrue(Files.exists(newFile), "a new thumb nail is kept, and so its folder"),
+					() -> assertFalse(Files.exists(emptyFolder.getParent().getParent()), "an empty folder is deleted, however new"),
+					() -> assertTrue(Files.exists(root)));
+	}
+
+	@Test
+	void deleteStoredThumbnailsOlderThanDoesNothingWithoutAThumbnailDirectory() throws IOException {
+		UtilImpl.THUMBNAIL_DIRECTORY = tempDir.getAbsolutePath() + "/missing/";
+		assertEquals(0, Thumbnail.deleteStoredThumbnailsOlderThan(90));
+	}
+
+	@Test
+	void deleteStoredThumbnailsOlderThanUsesTheContentDirectoryWhenNoThumbnailDirectoryIsSet() throws IOException {
+		String savedContentDirectory = UtilImpl.CONTENT_DIRECTORY;
+		try {
+			UtilImpl.THUMBNAIL_DIRECTORY = null;
+			UtilImpl.CONTENT_DIRECTORY = tempDir.getAbsolutePath() + "/content/";
+			Path old = Files.createFile(Files.createDirectories(new File(Util.getThumbnnailDirectory(), "aa").toPath()).resolve("64x64.png"));
+			Files.setLastModifiedTime(old, java.nio.file.attribute.FileTime.fromMillis(System.currentTimeMillis() - java.util.concurrent.TimeUnit.DAYS.toMillis(91)));
+
+			assertEquals(1, Thumbnail.deleteStoredThumbnailsOlderThan(90));
+		}
+		finally {
+			UtilImpl.CONTENT_DIRECTORY = savedContentDirectory;
+		}
+	}
+
+	@Test
+	void aThumbnailThatCannotBeStoredIsStillServed() throws IOException {
+		File pngFile = createPngFile("unstorable.png", 400, 300);
+		assertNotNull(new Thumbnail(pngFile, 100, 100).getBytes());
+		File stored = storedThumbnail("100x100.png");
+		File folder = stored.getParentFile();
+		Files.delete(stored.toPath());
+		assertTrue(folder.setWritable(false));
+		try {
+			Thumbnail thumbnail = new Thumbnail(pngFile, 100, 100);
+
+			assertEquals(MimeType.png, thumbnail.getMimeType());
+			assertEquals("100x75", size(thumbnail));
+			assertEquals(0, storedThumbnailCount());
+		}
+		finally {
+			assertTrue(folder.setWritable(true));
+		}
+	}
+
+	@Test
+	void decodeThreadsIsHalfTheProcessorsOrTheSettingButWithinAQuarterOfTheHeap() {
+		long megabyte = 1024L * 1024L;
+		assertAll(
+			() -> assertEquals(4, Thumbnail.decodeThreads(0, 8, 4096 * megabyte), "half the processors"),
+			() -> assertEquals(1, Thumbnail.decodeThreads(0, 1, 4096 * megabyte), "at least 1"),
+			() -> assertEquals(3, Thumbnail.decodeThreads(3, 8, 4096 * megabyte), "the setting"),
+			// A quarter of 4GB is room for eight 128MB thumbnails
+			() -> assertEquals(8, Thumbnail.decodeThreads(10, 8, 4096 * megabyte), "the setting, limited by the heap"),
+			() -> assertEquals(8, Thumbnail.decodeThreads(0, 32, 4096 * megabyte), "half the processors, limited by the heap"),
+			() -> assertEquals(1, Thumbnail.decodeThreads(10, 8, 512 * megabyte), "a quarter of 512MB is room for one"),
+			() -> assertEquals(1, Thumbnail.decodeThreads(10, 8, 100 * megabyte), "always at least 1"));
+	}
+
+	@Test
+	void aFailedDecodeGivesBackItsDecodePermit() throws IOException {
+		// A PNG cut off in its image data - its header reads, but decoding it fails
+		BufferedImage noise = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+		java.util.Random random = new java.util.Random(4);
+		for (int x = 0; x < 200; x++) {
+			for (int y = 0; y < 200; y++) {
+				noise.setRGB(x, y, random.nextInt());
+			}
+		}
+		java.io.ByteArrayOutputStream png = new java.io.ByteArrayOutputStream();
+		ImageIO.write(noise, "png", png);
+		byte[] truncated = java.util.Arrays.copyOf(png.toByteArray(), png.size() / 2);
+		File good = createPngFile("good.png", 400, 300);
+		UtilImpl.THUMBNAIL_FILE_STORAGE = false;
+
+		// More failures than there can be permits - a leaked permit would make the last thumbnail wait 60 seconds
+		assertTimeoutPreemptively(java.time.Duration.ofSeconds(20), () -> {
+			for (int i = 0; i < 100; i++) {
+				assertThrows(IOException.class,
+								() -> new Thumbnail(new ByteArrayInputStream(truncated), "/broken.png", "image/png", 64, 64),
+								"failure " + i);
+			}
+			assertEquals("64x48", size(new Thumbnail(good, 64, 64)));
+		});
+	}
+
+	@Test
+	void deleteStoredThumbnailsRemovesAnAttachmentsThumbnails() throws IOException {
+		AttachmentContent content = createPngContent();
+		assertNotNull(new Thumbnail(content, 4, 4).getBytes());
+		assertTrue(storedThumbnailCount() > 0);
+
+		// The content ID is matched whatever its case, as the folder name is lower case
+		Thumbnail.deleteStoredThumbnails("0123456789ABCDEF0123456789ABCDEF");
+		assertEquals(0, storedThumbnailCount());
+		// Deleting again, or deleting thumbnails that were never made, is harmless
+		Thumbnail.deleteStoredThumbnails("0123456789abcdef0123456789abcdef");
+		Thumbnail.deleteStoredThumbnails("ffffffffffffffffffffffffffffffff");
+	}
+
 	@Test
 	void fileWidthHeightConstructorSecondCallReturnsCachedPng() throws IOException {
 		File pngFile = createSmallPngFile();
@@ -276,5 +523,59 @@ class ThumbnailTest {
 		assertNotNull(second.getBytes());
 		assertEquals(MimeType.png, second.getMimeType());
 		assertArrayEquals(first.getBytes(), second.getBytes());
+	}
+
+	// The waits take a deadline, so one already passed times out at once
+
+	@Test
+	void acquireTimesOutWhileAnotherThreadHoldsTheImageLock() throws InterruptedException {
+		ReentrantLock lock = new ReentrantLock(true);
+		// A lock is kept by a thread that ends without unlocking it
+		Thread holder = new Thread(lock::lock);
+		holder.start();
+		holder.join();
+
+		long deadline = System.nanoTime();
+		assertThrows(Thumbnail.BusyException.class, () -> Thumbnail.acquire(lock, deadline));
+	}
+
+	@Test
+	void acquireDecoderTimesOutWhileEveryPermitIsTaken() {
+		int taken = Thumbnail.DECODERS.drainPermits();
+		try {
+			long deadline = System.nanoTime();
+			assertThrows(Thumbnail.BusyException.class, () -> Thumbnail.acquireDecoder(deadline));
+		}
+		finally {
+			Thumbnail.DECODERS.release(taken);
+		}
+	}
+
+	@Test
+	void acquireWhenInterruptedThrowsAndKeepsTheInterrupt() {
+		ReentrantLock lock = new ReentrantLock(true);
+		long deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(1);
+		Thread.currentThread().interrupt();
+		try {
+			assertThrowsExactly(InterruptedIOException.class, () -> Thumbnail.acquire(lock, deadline));
+			assertFalse(lock.isLocked());
+		}
+		finally {
+			assertTrue(Thread.interrupted(), "the interrupt is kept");
+		}
+	}
+
+	@Test
+	void acquireDecoderWhenInterruptedThrowsAndKeepsTheInterrupt() {
+		int permits = Thumbnail.DECODERS.availablePermits();
+		long deadline = System.nanoTime() + TimeUnit.MINUTES.toNanos(1);
+		Thread.currentThread().interrupt();
+		try {
+			assertThrowsExactly(InterruptedIOException.class, () -> Thumbnail.acquireDecoder(deadline));
+			assertEquals(permits, Thumbnail.DECODERS.availablePermits());
+		}
+		finally {
+			assertTrue(Thread.interrupted(), "the interrupt is kept");
+		}
 	}
 }

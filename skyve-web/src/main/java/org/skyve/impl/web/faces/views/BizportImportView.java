@@ -7,10 +7,12 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.UploadException;
@@ -19,8 +21,10 @@ import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.bizport.POIWorkbook;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
+import org.skyve.impl.web.UserAgent;
 import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.metadata.controller.BizImportAction;
@@ -29,9 +33,12 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.annotation.ManagedProperty;
@@ -50,6 +57,13 @@ import jakarta.servlet.http.HttpServletRequest;
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate upload view response fragments.
 public class BizportImportView extends AbstractUploadView {
 	private static final long serialVersionUID = -8452779436908784172L;
+
+	/**
+	 * The callback parameter that tells a SmartClient import window that the import succeeded without problems:
+	 * bizImport.xhtml's {@code skyveAfterBizImport} (the upload's {@code oncomplete}) refreshes the view, and then shows
+	 * the page's messages ({@link #MESSAGES_PARAM}) in the view's growl and closes the window.
+	 */
+	private static final String BIZ_IMPORT_SUCCEEDED_PARAM = "bizImportSucceeded";
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.ACTION_NAME + "}")
@@ -81,7 +95,7 @@ public class BizportImportView extends AbstractUploadView {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				initialise();
 				return null;
 			}
@@ -93,7 +107,7 @@ public class BizportImportView extends AbstractUploadView {
 	 *
 	 * @return import action name
 	 */
-	public String getAction() {
+	public @Nullable String getAction() {
 		return action;
 	}
 
@@ -107,7 +121,7 @@ public class BizportImportView extends AbstractUploadView {
 	 *
 	 * @return mutable list of import problems
 	 */
-	public List<Problem> getProblems() {
+	public @Nonnull List<Problem> getProblems() {
 		return problems;
 	}
 
@@ -117,12 +131,23 @@ public class BizportImportView extends AbstractUploadView {
 	 * <p>This method intentionally does not use {@link FacesAction} so user-facing growl messages
 	 * are always available, including iframe-hosted upload pages.
 	 *
+	 * <p>The import is refused unless the view of the bean's own document, for the request's
+	 * UX/UI, offers a reachable trigger for the action in the bean's current state (see
+	 * {@link ActionAvailability}). SmartClient, the client that opens the import page, saves the
+	 * form first, so a saved edit that changes the action's conditions decides the check. A refusal's
+	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a warning,
+	 * rolled back, and enqueued as the refusal's localised message.
+	 *
+	 * <p>An import without problems tells the SmartClient window to close (the {@code bizImportSucceeded} callback
+	 * parameter), with the page's messages to show in the view as it closes; one with errors or warnings, or that
+	 * fails, leaves the window open, showing them.
+	 *
 	 * @param event PrimeFaces upload event containing the uploaded file
 	 * @throws Exception when unexpected import processing failures occur before they are converted
 	 *         to user-facing messages
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void handleFileUpload(FileUploadEvent event) throws Exception {
+	public void handleFileUpload(@Nonnull FileUploadEvent event) throws Exception {
 		FacesContext fc = FacesContext.getCurrentInstance();
 
 		UploadedFile file = event.getFile();
@@ -172,6 +197,17 @@ public class BizportImportView extends AbstractUploadView {
 			if (! user.canExecuteAction(document, action)) {
 				throw new SecurityException(action, user.getName());
 			}
+			String uxui = UserAgent.getSelection(request).getUxUi().getName();
+			ActionAvailability.check(user,
+										document,
+										document.getView(uxui,
+															customer,
+															bean.isCreated() ?
+																ViewType.edit.toString() :
+																ViewType.create.toString()),
+										uxui,
+										bean,
+										action);
 			BizImportAction bizPortAction = document.getBizImportAction(customer, action, true);
 
 			UploadException exception = new UploadException();
@@ -236,7 +272,17 @@ public class BizportImportView extends AbstractUploadView {
 			else {
 				FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_INFO, "Successful", "The import completed successfully.");
 				fc.addMessage(null, msg);
+				// The window closes: its messages are shown in the view's growl instead
+				PrimeFaces.Ajax ajax = PrimeFaces.current().ajax();
+				ajax.addCallbackParam(BIZ_IMPORT_SUCCEEDED_PARAM, Boolean.TRUE);
+				ajax.addCallbackParam(MESSAGES_PARAM, messagesJSON(fc));
 			}
+		}
+		catch (ActionUnavailableException e) {
+			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
+			persistence.rollback();
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, "Failure", OWASP.escapeHtml(e.getMessages().get(0).getText()));
+			fc.addMessage(null, msg);
 		}
 		catch (Throwable t) {
 			persistence.rollback();

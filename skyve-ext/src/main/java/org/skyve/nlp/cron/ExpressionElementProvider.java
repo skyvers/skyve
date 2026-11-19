@@ -1,5 +1,8 @@
 package org.skyve.nlp.cron;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines a parser fragment that extracts one or more cron fields from natural-language text.
  *
@@ -14,7 +17,7 @@ public interface ExpressionElementProvider {
 	  * @param value The natural-language text to inspect.
 	  * @return {@code true} when this provider captured matching segments.
 	  */
-	public boolean matches(String value);
+	public boolean matches(@Nonnull String value);
 
 	/**
 	 * Indicates whether this provider contributes the cron seconds field.
@@ -30,7 +33,7 @@ public interface ExpressionElementProvider {
 	 *
 	 * @return A cron seconds token, or {@code null} when no seconds value is provided
 	 */
-	default String getSecondElement() {
+	default @Nullable String getSecondElement() {
 		return null;
 	}
 
@@ -46,7 +49,7 @@ public interface ExpressionElementProvider {
 	 *
 	 * @return A valid cron minute token or {@code null} when this provider contributes no minute.
 	 */
-	public String getMinuteElement();
+	public @Nullable String getMinuteElement();
 
 	/**
 	 * Indicates whether this provider contributes the cron hour field.
@@ -60,7 +63,7 @@ public interface ExpressionElementProvider {
 	 *
 	 * @return A valid cron hour token or {@code null} when this provider contributes no hour.
 	 */
-	public String getHourElement();
+	public @Nullable String getHourElement();
 
 	/**
 	 * Indicates whether this provider contributes the cron day-of-month field.
@@ -74,7 +77,7 @@ public interface ExpressionElementProvider {
 	 *
 	 * @return A valid cron day-of-month token or {@code null} when not provided.
 	 */
-	public String getDayNumberElement();
+	public @Nullable String getDayNumberElement();
 
 	/**
 	 * Indicates whether this provider contributes the cron month field.
@@ -88,7 +91,7 @@ public interface ExpressionElementProvider {
 	 *
 	 * @return A valid cron month token or {@code null} when not provided.
 	 */
-	public String getMonthElement();
+	public @Nullable String getMonthElement();
 
 	/**
 	 * Indicates whether this provider contributes the cron day-of-week field.
@@ -102,7 +105,7 @@ public interface ExpressionElementProvider {
 	 *
 	 * @return A valid cron day-of-week token or {@code null} when not provided.
 	 */
-	public String getDayOfWeekElement();
+	public @Nullable String getDayOfWeekElement();
 
 	/**
 	 * Indicates whether the contributed seconds value is fixed and should not be overridden.

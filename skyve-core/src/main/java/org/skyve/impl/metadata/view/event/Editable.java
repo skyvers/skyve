@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.event;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for widgets that fire an inline-edit event.
  *
@@ -11,5 +13,5 @@ import java.util.List;
  * @see EventSource
  */
 public interface Editable extends EventSource {
-	public List<EventAction> getEditedActions();
+	public @Nonnull List<EventAction> getEditedActions();
 }

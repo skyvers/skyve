@@ -33,6 +33,7 @@ class EventActionTest {
 	}
 
 	/** Verifies server-side action name state and properties round-trip correctly. */
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void serverSideActionNameRoundTripAndProperties() {
 		ServerSideActionEventAction action = new ServerSideActionEventAction();
@@ -43,7 +44,24 @@ class EventActionTest {
 		assertEquals("v", action.getProperties().get("k"));
 	}
 
+	/** Verifies a blank server-side action name normalizes to null. */
+	@Test
+	void serverSideActionBlankActionNameBecomesNull() {
+		ServerSideActionEventAction action = new ServerSideActionEventAction();
+		action.setActionName("   ");
+		assertNull(action.getActionName());
+	}
+
+	/** Verifies a padded server-side action name is trimmed. */
+	@Test
+	void serverSideActionPaddedActionNameIsTrimmed() {
+		ServerSideActionEventAction action = new ServerSideActionEventAction();
+		action.setActionName("  doSomething  ");
+		assertEquals("doSomething", action.getActionName());
+	}
+
 	/** Verifies rerender action client-validation and properties round-trip correctly. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void rerenderClientValidationRoundTripAndProperties() {
 		RerenderEventAction action = new RerenderEventAction();
@@ -56,11 +74,11 @@ class EventActionTest {
 
 	/** Verifies disabled condition names can be stored directly and retrieved unchanged. */
 	@Test
-	void setDisabledConditionNameIsStoredAndRetrieved() {
+	void setDisabledConditionIsStoredAndRetrieved() {
 		SetDisabledEventAction action = new SetDisabledEventAction();
-		action.setDisabledConditionName("disabled");
-		assertEquals("disabled", action.getDisabledConditionName());
-		assertNull(action.getEnabledConditionName());
+		action.setXmlDisabledCondition("disabled");
+		assertEquals("disabled", action.getDisabledCondition());
+		assertNull(action.getXmlEnabledCondition());
 		action.getProperties().put("k", "v");
 		assertEquals("v", action.getProperties().get("k"));
 	}
@@ -69,23 +87,23 @@ class EventActionTest {
 	@Test
 	void setDisabledNegatesEnabledExpressionAndTrimsBlankInput() {
 		SetDisabledEventAction action = new SetDisabledEventAction();
-		action.setEnabledConditionName("enabled");
-		assertEquals("notEnabled", action.getDisabledConditionName());
-		action.setEnabledConditionName("notReady");
-		assertEquals("ready", action.getDisabledConditionName());
-		action.setEnabledConditionName("   ");
-		assertNull(action.getDisabledConditionName());
-		action.setEnabledConditionName(null);
-		assertNull(action.getDisabledConditionName());
+		action.setXmlEnabledCondition("enabled");
+		assertEquals("notEnabled", action.getDisabledCondition());
+		action.setXmlEnabledCondition("notReady");
+		assertEquals("ready", action.getDisabledCondition());
+		action.setXmlEnabledCondition("   ");
+		assertNull(action.getDisabledCondition());
+		action.setXmlEnabledCondition(null);
+		assertNull(action.getDisabledCondition());
 	}
 
 	/** Verifies invisible condition names can be stored directly and retrieved unchanged. */
 	@Test
-	void setInvisibleConditionNameIsStoredAndRetrieved() {
+	void setInvisibleConditionIsStoredAndRetrieved() {
 		SetInvisibleEventAction action = new SetInvisibleEventAction();
-		action.setInvisibleConditionName("hidden");
-		assertEquals("hidden", action.getInvisibleConditionName());
-		assertNull(action.getVisibleConditionName());
+		action.setXmlInvisibleCondition("hidden");
+		assertEquals("hidden", action.getInvisibleCondition());
+		assertNull(action.getXmlVisibleCondition());
 		action.getProperties().put("k", "v");
 		assertEquals("v", action.getProperties().get("k"));
 	}
@@ -94,17 +112,18 @@ class EventActionTest {
 	@Test
 	void setInvisibleNegatesVisibleExpressionAndTrimsBlankInput() {
 		SetInvisibleEventAction action = new SetInvisibleEventAction();
-		action.setVisibleConditionName("visible");
-		assertEquals("notVisible", action.getInvisibleConditionName());
-		action.setVisibleConditionName("notShown");
-		assertEquals("shown", action.getInvisibleConditionName());
-		action.setVisibleConditionName("   ");
-		assertNull(action.getInvisibleConditionName());
-		action.setVisibleConditionName(null);
-		assertNull(action.getInvisibleConditionName());
+		action.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", action.getInvisibleCondition());
+		action.setXmlVisibleCondition("notShown");
+		assertEquals("shown", action.getInvisibleCondition());
+		action.setXmlVisibleCondition("   ");
+		assertNull(action.getInvisibleCondition());
+		action.setXmlVisibleCondition(null);
+		assertNull(action.getInvisibleCondition());
 	}
 
 	/** Verifies rerender action supports explicitly disabling client-side validation. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void rerenderSupportsFalseClientValidation() {
 		RerenderEventAction action = new RerenderEventAction();

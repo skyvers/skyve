@@ -37,6 +37,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.DataStore;
 import org.skyve.toolchain.AbstractSkyveMojo;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates a baseline Flutter project from an existing Skyve project.
  *
@@ -136,7 +139,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @throws MalformedURLException if a classpath element cannot be converted to a URL
      */
     @SuppressWarnings("java:S2696") // Part of init and only ever called once, so static mutability is acceptable here.
-	Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
+	@Nonnull Weld bootstrapSkyve() throws DependencyResolutionRequiredException, MalformedURLException {
         configureClasspath(srcDir);
 
         String output = project.getBuild()
@@ -181,7 +184,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
     }
 
 	@SuppressWarnings({"static-method", "resource"}) // test seam
-	void initialize(Weld weld) {
+	void initialize(@Nonnull Weld weld) {
         weld.addPackage(true, SkyveCDIProducer.class);
         weld.initialize();
     }
@@ -192,7 +195,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
     }
 
 	@SuppressWarnings("static-method") // test seam
-	AbstractPersistence getPersistence() {
+	@Nonnull AbstractPersistence getPersistence() {
         return AbstractPersistence.get();
     }
 
@@ -206,7 +209,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @throws MojoExecutionException if the directory cannot be created or cleared
      */
 	@SuppressWarnings("java:S3776") // complexity OK
-	private Path prepareTargetDirectory(String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
+	private @Nonnull Path prepareTargetDirectory(@Nonnull String dir, boolean clear) throws MojoFailureException, MojoExecutionException {
         Path root = Path.of(dir);
         if (root.toFile()
                 .exists()) {
@@ -252,7 +255,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      *
      * @param msg the message to log
      */
-	private void debug(CharSequence msg) {
+	private void debug(@Nonnull CharSequence msg) {
         getLog().debug("[flutter-init] " + msg);
     }
 
@@ -261,7 +264,7 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      *
      * @param msg the message to log
      */
-	private void info(CharSequence msg) {
+	private void info(@Nonnull CharSequence msg) {
         getLog().info("[flutter-init] " + msg);
     }
 
@@ -271,12 +274,12 @@ public class FlutterInitMojo extends AbstractSkyveMojo {
      * @param name the parameter name
      * @param value the parameter value
      */
-	private void debugParam(String name, Object value) {
+	private void debugParam(@Nonnull String name, @Nullable Object value) {
         debug(name + "=" + value);
     }
 
 	@SuppressWarnings("static-method") // test seam
-	void generate(GeneratorConfig config) throws IOException {
+	void generate(@Nonnull GeneratorConfig config) throws IOException {
         FlutterGenerator generator = new FlutterGenerator(config);
         generator.generate();
     }

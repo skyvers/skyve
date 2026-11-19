@@ -6,6 +6,9 @@ import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds metadata query projected column definitions.
  */
@@ -24,7 +27,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 *
 	 * @param column The metadata to mutate.
 	 */
-	public FluentMetaDataQueryProjectedColumn(MetaDataQueryProjectedColumnMetaData column) {
+	public FluentMetaDataQueryProjectedColumn(@Nonnull MetaDataQueryProjectedColumnMetaData column) {
 		this.column = column;
 	}
 
@@ -34,7 +37,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param column The source projected column definition.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn from(@SuppressWarnings("hiding") MetaDataQueryProjectedColumn column) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn from(@SuppressWarnings("hiding") @Nonnull MetaDataQueryProjectedColumn column) {
 		super.from(column);
 		projected(column.isProjected());
 		expression(column.getExpression());
@@ -54,7 +57,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param projected {@code true} to project the column.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn projected(boolean projected) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn projected(boolean projected) {
 		column.setProjected(projected ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -65,7 +68,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param expression The projection expression.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn expression(String expression) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn expression(@Nullable String expression) {
 		column.setExpression(expression);
 		return this;
 	}
@@ -76,7 +79,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param sortable {@code true} to allow sorting.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn sortable(boolean sortable) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn sortable(boolean sortable) {
 		column.setSortable(sortable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -87,7 +90,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param filterable {@code true} to allow filtering.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn filterable(boolean filterable) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn filterable(boolean filterable) {
 		column.setFilterable(filterable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -98,7 +101,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param editable {@code true} to allow editing.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn editable(boolean editable) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn editable(boolean editable) {
 		column.setEditable(editable ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -109,7 +112,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param escape {@code true} to escape output.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn escape(boolean escape) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn escape(boolean escape) {
 		column.setEscape(escape ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -120,7 +123,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param sanitise The sanitisation policy.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn sanitise(Sanitisation sanitise) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn sanitise(@Nullable Sanitisation sanitise) {
 		column.setSanitise(sanitise);
 		return this;
 	}
@@ -131,7 +134,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param formatterName The formatter name.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn formatter(FormatterName formatterName) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn formatter(@Nullable FormatterName formatterName) {
 		column.setFormatterName(formatterName);
 		return this;
 	}
@@ -142,7 +145,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @param customFormatterName The custom formatter name.
 	 * @return this fluent instance.
 	 */
-	public FluentMetaDataQueryProjectedColumn customFormatter(String customFormatterName) {
+	public @Nonnull FluentMetaDataQueryProjectedColumn customFormatter(@Nullable String customFormatterName) {
 		column.setCustomFormatterName(customFormatterName);
 		return this;
 	}
@@ -153,7 +156,7 @@ public class FluentMetaDataQueryProjectedColumn extends FluentMetaDataQueryColum
 	 * @return The projected column metadata instance.
 	 */
 	@Override
-	public MetaDataQueryColumnMetaData get() {
+	public @Nonnull MetaDataQueryColumnMetaData get() {
 		return column;
 	}
 }

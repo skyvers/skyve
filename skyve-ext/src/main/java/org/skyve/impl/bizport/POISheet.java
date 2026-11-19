@@ -60,6 +60,7 @@ import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Sets up a sheet with a number of columns in it.
@@ -134,7 +135,7 @@ public final class POISheet implements BizPortSheet {
 	 * New File constructor
 	 * This constructor is used when creating a new Excel sheet.
 	 */
-	public POISheet(String title) {
+	public POISheet(@Nonnull String title) {
 		this.title = title;
 	}
 
@@ -146,7 +147,7 @@ public final class POISheet implements BizPortSheet {
 	 * @param sheet	The excel worksheet.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	POISheet(Customer customer, POIWorkbook parent, Sheet sheet, UploadException problems) {
+	POISheet(@Nonnull Customer customer, @Nonnull POIWorkbook parent, @Nonnull Sheet sheet, @Nonnull UploadException problems) {
 		title = sheet.getSheetName();
 
 		// get the columns in the sheet (row 2 is binding, row 3 is titles)
@@ -192,6 +193,9 @@ public final class POISheet implements BizPortSheet {
 		// Add ReferenceSheets to the columns now we can tell ChildDocument sheets (from the column bindings)
 		for (String binding : getColumnBindings()) {
 			final BizPortColumn column = getColumn(binding);
+			if (column == null) {
+				throw new IllegalStateException("Sheet " + title + " has no column for binding " + binding);
+			}
 			// if we are working with a document sheet, determine if we need to setup the column's "referencedSheet" property
 			if ((collectionBinding == null) || getColumnBindings().contains(ChildBean.PARENT_NAME)) { // have a document sheet (including ChildDocument)
 				if (ChildBean.PARENT_NAME.equals(binding)) { // cater for the parent binding
@@ -292,9 +296,9 @@ public final class POISheet implements BizPortSheet {
 	 * @param parent	The pure Excel workbook that owns this sheet.
 	 * @param sheet	The pure Excel worksheet that backs this sheet in-memoty representation.
 	 */
-	void materialise(SheetKey key,
-						@SuppressWarnings("hiding") POIWorkbook parent,
-						@SuppressWarnings("hiding") Sheet sheet) {
+	void materialise(@Nonnull SheetKey key,
+						@SuppressWarnings("hiding") @Nonnull POIWorkbook parent,
+						@SuppressWarnings("hiding") @Nonnull Sheet sheet) {
 		this.parent = parent;
 		this.sheet = sheet;
 		this.sheet.createFreezePane(0, 3);
@@ -380,13 +384,17 @@ public final class POISheet implements BizPortSheet {
 				setRangeValues(rangeValues, i);
 			}
 			else {
-				setDataValidation(column.getType(), i);
+				// No type means no data validation, as for types without a validation
+				AttributeType type = column.getType();
+				if (type != null) {
+					setDataValidation(type, i);
+				}
 			}
 			i++;
 		}
 	}
 
-	private void createCellComment(Cell cell, String comment) {
+	private void createCellComment(@Nonnull Cell cell, @Nullable String comment) {
 		if (comment != null) {
 		    // When the comment box is visible, have it show in a 1x3 space
 		    ClientAnchor anchor = parent.creationHelper.createClientAnchor();
@@ -410,7 +418,7 @@ public final class POISheet implements BizPortSheet {
 	 * @param rangeValues	The range values to set.
 	 * @param columnIndex	The index of the column (starts with 0 index).
 	 */
-	private void setRangeValues(String[] rangeValues, int columnIndex) {
+	private void setRangeValues(@Nonnull String[] rangeValues, int columnIndex) {
 		if (parent.ooxmlFormat) {
 			XSSFSheet xssfSheet = (XSSFSheet) sheet;
 			DataValidationHelper validationHelper = new XSSFDataValidationHelper((XSSFSheet) sheet);
@@ -597,7 +605,7 @@ public final class POISheet implements BizPortSheet {
 	}
 	
 	@Override
-	public BizPortColumn addColumn(String columnBinding, BizPortColumn column) {
+	public @Nullable BizPortColumn addColumn(@Nonnull String columnBinding, @Nonnull BizPortColumn column) {
 		if (sheet != null) {
 			throw new IllegalStateException("This workbook data has been materialized");
 		}
@@ -605,7 +613,7 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	public BizPortColumn removeColumn(String columnBinding) {
+	public @Nullable BizPortColumn removeColumn(@Nonnull String columnBinding) {
 		if (sheet != null) {
 			throw new IllegalStateException("This workbook data has been materialized");
 		}
@@ -613,17 +621,17 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	public BizPortColumn getColumn(String columnBinding) {
+	public @Nullable BizPortColumn getColumn(@Nonnull String columnBinding) {
 		return columns.get(columnBinding);
 	}
 
 	@Override
-	public Set<String> getColumnBindings() {
+	public @Nonnull Set<String> getColumnBindings() {
 		return columns.keySet();
 	}
 
 	@Override
-	public boolean moveToRow(Object... rowKey) {
+	public boolean moveToRow(@Nonnull Object... rowKey) {
 		if (sheet == null) {
 			throw new IllegalStateException(WORKBOOK_DATA_NOT_MATERIALIZED);
 		}
@@ -637,7 +645,7 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	public void addRow(Object... rowKey) {
+	public void addRow(@Nonnull Object... rowKey) {
         if (sheet == null) {
             throw new IllegalStateException(WORKBOOK_DATA_NOT_MATERIALIZED);
         }
@@ -657,7 +665,7 @@ public final class POISheet implements BizPortSheet {
 	 * @param rowKey	The key components.
 	 * @return	The key string.
 	 */
-	private static String buildRowKey(Object... rowKey) {
+	private static @Nonnull String buildRowKey(@Nonnull Object... rowKey) {
 		// Build the composite row key
 		String result = null;
 		if (rowKey.length == 1) {
@@ -685,7 +693,7 @@ public final class POISheet implements BizPortSheet {
 		return (nextRow <= lastRow);
 	}
 
-	private String getCurrentRowExcelRef(BizPortColumn column) {
+	private @Nonnull String getCurrentRowExcelRef(@Nullable BizPortColumn column) {
 		StringBuilder ref = new StringBuilder(64);
 		ref.append(getTitle()).append('!');
 		if ((currentRow != null) && (column != null)) {
@@ -700,16 +708,16 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	public void addErrorAtCurrentRow(UploadException problems,
-										BizPortColumn column,
-										String message) {
+	public void addErrorAtCurrentRow(@Nonnull UploadException problems,
+										@Nullable BizPortColumn column,
+										@Nonnull String message) {
 		problems.addError(new Problem(message, getCurrentRowExcelRef(column)));
 	}
 
 	@Override
-	public void addWarningAtCurrentRow(UploadException problems,
-										BizPortColumn column,
-										String message) {
+	public void addWarningAtCurrentRow(@Nonnull UploadException problems,
+										@Nullable BizPortColumn column,
+										@Nonnull String message) {
 		problems.addWarning(new Problem(message, getCurrentRowExcelRef(column)));
 	}
 
@@ -721,9 +729,9 @@ public final class POISheet implements BizPortSheet {
 
 	@Override
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	public <T> T getValue(String columnBinding,
-							AttributeType attributeType,
-							UploadException problems) {
+	public @Nullable <T> T getValue(@Nonnull String columnBinding,
+										@Nullable AttributeType attributeType,
+										@Nonnull UploadException problems) {
 		T result = null;
 
 		if (sheet == null) {
@@ -816,7 +824,7 @@ public final class POISheet implements BizPortSheet {
 		return result;
 	}
 
-	private static boolean isStringCell(AttributeType attributeType) {
+	private static boolean isStringCell(@Nullable AttributeType attributeType) {
 		return (AttributeType.text.equals(attributeType) ||
 					AttributeType.enumeration.equals(attributeType) ||
 					AttributeType.association.equals(attributeType) ||
@@ -831,7 +839,7 @@ public final class POISheet implements BizPortSheet {
 	
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void setValue(String columnBinding, Object value) {
+	public void setValue(@Nonnull String columnBinding, @Nullable Object value) {
 		if (sheet == null) {
 			throw new IllegalStateException(WORKBOOK_DATA_NOT_MATERIALIZED);
 		}
@@ -892,7 +900,7 @@ public final class POISheet implements BizPortSheet {
 
 	// Place a formula like =VLOOKUP(Q4, Model!$A$4:$B$65535, 2, FALSE)
 	// to enable the bizkey of the reference sheets to be displayed
-	private void applyLookupFormula(Row row, int keyColumn, String referencedSheetTitle) {
+	private void applyLookupFormula(@Nonnull Row row, int keyColumn, @Nonnull String referencedSheetTitle) {
 	    int descriptionColumn = keyColumn + 1;
 	    Cell descriptionCell = row.getCell(descriptionColumn, Row.MissingCellPolicy.RETURN_BLANK_AS_NULL);
         if (descriptionCell == null) { // not created yet
@@ -908,12 +916,12 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	public String getTitle() {
+	public @Nonnull String getTitle() {
 		return title;
 	}
 
 	@Override
-	public void setTitle(String title) {
+	public void setTitle(@Nonnull String title) {
 		if (sheet != null) { // materialised
 			int sheetIndex = parent.workbook.getSheetIndex(sheet);
 			parent.workbook.setSheetName(sheetIndex, title);
@@ -922,7 +930,7 @@ public final class POISheet implements BizPortSheet {
 	}
 
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return title;
 	}
 }

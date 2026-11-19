@@ -1,6 +1,7 @@
 package org.skyve.impl.archive.list;
 
 import static org.apache.commons.lang3.StringUtils.toRootLowerCase;
+import static org.apache.lucene.search.BooleanClause.Occur.FILTER;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST;
 import static org.apache.lucene.search.BooleanClause.Occur.MUST_NOT;
 import static org.apache.lucene.search.BooleanClause.Occur.SHOULD;
@@ -29,10 +30,13 @@ import org.apache.lucene.search.TermRangeQuery;
 import org.apache.lucene.search.WildcardQuery;
 import org.apache.lucene.util.BytesRef;
 import org.locationtech.jts.geom.Geometry;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.metadata.view.model.list.Filter;
 
 import com.google.common.base.MoreObjects;
+
+import jakarta.annotation.Nonnull;
 
 /**
  * Builds Lucene boolean queries from Skyve list filter operations.
@@ -49,11 +53,19 @@ public class LuceneFilter implements Filter {
      *
      * @return A boolean query representing all applied filter clauses.
      */
-    public Query toQuery() {
+    public @Nonnull Query toQuery() {
         Builder builder = new BooleanQuery.Builder();
 
+        boolean positive = false;
         for (BooleanClause clause : clauses) {
             builder.add(clause);
+            positive = positive || (clause.getOccur() != MUST_NOT);
+        }
+        // Lucene matches nothing with only MUST_NOT clauses: exclude them from every archived bean (a document with a
+        // bizId; an archive index also holds a progress document per archive file), so that a negation ("not equals",
+        // "null") matches the beans it does not exclude
+        if ((! clauses.isEmpty()) && (! positive)) {
+            builder.add(new FieldExistsQuery(Bean.DOCUMENT_ID), FILTER);
         }
 
         return builder.build();
@@ -65,7 +77,7 @@ public class LuceneFilter implements Filter {
      * @param value
      * @return
      */
-    private static String lower(String value) {
+    private static @Nonnull String lower(@Nonnull String value) {
         return toRootLowerCase(value);
     }
 
@@ -78,7 +90,7 @@ public class LuceneFilter implements Filter {
      * @param s
      * @return
      */
-    private static String escape(String s) {
+    private static @Nonnull String escape(@Nonnull String s) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -99,7 +111,7 @@ public class LuceneFilter implements Filter {
      * @param filter The filter whose query is ANDed into this filter.
      */
     @Override
-    public void addAnd(Filter filter) {
+    public void addAnd(@Nonnull Filter filter) {
         if (filter instanceof LuceneFilter otherFilter) {
             clauses.add(new BooleanClause(otherFilter.toQuery(), MUST));
         }
@@ -111,7 +123,7 @@ public class LuceneFilter implements Filter {
      * @param filter The filter whose query is ORed with the current query.
      */
     @Override
-    public void addOr(Filter filter) {
+    public void addOr(@Nonnull Filter filter) {
         if (filter instanceof LuceneFilter otherFilter) {
             Query copyThisQuery = toQuery();
             clauses.clear();
@@ -125,7 +137,7 @@ public class LuceneFilter implements Filter {
      * Adds the tagged constraint.
      */
     @Override
-    public void addTagged(String tagId, boolean tagged) {
+    public void addTagged(@Nonnull String tagId, boolean tagged) {
         throw new UnsupportedOperationException();
     }
 
@@ -133,7 +145,7 @@ public class LuceneFilter implements Filter {
      * Adds the null constraint.
      */
     @Override
-    public void addNull(String binding) {
+    public void addNull(@Nonnull String binding) {
         Query query = new FieldExistsQuery(binding);
         clauses.add(new BooleanClause(query, MUST_NOT));
     }
@@ -142,7 +154,7 @@ public class LuceneFilter implements Filter {
      * Adds the not null constraint.
      */
     @Override
-    public void addNotNull(String binding) {
+    public void addNotNull(@Nonnull String binding) {
         Query query = new FieldExistsQuery(binding);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -151,7 +163,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, String value) {
+    public void addEquals(@Nonnull String binding, @Nonnull String value) {
         Query query = new TermQuery(new Term(binding, lower(value)));
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -160,7 +172,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Date value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Date value) {
         String dateStr = formatDate(value);
         Query query = new TermQuery(new Term(binding, dateStr));
         clauses.add(new BooleanClause(query, MUST));
@@ -170,7 +182,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Integer value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Integer value) {
         Query eq = IntField.newExactQuery(binding, value);
         clauses.add(new BooleanClause(eq, MUST));
     }
@@ -179,7 +191,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Long value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Long value) {
         Query eq = LongField.newExactQuery(binding, value);
         clauses.add(new BooleanClause(eq, MUST));
     }
@@ -188,7 +200,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Decimal value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Decimal value) {
         Query eq = DoubleField.newExactQuery(binding, value.doubleValue());
         clauses.add(new BooleanClause(eq, MUST));
     }
@@ -197,7 +209,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Boolean value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Boolean value) {
         addEquals(binding, String.valueOf(value));
     }
 
@@ -205,7 +217,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Enum<?> value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
         addEquals(binding, String.valueOf(value));
     }
 
@@ -213,7 +225,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, String value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull String value) {
         Query query = new TermQuery(new Term(binding, lower(value)));
         clauses.add(new BooleanClause(query, MUST_NOT));
     }
@@ -222,7 +234,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Date value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Date value) {
         String dateStr = formatDate(value);
         addNotEquals(binding, dateStr);
     }
@@ -231,7 +243,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Integer value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Integer value) {
         Query iq = IntField.newExactQuery(binding, value);
         clauses.add(new BooleanClause(iq, MUST_NOT));
     }
@@ -240,7 +252,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Long value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Long value) {
         Query iq = LongField.newExactQuery(binding, value);
         clauses.add(new BooleanClause(iq, MUST_NOT));
     }
@@ -249,7 +261,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Decimal value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Decimal value) {
         Query eq = DoubleField.newExactQuery(binding, value.doubleValue());
         clauses.add(new BooleanClause(eq, MUST_NOT));
     }
@@ -258,7 +270,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Boolean value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Boolean value) {
         addNotEquals(binding, String.valueOf(value));
     }
 
@@ -266,7 +278,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Enum<?> value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
         addNotEquals(binding, String.valueOf(value));
     }
 
@@ -274,7 +286,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals ignore case constraint.
      */
     @Override
-    public void addEqualsIgnoreCase(String binding, String value) {
+    public void addEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
         addEquals(binding, value);
     }
 
@@ -282,7 +294,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals ignore case constraint.
      */
     @Override
-    public void addNotEqualsIgnoreCase(String binding, String value) {
+    public void addNotEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
         addNotEquals(binding, value);
     }
 
@@ -290,7 +302,7 @@ public class LuceneFilter implements Filter {
      * Adds the contains constraint.
      */
     @Override
-    public void addContains(String binding, String value) {
+    public void addContains(@Nonnull String binding, @Nonnull String value) {
         WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST));
     }
@@ -299,7 +311,7 @@ public class LuceneFilter implements Filter {
      * Adds the not contains constraint.
      */
     @Override
-    public void addNotContains(String binding, String value) {
+    public void addNotContains(@Nonnull String binding, @Nonnull String value) {
         WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
@@ -308,7 +320,7 @@ public class LuceneFilter implements Filter {
      * Adds the starts with constraint.
      */
     @Override
-    public void addStartsWith(String binding, String value) {
+    public void addStartsWith(@Nonnull String binding, @Nonnull String value) {
         WildcardQuery wq = new WildcardQuery(new Term(binding, lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST));
     }
@@ -317,7 +329,7 @@ public class LuceneFilter implements Filter {
      * Adds the not starts with constraint.
      */
     @Override
-    public void addNotStartsWith(String binding, String value) {
+    public void addNotStartsWith(@Nonnull String binding, @Nonnull String value) {
         WildcardQuery wq = new WildcardQuery(new Term(binding, lower(escape(value)) + WILDCARD));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
@@ -326,7 +338,7 @@ public class LuceneFilter implements Filter {
      * Adds the ends with constraint.
      */
     @Override
-    public void addEndsWith(String binding, String value) {
+    public void addEndsWith(@Nonnull String binding, @Nonnull String value) {
         WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value))));
         clauses.add(new BooleanClause(wq, MUST));
     }
@@ -335,7 +347,7 @@ public class LuceneFilter implements Filter {
      * Prefix wildcards are not supported by lucene
      */
     @Override
-    public void addNotEndsWith(String binding, String value) {
+    public void addNotEndsWith(@Nonnull String binding, @Nonnull String value) {
         WildcardQuery wq = new WildcardQuery(new Term(binding, WILDCARD + lower(escape(value))));
         clauses.add(new BooleanClause(wq, MUST_NOT));
     }
@@ -344,7 +356,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than constraint.
      */
     @Override
-    public void addGreaterThan(String binding, String value) {
+    public void addGreaterThan(@Nonnull String binding, @Nonnull String value) {
         boolean includeLower = false;
         TermRangeQuery query = TermRangeQuery.newStringRange(binding, lower(value), null, includeLower, INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
@@ -354,7 +366,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than constraint.
      */
     @Override
-    public void addGreaterThan(String binding, Date value) {
+    public void addGreaterThan(@Nonnull String binding, @Nonnull Date value) {
         String dateStr = formatDate(value);
         addGreaterThan(binding, dateStr);
     }
@@ -363,7 +375,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than constraint.
      */
     @Override
-    public void addGreaterThan(String binding, Integer value) {
+    public void addGreaterThan(@Nonnull String binding, @Nonnull Integer value) {
         int lowerVal = Math.addExact(value, 1);
         Query query = IntField.newRangeQuery(binding, lowerVal, Integer.MAX_VALUE);
         clauses.add(new BooleanClause(query, MUST));
@@ -373,7 +385,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than constraint.
      */
     @Override
-    public void addGreaterThan(String binding, Long value) {
+    public void addGreaterThan(@Nonnull String binding, @Nonnull Long value) {
         long lowerVal = Math.addExact(value, 1);
         Query query = LongField.newRangeQuery(binding, lowerVal, Long.MAX_VALUE);
         clauses.add(new BooleanClause(query, MUST));
@@ -383,7 +395,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than constraint.
      */
     @Override
-    public void addGreaterThan(String binding, Decimal value) {
+    public void addGreaterThan(@Nonnull String binding, @Nonnull Decimal value) {
         Query gt = DoubleField.newRangeQuery(binding, value.doubleValue(), Double.MAX_VALUE);
         clauses.add(new BooleanClause(gt, MUST));
 
@@ -395,7 +407,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than or equal to constraint.
      */
     @Override
-    public void addGreaterThanOrEqualTo(String binding, String value) {
+    public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
         TermRangeQuery query = TermRangeQuery.newStringRange(binding, lower(value), null, INCLUDE_LOWER_BOUND,
                 INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
@@ -405,7 +417,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than or equal to constraint.
      */
     @Override
-    public void addGreaterThanOrEqualTo(String binding, Date value) {
+    public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
         addGreaterThanOrEqualTo(binding, formatDate(value));
     }
 
@@ -413,7 +425,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than or equal to constraint.
      */
     @Override
-    public void addGreaterThanOrEqualTo(String binding, Integer value) {
+    public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
         Query query = IntField.newRangeQuery(binding, value, Integer.MAX_VALUE);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -422,7 +434,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than or equal to constraint.
      */
     @Override
-    public void addGreaterThanOrEqualTo(String binding, Long value) {
+    public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
         Query query = LongField.newRangeQuery(binding, value, Long.MAX_VALUE);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -431,7 +443,7 @@ public class LuceneFilter implements Filter {
      * Adds the greater than or equal to constraint.
      */
     @Override
-    public void addGreaterThanOrEqualTo(String binding, Decimal value) {
+    public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
         Query gte = DoubleField.newRangeQuery(binding, value.doubleValue(), Double.MAX_VALUE);
         clauses.add(new BooleanClause(gte, MUST));
     }
@@ -440,7 +452,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than constraint.
      */
     @Override
-    public void addLessThan(String binding, String value) {
+    public void addLessThan(@Nonnull String binding, @Nonnull String value) {
         boolean includeUpper = false;
         TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lower(value), INCLUDE_LOWER_BOUND, includeUpper);
         clauses.add(new BooleanClause(query, MUST));
@@ -450,7 +462,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than constraint.
      */
     @Override
-    public void addLessThan(String binding, Date value) {
+    public void addLessThan(@Nonnull String binding, @Nonnull Date value) {
         String dateStr = formatDate(value);
         boolean includeUpper = false;
         TermRangeQuery trq = TermRangeQuery.newStringRange(binding, null, dateStr, INCLUDE_LOWER_BOUND, includeUpper);
@@ -461,7 +473,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than constraint.
      */
     @Override
-    public void addLessThan(String binding, Integer value) {
+    public void addLessThan(@Nonnull String binding, @Nonnull Integer value) {
         int upperVal = Math.addExact(value, -1);
         Query query = IntField.newRangeQuery(binding, Integer.MIN_VALUE, upperVal);
         clauses.add(new BooleanClause(query, MUST));
@@ -471,7 +483,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than constraint.
      */
     @Override
-    public void addLessThan(String binding, Long value) {
+    public void addLessThan(@Nonnull String binding, @Nonnull Long value) {
         long upperVal = Math.addExact(value, -1);
         Query query = LongField.newRangeQuery(binding, Long.MIN_VALUE, upperVal);
         clauses.add(new BooleanClause(query, MUST));
@@ -481,7 +493,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than constraint.
      */
     @Override
-    public void addLessThan(String binding, Decimal value) {
+    public void addLessThan(@Nonnull String binding, @Nonnull Decimal value) {
         Query lt = DoubleField.newRangeQuery(binding, Double.MIN_VALUE, value.doubleValue());
         clauses.add(new BooleanClause(lt, MUST));
 
@@ -493,7 +505,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than or equal to constraint.
      */
     @Override
-    public void addLessThanOrEqualTo(String binding, String value) {
+    public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
         TermRangeQuery query = TermRangeQuery.newStringRange(binding, null, lower(value), INCLUDE_LOWER_BOUND,
                 INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(query, MUST));
@@ -503,7 +515,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than or equal to constraint.
      */
     @Override
-    public void addLessThanOrEqualTo(String binding, Date value) {
+    public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
         String dateStr = formatDate(value);
         addLessThanOrEqualTo(binding, dateStr);
     }
@@ -512,7 +524,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than or equal to constraint.
      */
     @Override
-    public void addLessThanOrEqualTo(String binding, Integer value) {
+    public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
         Query query = IntField.newRangeQuery(binding, Integer.MIN_VALUE, value);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -521,7 +533,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than or equal to constraint.
      */
     @Override
-    public void addLessThanOrEqualTo(String binding, Long value) {
+    public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
         Query query = LongField.newRangeQuery(binding, Long.MIN_VALUE, value);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -530,7 +542,7 @@ public class LuceneFilter implements Filter {
      * Adds the less than or equal to constraint.
      */
     @Override
-    public void addLessThanOrEqualTo(String binding, Decimal value) {
+    public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
         Query lt = DoubleField.newRangeQuery(binding, Double.MIN_VALUE, value.doubleValue());
         clauses.add(new BooleanClause(lt, MUST));
     }
@@ -539,7 +551,7 @@ public class LuceneFilter implements Filter {
      * Adds the between constraint.
      */
     @Override
-    public void addBetween(String binding, String start, String end) {
+    public void addBetween(@Nonnull String binding, @Nonnull String start, @Nonnull String end) {
         TermRangeQuery rangeQuery = TermRangeQuery.newStringRange(binding, lower(start), lower(end),
                 INCLUDE_LOWER_BOUND, INCLUDE_UPPER_BOUND);
         clauses.add(new BooleanClause(rangeQuery, MUST));
@@ -549,7 +561,7 @@ public class LuceneFilter implements Filter {
      * Adds the between constraint.
      */
     @Override
-    public void addBetween(String binding, Date start, Date end) {
+    public void addBetween(@Nonnull String binding, @Nonnull Date start, @Nonnull Date end) {
         addBetween(binding, formatDate(start), formatDate(end));
     }
 
@@ -560,7 +572,7 @@ public class LuceneFilter implements Filter {
      * @param d
      * @return
      */
-    private String formatDate(Date d) {
+    private @Nonnull String formatDate(@Nonnull Date d) {
         return DateTools.dateToString(d, Resolution.MILLISECOND);
     }
 
@@ -568,7 +580,7 @@ public class LuceneFilter implements Filter {
      * Adds the between constraint.
      */
     @Override
-    public void addBetween(String binding, Integer start, Integer end) {
+    public void addBetween(@Nonnull String binding, @Nonnull Integer start, @Nonnull Integer end) {
         Query query = IntField.newRangeQuery(binding, start, end);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -577,7 +589,7 @@ public class LuceneFilter implements Filter {
      * Adds the between constraint.
      */
     @Override
-    public void addBetween(String binding, Long start, Long end) {
+    public void addBetween(@Nonnull String binding, @Nonnull Long start, @Nonnull Long end) {
         Query query = LongField.newRangeQuery(binding, start, end);
         clauses.add(new BooleanClause(query, MUST));
     }
@@ -586,7 +598,7 @@ public class LuceneFilter implements Filter {
      * Adds the between constraint.
      */
     @Override
-    public void addBetween(String binding, Decimal start, Decimal end) {
+    public void addBetween(@Nonnull String binding, @Nonnull Decimal start, @Nonnull Decimal end) {
         Query between = DoubleField.newRangeQuery(binding, start.doubleValue(), end.doubleValue());
         clauses.add(new BooleanClause(between, MUST));
     }
@@ -598,7 +610,7 @@ public class LuceneFilter implements Filter {
      * @param values Candidate values for membership.
      */
     @Override
-    public void addIn(String binding, Object... values) {
+    public void addIn(@Nonnull String binding, @Nonnull Object... values) {
         List<BytesRef> refs = new ArrayList<>(values.length);
 
         for (Object val : values) {
@@ -615,7 +627,7 @@ public class LuceneFilter implements Filter {
      * @param values Values that must not match.
      */
     @Override
-    public void addNotIn(String binding, Object... values) {
+    public void addNotIn(@Nonnull String binding, @Nonnull Object... values) {
         List<BytesRef> refs = new ArrayList<>(values.length);
 
         for (Object val : values) {
@@ -639,7 +651,7 @@ public class LuceneFilter implements Filter {
      * Returns a debug representation of this filter.
      */
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("clauses", clauses)
                           .toString();
@@ -653,7 +665,7 @@ public class LuceneFilter implements Filter {
      * Adds the within constraint.
      */
     @Override
-    public void addWithin(String binding, Geometry value) {
+    public void addWithin(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -661,7 +673,7 @@ public class LuceneFilter implements Filter {
      * Adds the contains constraint.
      */
     @Override
-    public void addContains(String binding, Geometry value) {
+    public void addContains(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -669,7 +681,7 @@ public class LuceneFilter implements Filter {
      * Adds the crosses constraint.
      */
     @Override
-    public void addCrosses(String binding, Geometry value) {
+    public void addCrosses(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -677,7 +689,7 @@ public class LuceneFilter implements Filter {
      * Adds the disjoint constraint.
      */
     @Override
-    public void addDisjoint(String binding, Geometry value) {
+    public void addDisjoint(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -685,7 +697,7 @@ public class LuceneFilter implements Filter {
      * Adds the intersects constraint.
      */
     @Override
-    public void addIntersects(String binding, Geometry value) {
+    public void addIntersects(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -693,7 +705,7 @@ public class LuceneFilter implements Filter {
      * Adds the overlaps constraint.
      */
     @Override
-    public void addOverlaps(String binding, Geometry value) {
+    public void addOverlaps(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -701,7 +713,7 @@ public class LuceneFilter implements Filter {
      * Adds the touches constraint.
      */
     @Override
-    public void addTouches(String binding, Geometry value) {
+    public void addTouches(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -709,7 +721,7 @@ public class LuceneFilter implements Filter {
      * Adds the not equals constraint.
      */
     @Override
-    public void addNotEquals(String binding, Geometry value) {
+    public void addNotEquals(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 
@@ -717,7 +729,7 @@ public class LuceneFilter implements Filter {
      * Adds the equals constraint.
      */
     @Override
-    public void addEquals(String binding, Geometry value) {
+    public void addEquals(@Nonnull String binding, @Nonnull Geometry value) {
         throw new UnsupportedOperationException();
     }
 }

@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.locationtech.jts.geom.Point;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
@@ -53,7 +54,7 @@ public record IPGeolocation (@Nullable String city,
 	 * Keep EMPTY reference equivalent
 	 * @return this or EMPTY
 	 */
-	private Object readResolve() {
+	private @Nonnull Object readResolve() {
 		if ((city == null) && (region == null) && (countryCode == null) && (location == null)) {
 			return EMPTY;
 		}

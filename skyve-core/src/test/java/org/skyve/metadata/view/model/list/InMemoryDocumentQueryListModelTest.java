@@ -2,6 +2,7 @@ package org.skyve.metadata.view.model.list;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.TreeMap;
@@ -51,13 +52,13 @@ class InMemoryDocumentQueryListModelTest {
 	@Test
 	@SuppressWarnings("static-method")
 
-	void getColumnsReturnsNull() {
+	void getColumnsReturnsEmptyList() {
 		Module module = mock(Module.class);
 		Document document = mock(Document.class);
 		DocumentQuery query = mock(DocumentQuery.class);
 
 		InMemoryDocumentQueryListModel<?> model = new InMemoryDocumentQueryListModel<>(module, document, query);
-		assertNull(model.getColumns());
+		assertTrue(model.getColumns().isEmpty());
 	}
 
 	@Test

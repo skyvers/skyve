@@ -27,6 +27,9 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base implementation of {@link org.skyve.domain.Bean} providing change-tracking,
  * dynamic attribute support, and binding utilities.
@@ -70,7 +73,7 @@ public abstract class AbstractBean implements Bean {
 	 * @param propertyValue
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected final void preset(String propertyName, Serializable propertyValue) {
+	protected final void preset(@Nonnull String propertyName, @Nullable Serializable propertyValue) {
 		try {
 			if (! originalValues.containsKey(propertyName)) {
 				Serializable oldValue = (Serializable) BindUtil.get(this, propertyName);
@@ -106,7 +109,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public Map<String, Serializable> originalValues() {
+	public @Nonnull Map<String, Serializable> originalValues() {
 		return originalValues;
 	}
 	
@@ -118,12 +121,8 @@ public abstract class AbstractBean implements Bean {
 		Document document = null;
 		try {
 			customer = CORE.getUser().getCustomer();
-			if (customer != null) {
-				module = customer.getModule(getBizModule());
-				if (module != null) {
-					document = module.getDocument(customer, getBizDocument());
-				}
-			}
+			module = customer.getModule(getBizModule());
+			document = module.getDocument(customer, getBizDocument());
 		} 
 		catch (@SuppressWarnings("unused") MetaDataException e) {
 			// do nothing - we can continue
@@ -222,26 +221,26 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@SuppressWarnings("static-method")
-	protected final <T extends Bean> T getElementById(List<T> list, String elementBizId) {
+	protected final @Nullable <T extends Bean> T getElementById(@Nonnull List<T> list, @Nonnull String elementBizId) {
 		return BindUtil.getElementInCollection(list, elementBizId);
 	}
 	
 	@SuppressWarnings("static-method")
-	protected final <T extends Bean> void setElementById(List<T> list, T element) {
+	protected final <T extends Bean> void setElementById(@Nonnull List<T> list, @Nonnull T element) {
 		BindUtil.setElementInCollection(list, element);
 	}
 
 	@Override
-	public boolean evaluateCondition(String condition) {
+	public boolean evaluateCondition(@Nonnull String condition) {
 		return BindUtil.evaluateCondition(this, condition);
 	}
 
-	public boolean isUserInOwningModuleRole(String roleName) {
+	public boolean isUserInOwningModuleRole(@Nonnull String roleName) {
 		return isUserInRole(getBizModule(), roleName);
 	}
 
 	@SuppressWarnings("static-method") // not static because it is used in the generated beans generating warnings
-	public boolean isUserInRole(String moduleName, String roleName) {
+	public boolean isUserInRole(@Nonnull String moduleName, @Nonnull String roleName) {
 		return AbstractPersistence.get().getUser().isInRole(moduleName, roleName);
 	}
 
@@ -253,7 +252,7 @@ public abstract class AbstractBean implements Bean {
 	 * @return
 	 */
 	@SuppressWarnings("static-method") // not static because it is used in the generated beans generating warnings
-	public boolean isUserInDataGroup(String dataGroupId) {
+	public boolean isUserInDataGroup(@Nullable String dataGroupId) {
 		String myDataGroupId = AbstractPersistence.get().getUser().getDataGroupId();
 		if (dataGroupId == null) { // no data group to check
 			return (myDataGroupId == null); // check that user has no data group
@@ -291,12 +290,12 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public boolean isDynamic(String attributeName) {
+	public boolean isDynamic(@Nonnull String attributeName) {
 		return (dynamic != null) && dynamic.getMap().containsKey(attributeName);
 	}
 
 	@Override
-	public Object getDynamic(String simpleBinding) {
+	public @Nullable Object getDynamic(@Nonnull String simpleBinding) {
 		if (! isDynamic(simpleBinding)) {
 			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
 		}
@@ -304,7 +303,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public void setDynamic(String simpleBinding, Object value) {
+	public void setDynamic(@Nonnull String simpleBinding, @Nullable Object value) {
 		if (! isDynamic(simpleBinding)) {
 			throw new IllegalArgumentException("Binding does not exist - " + simpleBinding);
 		}
@@ -312,7 +311,7 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public void putDynamic(String simpleBinding, Object value) {
+	public void putDynamic(@Nonnull String simpleBinding, @Nullable Object value) {
 		if (dynamic == null) {
 			dynamic = new LazyDynaMap();
 		}
@@ -320,7 +319,7 @@ public abstract class AbstractBean implements Bean {
 	}
 
 	@Override
-	public void putAllDynamic(@SuppressWarnings("hiding") Map<String, Object> dynamic) {
+	public void putAllDynamic(@SuppressWarnings("hiding") @Nullable Map<String, Object> dynamic) {
 		if (dynamic == null) {
 			this.dynamic = null;
 		}
@@ -333,7 +332,7 @@ public abstract class AbstractBean implements Bean {
 	}
 	
 	@Override
-	public final boolean equals(Object o) {
+	public final boolean equals(@Nullable Object o) {
 		return ((o instanceof Bean bean) && 
 				this.getBizId().equals(bean.getBizId()));
 	}
@@ -347,19 +346,19 @@ public abstract class AbstractBean implements Bean {
 	 * Compare this bean to another by bizId.
 	 */
 	@Override
-	public final int compareTo(Bean other) {
+	public final int compareTo(@Nullable Bean other) {
 		return compareTo(this, other);
 	}
 
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return super.toString() + '#' + getBizId();
 	}
 
 	/**
 	 * Compare 2 beans by bizId.
 	 */
-	public static int compareTo(Bean thisOne, Bean otherOne) {
+	public static int compareTo(@Nullable Bean thisOne, @Nullable Bean otherOne) {
 		if ((thisOne == null) && (otherOne == null)) {
 			return 0;
 		}
@@ -379,7 +378,7 @@ public abstract class AbstractBean implements Bean {
 	 * @return this
 	 * @see BeanProvider#injectFields(Object)
 	 */
-	protected Object readResolve() {
+	protected @Nonnull Object readResolve() {
 	    LOGGER = SkyveLoggerFactory.getLogger(getClass());
 	    UtilImpl.inject(this);
 	    return this;

@@ -21,6 +21,8 @@ import org.skyve.util.logging.Category;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.model.SelectItem;
 
 /**
@@ -44,7 +46,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param bean the bean to adapt
 	 * @param webContext the active web context
 	 */
-	public BeanMapAdapter(Bean bean, WebContext webContext) {
+	public BeanMapAdapter(@Nullable Bean bean, @Nullable WebContext webContext) {
 		setBean(bean);
 		this.webContext = webContext;
 	}
@@ -54,7 +56,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 *
 	 * @return the adapted bean
 	 */
-	public Bean getBean() {
+	public @Nullable Bean getBean() {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.getBean {}", bean);
 		return bean;
 	}
@@ -64,7 +66,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 *
 	 * @param bean the new adapted bean
 	 */
-	public void setBean(Bean bean) {
+	public void setBean(@Nullable Bean bean) {
 		this.bean = bean;
 		delegate.clear();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.setBean {}", bean);
@@ -97,7 +99,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return {@code true} when the key exists in the cache
 	 */
 	@Override
-	public boolean containsKey(Object key) {
+	public boolean containsKey(@SuppressWarnings("null") @Nonnull Object key) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.containsKey {}", key);
 		return delegate.containsKey(key);
 	}
@@ -109,7 +111,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return {@code true} when a cached value matches
 	 */
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(@Nullable Object value) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.containsValue {}", value);
 		return delegate.containsValue(value);
 	}
@@ -121,7 +123,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the resolved value
 	 */
 	@Override
-	public Object get(final Object key) {
+	public @Nullable Object get(@SuppressWarnings("null") final @Nonnull Object key) {
 		return get(key, false, Sanitisation.none);
 	}
 	
@@ -133,7 +135,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param sanitisationType the sanitisation enum name
 	 * @return the resolved value
 	 */
-	public Object get(final Object key, final boolean escape, final String sanitisationType) {
+	public @Nullable Object get(final @Nonnull Object key, final boolean escape, final @Nullable String sanitisationType) {
 		final Sanitisation sanitise = (sanitisationType == null) ? null : Sanitisation.valueOf(sanitisationType);
 		return get(key, escape, sanitise);
 	}
@@ -149,10 +151,10 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the resolved value
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private Object get(final Object key, final boolean escape, final Sanitisation sanitise) {
+	private @Nullable Object get(final @Nonnull Object key, final boolean escape, final @Nullable Sanitisation sanitise) {
 		return new FacesAction<>() {
 			@Override
-			public Object callback() throws Exception {
+			public @Nullable Object callback() throws Exception {
 				String binding = (String) key;
 				Object result = null;
 				
@@ -200,6 +202,32 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	}
 
 	/**
+	 * Evaluates an inline condition expression, or the inverse of one, against the adapted bean for EL callers.
+	 *
+	 * <p>Condition names are resolved through {@link #get(Object)} as bindings. An inline expression cannot be,
+	 * because a key containing braces is formatted as a message and yields display text, not a boolean.
+	 *
+	 * <p>Side effects: stores the result in the delegate map under the condition text.
+	 *
+	 * @param condition the inline condition expression as held by view metadata
+	 * @return the result of the condition; {@code false} when it could not be evaluated,
+	 * 			in which case the failure has been reported through the faces action
+	 */
+	public boolean evaluateCondition(final @Nonnull String condition) {
+		Boolean result = new FacesAction<Boolean>() {
+			@Override
+			public @Nonnull Boolean callback() throws Exception {
+				Boolean value = Boolean.valueOf(BindUtil.evaluateCondition(bean, condition));
+				delegate.put(condition, value);
+
+				if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.evaluateCondition {} = {}", condition, value);
+				return value;
+			}
+		}.execute();
+		return Boolean.TRUE.equals(result);
+	}
+
+	/**
 	 * Sets a binding value on the adapted bean and updates the delegate cache.
 	 *
 	 * @param key the binding expression key
@@ -207,7 +235,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the previous cached value for the key
 	 */
 	@Override
-	public Object put(String key, Object value) {
+	public @Nullable Object put(@SuppressWarnings("null") @Nonnull String key, @Nullable Object value) {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.trace("BeanMapAdapter.put {} = {}", key, value);
 		set(key, value);
 		return delegate.put(key, value);
@@ -220,7 +248,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the removed cached value, or {@code null}
 	 */
 	@Override
-	public Object remove(Object key) {
+	public @Nullable Object remove(@SuppressWarnings("null") @Nonnull Object key) {
 		return delegate.remove(key);
 	}
 
@@ -230,7 +258,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param m the entries to add
 	 */
 	@Override
-	public void putAll(Map<? extends String, ? extends Object> m) {
+	public void putAll(@SuppressWarnings("null") @Nonnull Map<? extends String, ? extends Object> m) {
 		delegate.putAll(m);
 	}
 
@@ -248,7 +276,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the cached key set
 	 */
 	@Override
-	public Set<String> keySet() {
+	public @Nonnull Set<String> keySet() {
 		return delegate.keySet();
 	}
 
@@ -258,7 +286,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the cached values collection
 	 */
 	@Override
-	public Collection<Object> values() {
+	public @Nonnull Collection<Object> values() {
 		return delegate.values();
 	}
 
@@ -268,7 +296,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return the cached entry set
 	 */
 	@Override
-	public Set<Map.Entry<String, Object>> entrySet() {
+	public @Nonnull Set<Map.Entry<String, Object>> entrySet() {
 		return delegate.entrySet();
 	}
 
@@ -279,7 +307,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param includeEmptyItem whether an empty item should be included
 	 * @return resolved select items for the binding
 	 */
-	public List<SelectItem> getSelectItems(String binding, boolean includeEmptyItem) {
+	public @Nullable List<SelectItem> getSelectItems(@Nonnull String binding, boolean includeEmptyItem) {
 		String bizModule = bean.getBizModule();
 		String bizDocument = bean.getBizDocument();
 		final String key = String.format("%s.%s.%s", bizModule, bizDocument, binding);
@@ -293,10 +321,10 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @param binding the binding expression to populate
 	 * @param value the incoming value from JSF
 	 */
-	private void set(final String binding, final Object value) {
+	private void set(final @Nonnull String binding, final @Nullable Object value) {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				Object processedValue = value;
 				if (value instanceof BeanMapAdapter beanMapAdapter) {
 					processedValue = beanMapAdapter.getBean();
@@ -330,7 +358,7 @@ public final class BeanMapAdapter implements Map<String, Object>, Serializable {
 	 * @return {@code true} when the compared object represents the same bean
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		if (obj instanceof BeanMapAdapter beanMapAdapter) {
 			return bean.equals(beanMapAdapter.getBean());
 		}

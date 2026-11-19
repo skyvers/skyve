@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewContentUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewContentUserAccessMetaData} metadata.
  * 
@@ -20,14 +22,14 @@ public class FluentViewContentAccess extends FluentViewUserAccess<FluentViewCont
 	/**
 	 * Creates a new FluentViewContentAccess from the specified ViewContentUserAccessMetaData.
 	 */
-	public FluentViewContentAccess(ViewContentUserAccessMetaData access) {
+	public FluentViewContentAccess(@Nonnull ViewContentUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewContentAccess from a runtime metadata.
 	 */
-	protected FluentViewContentAccess from(String binding, Set<String> uxuis) {
+	protected @Nonnull FluentViewContentAccess from(@Nonnull String binding, @Nonnull Set<String> uxuis) {
 		binding(binding);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -36,7 +38,7 @@ public class FluentViewContentAccess extends FluentViewUserAccess<FluentViewCont
 	/**
 	 * Specifies the binding for this FluentViewContentAccess.
 	 */
-	public FluentViewContentAccess binding(final String binding) {
+	public @Nonnull FluentViewContentAccess binding(final @Nonnull String binding) {
 		access.setBinding(binding);
 		return this;
 	}
@@ -45,7 +47,7 @@ public class FluentViewContentAccess extends FluentViewUserAccess<FluentViewCont
 	 * Returns the underlying view user access metadata from this builder.
 	 */
 	@Override
-	public ViewContentUserAccessMetaData get() {
+	public @Nonnull ViewContentUserAccessMetaData get() {
 		return access;
 	}
 }

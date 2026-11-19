@@ -2,16 +2,18 @@ package org.skyve.domain.app.admin;
 
 import org.skyve.domain.PersistentBean;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Domain contract for document numbering sequences managed by the admin
  * module.
  */
 public interface DocumentNumber extends PersistentBean {
-	String getDocumentNumber();
+	@Nullable String getDocumentNumber();
 
-	void setModuleName(String moduleName);
-	void setDocumentName(String documentName);
-	void setSequenceName(String fieldName);
-	void setDocumentNumber(String nextNumber);
+	void setModuleName(@Nullable String moduleName);
+	void setDocumentName(@Nullable String documentName);
+	void setSequenceName(@Nullable String fieldName);
+	void setDocumentNumber(@Nullable String nextNumber);
 
 }

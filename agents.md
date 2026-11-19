@@ -16,9 +16,12 @@ This file is intentionally a table of contents only.
 - [docs/ai/plan.md](docs/ai/plan.md)
 - [docs/ai/test-patterns.md](docs/ai/test-patterns.md)
 - [docs/ai/glossary.md](docs/ai/glossary.md)
+- [docs/ai/plan_sail_completion.md](docs/ai/plan_sail_completion.md)
+- [docs/ai/plan_sail_recorder.md](docs/ai/plan_sail_recorder.md)
 
 ## Repository Docs
 
 - [docs/coverage-plan.md](docs/coverage-plan.md)
 - [docs/architecture-design.md](docs/architecture-design.md)
+- [docs/sail.md](docs/sail.md)
 - [README.md](README.md)

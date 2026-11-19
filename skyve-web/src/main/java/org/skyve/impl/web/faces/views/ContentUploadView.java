@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.apache.commons.io.FilenameUtils;
@@ -15,15 +16,21 @@ import org.skyve.EXT;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.MimeType;
 import org.skyve.domain.Bean;
+import org.skyve.domain.messages.ActionUnavailableException;
 import org.skyve.domain.messages.DomainException;
+import org.skyve.domain.messages.Message;
+import org.skyve.domain.messages.MessageException;
+import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.domain.messages.UploadException;
 import org.skyve.domain.messages.UploadException.Problem;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.view.ActionAvailability;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentCapture;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentDisplay;
+import org.skyve.impl.util.SvgMarkupSanitiser;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.UserAgent;
@@ -31,6 +38,7 @@ import org.skyve.impl.web.WebErrorUtil;
 import org.skyve.impl.web.content.ContentMediaClassifier;
 import org.skyve.impl.web.content.ContentMediaClassifier.ContentMediaKind;
 import org.skyve.impl.web.faces.FacesAction;
+import org.skyve.impl.web.faces.FacesWebContext;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadAffordance;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadCategory;
 import org.skyve.impl.web.faces.views.UnifiedUploadState.UploadKind;
@@ -44,6 +52,7 @@ import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.OWASP;
@@ -54,6 +63,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.annotation.ManagedProperty;
 import jakarta.faces.application.FacesMessage;
+import jakarta.faces.application.FacesMessage.Severity;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
@@ -70,6 +80,23 @@ public class ContentUploadView extends AbstractUploadView {
 	private static final long serialVersionUID = -6769960348990922565L;
 
 	private static final String FAILURE_MESSAGE_SUMMARY = "Failure";
+
+	/**
+	 * Tells a PrimeFaces upload page's owner, from within the page's frame, that its upload action has run, so that hiding
+	 * the page refreshes the view; with {@code true} and the page's messages (the upload succeeded), also shows the
+	 * messages in the view's growl and closes the page, as a content upload's page is closed. See
+	 * {@code SKYVE.PF.afterActionUpload}. A SmartClient upload window has no PrimeFaces owner, so the script does nothing
+	 * there.
+	 */
+	private static final String AFTER_ACTION_UPLOAD_SCRIPT = "var w=SKYVE.Util.findPrimeFacesWindow();if(w){w.SKYVE.PF.afterActionUpload(window,%s)}";
+
+	/**
+	 * The callback parameter that tells a SmartClient upload window, once its upload action has run, whether the upload
+	 * succeeded: upload.xhtml's {@code skyveAfterActionUpload} (the upload's {@code oncomplete}) refreshes the view, and
+	 * when it is {@code true}, shows the page's messages ({@link #MESSAGES_PARAM}) in the view's growl and closes the
+	 * window, as a content upload's window is closed.
+	 */
+	private static final String ACTION_UPLOAD_SUCCEEDED_PARAM = "actionUploadSucceeded";
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.RESOURCE_FILE_NAME + "}")
@@ -105,6 +132,14 @@ public class ContentUploadView extends AbstractUploadView {
 	@ManagedProperty(value = "#{param._af}")
 	@SuppressWarnings("java:S6813") // allow member injection
 	private @Nullable String uploadAffordance;
+
+	/**
+	 * SVG markup drawn over an image in the upload page's editor, posted with the image.
+	 */
+	@Inject
+	@ManagedProperty(value = "#{param._mk}")
+	@SuppressWarnings("java:S6813") // allow member injection
+	private @Nullable String markup;
 
 	@Inject
 	@ManagedProperty(value = "#{param." + AbstractWebContext.GRID_BINDING_NAME + "}")
@@ -174,7 +209,7 @@ public class ContentUploadView extends AbstractUploadView {
 	public void preRender() {
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				initialise();
 				return null;
 			}
@@ -513,6 +548,9 @@ public class ContentUploadView extends AbstractUploadView {
 			String bizDocument = bean.getBizDocument();
 			UxUi uxui = UserAgent.getSelection(request).getUxUi();
 			String unsanitisedContentBinding = BindUtil.unsanitiseBinding(contentBinding);
+			if (unsanitisedContentBinding == null) { // contentBinding was checked above
+				throw new IllegalStateException("contentBinding is null");
+			}
 			EXT.checkAccess(user, UserAccess.content(bizModule, bizDocument, unsanitisedContentBinding), uxui.getName());
 
 			// Check document access
@@ -526,20 +564,12 @@ public class ContentUploadView extends AbstractUploadView {
 			// NB This handles compound bindings and checks for content access on the content owning bean
 			String uploadedFileName = Objects.requireNonNull(fileName, "Uploaded file name");
 			byte[] uploadedFileContents = Objects.requireNonNull(fileContents, "Uploaded file content");
-			AttachmentContent content;
-			if (contentType == null) {
-				content = FacesContentUtil.handleFileUpload(uploadedFileName,
-																uploadedFileContents,
-																bean,
-																unsanitisedContentBinding);
-			}
-			else {
-				content = FacesContentUtil.handleFileUpload(uploadedFileName,
-																uploadedFileContents,
-																contentType,
-																bean,
-																unsanitisedContentBinding);
-			}
+			AttachmentContent content = FacesContentUtil.handleFileUpload(uploadedFileName,
+																			uploadedFileContents,
+																			contentType,
+																			sanitisedMarkup(contentType),
+																			bean,
+																			unsanitisedContentBinding);
 			String contentId = Objects.requireNonNull(content.getContentId(), "Uploaded content id");
 
 			// only put conversation in cache if we have been successful in executing
@@ -551,20 +581,63 @@ public class ContentUploadView extends AbstractUploadView {
 		}
 		catch (Exception e) {
 			persistence.rollback();
-			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
-			FacesMessage msg = new FacesMessage("Failure", WebErrorUtil.genericMessage(reference));
-			fc.addMessage(null, msg);
+			addContentUploadFailure(e, fc);
 		}
 		// NB No need to disconnect Persistence as it is done in the SkyveFacesPhaseListener after the response is rendered.
+	}
+
+	/**
+	 * Returns the SVG markup posted with an image upload as {@code _mk}, sanitised for storage.
+	 *
+	 * <p>Markup is only kept for raster images, as that is what it is drawn over.
+	 * Markup that cannot be sanitised is logged and dropped, so the image still uploads.
+	 *
+	 * @param contentType the uploaded content type, or {@code null} when unknown
+	 * @return the sanitised markup, or {@code null} when there is none to store
+	 */
+	private @Nullable String sanitisedMarkup(@Nullable String contentType) {
+		if ((markup == null) ||
+				(contentType == null) ||
+				(! contentType.startsWith("image/")) ||
+				MimeType.svg.toString().equals(contentType)) {
+			return null;
+		}
+		try {
+			return SvgMarkupSanitiser.sanitise(markup);
+		}
+		catch (IllegalArgumentException e) {
+			LOGGER.warn("Image markup posted with an upload to {} was dropped: {}", OWASP.sanitiseLog(contentBinding), e.getMessage());
+			return null;
+		}
 	}
 
 	/**
 	 * Processes an uploaded file for an action route while preserving
 	 * legacy action-upload semantics.
 	 *
+	 * <p>The upload is refused unless the view of the bean's own document, for the
+	 * request's UX/UI, offers a reachable trigger for the action in the bean's
+	 * current state (see {@link ActionAvailability}). SmartClient saves the form
+	 * before it opens the upload page, so a saved edit that changes the action's
+	 * conditions decides the check; PrimeFaces opens the upload page without
+	 * saving, so the state of the last postback decides.
+	 *
 	 * <p>Side effects: executes the configured upload action, updates the cached
 	 * conversation bean when the action returns one, rolls persistence back for
-	 * upload errors, and enqueues user-facing JSF messages.
+	 * upload errors, and enqueues user-facing JSF messages. Once the upload action
+	 * has run, the page is sent a script that, in PrimeFaces, has the view
+	 * refreshed when the page closes, and closes the page if the upload had no
+	 * problems; and a callback parameter that, in SmartClient, has the window
+	 * closed if the upload had no problems (the view is refreshed either way). An
+	 * upload with problems (errors or warnings) leaves the page open, showing
+	 * them. A refusal's
+	 * {@link ActionUnavailableException} is caught, not thrown: it is logged as a
+	 * warning, rolled back, and enqueued as the refusal's localised message. A
+	 * {@link MessageException} (such as a {@code ValidationException}) that the
+	 * upload action throws is shown as the upload's problems, as an
+	 * {@link UploadException}'s are, except an {@link ActionUnavailableException},
+	 * which the upload action or an interceptor can also throw: that is shown as the
+	 * refusal, as above.
 	 *
 	 * @param event PrimeFaces upload event; must not be {@code null}
 	 * @throws Exception if upload preconditions or processing fail unexpectedly
@@ -623,6 +696,17 @@ public class ContentUploadView extends AbstractUploadView {
 			if (! user.canExecuteAction(document, actionName)) {
 				throw new SecurityException(actionName, user.getName());
 			}
+			String uxui = UserAgent.getSelection(request).getUxUi().getName();
+			ActionAvailability.check(user,
+										document,
+										document.getView(uxui,
+															customer,
+															bean.isCreated() ?
+																ViewType.edit.toString() :
+																ViewType.create.toString()),
+										uxui,
+										bean,
+										actionName);
 			UploadAction<Bean> uploadAction = document.getUploadAction(customer, actionName, true);
 			UploadException exception = new UploadException();
 			MimeType mimeType = null;
@@ -662,24 +746,140 @@ public class ContentUploadView extends AbstractUploadView {
 				persistence.rollback();
 				exception = e;
 			}
+			catch (RuntimeException e) {
+				// An unavailable action is refused by the outer handler, as every other action is; anything that is not a
+				// message exception is unexpected, and is handled there too
+				if ((e instanceof ActionUnavailableException) || (! (e instanceof MessageException messageException))) {
+					throw e;
+				}
+				// A refusal by a validation (or another message exception) is shown as the upload's problems, as an
+				// UploadException's are, rather than as an unexpected failure. As for an UploadException, the persistence
+				// is rolled back and the conversation (whose bean the action did not replace) is cached again.
+				LOGGER.warn("File upload refused with a message exception.", e);
+				persistence.rollback();
+				exception = uploadException(messageException);
+			}
 			catch (IOException e) {
 				throw new DomainException("File Upload could not be processed", e);
 			}
 
+			addWebContextNotifications(webContext, fc);
 			StateUtil.commitAndCacheConversation(webContext);
 
-			if (exception.hasProblems()) {
-				addActionUploadProblems(exception, fc);
-			}
-			else {
+			boolean success = (! exception.hasProblems());
+			if (success) {
 				addActionUploadSuccess(file, fc);
 			}
+			else {
+				addActionUploadProblems(exception, fc);
+			}
+			PrimeFaces primeFaces = PrimeFaces.current();
+			PrimeFaces.Ajax ajax = primeFaces.ajax();
+			if (success) {
+				// The page closes: its messages are shown in the view's growl instead
+				String messages = messagesJSON(fc);
+				primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, "true," + messages));
+				ajax.addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.TRUE);
+				ajax.addCallbackParam(MESSAGES_PARAM, messages);
+			}
+			else {
+				primeFaces.executeScript(String.format(AFTER_ACTION_UPLOAD_SCRIPT, "false"));
+				ajax.addCallbackParam(ACTION_UPLOAD_SUCCEEDED_PARAM, Boolean.FALSE);
+			}
+		}
+		catch (ActionUnavailableException e) {
+			// Logged as a warning when refused, so show the user the refusal's message rather than an error reference
+			persistence.rollback();
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, OWASP.escapeHtml(e.getMessages().get(0).getText()));
+			fc.addMessage(null, msg);
 		}
 		catch (Exception e) {
 			persistence.rollback();
 			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "File upload failed for action " + actionName, e);
-			FacesMessage msg = new FacesMessage(FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
 			fc.addMessage(null, msg);
+		}
+	}
+
+	/**
+	 * Adds the growls and messages that the upload action or an interceptor added to the conversation's web context as
+	 * the page's messages, as {@code FacesWebContext} adds them (but with the text once), so that the page shows them,
+	 * and carries them to the view when it closes. Only a SmartClient conversation ({@code SmartClientWebContext}) holds
+	 * them: a PrimeFaces one adds them to the page's messages straight away, and has none to add here.
+	 *
+	 * @param webContext the conversation the upload action ran in; must not be {@code null}
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private static void addWebContextNotifications(@Nonnull AbstractWebContext webContext, @Nonnull FacesContext fc) {
+		addNotifications(webContext.getGrowls(), fc);
+		addNotifications(webContext.getMessages(), fc);
+	}
+
+	/**
+	 * Adds growls or messages, each a severity and a summary, as messages with that summary and an empty detail, so
+	 * that the page's growl (which shows details) shows the text once.
+	 *
+	 * @param notifications the growls or messages, or {@code null} for none
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private static void addNotifications(@Nullable List<Map<String, String>> notifications, @Nonnull FacesContext fc) {
+		if (notifications != null) {
+			for (Map<String, String> notification : notifications) {
+				String text = notification.get("summary");
+				Severity severity = FacesWebContext.determineFacesSeverity(MessageSeverity.valueOf(notification.get("severity")));
+				// an empty detail, not null: a message without a detail shows its summary as its detail
+				fc.addMessage(null, new FacesMessage(severity, text, ""));
+			}
+		}
+	}
+
+	/**
+	 * Converts a message exception (such as a {@code ValidationException}) that an upload action threw into the
+	 * upload's errors, so that it is shown as an {@link UploadException}'s problems are.
+	 *
+	 * @param messageException the refusal; must not be {@code null}
+	 * @return an upload exception with an error for each of the refusal's messages; where is the message's bindings
+	 */
+	static @Nonnull UploadException uploadException(@Nonnull MessageException messageException) {
+		UploadException result = new UploadException();
+		for (Message message : messageException.getMessages()) {
+			String where = String.join(", ", message.getBindings());
+			result.addError(new Problem(message.getText(), where.isEmpty() ? null : where));
+		}
+		return result;
+	}
+
+	/**
+	 * Shows why a content upload failed: a refusal's messages (a {@link MessageException}, such as a validation), or
+	 * else an error reference for an unexpected failure, which is logged.
+	 *
+	 * @param e the failure; must not be {@code null}
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private void addContentUploadFailure(@Nonnull Exception e, @Nonnull FacesContext fc) {
+		if (e instanceof MessageException messageException) {
+			// A refusal (such as a validation) is expected: show its messages as errors, as a Faces action does
+			if (LOGGER.isWarnEnabled()) {
+				LOGGER.warn("Content upload refused for binding {}", OWASP.sanitiseLog(contentBinding), e);
+			}
+			addMessageExceptionMessages(messageException, fc);
+		}
+		else {
+			String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "Content upload failed for binding " + contentBinding, e);
+			FacesMessage msg = new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, WebErrorUtil.genericMessage(reference));
+			fc.addMessage(null, msg);
+		}
+	}
+
+	/**
+	 * Adds a message exception's messages as error messages.
+	 *
+	 * @param messageException the refusal; must not be {@code null}
+	 * @param fc active Faces context used for messages; must not be {@code null}
+	 */
+	private static void addMessageExceptionMessages(@Nonnull MessageException messageException, @Nonnull FacesContext fc) {
+		for (Message message : messageException.getMessages()) {
+			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, FAILURE_MESSAGE_SUMMARY, OWASP.escapeHtml(message.getText())));
 		}
 	}
 
@@ -723,7 +923,7 @@ public class ContentUploadView extends AbstractUploadView {
 	}
 
 	/**
-	 * Queues a successful action-upload message including the uploaded file size.
+	 * Queues a successful action-upload message including the uploaded file's name (escaped) and size.
 	 *
 	 * @param file uploaded file metadata; must not be {@code null}
 	 * @param fc active Faces context used for messages; must not be {@code null}
@@ -731,7 +931,9 @@ public class ContentUploadView extends AbstractUploadView {
 	private static void addActionUploadSuccess(@Nonnull UploadedFile file, @Nonnull FacesContext fc) {
 		long size = file.getSize();
 		StringBuilder message = new StringBuilder(128);
-		message.append(file.getFileName()).append(" is uploaded. File Size is ");
+		// The file name is the user's: escaped, as the page's growl (and the view's, which the message is carried to)
+		// shows the message's markup
+		message.append(OWASP.escapeHtml(file.getFileName())).append(" is uploaded. File Size is ");
 
 		DecimalFormat format = CORE.getDecimalFormat("###,##0.00");
 		if (size > 1048576) {

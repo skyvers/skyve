@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="OrderedGridFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Kitchen Sink fixture for ordered collections that are saved: a data grid, an inline data grid and a list
+			membership, whose rows (or members) can be dragged into a new order, kept by their ordinals.
+		]]>
+	</documentation>
+	<persistent name="KS_OrderedGridFixture" />
+	<singularAlias>Ordered Grid Fixture</singularAlias>
+	<pluralAlias>Ordered Grid Fixtures</pluralAlias>
+	<bizKey expression="{name}" />
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+		<collection name="rows" type="child" ordered="true">
+			<displayName>Rows</displayName>
+			<description>An ordered collection: its rows can be dragged into a new order.</description>
+			<documentName>OrderedGridFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="lines" type="child" ordered="true">
+			<displayName>Lines</displayName>
+			<description>An ordered collection, edited inline: its rows can be dragged into a new order.</description>
+			<documentName>OrderedGridFixtureLine</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="members" type="aggregation" ordered="true">
+			<displayName>Members</displayName>
+			<description>An ordered list membership of lookup values: its members can be dragged into a new order.</description>
+			<domain>variant</domain>
+			<documentName>LookupDescription</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

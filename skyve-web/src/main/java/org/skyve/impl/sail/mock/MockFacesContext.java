@@ -39,6 +39,8 @@ public class MockFacesContext extends FacesContext implements AutoCloseable {
 	private @Nullable ResponseWriter responseWriter = null;
 	private boolean postback = false;
 	private boolean released = false;
+	/** The context this one replaced on the thread, put back when this one is released; or null. */
+	private @Nullable FacesContext replaced = null;
 
 	/**
 	 * Creates a container-independent context backed by mutable in-memory state.
@@ -88,6 +90,25 @@ public class MockFacesContext extends FacesContext implements AutoCloseable {
 		return install(new MockFacesContext(request, response));
 	}
 
+	/**
+	 * Creates a mock context and installs it in place of the thread's current context, such as a real request's,
+	 * which {@link #release()} puts back. Use it to build SAIL component trees inside a request without touching the
+	 * request's managed beans: the builders take generated ids from the request's page bean whenever the current
+	 * context is a real one.
+	 *
+	 * <p>Side effects: sets the JSF thread-local current context until the returned context is released. It must be
+	 * closed by the same thread, preferably with a try-with-resources statement.
+	 *
+	 * @return the newly installed mock context
+	 */
+	@SuppressWarnings("resource")
+	public static @Nonnull MockFacesContext replacingCurrent() {
+		MockFacesContext result = new MockFacesContext();
+		result.replaced = FacesContext.getCurrentInstance();
+		setCurrentInstance(result);
+		return result;
+	}
+
 	private static @Nonnull MockFacesContext install(@Nonnull MockFacesContext result) {
 		if (FacesContext.getCurrentInstance() != null) {
 			throw new IllegalStateException("A FacesContext is already installed on the current thread");
@@ -125,7 +146,7 @@ public class MockFacesContext extends FacesContext implements AutoCloseable {
 	 * Sets the active mock view root.
 	 */
 	@Override
-	public void setViewRoot(UIViewRoot root) {
+	public void setViewRoot(@SuppressWarnings("null") @Nonnull UIViewRoot root) {
 		this.root = root;
 	}
 
@@ -251,19 +272,20 @@ public class MockFacesContext extends FacesContext implements AutoCloseable {
 	 * Retains a message for subsequent assertions.
 	 */
 	@Override
-	public void addMessage(@Nullable String clientId, FacesMessage message) {
+	public void addMessage(@Nullable String clientId, @SuppressWarnings("null") @Nonnull FacesMessage message) {
 		messages.computeIfAbsent(clientId, ignored -> new ArrayList<>()).add(Objects.requireNonNull(message, "message"));
 	}
 
 	/**
 	 * Marks the context as released and removes it from the current thread when this context is installed there.
 	 *
-	 * <p>Side effects: clears the JSF thread-local current context only when it refers to this instance.
+	 * <p>Side effects: clears the JSF thread-local current context only when it refers to this instance, putting back
+	 * the context it replaced, if any (see {@link #replacingCurrent()}).
 	 */
 	@Override
 	public void release() {
 		if (FacesContext.getCurrentInstance() == this) {
-			setCurrentInstance(null);
+			setCurrentInstance(replaced);
 		}
 		released = true;
 	}

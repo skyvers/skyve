@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 
 import jakarta.faces.component.UIComponent;
@@ -51,6 +52,15 @@ class MapComponentTest {
 								eq("admin"),
 								eq("qAll"),
 								eq("location"));
+	}
+
+	@Test
+	void generateThrowsWhenNeitherModelNameNorQueryAttributesAreProvided() {
+		ComponentBuilder componentBuilder = mock(ComponentBuilder.class);
+
+		assertThrows(DomainException.class, () -> Map.generate("admin", "qAll", null, null, componentBuilder));
+		assertThrows(DomainException.class, () -> Map.generate("admin", null, "location", null, componentBuilder));
+		assertThrows(DomainException.class, () -> Map.generate(null, "qAll", "location", null, componentBuilder));
 	}
 
 	@Test

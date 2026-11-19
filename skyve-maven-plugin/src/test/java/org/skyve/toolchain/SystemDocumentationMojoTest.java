@@ -3,6 +3,7 @@ package org.skyve.toolchain;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -30,6 +31,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.project.MavenProject;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.metadata.model.document.field.Text;
 import org.junit.jupiter.api.BeforeEach;
@@ -330,7 +332,7 @@ class SystemDocumentationMojoTest {
 
 		Reference reference = mock(Reference.class);
 		when(document.getReferenceNames()).thenReturn(Set.of("account"));
-		when(document.getReferenceByName("account")).thenReturn(reference);
+		when(document.getNullSafeReferenceByName("account")).thenReturn(reference);
 		when(reference.getType()).thenReturn(AssociationType.aggregation);
 		when(reference.getDocumentName()).thenReturn("Account");
 		when(reference.isRequired()).thenReturn(Boolean.TRUE);
@@ -445,6 +447,22 @@ class SystemDocumentationMojoTest {
 
 		assertTrue(exception.getMessage().contains("Failed to generate system documentation"));
 		assertEquals("missing", mojo.customerName);
+	}
+
+	@Test
+	void getCustomerByNameLooksTheCustomerUpInTheRepository() {
+		Customer customer = mock(Customer.class);
+		ProvidedRepository repository = mock(ProvidedRepository.class);
+		when(repository.getCustomer("demo")).thenReturn(customer);
+		ProvidedRepository previousRepository = ProvidedRepositoryFactory.get();
+		ProvidedRepositoryFactory.set(repository);
+		try {
+			assertSame(customer, new SystemDocumentationMojo().getCustomer("demo"));
+			assertNull(new SystemDocumentationMojo().getCustomer("missing"));
+		}
+		finally {
+			ProvidedRepositoryFactory.set(previousRepository);
+		}
 	}
 
 	@SuppressWarnings("unchecked")

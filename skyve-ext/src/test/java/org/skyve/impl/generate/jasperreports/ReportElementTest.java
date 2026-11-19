@@ -254,6 +254,7 @@ class ReportElementTest {
 		assertThat(e.getReportFileName(), is("myReport.jasper"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldRoundTrip() {
 		ReportElement e = simple();
@@ -289,4 +290,13 @@ class ReportElementTest {
                                 Integer.valueOf(200), null, null, ElementAlignment.right, Boolean.FALSE, Boolean.FALSE, null);
                 assertThat(e.getElementAlignment(), is(ElementAlignment.right));
         }
+
+	@Test
+	void getNullSafeParentThrowsWhenTheElementHasNotBeenAddedToABand() {
+		ReportElement e = simple();
+
+		IllegalStateException thrown = org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException.class, e::getNullSafeParent);
+
+		assertThat(thrown.getMessage(), is("Report element test has not been added to a band"));
+	}
 }

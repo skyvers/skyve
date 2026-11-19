@@ -1,6 +1,8 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,7 +73,7 @@ import jakarta.faces.context.FacesContext;
 /**
  * Tests for ComponentBuilderChain delegation and state propagation.
  */
-@SuppressWarnings({"static-method", "boxing"})
+@SuppressWarnings({"static-method", "boxing", "java:S5960" }) // JUnit assertions belong in this test class.
 class ComponentBuilderChainTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {
@@ -438,6 +440,16 @@ class ComponentBuilderChainTest {
 	}
 
 	@Test
+	void orderedListMembershipDelegatesToBuilder() {
+		ListMembership membership = mock(ListMembership.class);
+		EscapableText candidates = EscapableText.of("candidates", true);
+		EscapableText members = EscapableText.of("members", false);
+		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
+		when(mockBuilder.listMembership(mockEventSource, candidates, members, membership, true)).thenReturn(result);
+		assertSame(result, chain.listMembership(mockEventSource, candidates, members, membership, true));
+	}
+
+	@Test
 	void checkBoxDelegatesToBuilder() {
 		CheckBox checkBox = mock(CheckBox.class);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
@@ -482,9 +494,10 @@ class ComponentBuilderChainTest {
 	void lookupDescriptionDelegatesToBuilder() {
 		LookupDescription lookup = mock(LookupDescription.class);
 		QueryDefinition query = mock(QueryDefinition.class);
+		Document owningDocument = mock(Document.class);
 		EventSourceComponent result = new EventSourceComponent(mock(UIComponent.class), mock(UIComponentBase.class));
-		when(mockBuilder.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query)).thenReturn(result);
-		assertSame(result, chain.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query));
+		when(mockBuilder.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query, owningDocument)).thenReturn(result);
+		assertSame(result, chain.lookupDescription(mockEventSource, "var", lookup, "disabled", "title", null, HorizontalAlignment.left, "displayBinding", query, owningDocument));
 	}
 
 	@Test
@@ -615,5 +628,20 @@ class ComponentBuilderChainTest {
 		UIComponent result = mock(UIComponent.class);
 		when(mockBuilder.view(null, false)).thenReturn(result);
 		assertSame(result, chain.view(null, false));
+	}
+
+	private static final class Collector extends NoOpComponentBuilder implements SailComponentCollector {
+		// marker only
+	}
+
+	@Test
+	void containsFindsDirectAndNestedBuildersOfTheType() {
+		ComponentBuilderChain direct = new ComponentBuilderChain(new NoOpComponentBuilder(), new Collector());
+		ComponentBuilderChain nested = new ComponentBuilderChain(new NoOpComponentBuilder(), direct);
+		ComponentBuilderChain without = new ComponentBuilderChain(new NoOpComponentBuilder(), new NoOpComponentBuilder());
+
+		assertTrue(direct.contains(SailComponentCollector.class));
+		assertTrue(nested.contains(SailComponentCollector.class));
+		assertFalse(without.contains(SailComponentCollector.class));
 	}
 }

@@ -111,7 +111,12 @@ public abstract class ExpressionEvaluator {
 	 * @return	The evaluated formatted expression.
 	 */
 	public static @Nonnull String format(@Nonnull String expression, @Nullable Bean bean) {
-		return (String) process(expression, bean, true);
+		// Formatting always produces a String
+		String result = (String) process(expression, bean, true);
+		if (result == null) {
+			throw new IllegalStateException("Formatting expression " + expression + " produced null");
+		}
+		return result;
 	}
 	
 	/**
@@ -537,7 +542,7 @@ public abstract class ExpressionEvaluator {
 	 * @return The evaluated expression.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Object process(String expression, Bean bean, boolean format) {
+	private static @Nullable Object process(@Nonnull String expression, @Nullable Bean bean, boolean format) {
 		String expressionWithoutSuffix = expression;
 		String formatName = null;
 		
@@ -609,7 +614,9 @@ public abstract class ExpressionEvaluator {
 					return CORE.format(formatName, result);
 				}
 				if (format) {
-					return (result == null) ? "" : result;
+					@SuppressWarnings("null") // a unit test asserts "" for a customer without a name
+					boolean resultMissing = (result == null);
+					return resultMissing ? "" : result;
 				}
 				return result;
 			}

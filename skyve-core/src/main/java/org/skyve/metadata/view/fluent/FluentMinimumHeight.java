@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs for minimum-height constraints.
  *
@@ -14,5 +16,5 @@ interface FluentMinimumHeight<T extends FluentMinimumHeight<T>> {
 	 *            the minimum allowed height in pixels
 	 * @return the fluent builder
 	 */
-	T minPixelHeight(int minPixelHeight);
+	@Nonnull T minPixelHeight(int minPixelHeight);
 }

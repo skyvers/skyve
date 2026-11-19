@@ -2,10 +2,14 @@ package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -36,6 +40,7 @@ import org.skyve.web.WebContext;
 
 @SuppressWarnings("static-method")
 class ViewJSONManipulatorApplyJsonTest {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertiesInvokesOnlyMutableBindings() throws Exception {
 		RecordingViewJSONManipulator manipulator = newManipulator();
@@ -54,6 +59,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		assertEquals("mutableBinding", manipulator.appliedBindings.get(2));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertyReturnsImmediatelyWhenValueIsAbsent() {
 		RecordingViewJSONManipulator manipulator = newManipulator();
@@ -67,6 +73,7 @@ class ViewJSONManipulatorApplyJsonTest {
 				null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertySwallowsMetaDataExceptionForUnknownBinding() {
 		RecordingViewJSONManipulator manipulator = newManipulator();
@@ -82,6 +89,17 @@ class ViewJSONManipulatorApplyJsonTest {
 	}
 
 	@Test
+	void applyJSONRejectsJsonNull() {
+		RecordingViewJSONManipulator manipulator = newManipulator();
+
+		assertThrows(IllegalArgumentException.class,
+				() -> manipulator.applyJSON("null", mock(AbstractPersistence.class), mock(WebContext.class)));
+
+		assertEquals(0, manipulator.appliedBindings.size());
+	}
+
+	@SuppressWarnings("null") // passes null on purpose
+	@Test
 	void applyJSONDelegatesToApplyJSONPropertiesWhenNoChildBindingsExist() {
 		ApplyJsonDelegatingManipulator manipulator = newDelegatingManipulator();
 		ViewBindings bindings = newBindings();
@@ -96,6 +114,7 @@ class ViewJSONManipulatorApplyJsonTest {
 		assertEquals(1, manipulator.applyJSONPropertiesCalls);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void applyJSONPropertyAndApplyJSONHandleAssociationAndCollectionMutation() throws Exception {
 		try (Fixture fixture = new Fixture()) {
@@ -155,6 +174,237 @@ class ViewJSONManipulatorApplyJsonTest {
 		}
 	}
 
+	/**
+	 * A tab pane's selected tab index binding to an attribute takes the tab the user selected, but
+	 * only the index of one of its tabs: a crafted value is ignored.
+	 */
+	@Test
+	void aSelectedTabIndexTakesOnlyTheIndexOfATab() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 3), true, true);
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			TestOwnerBean owner = new TestOwnerBean();
+
+			for (Object value : new Object[] {Integer.valueOf(2), Long.valueOf(1), "0"}) {
+				applyTabIndex(fixture, bindings, owner, value);
+				assertEquals(Integer.valueOf(String.valueOf(value)), owner.getTabIndex(), "the tab index " + value);
+			}
+			for (Object value : new Object[] {Integer.valueOf(3), Integer.valueOf(-1), Double.valueOf(1.5), "1; drop", Boolean.TRUE}) {
+				applyTabIndex(fixture, bindings, owner, value);
+				assertEquals(Integer.valueOf(0), owner.getTabIndex(), "ignored " + value);
+			}
+		}
+	}
+
+	/**
+	 * When another widget, such as a spinner, also sets the attribute of a selected tab index binding, a value that is not
+	 * a tab index is the widget's and is applied.
+	 */
+	@Test
+	void aSelectedTabIndexBindingAnotherWidgetSetsTakesAnyValue() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 3), true, true);
+			fixture.manipulator.addBinding("tabIndex", true, false, Sanitisation.text); // as a spinner bound to it does
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			TestOwnerBean owner = new TestOwnerBean();
+
+			applyTabIndex(fixture, bindings, owner, Integer.valueOf(7));
+			assertEquals(Integer.valueOf(7), owner.getTabIndex());
+		}
+	}
+
+	/**
+	 * Two tab panes that select their tab with one binding take an index of either, whichever was visited last.
+	 */
+	@Test
+	void twoTabPanesWithOneSelectedTabIndexBindingTakeAnIndexOfEither() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 5), true, true);
+			fixture.manipulator.visitTabPane(tabPane("tabIndex", 3), true, true);
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			TestOwnerBean owner = new TestOwnerBean();
+
+			applyTabIndex(fixture, bindings, owner, Integer.valueOf(4));
+			assertEquals(Integer.valueOf(4), owner.getTabIndex(), "a tab of the first tab pane");
+			applyTabIndex(fixture, bindings, owner, Integer.valueOf(5));
+			assertEquals(Integer.valueOf(4), owner.getTabIndex(), "ignored: a tab of neither");
+		}
+	}
+
+	/**
+	 * A selected tab index binding to a getter with no setter (not an attribute) is not set from the request, which
+	 * goes on without failing.
+	 */
+	@SuppressWarnings("null") // the web context is not used
+	@Test
+	void aSelectedTabIndexBindingWithNoSetterIsOnlyRead() throws Exception {
+		try (Fixture fixture = new Fixture()) {
+			fixture.manipulator.visitTabPane(tabPane("shownTab", 2), true, true);
+			ViewBindings bindings = bindingTree(fixture.manipulator);
+			ViewBinding binding = bindings.getBinding("shownTab");
+			org.junit.jupiter.api.Assertions.assertNotNull(binding);
+			assertFalse(binding.isMutable());
+
+			TestOwnerBean owner = new TestOwnerBean();
+			Map<String, Object> values = new HashMap<>();
+			values.put("shownTab", Integer.valueOf(1));
+			assertDoesNotThrow(() -> fixture.manipulator.applyJSON(bindings, fixture.sourceDocument, values, owner, fixture.persistence, null));
+			assertEquals(Integer.valueOf(0), owner.getShownTab());
+		}
+	}
+
+	private static org.skyve.impl.metadata.view.container.TabPane tabPane(String selectedTabIndexBinding, int tabs) {
+		org.skyve.impl.metadata.view.container.TabPane result = new org.skyve.impl.metadata.view.container.TabPane();
+		result.setSelectedTabIndexBinding(selectedTabIndexBinding);
+		for (int i = 0; i < tabs; i++) {
+			result.getTabs().add(new org.skyve.impl.metadata.view.container.Tab());
+		}
+		return result;
+	}
+
+	@SuppressWarnings("null") // the web context is not used
+	private static void applyTabIndex(Fixture fixture, ViewBindings bindings, TestOwnerBean owner, Object value) throws Exception {
+		Map<String, Object> values = new HashMap<>();
+		values.put("tabIndex", value);
+		fixture.manipulator.applyJSON(bindings, fixture.sourceDocument, values, owner, fixture.persistence, null);
+	}
+
+	private static ViewBindings bindingTree(ViewJSONManipulator manipulator) throws Exception {
+		Field field = ViewJSONManipulator.class.getDeclaredField("bindingTree");
+		field.setAccessible(true);
+		return (ViewBindings) field.get(manipulator);
+	}
+
+	@Test
+	void anUnorderedCollectionIsNotChangedWhenOnlyTheOrderDiffers() throws Exception {
+		try (Fixture fixture = new Fixture(false)) {
+			TestOwnerBean owner = ownerWithChildren("c1", "c2", "c3");
+			List<TestRelatedBean> before = new ArrayList<>(owner.getChildren());
+
+			applyChildren(fixture, owner, "c3", "c1", "c2");
+
+			assertEquals(before, owner.getChildren());
+			assertEquals(0, owner.getChildren().changes, "the collection must not be changed, so Hibernate sees no dirtiness");
+		}
+	}
+
+	@Test
+	void anUnorderedCollectionKeepsItsBeansWhereTheyAreRemovesMissingOnesAndAppendsNewOnes() throws Exception {
+		try (Fixture fixture = new Fixture(false)) {
+			TestOwnerBean owner = ownerWithChildren("c1", "c2", "c3");
+			TestRelatedBean c1 = owner.getChildren().get(0);
+			TestRelatedBean c3 = owner.getChildren().get(2);
+
+			applyChildren(fixture, owner, "c3", null, "c1");
+
+			List<TestRelatedBean> children = owner.getChildren();
+			assertEquals(3, children.size());
+			assertSame(c1, children.get(0));
+			assertSame(c3, children.get(1));
+			assertFalse(List.of("c1", "c2", "c3").contains(children.get(2).getBizId()), "the new bean goes on the end");
+		}
+	}
+
+	@Test
+	void anOrderedCollectionTakesTheRequestOrder() throws Exception {
+		try (Fixture fixture = new Fixture(true)) {
+			TestOwnerBean owner = ownerWithChildren("c1", "c2", "c3");
+
+			applyChildren(fixture, owner, "c3", "c1", "c2");
+
+			assertEquals(List.of("c3", "c1", "c2"), owner.getChildren().stream().map(Bean::getBizId).toList());
+		}
+	}
+
+	@Test
+	void anOrderedCollectionPutsANewBeanAtItsPositionAndRemovesMissingOnes() throws Exception {
+		try (Fixture fixture = new Fixture(true)) {
+			TestOwnerBean owner = ownerWithChildren("c1", "c2", "c3");
+			TestRelatedBean c1 = owner.getChildren().get(0);
+			TestRelatedBean c2 = owner.getChildren().get(1);
+
+			applyChildren(fixture, owner, "c2", null, "c1");
+
+			List<TestRelatedBean> children = owner.getChildren();
+			assertEquals(3, children.size());
+			assertSame(c2, children.get(0));
+			assertFalse(List.of("c1", "c2", "c3").contains(children.get(1).getBizId()), "the new bean is where the request has it");
+			assertSame(c1, children.get(2));
+		}
+	}
+
+	private static TestOwnerBean ownerWithChildren(String... bizIds) {
+		TestOwnerBean owner = new TestOwnerBean();
+		for (String bizId : bizIds) {
+			TestRelatedBean child = new TestRelatedBean();
+			child.setBizId(bizId);
+			owner.getChildren().add(child);
+		}
+		owner.getChildren().changes = 0;
+		return owner;
+	}
+
+	/**
+	 * Applies a request whose children are the given rows, in order: a bizId names an existing row, null a new one.
+	 */
+	@SuppressWarnings("null") // passes null on purpose
+	private static void applyChildren(Fixture fixture, TestOwnerBean owner, String... bizIds) throws Exception {
+		List<Map<String, Object>> rows = new ArrayList<>();
+		for (String bizId : bizIds) {
+			Map<String, Object> row = new HashMap<>();
+			if (bizId != null) {
+				row.put(Bean.DOCUMENT_ID, bizId);
+			}
+			rows.add(row);
+		}
+		Map<String, Object> values = new HashMap<>();
+		values.put("children", rows);
+		fixture.manipulator.applyJSON(fixture.rootBindings, fixture.sourceDocument, values, owner, fixture.persistence, null);
+	}
+
+	/** A list that counts the changes made to it, as Hibernate's collections track their dirtiness. */
+	public static final class RecordingList<T> extends ArrayList<T> {
+		private static final long serialVersionUID = 1L;
+
+		private int changes;
+
+		@Override
+		public boolean add(T element) {
+			changes++;
+			return super.add(element);
+		}
+
+		@Override
+		public void add(int index, T element) {
+			changes++;
+			super.add(index, element);
+		}
+
+		@Override
+		public T remove(int index) {
+			changes++;
+			return super.remove(index);
+		}
+
+		@Override
+		public boolean remove(Object element) {
+			changes++;
+			return super.remove(element);
+		}
+
+		@Override
+		public T set(int index, T element) {
+			changes++;
+			return super.set(index, element);
+		}
+
+		@Override
+		public void clear() {
+			changes++;
+			super.clear();
+		}
+	}
+
 	private static final class Fixture implements AutoCloseable {
 		private static final Field THREAD_LOCAL_PERSISTENCE_FIELD;
 		static {
@@ -176,6 +426,11 @@ class ViewJSONManipulatorApplyJsonTest {
 		private final ViewBindings rootBindings;
 
 		private Fixture() throws Exception {
+			this(false);
+		}
+
+		@SuppressWarnings("null") // passes null on purpose
+		private Fixture(boolean ordered) throws Exception {
 			previousRepository = ProvidedRepositoryFactory.get();
 			threadLocal = threadLocalPersistence();
 			previousPersistence = threadLocal.get();
@@ -203,6 +458,10 @@ class ViewJSONManipulatorApplyJsonTest {
 			text.setLength(50);
 			sourceDocument.putAttribute(text);
 
+			org.skyve.impl.metadata.model.document.field.Integer tabIndex = new org.skyve.impl.metadata.model.document.field.Integer();
+			tabIndex.setName("tabIndex");
+			sourceDocument.putAttribute(tabIndex);
+
 			AssociationImpl association = new AssociationImpl();
 			association.setName("association");
 			association.setDocumentName("RelatedDoc");
@@ -213,9 +472,12 @@ class ViewJSONManipulatorApplyJsonTest {
 			children.setName("children");
 			children.setDocumentName("RelatedDoc");
 			children.setType(CollectionType.child);
+			children.setOrdered(Boolean.valueOf(ordered));
 			sourceDocument.putRelation(children);
 
-			DocumentImpl relatedDocument = new DocumentImpl();
+			// a spy, so that a row the request adds becomes a new bean without a domain class
+			DocumentImpl relatedDocument = spy(new DocumentImpl());
+			doAnswer(invocation -> new TestRelatedBean()).when(relatedDocument).newInstance(user);
 			relatedDocument.setName("RelatedDoc");
 			relatedDocument.setOwningModuleName("testModule");
 			relatedDocument.setPersistent(new Persistent());
@@ -263,8 +525,9 @@ class ViewJSONManipulatorApplyJsonTest {
 		private static final long serialVersionUID = 1L;
 
 		private String text;
+		private Integer tabIndex;
 		private TestRelatedBean association;
-		private final List<TestRelatedBean> children = new ArrayList<>();
+		private final RecordingList<TestRelatedBean> children = new RecordingList<>();
 
 		@Override
 		public String getBizKey() {
@@ -285,6 +548,21 @@ class ViewJSONManipulatorApplyJsonTest {
 			return text;
 		}
 
+		public Integer getTabIndex() {
+			return tabIndex;
+		}
+
+		public void setTabIndex(Integer tabIndex) {
+			this.tabIndex = tabIndex;
+		}
+
+		/**
+		 * A tab index computed from another value, with no setter and no attribute, as an extension class can have.
+		 */
+		public Integer getShownTab() {
+			return Integer.valueOf((text == null) ? 0 : 1);
+		}
+
 		public void setText(String text) {
 			this.text = text;
 		}
@@ -297,7 +575,7 @@ class ViewJSONManipulatorApplyJsonTest {
 			this.association = association;
 		}
 
-		public List<TestRelatedBean> getChildren() {
+		public RecordingList<TestRelatedBean> getChildren() {
 			return children;
 		}
 
@@ -319,6 +597,17 @@ class ViewJSONManipulatorApplyJsonTest {
 
 	public static final class TestRelatedBean extends org.skyve.impl.domain.AbstractPersistentBean {
 		private static final long serialVersionUID = 1L;
+
+		// an ordered collection is sorted by its rows' ordinals after they are applied; left null, the sort keeps the order
+		private Integer bizOrdinal;
+
+		public Integer getBizOrdinal() {
+			return bizOrdinal;
+		}
+
+		public void setBizOrdinal(Integer bizOrdinal) {
+			this.bizOrdinal = bizOrdinal;
+		}
 
 		@Override
 		public String getBizKey() {

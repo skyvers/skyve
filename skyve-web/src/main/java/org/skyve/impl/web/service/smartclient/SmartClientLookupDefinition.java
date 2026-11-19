@@ -8,6 +8,7 @@ import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescription;
 import org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Reference;
@@ -17,6 +18,10 @@ import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.model.list.ListModel;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * SmartClient lookup definition encapsulates metadata used to render SmartClient option data sources and pick lists for lookup fields.
@@ -50,91 +55,103 @@ public class SmartClientLookupDefinition {
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
 	protected SmartClientLookupDefinition(boolean bindingToDataGrid,
-		    								User user,
-		    								Customer customer,
-		    								Module module,
-		    								Document document,
-		    								Relation relation,
-		    								LookupDescription lookup,
-		    								boolean runtime,
-		    								String uxui) {
-        this.bindingToDataGrid = bindingToDataGrid;
-        String queryName = (lookup == null) ? null : lookup.getQuery();
-        // Use reference query name if none provided in lookup
-        if ((queryName == null) && (relation instanceof Reference reference)) {
-        	queryName = reference.getQueryName();
-        }
-		// Use the default query if none is defined, else get the named query.
-        if (queryName == null) {
-        	query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
-        	queryName = query.getName();
-        }
-        else {
-        	query = module.getNullSafeMetaDataQuery(queryName);
-        }
-        
-        StringBuilder sb = new StringBuilder(128);
-        sb.append(module.getName()).append('_').append(queryName).append('_');
-        sb.append(document.getName()).append('_').append(relation.getName());
-        optionDataSource = sb.toString();
+											@Nullable User user,
+											@Nonnull Customer customer,
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull Relation relation,
+											@Nullable LookupDescription lookup,
+											boolean runtime,
+											@Nonnull String uxui) {
+		this.bindingToDataGrid = bindingToDataGrid;
+		String modelName = (lookup == null) ? null : lookup.getModelName();
+		Document queryDocument;
+		List<MetaDataQueryColumn> columns;
+		if (modelName != null) {
+			ListModel<Bean> model = document.getListModel(customer, modelName, runtime);
+			queryDocument = model.getDrivingDocument();
+			if (queryDocument == null) {
+				throw new IllegalStateException("List model " + modelName + " in document " + document.getName() + " has no driving document");
+			}
+			columns = model.getColumns();
+			optionDataSource = new StringBuilder(128).append(document.getOwningModuleName()).append('_')
+														.append(document.getName()).append("__")
+														.append(modelName).append('_').append(relation.getName()).toString();
+		}
+		else {
+			String queryName = (lookup == null) ? null : lookup.getQuery();
+			if ((queryName == null) && (relation instanceof Reference reference)) {
+				queryName = reference.getQueryName();
+			}
+			if (queryName == null) {
+				query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
+				queryName = query.getName();
+			}
+			else {
+				query = module.getNullSafeMetaDataQuery(queryName);
+			}
+			optionDataSource = new StringBuilder(128).append(module.getName()).append('_')
+														.append(queryName).append('_')
+														.append(document.getName()).append('_')
+														.append(relation.getName()).toString();
+			queryDocument = module.getDocument(customer, query.getDocumentName());
+			columns = query.getColumns();
+		}
 
-        String descriptionBinding = (lookup == null) ? null : lookup.getDescriptionBinding();
-        displayField = (descriptionBinding == null) ? 
-        					Bean.BIZ_KEY : 
-    						BindUtil.sanitiseBinding(descriptionBinding);
+		String descriptionBinding = (lookup == null) ? null : lookup.getDescriptionBinding();
+		displayField = (descriptionBinding == null) ?
+							Bean.BIZ_KEY :
+							BindUtil.sanitiseBinding(descriptionBinding);
 
-        Document queryDocument = module.getDocument(customer, query.getDocumentName());
-        
-        if (user != null) {
-            canCreate = user.canCreateDocument(queryDocument);
-            canUpdate = user.canUpdateDocument(queryDocument);
-        }
-        
-        List<LookupDescriptionColumn> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
-        if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
-        	pickListFields.add(displayField);
-        }
-        else {
-            for (MetaDataQueryColumn column : query.getColumns()) {
-            	String alias = column.getName();
-            	if (alias == null) {
-            		alias = column.getBinding();
-            	}
-            	final String a = alias;
-            	Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
-            	if (optional.isPresent()) {
-            		if ((column instanceof MetaDataQueryProjectedColumn projected) && projected.isProjected()) {
-                        SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user,
-                    																					customer, 
-																                                        module,
-																                                        queryDocument,
-																                                        column,
-																                                        runtime,
-																                                        uxui);
 
-                    	pickListFields.add(def.getName());
-                    	// only add fields that are filterable and can use the substring operator
-                    	Boolean filterable = optional.get().getFilterable();
-                    	if (Boolean.TRUE.equals(filterable)) {
-                    		filterFields.add(def.getName());
-                    	}
-                    	else if ((filterable == null) && 
-                    				def.isCanFilter() && 
-                    				def.getHasTextFilterOperators()) {
-                    		filterFields.add(def.getName());
-                    	}
-            		}
-            	}
-            }
-        }
-    }
-    
+		if (user != null) {
+			canCreate = user.canCreateDocument(queryDocument);
+			canUpdate = user.canUpdateDocument(queryDocument);
+		}
+
+		List<LookupDescriptionColumn> dropDownColumns = (lookup == null) ? null : lookup.getDropDownColumns();
+		if ((dropDownColumns == null) || dropDownColumns.isEmpty()) {
+			pickListFields.add(displayField);
+		}
+		else {
+			for (MetaDataQueryColumn column : columns) {
+				String alias = column.getName();
+				if (alias == null) {
+					alias = column.getBinding();
+					if (alias == null) { // validated when the query is loaded
+						throw new MetaDataException("A column in the lookup query for " + relation.getName() + " has no name or binding");
+					}
+				}
+				final String a = alias;
+				Optional<LookupDescriptionColumn> optional = dropDownColumns.stream().filter(c -> a.equals(c.getName())).findAny();
+				if (optional.isPresent() &&
+						(column instanceof MetaDataQueryProjectedColumn projected) && projected.isProjected()) {
+					SmartClientQueryColumnDefinition def = SmartClientViewRenderer.getQueryColumn(user,
+																									customer,
+																									(modelName == null) ? module : customer.getModule(queryDocument.getOwningModuleName()),
+																									queryDocument,
+																									column,
+																									runtime,
+																									uxui);
+
+					pickListFields.add(def.getName());
+					// only add fields that are filterable and can use the substring operator
+					Boolean filterable = optional.get().getFilterable();
+					if (Boolean.TRUE.equals(filterable) ||
+							((filterable == null) && def.isCanFilter() && def.getHasTextFilterOperators())) {
+						filterFields.add(def.getName());
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Returns the field name used to display selected lookup values.
 	 *
 	 * @return display field name
 	 */
-	public String getDisplayField() {
+	public @Nonnull String getDisplayField() {
         return displayField;
     }
 
@@ -143,7 +160,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @param displayField display field name
 	 */
-    public void setDisplayField(String displayField) {
+    public void setDisplayField(@Nonnull String displayField) {
         this.displayField = displayField;
     }
 
@@ -152,7 +169,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return option data source identifier
 	 */
-    public String getOptionDataSource() {
+    public @Nonnull String getOptionDataSource() {
         return optionDataSource;
     }
 
@@ -161,7 +178,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @param optionDataSource option data source identifier
 	 */
-    public void setOptionDataSource(String optionDataSource) {
+    public void setOptionDataSource(@Nonnull String optionDataSource) {
         this.optionDataSource = optionDataSource;
     }
 
@@ -170,7 +187,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return configured pick-list fields
 	 */
-    public List<String> getPickListFields() {
+    public @Nonnull List<String> getPickListFields() {
         return pickListFields;
     }
 
@@ -179,7 +196,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return lookup filter fields
 	 */
-    public List<String> getFilterFields() {
+    public @Nonnull List<String> getFilterFields() {
         return filterFields;
     }
 
@@ -188,7 +205,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @return backing metadata query
 	 */
-    public MetaDataQueryDefinition getQuery() {
+    public @Nullable MetaDataQueryDefinition getQuery() {
         return query;
     }
 
@@ -197,7 +214,7 @@ public class SmartClientLookupDefinition {
 	 *
 	 * @param query backing metadata query
 	 */
-    public void setQuery(MetaDataQueryDefinition query) {
+    public void setQuery(@Nullable MetaDataQueryDefinition query) {
         this.query = query;
     }
 

@@ -34,6 +34,7 @@ class SkyveDocumentExecuterFactoryTest {
 		assertThat(factory.createQueryExecuter((JasperReportsContext) null, dataset, null), nullValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void createQueryExecuterCreatesDocumentExecuterForQueryText() throws JRException {
 		JRQuery query = mock(JRQuery.class);

@@ -119,17 +119,19 @@
 				</document>
 				<document name="Snapshot" permission="CRUDU" />
 				<document name="User" permission="_RU_U" />
-				<document name="UserAccount" permission="_____" />
+				<document name="UserAccount" permission="_____">
+					<action name="SignOutOtherSessions" />
+				</document>
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserLoginRecord" permission="_R__U" />
 				<document name="UserProxy" permission="_RU_U" />
 			</privileges>
 			<accesses>
 				<singularAccess document="ReportTemplate"/>
 				<singularAccess document="UserAccount" />
 				<queryAggregateAccess query="qMyLoginHistory" />
-				<queryAggregateAccess query="qMySecurityLogs" />
 				<contentAccess document="Contact" binding="image" />
 				<contentAccess document="UserDashboard" binding="currentUser.contact.image" />
 			</accesses>
@@ -197,19 +199,21 @@
 				</document>
 				<document name="Tagged" permission="CRUDU" />
 				<document name="User" permission="_R__C" />
-				<document name="UserAccount" permission="_____" />
+				<document name="UserAccount" permission="_____">
+					<action name="SignOutOtherSessions" />
+				</document>
 				<document name="UserCandidateContact" permission="_____">
 					<action name="Select" />
 				</document>
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserLoginRecord" permission="_R__U" />
 				<document name="UserProxy" permission="_R__C" />
 			</privileges>
 			<accesses>
 				<singularAccess document="UserAccount" />
 				<queryAggregateAccess query="qMyLoginHistory" />
-				<queryAggregateAccess query="qMySecurityLogs" />
 			</accesses>
 		</role>
 		<role name="ContactManager">
@@ -373,6 +377,24 @@
 				<document name="UserProxy" permission="_R__C" />
 			</privileges>
 		</role>
+		<role name="SAILRecorder">
+			<documentation>
+				Records SAIL scripts of what the user does in SmartClient, when the configuration allows recording (sail.recording).
+				Recording is started, stopped and downloaded in the Control Panel, which shows a user without the DevOps role
+				only its recording controls.
+			</documentation>
+			<description>admin.adminRoles.sailRecorder.description</description>
+			<privileges>
+				<document name="ChangePassword" permission="_____">
+					<action name="MakePasswordChange" />
+				</document>
+				<document name="ControlPanel" permission="_____">
+					<action name="StartSAILRecording" />
+					<action name="StopSAILRecording" />
+					<action name="DownloadSAILRecording" />
+				</document>
+			</privileges>
+		</role>
 		<role name="SecurityAdministrator">
 			<documentation>
 				Administration of users and permissions.
@@ -437,6 +459,7 @@
 					<action name="Next" />
 					<action name="Back" />
 					<action name="ResendActivation"/>
+					<action name="SignOutEverywhere" />
 				</document>
 				<document name="UserCandidateContact" permission="_____" />
 				<document name="UserList" permission="_____">
@@ -481,15 +504,17 @@
 					<action name="PrepareExplanation" />
 				</document>
 				<document name="Tagged" permission="CRUDU" />
-				<document name="UserAccount" permission="_____" />
+				<document name="UserAccount" permission="_____">
+					<action name="SignOutOtherSessions" />
+				</document>
 				<document name="UserDashboard" permission="CR__U">
 					<action name="UpdateMyDetails" />
 				</document>
+				<document name="UserLoginRecord" permission="_R__U" />
 			</privileges>
 			<accesses>
 				<singularAccess document="UserAccount" />
 				<queryAggregateAccess query="qMyLoginHistory" />
-				<queryAggregateAccess query="qMySecurityLogs" />
 			</accesses>
 		</role>
 	</roles>
@@ -549,6 +574,7 @@
 		<group name="admin.adminMenu.devOps.group.displayName">
 			<edit document="ControlPanel" name="admin.adminMenu.controlPanel.document.displayName">
 				<role name="DevOps" />
+				<role name="SAILRecorder" />
 			</edit>
 			<edit document="DataMaintenance" name="admin.adminMenu.dataMaintenance.document.displayName">
 				<role name="DevOps" />
@@ -999,19 +1025,5 @@
 				<column binding="archiveFilename" hidden="true" />
 			</columns>
 		</query>
-		<query name="qMySecurityLogs" documentName="SecurityLog">
-            <description>My Security Events</description>
-            <columns>
-                <column binding="timestamp" sortOrder="descending"/>
-                <column binding="username"/>
-                <column binding="eventType"/>
-                <column binding="eventMessage"/>
-                <column binding="loggedInUserId">
-                	<filterOperator>equal</filterOperator>
-                	<filterExpression>{USERID}</filterExpression>
-                	<projected>false</projected>
-                </column>
-            </columns>
-        </query>
 	</queries>
 </module>

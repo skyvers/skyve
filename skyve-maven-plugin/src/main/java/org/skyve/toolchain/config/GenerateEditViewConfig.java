@@ -2,6 +2,8 @@ package org.skyve.toolchain.config;
 
 import org.apache.maven.plugins.annotations.Parameter;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Stores the parameters for the edit-view generator mojo.
  */
@@ -41,7 +43,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @return the customer name, or {@code null}
 	 */
-	public String getCustomer() {
+	public @Nullable String getCustomer() {
 		return customer;
 	}
 
@@ -50,7 +52,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @param customer the customer name
 	 */
-	public void setCustomer(String customer) {
+	public void setCustomer(@Nullable String customer) {
 		this.customer = customer;
 	}
 
@@ -59,7 +61,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @return the module name, or {@code null}
 	 */
-	public String getModule() {
+	public @Nullable String getModule() {
 		return module;
 	}
 
@@ -68,7 +70,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @param module the module name
 	 */
-	public void setModule(String module) {
+	public void setModule(@Nullable String module) {
 		this.module = module;
 	}
 
@@ -77,7 +79,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @return the document name, or {@code null}
 	 */
-	public String getDocument() {
+	public @Nullable String getDocument() {
 		return document;
 	}
 
@@ -86,7 +88,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @param document the document name
 	 */
-	public void setDocument(String document) {
+	public void setDocument(@Nullable String document) {
 		this.document = document;
 	}
 
@@ -113,7 +115,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @return the overridden view name, or {@code null}
 	 */
-	public String getOverridenViewName() {
+	public @Nullable String getOverridenViewName() {
 		return overridenViewName;
 	}
 
@@ -122,7 +124,7 @@ public class GenerateEditViewConfig {
 	 *
 	 * @param overridenViewName the overridden view name
 	 */
-	public void setOverridenViewName(String overridenViewName) {
+	public void setOverridenViewName(@Nullable String overridenViewName) {
 		this.overridenViewName = overridenViewName;
 	}
 }

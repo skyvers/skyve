@@ -1,13 +1,40 @@
 package org.skyve.metadata.view.model.list;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
+import org.skyve.impl.metadata.customer.CustomerImpl;
+import org.skyve.impl.metadata.model.document.DocumentImpl;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.FilterOperator;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
+import org.skyve.metadata.model.document.DomainType;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.widget.FilterParameter;
+import org.skyve.persistence.AutoClosingIterable;
 
 /**
  * Tests for the static filter-helper methods on {@link ListModel}.
@@ -419,5 +446,249 @@ class ListModelTest {
 		Object end = new Object();
 		assertThrows(IllegalArgumentException.class,
 				() -> ListModel.addBetween(filter, "val", start, end));
+	}
+
+	// ----- models without filtering -----------------------------------------
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addParametersWithFilterParametersThrowsWhenModelHasNoFilter() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn(Bean.BIZ_KEY);
+		when(parameter.getOperator()).thenReturn(FilterOperator.isNull);
+		Document document = mockDrivingDocument();
+		ListModel<Bean> model = new NoFilterListModel(null, null, document);
+		List<FilterParameter> parameters = List.of(parameter);
+
+		withCustomer(() -> assertThrows(IllegalStateException.class,
+											() -> model.addParameters(document, parameters, null)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addParametersWithoutValuesSucceedsWhenModelHasNoFilter() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn(Bean.BIZ_KEY);
+		when(parameter.getOperator()).thenReturn(FilterOperator.equal);
+		Document document = mockDrivingDocument();
+		ListModel<Bean> model = new NoFilterListModel(null, null, document);
+		List<FilterParameter> parameters = List.of(parameter);
+
+		withCustomer(() -> assertDoesNotThrow(() -> model.addParameters(document, parameters, null)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addParametersWithNullOrOperatorThrowsWhenModelCannotCreateFilters() {
+		FilterParameter parameter = mock(FilterParameter.class);
+		when(parameter.getFilterBinding()).thenReturn(Bean.BIZ_KEY);
+		when(parameter.getOperator()).thenReturn(FilterOperator.nullOrEqual);
+		when(parameter.getValue()).thenReturn("value");
+		Document document = mockDrivingDocument();
+		ListModel<Bean> model = new NoFilterListModel(mock(Filter.class), null, document);
+		List<FilterParameter> parameters = List.of(parameter);
+
+		withCustomer(() -> assertThrows(IllegalStateException.class,
+											() -> model.addParameters(document, parameters, null)));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void addParametersWithNullOrOperatorsAddsANullOrSomethingFilterForEachOperator() {
+		Filter filter = mock(Filter.class);
+		Filter newFilter = mock(Filter.class);
+		List<FilterOperator> operators = List.of(FilterOperator.nullOrEqual,
+													FilterOperator.nullOrGreater,
+													FilterOperator.nullOrGreaterEqual,
+													FilterOperator.nullOrLess,
+													FilterOperator.nullOrLessEqual,
+													FilterOperator.nullOrLike,
+													FilterOperator.nullOrNotEqual,
+													FilterOperator.nullOrNotLike);
+		List<FilterParameter> parameters = new ArrayList<>();
+		for (FilterOperator operator : operators) {
+			FilterParameter parameter = mock(FilterParameter.class);
+			when(parameter.getFilterBinding()).thenReturn(Bean.BIZ_KEY);
+			when(parameter.getOperator()).thenReturn(operator);
+			when(parameter.getValue()).thenReturn("value");
+			parameters.add(parameter);
+		}
+		Document document = mockDrivingDocument();
+		ListModel<Bean> model = new NoFilterListModel(filter, newFilter, document);
+
+		withCustomer(() -> model.addParameters(document, parameters, null));
+
+		int count = operators.size();
+		verify(newFilter).addEquals(Bean.BIZ_KEY, "value");
+		verify(newFilter).addGreaterThan(Bean.BIZ_KEY, "value");
+		verify(newFilter).addGreaterThanOrEqualTo(Bean.BIZ_KEY, "value");
+		verify(newFilter).addLessThan(Bean.BIZ_KEY, "value");
+		verify(newFilter).addLessThanOrEqualTo(Bean.BIZ_KEY, "value");
+		verify(newFilter).addContains(Bean.BIZ_KEY, "value");
+		verify(newFilter).addNotEquals(Bean.BIZ_KEY, "value");
+		verify(newFilter).addNotContains(Bean.BIZ_KEY, "value");
+		verify(newFilter, times(count)).addNull(Bean.BIZ_KEY);
+		verify(newFilter, times(count)).addOr(newFilter);
+		verify(filter, times(count)).addAnd(newFilter);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void getTop100VariantDomainValueCodesReturnsNoCodesWhenThereAreNoDomainValues() {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Attribute attribute = mock(Attribute.class);
+		DocumentImpl document = mock(DocumentImpl.class);
+		when(document.getDomainValues(customer, DomainType.variant, attribute, null, true)).thenReturn(List.of());
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+														withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			assertEquals(0, ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(document, attribute, "x").length);
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void determineColumnTitleThrowsWhenBoundColumnHasNoDrivingDocument() {
+		MetaDataQueryColumn column = mock(MetaDataQueryColumn.class);
+		when(column.getBinding()).thenReturn(Bean.BIZ_KEY);
+		ListModel<Bean> model = new NoFilterListModel(null, null, null);
+
+		assertThrows(IllegalStateException.class, () -> model.determineColumnTitle(column));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void determineColumnTitleUsesColumnNameWhenUnboundWithoutDrivingDocument() {
+		MetaDataQueryColumn column = mock(MetaDataQueryColumn.class);
+		when(column.getName()).thenReturn("unbound");
+		ListModel<Bean> model = new NoFilterListModel(null, null, null);
+
+		assertEquals("unbound", model.determineColumnTitle(column));
+	}
+
+	private static Document mockDrivingDocument() {
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("test");
+		when(document.getName()).thenReturn("Test");
+		return document;
+	}
+
+	/**
+	 * Runs the given test body with a mocked customer available through {@code CORE.getCustomer()}.
+	 */
+	private static void withCustomer(Executable body) {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		when(customer.getModule("test")).thenReturn(module);
+		User user = mock(User.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class,
+														withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		persistence.setUser(user);
+		persistence.setForThread();
+		try {
+			body.execute();
+		}
+		catch (Throwable t) {
+			throw new AssertionError(t);
+		}
+		finally {
+			clearPersistenceThreadLocal();
+		}
+	}
+
+	private static void clearPersistenceThreadLocal() {
+		try {
+			Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+			field.setAccessible(true);
+			@SuppressWarnings("unchecked")
+			ThreadLocal<AbstractPersistence> tl = (ThreadLocal<AbstractPersistence>) field.get(null);
+			tl.remove();
+		}
+		catch (@SuppressWarnings("unused") Exception ignored) {
+			// ignore
+		}
+	}
+
+	/**
+	 * A list model whose filter, new filter and driving document are given (and may be null).
+	 */
+	private static final class NoFilterListModel extends ListModel<Bean> {
+		private final Filter filter;
+		private final Filter newFilter;
+		private final Document drivingDocument;
+
+		private NoFilterListModel(Filter filter, Filter newFilter, Document drivingDocument) {
+			this.filter = filter;
+			this.newFilter = newFilter;
+			this.drivingDocument = drivingDocument;
+		}
+
+		@Override
+		public void postConstruct(Customer customer, boolean runtime) {
+			// nothing to construct
+		}
+
+		@Override
+		public String getDescription() {
+			return null;
+		}
+
+		@Override
+		public Document getDrivingDocument() {
+			return drivingDocument;
+		}
+
+		@Override
+		public List<MetaDataQueryColumn> getColumns() {
+			return Collections.emptyList();
+		}
+
+		@Override
+		public Set<String> getProjections() {
+			return Collections.emptySet();
+		}
+
+		@Override
+		public Filter getFilter() {
+			return filter;
+		}
+
+		@Override
+		public Filter newFilter() {
+			return newFilter;
+		}
+
+		@Override
+		public void putParameter(String name, Object value) {
+			// no parameters
+		}
+
+		@Override
+		public Page fetch() {
+			return new Page();
+		}
+
+		@Override
+		public AutoClosingIterable<Bean> iterate() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Bean update(String bizId, SortedMap<String, Object> properties) {
+			return null;
+		}
+
+		@Override
+		public void remove(String bizId) {
+			// nothing to remove
+		}
 	}
 }

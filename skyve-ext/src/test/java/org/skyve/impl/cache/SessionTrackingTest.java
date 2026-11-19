@@ -2,8 +2,11 @@ package org.skyve.impl.cache;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,12 +16,14 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 import org.ehcache.Cache;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.cache.CSRFTokenCacheConfig;
 import org.skyve.cache.ConversationCacheConfig;
 import org.skyve.cache.GeoIPCacheConfig;
@@ -39,7 +44,7 @@ import jakarta.servlet.http.HttpSession;
  * Unit tests for user-session tracking helpers in {@link StateUtil}.
  */
 @SuppressWarnings({"static-method", "boxing"})
-public class SessionTrackingTest {
+class SessionTrackingTest {
 	private static final String USER_ID = "test-user";
 
 	private boolean originalForceNonPersistentCaching;
@@ -50,8 +55,8 @@ public class SessionTrackingTest {
 	private GeoIPCacheConfig originalGeoIPCache;
 	private Path cacheDirectory;
 
-	@Before
-	public void before() throws Exception {
+	@BeforeEach
+	void before() throws Exception {
 		originalForceNonPersistentCaching = UtilImpl.FORCE_NON_PERSISTENT_CACHING;
 		originalCacheDirectory = UtilImpl.CACHE_DIRECTORY;
 		originalSessionCache = UtilImpl.SESSION_CACHE;
@@ -72,8 +77,8 @@ public class SessionTrackingTest {
 		StateUtil.removeSessions(USER_ID);
 	}
 
-	@After
-	public void after() throws Exception {
+	@AfterEach
+	void after() throws Exception {
 		StateUtil.removeSessions(USER_ID);
 		DefaultCaching.get().shutdown();
 
@@ -92,7 +97,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void hasOtherSessionAndGetSessionCountTrackDistinctSessionIds() {
+	void hasOtherSessionAndGetSessionCountTrackDistinctSessionIds() {
 		HttpSession sessionA = session("A");
 		HttpSession sessionB = session("B");
 
@@ -107,7 +112,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void duplicateSessionIdDoesNotCreateOtherSession() {
+	void duplicateSessionIdDoesNotCreateOtherSession() {
 		HttpSession sessionA1 = session("A");
 		HttpSession sessionA2 = session("A");
 
@@ -119,7 +124,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void removeSessionDecrementsCount() {
+	void removeSessionDecrementsCount() {
 		HttpSession sessionA = session("A");
 		HttpSession sessionB = session("B");
 
@@ -132,7 +137,44 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void removeSessionRemovesEntryWhenLastSession() {
+	void removeOtherSessionsKeepsOnlyTheGivenSessionAndCountsTheOthers() {
+		HttpSession sessionA = session("A");
+		StateUtil.addSession(USER_ID, sessionA);
+		StateUtil.addSession(USER_ID, session("B"));
+		StateUtil.addSession(USER_ID, session("C"));
+		StateUtil.addSession("other-user", session("D"));
+
+		assertThat(StateUtil.removeOtherSessions(USER_ID, sessionA), is(2));
+
+		assertThat(StateUtil.getSessions(USER_ID), is(Set.of("A")));
+		assertTrue(StateUtil.checkSession(USER_ID, sessionA));
+		assertFalse(StateUtil.checkSession(USER_ID, session("B")));
+		// another user's sessions are untouched
+		assertThat(StateUtil.getSessions("other-user"), is(Set.of("D")));
+		StateUtil.removeSessions("other-user");
+	}
+
+	@Test
+	void removeOtherSessionsWithNothingElseRemovesNothing() {
+		HttpSession sessionA = session("A");
+		StateUtil.addSession(USER_ID, sessionA);
+
+		assertThat(StateUtil.removeOtherSessions(USER_ID, sessionA), is(0));
+		assertThat(StateUtil.getSessions(USER_ID), is(Set.of("A")));
+		assertThat(StateUtil.removeOtherSessions("nobody", sessionA), is(0));
+	}
+
+	@Test
+	void removeOtherSessionsDoesNotRegisterAnUnregisteredSession() {
+		StateUtil.addSession(USER_ID, session("B"));
+
+		assertThat(StateUtil.removeOtherSessions(USER_ID, session("A")), is(1));
+
+		assertThat(StateUtil.getSessionCount(USER_ID), is(0));
+	}
+
+	@Test
+	void removeSessionRemovesEntryWhenLastSession() {
 		HttpSession sessionA = session("A");
 		StateUtil.addSession(USER_ID, sessionA);
 		StateUtil.removeSession(USER_ID, sessionA);
@@ -140,14 +182,14 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void removeSessionOnNonexistentUserDoesNotThrow() {
+	void removeSessionOnNonexistentUserDoesNotThrow() {
 		HttpSession sessionA = session("A");
 		StateUtil.removeSession("no-such-user-" + System.nanoTime(), sessionA); // should not throw
 		assertThat(StateUtil.getSessionCount("no-such-user-x"), is(0));
 	}
 
 	@Test
-	public void checkSessionReturnsTrueForRegisteredSession() {
+	void checkSessionReturnsTrueForRegisteredSession() {
 		HttpSession sessionA = session("check-true-" + System.nanoTime());
 		StateUtil.addSession(USER_ID, sessionA);
 		try {
@@ -158,13 +200,13 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void checkSessionReturnsFalseForUnregisteredSession() {
+	void checkSessionReturnsFalseForUnregisteredSession() {
 		HttpSession sessionX = session("unregistered-" + System.nanoTime());
 		assertThat(StateUtil.checkSession(USER_ID, sessionX), is(false));
 	}
 
 	@Test
-	public void checkSessionReturnsFalseAfterRemoval() {
+	void checkSessionReturnsFalseAfterRemoval() {
 		HttpSession sessionA = session("A-rem-" + System.nanoTime());
 		StateUtil.addSession(USER_ID, sessionA);
 		StateUtil.removeSession(USER_ID, sessionA);
@@ -172,7 +214,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void removeSessionsRemovesAllSessionsForUser() {
+	void removeSessionsRemovesAllSessionsForUser() {
 		StateUtil.addSession(USER_ID, session("S1"));
 		StateUtil.addSession(USER_ID, session("S2"));
 		StateUtil.removeSessions(USER_ID);
@@ -180,7 +222,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getSessionsReturnsRegisteredIds() {
+	void getSessionsReturnsRegisteredIds() {
 		HttpSession sessionA = session("GA");
 		HttpSession sessionB = session("GB");
 		StateUtil.addSession(USER_ID, sessionA);
@@ -195,19 +237,19 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getSessionsReturnsEmptySetForUnknownUser() {
+	void getSessionsReturnsEmptySetForUnknownUser() {
 		assertThat(StateUtil.getSessions("unknown-user-" + System.nanoTime()).isEmpty(), is(true));
 	}
 
 	@Test
-	public void getCachedConversationThrowsWhenConversationCacheMisses() {
+	void getCachedConversationThrowsWhenConversationCacheMisses() {
 		String webId = "12345678-1234-1234-1234-123456789012bean-id";
 
 		assertThrows(ConversationEndedException.class, () -> StateUtil.getCachedConversation(webId, null));
 	}
 
 	@Test
-	public void getCachedConversationRestoresConversationForMatchingSession() throws Exception {
+	void getCachedConversationRestoresConversationForMatchingSession() {
 		DynamicBean bean = bean("bean-id");
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
 		context.setCurrentBean(bean);
@@ -221,7 +263,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getCachedConversationRestoresConversationWhenNoRequestIsSupplied() throws Exception {
+	void getCachedConversationRestoresConversationWhenNoRequestIsSupplied() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", null);
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -233,7 +275,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getCachedConversationThrowsWhenRequestHasNoSession() throws Exception {
+	void getCachedConversationThrowsWhenRequestHasNoSession() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -244,7 +286,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getCachedConversationThrowsWhenSessionIdDiffers() throws Exception {
+	void getCachedConversationThrowsWhenSessionIdDiffers() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", "session-1");
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -255,7 +297,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getCachedConversationThrowsWhenStoredConversationHasNoSessionId() throws Exception {
+	void getCachedConversationThrowsWhenStoredConversationHasNoSessionId() {
 		TestWebContext context = new TestWebContext("12345678-1234-1234-1234-123456789012", null);
 		context.setCurrentBean(bean("bean-id"));
 		StateUtil.commitAndCacheConversation(context);
@@ -266,18 +308,33 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void hasOtherSessionReturnsFalseWhenNoSessions() {
+	void hasOtherSessionReturnsFalseWhenNoSessions() {
 		HttpSession sessionA = session("no-session-" + System.nanoTime());
 		assertThat(StateUtil.hasOtherSession("unknown-user-" + System.nanoTime(), sessionA), is(false));
 	}
 
 	@Test
-	public void getSessionCountForUnknownUserReturnsZero() {
+	void getSessionCountForUnknownUserReturnsZero() {
 		assertThat(StateUtil.getSessionCount("unknown-user-" + System.nanoTime()), is(0));
 	}
 
 	@Test
-	public void replaceTokenAddsTokenForSession() {
+	void removeTokenRemovesOnlyThatToken() {
+		String sessionId = "remove-token-session";
+		Integer kept = StateUtil.createToken();
+		Integer removed = StateUtil.createToken();
+		StateUtil.replaceToken(sessionId, null, kept);
+		StateUtil.replaceToken(sessionId, null, removed);
+		StateUtil.removeToken(sessionId, removed);
+		StateUtil.removeToken(sessionId, null);
+		StateUtil.removeToken("no-such-session", kept);
+		assertThat(StateUtil.checkToken(sessionId, removed), is(false));
+		assertThat(StateUtil.checkToken(sessionId, kept), is(true));
+		StateUtil.clearTokens(sessionId);
+	}
+
+	@Test
+	void replaceTokenAddsTokenForSession() {
 		String sessionId = "token-session-" + System.nanoTime();
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(sessionId, null, token);
@@ -286,19 +343,19 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void checkTokenReturnsFalseForNullToken() {
+	void checkTokenReturnsFalseForNullToken() {
 		String sessionId = "token-session-null-" + System.nanoTime();
 		assertThat(StateUtil.checkToken(sessionId, null), is(false));
 	}
 
 	@Test
-	public void checkTokenReturnsFalseForMissingSession() {
+	void checkTokenReturnsFalseForMissingSession() {
 		String sessionId = "missing-session-" + System.nanoTime();
 		assertThat(StateUtil.checkToken(sessionId, Integer.valueOf(42)), is(false));
 	}
 
 	@Test
-	public void replaceTokenRemovesOldToken() {
+	void replaceTokenRemovesOldToken() {
 		String sessionId = "replace-session-" + System.nanoTime();
 		Integer oldToken = StateUtil.createToken();
 		Integer newToken = StateUtil.createToken();
@@ -310,7 +367,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void clearTokensRemovesAllTokensForSession() {
+	void clearTokensRemovesAllTokensForSession() {
 		String sessionId = "clear-session-" + System.nanoTime();
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(sessionId, null, token);
@@ -319,7 +376,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void clearTokensHttpSessionOverloadRemovesAllTokensForSession() {
+	void clearTokensHttpSessionOverloadRemovesAllTokensForSession() {
 		HttpSession session = session("clear-http-session-" + System.nanoTime());
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(session.getId(), null, token);
@@ -328,7 +385,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void replaceTokenHttpSessionOverloadAddsTokenForSession() {
+	void replaceTokenHttpSessionOverloadAddsTokenForSession() {
 		HttpSession session = session("replace-http-session-" + System.nanoTime());
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(session, null, token);
@@ -337,7 +394,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void evictExpiredSessionTokensTouchesExistingEntries() {
+	void evictExpiredSessionTokensTouchesExistingEntries() {
 		String sessionId = "evict-token-session-" + System.nanoTime();
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(sessionId, null, token);
@@ -347,7 +404,7 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void evictExpiredConversationsTouchesExistingEntries() {
+	void evictExpiredConversationsTouchesExistingEntries() {
 		String cacheName = UtilImpl.CONVERSATION_CACHE.getName();
 		Cache<String, byte[]> cache = DefaultCaching.get().getEHCache(cacheName, String.class, byte[].class);
 		String conversationKey = "conversation-" + System.nanoTime();
@@ -357,23 +414,92 @@ public class SessionTrackingTest {
 	}
 
 	@Test
-	public void getGeoIPsReturnsConfiguredCache() {
+	void getGeoIPsReturnsConfiguredCache() {
 		assertThat(StateUtil.getGeoIPs(), is(org.hamcrest.CoreMatchers.notNullValue()));
 	}
 
 	@Test
-	public void logStateStatsRunsWithConfiguredCaches() {
+	void logStateStatsRunsWithConfiguredCaches() {
 		StateUtil.logStateStats();
 		assertThat(StateUtil.getSessionCount(USER_ID), is(0));
 	}
 
 	@Test
-	public void replaceTokenWithSameOldAndNewDoesNothing() {
+	void replaceTokenWithAnAlreadyValidNewTokenStillInvalidatesTheOldOne() {
+		String sessionId = "already-valid-" + System.nanoTime();
+		Integer oldToken = Integer.valueOf(1);
+		Integer newToken = Integer.valueOf(2);
+		StateUtil.replaceToken(sessionId, null, oldToken);
+		StateUtil.replaceToken(sessionId, null, newToken);
+
+		StateUtil.replaceToken(sessionId, oldToken, newToken);
+		StateUtil.replaceToken(sessionId, oldToken, newToken); // nothing left to change
+
+		assertThat(StateUtil.checkToken(sessionId, oldToken), is(false));
+		assertThat(StateUtil.checkToken(sessionId, newToken), is(true));
+		StateUtil.clearTokens(sessionId);
+	}
+
+	@Test
+	void replaceTokenWithSameOldAndNewDoesNothing() {
 		String sessionId = "same-token-" + System.nanoTime();
 		Integer token = StateUtil.createToken();
 		StateUtil.replaceToken(sessionId, token, token);
 		// token was not stored since old==new
 		assertThat(StateUtil.checkToken(sessionId, token), is(false));
+	}
+
+	@Test
+	void getSessionsReturnsAReadOnlySnapshot() {
+		HttpSession first = session("first");
+		StateUtil.addSession("snapshot-user", first);
+		Set<String> snapshot = StateUtil.getSessions("snapshot-user");
+
+		StateUtil.addSession("snapshot-user", session("second"));
+
+		assertEquals(Set.of("first"), snapshot);
+		assertThrows(UnsupportedOperationException.class, () -> snapshot.add("forged"));
+		assertEquals(2, StateUtil.getSessionCount("snapshot-user"));
+	}
+
+	@Test
+	void removingTheLastSessionRemovesTheUsersEntryAndSecondCallsChangeNothing() {
+		HttpSession session = session("only");
+		StateUtil.addSession("last-user", session);
+		StateUtil.addSession("last-user", session);
+		assertEquals(1, StateUtil.getSessionCount("last-user"));
+
+		StateUtil.removeSession("last-user", session("other"));
+		assertEquals(1, StateUtil.getSessionCount("last-user"));
+		StateUtil.removeSession("last-user", session);
+		StateUtil.removeSession("last-user", session);
+
+		assertFalse(sessionsCache().containsKey("last-user"));
+	}
+
+	@Test
+	void clearingTokensKeepsAnEmptyEntryOnlyForAKnownSession() {
+		StateUtil.replaceToken("known", null, Integer.valueOf(1));
+		StateUtil.removeToken("known", Integer.valueOf(1));
+		assertTrue(tokensCache().containsKey("known"));
+
+		StateUtil.replaceToken("cleared", null, Integer.valueOf(2));
+		StateUtil.clearTokens("cleared");
+		StateUtil.clearTokens("never-seen");
+
+		assertFalse(StateUtil.checkToken("cleared", Integer.valueOf(2)));
+		assertTrue(tokensCache().containsKey("cleared"));
+		assertFalse(tokensCache().containsKey("never-seen"));
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Cache<String, TreeSet> sessionsCache() {
+		return DefaultCaching.get().getEHCache(UtilImpl.SESSION_CACHE.getName(), String.class, TreeSet.class);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static Cache<String, TreeSet> tokensCache() {
+		return DefaultCaching.get().getEHCache(UtilImpl.CSRF_TOKEN_CACHE.getName(), String.class, TreeSet.class);
 	}
 
 	private static HttpSession session(String id) {

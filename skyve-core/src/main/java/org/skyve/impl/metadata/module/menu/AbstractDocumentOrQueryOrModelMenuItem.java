@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.module.menu;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Abstract base for menu items that may target a document, a named query, or a
  * model instead of a raw document.
@@ -22,17 +24,17 @@ public abstract class AbstractDocumentOrQueryOrModelMenuItem extends AbstractDoc
 	private String queryName;
 	private String modelName;
 
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = queryName;
 	}
 
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = modelName;
 	}
 }

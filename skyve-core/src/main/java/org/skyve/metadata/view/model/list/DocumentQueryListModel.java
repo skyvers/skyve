@@ -11,10 +11,13 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.metadata.model.document.InverseOne;
 import org.skyve.impl.persistence.AbstractDocumentQuery;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Association;
+import org.skyve.metadata.model.document.Association.AssociationType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
@@ -28,14 +31,18 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.web.SortParameter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private String description;
 	
+	private Customer queryCustomer;
 	private Module module;
 	private Document drivingDocument;
 	private MetaDataQueryDefinition query;
 
-	public DocumentQueryListModel(MetaDataQueryDefinition query) {
+	public DocumentQueryListModel(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 
@@ -50,12 +57,13 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	 * Used to set the query in postConstruct() of subclasses.
 	 * @param query
 	 */
-	protected void setQuery(MetaDataQueryDefinition query) {
+	protected void setQuery(@Nonnull MetaDataQueryDefinition query) {
 		this.query = query;
 	}
 
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
+		queryCustomer = customer;
 		description = query.getDescription();
 		columns = query.getColumns();
 		module = query.getDocumentModule(customer);
@@ -93,19 +101,19 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 	
 	@Override
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return description;
 	}
 
 	@Override
-	public Document getDrivingDocument() {
+	public @Nonnull Document getDrivingDocument() {
 		return drivingDocument;
 	}
 
 	private List<MetaDataQueryColumn> columns;
 	
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		return columns;
 	}
 
@@ -113,7 +121,7 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private Map<String, String> projections = new TreeMap<>();
 	
 	@Override
-	public Set<String> getProjections() {
+	public @Nonnull Set<String> getProjections() {
 		return projections.keySet();
 	}
 
@@ -122,29 +130,74 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	private DocumentQueryFilter filter;
 	
 	@Override
-	public Filter getFilter() {
+	public @Nonnull Filter getFilter() {
 		if (filter == null) {
 			establishQueries();
-			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter());
+			filter = new DocumentQueryFilter(detailQuery.getFilter(), summaryQuery.getFilter(), this::leftOuterJoinAssociations);
 		}
 		return filter;
 	}
 
 	@Override
-	public Filter newFilter() {
+	public @Nonnull Filter newFilter() {
 		establishQueries();
-		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter());
+		return new DocumentQueryFilter(detailQuery.newDocumentFilter(), summaryQuery.newDocumentFilter(), this::leftOuterJoinAssociations);
+	}
+
+	/**
+	 * Left outer joins the associations and inverse ones on the path of a binding that a filter puts a condition on.
+	 * Such a path in a filter is an implicit inner join in HQL, which would leave out the rows with nothing on it: a
+	 * negation also matches them, and under Match Any so does any other criterion. The joins are to-one, so they add
+	 * no rows, and a condition through the path still excludes the rows with nothing on it unless it matches no value.
+	 * A path the from clause joins already is not joined again: the query's own columns may have, and a custom from
+	 * may join it with an alias and a with condition, which another join of the path would replace for the filters and
+	 * the columns. An embedded association is on the row, so it needs none, and so is the foreign key that a condition
+	 * on an association's bizId compares, so that association needs none either.
+	 * <p>After a from clause of several entities ({@code {a.X} as bean, {a.Y} as y}), the join relies on the dialect
+	 * writing their separator as a cross join, so that its on clause sees bean: every Skyve dialect does.
+	 * <p>Side effects: adds the joins to the detail and the summary query.
+	 * @param binding	the binding of the condition
+	 */
+	private void leftOuterJoinAssociations(@Nonnull String binding) {
+		// postConstruct may not have been called: the model can fetch with only its query
+		if (queryCustomer == null) {
+			return;
+		}
+		int dot = binding.indexOf('.');
+		while (dot > 0) {
+			String path = binding.substring(0, dot);
+			TargetMetaData target = Binder.getMetaDataForBinding(queryCustomer, module, drivingDocument, path);
+			Attribute attribute = target.getAttribute();
+			if (! ((attribute instanceof Association) || (attribute instanceof InverseOne))) {
+				return;
+			}
+			boolean onTheRow = (attribute instanceof Association association) &&
+									((association.getType() == AssociationType.embedded) ||
+										Bean.DOCUMENT_ID.equals(binding.substring(dot + 1)));
+			if (! onTheRow) {
+				leftOuterJoin(detailQuery, path);
+				leftOuterJoin(summaryQuery, path);
+			}
+			dot = binding.indexOf('.', dot + 1);
+		}
+	}
+
+	private static void leftOuterJoin(@Nullable DocumentQuery query, @Nonnull String path) {
+		if ((query instanceof AbstractDocumentQuery documentQuery) &&
+				(! documentQuery.isJoined(path))) {
+			documentQuery.addLeftOuterJoin(path);
+		}
 	}
 	
 	@Override
-	public void putParameter(String name, Object value) {
+	public void putParameter(@Nonnull String name, @Nullable Object value) {
 		establishQueries();
 		detailQuery.putParameter(name, value);
 		summaryQuery.putParameter(name, value);
 	}
 
 	@Override
-	public Page fetch() throws Exception {
+	public @Nonnull Page fetch() throws Exception {
 		establishQueries();
 		
 		if (getSummary() == null) {
@@ -168,7 +221,14 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		if (sorts != null) {
 			for (SortParameter sort : sorts) {
 				String by = sort.getBy();
+				if (by == null) {
+					throw new IllegalStateException("A sort parameter for query " + query.getName() + " has no binding to sort by");
+				}
+				// No direction means ascending - the query treats anything but descending as ascending
 				SortDirection direction = sort.getDirection();
+				if (direction == null) {
+					direction = SortDirection.ascending;
+				}
 				String expression = projections.get(by);
 				if (expression == null) {
 					detailQuery.insertBoundOrdering(by, direction);
@@ -190,7 +250,8 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 		else {
 			summaryBean = summaryQuery.projectedResult();
 		}
-		Number totalRows = (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
+		// No summary row means no rows were counted
+		Number totalRows = (summaryBean == null) ? null : (Number) BindUtil.get(summaryBean, Bean.DOCUMENT_ID);
 		result.setTotalRows((totalRows == null) ? 0L : totalRows.longValue());
 		result.setRows(rows);
 		result.setSummary(summaryBean);
@@ -199,13 +260,13 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 
 	@Override
-	public AutoClosingIterable<Bean> iterate() throws Exception {
+	public @Nonnull AutoClosingIterable<Bean> iterate() throws Exception {
 		establishQueries();
 		return detailQuery.projectedIterable();
 	}
 	
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> values) 
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> values) 
 	throws Exception {
 		return update(bizId, 
 						values, 
@@ -214,11 +275,11 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 						getSelectedTagId());
 	}
 
-	public static Bean update(String bizId, 
-								SortedMap<String, Object> properties, 
-								Document drivingDocument,
-								MetaDataQueryDefinition query,
-								String selectedTagId) {
+	public static @Nullable Bean update(@Nonnull String bizId, 
+											@Nonnull SortedMap<String, Object> properties, 
+											@Nonnull Document drivingDocument,
+											@Nonnull MetaDataQueryDefinition query,
+											@Nullable String selectedTagId) {
 		Persistence p = CORE.getPersistence();
 		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
 		BindUtil.populateProperties(p.getUser(), bean, properties, true);
@@ -230,11 +291,11 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	}
 	
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		remove(bizId, drivingDocument);
 	}
 
-	public static void remove(String bizId, Document drivingDocument)
+	public static void remove(@Nonnull String bizId, @Nonnull Document drivingDocument)
 	throws Exception {
 		Persistence p = CORE.getPersistence();
 		PersistentBean bean = p.retrieveAndLock(drivingDocument, bizId);
@@ -258,14 +319,14 @@ public class DocumentQueryListModel <T extends Bean> extends ListModel<T> {
 	/**
 	 * For Sub-classes to get hold of the internal detail query being used.
 	 */
-	protected DocumentQuery getDetailQuery() {
+	protected @Nullable DocumentQuery getDetailQuery() {
 		return detailQuery;
 	}
 	
 	/**
 	 * For Sub-classes to get hold of the internal summary query being used.
 	 */
-	protected DocumentQuery getSummaryQuery() {
+	protected @Nullable DocumentQuery getSummaryQuery() {
 		return summaryQuery;
 	}
 }

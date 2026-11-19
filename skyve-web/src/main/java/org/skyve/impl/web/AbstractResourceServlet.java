@@ -5,15 +5,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
+import org.skyve.content.MimeType;
 import org.skyve.domain.messages.SecurityException;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.ImageUtil;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.user.User;
 import org.skyve.util.Thumbnail;
 import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
-import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
@@ -23,7 +24,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 /**
  * Base servlet for serving binary or text resources (files, content-managed blobs,
@@ -67,8 +67,8 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param documentName the document name parsed from the request
 	 * @param binding the optional binding parameter
 	 * @param resourceFileName the resource or content identifier
-	 * @param imageWidth the requested image width
-	 * @param imageHeight the requested image height
+	 * @param imageWidth the requested image width, at most {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}
+	 * @param imageHeight the requested image height, at most {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION}
 	 * @param user the authenticated user, if present
 	 * @param customer the authenticated customer, if present
 	 * @param customerName the resolved customer name
@@ -186,6 +186,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		protected int imageWidth = 0;
 		protected int imageHeight = 0;
 		private @Nullable Thumbnail image;
+		private boolean loaded = false;
 
 		/**
 		 * Returns the bytes of this resource, loading them on first access.
@@ -195,10 +196,20 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		 */
 		@Override
 		public @Nullable byte[] getBytes() throws IOException {
-			if (image == null) {
+			Thumbnail result = image();
+			return (result == null) ? null : result.getBytes();
+		}
+
+		/**
+		 * Calls {@link #load()} once, remembering a null result too, so a missing resource
+		 * or one that can't be made into a thumbnail isn't loaded again for each header.
+		 */
+		private @Nullable Thumbnail image() throws IOException {
+			if (! loaded) {
 				image = load();
+				loaded = true;
 			}
-			return (image == null) ? null : image.getBytes();
+			return image;
 		}
 
 		/**
@@ -208,11 +219,14 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		@Override
 		public void dispose() throws Exception {
 			image = null;
+			loaded = false;
 		}
 		
 		/**
-		 * Loads the backing data into {@link #image}.
-		 * Implementations must guard against repeated loading (check {@code image == null}).
+		 * Loads the backing data, as a thumbnail when {@link #imageWidth} and {@link #imageHeight} are set.
+		 * This is called at most once per resource, even when it returns null.
+		 *
+		 * @return the loaded data, or null if it is not available
 		 */
 		protected abstract @Nullable Thumbnail load() throws IOException;
 
@@ -239,13 +253,10 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		@Override
 		public @Nullable String getContentType() throws IOException {
 			if ((imageWidth > 0) && (imageHeight > 0)) {
-				if (image == null) {
-					image = load();
-				}
-				if (image != null) {
-					return image.getMimeType().toString();
-				}
-				return null;
+				Thumbnail result = image();
+				// The thumbnail's type is unknown when its file name has no recognised suffix
+				MimeType mimeType = (result == null) ? null : result.getMimeType();
+				return (mimeType == null) ? null : mimeType.toString();
 			}
 			return resolveContentType();
 		}
@@ -264,13 +275,10 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 		@Override
 		public @Nullable String getFileName() throws IOException {
 			if ((imageWidth > 0) && (imageHeight > 0)) {
-				if (image == null) {
-					image = load();
-				}
-				if (image != null) {
-					return "thumbnail." + image.getMimeType().getStandardFileSuffix();
-				}
-				return null;
+				Thumbnail result = image();
+				// The thumbnail's type is unknown when its file name has no recognised suffix
+				MimeType mimeType = (result == null) ? null : result.getMimeType();
+				return (mimeType == null) ? null : "thumbnail." + mimeType.getStandardFileSuffix();
 			}
 			return resolveFileName();
 		}
@@ -292,7 +300,8 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @throws IOException      if an I/O error occurs
 	 */
 	@Override
-	protected void service(HttpServletRequest request, HttpServletResponse response)
+	protected void service(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		try {
 			super.service(request, response);
@@ -325,7 +334,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @return milliseconds since the epoch, or {@code -1} if unknown or on error
 	 */
 	@Override
-	protected long getLastModified(HttpServletRequest request) {
+	protected long getLastModified(@SuppressWarnings("null") @Nonnull HttpServletRequest request) {
 		try {
 			Resource resource = RESOURCES.get();
 			if (resource == null) {
@@ -364,7 +373,8 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param response the current HTTP response
 	 */
 	@Override
-	public void doGet(HttpServletRequest request, HttpServletResponse response) {
+	public void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response) {
 		doResourceRequest(request, response, false);
 	}
 
@@ -377,11 +387,12 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	 * @param response the current HTTP response
 	 */
 	@Override
-	protected void doHead(HttpServletRequest request, HttpServletResponse response) {
+	protected void doHead(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response) {
 		doResourceRequest(request, response, true);
 	}
 
-	private void doResourceRequest(HttpServletRequest request, HttpServletResponse response, boolean headOnly) {
+	private void doResourceRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response, boolean headOnly) {
 		try {
 			RequestParams params = parseRequestParams(request);
 			Resource resource = RESOURCES.get();
@@ -418,6 +429,7 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 
 			byte[] bytes = resource.getBytes();
 			if (bytes == null) {
+				dontCache(response);
 				response.sendError(HttpServletResponse.SC_NOT_FOUND);
 				LOGGER.error("Problem getting the resource - {} was not found.", resource.getFileName());
 				return;
@@ -434,21 +446,41 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			}
 		}
 		catch (SecurityException e) {
+			dontCache(response);
 			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 			LOGGER.error("Problem getting the resource - {}", e.toString(), e);
 		}
+		catch (Thumbnail.BusyException e) {
+			// Too busy making thumbnails to make this one within the safety limit - the client can try again later
+			dontCache(response);
+			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+			response.setHeader("Retry-After", "5");
+			logResourceIOException(LOGGER, e);
+		}
 		catch (IOException e) {
+			dontCache(response);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			logResourceIOException(LOGGER, e);
 		}
 		catch (Exception e) {
+			dontCache(response);
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			LOGGER.error("Problem getting the resource - {}", e.toString(), e);
 		}
 	}
 
+	/**
+	 * Stops the browser keeping an error response, replacing any cache header already set for the resource,
+	 * so that the resource is asked for again once the problem is fixed - eg after signing in.
+	 */
+	private static void dontCache(@Nonnull HttpServletResponse response) {
+		response.setHeader("Cache-Control", "no-store");
+	}
+
 	static void logResourceIOException(@Nonnull Logger logger, @Nonnull IOException e) {
-		logger.warn("Problem getting the resource - {}", e.toString());
+		if (logger.isWarnEnabled()) {
+			logger.warn("Problem getting the resource - {}", e.toString());
+		}
 	}
 
 	/**
@@ -565,6 +597,9 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 	
 	/**
 	 * Parses common request parameters shared by all resource servlet implementations.
+	 * The requested image width and height become a square of the larger side rounded up to a step, capped at
+	 * {@link UtilImpl#THUMBNAIL_MAXIMUM_DIMENSION} - see {@link ImageUtil#thumbnailSize(int, int)}.
+	 * When only one of them is given, the image is still made a thumbnail, sized by that side.
 	 * Also resolves the current user and customer from the session and cookies.
 	 *
 	 * @param request the HTTP request
@@ -604,9 +639,14 @@ public abstract class AbstractResourceServlet extends HttpServlet {
 			imageHeight = 0;
 			LOGGER.error("Width/Height is malformed in the URL");
 		}
+		// Fit a square of the larger side rounded up to a step, so a request can only choose a few sizes.
+		// One side only still makes a thumbnail, sized by that side.
+		int size = ImageUtil.thumbnailSize(imageWidth, imageHeight);
+		imageWidth = size;
+		imageHeight = size;
 
-		HttpSession session = request.getSession(false);
-		User user = (session == null) ? null : (User) session.getAttribute(WebContext.USER_SESSION_ATTRIBUTE_NAME);
+		// A revoked session falls back to no user so that public resources are still served
+		User user = WebUtil.getValidatedSessionUser(request);
 		Customer customer = null;
 		String customerName = null;
 		if (user != null) { // we are logged in

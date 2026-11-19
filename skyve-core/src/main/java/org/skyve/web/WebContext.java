@@ -51,7 +51,7 @@ public interface WebContext extends Serializable {
 	 *
 	 * @param bizId the {@link org.skyve.domain.Bean#getBizId() bizId} to look up
 	 */
-	public @Nullable Bean getBean(String bizId);
+	public @Nullable Bean getBean(@Nonnull String bizId);
 	
 	/**
 	 * Return the bean currently under view or edit within this context.

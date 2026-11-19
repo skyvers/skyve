@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.repository.view.actions;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -11,8 +11,11 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 import org.skyve.metadata.controller.ImplicitActionName;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -41,10 +44,10 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"iconStyleClass", 
 							"confirmationText",
 							"escapeConfirm",
-							"disabledConditionName",
-							"enabledConditionName",
-							"invisibleConditionName",
-							"visibleConditionName",
+							"xmlDisabledCondition",
+							"xmlEnabledCondition",
+							"xmlInvisibleCondition",
+							"xmlVisibleCondition",
 							"properties"})
 public abstract class ActionMetaData implements DecoratedMetaData {
 	private static final long serialVersionUID = -6621003946775667744L;
@@ -60,15 +63,17 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	private String iconStyleClass;
 	private String confirmationText;
 	private Boolean escapeConfirm;
-	private String disabledConditionName;
-	private String invisibleConditionName;
+	private String disabledCondition;
+	private String enabledCondition;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	/**
 	 * Returns the implicit action name for framework-provided actions.
 	 *
 	 * @return implicit action name, or {@code null}
 	 */
-	public ImplicitActionName getImplicitName() {
+	public @Nullable ImplicitActionName getImplicitName() {
 		return implicitName;
 	}
 
@@ -77,7 +82,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return explicit action name, or {@code null}
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -87,7 +92,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param name explicit action name
 	 */
 	@XmlAttribute(required = false)
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 
@@ -96,7 +101,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return display label, or {@code null}
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -105,7 +110,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 
@@ -115,7 +120,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param displayName display label
 	 */
 	@XmlAttribute(required = false)
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
@@ -125,7 +130,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -134,7 +139,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return relative icon file name, or {@code null}
 	 */
-	public String getRelativeIconFileName() {
+	public @Nullable String getRelativeIconFileName() {
 		return relativeIconFileName;
 	}
 
@@ -144,7 +149,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param relativeIconFileName relative icon file name
 	 */
 	@XmlAttribute(required = false)
-	public void setRelativeIconFileName(String relativeIconFileName) {
+	public void setRelativeIconFileName(@Nullable String relativeIconFileName) {
 		this.relativeIconFileName = UtilImpl.processStringValue(relativeIconFileName);
 	}
 
@@ -153,7 +158,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return icon CSS style class, or {@code null}
 	 */
-	public String getIconStyleClass() {
+	public @Nullable String getIconStyleClass() {
 		return iconStyleClass;
 	}
 
@@ -163,7 +168,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param iconStyleClass icon CSS style class
 	 */
 	@XmlAttribute(required = false)
-	public void setIconStyleClass(String iconStyleClass) {
+	public void setIconStyleClass(@Nullable String iconStyleClass) {
 		this.iconStyleClass = UtilImpl.processStringValue(iconStyleClass);
 	}
 
@@ -172,7 +177,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return tooltip text, or {@code null}
 	 */
-	public String getToolTip() {
+	public @Nullable String getToolTip() {
 		return toolTip;
 	}
 
@@ -181,7 +186,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeToolTip() {
+	public @Nullable Boolean getEscapeToolTip() {
 		return escapeToolTip;
 	}
 
@@ -191,7 +196,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param toolTip tooltip text
 	 */
 	@XmlAttribute(required = false)
-	public void setToolTip(String toolTip) {
+	public void setToolTip(@Nullable String toolTip) {
 		this.toolTip = UtilImpl.processStringValue(toolTip);
 	}
 
@@ -201,7 +206,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param escapeToolTip {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeToolTip(Boolean escapeToolTip) {
+	public void setEscapeToolTip(@Nullable Boolean escapeToolTip) {
 		this.escapeToolTip = escapeToolTip;
 	}
 
@@ -210,7 +215,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return confirmation text, or {@code null}
 	 */
-	public String getConfirmationText() {
+	public @Nullable String getConfirmationText() {
 		return confirmationText;
 	}
 
@@ -219,7 +224,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeConfirm() {
+	public @Nullable Boolean getEscapeConfirm() {
 		return escapeConfirm;
 	}
 
@@ -229,7 +234,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param confirmationText confirmation text
 	 */
 	@XmlAttribute(name = "confirm", required = false)
-	public void setConfirmationText(String confirmationText) {
+	public void setConfirmationText(@Nullable String confirmationText) {
 		this.confirmationText = UtilImpl.processStringValue(confirmationText);
 	}
 
@@ -239,91 +244,127 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @param escapeConfirm {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(name = "escapeConfirm", required = false)
-	public void setEscapeConfirm(Boolean escapeConfirm) {
+	public void setEscapeConfirm(@Nullable Boolean escapeConfirm) {
 		this.escapeConfirm = escapeConfirm;
 	}
 
 	/**
-	 * Returns the internal invisible-condition name.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return invisible-condition name, or {@code null}
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the internal invisible-condition name.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName invisible-condition name
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
-	}
-
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * Sets the visibility condition using a positive expression.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * <p>Side effects: stores the negated form of {@code visibleConditionName} in
-	 * {@code invisibleConditionName} to preserve the internal invisible-condition
-	 * representation used by runtime metadata.
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
+	 */
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
+	}
+
+	/**
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName condition indicating when the action is visible
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
-	 * Returns the internal disabled-condition name.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return disabled-condition name, or {@code null}
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the internal disabled-condition name.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName disabled-condition name
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
-	}
-	
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * Sets the enabled condition using a positive expression.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * <p>Side effects: stores the negated form of {@code enabledConditionName} in
-	 * {@code disabledConditionName} to preserve the internal disabled-condition
-	 * representation used by runtime metadata.
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
+	 */
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enabled} attribute as authored.
 	 *
-	 * @param enabledConditionName condition indicating when the action is enabled
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	public Map<String, String> properties = new TreeMap<>();
+	@SuppressWarnings("java:S1948") // LinkedHashMap is Serializable
+	public Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns decorator properties defined for this action descriptor.
@@ -331,7 +372,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 * @return mutable action property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -343,12 +384,12 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 	 *
 	 * @return a populated runtime action instance
 	 */
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = new ActionImpl();
 
 		result.setConfirmationText(confirmationText);
 		result.setEscapeConfirm(escapeConfirm);
-		result.setDisabledConditionName(disabledConditionName);
+		BindUtil.copyAuthoredCondition(getXmlDisabledCondition(), getXmlEnabledCondition(), result::setXmlDisabledCondition, result::setXmlEnabledCondition);
 		result.setDisplayName(displayName);
 		result.setEscapeDisplayName(escapeDisplayName);
 		result.setName(name);
@@ -358,7 +399,7 @@ public abstract class ActionMetaData implements DecoratedMetaData {
 				result.setName(implicitName.toString());
 			}
 		}
-		result.setInvisibleConditionName(getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(getXmlInvisibleCondition(), getXmlVisibleCondition(), result::setXmlInvisibleCondition, result::setXmlVisibleCondition);
 		result.setRelativeIconFileName(getRelativeIconFileName());
 		result.setIconStyleClass(getIconStyleClass());
 		result.setToolTip(getToolTip());

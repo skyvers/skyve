@@ -21,6 +21,7 @@ import org.skyve.tag.TagManager;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
+import modules.admin.Group.GroupExtension;
 import modules.admin.Tag.TagExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.UserProxy.UserProxyExtension;
@@ -43,16 +44,19 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		tagManager = EXT.getTagManager();
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteCopiesTagToUser() throws Exception {
 		long suffix = System.nanoTime();
 		String tagName = "Test Tag " + suffix;
 		// Create source and target users
 		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(sourceUser, "source-" + suffix, "Source");
 		sourceUser.getContact().setEmail1("source-" + suffix + "@test.com");
 		sourceUser = CORE.getPersistence().save(sourceUser);
 
 		UserExtension targetUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(targetUser, "target-" + suffix, "Target");
 		targetUser.getContact().setEmail1("target-" + suffix + "@test.com");
 		targetUser = CORE.getPersistence().save(targetUser);
 
@@ -124,6 +128,7 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertEquals(2L, newTaggedCount);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteWithNullCopyToUserThrowsValidationException() throws Exception {
 		long suffix = System.nanoTime();
@@ -169,16 +174,19 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 		assertEquals(1L, originalTag.count());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteWithEmptyTagCopiesEmptyTag() throws Exception {
 		long suffix = System.nanoTime();
 		String tagName = "Empty Tag " + suffix;
 		// Create source and target users
 		UserExtension sourceUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(sourceUser, "source-empty-" + suffix, "Source");
 		sourceUser.getContact().setEmail1("source-empty-" + suffix + "@test.com");
 		sourceUser = CORE.getPersistence().save(sourceUser);
 
 		UserExtension targetUser = db.build(User.MODULE_NAME, User.DOCUMENT_NAME);
+		nameUniquely(targetUser, "target-empty-" + suffix, "Target");
 		targetUser.getContact().setEmail1("target-empty-" + suffix + "@test.com");
 		targetUser = CORE.getPersistence().save(targetUser);
 
@@ -214,5 +222,21 @@ class CopyTagToUserH2Test extends AbstractH2Test {
 
 		// Verify the new tag has 0 tagged items
 		assertEquals(0L, newTag.count());
+	}
+
+	/**
+	 * Names a built user and its groups. DataBuilder names both with random lorem text and both names are unique,
+	 * so two users built in one test sometimes share a user name or a group name.
+	 * @param user	The user to name.
+	 * @param userName	A user name that no other user in the test has.
+	 * @param groupLabel	A label that no other user in the test has, short enough for "{groupLabel} group N" to fit
+	 * 						the 30 character group name.
+	 */
+	private static void nameUniquely(User user, String userName, String groupLabel) {
+		user.setUserName(userName);
+		int groupNumber = 0;
+		for (GroupExtension group : user.getGroups()) {
+			group.setName(groupLabel + " group " + (++groupNumber));
+		}
 	}
 }

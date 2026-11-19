@@ -1,5 +1,7 @@
 package org.skyve.impl.metadata.view;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view widgets that declare both width and height constraints.
  *
@@ -8,8 +10,8 @@ package org.skyve.impl.metadata.view;
  * implemented by resizable container widgets.
  */
 public interface ConstrainableSize extends ConstrainableHeight {
-	public Integer getMinPixelWidth();
-	public void setMinPixelWidth(Integer minPixelWidth);
-	public Integer getMaxPixelWidth();
-	public void setMaxPixelWidth(Integer maxPixelWidth);
+	public @Nullable Integer getMinPixelWidth();
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth);
+	public @Nullable Integer getMaxPixelWidth();
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth);
 }

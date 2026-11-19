@@ -1,9 +1,9 @@
 package org.skyve.impl.metadata.view.widget;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -17,10 +17,13 @@ import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -43,10 +46,10 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"dialogWidth", 
 							"dialogHeight", 
 							"modalDialog",
-							"invisibleConditionName", 
-							"visibleConditionName",
-							"disabledConditionName", 
-							"enabledConditionName",
+							"xmlInvisibleCondition", 
+							"xmlVisibleCondition",
+							"xmlDisabledCondition", 
+							"xmlEnabledCondition",
 							"parameters",
 							"properties"})
 public class DialogButton implements Parameterizable, Disableable, Invisible, FormItemWidget {
@@ -59,13 +62,15 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	private Integer dialogWidth = Integer.valueOf(800);
 	private Integer dialogHeight = Integer.valueOf(630);
 	private Boolean modalDialog = Boolean.FALSE;
-	private String invisibleConditionName;
-	private String disabledConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
+	private String disabledCondition;
+	private String enabledCondition;
 	private List<Parameter> parameters = new ArrayList<>();
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates that this widget does not render a separate form label by default.
@@ -88,7 +93,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -97,7 +102,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the button label
 	 */
-	public String getDisplayName() {
+	public @Nonnull String getDisplayName() {
 		return displayName;
 	}
 
@@ -106,7 +111,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the localised display label
 	 */
-	public String getLocalisedDisplayName() {
+	public @Nullable String getLocalisedDisplayName() {
 		return Util.i18n(displayName);
 	}
 
@@ -115,7 +120,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public Boolean getEscapeDisplayName() {
+	public @Nullable Boolean getEscapeDisplayName() {
 		return escapeDisplayName;
 	}
 	
@@ -125,7 +130,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param displayName the button label
 	 */
 	@XmlAttribute(required = true)
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nonnull String displayName) {
 		this.displayName = UtilImpl.processStringValue(displayName);
 	}
 
@@ -135,7 +140,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param escapeDisplayName {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
 	@XmlAttribute(required = false)
-	public void setEscapeDisplayName(Boolean escapeDisplayName) {
+	public void setEscapeDisplayName(@Nullable Boolean escapeDisplayName) {
 		this.escapeDisplayName = escapeDisplayName;
 	}
 
@@ -144,7 +149,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog name, or {@code null} when a command is used instead
 	 */
-	public String getDialogName() {
+	public @Nullable String getDialogName() {
 		return dialogName;
 	}
 	
@@ -154,7 +159,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param dialogName the dialog name, or {@code null} when a command is used instead
 	 */
 	@XmlAttribute(required = false)
-	public void setDialogName(String dialogName) {
+	public void setDialogName(@Nullable String dialogName) {
 		this.dialogName = UtilImpl.processStringValue(dialogName);
 	}
 
@@ -163,7 +168,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog command, or {@code null} when opening a named dialog directly
 	 */
-	public String getCommand() {
+	public @Nullable String getCommand() {
 		return command;
 	}
 
@@ -173,7 +178,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param command the dialog command, or {@code null} when opening a named dialog directly
 	 */
 	@XmlAttribute(required = false)
-	public void setCommand(String command) {
+	public void setCommand(@Nullable String command) {
 		this.command = UtilImpl.processStringValue(command);
 	}
 
@@ -182,7 +187,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog width in pixels
 	 */
-	public Integer getDialogWidth() {
+	public @Nullable Integer getDialogWidth() {
 		return dialogWidth;
 	}
 
@@ -192,7 +197,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param dialogWidth the dialog width in pixels
 	 */
 	@XmlAttribute(required = false)
-	public void setDialogWidth(Integer dialogWidth) {
+	public void setDialogWidth(@Nullable Integer dialogWidth) {
 		this.dialogWidth = dialogWidth;
 	}
 
@@ -201,7 +206,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return the dialog height in pixels
 	 */
-	public Integer getDialogHeight() {
+	public @Nullable Integer getDialogHeight() {
 		return dialogHeight;
 	}
 
@@ -211,7 +216,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param dialogHeight the dialog height in pixels
 	 */
 	@XmlAttribute(required = false)
-	public void setDialogHeight(Integer dialogHeight) {
+	public void setDialogHeight(@Nullable Integer dialogHeight) {
 		this.dialogHeight = dialogHeight;
 	}
 
@@ -220,7 +225,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 *
 	 * @return {@code true} when the dialog is modal
 	 */
-	public Boolean isModalDialog() {
+	public @Nullable Boolean isModalDialog() {
 		return modalDialog;
 	}
 
@@ -230,94 +235,131 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @param modalDialog {@code true} to open the dialog modally
 	 */
 	@XmlAttribute(required = false)
-	public void setModalDialog(Boolean modalDialog) {
+	public void setModalDialog(@Nullable Boolean modalDialog) {
 		this.modalDialog = modalDialog;
 	}
 
 	/**
-	 * Returns the invisible condition expression.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return the invisible condition expression, or {@code null} when not set
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible condition expression directly.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition expression
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the visible condition attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; the visible condition is derived from the invisible condition
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName the visible condition expression
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
-	 * Returns the disabled condition expression.
+	 * Returns the derived {@code disabled} condition that renderers and other consumers read.
 	 *
-	 * @return the disabled condition expression, or {@code null} when not set
+	 * @return the {@code disabled} attribute as authored, or else the negation of the authored
+	 * 			{@code enabled} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getDisabledConditionName() {
-		return disabledConditionName;
+	@XmlTransient
+	public @Nullable String getDisabledCondition() {
+		return (disabledCondition != null) ? disabledCondition : BindUtil.negateCondition(enabledCondition);
 	}
 
 	/**
-	 * Sets the disabled condition expression directly.
+	 * Sets the {@code disabled} attribute as authored.
 	 *
-	 * @param disabledConditionName the disabled condition expression
+	 * <p>Side effects: clears any authored {@code enabled} attribute.
+	 *
+	 * @param disabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "disabled", required = false)
-	public void setDisabledConditionName(String disabledConditionName) {
-		this.disabledConditionName = UtilImpl.processStringValue(disabledConditionName);
-	}
-	
-	/**
-	 * JAXB placeholder for the enabled condition attribute.
-	 *
-	 * @return always {@code null}; the enabled condition is derived from the disabled condition
-	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getEnabledConditionName() {
-		return null;
+	public void setXmlDisabledCondition(@Nullable String disabledCondition) {
+		this.disabledCondition = UtilImpl.processStringValue(disabledCondition);
+		this.enabledCondition = null;
 	}
 
 	/**
-	 * Sets the enabled condition by storing its negation as the disabled condition.
+	 * Returns the {@code disabled} attribute as authored.
 	 *
-	 * @param enabledConditionName the enabled condition expression
+	 * @return the authored condition, or {@code null} when {@code enabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlDisabledCondition() {
+		return disabledCondition;
+	}
+
+	
+	/**
+	 * Returns the {@code enabled} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code disabled} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlEnabledCondition() {
+		return enabledCondition;
+	}
+
+	/**
+	 * Sets the {@code enabled} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code disabled} attribute, so that
+	 * {@link #getDisabledCondition()} returns the negation of this condition.
+	 *
+	 * @param enabledCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "enabled", required = false)
-	public void setEnabledConditionName(String enabledConditionName) {
-		this.disabledConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(enabledConditionName));
+	public void setXmlEnabledCondition(@Nullable String enabledCondition) {
+		this.enabledCondition = UtilImpl.processStringValue(enabledCondition);
+		this.disabledCondition = null;
 	}
 
 	/**
@@ -326,7 +368,7 @@ public class DialogButton implements Parameterizable, Disableable, Invisible, Fo
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

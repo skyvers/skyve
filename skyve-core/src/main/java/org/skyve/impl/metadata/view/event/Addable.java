@@ -2,6 +2,8 @@ package org.skyve.impl.metadata.view.event;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Mixin interface for widget containers that fire an add-item event.
  *
@@ -11,5 +13,5 @@ import java.util.List;
  * @see EventSource
  */
 public interface Addable extends EventSource {
-	public List<EventAction> getAddedActions();
+	public @Nonnull List<EventAction> getAddedActions();
 }

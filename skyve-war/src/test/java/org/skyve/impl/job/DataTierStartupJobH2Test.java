@@ -159,7 +159,7 @@ class DataTierStartupJobH2Test extends AbstractH2TestTruncate {
 	}
 
 	private static void registerDataStartupObserver() {
-		CustomerImpl customer = (CustomerImpl) ProvidedRepositoryFactory.get().getCustomer(CUSTOMER_NAME);
+		CustomerImpl customer = (CustomerImpl) ProvidedRepositoryFactory.getNullSafe().getCustomer(CUSTOMER_NAME);
 		assertNotNull(customer);
 		ObserverMetaDataImpl observer = new ObserverMetaDataImpl();
 		observer.setClassName(DataStartupObserver.class.getName());

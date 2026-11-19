@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.Persistent.ExtensionStrategy;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentPersistent metadata.
  */
@@ -19,7 +22,7 @@ public class FluentPersistent {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentPersistent(Persistent persistent) {
+	public FluentPersistent(@Nonnull Persistent persistent) {
 		this.persistent = persistent;
 	}
 
@@ -27,7 +30,7 @@ public class FluentPersistent {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentPersistent from(@SuppressWarnings("hiding") Persistent persistent) {
+	public @Nonnull FluentPersistent from(@SuppressWarnings("hiding") @Nonnull Persistent persistent) {
 		name(persistent.getName());
 		schema(persistent.getSchema());
 		catalog(persistent.getCatalog());
@@ -40,7 +43,7 @@ public class FluentPersistent {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentPersistent name(String name) {
+	public @Nonnull FluentPersistent name(@Nullable String name) {
 		persistent.setName(name);
 		return this;
 	}
@@ -48,7 +51,7 @@ public class FluentPersistent {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentPersistent schema(String schema) {
+	public @Nonnull FluentPersistent schema(@Nullable String schema) {
 		persistent.setSchema(schema);
 		return this;
 	}
@@ -56,7 +59,7 @@ public class FluentPersistent {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentPersistent catalog(String catalog) {
+	public @Nonnull FluentPersistent catalog(@Nullable String catalog) {
 		persistent.setCatalog(catalog);
 		return this;
 	}
@@ -64,14 +67,14 @@ public class FluentPersistent {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentPersistent strategy(ExtensionStrategy strategy) {
+	public @Nonnull FluentPersistent strategy(@Nullable ExtensionStrategy strategy) {
 		persistent.setStrategy(strategy);
 		return this;
 	}
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentPersistent discriminator(String discriminator) {
+	public @Nonnull FluentPersistent discriminator(@Nullable String discriminator) {
 		persistent.setDiscriminator(discriminator);
 		return this;
 	}
@@ -79,14 +82,14 @@ public class FluentPersistent {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentPersistent cacheName(String cacheName) {
+	public @Nonnull FluentPersistent cacheName(@Nullable String cacheName) {
 		persistent.setCacheName(cacheName);
 		return this;
 	}
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
-	public Persistent get() {
+	public @Nonnull Persistent get() {
 		return persistent;
 	}
 }

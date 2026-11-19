@@ -182,6 +182,7 @@ class ChartActionStaticTest {
 		assertEquals("TEST.PROCESSED", result.getExtender());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void pfChartModelWithUnsupportedTypeThrows() {
 		ChartData data = minimalChartData();
@@ -207,5 +208,22 @@ class ChartActionStaticTest {
 		assertDoesNotThrow(() -> ChartAction.pfChartModel(ChartType.pie, multiColorChartData()));
 		assertDoesNotThrow(() -> ChartAction.pfChartModel(ChartType.polarArea, multiColorChartData()));
 		assertDoesNotThrow(() -> ChartAction.pfChartModel(ChartType.radar, minimalChartData()));
+	}
+
+	/** A translucent colour's CSS has an English decimal point in a German JVM (not rgba(1,2,3,0,50)). */
+	@Test
+	void webColourIsEnglishInAGermanJvm() {
+		java.util.Locale display = java.util.Locale.getDefault(java.util.Locale.Category.DISPLAY);
+		java.util.Locale format = java.util.Locale.getDefault(java.util.Locale.Category.FORMAT);
+		java.util.Locale locale = java.util.Locale.getDefault();
+		java.util.Locale.setDefault(java.util.Locale.GERMANY);
+		try {
+			assertEquals("rgba(1,2,3,0.50)", ChartAction.web(new Color(1, 2, 3, 128)));
+		}
+		finally {
+			java.util.Locale.setDefault(locale);
+			java.util.Locale.setDefault(java.util.Locale.Category.DISPLAY, display);
+			java.util.Locale.setDefault(java.util.Locale.Category.FORMAT, format);
+		}
 	}
 }

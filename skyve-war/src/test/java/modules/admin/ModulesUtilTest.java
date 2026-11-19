@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Calendar;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -20,10 +21,12 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.util.Time;
 
+import customers.test.domain.TestCustomerRole;
 import modules.admin.Group.GroupExtension;
 import modules.admin.ModulesUtil.DayOfWeek;
 import modules.admin.ModulesUtil.OccurrencePeriod;
 import modules.admin.ModulesUtil.OccurenceFrequency;
+import modules.admin.domain.AdminRole;
 import modules.admin.domain.GroupRole;
 import modules.test.domain.AllAttributesPersistent;
 import util.AbstractH2Test;
@@ -143,6 +146,19 @@ class ModulesUtilTest extends AbstractH2Test {
 		GroupExtension testExistingGroupWithMissingRole = ModulesUtil.configureGroup("TestGroup", "admin.TestRole1");
 		assertThat(testExistingGroupWithMissingRole, is(notNullValue()));
 		assertThat(testExistingGroupWithMissingRole, is(testExistingGroup));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void configureGroupWithRoleReferencesStoresTheirAssignedRoleNames() {
+		GroupExtension group = ModulesUtil.configureGroup("TypedGroup", AdminRole.BASIC_USER, TestCustomerRole.TEST_MANAGER);
+
+		assertEquals(List.of("admin.BasicUser", "TestManager"),
+						group.getRoles().stream().map(GroupRole::getRoleName).toList());
+		// the same roles again leave the group as it is
+		GroupExtension again = ModulesUtil.configureGroup("TypedGroup", TestCustomerRole.TEST_MANAGER);
+		assertThat(again, is(group));
+		assertEquals(2, again.getRoles().size());
 	}
 
 	@Test

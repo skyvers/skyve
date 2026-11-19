@@ -19,6 +19,7 @@ import util.AbstractH2Test;
 class OfficeMapH2Test extends AbstractH2Test {
 	private static final GeometryFactory GEOMETRY_FACTORY = new GeometryFactory();
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void nonPersistedOfficeWithoutBoundaryReturnsNoItems() throws Exception {
 		OfficeMap model = new OfficeMap();
@@ -29,6 +30,7 @@ class OfficeMapH2Test extends AbstractH2Test {
 		assertTrue(result.getItems().isEmpty());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void nonPersistedOfficeWithIntersectingBoundaryReturnsOfficeFeature() throws Exception {
 		Office office = new Office();
@@ -50,6 +52,7 @@ class OfficeMapH2Test extends AbstractH2Test {
 		assertThat(item.getFeatures().get(0).getFillColour(), is("#FFFF00"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void nonPersistedOfficeWithOutsideBoundaryReturnsNoItems() throws Exception {
 		Office office = new Office();

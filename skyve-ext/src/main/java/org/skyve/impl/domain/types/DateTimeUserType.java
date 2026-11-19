@@ -15,6 +15,9 @@ import org.hibernate.type.LiteralType;
 import org.hibernate.usertype.UserType;
 import org.skyve.domain.types.DateTime;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Hibernate {@link org.hibernate.usertype.UserType} that maps the Skyve
  * {@link org.skyve.domain.types.DateTime} type to a SQL {@code TIMESTAMP} column.
@@ -23,17 +26,17 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 	private static final long serialVersionUID = 4767832769224136166L;
 
 	@Override
-	public int[] sqlTypes() {
+	public @Nonnull int[] sqlTypes() {
 		return new int[] {Types.TIMESTAMP};
 	}
 
 	@Override
-	public Class<?> returnedClass() {
+	public @Nonnull Class<?> returnedClass() {
 		return DateTime.class;
 	}
 
 	@Override
-	public boolean equals(Object x, Object y) throws HibernateException {
+	public boolean equals(@Nullable Object x, @Nullable Object y) throws HibernateException {
 		if (x == y) {
 			return true;
 		}
@@ -63,14 +66,17 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public int hashCode(Object o) 
+	public int hashCode(@SuppressWarnings("null") @Nonnull Object o) 
 	throws HibernateException {
 		java.util.Date ts = (Date) o;
 		return Long.valueOf(ts.getTime() / 1000).hashCode();
 	}
 
 	@Override
-	public Object nullSafeGet(ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+	public @Nullable Object nullSafeGet(@SuppressWarnings("null") @Nonnull ResultSet rs,
+										@SuppressWarnings("null") @Nonnull String[] names,
+										@Nullable SharedSessionContractImplementor session,
+										@Nullable Object owner)
 	throws HibernateException, SQLException {
 		Timestamp value = rs.getTimestamp(names[0]);
 		if (rs.wasNull()) {
@@ -81,7 +87,10 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public void nullSafeSet(PreparedStatement ps, Object value, int index, SharedSessionContractImplementor session)
+	public void nullSafeSet(@SuppressWarnings("null") @Nonnull PreparedStatement ps,
+							@Nullable Object value,
+							int index,
+							@Nullable SharedSessionContractImplementor session)
 	throws HibernateException, SQLException {
 		if (value == null) {
 			ps.setNull(index, Types.TIMESTAMP);
@@ -92,7 +101,7 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public Object deepCopy(Object value) 
+	public @Nullable Object deepCopy(@Nullable Object value) 
 	throws HibernateException {
 		return (value == null) ? null : new DateTime(((Date) value).getTime());
 	}
@@ -103,25 +112,25 @@ public class DateTimeUserType implements UserType, LiteralType<Date>, Serializab
 	}
 
 	@Override
-	public Serializable disassemble(Object value) 
+	public @Nullable Serializable disassemble(@Nullable Object value) 
 	throws HibernateException {
 		return (Serializable) value;
 	}
 
 	@Override
-	public Object assemble(Serializable cached, Object owner)
+	public @Nullable Object assemble(@Nullable Serializable cached, @Nullable Object owner)
 	throws HibernateException {
 		return cached;
 	}
 
 	@Override
-	public Object replace(Object original, Object target, Object owner) 
+	public @Nullable Object replace(@Nullable Object original, @Nullable Object target, @Nullable Object owner) 
 	throws HibernateException {
 		return original;
 	}
 
 	@Override
-	public String objectToSQLString(Date value, Dialect dialect) 
+	public @Nonnull String objectToSQLString(@Nullable Date value, @Nullable Dialect dialect) 
 	throws Exception {
 		return (value == null) ? "NULL" : '\'' + new Timestamp(value.getTime()).toString() + '\'';
 	}

@@ -21,11 +21,11 @@ mixin Bordered {
 }
 
 mixin Invisible {
-  late final String? invisibleConditionName;
+  late final String? invisibleCondition;
 }
 
 mixin Disabled {
-  late final String? disabledConditionName;
+  late final String? disabledCondition;
 }
 
 mixin Identifiable {

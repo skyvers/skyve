@@ -12,6 +12,9 @@ import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Executes a Faces callback action within the current Skyve web context.
  */
@@ -27,6 +30,8 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	private List<FilterParameter> filterParameters;
 	private List<Parameter> parameters;
 	private boolean escape;
+	private List<String> lookupFilterFields;
+	private String lookupSearch;
 
 	/**
 	 * Creates a list-bean retrieval action for a specific query/model context.
@@ -41,13 +46,13 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	 * @param escape whether output values should be escaped
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public GetBeansAction(FacesView facesView,
-							String bizModule,
-							String bizDocument,
-							String queryName,
-							String modelName,
-							List<FilterParameter> filterParameters,
-							List<Parameter> parameters,
+	public GetBeansAction(@Nonnull FacesView facesView,
+							@Nonnull String bizModule,
+							@Nullable String bizDocument,
+							@Nullable String queryName,
+							@Nullable String modelName,
+							@Nullable List<FilterParameter> filterParameters,
+							@Nullable List<Parameter> parameters,
 							boolean escape) {
 		this.facesView = facesView;
 		this.bizModule = bizModule;
@@ -60,16 +65,28 @@ public class GetBeansAction extends FacesAction<List<BeanMapAdapter>> {
 	}
 	
 	/**
+	 * Configures the lookup search applied before fetching the first page.
+	 *
+	 * @param fields query column names or bindings to search with OR semantics
+	 * @param search typed search text
+	 */
+	public void setLookupFilter(@Nonnull List<String> fields, @Nullable String search) {
+		lookupFilterFields = fields;
+		lookupSearch = search;
+	}
+
+	/**
 	 * Loads the first page of mapped bean rows for the configured list model context.
 	 *
 	 * @return the first page of mapped bean rows
 	 * @throws Exception if list model creation or loading fails
 	 */
 	@Override
-	public List<BeanMapAdapter> callback() throws Exception {
+	public @Nonnull List<BeanMapAdapter> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetBeansAction - bizModule={} : bizDocument={} : queryName={} : modelName={}", bizModule, bizDocument, queryName, modelName);
 
 		SkyveLazyDataModel model = new SkyveLazyDataModel(facesView, bizModule, bizDocument, queryName, modelName, filterParameters, parameters, escape);
+		model.setLookupFilter(lookupFilterFields, lookupSearch);
 		return model.load(0, 250, null, null);
 	}
 }

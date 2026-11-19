@@ -149,7 +149,7 @@ public class LoggingMailService implements MailService {
 		return MailDispatchOutcome.failed(provider, detail);
 	}
 
-	private String resolveProviderName() {
+	private @Nonnull String resolveProviderName() {
 		return delegate.getClass().getSimpleName();
 	}
 

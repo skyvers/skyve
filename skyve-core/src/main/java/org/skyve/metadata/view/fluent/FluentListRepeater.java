@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ListRepeater} metadata for repeated list-query rendering.
@@ -21,7 +25,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @param list
 	 *            the metadata instance to mutate
 	 */
-	public FluentListRepeater(ListRepeater list) {
+	public FluentListRepeater(@Nonnull ListRepeater list) {
 		this.list = list;
 	}
 
@@ -32,7 +36,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentListRepeater from(@SuppressWarnings("hiding") ListRepeater list) {
+	public @Nonnull FluentListRepeater from(@SuppressWarnings("hiding") @Nonnull ListRepeater list) {
 		Boolean b = list.getShowColumnHeaders();
 		if (b != null) {
 			showColumnHeaders(b.booleanValue());
@@ -46,14 +50,15 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 		escapeTitle(list.getEscapeTitle());
 		queryName(list.getQueryName());
 		modelName(list.getModelName());
-		postRefreshConditionName(list.getPostRefreshConditionName());
-		invisibleConditionName(list.getInvisibleConditionName());
+		postRefreshCondition(list.getPostRefreshCondition());
+		BindUtil.copyAuthoredCondition(list.getXmlInvisibleCondition(), list.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		relativeSize(list, this);
 
 		list.getParameters().forEach(p -> addParameter(new FluentParameter().from(p)));
-
 		list.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
+
+		list.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -65,7 +70,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            {@code true} to show headers
 	 * @return this builder
 	 */
-	public FluentListRepeater showColumnHeaders(boolean showColumnHeaders) {
+	public @Nonnull FluentListRepeater showColumnHeaders(boolean showColumnHeaders) {
 		list.setShowColumnHeaders(showColumnHeaders ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -77,7 +82,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            {@code true} to show grid styling
 	 * @return this builder
 	 */
-	public FluentListRepeater showGrid(boolean showGrid) {
+	public @Nonnull FluentListRepeater showGrid(boolean showGrid) {
 		list.setShowGrid(showGrid ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -89,7 +94,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            the title shown for the repeater
 	 * @return this builder
 	 */
-	public FluentListRepeater title(String title) {
+	public @Nonnull FluentListRepeater title(@Nullable String title) {
 		list.setTitle(title);
 		return this;
 	}
@@ -100,7 +105,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListRepeater escapeTitle(boolean escapeTitle) {
+	public @Nonnull FluentListRepeater escapeTitle(boolean escapeTitle) {
 		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -110,7 +115,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListRepeater escapeTitle(Boolean escapeTitle) {
+	public @Nonnull FluentListRepeater escapeTitle(@Nullable Boolean escapeTitle) {
 		list.setEscapeTitle(escapeTitle);
 		return this;
 	}
@@ -122,7 +127,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            the query identifier
 	 * @return this builder
 	 */
-	public FluentListRepeater queryName(String queryName) {
+	public @Nonnull FluentListRepeater queryName(@Nullable String queryName) {
 		list.setQueryName(queryName);
 		return this;
 	}
@@ -134,20 +139,20 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            the model identifier
 	 * @return this builder
 	 */
-	public FluentListRepeater modelName(String modelName) {
+	public @Nonnull FluentListRepeater modelName(@Nullable String modelName) {
 		list.setModelName(modelName);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name evaluated after refresh.
+	 * Sets the {@code postRefresh} condition as authored.
 	 *
-	 * @param postRefreshConditionName
-	 *            the post-refresh condition name
+	 * @param postRefreshCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListRepeater postRefreshConditionName(String postRefreshConditionName) {
-		list.setPostRefreshConditionName(postRefreshConditionName);
+	public @Nonnull FluentListRepeater postRefreshCondition(@Nullable String postRefreshCondition) {
+		list.setPostRefreshCondition(postRefreshCondition);
 		return this;
 	}
 
@@ -158,7 +163,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            the filter parameter to append
 	 * @return this builder
 	 */
-	public FluentListRepeater addFilterParameter(FluentFilterParameter filterParameter) {
+	public @Nonnull FluentListRepeater addFilterParameter(@Nonnull FluentFilterParameter filterParameter) {
 		list.getFilterParameters().add(filterParameter.get());
 		return this;
 	}
@@ -170,20 +175,32 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 *            the parameter to append
 	 * @return this builder
 	 */
-	public FluentListRepeater addParameter(FluentParameter parameter) {
+	public @Nonnull FluentListRepeater addParameter(@Nonnull FluentParameter parameter) {
 		list.getParameters().add(parameter.get());
 		return this;
 	}
 
 	/**
-	 * Sets the condition name controlling repeater visibility.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the visibility condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListRepeater invisibleConditionName(String invisibleConditionName) {
-		list.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentListRepeater invisibleCondition(@Nullable String invisibleCondition) {
+		list.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListRepeater visibleCondition(@Nullable String visibleCondition) {
+		list.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -195,7 +212,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater pixelHeight(int height) {
+	public @Nonnull FluentListRepeater pixelHeight(int height) {
 		list.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -208,7 +225,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater pixelWidth(int width) {
+	public @Nonnull FluentListRepeater pixelWidth(int width) {
 		list.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -221,7 +238,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentListRepeater minPixelWidth(int minPixelWidth) {
 		list.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -234,7 +251,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentListRepeater maxPixelWidth(int maxPixelWidth) {
 		list.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -247,7 +264,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentListRepeater maxPixelHeight(int maxPixelHeight) {
 		list.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -260,7 +277,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentListRepeater minPixelHeight(int minPixelHeight) {
 		list.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -273,7 +290,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater percentageWidth(int percentageWidth) {
+	public @Nonnull FluentListRepeater percentageWidth(int percentageWidth) {
 		list.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -286,7 +303,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentListRepeater responsiveWidth(int responsiveWidth) {
 		list.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -299,7 +316,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater sm(int sm) {
+	public @Nonnull FluentListRepeater sm(int sm) {
 		list.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -312,7 +329,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater md(int md) {
+	public @Nonnull FluentListRepeater md(int md) {
 		list.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -325,7 +342,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater lg(int lg) {
+	public @Nonnull FluentListRepeater lg(int lg) {
 		list.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -338,7 +355,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater xl(int xl) {
+	public @Nonnull FluentListRepeater xl(int xl) {
 		list.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -351,8 +368,21 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return this builder
 	 */
 	@Override
-	public FluentListRepeater percentageHeight(int percentageHeight) {
+	public @Nonnull FluentListRepeater percentageHeight(int percentageHeight) {
 		list.setPercentageHeight(Integer.valueOf(percentageHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListRepeater putProperty(@Nonnull String k, @Nonnull String v) {
+		list.getProperties().put(k, v);
 		return this;
 	}
 
@@ -362,7 +392,7 @@ public class FluentListRepeater extends FluentWidget implements FluentRelativeSi
 	 * @return the wrapped list-repeater metadata
 	 */
 	@Override
-	public ListRepeater get() {
+	public @Nonnull ListRepeater get() {
 		return list;
 	}
 }

@@ -5,6 +5,9 @@ import org.skyve.metadata.NamedMetaData;
 import org.skyve.metadata.module.Module;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A named role declared within a Skyve module, grouping a set of document permissions.
  *
@@ -20,20 +23,28 @@ import org.skyve.util.Util;
  */
 public interface Role extends NamedMetaData, DecoratedMetaData {
 	/**
+	 * Returns the name of this role, unique within its owning module.
+	 *
+	 * @return the role name; never {@code null}
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the human-readable description of this role.
 	 *
 	 * <p>For a localised version use {@link #getLocalisedDescription()}.
 	 *
-	 * @return the role description; may be {@code null} if none is specified
+	 * @return the role description
 	 */
-	public String getDescription();
+	public @Nonnull String getDescription();
 	
 	/**
 	 * Returns the localised description of this role for the current user locale.
 	 *
 	 * @return a non-{@code null} localised description; falls back to the raw key
 	 */
-	public default String getLocalisedDescription() {
+	public default @Nullable String getLocalisedDescription() {
 		return Util.i18n(getDescription());
 	}
 	
@@ -42,7 +53,7 @@ public interface Role extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the owning module; never {@code null}
 	 */
-	public Module getOwningModule();
+	public @Nonnull Module getOwningModule();
 	
 	/**
 	 * Returns optional long-form documentation for this role.
@@ -52,5 +63,5 @@ public interface Role extends NamedMetaData, DecoratedMetaData {
 	 *
 	 * @return the documentation string, or {@code null} if none is specified
 	 */
-	public String getDocumentation();
+	public @Nullable String getDocumentation();
 }

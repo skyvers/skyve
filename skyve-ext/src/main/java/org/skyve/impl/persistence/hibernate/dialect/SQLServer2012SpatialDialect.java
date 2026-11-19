@@ -7,6 +7,9 @@ import org.hibernate.spatial.dialect.sqlserver.SqlServer2012SpatialDialect;
 import org.hibernate.tool.schema.extract.spi.ColumnInformation;
 import org.locationtech.jts.geom.Geometry;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Skyve Hibernate dialect for SQL Server 2012+ with spatial type support.
  */
@@ -28,7 +31,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * Returns the Hibernate geometry type used by this dialect.
 	 */
 	@Override
-	public JTSGeometryType getGeometryType() {
+	public @Nonnull JTSGeometryType getGeometryType() {
 		return delegate.getGeometryType();
 	}
 
@@ -36,7 +39,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * Converts a JTS geometry into the persisted SQL Server geometry representation.
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nonnull Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		return delegate.convertToPersistedValue(geometry);
 	}
 
@@ -44,7 +47,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * Converts a persisted SQL Server geometry value back into a JTS geometry.
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nonnull Geometry convertFromPersistedValue(@Nonnull Object geometry) {
 		return delegate.convertFromPersistedValue(geometry);
 	}
 
@@ -52,7 +55,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * Determines whether a column definition difference requires ALTER COLUMN DDL.
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		return delegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 	
@@ -60,7 +63,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * Returns the SQL Server column-modification clause used in ALTER TABLE statements.
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return delegate.getModifyColumnString();
 	}
 	
@@ -70,7 +73,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * @return the unique delegate used by this dialect
 	 */
 	@Override
-	public UniqueDelegate getUniqueDelegate() {
+	public @Nonnull UniqueDelegate getUniqueDelegate() {
 		return delegate.getUniqueDelegate();
 	}
 	
@@ -78,7 +81,7 @@ public class SQLServer2012SpatialDialect extends SqlServer2012SpatialDialect imp
 	 * Returns the RDBMS identifier for this dialect.
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return delegate.getRDBMS();
 	}
 }

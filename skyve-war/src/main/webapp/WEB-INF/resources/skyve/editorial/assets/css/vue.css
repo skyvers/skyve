@@ -1,6 +1,6 @@
 /*
 	Editorial VueListGrid palette bridge.
-	Loaded after skyvevue/index.css (see editorial/view.xhtml) so these :root
+	Loaded after skyve/vue/skyve.css (see editorial/view.xhtml) so these :root
 	remaps beat Lara's hardcoded --primary-color / Inter font. Component chrome
 	(buttons, table shell, paginator) is restyled from editorial tokens in main.css.
 */

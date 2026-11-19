@@ -3,6 +3,8 @@ package org.skyve.metadata.sail.language;
 
 import org.skyve.metadata.sail.execution.Executor;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Implemented by every SAIL element that can be dispatched to an {@link Executor}.
  *
@@ -20,5 +22,5 @@ public interface Executable {
 	 *
 	 * @param executor the executor visiting this element; must not be {@code null}
 	 */
-	public void execute(Executor executor);
+	public void execute(@Nonnull Executor executor);
 }

@@ -35,10 +35,12 @@ class InlineGridBizletTest {
 
 	@Test
 	void getDynamicDomainValuesForKnownAttribute() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		var values = bizlet.getDynamicDomainValues(ListAttributes.dynamicDomainPropertyName, null);
 		assertNotNull(values);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getDynamicDomainValuesForUnknownAttributeReturnsNull() throws Exception {
 		assertNull(bizlet.getDynamicDomainValues("unknownAttr", null));

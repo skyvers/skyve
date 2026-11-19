@@ -1,10 +1,14 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.ShrinkWrap;
 import org.skyve.impl.metadata.view.VerticalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.VBox;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for vertical box container metadata.
@@ -25,7 +29,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @param box
 	 *            the vertical-box metadata to mutate
 	 */
-	public FluentVBox(VBox box) {
+	public FluentVBox(@Nonnull VBox box) {
 		this.box = box;
 	}
 	
@@ -38,7 +42,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 *            the source vertical box metadata
 	 * @return this builder
 	 */
-	public FluentVBox from(@SuppressWarnings("hiding") VBox box) {
+	public @Nonnull FluentVBox from(@SuppressWarnings("hiding") @Nonnull VBox box) {
 		widgetId(box.getWidgetId());
 		border(Boolean.TRUE.equals(box.getBorder()));
 		borderTitle(box.getBorderTitle());
@@ -49,10 +53,12 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 		horizontalAlignment(box.getHorizontalAlignment());
 		verticalAlignment(box.getVerticalAlignment());
 
-		invisibleConditionName(box.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(box.getXmlInvisibleCondition(), box.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		
 		super.from(box);
 		
+		box.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -63,7 +69,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentVBox widgetId(String widgetId) {
+	public @Nonnull FluentVBox widgetId(@Nullable String widgetId) {
 		box.setWidgetId(widgetId);
 		return this;
 	}
@@ -75,7 +81,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 *            whether the border is shown
 	 * @return this builder
 	 */
-	public FluentVBox border(boolean border) {
+	public @Nonnull FluentVBox border(boolean border) {
 		box.setBorder(border ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -87,7 +93,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 *            border caption text
 	 * @return this builder
 	 */
-	public FluentVBox borderTitle(String borderTitle) {
+	public @Nonnull FluentVBox borderTitle(@Nullable String borderTitle) {
 		box.setBorderTitle(borderTitle);
 		return this;
 	}
@@ -98,7 +104,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @param escapeBorderTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentVBox escapeBorderTitle(boolean escapeBorderTitle) {
+	public @Nonnull FluentVBox escapeBorderTitle(boolean escapeBorderTitle) {
 		return escapeBorderTitle(escapeBorderTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -108,7 +114,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentVBox escapeBorderTitle(Boolean escapeBorderTitle) {
+	public @Nonnull FluentVBox escapeBorderTitle(@Nullable Boolean escapeBorderTitle) {
 		box.setEscapeBorderTitle(escapeBorderTitle);
 		return this;
 	}
@@ -121,7 +127,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * If collapsible is defined, the box must have a border, a border title and a pixel or percentage height
 	 * defined. If any of these are missing, an exception will be thrown at runtime.
 	 */
-	public FluentVBox collapsible(Collapsible collapsible) {
+	public @Nonnull FluentVBox collapsible(@Nullable Collapsible collapsible) {
 		box.setCollapsible(collapsible);
 		return this;
 	}
@@ -134,7 +140,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox pixelWidth(int pixelWidth) {
+	public @Nonnull FluentVBox pixelWidth(int pixelWidth) {
 		box.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -147,7 +153,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentVBox responsiveWidth(int responsiveWidth) {
 		box.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -160,7 +166,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox sm(int sm) {
+	public @Nonnull FluentVBox sm(int sm) {
 		box.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -173,7 +179,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox md(int md) {
+	public @Nonnull FluentVBox md(int md) {
 		box.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -186,7 +192,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox lg(int lg) {
+	public @Nonnull FluentVBox lg(int lg) {
 		box.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -199,7 +205,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox xl(int xl) {
+	public @Nonnull FluentVBox xl(int xl) {
 		box.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -212,7 +218,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox percentageWidth(int percentageWidth) {
+	public @Nonnull FluentVBox percentageWidth(int percentageWidth) {
 		box.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -225,7 +231,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentVBox minPixelWidth(int minPixelWidth) {
 		box.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -238,7 +244,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentVBox maxPixelWidth(int maxPixelWidth) {
 		box.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -251,7 +257,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox pixelHeight(int pixelHeight) {
+	public @Nonnull FluentVBox pixelHeight(int pixelHeight) {
 		box.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -264,7 +270,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox percentageHeight(int percentageHeight) {
+	public @Nonnull FluentVBox percentageHeight(int percentageHeight) {
 		box.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -277,7 +283,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentVBox minPixelHeight(int minPixelHeight) {
 		box.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -290,7 +296,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentVBox maxPixelHeight(int maxPixelHeight) {
 		box.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -303,7 +309,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox pixelPadding(int pixelPadding) {
+	public @Nonnull FluentVBox pixelPadding(int pixelPadding) {
 		box.setPixelPadding(Integer.valueOf(pixelPadding));
 		return this;
 	}
@@ -316,7 +322,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox pixelMemberPadding(int pixelMemberPadding) {
+	public @Nonnull FluentVBox pixelMemberPadding(int pixelMemberPadding) {
 		box.setPixelMemberPadding(Integer.valueOf(pixelMemberPadding));
 		return this;
 	}
@@ -329,7 +335,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return this builder
 	 */
 	@Override
-	public FluentVBox shrinkWrap(ShrinkWrap shrinkWrap) {
+	public @Nonnull FluentVBox shrinkWrap(@Nullable ShrinkWrap shrinkWrap) {
 		box.setShrinkWrap(shrinkWrap);
 		return this;
 	}
@@ -341,7 +347,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 *            horizontal alignment mode
 	 * @return this builder
 	 */
-	public FluentVBox horizontalAlignment(HorizontalAlignment horizontalAlignment) {
+	public @Nonnull FluentVBox horizontalAlignment(@Nullable HorizontalAlignment horizontalAlignment) {
 		box.setHorizontalAlignment(horizontalAlignment);
 		return this;
 	}
@@ -353,20 +359,45 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 *            vertical alignment mode
 	 * @return this builder
 	 */
-	public FluentVBox verticalAlignment(VerticalAlignment verticalAlignment) {
+	public @Nonnull FluentVBox verticalAlignment(@Nullable VerticalAlignment verticalAlignment) {
 		box.setVerticalAlignment(verticalAlignment);
 		return this;
 	}
 	
 	/**
-	 * Sets the condition name that hides this box when true.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            invisibility condition identifier
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentVBox invisibleConditionName(String invisibleConditionName) {
-		box.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentVBox invisibleCondition(@Nullable String invisibleCondition) {
+		box.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentVBox visibleCondition(@Nullable String visibleCondition) {
+		box.setXmlVisibleCondition(visibleCondition);
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentVBox putProperty(@Nonnull String k, @Nonnull String v) {
+		box.getProperties().put(k, v);
 		return this;
 	}
 
@@ -376,7 +407,7 @@ public class FluentVBox extends FluentContainer<FluentVBox> implements FluentBox
 	 * @return the mutable vertical box metadata
 	 */
 	@Override
-	public VBox get() {
+	public @Nonnull VBox get() {
 		return box;
 	}
 }

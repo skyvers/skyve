@@ -27,6 +27,7 @@
 		<commonmark.version>0.10.0</commonmark.version>
 		<commons-beanutils.version>1.11.0</commons-beanutils.version>
 		<commons-codec.version>1.15</commons-codec.version>
+		<commons-collections4.version>4.5.0</commons-collections4.version>
 		<commons-lang3.version>3.20.0</commons-lang3.version>
 		<commons-text.version>1.10.0</commons-text.version>
 		<commons-validator.version>1.7</commons-validator.version>
@@ -41,6 +42,7 @@
 		<hibernate-entitymanager.version>5.6.15.Final</hibernate-entitymanager.version>
 		<hibernate-spatial.version>5.6.15.Final</hibernate-spatial.version>
 		<ireport.version>4.7.0</ireport.version>
+		<jackson.version>2.18.11</jackson.version>
 		<jasperreports.version>7.0.7</jasperreports.version>
 		<java.version>17</java.version>
 		<javassist.version>3.20.0-GA</javassist.version>
@@ -56,7 +58,7 @@
 		<postgresql.version>42.7.12</postgresql.version>
 		<pf4j.version>3.14.1</pf4j.version>
 		<bouncycastle.version>1.85</bouncycastle.version>
-		<poi.version>5.4.0</poi.version>
+		<poi.version>5.4.1</poi.version>
 		<primefaces.version>13.0.10</primefaces.version>
 		<primefaces-extensions.version>13.0.14</primefaces-extensions.version>
 		<primefaces-allthemes.version>1.0.10</primefaces-allthemes.version>
@@ -86,6 +88,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
 		<skipUnitTests>false</skipUnitTests>
+		<!-- Reruns hide flakes; SAIL browser runs should pass -Dsurefire.rerunFailingTestsCount=0 -->
+		<surefire.rerunFailingTestsCount>2</surefire.rerunFailingTestsCount>
 		<skipIntegrationTests>true</skipIntegrationTests>
 
 		<sonar.organization>skyvers</sonar.organization>
@@ -154,7 +158,7 @@
 							<exclude>**/*Sail</exclude>
 						</excludes>
 						<skipTests>${skipUnitTests}</skipTests>
-						<rerunFailingTestsCount>2</rerunFailingTestsCount>
+						<rerunFailingTestsCount>${surefire.rerunFailingTestsCount}</rerunFailingTestsCount>
 				   </configuration>
 				</plugin>
 				<plugin>
@@ -251,6 +255,14 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<!-- Align all Jackson modules; h2gis otherwise drags in an older jackson-core than JasperReports needs -->
+			<dependency>
+				<groupId>com.fasterxml.jackson</groupId>
+				<artifactId>jackson-bom</artifactId>
+				<version>${jackson.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>jakarta.platform</groupId>
 				<artifactId>jakarta.jakartaee-api</artifactId>
@@ -422,10 +434,6 @@
 					<exclusion>
 						<groupId>com.fasterxml.jackson.dataformat</groupId>
 						<artifactId>jackson-dataformat-xml</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.commons</groupId>
-						<artifactId>commons-collections4</artifactId>
 					</exclusion>
 					<exclusion>
 						<groupId>commons-digester</groupId>
@@ -738,8 +746,54 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<dependencies>
+		<!-- JasperReports requires 4.5.0, but POI brings 4.4. Inherit this as a direct
+		     compile dependency so downstream apps see 4.5.0 on the Skyve path;
+		     <dependencyManagement> above does not govern apps that do not inherit this parent. -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-collections4</artifactId>
+			<version>${commons-collections4.version}</version>
+			<scope>compile</scope>
+		</dependency>
+	</dependencies>
+
 	<!-- To produce aggregate jacoco test coverage -->
 	<profiles>
+		<!--
+			SAIL browser ITs (docs/sail.md, Running the Tests): one command runs the tagged SAIL ITs against a disposable
+			server, with no upstream unit tests, one fork and no reruns (a rerun would hide a flake and repeat destructive
+			steps), e.g.
+				mvn -pl skyve-war -am verify -Psail -Dsail.baseUrl=http://localhost:8080/skyve/
+			narrowed with -Dgroups=smoke (or admin, recording, ...) and -DexcludedGroups=destructive. One IT by name needs
+			-Dit.test=SailRunIT -Dfailsafe.failIfNoSpecifiedTests=false, as the upstream modules have no such test.
+			Evidence that a suite or -Dsail.evidence asks for goes under skyve-war/target/sail/.
+		-->
+		<profile>
+			<id>sail</id>
+			<properties>
+				<skipUnitTests>true</skipUnitTests>
+				<skipIntegrationTests>false</skipIntegrationTests>
+				<surefire.rerunFailingTestsCount>0</surefire.rerunFailingTestsCount>
+				<!-- load runs (performance) only when asked for, e.g. -Dgroups=performance; never on a shared server -->
+				<groups>sail &amp; !performance</groups>
+			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-failsafe-plugin</artifactId>
+							<configuration>
+								<forkCount>1</forkCount>
+								<reuseForks>true</reuseForks>
+								<rerunFailingTestsCount>0</rerunFailingTestsCount>
+							</configuration>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+		</profile>
 		<profile>
 			<id>coverage</id>
 			<build>

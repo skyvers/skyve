@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -25,17 +26,17 @@ public class ViewDynamicImageUserAccessMetaData extends ViewUserAccessMetaData {
 
 	private String imageName;
 
-	public String getImageName() {
+	public @Nonnull String getImageName() {
 		return imageName;
 	}
 
 	@XmlAttribute(name = "image", required = true)
-	public void setImageName(String imageName) {
+	public void setImageName(@Nonnull String imageName) {
 		this.imageName = UtilImpl.processStringValue(imageName);
 	}
 	
 	@Override
-	public void validate(String metaDataName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull Module module) {
 		if (imageName == null) {
 			throw new MetaDataException(metaDataName + " : [image] is required for all dynamic image user accesses.");
 		}
@@ -43,7 +44,7 @@ public class ViewDynamicImageUserAccessMetaData extends ViewUserAccessMetaData {
 	}
 
 	@Override
-	public UserAccess toUserAccess(String moduleName, String documentName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName, @Nonnull String documentName) {
 		return UserAccess.dynamicImage(moduleName, documentName, imageName);
 	}
 }

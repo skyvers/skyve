@@ -2,6 +2,8 @@ package org.skyve.impl.sail.execution;
 
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Marker interface for edit context generation in the UI test framework.
  * <p>
@@ -9,5 +11,5 @@ import org.skyve.metadata.sail.language.step.context.PushEditContext;
  */
 public interface GenerateEditContext {
 
-	PushEditContext pushEditContext();
+	@Nonnull PushEditContext pushEditContext();
 }

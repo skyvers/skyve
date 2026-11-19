@@ -83,7 +83,7 @@ public class UploadAction extends ClassAction {
 	 * @return runtime action metadata; never {@code null}
 	 */
 	@Override
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
 		result.getProperties().put(CAPTURE_PROPERTY_NAME, getResolvedCapture().name());
 		return result;

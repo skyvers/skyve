@@ -20,6 +20,9 @@ import org.hibernate.tool.schema.spi.Exporter;
 import org.locationtech.jts.geom.Geometry;
 import org.postgresql.util.PGobject;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides PostgreSQL/PostGIS-specific dialect behaviour used by Skyve spatial persistence.
  */
@@ -35,7 +38,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 *
 	 * @param dialect The Hibernate dialect backing this delegate.
 	 */
-	public PostgreSQLSpatialDialectDelegate(Dialect dialect) {
+	public PostgreSQLSpatialDialectDelegate(@Nonnull Dialect dialect) {
 		// We override index exporter for PostGreSQL so that we can specify lower() functional indexes
 		// using text pattern index operations (except for PKs which can be case sensitive)
 		indexExporter = new StandardIndexExporter(dialect) {
@@ -50,7 +53,8 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 			 * @return SQL statements to create the index.
 			 */
 			@Override
-			public String[] getSqlCreateStrings(Index index, Metadata metadata) {
+			public @Nonnull String[] getSqlCreateStrings(@SuppressWarnings("null") @Nonnull Index index,
+														@SuppressWarnings("null") @Nonnull Metadata metadata) {
 				@SuppressWarnings("deprecation")
 				String[] result = super.getSqlCreateStrings(index, metadata);
 
@@ -92,7 +96,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 * @return The configured {@link JTSGeometryType}.
 	 */
 	@Override
-	public JTSGeometryType getGeometryType() {
+	public @Nonnull JTSGeometryType getGeometryType() {
 		return geometryType;
 	}
 
@@ -103,7 +107,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 * @return A {@link PGobject} containing EWKB hex text.
 	 */
 	@Override
-	public Object convertToPersistedValue(Geometry geometry) {
+	public @Nonnull Object convertToPersistedValue(@Nonnull Geometry geometry) {
 		final WkbEncoder encoder = Wkb.newEncoder(Wkb.Dialect.POSTGIS_EWKB_1);
 		final String hexString = encoder.encode(JTS.from(geometry), ByteOrder.NDR).toString();
 		final PGobject result = new PGobject();
@@ -124,7 +128,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 * @return The decoded JTS geometry, or {@code null}.
 	 */
 	@Override
-	public Geometry convertFromPersistedValue(Object geometry) {
+	public @Nullable Geometry convertFromPersistedValue(@Nullable Object geometry) {
 		org.geolatte.geom.Geometry<?> result = PGGeometryTypeDescriptor.INSTANCE_WKB_2.toGeometry(geometry);
 		return (result == null) ? null : JTS.to(result);
 	}
@@ -137,7 +141,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 * @return {@code true} when a column change statement is required.
 	 */
 	@Override
-	public boolean isAlterTableColumnChangeRequired(Column column, ColumnInformation columnInfo) {
+	public boolean isAlterTableColumnChangeRequired(@Nonnull Column column, @Nullable ColumnInformation columnInfo) {
 		return DDLDelegate.isAlterTableColumnChangeRequired(column, columnInfo);
 	}
 
@@ -147,7 +151,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 * @return The PostgreSQL column-modify fragment.
 	 */
 	@Override
-	public String getModifyColumnString() {
+	public @Nonnull String getModifyColumnString() {
 		return "alter column";
 	}
 
@@ -157,7 +161,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 * @return {@link RDBMS#postgresql}.
 	 */
 	@Override
-	public RDBMS getRDBMS() {
+	public @Nonnull RDBMS getRDBMS() {
 		return RDBMS.postgresql;
 	}
 	
@@ -166,7 +170,7 @@ public final class PostgreSQLSpatialDialectDelegate implements SkyveDialect, Ser
 	 *
 	 * @return The {@link Exporter} used to emit index DDL.
 	 */
-	Exporter<Index> getIndexExporter() {
+	@Nonnull Exporter<Index> getIndexExporter() {
 		return indexExporter;
 	}
 }

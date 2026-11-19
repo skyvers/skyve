@@ -76,6 +76,11 @@ public final class AppConstants {
 	public static final String PASSWORD_LAST_CHANGED_ATTRIBUTE_NAME = "passwordLastChanged";
 	public static final String PASSWORD_RESET_EMAIL_BODY_ATTRIBUTE_NAME = "passwordResetEmailBody";
 	public static final String PASSWORD_RESET_EMAIL_SUBJECT_ATTRIBUTE_NAME = "passwordResetEmailSubject";
+	/**
+	 * The persistence stash key that marks a password change as a reset by token, the only change that does not
+	 * give the old password. Set by the framework around the change; consumed by the change-password action.
+	 */
+	public static final String PASSWORD_RESET_STASH_KEY = "skyve.passwordReset";
 	public static final String PASSWORD_RESET_TOKEN_ATTRIBUTE_NAME = "passwordResetToken";
 	public static final String PASSWORD_RESET_TOKEN_EXPIRY_MINUTES_ATTRIBUTE_NAME = "passwordResetTokenExpiryMinutes";
 	public static final String PASSWORD_RESET_TOKEN_CREATION_TIMESTAMP_ATTRIBUTE_NAME = "passwordResetTokenCreationTimestamp";

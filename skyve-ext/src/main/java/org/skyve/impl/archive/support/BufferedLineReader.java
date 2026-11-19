@@ -9,6 +9,9 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * An efficient NIO-based line reader over an archive file that tracks the byte
  * offset of each line for positional random-access retrieval.
@@ -34,7 +37,7 @@ public class BufferedLineReader implements AutoCloseable {
      * @param offset The byte offest where this line begins
      * @param end The byte offset where the <i>next</i> line begins
      */
-    public static record Line(String line, long offset, long end) {
+    public static record Line(@Nonnull String line, long offset, long end) {
 
         /**
          * The length (in bytes) of this line; not including any line feed character
@@ -61,7 +64,7 @@ public class BufferedLineReader implements AutoCloseable {
 
     private final FileChannel fileChannel;
 
-    public BufferedLineReader(Path path, long startOffseet) throws IOException {
+    public BufferedLineReader(@Nonnull Path path, long startOffseet) throws IOException {
         fileChannel = FileChannel.open(path, StandardOpenOption.READ);
 
         readPosition = lineOffset = fileChannel.position(startOffseet)
@@ -74,7 +77,7 @@ public class BufferedLineReader implements AutoCloseable {
      * @return the next Line, or null if the end of the file was reached and no data has been read in
      * @throws IOException
      */
-    public Line readLine() throws IOException {
+    public @Nullable Line readLine() throws IOException {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
@@ -126,7 +129,7 @@ public class BufferedLineReader implements AutoCloseable {
         return createLine(baos);
     }
 
-    private Line createLine(ByteArrayOutputStream baos) {
+    private @Nonnull Line createLine(@Nonnull ByteArrayOutputStream baos) {
         return new Line(baos.toString(ARCHIVE_CHARSET), lineOffset, readPosition);
     }
 

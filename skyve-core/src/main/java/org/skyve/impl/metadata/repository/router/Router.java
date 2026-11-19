@@ -1,6 +1,7 @@
 package org.skyve.impl.metadata.repository.router;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	
 	@XmlElement(namespace = XMLMetaData.ROUTER_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns the source metadata last-modified timestamp used for reload checks.
@@ -116,7 +117,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 *
 	 * @return mutable set of unsecured URL prefixes
 	 */
-	public Set<String> getUnsecuredUrlPrefixes() {
+	public @Nonnull Set<String> getUnsecuredUrlPrefixes() {
 		return unsecuredUrlPrefixes;
 	}
 
@@ -125,7 +126,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 *
 	 * @return selector implementation class name, or {@code null}
 	 */
-	public String getUxuiSelectorClassName() {
+	public @Nullable String getUxuiSelectorClassName() {
 		return uxuiSelectorClassName;
 	}
 
@@ -135,7 +136,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * @param uxuiSelectorClassName selector implementation class name
 	 */
 	@XmlAttribute(name = "uxuiSelectorClassName")
-	public void setUxuiSelectorClassName(String uxuiSelectorClassName) {
+	public void setUxuiSelectorClassName(@Nullable String uxuiSelectorClassName) {
 		this.uxuiSelectorClassName = uxuiSelectorClassName;
 	}
 
@@ -145,7 +146,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * @return mutable router property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -158,7 +159,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * @return the selector instance, never {@code null}
 	 * @throws MetaDataException if the selector class cannot be loaded or instantiated
 	 */
-	public TaggingUxUiSelector getUxuiSelector() {
+	public @Nonnull TaggingUxUiSelector getUxuiSelector() {
 		if (uxuiSelector == null) {
 			try {
 				Class<?> type = Thread.currentThread().getContextClassLoader().loadClass(uxuiSelectorClassName);
@@ -176,7 +177,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 *
 	 * @return mutable list of UX/UI metadata entries
 	 */
-	public List<UxUiMetadata> getUxUis() {
+	public @Nonnull List<UxUiMetadata> getUxUis() {
 		return uxuis;
 	}
 
@@ -262,7 +263,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * @param criteria request criteria to match
 	 * @return the matched outcome URL, or {@code null} when no route matches
 	 */
-	public String selectOutcomeUrl(String uxui, RouteCriteria criteria) {
+	public @Nullable String selectOutcomeUrl(@Nonnull String uxui, @Nonnull RouteCriteria criteria) {
 		Route route = selectRoute(uxui, criteria);
 		return (route == null) ? null : route.getOutcomeUrl();
 	}
@@ -277,7 +278,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * @param criteria request criteria to match
 	 * @return the first matching route, or {@code null} if none match
 	 */
-	public Route selectRoute(String uxui, RouteCriteria criteria) {
+	public @Nullable Route selectRoute(@Nonnull String uxui, @Nonnull RouteCriteria criteria) {
 		UxUiMetadata selectedUxUi = uxuiMap.get(uxui);
 		if (selectedUxUi != null) {
 			for (Route route : selectedUxUi.getRoutes()) {
@@ -303,7 +304,7 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 	 * @return {@code true} when the prefix starts with any configured unsecured
 	 *         prefix, otherwise {@code false}
 	 */
-	public boolean isUnsecured(String urlPrefixToTest) {
+	public boolean isUnsecured(@Nullable String urlPrefixToTest) {
 		if (urlPrefixToTest != null) {
 			for (String unsecuredURLPrefix : unsecuredUrlPrefixes) {
 	        	if (urlPrefixToTest.startsWith(unsecuredURLPrefix)) {
@@ -335,9 +336,21 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 			uxuiMap.put(uxui.getName(), uxui);
 		}
 
+		for (UxUiMetadata uxui : uxuis) {
+			for (Route route : uxui.getRoutes()) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean outcomeUrlMissing = (route.getOutcomeUrl() == null);
+				if (outcomeUrlMissing) {
+					throw new MetaDataException(metaDataName + " route outcome is required for UX/UI " + uxui.getName() + '.');
+				}
+			}
+		}
+
 		for (Direct direct : directs) {
 			String path = direct.getPath();
-			if (path == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean pathMissing = (path == null);
+			if (pathMissing) {
 				throw new MetaDataException(metaDataName + " direct path is required.");
 			}
 			if (! path.startsWith("/")) {
@@ -352,7 +365,9 @@ public class Router implements ConvertibleMetaData<Router>, DecoratedMetaData, R
 				throw new MetaDataException(metaDataName + " direct prefix path " + path
 												+ " must end with '/'.");
 			}
-			if (direct.getUxui() == null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean uxuiMissing = (direct.getUxui() == null);
+			if (uxuiMissing) {
 				throw new MetaDataException(metaDataName + " direct UX/UI target is required for path " + path + '.');
 			}
 		}

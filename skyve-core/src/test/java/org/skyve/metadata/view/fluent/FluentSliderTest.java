@@ -32,11 +32,13 @@ class FluentSliderTest {
 		assertEquals(10.0, new FluentSlider().max(10.0).get().getMax());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void numberOfDiscreteValuesSetsValue() {
 		assertEquals(5, new FluentSlider().numberOfDiscreteValues(5).get().getNumberOfDiscreteValues().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void roundingPrecisionSetsValue() {
 		assertEquals(2, new FluentSlider().roundingPrecision(2).get().getRoundingPrecision().intValue());
@@ -52,21 +54,25 @@ class FluentSliderTest {
 		assertThat(new FluentSlider().vertical(false).get().getVertical(), is(Boolean.FALSE));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(200, new FluentSlider().pixelWidth(200).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelHeightSetsValue() {
 		assertEquals(100, new FluentSlider().pixelHeight(100).get().getPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelHeightSetsValue() {
 		assertEquals(20, new FluentSlider().minPixelHeight(20).get().getMinPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelHeightSetsValue() {
 		assertEquals(300, new FluentSlider().maxPixelHeight(300).get().getMaxPixelHeight().intValue());
@@ -93,6 +99,7 @@ class FluentSliderTest {
 		assertThat(new FluentSlider().from(src).get().getVertical(), is(Boolean.TRUE));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fromCopiesNumberOfDiscreteValues() {
 		Slider src = new Slider();

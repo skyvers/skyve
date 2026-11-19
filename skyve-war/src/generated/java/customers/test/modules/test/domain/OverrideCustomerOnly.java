@@ -1,0 +1,136 @@
+package customers.test.modules.test.domain;
+
+import jakarta.annotation.Generated;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
+import jakarta.xml.bind.annotation.XmlType;
+import org.skyve.CORE;
+import org.skyve.domain.messages.DomainException;
+import org.skyve.impl.domain.AbstractPersistentBean;
+
+/**
+ * Override Customer Only
+ * <br/>
+ * Customer override fixture: a persistent document only the test customer has, with an owner
+			OverrideAdds, whose inverse only the test customer's override of OverrideAdds declares.
+ * 
+ * @navhas n owner 0..1 OverrideAdds
+ * @stereotype "persistent"
+ */
+@XmlType
+@XmlRootElement
+@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
+public class OverrideCustomerOnly extends AbstractPersistentBean {
+	/**
+	 * For Serialization
+	 * @hidden
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/** @hidden */
+	public static final String MODULE_NAME = "test";
+
+	/** @hidden */
+	public static final String DOCUMENT_NAME = "OverrideCustomerOnly";
+
+	/** @hidden */
+	public static final String textPropertyName = "text";
+
+	/** @hidden */
+	public static final String ownerPropertyName = "owner";
+
+	/**
+	 * Text
+	 **/
+	private String text;
+
+	/**
+	 * Owner
+	 **/
+	private OverrideAddsOverride owner = null;
+
+	@Override
+	@XmlTransient
+	public String getBizModule() {
+		return OverrideCustomerOnly.MODULE_NAME;
+	}
+
+	@Override
+	@XmlTransient
+	public String getBizDocument() {
+		return OverrideCustomerOnly.DOCUMENT_NAME;
+	}
+
+	public static OverrideCustomerOnly newInstance() {
+		try {
+			return CORE.getUser().getCustomer().getModule(MODULE_NAME).getDocument(CORE.getUser().getCustomer(), DOCUMENT_NAME).newInstance(CORE.getUser());
+		}
+		catch (RuntimeException e) {
+			throw e;
+		}
+		catch (Exception e) {
+			throw new DomainException(e);
+		}
+	}
+
+	@Override
+	@XmlTransient
+	public String getBizKey() {
+		try {
+			return org.skyve.util.Binder.formatMessage("{text}", this);
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return "Unknown";
+		}
+	}
+
+	/**
+	 * {@link #text} accessor.
+	 * @return	The value.
+	 **/
+	public String getText() {
+		return text;
+	}
+
+	/**
+	 * {@link #text} mutator.
+	 * @param text	The new value.
+	 **/
+	@XmlElement
+	public void setText(String text) {
+		preset(textPropertyName, text);
+		this.text = text;
+	}
+
+	/**
+	 * {@link #owner} accessor.
+	 * @return	The value.
+	 **/
+	public OverrideAddsOverride getOwner() {
+		return owner;
+	}
+
+	/**
+	 * {@link #owner} mutator.
+	 * @param owner	The new value.
+	 **/
+	@XmlElement
+	public void setOwner(OverrideAddsOverride owner) {
+		if (this.owner != owner) {
+			preset(ownerPropertyName, owner);
+			OverrideAddsOverride oldOwner = this.owner;
+			this.owner = owner;
+			if ((owner != null) && (owner.getOwnedItemsElementById(getBizId()) == null)) {
+				owner.getOwnedItems().add(this);
+			}
+			if (oldOwner != null) {
+				oldOwner.getOwnedItems().remove(this);
+			}
+		}
+	}
+
+	public void nullOwner() {
+		this.owner = null;
+	}
+}

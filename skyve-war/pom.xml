@@ -379,6 +379,18 @@
 				</excludes>
 			</resource>
 		</resources>
+		<testResources>
+			<testResource>
+				<directory>src/test/resources</directory>
+			</testResource>
+			<!-- SAIL scripts live beside the SAIL tests that run them as classpath resources -->
+			<testResource>
+				<directory>src/test/java</directory>
+				<includes>
+					<include>sail/**/*.xml</include>
+				</includes>
+			</testResource>
+		</testResources>
 	</build>
 
 	<dependencies>

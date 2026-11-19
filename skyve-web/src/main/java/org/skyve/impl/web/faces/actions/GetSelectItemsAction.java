@@ -28,6 +28,8 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.model.SelectItem;
 
 /**
@@ -52,7 +54,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	 * @param binding
 	 * @param includeEmptyItem
 	 */
-	public GetSelectItemsAction(Bean bean, WebContext webContext, String binding, boolean includeEmptyItem) {
+	public GetSelectItemsAction(@Nonnull Bean bean, @Nullable WebContext webContext, @Nonnull String binding, boolean includeEmptyItem) {
 		this.bean = bean;
 		this.webContext = webContext;
 		this.binding = binding;
@@ -68,7 +70,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 	 * @param binding
 	 * @param includeEmptyItem
 	 */
-	public GetSelectItemsAction(String moduleName, String documentName, String binding, boolean includeEmptyItem) {
+	public GetSelectItemsAction(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String binding, boolean includeEmptyItem) {
 		this.binding = binding;
 		this.includeEmptyItem = includeEmptyItem;
 		this.moduleName = moduleName;
@@ -77,7 +79,7 @@ public class GetSelectItemsAction extends FacesAction<List<SelectItem>> {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public List<SelectItem> callback() throws Exception {
+	public @Nonnull List<SelectItem> callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("GetSelectItemsAction - binding={} : includeEmptyItem={}", binding, Boolean.valueOf(includeEmptyItem));
 
     	Customer customer = CORE.getUser().getCustomer();

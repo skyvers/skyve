@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -21,7 +22,7 @@ import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.repository.ProvidedRepository;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S3011"})
 class ComponentTest {
 	private ProvidedRepository originalRepository;
 
@@ -87,36 +88,36 @@ class ComponentTest {
 	}
 
 	@Test
-	void invisibleConditionNameNullByDefault() {
-		assertNull(new Component().getInvisibleConditionName());
+	void invisibleConditionNullByDefault() {
+		assertNull(new Component().getInvisibleCondition());
 	}
 
 	@Test
-	void invisibleConditionNameRoundTrip() {
+	void invisibleConditionRoundTrip() {
 		Component c = new Component();
-		c.setInvisibleConditionName("hideIt");
-		assertEquals("hideIt", c.getInvisibleConditionName());
+		c.setXmlInvisibleCondition("hideIt");
+		assertEquals("hideIt", c.getInvisibleCondition());
 	}
 
 	@Test
-	void invisibleConditionNameBlankBecomesNull() {
+	void invisibleConditionBlankBecomesNull() {
 		Component c = new Component();
-		c.setInvisibleConditionName("  ");
-		assertNull(c.getInvisibleConditionName());
+		c.setXmlInvisibleCondition("  ");
+		assertNull(c.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameNegatesAndSetsInvisible() {
+	void visibleConditionNegatesToInvisibleCondition() {
 		Component c = new Component();
-		c.setVisibleConditionName("showIt");
-		assertEquals("notShowIt", c.getInvisibleConditionName());
+		c.setXmlVisibleCondition("showIt");
+		assertEquals("notShowIt", c.getInvisibleCondition());
 	}
 
 	@Test
-	void visibleConditionNameBlankNegatesToNull() {
+	void visibleConditionBlankNegatesToNull() {
 		Component c = new Component();
-		c.setVisibleConditionName("  ");
-		assertNull(c.getInvisibleConditionName());
+		c.setXmlVisibleCondition("  ");
+		assertNull(c.getInvisibleCondition());
 	}
 
 	@Test
@@ -132,8 +133,15 @@ class ComponentTest {
 	}
 
 	@Test
-	void namesListIsNotNull() {
-		assertNotNull(new Component().getNames());
+	void actionAndConditionMappingsAreSeparateEmptyLists() {
+		Component c = new Component();
+		assertNotNull(c.getActions());
+		assertNotNull(c.getConditions());
+		assertTrue(c.getActions().isEmpty());
+		assertTrue(c.getConditions().isEmpty());
+		c.getActions().add(new ComponentTranslation());
+		assertEquals(1, c.getActions().size());
+		assertTrue(c.getConditions().isEmpty());
 	}
 
 	@Test

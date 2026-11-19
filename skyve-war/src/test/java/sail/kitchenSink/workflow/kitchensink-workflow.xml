@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Kitchen sink workflow in one file, a member of kitchensink.suite.xml: its automations share one run, so {run} and the
+	variables carry from one to the next. The first runs in PrimeFaces' external UX/UI and the second in SmartClient, both
+	as a desktop browser, so the second drives the first one's browser.
+	The workflow's testStrategy is the default for its automations, which state none. Both sign in with {var:password}:
+	the run supplies it (KitchenSinkSuiteSailIT's settings().variable("password", ...), or -Dsail.var.password /
+	SAIL_VAR_PASSWORD), so no password is written here.
+-->
+<workflow testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<automation uxui="external" userAgentType="desktop">
+		<before>
+			<login user="admin" password="{var:password}" />
+			<testSuccess />
+		</before>
+		<interaction name="PrimeFaces: make a lookup value and keep its number">
+			<method>
+				<navigateList module="kitchensink" document="LookupDescription" />
+				<listGridNew module="kitchensink" document="LookupDescription" />
+				<dataEnter binding="description" value="SAIL one file {run}" />
+				<save />
+				<captureValue binding="number" variable="number" />
+				<captureTitle variable="title" />
+				<ok />
+			</method>
+		</interaction>
+	</automation>
+	<automation uxui="desktop" userAgentType="desktop">
+		<before>
+			<login user="admin" password="{var:password}" />
+			<switchMode />
+		</before>
+		<interaction name="SmartClient: find the lookup value by its number and delete it">
+			<method>
+				<comment>Made in PrimeFaces as {var:title}</comment>
+				<navigateMenu module="kitchensink" item="Lookup values" />
+				<listGridFilter column="number" value="{var:number}" operator="equals" />
+				<testGridRows rowContaining="SAIL one file {run}" minRows="1" maxRows="1" />
+				<listGridZoom rowContaining="SAIL one file {run}" />
+				<testValue binding="number" value="{var:number}" />
+				<delete />
+				<testGridRows rowContaining="SAIL one file {run}" maxRows="0" />
+				<listGridClearFilter />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+</workflow>

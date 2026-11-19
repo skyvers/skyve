@@ -3,12 +3,20 @@ package org.skyve.domain.types.converters.integer;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.NumberText;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
- * Converts integer values representing simple percentage display values.
+ * Converts integer values that are a whole number of percent: 12 is shown {@code 12%} (no thousands separator:
+ * {@code 1000%}).
+ * <p>
+ * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with or without a
+ * {@code %} at the end ({@code 12%} and {@code 12} are 12). Anything else (non-ASCII digits, grouping), or a value beyond an {@code int}, is refused.
  */
 public class SimplePercentage implements Converter<Integer> {
 	/**
@@ -16,7 +24,7 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Integer> getValueType() {
+	public @Nonnull Class<Integer> getValueType() {
 		return Integer.class;
 	}
 	
@@ -26,8 +34,16 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Integer fromDisplayValue(String displayValue) throws ConversionException {
-		String noPercentage = displayValue.replace("%", "");
+	public @Nonnull Integer fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
+		// a % at the end only: 12% and 12 are 12
+		String noPercentage = displayValue.trim();
+		if (noPercentage.endsWith("%")) {
+			noPercentage = noPercentage.substring(0, noPercentage.length() - 1).trim();
+		}
+		// ASCII digits only (Integer.valueOf reads other digits)
+		if (! NumberText.isPlain(noPercentage)) {
+			throw new ConversionException(ConversionException.SIMPLE_PERCENTAGE_KEY);
+		}
 		try {
 			return Integer.valueOf(noPercentage);
 		}
@@ -51,7 +67,7 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Integer value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Integer value) throws ConversionException {
 		try {
 			return value + "%";
 		}
@@ -65,7 +81,7 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.integer;
 	}
 
@@ -74,7 +90,7 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Integer> getFormat() {
+	public @Nullable Format<Integer> getFormat() {
 		return null;
 	}
 
@@ -83,7 +99,7 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Integer> getValidator() {
+	public @Nullable Validator<Integer> getValidator() {
 		return null;
 	}
 	
@@ -92,7 +108,7 @@ public class SimplePercentage implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.metadata.model.document.field.validator.IntegerValidator;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,12 +32,12 @@ public class Integer extends ConvertibleField {
 		setAttributeType(AttributeType.integer);
 	}
 	
-	public IntegerValidator getValidator() {
+	public @Nullable IntegerValidator getValidator() {
 		return validator;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setValidator(IntegerValidator validator) {
+	public void setValidator(@Nullable IntegerValidator validator) {
 		this.validator = validator;
 	}
 }

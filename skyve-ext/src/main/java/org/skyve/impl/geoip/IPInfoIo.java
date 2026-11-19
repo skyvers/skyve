@@ -16,6 +16,8 @@ import org.skyve.util.JSON;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Resolves IP geolocation data via the ipinfo.io API.
  *
@@ -38,7 +40,7 @@ public class IPInfoIo extends AbstractCachingGeoIPService {
 	 *         fails or no usable location is returned
 	 */
 	@Override
-	protected IPGeolocation doGeolocation(String ipAddress) {
+	protected @Nonnull IPGeolocation doGeolocation(@Nonnull String ipAddress) {
 		IPGeolocation result = IPGeolocation.EMPTY;
 		
 		HttpClient client = HttpClient.newHttpClient();
@@ -94,7 +96,7 @@ public class IPInfoIo extends AbstractCachingGeoIPService {
 	 *         for the response
 	 */
 	@SuppressWarnings("static-method")
-	protected HttpResponse<String> send(HttpClient client, HttpRequest request) throws IOException, InterruptedException {
+	protected @Nonnull HttpResponse<String> send(@Nonnull HttpClient client, @Nonnull HttpRequest request) throws IOException, InterruptedException {
 		return client.send(request, HttpResponse.BodyHandlers.ofString());
 	}
 }

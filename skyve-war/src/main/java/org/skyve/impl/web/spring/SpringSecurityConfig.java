@@ -25,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 //import org.springframework.security.saml2.provider.service.registration.RelyingPartyRegistrations;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 
 /**
@@ -38,7 +39,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @EnableWebSecurity
 public class SpringSecurityConfig {
 	private static final String LOGIN_ERROR_QUERY = "?error";
-	private static final String REMEMBER_ME_PARAMETER = "remember";
+	/** The remember-me cookie and sign in parameter name. */
+	public static final String REMEMBER_ME_PARAMETER = "remember";
 
 	/**
 	 * Security adapter that provides concrete Spring Security collaborators.
@@ -60,7 +62,7 @@ public class SpringSecurityConfig {
 	 *
 	 * @param skyve the Spring Security adapter to delegate to
 	 */
-	SpringSecurityConfig(SkyveSpringSecurity skyve) {
+	SpringSecurityConfig(@Nonnull SkyveSpringSecurity skyve) {
 		this.skyve = skyve;
 	}
 	
@@ -75,7 +77,7 @@ public class SpringSecurityConfig {
 	 */
 	@Bean
 	@SuppressWarnings("java:S4502") // Suppress CSRF turned off as Skyve implements its own
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public @Nonnull SecurityFilterChain filterChain(@Nonnull HttpSecurity http) throws Exception {
 		AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource = skyve.authenticationDetailsSource();
 
 		http.authorizeHttpRequests(c -> {
@@ -133,7 +135,7 @@ public class SpringSecurityConfig {
 				// Secure Image Servlet for HTML reporting through Jasper
 				.requestMatchers("/image").authenticated()
 				// Do not secure the customer resource servlet as it checks for a user
-				.requestMatchers("/resource", "/content").permitAll()
+				.requestMatchers("/resources", "/images/resources", "/content").permitAll()
 				// Do not secure the Download Servlet as it checks for a user
 				.requestMatchers("/download").permitAll()
 				// Secure meta data servlet
@@ -146,6 +148,8 @@ public class SpringSecurityConfig {
 				.requestMatchers("/smartcomplete").authenticated()
 				// Secure SC text search servlet
 				.requestMatchers("/smartsearch").authenticated()
+				// Secure the SAIL recording servlet
+				.requestMatchers("/sailrecording").authenticated()
 				// Secure map servlet
 				.requestMatchers("/map").authenticated()
 				// Secure the Bizport Export Servlet
@@ -163,11 +167,7 @@ public class SpringSecurityConfig {
 		.sessionManagement(c -> c.sessionFixation().changeSessionId())
 		.rememberMe(c ->
 			c.key(REMEMBER_ME_PARAMETER)
-				.tokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60)
-				.rememberMeParameter(REMEMBER_ME_PARAMETER)
-				.rememberMeCookieName(REMEMBER_ME_PARAMETER)
-				.tokenRepository(tokenRepository())
-				.useSecureCookie(Util.isSecureUrl())
+				.rememberMeServices(rememberMeServices())
 		)
 		.formLogin(c -> 
 			c.authenticationDetailsSource(authenticationDetailsSource)
@@ -238,17 +238,34 @@ public class SpringSecurityConfig {
 	 * @return the configured password encoder
 	 */
 	@Bean
-	public PasswordEncoder passwordEncoder() {
+	public @Nonnull PasswordEncoder passwordEncoder() {
 		return skyve.passwordEncoder();
 	}
 	
+	/**
+	 * Builds the remember-me services, whose sign out ends Remember me in the signing-out browser only
+	 * (see {@link SkyveRememberMeServices}).
+	 *
+	 * @return the remember-me services, configured from the application's account settings
+	 */
+	private @Nonnull SkyveRememberMeServices rememberMeServices() {
+		SkyveRememberMeServices result = new SkyveRememberMeServices(REMEMBER_ME_PARAMETER,
+																		userDetailsManager(),
+																		tokenRepository());
+		result.setTokenValiditySeconds(UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS * 60 * 60);
+		result.setParameter(REMEMBER_ME_PARAMETER);
+		result.setCookieName(REMEMBER_ME_PARAMETER);
+		result.setUseSecureCookie(Util.isSecureUrl());
+		return result;
+	}
+
 	/**
 	 * Exposes the remember-me token repository.
 	 *
 	 * @return the configured persistent token repository
 	 */
 	@Bean
-	public PersistentTokenRepository tokenRepository() {
+	public @Nonnull PersistentTokenRepository tokenRepository() {
 		return skyve.tokenRepository();
 	}
 	
@@ -258,7 +275,7 @@ public class SpringSecurityConfig {
 	 * @return the configured user-details manager
 	 */
 	@Bean
-	public UserDetailsManager userDetailsManager() {
+	public @Nonnull UserDetailsManager userDetailsManager() {
 		return skyve.jdbcUserDetailsManager();
 	}
 	
@@ -268,7 +285,7 @@ public class SpringSecurityConfig {
 	 * @return the configured client registration repository
 	 */
  	@Bean
-    public ClientRegistrationRepository clientRegistrationRepository() {
+    public @Nonnull ClientRegistrationRepository clientRegistrationRepository() {
  		return skyve.clientRegistrationRepository();
     }
 

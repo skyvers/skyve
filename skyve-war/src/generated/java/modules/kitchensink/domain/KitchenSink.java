@@ -156,9 +156,9 @@ public class KitchenSink extends AbstractTransientBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public enum Combo implements Enumeration {
-		one("one", "one"),
-		two("two", "two"),
-		three("three", "three");
+		one("one", "First"),
+		two("two", "Second"),
+		three("three", "Third");
 
 		private String code;
 		private String description;
@@ -182,7 +182,7 @@ public class KitchenSink extends AbstractTransientBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -227,9 +227,9 @@ public class KitchenSink extends AbstractTransientBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public enum Radio implements Enumeration {
-		one("one", "one"),
-		two("two", "two"),
-		three("three", "three");
+		one("one", "First"),
+		two("two", "Second"),
+		three("three", "Third");
 
 		private String code;
 		private String description;
@@ -253,7 +253,7 @@ public class KitchenSink extends AbstractTransientBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override

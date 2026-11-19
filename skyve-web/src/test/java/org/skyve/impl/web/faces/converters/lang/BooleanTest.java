@@ -3,37 +3,37 @@ package org.skyve.impl.web.faces.converters.lang;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
-public class BooleanTest {
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+class BooleanTest {
 
 	private Boolean converter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		converter = new Boolean();
 	}
 
 	@Test
-	public void testGetAsObjectInvalidStringValueReturnsFalse() {
+	void testGetAsObjectInvalidStringValueReturnsFalse() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, "not a boolean"), is(java.lang.Boolean.FALSE));
 	}
 
 	@Test
-	public void testGetAsObjectUppercaseFalseValue() {
+	void testGetAsObjectUppercaseFalseValue() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, "FALSE"), is(java.lang.Boolean.FALSE));
 	}
 
 	@Test
-	public void testGetAsObjectUppercaseTrueValue() {
+	void testGetAsObjectUppercaseTrueValue() {
 		// call the method under test
 		assertThat(converter.getAsObject(null, null, "TRUE"), is(java.lang.Boolean.TRUE));
 	}
 
 	@Test
-	public void testGetAsObjectValidFalseValue() {
+	void testGetAsObjectValidFalseValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.FALSE;
 
@@ -42,7 +42,7 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidTrueValue() {
+	void testGetAsObjectValidTrueValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.TRUE;
 
@@ -51,7 +51,7 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsStringFalseValue() {
+	void testGetAsStringFalseValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.FALSE;
 
@@ -60,7 +60,7 @@ public class BooleanTest {
 	}
 
 	@Test
-	public void testGetAsStringTrueValue() {
+	void testGetAsStringTrueValue() {
 		// setup the test data
 		java.lang.Boolean testValue = java.lang.Boolean.TRUE;
 

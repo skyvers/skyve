@@ -8,6 +8,9 @@ import org.skyve.content.SearchResults;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extend this to make a stateless session bean in the skyve server instance.
  * Not that all methods must be defined in this class for the @PermittAll annotation to have an effect.
@@ -74,7 +77,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
     private static final Logger LOGGER = SkyveLoggerFactory.getLogger(AbstractEJBRemoteContentManagerServerBean.class);
 
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() received for {}", content.getBizId());
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.put(content);
@@ -82,7 +85,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 	
 	@Override
-	public String put(AttachmentContent content, boolean index) throws Exception {
+	public @Nullable String put(@Nonnull AttachmentContent content, boolean index) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.put() received for {} attribute {}", content.getBizId(), content.getAttributeName());
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.put(content, index);
@@ -91,7 +94,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 
 	@Override
-	public void update(AttachmentContent content) throws Exception {
+	public void update(@Nonnull AttachmentContent content) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.update() received for {}", content.getContentId());
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.update(content);
@@ -99,7 +102,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 	
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.getAttachment() received for {}", contentId);
 		try (ContentManager cm = EXT.newContentManager()) {
 			return cm.getAttachment(contentId);
@@ -107,7 +110,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeBean() received for {}", bizId);
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.removeBean(bizId);
@@ -115,7 +118,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 
 	@Override
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.removeAttachment() received for {}", contentId);
 		try (ContentManager cm = EXT.newContentManager()) {
 			cm.removeAttachment(contentId);
@@ -123,7 +126,7 @@ public abstract class AbstractEJBRemoteContentManagerServerBean implements EJBRe
 	}
 	
 	@Override
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		LOGGER.info("Remote call to EJBRemoteContentManagerServer.google() received for '" + search + '\'');
 		try (ContentManager cm = EXT.newContentManager()) {
 			return cm.google(search, maxResults);

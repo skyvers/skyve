@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A class to accept and process delegated method calls from a Proxy.
  * Extend this class and override the invoke method to implement behaviour around the delegated method calls from the proxy.
@@ -27,7 +30,7 @@ public class ProxyDelegate <T extends Object> implements Serializable {
 	 * @return	The call result (if applicable)
 	 * @throws Throwable
 	 */
-	public Object invoke(T proxy, T proxied, Method method, Object[] args) throws Throwable {
+	public @Nullable Object invoke(@Nonnull T proxy, @Nullable T proxied, @Nonnull Method method, @Nullable Object[] args) throws Throwable {
 		try {
 			return method.invoke(proxied, args);
 		}

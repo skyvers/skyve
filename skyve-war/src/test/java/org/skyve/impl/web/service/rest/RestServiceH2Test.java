@@ -41,6 +41,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		WebContainer.clear();
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void insertJsonPostPersistsAndReturnsInsertedBean() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
@@ -61,6 +62,7 @@ class RestServiceH2Test extends AbstractSkyveTest {
 		verify(response).setContentType("application/json");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void updateJsonPostUpdatesPersistedBeanAndReturnsUpdatedJson() throws Exception {
 		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)

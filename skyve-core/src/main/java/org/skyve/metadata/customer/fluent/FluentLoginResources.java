@@ -3,6 +3,9 @@ package org.skyve.metadata.customer.fluent;
 import org.skyve.impl.metadata.repository.customer.LoginResourcesMetaData;
 import org.skyve.metadata.customer.LoginResources;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds customer login resource metadata.
  */
@@ -21,7 +24,7 @@ public class FluentLoginResources {
 	 *
 	 * @param resources backing metadata
 	 */
-	public FluentLoginResources(LoginResourcesMetaData resources) {
+	public FluentLoginResources(@Nonnull LoginResourcesMetaData resources) {
 		this.resources = resources;
 	}
 	
@@ -31,7 +34,7 @@ public class FluentLoginResources {
 	 * @param resources source login resources
 	 * @return this builder
 	 */
-	public FluentLoginResources from(@SuppressWarnings("hiding") LoginResources resources) {
+	public @Nonnull FluentLoginResources from(@SuppressWarnings("hiding") @Nonnull LoginResources resources) {
 		loginPageURL(resources.getLoginPageURL());
 		loggedOutPageURL(resources.getLoggedOutPageURL());
 		return this;
@@ -43,7 +46,7 @@ public class FluentLoginResources {
 	 * @param url login page URL
 	 * @return this builder
 	 */
-	public FluentLoginResources loginPageURL(String url) {
+	public @Nonnull FluentLoginResources loginPageURL(@Nullable String url) {
 		resources.setLoginPageURL(url);
 		return this;
 	}
@@ -54,7 +57,7 @@ public class FluentLoginResources {
 	 * @param url logged-out page URL
 	 * @return this builder
 	 */
-	public FluentLoginResources loggedOutPageURL(String url) {
+	public @Nonnull FluentLoginResources loggedOutPageURL(@Nullable String url) {
 		resources.setLoggedOutPageURL(url);
 		return this;
 	}
@@ -64,7 +67,7 @@ public class FluentLoginResources {
 	 *
 	 * @return backing login resources metadata
 	 */
-	public LoginResourcesMetaData get() {
+	public @Nonnull LoginResourcesMetaData get() {
 		return resources;
 	}
 }

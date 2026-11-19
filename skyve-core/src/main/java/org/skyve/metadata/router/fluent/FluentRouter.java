@@ -10,6 +10,7 @@ import org.skyve.impl.metadata.repository.router.UxUiMetadata;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds router metadata including UX/UI variants, ordered {@code direct} declarations, and
@@ -33,7 +34,7 @@ public class FluentRouter {
 	 *
 	 * @param router backing router metadata
 	 */
-	public FluentRouter(Router router) {
+	public FluentRouter(@Nonnull Router router) {
 		this.router = router;
 	}
 
@@ -59,6 +60,8 @@ public class FluentRouter {
 		for (String unsecuredUrlPrefix : router.getUnsecuredUrlPrefixes()) {
 			addUnsecuredUrlPrefix(unsecuredUrlPrefix);
 		}
+		router.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 	
@@ -68,7 +71,7 @@ public class FluentRouter {
 	 * @param fullyQualifiedClassName selector class name
 	 * @return this builder
 	 */
-	public FluentRouter uxuiSelectorClassName(String fullyQualifiedClassName) {
+	public @Nonnull FluentRouter uxuiSelectorClassName(@Nullable String fullyQualifiedClassName) {
 		router.setUxuiSelectorClassName(fullyQualifiedClassName);
 		return this;
 	}
@@ -79,7 +82,7 @@ public class FluentRouter {
 	 * @param uxui UX/UI wrapper
 	 * @return this builder
 	 */
-	public FluentRouter addUxUi(FluentUxUi uxui) {
+	public @Nonnull FluentRouter addUxUi(@Nonnull FluentUxUi uxui) {
 		router.getUxUis().add(uxui.get());
 		return this;
 	}
@@ -90,7 +93,7 @@ public class FluentRouter {
 	 * @param name UX/UI name
 	 * @return this builder
 	 */
-	public FluentRouter removeUxUi(String name) {
+	public @Nonnull FluentRouter removeUxUi(@Nonnull String name) {
 		router.getUxUis().removeIf(u -> name.equals(u.getName()));
 		return this;
 	}
@@ -101,7 +104,7 @@ public class FluentRouter {
 	 * @param name UX/UI name
 	 * @return matching wrapper, or {@code null}
 	 */
-	public FluentUxUi findUxUi(String name) {
+	public @Nullable FluentUxUi findUxUi(@Nonnull String name) {
 		UxUiMetadata result = router.getUxUis().stream().filter(u -> name.equals(u.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentUxUi(result);
@@ -114,7 +117,7 @@ public class FluentRouter {
 	 *
 	 * @return this builder
 	 */
-	public FluentRouter clearUxUis() {
+	public @Nonnull FluentRouter clearUxUis() {
 		router.getUxUis().clear();
 		return this;
 	}
@@ -195,7 +198,7 @@ public class FluentRouter {
 	 * @param unsecuredUrlPrefix URL prefix that bypasses authentication
 	 * @return this builder
 	 */
-	public FluentRouter addUnsecuredUrlPrefix(String unsecuredUrlPrefix) {
+	public @Nonnull FluentRouter addUnsecuredUrlPrefix(@Nonnull String unsecuredUrlPrefix) {
 		router.getUnsecuredUrlPrefixes().add(unsecuredUrlPrefix);
 		return this;
 	}
@@ -206,7 +209,7 @@ public class FluentRouter {
 	 * @param unsecuredUrlPrefix URL prefix to remove
 	 * @return this builder
 	 */
-	public FluentRouter removeUnsecuredUrlPrefix(String unsecuredUrlPrefix) {
+	public @Nonnull FluentRouter removeUnsecuredUrlPrefix(@Nonnull String unsecuredUrlPrefix) {
 		router.getUnsecuredUrlPrefixes().remove(unsecuredUrlPrefix);
 		return this;
 	}
@@ -216,8 +219,21 @@ public class FluentRouter {
 	 *
 	 * @return this builder
 	 */
-	public FluentRouter clearUnsecuredUrlPrefixes() {
+	public @Nonnull FluentRouter clearUnsecuredUrlPrefixes() {
 		router.getUnsecuredUrlPrefixes().clear();
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentRouter putProperty(@Nonnull String k, @Nonnull String v) {
+		router.getProperties().put(k, v);
 		return this;
 	}
 
@@ -226,7 +242,7 @@ public class FluentRouter {
 	 *
 	 * @return backing router metadata
 	 */
-	public Router get() {
+	public @Nonnull Router get() {
 		return router;
 	}
 }

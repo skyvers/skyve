@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleQueryAggregateUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleQueryAggregateUserAccessMetaData} metadata.
  * 
@@ -21,14 +23,14 @@ public class FluentModuleRoleQueryAggregateAccess extends
 	/**
 	 * Creates a new FluentModuleRoleQueryAggregateAccess from the specified ModuleRoleQueryAggregateUserAccessMetaData.
 	 */
-	public FluentModuleRoleQueryAggregateAccess(ModuleRoleQueryAggregateUserAccessMetaData access) {
+	public FluentModuleRoleQueryAggregateAccess(@Nonnull ModuleRoleQueryAggregateUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleQueryAggregateAccess from a runtime metadata.
 	 */
-	protected FluentModuleRoleQueryAggregateAccess from(String queryName, Set<String> uxuis) {
+	protected @Nonnull FluentModuleRoleQueryAggregateAccess from(@Nonnull String queryName, @Nonnull Set<String> uxuis) {
 		queryName(queryName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -37,7 +39,7 @@ public class FluentModuleRoleQueryAggregateAccess extends
 	/**
 	 * Specifies the query name for this FluentModuleRoleQueryAggregateAccess.
 	 */
-	public FluentModuleRoleQueryAggregateAccess queryName(final String queryName) {
+	public @Nonnull FluentModuleRoleQueryAggregateAccess queryName(final @Nonnull String queryName) {
 		access.setQueryName(queryName);
 		return this;
 	}
@@ -46,7 +48,7 @@ public class FluentModuleRoleQueryAggregateAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleQueryAggregateUserAccessMetaData get() {
+	public @Nonnull ModuleRoleQueryAggregateUserAccessMetaData get() {
 		return access;
 	}
 }

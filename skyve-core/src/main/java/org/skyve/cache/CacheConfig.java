@@ -2,6 +2,8 @@ package org.skyve.cache;
 
 import java.io.Serializable;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Abstract cache configuration that declares the sizing and expiry policy for a named cache.
  *
@@ -35,13 +37,13 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
 	 * @param keyClass the keyClass
 	 * @param valueClass the valueClass
 	 */
-	protected CacheConfig(String name,
+	protected CacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		this.name = name;
 		this.heapSizeEntries = heapSizeEntries;
 		this.offHeapSizeInMB = offHeapSizeInMB;
@@ -60,12 +62,12 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
 	 * @param keyClass the keyClass
 	 * @param valueClass the valueClass
 	 */
-	protected CacheConfig(String name,
+	protected CacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							CacheExpiryPolicy expiryPolicy,
+							@Nonnull CacheExpiryPolicy expiryPolicy,
 							long expiryInMinutes,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		this(name, heapSizeEntries, 0, expiryPolicy, expiryInMinutes, keyClass, valueClass);
 	}
 	
@@ -77,11 +79,11 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
  	 * @param keyClass the keyClass
  	 * @param valueClass the valueClass
  	 */
- 	protected CacheConfig(String name,
+ 	protected CacheConfig(@Nonnull String name,
 							long heapSizeEntries,
 							long offHeapSizeInMB,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		this(name, heapSizeEntries, offHeapSizeInMB, CacheExpiryPolicy.eternal, 0, keyClass, valueClass);
 	}
  	
@@ -92,10 +94,10 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
  	 * @param keyClass the keyClass
  	 * @param valueClass the valueClass
  	 */
- 	protected CacheConfig(String name,
+ 	protected CacheConfig(@Nonnull String name,
 							long heapSizeEntries,
-							Class<K> keyClass,
-							Class<V> valueClass) {
+							@Nonnull Class<K> keyClass,
+							@Nonnull Class<V> valueClass) {
 		this(name, heapSizeEntries, 0, keyClass, valueClass);
  	}
 
@@ -103,7 +105,7 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
 	 * Returns the name.
 	 * @return the result
 	 */
-	public String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -127,7 +129,7 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
 	 * Returns the expiryPolicy.
 	 * @return the result
 	 */
-	public CacheExpiryPolicy getExpiryPolicy() {
+	public @Nonnull CacheExpiryPolicy getExpiryPolicy() {
 		return expiryPolicy;
 	}
 
@@ -143,7 +145,7 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
 	 * Returns the keyClass.
 	 * @return the result
 	 */
-	public Class<K> getKeyClass() {
+	public @Nonnull Class<K> getKeyClass() {
 		return keyClass;
 	}
 
@@ -151,7 +153,7 @@ public abstract class CacheConfig<K extends Serializable, V extends Serializable
 	 * Returns the valueClass.
 	 * @return the result
 	 */
-	public Class<V> getValueClass() {
+	public @Nonnull Class<V> getValueClass() {
 		return valueClass;
 	}
 }

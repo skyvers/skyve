@@ -131,6 +131,7 @@ class POISheetGeneratorTest {
 		assertNull(new POISheetGenerator("module", null).getDownload());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDownloadCanGenerateTitleOnlyWorkbook() throws Exception {
 		bindPersistenceWithCustomer(customer());
@@ -148,6 +149,7 @@ class POISheetGeneratorTest {
 		assertTrue(download.getBytes().length > 0);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDownloadGeneratesRowsUsingFallbackBindingExpression() throws Exception {
 		Bean bean = new DynamicBean("sales", "Order",
@@ -162,6 +164,29 @@ class POISheetGeneratorTest {
 		try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(download.getBytes()))) {
 			assertEquals("Identifier", workbook.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
 			assertEquals("Order order-1", workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
+		}
+	}
+
+	@SuppressWarnings("null") // a null here fails the test
+	@Test
+	void getDownloadStripsTheBracesFromABracedBindingExpression() throws Exception {
+		Bean bean = new DynamicBean("sales", "Order",
+				new java.util.HashMap<>(java.util.Map.of(Bean.DOCUMENT_ID, "order-1", "name", "Widget")));
+		Customer customer = customer();
+		org.skyve.impl.metadata.model.document.field.Text name = new org.skyve.impl.metadata.model.document.field.Text();
+		name.setName("name");
+		name.setDisplayName("Name");
+		name.setLength(50);
+		when(customer.getModule("sales").getDocument(customer, "Order").getAttribute("name")).thenReturn(name);
+		bindPersistenceWithCustomer(customer, List.of(bean));
+		POISheetGenerator gen = new POISheetGenerator("sales", "Order");
+		gen.setDownloadName("orders");
+		gen.addField("Name", "{name}");
+
+		Download download = gen.getDownload();
+
+		try (XSSFWorkbook workbook = new XSSFWorkbook(new ByteArrayInputStream(download.getBytes()))) {
+			assertEquals("Widget", workbook.getSheetAt(0).getRow(1).getCell(0).getStringCellValue());
 		}
 	}
 

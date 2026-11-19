@@ -13,6 +13,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A Tree Model that displays any document relations present in the edited document.
  * That is, associations, collections, inverseOnes and inverseManys.
@@ -31,7 +34,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	 * Construct a new tree model
 	 * @param stopDocuments	Document names to exclude from the tree.
 	 */
-	public RelationTreeModel(String... stopDocuments) {
+	public RelationTreeModel(@Nonnull String... stopDocuments) {
 		this.stopDocuments = stopDocuments;
 		Customer c = CORE.getUser().getCustomer();
 		Module m = c.getModule(AppConstants.ADMIN_MODULE_NAME);
@@ -40,12 +43,12 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	}
 	
 	@Override
-	public List<Bean> getRows() {
+	public @Nonnull List<Bean> getRows() {
 		return new ArrayList<>(); // empty list ready for the filter to add rows to
 	}
 
 	@Override
-	public Filter newFilter() {
+	public @Nonnull Filter newFilter() {
 		// This filter adds the rows for the bizParentId given
 		return new RelationTreeModelFilter<>(getBean(), stopDocuments);
 	}
@@ -54,7 +57,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	 * One column, the "Related" column.
 	 */
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		if (columns == null) {
 			columns = new ArrayList<>(1);
 
@@ -72,7 +75,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	 * Not implemented
 	 */
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties) throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 
@@ -80,7 +83,7 @@ public abstract class RelationTreeModel<T extends Bean> extends InMemoryListMode
 	 * Not implemented
 	 */
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		throw new IllegalStateException("NOT IMPLEMENTED");
 	}
 }

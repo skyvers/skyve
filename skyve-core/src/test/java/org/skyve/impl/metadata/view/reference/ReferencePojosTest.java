@@ -167,6 +167,20 @@ class ReferencePojosTest {
 		assertNull(new ResourceReference().getRelativeFile());
 	}
 
+	@Test
+	void resourceReferenceBlankRelativeFileBecomesNull() {
+		ResourceReference ref = new ResourceReference();
+		ref.setRelativeFile("  ");
+		assertNull(ref.getRelativeFile());
+	}
+
+	@Test
+	void resourceReferencePaddedRelativeFileIsTrimmed() {
+		ResourceReference ref = new ResourceReference();
+		ref.setRelativeFile("  images/logo.png  ");
+		assertThat(ref.getRelativeFile(), is("images/logo.png"));
+	}
+
 	// ---- ReferenceTarget ----
 
 	@Test

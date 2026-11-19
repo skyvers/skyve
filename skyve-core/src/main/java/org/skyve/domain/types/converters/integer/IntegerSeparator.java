@@ -1,14 +1,25 @@
 package org.skyve.domain.types.converters.integer;
 
+import java.util.Locale;
+
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.NumberText;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
- * Converts integer values using grouped thousands separator formatting.
+ * Converts integer values using grouped thousands separator formatting ({@code 1,234,567}).
+ * <p>
+ * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with optional {@code ,}
+ * grouping between digits (read leniently: {@code 1,23,4} is 1234). Anything else (non-ASCII digits, a {@code ,} not
+ * between digits such as {@code 1,} or {@code ,1}), or a value beyond an {@code int}, is refused. The grouping is
+ * {@code ,} whatever the JVM's locale.
  */
 public class IntegerSeparator implements Converter<Integer> {
 	/**
@@ -16,7 +27,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Integer> getValueType() {
+	public @Nonnull Class<Integer> getValueType() {
 		return Integer.class;
 	}
 	
@@ -26,9 +37,14 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Integer fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Integer fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
-			String result = displayValue.replace(",", "");
+			String text = displayValue.trim();
+			// ASCII digits only, each , between two digits (Integer.valueOf reads other digits)
+			if (! NumberText.isPlain(text)) {
+				throw new NumberFormatException(displayValue);
+			}
+			String result = text.replace(",", "");
 			return Integer.valueOf(result);
 		}
 		catch (NumberFormatException e) {
@@ -51,9 +67,9 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Integer value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Integer value) throws ConversionException {
 		try {
-			return String.format("%,d", value);
+			return String.format(Locale.ENGLISH, "%,d", value);
 		}
 		catch (Exception e) {
 			throw new ConversionException(ConversionException.INTEGER_SEPARATOR_KEY, e);
@@ -65,7 +81,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.integer;
 	}
 
@@ -74,7 +90,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Integer> getFormat() {
+	public @Nullable Format<Integer> getFormat() {
 		return null;
 	}
 
@@ -83,7 +99,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Integer> getValidator() {
+	public @Nullable Validator<Integer> getValidator() {
 		return null;
 	}
 	
@@ -92,7 +108,7 @@ public class IntegerSeparator implements Converter<Integer> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

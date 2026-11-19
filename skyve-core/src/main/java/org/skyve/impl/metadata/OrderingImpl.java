@@ -5,7 +5,10 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.Ordering;
 import org.skyve.metadata.SortDirection;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -18,7 +21,7 @@ import jakarta.xml.bind.annotation.XmlType;
 public class OrderingImpl implements Ordering {
 	private static final long serialVersionUID = 5816585894418535717L;
 
-	@XmlAttribute(required = true)
+	@XmlTransient // bound through setBy() so blank values become null
 	private String by;
 	@XmlAttribute(required = true)
 	private SortDirection sort;
@@ -36,7 +39,7 @@ public class OrderingImpl implements Ordering {
 	 * @param by the field or binding to order by
 	 * @param sort the direction to apply
 	 */
-	public OrderingImpl(String by, SortDirection sort) {
+	public OrderingImpl(@Nonnull String by, @Nullable SortDirection sort) {
 		this.by = UtilImpl.processStringValue(by);
 		this.sort = sort;
 	}
@@ -47,7 +50,7 @@ public class OrderingImpl implements Ordering {
 	 * @return the field or binding name
 	 */
 	@Override
-	public String getBy() {
+	public @Nonnull String getBy() {
 		return by;
 	}
 
@@ -56,7 +59,8 @@ public class OrderingImpl implements Ordering {
 	 *
 	 * @param by the field or binding name
 	 */
-	public void setBy(String by) {
+	@XmlAttribute(required = true)
+	public void setBy(@Nonnull String by) {
 		this.by = UtilImpl.processStringValue(by);
 	}
 
@@ -66,7 +70,7 @@ public class OrderingImpl implements Ordering {
 	 * @return the configured sort direction
 	 */
 	@Override
-	public SortDirection getSort() {
+	public @Nullable SortDirection getSort() {
 		return sort;
 	}
 
@@ -75,7 +79,7 @@ public class OrderingImpl implements Ordering {
 	 *
 	 * @param sort the direction to apply
 	 */
-	public void setSort(SortDirection sort) {
+	public void setSort(@Nullable SortDirection sort) {
 		this.sort = sort;
 	}
 }

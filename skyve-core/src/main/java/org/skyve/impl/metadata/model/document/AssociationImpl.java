@@ -4,6 +4,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.Association;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -43,12 +45,12 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 	}
 
 	@Override
-	public AssociationType getType() {
+	public @Nonnull AssociationType getType() {
 		return type;
 	}
 
 	@XmlAttribute(required = true)
-	public void setType(AssociationType type) {
+	public void setType(@Nonnull AssociationType type) {
 		this.type = type;
 	}
 	
@@ -57,7 +59,7 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 		return required;
 	}
 	
-	public Boolean getRequiredBool() {
+	public @Nonnull Boolean getRequiredBool() {
 		return Boolean.valueOf(required);
 	}
 
@@ -67,37 +69,37 @@ public class AssociationImpl extends ReferenceImpl implements Association {
 	}
 	
 	@XmlAttribute(name = "required", required = false)
-	public void setRequiredBool(Boolean required) {
+	public void setRequiredBool(@Nonnull Boolean required) {
 		this.required = required.booleanValue();
 	}
 	
 	@Override
-	public String getRequiredMessage() {
+	public @Nullable String getRequiredMessage() {
 		return requiredMessage;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setRequiredMessage(String requiredMessage) {
+	public void setRequiredMessage(@Nullable String requiredMessage) {
 		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
 	}
 
 	@Override
-	public String getEmbeddedColumnsPrefix() {
+	public @Nullable String getEmbeddedColumnsPrefix() {
 		return embeddedColumnsPrefix;
 	}
 
 	@XmlAttribute(required = false)
-	public void setEmbeddedColumnsPrefix(String embeddedColumnsPrefix) {
+	public void setEmbeddedColumnsPrefix(@Nullable String embeddedColumnsPrefix) {
 		this.embeddedColumnsPrefix = embeddedColumnsPrefix;
 	}
 	
 	@Override
-	public Boolean getDatabaseIndex() {
+	public @Nullable Boolean getDatabaseIndex() {
 		return databaseIndex;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setDatabaseIndex(Boolean databaseIndex) {
+	public void setDatabaseIndex(@Nullable Boolean databaseIndex) {
 		this.databaseIndex = databaseIndex;
 	}
 }

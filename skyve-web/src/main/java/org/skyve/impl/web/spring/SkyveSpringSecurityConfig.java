@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Declares Spring beans that connect Spring Security eventing and helper services to Skyve web runtime behavior.
  */
@@ -16,7 +18,7 @@ public class SkyveSpringSecurityConfig {
 	 */
 	@Bean
 	@SuppressWarnings("static-method")
-	public SkyveSpringSecurity skyveSpringSecurity() {
+	public @Nonnull SkyveSpringSecurity skyveSpringSecurity() {
 		return new SkyveSpringSecurity();
 	}
 
@@ -25,7 +27,7 @@ public class SkyveSpringSecurityConfig {
 	 */
 	@Bean
 	@SuppressWarnings("static-method")
-	public AuthenticationEventPublisher authenticationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+	public @Nonnull AuthenticationEventPublisher authenticationEventPublisher(@Nonnull ApplicationEventPublisher applicationEventPublisher) {
 		return new DefaultAuthenticationEventPublisher(applicationEventPublisher);
 	}
 }

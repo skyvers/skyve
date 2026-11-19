@@ -88,7 +88,7 @@ public class OrderedGrid extends AbstractTransientBean implements ChildBean<Kitc
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override

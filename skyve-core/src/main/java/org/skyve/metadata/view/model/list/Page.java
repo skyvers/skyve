@@ -4,6 +4,9 @@ import java.util.List;
 
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A single page of rows returned by {@link ListModel#fetch()}.
  *
@@ -24,17 +27,17 @@ public final class Page {
 		this.totalRows = totalRows;
 	}
 
-	public List<Bean> getRows() {
+	public @Nullable List<Bean> getRows() {
 		return rows;
 	}
-	public void setRows(List<Bean> rows) {
+	public void setRows(@Nonnull List<Bean> rows) {
 		this.rows = rows;
 	}
 
-	public Bean getSummary() {
+	public @Nullable Bean getSummary() {
 		return summary;
 	}
-	public void setSummary(Bean summary) {
+	public void setSummary(@Nullable Bean summary) {
 		this.summary = summary;
 	}
 }

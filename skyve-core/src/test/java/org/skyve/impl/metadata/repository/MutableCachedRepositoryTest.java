@@ -1,8 +1,11 @@
 package org.skyve.impl.metadata.repository;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,16 +22,20 @@ import org.junit.jupiter.api.io.TempDir;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.repository.behaviour.ActionMetaData;
 import org.skyve.impl.metadata.repository.behaviour.BizletMetaData;
+import org.skyve.impl.metadata.repository.customer.CustomerMetaData;
 import org.skyve.impl.metadata.repository.document.DocumentMetaData;
 import org.skyve.impl.metadata.repository.module.MenuMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleDocumentMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleMetaData;
+import org.skyve.impl.metadata.repository.view.ViewMetaData;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.impl.metadata.repository.router.Router;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.view.View;
+import org.skyve.metadata.view.View.ViewType;
 import org.skyve.metadata.repository.ProvidedRepository;
 
 /**
@@ -197,6 +204,58 @@ class MutableCachedRepositoryTest {
 		assertEquals("admin", retrieved.getName());
 	}
 
+	// ---- putView ----
+
+	/**
+	 * Build a minimal valid edit view.
+	 */
+	private static ViewMetaData minimalView() {
+		ViewMetaData view = new ViewMetaData();
+		view.setName(ViewType.edit.toString());
+		view.setTitle("Edit User");
+		return view;
+	}
+
+	@Test
+	void putViewForAUxUiConvertsTheViewAgainstTheOwningModule() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+
+		View view = repo.putView("desktop", document, minimalView());
+
+		assertEquals("edit", view.getName());
+		assertEquals("Edit User", view.getTitle());
+	}
+
+	@Test
+	void putViewForACustomerConvertsTheViewAgainstTheOwningModule() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("acme");
+		when(customer.getModuleEntries()).thenReturn(Map.of("admin", FormLabelLayout.side));
+
+		View view = repo.putView(customer, document, minimalView());
+
+		assertEquals("edit", view.getName());
+	}
+
+	@Test
+	void putViewWithoutAUxUiConvertsTheViewAgainstTheOwningModule() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+
+		View view = repo.putView(document, minimalView());
+
+		assertEquals("edit", view.getName());
+	}
+
 	// ---- putDocument / getDocument ----
 
 	@Test
@@ -228,7 +287,8 @@ class MutableCachedRepositoryTest {
 		ModuleMetaData mmd = minimalModule("admin", "User");
 		Module module = repo.putModule(mmd);
 		// "NonExistent" is not in the module's documentRefs — should throw
-		assertThrows(IllegalArgumentException.class, () -> repo.getDocument(null, module, "NonExistent"));
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getDocument(null, module, "NonExistent"));
+		assertEquals("Document NonExistent does not exist in module admin", e.getMessage());
 	}
 
 	@Test
@@ -340,6 +400,233 @@ class MutableCachedRepositoryTest {
 		org.skyve.metadata.view.View retrieved = repo.getView(null, null, document, "edit");
 
 		assertNull(retrieved);
+	}
+
+	@Test
+	void getViewThrowsWhenScaffoldingWithoutCustomer() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		repo.putModule(minimalModule("admin", "User"));
+		ProvidedRepositoryFactory.set(repo);
+		Document document = mockDocument("admin", "User");
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.getView(null, null, document, "edit"));
+
+		assertEquals("Cannot scaffold view edit for document admin.User without a customer", e.getMessage());
+	}
+
+	private static CustomerImpl mockCustomer(String customerName, Module module) {
+		CustomerImpl result = mock(CustomerImpl.class);
+		when(result.getName()).thenReturn(customerName);
+		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
+		moduleEntries.put(module.getName(), null);
+		when(result.getModuleEntries()).thenReturn(moduleEntries);
+		when(result.getModule(module.getName())).thenReturn(module);
+		return result;
+	}
+
+	/**
+	 * A customer's override of a document can have other attributes, so a view scaffolded for one
+	 * customer must not be cached under the vanilla view key, where every other customer finds it.
+	 */
+	@Test
+	void aScaffoldedViewIsCachedPerCustomer() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl acme = mockCustomer("acme", module);
+		CustomerImpl beta = mockCustomer("beta", module);
+
+		View acmeView = repo.getView(null, acme, document, ViewType.edit.toString());
+		View betaView = repo.getView(null, beta, document, ViewType.edit.toString());
+
+		assertAll(() -> assertNotNull(acmeView),
+					() -> assertNotNull(betaView),
+					() -> assertNotSame(acmeView, betaView),
+					() -> assertSame(acmeView, repo.getView(null, acme, document, ViewType.edit.toString())),
+					() -> assertNull(repo.vtable(null, "modules/admin/User/views/edit")));
+	}
+
+	/**
+	 * A dynamic repository, whose eviction needs no persistence, that scaffolds views as a file
+	 * system repository does.
+	 */
+	private static final class ScaffoldingDynamicRepository extends UnsynchronisedDynamicRepository {
+		@Override
+		public boolean getUseScaffoldedViews() {
+			return true;
+		}
+	}
+
+	/**
+	 * Evicting a customer evicts the shared documents of its modules, which other customers' views
+	 * are scaffolded from too, so their scaffolded views of those documents go as well, while a
+	 * customer without those modules keeps its scaffolded views. A scaffolded view is no metadata
+	 * that the vtable finds.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void evictingACustomerEvictsEveryCustomersScaffoldedViewsOfItsModules() {
+		ScaffoldingDynamicRepository repo = new ScaffoldingDynamicRepository();
+		ProvidedRepositoryFactory.set(repo);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		Document document = repo.putDocument(module, minimalDocument("User"));
+		CustomerImpl acme = mockCustomer("acme", module);
+		CustomerImpl beta = mockCustomer("beta", module);
+		View betaView = repo.getView(null, beta, document, ViewType.edit.toString());
+		CustomerImpl other = mock(CustomerImpl.class);
+		when(other.getName()).thenReturn("other");
+		Map<String, FormLabelLayout> otherModules = new HashMap<>();
+		otherModules.put("crm", null);
+		when(other.getModuleEntries()).thenReturn(otherModules);
+
+		repo.evictCachedMetaData(other);
+		View betaViewAfterOtherEviction = repo.getView(null, beta, document, ViewType.edit.toString());
+		repo.evictCachedMetaData(acme);
+		// re-put the evicted module and document, as a repository building its metadata does
+		module = repo.putModule(minimalModule("admin", "User"));
+		Document reloaded = repo.putDocument(module, minimalDocument("User"));
+		View betaViewAfterAcmeEviction = repo.getView(null, beta, reloaded, ViewType.edit.toString());
+
+		assertAll(() -> assertSame(betaView, betaViewAfterOtherEviction),
+					() -> assertNotSame(betaView, betaViewAfterAcmeEviction),
+					() -> assertNull(repo.vtable("beta", "modules/admin/User/views/edit")));
+	}
+
+	/**
+	 * A repository that populates fixed keys, as a file system repository populates those of its
+	 * metadata files, and that loads no metadata for them.
+	 */
+	private static final class KeyPopulatingRepository extends UnsynchronisedDynamicRepository {
+		private final String[] keys;
+
+		private KeyPopulatingRepository(String... keys) {
+			this.keys = keys;
+		}
+
+		@Override
+		public void populateKeys() {
+			for (String key : keys) {
+				addKey(key);
+			}
+		}
+	}
+
+	/**
+	 * Evicting a customer resets its own keys and those of its modules to unloaded placeholders, as
+	 * lookups resolve only the keys present, and leaves the metadata of a customer or module whose
+	 * name starts with the same characters loaded.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void evictingACustomerLeavesCustomersAndModulesWithLongerNames() {
+		String[] evicted = {"customers/test", "customers/test/modules/test/Doc", "modules/admin", "modules/admin/User"};
+		String[] kept = {"customers/test2", "customers/test2/modules/test/Doc", "modules/admin2", "modules/admin2/User"};
+		String[] keys = new String[evicted.length + kept.length];
+		System.arraycopy(evicted, 0, keys, 0, evicted.length);
+		System.arraycopy(kept, 0, keys, evicted.length, kept.length);
+		KeyPopulatingRepository repo = new KeyPopulatingRepository(keys);
+		repo.populateKeys();
+		repo.putModule(minimalModule("admin", "User"));
+		Module admin2 = repo.putModule(minimalModule("admin2", "User"));
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("test");
+		Map<String, FormLabelLayout> moduleEntries = new HashMap<>();
+		moduleEntries.put("admin", null);
+		when(customer.getModuleEntries()).thenReturn(moduleEntries);
+
+		repo.evictCachedMetaData(customer);
+
+		assertAll(() -> assertAll(java.util.Arrays.stream(keys).map(key -> () -> assertEquals(key, repo.vtable(null, key), key))),
+					() -> assertNull(repo.getModule(null, "admin"), "evicted module is loaded again"),
+					() -> assertSame(admin2, repo.getModule(null, "admin2"), "kept module stays loaded"));
+	}
+
+	/**
+	 * A full eviction puts back every populated key as an unloaded placeholder.
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void fullEvictionPutsBackThePopulatedKeysUnloaded() {
+		String[] keys = {MutableCachedRepository.ROUTER_KEY, "customers/test", "modules/admin", "modules/admin/User", "modules/admin/User/views/edit"};
+		KeyPopulatingRepository repo = new KeyPopulatingRepository(keys);
+		repo.populateKeys();
+		repo.putModule(minimalModule("admin", "User"));
+
+		repo.evictCachedMetaData(null);
+
+		assertAll(() -> assertAll(java.util.Arrays.stream(keys).map(key -> () -> assertEquals(key, repo.vtable(null, key), key))),
+					() -> assertNull(repo.getModule(null, "admin"), "evicted module is loaded again"));
+	}
+
+	/**
+	 * A dynamic repository has no keys to populate, so eviction leaves it without the metadata
+	 * added to it, which nothing could load again.
+	 */
+	@Test
+	void evictingADynamicRepositoryRemovesItsMetaData() {
+		NullLoadingRepository repo = newNullLoadingRepository();
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		CustomerImpl customer = mockCustomer("test", module);
+
+		repo.evictCachedMetaData(customer);
+
+		assertAll(() -> assertNull(repo.vtable(null, "modules/admin")),
+					() -> assertNull(repo.getModule(null, "admin")));
+	}
+
+	// ---- unnamed metadata ----
+
+	@Test
+	void putCustomerThrowsWhenCustomerHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		CustomerMetaData unnamed = new CustomerMetaData();
+
+		assertThrows(MetaDataException.class, () -> repo.putCustomer(unnamed));
+	}
+
+	@Test
+	void putModuleThrowsWhenModuleHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ModuleMetaData mmd = minimalModule("admin", "User");
+		mmd.setName(null);
+
+		assertThrows(MetaDataException.class, () -> repo.putModule(mmd));
+	}
+
+	@Test
+	void putModuleForCustomerThrowsWhenModuleHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("acme");
+		ModuleMetaData mmd = minimalModule("admin", "User");
+		mmd.setName(null);
+
+		assertThrows(MetaDataException.class, () -> repo.putModule(customer, mmd));
+	}
+
+	@Test
+	void putDocumentThrowsWhenDocumentHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		DocumentMetaData dmd = minimalDocument("User");
+		dmd.setName(null);
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.putDocument(module, dmd));
+
+		assertEquals("The document [name] is required in module admin", e.getMessage());
+	}
+
+	@Test
+	void putDocumentForCustomerThrowsWhenDocumentHasNoName() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		Module module = repo.putModule(minimalModule("admin", "User"));
+		CustomerImpl customer = mock(CustomerImpl.class);
+		when(customer.getName()).thenReturn("acme");
+		DocumentMetaData dmd = minimalDocument("User");
+		dmd.setName(null);
+
+		assertThrows(MetaDataException.class, () -> repo.putDocument(customer, module, dmd));
 	}
 
 	// ---- vtable ----
@@ -595,5 +882,25 @@ class MutableCachedRepositoryTest {
 		// Covers FileSystemRepository(String, boolean) and LocalDesignRepository(String, boolean)
 		LocalDesignRepository repo = new LocalDesignRepository(basePath, false);
 		assertNotNull(repo);
+	}
+
+	// ---- putView when the owning module does not exist ----
+
+	@Test
+	void putViewThrowsWhenTheOwningModuleDoesNotExist() {
+		LocalDesignRepository repo = new LocalDesignRepository(basePath);
+		ProvidedRepositoryFactory.set(mock(ProvidedRepository.class)); // resolves no modules
+		Document document = mock(Document.class);
+		when(document.getName()).thenReturn("User");
+		when(document.getOwningModuleName()).thenReturn("missing");
+		Customer customer = mock(Customer.class);
+		ViewMetaData view = new ViewMetaData();
+
+		MetaDataException e = assertThrows(MetaDataException.class, () -> repo.putView("desktop", document, view));
+		assertEquals("Module missing does not exist.", e.getMessage());
+		e = assertThrows(MetaDataException.class, () -> repo.putView(customer, document, view));
+		assertEquals("Module missing does not exist.", e.getMessage());
+		e = assertThrows(MetaDataException.class, () -> repo.putView(document, view));
+		assertEquals("Module missing does not exist.", e.getMessage());
 	}
 }

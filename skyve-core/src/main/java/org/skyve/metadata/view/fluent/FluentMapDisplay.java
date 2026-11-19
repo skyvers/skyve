@@ -1,7 +1,11 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.LoadingType;
 import org.skyve.impl.metadata.view.widget.MapDisplay;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link MapDisplay} widget metadata using a fluent API.
@@ -21,7 +25,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 *
 	 * @param map the metadata instance to mutate
 	 */
-	public FluentMapDisplay(MapDisplay map) {
+	public FluentMapDisplay(@Nonnull MapDisplay map) {
 		this.map = map;
 	}
 
@@ -32,7 +36,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentMapDisplay from(@SuppressWarnings("hiding") MapDisplay map) {
+	public @Nonnull FluentMapDisplay from(@SuppressWarnings("hiding") @Nonnull MapDisplay map) {
 
 		modelName(map.getModelName());
 		loading(map.getLoading());
@@ -44,9 +48,11 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 		if (b != null) {
 			showRefreshControls(b.booleanValue());
 		}
-		invisibleConditionName(map.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(map.getXmlInvisibleCondition(), map.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		relativeSize(map, this);
+
+		map.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -57,7 +63,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @param modelName the model name
 	 * @return this builder
 	 */
-	public FluentMapDisplay modelName(String modelName) {
+	public @Nonnull FluentMapDisplay modelName(@Nonnull String modelName) {
 		map.setModelName(modelName);
 		return this;
 	}
@@ -68,7 +74,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @param loading the loading type
 	 * @return this builder
 	 */
-	public FluentMapDisplay loading(LoadingType loading) {
+	public @Nonnull FluentMapDisplay loading(@Nullable LoadingType loading) {
 		map.setLoading(loading);
 		return this;
 	}
@@ -79,7 +85,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @param refreshTimeInSeconds the refresh interval
 	 * @return this builder
 	 */
-	public FluentMapDisplay refreshTimeInSeconds(int refreshTimeInSeconds) {
+	public @Nonnull FluentMapDisplay refreshTimeInSeconds(int refreshTimeInSeconds) {
 		map.setRefreshTimeInSeconds(Integer.valueOf(refreshTimeInSeconds));
 		return this;
 	}
@@ -90,19 +96,32 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @param showRefreshControls {@code true} to show refresh controls
 	 * @return this builder
 	 */
-	public FluentMapDisplay showRefreshControls(boolean showRefreshControls) {
+	public @Nonnull FluentMapDisplay showRefreshControls(boolean showRefreshControls) {
 		map.setShowRefreshControls(showRefreshControls ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this map display widget.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentMapDisplay invisibleConditionName(String invisibleConditionName) {
-		map.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentMapDisplay invisibleCondition(@Nullable String invisibleCondition) {
+		map.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentMapDisplay visibleCondition(@Nullable String visibleCondition) {
+		map.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -113,7 +132,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay pixelHeight(int height) {
+	public @Nonnull FluentMapDisplay pixelHeight(int height) {
 		map.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -125,7 +144,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay pixelWidth(int width) {
+	public @Nonnull FluentMapDisplay pixelWidth(int width) {
 		map.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -137,7 +156,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentMapDisplay minPixelWidth(int minPixelWidth) {
 		map.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -149,7 +168,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentMapDisplay maxPixelWidth(int maxPixelWidth) {
 		map.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -161,7 +180,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentMapDisplay maxPixelHeight(int maxPixelHeight) {
 		map.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -173,7 +192,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentMapDisplay minPixelHeight(int minPixelHeight) {
 		map.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -185,7 +204,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay percentageWidth(int percentageWidth) {
+	public @Nonnull FluentMapDisplay percentageWidth(int percentageWidth) {
 		map.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -197,7 +216,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentMapDisplay responsiveWidth(int responsiveWidth) {
 		map.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -209,7 +228,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay sm(int sm) {
+	public @Nonnull FluentMapDisplay sm(int sm) {
 		map.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -221,7 +240,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay md(int md) {
+	public @Nonnull FluentMapDisplay md(int md) {
 		map.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -233,7 +252,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay lg(int lg) {
+	public @Nonnull FluentMapDisplay lg(int lg) {
 		map.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -245,7 +264,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay xl(int xl) {
+	public @Nonnull FluentMapDisplay xl(int xl) {
 		map.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -257,8 +276,21 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return this builder
 	 */
 	@Override
-	public FluentMapDisplay percentageHeight(int percentageHeight) {
+	public @Nonnull FluentMapDisplay percentageHeight(int percentageHeight) {
 		map.setPercentageHeight(Integer.valueOf(percentageHeight));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentMapDisplay putProperty(@Nonnull String k, @Nonnull String v) {
+		map.getProperties().put(k, v);
 		return this;
 	}
 
@@ -268,7 +300,7 @@ public class FluentMapDisplay extends FluentWidget implements FluentRelativeSize
 	 * @return the mutable map-display metadata being configured
 	 */
 	@Override
-	public MapDisplay get() {
+	public @Nonnull MapDisplay get() {
 		return map;
 	}
 }

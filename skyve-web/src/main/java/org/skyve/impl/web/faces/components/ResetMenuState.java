@@ -8,6 +8,7 @@ import org.skyve.impl.web.faces.views.MenuView;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.el.ELContext;
 import jakarta.faces.component.FacesComponent;
 import jakarta.faces.component.UIComponentBase;
@@ -26,12 +27,12 @@ public class ResetMenuState extends UIComponentBase {
     private static final Logger FACES_LOGGER = Category.FACES.logger();
 
 	@Override
-	public String getFamily() {
+	public @Nonnull String getFamily() {
 		return "resetMenuState";
 	}
 
 	@Override
-	public void encodeBegin(FacesContext context) throws IOException {
+	public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("Menu State Cookies deleted...");
 
 		ELContext elc = context.getELContext();

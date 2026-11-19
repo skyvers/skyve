@@ -4,6 +4,8 @@ import org.skyve.impl.sail.execution.GenerateListContext;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
 import org.skyve.metadata.sail.language.step.context.PushListContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * List context generation in a PrimeFaces UI.
  * <p>
@@ -13,6 +15,6 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
  * @param componentBuilder the component builder for this view
  */
 public record PrimeFacesGenerateListContext(
-		PushListContext pushListContext,
-		ComponentBuilder componentBuilder) implements GenerateListContext {
+		@Nonnull PushListContext pushListContext,
+		@Nonnull ComponentBuilder componentBuilder) implements GenerateListContext {
 }

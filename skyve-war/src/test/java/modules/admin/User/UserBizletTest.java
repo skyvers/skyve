@@ -3,17 +3,17 @@ package modules.admin.User;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
 import modules.admin.domain.User;
-import util.AbstractH2TestForJUnit4;
+import util.AbstractH2Test;
 
-public class UserBizletTest extends AbstractH2TestForJUnit4 {
+class UserBizletTest extends AbstractH2Test {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testPreSaveSetsPasswordExpired() throws Exception {
+	void testPreSaveSetsPasswordExpired() throws Exception {
 		// setup the test data
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);
 		user.setPasswordExpired(Boolean.FALSE);

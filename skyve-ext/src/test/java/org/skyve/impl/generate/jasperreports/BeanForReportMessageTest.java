@@ -7,6 +7,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,6 +43,7 @@ class BeanForReportMessageTest {
 		assertThat(result, is(message));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void getMessageWithNullMessageThrowsNPE() {
 		// BindUtil.formatMessage(null, bean) does not guard against a null message string
@@ -76,6 +78,36 @@ class BeanForReportMessageTest {
 			assertThat(BeanForReport.getMessage("mod", "doc", "123", "Hello"), is("Hello"));
 			assertTrue(BeanForReport.evaluateCondition("mod", "doc", "123", "editable"));
 			assertFalse(BeanForReport.evaluateCondition("mod", "doc", "123", "missing"));
+		}
+		finally {
+			if (original == null) {
+				threadLocal.remove();
+			}
+			else {
+				threadLocal.set(original);
+			}
+		}
+	}
+
+	@Test
+	void evaluateConditionForAMissingBeanThrowsIllegalState() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, withSettings().defaultAnswer(CALLS_REAL_METHODS));
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "doc")).thenReturn(document);
+		doReturn(null).when(persistence).retrieve(document, "404");
+		persistence.setUser(user);
+
+		ThreadLocal<AbstractPersistence> threadLocal = getThreadLocalPersistence();
+		AbstractPersistence original = threadLocal.get();
+		try {
+			threadLocal.set(persistence);
+			assertThrows(IllegalStateException.class, () -> BeanForReport.evaluateCondition("mod", "doc", "404", "editable"));
 		}
 		finally {
 			if (original == null) {

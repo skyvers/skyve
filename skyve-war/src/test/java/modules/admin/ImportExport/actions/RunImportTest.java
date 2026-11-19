@@ -99,6 +99,43 @@ class RunImportTest extends AbstractH2Test {
 		verify(webContext).growl(MessageSeverity.info, "Import unsuccessful. Try again.");
 	}
 
+	@Test
+	void executeWithRowLeavingBizKeyBlankThrowsValidationException() throws Exception {
+		// a Group's bizKey is its name
+		ImportExportExtension bean = createEverythingImportBean("Group", "Description", "description");
+		bean.setImportFileAbsolutePath(writeWorkbook(new String[] {"Description"}, new String[] {"No name given"}).toString());
+		RunImport action = new RunImport();
+		WebContext webContext = mock(WebContext.class);
+
+		ValidationException exception = assertThrows(ValidationException.class, () -> action.execute(bean, webContext));
+
+		assertTrue(exception.getMessages()
+				.stream()
+				.anyMatch(message -> message.getText().contains("The new record has no value for bizKey at row 0.")));
+	}
+
+	@Test
+	void executeWithRowGivingBizKeySavesTheRecord() throws Exception {
+		// a DataGroup's bizKey is its name, its only required attribute
+		ImportExportExtension bean = createEverythingImportBean("DataGroup", "Name", "name");
+		bean.setImportFileAbsolutePath(writeWorkbook(new String[] {"Name"}, new String[] {"Imported Data Group"}).toString());
+		WebContext webContext = mock(WebContext.class);
+
+		new RunImport().execute(bean, webContext);
+
+		assertTrue(bean.getResults().startsWith("Successfully loaded 1 rows. 1 "), bean.getResults());
+	}
+
+	private static ImportExportExtension createEverythingImportBean(String documentName, String columnName, String bindingName) {
+		ImportExportExtension bean = new ImportExportExtension();
+		bean.setModuleName("admin");
+		bean.setDocumentName(documentName);
+		bean.setFileContainsHeaders(Boolean.TRUE);
+		bean.setLoadType(ImportExportUtil.CREATE_EVERYTHING_EVEN_IF_THERE_MIGHT_BE_DUPLICATES);
+		bean.addImportExportColumnsElement(column(columnName, bindingName, null));
+		return bean;
+	}
+
 	private ImportExportExtension importBeanWithColumn(String columnName, String bindingName) {
 		ImportExportExtension bean = new ImportExportExtension();
 		bean.setModuleName("admin");
@@ -120,12 +157,23 @@ class RunImportTest extends AbstractH2Test {
 	}
 
 	private Path writeWorkbook(String... headers) throws Exception {
+		return writeWorkbook(headers, new String[0][]);
+	}
+
+	private Path writeWorkbook(String[] headers, String[]... rows) throws Exception {
 		Path path = tempDir.resolve(headers[0].replace(' ', '_') + ".xlsx");
 		try (XSSFWorkbook workbook = new XSSFWorkbook();
 				OutputStream out = Files.newOutputStream(path)) {
-			var row = workbook.createSheet("Data").createRow(0);
+			var sheet = workbook.createSheet("Data");
+			var row = sheet.createRow(0);
 			for (int i = 0; i < headers.length; i++) {
 				row.createCell(i).setCellValue(headers[i]);
+			}
+			for (int r = 0; r < rows.length; r++) {
+				var dataRow = sheet.createRow(r + 1);
+				for (int i = 0; i < rows[r].length; i++) {
+					dataRow.createCell(i).setCellValue(rows[r][i]);
+				}
 			}
 			workbook.write(out);
 		}

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 import org.skyve.domain.types.Decimal10;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 //@XmlJavaTypeAdapter(Decimal10Mapper.class)
@@ -21,12 +22,12 @@ import jakarta.xml.bind.annotation.adapters.XmlAdapter;
  */
 public class Decimal10Mapper extends XmlAdapter<BigDecimal, Decimal10> {
 	@Override
-	public Decimal10 unmarshal(BigDecimal value) throws Exception {
+	public @Nullable Decimal10 unmarshal(@Nullable BigDecimal value) throws Exception {
 		return (value == null) ? null : new Decimal10(value);
 	}
 
 	@Override
-	public BigDecimal marshal(Decimal10 value) throws Exception {
+	public @Nullable BigDecimal marshal(@Nullable Decimal10 value) throws Exception {
 		return (value == null) ? null : value.bigDecimalValue();
 	}
 }

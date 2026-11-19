@@ -2,6 +2,8 @@ package org.skyve.domain.types.converters.date;
 
 import org.skyve.domain.messages.ConversionException;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Converts {@link org.skyve.domain.types.DateOnly} values using
  * {@code MM/dd/yyyy} formatting.
@@ -15,7 +17,7 @@ public class MM_DD_YYYY extends AbstractDateConverter {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nonnull String getFormatPattern() {
 		return PATTERN;
 	}
 	
@@ -24,7 +26,7 @@ public class MM_DD_YYYY extends AbstractDateConverter {
 	 * @return the result value
 	 */
 	@Override
-	protected String getI18nKey() {
+	protected @Nonnull String getI18nKey() {
 		return ConversionException.MM_DD_YYYY_KEY;
 	}
 }

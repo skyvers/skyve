@@ -1,5 +1,7 @@
 package org.skyve.domain.types.converters.decimal;
 
+import java.util.regex.Pattern;
+
 import org.skyve.CORE;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Decimal5;
@@ -9,16 +11,27 @@ import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.FormatterName;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
- * Converts {@link Decimal5} values representing time durations.
+ * Converts {@link Decimal5} values representing time durations, in hours, displayed as hours and minutes (h:mm).
+ * <p>
+ * It reads hours, a colon, then minutes, each a decimal number (with an optional sign and spaces around it), as
+ * SmartClient's bizTimeDuration does: 1:30 is 1.5 hours, 1:75 is 2.25, 0:29.4996 is 0.49166, and -0:30 is -0.5 (the
+ * sign is the hours' text's). Anything else, such as 1.5 (no colon), is not a duration. It shows a value as
+ * {@link org.skyve.domain.types.formatters.TimeDurationFormatter} does: the minutes rounded once, half up.
  */
 public class Decimal5TimeDuration implements Converter<Decimal5> {
+	/** The hours or the minutes: a decimal number with an optional sign (no exponent). */
+	private static final Pattern NUMBER = Pattern.compile("[-+]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)");
+
 	/**
 	 * Returns the value type handled by this converter.
 	 * @return the result value
 	 */
 	@Override
-	public Class<Decimal5> getValueType() {
+	public @Nonnull Class<Decimal5> getValueType() {
 		return Decimal5.class;
 	}
 	
@@ -28,19 +41,25 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Decimal5 fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Decimal5 fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
 			int colonIndex = displayValue.indexOf(':');
 			if (colonIndex < 0) {
 				throw new ConversionException(ConversionException.DECIMAL_5_TIME_DURATION_KEY);
 			}
 	
-			Decimal5 hours = new Decimal5(displayValue.substring(0, colonIndex));
-			Decimal5 minutes = new Decimal5(displayValue.substring(colonIndex + 1));
+			String hoursValue = displayValue.substring(0, colonIndex).trim();
+			String minutesValue = displayValue.substring(colonIndex + 1).trim();
+			if ((! NUMBER.matcher(hoursValue).matches()) || (! NUMBER.matcher(minutesValue).matches())) {
+				throw new ConversionException(ConversionException.DECIMAL_5_TIME_DURATION_KEY);
+			}
+			Decimal5 hours = new Decimal5(hoursValue);
+			Decimal5 minutes = new Decimal5(minutesValue);
 			minutes = minutes.divide(Decimal5.SIXTY);
 	
+			// The sign is the hours' text's: -0:30 is negative, although its hours are zero
 			Decimal5 returnValue;
-			if (hours.compareTo(Decimal5.ZERO) >= 0) {
+			if (! hoursValue.startsWith("-")) {
 				returnValue = hours.add(minutes);
 			}
 			else {
@@ -63,7 +82,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Decimal5 value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal5 value) throws ConversionException {
 		try {
 			return CORE.format(FormatterName.TimeDuration, value);
 		}
@@ -77,7 +96,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.decimal5;
 	}
 
@@ -86,7 +105,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Decimal5> getFormat() {
+	public @Nullable Format<Decimal5> getFormat() {
 		return null;
 	}
 
@@ -95,7 +114,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Decimal5> getValidator() {
+	public @Nullable Validator<Decimal5> getValidator() {
 		return null;
 	}
 	
@@ -104,7 +123,7 @@ public class Decimal5TimeDuration implements Converter<Decimal5> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

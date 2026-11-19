@@ -32,9 +32,13 @@ import org.skyve.cache.GeoIPCacheConfig;
 import org.skyve.cache.HibernateCacheConfig;
 import org.skyve.cache.JCacheConfig;
 import org.skyve.cache.SessionCacheConfig;
+import org.skyve.dataaccess.sql.ConnectionCustomiser;
+import org.skyve.dialog.Dialogs;
 import org.skyve.domain.number.NumberGenerator;
 import org.skyve.impl.archive.support.ArchiveLuceneIndexerSingleton;
 import org.skyve.impl.content.AbstractContentManager;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
+import org.skyve.impl.dataaccess.sql.ConnectionCustomiserStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
@@ -71,6 +75,7 @@ import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterRegistration;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
@@ -84,14 +89,14 @@ import jakarta.servlet.SessionCookieConfig;
 public class SkyveContextListener implements ServletContextListener {
 	static final String SHUTTING_DOWN_ATTRIBUTE_NAME = SkyveContextListener.class.getName() + ".shuttingDown";
 
-	private static record AppCacheSettings(String cacheName,
-									 String type,
+	private static record AppCacheSettings(@Nonnull String cacheName,
+									 @Nonnull String type,
 									 int heapSizeEntries,
 									 long offHeapSize,
-									 CacheExpiryPolicy expiryPolicy,
+									 @Nonnull CacheExpiryPolicy expiryPolicy,
 									 long expiry,
-									 Class<? extends Serializable> keyClass,
-									 Class<? extends Serializable> valueClass,
+									 @Nonnull Class<? extends Serializable> keyClass,
+									 @Nonnull Class<? extends Serializable> valueClass,
 									 long diskSize,
 									 boolean persistent) {
 	}
@@ -122,6 +127,7 @@ public class SkyveContextListener implements ServletContextListener {
 	private static final String ACCOUNT_KEY = "account";
 	private static final String ENVIRONMENT_KEY = "environment";
 	private static final String HEALTH_KEY = "health";
+	private static final String SAIL_KEY = "sail";
 	private static final String BOOTSTRAP_KEY = "bootstrap";
 	private static final String API_KEY = "api";
 	private static final String DOES_NOT_EXIST = " does not exist.";
@@ -140,7 +146,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param evt The servlet context event.
 	 */
 	@Override
-	public void contextInitialized(ServletContextEvent evt) {
+	public void contextInitialized(@SuppressWarnings("null") @Nonnull ServletContextEvent evt) {
 		ServletContext ctx = evt.getServletContext();
 		populateUtilImpl(ctx);
 
@@ -226,8 +232,8 @@ public class SkyveContextListener implements ServletContextListener {
 		Map<String, Object> properties = readExpandedConfiguration(new File(UtilImpl.PROPERTIES_FILE_PATH));
 		UtilImpl.CONFIGURATION = properties;
 
-		Map<String, Object> content = getObject(null, CONTENT_KEY, properties, true);
-		UtilImpl.CONTENT_DIRECTORY = getString(CONTENT_KEY, DIRECTORY_KEY, content, true);
+		Map<String, Object> content = getRequiredObject(null, CONTENT_KEY, properties);
+		UtilImpl.CONTENT_DIRECTORY = getRequiredString(CONTENT_KEY, DIRECTORY_KEY, content);
 		UtilImpl.CONTENT_DIRECTORY = cleanupDirectory(UtilImpl.CONTENT_DIRECTORY);
 		testWritableDirectory(CONTENT_KEY + '.' + DIRECTORY_KEY, UtilImpl.CONTENT_DIRECTORY);
 
@@ -260,6 +266,7 @@ public class SkyveContextListener implements ServletContextListener {
 		configureAccountSettings(properties);
 		configureEnvironmentSettings(properties);
 		configureHealthSettings(properties);
+		configureSailSettings(properties);
 		configureApiSettings(properties);
 		configureBootstrapSettings(properties);
 		configurePrimeFlex(ctx);
@@ -286,7 +293,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void validateRequiredFilters(ServletContext ctx) {
+	private static void validateRequiredFilters(@Nonnull ServletContext ctx) {
 		boolean securityHeadersFilterExists = false;
 		for (Entry<String, ? extends FilterRegistration> entry : ctx.getFilterRegistrations().entrySet()) {
 			FilterRegistration reg = entry.getValue();
@@ -308,10 +315,14 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static Map<String, Object> readExpandedConfiguration(File file) {
+	private static @Nonnull Map<String, Object> readExpandedConfiguration(@Nonnull File file) {
 		try (FileInputStream fis = new FileInputStream(file)) {
+			Map<String, Object> configuration = UtilImpl.readJSONConfig(fis);
+			if (configuration == null) { // the JSON "null"
+				throw new IllegalStateException(file.getAbsolutePath() + " does not contain a JSON object");
+			}
 			VariableExpander variableExpander = new VariableExpander();
-			return variableExpander.expand(UtilImpl.readJSONConfig(fis), System.getenv());
+			return variableExpander.expand(configuration, System.getenv());
 		}
 		catch (Exception e) {
 			throw new IllegalStateException("Cannot open or read " + file.getAbsolutePath(), e);
@@ -324,10 +335,10 @@ public class SkyveContextListener implements ServletContextListener {
 	 *
 	 * @param properties The root configuration map.
 	 */
-	private static void configureArchiveProperties(Map<String, Object> properties) {
+	private static void configureArchiveProperties(@Nonnull Map<String, Object> properties) {
         String archKey = "archive";
 
-        Map<String, Object> archiveProps = getObject(null, archKey, properties, false);
+        Map<String, Object> archiveProps = getOptionalObject(archKey, properties);
         if (archiveProps == null) {
             LOGGER.info("Archiving is not configured");
             return;
@@ -338,18 +349,18 @@ public class SkyveContextListener implements ServletContextListener {
             throw new IllegalArgumentException("Archiving is not supported on multi-tenancy instances");
         }
 
-		int runtime = getNumber(archKey, "exportRuntimeSec", archiveProps, true).intValue();
-		int batchSize = getNumber(archKey, "exportBatchSize", archiveProps, true).intValue();
+		int runtime = getRequiredNumber(archKey, "exportRuntimeSec", archiveProps).intValue();
+		int batchSize = getRequiredNumber(archKey, "exportBatchSize", archiveProps).intValue();
 
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> docProps = (List<Map<String, Object>>) get(archKey, "documents", archiveProps, true);
+        List<Map<String, Object>> docProps = (List<Map<String, Object>>) getRequired(archKey, "documents", archiveProps);
 
         List<ArchiveConfig.ArchiveDocConfig> docConfigs = new ArrayList<>();
         for (Map<String, Object> docProp : docProps) {
 
-            String module = getString(null, "module", docProp, true);
-            String document = getString(null, "document", docProp, true);
-			String directory = getString(null, DIRECTORY_KEY, docProp, true);
+            String module = getRequiredString(null, "module", docProp);
+            String document = getRequiredString(null, "document", docProp);
+			String directory = getRequiredString(null, DIRECTORY_KEY, docProp);
             int retainDeletedDocumentsDays = getInt(null, "retainDeletedDocumentsDays", docProp);
 
             docConfigs.add(new ArchiveDocConfig(module, document, directory, retainDeletedDocumentsDays));
@@ -358,25 +369,25 @@ public class SkyveContextListener implements ServletContextListener {
         // Setup the archive doc cache, with some defaults
         ArchivedDocumentCacheConfig cacheConfig = ArchivedDocumentCacheConfig.DEFAULT;
 
-        Map<String, Object> cacheProps = getObject(archKey, "cache", archiveProps, false);
+        Map<String, Object> cacheProps = getOptionalObject("cache", archiveProps);
         if (cacheProps != null) {
 
             final String cacheKey = archKey + ".cache";
 
-			Number heapSizeEntriesNumber = getNumber(cacheKey, HEAP_SIZE_ENTRIES_KEY, cacheProps, false);
+			Number heapSizeEntriesNumber = getOptionalNumber(HEAP_SIZE_ENTRIES_KEY, cacheProps);
 			long heapSizeEntries = (heapSizeEntriesNumber == null) ? 100L : heapSizeEntriesNumber.longValue();
-			Number expiryInMinutesNumber = getNumber(cacheKey, EXPIRY_TIME_MINUTES_KEY, cacheProps, false);
+			Number expiryInMinutesNumber = getOptionalNumber(EXPIRY_TIME_MINUTES_KEY, cacheProps);
 			long expiryInMinutes = (expiryInMinutesNumber == null) ? 10L : expiryInMinutesNumber.longValue();
 
             cacheConfig = new ArchivedDocumentCacheConfig(heapSizeEntries, expiryInMinutes);
         }
 
         ArchiveSchedule schedule = ArchiveSchedule.DEFUALT;
-        Map<String, Object> scheduleSettings = getObject(archKey, "schedule", archiveProps, false);
+        Map<String, Object> scheduleSettings = getOptionalObject("schedule", archiveProps);
         if (scheduleSettings != null) {
             final String key = archKey + ".schedule";
 
-            String cron = getString(key, "cron", scheduleSettings, true);
+            String cron = getRequiredString(key, "cron", scheduleSettings);
             String customer = UtilImpl.CUSTOMER;
             schedule = new ArchiveSchedule(cron, customer, "archive_user");
         }
@@ -402,32 +413,44 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param properties the root configuration properties
 	 * @param factories the configured factory class names
 	 */
-	static void configureMailServiceAndSmtp(Map<String, Object> properties, Map<String, Object> factories) {
+	static void configureMailServiceAndSmtp(@Nonnull Map<String, Object> properties, @Nonnull Map<String, Object> factories) {
 		boolean smtpRequired = configureMailService(factories);
 
-		Map<String, Object> smtp = getObject(null, SMTP_KEY, properties, smtpRequired);
+		Map<String, Object> smtp = (smtpRequired ? getRequiredObject(null, SMTP_KEY, properties) : getOptionalObject(SMTP_KEY, properties));
 		if (smtp == null) {
 			return;
 		}
 
-		UtilImpl.SMTP = getString(SMTP_KEY, "server", smtp, smtpRequired);
-		Number smtpPort = getNumber(SMTP_KEY, "port", smtp, smtpRequired);
+		UtilImpl.SMTP = (smtpRequired ? getRequiredString(SMTP_KEY, "server", smtp) : getOptionalString("server", smtp));
+		Number smtpPort = (smtpRequired ? getRequiredNumber(SMTP_KEY, "port", smtp) : getOptionalNumber("port", smtp));
 		UtilImpl.SMTP_PORT = (smtpPort == null) ? 0 : smtpPort.intValue();
-		UtilImpl.SMTP_UID = getString(SMTP_KEY, "uid", smtp, false);
-		UtilImpl.SMTP_PWD = getString(SMTP_KEY, "pwd", smtp, false);
+		UtilImpl.SMTP_UID = getOptionalString("uid", smtp);
+		UtilImpl.SMTP_PWD = getOptionalString("pwd", smtp);
 
-		UtilImpl.SMTP_PROPERTIES = toStringMap(getObject(SMTP_KEY, "properties", smtp, false));
+		UtilImpl.SMTP_PROPERTIES = toStringMap(getOptionalObject("properties", smtp));
 
-		UtilImpl.SMTP_HEADERS = toStringMap(getObject(SMTP_KEY, "headers", smtp, false));
+		UtilImpl.SMTP_HEADERS = toStringMap(getOptionalObject("headers", smtp));
 
-		UtilImpl.SMTP_SENDER = getString(SMTP_KEY, "sender", smtp, smtpRequired);
-		UtilImpl.SMTP_TEST_RECIPIENT = getString(SMTP_KEY, "testRecipient", smtp, false);
-		Boolean smtpTestBogusSend = (Boolean) get(SMTP_KEY, "testBogusSend", smtp, smtpRequired);
+		UtilImpl.SMTP_SENDER = (smtpRequired ? getRequiredString(SMTP_KEY, "sender", smtp) : getOptionalString("sender", smtp));
+		UtilImpl.SMTP_TEST_RECIPIENT = getOptionalString("testRecipient", smtp);
+		Boolean smtpTestBogusSend = (Boolean) (smtpRequired ? getRequired(SMTP_KEY, "testBogusSend", smtp) : getOptional("testBogusSend", smtp));
 		UtilImpl.SMTP_TEST_BOGUS_SEND = Boolean.TRUE.equals(smtpTestBogusSend);
+		Boolean smtpLogBodyExcerpt = (Boolean) getOptional("logBodyExcerpt", smtp);
+		UtilImpl.SMTP_LOG_BODY_EXCERPT = Boolean.TRUE.equals(smtpLogBodyExcerpt);
+		Boolean smtpLogAttachments = (Boolean) getOptional("logAttachments", smtp);
+		UtilImpl.SMTP_LOG_ATTACHMENTS = Boolean.TRUE.equals(smtpLogAttachments);
+		Number smtpLogAttachmentsMaxBytes = getOptionalNumber("logAttachmentsMaxBytes", smtp);
+		UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = (smtpLogAttachmentsMaxBytes == null) ?
+														UtilImpl.DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES :
+														smtpLogAttachmentsMaxBytes.longValue();
+		if (UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES < 0L) {
+			LOGGER.warn("{}.logAttachmentsMaxBytes of {} is negative - using 0", SMTP_KEY, smtpLogAttachmentsMaxBytes);
+			UtilImpl.SMTP_LOG_ATTACHMENTS_MAX_BYTES = 0L;
+		}
 	}
 
-	private static boolean configureMailService(Map<String, Object> factories) {
-		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = getString(FACTORIES_KEY, "mailServiceClass", factories, false);
+	private static boolean configureMailService(@Nonnull Map<String, Object> factories) {
+		UtilImpl.SKYVE_MAIL_SERVICE_CLASS = getOptionalString("mailServiceClass", factories);
 		if (UtilImpl.SKYVE_MAIL_SERVICE_CLASS == null) {
 			MailServiceStaticSingleton.setDefault();
 			return true;
@@ -444,7 +467,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static TreeMap<String, String> toStringMap(Map<String, Object> values) {
+	private static @Nonnull TreeMap<String, String> toStringMap(@Nullable Map<String, Object> values) {
 		TreeMap<String, String> result = new TreeMap<>();
 		if (values == null) {
 			return result;
@@ -460,8 +483,8 @@ public class SkyveContextListener implements ServletContextListener {
 		return result;
 	}
 
-	private static void configureTraceSettings(Map<String, Object> properties) {
-		Map<String, Object> trace = getObject(null, TRACE_KEY, properties, true);
+	private static void configureTraceSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> trace = getRequiredObject(null, TRACE_KEY, properties);
 		UtilImpl.XML_TRACE = getBoolean(TRACE_KEY, "xml", trace);
 		UtilImpl.HTTP_TRACE = getBoolean(TRACE_KEY, "http", trace);
 		UtilImpl.COMMAND_TRACE = getBoolean(TRACE_KEY, "command", trace);
@@ -474,43 +497,43 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.DIRTY_TRACE = getBoolean(TRACE_KEY, "dirty", trace);
 	}
 
-	private static void configureContentSettings(Map<String, Object> content) {
-		UtilImpl.CONTENT_GC_CRON = getString(CONTENT_KEY, "gcCron", content, true);
-		Number gcEligibleAgeMinutes = getNumber(CONTENT_KEY, "gcEligibleAgeMinutes", content, false);
+	private static void configureContentSettings(@Nonnull Map<String, Object> content) {
+		UtilImpl.CONTENT_GC_CRON = getRequiredString(CONTENT_KEY, "gcCron", content);
+		Number gcEligibleAgeMinutes = getOptionalNumber("gcEligibleAgeMinutes", content);
 		if (gcEligibleAgeMinutes != null) {
 			UtilImpl.CONTENT_GC_ELIGIBLE_AGE_MINUTES = gcEligibleAgeMinutes.intValue();
 		}
-		UtilImpl.CONTENT_JDBC_SERVER_ARGS = getString(CONTENT_KEY, "serverArgs", content, false);
-		UtilImpl.CONTENT_REST_SERVER_URL = getString(CONTENT_KEY, "serverUrl", content, false);
+		UtilImpl.CONTENT_JDBC_SERVER_ARGS = getOptionalString("serverArgs", content);
+		UtilImpl.CONTENT_REST_SERVER_URL = getOptionalString("serverUrl", content);
 		UtilImpl.CONTENT_FILE_STORAGE = getBoolean(CONTENT_KEY, "fileStorage", content);
 		UtilImpl.CONTENT_FILE_SUFFIXES = getBoolean(CONTENT_KEY, "fileSuffixes", content);
 	}
 
-	private static void configureBackupSettings(Map<String, Object> properties) {
-		Map<String, Object> backup = getObject(null, BACKUP_KEY, properties, false);
+	private static void configureBackupSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> backup = getOptionalObject(BACKUP_KEY, properties);
 		if (backup == null) {
 			return;
 		}
 
-		UtilImpl.BACKUP_DIRECTORY = getString(BACKUP_KEY, DIRECTORY_KEY, backup, false);
+		UtilImpl.BACKUP_DIRECTORY = getOptionalString(DIRECTORY_KEY, backup);
 		if (UtilImpl.BACKUP_DIRECTORY != null) {
 			UtilImpl.BACKUP_DIRECTORY = cleanupDirectory(UtilImpl.BACKUP_DIRECTORY);
 			testWritableDirectory(BACKUP_KEY + '.' + DIRECTORY_KEY, UtilImpl.BACKUP_DIRECTORY);
 		}
-		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getString(BACKUP_KEY, "externalBackupClass", backup, false);
-		UtilImpl.BACKUP_PROPERTIES = getObject(BACKUP_KEY, "properties", backup, false);
-		Number restoreMaxExtractEntries = getNumber(BACKUP_KEY, "restoreMaxExtractEntries", backup, false);
+		UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = getOptionalString("externalBackupClass", backup);
+		UtilImpl.BACKUP_PROPERTIES = getOptionalObject("properties", backup);
+		Number restoreMaxExtractEntries = getOptionalNumber("restoreMaxExtractEntries", backup);
 		if (restoreMaxExtractEntries != null) {
 			UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_ENTRIES = restoreMaxExtractEntries.intValue();
 		}
-		Number restoreMaxExtractSizeMB = getNumber(BACKUP_KEY, "restoreMaxExtractSizeMB", backup, false);
+		Number restoreMaxExtractSizeMB = getOptionalNumber("restoreMaxExtractSizeMB", backup);
 		if (restoreMaxExtractSizeMB != null) {
 			UtilImpl.BACKUP_RESTORE_MAX_EXTRACT_SIZE_MB = restoreMaxExtractSizeMB.intValue();
 		}
 	}
 
-	private static void configureUploadsSettings(Map<String, Object> properties) {
-		Map<String, Object> uploads = getObject(null, UPLOADS_KEY, properties, false);
+	private static void configureUploadsSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> uploads = getOptionalObject(UPLOADS_KEY, properties);
 		if (uploads == null) {
 			return;
 		}
@@ -539,8 +562,8 @@ public class SkyveContextListener implements ServletContextListener {
 		// Multipart upload limits are therefore applied through container configuration instead.
 	}
 
-	private static void configurePushSettings(Map<String, Object> properties) {
-		Map<String, Object> push = getObject(null, PUSH_KEY, properties, false);
+	private static void configurePushSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> push = getOptionalObject(PUSH_KEY, properties);
 		if (push == null) {
 			return;
 		}
@@ -576,101 +599,111 @@ public class SkyveContextListener implements ServletContextListener {
 		});
 	}
 
-	private static void configureAddinsSettings(Map<String, Object> properties) {
-		Map<String, Object> addins = getObject(null, "addins", properties, false);
+	private static void configureAddinsSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> addins = getOptionalObject("addins", properties);
 		if (addins == null) {
 			return;
 		}
 
-		UtilImpl.ADDINS_DIRECTORY = getString("addins", DIRECTORY_KEY, addins, false);
+		UtilImpl.ADDINS_DIRECTORY = getOptionalString(DIRECTORY_KEY, addins);
 		if (UtilImpl.ADDINS_DIRECTORY != null) {
 			UtilImpl.ADDINS_DIRECTORY = cleanupDirectory(UtilImpl.ADDINS_DIRECTORY);
 			testWritableDirectory("addins.directory", UtilImpl.ADDINS_DIRECTORY);
 		}
 	}
 
-	private static void configureThumbnailSettings(Map<String, Object> properties) {
-		Map<String, Object> thumbnail = getObject(null, THUMBNAIL_KEY, properties, false);
+	private static void configureThumbnailSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> thumbnail = getOptionalObject(THUMBNAIL_KEY, properties);
 		if (thumbnail == null) {
 			return;
 		}
 
 		UtilImpl.THUMBNAIL_CONCURRENT_THREADS = getInt(THUMBNAIL_KEY, "concurrentThreads", thumbnail);
 		UtilImpl.THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = getInt(THUMBNAIL_KEY, "subsamplingMinimumTargetSize", thumbnail);
+		// Optional so older JSON files keep the default
+		Number maximumDimension = getOptionalNumber("maximumDimension", thumbnail);
+		if (maximumDimension != null) {
+			// No unlimited setting - an uncapped size lets a request exhaust memory
+			double value = maximumDimension.doubleValue();
+			if ((value < 1) || (value > Integer.MAX_VALUE) || (value != Math.floor(value))) {
+				throw new IllegalStateException(THUMBNAIL_KEY + ".maximumDimension must be a whole number greater than 0");
+			}
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = maximumDimension.intValue();
+		}
 		UtilImpl.THUMBNAIL_FILE_STORAGE = getBoolean(THUMBNAIL_KEY, "fileStorage", thumbnail);
-		UtilImpl.THUMBNAIL_DIRECTORY = getString(THUMBNAIL_KEY, DIRECTORY_KEY, thumbnail, false);
+		UtilImpl.THUMBNAIL_DIRECTORY = getOptionalString(DIRECTORY_KEY, thumbnail);
 		if (UtilImpl.THUMBNAIL_DIRECTORY != null) {
 			UtilImpl.THUMBNAIL_DIRECTORY = cleanupDirectory(UtilImpl.THUMBNAIL_DIRECTORY);
 			testWritableDirectory(THUMBNAIL_KEY + '.' + DIRECTORY_KEY, UtilImpl.THUMBNAIL_DIRECTORY);
 		}
 	}
 
-	private static void configureUrlSettings(Map<String, Object> properties) {
-		Map<String, Object> url = getObject(null, URL_KEY, properties, true);
-		UtilImpl.SERVER_URL = getString(URL_KEY, "server", url, true);
-		UtilImpl.SKYVE_CONTEXT = getString(URL_KEY, "context", url, true);
-		UtilImpl.HOME_URI = getString(URL_KEY, "home", url, true);
+	private static void configureUrlSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> url = getRequiredObject(null, URL_KEY, properties);
+		UtilImpl.SERVER_URL = getRequiredString(URL_KEY, "server", url);
+		UtilImpl.SKYVE_CONTEXT = getRequiredString(URL_KEY, "context", url);
+		UtilImpl.HOME_URI = getRequiredString(URL_KEY, "home", url);
 	}
 
-	private static void configureStateSettings(Map<String, Object> properties) {
-		Map<String, Object> state = getObject(null, STATE_KEY, properties, true);
-		UtilImpl.CACHE_DIRECTORY = getString(STATE_KEY, DIRECTORY_KEY, state, false);
+	private static void configureStateSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> state = getRequiredObject(null, STATE_KEY, properties);
+		UtilImpl.CACHE_DIRECTORY = getOptionalString(DIRECTORY_KEY, state);
 		if (UtilImpl.CACHE_DIRECTORY != null) {
 			UtilImpl.CACHE_DIRECTORY = cleanupDirectory(UtilImpl.CACHE_DIRECTORY);
 			testWritableDirectory(STATE_KEY + '.' + DIRECTORY_KEY, UtilImpl.CACHE_DIRECTORY);
 		}
 
-		UtilImpl.CACHE_MULTIPLE = Boolean.TRUE.equals(get(STATE_KEY, "multiple", state, false));
-		Map<String, Object> conversations = getObject(STATE_KEY, "conversations", state, true);
+		UtilImpl.CACHE_MULTIPLE = Boolean.TRUE.equals(getOptional("multiple", state));
+		Map<String, Object> conversations = getRequiredObject(STATE_KEY, "conversations", state);
 		UtilImpl.CONVERSATION_CACHE = new ConversationCacheConfig(getInt(STATE_CONVERSATIONS_KEY, HEAP_SIZE_ENTRIES_KEY, conversations),
 													getInt(STATE_CONVERSATIONS_KEY, OFF_HEAP_SIZE_MB_KEY, conversations),
 													toDiskSizeMb(STATE_CONVERSATIONS_KEY, conversations),
 													getInt(STATE_CONVERSATIONS_KEY, EXPIRY_TIME_MINUTES_KEY, conversations));
-		Map<String, Object> tokens = getObject(STATE_KEY, "csrfTokens", state, true);
+		Map<String, Object> tokens = getRequiredObject(STATE_KEY, "csrfTokens", state);
 		UtilImpl.CSRF_TOKEN_CACHE = new CSRFTokenCacheConfig(getInt(STATE_CSRF_TOKENS_KEY, HEAP_SIZE_ENTRIES_KEY, tokens),
 											getInt(STATE_CSRF_TOKENS_KEY, OFF_HEAP_SIZE_MB_KEY, tokens),
 											toDiskSizeMb(STATE_CSRF_TOKENS_KEY, tokens),
 											getInt(STATE_CSRF_TOKENS_KEY, EXPIRY_TIME_MINUTES_KEY, tokens));
-		Map<String, Object> sessions = getObject(STATE_KEY, "sessions", state, true);
+		Map<String, Object> sessions = getRequiredObject(STATE_KEY, "sessions", state);
 		UtilImpl.SESSION_CACHE = new SessionCacheConfig(getInt(STATE_SESSIONS_KEY, HEAP_SIZE_ENTRIES_KEY, sessions),
 										getInt(STATE_SESSIONS_KEY, OFF_HEAP_SIZE_MB_KEY, sessions),
 										toDiskSizeMb(STATE_SESSIONS_KEY, sessions),
 										getInt(STATE_SESSIONS_KEY, EXPIRY_TIME_MINUTES_KEY, sessions));
-		Map<String, Object> geoIps = getObject(STATE_KEY, "geoIPs", state, true);
+		Map<String, Object> geoIps = getRequiredObject(STATE_KEY, "geoIPs", state);
 		UtilImpl.GEO_IP_CACHE = new GeoIPCacheConfig(getInt(STATE_GEO_IPS_KEY, HEAP_SIZE_ENTRIES_KEY, geoIps),
 										getInt(STATE_GEO_IPS_KEY, OFF_HEAP_SIZE_MB_KEY, geoIps),
 										toDiskSizeMb(STATE_GEO_IPS_KEY, geoIps),
 										getInt(STATE_GEO_IPS_KEY, EXPIRY_TIME_MINUTES_KEY, geoIps));
-		UtilImpl.STATE_EVICT_CRON = getString(STATE_KEY, "evictCron", state, false);
+		UtilImpl.STATE_EVICT_CRON = getOptionalString("evictCron", state);
 	}
 
-	private static void configureUploadCategory(Map<String, Object> uploads,
-									 String category,
-									 Consumer<String> regexSetter,
-									 IntConsumer maximumSizeSetter) {
-		Map<String, Object> values = getObject(UPLOADS_KEY, category, uploads, false);
+	private static void configureUploadCategory(@Nonnull Map<String, Object> uploads,
+									 @Nonnull String category,
+									 @Nonnull Consumer<String> regexSetter,
+									 @Nonnull IntConsumer maximumSizeSetter) {
+		Map<String, Object> values = getOptionalObject(category, uploads);
 		if (values == null) {
 			return;
 		}
 
 		String uploadKey = UPLOADS_KEY + '.' + category;
-		String whitelistRegex = Util.processStringValue(getString(uploadKey, WHITELIST_REGEX_KEY, values, false));
+		String whitelistRegex = Util.processStringValue(getOptionalString(WHITELIST_REGEX_KEY, values));
 		if (whitelistRegex != null) {
 			validateRegex(uploadKey + '.' + WHITELIST_REGEX_KEY, whitelistRegex);
 			regexSetter.accept(whitelistRegex);
 		}
 
-		Number maximumSizeMB = getNumber(uploadKey, MAXIMUM_SIZE_MB_KEY, values, false);
+		Number maximumSizeMB = getOptionalNumber(MAXIMUM_SIZE_MB_KEY, values);
 		if (maximumSizeMB != null) {
 			maximumSizeSetter.accept(maximumSizeMB.intValue());
 		}
 	}
 
-	private static long toDiskSizeMb(String key, Map<String, Object> values) {
+	private static long toDiskSizeMb(@Nonnull String key, @Nonnull Map<String, Object> values) {
 		return getInt(key, DISK_SIZE_GB_KEY, values) * 1024L;
 	}
 
-	private static void validateRegex(String key, String regex) {
+	private static void validateRegex(@Nonnull String key, @Nonnull String regex) {
 		try {
 			Pattern.compile(regex);
 		}
@@ -679,21 +712,21 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureMapSettings(Map<String, Object> properties) {
-		Map<String, Object> map = getObject(null, MAP_KEY, properties, true);
-		String value = getString(MAP_KEY, "type", map, true);
+	private static void configureMapSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> map = getRequiredObject(null, MAP_KEY, properties);
+		String value = getRequiredString(MAP_KEY, "type", map);
 		UtilImpl.MAP_TYPE = MapType.valueOf(value);
-		UtilImpl.MAP_LAYERS = getString(MAP_KEY, "layers", map, true);
-		UtilImpl.MAP_CENTRE = getString(MAP_KEY, "centre", map, false);
-		Number zoom = getNumber(MAP_KEY, "zoom", map, false);
+		UtilImpl.MAP_LAYERS = getRequiredString(MAP_KEY, "layers", map);
+		UtilImpl.MAP_CENTRE = getOptionalString("centre", map);
+		Number zoom = getOptionalNumber("zoom", map);
 		if (zoom != null) {
 			UtilImpl.MAP_ZOOM = zoom.intValue();
 		}
 	}
 
-	private static void configureAccountSettings(Map<String, Object> properties) {
-		Map<String, Object> account = getObject(null, ACCOUNT_KEY, properties, true);
-		UtilImpl.PASSWORD_HASHING_ALGORITHM = getString(ACCOUNT_KEY, "passwordHashingAlgorithm", account, true);
+	private static void configureAccountSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> account = getRequiredObject(null, ACCOUNT_KEY, properties);
+		UtilImpl.PASSWORD_HASHING_ALGORITHM = getRequiredString(ACCOUNT_KEY, "passwordHashingAlgorithm", account);
 		applyOptionalInt(account, ACCOUNT_KEY, "passwordExpiryInDays", value -> UtilImpl.PASSWORD_EXPIRY_IN_DAYS = value);
 		applyOptionalInt(account, ACCOUNT_KEY, "passwordHistoryRetention", value -> UtilImpl.PASSWORD_HISTORY_RETENTION = value);
 		applyOptionalInt(account, ACCOUNT_KEY, "accountLockoutThreshold", value -> UtilImpl.ACCOUNT_LOCKOUT_THRESHOLD = value);
@@ -702,25 +735,25 @@ public class SkyveContextListener implements ServletContextListener {
 				"accountLockoutDurationMultipleInSeconds",
 				value -> UtilImpl.ACCOUNT_LOCKOUT_DURATION_MULTIPLE_IN_SECONDS = value);
 
-		String loginUri = getString(ACCOUNT_KEY, "loginUri", account, false);
+		String loginUri = getOptionalString("loginUri", account);
 		if (loginUri != null) {
 			UtilImpl.AUTHENTICATION_LOGIN_URI = loginUri;
 		}
 
 		UtilImpl.ACCOUNT_ALLOW_SELF_REGISTRATION = getBoolean(ACCOUNT_KEY, "allowUserSelfRegistration", account);
-		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = getString(ACCOUNT_KEY, "googleAuthClientId", account, false);
-		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = getString(ACCOUNT_KEY, "googleAuthSecret", account, false);
-		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = getString(ACCOUNT_KEY, "facebookAuthClientId", account, false);
-		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getString(ACCOUNT_KEY, "facebookAuthSecret", account, false);
-		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getString(ACCOUNT_KEY, "githubAuthClientId", account, false);
-		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getString(ACCOUNT_KEY, "githubAuthSecret", account, false);
-		UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID = getString(ACCOUNT_KEY, "azureAdAuthClientId", account, false);
-		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = getString(ACCOUNT_KEY, "azureAdAuthTenantId", account, false);
-		UtilImpl.AUTHENTICATION_AZUREAD_SECRET = getString(ACCOUNT_KEY, "azureAdAuthSecret", account, false);
+		UtilImpl.AUTHENTICATION_GOOGLE_CLIENT_ID = getOptionalString("googleAuthClientId", account);
+		UtilImpl.AUTHENTICATION_GOOGLE_SECRET = getOptionalString("googleAuthSecret", account);
+		UtilImpl.AUTHENTICATION_FACEBOOK_CLIENT_ID = getOptionalString("facebookAuthClientId", account);
+		UtilImpl.AUTHENTICATION_FACEBOOK_SECRET = getOptionalString("facebookAuthSecret", account);
+		UtilImpl.AUTHENTICATION_GITHUB_CLIENT_ID = getOptionalString("githubAuthClientId", account);
+		UtilImpl.AUTHENTICATION_GITHUB_SECRET = getOptionalString("githubAuthSecret", account);
+		UtilImpl.AUTHENTICATION_AZUREAD_CLIENT_ID = getOptionalString("azureAdAuthClientId", account);
+		UtilImpl.AUTHENTICATION_AZUREAD_TENANT_ID = getOptionalString("azureAdAuthTenantId", account);
+		UtilImpl.AUTHENTICATION_AZUREAD_SECRET = getOptionalString("azureAdAuthSecret", account);
 		applyOptionalInt(account, ACCOUNT_KEY, "rememberMeTokenTimeoutHours", value -> UtilImpl.REMEMBER_ME_TOKEN_TIMEOUT_HOURS = value);
 
 		UtilImpl.TWO_FACTOR_AUTH_CUSTOMERS = new HashSet<>();
-		List<String> tfaCustomers = getList(ACCOUNT_KEY, "tfaCustomers", account, false);
+		List<String> tfaCustomers = getOptionalList("tfaCustomers", account);
 		if (tfaCustomers != null) {
 			for (String customerName : tfaCustomers) {
 				String name = UtilImpl.processStringValue(customerName);
@@ -738,9 +771,9 @@ public class SkyveContextListener implements ServletContextListener {
 		});
 	}
 
-	private static void configureEnvironmentSettings(Map<String, Object> properties) {
-		Map<String, Object> environment = getObject(null, ENVIRONMENT_KEY, properties, true);
-		UtilImpl.ENVIRONMENT_IDENTIFIER = getString(ENVIRONMENT_KEY, "identifier", environment, false);
+	private static void configureEnvironmentSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> environment = getRequiredObject(null, ENVIRONMENT_KEY, properties);
+		UtilImpl.ENVIRONMENT_IDENTIFIER = getOptionalString("identifier", environment);
 
 		if ((UtilImpl.ENVIRONMENT_IDENTIFIER == null) && UtilImpl.DEV_LOGIN_FILTER_USED) {
 			LOGGER.error(WARNING_BANNER);
@@ -751,15 +784,15 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 
 		UtilImpl.DEV_MODE = getBoolean(ENVIRONMENT_KEY, "devMode", environment);
-		Boolean accessControl = (Boolean) get(ENVIRONMENT_KEY, "accessControl", environment, false);
+		Boolean accessControl = (Boolean) getOptional("accessControl", environment);
 		if (accessControl != null) {
 			UtilImpl.ACCESS_CONTROL = accessControl.booleanValue();
 		}
 
-		UtilImpl.CUSTOMER = getString(ENVIRONMENT_KEY, "customer", environment, false);
+		UtilImpl.CUSTOMER = getOptionalString("customer", environment);
 		UtilImpl.JOB_SCHEDULER = getBoolean(ENVIRONMENT_KEY, "jobScheduler", environment);
-		UtilImpl.APPS_JAR_DIRECTORY = getString(ENVIRONMENT_KEY, "appsJarDirectory", environment, false);
-		UtilImpl.MODULE_DIRECTORY = getString(ENVIRONMENT_KEY, "moduleDirectory", environment, false);
+		UtilImpl.APPS_JAR_DIRECTORY = getOptionalString("appsJarDirectory", environment);
+		UtilImpl.MODULE_DIRECTORY = getOptionalString("moduleDirectory", environment);
 		if (UtilImpl.MODULE_DIRECTORY != null) {
 			UtilImpl.MODULE_DIRECTORY = UtilImpl.cleanupModuleDirectory(UtilImpl.MODULE_DIRECTORY);
 
@@ -772,12 +805,12 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
-		UtilImpl.SUPPORT_EMAIL_ADDRESS = getString(ENVIRONMENT_KEY, "supportEmailAddress", environment, false);
+		UtilImpl.SUPPORT_EMAIL_ADDRESS = getOptionalString("supportEmailAddress", environment);
 		UtilImpl.SHOW_SETUP = getBoolean(ENVIRONMENT_KEY, "showSetup", environment);
 	}
 
-	private static void configureHealthSettings(Map<String, Object> properties) {
-		Map<String, Object> health = getObject(null, HEALTH_KEY, properties, false);
+	private static void configureHealthSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> health = getOptionalObject(HEALTH_KEY, properties);
 		if (health == null) {
 			return;
 		}
@@ -786,48 +819,78 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HEALTH_CACHE_TIME_IN_SECONDS = getInt(HEALTH_KEY, "cacheTimeInSeconds", health);
 	}
 
-	private static void configureApiSettings(Map<String, Object> properties) {
-		Map<String, Object> api = getObject(null, API_KEY, properties, true);
-		UtilImpl.CHECK_FOR_BREACHED_PASSWORD = Boolean.TRUE.equals(get(API_KEY, "checkForBreachedPassword", api, false));
-		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getString(API_KEY, "googleMapsV3Key", api, false);
-		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getString(API_KEY, "googleRecaptchaSiteKey", api, false);
-		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getString(API_KEY, "googleRecaptchaSecretKey", api, false);
-		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getString(API_KEY, "cloudflareTurnstileSiteKey", api, false);
-		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getString(API_KEY, "cloudflareTurnstileSecretKey", api, false);
-		UtilImpl.GEO_IP_KEY = getString(API_KEY, "geoIPKey", api, false);
+	/**
+	 * Reads the optional {@code sail} section: {@code sail.recording} allows users with the {@code admin.SAILRecorder}
+	 * role to record SAIL scripts. It defaults to {@code false}. {@code sail.maximumSteps} caps the steps one recording
+	 * keeps (default 5000). Recording is allowed in production (a null
+	 * {@code environment.identifier}), with a warning, because a recording holds the data the user saw and typed.
+	 *
+	 * <p>Side effects: sets {@link UtilImpl#SAIL_RECORDING} and {@link UtilImpl#SAIL_RECORDING_MAXIMUM_STEPS}; logs a warning when recording is allowed in production.
+	 * Must run after the environment settings are read.
+	 *
+	 * @param properties	the configuration
+	 */
+	private static void configureSailSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> sail = getOptionalObject(SAIL_KEY, properties);
+		Boolean recording = (sail == null) ? null : (Boolean) getOptional("recording", sail);
+		UtilImpl.SAIL_RECORDING = Boolean.TRUE.equals(recording);
+		if (sail != null) {
+			applyOptionalInt(sail, SAIL_KEY, "maximumSteps", value -> {
+				if (value < 1) {
+					throw new IllegalStateException(SAIL_KEY + ".maximumSteps must be greater than 0");
+				}
+				UtilImpl.SAIL_RECORDING_MAXIMUM_STEPS = value;
+			});
+		}
+		if (UtilImpl.SAIL_RECORDING && (UtilImpl.ENVIRONMENT_IDENTIFIER == null)) {
+			LOGGER.warn(WARNING_BANNER);
+			LOGGER.warn("SAIL recording (sail.recording) is enabled in production - users with the admin.SAILRecorder role can record what they see and type");
+			LOGGER.warn(WARNING_BANNER);
+		}
+	}
 
-		String geoIpCountryCodes = getString(API_KEY, "geoIPCountryCodes", api, false);
+	private static void configureApiSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> api = getRequiredObject(null, API_KEY, properties);
+		UtilImpl.CHECK_FOR_BREACHED_PASSWORD = Boolean.TRUE.equals(getOptional("checkForBreachedPassword", api));
+		UtilImpl.GOOGLE_MAPS_V3_API_KEY = getOptionalString("googleMapsV3Key", api);
+		UtilImpl.GOOGLE_RECAPTCHA_SITE_KEY = getOptionalString("googleRecaptchaSiteKey", api);
+		UtilImpl.GOOGLE_RECAPTCHA_SECRET_KEY = getOptionalString("googleRecaptchaSecretKey", api);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SITE_KEY = getOptionalString("cloudflareTurnstileSiteKey", api);
+		UtilImpl.CLOUDFLARE_TURNSTILE_SECRET_KEY = getOptionalString("cloudflareTurnstileSecretKey", api);
+		UtilImpl.GEO_IP_KEY = getOptionalString("geoIPKey", api);
+
+		String geoIpCountryCodes = getOptionalString("geoIPCountryCodes", api);
 		if (geoIpCountryCodes != null) {
 			String[] codes = geoIpCountryCodes.split("\\|");
 			UtilImpl.GEO_IP_COUNTRY_CODES = new CopyOnWriteArraySet<>(Arrays.asList(codes));
 		}
 
-		Boolean geoIpWhitelist = (Boolean) get(API_KEY, "geoIPWhitelist", api, false);
+		Boolean geoIpWhitelist = (Boolean) getOptional("geoIPWhitelist", api);
 		if (geoIpWhitelist != null) {
 			UtilImpl.GEO_IP_WHITELIST = geoIpWhitelist.booleanValue();
 		}
 
-		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getString(API_KEY, "ckEditorConfigFileUrl", api, false);
+		UtilImpl.CKEDITOR_CONFIG_FILE_URL = getOptionalString("ckEditorConfigFileUrl", api);
 		if (UtilImpl.CKEDITOR_CONFIG_FILE_URL == null) {
 			UtilImpl.CKEDITOR_CONFIG_FILE_URL = "";
 		}
 	}
 
-	private static void configureApplicationCaches(Map<String, Object> properties) {
-		Map<String, Object> caches = getObject(null, CACHES_KEY, properties, false);
+	private static void configureApplicationCaches(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> caches = getOptionalObject(CACHES_KEY, properties);
 		if (caches != null) {
 			for (String cacheName : caches.keySet()) {
-				Map<String, Object> cache = getObject(CACHES_KEY, cacheName, caches, true);
-				String prefix = String.format("caches.%s", cacheName);
-				String type = getString(CACHES_KEY + '.' + cacheName, "type", cache, true);
+				Map<String, Object> cache = getRequiredObject(CACHES_KEY, cacheName, caches);
+				String prefix = CACHES_KEY + '.' + cacheName;
+				String type = getRequiredString(prefix, "type", cache);
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
-				Number offHeapSizeInMb = getNumber(prefix, OFF_HEAP_SIZE_MB_KEY, cache, false);
-				Number expiryInMinutes = getNumber(prefix, EXPIRY_TIME_MINUTES_KEY, cache, false);
-				Number diskSizeInGb = getNumber(prefix, DISK_SIZE_GB_KEY, cache, false);
-				String keyClassName = getString(prefix, "keyClass", cache, true);
-				String valueClassName = getString(prefix, "valueClass", cache, true);
-				String expiryPolicyString = getString(prefix, "expiryPolicy", cache, false);
-				Boolean persistent = (Boolean) get(prefix, "persistent", cache, false);
+				Number offHeapSizeInMb = getOptionalNumber(OFF_HEAP_SIZE_MB_KEY, cache);
+				Number expiryInMinutes = getOptionalNumber(EXPIRY_TIME_MINUTES_KEY, cache);
+				Number diskSizeInGb = getOptionalNumber(DISK_SIZE_GB_KEY, cache);
+				String keyClassName = getRequiredString(prefix, "keyClass", cache);
+				String valueClassName = getRequiredString(prefix, "valueClass", cache);
+				String expiryPolicyString = getOptionalString("expiryPolicy", cache);
+				Boolean persistent = (Boolean) getOptional("persistent", cache);
 				Class<? extends Serializable> keyClass = loadSerializableClass(keyClassName, prefix + ".keyClass");
 				Class<? extends Serializable> valueClass = loadSerializableClass(valueClassName, prefix + ".valueClass");
 				CacheExpiryPolicy expiryPolicy = (expiryPolicyString == null) ? CacheExpiryPolicy.eternal : CacheExpiryPolicy.valueOf(expiryPolicyString);
@@ -849,7 +912,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void addApplicationCache(AppCacheSettings settings) {
+	private static void addApplicationCache(@Nonnull AppCacheSettings settings) {
 		if ("jcache".equals(settings.type())) {
 			UtilImpl.APP_CACHES.add(new JCacheConfig<>(settings.cacheName(),
 						settings.heapSizeEntries(),
@@ -875,19 +938,19 @@ public class SkyveContextListener implements ServletContextListener {
 		throw new IllegalStateException("Cache type " + settings.type() + " is not a known type");
 	}
 
-	private static void configureDataStores(Map<String, Object> properties) {
-		Map<String, Object> dataStores = getObject(null, "dataStores", properties, true);
+	private static void configureDataStores(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> dataStores = getRequiredObject(null, "dataStores", properties);
 		for (String dataStoreName : dataStores.keySet()) {
-			Map<String, Object> dataStore = getObject("dataStores", dataStoreName, dataStores, true);
-			String prefix = String.format("dataStores.%s", dataStoreName);
-			String dialect = getString(prefix, "dialect", dataStore, true);
-			String jndi = getString(prefix, "jndi", dataStore, false);
+			Map<String, Object> dataStore = getRequiredObject("dataStores", dataStoreName, dataStores);
+			String prefix = "dataStores." + dataStoreName;
+			String dialect = getRequiredString(prefix, "dialect", dataStore);
+			String jndi = getOptionalString("jndi", dataStore);
 			if (jndi == null) {
 				UtilImpl.DATA_STORES.put(dataStoreName,
-						new DataStore(getString(prefix, "driver", dataStore, true),
-								getString(prefix, URL_KEY, dataStore, true),
-								getString(prefix, "user", dataStore, false),
-								getString(prefix, "password", dataStore, false),
+						new DataStore(getRequiredString(prefix, "driver", dataStore),
+								getRequiredString(prefix, URL_KEY, dataStore),
+								getOptionalString("user", dataStore),
+								getOptionalString("password", dataStore),
 								dialect,
 								getInt(prefix, "oltpConnectionTimeoutInSeconds", dataStore),
 								getInt(prefix, "asyncConnectionTimeoutInSeconds", dataStore)));
@@ -902,27 +965,27 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureHibernateSettings(Map<String, Object> properties) {
-		Map<String, Object> hibernate = getObject(null, HIBERNATE_KEY, properties, true);
-		String dataStoreName = getString(HIBERNATE_KEY, "dataStore", hibernate, true);
+	private static void configureHibernateSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> hibernate = getRequiredObject(null, HIBERNATE_KEY, properties);
+		String dataStoreName = getRequiredString(HIBERNATE_KEY, "dataStore", hibernate);
 		UtilImpl.DATA_STORE = UtilImpl.DATA_STORES.get(dataStoreName);
 		if (UtilImpl.DATA_STORE == null) {
 			throw new IllegalStateException("hibernate.dataStore " + dataStoreName + " is not defined in dataStores");
 		}
 		UtilImpl.DDL_SYNC = getBoolean(HIBERNATE_KEY, "ddlSync", hibernate);
-		UtilImpl.CATALOG = getString(HIBERNATE_KEY, "catalog", hibernate, false);
-		UtilImpl.SCHEMA = getString(HIBERNATE_KEY, "schema", hibernate, false);
+		UtilImpl.CATALOG = getOptionalString("catalog", hibernate);
+		UtilImpl.SCHEMA = getOptionalString("schema", hibernate);
 		UtilImpl.PRETTY_SQL_OUTPUT = getBoolean(HIBERNATE_KEY, "prettySql", hibernate);
 
-		Map<String, Object> hibernateCaches = getObject(HIBERNATE_KEY, CACHES_KEY, hibernate, false);
+		Map<String, Object> hibernateCaches = getOptionalObject(CACHES_KEY, hibernate);
 		if (hibernateCaches != null) {
 			for (String cacheName : hibernateCaches.keySet()) {
-				Map<String, Object> cache = getObject("hibernate.caches", cacheName, hibernateCaches, true);
-				String prefix = String.format("hibernate.caches.%s", cacheName);
+				Map<String, Object> cache = getRequiredObject("hibernate.caches", cacheName, hibernateCaches);
+				String prefix = HIBERNATE_KEY + '.' + CACHES_KEY + '.' + cacheName;
 				int heapSizeEntries = getInt(prefix, HEAP_SIZE_ENTRIES_KEY, cache);
-				Number offHeapSizeInMb = getNumber(prefix, OFF_HEAP_SIZE_MB_KEY, cache, false);
-				String expiryPolicyString = getString(prefix, "expiryPolicy", cache, false);
-				Number expiryInMinutes = getNumber(prefix, EXPIRY_TIME_MINUTES_KEY, cache, false);
+				Number offHeapSizeInMb = getOptionalNumber(OFF_HEAP_SIZE_MB_KEY, cache);
+				String expiryPolicyString = getOptionalString("expiryPolicy", cache);
+				Number expiryInMinutes = getOptionalNumber(EXPIRY_TIME_MINUTES_KEY, cache);
 				UtilImpl.HIBERNATE_CACHES.add(new HibernateCacheConfig(cacheName,
 														heapSizeEntries,
 														(offHeapSizeInMb == null) ? 0L : offHeapSizeInMb.longValue(),
@@ -934,8 +997,8 @@ public class SkyveContextListener implements ServletContextListener {
 		UtilImpl.HIBERNATE_FAIL_ON_MISSING_CACHE = true;
 	}
 
-	private static void configureFactorySettings(Map<String, Object> properties) {
-		Map<String, Object> factories = getObject(null, FACTORIES_KEY, properties, true);
+	private static void configureFactorySettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> factories = getRequiredObject(null, FACTORIES_KEY, properties);
 		configureRepositoryFactory(factories);
 		configurePersistenceFactories(factories);
 		configureSingletonFactories(factories);
@@ -948,8 +1011,8 @@ public class SkyveContextListener implements ServletContextListener {
 		configureServiceFactories(factories);
 	}
 
-	private static void configureRepositoryFactory(Map<String, Object> factories) {
-		UtilImpl.SKYVE_REPOSITORY_CLASS = getString(FACTORIES_KEY, "repositoryClass", factories, false);
+	private static void configureRepositoryFactory(@Nonnull Map<String, Object> factories) {
+		UtilImpl.SKYVE_REPOSITORY_CLASS = getOptionalString("repositoryClass", factories);
 		if (! ProvidedRepositoryFactory.isConfigured()) {
 			if (UtilImpl.SKYVE_REPOSITORY_CLASS == null) {
 				LOGGER.info("SET SKYVE REPOSITORY CLASS TO DEFAULT");
@@ -965,8 +1028,8 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static void configurePersistenceFactories(Map<String, Object> factories) {
-		UtilImpl.SKYVE_PERSISTENCE_CLASS = getString(FACTORIES_KEY, "persistenceClass", factories, false);
+	private static void configurePersistenceFactories(@Nonnull Map<String, Object> factories) {
+		UtilImpl.SKYVE_PERSISTENCE_CLASS = getOptionalString("persistenceClass", factories);
 		if (AbstractPersistence.IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_PERSISTENCE_CLASS == null) {
 				LOGGER.info("SET SKYVE PERSISTENCE CLASS TO DEFAULT (HibernateContentPersistence)");
@@ -979,7 +1042,7 @@ public class SkyveContextListener implements ServletContextListener {
 			}
 		}
 
-		UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS = getString(FACTORIES_KEY, "dynamicPersistenceClass", factories, false);
+		UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS = getOptionalString("dynamicPersistenceClass", factories);
 		if (AbstractPersistence.DYNAMIC_IMPLEMENTATION_CLASS == null) {
 			if (UtilImpl.SKYVE_DYNAMIC_PERSISTENCE_CLASS == null) {
 				LOGGER.info("SET SKYVE DYNAMIC PERSISTENCE CLASS TO DEFAULT (RDBMSDynamicPersistence)");
@@ -994,10 +1057,10 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void configureSingletonFactories(Map<String, Object> factories) {
-		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getString(FACTORIES_KEY, "contentManagerClass", factories, false);
+	private static void configureSingletonFactories(@Nonnull Map<String, Object> factories) {
+		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = getOptionalString("contentManagerClass", factories);
 
-		UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS = getString(FACTORIES_KEY, "numberGeneratorClass", factories, false);
+		UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS = getOptionalString("numberGeneratorClass", factories);
 		if (UtilImpl.SKYVE_NUMBER_GENERATOR_CLASS == null) {
 			NumberGeneratorStaticSingleton.setDefault();
 		}
@@ -1008,7 +1071,7 @@ public class SkyveContextListener implements ServletContextListener {
 			NumberGeneratorStaticSingleton.set(numberGenerator);
 		}
 
-		UtilImpl.SKYVE_CUSTOMISATIONS_CLASS = getString(FACTORIES_KEY, "customisationsClass", factories, false);
+		UtilImpl.SKYVE_CUSTOMISATIONS_CLASS = getOptionalString("customisationsClass", factories);
 		if (UtilImpl.SKYVE_CUSTOMISATIONS_CLASS == null) {
 			CustomisationsStaticSingleton.setDefault();
 		}
@@ -1018,56 +1081,83 @@ public class SkyveContextListener implements ServletContextListener {
 					"factories.customisationsClass");
 			CustomisationsStaticSingleton.set(customisations);
 		}
+
+		UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS = getOptionalString("connectionCustomiserClass", factories);
+		if (UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS == null) {
+			ConnectionCustomiserStaticSingleton.set(null);
+		}
+		else {
+			ConnectionCustomiser connectionCustomiser = instantiateFactory(ConnectionCustomiser.class,
+					UtilImpl.SKYVE_CONNECTION_CUSTOMISER_CLASS,
+					"factories.connectionCustomiserClass");
+			ConnectionCustomiserStaticSingleton.set(connectionCustomiser);
+		}
 	}
 
-	private static void configureServiceFactories(Map<String, Object> factories) {
-		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getString(FACTORIES_KEY, "geoIPServiceClass", factories, false);
+	/**
+	 * Installs the configured or default dialogs, GeoIP and SMS services.
+	 *
+	 * @param factories	The {@code factories} configuration; never {@code null}.
+	 */
+	private static void configureServiceFactories(@Nonnull Map<String, Object> factories) {
+		UtilImpl.SKYVE_DIALOGS_CLASS = getOptionalString("dialogsClass", factories);
+		if (UtilImpl.SKYVE_DIALOGS_CLASS == null) {
+			DialogsStaticSingleton.setDefault();
+		}
+		else {
+			Dialogs dialogs = instantiateFactory(Dialogs.class,
+													UtilImpl.SKYVE_DIALOGS_CLASS,
+													"factories.dialogsClass");
+			DialogsStaticSingleton.set(dialogs);
+		}
+
+		UtilImpl.SKYVE_GEOIP_SERVICE_CLASS = getOptionalString("geoIPServiceClass", factories);
 		if (UtilImpl.SKYVE_GEOIP_SERVICE_CLASS == null) {
 			GeoIPServiceStaticSingleton.setDefault();
 		}
 		else {
 			GeoIPService geoIpService = instantiateFactory(GeoIPService.class,
-					UtilImpl.SKYVE_GEOIP_SERVICE_CLASS,
-					"factories.geoIPServiceClass");
+															UtilImpl.SKYVE_GEOIP_SERVICE_CLASS,
+															"factories.geoIPServiceClass");
 			GeoIPServiceStaticSingleton.set(geoIpService);
 		}
 
-		UtilImpl.SKYVE_SMS_SERVICE_CLASS = getString(FACTORIES_KEY, "smsServiceClass", factories, false);
+		UtilImpl.SKYVE_SMS_SERVICE_CLASS = getOptionalString("smsServiceClass", factories);
 		if (UtilImpl.SKYVE_SMS_SERVICE_CLASS == null) {
 			SMSServiceStaticSingleton.setDefault();
 		}
 		else {
 			SMSService smsService = instantiateFactory(SMSService.class,
-					UtilImpl.SKYVE_SMS_SERVICE_CLASS,
-					"factories.smsServiceClass");
+														UtilImpl.SKYVE_SMS_SERVICE_CLASS,
+														"factories.smsServiceClass");
 			SMSServiceStaticSingleton.set(smsService);
 		}
 	}
 
-	private static void configureBootstrapSettings(Map<String, Object> properties) {
-		Map<String, Object> bootstrap = getObject(null, BOOTSTRAP_KEY, properties, false);
+	private static void configureBootstrapSettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> bootstrap = getOptionalObject(BOOTSTRAP_KEY, properties);
 		if (bootstrap == null) {
 			return;
 		}
 
-		UtilImpl.BOOTSTRAP_CUSTOMER = getString(BOOTSTRAP_KEY, "customer", bootstrap, true);
-		UtilImpl.BOOTSTRAP_USER = getString(BOOTSTRAP_KEY, "user", bootstrap, true);
-		UtilImpl.BOOTSTRAP_EMAIL = getString(BOOTSTRAP_KEY, "email", bootstrap, false);
+		UtilImpl.BOOTSTRAP_CUSTOMER = getRequiredString(BOOTSTRAP_KEY, "customer", bootstrap);
+		UtilImpl.BOOTSTRAP_USER = getRequiredString(BOOTSTRAP_KEY, "user", bootstrap);
+		UtilImpl.BOOTSTRAP_EMAIL = getOptionalString("email", bootstrap);
 		if (UtilImpl.BOOTSTRAP_EMAIL == null) {
 			UtilImpl.BOOTSTRAP_EMAIL = "pleaseupdate@test.com";
 		}
-		UtilImpl.BOOTSTRAP_PASSWORD = getString(BOOTSTRAP_KEY, "password", bootstrap, true);
+		UtilImpl.BOOTSTRAP_PASSWORD = getRequiredString(BOOTSTRAP_KEY, "password", bootstrap);
 	}
 
-	private static void configurePrimeFlex(ServletContext ctx) {
+	private static void configurePrimeFlex(@Nonnull ServletContext ctx) {
 		String primeFlex = UtilImpl.processStringValue(ctx.getInitParameter("org.skyve.web.faces.PRIMEFLEX"));
 		if (primeFlex != null) {
 			UtilImpl.PRIMEFLEX = Boolean.parseBoolean(primeFlex);
 		}
 	}
 
-	private static void configureSecuritySettings(Map<String, Object> properties) {
-		Map<String, Object> security = getObject(null, SECURITY_KEY, properties, false);
+	private static void configureSecuritySettings(@Nonnull Map<String, Object> properties) {
+		Map<String, Object> security = getOptionalObject(SECURITY_KEY, properties);
 		if (security == null) {
 			return;
 		}
@@ -1079,7 +1169,7 @@ public class SkyveContextListener implements ServletContextListener {
 			UtilImpl.IP_ADDRESS_HISTORY_CHECK_COUNT = getInt(SECURITY_KEY, "ipAddressHistoryCheckCount", security);
 		}
 
-		UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = getString(SECURITY_KEY, "securityNotificationsEmail", security, false);
+		UtilImpl.SECURITY_NOTIFICATIONS_EMAIL_ADDRESS = getOptionalString("securityNotificationsEmail", security);
 		UtilImpl.GEO_IP_BLOCK_NOTIFICATIONS = getBoolean(SECURITY_KEY, "geoIPBlockNotifications", security);
 		UtilImpl.PASSWORD_CHANGE_NOTIFICATIONS = getBoolean(SECURITY_KEY, "passwordChangeNotifications", security);
 		UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS = getBoolean(SECURITY_KEY, "differentCountryLoginNotifications", security);
@@ -1094,7 +1184,7 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static Class<?> loadFactoryClass(String className, String propertyKey) {
+	private static @Nonnull Class<?> loadFactoryClass(@Nonnull String className, @Nonnull String propertyKey) {
 		try {
 			return Thread.currentThread().getContextClassLoader().loadClass(className);
 		}
@@ -1104,11 +1194,11 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static Class<? extends Serializable> loadSerializableClass(String className, String propertyKey) {
+	private static @Nonnull Class<? extends Serializable> loadSerializableClass(@Nonnull String className, @Nonnull String propertyKey) {
 		return (Class<? extends Serializable>) loadFactoryClass(className, propertyKey);
 	}
 
-	private static <T> T instantiateFactory(Class<T> expectedType, String className, String propertyKey) {
+	private static @Nonnull <T> T instantiateFactory(@Nonnull Class<T> expectedType, @Nonnull String className, @Nonnull String propertyKey) {
 		try {
 			Class<?> loadedClass = loadFactoryClass(className, propertyKey);
 			Object instance = loadedClass.getDeclaredConstructor().newInstance();
@@ -1122,8 +1212,8 @@ public class SkyveContextListener implements ServletContextListener {
 		}
 	}
 
-	private static void applyOptionalInt(Map<String, Object> properties, String key, String name, IntConsumer setter) {
-		Number number = getNumber(key, name, properties, false);
+	private static void applyOptionalInt(@Nonnull Map<String, Object> properties, @Nonnull String key, @Nonnull String name, @Nonnull IntConsumer setter) {
+		Number number = getOptionalNumber(name, properties);
 		if (number != null) {
 			setter.accept(number.intValue());
 		}
@@ -1135,7 +1225,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param overrides the overriding values
 	 * @param properties the destination properties to update
 	 */
-	private static void merge(Map<String, Object> overrides, Map<String, Object> properties) {
+	private static void merge(@Nonnull Map<String, Object> overrides, @Nonnull Map<String, Object> properties) {
 		for (Entry<String, Object> entry : overrides.entrySet()) {
 			String key = entry.getKey();
 			Object override = entry.getValue();
@@ -1166,23 +1256,34 @@ public class SkyveContextListener implements ServletContextListener {
 	}
 	
 	/**
-	 * Look up a configuration value and optionally enforce existence.
+	 * Look up a configuration value that must exist.
 	 *
 	 * @param prefix Optional configuration prefix for error messages.
 	 * @param key The key to look up.
 	 * @param properties The configuration map.
-	 * @param required Whether the key must exist.
-	 * @return The raw configuration value (may be null when not required).
+	 * @return The raw configuration value.
+	 * @throws IllegalStateException if the key does not exist.
 	 */
-	private static Object get(String prefix, String key, Map<String, Object> properties, boolean required) {
+	private static @Nonnull Object getRequired(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
 		Object result = properties.get(key);
-		if (required && (result == null)) {
+		if (result == null) {
 			if (prefix != null) {
 				throw new IllegalStateException(String.format("Property %s.%s does not exist in the JSON configuration.", prefix, key));
 			}
 			throw new IllegalStateException(String.format("Property %s does not exist in the JSON configuration.", key));
 		}
 		return result;
+	}
+
+	/**
+	 * Look up an optional configuration value.
+	 *
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @return The raw configuration value, or null if the key does not exist.
+	 */
+	private static @Nullable Object getOptional(@Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return properties.get(key);
 	}
 
 	/**
@@ -1193,9 +1294,8 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param properties The configuration map.
 	 * @return The boolean value.
 	 */
-	private static boolean getBoolean(String prefix, String key, Map<String, Object> properties) {
-		Boolean result = (Boolean) get(prefix, key, properties, true);
-		return result.booleanValue();
+	private static boolean getBoolean(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return ((Boolean) getRequired(prefix, key, properties)).booleanValue();
 	}
 	
 	/**
@@ -1206,64 +1306,96 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param properties The configuration map.
 	 * @return The integer value.
 	 */
-	private static int getInt(String prefix, String key, Map<String, Object> properties) {
-		return getNumber(prefix, key, properties, true).intValue();
+	private static int getInt(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return getRequiredNumber(prefix, key, properties).intValue();
 	}
 
 	/**
-	 * Retrieve a numeric configuration value.
+	 * Retrieve a required numeric configuration value.
 	 *
 	 * @param prefix Optional configuration prefix for error messages.
 	 * @param key The key to look up.
 	 * @param properties The configuration map.
-	 * @param required Whether the key must exist.
-	 * @return The numeric value (may be null when not required).
+	 * @return The numeric value.
+	 * @throws IllegalStateException if the key does not exist.
 	 */
-	private static Number getNumber(String prefix, String key, Map<String, Object> properties, boolean required) {
-		return (Number) get(prefix, key, properties, required);
+	private static @Nonnull Number getRequiredNumber(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (Number) getRequired(prefix, key, properties);
 	}
 
 	/**
-	 * Retrieve a string configuration value.
+	 * Retrieve an optional numeric configuration value.
 	 *
-	 * @param prefix Optional configuration prefix for error messages.
 	 * @param key The key to look up.
 	 * @param properties The configuration map.
-	 * @param required Whether the key must exist.
-	 * @return The string value (may be null when not required).
+	 * @return The numeric value, or null if the key does not exist.
 	 */
-	private static String getString(String prefix, String key, Map<String, Object> properties, boolean required) {
-		return (String) get(prefix, key, properties, required);
+	private static @Nullable Number getOptionalNumber(@Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (Number) getOptional(key, properties);
 	}
 
 	/**
-	 * Retrieve a nested object configuration map.
+	 * Retrieve a required string configuration value.
 	 *
 	 * @param prefix Optional configuration prefix for error messages.
 	 * @param key The key to look up.
 	 * @param properties The configuration map.
-	 * @param required Whether the key must exist.
-	 * @return The nested map (may be null when not required).
+	 * @return The string value.
+	 * @throws IllegalStateException if the key does not exist.
+	 */
+	private static @Nonnull String getRequiredString(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (String) getRequired(prefix, key, properties);
+	}
+
+	/**
+	 * Retrieve an optional string configuration value.
+	 *
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @return The string value, or null if the key does not exist.
+	 */
+	private static @Nullable String getOptionalString(@Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (String) getOptional(key, properties);
+	}
+
+	/**
+	 * Retrieve a required nested object configuration value.
+	 *
+	 * @param prefix Optional configuration prefix for error messages.
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @return The nested object value.
+	 * @throws IllegalStateException if the key does not exist.
 	 */
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> getObject(String prefix, String key, Map<String, Object> properties, boolean required) {
-		return (Map<String, Object>) get(prefix, key, properties, required);
+	private static @Nonnull Map<String, Object> getRequiredObject(@Nullable String prefix, @Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (Map<String, Object>) getRequired(prefix, key, properties);
 	}
-	
+
 	/**
-	 * Retrieve a list configuration value.
+	 * Retrieve an optional nested object configuration value.
 	 *
-	 * @param prefix Optional configuration prefix for error messages.
 	 * @param key The key to look up.
 	 * @param properties The configuration map.
-	 * @param required Whether the key must exist.
-	 * @return The list value (may be null when not required).
+	 * @return The nested object value, or null if the key does not exist.
 	 */
 	@SuppressWarnings("unchecked")
-	private static List<String> getList(String prefix, String key, Map<String, Object> properties, boolean required) {
-		return (List<String>) get(prefix, key, properties, required);
+	private static @Nullable Map<String, Object> getOptionalObject(@Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (Map<String, Object>) getOptional(key, properties);
 	}
-	
+
+	/**
+	 * Retrieve an optional list configuration value.
+	 *
+	 * @param key The key to look up.
+	 * @param properties The configuration map.
+	 * @return The list value, or null if the key does not exist.
+	 */
+	@SuppressWarnings("unchecked")
+	private static @Nullable List<String> getOptionalList(@Nonnull String key, @Nonnull Map<String, Object> properties) {
+		return (List<String>) getOptional(key, properties);
+	}
+
 	/**
 	 * Shutdown Skyve services and notify per-customer shutdown hooks when the
 	 * web application context is destroyed.
@@ -1271,7 +1403,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param evt The servlet context event.
 	 */
 	@Override
-	public void contextDestroyed(ServletContextEvent evt) {
+	public void contextDestroyed(@SuppressWarnings("null") @Nonnull ServletContextEvent evt) {
 		evt.getServletContext().setAttribute(SHUTTING_DOWN_ATTRIBUTE_NAME, Boolean.TRUE);
 
 		try {
@@ -1346,7 +1478,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @return The updated path if any slashes need to be added
 	 */
 	@SuppressWarnings("java:S1075")
-	static String cleanupDirectory(final String path) {
+	static @Nullable String cleanupDirectory(final @Nullable String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path.replace("\\", "/");
 
@@ -1365,7 +1497,7 @@ public class SkyveContextListener implements ServletContextListener {
 	 * @param propertyName	The property name to report in exceptions.
 	 * @param directoryPath	The property value to test.
 	 */
-	private static void testWritableDirectory(String propertyName, String directoryPath) {
+	private static void testWritableDirectory(@Nonnull String propertyName, @Nonnull String directoryPath) {
 		File directory = new File(directoryPath);
 		
 		if (! directory.exists()) {

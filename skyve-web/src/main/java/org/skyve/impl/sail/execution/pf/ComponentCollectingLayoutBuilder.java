@@ -3,6 +3,8 @@ package org.skyve.impl.sail.execution.pf;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.web.faces.pipeline.layout.NoOpLayoutBuilder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 
 /**
@@ -16,7 +18,7 @@ public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 	 *
 	 * @param cccb the collecting component builder receiving deferred component additions
 	 */
-	public ComponentCollectingLayoutBuilder(ComponentCollectingComponentBuilder cccb) {
+	public ComponentCollectingLayoutBuilder(@Nonnull ComponentCollectingComponentBuilder cccb) {
 		this.cccb = cccb;
 	}
 	
@@ -37,24 +39,26 @@ public class ComponentCollectingLayoutBuilder extends NoOpLayoutBuilder {
 	 * @param md optional medium breakpoint width
 	 * @param lg optional large breakpoint width
 	 * @param xl optional extra-large breakpoint width
-	 * @param invisibleConditionName optional invisible-condition expression
+	 * @param invisibleCondition optional invisible-condition expression
 	 *
 	 * @return {@code component}, unchanged, because this no-op layout builder does not alter container structure
 	 */
 	@Override
-	public UIComponent addToContainer(UIComponent component,
-										Container viewContainer,
-										UIComponent container,
-										UIComponent componentToAdd,
-										Integer pixelWidth,
-										Integer responsiveWidth,
-										Integer percentageWidth,
-										Integer sm,
-										Integer md,
-										Integer lg,
-										Integer xl,
-										String invisibleConditionName) {
-		cccb.addToContainer(componentToAdd);
+	public @Nullable UIComponent addToContainer(@Nullable UIComponent component,
+													@Nullable Container viewContainer,
+													@Nullable UIComponent container,
+													@Nullable UIComponent componentToAdd,
+													@Nullable Integer pixelWidth,
+													@Nullable Integer responsiveWidth,
+													@Nullable Integer percentageWidth,
+													@Nullable Integer sm,
+													@Nullable Integer md,
+													@Nullable Integer lg,
+													@Nullable Integer xl,
+													@Nullable String invisibleCondition) {
+		if (componentToAdd != null) {
+			cccb.addToContainer(componentToAdd);
+		}
 		return component;
 	}
 }

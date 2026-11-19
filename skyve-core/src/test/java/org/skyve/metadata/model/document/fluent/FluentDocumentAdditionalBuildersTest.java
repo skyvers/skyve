@@ -367,6 +367,8 @@ class FluentDocumentAdditionalBuildersTest {
 	void fromDocumentWithUnknownAttributeTypeThrowsIllegalState() {
 		DocumentImpl doc = new DocumentImpl();
 		AbstractAttribute unknown = new AbstractAttribute() {
+			private static final long serialVersionUID = 1L;
+
 			@Override public boolean isScalar() { return false; }
 			@Override public boolean isPersistent() { return false; }
 			@Override public boolean isRequired() { return false; }

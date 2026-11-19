@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces conformance script for dataGridLink, a member of kitchensink.suite.xml: the Actions Fixture's Run From Row
+	link in a row of its rows grid, declined and confirmed, by the row's text and by its number. The grid zooms into a row
+	when the row is selected, so this also checks that clicking the link does not select its row.
+-->
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Actions Fixture: a link in a data grid row">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<tabSelect path="Rows" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL link row {run}" />
+			<zoomOut />
+			<comment>The link's action asks for a confirmation: declined, the action does not run</comment>
+			<dataGridLink binding="rows" rowContaining="SAIL link row {run}" text="Run From Row" confirm="false" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" maxRows="0" />
+			<dataGridLink binding="rows" rowContaining="SAIL link row {run}" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+			<comment>A second row, whose link is clicked by the row's number: both rows have run</comment>
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL second link row {run}" />
+			<zoomOut />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="1" maxRows="1" />
+			<dataGridLink binding="rows" row="1" text="Run From Row" />
+			<testGridRows binding="rows" rowContaining="Run From Row ran" minRows="2" maxRows="2" />
+			<captureCell binding="rows" rowContaining="SAIL link row {run}" column="outcome" variable="outcome" pattern="Run From (\w+) ran" />
+			<testGridRows binding="rows" rowContaining="Run From {var:outcome} ran" minRows="2" maxRows="2" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

@@ -1,13 +1,14 @@
 package org.skyve.impl.metadata.repository.behaviour.statement;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.DecoratedMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -32,7 +33,7 @@ public abstract class StatementMetaData implements DecoratedMetaData {
 	
 	@XmlElement(namespace = XMLMetaData.BEHAVIOUR_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Returns decorator properties attached to this statement metadata.
@@ -40,7 +41,7 @@ public abstract class StatementMetaData implements DecoratedMetaData {
 	 * @return mutable statement property map
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 
@@ -49,5 +50,5 @@ public abstract class StatementMetaData implements DecoratedMetaData {
 	 *
 	 * @param bean the current document instance for statement evaluation
 	 */
-	public abstract void execute(Bean bean);
+	public abstract void execute(@Nonnull Bean bean);
 }

@@ -157,6 +157,12 @@ isc.AdvancedFilter.addMethods({
 			dataSource,
 			topOperatorAppearance: style,
 			allowEmpty: true,
+			// A type's own filter editor, as in the filter row (see BizUtil.filterEditorType)
+			getValueFieldProperties: function (type, fieldName, operatorId, itemType) {
+				const field = isc.DS.get(dataSource)?.getField(fieldName);
+				const editorType = field ? isc.BizUtil.filterEditorType(field.type) : null;
+				return editorType ? { editorType: editorType } : this.Super("getValueFieldProperties", arguments);
+			},
 		});
 
 		// Add the new filter builder to the layout and manage visibility

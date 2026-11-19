@@ -1,5 +1,7 @@
 package org.skyve.domain;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Extends {@link Bean} for documents that are owned as children within a parent bean's collection.
  *
@@ -43,7 +45,7 @@ public interface ChildBean<T extends Bean> extends Bean {
 	 *
 	 * @return the parent; never {@code null} for a properly loaded child bean
 	 */
-	public T getParent();
+	public @Nullable T getParent();
 	
 	/**
 	 * Sets the parent bean that owns this child.
@@ -54,7 +56,7 @@ public interface ChildBean<T extends Bean> extends Bean {
 	 *
 	 * @param parent the owning parent bean; must not be {@code null}
 	 */
-	public void setParent(T parent);
+	public void setParent(@Nullable T parent);
 	
 	/**
 	 * Returns the zero-based ordinal position of this child within the parent's collection.
@@ -66,7 +68,7 @@ public interface ChildBean<T extends Bean> extends Bean {
 	 * @return the ordinal, or {@code null} for a newly created child that has not yet
 	 *         been added to a parent collection
 	 */
-	public Integer getBizOrdinal();
+	public @Nullable Integer getBizOrdinal();
 	
 	/**
 	 * Sets the ordinal position of this child within the parent's collection.
@@ -76,5 +78,5 @@ public interface ChildBean<T extends Bean> extends Bean {
 	 *
 	 * @param bizOrdinal the new zero-based ordinal position
 	 */
-	public void setBizOrdinal(Integer bizOrdinal);
+	public void setBizOrdinal(@Nullable Integer bizOrdinal);
 }

@@ -2,6 +2,8 @@ package org.skyve.metadata.module.fluent;
 
 import org.skyve.impl.metadata.repository.module.EditItemMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds edit menu item metadata.
  */
@@ -20,7 +22,7 @@ public class FluentEditItem extends FluentMenuItem<FluentEditItem> {
 	 *
 	 * @param item The metadata to mutate.
 	 */
-	public FluentEditItem(EditItemMetaData item) {
+	public FluentEditItem(@Nonnull EditItemMetaData item) {
 		this.item = item;
 	}
 
@@ -30,7 +32,7 @@ public class FluentEditItem extends FluentMenuItem<FluentEditItem> {
 	 * @param item The source edit menu item.
 	 * @return this fluent instance.
 	 */
-	public FluentEditItem from(@SuppressWarnings("hiding") org.skyve.impl.metadata.module.menu.EditItem item) {
+	public @Nonnull FluentEditItem from(@SuppressWarnings("hiding") @Nonnull org.skyve.impl.metadata.module.menu.EditItem item) {
 		super.from(item);
 		documentName(item.getDocumentName());
 		return this;
@@ -42,7 +44,7 @@ public class FluentEditItem extends FluentMenuItem<FluentEditItem> {
 	 * @param documentName The document name.
 	 * @return this fluent instance.
 	 */
-	public FluentEditItem documentName(String documentName) {
+	public @Nonnull FluentEditItem documentName(@Nonnull String documentName) {
 		item.setDocumentName(documentName);
 		return this;
 	}
@@ -53,7 +55,7 @@ public class FluentEditItem extends FluentMenuItem<FluentEditItem> {
 	 * @return The edit item metadata instance.
 	 */
 	@Override
-	public EditItemMetaData get() {
+	public @Nonnull EditItemMetaData get() {
 		return item;
 	}
 }

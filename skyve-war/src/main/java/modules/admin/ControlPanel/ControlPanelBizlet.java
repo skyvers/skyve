@@ -54,7 +54,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 		bean.setSailTestStrategy(SailTestStrategy.None);
 
 		// Set module name to the first non-admin module found
-		ProvidedRepository r = ProvidedRepositoryFactory.get();
+		ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 		for (String moduleName : r.getAllVanillaModuleNames()) {
 			if (!ControlPanel.MODULE_NAME.equals(moduleName)) {
 				bean.setSailModuleName(moduleName);
@@ -164,7 +164,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 	public List<DomainValue> getVariantDomainValues(String attributeName) throws Exception {
 		if (ControlPanel.customerNameToSwapToPropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
-			ProvidedRepository rep = ProvidedRepositoryFactory.get();
+			ProvidedRepository rep = ProvidedRepositoryFactory.getNullSafe();
 			for (String cus : rep.getAllCustomerNames()) {
 				result.add(new DomainValue(cus));
 			}
@@ -172,7 +172,7 @@ public class ControlPanelBizlet extends Bizlet<ControlPanelExtension> {
 			return result;
 		} else if (ControlPanel.sailModuleNamePropertyName.equals(attributeName)) {
 			List<DomainValue> result = new ArrayList<>();
-			ProvidedRepository r = ProvidedRepositoryFactory.get();
+			ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 			for (String moduleName : r.getAllVanillaModuleNames()) {
 				result.add(new DomainValue(moduleName));
 			}

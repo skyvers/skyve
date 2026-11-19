@@ -25,9 +25,9 @@ class FluentProgressBarTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void invisibleConditionNameReturnsSelf() {
+	void invisibleConditionReturnsSelf() {
 		FluentProgressBar pb = new FluentProgressBar();
-		FluentProgressBar result = pb.invisibleConditionName("hiddenCond");
+		FluentProgressBar result = pb.invisibleCondition("hiddenCond");
 		assertSame(pb, result);
 	}
 

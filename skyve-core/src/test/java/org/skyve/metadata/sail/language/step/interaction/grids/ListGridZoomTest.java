@@ -3,14 +3,17 @@ package org.skyve.metadata.sail.language.step.interaction.grids;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.sail.execution.GenerateEditContext;
 import org.skyve.impl.sail.execution.GenerateListContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
 
 class ListGridZoomTest {
@@ -98,6 +101,7 @@ class ListGridZoomTest {
 	@Test
 	void executeCallsExecutorListGridZoom() {
 		Executor executor = mock(Executor.class);
+		zoom.setRow(Integer.valueOf(0));
 		zoom.execute(executor);
 		verify(executor).executeListGridZoom(zoom);
 	}
@@ -163,5 +167,48 @@ class ListGridZoomTest {
 				// no-op
 			}
 		};
+	}
+
+	// ---- rowContaining ----
+
+	@Test
+	void defaultRowContainingIsNull() {
+		assertThat(zoom.getRowContaining(), is(nullValue()));
+	}
+
+	@Test
+	void setRowContainingRoundtripTrims() {
+		zoom.setRowContaining("  Jane {run} ");
+		assertThat(zoom.getRowContaining(), is("Jane {run}"));
+	}
+
+	@Test
+	void setRowNullAllowed() {
+		zoom.setRow(null);
+		assertThat(zoom.getRow(), is(nullValue()));
+	}
+
+	@Test
+	void executeWithRowContainingCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		zoom.setRowContaining("Jane");
+		zoom.execute(executor);
+		verify(executor).executeListGridZoom(zoom);
+	}
+
+	@Test
+	void executeWithoutRowOrRowContainingThrows() {
+		Executor executor = mock(Executor.class);
+		assertThrows(MetaDataException.class, () -> zoom.execute(executor));
+		verifyNoInteractions(executor);
+	}
+
+	@Test
+	void executeWithRowAndRowContainingThrows() {
+		Executor executor = mock(Executor.class);
+		zoom.setRow(Integer.valueOf(0));
+		zoom.setRowContaining("Jane");
+		assertThrows(MetaDataException.class, () -> zoom.execute(executor));
+		verifyNoInteractions(executor);
 	}
 }

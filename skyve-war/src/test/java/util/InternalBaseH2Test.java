@@ -14,10 +14,13 @@ import org.skyve.cache.SessionCacheConfig;
 import org.skyve.impl.cdi.SkyveCDIProducer;
 import org.skyve.impl.content.AbstractContentManager;
 import org.skyve.impl.content.NoOpContentManager;
+import org.skyve.impl.dialog.DialogsStaticSingleton;
 import org.skyve.impl.domain.number.NumberGeneratorStaticSingleton;
 import org.skyve.impl.geoip.GeoIPServiceStaticSingleton;
 import org.skyve.impl.job.JobSchedulerStaticSingleton;
 import org.skyve.impl.job.MockJobScheduler;
+import org.skyve.impl.mail.MailServiceStaticSingleton;
+import org.skyve.impl.mail.NoOpMailService;
 import org.skyve.impl.metadata.controller.CustomisationsStaticSingleton;
 import org.skyve.impl.metadata.repository.DefaultRepository;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -38,6 +41,7 @@ import org.springframework.mock.web.MockServletContext;
 
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.servlet.http.HttpServletRequest;
+import modules.admin.Group.GroupExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.User.UserService;
 import modules.admin.domain.User;
@@ -123,7 +127,11 @@ abstract class InternalBaseH2Test {
 		NumberGeneratorStaticSingleton.setDefault();
 		GeoIPServiceStaticSingleton.setDefault();
 		CustomisationsStaticSingleton.setDefault();
+		// tests run without a request, so answer questions with their positive button; see TestDialogs
+		DialogsStaticSingleton.set(new TestDialogs());
 		JobSchedulerStaticSingleton.set(new MockJobScheduler());
+		// ignore mail in tests; tests that check mail install their own mail service
+		MailServiceStaticSingleton.set(new NoOpMailService());
 		UtilImpl.DATA_STORE = new DataStore(DB_DRIVER, DB_URL, DB_UNAME, DB_PWD, DB_DIALECT);
 		UtilImpl.DATA_STORES.put("test", UtilImpl.DATA_STORE);
 		UtilImpl.DDL_SYNC = true;
@@ -141,7 +149,7 @@ abstract class InternalBaseH2Test {
 		// setUser is called, otherwise SuperUser.getAccessibleModuleNames()
 		// silently returns null when the customer metadata hasn't been loaded yet,
 		// which causes a NPE in AbstractHibernatePersistence.resetDocumentPermissionScopes().
-		ProvidedRepositoryFactory.get().getCustomer(CUSTOMER);
+		ProvidedRepositoryFactory.getNullSafe().getCustomer(CUSTOMER);
 
 		final SuperUser user = new SuperUser();
 		user.setCustomerName(CUSTOMER);
@@ -185,12 +193,19 @@ abstract class InternalBaseH2Test {
 	 * Create a new {@link User} which corresponds to the metadata superuser running
 	 * as the current persistence user so that requests to currentAdminUser resolve.
 	 */
+	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension createAdminUser(SuperUser superUser) {
 		UserExtension adminUser = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME,
 				User.DOCUMENT_NAME);
 		adminUser.setUserName(superUser.getName());
 		adminUser.setPassword(EXT.hashPassword(PASSWORD));
 		adminUser.setPasswordHistory(null);
+		// DataBuilder names groups with random lorem text, and group names are unique, so a test that builds another
+		// user could build a group of the same name (about 1 test in 500): use names that lorem text never has
+		int groupNumber = 0;
+		for (GroupExtension group : adminUser.getGroups()) {
+			group.setName("Test admin group " + (++groupNumber));
+		}
 		superUser.setContactId(adminUser.getContact().getBizId());
 		adminUser.setBizId(superUser.getId());
 		return adminUser;

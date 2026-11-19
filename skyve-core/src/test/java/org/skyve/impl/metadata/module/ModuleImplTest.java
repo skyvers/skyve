@@ -4,9 +4,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
@@ -212,6 +215,68 @@ class ModuleImplTest {
 		assertThat(m.getBizQL("nonExistent"), is(nullValue()));
 	}
 
+	/**
+	 * A module keeps all its metadata by name, so each typed lookup is given the names of the
+	 * other kinds of metadata.
+	 */
+	@Test
+	void typedLookupsDoNotReturnAnotherKindOfMetadata() {
+		ModuleImpl m = moduleWithOneOfEachKind();
+		assertAll(() -> assertNull(m.getMetaDataQuery("bizQL")),
+					() -> assertNull(m.getMetaDataQuery("sql")),
+					() -> assertNull(m.getBizQL("query")),
+					() -> assertNull(m.getBizQL("sql")),
+					() -> assertNull(m.getSQL("query")),
+					() -> assertNull(m.getSQL("bizQL")),
+					() -> assertNull(m.getRole("job")),
+					() -> assertEquals("Job M.role is not defined in the skyve metadata.",
+										assertThrows(MetaDataException.class, () -> m.getJob("role")).getMessage()));
+	}
+
+	@Test
+	void getNullSafeBizQLAndSQLReturnTheirKindOfQuery() {
+		ModuleImpl m = moduleWithOneOfEachKind();
+		assertAll(() -> assertSame(m.getBizQL("bizQL"), m.getNullSafeBizQL("bizQL")),
+					() -> assertSame(m.getSQL("sql"), m.getNullSafeSQL("sql")));
+	}
+
+	@Test
+	void getNullSafeBizQLAndSQLThrowForAMissingNameOrAnotherKind() {
+		ModuleImpl m = moduleWithOneOfEachKind();
+		assertAll(() -> assertEquals("BizQL query missing does not exist in module M",
+										assertThrows(MetaDataException.class, () -> m.getNullSafeBizQL("missing")).getMessage()),
+					() -> assertEquals("BizQL query sql does not exist in module M",
+										assertThrows(MetaDataException.class, () -> m.getNullSafeBizQL("sql")).getMessage()),
+					() -> assertEquals("SQL query missing does not exist in module M",
+										assertThrows(MetaDataException.class, () -> m.getNullSafeSQL("missing")).getMessage()),
+					() -> assertEquals("SQL query bizQL does not exist in module M",
+										assertThrows(MetaDataException.class, () -> m.getNullSafeSQL("bizQL")).getMessage()));
+	}
+
+	/**
+	 * Creates module M with a metadata query, a BizQL query, a SQL query, a job and a role, each
+	 * named after its kind.
+	 */
+	private static ModuleImpl moduleWithOneOfEachKind() {
+		ModuleImpl result = newModule("M");
+		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();
+		query.setName("query");
+		result.putQuery(query);
+		BizQLDefinitionImpl bizQL = new BizQLDefinitionImpl();
+		bizQL.setName("bizQL");
+		result.putQuery(bizQL);
+		SQLDefinitionImpl sql = new SQLDefinitionImpl();
+		sql.setName("sql");
+		result.putQuery(sql);
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setName("job");
+		result.putJob(job);
+		org.skyve.impl.metadata.user.RoleImpl role = new org.skyve.impl.metadata.user.RoleImpl();
+		role.setName("role");
+		result.putRole(role);
+		return result;
+	}
+
 	@Test
 	void getMetadataQueriesReturnsAllQueries() {
 		ModuleImpl m = newModule("M");
@@ -332,6 +397,28 @@ class ModuleImplTest {
 	void jobMetaDataImplPropertiesNotNull() {
 		JobMetaDataImpl job = new JobMetaDataImpl();
 		assertNotNull(job.getProperties());
+	}
+
+	@Test
+	void jobMetaDataImplGetNameReturnsSetName() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		assertThat(job.getName(), is(nullValue()));
+		job.setName("myJob");
+		assertEquals("myJob", job.getName());
+	}
+
+	@Test
+	void jobMetaDataImplDisplayNameBlankBecomesNull() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setDisplayName("   ");
+		assertThat(job.getDisplayName(), is(nullValue()));
+	}
+
+	@Test
+	void jobMetaDataImplDisplayNamePaddedValueIsTrimmed() {
+		JobMetaDataImpl job = new JobMetaDataImpl();
+		job.setDisplayName("  My Job  ");
+		assertEquals("My Job", job.getDisplayName());
 	}
 
 	@Test

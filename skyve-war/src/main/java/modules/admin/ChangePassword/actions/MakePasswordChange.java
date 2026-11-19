@@ -2,6 +2,7 @@ package modules.admin.ChangePassword.actions;
 
 import org.skyve.CORE;
 import org.skyve.EXT;
+import org.skyve.domain.app.AppConstants;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.impl.metadata.user.UserImpl;
@@ -25,9 +26,10 @@ import modules.admin.domain.Configuration;
  * Applies a password change and triggers follow-up notification handling.
  */
 public class MakePasswordChange implements ServerSideAction<ChangePassword> {
-	
+
 	/**
 	 * Performs the execute operation.
+	 * 
 	 * @param bean the bean value
 	 * @param webContext the webContext value
 	 * @return the operation result
@@ -50,11 +52,11 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		// check for suitable complexity
 		ConfigurationExtension configuration = Configuration.newInstance();
 
-		if (! configuration.meetsComplexity(newPassword)) {
+		if (!configuration.meetsComplexity(newPassword)) {
 			StringBuilder sb = new StringBuilder("The password you have entered is not sufficiently complex. ");
 			sb.append(configuration.getPasswordRuleDescription());
 			sb.append(" Please re-enter and confirm the password.");
-			
+
 			Message message = new Message(ChangePassword.newPasswordPropertyName, sb.toString());
 			throw new ValidationException(message);
 		}
@@ -69,19 +71,21 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 		Document userDocument = module.getDocument(customer, modules.admin.domain.User.DOCUMENT_NAME);
 		modules.admin.domain.User userBean = persistence.retrieveAndLock(userDocument, user.getId());
 
-		// check old password matches if it is defined
-		if (oldPassword != null) {
-			if (! EXT.checkPassword(oldPassword, userBean.getPassword())) {
+		// The old password is required (and must be right) for every change but a reset by token,
+		// which WebUtil.resetPassword marks in the stash (and removes) around the call.
+		boolean tokenReset = (CORE.getStash().remove(AppConstants.PASSWORD_RESET_STASH_KEY) != null);
+		if (!tokenReset) {
+			if ((oldPassword == null) || (!EXT.checkPassword(oldPassword, userBean.getPassword()))) {
 				Message message = new Message(ChangePassword.oldPasswordPropertyName,
-												"The old password is incorrect.  Please re-enter the old/existing password.");
+						"The old password is incorrect.  Please re-enter the old/existing password.");
 				throw new ValidationException(message);
 			}
 		}
-		
+
 		if (EXT.checkPassword(newPassword, userBean.getPassword())) {
 			Message message = new Message("This password matches a previous one.  Please re-enter and confirm the password.");
 			message.addBinding(ChangePassword.confirmPasswordPropertyName);
-			throw new ValidationException(message);			
+			throw new ValidationException(message);
 		}
 
 		String hashedPassword = EXT.hashPassword(newPassword);
@@ -92,36 +96,34 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 			if (passwordHistory == null) { // no history
 				// just set this password in the history
 				userBean.setPasswordHistory(hashedPassword);
-			}
-			else { // we have history
+			} else { // we have history
 				String[] passwords = passwordHistory.split("\\t");
-				
+
 				// Check this password doesn't match a previous one
 				for (String password : passwords) {
 					if (EXT.checkPassword(newPassword, password)) {
-						Message message = new Message("This password matches a previous one.  Please re-enter and confirm the password.");
+						Message message = new Message(
+								"This password matches a previous one.  Please re-enter and confirm the password.");
 						message.addBinding(ChangePassword.confirmPasswordPropertyName);
-						throw new ValidationException(message);			
+						throw new ValidationException(message);
 					}
 				}
 
 				// We are right, make the new history
 				StringBuilder newPasswordHistory = new StringBuilder(passwords.length * 128);
-				
+
 				// Cull old history
 				if (passwords.length >= UtilImpl.PASSWORD_HISTORY_RETENTION) {
 					for (int i = passwords.length - UtilImpl.PASSWORD_HISTORY_RETENTION + 1, l = passwords.length; i < l; i++) {
 						newPasswordHistory.append(passwords[i]).append('\t');
 					}
-				}
-				else {
+				} else {
 					newPasswordHistory.append(passwordHistory).append('\t');
 				}
 				newPasswordHistory.append(hashedPassword);
 				userBean.setPasswordHistory(newPasswordHistory.toString());
 			}
-		}
-		else { // zero password history if it is switched off
+		} else { // zero password history if it is switched off
 			userBean.setPasswordHistory(null);
 		}
 
@@ -142,7 +144,7 @@ public class MakePasswordChange implements ServerSideAction<ChangePassword> {
 
 		// Ensure the user doesn't need to change their password any more.
 		((UserImpl) user).setPasswordChangeRequired(false);
-		
+
 		return new ServerSideActionResult<>(bean); // stay on the same form
 	}
 }

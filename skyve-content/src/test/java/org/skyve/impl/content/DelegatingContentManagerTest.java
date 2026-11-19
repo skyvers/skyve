@@ -29,6 +29,7 @@ class DelegatingContentManagerTest {
 		UtilImpl.SKYVE_CONTENT_MANAGER_CLASS = originalManagerClass;
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testForwardingToInjectedDelegate() throws Exception {
 		try (DelegatingContentManager manager = new DelegatingContentManager();

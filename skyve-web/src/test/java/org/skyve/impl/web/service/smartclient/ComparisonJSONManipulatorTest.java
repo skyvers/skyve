@@ -2,9 +2,14 @@ package org.skyve.impl.web.service.smartclient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
@@ -162,6 +167,42 @@ class ComparisonJSONManipulatorTest {
 	}
 
 	@Test
+	void toJSONStructureTakesChildWithoutReferenceNameAsAssociation() throws Exception {
+		Document rootDocument = mock(Document.class);
+
+		ComparisonComposite root = new ComparisonComposite("71", "Root", "", "RootRel", Mutation.unchanged, rootDocument);
+		root.getChildren().add(new ComparisonComposite("72", "Child", null, "ChildRel", Mutation.added, null));
+
+		ComparisonJSONManipulator manipulator = new ComparisonJSONManipulator(mock(User.class), mock(CustomerImpl.class), root);
+		List<Map<String, Object>> rows = toList(manipulator.toJSONStructure());
+
+		assertEquals(2, rows.size());
+		assertEquals("A", rows.get(1).get("_t"));
+		verify(rootDocument, never()).getReferenceByName(any());
+	}
+
+	@Test
+	void toJSONStructureBakesTextForPropertyWithoutName() throws Exception {
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Document rootDocument = mock(Document.class);
+
+		ComparisonComposite root = new ComparisonComposite("81", "Root", "", "RootRel", Mutation.unchanged, rootDocument);
+		root.getProperties().add(new ComparisonProperty(null, "Unnamed", null, "newValue", "oldValue"));
+
+		ComparisonJSONManipulator manipulator = new ComparisonJSONManipulator(mock(User.class), customer, root);
+		List<Map<String, Object>> rows = toList(manipulator.toJSONStructure());
+
+		@SuppressWarnings("unchecked")
+		List<Map<String, Object>> properties = (List<Map<String, Object>>) rows.get(0).get("properties");
+		assertEquals(1, properties.size());
+		Map<String, Object> property = properties.get(0);
+		assertEquals("text", property.get("type"));
+		assertEquals("oldValue", property.get("oldValue"));
+		assertEquals("newValue", property.get("newValue"));
+		verify(customer, never()).getModule(any());
+	}
+
+	@Test
 	void toJSONStructureFallsBackToTextWhenNonNullDocumentMetadataLookupFails() throws Exception {
 		CustomerImpl customer = new CustomerImpl();
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -194,7 +235,7 @@ class ComparisonJSONManipulatorTest {
 	@Test
 	void toJSONStructureUsesMetadataFieldDefinitionForConstantDomainProperty() throws Exception {
 		User user = mock(User.class);
-		CustomerImpl customer = org.mockito.Mockito.spy(new CustomerImpl());
+		CustomerImpl customer = spy(new CustomerImpl());
 		ProvidedRepository repository = mock(ProvidedRepository.class);
 		Module module = mock(Module.class);
 		DocumentImpl document = new DocumentImpl();
@@ -263,6 +304,14 @@ class ComparisonJSONManipulatorTest {
 		String result = (String) method.invoke(null, "");
 
 		assertEquals("<span style='color:red'> *</span>", result);
+	}
+
+	@Test
+	void showDirtyLeavesOutMissingLabel() throws Exception {
+		Method method = ComparisonJSONManipulator.class.getDeclaredMethod("showDirty", String.class);
+		method.setAccessible(true);
+
+		assertNull(method.invoke(null, (Object) null));
 	}
 
 	private static List<Map<String, Object>> toList(Iterable<Map<String, Object>> iterable) {

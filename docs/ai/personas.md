@@ -64,6 +64,7 @@ Prove behavior and reduce regression risk with the narrowest meaningful tests.
 
 ### Must Not Do
 - Do not add new JUnit 4 tests.
+- Do not put framework tests or internal test helpers in `skyve-war/src/test/java/util/**`; `skyve:assemble` copies that tree into downstream projects. Use `org/skyve/**` instead; reserve `util/**` for shared assembly scaffolding.
 - Do not claim broad validation when only focused tests ran.
 - Do not use brittle fixtures when `DataBuilder` or existing bases fit.
 

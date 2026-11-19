@@ -2,33 +2,31 @@ package org.skyve.impl.web.faces.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-public class DD_MMM_YYYY_HH24_MI_SSTest {
+class DD_MMM_YYYY_HH24_MI_SSTest {
 	private DD_MMM_YYYY_HH24_MI_SS formatter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		formatter = new DD_MMM_YYYY_HH24_MI_SS();
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidFormat() {
+	@Test
+	void testGetAsObjectInvalidFormat() {
 		// call the method under test
-		formatter.getAsObject(null, null, "03-01-2020 02:30:55");
-
-		fail("Should throw exception before this line.");
+		assertThrows(ConverterException.class, () -> formatter.getAsObject(null, null, "03-01-2020 02:30:55"));
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatAM() {
+	void testGetAsObjectValidFormatAM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -38,7 +36,17 @@ public class DD_MMM_YYYY_HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testGetAsObjectValidFormatPM() {
+	void testGetAsObjectTrimsSurroundingSpaces() {
+		// setup the test data
+		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
+		Time.setTime(testDate, 02, 30, 55);
+
+		// call the method under test with the value padded by spaces
+		assertThat(formatter.getAsObject(null, null, "  01-Mar-2020 02:30:55  "), is(testDate));
+	}
+
+	@Test
+	void testGetAsObjectValidFormatPM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -48,7 +56,7 @@ public class DD_MMM_YYYY_HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testGetAsStringAM() {
+	void testGetAsStringAM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 02, 30, 55);
@@ -58,7 +66,7 @@ public class DD_MMM_YYYY_HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testGetAsStringPM() {
+	void testGetAsStringPM() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 		Time.setTime(testDate, 14, 30, 55);
@@ -68,12 +76,12 @@ public class DD_MMM_YYYY_HH24_MI_SSTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertNull(formatter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

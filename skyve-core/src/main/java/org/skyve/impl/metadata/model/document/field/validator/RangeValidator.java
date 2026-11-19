@@ -6,6 +6,7 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
@@ -35,43 +36,43 @@ public abstract class RangeValidator<T> extends FieldValidator<T> {
 	private T min;
 	private T max;
 	
-	public String getXmlMin() {
+	public @Nullable String getXmlMin() {
 		return xmlMin;
 	}
 
 	@XmlAttribute(name = "min")
-	public void setXmlMin(String xmlMin) {
+	public void setXmlMin(@Nullable String xmlMin) {
 		this.xmlMin = xmlMin;
 	}
 
-	public String getXmlMax() {
+	public @Nullable String getXmlMax() {
 		return xmlMax;
 	}
 
 	@XmlAttribute(name = "max")
-	public void setXmlMax(String xmlMax) {
+	public void setXmlMax(@Nullable String xmlMax) {
 		this.xmlMax = xmlMax;
 	}
 
-	public T getMin() {
+	public @Nullable T getMin() {
 		return min;
 	}
 	@XmlTransient
-	public void setMin(T min) {
+	public void setMin(@Nullable T min) {
 		this.min = min;
 	}
 
-	public T getMax() {
+	public @Nullable T getMax() {
 		return max;
 	}
 	@XmlTransient
-	public void setMax(T max) {
+	public void setMax(@Nullable T max) {
 		this.max = max;
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public String constructMessage(User user, String localisedDisplayName, Converter<T> converter) {
+	public @Nullable String constructMessage(@Nullable User user, @Nullable String localisedDisplayName, @Nullable Converter<T> converter) {
 		String result = getLocalisedValidationMessage();
 		if (result == null) {
 			try {

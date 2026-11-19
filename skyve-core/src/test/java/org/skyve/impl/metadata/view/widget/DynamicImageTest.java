@@ -11,9 +11,9 @@ import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
 class DynamicImageTest {
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
+	void xmlVisibleConditionIsNullByDefault() {
 		DynamicImage widget = new DynamicImage();
-		assertNull(widget.getVisibleConditionName());
+		assertNull(widget.getXmlVisibleCondition());
 	}
 
 	@Test
@@ -23,22 +23,22 @@ class DynamicImageTest {
 	}
 
         @Test
-        void getInvisibleConditionNameReturnsNullByDefault() {
-                assertNull(new DynamicImage().getInvisibleConditionName());
+        void getInvisibleConditionReturnsNullByDefault() {
+                assertNull(new DynamicImage().getInvisibleCondition());
         }
 
         @Test
-        void setInvisibleConditionNameStoresValue() {
+        void setInvisibleConditionStoresValue() {
                 DynamicImage widget = new DynamicImage();
-                widget.setInvisibleConditionName("hidden");
-                assertNotNull(widget.getInvisibleConditionName());
+                widget.setXmlInvisibleCondition("hidden");
+                assertEquals("hidden", widget.getInvisibleCondition());
         }
 
         @Test
-        void setVisibleConditionNameStoresNegatedCondition() {
+        void setVisibleConditionDerivesNegatedCondition() {
                 DynamicImage widget = new DynamicImage();
-                widget.setVisibleConditionName("active");
-                assertNotNull(widget.getInvisibleConditionName());
+                widget.setXmlVisibleCondition("active");
+                assertEquals("notActive", widget.getInvisibleCondition());
         }
 
         @Test

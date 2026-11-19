@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -410,7 +411,9 @@ public class ReportDatasetExtension extends ReportDataset {
 
 					// check it hasn't already been replaced
 					if (query.contains(dateExpression)) {
-						String dateParameterName = String.format(DATE_PARAMETER_STRING_FORMAT,
+						// a query parameter's name: ASCII digits whatever the JVM's locale
+						String dateParameterName = String.format(Locale.ENGLISH,
+								DATE_PARAMETER_STRING_FORMAT,
 								DATE_PARAMETER_DATE_FORMAT.format(LocalDateTime.now(ZoneId.systemDefault())),
 								Integer.valueOf(dateCount));
 

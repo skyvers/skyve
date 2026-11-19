@@ -7,6 +7,8 @@ import java.util.regex.Pattern;
 
 import org.skyve.nlp.cron.ExpressionElementProvider;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Parses weekly recurrence phrases and contributes weekly cron fields.
  */
@@ -32,7 +34,7 @@ public class EveryWeek implements ExpressionElementProvider {
 	 * @return {@code true} when weekly syntax is detected.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nonnull String value) {
 		Matcher m = compiledPattern.matcher(value);
 		while (m.find()) {
 			for (int i = 0; i <= m.groupCount(); i++) {
@@ -58,7 +60,7 @@ public class EveryWeek implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getMinuteElement() {
+	public @Nonnull String getMinuteElement() {
 		return "0";
 	}
 
@@ -78,7 +80,7 @@ public class EveryWeek implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "0";
 	}
 
@@ -98,7 +100,7 @@ public class EveryWeek implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getDayNumberElement() {
+	public @Nonnull String getDayNumberElement() {
 		return "*";
 	}
 
@@ -118,7 +120,7 @@ public class EveryWeek implements ExpressionElementProvider {
 	 * @return {@code "*"}.
 	 */
 	@Override
-	public String getMonthElement() {
+	public @Nonnull String getMonthElement() {
 		return "*";
 	}
 
@@ -138,7 +140,7 @@ public class EveryWeek implements ExpressionElementProvider {
 	 * @return {@code "0"}.
 	 */
 	@Override
-	public String getDayOfWeekElement() {
+	public @Nonnull String getDayOfWeekElement() {
 		return "0";
 	}
 

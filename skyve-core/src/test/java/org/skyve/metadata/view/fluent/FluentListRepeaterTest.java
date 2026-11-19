@@ -55,55 +55,64 @@ class FluentListRepeaterTest {
 	}
 
 	@Test
-	void postRefreshConditionNameSetsValue() {
-		assertThat(new FluentListRepeater().postRefreshConditionName("cond").get().getPostRefreshConditionName(), is("cond"));
+	void postRefreshConditionSetsValue() {
+		assertThat(new FluentListRepeater().postRefreshCondition("cond").get().getPostRefreshCondition(), is("cond"));
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentListRepeater().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentListRepeater().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(400, new FluentListRepeater().pixelWidth(400).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelHeightSetsValue() {
 		assertEquals(300, new FluentListRepeater().pixelHeight(300).get().getPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelWidthSetsValue() {
 		assertEquals(100, new FluentListRepeater().minPixelWidth(100).get().getMinPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void smSetsValue() {
 		assertEquals(3, new FluentListRepeater().sm(3).get().getSm().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mdSetsValue() {
 		assertEquals(6, new FluentListRepeater().md(6).get().getMd().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void lgSetsValue() {
 		assertEquals(9, new FluentListRepeater().lg(9).get().getLg().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void xlSetsValue() {
 		assertEquals(12, new FluentListRepeater().xl(12).get().getXl().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void responsiveWidthSetsValue() {
 		assertEquals(6, new FluentListRepeater().responsiveWidth(6).get().getResponsiveWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageHeightSetsValue() {
 		assertEquals(75, new FluentListRepeater().percentageHeight(75).get().getPercentageHeight().intValue());
@@ -150,10 +159,10 @@ class FluentListRepeaterTest {
 	}
 
 	@Test
-	void fromCopiesInvisibleConditionName() {
+	void fromCopiesInvisibleCondition() {
 		ListRepeater src = new ListRepeater();
-		src.setInvisibleConditionName("invisible");
-		assertThat(new FluentListRepeater().from(src).get().getInvisibleConditionName(), is("invisible"));
+		src.setXmlInvisibleCondition("invisible");
+		assertThat(new FluentListRepeater().from(src).get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test

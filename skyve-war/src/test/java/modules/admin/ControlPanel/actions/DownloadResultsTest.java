@@ -14,6 +14,7 @@ import modules.admin.ControlPanel.ControlPanelExtension;
 @SuppressWarnings("static-method")
 class DownloadResultsTest {
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareWithNullResultsThrowsValidationException() {
 		DownloadResults action = new DownloadResults();
@@ -22,6 +23,7 @@ class DownloadResultsTest {
 		assertThrows(ValidationException.class, () -> action.prepare(bean, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareWithNonNullResultsDoesNotThrow() throws Exception {
 		DownloadResults action = Assertions.assertDoesNotThrow(DownloadResults::new);
@@ -37,6 +39,7 @@ class DownloadResultsTest {
 		ControlPanelExtension bean = new ControlPanelExtension();
 		bean.setResults("test{content}", false);
 
+		@SuppressWarnings("null") // passes null on purpose
 		Download result = action.download(bean, null);
 
 		assertNotNull(result);

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.model.document.field;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.model.document.DomainType;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -25,12 +26,12 @@ public class ConstrainableField extends Field {
 	private static final long serialVersionUID = 8797830818574132688L;
 
 	@Override
-	public DomainType getDomainType() {
+	public @Nullable DomainType getDomainType() {
 		return domainType;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "domain")
-	public void setDomainType(DomainType domainType) {
+	public void setDomainType(@Nullable DomainType domainType) {
 		this.domainType = domainType;
 	}
 }

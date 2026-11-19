@@ -100,6 +100,22 @@
 			<length>200</length>
 			<validator type="email" />
 		</text>
+		<boolean name="mailLogAttachments">
+			<displayName>Log Attachments</displayName>
+			<description>If true, the Mail Log stores the attachments sent as a zip (up to the maximum size below), otherwise only the attachment file names are stored. Attachments are stored unmasked and can be downloaded by anyone who can view the Mail Log.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<longInteger name="mailLogAttachmentsMaxBytes" required="true">
+			<displayName>Log Attachments Maximum Bytes</displayName>
+			<description>The maximum total size in bytes of the attachments stored for a single Mail Log entry. Attachments over the limit are listed in SKIPPED.txt in the zip.</description>
+			<defaultValue>5242880</defaultValue>
+			<validator min="0" />
+		</longInteger>
+		<boolean name="mailLogBodyExcerpt">
+			<displayName>Log Body Excerpt</displayName>
+			<description>If true, the Mail Log stores a plain-text excerpt of the email body (up to 500 characters, with verification codes masked), otherwise the body is always redacted</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
 
 		<!-- api settings -->
 		<text name="apiGoogleMapsKey">

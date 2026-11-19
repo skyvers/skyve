@@ -6,6 +6,7 @@ import org.skyve.EXT;
 import org.skyve.util.GeoIPService;
 import org.skyve.util.IPGeolocation;
 
+import jakarta.annotation.Nonnull;
 import jakarta.enterprise.inject.Alternative;
 
 /**
@@ -18,7 +19,7 @@ public class GeoIPServiceInjectable implements GeoIPService, Serializable {
 	private static final long serialVersionUID = 2567279857426720449L;
 
 	@Override
-	public IPGeolocation geolocate(String ipAddress) {
+	public @Nonnull IPGeolocation geolocate(@Nonnull String ipAddress) {
 		return EXT.getGeoIPService().geolocate(ipAddress);
 	}
 }

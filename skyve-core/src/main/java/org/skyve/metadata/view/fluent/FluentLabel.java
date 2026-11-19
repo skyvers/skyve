@@ -1,8 +1,12 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.widget.bound.Label;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link Label} widget metadata using a fluent API.
@@ -22,7 +26,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 *
 	 * @param label the metadata instance to mutate
 	 */
-	public FluentLabel(Label label) {
+	public FluentLabel(@Nonnull Label label) {
 		this.label = label;
 	}
 
@@ -33,14 +37,14 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentLabel from(@SuppressWarnings("hiding") Label label) {
+	public @Nonnull FluentLabel from(@SuppressWarnings("hiding") @Nonnull Label label) {
 
 		value(label.getValue());
 		forBinding(label.getFor());
 
 		absoluteSize(label, this);
 
-		invisibleConditionName(label.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(label.getXmlInvisibleCondition(), label.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		Boolean b = label.getFormatted();
 		if (b != null) {
 			formatted(b.booleanValue());
@@ -53,6 +57,9 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 		sanitise(label.getSanitise());
 
 		super.from(label);
+		
+		label.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+		
 		return this;
 	}
 
@@ -62,7 +69,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @param value the label text
 	 * @return this builder
 	 */
-	public FluentLabel value(String value) {
+	public @Nonnull FluentLabel value(@Nullable String value) {
 		label.setValue(value);
 		return this;
 	}
@@ -73,19 +80,32 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @param forBinding the binding expression
 	 * @return this builder
 	 */
-	public FluentLabel forBinding(String forBinding) {
+	public @Nonnull FluentLabel forBinding(@Nullable String forBinding) {
 		label.setFor(forBinding);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this label.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentLabel invisibleConditionName(String invisibleConditionName) {
-		label.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentLabel invisibleCondition(@Nullable String invisibleCondition) {
+		label.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentLabel visibleCondition(@Nullable String visibleCondition) {
+		label.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -95,7 +115,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @param formatted {@code true} to apply formatting
 	 * @return this builder
 	 */
-	public FluentLabel formatted(boolean formatted) {
+	public @Nonnull FluentLabel formatted(boolean formatted) {
 		label.setFormatted(formatted ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -106,7 +126,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @param textAlignment the alignment value
 	 * @return this builder
 	 */
-	public FluentLabel textAlignment(HorizontalAlignment textAlignment) {
+	public @Nonnull FluentLabel textAlignment(@Nullable HorizontalAlignment textAlignment) {
 		label.setTextAlignment(textAlignment);
 		return this;
 	}
@@ -117,7 +137,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @param escape {@code true} to escape HTML characters
 	 * @return this builder
 	 */
-	public FluentLabel escape(boolean escape) {
+	public @Nonnull FluentLabel escape(boolean escape) {
 		label.setEscape(escape ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -128,7 +148,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @param sanitise the sanitisation policy
 	 * @return this builder
 	 */
-	public FluentLabel sanitise(Sanitisation sanitise) {
+	public @Nonnull FluentLabel sanitise(@Nullable Sanitisation sanitise) {
 		label.setSanitise(sanitise);
 		return this;
 	}
@@ -140,7 +160,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentLabel pixelWidth(int width) {
+	public @Nonnull FluentLabel pixelWidth(int width) {
 		label.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -152,8 +172,21 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentLabel pixelHeight(int height) {
+	public @Nonnull FluentLabel pixelHeight(int height) {
 		label.setPixelHeight(Integer.valueOf(height));
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentLabel putProperty(@Nonnull String k, @Nonnull String v) {
+		label.getProperties().put(k, v);
 		return this;
 	}
 
@@ -163,7 +196,7 @@ public class FluentLabel extends FluentBoundWidget<FluentLabel> implements Fluen
 	 * @return the mutable label metadata being configured
 	 */
 	@Override
-	public Label get() {
+	public @Nonnull Label get() {
 		return label;
 	}
 }

@@ -2,6 +2,8 @@ package org.skyve.impl.generate.client;
 
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides shared state for client code renderers that accumulate generated
  * source fragments.
@@ -23,7 +25,7 @@ public abstract class AbstractRenderer {
 	 *
 	 * @param userAgentType the resolved user-agent classification; must not be {@code null}
 	 */
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nonnull UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 }

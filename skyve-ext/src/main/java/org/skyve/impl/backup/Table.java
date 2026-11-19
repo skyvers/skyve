@@ -29,6 +29,9 @@ import org.skyve.util.JSON;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents backup table metadata derived from Skyve documents, including
  * persistent identifiers, fields, and indexes used for backup/restore.
@@ -73,7 +76,7 @@ class Table {
 	 * @param agnosticIdentifier schema-agnostic table identifier
 	 * @param persistentIdentifier fully qualified persistent identifier
 	 */
-	Table(String agnosticIdentifier, String persistentIdentifier) {
+	Table(@Nonnull String agnosticIdentifier, @Nonnull String persistentIdentifier) {
 		this.agnosticIdentifier = agnosticIdentifier;
 		this.persistentIdentifier = persistentIdentifier;
 	}
@@ -82,7 +85,7 @@ class Table {
 	 * Equality is based on the schema-agnostic identifier.
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(@Nullable Object obj) {
 		return ((obj instanceof Table table) && (agnosticIdentifier != null) && agnosticIdentifier.equals(table.agnosticIdentifier));
 	}
 
@@ -105,14 +108,14 @@ class Table {
 	 * @param document the document whose metadata drives the backup schema
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	void addFieldsFromDocument(Customer customer, Document document) {
+	void addFieldsFromDocument(@Nonnull Customer customer, @Nonnull Document document) {
 		boolean joinedExtension = false;
 		Persistent persistent = document.getPersistent();
 		if (persistent != null) {
 			ExtensionStrategy strategy = persistent.getStrategy();
 			// Check there is actually a Document with a persistent name extended somewhere in the document hierarchy
 			Module module = customer.getModule(document.getOwningModuleName());
-			if (ProvidedRepositoryFactory.get().findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document) != null) {
+			if (ProvidedRepositoryFactory.getNullSafe().findNearestPersistentSingleOrJoinedSuperDocument(customer, module, document) != null) {
 				if (ExtensionStrategy.single.equals(strategy)) {
 					fields.put(PersistentBean.DISCRIMINATOR_NAME, TEXT);
 				}
@@ -167,7 +170,7 @@ class Table {
 	 * @param document the document whose attributes are being processed
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void processAttributes(boolean joinedExtension, String embeddedColumnsPrefix, Customer customer, Document document) {
+	private void processAttributes(boolean joinedExtension, @Nullable String embeddedColumnsPrefix, @Nonnull Customer customer, @Nonnull Document document) {
 		for (Attribute attribute : joinedExtension ? document.getAttributes() : document.getAllAttributes(customer)) {
 			if (attribute.isPersistent()) {
 				String attributeName = attribute.getName();
@@ -225,7 +228,8 @@ class Table {
 						}
 						else {
 							Sensitivity existing = field.getSensitivity();
-							if (sensitivity.ordinal() > existing.ordinal()) {
+							// No existing sensitivity is treated as Sensitivity.none, the lowest
+							if ((existing == null) || (sensitivity.ordinal() > existing.ordinal())) {
 								field.setSensitivity(sensitivity);
 							}
 						}
@@ -244,7 +248,7 @@ class Table {
 	 * @return JSON representation of this table definition
 	 * @throws Exception if JSON marshalling fails
 	 */
-	public String toJSON() throws Exception {
+	public @Nonnull String toJSON() throws Exception {
 		Map<String, Object> result = new TreeMap<>();
 		result.put("name", agnosticIdentifier);
 		List<Map<String, Object>> fieldList = new ArrayList<>(fields.size());
@@ -273,8 +277,11 @@ class Table {
 	 * @return the reconstructed table definition
 	 * @throws Exception if JSON parsing or conversion fails
 	 */
-	public static Table fromJSON(String json) throws Exception {
+	public static @Nonnull Table fromJSON(@Nonnull String json) throws Exception {
 		Map<String, Object> map = (Map<String, Object>) JSON.unmarshall(json);
+		if (map == null) {
+			throw new IllegalArgumentException("Table definition JSON " + json + " does not define a table");
+		}
 
 		String agnosticIdentifier = (String) map.get("name");
 		String persistentIdentifier = agnosticIdentifier;
@@ -283,10 +290,10 @@ class Table {
 
 		if ((UtilImpl.CATALOG != null) || (UtilImpl.SCHEMA != null)) {
 			if (agnosticIdentifier.indexOf('.') < 0) { // no schema or catalog
-				persistentIdentifier = Persistent.determinePersistentIdentifier(agnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+				persistentIdentifier = qualify(agnosticIdentifier);
 			}
 			if ((ownerAgnosticIdentifier != null) && (ownerAgnosticIdentifier.indexOf('.') < 0)) { // no schema or catalog
-				ownerPersistentIdentifier = Persistent.determinePersistentIdentifier(ownerAgnosticIdentifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+				ownerPersistentIdentifier = qualify(ownerAgnosticIdentifier);
 			}
 		}
 		
@@ -303,6 +310,20 @@ class Table {
 			}
 		}
 		
+		return result;
+	}
+
+	/**
+	 * Qualify a table identifier with the configured catalog and schema.
+	 *
+	 * @param identifier the table identifier to qualify
+	 * @return the qualified table identifier
+	 */
+	private static @Nonnull String qualify(@Nonnull String identifier) {
+		String result = Persistent.determinePersistentIdentifier(identifier, UtilImpl.CATALOG, UtilImpl.SCHEMA);
+		if (result == null) { // only null for a null table name
+			throw new IllegalStateException("Cannot qualify table identifier " + identifier);
+		}
 		return result;
 	}
 }

@@ -156,7 +156,7 @@ public class SnapshotCriterion extends SnapshotFilter {
 	 * @return A map containing criterion field values.
 	 */
 	@Override
-	protected LinkedHashMap<String, Object> toMap() {
+	protected @Nonnull LinkedHashMap<String, Object> toMap() {
 		LinkedHashMap<String, Object> result = new LinkedHashMap<>();
 
 		result.put(COLUMN_PROPERTY_NAME, column);
@@ -178,7 +178,7 @@ public class SnapshotCriterion extends SnapshotFilter {
 	 * @param map The source map containing criterion field values.
 	 */
 	@Override
-	protected void populate(Map<String, Object> map) {
+	protected void populate(@Nonnull Map<String, Object> map) {
 		Object mapValue = map.get(COLUMN_PROPERTY_NAME);
 		if (mapValue != null) {
 			column = mapValue.toString();

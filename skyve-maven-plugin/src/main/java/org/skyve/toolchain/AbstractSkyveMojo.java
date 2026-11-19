@@ -22,6 +22,9 @@ import org.codehaus.plexus.components.interactivity.Prompter;
 import org.codehaus.plexus.components.interactivity.PrompterException;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides shared helper operations for Skyve Maven mojos.
  *
@@ -55,7 +58,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
 	 *
 	 * @param srcDir optional source directory to add to the classpath; may be {@code null}
 	 */
-	protected void configureClasspath(String srcDir) throws DependencyResolutionRequiredException, MalformedURLException {
+	protected void configureClasspath(@Nullable String srcDir) throws DependencyResolutionRequiredException, MalformedURLException {
         final Collection<String> elements = project.getTestClasspathElements();
         final List<URL> listUrl = new ArrayList<>(elements.size() + 1);
         for (String artifact : elements) {
@@ -78,7 +81,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
      * @return the first matching path
      * @throws FileNotFoundException if the directory cannot be found under any compile source root
      */
-    protected Path getSkyveDirectory(String directoryName) throws FileNotFoundException {
+    protected @Nonnull Path getSkyveDirectory(@Nonnull String directoryName) throws FileNotFoundException {
         for (final String sourceRoot : project.getCompileSourceRoots()) {
             final Path sourceDirectory = Paths.get(sourceRoot, directoryName);
             if (sourceDirectory.toFile().exists()) {
@@ -95,7 +98,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
      * @return the modules directory
      * @throws FileNotFoundException if the directory cannot be found
      */
-    protected Path getModulesDirectory() throws FileNotFoundException {
+    protected @Nonnull Path getModulesDirectory() throws FileNotFoundException {
         return getSkyveDirectory("modules");
     }
 
@@ -105,7 +108,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
      * @return the customers directory
      * @throws FileNotFoundException if the directory cannot be found
      */
-    protected Path getCustomersDirectory() throws FileNotFoundException {
+    protected @Nonnull Path getCustomersDirectory() throws FileNotFoundException {
         return getSkyveDirectory("customers");
     }
 
@@ -115,7 +118,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
      * @param customersDirectory the directory that contains customer subdirectories
      * @return the customer directories in filesystem order
      */
-    protected static List<File> getCustomerDirectories(Path customersDirectory) {
+    protected static @Nonnull List<File> getCustomerDirectories(@Nonnull Path customersDirectory) {
         return Arrays.stream(customersDirectory.toFile().listFiles())
                 .filter(File::isDirectory)
                 .toList();
@@ -133,7 +136,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
      * @throws FileNotFoundException if the customers directory cannot be found
      * @throws PrompterException if prompting fails
      */
-    protected String getDefaultOrPromptCustomer(String defaultCustomer) throws FileNotFoundException, PrompterException {
+    protected @Nullable String getDefaultOrPromptCustomer(@Nullable String defaultCustomer) throws FileNotFoundException, PrompterException {
         String processedDefaultCustomer = Util.processStringValue(defaultCustomer);
     	if (processedDefaultCustomer != null) {
             return processedDefaultCustomer;
@@ -171,7 +174,7 @@ public abstract class AbstractSkyveMojo extends AbstractMojo {
      * @return the resolved value
      * @throws PrompterException if prompting fails
      */
-    protected String getDefaultOrPrompt(String defaultValue, String promptMessage) throws PrompterException {
+    protected @Nullable String getDefaultOrPrompt(@Nullable String defaultValue, @Nonnull String promptMessage) throws PrompterException {
     	String processedDefaultValue = Util.processStringValue(defaultValue);
     	if (processedDefaultValue != null) {
             return processedDefaultValue;

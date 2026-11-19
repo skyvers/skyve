@@ -3,6 +3,8 @@ package org.skyve.domain.messages;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Accumulates one or more field-level or cross-field validation errors for display in
  * the Skyve UI.
@@ -50,7 +52,7 @@ public class ValidationException extends DomainException implements MessageExcep
 	 * Constructor
 	 * @param message
 	 */
-	public ValidationException(Message message) {
+	public ValidationException(@Nonnull Message message) {
 		messages.add(message);
 	}
 
@@ -59,7 +61,7 @@ public class ValidationException extends DomainException implements MessageExcep
 	 *
 	 * @param message A message describing the validation exception.
 	 */
-	public ValidationException(String message) {
+	public ValidationException(@Nonnull String message) {
 		this(new Message(message));
 	}
 
@@ -69,14 +71,14 @@ public class ValidationException extends DomainException implements MessageExcep
 	 * @param binding The binding for the validation exception.
 	 * @param message A message describing the validation exception.
 	 */
-	public ValidationException(String binding, String message) {
+	public ValidationException(@Nonnull String binding, @Nonnull String message) {
 		this(new Message(binding, message));
 	}
 
 	/**
 	 * @param messages A list of messages to add to the ValidationException.
 	 */
-	public ValidationException(List<Message> messages) {
+	public ValidationException(@Nonnull List<Message> messages) {
 		this.messages.addAll(messages);
 	}
 
@@ -85,7 +87,7 @@ public class ValidationException extends DomainException implements MessageExcep
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 
@@ -94,7 +96,7 @@ public class ValidationException extends DomainException implements MessageExcep
 	 * @return the result
 	 */
 	@Override
-	public String getMessage() {
+	public @Nonnull String getMessage() {
 		String superMessage = super.getMessage();
 		StringBuilder result = new StringBuilder((superMessage == null) ? "" : superMessage);
 		for (Message message : messages) {

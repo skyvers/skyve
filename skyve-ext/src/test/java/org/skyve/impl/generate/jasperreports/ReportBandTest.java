@@ -130,6 +130,26 @@ class ReportBandTest {
 	}
 
 	@Test
+	void spreadElementsSizesAnElementWithoutAHeightWithTheDesignDefaultElementHeight() {
+		parent.setWidth(Integer.valueOf(600));
+		parent.setColumnWidth(Integer.valueOf(600));
+		ReportBand band = bandWithParent();
+
+		// added directly, so addElement() does not default the heights
+		ReportElement first = new ReportElement(ReportElement.ElementType.staticText, "first", "A", null, null, null, null);
+		ReportElement last = new ReportElement(ReportElement.ElementType.staticText, "last", "B", null, null, null, null);
+		band.getElements().add(first);
+		band.getElements().add(last);
+
+		band.spreadElements();
+
+		// default element height 20 * 5
+		assertThat(first.getElementWidth(), is(Integer.valueOf(100)));
+		assertThat(last.getElementLeft(), is(Integer.valueOf(100)));
+		assertThat(last.getElementWidth(), is(Integer.valueOf(500)));
+	}
+
+	@Test
 	void addContainerFlattensElementsFromContainerIntoBand() {
 		ReportBand band = bandWithParent();
 

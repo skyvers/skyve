@@ -20,25 +20,25 @@ class ViewWidgetSchemaTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentWidgetIsAccepted() throws Exception {
+	void contentWidgetIsAccepted() {
 		assertDoesNotThrow(() -> validate("<content xmlns=\"" + VIEW_NAMESPACE + "\" binding=\"media\" />"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentImageWidgetIsRejected() throws Exception {
+	void contentImageWidgetIsRejected() {
 		assertThrows(SAXException.class, () -> validate("<contentImage xmlns=\"" + VIEW_NAMESPACE + "\" binding=\"image\" />"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void contentLinkWidgetIsRejected() throws Exception {
+	void contentLinkWidgetIsRejected() {
 		assertThrows(SAXException.class, () -> validate("<contentLink xmlns=\"" + VIEW_NAMESPACE + "\" binding=\"media\" />"));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	void boilerplateEscapeAttributesAreAcceptedOnSupportedViewElements() throws Exception {
+	void boilerplateEscapeAttributesAreAcceptedOnSupportedViewElements() {
 		assertDoesNotThrow(() -> validate("<view xmlns=\"" + VIEW_NAMESPACE
 											+ "\" name=\"edit\" title=\"Edit\" escapeTitle=\"false\">"
 											+ "<actions>"

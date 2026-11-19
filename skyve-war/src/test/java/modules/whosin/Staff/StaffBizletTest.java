@@ -16,6 +16,7 @@ class StaffBizletTest {
 		StaffBizlet bizlet = new StaffBizlet();
 		Staff bean = new Staff();
 		// getParent() returns null when bizParentId is null → no CORE call
+		@SuppressWarnings("null") // passes null on purpose
 		Staff result = bizlet.preExecute(ImplicitActionName.Edit, bean, null, null);
 		assertNotNull(result);
 		assertNull(result.getReportsTo()); // parent was null, so reportsTo set to null
@@ -25,10 +26,12 @@ class StaffBizletTest {
 	void preExecuteWithDeleteReturnsBean() throws Exception {
 		StaffBizlet bizlet = new StaffBizlet();
 		Staff bean = new Staff();
+		@SuppressWarnings("null") // passes null on purpose
 		Staff result = bizlet.preExecute(ImplicitActionName.Delete, bean, null, null);
 		assertNotNull(result);
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithUnknownSourceDoesNothing() throws Exception {
 		StaffBizlet bizlet = new StaffBizlet();
@@ -38,6 +41,7 @@ class StaffBizletTest {
 		assertNull(bean.getStatus());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithStatusSourceButNotInOfficeDoesNotSetLocation() throws Exception {
 		StaffBizlet bizlet = new StaffBizlet();

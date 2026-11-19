@@ -29,6 +29,7 @@ import util.AbstractH2Test;
 @SuppressWarnings("static-method")
 class ExportReportSpecificationsTest extends AbstractH2Test {
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareWithEmptyCurrentReportsThrowsValidationException() {
 		ExportReportSpecifications action = new ExportReportSpecifications();
@@ -38,6 +39,7 @@ class ExportReportSpecificationsTest extends AbstractH2Test {
 		assertThrows(ValidationException.class, () -> action.prepare(bean, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareWithValidReportsCreatesPreparationFolderAndMarshallsEachReport() throws Exception {
 		FakeReportManagerService service = new FakeReportManagerService();
@@ -55,6 +57,7 @@ class ExportReportSpecificationsTest extends AbstractH2Test {
 		assertThat(bean.marshalledReports, is(List.of(first, second)));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void downloadZipsPreparedFolderAndCleansUpTemporaryFiles() throws Exception {
 		File folder = Files.createTempDirectory("report-manager-export").toFile();

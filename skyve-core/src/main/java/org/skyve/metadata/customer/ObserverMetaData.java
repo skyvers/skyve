@@ -3,6 +3,8 @@ package org.skyve.metadata.customer;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.metadata.controller.Observer;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Metadata descriptor for a registered {@link Observer} implementation.
  *
@@ -19,12 +21,12 @@ public interface ObserverMetaData extends SerializableMetaData {
 	 *
 	 * @return the class name; never {@code null}
 	 */
-	public String getClassName();
+	public @Nonnull String getClassName();
 
 	/**
 	 * Returns the singleton {@link Observer} instance, instantiating it if necessary.
 	 *
 	 * @return the observer instance; never {@code null}
 	 */
-	public Observer getObserver();
+	public @Nonnull Observer getObserver();
 }

@@ -14,6 +14,8 @@ import modules.admin.domain.Contact.ContactType;
 import modules.whosin.domain.Office;
 import modules.whosin.domain.Staff;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates seeded {@link Staff} fixtures for Who's In demonstration data.
  */
@@ -27,7 +29,7 @@ public class StaffFactory {
 	 * @return a seeded staff instance suitable for fixture loading
 	 */
 	@SkyveFixture(types = FixtureType.seed)
-	public static Staff seedInstance() {
+	public static @Nonnull Staff seedInstance() {
 
 		Staff bean = new DataBuilder().factoryBuild(Staff.MODULE_NAME, Staff.DOCUMENT_NAME);
 

@@ -1,5 +1,7 @@
 package org.skyve.metadata;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Metadata that carries an identifier name.
  *
@@ -16,7 +18,11 @@ public interface NamedMetaData extends SerializableMetaData {
 	 * <p>The name is unique within its containing scope (e.g. unique among
 	 * attributes of a document, or among documents of a module).
 	 *
-	 * @return the name; never {@code null}
+	 * <p>Sub-interfaces whose name is always set once the metadata is loaded redeclare
+	 * this method as non-null. A {@link org.skyve.metadata.model.Persistent} name is
+	 * {@code null} when the document is not mapped to a table.
+	 *
+	 * @return the name, or {@code null} where the metadata has none
 	 */
-	public String getName();
+	public @Nullable String getName();
 }

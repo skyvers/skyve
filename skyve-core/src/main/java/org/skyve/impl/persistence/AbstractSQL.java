@@ -100,7 +100,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL noTimeout() {
+	public @Nonnull SQL noTimeout() {
 		this.timeoutInSeconds = Integer.MIN_VALUE;
 		return this;
 	}
@@ -113,7 +113,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, DateOnly value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable DateOnly value) {
 		return putParameter(name, value, AttributeType.date);
 	}
 
@@ -125,7 +125,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, DateTime value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable DateTime value) {
 		return putParameter(name, value, AttributeType.dateTime);
 	}
 
@@ -137,7 +137,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, TimeOnly value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable TimeOnly value) {
 		return putParameter(name, value, AttributeType.time);
 	}
 
@@ -149,7 +149,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Timestamp value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Timestamp value) {
 		return putParameter(name, value, AttributeType.timestamp);
 	}
 
@@ -161,7 +161,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Decimal value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Decimal value) {
 		return putParameter(name, value, AttributeType.decimal10);
 	}
 
@@ -173,7 +173,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Integer value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Integer value) {
 		return putParameter(name, value, AttributeType.integer);
 	}
 
@@ -185,7 +185,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Long value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Long value) {
 		return putParameter(name, value, AttributeType.longInteger);
 	}
 
@@ -198,7 +198,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, String value, boolean memo) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable String value, boolean memo) {
 		return putParameter(name, value, memo ? AttributeType.memo : AttributeType.text);
 	}
 
@@ -210,7 +210,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Bean value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Bean value) {
 		return putParameter(name, (value == null) ? null : value.getBizId(), AttributeType.id);
 	}
 
@@ -222,7 +222,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Geometry value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Geometry value) {
 		return putParameter(name, value, AttributeType.geometry);
 	}
 
@@ -234,7 +234,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Boolean value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Boolean value) {
 		return putParameter(name, value, AttributeType.bool);
 	}
 
@@ -246,7 +246,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public SQL putParameter(String name, Enumeration value) {
+	public @Nonnull SQL putParameter(@Nonnull String name, @Nullable Enumeration value) {
 		return putParameter(name, (value == null) ? null : value.toCode(), AttributeType.enumeration);
 	}
 
@@ -259,7 +259,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public AbstractSQL putParameter(String name, Object value, AttributeType type) {
+	public @Nonnull AbstractSQL putParameter(@Nonnull String name, @Nullable Object value, @Nonnull AttributeType type) {
 		parameters.put(name, value);
 		parametersTypes.put(name, type);
 		if (UtilImpl.QUERY_TRACE) {
@@ -274,7 +274,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @param name the parameter name
 	 * @return the declared parameter type, or {@code null} when unknown
 	 */
-	public final @Nullable AttributeType getParameterType(String name) {
+	public final @Nullable AttributeType getParameterType(@Nonnull String name) {
 		return parametersTypes.get(name);
 	}
 	
@@ -284,7 +284,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return SQL query string
 	 */
 	@Override
-	public String toQueryString() {
+	public @Nonnull String toQueryString() {
 		return query;
 	}
 	
@@ -313,7 +313,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return first result bean or {@code null}
 	 */
 	@Override
-	public final <T extends Bean> T beanResult() {
+	public final @Nullable <T extends Bean> T beanResult() {
 		List<T> results = beanResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -325,7 +325,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return single result bean
 	 */
 	@Override
-	public final <T extends Bean> T retrieveBean() {
+	public final @Nonnull <T extends Bean> T retrieveBean() {
 		List<T> results = beanResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -338,7 +338,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return first scalar result or {@code null}
 	 */
 	@Override
-	public final <T> T scalarResult(Class<T> type) {
+	public final @Nullable <T> T scalarResult(@Nonnull Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -351,7 +351,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return single scalar result
 	 */
 	@Override
-	public final <T> T retrieveScalar(Class<T> type) {
+	public final @Nonnull <T> T retrieveScalar(@Nonnull Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -362,7 +362,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return first tuple result or {@code null}
 	 */
 	@Override
-	public final Object[] tupleResult() {
+	public final @Nullable Object[] tupleResult() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -373,7 +373,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return single tuple result
 	 */
 	@Override
-	public final Object[] retrieveTuple() {
+	public final @Nonnull Object[] retrieveTuple() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -382,7 +382,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * Returns the first dynamic-row result or {@code null} when no results exist.
 	 */
 	@Override
-	public final DynaBean dynaResult() {
+	public final @Nullable DynaBean dynaResult() {
 		List<DynaBean> results = dynaResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -393,7 +393,7 @@ public abstract class AbstractSQL extends AbstractQuery implements SQL {
 	 * @return single dynamic-row result
 	 */
 	@Override
-	public final DynaBean retrieveDyna() {
+	public final @Nonnull DynaBean retrieveDyna() {
 		List<DynaBean> results = dynaResults();
 		return AbstractQuery.assertOneResult(results);
 	}

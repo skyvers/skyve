@@ -38,8 +38,11 @@ export default {
     },
     created() {
 
-        if (!!this.modelValue) {
-            this.date = new Date(this.modelValue);
+        // The value is yyyy-MM-dd, a day where the user is (new Date() would read it as midnight UTC, the day
+        // before west of UTC)
+        const match = /^(\d{4})-(\d\d)-(\d\d)$/.exec(this.modelValue ?? '');
+        if (match) {
+            this.date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
         }
     }
 }

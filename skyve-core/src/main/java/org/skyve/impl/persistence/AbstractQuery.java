@@ -35,19 +35,19 @@ public abstract class AbstractQuery {
 		return parameters.keySet();
 	}
 
-	public final @Nullable Object getParameter(String name) {
+	public final @Nullable Object getParameter(@Nonnull String name) {
 		return parameters.get(name);
 	}
 	
-	public String getDrivingModuleName() {
+	public @Nullable String getDrivingModuleName() {
 		return drivingModuleName;
 	}
 
-	public String getDrivingDocumentName() {
+	public @Nullable String getDrivingDocumentName() {
 		return drivingDocumentName;
 	}
 
-	public abstract String toQueryString();
+	public abstract @Nonnull String toQueryString();
 
 	/**
 	 * Returns exactly one result from this query; or throws a NoResultsException or 

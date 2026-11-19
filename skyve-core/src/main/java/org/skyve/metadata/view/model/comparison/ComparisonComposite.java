@@ -5,6 +5,9 @@ import java.util.List;
 
 import org.skyve.metadata.model.document.Document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class ComparisonComposite {
 	@SuppressWarnings("java:S115") // Enum names are comparison state values exposed to callers.
 	public enum Mutation {
@@ -26,12 +29,12 @@ public class ComparisonComposite {
 	public ComparisonComposite() {
 	}
 	
-	public ComparisonComposite(String bizId,
-								String businessKeyDescription,
-								String referenceName,
-								String relationshipDescription,
-								Mutation mutation,
-								Document document) {
+	public ComparisonComposite(@Nullable String bizId,
+								@Nullable String businessKeyDescription,
+								@Nullable String referenceName,
+								@Nullable String relationshipDescription,
+								@Nullable Mutation mutation,
+								@Nullable Document document) {
 		this.bizId = bizId;
 		this.businessKeyDescription = businessKeyDescription;
 		this.referenceName = referenceName;
@@ -41,46 +44,46 @@ public class ComparisonComposite {
 	}
 
 
-	public String getBizId() {
+	public @Nullable String getBizId() {
 		return bizId;
 	}
-	public void setBizId(String bizId) {
+	public void setBizId(@Nullable String bizId) {
 		this.bizId = bizId;
 	}
-	public String getBusinessKeyDescription() {
+	public @Nullable String getBusinessKeyDescription() {
 		return businessKeyDescription;
 	}
-	public void setBusinessKeyDescription(String businessKeyDescription) {
+	public void setBusinessKeyDescription(@Nullable String businessKeyDescription) {
 		this.businessKeyDescription = businessKeyDescription;
 	}
-	public String getReferenceName() {
+	public @Nullable String getReferenceName() {
 		return referenceName;
 	}
-	public void setReferenceName(String referenceName) {
+	public void setReferenceName(@Nullable String referenceName) {
 		this.referenceName = referenceName;
 	}
-	public String getRelationshipDescription() {
+	public @Nullable String getRelationshipDescription() {
 		return relationshipDescription;
 	}
-	public void setRelationshipDescription(String relationshipDescription) {
+	public void setRelationshipDescription(@Nullable String relationshipDescription) {
 		this.relationshipDescription = relationshipDescription;
 	}
-	public Mutation getMutation() {
+	public @Nullable Mutation getMutation() {
 		return mutation;
 	}
-	public void setMutation(Mutation mutation) {
+	public void setMutation(@Nullable Mutation mutation) {
 		this.mutation = mutation;
 	}
-	public Document getDocument() {
+	public @Nullable Document getDocument() {
 		return document;
 	}
-	public void setDocument(Document document) {
+	public void setDocument(@Nullable Document document) {
 		this.document = document;
 	}
-	public List<ComparisonProperty> getProperties() {
+	public @Nonnull List<ComparisonProperty> getProperties() {
 		return properties;
 	}
-	public List<ComparisonComposite> getChildren() {
+	public @Nonnull List<ComparisonComposite> getChildren() {
 		return children;
 	}
 	

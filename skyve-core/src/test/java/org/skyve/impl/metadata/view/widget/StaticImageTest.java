@@ -16,8 +16,8 @@ class StaticImageTest {
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new StaticImage().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new StaticImage().getXmlVisibleCondition());
 	}
 
 	@Test
@@ -26,10 +26,10 @@ class StaticImageTest {
 	}
 
 	@Test
-	void setVisibleConditionNameNegatesCondition() {
+	void setVisibleConditionNegatesCondition() {
 		StaticImage img = new StaticImage();
-		img.setVisibleConditionName("visible");
-		assertNotNull(img.getInvisibleConditionName());
+		img.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", img.getInvisibleCondition());
 	}
 
 	@Test
@@ -49,7 +49,7 @@ class StaticImageTest {
 		image.setPercentageHeight(Integer.valueOf(60));
 		image.setMinPixelHeight(Integer.valueOf(80));
 		image.setMaxPixelHeight(Integer.valueOf(400));
-		image.setInvisibleConditionName("hidden");
+		image.setXmlInvisibleCondition("hidden");
 
 		assertEquals("images/logo.png", image.getRelativeFile());
 		assertEquals(Integer.valueOf(320), image.getPixelWidth());
@@ -65,6 +65,6 @@ class StaticImageTest {
 		assertEquals(Integer.valueOf(60), image.getPercentageHeight());
 		assertEquals(Integer.valueOf(80), image.getMinPixelHeight());
 		assertEquals(Integer.valueOf(400), image.getMaxPixelHeight());
-		assertEquals("hidden", image.getInvisibleConditionName());
+		assertEquals("hidden", image.getInvisibleCondition());
 	}
 }

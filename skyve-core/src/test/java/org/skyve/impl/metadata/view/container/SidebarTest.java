@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 class SidebarTest {
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new Sidebar().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new Sidebar().getXmlVisibleCondition());
 	}
 }

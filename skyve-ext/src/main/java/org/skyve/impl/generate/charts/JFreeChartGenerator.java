@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.image.BufferedImage;
+import java.util.Collections;
 import java.util.List;
 
 import org.jfree.chart.ChartFactory;
@@ -33,6 +34,8 @@ import org.skyve.impl.metadata.view.widget.Chart.ChartType;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.view.model.chart.ChartData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates JFreeChart chart images from Skyve chart model data.
  *
@@ -55,7 +58,7 @@ public class JFreeChartGenerator {
 	private int pixelWidth = 0;
 	private int pixelHeight = 0;
 
-	public JFreeChartGenerator(ChartData data, int pixelWidth, int pixelHeight) {
+	public JFreeChartGenerator(@Nonnull ChartData data, int pixelWidth, int pixelHeight) {
 		this.data = data;
 		this.pixelWidth = pixelWidth;
 		this.pixelHeight = pixelHeight;
@@ -64,7 +67,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs chart.
 	 */
-	public JFreeChart chart(ChartType type) {
+	public @Nonnull JFreeChart chart(@Nonnull ChartType type) {
 		JFreeChart result = null;
 		
 		if (ChartType.bar.equals(type)) {
@@ -101,21 +104,21 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs image.
 	 */
-	public BufferedImage image(JFreeChart chart) {
+	public @Nonnull BufferedImage image(@Nonnull JFreeChart chart) {
 		return chart.createBufferedImage(pixelWidth, pixelHeight);
 	}
 
 	/**
 	 * Performs image.
 	 */
-	public BufferedImage image(ChartType type) {
+	public @Nonnull BufferedImage image(@Nonnull ChartType type) {
 		return image(chart(type));
 	}
 
 	/**
 	 * Performs bar.
 	 */
-	public JFreeChart bar() {
+	public @Nonnull JFreeChart bar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
 															"",
@@ -136,7 +139,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs horizontalBar.
 	 */
-	public JFreeChart horizontalBar() {
+	public @Nonnull JFreeChart horizontalBar() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createBarChart(data.getTitle(),
 															"",
@@ -157,7 +160,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs lineArea.
 	 */
-	public JFreeChart lineArea() {
+	public @Nonnull JFreeChart lineArea() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createAreaChart(data.getTitle(),
 															"",
@@ -176,7 +179,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs line.
 	 */
-	public JFreeChart line() {
+	public @Nonnull JFreeChart line() {
 		CategoryDataset dataSet = dataSet();
 		JFreeChart result = ChartFactory.createLineChart(data.getTitle(),
 															"",
@@ -198,7 +201,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs pie.
 	 */
-	public JFreeChart pie() {
+	public @Nonnull JFreeChart pie() {
 		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createPieChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
@@ -210,7 +213,7 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs doughnut.
 	 */
-	public JFreeChart doughnut() {
+	public @Nonnull JFreeChart doughnut() {
 		PieDataset<?> dataSet = pieDataSet();
 		JFreeChart result = ChartFactory.createRingChart(data.getTitle(), dataSet, true, false, false);
 		configurePieChart(result);
@@ -222,12 +225,12 @@ public class JFreeChartGenerator {
 	/**
 	 * Performs polarArea.
 	 */
-	public JFreeChart polarArea() {
+	public @Nonnull JFreeChart polarArea() {
 		XYSeriesCollection dataSet = new XYSeriesCollection();
 		dataSet.setNotify(false);
 		
-		List<String> labels = data.getLabels();
-		List<Number> values = data.getValues();
+		List<Number> values = values();
+		List<String> labels = labels(values.size());
 		
 		for (int i = 0, l = values.size(); i < l; i++) {
 			XYSeries series = new XYSeries(labels.get(i));
@@ -259,24 +262,33 @@ public class JFreeChartGenerator {
 		for (int i = 0, l = values.size(); i < l; i++) {
 			renderer.setSeriesFilled(i, true);
 			renderer.setSeriesShape(i, null);
-			renderer.setSeriesFillPaint(i, backgrounds.get(i));
-			renderer.setSeriesOutlinePaint(i, borders.get(i));
+			// No colours leaves the renderer's defaults
+			if (backgrounds != null) {
+				renderer.setSeriesFillPaint(i, backgrounds.get(i));
+			}
+			if (borders != null) {
+				renderer.setSeriesOutlinePaint(i, borders.get(i));
+			}
 		}
 
 		LegendTitle legend = result.getLegend();
-		legend.setItemFont(THEME_LEGEND_FONT);
+		if (legend != null) {
+			legend.setItemFont(THEME_LEGEND_FONT);
+		}
 
 		TextTitle title = result.getTitle();
-		title.setFont(THEME_TITLE_FONT);
+		if (title != null) {
+			title.setFont(THEME_TITLE_FONT);
+		}
 
 		postProcess(result);
 		return result;
 	}
-	
+
 	/**
 	 * Performs radar.
 	 */
-	public JFreeChart radar() {
+	public @Nonnull JFreeChart radar() {
 		CategoryDataset dataSet = dataSet();
 	    SpiderWebPlot plot = new SpiderWebPlot(dataSet);
 		plot.setBackgroundPaint(null);
@@ -295,13 +307,13 @@ public class JFreeChartGenerator {
 		return result;
 	}
 
-	private CategoryDataset dataSet() {
+	private @Nonnull CategoryDataset dataSet() {
 		DefaultCategoryDataset result = new DefaultCategoryDataset();
 		
 		result.setNotify(false);
 		String rowKey = data.getLabel();
-		List<String> labels = data.getLabels();
-		List<Number> values = data.getValues();
+		List<Number> values = values();
+		List<String> labels = labels(values.size());
 		for (int i = 0, l = values.size(); i < l; i++) {
 			String columnKey = labels.get(i);
 			result.addValue(values.get(i), rowKey, columnKey);
@@ -310,11 +322,39 @@ public class JFreeChartGenerator {
 		return result;
 	}
 	
-	private PieDataset<?> pieDataSet() {
+	/**
+	 * Returns the chart values, where no values is no data.
+	 *
+	 * @return the values, or an empty list when the chart data has none
+	 */
+	private @Nonnull List<Number> values() {
+		List<Number> result = data.getValues();
+		return (result == null) ? Collections.emptyList() : result;
+	}
+
+	/**
+	 * Returns the chart labels, which are required to label each of the values.
+	 *
+	 * @param valueCount the number of values to label
+	 * @return the labels, or an empty list when the chart data has no labels and no values
+	 * @throws IllegalArgumentException if the chart data has values but no labels
+	 */
+	private @Nonnull List<String> labels(int valueCount) {
+		List<String> result = data.getLabels();
+		if (result == null) {
+			if (valueCount > 0) {
+				throw new IllegalArgumentException("Chart data has " + valueCount + " values but no labels.");
+			}
+			return Collections.emptyList();
+		}
+		return result;
+	}
+
+	private @Nonnull PieDataset<?> pieDataSet() {
 		return new CategoryToPieDataset(dataSet(), TableOrder.BY_ROW, 0);
 	}
 	
-	private void configureCategoryChart(JFreeChart chart) {
+	private void configureCategoryChart(@Nonnull JFreeChart chart) {
 		chart.setBackgroundPaint(null);
 	    chart.setBorderVisible(false);
 		
@@ -347,7 +387,7 @@ public class JFreeChartGenerator {
 		plot.getRangeAxis().setLabelFont(THEME_RANGE_FONT);
 	}
 	
-	private void configurePieChart(JFreeChart chart) {
+	private void configurePieChart(@Nonnull JFreeChart chart) {
 		chart.setBackgroundPaint(null);
 	    chart.setBorderVisible(false);
 
@@ -364,10 +404,15 @@ public class JFreeChartGenerator {
 		List<Color> backgrounds = data.getBackgrounds();
 		List<Color> borders = data.getBorders();
 		
-		for (int i = 0, l = backgrounds.size(); i < l; i++) {
-			String label = labels.get(i);
-			piePlot.setSectionPaint(label, backgrounds.get(i));
-			piePlot.setSectionOutlinePaint(label, borders.get(i));
+		// No labels means no values and so no sections, and no colours leaves the plot's defaults
+		if ((labels != null) && (backgrounds != null)) {
+			for (int i = 0, l = backgrounds.size(); i < l; i++) {
+				String label = labels.get(i);
+				piePlot.setSectionPaint(label, backgrounds.get(i));
+				if (borders != null) {
+					piePlot.setSectionOutlinePaint(label, borders.get(i));
+				}
+			}
 		}
 		
 		LegendTitle legend = chart.getLegend();
@@ -381,7 +426,7 @@ public class JFreeChartGenerator {
 		}
 	}
 	
-	private void postProcess(JFreeChart chart) {
+	private void postProcess(@Nonnull JFreeChart chart) {
 		String postProcessor = data.getJFreeChartPostProcessorClassName();
 		if (postProcessor == null) {
 			Customer c = CORE.getCustomer();

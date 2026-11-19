@@ -13,6 +13,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -44,7 +46,7 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @throws ServletException when initialization fails
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		String param = Util.processStringValue(config.getInitParameter(REALM_INIT_PARAMETER));
 		if (param != null) {
 			realm = param;
@@ -76,7 +78,7 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @throws IOException when downstream filter invocation fails
 	 * @throws ServletException when downstream filter invocation fails
 	 */
-	protected boolean doUnsecuredFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	protected boolean doUnsecuredFilter(@Nonnull ServletRequest request, @Nonnull ServletResponse response, @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 
@@ -102,7 +104,7 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param response servlet response to write to
 	 * @param message error message payload
 	 */
-	public static void error(HttpServletResponse response, String message) {
+	public static void error(@Nonnull HttpServletResponse response, @Nonnull String message) {
 		error(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
 	}
 
@@ -113,9 +115,9 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param response servlet response to write to
 	 * @param message error message payload
 	 */
-	public static void error(Persistence persistence, 
-								HttpServletResponse response, 
-								String message) {
+	public static void error(@Nullable Persistence persistence, 
+								@Nonnull HttpServletResponse response, 
+								@Nonnull String message) {
 		error(persistence, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message);
 	}
 
@@ -127,10 +129,10 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param response servlet response to write to
 	 * @param message error message payload
 	 */
-	protected static void error(Persistence persistence,
-									HttpServletRequest request,
-									HttpServletResponse response,
-									String message) {
+	protected static void error(@Nullable Persistence persistence,
+									@Nonnull HttpServletRequest request,
+									@Nonnull HttpServletResponse response,
+									@Nonnull String message) {
 		error(persistence, request, response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null, message);
 	}
 
@@ -141,9 +143,9 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param status HTTP status code
 	 * @param message error message payload
 	 */
-	public static void error(HttpServletResponse response, 
+	public static void error(@Nonnull HttpServletResponse response, 
 								int status,
-								String message) {
+								@Nonnull String message) {
 		error(null, response, status, null, message);
 	}
 
@@ -155,10 +157,10 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param status HTTP status code
 	 * @param message error message payload
 	 */
-	public static void error(Persistence persistence, 
-								HttpServletResponse response, 
+	public static void error(@Nullable Persistence persistence, 
+								@Nonnull HttpServletResponse response, 
 								int status,
-								String message) {
+								@Nonnull String message) {
 		error(persistence, response, status, null, message);
 	}
 
@@ -171,11 +173,11 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param realm optional BASIC auth realm value for {@code WWW-Authenticate}
 	 * @param message error message payload
 	 */
-	public static void error(Persistence persistence, 
-								HttpServletResponse response, 
+	public static void error(@Nullable Persistence persistence, 
+								@Nonnull HttpServletResponse response, 
 								int status,
-								String realm,
-								String message) {
+								@Nullable String realm,
+								@Nonnull String message) {
     	if (persistence != null) {
     		persistence.rollback();
     	}
@@ -218,12 +220,12 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param realm optional BASIC auth realm value for {@code WWW-Authenticate}
 	 * @param message error message payload
 	 */
-	protected static void error(Persistence persistence,
-									HttpServletRequest request,
-									HttpServletResponse response,
+	protected static void error(@Nullable Persistence persistence,
+									@Nonnull HttpServletRequest request,
+									@Nonnull HttpServletResponse response,
 									int status,
-									String realm,
-									String message) {
+									@Nullable String realm,
+									@Nonnull String message) {
 		if (response.getContentType() == null) {
 			response.setContentType(isXmlRequest(request) ? MediaType.APPLICATION_XML : MediaType.APPLICATION_JSON);
 		}
@@ -236,7 +238,7 @@ public abstract class AbstractRestFilter implements Filter {
 	 * @param request servlet request
 	 * @return true when the URI indicates XML format
 	 */
-	private static boolean isXmlRequest(HttpServletRequest request) {
+	private static boolean isXmlRequest(@Nonnull HttpServletRequest request) {
 		String requestURI = request.getRequestURI();
 		return (requestURI != null) && requestURI.contains("/xml/");
 	}

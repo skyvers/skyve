@@ -6,6 +6,8 @@ import org.skyve.impl.metadata.model.AbstractAttribute;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlTransient;
@@ -70,30 +72,30 @@ public abstract class Field extends AbstractAttribute {
 		return true;
 	}
 	
-	public IndexType getIndex() {
+	public @Nullable IndexType getIndex() {
 		return index;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setIndex(IndexType index) {
+	public void setIndex(@Nullable IndexType index) {
 		this.index = index;
 	}
 
-	public String getDefaultValue() {
+	public @Nullable String getDefaultValue() {
 		return defaultValue;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setDefaultValue(String defaultValue) {
+	public void setDefaultValue(@Nullable String defaultValue) {
 		this.defaultValue = UtilImpl.processStringValue(defaultValue);
 	}
 
-	public GeneratedType getGenerated() {
+	public @Nullable GeneratedType getGenerated() {
 		return generated;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setGenerated(GeneratedType generated) {
+	public void setGenerated(@Nullable GeneratedType generated) {
 		this.generated = generated;
 	}
 	
@@ -107,22 +109,22 @@ public abstract class Field extends AbstractAttribute {
 		this.required = required;
 	}
 	
-	public Boolean getRequiredBool() {
+	public @Nonnull Boolean getRequiredBool() {
 		return Boolean.valueOf(required);
 	}
 
 	@XmlAttribute(name = "required")
-	public void setRequiredBool(Boolean required) {
+	public void setRequiredBool(@Nonnull Boolean required) {
 		this.required = required.booleanValue();
 	}
 	
 	@Override
-	public String getRequiredMessage() {
+	public @Nullable String getRequiredMessage() {
 		return requiredMessage;
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE)
-	public void setRequiredMessage(String requiredMessage) {
+	public void setRequiredMessage(@Nullable String requiredMessage) {
 		this.requiredMessage = UtilImpl.processStringValue(requiredMessage);
 	}
 
@@ -136,12 +138,12 @@ public abstract class Field extends AbstractAttribute {
 		this.persistent = persistent;
 	}
 
-	public Boolean getPersistentBool() {
+	public @Nonnull Boolean getPersistentBool() {
 		return Boolean.valueOf(persistent);
 	}
 
 	@XmlAttribute(name = "persistent")
-	public void setPersistentBool(Boolean persistent) {
+	public void setPersistentBool(@Nonnull Boolean persistent) {
 		this.persistent = persistent.booleanValue();
 	}
 
@@ -154,12 +156,12 @@ public abstract class Field extends AbstractAttribute {
 		this.dynamic = dynamic;
 	}
 
-	public Boolean getDynamicBool() {
+	public @Nonnull Boolean getDynamicBool() {
 		return Boolean.valueOf(dynamic);
 	}
 
 	@XmlElement(namespace = XMLMetaData.DOCUMENT_NAMESPACE, name = "dynamic")
-	public void setDynamicBool(Boolean dynamic) {
+	public void setDynamicBool(@Nonnull Boolean dynamic) {
 		this.dynamic = dynamic.booleanValue();
 	}
 }

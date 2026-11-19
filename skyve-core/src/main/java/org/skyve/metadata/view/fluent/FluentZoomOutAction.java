@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.ZoomOutAction;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link ZoomOutAction} metadata using a fluent API.
  */
@@ -21,7 +23,7 @@ public class FluentZoomOutAction extends FluentValidatableAction<FluentZoomOutAc
 	 * @param action
 	 *            the action instance to wrap
 	 */
-	public FluentZoomOutAction(ZoomOutAction action) {
+	public FluentZoomOutAction(@Nonnull ZoomOutAction action) {
 		this.action = action;
 	}
 	
@@ -32,7 +34,7 @@ public class FluentZoomOutAction extends FluentValidatableAction<FluentZoomOutAc
 	 *            the source action metadata
 	 * @return this builder
 	 */
-	public FluentZoomOutAction from(@SuppressWarnings("hiding") ZoomOutAction action) {
+	public @Nonnull FluentZoomOutAction from(@SuppressWarnings("hiding") @Nonnull ZoomOutAction action) {
 		super.from(action);
 		return this;
 	}
@@ -41,7 +43,7 @@ public class FluentZoomOutAction extends FluentValidatableAction<FluentZoomOutAc
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public ZoomOutAction get() {
+	public @Nonnull ZoomOutAction get() {
 		return action;
 	}
 }

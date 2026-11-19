@@ -4,16 +4,18 @@ import org.skyve.metadata.sail.language.Automation;
 import org.skyve.metadata.sail.language.Interaction;
 import org.skyve.metadata.sail.language.Procedure;
 import org.skyve.metadata.sail.language.Step;
-import org.skyve.metadata.sail.language.step.Execute;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Abstract SAIL executor that drives a full automation script, managing the execution
  * order of procedures ({@code before}, interactions, {@code after}) and translating
  * each step into client-generated script output.
  *
- * <p>Subclasses provide the target scripting language (Selenese, WebDriver Java, etc.)
+ * <p>Subclasses provide the target scripting language (such as WebDriver Java)
  * by implementing the abstract {@code startTest}, {@code endTest}, and step-specific
  * methods. The accumulated script is available via {@code getScript()}.
  *
@@ -28,7 +30,7 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
     protected final Logger LOGGER = SkyveLoggerFactory.getLogger(getClass());
 
 	@Override
-	public void executeAutomation(Automation automation) {
+	public void executeAutomation(@Nonnull Automation automation) {
 		super.executeAutomation(automation); // set context defaults
 
 		Procedure before = automation.getBefore();
@@ -53,12 +55,12 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 	}
 	
 	@Override
-	public void executeInteraction(Interaction interaction) {
+	public void executeInteraction(@Nonnull Interaction interaction) {
 		LOGGER.info("Execute Interaction {}", interaction.getName());
 		startTest(interaction.getName());
 		Procedure before = interaction.getBefore();
 		if (before != null) {
-			indent().append("<!-- Before ").append(interaction.getName()).append(" -->").newline();
+			comment("Before " + interaction.getName());
 			for (Step step : before.getSteps()) {
 				step.execute(this);
 			}
@@ -68,7 +70,7 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 		}
 		Procedure after = interaction.getAfter();
 		if (after != null) {
-			indent().append("<!-- After ").append(interaction.getName()).append(" -->").newline();
+			comment("After " + interaction.getName());
 			for (Step step : after.getSteps()) {
 				step.execute(this);
 			}
@@ -76,45 +78,47 @@ public abstract class ScriptExecutor<T extends AutomationContext> extends Contex
 		endTest();
 	}
 
-	protected abstract void startTest(String heading);
+	/**
+	 * Emits a comment into the script, such as the start of an interaction's before or after procedure.
+	 *
+	 * @param comment	the comment's text, as the script has it: the subclass makes it safe for its language
+	 */
+	protected abstract void comment(@Nullable String comment);
+
+	protected abstract void startTest(@Nonnull String heading);
 	protected abstract void endTest();
 
-    public final ScriptExecutor<T> indent() {
+    public final @Nonnull ScriptExecutor<T> indent() {
 		for (int i = 0; i < indent; i++) {
 			script.append('\t');
 		}
 		return this;
 	}
 	
-	public final ScriptExecutor<T> in() {
+	public final @Nonnull ScriptExecutor<T> in() {
 		indent++;
 		return this;
 	}
 
-	public final ScriptExecutor<T> out() {
+	public final @Nonnull ScriptExecutor<T> out() {
 		indent--;
 		return this;
 	}
 	
-	public final ScriptExecutor<T> append(String stuff) {
+	public final @Nonnull ScriptExecutor<T> append(@Nullable String stuff) {
 		if (stuff != null) {
 			script.append(stuff);
 		}
 		return this;
 	}
 	
-	public final ScriptExecutor<T> newline() {
+	public final @Nonnull ScriptExecutor<T> newline() {
 		script.append('\n');
 		return this;
 	}
 
 	@Override
-	public void executeExecute(Execute execute) {
-		indent().append(execute.getScript()).newline();
-	}
-	
-	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return script.toString();
 	}
 }

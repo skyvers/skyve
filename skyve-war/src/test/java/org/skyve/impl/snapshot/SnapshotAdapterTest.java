@@ -10,7 +10,7 @@ import modules.test.AbstractSkyveTest;
 
 class SnapshotAdapterTest extends AbstractSkyveTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void testSnapshotJSON() throws Exception {
 		Snapshot test = new Snapshot();
 		test.setAdvanced(AdvancedSearchType.radio);

@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentReme
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Persists Spring remember-me tokens in Skyve admin token storage tables.
@@ -48,6 +49,18 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * SQL used to remove all remember-me tokens for a user principal name.
 	 */
 	private String removeUserTokensSql = "delete from ADM_UserToken where userName = ?";
+
+	/**
+	 * SQL used to remove one remember-me token series of a user principal name.
+	 * The user name is part of the match, so a series can only be removed by the user it was issued to.
+	 */
+	private String removeUserTokenSql = "delete from ADM_UserToken where userName = ? and series = ?";
+
+	/**
+	 * SQL used to remove all of a user's remember-me tokens but one series (this browser's).
+	 * Takes the user name then the series to keep.
+	 */
+	private String removeOtherUserTokensSql = "delete from ADM_UserToken where userName = ? and series <> ?";
 	
 	/**
 	 * Inserts a newly issued remember-me token.
@@ -55,7 +68,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param token The token to persist.
 	 */
 	@Override
-	public void createNewToken(PersistentRememberMeToken token) {
+	public void createNewToken(@SuppressWarnings("null") @Nonnull PersistentRememberMeToken token) {
 		String series = token.getSeries();
 		String customerAndUserName = token.getUsername();
 		String userName = customerAndUserName;
@@ -94,7 +107,9 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param lastUsed The timestamp of token usage.
 	 */
 	@Override
-	public void updateToken(String series, String tokenValue, Date lastUsed) {
+	public void updateToken(@SuppressWarnings("null") @Nonnull String series,
+							@SuppressWarnings("null") @Nonnull String tokenValue,
+							@SuppressWarnings("null") @Nonnull Date lastUsed) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
 			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
@@ -108,7 +123,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * should just be a failed persistent login).
 	 */
 	@Override
-	public PersistentRememberMeToken getTokenForSeries(String seriesId) {
+	public @Nullable PersistentRememberMeToken getTokenForSeries(@SuppressWarnings("null") @Nonnull String seriesId) {
 		try {
 			JdbcTemplate t = getJdbcTemplate();
 			if (t == null) {
@@ -126,7 +141,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 							 * @throws SQLException If reading the row fails.
 							 */
 							@Override
-							public PersistentRememberMeToken mapRow(ResultSet rs, int rowNum)
+							public @Nonnull PersistentRememberMeToken mapRow(@SuppressWarnings("null") @Nonnull ResultSet rs, int rowNum)
 							throws SQLException {
 								return new PersistentRememberMeToken(rs.getString(1),
 																		rs.getString(2),
@@ -155,12 +170,27 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 * @param username The principal name to purge token rows for.
 	 */
 	@Override
-	public void removeUserTokens(String username) {
+	public void removeUserTokens(@SuppressWarnings("null") @Nonnull String username) {
 		JdbcTemplate t = getJdbcTemplate();
 		if (t == null) {
 			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
 		}
 		t.update(removeUserTokensSql, username);
+	}
+
+	/**
+	 * Removes one remember-me token series, leaving the user's other series (other browsers and devices) in place.
+	 * Nothing is removed if the series belongs to another user.
+	 *
+	 * @param username The principal name the series was issued to, usually in the form customer-name/user-name.
+	 * @param series The series identifier, from the remember-me cookie of the browser that is signing out.
+	 */
+	public void removeUserToken(@Nonnull String username, @Nonnull String series) {
+		JdbcTemplate t = getJdbcTemplate();
+		if (t == null) {
+			throw new IllegalStateException(JDBC_TEMPLATE_REQUIRED);
+		}
+		t.update(removeUserTokenSql, username, series);
 	}
 
 	/**
@@ -177,11 +207,34 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	}
 	
 	/**
+	 * Use the given Persistence to remove all of a user's remember-me tokens except one series,
+	 * leaving that browser's Remember me in place ("sign out of all other sessions").
+	 * This occurs within the Persistence transaction.
+	 *
+	 * @param p The persistence to use.
+	 * @param username The user principal name, usually in the form customer-name/user-name.
+	 * @param keepSeries The series to keep, from this browser's remember-me cookie; {@code null} if the browser
+	 * 						has none, when all of the user's tokens are removed.
+	 * @return The number of token series removed.
+	 */
+	public int removeOtherUserTokens(@Nonnull Persistence p, @Nonnull String username, @Nullable String keepSeries) {
+		if (keepSeries == null) {
+			return p.newSQL(removeUserTokensSql.replace("?", ":userName"))
+						.putParameter("userName", username, false)
+						.execute();
+		}
+		return p.newSQL(removeOtherUserTokensSql.replaceFirst("\\?", ":userName").replaceFirst("\\?", ":series"))
+					.putParameter("userName", username, false)
+					.putParameter("series", keepSeries, false)
+					.execute();
+	}
+
+	/**
 	 * Returns the SQL used to load a token by series.
 	 *
 	 * @return The token lookup SQL.
 	 */
-	public String getGetTokenForSeriesSql() {
+	public @Nonnull String getGetTokenForSeriesSql() {
 		return getTokenForSeriesSql;
 	}
 
@@ -190,7 +243,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param getTokenForSeriesSql The token lookup SQL.
 	 */
-	public void setGetTokenForSeriesSql(String getTokenForSeriesSql) {
+	public void setGetTokenForSeriesSql(@Nonnull String getTokenForSeriesSql) {
 		this.getTokenForSeriesSql = getTokenForSeriesSql;
 	}
 
@@ -199,7 +252,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token insert SQL.
 	 */
-	public String getCreateNewTokenSql() {
+	public @Nonnull String getCreateNewTokenSql() {
 		return createNewTokenSql;
 	}
 
@@ -208,7 +261,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param createNewTokenSql The token insert SQL.
 	 */
-	public void setCreateNewTokenSql(String createNewTokenSql) {
+	public void setCreateNewTokenSql(@Nonnull String createNewTokenSql) {
 		this.createNewTokenSql = createNewTokenSql;
 	}
 
@@ -217,7 +270,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token update SQL.
 	 */
-	public String getUpdateTokenSql() {
+	public @Nonnull String getUpdateTokenSql() {
 		return updateTokenSql;
 	}
 
@@ -226,8 +279,44 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param updateTokenSql The token update SQL.
 	 */
-	public void setUpdateTokenSql(String updateTokenSql) {
+	public void setUpdateTokenSql(@Nonnull String updateTokenSql) {
 		this.updateTokenSql = updateTokenSql;
+	}
+
+	/**
+	 * Returns the SQL used to remove one series of a user's token rows.
+	 *
+	 * @return The single series removal SQL, taking the user name and then the series.
+	 */
+	public @Nonnull String getRemoveUserTokenSql() {
+		return removeUserTokenSql;
+	}
+
+	/**
+	 * Sets the SQL used to remove one series of a user's token rows.
+	 *
+	 * @param removeUserTokenSql The single series removal SQL, taking the user name and then the series.
+	 */
+	public void setRemoveUserTokenSql(@Nonnull String removeUserTokenSql) {
+		this.removeUserTokenSql = removeUserTokenSql;
+	}
+
+	/**
+	 * Returns the SQL used to remove all of a user's token rows but one series.
+	 *
+	 * @return The removal SQL, taking the user name and then the series to keep.
+	 */
+	public @Nonnull String getRemoveOtherUserTokensSql() {
+		return removeOtherUserTokensSql;
+	}
+
+	/**
+	 * Sets the SQL used to remove all of a user's token rows but one series.
+	 *
+	 * @param removeOtherUserTokensSql The removal SQL, taking the user name and then the series to keep.
+	 */
+	public void setRemoveOtherUserTokensSql(@Nonnull String removeOtherUserTokensSql) {
+		this.removeOtherUserTokensSql = removeOtherUserTokensSql;
 	}
 
 	/**
@@ -235,7 +324,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @return The token removal SQL.
 	 */
-	public String getRemoveUserTokensSql() {
+	public @Nonnull String getRemoveUserTokensSql() {
 		return removeUserTokensSql;
 	}
 
@@ -244,7 +333,7 @@ public class SkyveRememberMeTokenRepository extends JdbcDaoSupport implements Pe
 	 *
 	 * @param removeUserTokensSql The token removal SQL.
 	 */
-	public void setRemoveUserTokensSql(String removeUserTokensSql) {
+	public void setRemoveUserTokensSql(@Nonnull String removeUserTokensSql) {
 		this.removeUserTokensSql = removeUserTokensSql;
 	}
 }

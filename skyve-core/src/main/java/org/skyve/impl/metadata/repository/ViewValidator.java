@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -49,6 +50,9 @@ import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderOrderMetaData;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderTopMetaData;
+import org.skyve.impl.metadata.view.model.chart.TemporalBucketMetaData;
 import org.skyve.impl.metadata.view.reference.ActionReference;
 import org.skyve.impl.metadata.view.reference.ContentReference;
 import org.skyve.impl.metadata.view.reference.DefaultListViewReference;
@@ -130,8 +134,10 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
+import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 // TODO check suggestion attributes on text fields etc
 /**
@@ -168,25 +174,42 @@ class ViewValidator extends ViewVisitor {
 	private String dataWidgetIdentifier;
 	private String dataWidgetBinding;
 
-	ViewValidator(ViewImpl view,
-					ProvidedRepository repository,
-					CustomerImpl customer,
-					DocumentImpl document,
-					String uxui) {
-		super(customer, (ModuleImpl) repository.getModule(customer, document.getOwningModuleName()), document, view, uxui);
+	ViewValidator(@Nonnull ViewImpl view,
+					@Nonnull ProvidedRepository repository,
+					@Nonnull CustomerImpl customer,
+					@Nonnull DocumentImpl document,
+					@Nonnull String uxui) {
+		super(customer, (ModuleImpl) Objects.requireNonNull(repository.getModule(customer, document.getOwningModuleName())), document, view, uxui);
 		this.repository = repository;
 		viewIdentifier = view.getName() + " view for UX/UI " + uxui + " for document " + module.getName() + '.' + document.getName();
 	}
 
+	/**
+	 * Returns the owning module of a document resolved by this validator, which must exist for the customer.
+	 *
+	 * @param owned the document whose owning module is required
+	 * @return the owning module; never {@code null}
+	 * @throws MetaDataException when the repository cannot resolve the owning module
+	 */
+	private @Nonnull Module getOwningModule(@Nonnull Document owned) {
+		String owningModuleName = owned.getOwningModuleName();
+		Module result = repository.getModule(customer, owningModuleName);
+		if (result == null) {
+			throw new MetaDataException("Module " + owningModuleName + " of document " + owned.getName() +
+											IN + viewIdentifier + " does not exist for customer " + customer.getName());
+		}
+		return result;
+	}
+
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private Class<?> validateBinding(String bindingPrefix,
-										String binding,
-										boolean bindingRequired,
-										boolean compoundBindingInvalid,
-										boolean domainValuesRequired,
-										boolean scalarBindingOnly,
-										String widgetIdentifier,
-										AttributeType... assertTypes) {
+	private @Nullable Class<?> validateBinding(@Nullable String bindingPrefix,
+													@Nullable String binding,
+													boolean bindingRequired,
+													boolean compoundBindingInvalid,
+													boolean domainValuesRequired,
+													boolean scalarBindingOnly,
+													@Nonnull String widgetIdentifier,
+													@Nullable AttributeType... assertTypes) {
 		return validateBinding(module,
 								document,
 								bindingPrefix,
@@ -200,16 +223,16 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private Class<?> validateBinding(Module contextModule,
-										Document contextDocument,
-										String bindingPrefix,
-										String binding,
-										boolean bindingRequired,
-										boolean compoundBindingInvalid,
-										boolean domainValuesRequired,
-										boolean scalarBindingOnly,
-										String widgetIdentifier,
-										AttributeType... assertTypes) {
+	private @Nullable Class<?> validateBinding(@Nonnull Module contextModule,
+													@Nonnull Document contextDocument,
+													@Nullable String bindingPrefix,
+													@Nullable String binding,
+													boolean bindingRequired,
+													boolean compoundBindingInvalid,
+													boolean domainValuesRequired,
+													boolean scalarBindingOnly,
+													@Nonnull String widgetIdentifier,
+													@Nullable AttributeType... assertTypes) {
 		if (bindingRequired && (binding == null)) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + " - binding is required.");
 		}
@@ -307,15 +330,28 @@ class ViewValidator extends ViewVisitor {
 		return result;
 	}
 
-	private void validateConditionName(String conditionName, String widgetIdentifier) {
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private void validateCondition(@Nullable String condition, @Nonnull String widgetIdentifier) {
 		// ignore true and false when checking the condition exists
-		if ((conditionName != null) && (! "true".equals(conditionName)) && (! "false".equals(conditionName))) {
+		if ((condition != null) && (! "true".equals(condition)) && (! "false".equals(condition))) {
+			// an inline condition expression (or its inverse) must evaluate to a boolean
+			boolean negatedExpression = BindUtil.isNegatedSkyveExpression(condition);
+			if (negatedExpression || BindUtil.isSkyveExpression(condition)) {
+				String expression = negatedExpression ? condition.substring(3) : condition;
+				String error = ExpressionEvaluator.validate(expression, Boolean.class, customer, module, document);
+				if (error != null) {
+					throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
+													" has an inline condition " + expression + " with an error : " + error);
+				}
+				return;
+			}
+
 			// reverse the sense of the condition if it starts with "not"
-			String testConditionName = conditionName;
+			String testConditionName = condition;
 			if (testConditionName.startsWith("not")) {
 				if (! Character.isUpperCase(testConditionName.charAt(3))) {
 					throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
-													"references condition " + conditionName + " which is not correctly camel cased (eg notTrue)");
+													"references condition " + condition + " which is not correctly camel cased (eg notTrue)");
 				}
 				testConditionName = Character.toLowerCase(testConditionName.charAt(3)) + testConditionName.substring(4);
 			}
@@ -324,15 +360,15 @@ class ViewValidator extends ViewVisitor {
 			if ((! Bean.PERSISTED_KEY.equals(testConditionName)) &&
 					(! Bean.CREATED_KEY.equals(testConditionName)) &&
 					(! Bean.CHANGED_KEY.equals(testConditionName))) {
-				validateCondition(module, document, testConditionName, widgetIdentifier);
+				validateConditionExists(module, document, testConditionName, widgetIdentifier);
 			}
 		}
 	}
 
-	private void validateCondition(ModuleImpl currentModule,
-									DocumentImpl currentDocument,
-									String testConditionName,
-									String widgetIdentifier) {
+	private void validateConditionExists(@Nonnull ModuleImpl currentModule,
+											@Nonnull DocumentImpl currentDocument,
+											@Nonnull String testConditionName,
+											@Nonnull String widgetIdentifier) {
 		if (! currentDocument.getConditionNames().contains(testConditionName)) {
 			Extends extension = currentDocument.getExtends();
 			if (extension == null) {
@@ -341,12 +377,12 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			DocumentImpl baseDocument = (DocumentImpl) currentModule.getDocument(customer, extension.getDocumentName());
-			ModuleImpl baseModule = (ModuleImpl) repository.getModule(customer, baseDocument.getOwningModuleName());
-			validateCondition(baseModule, baseDocument, testConditionName, widgetIdentifier);
+			ModuleImpl baseModule = (ModuleImpl) getOwningModule(baseDocument);
+			validateConditionExists(baseModule, baseDocument, testConditionName, widgetIdentifier);
 		}
 	}
 
-	private void validateParameterBindings(List<Parameter> parameters, String parentWidgetIdentifier) {
+	private void validateParameterBindings(@Nullable List<Parameter> parameters, @Nonnull String parentWidgetIdentifier) {
 		if (parameters != null) {
 			for (Parameter parameter : parameters) {
 				validateBinding(null,
@@ -360,11 +396,11 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateFilterParameterBindings(List<FilterParameter> parameters,
-													String parentWidgetIdentifier,
-													Document drivingDocument) {
+	private void validateFilterParameterBindings(@Nullable List<FilterParameter> parameters,
+													@Nonnull String parentWidgetIdentifier,
+													@Nullable Document drivingDocument) {
 		if (parameters != null) {
-			Module drivingModule = (drivingDocument == null) ? null : repository.getModule(customer, drivingDocument.getOwningModuleName());
+			Module drivingModule = (drivingDocument == null) ? null : getOwningModule(drivingDocument);
 
 			for (FilterParameter parameter : parameters) {
 				String filterBinding = parameter.getFilterBinding();
@@ -376,7 +412,7 @@ class ViewValidator extends ViewVisitor {
 									false,
 									false,
 									widgetIdentifier);
-				if (drivingDocument != null) {
+				if ((drivingModule != null) && (drivingDocument != null)) {
 					validateBinding(drivingModule,
 										drivingDocument,
 										null,
@@ -391,9 +427,9 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateMessageExpressions(String message,
-												String widgetIdentifier,
-												String description) {
+	private void validateMessageExpressions(@Nullable String message,
+												@Nonnull String widgetIdentifier,
+												@Nonnull String description) {
 		if (message != null) {
 			Document testDocument = document;
 			if (dataWidgetBinding != null) {
@@ -412,7 +448,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateNoColonInParameter(List<Parameter> parameters, String widgetIdentifier) {
+	private void validateNoColonInParameter(@Nullable List<Parameter> parameters, @Nonnull String widgetIdentifier) {
 		if (parameters != null) {
 			for (Parameter parameter : parameters) {
 				if (parameter.getName().indexOf(':') >= 0) {
@@ -423,7 +459,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateNoColonInFilterParameter(List<FilterParameter> parameters, String widgetIdentifier) {
+	private void validateNoColonInFilterParameter(@Nullable List<FilterParameter> parameters, @Nonnull String widgetIdentifier) {
 		if (parameters != null) {
 			for (FilterParameter parameter : parameters) {
 				if (parameter.getFilterBinding().indexOf(':') >= 0) {
@@ -434,7 +470,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private Document validateQueryOrModel(String queryName, String modelName, String widgetIdentifier) {
+	private @Nullable Document validateQueryOrModel(@Nullable String queryName, @Nullable String modelName, @Nonnull String widgetIdentifier) {
 		Document result = null;
 		if (queryName != null) {
 			if (modelName != null) {
@@ -451,7 +487,7 @@ class ViewValidator extends ViewVisitor {
 		return result;
 	}
 
-	private Document validateQueryName(String queryName, String widgetIdentifier) {
+	private @Nullable Document validateQueryName(@Nullable String queryName, @Nonnull String widgetIdentifier) {
 		Document result = null;
 		if (queryName != null) {
 			MetaDataQueryDefinition query = module.getMetaDataQuery(queryName);
@@ -464,7 +500,7 @@ class ViewValidator extends ViewVisitor {
 		return result;
  	}
 
-	private Document validateListModelName(String modelName, String widgetIdentifier) {
+	private @Nullable Document validateListModelName(@Nullable String modelName, @Nonnull String widgetIdentifier) {
 		Document result = null;
 		if (modelName != null) {
 			ListModel<Bean> model = null;
@@ -485,7 +521,7 @@ class ViewValidator extends ViewVisitor {
 		return result;
 	}
 
-	private void validateMapModelName(String modelName, String widgetIdentifier) {
+	private void validateMapModelName(@Nullable String modelName, @Nonnull String widgetIdentifier) {
 		if (modelName != null) {
 			try {
 				repository.getMapModel(customer, document, modelName, false);
@@ -496,7 +532,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateChartModelName(String modelName, String widgetIdentifier) {
+	private void validateChartModelName(@Nullable String modelName, @Nonnull String widgetIdentifier) {
 		if (modelName != null) {
 			try {
 				repository.getChartModel(customer, document, modelName, false);
@@ -507,7 +543,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateComparisonModelName(String modelName, String widgetIdentifier) {
+	private void validateComparisonModelName(@Nullable String modelName, @Nonnull String widgetIdentifier) {
 		if (modelName != null) {
 			try {
 				repository.getComparisonModel(customer, document, modelName, false);
@@ -518,13 +554,13 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateActionName(String actionName, String widgetIdentifier) {
+	private void validateActionName(@Nullable String actionName, @Nonnull String widgetIdentifier) {
 		if ((actionName != null) && (view.getAction(actionName) == null)) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + " references a non-existent action " + actionName);
 		}
 	}
 
-	private void validateSize(AbsoluteWidth sizable, String widgetIdentifier) {
+	private void validateSize(@Nonnull AbsoluteWidth sizable, @Nonnull String widgetIdentifier) {
 		validatePositive(sizable.getPixelWidth(), widgetIdentifier, "pixelWidth");
 		if (sizable instanceof AbsoluteSize absolute) {
 			validatePositive(absolute.getPixelHeight(), widgetIdentifier, "pixelHeight");
@@ -552,13 +588,13 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validatePositive(Integer size, String widgetIdentifier, String sizeAttributeName) {
+	private void validatePositive(@Nullable Integer size, @Nonnull String widgetIdentifier, @Nonnull String sizeAttributeName) {
 		if ((size != null) && (size.intValue() <= 0)) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier + HAS_VALUE_FOR + sizeAttributeName + OF + size + " that is not positive");
 		}
 	}
 
-	private void validatePercentage(Integer size, String widgetIdentifier, String sizeAttributeName) {
+	private void validatePercentage(@Nullable Integer size, @Nonnull String widgetIdentifier, @Nonnull String sizeAttributeName) {
 		if (size != null) {
 			int value = size.intValue();
 			if ((value <= 0) || (value > 100)) {
@@ -567,7 +603,7 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateResponsive(Integer size, String widgetIdentifier, String sizeAttributeName) {
+	private void validateResponsive(@Nullable Integer size, @Nonnull String widgetIdentifier, @Nonnull String sizeAttributeName) {
 		if (size != null) {
 			int value = size.intValue();
 			if ((value <= 0) || (value > 12)) {
@@ -576,11 +612,11 @@ class ViewValidator extends ViewVisitor {
 		}
 	}
 
-	private void validateCollapsible(Collapsible collapsible,
-										String borderTitle,
-										Integer pixelHeight,
-										Integer percentageHeight,
-										String widgetIdentifier) {
+	private void validateCollapsible(@Nullable Collapsible collapsible,
+										@Nullable String borderTitle,
+										@Nullable Integer pixelHeight,
+										@Nullable Integer percentageHeight,
+										@Nonnull String widgetIdentifier) {
 		if (collapsible != null) {
 			if (borderTitle == null) {
 				throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
@@ -594,15 +630,23 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
+	public void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
 		String actionName = button.getActionName();
 		String buttonIdentifier = "A button " + button.getActionName();
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean actionNameMissing = (actionName == null);
+		if (actionNameMissing) {
+			throw new MetaDataException(buttonIdentifier + IN + viewIdentifier + " - action is required.");
+		}
 		validateActionName(actionName, buttonIdentifier);
 		validateSize(button, buttonIdentifier);
 
 		ActionShow show = button.getShow();
 		if (ActionShow.icon == show) {
 			Action action = view.getAction(actionName); // validated to exist above
+			if (action == null) {
+				throw new IllegalStateException(buttonIdentifier + IN + viewIdentifier + " references a non-existent action " + actionName);
+			}
 			if ((action.getIconStyleClass() == null) && (action.getRelativeIconFileName() == null)) {
 				throw new MetaDataException(buttonIdentifier + IN + viewIdentifier + " is set to [show] an icon but " + actionName + " has no [iconStyleClass] or [relativeIconFileName] defined.");
 			}
@@ -610,7 +654,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+	public void visitZoomIn(@Nonnull ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
 		String binding = zoomIn.getBinding();
 		String zoomInIdentifier = "ZoomIn " + binding;
 		validateBinding(null,
@@ -622,8 +666,8 @@ class ViewValidator extends ViewVisitor {
 							zoomInIdentifier,
 							AttributeType.association,
 							AttributeType.inverseOne);
-		validateConditionName(zoomIn.getDisabledConditionName(), zoomInIdentifier);
-		validateConditionName(zoomIn.getInvisibleConditionName(), zoomInIdentifier);
+		validateCondition(zoomIn.getDisabledCondition(), zoomInIdentifier);
+		validateCondition(zoomIn.getInvisibleCondition(), zoomInIdentifier);
 		validateSize(zoomIn, zoomInIdentifier);
 
 		if ((ActionShow.icon == zoomIn.getShow()) &&
@@ -634,15 +678,20 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
+	public void visitDynamicImage(@Nonnull DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "Dynamic Image " + image.getName();
-		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean nameMissing = (image.getName() == null);
+		if (nameMissing) {
+			throw new MetaDataException(imageIdentifier + IN + viewIdentifier + " - name is required.");
+		}
+		validateCondition(image.getInvisibleCondition(), imageIdentifier);
 		validateParameterBindings(image.getParameters(), imageIdentifier);
 		validateSize(image, imageIdentifier);
 	}
 
 	@Override
-	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckBox(@Nonnull CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
 		String binding = checkBox.getBinding();
 		String checkBoxIdentifier = "CheckBox " + binding;
 		if (dataWidgetBinding != null) {
@@ -656,20 +705,20 @@ class ViewValidator extends ViewVisitor {
 							true,
 							checkBoxIdentifier,
 							AttributeType.bool);
-		validateConditionName(checkBox.getDisabledConditionName(), checkBoxIdentifier);
-		validateConditionName(checkBox.getInvisibleConditionName(), checkBoxIdentifier);
+		validateCondition(checkBox.getDisabledCondition(), checkBoxIdentifier);
+		validateCondition(checkBox.getInvisibleCondition(), checkBoxIdentifier);
 		validateSize(checkBox, checkBoxIdentifier);
 	}
 
 	@Override
-	public void visitedCheckBox(CheckBox checkBox,
+	public void visitedCheckBox(@Nonnull CheckBox checkBox,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckMembership(@Nonnull CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
 		String membershipIdentifier = "CheckBox " + membership.getBinding();
 		validateBinding(null,
 							membership.getBinding(),
@@ -679,19 +728,19 @@ class ViewValidator extends ViewVisitor {
 							false,
 							membershipIdentifier,
 							AttributeType.collection);
-		validateConditionName(membership.getDisabledConditionName(), membershipIdentifier);
-		validateConditionName(membership.getInvisibleConditionName(), membershipIdentifier);
+		validateCondition(membership.getDisabledCondition(), membershipIdentifier);
+		validateCondition(membership.getInvisibleCondition(), membershipIdentifier);
 	}
 
 	@Override
-	public void visitedCheckMembership(CheckMembership membership,
+	public void visitedCheckMembership(@Nonnull CheckMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitColourPicker(ColourPicker colour,
+	public void visitColourPicker(@Nonnull ColourPicker colour,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		String binding = colour.getBinding();
@@ -707,20 +756,20 @@ class ViewValidator extends ViewVisitor {
 							true,
 							colourIdentifier,
 							AttributeType.colour);
-		validateConditionName(colour.getDisabledConditionName(), colourIdentifier);
-		validateConditionName(colour.getInvisibleConditionName(), colourIdentifier);
+		validateCondition(colour.getDisabledCondition(), colourIdentifier);
+		validateCondition(colour.getInvisibleCondition(), colourIdentifier);
 		validateSize(colour, colourIdentifier);
 	}
 
 	@Override
-	public void visitedColourPicker(ColourPicker colour,
+	public void visitedColourPicker(@Nonnull ColourPicker colour,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
+	public void visitCombo(@Nonnull Combo combo, boolean parentVisible, boolean parentEnabled) {
 		String binding = combo.getBinding();
 		String comboIdentifier = "Combo " + binding;
 		if (dataWidgetBinding != null) {
@@ -740,13 +789,13 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.bool,
 							AttributeType.integer,
 							AttributeType.longInteger);
-		validateConditionName(combo.getDisabledConditionName(), comboIdentifier);
-		validateConditionName(combo.getInvisibleConditionName(), comboIdentifier);
+		validateCondition(combo.getDisabledCondition(), comboIdentifier);
+		validateCondition(combo.getInvisibleCondition(), comboIdentifier);
 		validateSize(combo, comboIdentifier);
 	}
 
 	@Override
-	public void visitedCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
+	public void visitedCombo(@Nonnull Combo combo, boolean parentVisible, boolean parentEnabled) {
 		// do nothing
 	}
 
@@ -777,8 +826,8 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.content,
 							AttributeType.image);
 		validateContentDisplayCapture(content, contentIdentifier);
-		validateConditionName(content.getDisabledConditionName(), contentIdentifier);
-		validateConditionName(content.getInvisibleConditionName(), contentIdentifier);
+		validateCondition(content.getDisabledCondition(), contentIdentifier);
+		validateCondition(content.getInvisibleCondition(), contentIdentifier);
 		validateSize(content, contentIdentifier);
 	}
 
@@ -816,7 +865,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+	public void visitContentSignature(@Nonnull ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
 		String binding = signature.getBinding();
 		String signatureIdentifier = "ContentSignature " + binding;
 		validateBinding(dataWidgetBinding,
@@ -828,8 +877,8 @@ class ViewValidator extends ViewVisitor {
 							signatureIdentifier,
 							AttributeType.content,
 							AttributeType.image);
-		validateConditionName(signature.getDisabledConditionName(), signatureIdentifier);
-		validateConditionName(signature.getInvisibleConditionName(), signatureIdentifier);
+		validateCondition(signature.getDisabledCondition(), signatureIdentifier);
+		validateCondition(signature.getInvisibleCondition(), signatureIdentifier);
 		validateSize(signature, signatureIdentifier);
 
 		String colour = signature.getRgbHexBackgroundColour();
@@ -853,22 +902,22 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		visitDataWidget(grid, "DataGrid");
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, dataWidgetIdentifier, AttributeType.id);
-		validateConditionName(grid.getDisabledConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), dataWidgetIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), dataWidgetIdentifier);
+		validateCondition(grid.getDisabledCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableAddCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableEditCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableRemoveCondition(), dataWidgetIdentifier);
+		validateCondition(grid.getDisableZoomCondition(), dataWidgetIdentifier);
 	}
 
 	@Override
-	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataRepeater(@Nonnull DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		visitDataWidget(repeater, "DataRepeater");
 	}
 
-	private void visitDataWidget(AbstractDataWidget widget, String widgetDescription) {
+	private void visitDataWidget(@Nonnull AbstractDataWidget widget, @Nonnull String widgetDescription) {
 		String title = widget.getTitle();
 		dataWidgetBinding = widget.getBinding();
 		StringBuilder sb = new StringBuilder(64);
@@ -891,12 +940,12 @@ class ViewValidator extends ViewVisitor {
 							dataWidgetIdentifier,
 							AttributeType.collection,
 							AttributeType.inverseMany);
-		validateConditionName(widget.getInvisibleConditionName(), dataWidgetIdentifier);
+		validateCondition(widget.getInvisibleCondition(), dataWidgetIdentifier);
 		validateSize(widget, dataWidgetIdentifier);
 	}
 
 	@Override
-	public void visitDataGridBoundColumn(DataGridBoundColumn column,
+	public void visitDataGridBoundColumn(@Nonnull DataGridBoundColumn column,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String columnIdentifier = "Column " + column.getTitle() + OF + dataWidgetIdentifier;
@@ -939,36 +988,41 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedDataGridBoundColumn(DataGridBoundColumn column,
+	public void visitedDataGridBoundColumn(@Nonnull DataGridBoundColumn column,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do
 	}
 
 	@Override
-	public void visitDataGridContainerColumn(DataGridContainerColumn column,
+	public void visitDataGridContainerColumn(@Nonnull DataGridContainerColumn column,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do
 	}
 
 	@Override
-	public void visitedDataGridContainerColumn(DataGridContainerColumn column,
+	public void visitedDataGridContainerColumn(@Nonnull DataGridContainerColumn column,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do
 	}
 
 	@Override
-	public void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
+	public void visitDialogButton(@Nonnull DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		String buttonIdentifier = "A Dialog Button" + button.getDialogName();
-		validateConditionName(button.getDisabledConditionName(), buttonIdentifier);
-		validateConditionName(button.getInvisibleConditionName(), buttonIdentifier);
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean displayNameMissing = (button.getDisplayName() == null);
+		if (displayNameMissing) {
+			throw new MetaDataException(buttonIdentifier + IN + viewIdentifier + " - displayName is required.");
+		}
+		validateCondition(button.getDisabledCondition(), buttonIdentifier);
+		validateCondition(button.getInvisibleCondition(), buttonIdentifier);
 		validateParameterBindings(button.getParameters(), buttonIdentifier);
 	}
 
 	@Override
-	public void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
+	public void visitForm(@Nonnull Form form, boolean parentVisible, boolean parentEnabled) {
 		String formIdentifier = form.getWidgetId();
 		if (formIdentifier == null) {
 			formIdentifier = "A Form";
@@ -976,8 +1030,8 @@ class ViewValidator extends ViewVisitor {
 		else {
 			formIdentifier = "Form " + formIdentifier;
 		}
-		validateConditionName(form.getDisabledConditionName(), formIdentifier);
-		validateConditionName(form.getInvisibleConditionName(), formIdentifier);
+		validateCondition(form.getDisabledCondition(), formIdentifier);
+		validateCondition(form.getInvisibleCondition(), formIdentifier);
 		validateSize(form, formIdentifier);
 		validateMessageExpressions(form.getLocalisedBorderTitle(), formIdentifier, BORDER_TITLE);
 		validateCollapsible(form.getCollapsible(),
@@ -988,7 +1042,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFormColumn(FormColumn column, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormColumn(@Nonnull FormColumn column, boolean parentVisible, boolean parentEnabled) {
 		String columnIdentifer = "A form column";
 		validatePositive(column.getPixelWidth(), columnIdentifer, "pixelWidth");
 		validatePercentage(column.getPercentageWidth(), columnIdentifer, "percentageWidth");
@@ -1000,19 +1054,19 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormRow(@Nonnull FormRow row, boolean parentVisible, boolean parentEnabled) {
 		if (row.getItems().isEmpty()) {
 			throw new MetaDataException("A form row in " + viewIdentifier + " is empty (has not items declared).");
 		}
 	}
 
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// TODO Implement FormItem validation
 	}
 
 	@Override
-	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Geometry " + geometry.getBinding();
 		validateBinding(dataWidgetBinding,
 							geometry.getBinding(),
@@ -1022,18 +1076,18 @@ class ViewValidator extends ViewVisitor {
 							true,
 							geometryIdentifier,
 							AttributeType.geometry);
-		validateConditionName(geometry.getDisabledConditionName(), geometryIdentifier);
-		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
+		validateCondition(geometry.getDisabledCondition(), geometryIdentifier);
+		validateCondition(geometry.getInvisibleCondition(), geometryIdentifier);
 		validateSize(geometry, geometryIdentifier);
 	}
 
 	@Override
-	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitedGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		// nothing to validate
 	}
 
 	@Override
-	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitGeometryMap(@Nonnull GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "GeometryMap " + geometry.getBinding();
 		validateBinding(null,
 							geometry.getBinding(),
@@ -1043,26 +1097,31 @@ class ViewValidator extends ViewVisitor {
 							true,
 							geometryIdentifier,
 							AttributeType.geometry);
-		validateConditionName(geometry.getDisabledConditionName(), geometryIdentifier);
-		validateConditionName(geometry.getInvisibleConditionName(), geometryIdentifier);
+		validateCondition(geometry.getDisabledCondition(), geometryIdentifier);
+		validateCondition(geometry.getInvisibleCondition(), geometryIdentifier);
 		validateSize(geometry, geometryIdentifier);
 	}
 
 	@Override
-	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitedGeometryMap(@Nonnull GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		// nothing to validate
 	}
 
 	@Override
-	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+	public void visitMap(@Nonnull MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		String geometryIdentifier = "Map with model " + map.getModelName();
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean modelNameMissing = (map.getModelName() == null);
+		if (modelNameMissing) {
+			throw new MetaDataException(geometryIdentifier + IN + viewIdentifier + " - modelName is required.");
+		}
 		validateSize(map, geometryIdentifier);
-		validateConditionName(map.getInvisibleConditionName(), geometryIdentifier);
+		validateCondition(map.getInvisibleCondition(), geometryIdentifier);
 		validateMapModelName(map.getModelName(), geometryIdentifier);
 	}
 
 	@Override
-	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+	public void visitChart(@Nonnull Chart chart, boolean parentVisible, boolean parentEnabled) {
 		String modelName = chart.getModelName();
 		ChartBuilderMetaData model = chart.getModel();
 		String chartIdentifier = "Chart" + ((model == null) ? ((modelName == null) ? " with no model" : " with model named " + modelName) : " with model label " + model.getLabel());
@@ -1071,17 +1130,27 @@ class ViewValidator extends ViewVisitor {
 			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " requires a modelName or a model but not both.");
 		}
 		validateSize(chart, chartIdentifier);
-		validateConditionName(chart.getInvisibleConditionName(), chartIdentifier);
+		validateCondition(chart.getInvisibleCondition(), chartIdentifier);
 		if (modelName != null) {
 			validateChartModelName(chart.getModelName(), chartIdentifier);
 		}
-		else {
+		else if (model != null) { // either the modelName or the model is defined (validated above)
 			validateChartModel(model, chartIdentifier);
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean typeMissing = (chart.getType() == null);
+		if (typeMissing) {
+			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - type is required.");
 		}
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void validateChartModel(ChartBuilderMetaData model, String chartIdentifier) {
+	private void validateChartModel(@Nonnull ChartBuilderMetaData model, @Nonnull String chartIdentifier) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean labelMissing = (model.getLabel() == null);
+		if (labelMissing) {
+			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - label is required.");
+		}
 		Module contextModule = null;
 		try {
 			contextModule = repository.getModule(customer, model.getModuleName());
@@ -1176,15 +1245,48 @@ class ViewValidator extends ViewVisitor {
 				}
 			}
 		}
+
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean temporalBucketTypeMissing = (model.getCategoryBucket() instanceof TemporalBucketMetaData temporalBucket) &&
+												(temporalBucket.getType() == null);
+		if (temporalBucketTypeMissing) {
+			throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - type is required for temporalBucket.");
+		}
+		ChartBuilderTopMetaData top = model.getTop();
+		if (top != null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean byMissing = (top.getBy() == null);
+			if (byMissing) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - by is required for top.");
+			}
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean sortMissing = (top.getSort() == null);
+			if (sortMissing) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - sort is required for top.");
+			}
+		}
+		ChartBuilderOrderMetaData order = model.getOrder();
+		if (order != null) {
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean byMissing = (order.getBy() == null);
+			if (byMissing) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - by is required for order.");
+			}
+			@SuppressWarnings("null") // metadata built in code bypasses the XSD
+			boolean sortMissing = (order.getSort() == null);
+			if (sortMissing) {
+				throw new MetaDataException(chartIdentifier + IN + viewIdentifier + " - sort is required for order.");
+			}
+		}
 	}
 
 	@Override
-	public void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitHBox(@Nonnull HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		String borderTitle = hbox.getBorderTitle();
 		String id = hbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A HBox" : "HBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(hbox, boxIdentifier);
-		validateConditionName(hbox.getInvisibleConditionName(), boxIdentifier);
+		validateCondition(hbox.getInvisibleCondition(), boxIdentifier);
 		validateMessageExpressions(hbox.getLocalisedBorderTitle(), boxIdentifier, BORDER_TITLE);
 		validateCollapsible(hbox.getCollapsible(),
 								hbox.getBorderTitle(),
@@ -1194,11 +1296,21 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled) {
+	public void visitHTML(@Nonnull HTML html, boolean parentVisible, boolean parentEnabled) {
 		String binding = html.getBinding();
 		String htmlIdentifier = "HTML " + html.getBinding();
 		if (dataWidgetBinding != null) {
 			htmlIdentifier += IN + dataWidgetIdentifier;
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean pixelWidthMissing = (html.getPixelWidth() == null);
+		if (pixelWidthMissing) {
+			throw new MetaDataException(htmlIdentifier + IN + viewIdentifier + " - pixelWidth is required.");
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean pixelHeightMissing = (html.getPixelHeight() == null);
+		if (pixelHeightMissing) {
+			throw new MetaDataException(htmlIdentifier + IN + viewIdentifier + " - pixelHeight is required.");
 		}
 		validateBinding(dataWidgetBinding,
 							binding,
@@ -1208,13 +1320,13 @@ class ViewValidator extends ViewVisitor {
 							true,
 							htmlIdentifier,
 							AttributeType.markup);
-		validateConditionName(html.getDisabledConditionName(), htmlIdentifier);
-		validateConditionName(html.getInvisibleConditionName(), htmlIdentifier);
+		validateCondition(html.getDisabledCondition(), htmlIdentifier);
+		validateCondition(html.getInvisibleCondition(), htmlIdentifier);
 		validateSize(html, htmlIdentifier);
 	}
 
 	@Override
-	public void visitBlurb(Blurb blurb,
+	public void visitBlurb(@Nonnull Blurb blurb,
 							boolean parentVisible,
 							boolean parentEnabled) {
 		String blurbIdentifier = "A Blurb";
@@ -1226,12 +1338,12 @@ class ViewValidator extends ViewVisitor {
 			throw new MetaDataException(blurbIdentifier + IN + viewIdentifier + " has no markup specified.");
 		}
 		validateMessageExpressions(blurb.getLocalisedMarkup(), blurbIdentifier, "markup");
-		validateConditionName(blurb.getInvisibleConditionName(), blurbIdentifier);
+		validateCondition(blurb.getInvisibleCondition(), blurbIdentifier);
 		validateSize(blurb, blurbIdentifier);
 	}
 
 	@Override
-	public void visitLabel(Label label, boolean parentVisible, boolean parentEnabled) {
+	public void visitLabel(@Nonnull Label label, boolean parentVisible, boolean parentEnabled) {
 		String labelIdentifier = "A Label";
 		if (dataWidgetBinding != null) {
 			labelIdentifier += IN + dataWidgetIdentifier;
@@ -1252,23 +1364,23 @@ class ViewValidator extends ViewVisitor {
 							false,
 							labelIdentifier);
 		validateMessageExpressions(label.getLocalisedValue(), labelIdentifier, "a value");
-		validateConditionName(label.getInvisibleConditionName(), labelIdentifier);
+		validateCondition(label.getInvisibleCondition(), labelIdentifier);
 		validateSize(label, labelIdentifier);
 	}
 
 	@Override
-	public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitListGrid(@Nonnull ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		String queryName = grid.getQueryName();
 		String modelName = grid.getModelName();
 		String listGridIdentifier = "ListGrid " + ((modelName != null) ? modelName : queryName);
 		validateSize(grid, listGridIdentifier);
-		validateConditionName(grid.getDisabledConditionName(), listGridIdentifier);
-		validateConditionName(grid.getInvisibleConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), listGridIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), listGridIdentifier);
-		validateConditionName(grid.getPostRefreshConditionName(), listGridIdentifier);
+		validateCondition(grid.getDisabledCondition(), listGridIdentifier);
+		validateCondition(grid.getInvisibleCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableAddCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableEditCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableZoomCondition(), listGridIdentifier);
+		validateCondition(grid.getDisableRemoveCondition(), listGridIdentifier);
+		validateCondition(grid.getPostRefreshCondition(), listGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, listGridIdentifier, AttributeType.id);
 		Document drivingDocument = validateQueryOrModel(queryName, modelName, listGridIdentifier);
 		validateFilterParameterBindings(grid.getFilterParameters(), listGridIdentifier, drivingDocument);
@@ -1278,13 +1390,13 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitListRepeater(@Nonnull ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		String queryName = repeater.getQueryName();
 		String modelName = repeater.getModelName();
 		String listRepeaterIdentifier = "ListRepeater " + ((modelName != null) ? modelName : queryName);
 		validateSize(repeater, listRepeaterIdentifier);
-		validateConditionName(repeater.getInvisibleConditionName(), listRepeaterIdentifier);
-		validateConditionName(repeater.getPostRefreshConditionName(), listRepeaterIdentifier);
+		validateCondition(repeater.getInvisibleCondition(), listRepeaterIdentifier);
+		validateCondition(repeater.getPostRefreshCondition(), listRepeaterIdentifier);
 		Document drivingDocument = validateQueryOrModel(queryName, modelName, listRepeaterIdentifier);
 		validateFilterParameterBindings(repeater.getFilterParameters(), listRepeaterIdentifier, drivingDocument);
 		validateParameterBindings(repeater.getParameters(), listRepeaterIdentifier);
@@ -1293,18 +1405,18 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitTreeGrid(@Nonnull TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		String queryName = grid.getQueryName();
 		String modelName = grid.getModelName();
 		String treeGridIdentifier = "TreeGrid " + ((modelName != null) ? modelName : queryName);
 		validateSize(grid, treeGridIdentifier);
-		validateConditionName(grid.getDisabledConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getInvisibleConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableAddConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableEditConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableZoomConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getDisableRemoveConditionName(), treeGridIdentifier);
-		validateConditionName(grid.getPostRefreshConditionName(), treeGridIdentifier);
+		validateCondition(grid.getDisabledCondition(), treeGridIdentifier);
+		validateCondition(grid.getInvisibleCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableAddCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableEditCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableZoomCondition(), treeGridIdentifier);
+		validateCondition(grid.getDisableRemoveCondition(), treeGridIdentifier);
+		validateCondition(grid.getPostRefreshCondition(), treeGridIdentifier);
 		validateBinding(null, grid.getSelectedIdBinding(), false, false, false, true, treeGridIdentifier, AttributeType.id);
 		validateBinding(null, grid.getRootIdBinding(), false, false, false, true, treeGridIdentifier);
 		Document drivingDocument = validateQueryOrModel(queryName, modelName, treeGridIdentifier);
@@ -1315,7 +1427,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitListMembership(@Nonnull ListMembership membership, boolean parentVisible, boolean parentEnabled) {
 		String membershipIdentifier = "ListMembership " + membership.getBinding();
 		validateBinding(null,
 							membership.getBinding(),
@@ -1326,20 +1438,20 @@ class ViewValidator extends ViewVisitor {
 							membershipIdentifier,
 							AttributeType.collection,
 							AttributeType.inverseMany);
-		validateConditionName(membership.getDisabledConditionName(), membershipIdentifier);
-		validateConditionName(membership.getInvisibleConditionName(), membershipIdentifier);
+		validateCondition(membership.getDisabledCondition(), membershipIdentifier);
+		validateCondition(membership.getInvisibleCondition(), membershipIdentifier);
 		validateSize(membership, membershipIdentifier);
 	}
 
 	@Override
-	public void visitedListMembership(ListMembership membership,
+	public void visitedListMembership(@Nonnull ListMembership membership,
 										boolean parentVisible,
 										boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitComparison(Comparison comparison,
+	public void visitComparison(@Nonnull Comparison comparison,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		String comparisonIdentifier = "Comparison " + comparison.getBinding();
@@ -1351,18 +1463,23 @@ class ViewValidator extends ViewVisitor {
 							false,
 							comparisonIdentifier,
 							AttributeType.association);
-		validateConditionName(comparison.getDisabledConditionName(), comparisonIdentifier);
-		validateConditionName(comparison.getInvisibleConditionName(), comparisonIdentifier);
+		validateCondition(comparison.getDisabledCondition(), comparisonIdentifier);
+		validateCondition(comparison.getInvisibleCondition(), comparisonIdentifier);
 		validateComparisonModelName(comparison.getModelName(), comparisonIdentifier);
 		validateSize(comparison, comparisonIdentifier);
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		String binding = lookup.getBinding();
 		String descriptionBinding = lookup.getDescriptionBinding();
 		String lookupIdentifier = "LookupDescription " + binding;
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean descriptionBindingMissing = (descriptionBinding == null);
+		if (descriptionBindingMissing) {
+			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " - descriptionBinding is required.");
+		}
 		validateSize(lookup, lookupIdentifier);
 		// A lookupDescription in a data grid bound to an aggregated collection
 		// doesn't have to have a binding
@@ -1384,25 +1501,28 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							lookupIdentifier);
-		validateConditionName(lookup.getDisabledConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getInvisibleConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisablePickConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableEditConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableAddConditionName(), lookupIdentifier);
-		validateConditionName(lookup.getDisableClearConditionName(), lookupIdentifier);
-		Document drivingDocument = validateQueryName(lookup.getQuery(), lookupIdentifier);
+		validateCondition(lookup.getDisabledCondition(), lookupIdentifier);
+		validateCondition(lookup.getInvisibleCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisablePickCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisableEditCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisableAddCondition(), lookupIdentifier);
+		validateCondition(lookup.getDisableClearCondition(), lookupIdentifier);
+		String modelName = lookup.getModelName();
+		String queryName = lookup.getQuery();
+		Document drivingDocument = (modelName == null) ?
+				validateQueryName(queryName, lookupIdentifier) :
+				validateQueryOrModel(queryName, modelName, lookupIdentifier);
 		validateFilterParameterBindings(lookup.getFilterParameters(), lookupIdentifier, drivingDocument);
 		validateParameterBindings(lookup.getParameters(), lookupIdentifier);
 		validateNoColonInFilterParameter(lookup.getFilterParameters(), lookupIdentifier);
 		validateNoColonInParameter(lookup.getParameters(), lookupIdentifier);
 
-		// determine the query that will be used
-		MetaDataQueryDefinition query = null;
-		if (lookup.getQuery() != null) {
-    		query = module.getNullSafeMetaDataQuery(lookup.getQuery());
-    	}
-		else {
-			// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
+		// determine the columns that will be used
+		List<MetaDataQueryColumn> columns;
+		if (modelName != null) {
+			if (drivingDocument == null) {
+				throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " requires a model with a driving document.");
+			}
 			String fullBinding = binding;
 			if (dataWidgetBinding != null) {
 				if (binding == null) {
@@ -1416,71 +1536,105 @@ class ViewValidator extends ViewVisitor {
 				throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " - binding is required.");
 			}
 			TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
-    		Relation relation = (Relation) target.getAttribute();
-    		// This should never happen as shit was validated above
-    		if (relation == null) {
-    			throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
-    		}
-    		String queryName = (relation instanceof Reference reference) ? reference.getQueryName() : null;
-    		if (queryName != null) {
-        		query = module.getNullSafeMetaDataQuery(queryName);
-    		}
-    		else {
-    			query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
-    		}
+			Relation relation = (Relation) Objects.requireNonNull(target.getAttribute());
+			Document targetDocument = customer.getModule(target.getDocument().getOwningModuleName())
+					.getDocument(customer, relation.getDocumentName());
+			if ((! targetDocument.getName().equals(drivingDocument.getName())) ||
+					(! targetDocument.getOwningModuleName().equals(drivingDocument.getOwningModuleName()))) {
+				throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " model must drive the lookup target document.");
+			}
+			columns = Objects.requireNonNull(repository.getListModel(customer, document, modelName, false)).getColumns();
+		}
+		else {
+			MetaDataQueryDefinition query = null;
+			if (queryName != null) {
+				query = module.getNullSafeMetaDataQuery(queryName);
+			}
+			else {
+				// NB Use getMetaDataForBinding() to ensure we find attributes from base documents inherited
+				String fullBinding = binding;
+				if (dataWidgetBinding != null) {
+					if (binding == null) {
+						fullBinding = dataWidgetBinding;
+					}
+					else {
+						fullBinding = BindUtil.createCompoundBinding(dataWidgetBinding, binding);
+					}
+				}
+				if (fullBinding == null) {
+					throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " - binding is required.");
+				}
+				TargetMetaData target = Binder.getMetaDataForBinding(customer, module, document, fullBinding);
+				Relation relation = (Relation) target.getAttribute();
+				// This should never happen as shit was validated above
+				if (relation == null) {
+					throw new MetaDataException(fullBinding + " doesn't point to an attribute from document " + document.getName());
+				}
+				queryName = (relation instanceof Reference reference) ? reference.getQueryName() : null;
+				if (queryName != null) {
+					query = module.getNullSafeMetaDataQuery(queryName);
+				}
+				else {
+					query = module.getDocumentDefaultQuery(customer, relation.getDocumentName());
+				}
+			}
+
+			columns = query.getColumns();
 		}
 
 		// validate drop down columns and description binding
 		List<LookupDescriptionColumn> dropDownColumns = lookup.getDropDownColumns();
-		LinkedHashSet<String> testColumns = null;
-		if (dropDownColumns != null) {
-			testColumns = new LinkedHashSet<>(dropDownColumns.size());
-			for (LookupDescriptionColumn dropDownColumn : dropDownColumns) {
-				String dropDownColumnName = dropDownColumn.getName();
-				if (! Bean.BIZ_KEY.equals(dropDownColumnName)) {
-					testColumns.add(dropDownColumnName);
-				}
+		LinkedHashSet<String> testColumns = new LinkedHashSet<>(dropDownColumns.size());
+		for (LookupDescriptionColumn dropDownColumn : dropDownColumns) {
+			String dropDownColumnName = dropDownColumn.getName();
+			if (! Bean.BIZ_KEY.equals(dropDownColumnName)) {
+				testColumns.add(dropDownColumnName);
 			}
 		}
-			boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
+		boolean foundLookupDescription = Bean.BIZ_KEY.equals(descriptionBinding);
 
-			for (MetaDataQueryColumn column : query.getColumns()) {
-				String alias = column.getName();
-				if (alias == null) {
-					alias = column.getBinding();
-				}
-				MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn projected) ?
-																	projected :
-																	null;
-				if ((testColumns != null) && testColumns.contains(alias)) {
-					if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
-						throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query.");
-					}
-					testColumns.remove(alias);
-				}
-				if ((! foundLookupDescription) && descriptionBinding.equals(alias)) {
-					if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
-						throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + alias + " which is not projected in the query.");
-					}
-					foundLookupDescription = true;
-				}
+		for (MetaDataQueryColumn column : columns) {
+			String alias = column.getName();
+			if (alias == null) {
+				alias = column.getBinding();
 			}
+			MetaDataQueryProjectedColumn projectedColumn = (column instanceof MetaDataQueryProjectedColumn projected) ?
+																projected :
+																null;
+			if (testColumns.contains(alias)) {
+				if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
+					throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + alias + " which is not projected in the query or model.");
+				}
+				testColumns.remove(alias);
+			}
+			if ((! foundLookupDescription) && descriptionBinding.equals(alias)) {
+				if ((projectedColumn != null) && (! projectedColumn.isProjected())) {
+					throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + alias + " which is not projected in the query or model.");
+				}
+				foundLookupDescription = true;
+			}
+		}
 
-    	if (! foundLookupDescription) {
-			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + descriptionBinding + " which is not defined in the query.");
-    	}
-    	if ((testColumns != null) && (! testColumns.isEmpty())) {
-			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + testColumns.iterator().next() + " which is not defined in the query.");
-    	}
+		if (! foundLookupDescription) {
+			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a description binding of " + descriptionBinding + " which is not defined in the query or model.");
+		}
+		if (! testColumns.isEmpty()) {
+			throw new MetaDataException(lookupIdentifier + IN + viewIdentifier + " has a drop down column of " + testColumns.iterator().next() + " which is not defined in the query or model.");
+		}
 	}
 
 	@Override
-	public void visitedLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+	public void visitParameter(@Nonnull Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean nameMissing = (parameter.getName() == null);
+		if (nameMissing) {
+			throw new MetaDataException(PARAMETER_PREFIX + parameter.getName() + IN + viewIdentifier + " - name is required.");
+		}
 		// Check that value or valueBinding is populated
 		if ((parameter.getValue() == null) && (parameter.getValueBinding() == null)) {
 			throw new MetaDataException(PARAMETER_PREFIX + parameter.getName() + " requires either a value or a valueBinding.");
@@ -1488,7 +1642,17 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+	public void visitFilterParameter(@Nonnull FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean filterBindingMissing = (parameter.getFilterBinding() == null);
+		if (filterBindingMissing) {
+			throw new MetaDataException("Filter Parameter " + parameter.getFilterBinding() + IN + viewIdentifier + " - filterBinding is required.");
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean operatorMissing = (parameter.getOperator() == null);
+		if (operatorMissing) {
+			throw new MetaDataException("Filter Parameter " + parameter.getFilterBinding() + IN + viewIdentifier + " - operator is required.");
+		}
 		// Check that value or valueBinding is populated for pertinent operators
 		FilterOperator operator = parameter.getOperator();
 		if ((! FilterOperator.isNull.equals(operator)) &&
@@ -1500,7 +1664,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
+	public void visitPassword(@Nonnull Password password, boolean parentVisible, boolean parentEnabled) {
 		String binding = password.getBinding();
 		String passwordIdentifier = "Password " + binding;
 		if (dataWidgetBinding != null) {
@@ -1514,20 +1678,20 @@ class ViewValidator extends ViewVisitor {
 							true,
 							passwordIdentifier,
 							AttributeType.text);
-		validateConditionName(password.getDisabledConditionName(), passwordIdentifier);
-		validateConditionName(password.getInvisibleConditionName(), passwordIdentifier);
+		validateCondition(password.getDisabledCondition(), passwordIdentifier);
+		validateCondition(password.getInvisibleCondition(), passwordIdentifier);
 		validateSize(password, passwordIdentifier);
 	}
 
 	@Override
-	public void visitedPassword(Password password,
+	public void visitedPassword(@Nonnull Password password,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitProgressBar(ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {
+	public void visitProgressBar(@Nonnull ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {
 		String progressBarIdentifier = "ProgressBar " + progressBar.getBinding();
 		validateBinding(null,
 							progressBar.getBinding(),
@@ -1536,12 +1700,12 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							progressBarIdentifier);
-		validateConditionName(progressBar.getInvisibleConditionName(), progressBarIdentifier);
+		validateCondition(progressBar.getInvisibleCondition(), progressBarIdentifier);
 		validateSize(progressBar, progressBarIdentifier);
 	}
 
 	@Override
-	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
+	public void visitRadio(@Nonnull Radio radio, boolean parentVisible, boolean parentEnabled) {
 		String binding = radio.getBinding();
 		String radioIdentifier = "Radio " + binding;
 		if (dataWidgetBinding != null) {
@@ -1561,24 +1725,44 @@ class ViewValidator extends ViewVisitor {
 							AttributeType.bool,
 							AttributeType.integer,
 							AttributeType.longInteger);
-		validateConditionName(radio.getDisabledConditionName(), radioIdentifier);
-		validateConditionName(radio.getInvisibleConditionName(), radioIdentifier);
+		validateCondition(radio.getDisabledCondition(), radioIdentifier);
+		validateCondition(radio.getInvisibleCondition(), radioIdentifier);
 		validateSize(radio, radioIdentifier);
 	}
 
 	@Override
-	public void visitedRadio(Radio radio,
+	public void visitedRadio(@Nonnull Radio radio,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
+	public void visitRichText(@Nonnull RichText richText, boolean parentVisible, boolean parentEnabled) {
 		String binding = richText.getBinding();
 		String richTextIdentifier = "RichText " + binding;
 		if (dataWidgetBinding != null) {
 			richTextIdentifier += IN + dataWidgetIdentifier;
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean pixelWidthMissing = (richText.getPixelWidth() == null);
+		if (pixelWidthMissing) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - pixelWidth is required.");
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean pixelHeightMissing = (richText.getPixelHeight() == null);
+		if (pixelHeightMissing) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - pixelHeight is required.");
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean minPixelHeightMissing = (richText.getMinPixelHeight() == null);
+		if (minPixelHeightMissing) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - minPixelHeight is required.");
+		}
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean maxPixelHeightMissing = (richText.getMaxPixelHeight() == null);
+		if (maxPixelHeightMissing) {
+			throw new MetaDataException(richTextIdentifier + IN + viewIdentifier + " - maxPixelHeight is required.");
 		}
 		validateBinding(dataWidgetBinding,
 							binding,
@@ -1589,20 +1773,20 @@ class ViewValidator extends ViewVisitor {
 							richTextIdentifier,
 							AttributeType.memo,
 							AttributeType.markup);
-		validateConditionName(richText.getDisabledConditionName(), richTextIdentifier);
-		validateConditionName(richText.getInvisibleConditionName(), richTextIdentifier);
+		validateCondition(richText.getDisabledCondition(), richTextIdentifier);
+		validateCondition(richText.getInvisibleCondition(), richTextIdentifier);
 		validateSize(richText, richTextIdentifier);
 	}
 
 	@Override
-	public void visitedRichText(RichText richText,
+	public void visitedRichText(@Nonnull RichText richText,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
+	public void visitSlider(@Nonnull Slider slider, boolean parentVisible, boolean parentEnabled) {
 		String binding = slider.getBinding();
 		String sliderIdentifier = "Slider " + binding;
 		if (dataWidgetBinding != null) {
@@ -1615,27 +1799,27 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							sliderIdentifier);
-		validateConditionName(slider.getDisabledConditionName(), sliderIdentifier);
-		validateConditionName(slider.getInvisibleConditionName(), sliderIdentifier);
+		validateCondition(slider.getDisabledCondition(), sliderIdentifier);
+		validateCondition(slider.getInvisibleCondition(), sliderIdentifier);
 		validateSize(slider, sliderIdentifier);
 	}
 
 	@Override
-	public void visitedSlider(Slider slider,
+	public void visitedSlider(@Nonnull Slider slider,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitSpacer(Spacer spacer) {
+	public void visitSpacer(@Nonnull Spacer spacer) {
 		String spacerIdentifier = "A Spacer";
-		validateConditionName(spacer.getInvisibleConditionName(), spacerIdentifier);
+		validateCondition(spacer.getInvisibleCondition(), spacerIdentifier);
 		validateSize(spacer, spacerIdentifier);
 	}
 
 	@Override
-	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
+	public void visitSpinner(@Nonnull Spinner spinner, boolean parentVisible, boolean parentEnabled) {
 		String binding = spinner.getBinding();
 		String spinnerIdentifier = "Spinner " + binding;
 		if (dataWidgetBinding != null) {
@@ -1648,36 +1832,36 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							spinnerIdentifier);
-		validateConditionName(spinner.getDisabledConditionName(), spinnerIdentifier);
-		validateConditionName(spinner.getInvisibleConditionName(), spinnerIdentifier);
+		validateCondition(spinner.getDisabledCondition(), spinnerIdentifier);
+		validateCondition(spinner.getInvisibleCondition(), spinnerIdentifier);
 		validateSize(spinner, spinnerIdentifier);
 	}
 
 	@Override
-	public void visitedSpinner(Spinner spinner,
+	public void visitedSpinner(@Nonnull Spinner spinner,
 								boolean parentVisible,
 								boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
+	public void visitStaticImage(@Nonnull StaticImage image, boolean parentVisible, boolean parentEnabled) {
 		String imageIdentifier = "StaticImage " + image.getRelativeFile();
-		validateConditionName(image.getInvisibleConditionName(), imageIdentifier);
+		validateCondition(image.getInvisibleCondition(), imageIdentifier);
 		validateSize(image, imageIdentifier);
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
+	public void visitLink(@Nonnull Link link, boolean parentVisible, boolean parentEnabled) {
 		final String linkIdentifier = "Link " + link.getValue();
-		validateConditionName(link.getInvisibleConditionName(), linkIdentifier);
+		validateCondition(link.getInvisibleCondition(), linkIdentifier);
 		validateSize(link, linkIdentifier);
 
 		new ReferenceProcessor() {
 			@SuppressWarnings("synthetic-access")
-			private ModuleImpl validateReferenceModuleName(String referenceModuleName,
-															String referenceDescription) {
+			private @Nullable ModuleImpl validateReferenceModuleName(@Nonnull String referenceModuleName,
+																		@Nonnull String referenceDescription) {
 				ModuleImpl result = null;
 
 				if (referenceModuleName.indexOf('{') < 0) {
@@ -1699,9 +1883,9 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			@SuppressWarnings("synthetic-access")
-			private DocumentImpl validateReferenceDocumentName(ModuleImpl referenceModule,
-															String referenceDocumentName,
-															String referenceDescription) {
+			private @Nullable DocumentImpl validateReferenceDocumentName(@Nonnull ModuleImpl referenceModule,
+																		@Nonnull String referenceDocumentName,
+																		@Nonnull String referenceDescription) {
 				DocumentImpl result = null;
 
 				if (referenceDocumentName.indexOf('{') < 0) {
@@ -1720,8 +1904,8 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			@SuppressWarnings("synthetic-access")
-			private TargetMetaData validateReferenceBinding(String referenceBinding,
-																String referenceDescription) {
+			private @Nullable TargetMetaData validateReferenceBinding(@Nullable String referenceBinding,
+																			@Nonnull String referenceDescription) {
 				String bindingToTest = referenceBinding;
 				if (dataWidgetBinding != null) {
 					if (referenceBinding == null) {
@@ -1750,13 +1934,32 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			@Override
-			public void processResourceReference(ResourceReference reference) {
-				// nothing to do here
+			public void processResourceReference(@Nonnull ResourceReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean relativeFileMissing = (reference.getRelativeFile() == null);
+				if (relativeFileMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - relativeFile is required for a resource reference.");
+				}
 			}
 
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processReportReference(ReportReference reference) {
+			public void processReportReference(@Nonnull ReportReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean moduleNameMissing = (reference.getModuleName() == null);
+				if (moduleNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - moduleName is required for a report reference.");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean documentNameMissing = (reference.getDocumentName() == null);
+				if (documentNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - documentName is required for a report reference.");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean reportNameMissing = (reference.getReportName() == null);
+				if (reportNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - reportName is required for a report reference.");
+				}
 				ModuleImpl reportModule = validateReferenceModuleName(reference.getModuleName(),
 																	"a report");
 				if (reportModule != null) { // valid module name with no '{'
@@ -1783,7 +1986,7 @@ class ViewValidator extends ViewVisitor {
 
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processQueryListViewReference(QueryListViewReference reference) {
+			public void processQueryListViewReference(@Nonnull QueryListViewReference reference) {
 				try {
 					if (module.getMetaDataQuery(reference.getQueryName()) == null) {
 						throw new IllegalStateException("No such query");
@@ -1797,17 +2000,35 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			@Override
-			public void processImplicitActionReference(ImplicitActionReference reference) {
-				// nothing to do here
+			public void processImplicitActionReference(@Nonnull ImplicitActionReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean implicitActionNameMissing = (reference.getImplicitActionName() == null);
+				if (implicitActionNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - implicitActionName is required for an implicit action reference.");
+				}
 			}
 
 			@Override
-			public void processExternalReference(ExternalReference reference) {
-				// nothing to do here
+			public void processExternalReference(@Nonnull ExternalReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean hrefMissing = (reference.getHref() == null);
+				if (hrefMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - href is required for an external reference.");
+				}
 			}
 
 			@Override
-			public void processEditViewReference(EditViewReference reference) {
+			public void processEditViewReference(@Nonnull EditViewReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean moduleNameMissing = (reference.getModuleName() == null);
+				if (moduleNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - moduleName is required for an edit view reference.");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean documentNameMissing = (reference.getDocumentName() == null);
+				if (documentNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - documentName is required for an edit view reference.");
+				}
 				ModuleImpl viewModule = validateReferenceModuleName(reference.getModuleName(), EDIT_VIEW_DESCRIPTION);
 				if (viewModule != null) { // valid module name with no '{'
 					validateReferenceDocumentName(viewModule,
@@ -1818,7 +2039,17 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			@Override
-			public void processDefaultListViewReference(DefaultListViewReference reference) {
+			public void processDefaultListViewReference(@Nonnull DefaultListViewReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean moduleNameMissing = (reference.getModuleName() == null);
+				if (moduleNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - moduleName is required for a default list view reference.");
+				}
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean documentNameMissing = (reference.getDocumentName() == null);
+				if (documentNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - documentName is required for a default list view reference.");
+				}
 				ModuleImpl viewModule = validateReferenceModuleName(reference.getModuleName(), EDIT_VIEW_DESCRIPTION);
 				if (viewModule != null) { // valid module name with no '{'
 					validateReferenceDocumentName(viewModule,
@@ -1828,7 +2059,7 @@ class ViewValidator extends ViewVisitor {
 			}
 
 			@Override
-			public void processContentReference(ContentReference reference) {
+			public void processContentReference(@Nonnull ContentReference reference) {
 				String widgetidentifier = linkIdentifier + " with a content reference";
 				if (dataWidgetBinding != null) {
 					widgetidentifier += IN + dataWidgetIdentifier;
@@ -1845,7 +2076,12 @@ class ViewValidator extends ViewVisitor {
 
 			@Override
 			@SuppressWarnings("synthetic-access")
-			public void processActionReference(ActionReference reference) {
+			public void processActionReference(@Nonnull ActionReference reference) {
+				@SuppressWarnings("null") // metadata built in code bypasses the XSD
+				boolean actionNameMissing = (reference.getActionName() == null);
+				if (actionNameMissing) {
+					throw new MetaDataException(linkIdentifier + IN + viewIdentifier + " - action is required for an action reference.");
+				}
 				String widgetIdentifier = linkIdentifier + " with an action reference";
 				if (dataWidgetBinding != null) { // in a repeater or grid
 					widgetIdentifier += IN + dataWidgetBinding;
@@ -1883,15 +2119,20 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		String tabIdentifier = "Tab " + tab.getTitle();
-		validateConditionName(tab.getDisabledConditionName(), tabIdentifier);
-		validateConditionName(tab.getInvisibleConditionName(), tabIdentifier);
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean titleMissing = (tab.getTitle() == null);
+		if (titleMissing) {
+			throw new MetaDataException(tabIdentifier + IN + viewIdentifier + " - title is required.");
+		}
+		validateCondition(tab.getDisabledCondition(), tabIdentifier);
+		validateCondition(tab.getInvisibleCondition(), tabIdentifier);
 		validateMessageExpressions(tab.getLocalisedTitle(), tabIdentifier, "title");
 	}
 
 	@Override
-	public void visitTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
+	public void visitTabPane(@Nonnull TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		String tabPaneIdentifier = tabPane.getWidgetId();
 		if (tabPaneIdentifier != null) {
 			tabPaneIdentifier = "TabPane " + tabPaneIdentifier;
@@ -1900,8 +2141,8 @@ class ViewValidator extends ViewVisitor {
 			tabPaneIdentifier = "A TabPane";
 		}
 		validateSize(tabPane, tabPaneIdentifier);
-		validateConditionName(tabPane.getDisabledConditionName(), tabPaneIdentifier);
-		validateConditionName(tabPane.getInvisibleConditionName(), tabPaneIdentifier);
+		validateCondition(tabPane.getDisabledCondition(), tabPaneIdentifier);
+		validateCondition(tabPane.getInvisibleCondition(), tabPaneIdentifier);
 		validateBinding(null,
 							tabPane.getSelectedTabIndexBinding(),
 							false,
@@ -1914,7 +2155,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextArea(@Nonnull TextArea text, boolean parentVisible, boolean parentEnabled) {
 		String binding = text.getBinding();
 		String textIdentifier = "TextArea " + binding;
 		if (dataWidgetBinding != null) {
@@ -1927,20 +2168,20 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							textIdentifier);
-		validateConditionName(text.getDisabledConditionName(), textIdentifier);
-		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
+		validateCondition(text.getDisabledCondition(), textIdentifier);
+		validateCondition(text.getInvisibleCondition(), textIdentifier);
 		validateSize(text, textIdentifier);
 	}
 
 	@Override
-	public void visitedTextArea(TextArea text,
+	public void visitedTextArea(@Nonnull TextArea text,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
 	}
 
 	@Override
-	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextField(@Nonnull TextField text, boolean parentVisible, boolean parentEnabled) {
 		String binding = text.getBinding();
 		String textIdentifier = "Text " + binding;
 		if (dataWidgetBinding != null) {
@@ -1953,13 +2194,13 @@ class ViewValidator extends ViewVisitor {
 							false,
 							true,
 							textIdentifier);
-		validateConditionName(text.getDisabledConditionName(), textIdentifier);
-		validateConditionName(text.getInvisibleConditionName(), textIdentifier);
+		validateCondition(text.getDisabledCondition(), textIdentifier);
+		validateCondition(text.getInvisibleCondition(), textIdentifier);
 		validateSize(text, textIdentifier);
 	}
 
 	@Override
-	public void visitedTextField(TextField text,
+	public void visitedTextField(@Nonnull TextField text,
 									boolean parentVisible,
 									boolean parentEnabled) {
 		// do nothing
@@ -1967,19 +2208,23 @@ class ViewValidator extends ViewVisitor {
 
 
 	@Override
-	public void visitInject(Inject inject,
+	public void visitInject(@Nonnull Inject inject,
 								boolean parentVisible,
 								boolean parentEnabled) {
-		// nothing to do here
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean scriptMissing = (inject.getScript() == null);
+		if (scriptMissing) {
+			throw new MetaDataException("Inject" + IN + viewIdentifier + " - script is required.");
+		}
 	}
 
 	@Override
-	public void visitVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitVBox(@Nonnull VBox vbox, boolean parentVisible, boolean parentEnabled) {
 		String borderTitle = vbox.getBorderTitle();
 		String id = vbox.getWidgetId();
 		String boxIdentifier = ((id == null) ? "A VBox" : "VBox " + id) + ((borderTitle == null) ? "" : " titled " + borderTitle);
 		validateSize(vbox, boxIdentifier);
-		validateConditionName(vbox.getInvisibleConditionName(), boxIdentifier);
+		validateCondition(vbox.getInvisibleCondition(), boxIdentifier);
 		validateMessageExpressions(vbox.getLocalisedBorderTitle(), boxIdentifier, BORDER_TITLE);
 		validateCollapsible(vbox.getCollapsible(),
 								vbox.getBorderTitle(),
@@ -1990,87 +2235,90 @@ class ViewValidator extends ViewVisitor {
 
 	@Override
 	public void visitView() {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean titleMissing = (view.getTitle() == null);
+		if (titleMissing) {
+			throw new MetaDataException("The " + viewIdentifier + " - title is required.");
+		}
 		validateMessageExpressions(view.getLocalisedTitle(), viewIdentifier, "a title");
 
 		List<ViewParameter> parameters = view.getParameters();
-		if (parameters != null) {
-			for (ViewParameter parameter : parameters) {
-				validateBinding(null,
-									parameter.getBoundTo(),
-									false,
-									false,
-									false,
-									false,
-									PARAMETER_PREFIX + parameter.getFromBinding() + IN + viewIdentifier);
-			}
+		for (ViewParameter parameter : parameters) {
+			validateBinding(null,
+								parameter.getBoundTo(),
+								false,
+								false,
+								false,
+								false,
+								PARAMETER_PREFIX + parameter.getFromBinding() + IN + viewIdentifier);
 		}
 
 		validateActionName(view.getRefreshActionName(), viewIdentifier);
-		validateConditionName(view.getRefreshConditionName(), viewIdentifier);
+		validateCondition(view.getRefreshIfCondition(), viewIdentifier);
 		if ((view.getHelpURL() != null) && (view.getHelpRelativeFileName() != null)) {
 			throw new MetaDataException(viewIdentifier + " should define one of helpURL or helpRelativeFileName but not both");
 		}
 	}
 
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		dataWidgetBinding = null;
 		dataWidgetIdentifier = null;
 	}
 
 	@Override
-	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataRepeater(@Nonnull DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		dataWidgetBinding = null;
 		dataWidgetIdentifier = null;
 	}
 
 	@Override
-	public void visitedForm(Form form, boolean parentVisible, boolean parentEnabled) {
+	public void visitedForm(@Nonnull Form form, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitedFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
+	public void visitedFormRow(@Nonnull FormRow row, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitedHBox(@Nonnull HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedListGrid(@Nonnull ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitedListRepeater(@Nonnull ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTreeGrid(@Nonnull TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTabPane(@Nonnull TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitedVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitedVBox(@Nonnull VBox vbox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -2079,11 +2327,11 @@ class ViewValidator extends ViewVisitor {
 		// nothing to do here
 	}
 
-	private void validateAction(ActionImpl action) {
+	private void validateAction(@Nonnull ActionImpl action) {
 		String actionIdentifier = "Action " + action.getName();
 
-		validateConditionName(action.getDisabledConditionName(), actionIdentifier);
-		validateConditionName(action.getInvisibleConditionName(), actionIdentifier);
+		validateCondition(action.getDisabledCondition(), actionIdentifier);
+		validateCondition(action.getInvisibleCondition(), actionIdentifier);
 		validateParameterBindings(action.getParameters(), actionIdentifier);
 
 		if ((ActionShow.icon == action.getShow()) &&
@@ -2094,7 +2342,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	// validate the resource name which represents the class to load for ClassActions
-	private void validateClassAction(String resourceName) {
+	private void validateClassAction(@Nullable String resourceName) {
 		if (ImplicitActionName.Print.toString().equals(resourceName)) {
 			throw new MetaDataException("Name clash: Action " + resourceName + " is an implicit action name and cannot be used.");
 		}
@@ -2108,8 +2356,11 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitCustomAction(ActionImpl action) {
+	public void visitCustomAction(@Nonnull ActionImpl action) {
 		String resourceName = action.getResourceName();
+		if (resourceName == null) {
+			throw new MetaDataException("Custom action " + action.getName() + IN + viewIdentifier + " - className is required.");
+		}
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, document, resourceName);
 		if (metaDataAction == null) {
 			validateClassAction(resourceName);
@@ -2118,72 +2369,72 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitAddAction(ActionImpl action) {
+	public void visitAddAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitBizExportAction(ActionImpl action) {
+	public void visitBizExportAction(@Nonnull ActionImpl action) {
 		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
-	public void visitBizImportAction(ActionImpl action) {
+	public void visitBizImportAction(@Nonnull ActionImpl action) {
 		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
-	public void visitDownloadAction(ActionImpl action) {
+	public void visitDownloadAction(@Nonnull ActionImpl action) {
 		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
-	public void visitUploadAction(ActionImpl action) {
+	public void visitUploadAction(@Nonnull ActionImpl action) {
 		validateClassAction(action.getResourceName());
 		validateAction(action);
 	}
 
 	@Override
-	public void visitCancelAction(ActionImpl action) {
+	public void visitCancelAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitDeleteAction(ActionImpl action) {
+	public void visitDeleteAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitEditAction(ActionImpl action) {
+	public void visitEditAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitNavigateAction(ActionImpl action) {
+	public void visitNavigateAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitNewAction(ActionImpl action) {
+	public void visitNewAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitOKAction(ActionImpl action) {
+	public void visitOKAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitRemoveAction(ActionImpl action) {
+	public void visitRemoveAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void visitReportAction(ActionImpl action) {
+	public void visitReportAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 
 		List<Parameter> reportParameters = action.getParameters();
@@ -2227,7 +2478,11 @@ class ViewValidator extends ViewVisitor {
 											e);
 		}
 
-		String fileName = repository.getReportFileName(customer, reportDocument, action.getResourceName());
+		String reportName = action.getResourceName();
+		if (reportName == null) {
+			throw new MetaDataException("A Report Action" + IN_VIEW + viewIdentifier + " is missing the reportName");
+		}
+		String fileName = repository.getReportFileName(customer, reportDocument, reportName);
 		if (fileName == null) {
 			throw new MetaDataException(REPORT_ACTION_FOR_REPORT + action.getResourceName() +
 											IN_VIEW + viewIdentifier +
@@ -2263,16 +2518,16 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitSaveAction(ActionImpl action) {
+	public void visitSaveAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
 	@Override
-	public void visitZoomOutAction(ActionImpl action) {
+	public void visitZoomOutAction(@Nonnull ActionImpl action) {
 		validateAction(action);
 	}
 
-	private static void validateEventHandlerSequence(List<EventAction> actions, String widgetIdentifier) {
+	private static void validateEventHandlerSequence(@Nullable List<EventAction> actions, @Nonnull String widgetIdentifier) {
 		if (actions != null) {
 			Iterator<EventAction> i = actions.iterator();
 			while (i.hasNext()) {
@@ -2294,7 +2549,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitOnChangedEventHandler(Changeable changeable,
+	public void visitOnChangedEventHandler(@Nonnull Changeable changeable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		validateEventHandlerSequence(changeable.getChangedActions(),
@@ -2303,14 +2558,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable,
+	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnFocusEventHandler(Focusable focusable,
+	public void visitOnFocusEventHandler(@Nonnull Focusable focusable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (focusable instanceof Bound bound) ? bound.getBinding() : "unknown";
@@ -2319,14 +2574,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable,
+	public void visitedOnFocusEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnBlurEventHandler(Focusable focusable,
+	public void visitOnBlurEventHandler(@Nonnull Focusable focusable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String binding = (focusable instanceof Bound bound) ? bound.getBinding() : "unknown";
@@ -2335,14 +2590,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable,
+	public void visitedOnBlurEventHandler(@Nonnull Focusable blurable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnAddedEventHandler(Addable addable,
+	public void visitOnAddedEventHandler(@Nonnull Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String widgetIdentifier = UNKNOWN_WIDGET;
@@ -2356,14 +2611,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnAddedEventHandler(Addable addable,
+	public void visitedOnAddedEventHandler(@Nonnull Addable addable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnEditedEventHandler(Editable editable,
+	public void visitOnEditedEventHandler(@Nonnull Editable editable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String widgetIdentifier = UNKNOWN_WIDGET;
@@ -2377,14 +2632,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnEditedEventHandler(Editable editable,
+	public void visitedOnEditedEventHandler(@Nonnull Editable editable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnRemovedEventHandler(Removable removable,
+	public void visitOnRemovedEventHandler(@Nonnull Removable removable,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		String widgetIdentifier = UNKNOWN_WIDGET;
@@ -2398,14 +2653,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnRemovedEventHandler(Removable removable,
+	public void visitedOnRemovedEventHandler(@Nonnull Removable removable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnSelectedEventHandler(Selectable selectable,
+	public void visitOnSelectedEventHandler(@Nonnull Selectable selectable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		String widgetIdentifier = UNKNOWN_WIDGET;
@@ -2419,14 +2674,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnSelectedEventHandler(Selectable editable,
+	public void visitedOnSelectedEventHandler(@Nonnull Selectable editable,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnPickedEventHandler(LookupDescription lookup,
+	public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		validateEventHandlerSequence(lookup.getPickedActions(),
@@ -2435,14 +2690,14 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnPickedEventHandler(LookupDescription lookup,
+	public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitOnClearedEventHandler(LookupDescription lookup,
+	public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		validateEventHandlerSequence(lookup.getClearedActions(),
@@ -2451,29 +2706,34 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitedOnClearedEventHandler(LookupDescription lookup,
+	public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender,
-											EventSource source,
+	public void visitRerenderEventAction(@Nonnull RerenderEventAction rerender,
+											@Nonnull EventSource source,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		// no properties to check
 	}
 
 	@Override
-	public void visitServerSideActionEventAction(ServerSideActionEventAction server,
+	public void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server,
 													boolean parentVisible,
 													boolean parentEnabled) {
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean actionNameMissing = (server.getActionName() == null);
+		if (actionNameMissing) {
+			throw new MetaDataException("[server] event action in an event handler" + IN + viewIdentifier + " - action is required.");
+		}
 		validateActionName(server.getActionName(), "[server] event action in an event handler");
 	}
 
 	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
+	public void visitSetDisabledEventAction(@Nonnull SetDisabledEventAction setDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		String widgetIdentifier = "[setDisabled] event action in an event handler";
@@ -2485,16 +2745,16 @@ class ViewValidator extends ViewVisitor {
 							false,
 							widgetIdentifier,
 							AttributeType.bool);
-		String disabledConditionName = setDisabled.getDisabledConditionName();
-		if (disabledConditionName == null) {
+		String disabledCondition = setDisabled.getDisabledCondition();
+		if (disabledCondition == null) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
 											" requires a [disabled] or [enabled] condition name.");
 		}
-		validateConditionName(disabledConditionName, widgetIdentifier);
+		validateCondition(disabledCondition, widgetIdentifier);
 	}
 
 	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+	public void visitToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		String widgetIdentifier = "[toggleDisabled] event action in an event handler";
@@ -2509,7 +2769,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+	public void visitToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
 													boolean parentEnabled) {
 		String widgetIdentifier = "[toggleVisibility] event action in an event handler";
@@ -2524,7 +2784,7 @@ class ViewValidator extends ViewVisitor {
 	}
 
 	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
+	public void visitSetInvisibleEventAction(@Nonnull SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		String widgetIdentifier = "[setInvisible] event action in an event handler";
@@ -2536,27 +2796,32 @@ class ViewValidator extends ViewVisitor {
 							false,
 							widgetIdentifier,
 							AttributeType.bool);
-		String invisibleConditionName = setInvisible.getInvisibleConditionName();
-		if (invisibleConditionName == null) {
+		String invisibleCondition = setInvisible.getInvisibleCondition();
+		if (invisibleCondition == null) {
 			throw new MetaDataException(widgetIdentifier + IN + viewIdentifier +
 											" requires an [invisible] or [visible] condition name.");
 		}
-		validateConditionName(invisibleConditionName, widgetIdentifier);
+		validateCondition(invisibleCondition, widgetIdentifier);
 	}
 
 	@Override
-	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+	public void visitSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		String sidebarIdentifier = "The sidebar";
 		if ((sidebar.getPercentageWidth() == null) &&
 				(sidebar.getPixelWidth() == null) &&
 				(sidebar.getResponsiveWidth() == null)) {
 			throw new MetaDataException(sidebarIdentifier + IN + viewIdentifier + " requires at least one of [percentageWidth, pixelWidth, responsiveWidth]");
 		}
-		validateConditionName(sidebar.getInvisibleConditionName(), sidebarIdentifier);
+		@SuppressWarnings("null") // metadata built in code bypasses the XSD
+		boolean floatingPixelWidthBreakpointMissing = (sidebar.getFloatingPixelWidthBreakpoint() == null);
+		if (floatingPixelWidthBreakpointMissing) {
+			throw new MetaDataException(sidebarIdentifier + IN + viewIdentifier + " - floatingPixelWidthBreakpoint is required.");
+		}
+		validateCondition(sidebar.getInvisibleCondition(), sidebarIdentifier);
 	}
 
 	@Override
-	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+	public void visitedSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		// nothing to see here
 	}
 }

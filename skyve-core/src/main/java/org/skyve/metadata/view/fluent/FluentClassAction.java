@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.repository.view.actions.ClassAction;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Adds class-targeting behaviour to fluent action builders.
  *
@@ -24,7 +27,7 @@ public abstract class FluentClassAction<T extends FluentClassAction<T>> extends 
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(ClassAction action) {
+	protected @Nonnull T from(@Nonnull ClassAction action) {
 		super.from(action);
 		className(action.getClassName());
 		return (T) this;
@@ -38,7 +41,7 @@ public abstract class FluentClassAction<T extends FluentClassAction<T>> extends 
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T className(String className) {
+	public @Nonnull T className(@Nullable String className) {
 		get().setClassName(className);
 		return (T) this;
 	}
@@ -47,5 +50,5 @@ public abstract class FluentClassAction<T extends FluentClassAction<T>> extends 
 	 * Returns the wrapped repository action instance.
 	 */
 	@Override
-	public abstract ClassAction get();
+	public abstract @Nonnull ClassAction get();
 }

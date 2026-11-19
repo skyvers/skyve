@@ -132,7 +132,7 @@ public class Snapshot {
 	 *
 	 * @return JSON containing non-null snapshot state.
 	 */
-	public String toJSON() {
+	public @Nonnull String toJSON() {
 		Map<String, Object> result = new LinkedHashMap<>(); // keep insertion order
 		
 		put(result, ADVANCED_PROPERTY_NAME, advanced);
@@ -164,7 +164,7 @@ public class Snapshot {
 	 * @throws Exception If the JSON payload cannot be parsed into a valid snapshot structure.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static Snapshot fromJSON(String json) throws Exception {
+	public static @Nullable Snapshot fromJSON(@Nonnull String json) throws Exception {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> values = (Map<String, Object>) JSON.unmarshall(json);
 		if (values == null) {
@@ -223,7 +223,7 @@ public class Snapshot {
 		return result;
 	}
 
-	private static void put(Map<String, Object> values, String key, Object value) {
+	private static void put(@Nonnull Map<String, Object> values, @Nonnull String key, @Nullable Object value) {
 		if (value == null) {
 			return;
 		}

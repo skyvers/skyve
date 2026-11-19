@@ -13,6 +13,9 @@ import org.skyve.metadata.model.document.Collection.CollectionType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Holds the design parameters used to programmatically generate a JasperReports
  * report design ({@code .jrxml}) from Skyve module/document metadata.
@@ -332,7 +335,7 @@ public class DesignSpecification {
 	 * Returns the configured name.
 	 * @return The configured value.
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 	
@@ -340,7 +343,7 @@ public class DesignSpecification {
 	 * Sets the configured name.
 	 * @param name The name value.
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 	
@@ -348,7 +351,7 @@ public class DesignSpecification {
 	 * Returns the configured mode.
 	 * @return The configured value.
 	 */
-	public Mode getMode() {
+	public @Nullable Mode getMode() {
 		return mode;
 	}
 	
@@ -356,7 +359,7 @@ public class DesignSpecification {
 	 * Sets the configured mode.
 	 * @param mode The mode value.
 	 */
-	public void setMode(Mode mode) {
+	public void setMode(@Nullable Mode mode) {
 		this.mode = mode;
 	}
 	
@@ -364,7 +367,7 @@ public class DesignSpecification {
 	 * Returns the configured definitionSource.
 	 * @return The configured value.
 	 */
-	public DefinitionSource getDefinitionSource() {
+	public @Nullable DefinitionSource getDefinitionSource() {
 		return definitionSource;
 	}
 	
@@ -372,7 +375,7 @@ public class DesignSpecification {
 	 * Sets the configured definitionSource.
 	 * @param definitionSource The definitionSource value.
 	 */
-	public void setDefinitionSource(DefinitionSource definitionSource) {
+	public void setDefinitionSource(@Nullable DefinitionSource definitionSource) {
 		this.definitionSource = definitionSource;
 	}
 	
@@ -380,7 +383,7 @@ public class DesignSpecification {
 	 * Returns the configured reportType.
 	 * @return The configured value.
 	 */
-	public ReportType getReportType() {
+	public @Nonnull ReportType getReportType() {
 		return reportType;
 	}
 	
@@ -388,7 +391,7 @@ public class DesignSpecification {
 	 * Sets the configured reportType.
 	 * @param reportType The reportType value.
 	 */
-	public void setReportType(ReportType reportType) {
+	public void setReportType(@Nonnull ReportType reportType) {
 		this.reportType = reportType;
 	}
 	
@@ -396,7 +399,7 @@ public class DesignSpecification {
 	 * Sets the configured moduleName.
 	 * @param moduleName The moduleName value.
 	 */
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = moduleName;
 	}
 	
@@ -404,7 +407,7 @@ public class DesignSpecification {
 	 * Sets the configured documentName.
 	 * @param documentName The documentName value.
 	 */
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
    
@@ -412,7 +415,7 @@ public class DesignSpecification {
      * Returns the configured queryName.
      * @return The configured value.
      */
-    public String getQueryName() {
+    public @Nullable String getQueryName() {
         return queryName;
     }
     
@@ -420,14 +423,14 @@ public class DesignSpecification {
      * Sets the configured queryName.
      * @param queryName The queryName value.
      */
-    public void setQueryName(String queryName) {
+    public void setQueryName(@Nullable String queryName) {
         this.queryName = queryName;
     }
     /**
      * Returns the configured uxui.
      * @return The configured value.
      */
-    public String getUxui() {
+    public @Nullable String getUxui() {
 		return uxui;
 	}
 	
@@ -435,7 +438,7 @@ public class DesignSpecification {
 	 * Sets the configured uxui.
 	 * @param uxui The uxui value.
 	 */
-	public void setUxui(String uxui) {
+	public void setUxui(@Nullable String uxui) {
 		this.uxui = uxui;
 	}
 	
@@ -443,7 +446,7 @@ public class DesignSpecification {
 	 * Returns the configured repositoryPath.
 	 * @return The configured value.
 	 */
-	public String getRepositoryPath() {
+	public @Nullable String getRepositoryPath() {
 		return repositoryPath;
 	}
 	
@@ -451,7 +454,7 @@ public class DesignSpecification {
 	 * Sets the configured repositoryPath.
 	 * @param repositoryPath The repositoryPath value.
 	 */
-	public void setRepositoryPath(String repositoryPath) {
+	public void setRepositoryPath(@Nullable String repositoryPath) {
 		this.repositoryPath = repositoryPath;
 	}
 	
@@ -459,7 +462,7 @@ public class DesignSpecification {
 	 * Returns the configured saveToDocumentPackage.
 	 * @return The configured value.
 	 */
-	public Boolean getSaveToDocumentPackage() {
+	public @Nullable Boolean getSaveToDocumentPackage() {
 		return saveToDocumentPackage;
 	}
 	
@@ -467,7 +470,7 @@ public class DesignSpecification {
 	 * Sets the configured saveToDocumentPackage.
 	 * @param saveToDocumentPackage The saveToDocumentPackage value.
 	 */
-	public void setSaveToDocumentPackage(Boolean saveToDocumentPackage) {
+	public void setSaveToDocumentPackage(@Nullable Boolean saveToDocumentPackage) {
 		this.saveToDocumentPackage = saveToDocumentPackage;
 	}
 	
@@ -475,7 +478,7 @@ public class DesignSpecification {
 	 * Returns the configured orientation.
 	 * @return The configured value.
 	 */
-	public Orientation getOrientation() {
+	public @Nullable Orientation getOrientation() {
 		return orientation;
 	}
 	
@@ -483,7 +486,7 @@ public class DesignSpecification {
 	 * Sets the configured orientation.
 	 * @param orientation The orientation value.
 	 */
-	public void setOrientation(Orientation orientation) {
+	public void setOrientation(@Nullable Orientation orientation) {
 		this.orientation = orientation;
 	}
 	
@@ -491,7 +494,7 @@ public class DesignSpecification {
 	 * Returns the configured width.
 	 * @return The configured value.
 	 */
-	public Integer getWidth() {
+	public @Nonnull Integer getWidth() {
 		return width;
 	}
 	
@@ -499,7 +502,7 @@ public class DesignSpecification {
 	 * Sets the configured width.
 	 * @param width The width value.
 	 */
-	public void setWidth(Integer width) {
+	public void setWidth(@Nonnull Integer width) {
 		this.width = width;
 	}
 	
@@ -507,7 +510,7 @@ public class DesignSpecification {
 	 * Returns the configured height.
 	 * @return The configured value.
 	 */
-	public Integer getHeight() {
+	public @Nonnull Integer getHeight() {
 		return height;
 	}
 	
@@ -515,7 +518,7 @@ public class DesignSpecification {
 	 * Sets the configured height.
 	 * @param height The height value.
 	 */
-	public void setHeight(Integer height) {
+	public void setHeight(@Nonnull Integer height) {
 		this.height = height;
 	}
 	
@@ -523,7 +526,7 @@ public class DesignSpecification {
 	 * Returns the configured leftMargin.
 	 * @return The configured value.
 	 */
-	public Integer getLeftMargin() {
+	public @Nonnull Integer getLeftMargin() {
 		return leftMargin;
 	}
 	
@@ -531,7 +534,7 @@ public class DesignSpecification {
 	 * Sets the configured leftMargin.
 	 * @param leftMargin The leftMargin value.
 	 */
-	public void setLeftMargin(Integer leftMargin) {
+	public void setLeftMargin(@Nonnull Integer leftMargin) {
 		this.leftMargin = leftMargin;
 	}
 	
@@ -539,7 +542,7 @@ public class DesignSpecification {
 	 * Returns the configured rightMargin.
 	 * @return The configured value.
 	 */
-	public Integer getRightMargin() {
+	public @Nonnull Integer getRightMargin() {
 		return rightMargin;
 	}
 	
@@ -547,7 +550,7 @@ public class DesignSpecification {
 	 * Sets the configured rightMargin.
 	 * @param rightMargin The rightMargin value.
 	 */
-	public void setRightMargin(Integer rightMargin) {
+	public void setRightMargin(@Nonnull Integer rightMargin) {
 		this.rightMargin = rightMargin;
 	}
 	
@@ -555,7 +558,7 @@ public class DesignSpecification {
 	 * Returns the configured topMargin.
 	 * @return The configured value.
 	 */
-	public Integer getTopMargin() {
+	public @Nonnull Integer getTopMargin() {
 		return topMargin;
 	}
 	
@@ -563,7 +566,7 @@ public class DesignSpecification {
 	 * Sets the configured topMargin.
 	 * @param topMargin The topMargin value.
 	 */
-	public void setTopMargin(Integer topMargin) {
+	public void setTopMargin(@Nonnull Integer topMargin) {
 		this.topMargin = topMargin;
 	}
 	
@@ -571,7 +574,7 @@ public class DesignSpecification {
 	 * Returns the configured bottomMargin.
 	 * @return The configured value.
 	 */
-	public Integer getBottomMargin() {
+	public @Nonnull Integer getBottomMargin() {
 		return bottomMargin;
 	}
 	
@@ -579,7 +582,7 @@ public class DesignSpecification {
 	 * Sets the configured bottomMargin.
 	 * @param bottomMargin The bottomMargin value.
 	 */
-	public void setBottomMargin(Integer bottomMargin) {
+	public void setBottomMargin(@Nonnull Integer bottomMargin) {
 		this.bottomMargin = bottomMargin;
 	}
 	
@@ -587,7 +590,7 @@ public class DesignSpecification {
 	 * Returns the configured columnWidth.
 	 * @return The configured value.
 	 */
-	public Integer getColumnWidth() {
+	public @Nonnull Integer getColumnWidth() {
 		return columnWidth;
 	}
 
@@ -595,7 +598,7 @@ public class DesignSpecification {
 	 * Sets the configured columnWidth.
 	 * @param columnWidth The columnWidth value.
 	 */
-	public void setColumnWidth(Integer columnWidth) {
+	public void setColumnWidth(@Nonnull Integer columnWidth) {
 		this.columnWidth = columnWidth;
 	}
 	
@@ -603,7 +606,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultFontName.
 	 * @return The configured value.
 	 */
-	public String getDefaultFontName() {
+	public @Nullable String getDefaultFontName() {
 		return defaultFontName;
 	}
 	
@@ -611,7 +614,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultFontName.
 	 * @param defaultFontName The defaultFontName value.
 	 */
-	public void setDefaultFontName(String defaultFontName) {
+	public void setDefaultFontName(@Nullable String defaultFontName) {
 		this.defaultFontName = defaultFontName;
 	}
 	
@@ -619,7 +622,7 @@ public class DesignSpecification {
 	 * Returns the configured titleFontSize.
 	 * @return The configured value.
 	 */
-	public Integer getTitleFontSize() {
+	public @Nullable Integer getTitleFontSize() {
 		return titleFontSize;
 	}
 	
@@ -627,7 +630,7 @@ public class DesignSpecification {
 	 * Sets the configured titleFontSize.
 	 * @param titleFontSize The titleFontSize value.
 	 */
-	public void setTitleFontSize(Integer titleFontSize) {
+	public void setTitleFontSize(@Nullable Integer titleFontSize) {
 		this.titleFontSize = titleFontSize;
 	}
 	
@@ -635,7 +638,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultFontSize.
 	 * @return The configured value.
 	 */
-	public Integer getDefaultFontSize() {
+	public @Nullable Integer getDefaultFontSize() {
 		return defaultFontSize;
 	}
 	
@@ -643,7 +646,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultFontSize.
 	 * @param defaultFontSize The defaultFontSize value.
 	 */
-	public void setDefaultFontSize(Integer defaultFontSize) {
+	public void setDefaultFontSize(@Nullable Integer defaultFontSize) {
 		this.defaultFontSize = defaultFontSize;
 	}
 	
@@ -651,7 +654,7 @@ public class DesignSpecification {
 	 * Returns the configured renderLabelAsTextFields.
 	 * @return The configured value.
 	 */
-	public Boolean getRenderLabelAsTextFields() {
+	public @Nullable Boolean getRenderLabelAsTextFields() {
 		return renderLabelAsTextFields;
 	}
 	
@@ -659,7 +662,7 @@ public class DesignSpecification {
 	 * Sets the configured renderLabelAsTextFields.
 	 * @param renderLabelAsTextFields The renderLabelAsTextFields value.
 	 */
-	public void setRenderLabelAsTextFields(Boolean renderLabelAsTextFields) {
+	public void setRenderLabelAsTextFields(@Nullable Boolean renderLabelAsTextFields) {
 		this.renderLabelAsTextFields = renderLabelAsTextFields;
 	}
 	
@@ -667,7 +670,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultBorder.
 	 * @return The configured value.
 	 */
-	public Boolean getDefaultBorder() {
+	public @Nullable Boolean getDefaultBorder() {
 		return defaultBorder;
 	}
 	
@@ -675,7 +678,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultBorder.
 	 * @param defaultBorder The defaultBorder value.
 	 */
-	public void setDefaultBorder(Boolean defaultBorder) {
+	public void setDefaultBorder(@Nullable Boolean defaultBorder) {
 		this.defaultBorder = defaultBorder;
 	}
 	
@@ -683,7 +686,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultBorderTop.
 	 * @return The configured value.
 	 */
-	public Boolean getDefaultBorderTop() {
+	public @Nullable Boolean getDefaultBorderTop() {
 		return defaultBorderTop;
 	}
 	
@@ -691,7 +694,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultBorderTop.
 	 * @param defaultBorderTop The defaultBorderTop value.
 	 */
-	public void setDefaultBorderTop(Boolean defaultBorderTop) {
+	public void setDefaultBorderTop(@Nullable Boolean defaultBorderTop) {
 		this.defaultBorderTop = defaultBorderTop;
 	}
 	
@@ -699,7 +702,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultBorderLeft.
 	 * @return The configured value.
 	 */
-	public Boolean getDefaultBorderLeft() {
+	public @Nullable Boolean getDefaultBorderLeft() {
 		return defaultBorderLeft;
 	}
 	
@@ -707,7 +710,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultBorderLeft.
 	 * @param defaultBorderLeft The defaultBorderLeft value.
 	 */
-	public void setDefaultBorderLeft(Boolean defaultBorderLeft) {
+	public void setDefaultBorderLeft(@Nullable Boolean defaultBorderLeft) {
 		this.defaultBorderLeft = defaultBorderLeft;
 	}
 	
@@ -715,7 +718,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultBorderBottom.
 	 * @return The configured value.
 	 */
-	public Boolean getDefaultBorderBottom() {
+	public @Nullable Boolean getDefaultBorderBottom() {
 		return defaultBorderBottom;
 	}
 	
@@ -723,7 +726,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultBorderBottom.
 	 * @param defaultBorderBottom The defaultBorderBottom value.
 	 */
-	public void setDefaultBorderBottom(Boolean defaultBorderBottom) {
+	public void setDefaultBorderBottom(@Nullable Boolean defaultBorderBottom) {
 		this.defaultBorderBottom = defaultBorderBottom;
 	}
 	
@@ -731,14 +734,14 @@ public class DesignSpecification {
 	 * Returns the configured defaultBorderRight.
 	 * @return The configured value.
 	 */
-	public Boolean getDefaultBorderRight() {
+	public @Nullable Boolean getDefaultBorderRight() {
 		return defaultBorderRight;
 	}
 	/**
 	 * Sets the configured defaultBorderRight.
 	 * @param defaultBorderRight The defaultBorderRight value.
 	 */
-	public void setDefaultBorderRight(Boolean defaultBorderRight) {
+	public void setDefaultBorderRight(@Nullable Boolean defaultBorderRight) {
 		this.defaultBorderRight = defaultBorderRight;
 	}
 	
@@ -746,7 +749,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultLineColour.
 	 * @return The configured value.
 	 */
-	public String getDefaultLineColour() {
+	public @Nullable String getDefaultLineColour() {
 		return defaultLineColour;
 	}
 	
@@ -754,7 +757,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultLineColour.
 	 * @param defaultLineColour The defaultLineColour value.
 	 */
-	public void setDefaultLineColour(String defaultLineColour) {
+	public void setDefaultLineColour(@Nullable String defaultLineColour) {
 		this.defaultLineColour = defaultLineColour;
 	}
 	
@@ -762,7 +765,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultLineWidth.
 	 * @return The configured value.
 	 */
-	public Decimal2 getDefaultLineWidth() {
+	public @Nullable Decimal2 getDefaultLineWidth() {
 		return defaultLineWidth;
 	}
 	
@@ -770,7 +773,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultLineWidth.
 	 * @param defaultLineWidth The defaultLineWidth value.
 	 */
-	public void setDefaultLineWidth(Decimal2 defaultLineWidth) {
+	public void setDefaultLineWidth(@Nullable Decimal2 defaultLineWidth) {
 		this.defaultLineWidth = defaultLineWidth;
 	}
 	
@@ -778,7 +781,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultElementHeight.
 	 * @return The configured value.
 	 */
-	public Integer getDefaultElementHeight() {
+	public @Nonnull Integer getDefaultElementHeight() {
 		return defaultElementHeight;
 	}
 	
@@ -786,7 +789,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultElementHeight.
 	 * @param defaultElementHeight The defaultElementHeight value.
 	 */
-	public void setDefaultElementHeight(Integer defaultElementHeight) {
+	public void setDefaultElementHeight(@Nonnull Integer defaultElementHeight) {
 		this.defaultElementHeight = defaultElementHeight;
 	}
 	
@@ -794,7 +797,7 @@ public class DesignSpecification {
 	 * Returns the configured includePageNumbers.
 	 * @return The configured value.
 	 */
-	public Boolean getIncludePageNumbers() {
+	public @Nullable Boolean getIncludePageNumbers() {
 		return includePageNumbers;
 	}
 	
@@ -802,7 +805,7 @@ public class DesignSpecification {
 	 * Sets the configured includePageNumbers.
 	 * @param includePageNumbers The includePageNumbers value.
 	 */
-	public void setIncludePageNumbers(Boolean includePageNumbers) {
+	public void setIncludePageNumbers(@Nullable Boolean includePageNumbers) {
 		this.includePageNumbers = includePageNumbers;
 	}
 	
@@ -810,7 +813,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultCellTopPadding.
 	 * @return The configured value.
 	 */
-	public Integer getDefaultCellTopPadding() {
+	public @Nullable Integer getDefaultCellTopPadding() {
 		return defaultCellTopPadding;
 	}
 	
@@ -818,7 +821,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultCellTopPadding.
 	 * @param defaultCellTopPadding The defaultCellTopPadding value.
 	 */
-	public void setDefaultCellTopPadding(Integer defaultCellTopPadding) {
+	public void setDefaultCellTopPadding(@Nullable Integer defaultCellTopPadding) {
 		this.defaultCellTopPadding = defaultCellTopPadding;
 	}
 	
@@ -826,7 +829,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultCellLeftPadding.
 	 * @return The configured value.
 	 */
-	public Integer getDefaultCellLeftPadding() {
+	public @Nullable Integer getDefaultCellLeftPadding() {
 		return defaultCellLeftPadding;
 	}
 	
@@ -834,7 +837,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultCellLeftPadding.
 	 * @param defaultCellLeftPadding The defaultCellLeftPadding value.
 	 */
-	public void setDefaultCellLeftPadding(Integer defaultCellLeftPadding) {
+	public void setDefaultCellLeftPadding(@Nullable Integer defaultCellLeftPadding) {
 		this.defaultCellLeftPadding = defaultCellLeftPadding;
 	}
 	
@@ -842,7 +845,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultCellBottomPadding.
 	 * @return The configured value.
 	 */
-	public Integer getDefaultCellBottomPadding() {
+	public @Nullable Integer getDefaultCellBottomPadding() {
 		return defaultCellBottomPadding;
 	}
 	
@@ -850,7 +853,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultCellBottomPadding.
 	 * @param defaultCellBottomPadding The defaultCellBottomPadding value.
 	 */
-	public void setDefaultCellBottomPadding(Integer defaultCellBottomPadding) {
+	public void setDefaultCellBottomPadding(@Nullable Integer defaultCellBottomPadding) {
 		this.defaultCellBottomPadding = defaultCellBottomPadding;
 	}
 	
@@ -858,7 +861,7 @@ public class DesignSpecification {
 	 * Returns the configured defaultCellRightPadding.
 	 * @return The configured value.
 	 */
-	public Integer getDefaultCellRightPadding() {
+	public @Nullable Integer getDefaultCellRightPadding() {
 		return defaultCellRightPadding;
 	}
 	
@@ -866,7 +869,7 @@ public class DesignSpecification {
 	 * Sets the configured defaultCellRightPadding.
 	 * @param defaultCellRightPadding The defaultCellRightPadding value.
 	 */
-	public void setDefaultCellRightPadding(Integer defaultCellRightPadding) {
+	public void setDefaultCellRightPadding(@Nullable Integer defaultCellRightPadding) {
 		this.defaultCellRightPadding = defaultCellRightPadding;
 	}
 	
@@ -874,7 +877,7 @@ public class DesignSpecification {
 	 * Returns the configured dynamicFlow.
 	 * @return The configured value.
 	 */
-	public Boolean getDynamicFlow() {
+	public @Nullable Boolean getDynamicFlow() {
 		return dynamicFlow;
 	}
 	
@@ -882,7 +885,7 @@ public class DesignSpecification {
 	 * Sets the configured dynamicFlow.
 	 * @param dynamicFlow The dynamicFlow value.
 	 */
-	public void setDynamicFlow(Boolean dynamicFlow) {
+	public void setDynamicFlow(@Nullable Boolean dynamicFlow) {
 		this.dynamicFlow = dynamicFlow;
 	}
 	
@@ -890,7 +893,7 @@ public class DesignSpecification {
 	 * Returns the configured bandSplitType.
 	 * @return The configured value.
 	 */
-	public ReportBand.SplitType getBandSplitType() {
+	public @Nullable ReportBand.SplitType getBandSplitType() {
 		return bandSplitType;
 	}
 	
@@ -898,7 +901,7 @@ public class DesignSpecification {
 	 * Sets the configured bandSplitType.
 	 * @param bandSplitType The bandSplitType value.
 	 */
-	public void setBandSplitType(ReportBand.SplitType bandSplitType) {
+	public void setBandSplitType(@Nullable ReportBand.SplitType bandSplitType) {
 		this.bandSplitType = bandSplitType;
 	}
 	
@@ -906,7 +909,7 @@ public class DesignSpecification {
 	 * Returns the configured boldLabels.
 	 * @return The configured value.
 	 */
-	public Boolean getBoldLabels() {
+	public @Nullable Boolean getBoldLabels() {
 		return boldLabels;
 	}
 	
@@ -914,7 +917,7 @@ public class DesignSpecification {
 	 * Sets the configured boldLabels.
 	 * @param boldLabels The boldLabels value.
 	 */
-	public void setBoldLabels(Boolean boldLabels) {
+	public void setBoldLabels(@Nullable Boolean boldLabels) {
 		this.boldLabels = boldLabels;
 	}
 	
@@ -922,7 +925,7 @@ public class DesignSpecification {
 	 * Returns the configured checkBoxFontName.
 	 * @return The configured value.
 	 */
-	public String getCheckBoxFontName() {
+	public @Nullable String getCheckBoxFontName() {
 		return checkBoxFontName;
 	}
 	
@@ -930,7 +933,7 @@ public class DesignSpecification {
 	 * Sets the configured checkBoxFontName.
 	 * @param checkBoxFontName The checkBoxFontName value.
 	 */
-	public void setCheckBoxFontName(String checkBoxFontName) {
+	public void setCheckBoxFontName(@Nullable String checkBoxFontName) {
 		this.checkBoxFontName = checkBoxFontName;
 	}
 	
@@ -938,7 +941,7 @@ public class DesignSpecification {
 	 * Returns the configured checkBoxDisplayExpression.
 	 * @return The configured value.
 	 */
-	public String getCheckBoxDisplayExpression() {
+	public @Nonnull String getCheckBoxDisplayExpression() {
 		return checkBoxDisplayExpression;
 	}
 	
@@ -946,7 +949,7 @@ public class DesignSpecification {
 	 * Sets the configured checkBoxDisplayExpression.
 	 * @param checkBoxDisplayExpression The checkBoxDisplayExpression value.
 	 */
-	public void setCheckBoxDisplayExpression(String checkBoxDisplayExpression) {
+	public void setCheckBoxDisplayExpression(@Nonnull String checkBoxDisplayExpression) {
 		this.checkBoxDisplayExpression = checkBoxDisplayExpression;
 	}
 	
@@ -954,7 +957,7 @@ public class DesignSpecification {
 	 * Returns the configured pixelToTwip.
 	 * @return The configured value.
 	 */
-	public Decimal5 getPixelToTwip() {
+	public @Nullable Decimal5 getPixelToTwip() {
 		return pixelToTwip;
 	}
 	
@@ -962,7 +965,7 @@ public class DesignSpecification {
 	 * Sets the configured pixelToTwip.
 	 * @param pixelToTwip The pixelToTwip value.
 	 */
-	public void setPixelToTwip(Decimal5 pixelToTwip) {
+	public void setPixelToTwip(@Nullable Decimal5 pixelToTwip) {
 		this.pixelToTwip = pixelToTwip;
 	}
 	
@@ -970,7 +973,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionBorderTop.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionBorderTop() {
+	public @Nullable Boolean getSectionBorderTop() {
 		return sectionBorderTop;
 	}
 	
@@ -978,7 +981,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionBorderTop.
 	 * @param sectionBorderTop The sectionBorderTop value.
 	 */
-	public void setSectionBorderTop(Boolean sectionBorderTop) {
+	public void setSectionBorderTop(@Nullable Boolean sectionBorderTop) {
 		this.sectionBorderTop = sectionBorderTop;
 	}
 	
@@ -986,7 +989,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionBorderLeft.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionBorderLeft() {
+	public @Nullable Boolean getSectionBorderLeft() {
 		return sectionBorderLeft;
 	}
 	
@@ -994,7 +997,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionBorderLeft.
 	 * @param sectionBorderLeft The sectionBorderLeft value.
 	 */
-	public void setSectionBorderLeft(Boolean sectionBorderLeft) {
+	public void setSectionBorderLeft(@Nullable Boolean sectionBorderLeft) {
 		this.sectionBorderLeft = sectionBorderLeft;
 	}
 	
@@ -1002,7 +1005,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionBorderRight.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionBorderRight() {
+	public @Nullable Boolean getSectionBorderRight() {
 		return sectionBorderRight;
 	}
 	
@@ -1010,7 +1013,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionBorderRight.
 	 * @param sectionBorderRight The sectionBorderRight value.
 	 */
-	public void setSectionBorderRight(Boolean sectionBorderRight) {
+	public void setSectionBorderRight(@Nullable Boolean sectionBorderRight) {
 		this.sectionBorderRight = sectionBorderRight;
 	}
 	
@@ -1018,7 +1021,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionBorderBottom.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionBorderBottom() {
+	public @Nullable Boolean getSectionBorderBottom() {
 		return sectionBorderBottom;
 	}
 	
@@ -1026,7 +1029,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionBorderBottom.
 	 * @param sectionBorderBottom The sectionBorderBottom value.
 	 */
-	public void setSectionBorderBottom(Boolean sectionBorderBottom) {
+	public void setSectionBorderBottom(@Nullable Boolean sectionBorderBottom) {
 		this.sectionBorderBottom = sectionBorderBottom;
 	}
 	
@@ -1034,7 +1037,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionTitleBorderTop.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionTitleBorderTop() {
+	public @Nullable Boolean getSectionTitleBorderTop() {
 		return sectionTitleBorderTop;
 	}
 	
@@ -1042,7 +1045,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionTitleBorderTop.
 	 * @param sectionTitleBorderTop The sectionTitleBorderTop value.
 	 */
-	public void setSectionTitleBorderTop(Boolean sectionTitleBorderTop) {
+	public void setSectionTitleBorderTop(@Nullable Boolean sectionTitleBorderTop) {
 		this.sectionTitleBorderTop = sectionTitleBorderTop;
 	}
 	
@@ -1050,7 +1053,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionTitleBorderLeft.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionTitleBorderLeft() {
+	public @Nullable Boolean getSectionTitleBorderLeft() {
 		return sectionTitleBorderLeft;
 	}
 	
@@ -1058,7 +1061,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionTitleBorderLeft.
 	 * @param sectionTitleBorderLeft The sectionTitleBorderLeft value.
 	 */
-	public void setSectionTitleBorderLeft(Boolean sectionTitleBorderLeft) {
+	public void setSectionTitleBorderLeft(@Nullable Boolean sectionTitleBorderLeft) {
 		this.sectionTitleBorderLeft = sectionTitleBorderLeft;
 	}
 	
@@ -1066,7 +1069,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionTitleBorderRight.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionTitleBorderRight() {
+	public @Nullable Boolean getSectionTitleBorderRight() {
 		return sectionTitleBorderRight;
 	}
 	
@@ -1074,7 +1077,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionTitleBorderRight.
 	 * @param sectionTitleBorderRight The sectionTitleBorderRight value.
 	 */
-	public void setSectionTitleBorderRight(Boolean sectionTitleBorderRight) {
+	public void setSectionTitleBorderRight(@Nullable Boolean sectionTitleBorderRight) {
 		this.sectionTitleBorderRight = sectionTitleBorderRight;
 	}
 	
@@ -1082,7 +1085,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionTitleBorderBottom.
 	 * @return The configured value.
 	 */
-	public Boolean getSectionTitleBorderBottom() {
+	public @Nullable Boolean getSectionTitleBorderBottom() {
 		return sectionTitleBorderBottom;
 	}
 	
@@ -1090,7 +1093,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionTitleBorderBottom.
 	 * @param sectionTitleBorderBottom The sectionTitleBorderBottom value.
 	 */
-	public void setSectionTitleBorderBottom(Boolean sectionTitleBorderBottom) {
+	public void setSectionTitleBorderBottom(@Nullable Boolean sectionTitleBorderBottom) {
 		this.sectionTitleBorderBottom = sectionTitleBorderBottom;
 	}
 	
@@ -1098,7 +1101,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionTitleForeground.
 	 * @return The configured value.
 	 */
-	public String getSectionTitleForeground() {
+	public @Nullable String getSectionTitleForeground() {
 		return sectionTitleForeground;
 	}
 	
@@ -1106,7 +1109,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionTitleForeground.
 	 * @param sectionTitleForeground The sectionTitleForeground value.
 	 */
-	public void setSectionTitleForeground(String sectionTitleForeground) {
+	public void setSectionTitleForeground(@Nullable String sectionTitleForeground) {
 		this.sectionTitleForeground = sectionTitleForeground;
 	}
 	
@@ -1114,7 +1117,7 @@ public class DesignSpecification {
 	 * Returns the configured sectionTitleBackground.
 	 * @return The configured value.
 	 */
-	public String getSectionTitleBackground() {
+	public @Nullable String getSectionTitleBackground() {
 		return sectionTitleBackground;
 	}
 	
@@ -1122,7 +1125,7 @@ public class DesignSpecification {
 	 * Sets the configured sectionTitleBackground.
 	 * @param sectionTitleBackground The sectionTitleBackground value.
 	 */
-	public void setSectionTitleBackground(String sectionTitleBackground) {
+	public void setSectionTitleBackground(@Nullable String sectionTitleBackground) {
 		this.sectionTitleBackground = sectionTitleBackground;
 	}
 	
@@ -1130,7 +1133,7 @@ public class DesignSpecification {
 	 * Returns the configured parameters.
 	 * @return The configured value.
 	 */
-	public List<ReportParameter> getParameters() {
+	public @Nonnull List<ReportParameter> getParameters() {
 		return parameters;
 	}
 
@@ -1138,7 +1141,7 @@ public class DesignSpecification {
 	 * Sets the configured parameters.
 	 * @param parameters The parameters value.
 	 */
-	public void setParameters(List<ReportParameter> parameters) {
+	public void setParameters(@Nonnull List<ReportParameter> parameters) {
 		this.parameters = parameters;
 	}
 
@@ -1146,7 +1149,7 @@ public class DesignSpecification {
 	 * Returns the configured fields.
 	 * @return The configured value.
 	 */
-	public List<ReportField> getFields() {
+	public @Nonnull List<ReportField> getFields() {
 		return fields;
 	}
 
@@ -1154,7 +1157,7 @@ public class DesignSpecification {
 	 * Sets the configured fields.
 	 * @param fields The fields value.
 	 */
-	public void setFields(List<ReportField> fields) {
+	public void setFields(@Nonnull List<ReportField> fields) {
 		this.fields = fields;
 	}
 
@@ -1162,7 +1165,7 @@ public class DesignSpecification {
 	 * Returns the configured variables.
 	 * @return The configured value.
 	 */
-	public List<ReportVariable> getVariables() {
+	public @Nonnull List<ReportVariable> getVariables() {
 		return variables;
 	}
 
@@ -1170,7 +1173,7 @@ public class DesignSpecification {
 	 * Sets the configured variables.
 	 * @param variables The variables value.
 	 */
-	public void setVariables(List<ReportVariable> variables) {
+	public void setVariables(@Nonnull List<ReportVariable> variables) {
 		this.variables = variables;
 	}
 
@@ -1178,7 +1181,7 @@ public class DesignSpecification {
 	 * Returns the configured bands.
 	 * @return The configured value.
 	 */
-	public List<ReportBand> getBands() {
+	public @Nonnull List<ReportBand> getBands() {
 		return bands;
 	}
 
@@ -1186,7 +1189,7 @@ public class DesignSpecification {
 	 * Sets the configured bands.
 	 * @param bands The bands value.
 	 */
-	public void setBands(List<ReportBand> bands) {
+	public void setBands(@Nonnull List<ReportBand> bands) {
 		this.bands = bands;
 	}
 
@@ -1194,7 +1197,7 @@ public class DesignSpecification {
 	 * Returns the configured subReports.
 	 * @return The configured value.
 	 */
-	public List<DesignSpecification> getSubReports() {
+	public @Nonnull List<DesignSpecification> getSubReports() {
 		return subReports;
 	}
 
@@ -1202,7 +1205,7 @@ public class DesignSpecification {
 	 * Sets the configured subReports.
 	 * @param subReports The subReports value.
 	 */
-	public void setSubReports(List<DesignSpecification> subReports) {
+	public void setSubReports(@Nonnull List<DesignSpecification> subReports) {
 		this.subReports = subReports;
 	}
 
@@ -1210,7 +1213,7 @@ public class DesignSpecification {
 	 * Returns the configured field.
 	 * @return The configured value.
 	 */
-	public ReportField getField() {
+	public @Nullable ReportField getField() {
 		return field;
 	}
 
@@ -1218,7 +1221,7 @@ public class DesignSpecification {
 	 * Sets the configured field.
 	 * @param field The field value.
 	 */
-	public void setField(ReportField field) {
+	public void setField(@Nullable ReportField field) {
 		this.field = field;
 	}
 
@@ -1226,7 +1229,7 @@ public class DesignSpecification {
 	 * Returns the configured collectionType.
 	 * @return The configured value.
 	 */
-	public CollectionType getCollectionType() {
+	public @Nullable CollectionType getCollectionType() {
 		return collectionType;
 	}
 
@@ -1234,7 +1237,7 @@ public class DesignSpecification {
 	 * Sets the configured collectionType.
 	 * @param collectionType The collectionType value.
 	 */
-	public void setCollectionType(CollectionType collectionType) {
+	public void setCollectionType(@Nullable CollectionType collectionType) {
 		this.collectionType = collectionType;
 	}
 
@@ -1242,7 +1245,7 @@ public class DesignSpecification {
 	 * Returns the configured parentReportPersistentName.
 	 * @return The configured value.
 	 */
-	public String getParentReportPersistentName() {
+	public @Nullable String getParentReportPersistentName() {
 		return parentReportPersistentName;
 	}
 
@@ -1250,7 +1253,7 @@ public class DesignSpecification {
 	 * Sets the configured parentReportPersistentName.
 	 * @param parentReportPersistentName The parentReportPersistentName value.
 	 */
-	public void setParentReportPersistentName(String parentReportPersistentName) {
+	public void setParentReportPersistentName(@Nullable String parentReportPersistentName) {
 		this.parentReportPersistentName = parentReportPersistentName;
 	}
 
@@ -1258,7 +1261,7 @@ public class DesignSpecification {
 	 * Returns the configured verticalise.
 	 * @return The configured value.
 	 */
-	public Boolean getVerticalise() {
+	public @Nullable Boolean getVerticalise() {
 		return verticalise;
 	}
 
@@ -1266,7 +1269,7 @@ public class DesignSpecification {
 	 * Sets the configured verticalise.
 	 * @param verticalise The verticalise value.
 	 */
-	public void setVerticalise(Boolean verticalise) {
+	public void setVerticalise(@Nullable Boolean verticalise) {
 		this.verticalise = verticalise;
 	}
 
@@ -1274,7 +1277,7 @@ public class DesignSpecification {
 	 * Returns the configured labelAlignmentOverride.
 	 * @return The configured value.
 	 */
-	public ReportElement.ElementAlignment getLabelAlignmentOverride() {
+	public @Nullable ReportElement.ElementAlignment getLabelAlignmentOverride() {
 		return labelAlignmentOverride;
 	}
 
@@ -1282,7 +1285,7 @@ public class DesignSpecification {
 	 * Sets the configured labelAlignmentOverride.
 	 * @param labelAlignmentOverride The labelAlignmentOverride value.
 	 */
-	public void setLabelAlignmentOverride(ReportElement.ElementAlignment labelAlignmentOverride) {
+	public void setLabelAlignmentOverride(@Nullable ReportElement.ElementAlignment labelAlignmentOverride) {
 		this.labelAlignmentOverride = labelAlignmentOverride;
 	}
 
@@ -1290,7 +1293,7 @@ public class DesignSpecification {
 	 * Returns the configured moduleName.
 	 * @return The configured value.
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -1298,7 +1301,7 @@ public class DesignSpecification {
 	 * Returns the configured documentName.
 	 * @return The configured value.
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -1322,7 +1325,7 @@ public class DesignSpecification {
 	 * Returns the configured joinAlias.
 	 * @return The configured value.
 	 */
-	public Map<String, String> getJoinAlias() {
+	public @Nullable Map<String, String> getJoinAlias() {
 		return joinAlias;
 	}
 
@@ -1330,7 +1333,7 @@ public class DesignSpecification {
 	 * Sets the configured joinAlias.
 	 * @param joinAlias The joinAlias value.
 	 */
-	public void setJoinAlias(Map<String, String> joinAlias) {
+	public void setJoinAlias(@Nullable Map<String, String> joinAlias) {
 		this.joinAlias = joinAlias;
 	}
 
@@ -1338,7 +1341,7 @@ public class DesignSpecification {
 	 * Returns the configured joins.
 	 * @return The configured value.
 	 */
-	public Map<String, String> getJoins() {
+	public @Nullable Map<String, String> getJoins() {
 		return joins;
 	}
 
@@ -1346,7 +1349,7 @@ public class DesignSpecification {
 	 * Sets the configured joins.
 	 * @param joins The joins value.
 	 */
-	public void setJoins(Map<String, String> joins) {
+	public void setJoins(@Nullable Map<String, String> joins) {
 		this.joins = joins;
 	}
 	
@@ -1357,7 +1360,7 @@ public class DesignSpecification {
 	 * @param alias The table alias assigned to the join.
 	 * @param join The SQL join fragment.
 	 */
-	public void addJoin(@SuppressWarnings("hiding") String documentName, @SuppressWarnings("hiding") String alias, String join){
+	public void addJoin(@SuppressWarnings("hiding") @Nonnull String documentName, @SuppressWarnings("hiding") @Nonnull String alias, @Nonnull String join){
 		if(joins==null){
 			joins = new HashMap<>();
 			joinAlias = new HashMap<>();
@@ -1456,9 +1459,13 @@ public class DesignSpecification {
 	 *
 	 * @return The resolved module metadata.
 	 */
-	public Module getModule() {
+	public @Nonnull Module getModule() {
+		final String moduleNameToResolve = getModuleName();
+		if (moduleNameToResolve == null) {
+			throw new IllegalStateException("Report design " + name + " has no module name");
+		}
 		final Customer customer = CORE.getCustomer();
-		return customer.getModule(getModuleName());
+		return customer.getModule(moduleNameToResolve);
 	}
 
 	/**
@@ -1466,9 +1473,13 @@ public class DesignSpecification {
 	 *
 	 * @return The resolved document metadata.
 	 */
-	public Document getDocument() {
+	public @Nonnull Document getDocument() {
+		final String documentNameToResolve = getDocumentName();
+		if (documentNameToResolve == null) {
+			throw new IllegalStateException("Report design " + name + " has no document name");
+		}
 		final Customer customer = CORE.getCustomer();
-		return getModule().getDocument(customer, getDocumentName());
+		return getModule().getDocument(customer, documentNameToResolve);
 	}
 
 	/**
@@ -1476,7 +1487,7 @@ public class DesignSpecification {
 	 *
 	 * @return The configured language, or {@code null} to use Jasper defaults.
 	 */
-	public String getLanguage() {
+	public @Nullable String getLanguage() {
 		return language;
 	}
 
@@ -1484,7 +1495,7 @@ public class DesignSpecification {
 	 * Sets the configured language.
 	 * @param language The language value.
 	 */
-	public void setLanguage(String language) {
+	public void setLanguage(@Nullable String language) {
 		this.language = language;
 	}
 }

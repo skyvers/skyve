@@ -1,24 +1,26 @@
 package org.skyve.domain.types.formatters;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.Decimal5;
 
+import jakarta.annotation.Nonnull;
+
 /**
- * Format any org.skyve.domain.types.Decimal into a time duration (hours:minutes) representation
+ * Format any org.skyve.domain.types.Decimal into a time duration (hours:minutes) representation: the hours truncated
+ * towards zero, then the minutes rounded once, half up (away from zero), from the exact fraction of an hour, with a sign
+ * for a negative duration: 1.26 is 1:16, 0.49166 is 0:29, 0.99999 is 1:00 and -0.01 is -0:01.
  */
 public class TimeDurationFormatter implements Formatter<Decimal> {
-	private static final MathContext MATH_CONTEXT = new MathContext(4, RoundingMode.HALF_UP);
 
 	/**
 	 * Returns the valueType.
 	 * @return the result
 	 */
 	@Override
-	public Class<Decimal> getValueType() {
+	public @Nonnull Class<Decimal> getValueType() {
 		return Decimal.class;
 	}
 	
@@ -28,14 +30,15 @@ public class TimeDurationFormatter implements Formatter<Decimal> {
 	 * @return the result
 	 */
 	@Override
-	public String toDisplayValue(Decimal value) {
+	public @Nonnull String toDisplayValue(@Nonnull Decimal value) {
 		BigDecimal decimalValue = value.bigDecimalValue();
-		int hours = decimalValue.round(new MathContext(0, RoundingMode.DOWN)).intValue();
+		// truncated towards zero
+		int hours = decimalValue.intValue();
 
+		// the exact minutes (a decimal times 60 needs no rounding), rounded once to the nearest minute, half up
 		decimalValue = decimalValue.subtract(new BigDecimal(hours));
-		decimalValue = decimalValue.multiply(Decimal5.SIXTY.bigDecimalValue(), MATH_CONTEXT);
-		decimalValue = decimalValue.round(new MathContext(0, RoundingMode.HALF_UP));
-		int minutesValue = (Integer.valueOf(decimalValue.intValue())).intValue();
+		decimalValue = decimalValue.multiply(Decimal5.SIXTY.bigDecimalValue());
+		int minutesValue = decimalValue.setScale(0, RoundingMode.HALF_UP).intValue();
 
 		// handle round up to 60 minutes
 		if (minutesValue == 60) {

@@ -25,6 +25,7 @@ class UploadAndWebFileInputStreamTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void uploadWithNullStreamAndMimeType() {
+		@SuppressWarnings("null") // passes null on purpose
 		Upload upload = new Upload("file.txt", null, null);
 		assertThat(upload.getFileName(), is("file.txt"));
 	}

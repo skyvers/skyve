@@ -66,6 +66,21 @@ class LoginTest {
 	}
 
 	@Test
+	void defaultRememberIsNull() {
+		assertThat(step.getRemember(), is(nullValue()));
+	}
+
+	@Test
+	void setRememberRoundtrip() {
+		step.setRemember(Boolean.TRUE);
+		assertThat(step.getRemember(), is(Boolean.TRUE));
+		step.setRemember(Boolean.FALSE);
+		assertThat(step.getRemember(), is(Boolean.FALSE));
+		step.setRemember(null);
+		assertThat(step.getRemember(), is(nullValue()));
+	}
+
+	@Test
 	void executeCallsExecutor() {
 		Executor executor = mock(Executor.class);
 		step.execute(executor);

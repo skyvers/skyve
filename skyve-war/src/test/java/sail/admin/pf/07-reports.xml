@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), PrimeFaces: Reports, as a workflow, because PrimeFaces only runs and schedules reports: a report
+	is designed in SmartClient (its Report Designer, and the wizard that creates one, are desktop only), listed in the Reports
+	menu item (tablet and external only) and run and scheduled in PrimeFaces, and Report Schedules (desktop only) shows the
+	schedule. Automations, in order: SmartClient designs a report whose parameter is required; PrimeFaces lists it, runs it with
+	an input value (Download Report) and has scheduling refused because of the required parameter; SmartClient makes the
+	parameter optional; PrimeFaces schedules it (refused without a user to run as, and without a user to email; Add User to
+	Email; selected hours), then reads the schedule back; SmartClient finds it in Report Schedules and deletes it.
+	The Reports menu item is the only Reports one PrimeFaces shows. Downloads are requested but their content is not
+	checked: SAIL has no step for downloads (docs/sail.md, Known Limitations).
+-->
+<workflow testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<automation uxui="desktop" userAgentType="desktop">
+		<before>
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+		</before>
+		<interaction name="SmartClient: design a report with a required parameter">
+			<method>
+				<navigateMenu module="admin" item="Reports/Report Designer" />
+				<listGridNew module="admin" document="ReportTemplate" createView="true" />
+				<dataEnter binding="name" value="SAIL{run}" />
+				<dataEnter binding="description" value="A SAIL report" />
+				<dataEnter binding="generateExisting" value="Existing" match="label" />
+				<action name="Next" />
+				<dataEnter binding="template" value="Report ${title}" />
+				<dataEnter binding="outputFormat" value="CSV" match="label" />
+				<dataGridNew binding="datasets" />
+				<dataEnter binding="datasetName" value="title" />
+				<dataEnter binding="datasetType" value="Constant" match="label" />
+				<dataEnter binding="query" value="SAIL title" />
+				<zoomOut />
+				<dataGridNew binding="datasets" />
+				<dataEnter binding="datasetName" value="users" />
+				<dataEnter binding="datasetType" value="BizQL" match="label" />
+				<dataEnter binding="query" value="select a from {admin.User} a where a.userName = :uname" />
+				<dataGridZoom binding="parent.parameters" row="0" />
+				<dataEnter binding="description" value="The user name" />
+				<dataEnter binding="type" value="Text" match="label" />
+				<dataEnter binding="required" value="true" />
+				<dataEnter binding="textDefaultValue" value="admin" />
+				<dataEnter binding="textTestValue" value="admin" />
+				<zoomOut />
+				<zoomOut />
+				<save createView="false" />
+				<testSuccess />
+				<ok />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+	<automation uxui="tablet" userAgentType="tablet">
+		<before>
+			<login user="admin" password="admin" />
+			<testSuccess />
+		</before>
+		<interaction name="Reports: the report is listed and runs">
+			<method>
+				<testMenu module="admin" item="Reports/Report Designer" present="false" />
+				<testMenu module="admin" item="Reports/Report Manager" present="false" />
+				<testMenu module="admin" item="Reports/Report Schedules" present="false" />
+				<navigateMenu module="admin" item="Reports/Reports" />
+				<testGridRows module="admin" query="qEnabledReports" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+				<listGridZoom module="admin" query="qEnabledReports" rowContaining="SAIL{run}" />
+				<testGridRows binding="parameters" minRows="1" maxRows="1" />
+				<dataGridEdit binding="parameters" row="0" />
+				<dataEnter binding="reportInputValue" value="admin" />
+				<action name="DownloadReport" />
+				<tabSelect path="Schedule Details" />
+				<dataEnter binding="scheduled" value="true" />
+				<testFailure message="required parameters" />
+				<cancel />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+	<automation uxui="desktop" userAgentType="desktop">
+		<before>
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+		</before>
+		<interaction name="SmartClient: the parameter is no longer required">
+			<method>
+				<navigateMenu module="admin" item="Reports/Report Designer" />
+				<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+				<dataGridZoom binding="datasets" rowContaining="users" />
+				<dataGridZoom binding="parent.parameters" row="0" />
+				<dataEnter binding="required" value="false" />
+				<zoomOut />
+				<zoomOut />
+				<save />
+				<testSuccess />
+				<ok />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+	<automation uxui="tablet" userAgentType="tablet">
+		<before>
+			<login user="admin" password="admin" />
+			<testSuccess />
+		</before>
+		<interaction name="Reports: schedule the report">
+			<method>
+				<navigateMenu module="admin" item="Reports/Reports" />
+				<listGridZoom module="admin" query="qEnabledReports" rowContaining="SAIL{run}" />
+				<tabSelect path="Schedule Details" />
+				<dataEnter binding="scheduled" value="true" />
+				<save testSuccess="false" />
+				<testFailure message="Run As is required" />
+				<lookupDescriptionAutoComplete binding="runAs" search="admin" />
+				<save testSuccess="false" />
+				<testFailure message="Please provide at least one user to email the report to" />
+				<lookupDescriptionAutoComplete binding="newUserToEmail" search="admin" />
+				<action name="AddUserToEmail" />
+				<testGridRows binding="editUsersToEmail" minRows="1" maxRows="1" />
+				<dataEnter binding="allHours" value="Selected" match="label" />
+				<dataEnter binding="hour3" value="true" />
+				<save />
+				<testSuccess />
+				<testValue binding="scheduled" value="true" />
+				<cancel />
+				<listGridZoom module="admin" query="qEnabledReports" rowContaining="SAIL{run}" />
+				<tabSelect path="Schedule Details" />
+				<testValue binding="scheduled" value="true" />
+				<testValue binding="allHours" value="Selected" />
+				<testValue binding="hour3" value="true" />
+				<testValue binding="hour4" value="false" />
+				<testGridRows binding="editUsersToEmail" minRows="1" maxRows="1" />
+				<cancel />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+	<automation uxui="desktop" userAgentType="desktop">
+		<before>
+			<login user="admin" password="admin" />
+			<testSuccess />
+			<switchMode />
+		</before>
+		<interaction name="SmartClient: Report Schedules shows the schedule, then the report is deleted">
+			<method>
+				<navigateMenu module="admin" item="Reports/Report Schedules" />
+				<testGridRows module="admin" query="qReportSchedules" rowContaining="SAIL{run}" minRows="1" maxRows="1" />
+				<listGridFilter module="admin" query="qReportSchedules" column="name" value="SAIL{run}" />
+				<testGridRows module="admin" query="qReportSchedules" rowContaining="03:00" minRows="1" maxRows="1" />
+				<listGridClearFilter module="admin" query="qReportSchedules" />
+				<navigateMenu module="admin" item="Reports/Report Designer" />
+				<listGridZoom module="admin" document="ReportTemplate" rowContaining="SAIL{run}" />
+				<delete />
+				<testGridRows module="admin" document="ReportTemplate" rowContaining="SAIL{run}" maxRows="0" />
+			</method>
+		</interaction>
+		<after>
+			<logout />
+		</after>
+	</automation>
+</workflow>

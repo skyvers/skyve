@@ -75,7 +75,7 @@ class GeometryConverterTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void toDisplayValueNullThrowsConversionException() {
 		GeometryConverter converter = new GeometryConverter();
 		assertThrows(ConversionException.class, () -> converter.toDisplayValue(null));

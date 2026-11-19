@@ -6,12 +6,22 @@ import java.util.List;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
 import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
 import org.skyve.metadata.sail.language.step.TestFailure;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
 import org.skyve.metadata.sail.language.step.TestSuccess;
 import org.skyve.metadata.sail.language.step.TestValue;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
 import org.skyve.metadata.sail.language.step.context.ClearContext;
 import org.skyve.metadata.sail.language.step.context.PopContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
@@ -19,6 +29,7 @@ import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.sail.language.step.interaction.DataEnter;
 import org.skyve.metadata.sail.language.step.interaction.TabSelect;
 import org.skyve.metadata.sail.language.step.interaction.TestDataEnter;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
 import org.skyve.metadata.sail.language.step.interaction.actions.Action;
 import org.skyve.metadata.sail.language.step.interaction.actions.Cancel;
 import org.skyve.metadata.sail.language.step.interaction.actions.Delete;
@@ -28,26 +39,41 @@ import org.skyve.metadata.sail.language.step.interaction.actions.Save;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomIn;
 import org.skyve.metadata.sail.language.step.interaction.actions.ZoomOut;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridEdit;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridRemove;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridSelect;
 import org.skyve.metadata.sail.language.step.interaction.grids.DataGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridNew;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSelect;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
 import org.skyve.metadata.sail.language.step.interaction.grids.ListGridZoom;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionAutoComplete;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionEdit;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionNew;
 import org.skyve.metadata.sail.language.step.interaction.lookup.LookupDescriptionPick;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateCalendar;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateEdit;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMap;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateTree;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
 import org.skyve.metadata.sail.language.step.interaction.session.Login;
 import org.skyve.metadata.sail.language.step.interaction.session.Logout;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementRef;
@@ -88,7 +114,7 @@ public class Interaction implements Executable {
 	 * Returns the name.
 	 * @return the result
 	 */
-	public String getName() {
+	public @Nonnull String getName() {
 		return name;
 	}
 
@@ -97,7 +123,7 @@ public class Interaction implements Executable {
 	 * @param name the name
 	 */
 	@XmlAttribute(required = true)
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
@@ -105,7 +131,7 @@ public class Interaction implements Executable {
 	 * Returns the before.
 	 * @return the result
 	 */
-	public Procedure getBefore() {
+	public @Nullable Procedure getBefore() {
 		return before;
 	}
 
@@ -114,7 +140,7 @@ public class Interaction implements Executable {
 	 * @param before the before
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "before")
-	public void setBefore(Procedure before) {
+	public void setBefore(@Nullable Procedure before) {
 		this.before = before;
 	}
 
@@ -122,7 +148,7 @@ public class Interaction implements Executable {
 	 * Returns the after.
 	 * @return the result
 	 */
-	public Procedure getAfter() {
+	public @Nullable Procedure getAfter() {
 		return after;
 	}
 
@@ -131,7 +157,7 @@ public class Interaction implements Executable {
 	 * @param after the after
 	 */
 	@XmlElement(namespace = XMLMetaData.SAIL_NAMESPACE, name = "after")
-	public void setAfter(Procedure after) {
+	public void setAfter(@Nullable Procedure after) {
 		this.after = after;
 	}
 
@@ -176,12 +202,36 @@ public class Interaction implements Executable {
 						@XmlElementRef(type = TestFailure.class),
 						@XmlElementRef(type = Comment.class),
 						@XmlElementRef(type = Execute.class),
+						@XmlElementRef(type = ExecuteAsync.class),
+						@XmlElementRef(type = WaitFor.class),
+						@XmlElementRef(type = TestScript.class),
+						@XmlElementRef(type = Call.class),
 						@XmlElementRef(type = Pause.class),
 						@XmlElementRef(type = PushListContext.class),
 						@XmlElementRef(type = PushEditContext.class),
 						@XmlElementRef(type = PopContext.class),
-						@XmlElementRef(type = ClearContext.class)})
-	public List<Step> getSteps() {
+						@XmlElementRef(type = ClearContext.class),
+						@XmlElementRef(type = Upload.class),
+						@XmlElementRef(type = TestMessage.class),
+						@XmlElementRef(type = TestGridRows.class),
+						@XmlElementRef(type = TestWidget.class),
+						@XmlElementRef(type = NavigateMenu.class),
+						@XmlElementRef(type = TestMenu.class),
+						@XmlElementRef(type = SwitchMode.class),
+						@XmlElementRef(type = ListGridFilter.class),
+						@XmlElementRef(type = ListGridClearFilter.class),
+						@XmlElementRef(type = ListGridSort.class),
+						@XmlElementRef(type = CaptureValue.class),
+						@XmlElementRef(type = CaptureCell.class),
+						@XmlElementRef(type = CaptureTitle.class),
+						@XmlElementRef(type = DataGridLink.class),
+						@XmlElementRef(type = DataGridMove.class),
+						@XmlElementRef(type = ListMembershipMove.class),
+						@XmlElementRef(type = NavigateBack.class),
+						@XmlElementRef(type = Refresh.class),
+						@XmlElementRef(type = CloseWindow.class),
+						@XmlElementRef(type = ListGridTool.class)})
+	public @Nonnull List<Step> getSteps() {
 		return steps;
 	}
 	
@@ -190,7 +240,7 @@ public class Interaction implements Executable {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeInteraction(this);
 	}
 }

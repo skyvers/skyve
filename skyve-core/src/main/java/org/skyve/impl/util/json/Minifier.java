@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Minifies JSON file by stripping all whitespace and comments.
  * 
@@ -44,7 +46,7 @@ public class Minifier {
 	 *         removed, null if param is null.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static final String minify(String json) {
+	public static final @Nullable String minify(@Nullable String json) {
 		if (json == null || json.isEmpty())
 			return json;
 		StringBuilder sb = new StringBuilder();

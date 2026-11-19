@@ -2,6 +2,7 @@ package org.skyve.impl.web.filter.rest;
 
 import java.io.IOException;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -29,7 +30,9 @@ public class ForbiddenFilter extends AbstractRestFilter {
 	 * @throws ServletException if downstream unsecured filter processing fails
 	 */
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		if (super.doUnsecuredFilter(request, response, chain)) {
 			return;

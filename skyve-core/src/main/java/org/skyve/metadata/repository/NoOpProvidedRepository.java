@@ -29,6 +29,9 @@ import org.skyve.metadata.view.model.comparison.ComparisonModel;
 import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines the NoOpProvidedRepository type.
  */
@@ -38,7 +41,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param customer the customer
 	 */
 	@Override
-	public void evictCachedMetaData(Customer customer) {
+	public void evictCachedMetaData(@Nullable Customer customer) {
 		// do nothing
 	}
 
@@ -50,7 +53,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
+	public @Nullable File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName) {
 		return null;
 	}
 
@@ -59,7 +62,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Router getRouter() {
+	public @Nullable Router getRouter() {
 		return null;
 	}
 
@@ -69,7 +72,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Customer getCustomer(String customerName) {
+	public @Nullable Customer getCustomer(@Nonnull String customerName) {
 		return null;
 	}
 
@@ -82,7 +85,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
+	public @Nullable <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull Document document, @Nonnull String imageName, boolean runtime) {
 		return null;
 	}
 
@@ -95,7 +98,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public View getView(String uxui, Customer customer, Document document, String name) {
+	public @Nullable View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull Document document, @Nonnull String name) {
 		return null;
 	}
 
@@ -107,7 +110,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+	public @Nullable ActionMetaData getMetaDataAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName) {
 		return null;
 	}
 
@@ -120,7 +123,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
@@ -133,7 +136,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
@@ -146,7 +149,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
@@ -159,7 +162,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		return null;
 	}
 
@@ -172,7 +175,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
@@ -185,7 +188,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
@@ -198,7 +201,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
@@ -211,7 +214,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
@@ -224,7 +227,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		return null;
 	}
 
@@ -235,7 +238,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Object getDataFactory(Customer customer, Document document) {
+	public @Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document) {
 		return null;
 	}
 
@@ -245,7 +248,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public UserImpl retrieveUser(String userName) {
+	public @Nullable UserImpl retrieveUser(@Nonnull String userName) {
 		return null;
 	}
 
@@ -254,7 +257,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param user the user
 	 */
 	@Override
-	public void resetMenus(User user) {
+	public void resetMenus(@Nonnull User user) {
 		// do nothing
 	}
 
@@ -264,7 +267,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public boolean populatePermissions(User user) {
+	public boolean populatePermissions(@Nonnull User user) {
 		return false;
 	}
 
@@ -273,7 +276,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param user the user
 	 */
 	@Override
-	public void resetUserPermissions(User user) {
+	public void resetUserPermissions(@Nonnull User user) {
 		// do nothing
 	}
 
@@ -284,7 +287,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public boolean populateUser(User user, Connection connection) {
+	public boolean populateUser(@Nonnull User user, @Nonnull Connection connection) {
 		return false;
 	}
 
@@ -293,7 +296,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		return Collections.emptyList();
 	}
 
@@ -302,7 +305,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		return Collections.emptyList();
 	}
 
@@ -312,7 +315,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public String retrievePublicUserName(String customerName) {
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName) {
 		return null;
 	}
 
@@ -321,7 +324,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public List<String> getAllCustomerNames() {
+	public @Nonnull List<String> getAllCustomerNames() {
 		return Collections.emptyList();
 	}
 
@@ -330,7 +333,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public List<String> getAllVanillaModuleNames() {
+	public @Nonnull List<String> getAllVanillaModuleNames() {
 		return Collections.emptyList();
 	}
 
@@ -341,7 +344,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Module getModule(Customer customer, String moduleName) {
+	public @Nullable Module getModule(@Nullable Customer customer, @Nonnull String moduleName) {
 		return null;
 	}
 
@@ -353,7 +356,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Document getDocument(Customer customer, Module module, String documentName) {
+	public @Nullable Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		return null;
 	}
 
@@ -365,7 +368,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer, @Nonnull Document document, boolean runtime) {
 		return null;
 	}
 
@@ -376,7 +379,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+	public @Nullable BizletMetaData getMetaDataBizlet(@Nullable Customer customer, @Nonnull Document document) {
 		return null;
 	}
 
@@ -385,7 +388,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param customer the customer
 	 */
 	@Override
-	public void validateCustomerForGenerateDomain(Customer customer) {
+	public void validateCustomerForGenerateDomain(@Nonnull Customer customer) {
 		// do nothing
 	}
 
@@ -395,7 +398,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param module the module
 	 */
 	@Override
-	public void validateModuleForGenerateDomain(Customer customer, Module module) {
+	public void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module) {
 		// do nothing
 	}
 
@@ -405,7 +408,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param document the document
 	 */
 	@Override
-	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
+	public void validateDocumentForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document) {
 		// do nothing
 	}
 
@@ -417,7 +420,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @param uxui the uxui
 	 */
 	@Override
-	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
+	public void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui) {
 		// do nothing
 	}
 
@@ -426,7 +429,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Router getGlobalRouter() {
+	public @Nullable Router getGlobalRouter() {
 		return null;
 	}
 
@@ -435,7 +438,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public List<Router> getModuleRouters() {
+	public @Nonnull List<Router> getModuleRouters() {
 		return Collections.emptyList();
 	}
 
@@ -447,7 +450,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public String getReportFileName(Customer customer, Document document, String reportName) {
+	public @Nullable String getReportFileName(@Nullable Customer customer, @Nonnull Document document, @Nonnull String reportName) {
 		return null;
 	}
 
@@ -458,7 +461,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public Class<?> getJavaClass(Customer customer, String fullyQualifiedJavaCodeName) {
+	public @Nullable Class<?> getJavaClass(@Nullable Customer customer, @Nonnull String fullyQualifiedJavaCodeName) {
 		return null;
 	}
 
@@ -469,7 +472,7 @@ public class NoOpProvidedRepository extends ProvidedRepositoryFactory {
 	 * @return the result
 	 */
 	@Override
-	public String vtable(String customerName, String key) {
+	public @Nullable String vtable(@Nullable String customerName, @Nonnull String key) {
 		return null;
 	}
 	

@@ -9,6 +9,9 @@ import java.util.TimeZone;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Records the user and UTC timestamp of the last successful save of a
  * {@link org.skyve.domain.PersistentBean}.
@@ -53,7 +56,7 @@ public class OptimisticLock implements Serializable {
 	 * @param username  the name of the user who performed the save; must not be {@code null}
 	 * @param timestamp the UTC timestamp of the save; must not be {@code null}
 	 */
-	public OptimisticLock(String username, Date timestamp) {
+	public OptimisticLock(@Nonnull String username, @Nonnull Date timestamp) {
 		this.lockUsername = username;
 		this.lockTimestamp = timestamp;
 	}
@@ -66,8 +69,10 @@ public class OptimisticLock implements Serializable {
 	 * @throws org.skyve.domain.messages.DomainException if {@code lockString} is {@code null},
 	 *         shorter than 18 characters, or contains an unparseable timestamp
 	 */
-	public OptimisticLock(String lockString) {
-		if ((lockString == null) || (lockString.length() < 18)) {
+	public OptimisticLock(@Nonnull String lockString) {
+		@SuppressWarnings("null") // lock strings arrive from JSON and request data; unit tests assert this
+		boolean lockStringInvalid = (lockString == null) || (lockString.length() < 18);
+		if (lockStringInvalid) {
 			throw new DomainException("bizLock " + lockString + " is invalid");
 		}
 		
@@ -89,7 +94,7 @@ public class OptimisticLock implements Serializable {
 	 * @return the serialized lock string; never {@code null}
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		SimpleDateFormat format = CORE.getDateFormat(LOCK_TIMESTAMP_FORMAT);
 		format.setTimeZone(LOCK_TIMEZONE);
 		return format.format(lockTimestamp) + lockUsername;
@@ -99,7 +104,7 @@ public class OptimisticLock implements Serializable {
 	 * 
 	 */
 	@Override
-	public boolean equals(Object object) {
+	public boolean equals(@Nullable Object object) {
 		if (object instanceof OptimisticLock otherLock) {
 			return (lockUsername.equals(otherLock.lockUsername) && lockTimestamp.equals(otherLock.lockTimestamp));
 		}
@@ -124,7 +129,7 @@ public class OptimisticLock implements Serializable {
 	 *
 	 * @return the lock timestamp; never {@code null} for a properly constructed lock
 	 */
-	public Date getTimestamp() {
+	public @Nonnull Date getTimestamp() {
 		return lockTimestamp;
 	}
 
@@ -133,7 +138,7 @@ public class OptimisticLock implements Serializable {
 	 *
 	 * @param timestamp the new timestamp; must not be {@code null}
 	 */
-	public void setTimestamp(Date timestamp) {
+	public void setTimestamp(@Nonnull Date timestamp) {
 		this.lockTimestamp = timestamp;
 	}
 
@@ -142,7 +147,7 @@ public class OptimisticLock implements Serializable {
 	 *
 	 * @return the username; never {@code null} for a properly constructed lock
 	 */
-	public String getUsername() {
+	public @Nonnull String getUsername() {
 		return lockUsername;
 	}
 
@@ -151,7 +156,7 @@ public class OptimisticLock implements Serializable {
 	 *
 	 * @param username the new username; must not be {@code null}
 	 */
-	public void setUsername(String username) {
+	public void setUsername(@Nonnull String username) {
 		this.lockUsername = username;
 	}
 }

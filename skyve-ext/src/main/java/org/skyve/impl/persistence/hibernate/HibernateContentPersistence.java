@@ -5,6 +5,8 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentManager;
 import org.skyve.domain.PersistentBean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * {@link AbstractHibernatePersistence} variant that also manages content-store
  * (attachment and bean content) lifecycle alongside the relational data.
@@ -16,7 +18,7 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	private transient ContentManager cm;
 
 	@SuppressWarnings("resource") // This persistence instance owns the content manager and closes it in closeContent().
-	private ContentManager getContentManager() {
+	private @Nonnull ContentManager getContentManager() {
 		if (cm == null) {
 			cm = EXT.newContentManager();
 		}
@@ -43,7 +45,7 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	 */
 	@Override
 	@SuppressWarnings("resource") // The managed content manager is owned by this persistence instance and closed in closeContent().
-	protected void removeBeanContent(PersistentBean bean) throws Exception {
+	protected void removeBeanContent(@Nonnull PersistentBean bean) throws Exception {
 		getContentManager().removeBean(bean.getBizId());
 	}
 
@@ -54,7 +56,7 @@ public class HibernateContentPersistence extends AbstractHibernatePersistence {
 	 */
 	@Override
 	@SuppressWarnings("resource") // The managed content manager is owned by this persistence instance and closed in closeContent().
-	protected void putBeanContent(BeanContent content) throws Exception {
+	protected void putBeanContent(@Nonnull BeanContent content) throws Exception {
 		getContentManager().put(content);
 	}
 }

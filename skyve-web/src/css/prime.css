@@ -1,7 +1,52 @@
+/* Environment banners - inlined by the lightningcss --bundle step in build.xml */
+@import "env-banner.css";
+
 body,html {
 	margin: 0;
 	padding: 0;
 	height: 100%;
+}
+
+/* Floating labels wrap within their field and grow upwards, clear of the control.
+ * The row observer reserves the tallest floated label's height, even for empty fields. */
+.skyve-floating-label > label {
+	right: 0;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+.skyve-floating-label > input:focus ~ label,
+.skyve-floating-label > input.ui-state-filled ~ label,
+.skyve-floating-label > textarea:focus ~ label,
+.skyve-floating-label > textarea.ui-state-filled ~ label,
+.skyve-floating-label > .ui-inputwrapper-focus ~ label,
+.skyve-floating-label > .ui-inputwrapper-filled ~ label {
+	top: auto !important;
+	bottom: calc(100% + 4px);
+	margin-top: 0;
+}
+.skyve-floating-label > input:-webkit-autofill ~ label,
+.skyve-floating-label > textarea:-webkit-autofill ~ label {
+	top: auto !important;
+	bottom: calc(100% + 4px);
+	margin-top: 0;
+}
+.skyve-floating-label-measure {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	visibility: hidden;
+	pointer-events: none;
+}
+.skyve-floating-label-measure > label {
+	transition: none !important;
+}
+
+/* An action bar whose actions are all hidden is an empty toolbar; don't show it or reserve its space.
+ * Theme rules that make room for the bar match only a bar with something in it. */
+.skyve-action-bar-wrapper:not(:has(.ui-toolbar-group-left > *, .ui-toolbar-group-right > *)),
+.action-bar-wrapper:not(:has(.ui-toolbar-group-left > *, .ui-toolbar-group-right > *)) {
+	display: none;
 }
 
 /* Metadata icon and title shared by all PrimeFaces layout themes. */
@@ -386,26 +431,6 @@ span.right {
 	bottom: 16px
 }
 
-/* Red environment banner style */
-.skyveEnvBanner {
-	background: red;
-	font-size: 8px;
-	color: white;
-	position: fixed;
-	text-align: center;
-	left: 0px;
-	z-index: 2147483646;
-	width: 100%;
-	height: 8px;
-	line-height: 8px;
-}
-.skyveTopEnvBanner {
-	top: 0px;
-}
-.skyveBottomEnvBanner {
-	bottom: 0px;
-}
-
 /* Table style for those that combine an error message and input field */
 table.inputComponent {
 	width: 100%;
@@ -508,6 +533,15 @@ div.skyveContentPreview.skyveContentResponsiveImage {
 .skyveContentResponsiveVideo {
 	aspect-ratio: 16 / 9;
 	height: auto !important;
+}
+
+/* Pin the media to the box's edges. Safari (and every iOS browser) does not resolve
+   height:100% against a box sized by aspect-ratio, so the media takes its own height
+   and object-fit:contain centres it out of view. */
+div.skyveContentPreview.skyveContentResponsiveImage > img,
+.skyveContentResponsiveVideo > video {
+	position: absolute;
+	inset: 0;
 }
 
 /* PrimeFaces ui-g collapse breakpoint */

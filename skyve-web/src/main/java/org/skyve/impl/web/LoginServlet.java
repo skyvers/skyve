@@ -5,10 +5,12 @@ import java.io.IOException;
 import org.skyve.CORE;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.customer.LoginResources;
 import org.skyve.metadata.repository.Repository;
 import org.skyve.metadata.user.User;
 import org.skyve.web.WebContext;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -43,7 +45,8 @@ public class LoginServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -58,7 +61,8 @@ public class LoginServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -72,7 +76,7 @@ public class LoginServlet extends HttpServlet {
 	 * @throws IOException when request forwarding fails
 	 */
 	@SuppressWarnings("java:S3776") // Readability and cohesiveness over cyclomatic complexity
-	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		String customerName = null;
 		HttpSession session = request.getSession(false);
@@ -100,8 +104,9 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/login.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					if (customer != null) {
-						String value = customer.getLoginResources().getLoginPageURL();
+					LoginResources loginResources = (customer == null) ? null : customer.getLoginResources();
+					if (loginResources != null) {
+						String value = loginResources.getLoginPageURL();
 						if (value != null) {
 							url = value;
 						}
@@ -116,8 +121,9 @@ public class LoginServlet extends HttpServlet {
 				String url = "/pages/loggedOut.jsp";
 				if (customerName != null) {
 					Customer customer = repository.getCustomer(customerName);
-					if (customer != null) {
-						String value = customer.getLoginResources().getLoggedOutPageURL();
+					LoginResources loginResources = (customer == null) ? null : customer.getLoginResources();
+					if (loginResources != null) {
+						String value = loginResources.getLoggedOutPageURL();
 						if (value != null) {
 							url = value;
 						}

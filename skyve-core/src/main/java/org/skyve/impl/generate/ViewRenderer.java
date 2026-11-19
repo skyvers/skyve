@@ -14,6 +14,7 @@ import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
+import org.skyve.impl.metadata.view.ViewActionPrivileges;
 import org.skyve.impl.metadata.view.Inject;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.impl.metadata.view.ViewVisitor;
@@ -911,8 +912,8 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // Complexity OK
 	private boolean preProcessAction(@Nullable ImplicitActionName implicitName, @Nonnull Action action, @Nullable ActionShow showOverride) {
-		boolean result = true;
 		DocumentImpl actionDocument = document;
+		boolean result = ViewActionPrivileges.permitted(user, actionDocument, implicitName, action);
 		
 		String resourceName = action.getResourceName();
 		String displayName = action.getLocalisedDisplayName();
@@ -939,18 +940,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 		String actionConfirmationParam = null;
 		
 		if (implicitName == null) {
-			if (! user.canExecuteAction(actionDocument, resourceName)) {
-				result = false;
-			}
 			actionName = resourceName;
 		}
 		else {
 			actionName = implicitName.name();
 			switch (implicitName) {
 				case Add:
-					if (! user.canCreateDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_ADD;
 					}
@@ -959,9 +954,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case BizExport:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_BIZ_EXPORT;
 					}
@@ -971,9 +963,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case BizImport:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_BIZ_IMPORT;
 					}
@@ -983,9 +972,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case Download:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_DOWNLOAD;
 					}
@@ -995,9 +981,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					actionName = resourceName;
 					break;
 				case Upload:
-					if (! user.canExecuteAction(actionDocument, resourceName)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_UPLOAD;
 					}
@@ -1015,9 +998,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Delete:
-					if (! user.canDeleteDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_DELETE;
 					}
@@ -1030,9 +1010,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Edit:
-					if (! user.canReadDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_EDIT;
 					}
@@ -1041,9 +1018,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case New:
-					if (! user.canCreateDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_NEW;
 					}
@@ -1052,10 +1026,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case OK:
-					if ((! user.canUpdateDocument(actionDocument)) &&
-							(! user.canCreateDocument(actionDocument))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_OK;
 					}
@@ -1064,9 +1034,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Remove:
-					if (! user.canDeleteDocument(actionDocument)) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_REMOVE;
 					}
@@ -1086,10 +1053,6 @@ public abstract class ViewRenderer extends ViewVisitor {
 					}
 					break;
 				case Save:
-					if ((! user.canUpdateDocument(actionDocument)) &&
-							(! user.canCreateDocument(actionDocument))) {
-						result = false;
-					}
 					if (relativeIconFileName == null) {
 						relativeIconFileName = Icons.IMAGE_SAVE;
 					}
@@ -1147,7 +1110,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
 		preProcessWidget(true, button.showsLabelByDefault());
-		Action action = view.getAction(button.getActionName());
+		Action action = getValidatedAction(button.getActionName());
 		if (preProcessAction(action.getImplicitName(), action, button.getShow())) {
 			if (currentFormItem != null) {
 				renderFormButton(actionName,
@@ -1626,7 +1589,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 *
 	 * @param value the resolved or authored value, or null when absent
 	 * @param boundValue whether the value contains a Skyve binding expression
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 */
 	public abstract void renderFormLabel(@Nullable String value, boolean boundValue, @Nonnull Label label);
 
@@ -1634,7 +1597,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * Renders the container column label for the active traversal context.
 	 *
 	 * @param value the resolved or authored value, or null when absent
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 */
 	public abstract void renderContainerColumnLabel(@Nullable String value, @Nonnull Label label);
 
@@ -1643,7 +1606,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 *
 	 * @param value the resolved or authored value, or null when absent
 	 * @param boundValue whether the value contains a Skyve binding expression
-	 * @param label the localised label, or null when no label is rendered
+	 * @param label the label metadata; must not be null
 	 */
 	public abstract void renderLabel(@Nullable String value, boolean boundValue, @Nonnull Label label);
 
@@ -2487,10 +2450,23 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 *
 	 * @param binding the widget binding, or null for an unbound widget
 	 * @param widgetQueryName the explicitly configured query name, or null to derive one from the relation
+	 * @param widgetModelName the enclosing document's list model, or null for query resolution
 	 * @param showsLabelByDefault whether the widget type displays a label when metadata does not override it
 	 */
-	private void preProcessLookupWidget(@Nullable String binding, @Nullable String widgetQueryName, boolean showsLabelByDefault) {
+	private void preProcessLookupWidget(@Nullable String binding, @Nullable String widgetQueryName, @Nullable String widgetModelName, boolean showsLabelByDefault) {
 		preProcessWidget(binding, showsLabelByDefault);
+		if (widgetModelName != null) {
+			ListModel<Bean> model = document.getListModel(customer, widgetModelName, true);
+			Document drivingDocument = model.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new MetaDataException("Lookup model " + widgetModelName + " has no driving document.");
+			}
+			currentLookupQuery = null;
+			currentLookupCanCreate = user.canCreateDocument(drivingDocument);
+			currentLookupCanUpdate = user.canUpdateDocument(drivingDocument);
+			return;
+		}
+
 		String queryName = widgetQueryName;
 		// Use reference query name if none provided in the widget
 		TargetMetaData target = currentTarget;
@@ -2509,11 +2485,12 @@ public abstract class ViewRenderer extends ViewVisitor {
 			currentLookupQuery = module.getMetaDataQuery(queryName);
 		}
 
-		if (currentLookupQuery == null) {
+		MetaDataQueryDefinition lookupQuery = currentLookupQuery;
+		if (lookupQuery == null) {
 			throw new MetaDataException("Lookup widget " + binding + " has no query to use.");
 		}
 		
-		Document queryDocument = module.getDocument(customer, currentLookupQuery.getDocumentName());
+		Document queryDocument = module.getDocument(customer, lookupQuery.getDocumentName());
 		currentLookupCanCreate = user.canCreateDocument(queryDocument);
 		currentLookupCanUpdate = user.canUpdateDocument(queryDocument);
 	}
@@ -2523,14 +2500,16 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/** {@inheritDoc} */
 	@Override
 	public final void visitLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
-		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery(), lookup.showsLabelByDefault());
+		preProcessLookupWidget(lookup.getBinding(), lookup.getQuery(), lookup.getModelName(), lookup.showsLabelByDefault());
 
 		MetaDataQueryDefinition lookupQuery = currentLookupQuery;
-		if (lookupQuery == null) {
+		if ((lookupQuery == null) && (lookup.getModelName() == null)) {
 			throw new MetaDataException("Lookup description has no query to use.");
 		}
 		String descriptionBinding = lookup.getDescriptionBinding();
-		if (descriptionBinding == null) {
+		@SuppressWarnings("null") // views built in code (and tests) can omit it; the bizKey is the default
+		boolean descriptionBindingMissing = (descriptionBinding == null);
+		if (descriptionBindingMissing) {
 			descriptionBinding = Bean.BIZ_KEY;
 		}
 		currentLookupDescriptionBinding = descriptionBinding;
@@ -2554,13 +2533,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/**
 	 * Renders the bound column lookup description for the active traversal context.
 	 *
-	 * @param query the resolved lookup query; must not be null
+	 * @param query the resolved lookup query, or null for a model lookup
 	 * @param canCreate whether the user may create records through the lookup
 	 * @param canUpdate whether the user may update records through the lookup
 	 * @param descriptionBinding the resolved lookup description binding; must not be null
 	 * @param lookup the lookup metadata; must not be null
 	 */
-	public abstract void renderBoundColumnLookupDescription(@Nonnull MetaDataQueryDefinition query,
+	public abstract void renderBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 																boolean canCreate,
 																boolean canUpdate,
 																@Nonnull String descriptionBinding,
@@ -2569,13 +2548,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/**
 	 * Renders a lookup-description widget in a form item.
 	 *
-	 * @param query the resolved lookup query; must not be null
+	 * @param query the resolved lookup query, or null for a model lookup
 	 * @param canCreate whether the user may create records through the lookup
 	 * @param canUpdate whether the user may update records through the lookup
 	 * @param descriptionBinding the resolved lookup description binding; must not be null
 	 * @param lookup the lookup metadata; must not be null
 	 */
-	public abstract void renderFormLookupDescription(@Nonnull MetaDataQueryDefinition query,
+	public abstract void renderFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 														boolean canCreate,
 														boolean canUpdate,
 														@Nonnull String descriptionBinding,
@@ -2585,7 +2564,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	@Override
 	public final void visitedLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		MetaDataQueryDefinition lookupQuery = currentLookupQuery;
-		if (lookupQuery == null) {
+		if ((lookupQuery == null) && (lookup.getModelName() == null)) {
 			throw new MetaDataException("Lookup description has no query to use.");
 		}
 		String descriptionBinding = currentLookupDescriptionBinding;
@@ -2617,13 +2596,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/**
 	 * Completes rendering of the bound column lookup description after its nested metadata.
 	 *
-	 * @param query the resolved lookup query; must not be null
+	 * @param query the resolved lookup query, or null for a model lookup
 	 * @param canCreate whether the user may create records through the lookup
 	 * @param canUpdate whether the user may update records through the lookup
 	 * @param descriptionBinding the resolved lookup description binding; must not be null
 	 * @param lookup the lookup metadata; must not be null
 	 */
-	public abstract void renderedBoundColumnLookupDescription(@Nonnull MetaDataQueryDefinition query,
+	public abstract void renderedBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 																boolean canCreate,
 																boolean canUpdate,
 																@Nonnull String descriptionBinding,
@@ -2632,13 +2611,13 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/**
 	 * Completes rendering of a form lookup-description widget.
 	 *
-	 * @param query the resolved lookup query; must not be null
+	 * @param query the resolved lookup query, or null for a model lookup
 	 * @param canCreate whether the user may create records through the lookup
 	 * @param canUpdate whether the user may update records through the lookup
 	 * @param descriptionBinding the resolved lookup description binding; must not be null
 	 * @param lookup the lookup metadata; must not be null
 	 */
-	public abstract void renderedFormLookupDescription(@Nonnull MetaDataQueryDefinition query,
+	public abstract void renderedFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 														boolean canCreate,
 														boolean canUpdate,
 														@Nonnull String descriptionBinding,
@@ -3595,7 +3574,7 @@ public abstract class ViewRenderer extends ViewVisitor {
 	/** {@inheritDoc} */
 	@Override
 	public final void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
-		Action action = view.getAction(server.getActionName());
+		Action action = getValidatedAction(server.getActionName());
 		visitServerSideActionEventAction(action, server);
 	}
 	
@@ -3653,7 +3632,22 @@ public abstract class ViewRenderer extends ViewVisitor {
 	 * @param imagePath the image-relative path; must not be null
 	 * @return the static-image URL; never null
 	 */
-	private static @Nonnull String staticImageToUrl(@Nonnull String imagePath) {
+	/**
+	 * Returns a view action referenced by a widget, which is validated to exist when the view is validated.
+	 *
+	 * @param referencedActionName the referenced action name
+	 * @return the action; never {@code null}
+	 * @throws MetaDataException when the view has no such action
+	 */
+	private @Nonnull Action getValidatedAction(@Nullable String referencedActionName) {
+		Action result = (referencedActionName == null) ? null : view.getAction(referencedActionName);
+		if (result == null) {
+			throw new MetaDataException("View " + view.getName() + " references a non-existent action " + referencedActionName);
+		}
+		return result;
+	}
+
+	private static @Nonnull String staticImageToUrl(@Nullable String imagePath) {
 		return "images/" + imagePath;
 	}
 }

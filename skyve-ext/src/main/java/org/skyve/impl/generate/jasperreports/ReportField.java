@@ -1,5 +1,8 @@
 package org.skyve.impl.generate.jasperreports;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Descriptor for a single JasperReports field, holding the name, class, and
  * optional description used when generating a {@code .jrxml} programmatically.
@@ -60,7 +63,7 @@ public class ReportField  {
 	 *
 	 * @return The field name.
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -69,7 +72,7 @@ public class ReportField  {
 	 *
 	 * @param name The field name.
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
@@ -78,7 +81,7 @@ public class ReportField  {
 	 *
 	 * @return The field type class name.
 	 */
-	public String getTypeClass() {
+	public @Nullable String getTypeClass() {
 		return typeClass;
 	}
 
@@ -87,7 +90,7 @@ public class ReportField  {
 	 *
 	 * @param typeClass The field type class name.
 	 */
-	public void setTypeClass(String typeClass) {
+	public void setTypeClass(@Nullable String typeClass) {
 		this.typeClass = typeClass;
 	}
 
@@ -96,7 +99,7 @@ public class ReportField  {
 	 *
 	 * @return {@code TRUE} when totals should include this field, otherwise {@code FALSE} or {@code null}.
 	 */
-	public Boolean getIncludeTotal() {
+	public @Nullable Boolean getIncludeTotal() {
 		return includeTotal;
 	}
 
@@ -105,7 +108,7 @@ public class ReportField  {
 	 *
 	 * @param includeTotal {@code TRUE} to include in totals, otherwise {@code FALSE}.
 	 */
-	public void setIncludeTotal(Boolean includeTotal) {
+	public void setIncludeTotal(@Nullable Boolean includeTotal) {
 		this.includeTotal = includeTotal;
 	}
 
@@ -114,7 +117,7 @@ public class ReportField  {
 	 *
 	 * @return JRXML for this field.
 	 */
-	public String getJrxml() {
+	public @Nonnull String getJrxml() {
 		return Renderer.renderField(this);
 	}
 
@@ -123,7 +126,7 @@ public class ReportField  {
 	 *
 	 * @return {@code TRUE} when implicit, otherwise {@code FALSE} or {@code null}.
 	 */
-	public Boolean getImplicit() {
+	public @Nullable Boolean getImplicit() {
 		return implicit;
 	}
 
@@ -132,7 +135,7 @@ public class ReportField  {
 	 *
 	 * @param implicit {@code TRUE} when the field is implicit.
 	 */
-	public void setImplicit(Boolean implicit) {
+	public void setImplicit(@Nullable Boolean implicit) {
 		this.implicit = implicit;
 	}
 
@@ -141,7 +144,7 @@ public class ReportField  {
 	 *
 	 * @return The Skyve attribute type.
 	 */
-	public String getSkyveType() {
+	public @Nullable String getSkyveType() {
 		return skyveType;
 	}
 
@@ -150,7 +153,7 @@ public class ReportField  {
 	 *
 	 * @param skyveType The Skyve attribute type.
 	 */
-	public void setSkyveType(String skyveType) {
+	public void setSkyveType(@Nullable String skyveType) {
 		this.skyveType = skyveType;
 	}
 
@@ -159,7 +162,7 @@ public class ReportField  {
 	 *
 	 * @return The display name.
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
@@ -168,7 +171,7 @@ public class ReportField  {
 	 *
 	 * @param displayName The display name.
 	 */
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -177,7 +180,7 @@ public class ReportField  {
 	 *
 	 * @return The owning module name.
 	 */
-	public String getOwningModuleName() {
+	public @Nullable String getOwningModuleName() {
 		return owningModuleName;
 	}
 
@@ -186,7 +189,7 @@ public class ReportField  {
 	 *
 	 * @param owningModuleName The owning module name.
 	 */
-	public void setOwningModuleName(String owningModuleName) {
+	public void setOwningModuleName(@Nullable String owningModuleName) {
 		this.owningModuleName = owningModuleName;
 	}
 
@@ -195,7 +198,7 @@ public class ReportField  {
 	 *
 	 * @param documentName The document name.
 	 */
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
 
@@ -204,7 +207,7 @@ public class ReportField  {
 	 *
 	 * @return The field binding path.
 	 */
-	public String getBinding() {
+	public @Nullable String getBinding() {
 		return binding;
 	}
 
@@ -213,7 +216,7 @@ public class ReportField  {
 	 *
 	 * @param binding The field binding path.
 	 */
-	public void setBinding(String binding) {
+	public void setBinding(@Nullable String binding) {
 		this.binding = binding;
 	}
 
@@ -222,7 +225,7 @@ public class ReportField  {
 	 *
 	 * @return The SQL field name expression.
 	 */
-	public String getNameSql() {
+	public @Nullable String getNameSql() {
 		return nameSql;
 	}
 
@@ -231,7 +234,7 @@ public class ReportField  {
 	 *
 	 * @param nameSql The SQL field name expression.
 	 */
-	public void setNameSql(String nameSql) {
+	public void setNameSql(@Nullable String nameSql) {
 		this.nameSql = nameSql;
 	}
 
@@ -240,7 +243,7 @@ public class ReportField  {
 	 *
 	 * @return The SQL join fragment.
 	 */
-	public String getJoinSql() {
+	public @Nullable String getJoinSql() {
 		return joinSql;
 	}
 
@@ -249,7 +252,7 @@ public class ReportField  {
 	 *
 	 * @param joinSql The SQL join fragment.
 	 */
-	public void setJoinSql(String joinSql) {
+	public void setJoinSql(@Nullable String joinSql) {
 		this.joinSql = joinSql;
 	}
 
@@ -258,7 +261,7 @@ public class ReportField  {
 	 *
 	 * @return {@code TRUE} when collection-valued, otherwise {@code FALSE} or {@code null}.
 	 */
-	public Boolean getCollection() {
+	public @Nullable Boolean getCollection() {
 		return collection;
 	}
 
@@ -267,7 +270,7 @@ public class ReportField  {
 	 *
 	 * @param collection {@code TRUE} when collection-valued.
 	 */
-	public void setCollection(Boolean collection) {
+	public void setCollection(@Nullable Boolean collection) {
 		this.collection = collection;
 	}
 
@@ -276,7 +279,7 @@ public class ReportField  {
 	 *
 	 * @return The parent design specification.
 	 */
-	public DesignSpecification getParent() {
+	public @Nullable DesignSpecification getParent() {
 		return parent;
 	}
 
@@ -285,7 +288,7 @@ public class ReportField  {
 	 *
 	 * @param parent The parent design specification.
 	 */
-	public void setParent(DesignSpecification parent) {
+	public void setParent(@Nullable DesignSpecification parent) {
 		this.parent = parent;
 	}
 	
@@ -294,7 +297,7 @@ public class ReportField  {
 	 *
 	 * @return The document name.
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 }

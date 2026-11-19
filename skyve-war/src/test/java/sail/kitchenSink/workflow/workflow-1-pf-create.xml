@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Kitchen sink workflow, leg 1 of 3 (KitchenSinkWorkflowSailIT.legsInSeparateFiles): in PrimeFaces (tablet), make a lookup
+	value with this workflow's run token and keep its generated number. Leg 2 finds it in SmartClient by the number.
+-->
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Make a lookup value and keep its number">
+		<method>
+			<comment>Workflow run {run}</comment>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL workflow {run}" />
+			<save />
+			<captureValue binding="number" variable="number" />
+			<ok />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="SAIL workflow {run}" />
+			<captureCell module="kitchensink" document="LookupDescription" row="0" column="description" variable="description" />
+			<listGridClearFilter module="kitchensink" document="LookupDescription" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

@@ -1,6 +1,7 @@
 package org.skyve.metadata.view.model.list;
 
 import java.util.Date;
+import java.util.function.Consumer;
 
 import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
@@ -11,6 +12,9 @@ import org.skyve.persistence.DocumentFilter;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class DocumentQueryFilter implements Filter {
     private static final Logger QUERY_LOGGER = Category.QUERY.logger();
 	private static final String EQUALS_LOG = "{} equals {}";
@@ -20,6 +24,8 @@ public class DocumentQueryFilter implements Filter {
 	private static final String LESS_THAN_LOG = "{} lessThan {}";
 	private static final String LESS_THAN_EQUAL_LOG = "{} lessThanOrEqualTo {}";
 	private static final String BETWEEN_LOG = "{} between {} and {}";
+	// A predicate that holds for every row: "not in" an empty set (it still counts when ORed with another predicate)
+	private static final String EVERY_ROW = "1 = 1";
 	
 	private DocumentFilter detailFilter;
 	private DocumentFilter summaryFilter;
@@ -27,14 +33,42 @@ public class DocumentQueryFilter implements Filter {
 	// Indicates if the filter is empty - ie has no predicates added
 	private boolean empty = true;
 	
-	DocumentQueryFilter(DocumentFilter detailFilter, DocumentFilter summaryFilter) {
+	// told of each binding a condition is put on, so that the query can keep the rows with no association on its path
+	private final Consumer<String> filteredBindings;
+
+	/**
+	 * Creates a filter that puts each condition on both document filters.
+	 * @param detailFilter	the filter of the list's rows
+	 * @param summaryFilter	the filter of its summary (count) query, given the same conditions, if there is one
+	 * @param filteredBindings	told of the binding of each condition added (not of tags, and not of the filters an
+	 * 							and or an or adds, which told it of their own)
+	 */
+	DocumentQueryFilter(@Nonnull DocumentFilter detailFilter,
+							@Nullable DocumentFilter summaryFilter,
+							@Nonnull Consumer<String> filteredBindings) {
 		this.detailFilter = detailFilter;
 		this.summaryFilter = summaryFilter;
+		this.filteredBindings = filteredBindings;
 		user = CORE.getUser();
+	}
+
+	/**
+	 * Adds a condition on a binding to the detail and the summary filter.
+	 * <p>Side effects: tells filteredBindings of the binding first, and marks this filter not empty.
+	 * @param binding	the binding the condition is on
+	 * @param condition	adds the condition to the document filter given
+	 */
+	private void add(@Nonnull String binding, @Nonnull Consumer<DocumentFilter> condition) {
+		empty = false;
+		filteredBindings.accept(binding);
+		condition.accept(detailFilter);
+		if (summaryFilter != null) {
+			condition.accept(summaryFilter);
+		}
 	}
 	
 	@Override
-	public void addAnd(Filter filter) {
+	public void addAnd(@Nonnull Filter filter) {
 		empty = false;
 		detailFilter.addAnd(((DocumentQueryFilter) filter).detailFilter);
 		if (summaryFilter != null) {
@@ -43,7 +77,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addOr(Filter filter) {
+	public void addOr(@Nonnull Filter filter) {
 		empty = false;
 		detailFilter.addOr(((DocumentQueryFilter) filter).detailFilter);
 		if (summaryFilter != null) {
@@ -52,7 +86,7 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addTagged(String tagId, boolean tagged) {
+	public void addTagged(@Nonnull String tagId, boolean tagged) {
 		empty = false;
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("add tagged {} with tagId {}", Boolean.valueOf(tagged), tagId);
 		StringBuilder sb = new StringBuilder(64);
@@ -78,534 +112,328 @@ public class DocumentQueryFilter implements Filter {
 	}
 
 	@Override
-	public void addNull(String binding) {
-		empty = false;
+	public void addNull(@Nonnull String binding) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} is null", binding);
-		detailFilter.addNull(binding);
-		if (summaryFilter != null) {
-			summaryFilter.addNull(binding);
-		}
+		add(binding, f -> f.addNull(binding));
 	}
 
 	@Override
-	public void addNotNull(String binding) {
-		empty = false;
+	public void addNotNull(@Nonnull String binding) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} is not null", binding);
-		detailFilter.addNotNull(binding);
-		if (summaryFilter != null) {
-			summaryFilter.addNotNull(binding);
-		}
+		add(binding, f -> f.addNotNull(binding));
 	}
 
 	@Override
-	public void addEquals(String binding, String value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Date value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Date value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Integer value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Integer value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Long value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Long value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Decimal value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Boolean value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Enum<?> value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}	
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addEquals(String binding, Geometry value) {
-		empty = false;
+	public void addEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(EQUALS_LOG, binding, value);
-		detailFilter.addEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addEquals(binding, value);
-		}
+		add(binding, f -> f.addEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, String value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Date value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Date value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Integer value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Integer value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Long value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Long value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Decimal value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Boolean value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Enum<?> value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addNotEquals(String binding, Geometry value) {
-		empty = false;
+	public void addNotEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(NOT_EQUALS_LOG, binding, value);
-		detailFilter.addNotEquals(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotEquals(binding, value);
-		}
+		add(binding, f -> f.addNotEquals(binding, value));
 	}
 
 	@Override
-	public void addEqualsIgnoreCase(String binding, String value) {
-		empty = false;
+	public void addEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} equalsIgnoreCase {}", binding, value);
-		detailFilter.addLike(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLike(binding, value);
-		}
+		add(binding, f -> f.addLike(binding, value));
 	}
 
 	@Override
-	public void addNotEqualsIgnoreCase(String binding, String value) {
-		empty = false;
+	public void addNotEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notEqualsIgnoreCase {}", binding, value);
-		detailFilter.addNotLike(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addNotLike(binding, value);
-		}
+		add(binding, f -> f.addNotLike(binding, value));
 	}
 
 	@Override
-	public void addContains(String binding, String value) {
-		empty = false;
+	public void addContains(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} contains {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
-		detailFilter.addLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addLike(binding, operand);
-		}
+		add(binding, f -> f.addLike(binding, operand));
 	}
 
 	@Override
-	public void addNotContains(String binding, String value) {
-		empty = false;
+	public void addNotContains(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notContains {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).append('%').toString();
-		detailFilter.addNullOrNotLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addNullOrNotLike(binding, operand);
-		}
+		add(binding, f -> f.addNullOrNotLike(binding, operand));
 	}
 
 	@Override
-	public void addStartsWith(String binding, String value) {
-		empty = false;
+	public void addStartsWith(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} startsWith {}", binding, value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
-		detailFilter.addLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addLike(binding, operand);
-		}
+		add(binding, f -> f.addLike(binding, operand));
 	}
 
 	@Override
-	public void addNotStartsWith(String binding, String value) {
-		empty = false;
+	public void addNotStartsWith(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notStartsWith {}", binding, value);
 		String operand = new StringBuilder(32).append(value).append('%').toString();
-		detailFilter.addNullOrNotLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addNullOrNotLike(binding, operand);
-		}
+		add(binding, f -> f.addNullOrNotLike(binding, operand));
 	}
 
 	@Override
-	public void addEndsWith(String binding, String value) {
-		empty = false;
+	public void addEndsWith(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} endsWith {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
-		detailFilter.addLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addLike(binding, operand);
-		}
+		add(binding, f -> f.addLike(binding, operand));
 	}
 
 	@Override
-	public void addNotEndsWith(String binding, String value) {
-		empty = false;
+	public void addNotEndsWith(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} notEndsWith {}", binding, value);
 		String operand = new StringBuilder(32).append('%').append(value).toString();
-		detailFilter.addNullOrNotLike(binding, operand);
-		if (summaryFilter != null) {
-			summaryFilter.addNullOrNotLike(binding, operand);
-		}
+		add(binding, f -> f.addNullOrNotLike(binding, operand));
 	}
 
 	@Override
-	public void addGreaterThan(String binding, String value) {
-		empty = false;
+	public void addGreaterThan(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
-		detailFilter.addGreaterThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThan(binding, value);
-		}
+		add(binding, f -> f.addGreaterThan(binding, value));
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Date value) {
-		empty = false;
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Date value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
-		detailFilter.addGreaterThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThan(binding, value);
-		}
+		add(binding, f -> f.addGreaterThan(binding, value));
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Integer value) {
-		empty = false;
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Integer value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
-		detailFilter.addGreaterThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThan(binding, value);
-		}
+		add(binding, f -> f.addGreaterThan(binding, value));
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Long value) {
-		empty = false;
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Long value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
-		detailFilter.addGreaterThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThan(binding, value);
-		}
+		add(binding, f -> f.addGreaterThan(binding, value));
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Decimal value) {
-		empty = false;
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Decimal value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_LOG, binding, value);
-		detailFilter.addGreaterThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThan(binding, value);
-		}
+		add(binding, f -> f.addGreaterThan(binding, value));
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, String value) {
-		empty = false;
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addGreaterThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addGreaterThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Date value) {
-		empty = false;
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addGreaterThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addGreaterThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Integer value) {
-		empty = false;
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addGreaterThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addGreaterThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Long value) {
-		empty = false;
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addGreaterThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addGreaterThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Decimal value) {
-		empty = false;
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(GREATER_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addGreaterThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addGreaterThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addGreaterThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addLessThan(String binding, String value) {
-		empty = false;
+	public void addLessThan(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
-		detailFilter.addLessThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThan(binding, value);
-		}
+		add(binding, f -> f.addLessThan(binding, value));
 	}
 
 	@Override
-	public void addLessThan(String binding, Date value) {
-		empty = false;
+	public void addLessThan(@Nonnull String binding, @Nonnull Date value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
-		detailFilter.addLessThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThan(binding, value);
-		}
+		add(binding, f -> f.addLessThan(binding, value));
 	}
 
 	@Override
-	public void addLessThan(String binding, Integer value) {
-		empty = false;
+	public void addLessThan(@Nonnull String binding, @Nonnull Integer value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
-		detailFilter.addLessThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThan(binding, value);
-		}
+		add(binding, f -> f.addLessThan(binding, value));
 	}
 
 	@Override
-	public void addLessThan(String binding, Long value) {
-		empty = false;
+	public void addLessThan(@Nonnull String binding, @Nonnull Long value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
-		detailFilter.addLessThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThan(binding, value);
-		}
+		add(binding, f -> f.addLessThan(binding, value));
 	}
 
 	@Override
-	public void addLessThan(String binding, Decimal value) {
-		empty = false;
+	public void addLessThan(@Nonnull String binding, @Nonnull Decimal value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_LOG, binding, value);
-		detailFilter.addLessThan(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThan(binding, value);
-		}
+		add(binding, f -> f.addLessThan(binding, value));
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, String value) {
-		empty = false;
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addLessThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addLessThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Date value) {
-		empty = false;
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addLessThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addLessThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Integer value) {
-		empty = false;
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addLessThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addLessThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Long value) {
-		empty = false;
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addLessThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addLessThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Decimal value) {
-		empty = false;
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(LESS_THAN_EQUAL_LOG, binding, value);
-		detailFilter.addLessThanOrEqualTo(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addLessThanOrEqualTo(binding, value);
-		}
+		add(binding, f -> f.addLessThanOrEqualTo(binding, value));
 	}
 
 	@Override
-	public void addBetween(String binding, String start, String end) {
-		empty = false;
+	public void addBetween(@Nonnull String binding, @Nonnull String start, @Nonnull String end) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
-		detailFilter.addBetween(binding, start, end);
-		if (summaryFilter != null) {
-			summaryFilter.addBetween(binding, start, end);
-		}
+		add(binding, f -> f.addBetween(binding, start, end));
 	}
 
 	@Override
-	public void addBetween(String binding, Date start, Date end) {
-		empty = false;
+	public void addBetween(@Nonnull String binding, @Nonnull Date start, @Nonnull Date end) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
-		detailFilter.addBetween(binding, start, end);
-		if (summaryFilter != null) {
-			summaryFilter.addBetween(binding, start, end);
-		}
+		add(binding, f -> f.addBetween(binding, start, end));
 	}
 
 	@Override
-	public void addBetween(String binding, Integer start, Integer end) {
-		empty = false;
+	public void addBetween(@Nonnull String binding, @Nonnull Integer start, @Nonnull Integer end) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
-		detailFilter.addBetween(binding, start, end);
-		if (summaryFilter != null) {
-			summaryFilter.addBetween(binding, start, end);
-		}
+		add(binding, f -> f.addBetween(binding, start, end));
 	}
 
 	@Override
-	public void addBetween(String binding, Long start, Long end) {
-		empty = false;
+	public void addBetween(@Nonnull String binding, @Nonnull Long start, @Nonnull Long end) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
-		detailFilter.addBetween(binding, start, end);
-		if (summaryFilter != null) {
-			summaryFilter.addBetween(binding, start, end);
-		}
+		add(binding, f -> f.addBetween(binding, start, end));
 	}
 
 	@Override
-	public void addBetween(String binding, Decimal start, Decimal end) {
-		empty = false;
+	public void addBetween(@Nonnull String binding, @Nonnull Decimal start, @Nonnull Decimal end) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info(BETWEEN_LOG, binding, start, end);
-		detailFilter.addBetween(binding, start, end);
-		if (summaryFilter != null) {
-			summaryFilter.addBetween(binding, start, end);
-		}
+		add(binding, f -> f.addBetween(binding, start, end));
 	}
 
 	@Override
-	public void addIn(String binding, Object... values) {
+	public void addIn(@Nonnull String binding, @Nonnull Object... values) {
 		in(binding, false, values);
 	}
 
 	@Override
-	public void addNotIn(String binding, Object... values) {
+	public void addNotIn(@Nonnull String binding, @Nonnull Object... values) {
 		in(binding, true, values);
 	}
 	
-	@SuppressWarnings("java:S3776") // Complexity OK
-	private void in(String binding, boolean not, Object... values) {
-		empty = false;
+	private void in(@Nonnull String binding, boolean not, @Nonnull Object... values) {
 		if (UtilImpl.QUERY_TRACE) {
 			StringBuilder sb = new StringBuilder(20 + (7 * values.length));
 			sb.append(binding).append(not ? " not in " : " in ");
@@ -615,104 +443,71 @@ public class DocumentQueryFilter implements Filter {
 			sb.setLength(sb.length() - 2);
 			QUERY_LOGGER.info(sb.toString());
 		}
+		add(binding, f -> in(f, binding, not, values));
+	}
+
+	/**
+	 * Adds an in or not in predicate: in an empty set selects nothing, not in an empty set every row.
+	 */
+	private static void in(@Nonnull DocumentFilter filter, @Nonnull String binding, boolean not, @Nonnull Object... values) {
 		if (values.length > 0) {
 			if (not) {
-				detailFilter.addNotIn(binding, values);
+				filter.addNotIn(binding, values);
 			}
 			else {
-				detailFilter.addIn(binding, values);
+				filter.addIn(binding, values);
 			}
+		}
+		else if (not) {
+			filter.addExpression(EVERY_ROW);
 		}
 		else {
 			// select nothing
-			detailFilter.addNull(binding);
-			detailFilter.addNotNull(binding);
-		}
-		if (summaryFilter != null) {
-			if (values.length > 0) {
-				if (not) {
-					summaryFilter.addNotIn(binding, values);
-				}
-				else {
-					summaryFilter.addIn(binding, values);
-				}
-			}
-			else {
-				// select nothing
-				summaryFilter.addNull(binding);
-				summaryFilter.addNotNull(binding);
-			}
+			filter.addNull(binding);
+			filter.addNotNull(binding);
 		}
 	}
 	
 	@Override
-	public void addWithin(String binding, Geometry value) {
-		empty = false;
+	public void addWithin(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} within {}", binding, value);
-		detailFilter.addWithin(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addWithin(binding, value);
-		}
+		add(binding, f -> f.addWithin(binding, value));
 	}
 
 	@Override
-	public void addContains(String binding, Geometry value) {
-		empty = false;
+	public void addContains(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} contains {}", binding, value);
-		detailFilter.addContains(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addContains(binding, value);
-		}
+		add(binding, f -> f.addContains(binding, value));
 	}
 
 	@Override
-	public void addCrosses(String binding, Geometry value) {
-		empty = false;
+	public void addCrosses(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} crosses {}", binding, value);
-		detailFilter.addCrosses(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addCrosses(binding, value);
-		}
+		add(binding, f -> f.addCrosses(binding, value));
 	}
 
 	@Override
-	public void addDisjoint(String binding, Geometry value) {
-		empty = false;
+	public void addDisjoint(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} disjoint {}", binding, value);
-		detailFilter.addDisjoint(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addDisjoint(binding, value);
-		}
+		add(binding, f -> f.addDisjoint(binding, value));
 	}
 
 	@Override
-	public void addIntersects(String binding, Geometry value) {
-		empty = false;
+	public void addIntersects(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} intersects {}", binding, value);
-		detailFilter.addIntersects(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addIntersects(binding, value);
-		}
+		add(binding, f -> f.addIntersects(binding, value));
 	}
 
 	@Override
-	public void addOverlaps(String binding, Geometry value) {
-		empty = false;
+	public void addOverlaps(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} overlaps {}", binding, value);
-		detailFilter.addOverlaps(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addOverlaps(binding, value);
-		}
+		add(binding, f -> f.addOverlaps(binding, value));
 	}
 
 	@Override
-	public void addTouches(String binding, Geometry value) {
-		empty = false;
+	public void addTouches(@Nonnull String binding, @Nonnull Geometry value) {
 		if (UtilImpl.QUERY_TRACE) QUERY_LOGGER.info("{} touches {}", binding, value);
-		detailFilter.addTouches(binding, value);
-		if (summaryFilter != null) {
-			summaryFilter.addTouches(binding, value);
-		}
+		add(binding, f -> f.addTouches(binding, value));
 	}
 
 	@Override

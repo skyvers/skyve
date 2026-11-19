@@ -3,6 +3,7 @@ package org.skyve.metadata.view.fluent;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.metadata.view.container.Collapsible;
 import org.skyve.impl.metadata.view.container.form.Form;
@@ -11,6 +12,9 @@ import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.view.widget.bound.Bound;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Fluent builder for form container metadata.
@@ -31,7 +35,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @param form
 	 *            the form metadata to mutate
 	 */
-	public FluentForm(Form form) {
+	public FluentForm(@Nonnull Form form) {
 		this.form = form;
 	}
 
@@ -45,7 +49,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the source form metadata
 	 * @return this builder
 	 */
-	public FluentForm from(@SuppressWarnings("hiding") Form form) {
+	public @Nonnull FluentForm from(@SuppressWarnings("hiding") @Nonnull Form form) {
 		widgetId(form.getWidgetId());
 		border(Boolean.TRUE.equals(form.getBorder()));
 		borderTitle(form.getBorderTitle());
@@ -57,12 +61,13 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 		collapsible(form.getCollapsible());
 		labelLayout(form.getLabelLayout());
 
-		disabledConditionName(form.getDisabledConditionName());
-		invisibleConditionName(form.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(form.getXmlDisabledCondition(), form.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(form.getXmlInvisibleCondition(), form.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 
 		form.getColumns().forEach(c -> addColumn(new FluentFormColumn().from(c)));
-
 		form.getRows().forEach(r -> addRow(new FluentFormRow().from(r)));
+
+		form.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -74,7 +79,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the widget identifier
 	 * @return this builder
 	 */
-	public FluentForm widgetId(String widgetId) {
+	public @Nonnull FluentForm widgetId(@Nullable String widgetId) {
 		form.setWidgetId(widgetId);
 		return this;
 	}
@@ -86,7 +91,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            whether the border is shown
 	 * @return this builder
 	 */
-	public FluentForm border(boolean border) {
+	public @Nonnull FluentForm border(boolean border) {
 		form.setBorder(border ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -98,7 +103,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the border caption text
 	 * @return this builder
 	 */
-	public FluentForm borderTitle(String borderTitle) {
+	public @Nonnull FluentForm borderTitle(@Nullable String borderTitle) {
 		form.setBorderTitle(borderTitle);
 		return this;
 	}
@@ -109,7 +114,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @param escapeBorderTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentForm escapeBorderTitle(boolean escapeBorderTitle) {
+	public @Nonnull FluentForm escapeBorderTitle(boolean escapeBorderTitle) {
 		return escapeBorderTitle(escapeBorderTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -119,7 +124,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @param escapeBorderTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentForm escapeBorderTitle(Boolean escapeBorderTitle) {
+	public @Nonnull FluentForm escapeBorderTitle(@Nullable Boolean escapeBorderTitle) {
 		form.setEscapeBorderTitle(escapeBorderTitle);
 		return this;
 	}
@@ -132,7 +137,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm pixelWidth(int pixelWidth) {
+	public @Nonnull FluentForm pixelWidth(int pixelWidth) {
 		form.setPixelWidth(Integer.valueOf(pixelWidth));
 		return this;
 	}
@@ -145,7 +150,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentForm responsiveWidth(int responsiveWidth) {
 		form.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -158,7 +163,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm sm(int sm) {
+	public @Nonnull FluentForm sm(int sm) {
 		form.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -171,7 +176,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm md(int md) {
+	public @Nonnull FluentForm md(int md) {
 		form.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -184,7 +189,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm lg(int lg) {
+	public @Nonnull FluentForm lg(int lg) {
 		form.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -197,7 +202,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm xl(int xl) {
+	public @Nonnull FluentForm xl(int xl) {
 		form.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -210,7 +215,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm percentageWidth(int percentageWidth) {
+	public @Nonnull FluentForm percentageWidth(int percentageWidth) {
 		form.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -223,7 +228,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentForm minPixelWidth(int minPixelWidth) {
 		form.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -236,7 +241,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentForm maxPixelWidth(int maxPixelWidth) {
 		form.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -249,7 +254,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm pixelHeight(int pixelHeight) {
+	public @Nonnull FluentForm pixelHeight(int pixelHeight) {
 		form.setPixelHeight(Integer.valueOf(pixelHeight));
 		return this;
 	}
@@ -262,7 +267,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm percentageHeight(int percentageHeight) {
+	public @Nonnull FluentForm percentageHeight(int percentageHeight) {
 		form.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
@@ -275,7 +280,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentForm minPixelHeight(int minPixelHeight) {
 		form.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -288,7 +293,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * @return this builder
 	 */
 	@Override
-	public FluentForm maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentForm maxPixelHeight(int maxPixelHeight) {
 		form.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -300,7 +305,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            default label alignment
 	 * @return this builder
 	 */
-	public FluentForm labelDefaultHorizontalAlignment(HorizontalAlignment alignment) {
+	public @Nonnull FluentForm labelDefaultHorizontalAlignment(@Nullable HorizontalAlignment alignment) {
 		form.setLabelDefaultHorizontalAlignment(alignment);
 		return this;
 	}
@@ -313,7 +318,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 * If collapsible is defined, the form must have a border, a border title and a pixel or percentage height
 	 * defined. If any of these are missing, an exception will be thrown at runtime.
 	 */
-	public FluentForm collapsible(Collapsible collapsible) {
+	public @Nonnull FluentForm collapsible(@Nullable Collapsible collapsible) {
 		form.setCollapsible(collapsible);
 		return this;
 	}
@@ -325,32 +330,56 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            label layout mode
 	 * @return this builder
 	 */
-	public FluentForm labelLayout(FormLabelLayout layout) {
+	public @Nonnull FluentForm labelLayout(@Nullable FormLabelLayout layout) {
 		form.setLabelLayout(layout);
 		return this;
 	}
 	
 	/**
-	 * Sets the condition name that disables this form when true.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            disabled condition identifier
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentForm disabledConditionName(String disabledConditionName) {
-		form.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentForm disabledCondition(@Nullable String disabledCondition) {
+		form.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this form when true.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            invisibility condition identifier
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentForm invisibleConditionName(String invisibleConditionName) {
-		form.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentForm enabledCondition(@Nullable String enabledCondition) {
+		form.setXmlEnabledCondition(enabledCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
+	 *
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentForm invisibleCondition(@Nullable String invisibleCondition) {
+		form.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentForm visibleCondition(@Nullable String visibleCondition) {
+		form.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -361,7 +390,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the column builder
 	 * @return this builder
 	 */
-	public FluentForm addColumn(FluentFormColumn column) {
+	public @Nonnull FluentForm addColumn(@Nonnull FluentFormColumn column) {
 		form.getColumns().add(column.get());
 		return this;
 	}
@@ -375,7 +404,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the column builder
 	 * @return this builder
 	 */
-	public FluentForm addColumn(int index, FluentFormColumn column) {
+	public @Nonnull FluentForm addColumn(int index, @Nonnull FluentFormColumn column) {
 		form.getColumns().add(index, column.get());
 		return this;
 	}
@@ -387,7 +416,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            zero-based index
 	 * @return the column wrapper
 	 */
-	public FluentFormColumn getColumn(int index) {
+	public @Nonnull FluentFormColumn getColumn(int index) {
 		return new FluentFormColumn(form.getColumns().get(index));
 	}
 	
@@ -398,7 +427,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            zero-based column index
 	 * @return this builder
 	 */
-	public FluentForm removeColumn(int index) {
+	public @Nonnull FluentForm removeColumn(int index) {
 		form.getColumns().remove(index);
 		return this;
 	}
@@ -408,7 +437,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *
 	 * @return this builder
 	 */
-	public FluentForm clearColumns() {
+	public @Nonnull FluentForm clearColumns() {
 		form.getColumns().clear();
 		return this;
 	}
@@ -420,7 +449,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the row builder
 	 * @return this builder
 	 */
-	public FluentForm addRow(FluentFormRow row) {
+	public @Nonnull FluentForm addRow(@Nonnull FluentFormRow row) {
 		form.getRows().add(row.get());
 		return this;
 	}
@@ -434,7 +463,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the row builder
 	 * @return this builder
 	 */
-	public FluentForm addRow(int index, FluentFormRow row) {
+	public @Nonnull FluentForm addRow(int index, @Nonnull FluentFormRow row) {
 		form.getRows().add(index, row.get());
 		return this;
 	}
@@ -446,7 +475,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            zero-based index
 	 * @return the row wrapper
 	 */
-	public FluentFormRow getRow(int index) {
+	public @Nonnull FluentFormRow getRow(int index) {
 		return new FluentFormRow(form.getRows().get(index));
 	}
 	
@@ -457,7 +486,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            zero-based row index
 	 * @return this builder
 	 */
-	public FluentForm removeRow(int index) {
+	public @Nonnull FluentForm removeRow(int index) {
 		form.getRows().remove(index);
 		return this;
 	}
@@ -467,7 +496,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *
 	 * @return this builder
 	 */
-	public FluentForm clearRows() {
+	public @Nonnull FluentForm clearRows() {
 		form.getRows().clear();
 		return this;
 	}
@@ -481,7 +510,7 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	 *            the binding expression to match
 	 * @return matching items in row traversal order; never {@code null}
 	 */
-	public List<FluentFormItem> findItems(String binding) {
+	public @Nonnull List<FluentFormItem> findItems(@Nonnull String binding) {
 		List<FluentFormItem> result = new ArrayList<>();
 		for (FormRow row : form.getRows()) {
 			for (FormItem item : row.getItems()) {
@@ -495,12 +524,25 @@ public class FluentForm extends FluentWidget implements FluentRelativeSize<Fluen
 	}
 
 	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentForm putProperty(@Nonnull String k, @Nonnull String v) {
+		form.getProperties().put(k, v);
+		return this;
+	}
+
+	/**
 	 * Returns the backing metadata instance.
 	 *
 	 * @return the mutable form metadata
 	 */
 	@Override
-	public Form get() {
+	public @Nonnull Form get() {
 		return form;
 	}
 }

@@ -36,7 +36,7 @@ import org.skyve.metadata.view.Action;
 
 class FlutterRenderersTest {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void componentRendererCoversPrimaryOutputsAndImports() {
 		Set<String> imports = new HashSet<>();
 		FlutterComponentRenderer renderer = new FlutterComponentRenderer(imports, "");
@@ -108,7 +108,7 @@ class FlutterRenderersTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void layoutRendererCoversHierarchyAndFormHelpers() {
 		Set<String> imports = new HashSet<>();
 		FlutterLayoutRenderer renderer = new FlutterLayoutRenderer(imports);

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -55,6 +56,7 @@ import org.skyve.impl.metadata.view.event.SetDisabledEventAction;
 import org.skyve.impl.metadata.view.event.SetInvisibleEventAction;
 import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
+import org.skyve.impl.metadata.view.model.chart.ChartBuilderMetaData;
 import org.skyve.impl.metadata.view.widget.Blurb;
 import org.skyve.impl.metadata.view.widget.Button;
 import org.skyve.impl.metadata.view.widget.Chart;
@@ -162,11 +164,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @return The protected.
 	 */
-	protected SmartClientViewRenderer(User user,
-										Module module,
-										Document document,
-										View view,
-										String uxui,
+	protected SmartClientViewRenderer(@Nonnull User user,
+										@Nonnull Module module,
+										@Nonnull Document document,
+										@Nonnull View view,
+										@Nonnull String uxui,
 										boolean noCreateView) {
 		super(user, module, document, view, uxui);
 		this.noCreateView = noCreateView;
@@ -177,7 +179,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @return The mutable code buffer used during rendering.
 	 */
-	public StringBuilder getCode() {
+	public @Nonnull StringBuilder getCode() {
 		return code;
 	}
 
@@ -219,7 +221,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else if (ViewType.edit.toString().equals(view.getName())) {
 			if (sidebar == null) {
-				code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append("var edit=isc.BizContainer.create({width:'100%',height:'100%',invisibleCondition:'");
 				code.append(Bean.NOT_CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("edit");
@@ -230,7 +232,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		else if (ViewType.create.toString().equals(view.getName())) {
 			if (sidebar == null) {
-				code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleConditionName:'");
+				code.append("var create=isc.BizContainer.create({width:'100%',height:'100%',invisibleCondition:'");
 				code.append(Bean.CREATED_KEY);
 				code.append("'});");
 				containerVariables.push("create");
@@ -245,13 +247,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * Rearranges the top-level layout to include a sidebar alongside the main view pane.
 	 *
 	 * @param sidebar The sidebar metadata to apply.
-	 * @param invisibleConditionName The optional invisible condition for the wrapper container.
+	 * @param invisibleCondition The optional invisible condition for the wrapper container.
 	 * @param variableName The JavaScript variable name to assign to the wrapper container.
 	 */
-	private void rearrangeForSidebar(Sidebar sidebar, String invisibleConditionName, String variableName) {
+	private void rearrangeForSidebar(@Nonnull Sidebar sidebar, @Nullable String invisibleCondition, @Nonnull String variableName) {
 		code.append("var sidebarPane=isc.BizContainer.create({");
 		size(sidebar, null, code);
-		invisible(sidebar.getInvisibleConditionName(), code);
+		invisible(sidebar.getInvisibleCondition(), code);
 		// Override hide/show to switch on and off the resize bar in the viewPane.
 		// Skyve calls Canvas.hide()/Canvas.show() directly when processing the widget tree on scatter, whereas the Snapbar collapse function calls BizHBox.hideMember()
 		// We set the _hiding variable so we know when we are collapsing in the UI versus programmatically hiding on invisible condition
@@ -263,7 +265,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		containerVariables.push("viewPane");
 
 		code.append("var ").append(variableName).append("=isc.BizHBox.create({width:'100%',height:'100%',padding:10,");
-		invisible(invisibleConditionName, code);
+		invisible(invisibleCondition, code);
 		// Override hideMember to indicate that we are using the Snapbar collapse function
 		// Skyve calls Canvas.hide()/Canvas.show() directly when processing the widget tree on scatter, whereas the Snapbar collapse function calls BizHBox.hideMember()
 		// We set the _hiding variable so we know when we are collapsing in the UI versus programmatically hiding on invisible condition
@@ -299,7 +301,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		if (! viewHasAtLeastOneForm) {
 			String var = "v" + variableCounter++;
-			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleConditionName:'true'});");
+			code.append("var ").append(var).append("=isc.DynamicForm.create({invisibleCondition:'true'});");
 			code.append("view._vm.addMember(").append(var).append(");");
 			code.append("view.addContained(").append(var).append(");\n");
 		}
@@ -314,13 +316,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tabPane The tab pane metadata being rendered.
 	 */
 	@Override
-	public void renderTabPane(TabPane tabPane) {
+	public void renderTabPane(@Nonnull TabPane tabPane) {
 		tabNumbers.push(Integer.valueOf(0));
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizTabPane.create({");
 		size(tabPane, DEFAULT_TAB_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(tabPane.getDisabledConditionName(), code);
-		invisible(tabPane.getInvisibleConditionName(), code);
+		disabled(tabPane.getDisabledCondition(), code);
+		invisible(tabPane.getInvisibleCondition(), code);
 		String selected = tabPane.getSelectedTabIndexBinding();
 		if (selected != null) {
 			code.append("selectedTabIndexBinding:'").append(BindUtil.sanitiseBinding(selected)).append("',");
@@ -336,7 +338,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tabPane The tab pane metadata being rendered.
 	 */
 	@Override
-	public void renderedTabPane(TabPane tabPane) {
+	public void renderedTabPane(@Nonnull TabPane tabPane) {
 		String variable = containerVariables.pop();
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
 		tabNumbers.pop();
@@ -350,7 +352,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tab The tab metadata being rendered.
 	 */
 	@Override
-	public void renderTab(String title, String icon16x16Url, Tab tab) {
+	public void renderTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizContainer.create({membersMargin:10,layoutMargin:10});\n");
 
@@ -365,7 +367,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tab The tab metadata being rendered.
 	 */
 	@Override
-	public void renderedTab(String title, String icon16x16Url, Tab tab) {
+	public void renderedTab(@Nullable String title, @Nullable String icon16x16Url, @Nonnull Tab tab) {
 		String paneVariable = containerVariables.pop();
 		String tabPaneVariable = containerVariables.peek();
 		Integer tabNumber = tabNumbers.pop();
@@ -385,8 +387,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append(escapeSmartClientText(title, shouldEscape(tab.getEscapeTitle())));
 		code.append("',pane:").append(paneVariable).append(',');
 		tabNumbers.push(Integer.valueOf(tabNumber.intValue() + 1));
-		disabled(tab.getDisabledConditionName(), code);
-		invisible(tab.getInvisibleConditionName(), code);
+		disabled(tab.getDisabledCondition(), code);
+		invisible(tab.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
 	}
@@ -398,7 +400,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param vbox The vertical box metadata.
 	 */
 	@Override
-	public void renderVBox(String borderTitle, VBox vbox) {
+	public void renderVBox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 		vbox(borderTitle, vbox);
 	}
 
@@ -408,7 +410,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param borderTitle The optional border title.
 	 * @param vbox The vertical box metadata.
 	 */
-	private void vbox(String borderTitle, VBox vbox) {
+	private void vbox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({");
 		String escapedBorderTitle = escapeSmartClientText(borderTitle, shouldEscape(vbox.getEscapeBorderTitle()));
@@ -460,7 +462,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 				throw new MetaDataException("VBox HorizontalAlignment of " + h + " is not supported");
 			}
 		}
-		invisible(vbox.getInvisibleConditionName(), code);
+		invisible(vbox.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
 
@@ -476,7 +478,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param vbox The vertical box metadata.
 	 */
 	@Override
-	public void renderedVBox(String borderTitle, VBox vbox) {
+	public void renderedVBox(@Nullable String borderTitle, @Nonnull VBox vbox) {
 		containerVariables.pop();
 	}
 
@@ -487,7 +489,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param hbox The horizontal box metadata.
 	 */
 	@Override
-	public void renderHBox(String borderTitle, HBox hbox) {
+	public void renderHBox(@Nullable String borderTitle, @Nonnull HBox hbox) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizHBox.create({");
 		String escapedBorderTitle = escapeSmartClientText(borderTitle, shouldEscape(hbox.getEscapeBorderTitle()));
@@ -539,7 +541,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			}
 		}
 		box(hbox);
-		invisible(hbox.getInvisibleConditionName(), code);
+		invisible(hbox.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 
 		code.append("});\n");
@@ -556,7 +558,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param bbox The horizontal box metadata.
 	 */
 	@Override
-	public void renderedHBox(String title, HBox bbox) {
+	public void renderedHBox(@Nullable String title, @Nonnull HBox bbox) {
 		containerVariables.pop();
 	}
 
@@ -565,7 +567,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param box The box metadata providing padding values.
 	 */
-	private void box(Box box) {
+	private void box(@Nonnull Box box) {
 		Integer padding = box.getPixelPadding();
 		if (padding != null) {
 			code.append("layoutMargin:").append(padding).append(',');
@@ -587,7 +589,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param itemVariable The JavaScript variable for the inner item.
 	 * @return The collapsible wrapper variable name, or null when no wrapper is created.
 	 */
-	private String collapsible(String borderTitle, Box box, String itemVariable) {
+	private @Nullable String collapsible(@Nullable String borderTitle, @Nonnull Box box, @Nonnull String itemVariable) {
 		String result = null;
 		Collapsible collapsible = box.getCollapsible();
 		if (collapsible != null) {
@@ -595,7 +597,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("var ").append(result).append("=isc.BizCollapsible.create({title:'").append(borderTitle);
 			code.append("',minimized:").append(collapsible.equals(Collapsible.closed) ? "true," : "false,");
 			size(box, null, code);
-			invisible(box.getInvisibleConditionName(), code);
+			invisible(box.getInvisibleCondition(), code);
 			code.append("_view:view});\n");
 			code.append(result).append(".addContained(").append(itemVariable).append(");\n");
 		}
@@ -613,7 +615,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param form The form metadata being rendered.
 	 */
 	@Override
-	public void renderForm(String borderTitle, Form form) {
+	public void renderForm(@Nullable String borderTitle, @Nonnull Form form) {
 		viewHasAtLeastOneForm = true;
 
 		// If a form is defined with a border, then wrap the form definition in a vbox.
@@ -630,7 +632,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			borderBox.setBorderTitle(form.getLocalisedBorderTitle());
 			borderBox.setEscapeBorderTitle(form.getEscapeBorderTitle());
 			borderBox.setCollapsible(collapsible);
-			borderBox.setInvisibleConditionName(form.getInvisibleConditionName());
+			BindUtil.copyAuthoredCondition(form.getXmlInvisibleCondition(), form.getXmlVisibleCondition(), borderBox::setXmlInvisibleCondition, borderBox::setXmlVisibleCondition);
 			borderBox.setPixelWidth(form.getPixelWidth());
 			borderBox.setResponsiveWidth(form.getResponsiveWidth());
 			borderBox.setPercentageWidth(form.getPercentageWidth());
@@ -662,13 +664,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		// in some views which doesn't work.
 		code.append("_view:view,");
 		code.append("ID:").append(IDExpression()).append(',');
-		disabled(form.getDisabledConditionName(), code);
+		disabled(form.getDisabledCondition(), code);
 //code.append("cellBorder:1,");
 
 		// only size the form if its not in a border VBox
 		if (! Boolean.TRUE.equals(border)) { // false or null
 			size(form, null, code);
-			invisible(form.getInvisibleConditionName(), code);
+			invisible(form.getInvisibleCondition(), code);
 		}
 
 		HorizontalAlignment alignment = form.getLabelDefaultHorizontalAlignment();
@@ -687,7 +689,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param form The form metadata being rendered.
 	 */
 	@Override
-	public void renderedForm(String borderTitle, Form form) {
+	public void renderedForm(@Nullable String borderTitle, @Nonnull Form form) {
 		code.setLength(code.length() - 1); // remove last comma
 		code.append("]);\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(formVariable).append(");\n");
@@ -706,7 +708,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The form column metadata.
 	 */
 	@Override
-	public void renderFormColumn(FormColumn column) {
+	public void renderFormColumn(@Nonnull FormColumn column) {
 		Integer percentage = column.getPercentageWidth();
 		Integer pixel = column.getPixelWidth();
 		Integer responsive = column.getResponsiveWidth();
@@ -737,7 +739,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param row The form row metadata being rendered.
 	 */
 	@Override
-	public void renderFormRow(FormRow row) {
+	public void renderFormRow(@Nonnull FormRow row) {
 		startedNewFormRow = true;
 		if (! renderedFormRow) {
 			code.setLength(code.length() - 1); // remove last column comma
@@ -760,12 +762,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param item The item.
 	 */
 	@Override
-	public void renderFormItem(String label,
-								String requiredMessage,
-								String help,
+	public void renderFormItem(@Nullable String label,
+								@Nullable String requiredMessage,
+								@Nullable String help,
 								boolean showLabel,
 								int colspan,
-								FormItem item) {
+								@Nonnull FormItem item) {
 		code.append("{showTitle:").append(showLabel).append(',');
 		// label handled in preProcessFormItem()
 		if (colspan >= 1) {
@@ -799,12 +801,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param item The item.
 	 */
 	@Override
-	public void renderedFormItem(String label,
-									String requiredMessage,
-									String help,
+	public void renderedFormItem(@Nullable String label,
+									@Nullable String requiredMessage,
+									@Nullable String help,
 									boolean showLabel,
 									int colspan,
-									FormItem item) {
+									@Nonnull FormItem item) {
 		if (startedNewFormRow) {
 			code.append("startRow:true},");
 			startedNewFormRow = false;
@@ -828,7 +830,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 */
 
 	@Override
-	public void renderedFormRow(FormRow row) {
+	public void renderedFormRow(@Nonnull FormRow row) {
 		code.setLength(code.length() - 2); // remove "},"
 		code.append(",endRow:true},");
 	}
@@ -846,14 +848,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param button The button widget metadata.
 	 */
 	@Override
-	public void renderFormButton(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									Action action,
-									Button button) {
+	public void renderFormButton(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull Action action,
+									@Nonnull Button button) {
 		String buttonCode = generateButton(name,
 											action.getImplicitName(),
 											label,
@@ -866,8 +868,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											confirmationText,
 											getActionEscapeConfirm(),
 											action.getParameters(),
-											action.getDisabledConditionName(),
-											action.getInvisibleConditionName(),
+											action.getDisabledCondition(),
+											action.getInvisibleCondition(),
 											button,
 											null);
 		if (ImplicitActionName.Upload.equals(action.getImplicitName())) {
@@ -875,8 +877,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append("type:'canvas',showTitle:false,width:1,canvas:isc.HLayout.create({height:22,members:[");
 		code.append(buttonCode).append("]}),");
-		disabled(action.getDisabledConditionName(), code);
-		invisible(action.getInvisibleConditionName(), code);
+		disabled(action.getDisabledCondition(), code);
+		invisible(action.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -892,14 +894,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param button The button widget metadata.
 	 */
 	@Override
-	public void renderButton(String name,
-								String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								Action action,
-								Button button) {
+	public void renderButton(@Nullable String name,
+								@Nullable String label,
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull Action action,
+								@Nonnull Button button) {
 		String buttonCode = generateButton(name,
 											action.getImplicitName(),
 											label,
@@ -912,8 +914,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											confirmationText,
 											getActionEscapeConfirm(),
 											action.getParameters(),
-											action.getDisabledConditionName(),
-											action.getInvisibleConditionName(),
+											action.getDisabledCondition(),
+											action.getInvisibleCondition(),
 											button,
 											null);
 		if (ImplicitActionName.Upload.equals(action.getImplicitName())) {
@@ -934,16 +936,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param zoomIn The zoom-in metadata.
 	 */
 	@Override
-	public void renderFormZoomIn(String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									ZoomIn zoomIn) {
+	public void renderFormZoomIn(@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nonnull ZoomIn zoomIn) {
 		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		code.append("type:'canvas',showTitle:false,width:1,canvas:");
 		code.append(zoomInCode).append(',');
-		disabled(zoomIn.getDisabledConditionName(), code);
-		invisible(zoomIn.getInvisibleConditionName(), code);
+		disabled(zoomIn.getDisabledCondition(), code);
+		invisible(zoomIn.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -956,11 +958,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param zoomIn The zoom-in metadata.
 	 */
 	@Override
-	public void renderZoomIn(String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								ZoomIn zoomIn) {
+	public void renderZoomIn(@Nullable String label,
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nonnull ZoomIn zoomIn) {
 		String zoomInCode = generateZoomIn(label, iconUrl, iconStyleClass, toolTip, zoomIn);
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=').append(zoomInCode).append(";\n");
@@ -973,7 +975,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param map The map metadata.
 	 */
 	@Override
-	public void renderMap(MapDisplay map) {
+	public void renderMap(@Nonnull MapDisplay map) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizMap.create({_view:view,loading:'");
 		LoadingType loading = map.getLoading();
@@ -992,14 +994,18 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param chart The chart metadata.
 	 */
 	@Override
-	public void renderChart(Chart chart) {
+	public void renderChart(@Nonnull Chart chart) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizChart.create({_view:view,");
 		size(chart, null, code);
 		code.append("chartType:'").append(chart.getType()).append("'});");
 		String dataSource = chart.getModelName();
 		if (dataSource == null) {
-			dataSource = String.valueOf(chart.getModel().getModelName());
+			ChartBuilderMetaData model = chart.getModel();
+			if (model == null) { // validated when the view is loaded
+				throw new MetaDataException("Chart requires a modelName or a model");
+			}
+			dataSource = String.valueOf(model.getModelName());
 		}
 		code.append(variable).append(".setDataSource('").append(dataSource).append("');\n");
 		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
@@ -1011,7 +1017,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param geometry The geometry metadata.
 	 */
 	@Override
-	public void renderBoundColumnGeometry(Geometry geometry) {
+	public void renderBoundColumnGeometry(@Nonnull Geometry geometry) {
 		dataWidgetColumnInputWidget = geometry;
 	}
 
@@ -1021,7 +1027,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param geometry The geometry metadata.
 	 */
 	@Override
-	public void renderedBoundColumnGeometry(Geometry geometry) {
+	public void renderedBoundColumnGeometry(@Nonnull Geometry geometry) {
 		// do nothing
 	}
 
@@ -1031,11 +1037,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param geometry The geometry metadata.
 	 */
 	@Override
-	public void renderFormGeometry(Geometry geometry) {
+	public void renderFormGeometry(@Nonnull Geometry geometry) {
 		preProcessFormItem(geometry, "geometry");
 		size(geometry, null, code);
-		disabled(geometry.getDisabledConditionName(), code);
-		invisible(geometry.getInvisibleConditionName(), code);
+		disabled(geometry.getDisabledCondition(), code);
+		invisible(geometry.getInvisibleCondition(), code);
 
 		// Highlight text on focus
 		code.append("selectOnFocus:true,");
@@ -1054,7 +1060,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param geometry The geometry metadata.
 	 */
 	@Override
-	public void renderedFormGeometry(Geometry geometry) {
+	public void renderedFormGeometry(@Nonnull Geometry geometry) {
 		// do nothing
 	}
 
@@ -1064,7 +1070,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param geometry The geometry map metadata.
 	 */
 	@Override
-	public void renderFormGeometryMap(GeometryMap geometry) {
+	public void renderFormGeometryMap(@Nonnull GeometryMap geometry) {
 		preProcessFormItem(geometry, "geometryMap");
 
 		// If no height, make the map at least 150px high so that all the map controls fit
@@ -1079,8 +1085,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			geometry.setMinPixelHeight(null);
 		}
 
-		disabled(geometry.getDisabledConditionName(), code);
-		invisible(geometry.getInvisibleConditionName(), code);
+		disabled(geometry.getDisabledCondition(), code);
+		invisible(geometry.getInvisibleCondition(), code);
 
 		GeometryInputType type = geometry.getType();
 		if (type != null) {
@@ -1094,7 +1100,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param geometry The geometry map metadata.
 	 */
 	@Override
-	public void renderedFormGeometryMap(GeometryMap geometry) {
+	public void renderedFormGeometryMap(@Nonnull GeometryMap geometry) {
 		// do nothing
 	}
 
@@ -1105,11 +1111,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param button The dialog button metadata.
 	 */
 	@Override
-	public void renderFormDialogButton(String label, DialogButton button) {
+	public void renderFormDialogButton(@Nullable String label, @Nonnull DialogButton button) {
 		code.append("type:'blurb',defaultValue:'dialog button ");
 		code.append(escapeSmartClientText(label, shouldEscape(button.getEscapeDisplayName()))).append("',");
-		disabled(button.getDisabledConditionName(), code);
-		invisible(button.getInvisibleConditionName(), code);
+		disabled(button.getDisabledCondition(), code);
+		invisible(button.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1119,7 +1125,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param button The dialog button metadata.
 	 */
 	@Override
-	public void renderDialogButton(String label, DialogButton button) {
+	public void renderDialogButton(@Nullable String label, @Nonnull DialogButton button) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
 		code.append(escapeSmartClientText(label, shouldEscape(button.getEscapeDisplayName())));
@@ -1133,10 +1139,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param spacer The spacer metadata.
 	 */
 	@Override
-	public void renderFormSpacer(Spacer spacer) {
+	public void renderFormSpacer(@Nonnull Spacer spacer) {
 		code.append("type:'spacer',");
 		size(spacer, null, code);
-		invisible(spacer.getInvisibleConditionName(), code);
+		invisible(spacer.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1145,15 +1151,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param spacer The spacer metadata.
 	 */
 	@Override
-	public void renderSpacer(Spacer spacer) {
+	public void renderSpacer(@Nonnull Spacer spacer) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.LayoutSpacer.create(");
         if ((spacer.getPixelWidth() != null) ||
         		(spacer.getPixelHeight() != null) ||
-        		(spacer.getInvisibleConditionName() != null)) {
+        		(spacer.getInvisibleCondition() != null)) {
 			code.append('{');
 			size(spacer, null, code);
-			invisible(spacer.getInvisibleConditionName(), code);
+			invisible(spacer.getInvisibleCondition(), code);
 			code.setLength(code.length() - 1); // remove trailing comma
 			code.append('}');
 		}
@@ -1169,7 +1175,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param image The static image metadata.
 	 */
 	@Override
-	public void renderFormStaticImage(String fileUrl, StaticImage image) {
+	public void renderFormStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 		if (isCurrentWidgetShowLabel()) {
 			String title = getCurrentWidgetLabel();
 			if (title != null) {
@@ -1191,7 +1197,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param image The static image metadata.
 	 */
 	@Override
-	public void renderContainerColumnStaticImage(String fileUrl, StaticImage image) {
+	public void renderContainerColumnStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 		// markup is generated in the JSON data for a data grid container column static image
 	}
 
@@ -1203,7 +1209,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param image The static image metadata.
 	 */
 	@Override
-	public void renderStaticImage(String fileUrl, StaticImage image) {
+	public void renderStaticImage(@Nonnull String fileUrl, @Nonnull StaticImage image) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=');
 		addStaticImage(image);
@@ -1216,7 +1222,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param image The static image metadata.
 	 */
-	private void addStaticImage(StaticImage image) {
+	private void addStaticImage(@Nonnull StaticImage image) {
 		code.append("isc.BizImage.create({modoc:'").append(module.getName()).append('.').append(document.getName());
 		code.append("',file:'").append(image.getRelativeFile()).append("',");
 		size(image, null, code);
@@ -1230,7 +1236,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param image The dynamic image metadata.
 	 */
 	@Override
-	public void renderContainerColumnDynamicImage(DynamicImage image) {
+	public void renderContainerColumnDynamicImage(@Nonnull DynamicImage image) {
 		// markup is generated in the JSON data for a data grid container column dynamic image
 	}
 
@@ -1240,7 +1246,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param image The dynamic image metadata.
 	 */
 	@Override
-	public void renderDynamicImage(DynamicImage image) {
+	public void renderDynamicImage(@Nonnull DynamicImage image) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append('=');
 		addImage(image);
@@ -1253,7 +1259,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param image The dynamic image metadata.
 	 */
-	private void addImage(DynamicImage image) {
+	private void addImage(@Nonnull DynamicImage image) {
 		code.append("isc.BizDynamicImage.create({name:'");
 		code.append(image.getName());
 		code.append("',moduleDotDocument:'");
@@ -1263,7 +1269,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		ImageFormat format = document.getDynamicImage(customer, image.getName()).getFormat();
 		code.append((format != null) ? format : ImageFormat.png).append("',");
 		size(image, null, code);
-		invisible(image.getInvisibleConditionName(), code);
+		invisible(image.getInvisibleCondition(), code);
 		Integer initialWidth = image.getImageInitialPixelWidth();
 		if (initialWidth != null) {
 			code.append("imageWidth:").append(initialWidth).append(',');
@@ -1282,7 +1288,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param link The link metadata.
 	 */
 	@Override
-	public void renderFormLink(String value, Link link) {
+	public void renderFormLink(@Nullable String value, @Nonnull Link link) {
 		// Take care of the title, as we're not calling preProcessFormItem
 		String label = getCurrentWidgetLabel();
 		if (label == null) {
@@ -1292,7 +1298,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		code.append("type:'blurb',name:'_");
 		code.append(formatCounter++).append("',"); // _1, _2 and so on
 		size(link, null, code);
-		invisible(link.getInvisibleConditionName(), code);
+		invisible(link.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1302,7 +1308,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param link The link metadata.
 	 */
 	@Override
-	public void renderContainerColumnLink(String value, Link link) {
+	public void renderContainerColumnLink(@Nullable String value, @Nonnull Link link) {
 		// markup is generated in the JSON data for a data grid container column link
 	}
 
@@ -1313,7 +1319,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param link The link metadata.
 	 */
 	@Override
-	public void renderLink(String value, Link link) {
+	public void renderLink(@Nullable String value, @Nonnull Link link) {
 		// TODO Implement later
 	}
 
@@ -1323,13 +1329,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param blurb The blurb metadata source.
 	 * @return A label configured from the blurb.
 	 */
-	private static Label makeNewLabelFromBlurb(Blurb blurb) {
+	private static @Nonnull Label makeNewLabelFromBlurb(@Nonnull Blurb blurb) {
 		Label result = new Label();
 		result.setValue(blurb.getMarkup());
 		result.setPixelWidth(blurb.getPixelWidth());
 		result.setPixelHeight(blurb.getPixelHeight());
 		result.setTextAlignment(blurb.getTextAlignment());
-		result.setInvisibleConditionName(blurb.getInvisibleConditionName());
+		BindUtil.copyAuthoredCondition(blurb.getXmlInvisibleCondition(), blurb.getXmlVisibleCondition(), result::setXmlInvisibleCondition, result::setXmlVisibleCondition);
 		return result;
 	}
 
@@ -1340,8 +1346,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param blurb The blurb metadata.
 	 */
 	@Override
-	public void renderFormBlurb(String markup, Blurb blurb) {
-		renderFormLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
+	public void renderFormBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
+		renderFormLabel(markup, (markup != null) && BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
 	/**
@@ -1351,7 +1357,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param blurb The blurb metadata.
 	 */
 	@Override
-	public void renderContainerColumnBlurb(String markup, Blurb blurb) {
+	public void renderContainerColumnBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
 		renderContainerColumnLabel(markup, makeNewLabelFromBlurb(blurb));
 	}
 
@@ -1362,8 +1368,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param blurb The blurb metadata.
 	 */
 	@Override
-	public void renderBlurb(String markup, Blurb blurb) {
-		renderLabel(markup, BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
+	public void renderBlurb(@Nullable String markup, @Nonnull Blurb blurb) {
+		renderLabel(markup, (markup != null) && BindUtil.containsSkyveExpressions(markup), makeNewLabelFromBlurb(blurb));
 	}
 
 	/**
@@ -1374,8 +1380,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param label The label metadata.
 	 */
 	@Override
-	public void renderFormLabel(String value, boolean boundValue, Label label) {
-		FormItem currentFormItem = getCurrentFormItem();
+	public void renderFormLabel(@Nullable String value, boolean boundValue, @Nonnull Label label) {
+		FormItem currentFormItem = Objects.requireNonNull(getCurrentFormItem());
 
 		// Set colSpan 1 if not set otherwise all formatting hell breaks loose
 		if (currentFormItem.getColspan() == null) { // not set
@@ -1415,7 +1421,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 		size(label, null, code);
-		invisible(label.getInvisibleConditionName(), code);
+		invisible(label.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1425,7 +1431,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param label The label metadata.
 	 */
 	@Override
-	public void renderContainerColumnLabel(String value, Label label) {
+	public void renderContainerColumnLabel(@Nullable String value, @Nonnull Label label) {
 		// markup is generated in the JSON data for a data grid container column label or a dynamic form-based value
 	}
 
@@ -1437,7 +1443,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param label The label metadata.
 	 */
 	@Override
-	public void renderLabel(String value, boolean boundValue, Label label) {
+	public void renderLabel(@Nullable String value, boolean boundValue, @Nonnull Label label) {
 		// Throw if the value has binding expressions in them
 		if (boundValue) {
 			throw new MetaDataException("Label or blurb with a value of [" + label.getValue() +
@@ -1457,7 +1463,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("textAlign:'").append(alignment.toTextAlignmentString()).append("',");
 		}
 
-		invisible(label.getInvisibleConditionName(), code);
+		invisible(label.getInvisibleCondition(), code);
 
 		String binding = label.getBinding();
 		if (binding == null) {
@@ -1471,18 +1477,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Renders a progress bar placeholder inside a form.
+	 * Renders a progress bar inside a form as a read-only item showing its bound value.
+	 *
+	 * <p>This writes the properties of the current form item, so it must not write a statement.
 	 *
 	 * @param progressBar The progress bar metadata.
 	 */
 	@Override
-	public void renderFormProgressBar(ProgressBar progressBar) {
-		// TODO Make a value from CanvasItem.
-		String variable = "v" + variableCounter++;
-		code.append("var ").append(variable).append("=isc.BizLabel.create({value: '");
-		code.append(progressBar.getBinding());
-		code.append("'});\n");
-		code.append(containerVariables.peek()).append(".addContained(").append(variable).append(");\n");
+	public void renderFormProgressBar(@Nonnull ProgressBar progressBar) {
+		// TODO Make a progress bar from a CanvasItem.
+		String title = getCurrentWidgetLabel();
+		if (title != null) {
+			code.append("title:'").append(escapeSmartClientText(title, getCurrentWidgetEscapeLabel())).append("',");
+		}
+		code.append("type:'blurb',name:'").append(BindUtil.sanitiseBinding(progressBar.getBinding())).append("',");
+		size(progressBar, null, code);
+		invisible(progressBar.getInvisibleCondition(), code);
 	}
 
 	private String listWidgetVariable = null;
@@ -1495,7 +1505,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid The list grid metadata.
 	 */
 	@Override
-	public void renderListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+	public void renderListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
 		renderListWidget(grid);
 		renderGrid(grid);
 	}
@@ -1506,7 +1516,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The projected query column metadata.
 	 */
 	@Override
-	public void renderListGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+	public void renderListGridProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1517,7 +1527,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The content query column metadata.
 	 */
 	@Override
-	public void renderListGridContentColumn(MetaDataQueryContentColumn column) {
+	public void renderListGridContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1530,7 +1540,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid The list grid metadata.
 	 */
 	@Override
-	public void renderedListGrid(String title, boolean aggregateQuery, ListGrid grid) {
+	public void renderedListGrid(@Nullable String title, boolean aggregateQuery, @Nonnull ListGrid grid) {
 		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
@@ -1542,7 +1552,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param repeater The list repeater metadata.
 	 */
 	@Override
-	public void renderListRepeater(String title, ListRepeater repeater) {
+	public void renderListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
 		renderListWidget(repeater);
 		code.append("isRepeater:true,");
 		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders())).append(',');
@@ -1555,7 +1565,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The projected query column metadata.
 	 */
 	@Override
-	public void renderListRepeaterProjectedColumn(MetaDataQueryProjectedColumn column) {
+	public void renderListRepeaterProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1566,7 +1576,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The content query column metadata.
 	 */
 	@Override
-	public void renderListRepeaterContentColumn(MetaDataQueryContentColumn column) {
+	public void renderListRepeaterContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1578,7 +1588,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param repeater The list repeater metadata.
 	 */
 	@Override
-	public void renderedListRepeater(String title, ListRepeater repeater) {
+	public void renderedListRepeater(@Nullable String title, @Nonnull ListRepeater repeater) {
 		appendFilterParameters(repeater.getFilterParameters(), repeater.getParameters(), code);
 		renderedListWidget();
 	}
@@ -1590,7 +1600,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid The tree grid metadata.
 	 */
 	@Override
-	public void renderTreeGrid(String title, TreeGrid grid) {
+	public void renderTreeGrid(@Nullable String title, @Nonnull TreeGrid grid) {
 		renderListWidget(grid);
 		renderGrid(grid);
 		String rootBinding = grid.getRootIdBinding();
@@ -1606,7 +1616,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The projected query column metadata.
 	 */
 	@Override
-	public void renderTreeGridProjectedColumn(MetaDataQueryProjectedColumn column) {
+	public void renderTreeGridProjectedColumn(@Nonnull MetaDataQueryProjectedColumn column) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1617,7 +1627,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The content query column metadata.
 	 */
 	@Override
-	public void renderTreeGridContentColumn(MetaDataQueryContentColumn column) {
+	public void renderTreeGridContentColumn(@Nonnull MetaDataQueryContentColumn column) {
 		// TODO Auto-generated method stub
 
 	}
@@ -1629,7 +1639,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid The tree grid metadata.
 	 */
 	@Override
-	public void renderedTreeGrid(String title, TreeGrid grid) {
+	public void renderedTreeGrid(@Nullable String title, @Nonnull TreeGrid grid) {
 		appendFilterParameters(grid.getFilterParameters(), grid.getParameters(), code);
 		renderedListWidget();
 	}
@@ -1639,13 +1649,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param widget The list widget metadata.
 	 */
-	private void renderListWidget(AbstractListWidget widget) {
+	private void renderListWidget(@Nonnull AbstractListWidget widget) {
 		String queryName = widget.getQueryName();
 		String modelName = widget.getModelName();
 		String dataSourceId = null;
-		if ((module == null) || (document == null)) {
-			throw new MetaDataException("Cannot render list widget without module and document context");
-		}
 		if (queryName != null) { // its a query
 			MetaDataQueryDefinition query = module.getNullSafeMetaDataQuery(queryName);
 			StringBuilder ds = new StringBuilder(256);
@@ -1677,7 +1684,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			else {
 				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, document.getName());
 				StringBuilder ds = new StringBuilder(256);
-				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, null);
+				dataSourceId = SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, currentUxUi, false, ds, new TreeSet<>());
 				code.insert(0, ds);
 			}
 		}
@@ -1691,12 +1698,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (title != null) {
 			border(escapeSmartClientText(title, shouldEscape(widget.getEscapeTitle())), null, code);
 		}
-		String postRefreshConditionName = widget.getPostRefreshConditionName();
-		if (postRefreshConditionName != null) {
-			code.append("postRefreshConditionName:'").append(postRefreshConditionName).append("',");
+		String postRefreshCondition = widget.getPostRefreshCondition();
+		if (postRefreshCondition != null) {
+			code.append("postRefreshCondition:'").append(BindUtil.conditionIdentifier(postRefreshCondition)).append("',");
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		invisible(widget.getInvisibleConditionName(), code);
+		invisible(widget.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -1704,7 +1711,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param grid The list-grid metadata.
 	 */
-	private void renderGrid(ListGrid grid) {
+	private void renderGrid(@Nonnull ListGrid grid) {
 		code.append("contConv:").append(grid.getContinueConversation()).append(",");
 		String selectedIdBinding = grid.getSelectedIdBinding();
 		if (selectedIdBinding != null) {
@@ -1713,7 +1720,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			Attribute attribute = target.getAttribute();
 			code.append("selectedIdTrackChanges:").append(((attribute != null) && attribute.isTrackChanges())).append(',');
 		}
-		disabled(grid.getDisabledConditionName(), code);
+		disabled(grid.getDisabledCondition(), code);
 		disableCRUD(grid, code);
 		if (Boolean.FALSE.equals(grid.getShowAdd())) {
 			code.append("showAdd:false,");
@@ -1779,7 +1786,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid The data-grid metadata.
 	 */
 	@Override
-	public void renderDataGrid(String title, DataGrid grid) {
+	public void renderDataGrid(@Nullable String title, @Nonnull DataGrid grid) {
 		renderDataWidget(grid);
 		if (Boolean.FALSE.equals(grid.getShowAdd())) {
 			code.append("showAdd:false,");
@@ -1810,7 +1817,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			Attribute attribute = target.getAttribute();
 			code.append("selectedIdTrackChanges:").append((attribute != null) && attribute.isTrackChanges()).append(',');
 		}
-		disabled(grid.getDisabledConditionName(), code);
+		disabled(grid.getDisabledCondition(), code);
 		editable(grid.getEditable(), code);
 		code.append("_fields:[");
 	}
@@ -1822,7 +1829,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid The data-grid metadata.
 	 */
 	@Override
-	public void renderedDataGrid(String title, DataGrid grid) {
+	public void renderedDataGrid(@Nullable String title, @Nonnull DataGrid grid) {
 		renderedDataWidget();
 	}
 
@@ -1833,7 +1840,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param repeater The repeater metadata.
 	 */
 	@Override
-	public void renderDataRepeater(String title, DataRepeater repeater) {
+	public void renderDataRepeater(@Nullable String title, @Nonnull DataRepeater repeater) {
 		renderDataWidget(repeater);
 		code.append("isRepeater:true,");
 		code.append("showColumnHeaders:").append(Boolean.TRUE.equals(repeater.getShowColumnHeaders()));
@@ -1848,7 +1855,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param repeater The repeater metadata.
 	 */
 	@Override
-	public void renderedDataRepeater(String title, DataRepeater repeater) {
+	public void renderedDataRepeater(@Nullable String title, @Nonnull DataRepeater repeater) {
 		renderedDataWidget();
 	}
 
@@ -1857,9 +1864,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param widget The data-widget metadata.
 	 */
-	private void renderDataWidget(AbstractDataWidget widget) {
+	private void renderDataWidget(@Nonnull AbstractDataWidget widget) {
 		dataWidgetBinding = widget.getBinding();
-		Relation relation = (Relation) getCurrentTarget().getAttribute();
+		Relation relation = (Relation) Objects.requireNonNull(getCurrentTarget()).getAttribute();
 		if (relation == null) { // should never happen
 			throw new MetaDataException(dataWidgetBinding + " does not point to a relation");
 		}
@@ -1884,7 +1891,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("_ordinal:'").append(Bean.ORDINAL_NAME).append("',");
 		}
 		size(widget, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		invisible(widget.getInvisibleConditionName(), code);
+		invisible(widget.getInvisibleCondition(), code);
 		dataWidgetFieldsIncomplete = true;
 	}
 
@@ -1913,7 +1920,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The bound column metadata.
 	 */
 	@Override
-	public void renderDataGridBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderDataGridBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		// do nothing
 	}
 
@@ -1924,7 +1931,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The bound column metadata.
 	 */
 	@Override
-	public void renderDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderDataRepeaterBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		renderDataGridBoundColumn(title, column);
 	}
 
@@ -1935,7 +1942,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The bound column metadata.
 	 */
 	@Override
-	public void renderedDataGridBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderedDataGridBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		if (dataWidgetColumnInputWidget != null) {
 			SmartClientDataGridFieldDefinition def = null;
 			String binding = column.getBinding();
@@ -1968,15 +1975,37 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			if (lookup != null) {
 				StringBuilder ds = new StringBuilder(64);
 				String optionDataSource = lookup.getOptionDataSource();
-				SmartClientViewRenderer.appendDataSourceDefinition(user,
-																	customer,
-																	lookup.getQuery(),
-																	optionDataSource,
-																	(LookupDescription) dataWidgetColumnInputWidget,
-																	currentUxUi,
-																	false,
-																	ds,
-																	new TreeSet<>());
+				LookupDescription lookupWidget = (LookupDescription) dataWidgetColumnInputWidget;
+				String lookupModelName = lookupWidget.getModelName();
+				if (lookupModelName != null) {
+					appendDataSourceDefinition(user,
+												customer,
+												module,
+												document,
+												lookupModelName,
+												optionDataSource,
+												lookupWidget,
+												currentUxUi,
+												false,
+												ds,
+												new TreeSet<>());
+				}
+				else {
+					// A lookup definition without a model always has a query
+					MetaDataQueryDefinition lookupQuery = lookup.getQuery();
+					if (lookupQuery == null) {
+						throw new MetaDataException("Lookup description has no query to use.");
+					}
+					SmartClientViewRenderer.appendDataSourceDefinition(user,
+																		customer,
+																		lookupQuery,
+																		optionDataSource,
+																		(LookupDescription) dataWidgetColumnInputWidget,
+																		currentUxUi,
+																		false,
+																		ds,
+																		new TreeSet<>());
+				}
 				code.insert(0, ds);
 			}
 			dataWidgetColumnInputWidget = null;
@@ -1990,7 +2019,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The bound column metadata.
 	 */
 	@Override
-	public void renderedDataRepeaterBoundColumn(String title, DataGridBoundColumn column) {
+	public void renderedDataRepeaterBoundColumn(@Nullable String title, @Nonnull DataGridBoundColumn column) {
 		renderedDataGridBoundColumn(title, column);
 	}
 
@@ -2001,7 +2030,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The container column metadata.
 	 */
 	@Override
-	public void renderDataGridContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		code.append("{name:'_").append(formatCounter++);
 		code.append("',type:'text',formatCellValue:'value;',canEdit:false,title:'");
 
@@ -2024,7 +2053,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The container column metadata.
 	 */
 	@Override
-	public void renderDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderDataRepeaterContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		renderDataGridContainerColumn(title, column);
 	}
 
@@ -2035,7 +2064,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The container column metadata.
 	 */
 	@Override
-	public void renderedDataGridContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderedDataGridContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		// do nothing
 	}
 
@@ -2046,7 +2075,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param column The container column metadata.
 	 */
 	@Override
-	public void renderedDataRepeaterContainerColumn(String title, DataGridContainerColumn column) {
+	public void renderedDataRepeaterContainerColumn(@Nullable String title, @Nonnull DataGridContainerColumn column) {
 		renderedDataGridContainerColumn(title, column);
 	}
 
@@ -2056,7 +2085,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param checkBox The checkbox metadata.
 	 */
 	@Override
-	public void renderBoundColumnCheckBox(CheckBox checkBox) {
+	public void renderBoundColumnCheckBox(@Nonnull CheckBox checkBox) {
 		dataWidgetColumnInputWidget = checkBox;
 	}
 
@@ -2066,15 +2095,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param checkBox The checkbox metadata.
 	 */
 	@Override
-	public void renderFormCheckBox(CheckBox checkBox) {
+	public void renderFormCheckBox(@Nonnull CheckBox checkBox) {
 		preProcessFormItem(checkBox, "checkbox");
 		size(checkBox, null, code);
 		if (! Boolean.FALSE.equals(checkBox.getTriState())) {
 			code.append("allowEmptyValue:true,");
 		}
 		code.append("labelAsTitle:true,");
-		disabled(checkBox.getDisabledConditionName(), code);
-		invisible(checkBox.getInvisibleConditionName(), code);
+		disabled(checkBox.getDisabledCondition(), code);
+		invisible(checkBox.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2083,7 +2112,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param checkBox The checkbox metadata.
 	 */
 	@Override
-	public void renderedBoundColumnCheckBox(CheckBox checkBox) {
+	public void renderedBoundColumnCheckBox(@Nonnull CheckBox checkBox) {
 		// do nothing
 	}
 
@@ -2093,7 +2122,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param checkBox The checkbox metadata.
 	 */
 	@Override
-	public void renderedFormCheckBox(CheckBox checkBox) {
+	public void renderedFormCheckBox(@Nonnull CheckBox checkBox) {
 		// do nothing
 	}
 
@@ -2104,7 +2133,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param membership The check-membership metadata.
 	 */
 	@Override
-	public void renderCheckMembership(CheckMembership membership) {
+	public void renderCheckMembership(@Nonnull CheckMembership membership) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizLabel.create({value:'");
 		code.append("check membership").append(membership.getBinding());
@@ -2118,7 +2147,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param membership The check-membership metadata.
 	 */
 	@Override
-	public void renderedCheckMembership(CheckMembership membership) {
+	public void renderedCheckMembership(@Nonnull CheckMembership membership) {
 		// do nothing - until implemented properly
 	}
 
@@ -2128,7 +2157,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param colour The colour picker metadata.
 	 */
 	@Override
-	public void renderBoundColumnColourPicker(ColourPicker colour) {
+	public void renderBoundColumnColourPicker(@Nonnull ColourPicker colour) {
 		dataWidgetColumnInputWidget = colour;
 	}
 
@@ -2138,11 +2167,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param colour The colour picker metadata.
 	 */
 	@Override
-	public void renderFormColourPicker(ColourPicker colour) {
+	public void renderFormColourPicker(@Nonnull ColourPicker colour) {
 		preProcessFormItem(colour, "color");
 		size(colour, null, code);
-		disabled(colour.getDisabledConditionName(), code);
-		invisible(colour.getInvisibleConditionName(), code);
+		disabled(colour.getDisabledCondition(), code);
+		invisible(colour.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2151,7 +2180,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param colour The colour picker metadata.
 	 */
 	@Override
-	public void renderedBoundColumnColourPicker(ColourPicker colour) {
+	public void renderedBoundColumnColourPicker(@Nonnull ColourPicker colour) {
 		// do nothing
 	}
 
@@ -2161,7 +2190,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param colour The colour picker metadata.
 	 */
 	@Override
-	public void renderedFormColourPicker(ColourPicker colour) {
+	public void renderedFormColourPicker(@Nonnull ColourPicker colour) {
 		// do nothing
 	}
 
@@ -2171,7 +2200,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param combo The combo metadata.
 	 */
 	@Override
-	public void renderBoundColumnCombo(Combo combo) {
+	public void renderBoundColumnCombo(@Nonnull Combo combo) {
 		dataWidgetColumnInputWidget = combo;
 	}
 
@@ -2181,11 +2210,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param combo The combo metadata.
 	 */
 	@Override
-	public void renderFormCombo(Combo combo) {
+	public void renderFormCombo(@Nonnull Combo combo) {
 		preProcessFormItem(combo, "select");
 		size(combo, null, code);
-		disabled(combo.getDisabledConditionName(), code);
-		invisible(combo.getInvisibleConditionName(), code);
+		disabled(combo.getDisabledCondition(), code);
+		invisible(combo.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2194,7 +2223,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param combo The combo metadata.
 	 */
 	@Override
-	public void renderedBoundColumnCombo(Combo combo) {
+	public void renderedBoundColumnCombo(@Nonnull Combo combo) {
 		// do nothing
 	}
 
@@ -2204,7 +2233,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param combo The combo metadata.
 	 */
 	@Override
-	public void renderedFormCombo(Combo combo) {
+	public void renderedFormCombo(@Nonnull Combo combo) {
 		// do nothing
 	}
 
@@ -2238,8 +2267,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		ContentDisplay display = content.getResolvedDisplay();
 		preProcessFormItem(content, "bizContent");
 		size(content, null, code);
-		disabled(content.getDisabledConditionName(), code);
-		invisible(content.getInvisibleConditionName(), code);
+		disabled(content.getDisabledCondition(), code);
+		invisible(content.getInvisibleCondition(), code);
 		editable(content.getEditable(), code);
 		appendContentProperties(content, display, code);
 	}
@@ -2250,12 +2279,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param signature The content-signature metadata.
 	 */
 	@Override
-	public void renderFormContentSignature(ContentSignature signature) {
+	public void renderFormContentSignature(@Nonnull ContentSignature signature) {
 		// TODO not implemented for SC yet - use the content-image SmartClient item for now
 		preProcessFormItem(signature, "bizContentImage");
 		size(signature, null, code);
-		disabled(signature.getDisabledConditionName(), code);
-		invisible(signature.getInvisibleConditionName(), code);
+		disabled(signature.getDisabledCondition(), code);
+		invisible(signature.getInvisibleCondition(), code);
 		editable(Boolean.TRUE, code);
 	}
 
@@ -2356,10 +2385,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Returns the server-generated media-kind companion field name for an auto content binding.
 	 *
-	 * @param binding The unsanitised content binding from view metadata.
+	 * @param binding The unsanitised content binding from view metadata, or {@code null}.
 	 * @return The sanitised companion field name.
 	 */
-	private static @Nonnull String contentCompanionName(@Nonnull String binding) {
+	private static @Nonnull String contentCompanionName(@Nullable String binding) {
 		return '_' + BindUtil.sanitiseBinding(binding);
 	}
 
@@ -2369,7 +2398,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param html The HTML metadata.
 	 */
 	@Override
-	public void renderBoundColumnHTML(HTML html) {
+	public void renderBoundColumnHTML(@Nonnull HTML html) {
 		dataWidgetColumnInputWidget = html;
 	}
 
@@ -2379,15 +2408,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param html The HTML metadata.
 	 */
 	@Override
-	public void renderFormHTML(HTML html) {
+	public void renderFormHTML(@Nonnull HTML html) {
 		preProcessFormItem(html, "bizHTML");
 		size(html, null, code);
 		String mentionMarkers = html.getMentionMarkers();
 		if (mentionMarkers != null) {
 			code.append("mentionMarkers:'").append(OWASP.escapeJsStringWithHtmlFormatting(mentionMarkers)).append("',");
 		}
-		disabled(html.getDisabledConditionName(), code);
-		invisible(html.getInvisibleConditionName(), code);
+		disabled(html.getDisabledCondition(), code);
+		invisible(html.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2398,8 +2427,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param membership The list-membership metadata.
 	 */
 	@Override
-	public void renderListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
-		Relation relation = (Relation) getCurrentTarget().getAttribute();
+	public void renderListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
+		Relation relation = (Relation) Objects.requireNonNull(getCurrentTarget()).getAttribute();
 
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizListMembership.create({_b:'");
@@ -2418,8 +2447,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 		code.append(",_view:view,");
 		size(membership, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(membership.getDisabledConditionName(), code);
-		invisible(membership.getInvisibleConditionName(), code);
+		disabled(membership.getDisabledCondition(), code);
+		invisible(membership.getInvisibleCondition(), code);
 
 		containerVariables.push(variable);
 	}
@@ -2432,7 +2461,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param membership The list-membership metadata.
 	 */
 	@Override
-	public void renderedListMembership(String candidatesHeading, String membersHeading, ListMembership membership) {
+	public void renderedListMembership(@Nullable String candidatesHeading, @Nullable String membersHeading, @Nonnull ListMembership membership) {
 		removeTrailingComma(code);
 		code.append("});\n");
 
@@ -2446,14 +2475,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param comparison The comparison metadata.
 	 */
 	@Override
-	public void renderComparison(Comparison comparison) {
+	public void renderComparison(@Nonnull Comparison comparison) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizComparison.create({_b:'");
 		code.append(BindUtil.sanitiseBinding(comparison.getBinding()));
 		code.append("',_view:view,");
 		editable(comparison.getEditable(), code);
-		disabled(comparison.getDisabledConditionName(), code);
-		invisible(comparison.getInvisibleConditionName(), code);
+		disabled(comparison.getDisabledCondition(), code);
+		invisible(comparison.getInvisibleCondition(), code);
 		size(comparison, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
 		removeTrailingComma(code);
 		code.append("});\n");
@@ -2470,11 +2499,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param lookup The lookup metadata.
 	 */
 	@Override
-	public void renderBoundColumnLookupDescription(MetaDataQueryDefinition query,
+	public void renderBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 													boolean canCreate,
 													boolean canUpdate,
-													String descriptionBinding,
-													LookupDescription lookup) {
+													@Nonnull String descriptionBinding,
+													@Nonnull LookupDescription lookup) {
 		dataWidgetColumnInputWidget = lookup;
 	}
 
@@ -2488,34 +2517,59 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param lookup The lookup metadata.
 	 */
 	@Override
-	public void renderFormLookupDescription(MetaDataQueryDefinition query,
+	public void renderFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 												boolean canCreate,
 												boolean canUpdate,
-												String descriptionBinding,
-												LookupDescription lookup) {
+												@Nonnull String descriptionBinding,
+												@Nonnull LookupDescription lookup) {
 		SmartClientFieldDefinition def = preProcessFormItem(lookup, "bizLookupDescription");
 		size(lookup, null, code);
-		disabled(lookup.getDisabledConditionName(), code);
-		invisible(lookup.getInvisibleConditionName(), code);
+		disabled(lookup.getDisabledCondition(), code);
+		invisible(lookup.getInvisibleCondition(), code);
 		editable(lookup.getEditable(), code);
 		disableLookupComponents(lookup, code);
-		code.append("canCreate:").append(def.getLookup().getCanCreate());
-		code.append(",canUpdate:").append(def.getLookup().getCanUpdate());
+		// A lookup description is bound to a relation, so its field definition has a lookup
+		SmartClientLookupDefinition lookupDefinition = def.getLookup();
+		if (lookupDefinition == null) {
+			throw new IllegalStateException("Lookup description " + lookup.getBinding() + " has no lookup definition");
+		}
+		code.append("canCreate:").append(lookupDefinition.getCanCreate());
+		code.append(",canUpdate:").append(lookupDefinition.getCanUpdate());
 
 		code.append(",_view:view,");
 		appendFilterParameters(lookup.getFilterParameters(), lookup.getParameters(), code);
 
 		StringBuilder ds = new StringBuilder(256);
-		String optionDataSource = def.getLookup().getOptionDataSource();
-		SmartClientViewRenderer.appendDataSourceDefinition(user,
-															customer,
-															query,
-															optionDataSource,
-															lookup,
-															currentUxUi,
-															false,
-															ds,
-															new TreeSet<>());
+		String optionDataSource = lookupDefinition.getOptionDataSource();
+		String lookupModelName = lookup.getModelName();
+		if (lookupModelName != null) {
+			appendDataSourceDefinition(user,
+										customer,
+										module,
+										document,
+										lookupModelName,
+										optionDataSource,
+										lookup,
+										currentUxUi,
+										false,
+										ds,
+										new TreeSet<>());
+		}
+		else {
+			// ViewRenderer.visitLookupDescription() ensures a query without a model
+			if (query == null) {
+				throw new MetaDataException("Lookup description has no query to use.");
+			}
+			SmartClientViewRenderer.appendDataSourceDefinition(user,
+																customer,
+																query,
+																optionDataSource,
+																lookup,
+																currentUxUi,
+																false,
+																ds,
+																new TreeSet<>());
+		}
 		code.insert(0, ds);
 	}
 
@@ -2529,11 +2583,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			 * @param lookup The lookup metadata.
 			 */
 	@Override
-	public void renderedBoundColumnLookupDescription(MetaDataQueryDefinition query,
+	public void renderedBoundColumnLookupDescription(@Nullable MetaDataQueryDefinition query,
 														boolean canCreate,
 														boolean canUpdate,
-														String descriptionBinding,
-														LookupDescription lookup) {
+														@Nonnull String descriptionBinding,
+														@Nonnull LookupDescription lookup) {
 		// do nothing
 	}
 
@@ -2547,11 +2601,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		 * @param lookup The lookup metadata.
 		 */
 	@Override
-	public void renderedFormLookupDescription(MetaDataQueryDefinition query,
+	public void renderedFormLookupDescription(@Nullable MetaDataQueryDefinition query,
 												boolean canCreate,
 												boolean canUpdate,
-												String descriptionBinding,
-												LookupDescription lookup) {
+												@Nonnull String descriptionBinding,
+												@Nonnull LookupDescription lookup) {
 		// do nothing
 	}
 
@@ -2561,7 +2615,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param password The password metadata.
 	 */
 	@Override
-	public void renderBoundColumnPassword(Password password) {
+	public void renderBoundColumnPassword(@Nonnull Password password) {
 		dataWidgetColumnInputWidget = password;
 	}
 
@@ -2571,13 +2625,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param password The password metadata.
 	 */
 	@Override
-	public void renderFormPassword(Password password) {
+	public void renderFormPassword(@Nonnull Password password) {
 		preProcessFormItem(password, "password");
 		size(password, null, code);
 		// Security settings
 		code.append("autoComplete:'none',browserAutoCapitalize:false,browserAutoCorrect:false,browserSpellCheck:false,");
-		disabled(password.getDisabledConditionName(), code);
-		invisible(password.getInvisibleConditionName(), code);
+		disabled(password.getDisabledCondition(), code);
+		invisible(password.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2586,7 +2640,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param password The password metadata.
 	 */
 	@Override
-	public void renderedBoundColumnPassword(Password password) {
+	public void renderedBoundColumnPassword(@Nonnull Password password) {
 		// do nothing
 	}
 
@@ -2596,7 +2650,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param password The password metadata.
 	 */
 	@Override
-	public void renderedFormPassword(Password password) {
+	public void renderedFormPassword(@Nonnull Password password) {
 		// do nothing
 	}
 
@@ -2606,7 +2660,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param radio The radio metadata.
 	 */
 	@Override
-	public void renderBoundColumnRadio(Radio radio) {
+	public void renderBoundColumnRadio(@Nonnull Radio radio) {
 		dataWidgetColumnInputWidget = radio;
 	}
 
@@ -2616,14 +2670,14 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param radio The radio metadata.
 	 */
 	@Override
-	public void renderFormRadio(Radio radio) {
+	public void renderFormRadio(@Nonnull Radio radio) {
 		preProcessFormItem(radio, "radioGroup");
 		size(radio, null, code);
 		if (Boolean.FALSE.equals(radio.getVertical())) {
 			code.append("vertical:false,");
 		}
-		disabled(radio.getDisabledConditionName(), code);
-		invisible(radio.getInvisibleConditionName(), code);
+		disabled(radio.getDisabledCondition(), code);
+		invisible(radio.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2632,7 +2686,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param radio The radio metadata.
 	 */
 	@Override
-	public void renderedBoundColumnRadio(Radio radio) {
+	public void renderedBoundColumnRadio(@Nonnull Radio radio) {
 		// do nothing
 	}
 
@@ -2642,7 +2696,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param radio The radio metadata.
 	 */
 	@Override
-	public void renderedFormRadio(Radio radio) {
+	public void renderedFormRadio(@Nonnull Radio radio) {
 		// do nothing
 	}
 
@@ -2652,7 +2706,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The rich-text metadata.
 	 */
 	@Override
-	public void renderBoundColumnRichText(RichText text) {
+	public void renderBoundColumnRichText(@Nonnull RichText text) {
 		dataWidgetColumnInputWidget = text;
 	}
 
@@ -2662,11 +2716,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The rich-text metadata.
 	 */
 	@Override
-	public void renderFormRichText(RichText text) {
+	public void renderFormRichText(@Nonnull RichText text) {
 		preProcessFormItem(text, "richText");
 		size(text, DEFAULT_MIN_HEIGHT_IN_PIXELS, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+		disabled(text.getDisabledCondition(), code);
+		invisible(text.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2675,7 +2729,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param richText The rich-text metadata.
 	 */
 	@Override
-	public void renderedBoundColumnRichText(RichText richText) {
+	public void renderedBoundColumnRichText(@Nonnull RichText richText) {
 		// do nothing
 	}
 
@@ -2685,7 +2739,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param richText The rich-text metadata.
 	 */
 	@Override
-	public void renderedFormRichText(RichText richText) {
+	public void renderedFormRichText(@Nonnull RichText richText) {
 		// do nothing
 	}
 
@@ -2695,7 +2749,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param slider The slider metadata.
 	 */
 	@Override
-	public void renderBoundColumnSlider(Slider slider) {
+	public void renderBoundColumnSlider(@Nonnull Slider slider) {
 		dataWidgetColumnInputWidget = slider;
 	}
 
@@ -2705,7 +2759,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param slider The slider metadata.
 	 */
 	@Override
-	public void renderFormSlider(Slider slider) {
+	public void renderFormSlider(@Nonnull Slider slider) {
 		preProcessFormItem(slider, "slider");
 		Double min = slider.getMin();
 		if (min != null) {
@@ -2726,9 +2780,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (Boolean.TRUE.equals(slider.getVertical())) {
 			code.append("vertical:true,");
 		}
+		// SmartClient's SliderItem makes its slider canvas overflow:'visible'. At some form widths a slider
+		// in a '*' column overflows it by a few pixels, which widens the form, so the form resizes the
+		// slider to the wider column, and then back, without end: the form redraws for ever and never
+		// settles. The slider lays out its track and range labels to fit its width, and its value label
+		// floats outside it, so clipping the slider hides nothing.
+		code.append("sliderProperties:{overflow:'hidden'},");
 		size(slider, null, code);
-		disabled(slider.getDisabledConditionName(), code);
-		invisible(slider.getInvisibleConditionName(), code);
+		disabled(slider.getDisabledCondition(), code);
+		invisible(slider.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2737,7 +2797,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param slider The slider metadata.
 	 */
 	@Override
-	public void renderedBoundColumnSlider(Slider slider) {
+	public void renderedBoundColumnSlider(@Nonnull Slider slider) {
 		// do nothing
 	}
 
@@ -2747,7 +2807,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param slider The slider metadata.
 	 */
 	@Override
-	public void renderedFormSlider(Slider slider) {
+	public void renderedFormSlider(@Nonnull Slider slider) {
 		// do nothing
 	}
 
@@ -2757,7 +2817,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param spinner The spinner metadata.
 	 */
 	@Override
-	public void renderBoundColumnSpinner(Spinner spinner) {
+	public void renderBoundColumnSpinner(@Nonnull Spinner spinner) {
 		dataWidgetColumnInputWidget = spinner;
 	}
 
@@ -2767,7 +2827,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param spinner The spinner metadata.
 	 */
 	@Override
-	public void renderFormSpinner(Spinner spinner) {
+	public void renderFormSpinner(@Nonnull Spinner spinner) {
 		preProcessFormItem(spinner, "spinner");
 		Double min = spinner.getMin();
 		if (min != null) {
@@ -2782,8 +2842,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 			code.append("step:").append(step).append(',');
 		}
 		size(spinner, null, code);
-		disabled(spinner.getDisabledConditionName(), code);
-		invisible(spinner.getInvisibleConditionName(), code);
+		disabled(spinner.getDisabledCondition(), code);
+		invisible(spinner.getInvisibleCondition(), code);
 	}
 
 	/**
@@ -2792,7 +2852,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param spinner The spinner metadata.
 	 */
 	@Override
-	public void renderedBoundColumnSpinner(Spinner spinner) {
+	public void renderedBoundColumnSpinner(@Nonnull Spinner spinner) {
 		// do nothing
 	}
 
@@ -2802,7 +2862,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param spinner The spinner metadata.
 	 */
 	@Override
-	public void renderedFormSpinner(Spinner spinner) {
+	public void renderedFormSpinner(@Nonnull Spinner spinner) {
 		// do nothing
 	}
 
@@ -2812,7 +2872,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-area metadata.
 	 */
 	@Override
-	public void renderBoundColumnTextArea(TextArea text) {
+	public void renderBoundColumnTextArea(@Nonnull TextArea text) {
 		dataWidgetColumnInputWidget = text;
 	}
 
@@ -2822,11 +2882,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-area metadata.
 	 */
 	@Override
-	public void renderFormTextArea(TextArea text) {
+	public void renderFormTextArea(@Nonnull TextArea text) {
 		preProcessFormItem(text, "textArea");
 		size(text, null, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+		disabled(text.getDisabledCondition(), code);
+		invisible(text.getInvisibleCondition(), code);
 
 		if (Boolean.FALSE.equals(text.getEditable())) {
 			code.append("canEdit:false,");
@@ -2842,7 +2902,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-area metadata.
 	 */
 	@Override
-	public void renderedBoundColumnTextArea(TextArea text) {
+	public void renderedBoundColumnTextArea(@Nonnull TextArea text) {
 		// do nothing
 	}
 
@@ -2852,7 +2912,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-area metadata.
 	 */
 	@Override
-	public void renderedFormTextArea(TextArea text) {
+	public void renderedFormTextArea(@Nonnull TextArea text) {
 		// do nothing
 	}
 
@@ -2862,7 +2922,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-field metadata.
 	 */
 	@Override
-	public void renderBoundColumnTextField(TextField text) {
+	public void renderBoundColumnTextField(@Nonnull TextField text) {
 		dataWidgetColumnInputWidget = text;
 	}
 
@@ -2872,7 +2932,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-field metadata.
 	 */
 	@Override
-	public void renderFormTextField(TextField text) {
+	public void renderFormTextField(@Nonnull TextField text) {
 		CompleteType complete = text.getComplete();
 		if (complete != null) {
 			preProcessFormItem(text, "bizComplete");
@@ -2884,8 +2944,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		size(text, null, code);
-		disabled(text.getDisabledConditionName(), code);
-		invisible(text.getInvisibleConditionName(), code);
+		disabled(text.getDisabledCondition(), code);
+		invisible(text.getInvisibleCondition(), code);
 
 		if (Boolean.FALSE.equals(text.getEditable())) {
 			code.append("canEdit:false,");
@@ -2901,7 +2961,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-field metadata.
 	 */
 	@Override
-	public void renderedBoundColumnTextField(TextField text) {
+	public void renderedBoundColumnTextField(@Nonnull TextField text) {
 		// do nothing
 	}
 
@@ -2911,7 +2971,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param text The text-field metadata.
 	 */
 	@Override
-	public void renderedFormTextField(TextField text) {
+	public void renderedFormTextField(@Nonnull TextField text) {
 		// do nothing
 	}
 
@@ -2921,7 +2981,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param inject The inject metadata.
 	 */
 	@Override
-	public void renderFormInject(Inject inject) {
+	public void renderFormInject(@Nonnull Inject inject) {
 		FormItem currentFormItem = getCurrentFormItem();
 		if (currentFormItem != null) {
 			// NB instead of preprocessFormItem(), handle title and required
@@ -2941,7 +3001,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param inject The inject metadata.
 	 */
 	@Override
-	public void renderInject(Inject inject) {
+	public void renderInject(@Nonnull Inject inject) {
 		code.append(inject.getScript());
 	}
 
@@ -2957,13 +3017,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderCustomAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderCustomAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					null,
 					label,
@@ -2974,8 +3034,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -2991,13 +3051,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderAddAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderAddAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Add,
 					label,
@@ -3008,8 +3068,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3026,13 +3086,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param canDelete The can delete.
 	 */
 	@Override
-	public void renderRemoveAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action,
+	public void renderRemoveAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action,
 									boolean canDelete) {
 		addAction(name,
 					ImplicitActionName.Remove,
@@ -3044,8 +3104,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					Boolean.valueOf(canDelete));
 	}
 
@@ -3061,13 +3121,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderZoomOutAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderZoomOutAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.ZoomOut,
 					label,
@@ -3078,8 +3138,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3095,13 +3155,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderNavigateAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderNavigateAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Navigate,
 					label,
@@ -3112,8 +3172,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3129,13 +3189,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderOKAction(String name,
-								String label,
-								String iconUrl,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText,
-								ActionImpl action) {
+	public void renderOKAction(@Nullable String name,
+								@Nullable String label,
+								@Nullable String iconUrl,
+								@Nullable String iconStyleClass,
+								@Nullable String toolTip,
+								@Nullable String confirmationText,
+								@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.OK,
 					label,
@@ -3146,8 +3206,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3163,13 +3223,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderSaveAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderSaveAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Save,
 					label,
@@ -3180,8 +3240,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3197,13 +3257,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderCancelAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderCancelAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Cancel,
 					label,
@@ -3214,8 +3274,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3231,13 +3291,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderDeleteAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderDeleteAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Delete,
 					label,
@@ -3248,8 +3308,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3265,13 +3325,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderReportAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderReportAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Report,
 					label,
@@ -3282,8 +3342,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3299,13 +3359,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderBizExportAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderBizExportAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.BizExport,
 					label,
@@ -3316,8 +3376,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3333,13 +3393,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderBizImportAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderBizImportAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.BizImport,
 					label,
@@ -3350,8 +3410,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3367,13 +3427,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderDownloadAction(String name,
-										String label,
-										String iconUrl,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText,
-										ActionImpl action) {
+	public void renderDownloadAction(@Nullable String name,
+										@Nullable String label,
+										@Nullable String iconUrl,
+										@Nullable String iconStyleClass,
+										@Nullable String toolTip,
+										@Nullable String confirmationText,
+										@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Download,
 					label,
@@ -3384,8 +3444,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3401,13 +3461,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderUploadAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderUploadAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Upload,
 					label,
@@ -3418,8 +3478,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null,
 					resolveActionUploadCapture(action).name());
 	}
@@ -3436,13 +3496,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderNewAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderNewAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.New,
 					label,
@@ -3453,8 +3513,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3470,13 +3530,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderEditAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderEditAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Edit,
 					label,
@@ -3487,8 +3547,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3504,13 +3564,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param action The action.
 	 */
 	@Override
-	public void renderPrintAction(String name,
-									String label,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText,
-									ActionImpl action) {
+	public void renderPrintAction(@Nullable String name,
+									@Nullable String label,
+									@Nullable String iconUrl,
+									@Nullable String iconStyleClass,
+									@Nullable String toolTip,
+									@Nullable String confirmationText,
+									@Nonnull ActionImpl action) {
 		addAction(name,
 					ImplicitActionName.Print,
 					label,
@@ -3521,8 +3581,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					toolTip,
 					confirmationText,
 					action.getParameters(),
-					action.getDisabledConditionName(),
-					action.getInvisibleConditionName(),
+					action.getDisabledCondition(),
+					action.getInvisibleCondition(),
 					null);
 	}
 
@@ -3551,7 +3611,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param server The server.
 	 */
 	@Override
-	public void visitServerSideActionEventAction(Action action, ServerSideActionEventAction server) {
+	public void visitServerSideActionEventAction(@Nonnull Action action, @Nonnull ServerSideActionEventAction server) {
 		if (getCurrentForm() != null) {
 			writeOutServerSideCallbackMethodIfNecessary();
 		}
@@ -3568,14 +3628,33 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	/**
 	 * Starts an on-change handler body for the current widget context.
 	 *
+	 * <p>A form item the user types into (a text field without completion, a password, a text area, a spinner or a
+	 * colour picker) whose change handler calls the server fires it when the value is committed, as PrimeFaces' change
+	 * event and Skyve's own date and number items do, not on every keypress: SmartClient's default
+	 * {@code changeOnKeypress: true} sent a request on each key, and the request's prompt took the focus, so the keys
+	 * typed meanwhile were lost. The value is committed when the user leaves the item, often by
+	 * clicking a button, so the handler's server events run as a blur handler's do: deferred, with the view's
+	 * {@code _blurry} marker set, so that the button's click is run after them rather than lost under their request.
+	 * A handler with only client-side actions is left firing on every keypress, as it sends no request.
+	 *
 	 * @param changeable The changeable.
 	 * @param parentVisible The parent visible.
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		if (getCurrentForm() == null) {
 			code.append("changed:function(){var view=this._view;");
+		}
+		else if ((((changeable instanceof TextField text) && (text.getComplete() == null)) ||
+						(changeable instanceof Password) ||
+						(changeable instanceof TextArea) ||
+						(changeable instanceof ColourPicker)) &&
+					changeable.getChangedActions().stream().anyMatch(a -> (a instanceof RerenderEventAction) || (a instanceof ServerSideActionEventAction))) {
+			visitingAsync = true;
+			// As the blur handler: no _blurry marker while requests are pending, to stop loops with multiple fields
+			code.append("changeOnKeypress:false,");
+			code.append("changed:function(form,item,value){var view=form._view;view._blurry=isc.RPCManager.requestsArePending()?null:item;");
 		}
 		else {
 			code.append("changed:function(form,item,value){var view=form._view;");
@@ -3583,15 +3662,16 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Closes the on-change handler body.
+	 * Closes the on-change handler body and ends any async sequencing that it started.
 	 *
 	 * @param changeable The changeable.
 	 * @param parentVisible The parent visible.
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
+		visitingAsync = false;
 	}
 
 	/**
@@ -3602,7 +3682,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// Note the test to short circuit focus event processing whilst requests are pending to stop loops with multiple fields.
 		code.append("editorEnter:function(form,item,value){if((!isc.RPCManager.requestsArePending())&&item.validate()){var view=form._view;");
 	}
@@ -3615,7 +3695,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		code.append("}},");
 	}
 
@@ -3631,7 +3711,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		visitingAsync = true;
 
 		// This fires before the BizButton action() method if a button was clicked
@@ -3650,7 +3730,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		code.append("}},");
 		visitingAsync = false;
 	}
@@ -3666,7 +3746,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
@@ -3689,7 +3769,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		inOnAddedEventHandler = false;
 	}
@@ -3705,7 +3785,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
@@ -3728,7 +3808,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		inOnEditedEventHandler = false;
 	}
@@ -3744,7 +3824,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 		if (dataWidgetFieldsIncomplete) {
 			code.setLength(code.length() - 1);
 			code.append("],");
@@ -3767,7 +3847,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		inOnRemovedEventHandler = false;
 	}
@@ -3780,7 +3860,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		if ((dataWidgetVariable != null) || (listWidgetVariable != null)) {
 			visitingAsync = true;
 		}
@@ -3800,7 +3880,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 		visitingAsync = false;
 	}
@@ -3813,7 +3893,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizPicked:function(form,item,value){var view=form._view;");
 	}
 
@@ -3825,7 +3905,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
 
@@ -3837,7 +3917,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("bizCleared:function(form,item,value){var view=form._view;");
 	}
 
@@ -3849,7 +3929,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		code.append("},");
 	}
 
@@ -3862,8 +3942,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender,
-											EventSource source,
+	public void visitRerenderEventAction(@Nonnull RerenderEventAction rerender,
+											@Nonnull EventSource source,
 											boolean parentVisible,
 											boolean parentEnabled) {
 		if (getCurrentForm() != null) {
@@ -3882,11 +3962,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled,
+	public void visitSetDisabledEventAction(@Nonnull SetDisabledEventAction setDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		code.append("view.setDisabled('").append(BindUtil.sanitiseBinding(setDisabled.getBinding()));
-		code.append("','").append(setDisabled.getDisabledConditionName()).append("');");
+		// NB the condition is mandatory but that is only enforced by view validation
+		String disabledCondition = setDisabled.getDisabledCondition();
+		code.append("','").append((disabledCondition == null) ? null : BindUtil.conditionIdentifier(disabledCondition)).append("');");
 	}
 
 	/**
@@ -3897,11 +3979,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible,
+	public void visitSetInvisibleEventAction(@Nonnull SetInvisibleEventAction setInvisible,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		code.append("view.setInvisible('").append(BindUtil.sanitiseBinding(setInvisible.getBinding()));
-		code.append("','").append(setInvisible.getInvisibleConditionName()).append("');");
+		// NB the condition is mandatory but that is only enforced by view validation
+		String invisibleCondition = setInvisible.getInvisibleCondition();
+		code.append("','").append((invisibleCondition == null) ? null : BindUtil.conditionIdentifier(invisibleCondition)).append("');");
 	}
 
 	/**
@@ -3912,7 +3996,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled,
+	public void visitToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction toggleDisabled,
 												boolean parentVisible,
 												boolean parentEnabled) {
 		code.append("view.toggleDisabled('").append(BindUtil.sanitiseBinding(toggleDisabled.getBinding()));
@@ -3927,7 +4011,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility,
+	public void visitToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction toggleVisibility,
 													boolean parentVisible,
 													boolean parentEnabled) {
 		code.append("view.toggleVisibility('").append(BindUtil.sanitiseBinding(toggleVisibility.getBinding()));
@@ -3944,7 +4028,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+	public void visitParameter(@Nonnull Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - parameters are handled separately
 	}
 
@@ -3958,7 +4042,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parentEnabled The parent enabled.
 	 */
 	@Override
-	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+	public void visitFilterParameter(@Nonnull FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		// do nothing - parameters are handled separately
 	}
 
@@ -3967,7 +4051,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @return A JavaScript expression that yields a unique component identifier.
 	 */
-	private String IDExpression() {
+	private @Nonnull String IDExpression() {
 		StringBuilder result = new StringBuilder(64);
 		result.append('\'').append(module.getName()).append('_');
 		result.append(document.getName()).append('_');
@@ -3991,9 +4075,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param builder JavaScript buffer receiving size-related properties
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void size(AbsoluteWidth sizable,
-						Integer defaultMinHeightInPixels,
-						StringBuilder builder) {
+	private void size(@Nonnull AbsoluteWidth sizable,
+						@Nullable Integer defaultMinHeightInPixels,
+						@Nonnull StringBuilder builder) {
 		ShrinkWrap shrinkWrap = (sizable instanceof ShrinkWrapper shrinkWrapper) ?
 									shrinkWrapper.getShrinkWrap() :
 									null;
@@ -4100,22 +4184,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param grid grid metadata containing disable-condition bindings
 	 * @param builder JavaScript buffer receiving action-disable properties
 	 */
-	private static void disableCRUD(DisableableCRUDGrid grid, StringBuilder builder) {
-		String disabledCRUDCondition = grid.getDisableAddConditionName();
+	private static void disableCRUD(@Nonnull DisableableCRUDGrid grid, @Nonnull StringBuilder builder) {
+		String disabledCRUDCondition = grid.getDisableAddCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableAddConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableAddCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
-		disabledCRUDCondition = grid.getDisableZoomConditionName();
+		disabledCRUDCondition = grid.getDisableZoomCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableZoomConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableZoomCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
-		disabledCRUDCondition = grid.getDisableEditConditionName();
+		disabledCRUDCondition = grid.getDisableEditCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableEditConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableEditCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
-		disabledCRUDCondition = grid.getDisableRemoveConditionName();
+		disabledCRUDCondition = grid.getDisableRemoveCondition();
 		if (disabledCRUDCondition != null) {
-			builder.append("disableRemoveConditionName:'").append(disabledCRUDCondition).append("',");
+			builder.append("disableRemoveCondition:'").append(BindUtil.conditionIdentifier(disabledCRUDCondition)).append("',");
 		}
 	}
 
@@ -4125,22 +4209,22 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param lookup lookup metadata containing disable-condition bindings
 	 * @param builder JavaScript buffer receiving action-disable properties
 	 */
-	private static void disableLookupComponents(LookupDescription lookup, StringBuilder builder) {
-		String disabledCondition = lookup.getDisablePickConditionName();
+	private static void disableLookupComponents(@Nonnull LookupDescription lookup, @Nonnull StringBuilder builder) {
+		String disabledCondition = lookup.getDisablePickCondition();
 		if (disabledCondition != null) {
-			builder.append("disablePickConditionName:'").append(disabledCondition).append("',");
+			builder.append("disablePickCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
-		disabledCondition = lookup.getDisableEditConditionName();
+		disabledCondition = lookup.getDisableEditCondition();
 		if (disabledCondition != null) {
-			builder.append("disableEditConditionName:'").append(disabledCondition).append("',");
+			builder.append("disableEditCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
-		disabledCondition = lookup.getDisableAddConditionName();
+		disabledCondition = lookup.getDisableAddCondition();
 		if (disabledCondition != null) {
-			builder.append("disableAddConditionName:'").append(disabledCondition).append("',");
+			builder.append("disableAddCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
-		disabledCondition = lookup.getDisableClearConditionName();
+		disabledCondition = lookup.getDisableClearCondition();
 		if (disabledCondition != null) {
-			builder.append("disableClearConditionName:'").append(disabledCondition).append("',");
+			builder.append("disableClearCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
 	}
 
@@ -4152,7 +4236,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param definedPixelPadding explicit padding value, or null
 	 * @param builder JavaScript buffer receiving border properties
 	 */
-	private static void bordered(String title, Bordered bordered, Integer definedPixelPadding, StringBuilder builder) {
+	private static void bordered(@Nullable String title, @Nonnull Bordered bordered, @Nullable Integer definedPixelPadding, @Nonnull StringBuilder builder) {
 		if (Boolean.TRUE.equals(bordered.getBorder())) {
 			border(title, definedPixelPadding, builder);
 		}
@@ -4165,7 +4249,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param definedPixelPadding explicit padding value, or null
 	 * @param builder JavaScript buffer receiving border properties
 	 */
-	private static void border(String title, Integer definedPixelPadding, StringBuilder builder) {
+	private static void border(@Nullable String title, @Nullable Integer definedPixelPadding, @Nonnull StringBuilder builder) {
 		builder.append("styleName:'bizhubRoundedBorder',groupBorderCSS:'1px solid #bfbfbf',isGroup:true,margin:1,groupLabelBackgroundColor:'transparent',");
 		if (title != null) {
 			builder.append("groupTitle:'&nbsp;&nbsp;").append(title);
@@ -4177,26 +4261,32 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	}
 
 	/**
-	 * Appends a disabled-condition binding when configured.
+	 * Appends the {@code disabledCondition} property when a condition is configured.
 	 *
-	 * @param disabledConditionName condition binding name, or null
+	 * <p>A condition name is written as it is; an inline condition expression is written as its identifier
+	 * (see {@link BindUtil#conditionIdentifier(String)}), which is the key its value has in the instance data.
+	 *
+	 * @param disabledCondition the derived disabled condition, or null
 	 * @param builder JavaScript buffer receiving the property
 	 */
-	private static void disabled(String disabledConditionName, StringBuilder builder) {
-		if (disabledConditionName != null) {
-			builder.append("disabledConditionName:'").append(disabledConditionName).append("',");
+	private static void disabled(@Nullable String disabledCondition, @Nonnull StringBuilder builder) {
+		if (disabledCondition != null) {
+			builder.append("disabledCondition:'").append(BindUtil.conditionIdentifier(disabledCondition)).append("',");
 		}
 	}
 
 	/**
-	 * Appends an invisible-condition binding when configured.
+	 * Appends the {@code invisibleCondition} property when a condition is configured.
 	 *
-	 * @param invisibleConditionName condition binding name, or null
+	 * <p>A condition name is written as it is; an inline condition expression is written as its identifier
+	 * (see {@link BindUtil#conditionIdentifier(String)}), which is the key its value has in the instance data.
+	 *
+	 * @param invisibleCondition the derived invisible condition, or null
 	 * @param builder JavaScript buffer receiving the property
 	 */
-	private static void invisible(String invisibleConditionName, StringBuilder builder) {
-		if (invisibleConditionName != null) {
-			builder.append("invisibleConditionName:'").append(invisibleConditionName).append("',");
+	private static void invisible(@Nullable String invisibleCondition, @Nonnull StringBuilder builder) {
+		if (invisibleCondition != null) {
+			builder.append("invisibleCondition:'").append(BindUtil.conditionIdentifier(invisibleCondition)).append("',");
 		}
 	}
 
@@ -4206,7 +4296,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param editable metadata flag; null is treated as editable
 	 * @param builder JavaScript buffer receiving the property
 	 */
-	private static void editable(Boolean editable, StringBuilder builder) {
+	private static void editable(@Nullable Boolean editable, @Nonnull StringBuilder builder) {
 		builder.append("editable:").append((! Boolean.FALSE.equals(editable)) ? "true," : "false,");
 	}
 
@@ -4215,7 +4305,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 *
 	 * @param builder JavaScript buffer to trim
 	 */
-	private static void removeTrailingComma(StringBuilder builder) {
+	private static void removeTrailingComma(@Nonnull StringBuilder builder) {
 		int length = builder.length();
 		if (builder.charAt(length - 1) == ',') {
 			builder.setLength(length - 1);
@@ -4235,24 +4325,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tooltip optional tooltip text
 	 * @param confirmationText optional confirmation message
 	 * @param parameters action parameters
-	 * @param disabledConditionName optional disabled condition binding
-	 * @param invisibleConditionName optional invisible condition binding
+	 * @param disabledCondition optional disabled condition binding
+	 * @param invisibleCondition optional invisible condition binding
 	 * @param canDelete delete permission used for remove actions
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private void addAction(String actionName,
-							ImplicitActionName implicitName,
-							String displayName,
-							Boolean inActionPanel,
-							Boolean clientValidation,
-							String iconUrl,
-							String iconStyleClass,
-							String tooltip,
-							String confirmationText,
-							List<Parameter> parameters,
-							String disabledConditionName,
-							String invisibleConditionName,
-							Boolean canDelete) { // null unless its a remove button
+	private void addAction(@Nullable String actionName,
+							@Nullable ImplicitActionName implicitName,
+							@Nullable String displayName,
+							@Nullable Boolean inActionPanel,
+							@Nullable Boolean clientValidation,
+							@Nullable String iconUrl,
+							@Nullable String iconStyleClass,
+							@Nullable String tooltip,
+							@Nullable String confirmationText,
+							@Nonnull List<Parameter> parameters,
+							@Nullable String disabledCondition,
+							@Nullable String invisibleCondition,
+							@Nullable Boolean canDelete) { // null unless its a remove button
 		addAction(actionName,
 					implicitName,
 					displayName,
@@ -4263,8 +4353,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 					tooltip,
 					confirmationText,
 					parameters,
-					disabledConditionName,
-					invisibleConditionName,
+					disabledCondition,
+					invisibleCondition,
 					canDelete,
 					null);
 	}
@@ -4283,26 +4373,26 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param tooltip optional tooltip text
 	 * @param confirmationText optional confirmation message
 	 * @param parameters action parameters
-	 * @param disabledConditionName optional disabled condition binding
-	 * @param invisibleConditionName optional invisible condition binding
+	 * @param disabledCondition optional disabled condition binding
+	 * @param invisibleCondition optional invisible condition binding
 	 * @param canDelete delete permission used for remove actions
 	 * @param uploadCapture optional upload capture enum name; {@code null} for non-upload actions
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private void addAction(String actionName,
-							ImplicitActionName implicitName,
-							String displayName,
-							Boolean inActionPanel,
-							Boolean clientValidation,
-							String iconUrl,
-							String iconStyleClass,
-							String tooltip,
-							String confirmationText,
-							List<Parameter> parameters,
-							String disabledConditionName,
-							String invisibleConditionName,
-							Boolean canDelete,
-							String uploadCapture) { // null unless its an upload button
+	private void addAction(@Nullable String actionName,
+							@Nullable ImplicitActionName implicitName,
+							@Nullable String displayName,
+							@Nullable Boolean inActionPanel,
+							@Nullable Boolean clientValidation,
+							@Nullable String iconUrl,
+							@Nullable String iconStyleClass,
+							@Nullable String tooltip,
+							@Nullable String confirmationText,
+							@Nonnull List<Parameter> parameters,
+							@Nullable String disabledCondition,
+							@Nullable String invisibleCondition,
+							@Nullable Boolean canDelete,
+							@Nullable String uploadCapture) { // null unless its an upload button
 		if (! Boolean.FALSE.equals(inActionPanel) &&
 				(! ImplicitActionName.Add.equals(implicitName)) &&
 				(! ImplicitActionName.Edit.equals(implicitName))) {
@@ -4318,8 +4408,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 												confirmationText,
 												getActionEscapeConfirm(),
 												parameters,
-												disabledConditionName,
-												invisibleConditionName,
+												disabledCondition,
+												invisibleCondition,
 												null,
 												canDelete);
 			if (uploadCapture != null) {
@@ -4341,7 +4431,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param uploadCapture
 	 * @return
 	 */
-	private static String withUploadCapture(String buttonCode, String uploadCapture) {
+	private static @Nonnull String withUploadCapture(@Nonnull String buttonCode, @Nonnull String uploadCapture) {
 		return buttonCode.replace("_view:view})", "capture:'" + uploadCapture + "',_view:view})");
 	}
 
@@ -4370,11 +4460,11 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param zoomIn zoom-in metadata
 	 * @return JavaScript constructor expression for the widget
 	 */
-	private String generateZoomIn(String label,
-			String iconUrl,
-			String iconStyleClass,
-			String toolTip,
-			ZoomIn zoomIn) {
+	private @Nonnull String generateZoomIn(@Nullable String label,
+			@Nullable String iconUrl,
+			@Nullable String iconStyleClass,
+			@Nullable String toolTip,
+			@Nonnull ZoomIn zoomIn) {
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizZoomIn.create({");
 
@@ -4409,8 +4499,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		}
 
 		size(zoomIn, null, result);
-		disabled(zoomIn.getDisabledConditionName(), result);
-		invisible(zoomIn.getInvisibleConditionName(), result);
+		disabled(zoomIn.getDisabledCondition(), result);
+		invisible(zoomIn.getInvisibleCondition(), result);
 
 		if (toolTip != null) {
 			result.append("tooltip:'")
@@ -4438,29 +4528,29 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param confirmationText optional confirmation message
 	 * @param escapeConfirm whether the confirmation message should be escaped
 	 * @param parameters action parameters
-	 * @param disabledConditionName optional disabled condition binding
-	 * @param invisibleConditionName optional invisible condition binding
+	 * @param disabledCondition optional disabled condition binding
+	 * @param invisibleCondition optional invisible condition binding
 	 * @param button source button metadata when rendering declared buttons
 	 * @param canDelete delete permission used for remove actions
 	 * @return JavaScript constructor expression for the button
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private String generateButton(String actionName,
-									ImplicitActionName implicitName,
-									String label,
-									boolean escapeDisplayName,
-									Boolean clientValidation,
-									String iconUrl,
-									String iconStyleClass,
-									String toolTip,
-									boolean escapeToolTip,
-									String confirmationText,
-									boolean escapeConfirm,
-									List<Parameter> parameters,
-									String disabledConditionName,
-									String invisibleConditionName,
-									Button button, // null if called from an action defn
-									Boolean canDelete) { // null for anything but remove button
+	private @Nonnull String generateButton(@Nullable String actionName,
+											@Nullable ImplicitActionName implicitName,
+											@Nullable String label,
+											boolean escapeDisplayName,
+											@Nullable Boolean clientValidation,
+											@Nullable String iconUrl,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											boolean escapeToolTip,
+											@Nullable String confirmationText,
+											boolean escapeConfirm,
+											@Nonnull List<Parameter> parameters,
+											@Nullable String disabledCondition,
+											@Nullable String invisibleCondition,
+											@Nullable Button button, // null if called from an action defn
+											@Nullable Boolean canDelete) { // null for anything but remove button
 		StringBuilder result = new StringBuilder(128);
 		result.append("isc.BizButton.create({validate:");
 		result.append(! Boolean.FALSE.equals(clientValidation));
@@ -4488,8 +4578,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 		if (button != null) {
 			size(button, null, result);
 		}
-		disabled(disabledConditionName, result);
-		invisible(invisibleConditionName, result);
+		disabled(disabledCondition, result);
+		invisible(invisibleCondition, result);
 		if (toolTip != null) {
 			result.append("tooltip:'").append(escapeSmartClientText(toolTip, escapeToolTip)).append("',");
 		}
@@ -4511,7 +4601,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param parameters parameter definitions to encode
 	 * @param builder JavaScript buffer receiving encoded parameters
 	 */
-	private static void appendParameters(List<Parameter> parameters, StringBuilder builder) {
+	private static void appendParameters(@Nullable List<Parameter> parameters, @Nonnull StringBuilder builder) {
 		if ((parameters != null) && (! parameters.isEmpty())) {
 			builder.append("params:{");
 			for (Parameter parameter : parameters) {
@@ -4601,8 +4691,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param typeOverride optional SmartClient type override
 	 * @return prepared field definition
 	 */
-	private SmartClientFieldDefinition preProcessFormItem(InputWidget widget,
-															String typeOverride) {
+	private @Nonnull SmartClientFieldDefinition preProcessFormItem(@Nonnull InputWidget widget,
+																	@Nullable String typeOverride) {
 		SmartClientFieldDefinition def = getField(document, widget, true);
 		if (typeOverride != null) {
 			def.setType(typeOverride);
@@ -4638,13 +4728,13 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param uxui active UX/UI profile name
 	 * @return the generated query-column definition
 	 */
-	public static SmartClientQueryColumnDefinition getQueryColumn(User user,
-																	Customer customer,
-																	Module module,
-																	Document document,
-																	MetaDataQueryColumn column,
-																	boolean runtime,
-																	String uxui) {
+	public static @Nonnull SmartClientQueryColumnDefinition getQueryColumn(@Nullable User user,
+																			@Nonnull Customer customer,
+																			@Nonnull Module module,
+																			@Nonnull Document document,
+																			@Nonnull MetaDataQueryColumn column,
+																			boolean runtime,
+																			@Nonnull String uxui) {
 		return new SmartClientQueryColumnDefinition(user, customer, module, document, column, runtime, uxui);
 	}
 
@@ -4656,9 +4746,9 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param runtime Whether the generated definition is for runtime execution.
 	 * @return The SmartClient field definition for the widget.
 	 */
-	public SmartClientFieldDefinition getField(@SuppressWarnings("hiding") Document document,
-												InputWidget widget,
-												boolean runtime) {
+	public @Nonnull SmartClientFieldDefinition getField(@SuppressWarnings("hiding") @Nonnull Document document,
+														@Nonnull InputWidget widget,
+														boolean runtime) {
 		return new SmartClientFieldDefinition(user, customer, module, document, widget, runtime, currentUxUi);
 	}
 
@@ -4672,12 +4762,12 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param runtime whether the generated definition is for runtime execution
 	 * @return the generated data-grid field definition
 	 */
-	public SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") Document document,
-    															InputWidget widget,
-    															String dataGridBinding,
+	public @Nonnull SmartClientDataGridFieldDefinition getDataGridField(@SuppressWarnings("hiding") @Nonnull Document document,
+    															@Nonnull InputWidget widget,
+    															@Nullable String dataGridBinding,
     															boolean hasFormatter,
     															boolean runtime) {
-    	return new SmartClientDataGridFieldDefinition(user, customer, module, document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
+		return new SmartClientDataGridFieldDefinition(user, customer, module, document, this.document, widget, dataGridBinding, hasFormatter, runtime, false, currentUxUi);
     }
 
     /**
@@ -4698,16 +4788,132 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	* @return the generated data-source id
      */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static String appendDataSourceDefinition(User user,
-														Customer customer,
-														Module owningModule,
-														Document owningDocument,
-														String modelName,
-														String uxui,
-														boolean config,
-														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) {
+	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule,
+											owningDocument,
+											modelName,
+											null,
+											null,
+											uxui,
+											config,
+											toAppendTo,
+											visitedQueryNames);
+	}
+
+	/**
+	 * Appends a model data source, including lookup-specific fields when supplied.
+	 *
+	 * @param user active user
+	 * @param customer active customer
+	 * @param owningModule model owner module
+	 * @param owningDocument model owner document
+	 * @param modelName model name
+	 * @param dataSourceIDOverride optional lookup data source identifier
+	 * @param forLookup optional lookup metadata
+	 * @param uxui active UX/UI
+	 * @param config whether to emit configuration only
+	 * @param toAppendTo output buffer
+	 * @param visitedQueryNames visited data sources
+	 * @return the data source identifier
+	 */
+	@SuppressWarnings("java:S107") // Matches the query data-source overload with model ownership.
+	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		ListModel<Bean> model = owningDocument.getListModel(customer, modelName, true);
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule,
+											owningDocument,
+											modelName,
+											model,
+											dataSourceIDOverride,
+											forLookup,
+											uxui,
+											config,
+											toAppendTo,
+											visitedQueryNames);
+	}
+
+	/**
+	 * Appends a SmartClient data source definition for a document list model that the caller has already built, so
+	 * that a caller who needs the model too builds it only once.
+	 *
+	 * <p>Side effects: appends generated JavaScript to the supplied buffer and tracks
+	 * visited data-source names to prevent recursive duplication.
+	 *
+	 * @param user active user
+	 * @param customer active customer metadata
+	 * @param owningModule module that owns the model
+	 * @param owningDocument document that owns the model
+	 * @param modelName list model name
+	 * @param model the model, from {@code owningDocument.getListModel(customer, modelName, true)}
+	 * @param uxui active UX/UI profile name
+	 * @param config whether to generate configuration-only output
+	 * @param toAppendTo buffer receiving the generated definition
+	 * @param visitedQueryNames visited data-source names used to break recursion
+	 * @return the generated data-source id
+	 * @throws MetaDataException if the model has no driving document
+	 */
+	@SuppressWarnings("java:S107") // Matches the model data-source overloads.
+	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nonnull ListModel<Bean> model,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
+		return appendDataSourceDefinition(user,
+											customer,
+											owningModule,
+											owningDocument,
+											modelName,
+											model,
+											null,
+											null,
+											uxui,
+											config,
+											toAppendTo,
+											visitedQueryNames);
+	}
+
+	/**
+	 * Appends a model data source from a built model, including lookup-specific fields when supplied.
+	 */
+	@SuppressWarnings("java:S107") // Matches the model data-source overloads.
+	private static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Module owningModule,
+																	@Nonnull Document owningDocument,
+																	@Nonnull String modelName,
+																	@Nonnull ListModel<Bean> model,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		// Note we cannot set the bean on the model here as we are only generating out the UI.
 		Document drivingDocument = model.getDrivingDocument();
 		if (drivingDocument == null) {
@@ -4726,8 +4932,8 @@ public class SmartClientViewRenderer extends ViewRenderer {
 											modelName,
 											model.getLocalisedDescription(),
 											model.getColumns(),
-											null,
-											null,
+											dataSourceIDOverride,
+											forLookup,
 											uxui,
 											config,
 											toAppendTo,
@@ -4752,15 +4958,15 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	* @return the generated data-source id
      */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static String appendDataSourceDefinition(User user,
-														Customer customer,
-														MetaDataQueryDefinition query,
-														String dataSourceIDOverride,
-														LookupDescription forLookup,
-														String uxui,
-														boolean config,
-														StringBuilder toAppendTo,
-														Set<String> visitedQueryNames) {
+	public static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull MetaDataQueryDefinition query,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		String documentName = query.getDocumentName();
 		Module documentModule = query.getDocumentModule(customer);
 		Module owningModule = query.getOwningModule();
@@ -4807,24 +5013,24 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @return generated data-source id
 	 */
 	@SuppressWarnings({"java:S107", "null", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private static String appendDataSourceDefinition(User user,
-														Customer customer,
-														String owningModuleName,
-														Document owningDocument,
-														Module drivingDocumentModule,
-														Document drivingDocument,
-														String queryName,
-														boolean aggregateQuery,
-														String modelName,
-														String description,
-														List<MetaDataQueryColumn> columns,
-														String dataSourceIDOverride,
-														LookupDescription forLookup,
-														String uxui,
-														// indicates that this is for configuration in the harness page
-														boolean config,
-														StringBuilder toAppendTo,
-														@Nonnull Set<String> visitedQueryNames) {
+	private static @Nullable String appendDataSourceDefinition(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nullable String owningModuleName,
+																	@Nonnull Document owningDocument,
+																	@Nonnull Module drivingDocumentModule,
+																	@Nonnull Document drivingDocument,
+																	@Nullable String queryName,
+																	boolean aggregateQuery,
+																	@Nullable String modelName,
+																	@Nullable String description,
+																	@Nonnull List<MetaDataQueryColumn> columns,
+																	@Nullable String dataSourceIDOverride,
+																	@Nullable LookupDescription forLookup,
+																	@Nonnull String uxui,
+																	// indicates that this is for configuration in the harness page
+																	boolean config,
+																	@Nonnull StringBuilder toAppendTo,
+																	@Nonnull Set<String> visitedQueryNames) {
 		// dataSourceId -> defn
 		Map<String, String> childDataSources = new TreeMap<>();
 
@@ -5034,7 +5240,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param borderTitle localized border title, or null
 	 * @throws MetaDataException if collapsible is set without a border title
 	 */
-	private static void validateCollapsible(Collapsible collapsible,String borderTitle) {
+	private static void validateCollapsible(@Nullable Collapsible collapsible,@Nullable String borderTitle) {
 		if (collapsible != null && borderTitle == null) {
 			throw new MetaDataException("Border title must be defined if the collapsible attribute is present");
 		}
@@ -5046,10 +5252,10 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param sidebar sidebar metadata to render
 	 */
 	@Override
-	public void renderSidebar(Sidebar sidebar) {
+	public void renderSidebar(@Nonnull Sidebar sidebar) {
 		String variable = "v" + variableCounter++;
 		code.append("var ").append(variable).append("=isc.BizVBox.create({width:'100%',height:'100%',");
-		invisible(sidebar.getInvisibleConditionName(), code);
+		invisible(sidebar.getInvisibleCondition(), code);
 		removeTrailingComma(code);
 		code.append("});\n");
 
@@ -5063,7 +5269,7 @@ public class SmartClientViewRenderer extends ViewRenderer {
 	 * @param sidebar sidebar metadata that was just rendered
 	 */
 	@Override
-	public void renderedSidebar(Sidebar sidebar) {
+	public void renderedSidebar(@Nonnull Sidebar sidebar) {
 		containerVariables.pop();
 	}
 }

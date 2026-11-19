@@ -14,6 +14,9 @@ import org.skyve.metadata.view.model.list.InMemoryListModel;
 
 import modules.test.domain.AllAttributesPersistent;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a minimal in-memory list model used by dynamic-persistent list tests.
  */
@@ -34,7 +37,7 @@ public class TestListModel extends InMemoryListModel<DynamicPersistentBean> {
 	 * @param runtime whether the model is being initialised at runtime
 	 */
 	@Override
-	public void postConstruct(Customer customer, boolean runtime) {
+	public void postConstruct(@Nonnull Customer customer, boolean runtime) {
 		Module m = customer.getModule(AllAttributesPersistent.MODULE_NAME);
 		setDrivingDocument(m, m.getDocument(customer, AllAttributesPersistent.DOCUMENT_NAME));
 		super.postConstruct(customer, runtime);
@@ -47,7 +50,7 @@ public class TestListModel extends InMemoryListModel<DynamicPersistentBean> {
 	 * @throws Exception if row resolution fails
 	 */
 	@Override
-	public List<Bean> getRows() throws Exception {
+	public @Nonnull List<Bean> getRows() throws Exception {
 		return new ArrayList<>();
 	}
 
@@ -57,7 +60,7 @@ public class TestListModel extends InMemoryListModel<DynamicPersistentBean> {
 	 * @return the fixed description string
 	 */
 	@Override
-	public String getDescription() {
+	public @Nonnull String getDescription() {
 		return "Test";
 	}
 
@@ -67,7 +70,7 @@ public class TestListModel extends InMemoryListModel<DynamicPersistentBean> {
 	 * @return the static projected-column definition list
 	 */
 	@Override
-	public List<MetaDataQueryColumn> getColumns() {
+	public @Nonnull List<MetaDataQueryColumn> getColumns() {
 		return COLUMNS;
 	}
 
@@ -80,7 +83,7 @@ public class TestListModel extends InMemoryListModel<DynamicPersistentBean> {
 	 * @throws Exception always, because updates are unsupported
 	 */
 	@Override
-	public Bean update(String bizId, SortedMap<String, Object> properties) throws Exception {
+	public @Nullable Bean update(@Nonnull String bizId, @Nonnull SortedMap<String, Object> properties) throws Exception {
 		throw new UnsupportedOperationException();
 	}
 
@@ -91,7 +94,7 @@ public class TestListModel extends InMemoryListModel<DynamicPersistentBean> {
 	 * @throws Exception always, because removal is unsupported
 	 */
 	@Override
-	public void remove(String bizId) throws Exception {
+	public void remove(@Nonnull String bizId) throws Exception {
 		throw new UnsupportedOperationException();
 	}
 }

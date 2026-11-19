@@ -56,7 +56,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public void init(ServletConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull ServletConfig config) throws ServletException {
 		super.init(config);
 		
 		String rendererParam = Util.processStringValue(config.getInitParameter("renderer"));
@@ -82,7 +82,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	 * @return the configured renderer
 	 * @throws DomainException if the configured renderer cannot be instantiated
 	 */
-	public static SmartClientViewRenderer newRenderer(User user, Module module, Document document, View view, String uxui, boolean noCreateView) {
+	public static @Nonnull SmartClientViewRenderer newRenderer(@Nonnull User user, @Nonnull Module module, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui, boolean noCreateView) {
 		if (RENDERER_CLASS == null) {
 			return new SmartClientViewRenderer(user, module, document, view, uxui, noCreateView);
 		}
@@ -105,8 +105,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request,
-							HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClient Generate - get....");
 		processRequest(request, response);
@@ -114,8 +114,8 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 
 	// NB - Never throw ServletException as this will halt the SmartClient Relogin flow.
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void processRequest(HttpServletRequest request,
-										HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request,
+										@Nonnull HttpServletResponse response)
 	throws IOException {
 		String moduleName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.MODULE_NAME)));
 		String documentName = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.DOCUMENT_NAME)));
@@ -271,7 +271,7 @@ public class SmartClientGeneratorServlet extends HttpServlet {
 	 * @param reference The reference to the logs.
 	 * @param pw The PrintWriter to append to.
 	 */
-	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
+	static void appendUnexpectedWarning(@Nonnull String reference, @Nonnull PrintWriter pw) {
 		pw.append("Could not generate views. ");
 		pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(reference)));
 	}

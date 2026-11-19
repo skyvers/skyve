@@ -23,6 +23,7 @@ import java.util.Enumeration;
 
 import org.skyve.content.MimeType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
@@ -43,7 +44,7 @@ public class CompressionFilterTestServlet extends HttpServlet {
 
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	public void doGet(HttpServletRequest request, HttpServletResponse response)
+	public void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request, @SuppressWarnings("null") @Nonnull HttpServletResponse response)
     throws ServletException, IOException {
 
         try (ServletOutputStream out = response.getOutputStream()) {

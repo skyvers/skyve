@@ -1,11 +1,12 @@
 package org.skyve.impl.web;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,15 +18,24 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cache.StateUtil;
+import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.web.service.smartclient.SmartClientWebContext;
+import org.skyve.metadata.router.UxUi;
 import org.skyve.report.ReportFormat;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
+import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -35,10 +45,18 @@ import jakarta.servlet.http.HttpSession;
 import net.sf.jasperreports.jakarta.servlets.BaseHttpServlet;
 import net.sf.jasperreports.engine.JasperPrint;
 import modules.test.AbstractSkyveTest;
-import modules.test.domain.AllAttributesPersistent;
+import modules.admin.domain.Contact;
 
 @SuppressWarnings({"static-method", "boxing", "resource"})
 class ReportServletH2Test extends AbstractSkyveTest {
+	/**
+	 * Build the test user's menus as login does; the menus are what grant list (aggregate) access.
+	 */
+	@BeforeEach
+	void resetMenus() {
+		ProvidedRepositoryFactory.getNullSafe().resetMenus(u);
+	}
+
 	@AfterEach
 	void restorePersistenceUser() {
 		AbstractPersistence.get().setUser(u);
@@ -46,43 +64,53 @@ class ReportServletH2Test extends AbstractSkyveTest {
 
 	@Test
 	void doExportStreamsCsvForDefaultDocumentQuery() throws Exception {
-		saveReportBean("report-export");
+		Contact bean = saveReportBean("report-export");
 
 		CapturedOutput output = new CapturedOutput();
-		HttpServletRequest request = exportRequest(null, "text");
+		HttpServletRequest request = exportRequest(null, "name");
 		HttpServletResponse response = exportResponse(output);
 
 		invokeDoExport(request, response);
 
-		assertTrue(output.bytes().length > 0);
+		String csv = output.text();
+		assertTrue(csv.contains(bean.getName()), csv);
+		verify(response, never()).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	@Test
 	void doExportAppliesSimpleCriteriaForDocumentQuery() throws Exception {
-		saveReportBean("report-simple");
+		Contact match = saveReportBean("report-simple");
+		Contact other = saveReportBean("report-other");
 
 		CapturedOutput output = new CapturedOutput();
-		HttpServletRequest request = exportRequest("\"criteria\":{\"text\":\"report-simple\"},", "text");
+		HttpServletRequest request = exportRequest("\"criteria\":{\"name\":\"" + match.getName() + "\"},", "name");
 		HttpServletResponse response = exportResponse(output);
 
 		invokeDoExport(request, response);
 
-		assertTrue(output.bytes().length > 0);
+		String csv = output.text();
+		assertTrue(csv.contains(match.getName()), csv);
+		assertFalse(csv.contains(other.getName()), csv);
+		verify(response, never()).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	@Test
 	void doExportAppliesAdvancedCriteriaForDocumentQuery() throws Exception {
-		saveReportBean("report-advanced");
+		Contact match = saveReportBean("report-advanced");
+		Contact other = saveReportBean("report-other");
 
 		CapturedOutput output = new CapturedOutput();
 		HttpServletRequest request = exportRequest(
-				"\"criteria\":{\"operator\":\"and\",\"criteria\":[{\"fieldName\":\"text\",\"operator\":\"iContains\",\"value\":\"report-advanced\"}]},",
-				"text");
+				"\"criteria\":{\"operator\":\"and\",\"criteria\":[{\"fieldName\":\"name\",\"operator\":\"iContains\",\"value\":\"" + match.getName() + "\"}]},",
+				"name");
 		HttpServletResponse response = exportResponse(output);
 
 		invokeDoExport(request, response);
 
-		assertTrue(output.bytes().length > 0);
+		String csv = output.text();
+		assertTrue(csv.contains(match.getName()), csv);
+		assertFalse(csv.contains(other.getName()), csv);
+		verify(response, never()).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 	}
 
 	@Test
@@ -140,6 +168,33 @@ class ReportServletH2Test extends AbstractSkyveTest {
 	}
 
 	@Test
+	void doReportWithoutAReportNameGeneratesTheEditViewReportOfTheConversationBean() throws Exception {
+		Contact contact = saveReportBean("report-print");
+		MockHttpSession session = new MockHttpSession();
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/report");
+		request.setSession(session);
+		// print as the desktop UX/UI, a UX/UI the test user has access to the contact's edit view in
+		request.setAttribute(UserAgent.class.getName() + ".selection",
+								new RequestUxUiSelection(UserAgentType.desktop,
+															false,
+															UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
+		SmartClientWebContext webContext = new SmartClientWebContext(UUID.randomUUID().toString(), request);
+		webContext.setCurrentBean(contact);
+		StateUtil.commitAndCacheConversation(webContext);
+		request.addParameter(AbstractWebContext.CONTEXT_NAME, webContext.getWebId());
+		request.addParameter(AbstractWebContext.MODULE_NAME, Contact.MODULE_NAME);
+		request.addParameter(AbstractWebContext.DOCUMENT_NAME, Contact.DOCUMENT_NAME);
+		request.addParameter(AbstractWebContext.REPORT_FORMAT, ReportFormat.csv.name());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		invokeDoReport(request, response);
+
+		assertEquals(HttpServletResponse.SC_OK, response.getStatus(), response.getContentAsString());
+		assertTrue(response.getContentType().startsWith(org.skyve.content.MimeType.csv.toString()), response.getContentType());
+		assertTrue(response.getContentAsString().contains(contact.getName()), response.getContentAsString());
+	}
+
+	@Test
 	void pumpOutReportFormatStreamsAllSupportedFormats() throws Exception {
 		byte[] bytes = "abc".getBytes(java.nio.charset.StandardCharsets.UTF_8);
 		for (ReportFormat format : ReportFormat.values()) {
@@ -185,7 +240,7 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		HttpServletResponse response = exportResponse(output);
 		when(response.encodeRedirectURL(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 		when(response.isCommitted()).thenReturn(false);
-		org.mockito.Mockito.doThrow(new IOException("redirect failed")).when(response).sendRedirect(anyString());
+		doThrow(new IOException("redirect failed")).when(response).sendRedirect(anyString());
 
 		invokeRedirectToErrorPage(response, "REF-2");
 
@@ -228,10 +283,13 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		assertNull(parameters.get("blank"));
 	}
 
-	private AllAttributesPersistent saveReportBean(String prefix) {
-		AllAttributesPersistent bean = new DataBuilder().fixture(FixtureType.crud)
-														.build(AllAttributesPersistent.MODULE_NAME, AllAttributesPersistent.DOCUMENT_NAME);
-		bean.setText(prefix + "-" + System.nanoTime());
+	/**
+	 * Saves a contact to export. The admin menu lists contacts through their default query (qContacts),
+	 * which is what gives the test user access to export them.
+	 */
+	private Contact saveReportBean(String prefix) {
+		Contact bean = new DataBuilder().fixture(FixtureType.crud).build(Contact.MODULE_NAME, Contact.DOCUMENT_NAME);
+		bean.setName(prefix + "-" + System.nanoTime());
 		return p.save(bean);
 	}
 
@@ -239,8 +297,13 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		HttpSession session = mock(HttpSession.class);
 		when(request.getSession()).thenReturn(session);
+		// export as the desktop UX/UI, a UX/UI the test user has list access in
+		when(request.getAttribute(UserAgent.class.getName() + ".selection")).thenReturn(
+				new RequestUxUiSelection(UserAgentType.desktop,
+											false,
+											UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
 		when(request.getParameter("values")).thenReturn("""
-				{"ds":"test_AllAttributesPersistent","reportFormat":"csv","style":"tabular","width":595,"height":842,
+				{"ds":"admin_qContacts","reportFormat":"csv","style":"tabular","width":595,"height":842,
 				"isPaginated":false,"isPretty":false,"showSummary":false,"top":10,"bottom":10,"left":10,"right":10,
 				%s
 				"columns":[{"name":"%s","line":0,"title":"Text","width":100,"align":"left"}],
@@ -276,6 +339,21 @@ class ReportServletH2Test extends AbstractSkyveTest {
 		doExport.setAccessible(true);
 		try {
 			doExport.invoke(null, request, response);
+		}
+		catch (InvocationTargetException e) {
+			Throwable cause = e.getCause();
+			if (cause instanceof Exception exception) {
+				throw exception;
+			}
+			throw e;
+		}
+	}
+
+	private static void invokeDoReport(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		Method doReport = ReportServlet.class.getDeclaredMethod("doReport", HttpServletRequest.class, HttpServletResponse.class);
+		doReport.setAccessible(true);
+		try {
+			doReport.invoke(null, request, response);
 		}
 		catch (InvocationTargetException e) {
 			Throwable cause = e.getCause();

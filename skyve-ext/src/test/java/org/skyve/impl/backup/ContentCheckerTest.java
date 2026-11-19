@@ -2,8 +2,11 @@ package org.skyve.impl.backup;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -14,8 +17,8 @@ import java.sql.Statement;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.content.AttachmentContent;
 import org.skyve.content.ContentManager;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
@@ -32,12 +35,12 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.persistence.SQL;
 
 @SuppressWarnings({"static-method", "boxing"})
-public class ContentCheckerTest {
+class ContentCheckerTest {
 	private final String originalCustomer = UtilImpl.CUSTOMER;
 	private final ProvidedRepository originalRepository = ProvidedRepositoryFactory.get();
 
-	@After
-	public void teardown() throws Exception {
+	@AfterEach
+	void teardown() throws Exception {
 		unbindPersistenceFromThread();
 		UtilImpl.CUSTOMER = originalCustomer;
 		if (originalRepository == null) {
@@ -49,7 +52,28 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void hasContentRecognisesContentAndImageFieldsOnly() throws Exception {
+	void checkContentThrowsWhenTheDynamicEntityDocumentHasNoTableName() throws Exception {
+		AbstractPersistence persistence = bindMockPersistence();
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		Customer customer = mock(Customer.class);
+		Module admin = mock(Module.class);
+		Document dynamicEntity = mock(Document.class);
+		when(persistence.getUser()).thenReturn(user);
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getName()).thenReturn("demo");
+		when(customer.getModule(org.skyve.domain.app.AppConstants.ADMIN_MODULE_NAME)).thenReturn(admin);
+		when(admin.getDocument(customer, org.skyve.domain.app.AppConstants.DYNAMIC_ENTITY_DOCUMENT_NAME)).thenReturn(dynamicEntity);
+		// persistent metadata without a name has no table name
+		when(dynamicEntity.getPersistent()).thenReturn(new Persistent());
+
+		org.skyve.metadata.MetaDataException e = assertThrows(org.skyve.metadata.MetaDataException.class,
+																			() -> new ContentChecker().checkContent());
+
+		assertThat(e.getMessage(), is("The dynamic entity document has persistent metadata with no table name."));
+	}
+
+	@Test
+	void hasContentRecognisesContentAndImageFieldsOnly() throws Exception {
 		Table scalar = new Table("Scalar", "SCALAR");
 		scalar.fields.put("name", new BackupField(AttributeType.text, Sensitivity.none));
 		Table content = new Table("Content", "CONTENT");
@@ -63,7 +87,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentCountsMissingAttachment() throws Exception {
+	void checkContentCountsMissingAttachment() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -77,7 +101,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentCountsAttributeNameMismatch() throws Exception {
+	void checkContentCountsAttributeNameMismatch() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -91,7 +115,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentCountsNonPersistentDocument() throws Exception {
+	void checkContentCountsNonPersistentDocument() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -110,7 +134,7 @@ public class ContentCheckerTest {
 
 	@Test
 	@SuppressWarnings("null")
-	public void checkContentCountsPersistentIdentifierMismatchForStaticDocument() throws Exception {
+	void checkContentCountsPersistentIdentifierMismatchForStaticDocument() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -125,7 +149,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentCountsMissingPolymorphicAttribute() throws Exception {
+	void checkContentCountsMissingPolymorphicAttribute() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -139,7 +163,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentCountsAttributeTypeMismatch() throws Exception {
+	void checkContentCountsAttributeTypeMismatch() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -153,7 +177,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentAcceptsEmbeddedFieldNameSuffixAndSkipsPersistentIdentifierMismatch() throws Exception {
+	void checkContentAcceptsEmbeddedFieldNameSuffixAndSkipsPersistentIdentifierMismatch() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -168,7 +192,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentCountsMissingContentDocument() throws Exception {
+	void checkContentCountsMissingContentDocument() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -182,7 +206,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentAcceptsMatchingDynamicDocumentContent() throws Exception {
+	void checkContentAcceptsMatchingDynamicDocumentContent() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -197,7 +221,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void checkContentSwallowsContentManagerException() throws Exception {
+	void checkContentSwallowsContentManagerException() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		@SuppressWarnings("resource")
 		ContentManager cm = mock(ContentManager.class);
@@ -212,7 +236,7 @@ public class ContentCheckerTest {
 
 	@Test
 	@SuppressWarnings("resource")
-	public void checkDynamicContentReadsJsonContentFieldsAndValidatesAttachments() throws Exception {
+	void checkDynamicContentReadsJsonContentFieldsAndValidatesAttachments() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		Connection connection = mock(Connection.class);
 		Statement statement = mock(Statement.class);
@@ -234,14 +258,38 @@ public class ContentCheckerTest {
 
 		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
 
-		org.mockito.Mockito.verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY where bizCustomer = 'demo'");
+		verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY where bizCustomer = 'demo'");
 		assertThat(counter(checker, "missingContentCount"), is(0));
 		assertThat(counter(checker, "erroneousContentCount"), is(0));
 	}
 
 	@Test
 	@SuppressWarnings("resource")
-	public void checkDynamicContentOmitsCustomerFilterWhenSingleCustomerConfigured() throws Exception {
+	void checkDynamicContentSkipsRowWithNullJsonFields() throws Exception {
+		ContentChecker checker = new ContentChecker();
+		Connection connection = mock(Connection.class);
+		Statement statement = mock(Statement.class);
+		ResultSet resultSet = mock(ResultSet.class);
+		ContentManager cm = mock(ContentManager.class);
+		Customer customer = mock(Customer.class);
+		document(customer, "OTHER_DYNAMIC_DOC", attribute("upload", AttributeType.content), attribute("photo", AttributeType.image));
+		when(connection.createStatement()).thenReturn(statement);
+		when(statement.getResultSet()).thenReturn(resultSet);
+		when(resultSet.next()).thenReturn(true, false);
+		when(resultSet.getString(2)).thenReturn("admin");
+		when(resultSet.getString(3)).thenReturn("Invoice");
+		when(resultSet.getString(4)).thenReturn("null");
+
+		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
+
+		verifyNoInteractions(cm);
+		assertThat(counter(checker, "missingContentCount"), is(0));
+		assertThat(counter(checker, "erroneousContentCount"), is(0));
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void checkDynamicContentOmitsCustomerFilterWhenSingleCustomerConfigured() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		UtilImpl.CUSTOMER = "demo";
 		Connection connection = mock(Connection.class);
@@ -255,11 +303,11 @@ public class ContentCheckerTest {
 
 		invokeCheckDynamicContent(checker, connection, cm, customer, "demo", "DYN_ENTITY");
 
-		org.mockito.Mockito.verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY");
+		verify(statement).execute("select bizId, moduleName, documentName, fields from DYN_ENTITY");
 	}
 
 	@Test
-	public void bogusStaticContentReferenceReturnsFirstTableAndBizId() throws Exception {
+	void bogusStaticContentReferenceReturnsFirstTableAndBizId() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
@@ -279,7 +327,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusStaticContentReferenceReturnsNullWhenNoRowsReferenceContent() throws Exception {
+	void bogusStaticContentReferenceReturnsNullWhenNoRowsReferenceContent() throws Exception {
 		ContentChecker checker = new ContentChecker();
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
@@ -296,7 +344,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsDynamicEntityReferenceForContentAttribute() throws Exception {
+	void bogusDynamicContentReferenceReturnsDynamicEntityReferenceForContentAttribute() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -319,7 +367,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenMatchedAttributeIsNotContent() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenMatchedAttributeIsNotContent() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -342,7 +390,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsDynamicEntityReferenceForImageAttribute() throws Exception {
+	void bogusDynamicContentReferenceReturnsDynamicEntityReferenceForImageAttribute() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -365,7 +413,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenCustomerCannotBeResolved() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenCustomerCannotBeResolved() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -381,7 +429,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenModuleCannotBeResolved() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenModuleCannotBeResolved() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -399,7 +447,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenDocumentCannotBeResolved() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenDocumentCannotBeResolved() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -419,7 +467,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenPolymorphicAttributeCannotBeResolved() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenPolymorphicAttributeCannotBeResolved() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);
@@ -441,7 +489,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenNoRowsReferenceContent() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenNoRowsReferenceContent() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		when(persistence.newSQL("select bizId, bizCustomer, moduleName, documentName, fields from DYN_ENTITY where fields like :like")).thenReturn(sql);
@@ -454,7 +502,7 @@ public class ContentCheckerTest {
 	}
 
 	@Test
-	public void bogusDynamicContentReferenceReturnsNullWhenAttributeNameCannotBeParsed() throws Exception {
+	void bogusDynamicContentReferenceReturnsNullWhenAttributeNameCannotBeParsed() throws Exception {
 		AbstractPersistence persistence = bindMockPersistence();
 		SQL sql = mock(SQL.class);
 		ProvidedRepository repository = mock(ProvidedRepository.class);

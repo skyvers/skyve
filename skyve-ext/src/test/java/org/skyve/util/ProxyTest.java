@@ -2,13 +2,16 @@ package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.messages.DomainException;
 
@@ -121,7 +124,6 @@ class ProxyTest {
 		assertThrows(DomainException.class, () -> Proxy.getDelegate(new Counter()));
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofCreatesProxyWithDelegateMethodCalls() {
 		Counter counter = new Counter();
@@ -131,7 +133,6 @@ class ProxyTest {
 		assertEquals(1, counter.getValue());
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofCreatesProxyWithOverriddenDelegate() {
 		Counter counter = new Counter();
@@ -148,7 +149,6 @@ class ProxyTest {
 		assertEquals(99, proxy.getValue());
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofTransientCreatesProxyDelegatingThroughToOriginal() {
 		Counter counter = new Counter();
@@ -157,7 +157,6 @@ class ProxyTest {
 		assertEquals(1, counter.getValue());
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void deproxyReturnsOriginalObject() {
 		Counter counter = new Counter();
@@ -165,7 +164,6 @@ class ProxyTest {
 		assertSame(counter, Proxy.deproxy(proxy));
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void reproxySetsNewProxiedObject() {
 		Counter counter = new Counter();
@@ -175,7 +173,6 @@ class ProxyTest {
 		assertSame(replacement, Proxy.deproxy(proxy));
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void isProxyReturnsTrueForProxy() {
 		Counter counter = new Counter();
@@ -183,7 +180,6 @@ class ProxyTest {
 		assertTrue(Proxy.isProxy(proxy));
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void getDelegateReturnsOriginalDelegate() {
 		Counter counter = new Counter();
@@ -192,7 +188,6 @@ class ProxyTest {
 		assertSame(delegate, Proxy.getDelegate(proxy));
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void ofProxyThrowsIllegalArgumentException() {
 		// Covers Proxy.java line 109-110: proxying an already-proxied object throws
@@ -208,7 +203,6 @@ class ProxyTest {
 		assertTrue(threw, "Expected IllegalArgumentException when proxying a proxy");
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void deproxyOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 185-186: deproxy on a non-proxy throws DomainException
@@ -223,7 +217,6 @@ class ProxyTest {
 		assertTrue(threw, "Expected DomainException when deproxying a non-proxy");
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void reproxyOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 200-201: reproxy on a non-proxy throws DomainException
@@ -239,7 +232,6 @@ class ProxyTest {
 		assertTrue(threw, "Expected DomainException when reproxying a non-proxy");
 	}
 
-	@Disabled("ByteBuddy requires --add-opens java.base/java.lang not set in surefire")
 	@Test
 	void getDelegateOnNonProxyThrowsDomainException() {
 		// Covers Proxy.java lines 237-238: getDelegate on a non-proxy throws DomainException
@@ -252,5 +244,163 @@ class ProxyTest {
 			threw = true;
 		}
 		assertTrue(threw, "Expected DomainException when getting delegate from a non-proxy");
+	}
+
+	// ---- one proxy class serves every delegate ----
+
+	/** Proxied by {@link #aSpecificDelegateFirstDoesNotStopOtherDelegatesBeingUsed()} only, so that test decides which delegate is first. */
+	public static class SpecificFirst extends Counter {
+		// nothing to add
+	}
+
+	/** Proxied by {@link #transientProxiesAcceptAnyDelegateToo()} only. */
+	public static class TransientSpecificFirst extends Counter {
+		// nothing to add
+	}
+
+	public static class DoublingDelegate<T> extends ProxyDelegate<T> {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Object invoke(T proxy, T proxied, Method method, Object[] args) throws Throwable {
+			Object result = super.invoke(proxy, proxied, method, args);
+			return (result instanceof Integer value) ? Integer.valueOf(value.intValue() * 2) : result;
+		}
+	}
+
+	public static class NegatingDelegate<T> extends ProxyDelegate<T> {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		public Object invoke(T proxy, T proxied, Method method, Object[] args) throws Throwable {
+			Object result = super.invoke(proxy, proxied, method, args);
+			return (result instanceof Integer value) ? Integer.valueOf(- value.intValue()) : result;
+		}
+	}
+
+	private static <T extends Counter> T incremented(T counter) {
+		counter.increment();
+		return counter;
+	}
+
+	@Test
+	void aSpecificDelegateFirstDoesNotStopOtherDelegatesBeingUsed() {
+		SpecificFirst doubled = Proxy.of(incremented(new SpecificFirst()), new DoublingDelegate<>());
+		SpecificFirst plain = Proxy.of(incremented(new SpecificFirst()), new ProxyDelegate<>());
+		SpecificFirst negated = Proxy.of(incremented(new SpecificFirst()), new NegatingDelegate<>());
+		assertEquals(2, doubled.getValue());
+		assertEquals(1, plain.getValue());
+		assertEquals(-1, negated.getValue());
+		// the three proxies share the one generated class
+		assertSame(doubled.getClass(), plain.getClass());
+		assertSame(doubled.getClass(), negated.getClass());
+		assertSame(SpecificFirst.class, doubled.getClass().getSuperclass());
+	}
+
+	@Test
+	void transientProxiesAcceptAnyDelegateToo() {
+		TransientSpecificFirst negated = Proxy.ofTransient(incremented(new TransientSpecificFirst()), new NegatingDelegate<>());
+		TransientSpecificFirst plain = Proxy.ofTransient(incremented(new TransientSpecificFirst()), new ProxyDelegate<>());
+		TransientSpecificFirst doubled = Proxy.ofTransient(incremented(new TransientSpecificFirst()), new DoublingDelegate<>());
+		assertEquals(-1, negated.getValue());
+		assertEquals(1, plain.getValue());
+		assertEquals(2, doubled.getValue());
+		assertSame(negated.getClass(), doubled.getClass());
+	}
+
+	@Test
+	void transientAndSerializableProxiesOfAClassAreDifferentClasses() {
+		Counter serializable = Proxy.of(new Counter(), new ProxyDelegate<>());
+		Counter transientProxied = Proxy.ofTransient(new Counter(), new ProxyDelegate<>());
+		assertNotSame(serializable.getClass(), transientProxied.getClass());
+		assertSame(serializable.getClass(), Proxy.of(new Counter(), new DoublingDelegate<>()).getClass());
+	}
+
+	// ---- where the proxy class is defined ----
+
+	@Test
+	void theProxyClassIsDefinedBesideTheProxiedClass() {
+		Counter proxy = Proxy.of(new Counter(), new ProxyDelegate<>());
+		Class<?> proxyClass = proxy.getClass();
+		assertSame(Counter.class.getClassLoader(), proxyClass.getClassLoader());
+		assertEquals(Counter.class.getPackageName(), proxyClass.getPackageName());
+		assertTrue(java.io.Serializable.class.isAssignableFrom(proxyClass));
+	}
+
+	@Test
+	void aTransientProxySurvivesSerialization() throws Exception {
+		Counter counter = incremented(new Counter());
+		Counter proxy = Proxy.ofTransient(counter, new DoublingDelegate<>());
+		assertEquals(2, proxy.getValue());
+
+		// the proxy class is Serializable although Counter is not
+		java.io.Serializable serializable = (java.io.Serializable) proxy;
+		java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+		try (java.io.ObjectOutputStream out = new java.io.ObjectOutputStream(bytes)) {
+			out.writeObject(serializable);
+		}
+		Counter restored;
+		try (java.io.ObjectInputStream in = new java.io.ObjectInputStream(new java.io.ByteArrayInputStream(bytes.toByteArray()))) {
+			restored = (Counter) in.readObject();
+		}
+
+		// the proxy class was found again, the delegate came with it and the transient proxied object did not
+		assertSame(proxy.getClass(), restored.getClass());
+		assertTrue(Proxy.isProxy(restored));
+		assertTrue(Proxy.getDelegate(restored) instanceof DoublingDelegate);
+		assertNull(Proxy.deproxy(restored));
+		Proxy.reproxy(restored, counter);
+		assertEquals(2, restored.getValue());
+	}
+
+	/**
+	 * A class that cannot be looked up into has its proxy class injected reflectively,
+	 * which the JVM only allows when it is started with {@code --add-opens java.base/java.lang=ALL-UNNAMED}.
+	 *
+	 * @return whether the JVM allowed the injection
+	 */
+	private static boolean injectionAllowed(Runnable proxying) {
+		try {
+			proxying.run();
+			return true;
+		}
+		catch (UnsupportedOperationException e) {
+			assertTrue(e.getMessage().contains("Cannot define class using reflection"), e.getMessage());
+			return false;
+		}
+	}
+
+	@Test
+	void aBootstrapClassIsProxiedByInjection() {
+		assertNull(java.util.ArrayList.class.getClassLoader());
+		java.util.ArrayList<String> list = new java.util.ArrayList<>();
+		injectionAllowed(() -> {
+			java.util.ArrayList<String> proxy = Proxy.of(list, new ProxyDelegate<>());
+			assertTrue(Proxy.isProxy(proxy));
+			assertSame(list, Proxy.deproxy(proxy));
+			proxy.add("through the proxy");
+			assertEquals(1, list.size());
+		});
+	}
+
+	@Test
+	@SuppressWarnings("java:S8714") // more than one throwable is an acceptable outcome, which assertThrows() cannot express
+	void aClassInAModuleThatIsNotOpenFallsBackToInjection() {
+		// java.sql.Timestamp has a class loader, but java.sql does not open its packages, so it cannot be looked up into.
+		assertNotNull(java.sql.Timestamp.class.getClassLoader());
+		java.sql.Timestamp timestamp = new java.sql.Timestamp(0L);
+		try {
+			Proxy.of(timestamp, new ProxyDelegate<>());
+			fail("A class in the platform class loader is not expected to be proxied");
+		}
+		catch (UnsupportedOperationException e) {
+			// the JVM was not started with the option that allows injection
+			assertTrue(e.getMessage().contains("Cannot define class using reflection"), e.getMessage());
+		}
+		catch (NoClassDefFoundError e) {
+			// A known limit: where injection is allowed, the proxy class lands in the platform class loader,
+			// which cannot see Skyve's ProxyDelegate, so the proxy class cannot be used.
+			assertTrue(e.getMessage().contains("ProxyDelegate"), e.getMessage());
+		}
 	}
 }

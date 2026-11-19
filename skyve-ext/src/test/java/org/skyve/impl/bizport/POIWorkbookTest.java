@@ -1,17 +1,22 @@
 package org.skyve.impl.bizport;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.bizport.BizPortColumn;
 import org.skyve.bizport.BizPortWorkbook.BizPortFormat;
 import org.skyve.bizport.SheetKey;
@@ -19,40 +24,40 @@ import org.skyve.domain.types.DateOnly;
 import org.skyve.metadata.model.Attribute.AttributeType;
 
 @SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
-public class POIWorkbookTest {
+class POIWorkbookTest {
 
 	@Test
-	public void constructorOoxmlFormat() {
+	void constructorOoxmlFormat() {
 		POIWorkbook wb = new POIWorkbook(true);
 		assertEquals(BizPortFormat.xlsx, wb.getFormat());
 	}
 
 	@Test
-	public void constructorXlsFormat() {
+	void constructorXlsFormat() {
 		POIWorkbook wb = new POIWorkbook(false);
 		assertEquals(BizPortFormat.xls, wb.getFormat());
 	}
 
 	@Test
-	public void getSheetKeysIsEmptyInitially() {
+	void getSheetKeysIsEmptyInitially() {
 		POIWorkbook wb = new POIWorkbook(true);
 		assertTrue(wb.getSheetKeys().isEmpty());
 	}
 
 	@Test
-	public void getSheetReturnsNullForMissingKey() {
+	void getSheetReturnsNullForMissingKey() {
 		POIWorkbook wb = new POIWorkbook(true);
 		assertNull(wb.getSheet(new SheetKey("mod", "doc")));
 	}
 
 	@Test
-	public void removeSheetReturnsNullForMissingKey() {
+	void removeSheetReturnsNullForMissingKey() {
 		POIWorkbook wb = new POIWorkbook(true);
 		assertNull(wb.removeSheet(new SheetKey("mod", "doc")));
 	}
 
 	@Test
-	public void putPOICellValueStringSetsStringValue() throws Exception {
+	void putPOICellValueStringSetsStringValue() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.STRING, "hello", false, false);
@@ -63,7 +68,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueNumericSetsNumericValue() throws Exception {
+	void putPOICellValueNumericSetsNumericValue() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.NUMERIC, Double.valueOf(42.5), false, false);
@@ -73,7 +78,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueNullWithForceNumericZero() throws Exception {
+	void putPOICellValueNullWithForceNumericZero() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.NUMERIC, null, true, false);
@@ -83,7 +88,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueNullNoForce() throws Exception {
+	void putPOICellValueNullNoForce() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.NUMERIC, null, false, false);
@@ -93,7 +98,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueTwoArgOverload() throws Exception {
+	void putPOICellValueTwoArgOverload() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.STRING, "world");
@@ -103,7 +108,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueThreeArgOverload() throws Exception {
+	void putPOICellValueThreeArgOverload() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.STRING, "bold", true);
@@ -113,7 +118,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueBoldStyle() throws Exception {
+	void putPOICellValueBoldStyle() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.STRING, "boldTest", false, true);
@@ -123,7 +128,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueCreatesNewRowIfNotExists() throws Exception {
+	void putPOICellValueCreatesNewRowIfNotExists() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("test");
 			// Row 5 doesn't exist
@@ -135,25 +140,53 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseCreatesWorkbookXlsx() throws Exception {
+	void materialiseCreatesWorkbookXlsx() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
+		wb.addSheet(new SheetKey("sales", "Order"), new POISheet("Orders"));
 		wb.materialise();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		wb.write(out);
-		assertTrue(out.size() > 0);
+		try (Workbook reopened = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			assertTrue(reopened instanceof XSSFWorkbook);
+			assertEquals("Orders", reopened.getSheetAt(0).getSheetName());
+			assertEquals("sales", reopened.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
+			assertEquals("Order", reopened.getSheetAt(0).getRow(0).getCell(1).getStringCellValue());
+		}
 	}
 
 	@Test
-	public void materialiseCreatesWorkbookXls() throws Exception {
+	void materialiseSkipsDataValidationForColumnWithoutType() throws Exception {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("Orders");
+		sheet.addColumn("name", new BizPortColumn("Name", null));
+		wb.addSheet(new SheetKey("sales", "Order"), sheet);
+		wb.materialise();
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		wb.write(out);
+		try (Workbook reopened = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			XSSFSheet reopenedSheet = (XSSFSheet) reopened.getSheetAt(0);
+			assertEquals("name", reopenedSheet.getRow(1).getCell(0).getStringCellValue());
+			assertTrue(reopenedSheet.getDataValidations().isEmpty());
+		}
+	}
+
+	@Test
+	void materialiseCreatesWorkbookXls() throws Exception {
 		POIWorkbook wb = new POIWorkbook(false);
+		wb.addSheet(new SheetKey("sales", "Order"), new POISheet("Orders"));
 		wb.materialise();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		wb.write(out);
-		assertTrue(out.size() > 0);
+		try (Workbook reopened = WorkbookFactory.create(new ByteArrayInputStream(out.toByteArray()))) {
+			assertTrue(reopened instanceof HSSFWorkbook);
+			assertEquals("Orders", reopened.getSheetAt(0).getSheetName());
+			assertEquals("sales", reopened.getSheetAt(0).getRow(0).getCell(0).getStringCellValue());
+			assertEquals("Order", reopened.getSheetAt(0).getRow(0).getCell(1).getStringCellValue());
+		}
 	}
 
 	@Test
-	public void putPOICellValueDateSetsDateValue() throws Exception {
+	void putPOICellValueDateSetsDateValue() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("Test");
 			Date date = new Date();
@@ -165,7 +198,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueDateOnlySetsDateOnlyValue() throws Exception {
+	void putPOICellValueDateOnlySetsDateOnlyValue() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("Test");
 			DateOnly date = new DateOnly();
@@ -177,7 +210,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueBooleanCellTypeDoesNotThrow() throws Exception {
+	void putPOICellValueBooleanCellTypeDoesNotThrow() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("Test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.BOOLEAN, "ignored", false, false);
@@ -186,7 +219,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void putPOICellValueBlankCellTypeDoesNotThrow() throws Exception {
+	void putPOICellValueBlankCellTypeDoesNotThrow() throws Exception {
 		try (XSSFWorkbook workbook = new XSSFWorkbook()) {
 			XSSFSheet sheet = workbook.createSheet("Test");
 			POIWorkbook.putPOICellValue(sheet, 1, 1, CellType.BLANK, "ignored", false, false);
@@ -194,37 +227,42 @@ public class POIWorkbookTest {
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void addSheetDuplicateThrows() {
+	@Test
+	void addSheetDuplicateThrows() {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key = new SheetKey("mod", "doc");
 		POISheet sheet = new POISheet("Test");
 		wb.addSheet(key, sheet);
-		wb.addSheet(key, new POISheet("Test2"));
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void writeThrowsWhenNotMaterialised() throws Exception {
-		POIWorkbook wb = new POIWorkbook(true);
-		wb.write(new ByteArrayOutputStream());
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void addSheetThrowsWhenAlreadyMaterialised() {
-		POIWorkbook wb = new POIWorkbook(true);
-		wb.materialise();
-		wb.addSheet(new SheetKey("mod", "doc"), new POISheet("S"));
-	}
-
-	@Test(expected = IllegalStateException.class)
-	public void removeSheetThrowsWhenAlreadyMaterialised() {
-		POIWorkbook wb = new POIWorkbook(true);
-		wb.materialise();
-		wb.removeSheet(new SheetKey("mod", "doc"));
+		POISheet duplicate = new POISheet("Test2");
+		assertThrows(IllegalArgumentException.class, () -> wb.addSheet(key, duplicate));
 	}
 
 	@Test
-	public void materialiseWithSheetWritesSheet() throws Exception {
+	void writeThrowsWhenNotMaterialised() {
+		POIWorkbook wb = new POIWorkbook(true);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		assertThrows(IllegalStateException.class, () -> wb.write(out));
+	}
+
+	@Test
+	void addSheetThrowsWhenAlreadyMaterialised() {
+		POIWorkbook wb = new POIWorkbook(true);
+		wb.materialise();
+		SheetKey key = new SheetKey("mod", "doc");
+		POISheet sheet = new POISheet("S");
+		assertThrows(IllegalStateException.class, () -> wb.addSheet(key, sheet));
+	}
+
+	@Test
+	void removeSheetThrowsWhenAlreadyMaterialised() {
+		POIWorkbook wb = new POIWorkbook(true);
+		wb.materialise();
+		SheetKey key = new SheetKey("mod", "doc");
+		assertThrows(IllegalStateException.class, () -> wb.removeSheet(key));
+	}
+
+	@Test
+	void materialiseWithSheetWritesSheet() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key = new SheetKey("mod", "doc");
 		POISheet sheet = new POISheet("MySheet");
@@ -236,7 +274,27 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseWithLongTitleTruncatesToValidName() throws Exception {
+	void writeThrowsWhenASheetHasNoColumnForOneOfItsBindings() throws Exception {
+		POIWorkbook wb = new POIWorkbook(true);
+		POISheet sheet = new POISheet("MySheet");
+		sheet.addColumn("name", new BizPortColumn("Name", null));
+		wb.addSheet(new SheetKey("mod", "doc"), sheet);
+		wb.materialise();
+		// break the invariant that every column binding has a column
+		java.lang.reflect.Field columnsField = POISheet.class.getDeclaredField("columns");
+		columnsField.setAccessible(true);
+		@SuppressWarnings("unchecked")
+		java.util.Map<String, BizPortColumn> columns = (java.util.Map<String, BizPortColumn>) columnsField.get(sheet);
+		columns.put("name", null);
+
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> wb.write(out));
+
+		assertEquals("Sheet MySheet has no column for binding name", e.getMessage());
+	}
+
+	@Test
+	void materialiseWithLongTitleTruncatesToValidName() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		// Title longer than 29 chars (the max allowed by generateValidUniqueSheetTitle)
 		SheetKey key = new SheetKey("mod", "doc");
@@ -250,7 +308,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseWithSlashInTitleReplacesWithPipe() throws Exception {
+	void materialiseWithSlashInTitleReplacesWithPipe() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key = new SheetKey("mod", "doc");
 		POISheet sheet = new POISheet("A/B");
@@ -262,7 +320,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseWithDuplicateLongTitleAppendsSuffix() throws Exception {
+	void materialiseWithDuplicateLongTitleAppendsSuffix() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key1 = new SheetKey("mod", "doc1");
 		SheetKey key2 = new SheetKey("mod", "doc2");
@@ -278,7 +336,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void writeWithReferencedSheetColumnAutoSizesColumns() throws Exception {
+	void writeWithReferencedSheetColumnAutoSizesColumns() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key = new SheetKey("mod", "doc");
 		POISheet sheet = new POISheet("TestSheet");
@@ -293,7 +351,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseWithRefSheetInWorkbookCoversHyperlinkAndFormula() throws Exception {
+	void materialiseWithRefSheetInWorkbookCoversHyperlinkAndFormula() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey refKey = new SheetKey("mod", "ref");
 		SheetKey docKey = new SheetKey("mod", "doc");
@@ -312,7 +370,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseWithMultiTypeColumnsXlsxCoversDataValidation() throws Exception {
+	void materialiseWithMultiTypeColumnsXlsxCoversDataValidation() throws Exception {
 		POIWorkbook wb = new POIWorkbook(true);
 		SheetKey key = new SheetKey("mod", "types");
 		POISheet sheet = new POISheet("TypesSheet");
@@ -331,7 +389,7 @@ public class POIWorkbookTest {
 	}
 
 	@Test
-	public void materialiseWithMultiTypeColumnsXlsCoversDataValidation() throws Exception {
+	void materialiseWithMultiTypeColumnsXlsCoversDataValidation() throws Exception {
 		POIWorkbook wb = new POIWorkbook(false);
 		SheetKey key = new SheetKey("mod", "types");
 		POISheet sheet = new POISheet("TypesSheet");

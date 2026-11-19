@@ -27,6 +27,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Handles Spring Security authentication success/failure events to maintain Skyve login-failure lockout state.
  *
@@ -46,7 +49,7 @@ public class SecurityListener {
 	 */
 	@EventListener
 	@SuppressWarnings("static-method")
-	public void onAuthenticationFailure(AbstractAuthenticationFailureEvent evt) {
+	public void onAuthenticationFailure(@Nonnull AbstractAuthenticationFailureEvent evt) {
 		AuthenticationException exception = evt.getException();
 		Authentication authentication = evt.getAuthentication();
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(authentication.getPrincipal());
@@ -78,7 +81,7 @@ public class SecurityListener {
 	 * @param exception The authentication exception.
 	 * @return True when the failure should be counted toward lockout.
 	 */
-	static boolean countsTowardLockout(AuthenticationException exception) {
+	static boolean countsTowardLockout(@Nonnull AuthenticationException exception) {
 		return (exception instanceof BadCredentialsException) || (exception instanceof LockedException);
 	}
 	
@@ -89,7 +92,7 @@ public class SecurityListener {
 	 */
 	@EventListener
 	@SuppressWarnings("static-method")
-	public void onAuthenticationSuccess(AuthenticationSuccessEvent evt) {
+	public void onAuthenticationSuccess(@Nonnull AuthenticationSuccessEvent evt) {
 		String userName = SkyveSpringSecurity.userNameFromPrincipal(evt.getAuthentication().getPrincipal());
 		if (userName == null) {
 			LOGGER.warn("Cannot reset login failures in org.skyve.impl.web.spring.SecurityListener.onAuthenticationSuccess() as the principal type is not known. If you are using a Spring Security plugin, please override this class in your project and handle the principal yourself.");
@@ -108,7 +111,7 @@ public class SecurityListener {
 	 * @throws MetaDataException If the failure record cannot be persisted.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void recordLoginFailure(String username, String ipAddress) {
+	private static void recordLoginFailure(@Nonnull String username, @Nonnull String ipAddress) {
 		SkyveDialect dialect = AbstractHibernatePersistence.getDialect(UtilImpl.DATA_STORE.getDialectClassName());
 		RDBMS rdbms = dialect.getRDBMS();
 		String sql = null;
@@ -192,7 +195,7 @@ public class SecurityListener {
 	 * @param username The username to reset.
 	 * @throws MetaDataException If the reset cannot be persisted.
 	 */
-	private static void resetLoginFailure(String username) {
+	private static void resetLoginFailure(@Nonnull String username) {
 		String sql = "update ADM_SecurityUser set authenticationFailures = 0, lastAuthenticationFailure = null where bizId = ?";
 
 		// NB select and then update by bizId to ensure row lock across all databases.
@@ -225,7 +228,7 @@ public class SecurityListener {
 	 * @throws SQLException If the lookup query fails.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static String getBizId(String fullUsername, Connection c, boolean forReset) throws SQLException {
+	private static @Nullable String getBizId(@Nullable String fullUsername, @Nonnull Connection c, boolean forReset) throws SQLException {
 		String result = null;
 		
 		String bizCustomer = null;

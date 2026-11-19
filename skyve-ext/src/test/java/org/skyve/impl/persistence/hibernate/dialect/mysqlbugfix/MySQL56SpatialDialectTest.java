@@ -3,18 +3,18 @@ package org.skyve.impl.persistence.hibernate.dialect.mysqlbugfix;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.hibernate.spatial.SpatialFunction;
 import org.hibernate.spatial.SpatialRelation;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings("static-method")
-public class MySQL56SpatialDialectTest {
+class MySQL56SpatialDialectTest {
 
 	@Test
-	public void constructorDoesNotThrow() {
+	void constructorDoesNotThrow() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		assertNotNull(dialect);
 	}
@@ -22,63 +22,63 @@ public class MySQL56SpatialDialectTest {
 	// ---- getSpatialRelateSQL switch cases ----
 
 	@Test
-	public void getSpatialRelateSQLWithin() {
+	void getSpatialRelateSQLWithin() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.WITHIN);
 		assertThat(sql, containsString("ST_Within"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLContains() {
+	void getSpatialRelateSQLContains() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.CONTAINS);
 		assertThat(sql, containsString("ST_Contains"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLCrosses() {
+	void getSpatialRelateSQLCrosses() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.CROSSES);
 		assertThat(sql, containsString("ST_Crosses"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLOverlaps() {
+	void getSpatialRelateSQLOverlaps() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.OVERLAPS);
 		assertThat(sql, containsString("ST_Overlaps"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLDisjoint() {
+	void getSpatialRelateSQLDisjoint() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.DISJOINT);
 		assertThat(sql, containsString("ST_Disjoint"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLIntersects() {
+	void getSpatialRelateSQLIntersects() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.INTERSECTS);
 		assertThat(sql, containsString("ST_Intersects"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLTouches() {
+	void getSpatialRelateSQLTouches() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.TOUCHES);
 		assertThat(sql, containsString("ST_Touches"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLEquals() {
+	void getSpatialRelateSQLEquals() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialRelateSQL("geom", SpatialRelation.EQUALS);
 		assertThat(sql, containsString("ST_Equals"));
 	}
 
 	@Test
-	public void getSpatialRelateSQLDefaultThrows() {
+	void getSpatialRelateSQLDefaultThrows() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		assertThrows(IllegalArgumentException.class, () -> dialect.getSpatialRelateSQL("geom", 9999));
 	}
@@ -86,54 +86,54 @@ public class MySQL56SpatialDialectTest {
 	// ---- Other spatial methods ----
 
 	@Test
-	public void getSpatialFilterExpressionReturnsNonNull() {
+	void getSpatialFilterExpressionReturnsNonNull() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getSpatialFilterExpression("geom");
 		assertThat(sql, notNullValue());
 	}
 
 	@Test
-	public void getSpatialAggregateSQLThrowsUnsupported() {
+	void getSpatialAggregateSQLThrowsUnsupported() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		assertThrows(UnsupportedOperationException.class, () -> dialect.getSpatialAggregateSQL("geom", 1));
 	}
 
 	@Test
-	public void getDWithinSQLThrowsUnsupported() {
+	void getDWithinSQLThrowsUnsupported() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		assertThrows(UnsupportedOperationException.class, () -> dialect.getDWithinSQL("geom"));
 	}
 
 	@Test
-	public void getHavingSridSQLReturnsNonNull() {
+	void getHavingSridSQLReturnsNonNull() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getHavingSridSQL("geom");
 		assertThat(sql, notNullValue());
 	}
 
 	@Test
-	public void getIsEmptySQLIsEmpty() {
+	void getIsEmptySQLIsEmpty() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getIsEmptySQL("geom", true);
 		assertThat(sql, notNullValue());
 	}
 
 	@Test
-	public void getIsEmptySQLIsNotEmpty() {
+	void getIsEmptySQLIsNotEmpty() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		String sql = dialect.getIsEmptySQL("geom", false);
 		assertThat(sql, notNullValue());
 	}
 
 	@Test
-	public void supportsFilteringReturnsFalse() {
+	void supportsFilteringReturnsFalse() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		// delegates to MySQLSpatialDialect which returns false
 		assertThat(Boolean.valueOf(dialect.supportsFiltering()), notNullValue());
 	}
 
 	@Test
-	public void supportsConvexHullReturnsFalse() {
+	void supportsConvexHullReturnsFalse() {
 		MySQL56SpatialDialect dialect = new MySQL56SpatialDialect();
 		assertThat(Boolean.valueOf(dialect.supports(SpatialFunction.convexhull)), notNullValue());
 	}

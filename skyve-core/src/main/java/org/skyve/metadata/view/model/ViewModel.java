@@ -3,6 +3,8 @@ package org.skyve.metadata.view.model;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.customer.Customer;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base interface for all programmatic view models that supply data or structure to a
  * Skyve view at runtime or during domain generation.
@@ -38,5 +40,5 @@ public interface ViewModel extends MetaData {
 	 * @param runtime   {@code true} when running in a live application context;
 	 *                  {@code false} when running at generate time
 	 */
-	void postConstruct(Customer customer, boolean runtime);
+	void postConstruct(@Nonnull Customer customer, boolean runtime);
 }

@@ -132,13 +132,37 @@ isc.ResultSet.addMethods({
 	},
 
 	/**
-	 * Sets criteria and forces a fetch for spatial operators.
+	 * Checks if criteria filter a day field: a date time or timestamp shown as a date (see BizUtil.dayFields).
+	 * SmartClient would filter cached rows with them by comparing the day's midnight with each row's instant, so a
+	 * narrower filter on a fully cached list (the filter row's day added to a name) would drop the day's rows that have
+	 * a time; the server filters by the day's range (see RestDataSource.transformRequest).
+	 * @param {Object} criteria - the criteria to check
+	 * @returns {boolean} - True if criteria filter a day field
+	 */
+	hasDayField: function (criteria) {
+		const dataSource = this.getDataSource();
+		const dayFields = dataSource ? isc.BizUtil.dayFields(dataSource) : [];
+		if (dayFields.length === 0) return false;
+		const filters = (c) =>
+			!!c &&
+			(c.criteria
+				? c.criteria.some(filters)
+				: c.fieldName
+					? dayFields.includes(c.fieldName)
+					: Object.keys(c).some((name) => dayFields.includes(name)));
+		return filters(criteria);
+	},
+
+	/**
+	 * Sets criteria and forces a fetch for spatial operators, and for day fields when the criteria change (unchanged
+	 * criteria keep the rows, as a refresh that has just invalidated the cache fetches them anyway).
 	 * @param {Object} newCriteria - the new criteria to set.
 	 * @returns {Object} - the result of the original `setCriteria` method.
 	 */
 	setCriteria: function (newCriteria) {
+		const changed = this.compareCriteria(newCriteria || {}, this.getCriteria() || {}) !== 0;
 		const result = this.skyveSetCriteria(newCriteria);
-		if (newCriteria && this.hasSpatialOperator(newCriteria)) {
+		if (newCriteria && (this.hasSpatialOperator(newCriteria) || (changed && this.hasDayField(newCriteria)))) {
 			this.invalidateCache();
 		}
 		return result;
@@ -279,8 +303,10 @@ isc.BizUtil.addClassMethods({
 			"bizDecimal2",
 			"bizDecimal5",
 			"bizDollarsAndCents",
+			"bizDollarsAndCentsAbsolute",
 			"bizIntegerPercentage",
 			"bizIntegerSeparator",
+			"bizSimplePercentage",
 			"bizTwoDecimalPlacesPercentage",
 			"bizTimeDuration",
 		];
@@ -324,7 +350,7 @@ isc.BizUtil.addClassMethods({
 	},
 
 	/**
-	 * Converts filter criteria by renaming `_display_*` fields.
+	 * Converts filter criteria by renaming `_display_*` fields, and by keeping time values as times.
 	 * @param {Object} criteria - the criteria to convert.
 	 */
 	convertFilterCriteria: function (criteria) {
@@ -333,7 +359,17 @@ isc.BizUtil.addClassMethods({
 				criteria.criteria.forEach((criterion) =>
 					isc.BizUtil.convertFilterCriteria(criterion),
 				);
-			} else if (
+				return;
+			}
+			// SmartClient's FilterBuilder flags every Date in a clause as a logical date unless its field is a datetime,
+			// so a time clause's value is sent as a date (1970-01-01). A Date flagged as both is a time: send it as one.
+			["value", "start", "end"].forEach((name) => {
+				const value = criteria[name];
+				if (isc.isA.Date(value) && value.logicalTime && value.logicalDate) {
+					delete value.logicalDate;
+				}
+			});
+			if (
 				criteria.fieldName &&
 				criteria.fieldName.startsWith("_display_")
 			) {
@@ -518,7 +554,7 @@ isc.BizUtil.addClassMethods({
 	},
 
 	createContentUploadUrl: function (contentFormItem, image) {
-		const instance = contentFormItem.form._view.gather(false);
+		const instance = contentFormItem.form._view.gather(false, true);
 		const display = contentFormItem.display || (image ? "image" : "link");
 		const capture = contentFormItem.capture || "none";
 		let url = `upload.xhtml?_u=boundContent&_n=${SKYVE.Util.unsanitiseBinding(
@@ -674,7 +710,7 @@ isc.BizUtil.addClassMethods({
 						return;
 					}
 					isc.BizUtil._registerContentFormItem(contentFormItem);
-					const instance = contentFormItem.form._view.gather(false);
+					const instance = contentFormItem.form._view.gather(false, true);
 					let url = `imageMarkup.xhtml?_n=${SKYVE.Util.unsanitiseBinding(
 						contentFormItem.name,
 					)}&_c=${instance._c}&_id=${contentFormItem.getValue()}`;
@@ -846,22 +882,30 @@ isc.BizUtil.addClassMethods({
 
 	/**
 	 * Displays growl notifications.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the growls shown: keep its arguments.
+	 * The page has one PrimeFaces Growl, which removes the messages it shows when it shows new ones, unless told to keep
+	 * them.
 	 * @param {Array} msgs - the messages to display.
 	 * @param {number} life - the duration of the notification.
 	 * @param {boolean} sticky - whether the notification is sticky.
+	 * @param {boolean} [keep] - whether to keep the messages already showing, rather than replace them.
 	 */
-	growl: function (msgs, life, sticky) {
+	growl: function (msgs, life, sticky, keep) {
 		PrimeFaces.cw("Growl", "growl", {
 			id: "growl",
 			widgetVar: "growl",
 			life: life || 6000,
 			sticky: sticky || false,
+			keepAlive: keep || false,
 			msgs,
 		});
 	},
 
 	/**
 	 * Handles push messages.
+	 * A pushed growl is added to the growls showing: it arrives on its own schedule, such as a job's when it finishes, and
+	 * must not remove a growl the user has not read yet, such as the "started" growl of the action that started the job.
+	 * PrimeFaces pages show pushed growls in a growl of their own for the same reason.
 	 * @param {Array} pushMessage - the push messages to handle.
 	 */
 	onPushMessage: function (pushMessage) {
@@ -883,7 +927,7 @@ isc.BizUtil.addClassMethods({
 			}
 		});
 
-		if (growls.length > 0) isc.BizUtil.growl(growls);
+		if (growls.length > 0) isc.BizUtil.growl(growls, null, null, true);
 		if (messages.length > 0) {
 			const markup =
 				messages.length > 1
@@ -892,5 +936,183 @@ isc.BizUtil.addClassMethods({
 			if (warn) isc.warn(markup);
 			else isc.say(markup);
 		}
+	},
+});
+
+/**
+ * Makes a filter on a date time or timestamp column whose converter shows only the date (a *_DateTime type) mean the
+ * whole local day, as the Vue list grid does: equals is from the day's start up to the next day's, notEqual is outside
+ * it (or no value), lessThan is before the day, greaterThan after it (lessOrEqual and greaterOrEqual likewise),
+ * between is after the start day and before the end day, and betweenInclusive from the start day's start to the end
+ * day's end. The column's filter gives the day's local midnight; without this, the server compares that instant
+ * exactly.
+ */
+isc.RestDataSource.addMethods({
+	skyveTransformRequest: isc.RestDataSource.getPrototype().transformRequest,
+
+	/**
+	 * Turns the day filters of a fetch's criteria into ranges, then transforms the request as RestDataSource does.
+	 *
+	 * @param {Object} dsRequest - the request.
+	 * @returns {Object} - the transformed request data.
+	 */
+	transformRequest: function (dsRequest) {
+		if (dsRequest.operationType === "fetch") {
+			dsRequest.data = isc.BizUtil.dataSourceDayCriteria(this, dsRequest.data, dsRequest.textMatchStyle);
+		}
+		return this.skyveTransformRequest(dsRequest);
+	},
+});
+
+isc.BizUtil.addClassMethods({
+	/**
+	 * Returns the criteria with each clause on a day field of the data source (see RestDataSource.transformRequest
+	 * above) made the range of that local day. A request that sends a list grid's criteria other than through the data
+	 * source's fetch (export, chart, tag and untag) converts them with this too, so that it means the rows shown.
+	 *
+	 * @param {Object} dataSource - the data source.
+	 * @param {Object} criteria - simple or advanced criteria, or nothing.
+	 * @param {string} textMatchStyle - the text match style for simple criteria; "substring" when not given, as the
+	 *   export, chart and tag servlets match simple criteria.
+	 * @returns {Object} - the criteria.
+	 */
+	dataSourceDayCriteria: function (dataSource, criteria, textMatchStyle) {
+		if (!criteria || isc.isAn.emptyObject(criteria)) {
+			return criteria;
+		}
+		const dayFields = isc.BizUtil.dayFields(dataSource);
+		return dayFields.length > 0 ? isc.BizUtil.dayCriteria(criteria, dayFields, textMatchStyle) : criteria;
+	},
+
+	/**
+	 * Returns the names of a data source's day fields: its date times and timestamps whose converter shows only the
+	 * date (a *_DateTime type).
+	 *
+	 * @param {Object} dataSource - the data source.
+	 * @returns {Array} - the field names, empty when it has none.
+	 */
+	dayFields: function (dataSource) {
+		return (dataSource.getFieldNames() || []).filter((name) => {
+			const type = dataSource.getField(name).type;
+			return isc.isA.String(type) && type.endsWith("_DateTime");
+		});
+	},
+
+	/**
+	 * Returns the criteria with each clause on a day field (see RestDataSource.transformRequest above) whose value (or
+	 * start or end, for a between) is a date made the range of those local days. Criteria without such a clause are
+	 * returned as they are.
+	 *
+	 * @param {Object} criteria - simple or advanced criteria.
+	 * @param {Array} dayFields - the names of the fields filtered by the day.
+	 * @param {string} textMatchStyle - the request's text match style, for simple criteria.
+	 * @returns {Object} - the criteria.
+	 */
+	dayCriteria: function (criteria, dayFields, textMatchStyle) {
+		const ranges = ["between", "iBetween", "betweenInclusive", "iBetweenInclusive"];
+		const onDay = (clause) =>
+			dayFields.includes(clause.fieldName) &&
+			(ranges.includes(clause.operator)
+				? isc.isA.Date(clause.start) || isc.isA.Date(clause.end)
+				: isc.isA.Date(clause.value));
+		let advanced = criteria;
+		if (!isc.DataSource.isAdvancedCriteria(criteria)) {
+			if (!Object.keys(criteria).some((name) => onDay({ fieldName: name, value: criteria[name] }))) {
+				return criteria;
+			}
+			advanced = isc.DataSource.convertCriteria(criteria, textMatchStyle || "substring");
+		}
+		const startOf = (day) => new Date(day.getFullYear(), day.getMonth(), day.getDate());
+		const nextAfter = (day) => new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
+		const convert = (clause) => {
+			if (clause.criteria) {
+				return { ...clause, criteria: clause.criteria.map(convert) };
+			}
+			if (!onDay(clause)) {
+				return clause;
+			}
+			const compare = (operator, value) => ({ fieldName: clause.fieldName, operator: operator, value: value });
+			const day = clause.value;
+			switch (clause.operator) {
+				case "equals":
+					return { operator: "and", criteria: [compare("greaterOrEqual", startOf(day)), compare("lessThan", nextAfter(day))] };
+				case "notEqual": // also a row with no value, as a negation is
+					return {
+						operator: "or",
+						criteria: [
+							compare("lessThan", startOf(day)),
+							compare("greaterOrEqual", nextAfter(day)),
+							{ fieldName: clause.fieldName, operator: "isNull" },
+						],
+					};
+				case "lessThan":
+					return compare("lessThan", startOf(day));
+				case "lessOrEqual":
+					return compare("lessThan", nextAfter(day));
+				case "greaterThan":
+					return compare("greaterOrEqual", nextAfter(day));
+				case "greaterOrEqual":
+					return compare("greaterOrEqual", startOf(day));
+				case "between":
+				case "iBetween":
+				case "betweenInclusive":
+				case "iBetweenInclusive": {
+					// As SmartClient compares a date column's days: between is after the start day and before the end day,
+					// betweenInclusive from the start of the start day to the end of the end day. A missing end is open.
+					const inclusive = clause.operator.endsWith("Inclusive");
+					const bounds = [];
+					if (isc.isA.Date(clause.start)) {
+						bounds.push(compare("greaterOrEqual", inclusive ? startOf(clause.start) : nextAfter(clause.start)));
+					}
+					if (isc.isA.Date(clause.end)) {
+						bounds.push(compare("lessThan", inclusive ? nextAfter(clause.end) : startOf(clause.end)));
+					}
+					return { operator: "and", criteria: bounds };
+				}
+				default:
+					return clause;
+			}
+		};
+		return convert(advanced);
+	},
+});
+
+isc.BizUtil.addClassMethods({
+	/**
+	 * Returns the editor a type's values are filtered with when it differs from the type's editor (a SimpleType's
+	 * filterEditorType), or null.
+	 *
+	 * @param {string} type - the type's name.
+	 * @returns {string|null} - the editor's class name.
+	 */
+	filterEditorType: function (type) {
+		const simpleType = type ? isc.SimpleType.getType(type) : null;
+		return (simpleType && simpleType.filterEditorType) || null;
+	},
+
+	/**
+	 * Returns whether a list grid's filter row may filter: false when an item holds a number its converter refuses
+	 * (see the end of types.js), which then shows an error, so that the grid does not filter without the value.
+	 *
+	 * @param {Object} grid - the list grid.
+	 * @returns {boolean} - true to filter.
+	 */
+	filterEditorAccepts: function (grid) {
+		const editor = grid.filterEditor;
+		const form = editor && editor.getEditForm ? editor.getEditForm() : null;
+		if (!form) {
+			return true;
+		}
+		let result = true;
+		form.getItems().forEach((item) => {
+			if (item._refusedText) {
+				result = false;
+				const integer = item.isA("BizIntegerSeparatorItem") || item.isA("BizSimplePercentageItem");
+				editor.setFieldError(0, item.name, integer ? isc.Validator.notAnInteger : isc.Validator.notADecimal);
+			} else if (editor.cellHasErrors(0, item.name)) {
+				editor.setFieldError(0, item.name, null);
+			}
+		});
+		return result;
 	},
 });

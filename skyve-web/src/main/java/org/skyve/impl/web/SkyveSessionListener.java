@@ -10,6 +10,7 @@ import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.HttpSessionEvent;
@@ -32,7 +33,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 	 * @param se the session event for the created session
 	 */
 	@Override
-	public void sessionCreated(HttpSessionEvent se) {
+	public void sessionCreated(@SuppressWarnings("null") @Nonnull HttpSessionEvent se) {
 		StateUtil.incrementSessionCount();
 	}
 
@@ -45,7 +46,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void sessionDestroyed(HttpSessionEvent se) {
+	public void sessionDestroyed(@SuppressWarnings("null") @Nonnull HttpSessionEvent se) {
 		StateUtil.decrementSessionCount();
 		
 		HttpSession session = se.getSession();
@@ -83,6 +84,7 @@ public class SkyveSessionListener implements HttpSessionListener {
 			}
 			// Remove the session repository if it exists
 			finally {
+				// sessions can be destroyed during shutdown, after the repository has gone
 				ProvidedRepository repository = ProvidedRepositoryFactory.get();
 				if (repository instanceof DefaultRepository defaultRepository) {
 					defaultRepository.removeSessionRepository(user);

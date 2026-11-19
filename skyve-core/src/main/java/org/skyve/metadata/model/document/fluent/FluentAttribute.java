@@ -37,6 +37,7 @@ import org.skyve.metadata.view.fluent.FluentTextArea;
 import org.skyve.metadata.view.fluent.FluentTextField;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Provides a fluent builder for FluentAttribute metadata.
@@ -55,7 +56,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * <p>Side effects: replaces this builder's current state with values from {@code attribute}.
 	 */
 	@SuppressWarnings({"unchecked", "java:S3776"}) // Complexity OK
-	protected T from(Attribute attribute) {
+	protected @Nonnull T from(@Nonnull Attribute attribute) {
 		audited(attribute.isAudited());
 		deprecated(attribute.isDeprecated());
 		description(attribute.getDescription());
@@ -117,6 +118,8 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 			}
 		}
 
+		attribute.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -124,7 +127,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T audited(boolean audited) {
+	public @Nonnull T audited(boolean audited) {
 		get().setAudited(audited);
 		return (T) this;
 	}
@@ -133,7 +136,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T deprecated(boolean deprecated) {
+	public @Nonnull T deprecated(boolean deprecated) {
 		get().setDeprecated(deprecated);
 		return (T) this;
 	}
@@ -142,7 +145,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T description(String description) {
+	public @Nonnull T description(@Nullable String description) {
 		get().setDescription(description);
 		return (T) this;
 	}
@@ -151,7 +154,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T displayName(String displayName) {
+	public @Nonnull T displayName(@Nonnull String displayName) {
 		get().setDisplayName(displayName);
 		return (T) this;
 	}
@@ -160,7 +163,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T documentation(String documentation) {
+	public @Nonnull T documentation(@Nullable String documentation) {
 		get().setDocumentation(documentation);
 		return (T) this;
 	}
@@ -169,7 +172,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T name(String name) {
+	public @Nonnull T name(@Nullable String name) {
 		get().setName(name);
 		return (T) this;
 	}
@@ -178,7 +181,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T trackChanges(boolean trackChanges) {
+	public @Nonnull T trackChanges(boolean trackChanges) {
 		get().setTrackChanges(trackChanges);
 		return (T) this;
 	}
@@ -187,7 +190,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T transientAttribute(boolean transientAttribute) {
+	public @Nonnull T transientAttribute(boolean transientAttribute) {
 		get().setTransient(transientAttribute);
 		return (T) this;
 	}
@@ -196,7 +199,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T usage(UsageType usage) {
+	public @Nonnull T usage(@Nullable UsageType usage) {
 		get().setUsage(usage);
 		return (T) this;
 	}
@@ -205,7 +208,7 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	 * Updates metadata on this fluent builder.
 	 */
 	@SuppressWarnings("unchecked")
-	public T sensitivity(Sensitivity sensitivity) {
+	public @Nonnull T sensitivity(@Nullable Sensitivity sensitivity) {
 		get().setSensitivity(sensitivity);
 		return (T) this;
 	}
@@ -223,96 +226,96 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentCheckBox check) {
+	public @Nonnull T defaultWidget(@Nonnull FluentCheckBox check) {
 		return defaultWidgetReference(check);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentColourPicker colour) {
+	public @Nonnull T defaultWidget(@Nonnull FluentColourPicker colour) {
 		return defaultWidgetReference(colour);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentCombo combo) {
+	public @Nonnull T defaultWidget(@Nonnull FluentCombo combo) {
 		return defaultWidgetReference(combo);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentGeometry geometry) {
+	public @Nonnull T defaultWidget(@Nonnull FluentGeometry geometry) {
 		return defaultWidgetReference(geometry);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentHTML html) {
+	public @Nonnull T defaultWidget(@Nonnull FluentHTML html) {
 		return defaultWidgetReference(html);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentLookupDescription lookup) {
+	public @Nonnull T defaultWidget(@Nonnull FluentLookupDescription lookup) {
 		return defaultWidgetReference(lookup);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentPassword password) {
+	public @Nonnull T defaultWidget(@Nonnull FluentPassword password) {
 		return defaultWidgetReference(password);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentRadio radio) {
+	public @Nonnull T defaultWidget(@Nonnull FluentRadio radio) {
 		return defaultWidgetReference(radio);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentRichText richText) {
+	public @Nonnull T defaultWidget(@Nonnull FluentRichText richText) {
 		return defaultWidgetReference(richText);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentSlider slider) {
+	public @Nonnull T defaultWidget(@Nonnull FluentSlider slider) {
 		return defaultWidgetReference(slider);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentSpinner spinner) {
+	public @Nonnull T defaultWidget(@Nonnull FluentSpinner spinner) {
 		return defaultWidgetReference(spinner);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentTextArea textArea) {
+	public @Nonnull T defaultWidget(@Nonnull FluentTextArea textArea) {
 		return defaultWidgetReference(textArea);
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public T defaultWidget(FluentTextField textField) {
+	public @Nonnull T defaultWidget(@Nonnull FluentTextField textField) {
 		return defaultWidgetReference(textField);
 	}
 
 	@SuppressWarnings("unchecked")
-	private T defaultWidgetReference(FluentInputWidget<?> widget) {
+	private @Nonnull T defaultWidgetReference(@Nullable FluentInputWidget<?> widget) {
 		WidgetReference reference = null;
 		if (widget != null) {
 			reference = new WidgetReference();
@@ -322,5 +325,19 @@ public abstract class FluentAttribute<T extends FluentAttribute<T>> {
 		return (T) this;
 	}
 
-	public abstract AbstractAttribute get();
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
+		return (T) this;
+	}
+
+	public abstract @Nonnull AbstractAttribute get();
 }

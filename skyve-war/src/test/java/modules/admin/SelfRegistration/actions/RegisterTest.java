@@ -77,6 +77,7 @@ class RegisterTest extends AbstractH2Test {
 		assertThrows(ValidationException.class, () -> register.execute(bean, null));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void executeWithBlockedGeoIpPassesSilently() throws Exception {
 		UtilImpl.GEO_IP_COUNTRY_CODES = new CopyOnWriteArraySet<>(java.util.List.of("AU"));

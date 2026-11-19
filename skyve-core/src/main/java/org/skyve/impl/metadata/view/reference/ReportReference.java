@@ -10,6 +10,8 @@ import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -32,39 +34,39 @@ public class ReportReference implements Reference, Parameterizable {
 	private ReportFormat format;
 	private List<Parameter> parameters = new ArrayList<>();
 	
-	public String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
-	public String getReportName() {
+	public @Nonnull String getReportName() {
 		return reportName;
 	}
 
 	@XmlAttribute(required = true)
-	public void setReportName(String reportName) {
+	public void setReportName(@Nonnull String reportName) {
 		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 
-	public ReportFormat getFormat() {
+	public @Nullable ReportFormat getFormat() {
 		return format;
 	}
 
 	@XmlAttribute
-	public void setFormat(ReportFormat format) {
+	public void setFormat(@Nullable ReportFormat format) {
 		this.format = format;
 	}
 
@@ -74,7 +76,7 @@ public class ReportReference implements Reference, Parameterizable {
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 }

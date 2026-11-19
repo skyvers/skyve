@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
@@ -23,6 +24,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Locale;
 
+import org.hibernate.proxy.HibernateProxy;
+import org.hibernate.proxy.LazyInitializer;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.metadata.user.User;
@@ -240,6 +243,7 @@ class UtilTest {
 	// ---- MEGABYTE constant ----
 
 	@Test
+	@SuppressWarnings("java:S3415") // the constant is the value under test; 1024L * 1024L is the expected value
 	void megabyteConstantIsCorrectValue() {
 		assertEquals(1024L * 1024L, Util.MEGABYTE);
 	}
@@ -359,6 +363,8 @@ class UtilTest {
 		String image = Util.getContentImageUrl("admin", "Contact", "photo", "cid1", 80, 40);
 		assertTrue(image.contains("_w=80"));
 		assertTrue(image.contains("_h=40"));
+		// The thumbnail sent can be another size, so the tag keeps the size asked for
+		assertTrue(image.endsWith("\" width=\"80\" height=\"40\" style=\"object-fit:contain\"/>"), image);
 
 		String anchor = Util.getContentAnchorUrl("admin", "Contact", "photo", "cid1", true, "Open");
 		assertTrue(anchor.contains("target=\"_blank\""));
@@ -397,12 +403,12 @@ class UtilTest {
 		assertThat(Util.getLoggedOutUrl(), is(notNullValue()));
 		assertTrue(Util.getResetPasswordUrl().contains("passwordResetToken"));
 
-		assertDoesNotThrow(() -> Util.getServerUrl());
-		assertDoesNotThrow(() -> Util.getSkyveContext());
-		assertDoesNotThrow(() -> Util.getSkyveContextRealPath());
-		assertDoesNotThrow(() -> Util.getModuleDirectory());
-		assertDoesNotThrow(() -> Util.getPasswordHashingAlgorithm());
-		assertDoesNotThrow(() -> Util.getSupportEmailAddress());
+		assertDoesNotThrow(Util::getServerUrl);
+		assertDoesNotThrow(Util::getSkyveContext);
+		assertDoesNotThrow(Util::getSkyveContextRealPath);
+		assertDoesNotThrow(Util::getModuleDirectory);
+		assertDoesNotThrow(Util::getPasswordHashingAlgorithm);
+		assertDoesNotThrow(Util::getSupportEmailAddress);
 	}
 
 	@Test
@@ -419,9 +425,7 @@ class UtilTest {
 	@Test
 	void isRtlAndSecureUrlAndCloneHelpersAreInvokable() {
 		assertFalse(Util.isRTL());
-		assertDoesNotThrow(() -> {
-			Util.isSecureUrl();
-		});
+		assertDoesNotThrow(Util::isSecureUrl);
 		String serverUrl = Util.getServerUrl();
 		if (serverUrl != null) {
 			assertThat(Boolean.valueOf(Util.isSecureUrl()), is(Boolean.valueOf(serverUrl.startsWith("https://"))));
@@ -489,5 +493,15 @@ class UtilTest {
 	void setDataGroupWithNonBeanObjectDoesNotThrow() {
 		// setDataGroup delegates to UtilImpl - for non-bean objects it returns without needing persistence
 		assertDoesNotThrow(() -> Util.setDataGroup("not-a-bean", "group1"));
+	}
+
+	@Test
+	void deproxyThrowsWhenTheProxyHasNoImplementation() {
+		HibernateProxy proxy = mock(HibernateProxy.class);
+		LazyInitializer initializer = mock(LazyInitializer.class);
+		when(proxy.getHibernateLazyInitializer()).thenReturn(initializer);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> Util.deproxy(proxy));
+		assertEquals("Proxy of " + proxy.getClass().getName() + " has no implementation", e.getMessage());
 	}
 }

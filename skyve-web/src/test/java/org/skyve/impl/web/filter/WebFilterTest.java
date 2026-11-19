@@ -14,10 +14,10 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.Vector;
 import java.util.stream.Stream;
+
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +42,7 @@ class WebFilterTest {
 
 	// ===== UTF8CharacterEncodingFilter =====
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testUtf8FilterSetsEncodingWhenNotSet() throws Exception {
 		UTF8CharacterEncodingFilter filter = new UTF8CharacterEncodingFilter();
@@ -60,6 +61,7 @@ class WebFilterTest {
 		filter.destroy();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testUtf8FilterSkipsEncodingWhenAlreadySet() throws Exception {
 		UTF8CharacterEncodingFilter filter = new UTF8CharacterEncodingFilter();
@@ -254,234 +256,6 @@ class WebFilterTest {
 		assertFalse(filter.staticURLPrefix(request));
 
 		filter.destroy();
-	}
-
-	// ===== ThumbnailFilter =====
-
-	@Test
-	void testThumbnailFilterInitWithDefaults() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-		filter.destroy();
-	}
-
-	@Test
-	void testThumbnailFilterInitWithCustomParams() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getInitParameter("widthParam")).thenReturn("width");
-		when(config.getInitParameter("heightParam")).thenReturn("height");
-		when(config.getInitParameter("maxWidth")).thenReturn("800");
-		when(config.getInitParameter("maxHeight")).thenReturn("600");
-		when(config.getInitParameter("nonImageResponse")).thenReturn("passthrough");
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-		filter.destroy();
-	}
-
-	@Test
-	void testThumbnailFilterInitWithSvgNonImage() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn("svg");
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-		filter.destroy();
-	}
-
-	@Test
-	void testThumbnailFilterInitThrowsOnInvalidNonImageResponse() {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn("invalid");
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		assertThrows(ServletException.class, () -> filter.init(config));
-	}
-
-	@ParameterizedTest
-	@MethodSource("passthroughThumbnailParams")
-	void testThumbnailFilterDoFilterPassesThroughForInvalidParams(String width, String height) throws Exception {
-		FilterConfig config = mock(FilterConfig.class);
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		FilterChain chain = mock(FilterChain.class);
-
-		when(request.getParameter("_w")).thenReturn(width);
-		when(request.getParameter("_h")).thenReturn(height);
-
-		filter.doFilter(request, response, chain);
-		verify(chain).doFilter(request, response);
-	}
-
-	private static Stream<Arguments> passthroughThumbnailParams() {
-		return Stream.of(
-			Arguments.of(null, null),
-			Arguments.of("0", "100"),
-			Arguments.of("abc", "100"));
-	}
-
-	@Test
-	void testThumbnailFilterDoFilterCapsWidthAndHeight() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn("800");
-		when(config.getInitParameter("maxHeight")).thenReturn("600");
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		FilterChain chain = new FilterChain() {
-			@Override
-			public void doFilter(ServletRequest req, ServletResponse res) throws IOException, ServletException {
-				// write a non-image content type so it passes through unchanged
-				HttpServletResponse httpRes = (HttpServletResponse) res;
-				httpRes.setContentType("text/plain");
-				try {
-					res.getOutputStream().write("hello".getBytes());
-				}
-				catch (@SuppressWarnings("unused") Exception e) {
-					// ignore
-				}
-			}
-		};
-
-		// width=2000/height=1000 both exceed max → get capped, then chain runs
-		when(request.getParameter("_w")).thenReturn("2000");
-		when(request.getParameter("_h")).thenReturn("1000");
-		when(request.getRequestURI()).thenReturn("/test/image.jpg");
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ServletOutputStream sos = new ServletOutputStream() {
-			@Override
-			public void write(int b) {
-				baos.write(b);
-			}
-
-			@Override
-			public boolean isReady() {
-				return true;
-			}
-
-			@Override
-			public void setWriteListener(WriteListener writeListener) {
-				// no-op
-			}
-		};
-		when(response.getOutputStream()).thenReturn(sos);
-
-		filter.doFilter(request, response, chain);
-		// Should not throw – content type not recognised as image, so passes through unchanged
-	}
-
-	@Test
-	void testThumbnailFilterCapturingWrapperUsesWriterWhenChainWritesText() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		// FilterChain writes via getWriter() and sets Content-Type via setHeader
-		FilterChain chain = (req, res) -> {
-			HttpServletResponse r = (HttpServletResponse) res;
-			r.setHeader("Content-Type", "text/html");
-			try (PrintWriter pw = r.getWriter()) {
-				pw.write("<html/>");
-			}
-		};
-
-		when(request.getParameter("_w")).thenReturn("100");
-		when(request.getParameter("_h")).thenReturn("100");
-		when(request.getRequestURI()).thenReturn("/test/page");
-		when(response.getCharacterEncoding()).thenReturn("UTF-8");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ServletOutputStream sos = new ServletOutputStream() {
-			@Override public void write(int b) { baos.write(b); }
-			@Override public boolean isReady() { return true; }
-			@Override public void setWriteListener(WriteListener l) {
-				// no-op for test stream
-			}
-		};
-		when(response.getOutputStream()).thenReturn(sos);
-
-		filter.doFilter(request, response, chain);
-		// Not an image content type → passes through
-	}
-
-	@Test
-	void testThumbnailFilterCapturingWrapperAddsContentTypeHeader() throws Exception {
-		FilterConfig config = Assertions.assertDoesNotThrow(() -> mock(FilterConfig.class));
-		when(config.getInitParameter("widthParam")).thenReturn(null);
-		when(config.getInitParameter("heightParam")).thenReturn(null);
-		when(config.getInitParameter("maxWidth")).thenReturn(null);
-		when(config.getInitParameter("maxHeight")).thenReturn(null);
-		when(config.getInitParameter("nonImageResponse")).thenReturn(null);
-
-		ThumbnailFilter filter = new ThumbnailFilter();
-		filter.init(config);
-
-		HttpServletRequest request = mock(HttpServletRequest.class);
-		HttpServletResponse response = mock(HttpServletResponse.class);
-		// FilterChain sets Content-Type via addHeader to cover addHeader() in CapturingResponseWrapper
-		FilterChain chain = (req, res) -> {
-			HttpServletResponse r = (HttpServletResponse) res;
-			r.addHeader("Content-Type", "text/plain");
-			try {
-				res.getOutputStream().write("data".getBytes());
-			} catch (@SuppressWarnings("unused") Exception ignored) {
-				// no-op for test helper path
-			}
-		};
-
-		when(request.getParameter("_w")).thenReturn("50");
-		when(request.getParameter("_h")).thenReturn("50");
-		when(request.getRequestURI()).thenReturn("/test/data");
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ServletOutputStream sos = new ServletOutputStream() {
-			@Override public void write(int b) { baos.write(b); }
-			@Override public boolean isReady() { return true; }
-			@Override public void setWriteListener(WriteListener l) {
-				// no-op for test stream
-			}
-		};
-		when(response.getOutputStream()).thenReturn(sos);
-
-		filter.doFilter(request, response, chain);
-		// text/plain not an image → passes through unchanged
 	}
 
 	// ===== CompressionFilter =====

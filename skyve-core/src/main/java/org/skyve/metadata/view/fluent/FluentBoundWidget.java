@@ -2,6 +2,9 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.widget.bound.AbstractBound;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides fluent operations shared by bound widget metadata builders.
  *
@@ -23,7 +26,7 @@ public abstract class FluentBoundWidget<T extends FluentBoundWidget<T>> extends 
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(AbstractBound bound) {
+	protected @Nonnull T from(@Nonnull AbstractBound bound) {
 		binding(bound.getBinding());
 		return (T) this;
 	}
@@ -36,7 +39,7 @@ public abstract class FluentBoundWidget<T extends FluentBoundWidget<T>> extends 
 	 * @return this builder
 	 */
 	@SuppressWarnings("unchecked")
-	public T binding(String binding) {
+	public @Nonnull T binding(@Nullable String binding) {
 		get().setBinding(binding);
 		return (T) this;
 	}
@@ -45,5 +48,5 @@ public abstract class FluentBoundWidget<T extends FluentBoundWidget<T>> extends 
 	 * Returns the wrapped bound-widget metadata instance being configured.
 	 */
 	@Override
-	public abstract AbstractBound get();
+	public abstract @Nonnull AbstractBound get();
 }

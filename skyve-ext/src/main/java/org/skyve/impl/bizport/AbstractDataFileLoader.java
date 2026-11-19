@@ -1,5 +1,8 @@
 package org.skyve.impl.bizport;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,6 +22,9 @@ import org.skyve.domain.types.Decimal5;
 import org.skyve.domain.types.TimeOnly;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.domain.types.converters.Converter;
+import org.skyve.domain.types.converters.decimal.AbstractDecimalConverter;
+import org.skyve.domain.types.converters.decimal.AbstractDecimalPercentageConverter;
+import org.skyve.domain.types.converters.decimal.currency.AbstractDollarsAndCentsConverter;
 import org.skyve.impl.bizport.DataFileField.LoadAction;
 import org.skyve.impl.metadata.model.document.field.ConvertibleField;
 import org.skyve.metadata.customer.Customer;
@@ -263,21 +269,22 @@ public abstract class AbstractDataFileLoader {
 	 * @param required
 	 * @param converter
 	 */
-	public void addField(@Nonnull String binding, LoadAction loadAction, boolean required, Converter<?> converter) {
+	public void addField(@Nonnull String binding, @Nullable LoadAction loadAction, boolean required, @Nullable Converter<?> converter) {
 		DataFileField field = new DataFileField(binding, loadAction, required, fields.size(), converter);
 		fields.add(finaliseField(field));
 	}
 
 	@SuppressWarnings({"java:S2629", "java:S3776"}) // logging log.toString() fine, complexity OK
-	private DataFileField finaliseField(@Nonnull DataFileField field) {
-		if (field.getBinding() != null) {
+	private @Nonnull DataFileField finaliseField(@Nonnull DataFileField field) {
+		String binding = field.getBinding();
+		if (binding != null) {
 			// default inferred load action
-			if (field.getBinding().indexOf('.') >= 0 && LoaderActivityType.CREATE_FIND.equals(activityType)) {
+			if (binding.indexOf('.') >= 0 && LoaderActivityType.CREATE_FIND.equals(activityType)) {
 				field.setLoadAction(LoadAction.LOOKUP_EQUALS);
 			}
 
 			// evaluate attribute
-			TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, field.getBinding());
+			TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, binding);
 
 			Attribute attr = tm.getAttribute();
 			if (attr != null) { // should always be
@@ -287,7 +294,7 @@ public abstract class AbstractDataFileLoader {
 	
 				// special case attribute is an association - go to bizkey
 				if (AttributeType.association.equals(attr.getAttributeType())) {
-					String newBinding = Binder.createCompoundBinding(field.getBinding(), Bean.BIZ_KEY);
+					String newBinding = Binder.createCompoundBinding(binding, Bean.BIZ_KEY);
 					field.setAttribute(attr);
 					field.setBinding(newBinding);
 					field.setLoadAction(LoadAction.LOOKUP_CONTAINS);
@@ -306,13 +313,15 @@ public abstract class AbstractDataFileLoader {
 			if (debugMode) {
 				StringBuilder log = new StringBuilder();
 				log.append("Field added for binding ").append(field.getBinding());
-				if (field.getAttribute() != null) {
+				Attribute fieldAttribute = field.getAttribute();
+				if (fieldAttribute != null) {
 					log.append(" evaluates to ").append(moduleName).append('.').append(documentName);
-					log.append('.').append(field.getAttribute().getName()).append(" (").append(field.getAttribute().getLocalisedDisplayName())
+					log.append('.').append(fieldAttribute.getName()).append(" (").append(fieldAttribute.getLocalisedDisplayName())
 							.append(')');
 				}
-				if (field.getConverter() != null) {
-					log.append(" with Converter ").append(field.getConverter().getClass().getName());
+				Converter<?> fieldConverter = field.getConverter();
+				if (fieldConverter != null) {
+					log.append(" with Converter ").append(fieldConverter.getClass().getName());
 				}
 				LOGGER.info(log.toString());
 			}
@@ -344,10 +353,11 @@ public abstract class AbstractDataFileLoader {
 	 */
 	public void setFieldOffset(int offset) {
 		for (DataFileField fld : fields) {
-			if (fld.getIndex() == null) {
-				fld.setIndex(Integer.valueOf(0));
+			Integer index = fld.getIndex();
+			if (index == null) {
+				index = Integer.valueOf(0);
 			}
-			fld.setIndex(fld.getIndex().intValue() + offset);
+			fld.setIndex(index.intValue() + offset);
 		}
 	}
 
@@ -390,7 +400,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param emptyAsNull
 	 * @return
 	 */
-	abstract String getStringFieldValue(int index, boolean emptyAsNull);
+	abstract @Nullable String getStringFieldValue(int index, boolean emptyAsNull);
 
 	/**
 	 * Get a numeric value from the field at index
@@ -399,7 +409,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param emptyAsZero
 	 * @return
 	 */
-	abstract Double getNumericFieldValue(int index, boolean emptyAsZero);
+	abstract @Nullable Double getNumericFieldValue(int index, boolean emptyAsZero);
 
 	/**
 	 * Get a date value from the field at index
@@ -407,7 +417,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param index
 	 * @return
 	 */
-	abstract Date getDateFieldValue(int index);
+	abstract @Nullable Date getDateFieldValue(int index);
 
 	/**
 	 * Describes the value location
@@ -415,7 +425,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param fieldIndex
 	 * @return
 	 */
-	private String getWhere(@Nullable Integer index) {
+	private @Nonnull String getWhere(@Nullable Integer index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Row ").append((dataIndex + 1));
 		if (index != null) {
@@ -431,7 +441,7 @@ public abstract class AbstractDataFileLoader {
 	 * @param index
 	 * @return
 	 */
-	public String getWhere(int index) {
+	public @Nonnull String getWhere(int index) {
 		return getWhere(Integer.valueOf(index));
 	}
 
@@ -480,6 +490,9 @@ public abstract class AbstractDataFileLoader {
 			// e.g. if customer.company.contact.name is supplied,
 			// we need to find if there is a customer with company.contact.name that matches
 			String binding = field.getBinding();
+			if (binding == null) {
+				throw new IllegalStateException("A field without a binding cannot look up a bean");
+			}
 
 			// the rest - e.g company.contact.name
 			String restBinding = binding;
@@ -502,10 +515,14 @@ public abstract class AbstractDataFileLoader {
 			TargetMetaData drivingMD = Binder.getMetaDataForBinding(customer, module, document, firstLevelBinding);
 			Document drivingDoc = drivingMD.getDocument();
 			DocumentQuery lookup = pers.newDocumentQuery(drivingDoc.getOwningModuleName(), drivingDoc.getName());
-			if (debugMode) {
-				LOGGER.info("{} searching {} in document {} for value {}", field.getLoadAction().name(), restBinding, drivingDoc.getName(), loadValue);
+			LoadAction loadAction = field.getLoadAction();
+			if (loadAction == null) {
+				throw new DomainException("No load action was specified to look up " + binding);
 			}
-			switch (field.getLoadAction()) {
+			if (debugMode) {
+				LOGGER.info("{} searching {} in document {} for value {}", loadAction.name(), restBinding, drivingDoc.getName(), loadValue);
+			}
+			switch (loadAction) {
 			case LOOKUP_EQUALS, CONFIRM_VALUE:
 				lookup.getFilter().addEquals(restBinding, loadValue);
 				break;
@@ -525,7 +542,7 @@ public abstract class AbstractDataFileLoader {
 				if (debugMode) {
 					LOGGER.info("Matching bean found {}", foundBean.getBizId());
 				}
-				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction()) && contextBean != null) {
+				if (DataFileField.LoadAction.CONFIRM_VALUE.equals(field.getLoadAction())) {
 					// check if the found bean matches the bean we have already found
 					Object resultValue = Binder.get(contextBean, searchBinding);
 					if (!foundBean.equals(resultValue)) {
@@ -593,7 +610,7 @@ public abstract class AbstractDataFileLoader {
 	 * @return
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public <T extends Bean> T beanResult() {
+	public @Nullable <T extends Bean> T beanResult() {
 
 		if (debugMode) {
 			LOGGER.info(debugData());
@@ -627,10 +644,11 @@ public abstract class AbstractDataFileLoader {
 		}
 		for (DataFileField field : fields) {
 
-			if (field.getIndex() == null) {
+			Integer index = field.getIndex();
+			if (index == null) {
 				fieldIndex++;
 			} else {
-				fieldIndex = field.getIndex().intValue();
+				fieldIndex = index.intValue();
 			}
 			what = new StringBuilder(64);
 			debugFilter = new StringBuilder(64);
@@ -650,7 +668,8 @@ public abstract class AbstractDataFileLoader {
 
 				Object loadValue = null;
 
-				if (field.getAttribute() == null) {
+				Attribute attribute = field.getAttribute();
+				if (attribute == null) {
 					String msg = "The attribute corresponding to " + field.getBinding() + " didn't check out.";
 					Problem prob = new Problem(msg, "Column " + (fieldIndex + 1));
 					exception.addError(prob);
@@ -658,25 +677,35 @@ public abstract class AbstractDataFileLoader {
 						LOGGER.info(msg);
 					}
 				} else {
-					if (field.getConverter() != null) {
+					Converter<?> converter = field.getConverter();
+					if (converter != null) {
 						try {
 							// use Skyve converter
 							operand = getStringFieldValue(fieldIndex, true);
 							String displayValue = (String) operand;
 							if (debugMode) {
-								LOGGER.info("Loading String value {} using Skyve converter {}", displayValue, field.getConverter().toString());
+								LOGGER.info("Loading String value {} using Skyve converter {}", displayValue, converter.toString());
 							}
 							if (displayValue != null && (! displayValue.trim().isEmpty())) {
 								try {
-									loadValue = field.getConverter().fromDisplayValue(displayValue.trim());
+									loadValue = converter.fromDisplayValue(displayValue.trim());
 								} catch (@SuppressWarnings("unused") Exception e) {
-									LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, field.getConverter().toString());
+									// a cell may have text after its number (1,234.50 kg), which the loader has always read
+									loadValue = leadingNumber(converter, displayValue.trim());
+									if (loadValue == null) {
+										LOGGER.info("Loading String value {} using Skyve converter {} FAILED", displayValue, converter);
+									}
 								}
 								
 								if (loadValue == null) {
 									try {	
 										Date d = getDateFieldValue(fieldIndex);
-										loadValue = new DateTime(d);
+										if (d == null) {
+											LOGGER.info("Loading String value {} using default conversion FAILED", displayValue);
+										}
+										else {
+											loadValue = new DateTime(d);
+										}
 									} catch (@SuppressWarnings("unused") Exception e) {
 										LOGGER.info("Loading String value {} using default conversion FAILED", displayValue);
 									}
@@ -692,9 +721,9 @@ public abstract class AbstractDataFileLoader {
 							}
 						} catch (Exception e) {
 							what.append(" The value ");
-							what.append("'").append(field.getAttribute().getLocalisedDisplayName()).append("'");
+							what.append("'").append(attribute.getLocalisedDisplayName()).append("'");
 							what.append(" is invalid");
-							what.append(" (using Converter " + field.getConverter().getClass().getSimpleName()).append(").");
+							what.append(" (using Converter " + converter.getClass().getSimpleName()).append(").");
 							if (e.getMessage() != null) {
 								what.append(" ").append(e.getMessage());
 							}
@@ -704,7 +733,7 @@ public abstract class AbstractDataFileLoader {
 					} else {
 						try {
 							// simplistic conversion making assumptions based on the attribute type
-							switch (field.getAttribute().getAttributeType()) {
+							switch (attribute.getAttributeType()) {
 							case bool:
 								operand = getStringFieldValue(fieldIndex, true);
 								if (operand != null) {
@@ -818,7 +847,7 @@ public abstract class AbstractDataFileLoader {
 								break;
 							default:
 								if (debugMode) {
-									LOGGER.info("Attribute type {} not supported.", field.getAttribute().getAttributeType().toString());
+									LOGGER.info("Attribute type {} not supported.", attribute.getAttributeType().toString());
 								}
 								break;
 							}
@@ -826,7 +855,7 @@ public abstract class AbstractDataFileLoader {
 							// handle the operand - by default - just attempt to set the value in the binding
 							if (field.isRequired() && loadValue == null) {
 								what.append(" A value is required for '");
-								what.append(field.getAttribute().getLocalisedDisplayName());
+								what.append(attribute.getLocalisedDisplayName());
 								what.append("' but no value was found.");
 								throw new Exception(what.toString());
 							}
@@ -838,7 +867,7 @@ public abstract class AbstractDataFileLoader {
 							String operandRawValue = getStringFieldValue(fieldIndex, true);
 							if (operandRawValue == null) {
 								what.append(" A value was expected for ");
-								what.append("'").append(field.getAttribute().getLocalisedDisplayName()).append("'");
+								what.append("'").append(attribute.getLocalisedDisplayName()).append("'");
 								what.append(" but no value was found.");
 								Problem problem = new Problem(what.toString(), getWhere(fieldIndex).toString());
 								exception.addWarning(problem);
@@ -848,7 +877,7 @@ public abstract class AbstractDataFileLoader {
 								what.append(" The value '");
 								what.append(operandRawValue);
 								what.append("' found for '");
-								what.append(field.getAttribute().getLocalisedDisplayName());
+								what.append(attribute.getLocalisedDisplayName());
 								what.append("' is invalid or the wrong type.");
 								if (e.getMessage() != null) {
 									what.append(e.getMessage());
@@ -867,11 +896,15 @@ public abstract class AbstractDataFileLoader {
 							}
 						} else {
 							if (debugMode) {
-								LOGGER.info("Loading Activity Type={} Field Load Action= {}", (activityType==null?"null":activityType.toString()), (field.getLoadAction()==null?"null":field.getLoadAction().toString()));
+								LoadAction fieldLoadAction = field.getLoadAction();
+								LOGGER.info("Loading Activity Type={} Field Load Action= {}", (activityType==null?"null":activityType.toString()), (fieldLoadAction==null?"null":fieldLoadAction.toString()));
 							}
 
 							switch (activityType) {
 							case CREATE_ALL:
+								if (result == null) {
+									throw new IllegalStateException("No " + documentName + " was created to load into");
+								}
 								if (binding.indexOf('.') > 0) {
 									Binder.populateProperty(user, result, binding, loadValue, false);
 								} else {
@@ -879,12 +912,16 @@ public abstract class AbstractDataFileLoader {
 								}
 								break;
 							case FIND:
-								if (debugMode) {
-									LOGGER.info("FIND {} for {}", field.getLoadAction().name(), field.getBinding());
+								LoadAction loadAction = field.getLoadAction();
+								if (loadAction == null) {
+									throw new DomainException("No load action was specified to find by " + binding);
 								}
-								debugFilter.append(field.getAttribute().getLocalisedDisplayName());
+								if (debugMode) {
+									LOGGER.info("FIND {} for {}", loadAction.name(), field.getBinding());
+								}
+								debugFilter.append(attribute.getLocalisedDisplayName());
 								// compile the query filter and run at the end
-								switch (field.getLoadAction()) {
+								switch (loadAction) {
 								case LOOKUP_EQUALS:
 									qFind.getFilter().addEquals(binding, loadValue);
 									debugFilter.append(" = '").append(loadValue).append("'");
@@ -903,6 +940,9 @@ public abstract class AbstractDataFileLoader {
 								break;
 							case CREATE_FIND:
 							default:
+								if (result == null) {
+									throw new IllegalStateException("No " + documentName + " was created to load into");
+								}
 
 								// check for compound binding
 								if (binding.indexOf('.') > 0) {
@@ -960,7 +1000,7 @@ public abstract class AbstractDataFileLoader {
 	 * 
 	 * @return
 	 */
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		while (hasNextData()) {
 			nextData();
 			if (isNoData()) {
@@ -991,5 +1031,42 @@ public abstract class AbstractDataFileLoader {
 		@SuppressWarnings("unchecked")
 		List<T> result = (List<T>) results;
 		return result;
+	}
+
+	/**
+	 * Reads the number at the start of a data file's cell for a decimal converter, as the loader did before the
+	 * converters read the whole text: a cell such as {@code 1,234.50 kg} loads 1234.50. A percentage's {@code %} is
+	 * removed wherever it is, and a {@code $} at the start of dollars. Forms and list filters read the whole text.
+	 *
+	 * @param converter the field's converter
+	 * @param displayValue the cell's text, trimmed
+	 * @return the value, or {@code null} if the converter is not a decimal converter or the text does not start with a
+	 * 			number
+	 */
+	static @Nullable Object leadingNumber(@Nonnull Converter<?> converter, @Nonnull String displayValue) {
+		if (! (converter instanceof AbstractDecimalConverter<?> decimalConverter)) {
+			return null;
+		}
+		String text = displayValue;
+		if (converter instanceof AbstractDecimalPercentageConverter<?>) {
+			text = text.replace("%", "");
+		}
+		else if ((converter instanceof AbstractDollarsAndCentsConverter<?>) && text.startsWith("$")) {
+			text = text.substring(1).trim();
+		}
+		DecimalFormat format = CORE.getDecimalFormat(decimalConverter.getFormatPattern());
+		format.setParseBigDecimal(true);
+		ParsePosition position = new ParsePosition(0);
+		Number number = format.parse(text, position);
+		if ((position.getIndex() == 0) || (! (number instanceof BigDecimal decimal))) {
+			return null;
+		}
+		try {
+			// the converter scales the number (and a percentage's is divided by 100)
+			return converter.fromDisplayValue(decimal.toPlainString());
+		}
+		catch (@SuppressWarnings("unused") Exception e) {
+			return null;
+		}
 	}
 }

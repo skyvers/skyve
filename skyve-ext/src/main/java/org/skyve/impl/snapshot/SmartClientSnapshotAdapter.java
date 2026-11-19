@@ -16,6 +16,9 @@ import org.skyve.persistence.DocumentQuery.AggregateFunction;
 import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 @SuppressWarnings("java:S1192") // Repeated literals are deliberate escaped SmartClient snapshot state fragments.
 class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	private static final String SC_ADVANCED_CRITERIA_STYLE = "advancedCriteriaStyle";
@@ -41,7 +44,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Snapshot fromClientPayload(String payload) {
+	public @Nullable Snapshot fromClientPayload(@Nonnull String payload) {
 		User u = CORE.getUser();
 		
 		Snapshot result = null;
@@ -211,7 +214,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static SnapshotFilter criteria(Map<String, Object> map) {
+	private static @Nonnull SnapshotFilter criteria(@Nonnull Map<String, Object> map) {
 		// Advanced Criteria
 		if (SC_ADVANCED_CRITERIA.equals(map.get(SC_CONSTRUCTOR))) {
 			SnapshotCriteria result = new SnapshotCriteria();
@@ -288,7 +291,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 	}
 	
 	@Override
-	public String toClientPayload(Snapshot snapshot) {
+	public @Nonnull String toClientPayload(@Nonnull Snapshot snapshot) {
 		StringBuilder result = new StringBuilder(512);
 
 		// Advanced search
@@ -367,7 +370,7 @@ class SmartClientSnapshotAdapter extends SnapshotAdapter {
 		return result.toString();
 	}
 	
-	private static Map<String, Object> criteria(SnapshotFilter criteria) {
+	private static @Nonnull Map<String, Object> criteria(@Nonnull SnapshotFilter criteria) {
 		Map<String, Object> result = new LinkedHashMap<>();
 
 		// Advanced Criteria

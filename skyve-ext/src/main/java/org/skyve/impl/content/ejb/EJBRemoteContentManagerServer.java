@@ -4,6 +4,9 @@ import org.skyve.content.AttachmentContent;
 import org.skyve.content.BeanContent;
 import org.skyve.content.SearchResults;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * To Setup remoting comms in wildly 33...
  * 
@@ -78,7 +81,7 @@ import org.skyve.content.SearchResults;
  * @author mike
  */
 public interface EJBRemoteContentManagerServer {
-	public void put(BeanContent content) throws Exception;
+	public void put(@Nonnull BeanContent content) throws Exception;
 
 	/**
 	 * 
@@ -87,15 +90,15 @@ public interface EJBRemoteContentManagerServer {
 	 * @return	The contentId.
 	 * @throws Exception
 	 */
-	public String put(AttachmentContent content, boolean index) throws Exception;
+	public @Nullable String put(@Nonnull AttachmentContent content, boolean index) throws Exception;
 
-	public void update(AttachmentContent content) throws Exception;
+	public void update(@Nonnull AttachmentContent content) throws Exception;
 
-	public AttachmentContent getAttachment(String contentId) throws Exception;
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception;
 	
-	public void removeBean(String bizId) throws Exception;
+	public void removeBean(@Nonnull String bizId) throws Exception;
 	
-	public void removeAttachment(String contentId) throws Exception;
+	public void removeAttachment(@Nonnull String contentId) throws Exception;
 	
-	public SearchResults google(String search, int maxResults) throws Exception;
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception;
 }

@@ -229,18 +229,23 @@ isc.BizMap.addMethods({
 	},
 
 	/**
-	 * Handles click events on map overlays and displays an info window with a zoom button.
+	 * Handles click events on map overlays and displays an info window.
+	 * The info window has a zoom button only when the overlay names a module, document and bizId to zoom to.
 	 *
 	 * @param {google.maps.OverlayView} overlay - the overlay that was clicked.
 	 * @param {google.maps.MapMouseEvent} event - the event that triggered the click.
 	 */
 	click: function (overlay, event) {
+		const zoomable = overlay.mod && overlay.doc && overlay.bizId;
+		const zoomButton = (topLat, leftLng, bottomLat, rightLng) =>
+			zoomable
+				? `<br/><br/><input type="button" value="Zoom" onclick="${this.ID}.zoom(${topLat},${leftLng},${bottomLat},${rightLng},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`
+				: "";
 		let contents = overlay.infoMarkup;
-		contents += `<br/><br/><input type="button" value="Zoom" onclick="${this.ID}.zoom(`;
 
 		if (overlay.getPosition) {
 			const p = overlay.getPosition();
-			contents += `${p.lat()},${p.lng()},${p.lat()},${p.lng()},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`;
+			contents += zoomButton(p.lat(), p.lng(), p.lat(), p.lng());
 
 			this.infoWindow.open(this.webmap, overlay);
 			this.infoWindow.setContent(contents);
@@ -255,7 +260,7 @@ isc.BizMap.addMethods({
 			const ne = bounds.getNorthEast();
 			const sw = bounds.getSouthWest();
 
-			contents += `${ne.lat()},${sw.lng()},${sw.lat()},${ne.lng()},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`;
+			contents += zoomButton(ne.lat(), sw.lng(), sw.lat(), ne.lng());
 
 			this.infoWindow.setPosition(event.latLng);
 			this.infoWindow.open(this.webmap);
@@ -265,7 +270,7 @@ isc.BizMap.addMethods({
 			const ne = bounds.getNorthEast();
 			const sw = bounds.getSouthWest();
 
-			contents += `${ne.lat()},${sw.lng()},${sw.lat()},${ne.lng()},'${overlay.mod}','${overlay.doc}','${overlay.bizId}')"/>`;
+			contents += zoomButton(ne.lat(), sw.lng(), sw.lat(), ne.lng());
 
 			this.infoWindow.setPosition(event.latLng);
 			this.infoWindow.open(this.webmap);

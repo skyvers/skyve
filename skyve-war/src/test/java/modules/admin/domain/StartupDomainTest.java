@@ -158,6 +158,27 @@ class StartupDomainTest extends AbstractH2Test {
 	}
 
 	@Test
+	void mailLogAttachmentsSetAndGet() {
+		Startup bean = Startup.newInstance();
+		bean.setMailLogAttachments(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getMailLogAttachments());
+	}
+
+	@Test
+	void mailLogAttachmentsMaxBytesSetAndGet() {
+		Startup bean = Startup.newInstance();
+		bean.setMailLogAttachmentsMaxBytes(Long.valueOf(1024));
+		assertEquals(Long.valueOf(1024), bean.getMailLogAttachmentsMaxBytes());
+	}
+
+	@Test
+	void mailLogBodyExcerptSetAndGet() {
+		Startup bean = Startup.newInstance();
+		bean.setMailLogBodyExcerpt(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, bean.getMailLogBodyExcerpt());
+	}
+
+	@Test
 	void geoIPKeySetAndGet() {
 		Startup bean = Startup.newInstance();
 		bean.setGeoIPKey("geo-key-123");

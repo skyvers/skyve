@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.skyve.content.ContentManager;
 import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
@@ -49,6 +51,9 @@ public class ContentChecker {
 		Customer customer = CORE.getCustomer();
 		String customerName = customer.getName();
 		String dynamicEntityPersistentIdentifier = RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
+		if (dynamicEntityPersistentIdentifier == null) { // the dynamic entity document always defines its table
+			throw new MetaDataException("The dynamic entity document has persistent metadata with no table name.");
+		}
 		
 		try (Connection connection = EXT.getDataStoreConnection()) {
 			connection.setAutoCommit(false);
@@ -79,7 +84,7 @@ public class ContentChecker {
 	 * @throws Exception if validation fails
 	 */
 	@SuppressWarnings({ "java:S3776", "resource" }) // complexity OK; cm is managed by caller
-	private void checkStaticContent(Connection connection, ContentManager cm, Customer customer, String customerName) throws Exception {
+	private void checkStaticContent(@Nonnull Connection connection, @Nonnull ContentManager cm, @Nonnull Customer customer, @Nonnull String customerName) throws Exception {
 		for (Table table : BackupUtil.getTables()) {
 			if (! hasContent(table)) {
 				continue;
@@ -124,11 +129,11 @@ public class ContentChecker {
 	 * @throws Exception if validation fails
 	 */
 	@SuppressWarnings("java:S3776") // complexity OK
-	private void checkDynamicContent(Connection connection,
-										ContentManager cm,
-										Customer customer,
-										String customerName,
-										String dynamicEntityPersistentIdentifier)
+	private void checkDynamicContent(@Nonnull Connection connection,
+										@Nonnull ContentManager cm,
+										@Nonnull Customer customer,
+										@Nonnull String customerName,
+										@Nonnull String dynamicEntityPersistentIdentifier)
 	throws Exception {
 		try (Statement statement = connection.createStatement()) {
 			// Iterate through all DynamicEntities looking for content/image attribute values
@@ -152,7 +157,8 @@ public class ContentChecker {
 							if (fieldsJSON == null) {
 								@SuppressWarnings("unchecked")
 								Map<String, Object> json = (Map<String, Object>) JSON.unmarshall(resultSet.getString(4));
-								fieldsJSON = json;
+								// null JSON fields hold no content to check
+								fieldsJSON = (json == null) ? Collections.emptyMap() : json;
 							}
 							String fieldName = a.getName();
 							String contentId = (String) fieldsJSON.get(fieldName);
@@ -178,12 +184,12 @@ public class ContentChecker {
 	 * @param dynamicDocument true if the reference comes from a dynamic entity
 	 */
 	@SuppressWarnings({"java:S3776", "java:S1141"}) // complexity OK
-	private void checkContent(String contentId,
-								ContentManager cm,
-								String fieldName,
-								String persistentIdentifier,
-								AttributeType attributeType,
-								Customer customer,
+	private void checkContent(@Nonnull String contentId,
+								@Nonnull ContentManager cm,
+								@Nonnull String fieldName,
+								@Nonnull String persistentIdentifier,
+								@Nonnull AttributeType attributeType,
+								@Nonnull Customer customer,
 								boolean dynamicDocument) {
 		AttachmentContent content;
 		try {
@@ -319,7 +325,6 @@ public class ContentChecker {
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
 	private static @Nullable String bogusDynamicContentReference(@Nonnull String contentId, @Nonnull String dynamicEntityPersistentIdentifier) {
-		ProvidedRepository r = ProvidedRepositoryFactory.get();
 		Persistence p = CORE.getPersistence();
 		
 		// Find any DynamicEntity with the given contentId as a value in the fields JSON
@@ -336,6 +341,7 @@ public class ContentChecker {
 			int previousDoubleQuoteIndex = fields.lastIndexOf('"');
 			if (previousDoubleQuoteIndex >= 0) {
 				String attributeName = fields.substring(previousDoubleQuoteIndex + 1);
+				ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 				Customer c = r.getCustomer((String) row[1]);
 				Module m = r.getModule(c, (String) row[2]);
 				Document d = (m == null) ? null : m.getDocument(c, (String) row[3]);

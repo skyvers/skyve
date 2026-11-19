@@ -3,6 +3,8 @@ package org.skyve.domain.messages;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.SecurityUtil;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Thrown when the current user does not have the privilege required to perform an
  * operation on a data entity or web resource.
@@ -26,7 +28,7 @@ import org.skyve.util.SecurityUtil;
 public class SecurityException extends DomainException {
 	private static final long serialVersionUID = 2941808458696267548L;
 
-	public SecurityException(String resource, String userName) {
+	public SecurityException(@Nullable String resource, @Nullable String userName) {
 		super(userName + " does not have access to " + resource);
 		SecurityUtil.log(this, isEmailed());
 	}

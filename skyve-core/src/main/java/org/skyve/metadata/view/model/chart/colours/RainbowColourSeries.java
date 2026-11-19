@@ -6,6 +6,8 @@ import java.util.Arrays;
 import org.skyve.metadata.view.model.chart.colours.rainbow.Rainbow;
 import org.skyve.metadata.view.model.chart.colours.rainbow.RainbowException;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Produce a gradient of colours between the default or a specified spectrum (min 2 colours).
  * 
@@ -32,7 +34,7 @@ public class RainbowColourSeries extends ColourSeries {
 		current = getColor(0);
 	}
 
-	public RainbowColourSeries(String... spectrum) {
+	public RainbowColourSeries(@Nonnull String... spectrum) {
 		this();
 		if (spectrum.length > 0) {
 			this.spectrum = spectrum;
@@ -43,7 +45,7 @@ public class RainbowColourSeries extends ColourSeries {
 	}
 
 	@Override
-	public Color next() {
+	public @Nonnull Color next() {
 		current = getColor(++currentRainbowIndex);
 		return current;
 	}
@@ -74,12 +76,12 @@ public class RainbowColourSeries extends ColourSeries {
 	 * @throws RainbowException if there is less than two arguments or if one of the arguments
 	 *         is an invalid colour
 	 */
-	public void setSpectrum(String... spectrum) throws RainbowException {
+	public void setSpectrum(@Nonnull String... spectrum) throws RainbowException {
 		this.rainbow.setSpectrum(spectrum);
 	}
 
 	@SuppressWarnings("boxing")
-	private Color getColor(int index) {
+	private @Nonnull Color getColor(int index) {
 		String hex = rainbow.colorAt(index);
 		return new Color(
 				Integer.valueOf(hex.substring(0, 2), 16),

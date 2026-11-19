@@ -46,7 +46,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	private static final Duration COPY_TIMEOUT = Duration.ofHours(4);
 
 	@Override
-	public List<String> listBackups() {
+	public @Nonnull List<String> listBackups() {
 		final Comparator<BlobItem> byLastModifiedDate = Comparator.comparing(blobItem -> blobItem.getProperties().getLastModified());
 		return getBlobContainerClient().listBlobsByHierarchy(getDirectoryName()).stream()
 				.sorted(byLastModifiedDate.reversed())
@@ -55,30 +55,30 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	}
 
 	@Override
-	public boolean exists(String backupName) {
+	public boolean exists(@Nonnull String backupName) {
 		return getBlobContainerClient().listBlobsByHierarchy(getDirectoryName()).stream()
 				.anyMatch(blob -> Objects.equals(backupName, blob.getName().replace(getDirectoryName(), "")));
 	}
 
 	@Override
-	public void downloadBackup(String backupName, OutputStream outputStream) {
+	public void downloadBackup(@Nonnull String backupName, @Nonnull OutputStream outputStream) {
 		LOGGER.info("Downloading backup {} from Azure", backupName);
 		getBlobClient(backupName).downloadStream(outputStream);
 	}
 
 	@Override
-	public void uploadBackup(String backupFilePath) {
+	public void uploadBackup(@Nonnull String backupFilePath) {
 		LOGGER.info("Uploading backup {} to Azure", Paths.get(backupFilePath).getFileName().toString());
 		getBlobClient(Paths.get(backupFilePath).getFileName().toString()).uploadFromFile(backupFilePath);
 	}
 
 	@Override
-	public void deleteBackup(String backupName) {
+	public void deleteBackup(@Nonnull String backupName) {
 		LOGGER.info("Deleting backup {} from Azure", backupName);
 		getBlobClient(backupName).delete();
 	}
 
-	private BlobContainerClient getBlobContainerClient() {
+	private @Nonnull BlobContainerClient getBlobContainerClient() {
 		final BlobServiceClient blobServiceClient = new BlobServiceClientBuilder().connectionString(getConnectionString()).buildClient();
 		final BlobContainerClient blobContainerClient = blobServiceClient.getBlobContainerClient(getContainerName());
 
@@ -116,7 +116,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	 * @throws DomainException if the copy does not complete successfully
 	 */
 	@Override
-	public void copyBackup(String srcBackupName, String destBackupName) {
+	public void copyBackup(@Nonnull String srcBackupName, @Nonnull String destBackupName) {
 		// resolve the container (a client build plus an existence round-trip) once for both blobs
 		final BlobContainerClient blobContainerClient = getBlobContainerClient();
 		final String directoryName = getDirectoryName();
@@ -178,7 +178,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	 * Aborts an in-flight copy and removes whatever partial destination blob it left behind.
 	 * Failures here are logged and swallowed because the caller is already about to throw.
 	 */
-	private static void abandonCopy(SyncPoller<BlobCopyInfo, Void> poller, BlobClient destBlobClient, String destBackupName) {
+	private static void abandonCopy(@Nonnull SyncPoller<BlobCopyInfo, Void> poller, @Nonnull BlobClient destBlobClient, @Nonnull String destBackupName) {
 		try {
 			poller.cancelOperation();
 		}
@@ -194,20 +194,20 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 	}
 
 	@Override
-	public void moveBackup(String srcBackupName, String destBackupName) {
+	public void moveBackup(@Nonnull String srcBackupName, @Nonnull String destBackupName) {
 		copyBackup(srcBackupName, destBackupName);
 		deleteBackup(srcBackupName);
 	}
 
 	@Override
-	public long getFileSize(String fileName) {
+	public long getFileSize(@Nonnull String fileName) {
 		final BlobProperties blobProperties = getBlobClient(fileName).getProperties();
 		long result = blobProperties.getBlobSize();
 
 		return result;
 	}
 
-	private static String getConnectionString() {
+	private static @Nonnull String getConnectionString() {
 		final String connectionString = (String) UtilImpl.BACKUP_PROPERTIES.get(AZURE_CONNECTION_STRING_KEY);
 		if (connectionString == null) {
 			throw new IllegalStateException("Missing JSON property connectionString under backup.");
@@ -233,7 +233,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return result;
 	}
 
-	private static String getContainerName() {
+	private static @Nonnull String getContainerName() {
 		final String containerName = (String) UtilImpl.BACKUP_PROPERTIES.get(AZURE_CONTAINER_NAME_KEY);
 		if (containerName == null) {
 			throw new IllegalStateException("Missing JSON property containerName under backup.");
@@ -241,7 +241,7 @@ public class AzureBlobStorageBackup implements ExternalBackup {
 		return containerName;
 	}
 
-	private static String getDirectoryName() {
+	private static @Nonnull String getDirectoryName() {
 		return "backup-" + CORE.getCustomer().getName().toLowerCase() + "/";
 	}
 	

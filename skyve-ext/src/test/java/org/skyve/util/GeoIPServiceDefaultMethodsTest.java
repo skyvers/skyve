@@ -1,11 +1,11 @@
 package org.skyve.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 
 /**
@@ -13,19 +13,19 @@ import org.skyve.impl.util.UtilImpl;
  * Uses a minimal anonymous implementation of the interface.
  */
 @SuppressWarnings("static-method")
-public class GeoIPServiceDefaultMethodsTest {
+class GeoIPServiceDefaultMethodsTest {
 
         /** Minimal implementation for testing default methods. */
         private static final GeoIPService MINIMAL = ipAddress -> IPGeolocation.EMPTY;
 
         @Test
-        public void isBlockingReturnsFalseWhenCountryCodesIsNull() {
+        void isBlockingReturnsFalseWhenCountryCodesIsNull() {
                 // UtilImpl.GEO_IP_COUNTRY_CODES is null by default in unit test env
                 assertFalse(MINIMAL.isBlocking());
         }
 
         @Test
-        public void isBlockingReturnsTrueWhenCountryCodesIsSet() {
+        void isBlockingReturnsTrueWhenCountryCodesIsSet() {
                 UtilImpl.GEO_IP_COUNTRY_CODES = new CopyOnWriteArraySet<>();
                 try {
                         assertTrue(MINIMAL.isBlocking());
@@ -35,13 +35,13 @@ public class GeoIPServiceDefaultMethodsTest {
         }
 
         @Test
-        public void isWhitelistReturnsTrueByDefault() {
+        void isWhitelistReturnsTrueByDefault() {
                 // UtilImpl.GEO_IP_WHITELIST is true by default in unit test env
                 assertTrue(MINIMAL.isWhitelist());
         }
 
         @Test
-        public void isWhitelistReturnsFalseWhenSetToFalse() {
+        void isWhitelistReturnsFalseWhenSetToFalse() {
                 UtilImpl.GEO_IP_WHITELIST = false;
                 try {
                         assertFalse(MINIMAL.isWhitelist());

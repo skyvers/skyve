@@ -9,6 +9,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.BeanValidator;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,23 +33,23 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 
 	private Integer precision;
 
-	public Integer getPrecision() {
+	public @Nullable Integer getPrecision() {
 		return precision;
 	}
 
 	@XmlAttribute
-	public void setPrecision(Integer precision) {
+	public void setPrecision(@Nullable Integer precision) {
 		this.precision = precision;
 	}
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void validate(User user,
-							Decimal value,
-							String binding,
-							String localisedDisplayName,
-							Converter<Decimal> converter,
-							ValidationException e) {
+	public void validate(@Nonnull User user,
+							@Nullable Decimal value,
+							@Nonnull String binding,
+							@Nullable String localisedDisplayName,
+							@Nullable Converter<Decimal> converter,
+							@Nonnull ValidationException e) {
 		if (value != null) {
 			boolean addedCustomerValidationMessage = false;
 			Decimal min = getMin();
@@ -70,7 +72,7 @@ public class DecimalValidator extends RangeValidator<Decimal> {
 		}
 	}
 	
-	public final String constructPrecisionMessage(String localisedDisplayName) {
+	public final @Nonnull String constructPrecisionMessage(@Nullable String localisedDisplayName) {
 		String result = getLocalisedValidationMessage();
 		if (result == null) {
 			result = Util.nullSafeI18n(BeanValidator.VALIDATION_PRECISION_KEY, localisedDisplayName, precision.toString());

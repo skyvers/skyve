@@ -32,6 +32,7 @@ class UserLoginRecordExtensionTest {
 		assertEquals(IPGeolocation.EMPTY, result);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getBizKeyWithFailedTruePrependsPrefix() {
 		UserLoginRecordExtension loginRecord = new UserLoginRecordExtension();

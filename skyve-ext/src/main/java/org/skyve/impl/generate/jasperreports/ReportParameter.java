@@ -1,5 +1,8 @@
 package org.skyve.impl.generate.jasperreports;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Descriptor for a single JasperReports parameter, used when generating a
  * {@code .jrxml} programmatically from Skyve metadata.
@@ -27,7 +30,7 @@ public class ReportParameter {
 	 *
 	 * @return The parameter name.
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -36,7 +39,7 @@ public class ReportParameter {
 	 *
 	 * @param name The parameter name.
 	 */
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 	
@@ -45,7 +48,7 @@ public class ReportParameter {
 	 *
 	 * @return The parameter type class name.
 	 */
-	public String getTypeClass() {
+	public @Nullable String getTypeClass() {
 		return typeClass;
 	}
 
@@ -54,7 +57,7 @@ public class ReportParameter {
 	 *
 	 * @param typeClass The parameter type class name.
 	 */
-	public void setTypeClass(String typeClass) {
+	public void setTypeClass(@Nullable String typeClass) {
 		this.typeClass = typeClass;
 	}
 
@@ -63,7 +66,7 @@ public class ReportParameter {
 	 *
 	 * @return The default-value expression.
 	 */
-	public String getDefaultValueExpression() {
+	public @Nullable String getDefaultValueExpression() {
 		return defaultValueExpression;
 	}
 
@@ -72,7 +75,7 @@ public class ReportParameter {
 	 *
 	 * @param defaultValueExpression The default-value expression.
 	 */
-	public void setDefaultValueExpression(String defaultValueExpression) {
+	public void setDefaultValueExpression(@Nullable String defaultValueExpression) {
 		this.defaultValueExpression = defaultValueExpression;
 	}
 
@@ -81,7 +84,7 @@ public class ReportParameter {
 	 *
 	 * @return JRXML for this parameter.
 	 */
-	public String getJrxml() {
+	public @Nonnull String getJrxml() {
 		return Renderer.renderParameter(this);
 	}
 
@@ -90,7 +93,7 @@ public class ReportParameter {
 	 *
 	 * @return The parent design specification.
 	 */
-	public DesignSpecification getParent() {
+	public @Nullable DesignSpecification getParent() {
 		return parent;
 	}
 	
@@ -99,7 +102,7 @@ public class ReportParameter {
 	 *
 	 * @param parent The parent design specification.
 	 */
-	public void setParent(DesignSpecification parent) {
+	public void setParent(@Nullable DesignSpecification parent) {
 		this.parent = parent;
 	}
 }

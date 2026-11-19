@@ -17,6 +17,7 @@ import org.skyve.impl.metadata.repository.module.ModuleMetaData;
 import org.skyve.impl.metadata.repository.module.QueryMetaData;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.impl.util.XMLMetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -29,6 +30,9 @@ import org.skyve.metadata.module.query.SQLDefinition;
 import org.skyve.metadata.repository.ProvidedRepository;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Generates query-related artefacts from module metadata.
@@ -43,7 +47,7 @@ public class QueryGenerator {
 		// do nothing
 	}
 
-	public static List<QueryDefinition> generate(Customer customer, Module module, boolean includeAssociationBizKeys) {
+	public static @Nonnull List<QueryDefinition> generate(@Nullable Customer customer, @Nonnull Module module, boolean includeAssociationBizKeys) {
 		Set<String> documentNames = module.getDocumentRefs().keySet();
 		List<QueryDefinition> result = new ArrayList<>(documentNames.size());
 
@@ -58,7 +62,7 @@ public class QueryGenerator {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String generateQueryXML(Customer customer, Module module, boolean includeAssociationBizKeys) {
+	public static @Nonnull String generateQueryXML(@Nullable Customer customer, @Nonnull Module module, boolean includeAssociationBizKeys) {
 		ModuleMetaData newModule = new ModuleMetaData();
 
 		List<QueryMetaData> metaDataQueries = newModule.getQueries();
@@ -128,7 +132,7 @@ public class QueryGenerator {
 		return XMLMetaData.marshalModule(newModule, false);
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		String customerName = null;
 		String moduleName = null;
 		boolean includeAssociationBizKeys = false;
@@ -145,12 +149,16 @@ public class QueryGenerator {
 		else {
 			System.err.println("Usage: org.skyve.impl.generate.QueryGenerator customerName moduleName");
 			System.exit(1);
+			return;
 		}
 
 		ProvidedRepositoryFactory.set(new LocalDesignRepository());
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		Customer customer = repository.getCustomer(customerName);
 		Module module = repository.getModule(customer, moduleName);
+		if (module == null) {
+			throw new MetaDataException("Module " + moduleName + " does not exist for customer " + customerName);
+		}
 		File file = new File("./generatedQueries.xml");
 		LOGGER.info("Output is written to {}", file.getCanonicalPath());
 		try (PrintWriter out = new PrintWriter(file)) {

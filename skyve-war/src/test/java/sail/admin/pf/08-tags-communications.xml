@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), PrimeFaces: Tags and a communication to a tag. The Tags menu item is SmartClient-only (admin.xml), but
+	the Tag document has the same view in PrimeFaces, so this member opens the Tags list by its query (qTags), as a user could by a link.
+	Snapshots are SmartClient only (no view, no menu item in PrimeFaces): see sc/08-tags-communications.xml.
+	The tags are loaded from sail/files/sail-tags.xlsx, whose cells name the contacts SAILTAGS Alpha to Delta (a spreadsheet cannot
+	hold the run token): the first interaction checks that no earlier run left a contact with that name. Tag A loads Alpha, Beta and
+	Gamma (column 1); tag B loads Beta, Gamma and Delta (column 2).
+	Where it goes in admin.suite.xml: after pf/05-reports-misc.xml and before pf/98-destructive.xml, and not alongside sc/08 (both use
+	the same contact names; the suite runs members one at a time). It starts jobs and leaves their rows in the completed jobs list, which
+	98 clears; it never clears the list itself.
+-->
+<automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+	</before>
+	<interaction name="Contacts: four contacts for the tags, none left by an earlier run">
+		<method>
+			<navigateMenu module="admin" item="Contacts" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
+			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" maxRows="0" />
+			<listGridNew module="admin" document="Contact" />
+			<dataEnter binding="name" value="SAILTAGS Alpha" />
+			<dataEnter binding="email1" value="sailtags.alpha.{run}@example.com" />
+			<save />
+			<ok />
+			<listGridNew module="admin" document="Contact" />
+			<dataEnter binding="name" value="SAILTAGS Beta" />
+			<dataEnter binding="email1" value="sailtags.beta.{run}@example.com" />
+			<save />
+			<ok />
+			<listGridNew module="admin" document="Contact" />
+			<dataEnter binding="name" value="SAILTAGS Gamma" />
+			<dataEnter binding="email1" value="sailtags.gamma.{run}@example.com" />
+			<save />
+			<ok />
+			<listGridNew module="admin" document="Contact" />
+			<dataEnter binding="name" value="SAILTAGS Delta" />
+			<dataEnter binding="email1" value="sailtags.delta.{run}@example.com" />
+			<save />
+			<ok />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
+			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" minRows="4" />
+		</method>
+	</interaction>
+	<interaction name="Tags: tag A and tag B, loaded from a spreadsheet">
+		<method>
+			<navigateList module="admin" query="qTags" />
+			<listGridNew module="admin" query="qTags" />
+			<tabSelect path="Details" />
+			<dataEnter binding="name" value="SAIL Tag A {run}" />
+			<tabSelect path="Load" />
+			<dataEnter binding="uploadModuleName" value="admin" match="code" />
+			<dataEnter binding="uploadDocumentName" value="Contact" match="code" />
+			<save />
+			<tabSelect path="Load" />
+			<dataEnter binding="attributeName" value="name" match="code" />
+			<dataEnter binding="filterOperator" value="equals" match="code" />
+			<dataEnter binding="filterAction" value="tag" match="code" />
+			<dataEnter binding="filterColumn" value="1" />
+			<save />
+			<upload action="UploadTagCriteria" file="sail/files/sail-tags.xlsx" />
+			<testValue binding="uploadMatched" value="3" />
+			<testValue binding="uploadTagged" value="3" />
+			<ok />
+			<listGridNew module="admin" query="qTags" />
+			<tabSelect path="Details" />
+			<dataEnter binding="name" value="SAIL Tag B {run}" />
+			<dataEnter binding="visible" value="true" />
+			<tabSelect path="Load" />
+			<dataEnter binding="uploadModuleName" value="admin" match="code" />
+			<dataEnter binding="uploadDocumentName" value="Contact" match="code" />
+			<save />
+			<tabSelect path="Load" />
+			<dataEnter binding="attributeName" value="name" match="code" />
+			<dataEnter binding="filterOperator" value="equals" match="code" />
+			<dataEnter binding="filterAction" value="tag" match="code" />
+			<dataEnter binding="filterColumn" value="2" />
+			<save />
+			<upload action="UploadTagCriteria" file="sail/files/sail-tags.xlsx" />
+			<testValue binding="uploadMatched" value="3" />
+			<testValue binding="uploadTagged" value="3" />
+			<ok />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag A {run}" minRows="1" maxRows="1" />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag B {run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Tags: combine tag A with tag B (intersect, except, union), untag, clear">
+		<method>
+			<navigateList module="admin" query="qTags" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag A {run}" />
+			<tabSelect path="Combinations" />
+			<comment>The combination is not allowed until an operator and the other tag are chosen (the allowCombination condition)</comment>
+			<testWidget action="PerformCombination" enabled="false" />
+			<dataEnter binding="combinationsOperator" value="Intersect" match="code" />
+			<testValue binding="combinationsOperator" value="Intersect" />
+			<testWidget action="PerformCombination" enabled="false" />
+			<dataEnter binding="operandTag" value="SAIL Tag B {run}" match="label" />
+			<testWidget action="PerformCombination" enabled="true" />
+			<comment>A is Alpha, Beta, Gamma and B is Beta, Gamma, Delta: the intersection is Beta and Gamma</comment>
+			<action name="PerformCombination" />
+			<tabSelect path="Load" />
+			<testValue binding="uploadTagged" value="2" />
+			<tabSelect path="Combinations" />
+			<dataEnter binding="operandTag" value="SAIL Tag B {run}" match="label" />
+			<dataEnter binding="combinationsOperator" value="Union" match="code" />
+			<testValue binding="combinationsOperator" value="Union" />
+			<action name="PerformCombination" />
+			<tabSelect path="Load" />
+			<comment>Union with B adds Delta to Beta and Gamma</comment>
+			<testValue binding="uploadTagged" value="3" />
+			<action name="Clear" />
+			<testValue binding="uploadTagged" value="0" />
+			<upload action="UploadTagCriteria" file="sail/files/sail-tags.xlsx" />
+			<testValue binding="uploadTagged" value="3" />
+			<tabSelect path="Combinations" />
+			<dataEnter binding="operandTag" value="SAIL Tag B {run}" match="label" />
+			<dataEnter binding="combinationsOperator" value="Except" match="code" />
+			<testValue binding="combinationsOperator" value="Except" />
+			<action name="PerformCombination" />
+			<tabSelect path="Load" />
+			<comment>Alpha, Beta and Gamma, except Beta, Gamma and Delta, is Alpha</comment>
+			<testValue binding="uploadTagged" value="1" />
+			<tabSelect path="Combinations" />
+			<dataEnter binding="operandTag" value="SAIL Tag B {run}" match="label" />
+			<dataEnter binding="combinationsOperator" value="Union" match="code" />
+			<testValue binding="combinationsOperator" value="Union" />
+			<action name="PerformCombination" />
+			<tabSelect path="Load" />
+			<comment>Alpha with Beta, Gamma and Delta is all four</comment>
+			<testValue binding="uploadTagged" value="4" />
+			<comment>Untag the records that match column 1 (Alpha, Beta and Gamma): Delta is left</comment>
+			<dataEnter binding="filterAction" value="unTag" match="code" />
+			<comment>PrimeFaces uploads from its own page, which sees only what is saved</comment>
+			<save />
+			<upload action="UploadTagCriteria" file="sail/files/sail-tags.xlsx" />
+			<testValue binding="uploadMatched" value="3" />
+			<testValue binding="uploadTagged" value="1" />
+			<action name="Clear" />
+			<testValue binding="uploadTagged" value="0" />
+			<ok />
+			<comment>Tag B was only the other side of every combination: it still has its three</comment>
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<tabSelect path="Load" />
+			<testValue binding="uploadTagged" value="3" />
+			<ok />
+		</method>
+	</interaction>
+	<interaction name="Tags: TagAll tags every record of a document, Clear removes them">
+		<method>
+			<navigateList module="admin" query="qTags" />
+			<listGridNew module="admin" query="qTags" />
+			<tabSelect path="Details" />
+			<dataEnter binding="name" value="SAIL Tag C {run}" />
+			<tabSelect path="Load" />
+			<dataEnter binding="uploadModuleName" value="admin" match="code" />
+			<dataEnter binding="uploadDocumentName" value="Contact" match="code" />
+			<save />
+			<tabSelect path="Load" />
+			<testValue binding="uploadTagged" value="0" />
+			<action name="TagAll" />
+			<captureValue binding="uploadTagged" variable="all" />
+			<comment>Every contact is tagged, so at least the four this member made</comment>
+			<testScript message="TagAll should tag every contact, at least the four made here"><![CDATA[
+				return parseInt(sail.vars.all, 10) >= 4;
+			]]></testScript>
+			<action name="Clear" />
+			<testValue binding="uploadTagged" value="0" />
+			<delete />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag C {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Tags: copy tag B to a user, then delete the original (the copy keeps its records)">
+		<method>
+			<navigateList module="admin" query="qTags" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<tabSelect path="Details" />
+			<comment>Nobody is chosen: the copy is refused</comment>
+			<action name="CopyTagToUser" testSuccess="false" />
+			<testFailure message="You have not selected a user to copy to" />
+			<lookupDescriptionAutoComplete binding="copyToUser" search="admin" />
+			<action name="CopyTagToUser" />
+			<testMessage contains="Tag copied successfully" type="info" />
+			<ok />
+			<comment>The copy has the same name, so there are two. Tag B was made visible and the copy was not: filter to tell them apart</comment>
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag B {run}" minRows="2" maxRows="2" />
+			<listGridFilter module="admin" query="qTags" column="visible" value="true" operator="equals" />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag B {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<tabSelect path="Details" />
+			<testValue binding="visible" value="true" />
+			<comment>Deleting tag B clears only its own records</comment>
+			<delete />
+			<listGridClearFilter module="admin" query="qTags" />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag B {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<tabSelect path="Details" />
+			<testValue binding="visible" value="" />
+			<comment>The copy has tag B's name and records only: its Load settings are the defaults (the home module), so point it at the contacts to count them</comment>
+			<tabSelect path="Load" />
+			<dataEnter binding="uploadModuleName" value="admin" match="code" />
+			<dataEnter binding="uploadDocumentName" value="Contact" match="code" />
+			<save />
+			<ok />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<tabSelect path="Load" />
+			<comment>The copy still has the three records. It is tag B from here on: the next interactions find it by its name</comment>
+			<testValue binding="uploadTagged" value="3" />
+			<ok />
+		</method>
+	</interaction>
+	<interaction name="Communications: a communication to tag B, count, results, batch files, zip and delete the batch">
+		<method>
+			<navigateMenu module="admin" item="Communication/Communications" />
+			<listGridNew module="admin" document="Communication" />
+			<tabSelect path="Contents" />
+			<dataEnter binding="description" value="SAIL Bulk {run}" />
+			<dataEnter binding="sendTo" value="{email1}" />
+			<dataEnter binding="subject" value="SAIL bulk {run} for {name}" />
+			<dataEnter binding="body" value="Hello {name}" />
+			<tabSelect path="Manage" />
+			<dataEnter binding="moduleName" value="admin" match="code" />
+			<dataEnter binding="documentName" value="Contact" match="code" />
+			<dataEnter binding="tag" value="SAIL Tag B {run}" match="label" />
+			<save />
+			<testSuccess />
+			<action name="GetCount" />
+			<testValue binding="results" value="3 communications for Contact" />
+			<comment>GetResults tests the bindings and output (it sends nothing) in a job, and saves the communication</comment>
+			<action name="GetResults" />
+			<testValue binding="results" value="3 communications for Contact will be tested.&#10;The job has been commenced - check Admin->Jobs for the log." />
+			<comment>No batch has been made, and without a selected batch the batch actions are disabled</comment>
+			<testGridRows model="BatchesModel" maxRows="0" />
+			<testWidget action="ZipBatch" enabled="false" />
+			<testWidget action="DeleteBatch" enabled="false" />
+			<action name="CreateFiles" />
+			<testValue binding="results" value="3 communications for Contact will be created as a batch for download.&#10;The job has been commenced - check Admin->Jobs for the log." />
+			<save />
+			<ok />
+			<comment>GetResults and CreateFiles each start a "Process the communication" job. The batch folder is listed as soon as its first file is written, so wait for both jobs to finish before using the batch</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Process the communication" minRows="2" timeoutMillis="60000" />
+			<navigateMenu module="admin" item="Communication/Communications" />
+			<listGridZoom module="admin" document="Communication" rowContaining="SAIL Bulk {run}" />
+			<tabSelect path="Manage" />
+			<testGridRows model="BatchesModel" minRows="1" maxRows="1" timeoutMillis="60000" />
+			<listGridSelect model="BatchesModel" row="0" />
+			<testWidget action="ZipBatch" enabled="true" />
+			<testWidget action="DeleteBatch" enabled="true" />
+			<action name="ZipBatch" />
+			<action name="DeleteBatch" confirm="false" />
+			<testGridRows model="BatchesModel" minRows="1" maxRows="1" />
+			<action name="DeleteBatch" />
+			<testGridRows model="BatchesModel" maxRows="0" timeoutMillis="10000" />
+			<testWidget action="DeleteBatch" enabled="false" />
+			<save />
+			<ok />
+			<listGridZoom module="admin" document="Communication" rowContaining="SAIL Bulk {run}" />
+			<delete />
+			<testGridRows module="admin" document="Communication" rowContaining="SAIL Bulk {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Tags: a bulk document action deletes the tagged contacts">
+		<method>
+			<navigateList module="admin" query="qTags" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<tabSelect path="Action" />
+			<dataEnter binding="actionModuleName" value="admin" match="code" />
+			<dataEnter binding="actionDocumentName" value="Contact" match="code" />
+			<dataEnter binding="documentAction" value="SkyveDelete" match="code" />
+			<action name="BulkDocumentAction" />
+			<testValue binding="documentActionResults" value="Perform action: Delete Documents&#10;For all tagged instances of: Admin Contacts&#10;&#10;Tag action Job started successfully. Check Job for results." />
+			<ok />
+			<comment>The job deletes Beta, Gamma and Delta (tag B), not Alpha: wait for it through the contacts list</comment>
+			<navigateMenu module="admin" item="Contacts" />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
+			<comment>The job deletes the beans one by one in no set order: wait once for the whole effect, one contact left</comment>
+			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" minRows="1" maxRows="1" timeoutMillis="60000" />
+			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS Alpha" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Clean up: delete tags A and B and the last contact">
+		<method>
+			<navigateList module="admin" query="qTags" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag A {run}" />
+			<delete />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag A {run}" maxRows="0" />
+			<listGridZoom module="admin" query="qTags" rowContaining="SAIL Tag B {run}" />
+			<delete />
+			<testGridRows module="admin" query="qTags" rowContaining="SAIL Tag B {run}" maxRows="0" />
+			<navigateMenu module="admin" item="Contacts" />
+			<listGridZoom module="admin" document="Contact" rowContaining="SAILTAGS Alpha" />
+			<delete />
+			<listGridFilter module="admin" document="Contact" column="name" value="SAILTAGS" />
+			<testGridRows module="admin" document="Contact" rowContaining="SAILTAGS" maxRows="0" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

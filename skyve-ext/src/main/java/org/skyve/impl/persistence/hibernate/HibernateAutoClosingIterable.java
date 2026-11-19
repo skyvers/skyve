@@ -10,6 +10,9 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Auto-closing iterable that wraps a Hibernate scroll result set, closing the
  * underlying {@link org.hibernate.ScrollableResults} when the iterator is exhausted
@@ -18,7 +21,7 @@ import org.skyve.persistence.AutoClosingIterable;
 public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	private String moduleName = null;
 	private String documentName = null;
-	@SuppressWarnings("resource") // Ownership is transferred to iterator() or released by close().
+	@SuppressWarnings("resource") // Closed by the iterator on exhaustion, otherwise by close().
 	private ScrollableResults results = null;
 	private String[] aliases = null;
 	boolean closed = false;
@@ -33,7 +36,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	 * @param assertSingle whether iteration should fail when a row contains more than one projected value
 	 * @param assertMultiple whether iteration should fail when a row contains one or fewer projected values
 	 */
-	public HibernateAutoClosingIterable(ScrollableResults results, boolean assertSingle, boolean assertMultiple) {
+	public HibernateAutoClosingIterable(@Nonnull ScrollableResults results, boolean assertSingle, boolean assertMultiple) {
 		this(null, null, results, null, assertSingle, assertMultiple);
 	}
 	
@@ -51,10 +54,10 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	 * @param assertSingle whether iteration should fail when a row contains more than one projected value
 	 * @param assertMultiple whether iteration should fail when a row contains one or fewer projected values
 	 */
-	public HibernateAutoClosingIterable(String moduleName, 
-											String documentName, 
-											ScrollableResults results, 
-											String[] aliases,
+	public HibernateAutoClosingIterable(@Nullable String moduleName, 
+											@Nullable String documentName, 
+											@Nonnull ScrollableResults results, 
+											@Nullable String[] aliases,
 											boolean assertSingle,
 											boolean assertMultiple) {
 		this.moduleName = moduleName;
@@ -72,16 +75,16 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 		@SuppressWarnings("hiding")
 		private String documentName = null;
 
-		@SuppressWarnings({"hiding", "resource"}) // The iterator owns and closes these scroll results on exhaustion.
+		@SuppressWarnings({"hiding", "resource"}) // Closed here on exhaustion, otherwise by the enclosing iterable's close().
 		private ScrollableResults results = null;
 
 		@SuppressWarnings("hiding")
 		private String[] aliases = null;
 
-		private HibernateIterator(String moduleName, 
-									String documentName, 
-									ScrollableResults results, 
-									String[] aliases) {
+		private HibernateIterator(@Nullable String moduleName, 
+									@Nullable String documentName, 
+									@Nonnull ScrollableResults results, 
+									@Nullable String[] aliases) {
 			this.moduleName = moduleName;
 			this.documentName = documentName;
 			this.results = results;
@@ -114,7 +117,7 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 		 */
 		@Override
 		@SuppressWarnings({"unchecked", "java:S2272"}) // hasNext() has side-effects
-		public Z next() {
+		public @Nullable Z next() {
 			Z result = null;
 
 			Object[] tuple = results.get();
@@ -165,17 +168,15 @@ public class HibernateAutoClosingIterable<T> implements AutoClosingIterable<T> {
 	/**
 	 * Returns an iterator that closes the underlying scroll results once exhausted.
 	 *
-	 * <p>Side effects: transfers ownership of the current {@link ScrollableResults}
-	 * instance to the returned iterator.
+	 * <p>If iteration stops early (a break or an exception), {@link #close()} must
+	 * still be called to release the {@link ScrollableResults}, so this iterable
+	 * keeps its reference to them.
 	 *
 	 * @return an auto-closing iterator over the current results
 	 */
 	@Override
-	public Iterator<T> iterator() {
+	public @Nonnull Iterator<T> iterator() {
 		Iterator<T> i = new HibernateIterator<>(moduleName, documentName, results, aliases);
-
-		results = null; // dereference the results
-
 		return new LoggingIteratorAdapter<>(i);
 	}
 

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Kitchen sink workflow, leg 2 of 3: in SmartClient, find the lookup value that leg 1 made, by the number leg 1 kept
+	({var:number}) and its run token, and change its description. Leg 3 finds the change in PrimeFaces.
+-->
+<automation uxui="desktop"
+			userAgentType="desktop"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+		<switchMode />
+	</before>
+	<interaction name="Find the lookup value by its number and change it">
+		<method>
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<listGridFilter column="number" value="{var:number}" operator="equals" />
+			<testGridRows rowContaining="{var:description}" minRows="1" maxRows="1" />
+			<listGridZoom rowContaining="SAIL workflow {run}" />
+			<testValue binding="number" value="{var:number}" />
+			<dataEnter binding="description" value="SAIL workflow {run} seen in SmartClient" />
+			<ok />
+			<testGridRows rowContaining="SAIL workflow {run} seen in SmartClient" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

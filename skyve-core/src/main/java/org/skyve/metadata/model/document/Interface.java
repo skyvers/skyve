@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document;
 
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Records a Java interface that the generated domain class for a document must implement.
  *
@@ -16,5 +18,5 @@ public interface Interface extends SerializableMetaData {
 	 *
 	 * @return the interface name; never {@code null}
 	 */
-	String getInterfaceName();
+	@Nullable String getInterfaceName();
 }

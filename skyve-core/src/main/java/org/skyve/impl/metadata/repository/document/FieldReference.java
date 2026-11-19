@@ -4,6 +4,7 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 
@@ -24,12 +25,12 @@ public class FieldReference implements SerializableMetaData {
 
 	private String ref;
 
-	public String getRef() {
+	public @Nullable String getRef() {
 		return ref;
 	}
 
 	@XmlValue
-	public void setRef(String ref) {
+	public void setRef(@Nullable String ref) {
 		this.ref = UtilImpl.processStringValue(ref);
 	}
 }

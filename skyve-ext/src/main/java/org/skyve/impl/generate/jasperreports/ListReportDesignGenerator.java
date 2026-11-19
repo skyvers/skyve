@@ -1,5 +1,7 @@
 package org.skyve.impl.generate.jasperreports;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates a JasperReports design for a Skyve list (query) report, producing
  * one column per selected query attribute.
@@ -12,7 +14,7 @@ public class ListReportDesignGenerator extends ReportDesignGenerator {
      * @throws UnsupportedOperationException Always.
      */
     @Override
-    protected ListReportDesignGenerator getSubreportGenerator() {
+    protected @Nonnull ListReportDesignGenerator getSubreportGenerator() {
         throw new UnsupportedOperationException("Subreports are not supported in list reports.");
     }
 }

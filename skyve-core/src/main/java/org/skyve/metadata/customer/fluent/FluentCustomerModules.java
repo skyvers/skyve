@@ -7,6 +7,9 @@ import org.skyve.impl.metadata.repository.customer.CustomerModulesMetaData;
 import org.skyve.impl.metadata.view.container.form.FormLabelLayout;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds customer module membership metadata and home-module selection.
  */
@@ -25,7 +28,7 @@ public class FluentCustomerModules {
 	 *
 	 * @param modules backing metadata
 	 */
-	public FluentCustomerModules(CustomerModulesMetaData modules) {
+	public FluentCustomerModules(@Nonnull CustomerModulesMetaData modules) {
 		this.modules = modules;
 	}
 	
@@ -36,7 +39,7 @@ public class FluentCustomerModules {
 	 * @param homeModule home module
 	 * @return this builder
 	 */
-	public FluentCustomerModules from(List<Module> customerModules, Module homeModule) {
+	public @Nonnull FluentCustomerModules from(@Nonnull List<Module> customerModules, @Nonnull Module homeModule) {
 		homeModule(homeModule.getName());
 		for (Module module : customerModules) {
 			addModule(module.getName(), module.getFormLabelLayout());
@@ -50,7 +53,7 @@ public class FluentCustomerModules {
 	 * @param moduleName home module name
 	 * @return this builder
 	 */
-	public FluentCustomerModules homeModule(String moduleName) {
+	public @Nonnull FluentCustomerModules homeModule(@Nonnull String moduleName) {
 		modules.setHomeModule(moduleName);
 		return this;
 	}
@@ -61,7 +64,7 @@ public class FluentCustomerModules {
 	 * @param moduleName module name
 	 * @return this builder
 	 */
-	public FluentCustomerModules addModule(String moduleName) {
+	public @Nonnull FluentCustomerModules addModule(@Nonnull String moduleName) {
 		return addModule(moduleName, null);
 	}
 
@@ -72,7 +75,7 @@ public class FluentCustomerModules {
 	 * @param layout optional form label layout override
 	 * @return this builder
 	 */
-	public FluentCustomerModules addModule(String moduleName, FormLabelLayout layout) {
+	public @Nonnull FluentCustomerModules addModule(@Nonnull String moduleName, @Nullable FormLabelLayout layout) {
 		CustomerModuleMetaData module = new CustomerModuleMetaData();
 		module.setName(moduleName);
 		module.setFormLabelLayout(layout);
@@ -86,7 +89,7 @@ public class FluentCustomerModules {
 	 * @param moduleName module name
 	 * @return this builder
 	 */
-	public FluentCustomerModules removeModule(String moduleName) {
+	public @Nonnull FluentCustomerModules removeModule(@Nonnull String moduleName) {
 		modules.getModules().removeIf(m -> moduleName.equals(m.getName()));
 		if (moduleName.equals(modules.getHomeModule())) {
 			modules.setHomeModule(null);
@@ -99,17 +102,30 @@ public class FluentCustomerModules {
 	 *
 	 * @return this builder
 	 */
-	public FluentCustomerModules clearModules() {
+	public @Nonnull FluentCustomerModules clearModules() {
 		modules.getModules().clear();
 		return this;
 	}
 	
 	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentCustomerModules putProperty(@Nonnull String k, @Nonnull String v) {
+		modules.getProperties().put(k, v);
+		return this;
+	}
+
+	/**
 	 * Returns the mutable metadata instance being built.
 	 *
 	 * @return backing customer-modules metadata
 	 */
-	public CustomerModulesMetaData get() {
+	public @Nonnull CustomerModulesMetaData get() {
 		return modules;
 	}
 }

@@ -1,12 +1,16 @@
 package org.skyve.impl.web.spring; // NOSONAR java:S1220
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +31,10 @@ import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
+import org.springframework.security.web.authentication.logout.CompositeLogoutHandler;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
+import org.springframework.security.web.authentication.rememberme.AbstractRememberMeServices;
+import org.springframework.security.web.authentication.rememberme.RememberMeAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 import jakarta.servlet.Filter;
@@ -110,6 +118,21 @@ class SpringSecurityConfigTest {
 			DefaultSecurityFilterChain chain = (DefaultSecurityFilterChain) config.filterChain(http);
 			assertSame(detailsSource, authenticationDetailsSource(findFilter(chain, UsernamePasswordAuthenticationFilter.class)));
 			assertSame(detailsSource, authenticationDetailsSource(findFilter(chain, TwoFactorAuthPushEmailFilter.class)));
+
+			// Remember me ends in the signing-out browser only: the same Skyve services issue, read and end the cookie
+			Filter formLogin = chain.getFilters()
+					.stream()
+					.filter(f -> f.getClass() == UsernamePasswordAuthenticationFilter.class)
+					.findFirst()
+					.orElseThrow();
+			Object issuing = field(AbstractAuthenticationProcessingFilter.class, "rememberMeServices", formLogin);
+			Object reading = field(RememberMeAuthenticationFilter.class, "rememberMeServices",
+					findFilter(chain, RememberMeAuthenticationFilter.class));
+			assertInstanceOf(SkyveRememberMeServices.class, reading);
+			assertSame(reading, issuing);
+			assertEquals("remember", field(AbstractRememberMeServices.class, "cookieName", reading));
+			assertTrue(((List<?>) field(CompositeLogoutHandler.class, "logoutHandlers",
+					field(LogoutFilter.class, "handler", findFilter(chain, LogoutFilter.class)))).contains(reading));
 		} finally {
 			UtilImpl.SERVER_URL = originalServerUrl;
 			UtilImpl.SKYVE_CONTEXT = originalContext;
@@ -128,8 +151,12 @@ class SpringSecurityConfigTest {
 	}
 
 	private static Object authenticationDetailsSource(Filter filter) throws ReflectiveOperationException {
-		Field field = AbstractAuthenticationProcessingFilter.class.getDeclaredField("authenticationDetailsSource");
+		return field(AbstractAuthenticationProcessingFilter.class, "authenticationDetailsSource", filter);
+	}
+
+	private static Object field(Class<?> type, String name, Object instance) throws ReflectiveOperationException {
+		Field field = type.getDeclaredField(name);
 		field.setAccessible(true);
-		return field.get(filter);
+		return field.get(instance);
 	}
 }

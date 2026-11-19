@@ -2,6 +2,8 @@ package org.skyve.impl.web.service;
 
 import org.skyve.impl.metadata.user.ClientUserData;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Encapsulates a User's session.
  * User - their menus etc and document permissions
@@ -19,7 +21,7 @@ public final class UserSession {
 	 *
 	 * @return session identifier
 	 */
-	public String getSessionID() {
+	public @Nullable String getSessionID() {
 		return sessionID;
 	}
 
@@ -28,7 +30,7 @@ public final class UserSession {
 	 *
 	 * @param sessionID session identifier
 	 */
-	public void setSessionID(String sessionID) {
+	public void setSessionID(@Nullable String sessionID) {
 		this.sessionID = sessionID;
 	}
 
@@ -37,7 +39,7 @@ public final class UserSession {
 	 *
 	 * @return client user data
 	 */
-	public ClientUserData getClientUserData() {
+	public @Nullable ClientUserData getClientUserData() {
 		return clientUserData;
 	}
 
@@ -46,7 +48,7 @@ public final class UserSession {
 	 *
 	 * @param clientUserData client user data
 	 */
-	public void setClientUserData(ClientUserData clientUserData) {
+	public void setClientUserData(@Nullable ClientUserData clientUserData) {
 		this.clientUserData = clientUserData;
 	}
 }

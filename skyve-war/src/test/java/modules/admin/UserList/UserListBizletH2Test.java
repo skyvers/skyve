@@ -15,6 +15,7 @@ import util.AbstractH2Test;
 
 @SuppressWarnings("static-method")
 class UserListBizletH2Test extends AbstractH2Test {
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getVariantDomainValuesForDefaultModuleReturnsCustomerModules() throws Exception {
 		List<DomainValue> values = new UserListBizlet().getVariantDomainValues(UserList.defaultModuleNamePropertyName);

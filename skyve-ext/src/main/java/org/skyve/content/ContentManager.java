@@ -3,6 +3,9 @@ package org.skyve.content;
 import org.pf4j.ExtensionPoint;
 import org.skyve.impl.util.SystemObserver;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Manages the storage, retrieval, search, and indexing of managed content
  * (file attachments and bean-level full-text search data).
@@ -35,14 +38,14 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @param content
 	 * @throws Exception
 	 */
-	void put(BeanContent content) throws Exception;
+	void put(@Nonnull BeanContent content) throws Exception;
 
 	/**
 	 * Put (and index) an attachment in the content repository
 	 * @param attachment
 	 * @throws Exception
 	 */
-	default void put(AttachmentContent attachment) 
+	default void put(@Nonnull AttachmentContent attachment) 
 	throws Exception {
 		put(attachment, true);
 	}
@@ -53,7 +56,7 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @param index
 	 * @throws Exception
 	 */
-	void put(AttachmentContent content, boolean index) throws Exception;
+	void put(@Nonnull AttachmentContent content, boolean index) throws Exception;
 
 	/**
 	 * Update an attachment in the content repository.
@@ -62,7 +65,7 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @param content
 	 * @throws Exception
 	 */
-	void update(AttachmentContent content) throws Exception;
+	void update(@Nonnull AttachmentContent content) throws Exception;
 	
 	/**
 	 * Get an attachment by content ID.
@@ -71,21 +74,21 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @return The attachment content, or {@code null} when not found
 	 * @throws Exception If retrieval fails
 	 */
-	AttachmentContent getAttachment(String contentId) throws Exception;
+	@Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception;
 
 	/**
 	 * Remove a bean by bizId from the content repository.
 	 * @param bizId
 	 * @throws Exception
 	 */
-	void removeBean(String bizId) throws Exception;
+	void removeBean(@Nonnull String bizId) throws Exception;
 
 	/**
 	 * Remove an attachment by contentId from the content repository.
 	 * @param contentId
 	 * @throws Exception
 	 */
-	void removeAttachment(String contentId) throws Exception;
+	void removeAttachment(@Nonnull String contentId) throws Exception;
 
 	/**
 	 * Find matching content that the current user has access to containing the search term.
@@ -95,7 +98,7 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @return Search results visible to the current user
 	 * @throws Exception If search execution fails
 	 */
-	SearchResults google(String search, int maxResults) throws Exception;
+	@Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception;
 	
 	/**
 	 * Delete all indexing for all customers.
@@ -109,21 +112,21 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @param customerName
 	 * @throws Exception
 	 */
-	void truncateIndexing(String customerName) throws Exception;
+	void truncateIndexing(@Nonnull String customerName) throws Exception;
 
 	/**
 	 * Remove all attachment indexing for a customer.
 	 * @param customerName
 	 * @throws Exception
 	 */
-	void truncateAttachmentIndexing(String customerName) throws Exception;
+	void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception;
 
 	/**
 	 * Remove all bean indexing for a customer.
 	 * @param customerName
 	 * @throws Exception
 	 */
-	void truncateBeanIndexing(String customerName) throws Exception;
+	void truncateBeanIndexing(@Nonnull String customerName) throws Exception;
 	
 	/**
 	 * Iterate over all content independent of customer.
@@ -131,7 +134,7 @@ public interface ContentManager extends AutoCloseable, ExtensionPoint, SystemObs
 	 * @return Iterable cursor over all content records
 	 * @throws Exception If iteration cannot be opened
 	 */
-	ContentIterable all() throws Exception;
+	@Nonnull ContentIterable all() throws Exception;
 
 	/**
 	 * Flushes pending content changes and releases per-instance resources.

@@ -25,6 +25,8 @@ import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.SQL;
 
 import jakarta.annotation.Generated;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Reindexes all bean-level content (indexed text attributes) in the content
@@ -132,7 +134,7 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return the current thread-bound persistence implementation
 	 */
 	@SuppressWarnings("static-method")
-	protected AbstractPersistence getPersistence() {
+	protected @Nonnull AbstractPersistence getPersistence() {
 		return AbstractPersistence.get();
 	}
 
@@ -143,7 +145,7 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return the persistent identifier for the dynamic entity table
 	 */
 	@SuppressWarnings("static-method")
-	protected String getDynamicEntityPersistenceIdentifier(Customer customer) {
+	protected @Nullable String getDynamicEntityPersistenceIdentifier(@Nonnull Customer customer) {
 		return RDBMSDynamicPersistenceListModel.getDynamicEntityPersistent(customer).getPersistentIdentifier();
 	}
 
@@ -153,7 +155,7 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return a new content manager instance
 	 */
 	@SuppressWarnings({"static-method", "resource"})
-	protected ContentManager newContentManager() {
+	protected @Nonnull ContentManager newContentManager() {
 		return EXT.newContentManager();
 	}
 	
@@ -165,7 +167,7 @@ public class ReindexBeansJob extends CancellableJob {
 	 * @return {@code true} when the document has at least one indexable text field
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static boolean needsIndexing(Customer customer, Document document) {
+	private static boolean needsIndexing(@Nonnull Customer customer, @Nonnull Document document) {
 		if (document.isPersistable()) {
 			for (Attribute attribute : document.getAllAttributes(customer)) {
 				if (attribute instanceof Field field) {

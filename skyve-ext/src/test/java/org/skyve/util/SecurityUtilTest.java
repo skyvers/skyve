@@ -3,7 +3,9 @@ package org.skyve.util;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -12,10 +14,12 @@ import static org.mockito.Mockito.when;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.skyve.domain.app.admin.SecurityLog;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
@@ -163,6 +167,7 @@ class SecurityUtilTest {
 	// ======== getSourceIpAddress() ========
 
 	@Test
+	@SuppressWarnings("java:S5976") // each header combination is a named scenario with its own stubbing; separate tests read better than a parameter table
 	void testGetSourceIpAddressFromForwardedHeader() {
 		jakarta.servlet.http.HttpServletRequest request = mock(jakarta.servlet.http.HttpServletRequest.class);
 		when(request.getHeader("Forwarded")).thenReturn("for=203.0.113.5; proto=https");
@@ -314,6 +319,28 @@ class SecurityUtilTest {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
 		String encoded = encoder.encode("myPassword");
 		assertTrue(encoder.matches("myPassword", encoded));
+	}
+
+	/**
+	 * A stored password the encoder cannot use, such as one a backup redacted, must fail a sign in as bad credentials.
+	 * Spring's own DelegatingPasswordEncoder, and some of its encoders, throw IllegalArgumentException (or an index
+	 * exception) for each of these, which escaped sign in as a server error.
+	 */
+	@Test
+	void testCreateDelegatingPasswordEncoderMatchesNoPasswordToAStoredValueItCannotUse() {
+		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
+		String argon2 = encoder.encode("admin");
+		assertAll(Stream.of("{a**********Nk", // a redacted {argon2} hash: an opening brace without a closing one
+							"ad**********Nk", // a redacted hash with no prefix
+							"{unknown}abc", // an unknown encoder
+							"{}abc", // an empty encoder id
+							"{pbkdf2}zz", // not hex
+							"{pbkdf2}abcd", // shorter than its salt
+							"{scrypt}$e0801$!!!!$!!!!", // not base64
+							"{argon2}$a**********Nk", // a redacted hash that kept its prefix
+							"{bcrypt}$2a$1**********Nk") // a redacted hash that kept its prefix
+							.<Executable> map(stored -> () -> assertFalse(encoder.matches("admin", stored), stored)));
+		assertTrue(encoder.matches("admin", argon2), "a good hash still matches");
 	}
 
 	// ======== hashPassword() ========

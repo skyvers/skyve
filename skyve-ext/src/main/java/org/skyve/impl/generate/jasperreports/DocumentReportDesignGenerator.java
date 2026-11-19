@@ -5,6 +5,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.document.Document;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Generates a JasperReports design ({@code .jrxml}) for a single Skyve document,
  * rendering all persistent attributes as report fields.
@@ -17,7 +19,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
      * @return A new document-based generator.
      */
     @Override
-    protected DocumentReportDesignGenerator getSubreportGenerator() {
+    protected @Nonnull DocumentReportDesignGenerator getSubreportGenerator() {
         return new DocumentReportDesignGenerator();
     }
 
@@ -27,7 +29,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design being populated.
      */
     @Override
-    protected void addFields(DesignSpecification design) {
+    protected void addFields(@Nonnull DesignSpecification design) {
         super.addFields(design);
 
         final Customer customer = CORE.getCustomer();
@@ -48,7 +50,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
      */
     @Override
     @SuppressWarnings("java:S3776") // Complexity OK
-    protected void addBands(DesignSpecification design) {
+    protected void addBands(@Nonnull DesignSpecification design) {
         super.addBands(design);
 
         ReportBand columnHeader = new ReportBand();
@@ -152,8 +154,12 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
                     subBand.setParent(design);
                     subBand.setName(sub.getName());
 
+                    final ReportField subField = sub.getField();
+                    if (subField == null) {
+                        throw new IllegalStateException("Subreport design " + sub.getName() + " has no collection field");
+                    }
                     ReportElement eS = new ReportElement(ReportElement.ElementType.subreport,
-                            sub.getField().getName(),
+                            subField.getName(),
                             null,
                             Integer.valueOf(0),
                             Integer.valueOf(0),
@@ -209,7 +215,7 @@ public class DocumentReportDesignGenerator extends ReportDesignGenerator {
      * @return The title band.
      */
     @Override
-    protected ReportBand createTitleBand(DesignSpecification design) {
+    protected @Nonnull ReportBand createTitleBand(@Nonnull DesignSpecification design) {
         ReportBand title = super.createTitleBand(design);
 
         if (DesignSpecification.ReportType.report.equals(design.getReportType())) {

@@ -3,14 +3,17 @@ package org.skyve.metadata.sail.language.step.interaction.grids;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.sail.execution.AutomationContext;
 import org.skyve.impl.sail.execution.GenerateEditContext;
 import org.skyve.impl.sail.execution.GenerateListContext;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.sail.execution.Executor;
 
 class ListGridSelectTest {
@@ -98,6 +101,7 @@ class ListGridSelectTest {
 	@Test
 	void executeCallsExecutorListGridSelect() {
 		Executor executor = mock(Executor.class);
+		select.setRow(Integer.valueOf(0));
 		select.execute(executor);
 		verify(executor).executeListGridSelect(select);
 	}
@@ -163,5 +167,48 @@ class ListGridSelectTest {
 				// no-op
 			}
 		};
+	}
+
+	// ---- rowContaining ----
+
+	@Test
+	void defaultRowContainingIsNull() {
+		assertThat(select.getRowContaining(), is(nullValue()));
+	}
+
+	@Test
+	void setRowContainingRoundtripTrims() {
+		select.setRowContaining("  Jane {run} ");
+		assertThat(select.getRowContaining(), is("Jane {run}"));
+	}
+
+	@Test
+	void setRowNullAllowed() {
+		select.setRow(null);
+		assertThat(select.getRow(), is(nullValue()));
+	}
+
+	@Test
+	void executeWithRowContainingCallsExecutor() {
+		Executor executor = mock(Executor.class);
+		select.setRowContaining("Jane");
+		select.execute(executor);
+		verify(executor).executeListGridSelect(select);
+	}
+
+	@Test
+	void executeWithoutRowOrRowContainingThrows() {
+		Executor executor = mock(Executor.class);
+		assertThrows(MetaDataException.class, () -> select.execute(executor));
+		verifyNoInteractions(executor);
+	}
+
+	@Test
+	void executeWithRowAndRowContainingThrows() {
+		Executor executor = mock(Executor.class);
+		select.setRow(Integer.valueOf(0));
+		select.setRowContaining("Jane");
+		assertThrows(MetaDataException.class, () -> select.execute(executor));
+		verifyNoInteractions(executor);
 	}
 }

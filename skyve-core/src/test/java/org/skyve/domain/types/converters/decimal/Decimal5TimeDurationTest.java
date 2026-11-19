@@ -38,6 +38,25 @@ class Decimal5TimeDurationTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void fromDisplayValueNegativeUnderAnHourIsNegative() throws ConversionException {
+		Decimal5TimeDuration converter = new Decimal5TimeDuration();
+		// -30 minutes: the hours are zero, so only the text has the sign
+		Decimal5 result = converter.fromDisplayValue("-0:30");
+		assertEquals(new Decimal5("-0.5"), result);
+		assertEquals("-0:30", converter.toDisplayValue(result));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void fromDisplayValueNegativeHoursAndMinutes() throws ConversionException {
+		Decimal5TimeDuration converter = new Decimal5TimeDuration();
+		Decimal5 result = converter.fromDisplayValue("-2:15");
+		assertEquals(new Decimal5("-2.25"), result);
+		assertEquals("-2:15", converter.toDisplayValue(result));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void fromDisplayValueNoColonThrowsConversionException() {
 		Decimal5TimeDuration converter = new Decimal5TimeDuration();
 		assertThrows(ConversionException.class, () -> converter.fromDisplayValue("130"));

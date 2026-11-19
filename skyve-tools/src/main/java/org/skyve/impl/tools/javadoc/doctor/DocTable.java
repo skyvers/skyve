@@ -3,6 +3,9 @@ package org.skyve.impl.tools.javadoc.doctor;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Renders tabular documentation content with optional list fallback.
  */
@@ -14,7 +17,7 @@ public class DocTable {
 	 *
 	 * @return table id
 	 */
-	public String getId() {
+	public @Nullable String getId() {
 		return id;
 	}
 
@@ -23,7 +26,7 @@ public class DocTable {
 	 *
 	 * @param id table id
 	 */
-	public void setId(String id) {
+	public void setId(@Nullable String id) {
 		this.id = id;
 	}
 
@@ -32,7 +35,7 @@ public class DocTable {
 	 *
 	 * @param id table id
 	 */
-	public DocTable(String id) {
+	public DocTable(@Nonnull String id) {
 		super();
 		this.id = id;
 	}
@@ -44,7 +47,7 @@ public class DocTable {
 	 *
 	 * @return table title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -53,7 +56,7 @@ public class DocTable {
 	 *
 	 * @param title table title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 
@@ -64,7 +67,7 @@ public class DocTable {
 	 *
 	 * @return mutable list of HTML fragments
 	 */
-	public List<String> getHtmlContent() {
+	public @Nonnull List<String> getHtmlContent() {
 		return htmlContent;
 	}
 
@@ -73,7 +76,7 @@ public class DocTable {
 	 *
 	 * @return header array
 	 */
-	public String[] getHeaders() {
+	public @Nullable String[] getHeaders() {
 		return headers;
 	}
 
@@ -82,7 +85,7 @@ public class DocTable {
 	 *
 	 * @param headers header values
 	 */
-	public void setHeaders(String[] headers) {
+	public void setHeaders(@Nullable String[] headers) {
 		this.headers = headers;
 	}
 
@@ -95,7 +98,7 @@ public class DocTable {
 	 *
 	 * @param headers header values
 	 */
-	public void setHeaderValues(String... headers) {
+	public void setHeaderValues(@Nonnull String... headers) {
 		this.headers = headers;
 	}
 
@@ -104,7 +107,7 @@ public class DocTable {
 	 *
 	 * @param values row values aligned with headers
 	 */
-	public void setRowValues(String... values) {
+	public void setRowValues(@Nonnull String... values) {
 		this.rows.add(values);
 	}
 
@@ -118,7 +121,7 @@ public class DocTable {
 	 * @return HTML string representation
 	 */
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public String toHTML(boolean displayAsListIfOneColumnOnly) {
+	public @Nonnull String toHTML(boolean displayAsListIfOneColumnOnly) {
 
 		// exclude empty columns - if only one column then display as an
 		// unordered list

@@ -35,6 +35,8 @@ import org.skyve.util.monitoring.Monitoring;
 import org.skyve.util.monitoring.RequestKey;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,7 +56,7 @@ public class EditAction extends FacesAction<Void> {
 	 *
 	 * @param facesView the target Faces view model
 	 */
-	public EditAction(FacesView facesView) {
+	public EditAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 
@@ -66,7 +68,7 @@ public class EditAction extends FacesAction<Void> {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("EditAction");
 
 		Bean bean = null;
@@ -87,9 +89,12 @@ public class EditAction extends FacesAction<Void> {
 				// Add session view zoom in bindings to view zoom in bindings in head first order first
 				facesView.getZoomInBindings().addAll(sessionView.getZoomInBindings());
 				webContext = sessionView.getWebContext();
+				if (webContext == null) { // hydrated in SkyveFacesPhaseListener
+					throw new IllegalStateException("Cannot edit as the session FacesView has no web context");
+				}
 				bean = webContext.getCurrentBean();
 
-				Bean current = (viewBinding == null) ? bean : (Bean) BindUtil.get(bean, facesView.getViewBinding());
+				Bean current = (viewBinding == null) ? bean : (Bean) BindUtil.get(bean, viewBinding);
 				if (current == null) { // should never happen
 					throw new IllegalStateException("current is null");
 				}
@@ -225,7 +230,7 @@ public class EditAction extends FacesAction<Void> {
 	 * @param bean
 	 * @param bindingParameter
 	 */
-	private void setupViewForZoomIn(Bean bean, String bindingParameter) {
+	private void setupViewForZoomIn(@Nonnull Bean bean, @Nonnull String bindingParameter) {
 		// Only set up the view to be zoomed in if we can grab the binding
 		Bean current = null;
 		String viewBinding = bindingParameter.replace(',', '.');

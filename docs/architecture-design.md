@@ -82,7 +82,7 @@ Skyve inverts this model. Security is **declarative, universal, and impossible t
 
 - **Role-based CRUD + scope** — each role declares exactly which documents it can Create, Read, Update, and Delete, scoped to Global, Customer, DataGroup, or User level. This is enforced transparently on every persistence operation, every query, and every UI interaction.
 - **Action permissions** — custom actions are only executable if the user's role explicitly grants execute privilege. The UI won't render the button; the server won't accept the request.
-- **Payload shaping** — REST and UI payloads are shaped by the framework according to the user's permissions. Fields the user cannot see are never serialised. Fields the user cannot modify are ignored on input. There is no over-posting vulnerability.
+- **Payload shaping** — REST and UI payloads are shaped by the framework according to the user's permissions. Fields the user cannot see are never serialised. Fields the user cannot modify are ignored on input. There is no over-posting vulnerability through the UI. The one exception is `RestService`'s insert, update and delete routes, which check no document permissions: they are blocked by default (below) and must not be enabled for untrusted callers.
 - **Access vectors and forced-browsing prevention** — `UserAccess` keys are computed from menus, roles, routes, and view metadata by `AccessProcessor`. `EXT.checkAccess()` rejects any request that doesn't match a declared access vector — meaning users cannot reach documents or actions by guessing URLs.
 - **Row-level isolation** — `bizCustomer`, `bizDataGroupId`, and `bizUserId` fields on every bean enforce tenant and ownership boundaries at the persistence layer. Queries are automatically filtered; no developer intervention required.
 - **Fail-closed by default** — REST endpoints are blocked (`ForbiddenFilter`) unless explicitly enabled. Security headers (CSP, X-Frame-Options, MIME-sniffing, Referrer-Policy) are applied to every response. CSRF tokens are rotated per request.
@@ -813,6 +813,8 @@ flowchart TD
 | `SkyveSpringSecurity` | skyve-web | Spring Security wiring: JDBC user details + OAuth client registrations |
 | `SkyveLegacyAuthenticationProvider` | skyve-ext | Direct-SQL credential authentication (legacy database auth) |
 | `SkyveRememberMeTokenRepository` | skyve-ext | JDBC remember-me token persistence |
+| `SkyveRememberMeServices` | skyve-web | Remember-me services whose sign out removes only the signing-out browser's token series, not the user's other devices' |
+| `SignOut` (`modules.admin.User`) | skyve-war | Ends a user's remember-me tokens and sessions for every device, or every device but the current browser's (admin's Sign out everywhere and Sign out of all other sessions); `UserBizlet` calls it when a user is disabled, deleted or renamed |
 
 ### Multi-Tenancy Model
 
@@ -1197,11 +1199,12 @@ flowchart TD
 | `SystemDocumentationMojo` | Generates system documentation with PlantUML directives |
 | Scaffold mojos | Project generation and module scaffolding |
 
-### SAIL (Skyve Automated Integration Lifecycle)
+### SAIL (Skyve Application Integration Language)
 
-- Generated from view metadata — produces browser-automation test scripts.
-- Supports Selenese or WebDriver output formats.
-- Validates that rendered UI matches metadata expectations.
+- An XML language for what a user does: scripts are written, recorded in the browser, or generated from menu and view metadata.
+- Interpreted executors run scripts, workflows and suites in a real browser against a server, in PrimeFaces and SmartClient; `SailLoad` runs them as many virtual users.
+- The Control Panel generates a JUnit 5 WebDriver test (`Sail.java`) from a script.
+- Validates that rendered UI matches metadata expectations. See [sail.md](sail.md).
 
 ### Unit Test Generation
 

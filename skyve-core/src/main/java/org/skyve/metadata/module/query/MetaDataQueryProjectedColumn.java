@@ -2,6 +2,8 @@ package org.skyve.metadata.module.query;
 
 import org.skyve.metadata.view.FormattedText;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A {@link MetaDataQueryColumn} that binds to a document attribute or an arbitrary
  * expression to project a scalar value in the list-view result set.
@@ -28,7 +30,7 @@ public interface MetaDataQueryProjectedColumn extends MetaDataQueryColumn, Forma
 	 *
 	 * @return the projection expression, or {@code null} if the column uses its binding
 	 */
-	public String getExpression();
+	public @Nullable String getExpression();
 
 	/**
 	 * Returns whether this column is included in the SELECT projection.

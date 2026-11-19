@@ -1,6 +1,10 @@
 package org.skyve.metadata.view.fluent;
 
+import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Builds {@link ListGrid} widget metadata using a fluent API.
@@ -21,7 +25,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @param grid
 	 *            the metadata instance to mutate
 	 */
-	public FluentListGrid(ListGrid grid) {
+	public FluentListGrid(@Nonnull ListGrid grid) {
 		this.grid = grid;
 	}
 
@@ -33,12 +37,13 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentListGrid from(@SuppressWarnings("hiding") ListGrid grid) {
+	public @Nonnull FluentListGrid from(@SuppressWarnings("hiding") @Nonnull ListGrid grid) {
 		title(grid.getTitle());
 		escapeTitle(grid.getEscapeTitle());
 		queryName(grid.getQueryName());
 		modelName(grid.getModelName());
-		postRefreshConditionName(grid.getPostRefreshConditionName());
+		postRefreshCondition(grid.getPostRefreshCondition());
+		BindUtil.copyAuthoredCondition(grid.getXmlInvisibleCondition(), grid.getXmlVisibleCondition(), this::invisibleCondition, this::visibleCondition);
 		grid.getFilterParameters();
 		grid.getParameters();
 		
@@ -48,11 +53,11 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 
 		grid.getFilterParameters().forEach(f -> addFilterParameter(new FluentFilterParameter().from(f)));
 
-		disabledConditionName(grid.getDisabledConditionName());
-		disableAddConditionName(grid.getDisableAddConditionName());
-		disableZoomConditionName(grid.getDisableZoomConditionName());
-		disableEditConditionName(grid.getDisableEditConditionName());
-		disableRemoveConditionName(grid.getDisableRemoveConditionName());
+		BindUtil.copyAuthoredCondition(grid.getXmlDisabledCondition(), grid.getXmlEnabledCondition(), this::disabledCondition, this::enabledCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableAddCondition(), grid.getXmlEnableAddCondition(), this::disableAddCondition, this::enableAddCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableZoomCondition(), grid.getXmlEnableZoomCondition(), this::disableZoomCondition, this::enableZoomCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableEditCondition(), grid.getXmlEnableEditCondition(), this::disableEditCondition, this::enableEditCondition);
+		BindUtil.copyAuthoredCondition(grid.getXmlDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), this::disableRemoveCondition, this::enableRemoveCondition);
 		Boolean b = grid.getShowAdd();
 		if (b != null) {
 			showAdd(b.booleanValue());
@@ -109,10 +114,10 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 		selectedIdBinding(grid.getSelectedIdBinding());
 
 		grid.getEditedActions().forEach(e -> addEditedAction(FluentEventAction.from(e)));
-
 		grid.getRemovedActions().forEach(r -> addRemovedAction(FluentEventAction.from(r)));
-
 		grid.getSelectedActions().forEach(s -> addSelectedAction(FluentEventAction.from(s)));
+
+		grid.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
 
 		return this;
 	}
@@ -124,7 +129,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the title text
 	 * @return this builder
 	 */
-	public FluentListGrid title(String title) {
+	public @Nonnull FluentListGrid title(@Nullable String title) {
 		grid.setTitle(title);
 		return this;
 	}
@@ -135,7 +140,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @param escapeTitle {@code false} to allow trusted markup; {@code true} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListGrid escapeTitle(boolean escapeTitle) {
+	public @Nonnull FluentListGrid escapeTitle(boolean escapeTitle) {
 		return escapeTitle(escapeTitle ? Boolean.TRUE : Boolean.FALSE);
 	}
 
@@ -145,7 +150,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @param escapeTitle {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 * @return this builder
 	 */
-	public FluentListGrid escapeTitle(Boolean escapeTitle) {
+	public @Nonnull FluentListGrid escapeTitle(@Nullable Boolean escapeTitle) {
 		grid.setEscapeTitle(escapeTitle);
 		return this;
 	}
@@ -157,7 +162,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the query name
 	 * @return this builder
 	 */
-	public FluentListGrid queryName(String queryName) {
+	public @Nonnull FluentListGrid queryName(@Nullable String queryName) {
 		grid.setQueryName(queryName);
 		return this;
 	}
@@ -169,20 +174,20 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the model name
 	 * @return this builder
 	 */
-	public FluentListGrid modelName(String modelName) {
+	public @Nonnull FluentListGrid modelName(@Nullable String modelName) {
 		grid.setModelName(modelName);
 		return this;
 	}
 	
 	/**
-	 * Sets the condition name evaluated after the list is refreshed.
+	 * Sets the {@code postRefresh} condition as authored.
 	 *
-	 * @param postRefreshConditionName
-	 *            the condition name
+	 * @param postRefreshCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid postRefreshConditionName(String postRefreshConditionName) {
-		grid.setPostRefreshConditionName(postRefreshConditionName);
+	public @Nonnull FluentListGrid postRefreshCondition(@Nullable String postRefreshCondition) {
+		grid.setPostRefreshCondition(postRefreshCondition);
 		return this;
 	}
 
@@ -193,7 +198,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the filter parameter to append
 	 * @return this builder
 	 */
-	public FluentListGrid addFilterParameter(FluentFilterParameter filterParameter) {
+	public @Nonnull FluentListGrid addFilterParameter(@Nonnull FluentFilterParameter filterParameter) {
 		grid.getFilterParameters().add(filterParameter.get());
 		return this;
 	}
@@ -205,20 +210,32 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the parameter to append
 	 * @return this builder
 	 */
-	public FluentListGrid addParameter(FluentParameter parameter) {
+	public @Nonnull FluentListGrid addParameter(@Nonnull FluentParameter parameter) {
 		grid.getParameters().add(parameter.get());
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that hides this list grid.
+	 * Sets the {@code invisible} condition as authored; the opposite sense of {@link #visibleCondition(String)}.
 	 *
-	 * @param invisibleConditionName
-	 *            the condition name
+	 * @param invisibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid invisibleConditionName(String invisibleConditionName) {
-		grid.setInvisibleConditionName(invisibleConditionName);
+	public @Nonnull FluentListGrid invisibleCondition(@Nullable String invisibleCondition) {
+		grid.setXmlInvisibleCondition(invisibleCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code visible} condition as authored; the opposite sense of {@link #invisibleCondition(String)}.
+	 *
+	 * @param visibleCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid visibleCondition(@Nullable String visibleCondition) {
+		grid.setXmlVisibleCondition(visibleCondition);
 		return this;
 	}
 
@@ -230,7 +247,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid pixelHeight(int height) {
+	public @Nonnull FluentListGrid pixelHeight(int height) {
 		grid.setPixelHeight(Integer.valueOf(height));
 		return this;
 	}
@@ -243,7 +260,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid pixelWidth(int width) {
+	public @Nonnull FluentListGrid pixelWidth(int width) {
 		grid.setPixelWidth(Integer.valueOf(width));
 		return this;
 	}
@@ -256,7 +273,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid minPixelWidth(int minPixelWidth) {
+	public @Nonnull FluentListGrid minPixelWidth(int minPixelWidth) {
 		grid.setMinPixelWidth(Integer.valueOf(minPixelWidth));
 		return this;
 	}
@@ -269,7 +286,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid maxPixelWidth(int maxPixelWidth) {
+	public @Nonnull FluentListGrid maxPixelWidth(int maxPixelWidth) {
 		grid.setMaxPixelWidth(Integer.valueOf(maxPixelWidth));
 		return this;
 	}
@@ -282,7 +299,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid maxPixelHeight(int maxPixelHeight) {
+	public @Nonnull FluentListGrid maxPixelHeight(int maxPixelHeight) {
 		grid.setMaxPixelHeight(Integer.valueOf(maxPixelHeight));
 		return this;
 	}
@@ -295,7 +312,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid minPixelHeight(int minPixelHeight) {
+	public @Nonnull FluentListGrid minPixelHeight(int minPixelHeight) {
 		grid.setMinPixelHeight(Integer.valueOf(minPixelHeight));
 		return this;
 	}
@@ -308,7 +325,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid percentageWidth(int percentageWidth) {
+	public @Nonnull FluentListGrid percentageWidth(int percentageWidth) {
 		grid.setPercentageWidth(Integer.valueOf(percentageWidth));
 		return this;
 	}
@@ -321,7 +338,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid responsiveWidth(int responsiveWidth) {
+	public @Nonnull FluentListGrid responsiveWidth(int responsiveWidth) {
 		grid.setResponsiveWidth(Integer.valueOf(responsiveWidth));
 		return this;
 	}
@@ -334,7 +351,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid sm(int sm) {
+	public @Nonnull FluentListGrid sm(int sm) {
 		grid.setSm(Integer.valueOf(sm));
 		return this;
 	}
@@ -347,7 +364,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid md(int md) {
+	public @Nonnull FluentListGrid md(int md) {
 		grid.setMd(Integer.valueOf(md));
 		return this;
 	}
@@ -360,7 +377,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid lg(int lg) {
+	public @Nonnull FluentListGrid lg(int lg) {
 		grid.setLg(Integer.valueOf(lg));
 		return this;
 	}
@@ -373,7 +390,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid xl(int xl) {
+	public @Nonnull FluentListGrid xl(int xl) {
 		grid.setXl(Integer.valueOf(xl));
 		return this;
 	}
@@ -386,68 +403,128 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return this builder
 	 */
 	@Override
-	public FluentListGrid percentageHeight(int percentageHeight) {
+	public @Nonnull FluentListGrid percentageHeight(int percentageHeight) {
 		grid.setPercentageHeight(Integer.valueOf(percentageHeight));
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables this list grid.
+	 * Sets the {@code disabled} condition as authored; the opposite sense of {@link #enabledCondition(String)}.
 	 *
-	 * @param disabledConditionName
-	 *            the condition name
+	 * @param disabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disabledConditionName(String disabledConditionName) {
-		grid.setDisabledConditionName(disabledConditionName);
+	public @Nonnull FluentListGrid disabledCondition(@Nullable String disabledCondition) {
+		grid.setXmlDisabledCondition(disabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the add action on this list grid.
+	 * Sets the {@code enabled} condition as authored; the opposite sense of {@link #disabledCondition(String)}.
 	 *
-	 * @param disableAddConditionName
-	 *            the condition name
+	 * @param enabledCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableAddConditionName(String disableAddConditionName) {
-		grid.setDisableAddConditionName(disableAddConditionName);
+	public @Nonnull FluentListGrid enabledCondition(@Nullable String enabledCondition) {
+		grid.setXmlEnabledCondition(enabledCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the zoom action on this list grid.
+	 * Sets the {@code disableAdd} condition as authored; the opposite sense of {@link #enableAddCondition(String)}.
 	 *
-	 * @param disableZoomConditionName
-	 *            the condition name
+	 * @param disableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableZoomConditionName(String disableZoomConditionName) {
-		grid.setDisableZoomConditionName(disableZoomConditionName);
+	public @Nonnull FluentListGrid disableAddCondition(@Nullable String disableAddCondition) {
+		grid.setXmlDisableAddCondition(disableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the edit action on this list grid.
+	 * Sets the {@code enableAdd} condition as authored; the opposite sense of {@link #disableAddCondition(String)}.
 	 *
-	 * @param disableEditConditionName
-	 *            the condition name
+	 * @param enableAddCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableEditConditionName(String disableEditConditionName) {
-		grid.setDisableEditConditionName(disableEditConditionName);
+	public @Nonnull FluentListGrid enableAddCondition(@Nullable String enableAddCondition) {
+		grid.setXmlEnableAddCondition(enableAddCondition);
 		return this;
 	}
 
 	/**
-	 * Sets the condition name that disables the remove action on this list grid.
+	 * Sets the {@code disableZoom} condition as authored; the opposite sense of {@link #enableZoomCondition(String)}.
 	 *
-	 * @param disableRemoveConditionName
-	 *            the condition name
+	 * @param disableZoomCondition
+	 *            a condition name, an inline condition expression or a boolean literal
 	 * @return this builder
 	 */
-	public FluentListGrid disableRemoveConditionName(String disableRemoveConditionName) {
-		grid.setDisableRemoveConditionName(disableRemoveConditionName);
+	public @Nonnull FluentListGrid disableZoomCondition(@Nullable String disableZoomCondition) {
+		grid.setXmlDisableZoomCondition(disableZoomCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableZoom} condition as authored; the opposite sense of {@link #disableZoomCondition(String)}.
+	 *
+	 * @param enableZoomCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid enableZoomCondition(@Nullable String enableZoomCondition) {
+		grid.setXmlEnableZoomCondition(enableZoomCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableEdit} condition as authored; the opposite sense of {@link #enableEditCondition(String)}.
+	 *
+	 * @param disableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid disableEditCondition(@Nullable String disableEditCondition) {
+		grid.setXmlDisableEditCondition(disableEditCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableEdit} condition as authored; the opposite sense of {@link #disableEditCondition(String)}.
+	 *
+	 * @param enableEditCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid enableEditCondition(@Nullable String enableEditCondition) {
+		grid.setXmlEnableEditCondition(enableEditCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code disableRemove} condition as authored; the opposite sense of {@link #enableRemoveCondition(String)}.
+	 *
+	 * @param disableRemoveCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid disableRemoveCondition(@Nullable String disableRemoveCondition) {
+		grid.setXmlDisableRemoveCondition(disableRemoveCondition);
+		return this;
+	}
+
+	/**
+	 * Sets the {@code enableRemove} condition as authored; the opposite sense of {@link #disableRemoveCondition(String)}.
+	 *
+	 * @param enableRemoveCondition
+	 *            a condition name, an inline condition expression or a boolean literal
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid enableRemoveCondition(@Nullable String enableRemoveCondition) {
+		grid.setXmlEnableRemoveCondition(enableRemoveCondition);
 		return this;
 	}
 
@@ -458,7 +535,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the binding expression
 	 * @return this builder
 	 */
-	public FluentListGrid selectedIdBinding(String selectedIdBinding) {
+	public @Nonnull FluentListGrid selectedIdBinding(@Nullable String selectedIdBinding) {
 		grid.setSelectedIdBinding(selectedIdBinding);
 		return this;
 	}
@@ -470,7 +547,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the add button
 	 * @return this builder
 	 */
-	public FluentListGrid showAdd(boolean showAdd) {
+	public @Nonnull FluentListGrid showAdd(boolean showAdd) {
 		grid.setShowAdd(showAdd ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -482,7 +559,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the zoom button
 	 * @return this builder
 	 */
-	public FluentListGrid showZoom(boolean showZoom) {
+	public @Nonnull FluentListGrid showZoom(boolean showZoom) {
 		grid.setShowZoom(showZoom ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -494,7 +571,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the edit button
 	 * @return this builder
 	 */
-	public FluentListGrid showEdit(boolean showEdit) {
+	public @Nonnull FluentListGrid showEdit(boolean showEdit) {
 		grid.setShowEdit(showEdit ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -506,7 +583,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the remove button
 	 * @return this builder
 	 */
-	public FluentListGrid showRemove(boolean showRemove) {
+	public @Nonnull FluentListGrid showRemove(boolean showRemove) {
 		grid.setShowRemove(showRemove ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -518,7 +595,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the deselect button
 	 * @return this builder
 	 */
-	public FluentListGrid showDeselect(boolean showDeselect) {
+	public @Nonnull FluentListGrid showDeselect(boolean showDeselect) {
 		grid.setShowDeselect(showDeselect ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -530,7 +607,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the export button
 	 * @return this builder
 	 */
-	public FluentListGrid showExport(boolean showExport) {
+	public @Nonnull FluentListGrid showExport(boolean showExport) {
 		grid.setShowExport(showExport ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -542,7 +619,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the chart button
 	 * @return this builder
 	 */
-	public FluentListGrid showChart(boolean showChart) {
+	public @Nonnull FluentListGrid showChart(boolean showChart) {
 		grid.setShowChart(showChart ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -554,7 +631,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the filter button
 	 * @return this builder
 	 */
-	public FluentListGrid showFilter(boolean showFilter) {
+	public @Nonnull FluentListGrid showFilter(boolean showFilter) {
 		grid.setShowFilter(showFilter ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -566,7 +643,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the summary row
 	 * @return this builder
 	 */
-	public FluentListGrid showSummary(boolean showSummary) {
+	public @Nonnull FluentListGrid showSummary(boolean showSummary) {
 		grid.setShowSummary(showSummary ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -578,7 +655,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the snap button
 	 * @return this builder
 	 */
-	public FluentListGrid showSnap(boolean showSnap) {
+	public @Nonnull FluentListGrid showSnap(boolean showSnap) {
 		grid.setShowSnap(showSnap ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -590,7 +667,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the tag button
 	 * @return this builder
 	 */
-	public FluentListGrid showTag(boolean showTag) {
+	public @Nonnull FluentListGrid showTag(boolean showTag) {
 		grid.setShowTag(showTag ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -602,7 +679,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to show the flag button
 	 * @return this builder
 	 */
-	public FluentListGrid showFlag(boolean showFlag) {
+	public @Nonnull FluentListGrid showFlag(boolean showFlag) {
 		grid.setShowFlag(showFlag ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -614,7 +691,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to auto-populate
 	 * @return this builder
 	 */
-	public FluentListGrid autoPopulate(boolean autoPopulate) {
+	public @Nonnull FluentListGrid autoPopulate(boolean autoPopulate) {
 		grid.setAutoPopulate(autoPopulate ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -626,7 +703,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            {@code true} to continue the conversation
 	 * @return this builder
 	 */
-	public FluentListGrid continueConversation(boolean continueConversation) {
+	public @Nonnull FluentListGrid continueConversation(boolean continueConversation) {
 		grid.setContinueConversation(continueConversation);
 		return this;
 	}
@@ -638,7 +715,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the event action to append
 	 * @return this builder
 	 */
-	public FluentListGrid addEditedAction(FluentEventAction action) {
+	public @Nonnull FluentListGrid addEditedAction(@Nonnull FluentEventAction action) {
 		grid.getEditedActions().add(action.get());
 		return this;
 	}
@@ -650,7 +727,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the event action to append
 	 * @return this builder
 	 */
-	public FluentListGrid addRemovedAction(FluentEventAction action) {
+	public @Nonnull FluentListGrid addRemovedAction(@Nonnull FluentEventAction action) {
 		grid.getRemovedActions().add(action.get());
 		return this;
 	}
@@ -662,8 +739,21 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 *            the event action to append
 	 * @return this builder
 	 */
-	public FluentListGrid addSelectedAction(FluentEventAction action) {
+	public @Nonnull FluentListGrid addSelectedAction(@Nonnull FluentEventAction action) {
 		grid.getSelectedActions().add(action.get());
+		return this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentListGrid putProperty(@Nonnull String k, @Nonnull String v) {
+		grid.getProperties().put(k, v);
 		return this;
 	}
 
@@ -673,7 +763,7 @@ public class FluentListGrid extends FluentWidget implements FluentRelativeSize<F
 	 * @return the mutable list-grid metadata being configured
 	 */
 	@Override
-	public ListGrid get() {
+	public @Nonnull ListGrid get() {
 		return grid;
 	}
 }

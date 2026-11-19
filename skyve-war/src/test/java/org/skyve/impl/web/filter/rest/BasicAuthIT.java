@@ -6,24 +6,24 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.util.Base64;
 
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.HttpServletResponse;
 
-@Ignore
-public class BasicAuthIT {
+@Disabled
+class BasicAuthIT {
 	@Test
 	@SuppressWarnings("static-method")
-	public void testNoBasicAuthHeader()
+	void testNoBasicAuthHeader()
 	throws Exception {
 		HttpURLConnection c = null;
 		try {
 			c = (HttpURLConnection) URI.create("http://localhost:8080/skyve/rest/json/admin/Contact").toURL().openConnection();
 			c.setRequestMethod("GET");
 			c.setRequestProperty("Accept", "application/json");
-			Assert.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, c.getResponseCode());
+			Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, c.getResponseCode());
 		}
 		finally {
 			if (c != null) {
@@ -34,7 +34,7 @@ public class BasicAuthIT {
 	
 	@Test
 	@SuppressWarnings("static-method")
-	public void testInvalidCredentialsInBasicAuthHeader()
+	void testInvalidCredentialsInBasicAuthHeader()
 	throws Exception {
 		HttpURLConnection c = null;
 		try {
@@ -44,7 +44,7 @@ public class BasicAuthIT {
 			
 			c.setRequestProperty("Authorization", "Basic: " + new String(Base64.getEncoder().encode("poo/bum:wee".getBytes())));
 			System.out.println("Response code from server = " + c.getResponseCode());
-			Assert.assertEquals(HttpServletResponse.SC_FORBIDDEN, c.getResponseCode());
+			Assertions.assertEquals(HttpServletResponse.SC_FORBIDDEN, c.getResponseCode());
 		}
 		finally {
 			if (c != null) {
@@ -55,7 +55,7 @@ public class BasicAuthIT {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testBasicAuthHeader()
+	void testBasicAuthHeader()
 	throws Exception {
 		HttpURLConnection c = null;
 		try {
@@ -65,7 +65,7 @@ public class BasicAuthIT {
 			
 			c.setRequestProperty("Authorization", "Basic: " + new String(Base64.getEncoder().encode("demo/admin:system01".getBytes())));
 			System.out.println("Response code from server = " + c.getResponseCode());
-			Assert.assertEquals(HttpServletResponse.SC_OK, c.getResponseCode());
+			Assertions.assertEquals(HttpServletResponse.SC_OK, c.getResponseCode());
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()))) {
 				System.out.println("Output from Server ....");
 				String output;

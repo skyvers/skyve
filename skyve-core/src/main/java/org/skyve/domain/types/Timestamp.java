@@ -9,6 +9,8 @@ import java.util.Date;
 
 import org.skyve.impl.util.TimeUtil;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A {@link java.util.Date} that carries a date and time to the <em>second</em> —
  * milliseconds are always zeroed.
@@ -46,7 +48,7 @@ public class Timestamp extends Date {
 	 * Creates a new Timestamp instance.
 	 * @param date the date
 	 */
-	public Timestamp(Date date) {
+	public Timestamp(@Nonnull Date date) {
 		this(date.getTime());
 	}
 	
@@ -54,7 +56,7 @@ public class Timestamp extends Date {
 	 * Creates a new Timestamp instance.
 	 * @param serializedForm the serializedForm
 	 */
-	public Timestamp(String serializedForm) throws ParseException {
+	public Timestamp(@Nonnull String serializedForm) throws ParseException {
 		this(TimeUtil.parseISODate(serializedForm));
 	}
 
@@ -62,7 +64,7 @@ public class Timestamp extends Date {
 	 * Creates a new Timestamp instance.
 	 * @param date the date
 	 */
-	public Timestamp(LocalDate date) {
+	public Timestamp(@Nonnull LocalDate date) {
 		this(date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 	}
 	
@@ -70,7 +72,7 @@ public class Timestamp extends Date {
 	 * Creates a new Timestamp instance.
 	 * @param date the date
 	 */
-	public Timestamp(LocalDateTime date) {
+	public Timestamp(@Nonnull LocalDateTime date) {
 		this(date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
 	}
 	
@@ -79,7 +81,7 @@ public class Timestamp extends Date {
 	 * @return the result
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return TimeUtil.formatISODate(this, true);
 	}
 	
@@ -87,7 +89,7 @@ public class Timestamp extends Date {
 	 * Executes toLocalDate.
 	 * @return the result
 	 */
-	public LocalDate toLocalDate() {
+	public @Nonnull LocalDate toLocalDate() {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 
@@ -95,7 +97,7 @@ public class Timestamp extends Date {
 	 * Executes toLocalDateTime.
 	 * @return the result
 	 */
-	public LocalDateTime toLocalDateTime() {
+	public @Nonnull LocalDateTime toLocalDateTime() {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 
@@ -103,7 +105,7 @@ public class Timestamp extends Date {
 	 * Executes toLocalTime.
 	 * @return the result
 	 */
-	public LocalTime toLocalTime() {
+	public @Nonnull LocalTime toLocalTime() {
 		return toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 }

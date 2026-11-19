@@ -59,12 +59,10 @@
 			<displayName>Decimal 5</displayName>
 			<defaultValue>{el:Decimal5.ZERO}</defaultValue>
 		</decimal5>
-<!-- 
 		<geometry name="geometry">
 			<displayName>Geometry</displayName>
 			<defaultValue>{el:newGeometry('POINT(0 0)')}</defaultValue>
 		</geometry>
--->
 		<id name="id">
 			<displayName>Id</displayName>
 		</id>
@@ -94,6 +92,30 @@
 		<image name="image">
 			<displayName>Image</displayName>
 		</image>
+		<!-- Dates and times with converters other than the customer's defaults, so that a list grid's filters are
+			 typed as these columns show them (SAIL's listGridFilter on a Vue list grid) -->
+		<date name="monthFirstDate">
+			<displayName>Month First Date</displayName>
+			<converterName>MM_DD_YYYY</converterName>
+		</date>
+		<dateTime name="twelveHourDateTime">
+			<displayName>12 Hour Date Time</displayName>
+			<converterName>MM_DD_YYYY_HH_MI</converterName>
+		</dateTime>
+		<timestamp name="monthNameTimestamp">
+			<displayName>Month Name Timestamp</displayName>
+			<converterName>MMM_DD_YYYY_HH_MI_SS</converterName>
+		</timestamp>
+		<time name="twelveHourTime">
+			<displayName>12 Hour Time</displayName>
+			<converterName>HH_MI_SS</converterName>
+		</time>
+		<!-- A date time shown as a date, for the Vue list grid of column types: ListAttributesBizlet keeps it equal to
+			 dateTime when saved, so it has a time that the column does not show -->
+		<dateTime name="dateTimeAsDate">
+			<displayName>Date Time As Date</displayName>
+			<converterName>MM_DD_YYYY_DateTime</converterName>
+		</dateTime>
 	</attributes>
 	<conditions>
 		<condition name="condition">

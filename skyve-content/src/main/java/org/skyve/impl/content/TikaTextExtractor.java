@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.xml.sax.SAXException;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Extracts searchable text and metadata from markup and binary attachments using Apache Tika.
@@ -55,7 +56,7 @@ public class TikaTextExtractor implements TextExtractor {
 	 */
 	@Override
 	@SuppressWarnings("java:S1181") // include Errors like NoClassDefFound
-	public String extractTextFromMarkup(String markup) {
+	public @Nullable String extractTextFromMarkup(@Nullable String markup) {
 		String result = null;
 		String processedMarkup = UtilImpl.processStringValue(markup);
 		if (processedMarkup != null) {
@@ -79,7 +80,7 @@ public class TikaTextExtractor implements TextExtractor {
 	 */
 	@Override
 	@SuppressWarnings({"java:S3776", "java:S1181"}) // include Errors like NoClassDefFound
-	public String extractTextFromContent(AttachmentContent content) {
+	public @Nullable String extractTextFromContent(@Nonnull AttachmentContent content) {
 		StringBuilder result = new StringBuilder(102400);
 
 		try {
@@ -138,7 +139,7 @@ public class TikaTextExtractor implements TextExtractor {
 		return result.isEmpty() ? null : result.toString();
 	}
 
-	private static String extractTextFromAttachmentMarkup(@Nonnull String markup)
+	private static @Nullable String extractTextFromAttachmentMarkup(@Nonnull String markup)
 	throws SAXException, ParserConfigurationException, IOException, TikaException {
 		try {
 			Document document = SecureDom4j.newSAXReader().read(new StringReader(markup));
@@ -158,7 +159,7 @@ public class TikaTextExtractor implements TextExtractor {
 		}
 	}
 
-	private static void appendSvgText(Element element, StringBuilder result) {
+	private static void appendSvgText(@Nonnull Element element, @Nonnull StringBuilder result) {
 		if ("text".equals(element.getName())) {
 			String text = UtilImpl.processStringValue(element.getStringValue());
 			if (text != null) {
@@ -182,7 +183,7 @@ public class TikaTextExtractor implements TextExtractor {
 	 */
 	@Override
 	@SuppressWarnings("java:S1181") // include Errors like NoClassDefFound
-	public void sniffContentType(AttachmentContent attachment) {
+	public void sniffContentType(@Nonnull AttachmentContent attachment) {
 		// Sniff content type if necessary
 		String contentType = attachment.getContentType();
 		if (contentType == null) {
@@ -210,7 +211,7 @@ public class TikaTextExtractor implements TextExtractor {
 	 */
 	@Override
 	@SuppressWarnings("java:S1181") // include Errors like NoClassDefFound
-	public String sniffLanguage(String text) {
+	public @Nullable String sniffLanguage(@Nullable String text) {
 		if (text == null || text.isBlank()) {
 			return null;
 		}

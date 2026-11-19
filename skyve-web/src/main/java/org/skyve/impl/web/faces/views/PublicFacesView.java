@@ -7,6 +7,7 @@ import org.skyve.impl.metadata.repository.ProvidedRepositoryFactory;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nullable;
 import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.view.ViewScoped;
@@ -32,7 +33,7 @@ public class PublicFacesView extends FacesView {
 	 *
 	 * @return customer name parameter value, or {@code null}
 	 */
-	public String getBizCustomerParameter() {
+	public @Nullable String getBizCustomerParameter() {
 		return bizCustomerParameter;
 	}
 	
@@ -41,7 +42,7 @@ public class PublicFacesView extends FacesView {
 	 *
 	 * @param bizCustomerParameter the customer name parameter value
 	 */
-	public void setBizCustomerParameter(String bizCustomerParameter) {
+	public void setBizCustomerParameter(@Nullable String bizCustomerParameter) {
 		this.bizCustomerParameter = bizCustomerParameter;
 	}
 	
@@ -68,7 +69,7 @@ public class PublicFacesView extends FacesView {
 					throw new IllegalStateException("Malformed URL - this URL must have a 'c' parameter with a valid customer");
 				}
 				
-				String userName = ProvidedRepositoryFactory.get().retrievePublicUserName(customerName);
+				String userName = ProvidedRepositoryFactory.getNullSafe().retrievePublicUserName(customerName);
 				if (userName == null) {
 					HttpServletResponse response = (HttpServletResponse) ec.getResponse();
 					try {

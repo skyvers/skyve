@@ -14,6 +14,7 @@ import modules.admin.ReportTemplate.ReportTemplateExtension;
 
 @SuppressWarnings("static-method")
 class DownloadJasperReportTest {
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareWithNoParametersDoesNotThrow() {
 		ReportTemplateExtension template = new ReportTemplateExtension();
@@ -31,6 +32,7 @@ class DownloadJasperReportTest {
 		parameter.setRequired(Boolean.TRUE);
 		template.getParameters().add(parameter);
 
+		@SuppressWarnings("null") // passes null on purpose
 		ValidationException exception = assertThrows(ValidationException.class,
 				() -> action.prepare(template, null));
 
@@ -47,6 +49,7 @@ class DownloadJasperReportTest {
 		parameter.setReportInputValue("not-a-number");
 		template.getParameters().add(parameter);
 
+		@SuppressWarnings("null") // passes null on purpose
 		ValidationException exception = assertThrows(ValidationException.class,
 				() -> action.prepare(template, null));
 

@@ -7,6 +7,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.skyve.util.Util;
 import org.slf4j.Logger;
@@ -80,7 +81,7 @@ public final class DiskSpaceSummary {
 			StringBuilder result = new StringBuilder(128);
 
 			result.append("<p><strong>Summary</strong></p>");
-			NumberFormat nf = NumberFormat.getNumberInstance();
+			NumberFormat nf = NumberFormat.getNumberInstance(Locale.ENGLISH);
 			result.append("<p>Total=").append(nf.format(totalSpace));
 			result.append("MB, Available=").append(nf.format(totalAvailable));
 			result.append("MB, Available Percentage=").append(totalAvailableLevel).append("%</p>");

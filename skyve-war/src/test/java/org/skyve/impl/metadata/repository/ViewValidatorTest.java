@@ -32,6 +32,7 @@ import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
+import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -98,6 +99,38 @@ class ViewValidatorTest extends AbstractSkyveTest {
 			row.getItems().add(item);
 		}
 		return form;
+	}
+
+	private static ViewImpl editViewWithSpacerVisibleWhen(String condition) {
+		ViewImpl view = editView();
+		Spacer spacer = new Spacer();
+		spacer.setXmlVisibleCondition(condition);
+		view.getContained().add(spacer);
+		return view;
+	}
+
+	@Test
+	void validateViewWithInlineConditionOnABooleanAttribute() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.booleanFlag}");
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithInlineConditionComparingAttributes() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.booleanFlag and bean.text eq 'a'}");
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithInlineConditionThatIsNotBooleanThrows() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.text}");
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithInlineConditionOnAnUnknownAttributeThrows() {
+		ViewImpl view = editViewWithSpacerVisibleWhen("{el:bean.noSuchAttribute}");
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
 	}
 
 	@Test
@@ -197,6 +230,8 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		HTML html = new HTML();
 		html.setBinding("markup");
+		html.setPixelWidth(Integer.valueOf(400));
+		html.setPixelHeight(Integer.valueOf(200));
 		item.setWidget(html);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -229,7 +264,43 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		RichText rt = new RichText();
 		rt.setBinding("markup");
+		rt.setPixelWidth(Integer.valueOf(400));
+		rt.setPixelHeight(Integer.valueOf(160));
+		rt.setMinPixelHeight(Integer.valueOf(120));
+		rt.setMaxPixelHeight(Integer.valueOf(260));
 		item.setWidget(rt);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertDoesNotThrow(() -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithRichTextMissingSizeThrowsException() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		RichText rt = new RichText();
+		rt.setBinding("markup");
+		item.setWidget(rt);
+		row.getItems().add(item);
+		view.getContained().add(form);
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
+	}
+
+	@Test
+	void validateViewWithDefaultWidgetBoundToMarkup() {
+		ViewImpl view = editView();
+		Form form = new Form();
+		form.getColumns().add(new FormColumn());
+		FormRow row = new FormRow();
+		form.getRows().add(row);
+		FormItem item = new FormItem();
+		DefaultWidget dw = new DefaultWidget();
+		dw.setBinding("markup");
+		item.setWidget(dw);
 		row.getItems().add(item);
 		view.getContained().add(form);
 		assertDoesNotThrow(() -> newValidator(view).visit());
@@ -478,8 +549,8 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setDisabledConditionName("condition");
-		tf.setInvisibleConditionName("notCondition");
+		tf.setXmlDisabledCondition("condition");
+		tf.setXmlInvisibleCondition("notCondition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -578,7 +649,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetDisabledEventAction setDisabled = new SetDisabledEventAction();
 		setDisabled.setBinding("booleanFlag");
-		setDisabled.setDisabledConditionName("condition");
+		setDisabled.setXmlDisabledCondition("condition");
 		tf.getChangedActions().add(setDisabled);
 		item.setWidget(tf);
 		row.getItems().add(item);
@@ -684,6 +755,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		ViewImpl view = editView();
 		DialogButton btn = new DialogButton();
 		btn.setDialogName("someDialog");
+		btn.setDisplayName("Open Dialog");
 		view.getContained().add(btn);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
@@ -857,12 +929,12 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	}
 
 	@Test
-	void validateViewWithMap() {
+	void validateViewWithMapMissingModelNameThrowsException() {
 		ViewImpl view = editView();
 		org.skyve.impl.metadata.view.widget.MapDisplay map = new org.skyve.impl.metadata.view.widget.MapDisplay();
-		// no model name - null model is allowed
+		// the map modelName is required by view.xsd
 		view.getContained().add(map);
-		assertDoesNotThrow(() -> newValidator(view).visit());
+		assertThrows(MetaDataException.class, () -> newValidator(view).visit());
 	}
 
 	@Test
@@ -870,6 +942,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		ViewImpl view = editView();
 		org.skyve.impl.metadata.view.container.Sidebar sidebar = new org.skyve.impl.metadata.view.container.Sidebar();
 		sidebar.setPixelWidth(Integer.valueOf(200));
+		sidebar.setFloatingPixelWidthBreakpoint(Integer.valueOf(800));
 		view.setSidebar(sidebar);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
@@ -1076,7 +1149,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		FormItem item = new FormItem();
 		TextField tf = new TextField();
 		tf.setBinding("text");
-		tf.setInvisibleConditionName("notcondition");
+		tf.setXmlInvisibleCondition("notcondition");
 		item.setWidget(tf);
 		row.getItems().add(item);
 		view.getContained().add(form);
@@ -1137,6 +1210,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 	void validateViewWithInjectWidget() {
 		ViewImpl view = editView();
 		org.skyve.impl.metadata.view.Inject inject = new org.skyve.impl.metadata.view.Inject();
+		inject.setScript("console.log('injected');");
 		view.getContained().add(inject);
 		assertDoesNotThrow(() -> newValidator(view).visit());
 	}
@@ -1213,7 +1287,7 @@ class ViewValidatorTest extends AbstractSkyveTest {
 		tf.setBinding("text");
 		SetInvisibleEventAction setInvisible = new SetInvisibleEventAction();
 		setInvisible.setBinding("booleanFlag");
-		setInvisible.setInvisibleConditionName("condition");
+		setInvisible.setXmlInvisibleCondition("condition");
 		tf.getChangedActions().add(setInvisible);
 		item.setWidget(tf);
 		row.getItems().add(item);

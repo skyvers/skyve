@@ -13,6 +13,7 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Abstract implementation of {@link org.skyve.persistence.BizQL} providing
@@ -49,7 +50,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public AbstractBizQL noTimeout() {
+	public @Nonnull AbstractBizQL noTimeout() {
 		this.timeoutInSeconds = Integer.MIN_VALUE;
 		return this;
 	}
@@ -65,7 +66,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * @return this query for fluent chaining
 	 */
 	@Override
-	public AbstractBizQL putParameter(String name, Object value) {
+	public @Nonnull AbstractBizQL putParameter(@Nonnull String name, @Nullable Object value) {
 		parameters.put(name, value);
 		if (UtilImpl.QUERY_TRACE) {
 		    QUERY_LOGGER.info("    SET PARAM {} = {}", name, value);
@@ -81,7 +82,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * @return the resolved query text ready for execution
 	 */
 	@Override
-	public String toQueryString() {
+	public @Nonnull String toQueryString() {
 		return toQueryString(true);
 	}
 
@@ -151,7 +152,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * <p>This base implementation returns an empty result set.
 	 */
 	@Override
-	public <T extends Bean> List<T> beanResults() {
+	public @Nonnull <T extends Bean> List<T> beanResults() {
 		// No-op
 		return Collections.emptyList();
 	}
@@ -160,7 +161,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final <T extends Bean> T retrieveBean() {
+	public final @Nonnull <T extends Bean> T retrieveBean() {
 		List<T> results = beanResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -169,7 +170,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final <T extends Bean> T beanResult() {
+	public final @Nullable <T extends Bean> T beanResult() {
 		List<T> results = beanResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -181,7 +182,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public <T extends Bean> AutoClosingIterable<T> beanIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> beanIterable() {
 		// No-op
 		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
@@ -192,7 +193,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * <p>This base implementation returns an empty result set.
 	 */
 	@Override
-	public <T extends Bean> List<T> projectedResults() {
+	public @Nonnull <T extends Bean> List<T> projectedResults() {
 		// No-op
 		return Collections.emptyList();
 	}
@@ -201,7 +202,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final <T extends Bean> T projectedResult() {
+	public final @Nullable <T extends Bean> T projectedResult() {
 		List<T> results = projectedResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -210,7 +211,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final <T extends Bean> T retrieveProjected() {
+	public final @Nonnull <T extends Bean> T retrieveProjected() {
 		List<T> results = projectedResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -222,7 +223,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public <T extends Bean> AutoClosingIterable<T> projectedIterable() {
+	public @Nonnull <T extends Bean> AutoClosingIterable<T> projectedIterable() {
 		// No-op
 		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
@@ -233,7 +234,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * <p>This base implementation returns an empty result set.
 	 */
 	@Override
-	public <T> List<T> scalarResults(Class<T> type) {
+	public @Nonnull <T> List<T> scalarResults(@Nonnull Class<T> type) {
 		// No-op
 		return Collections.emptyList();
 	}
@@ -242,7 +243,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final <T> T retrieveScalar(Class<T> type) {
+	public final @Nonnull <T> T retrieveScalar(@Nonnull Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -251,7 +252,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final <T> T scalarResult(Class<T> type) {
+	public final @Nullable <T> T scalarResult(@Nonnull Class<T> type) {
 		List<T> results = scalarResults(type);
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -263,7 +264,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public <T> AutoClosingIterable<T> scalarIterable(Class<T> type) {
+	public @Nonnull <T> AutoClosingIterable<T> scalarIterable(@Nonnull Class<T> type) {
 		// No-op
 		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
@@ -274,7 +275,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * <p>This base implementation returns an empty result set.
 	 */
 	@Override
-	public List<Object[]> tupleResults() {
+	public @Nonnull List<Object[]> tupleResults() {
 		// No-op
 		return Collections.emptyList();
 	}
@@ -283,7 +284,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final Object[] retrieveTuple() {
+	public final @Nonnull Object[] retrieveTuple() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.assertOneResult(results);
 	}
@@ -292,7 +293,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * Returns the corresponding query result using the current query state.
 	 */
 	@Override
-	public final Object[] tupleResult() {
+	public final @Nullable Object[] tupleResult() {
 		List<Object[]> results = tupleResults();
 		return AbstractQuery.returnOneResult(results);
 	}
@@ -304,7 +305,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 */
 	@Override
 	@SuppressWarnings("resource")
-	public AutoClosingIterable<Object[]> tupleIterable() {
+	public @Nonnull AutoClosingIterable<Object[]> tupleIterable() {
 		// No-op
 		return new AutoClosingIterableAdpater<>(Collections.emptyList());
 	}
@@ -326,7 +327,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * <p>This base implementation is a no-op and returns this query unchanged.
 	 */
 	@Override
-	public BizQL setFirstResult(int first) {
+	public @Nonnull BizQL setFirstResult(int first) {
 		// No-op
 		return this;
 	}
@@ -337,7 +338,7 @@ public class AbstractBizQL extends AbstractQuery implements BizQL {
 	 * <p>This base implementation is a no-op and returns this query unchanged.
 	 */
 	@Override
-	public BizQL setMaxResults(int max) {
+	public @Nonnull BizQL setMaxResults(int max) {
 		// No-op
 		return this;
 	}

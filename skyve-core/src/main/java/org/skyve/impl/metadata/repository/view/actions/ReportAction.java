@@ -4,12 +4,15 @@ import java.util.List;
 
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.widget.bound.ParameterImpl;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.view.widget.bound.Parameter;
 import org.skyve.report.ReportFormat;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -50,18 +53,18 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return module name
 	 */
-	public String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
 	/**
 	 * Sets the module containing the report document.
 	 *
-	 * @param moduleName module name
+	 * @param moduleName module name; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
-	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
+	public void setModuleName(@Nonnull String moduleName) {
+		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
 	/**
@@ -69,18 +72,18 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return document name
 	 */
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 
 	/**
 	 * Sets the document owning the report definition.
 	 *
-	 * @param documentName document name
+	 * @param documentName document name; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
-	public void setDocumentName(String documentName) {
-		this.documentName = documentName;
+	public void setDocumentName(@Nonnull String documentName) {
+		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
 	/**
@@ -88,18 +91,18 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return report name
 	 */
-	public String getReportName() {
+	public @Nonnull String getReportName() {
 		return reportName;
 	}
 
 	/**
 	 * Sets the report resource name to execute.
 	 *
-	 * @param reportName report name
+	 * @param reportName report name; blank values become {@code null}
 	 */
 	@XmlAttribute(required = true)
-	public void setReportName(String reportName) {
-		this.reportName = reportName;
+	public void setReportName(@Nonnull String reportName) {
+		this.reportName = UtilImpl.processStringValue(reportName);
 	}
 
 	/**
@@ -107,7 +110,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return report format, or {@code null}
 	 */
-	public ReportFormat getReportFormat() {
+	public @Nullable ReportFormat getReportFormat() {
 		return reportFormat;
 	}
 	
@@ -117,7 +120,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param reportFormat report format
 	 */
 	@XmlAttribute
-	public void setReportFormat(ReportFormat reportFormat) {
+	public void setReportFormat(@Nullable ReportFormat reportFormat) {
 		this.reportFormat = reportFormat;
 	}
 
@@ -126,7 +129,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return {@code true} for list-report mode, {@code false} otherwise, or {@code null}
 	 */
-	public Boolean isListReport() {
+	public @Nullable Boolean isListReport() {
 		return listReport;
 	}
 
@@ -136,7 +139,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param listReport {@code true} for list-report mode, {@code false} otherwise
 	 */
 	@XmlAttribute
-	public void setListReport(Boolean listReport) {
+	public void setListReport(@Nullable Boolean listReport) {
 		this.listReport = listReport;
 	}
 
@@ -145,7 +148,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return query name, or {@code null}
 	 */
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
@@ -155,7 +158,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param queryName query name
 	 */
 	@XmlAttribute
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = queryName;
 	}
 
@@ -164,7 +167,7 @@ public class ReportAction extends ParameterizableAction {
 	 *
 	 * @return model name, or {@code null}
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -174,7 +177,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @param modelName model name
 	 */
 	@XmlAttribute
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = modelName;
 	}
 
@@ -188,7 +191,7 @@ public class ReportAction extends ParameterizableAction {
 	 * @return runtime action metadata configured for report execution
 	 */
 	@Override
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
 		result.setResourceName(reportName);
 		if (ImplicitActionName.Report.toString().equals(result.getName())) {

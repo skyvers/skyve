@@ -8,6 +8,8 @@ import org.apache.lucene.document.DateTools.Resolution;
 import org.apache.lucene.document.Document;
 import org.skyve.domain.Bean;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * SPI for converting domain beans to Apache Lucene {@link org.apache.lucene.document.Document}
  * instances for content-store indexing.
@@ -19,6 +21,12 @@ import org.skyve.domain.Bean;
  * <p>Each implementation handles a specific module/document type (as reported by
  * {@link #handles}) and must produce a consistent set of Lucene fields so that
  * search queries can be constructed against known field names.
+ *
+ * <p>The document must index the bean's id in a field named {@link Bean#DOCUMENT_ID} with norms or doc values, for
+ * example as a {@link org.apache.lucene.document.TextField}, as Skyve's Audit and MailLog converters do; a
+ * {@link org.apache.lucene.document.StringField} omits norms. An archived list that is unfiltered, or whose filter has
+ * only negations, finds every archived bean with a {@link org.apache.lucene.search.FieldExistsQuery} on that field,
+ * which in Lucene 9.7 throws an {@link IllegalStateException} for a field indexed with neither.
  *
  * <p>Utility methods {@link #dateToString}/{@link #stringToDate} and
  * {@link #toSortBinding} are provided to standardise field naming and date encoding
@@ -34,7 +42,7 @@ public interface DocumentConverter {
      * @param bean
      * @return
      */
-    public Document convert(Bean bean);
+    public @Nonnull Document convert(@Nonnull Bean bean);
 
     /**
      * Does this converter handle the given module/document?
@@ -43,13 +51,27 @@ public interface DocumentConverter {
      * @param document
      * @return
      */
-    public boolean handles(String module, String document);
+    public boolean handles(@Nonnull String module, @Nonnull String document);
 
-    public static String dateToString(Date date) {
+    /**
+     * Prepare an exported bean before it is written to an archive file.
+     * <p>
+     * Called once per bean by the archive export job, before the bean is marshalled to the archive.
+     * Implementations can clear values that should not be archived - for example content IDs, whose
+     * content is not archived and is garbage collected once the archived row is hard deleted.
+     * The default implementation does nothing.
+     *
+     * @param bean	The bean being archived (usually a projected {@link org.skyve.domain.DynamicBean}).
+     */
+    public default void prepareForArchive(@Nonnull Bean bean) {
+        // nothing to prepare by default
+    }
+
+    public static @Nonnull String dateToString(@Nonnull Date date) {
         return DateTools.dateToString(date, Resolution.MILLISECOND);
     }
 
-    public static Date stringToDate(String dateStr) {
+    public static @Nonnull Date stringToDate(@Nonnull String dateStr) {
         try {
             return DateTools.stringToDate(dateStr);
         } catch (ParseException e) {
@@ -74,7 +96,7 @@ public interface DocumentConverter {
      * @param binding
      * @return
      */
-    public static String toSortBinding(String binding) {
+    public static @Nonnull String toSortBinding(@Nonnull String binding) {
         return binding + "_sort";
     }
 }

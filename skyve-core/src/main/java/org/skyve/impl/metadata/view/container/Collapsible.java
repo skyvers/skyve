@@ -2,6 +2,7 @@ package org.skyve.impl.metadata.view.container;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -17,7 +18,7 @@ public enum Collapsible {
 	
 	private String collapsibleString;
 	
-	private Collapsible(String collapsibleString) {
+	private Collapsible(@Nonnull String collapsibleString) {
 		this.collapsibleString = collapsibleString;
 	}
 	
@@ -26,7 +27,7 @@ public enum Collapsible {
 	 *
 	 * @return the stable XML token for this collapse mode
 	 */
-	public String toCollapsibleString() {
+	public @Nonnull String toCollapsibleString() {
 		return this.collapsibleString;
 	}
 }

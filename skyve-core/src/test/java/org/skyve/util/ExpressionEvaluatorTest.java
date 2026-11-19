@@ -175,6 +175,7 @@ class ExpressionEvaluatorTest {
 	}
 
 	@Test
+	@SuppressWarnings("java:S5976") // each completion case asserts a different shape of result, so separate named tests read more clearly
 	void completeExpressionReturnsEmptyListWhenNoExpressionSyntax() {
 		Customer customer = mock(Customer.class);
 		Module module = mock(Module.class);
@@ -420,6 +421,19 @@ class ExpressionEvaluatorTest {
 
 		withThreadLocalUserAndCustomer(user, () -> {
 			assertThat(ExpressionEvaluator.format("{USERID}"), is("user-1"));
+		});
+	}
+
+	@Test
+	void formatThrowsWhenTheExpressionProducesNull() {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+
+		withThreadLocalUserAndCustomer(user, () -> {
+			// a user without an ID makes {USERID} evaluate to null
+			IllegalStateException e = assertThrows(IllegalStateException.class, () -> ExpressionEvaluator.format("{USERID}"));
+			assertThat(e.getMessage(), is("Formatting expression {USERID} produced null"));
 		});
 	}
 

@@ -1,5 +1,8 @@
 package org.skyve.nlp.cron.elementprovider.hour;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Detects {@code noon} and {@code midday} phrases and contributes 12:00 hour semantics.
  */
@@ -12,7 +15,7 @@ public class Noon extends Midnight {
 	 * @return {@code true} when noon or midday is referenced.
 	 */
 	@Override
-	public boolean matches(String value) {
+	public boolean matches(@Nullable String value) {
 		match = value != null &&
 				(value.toLowerCase().indexOf("noon") >= 0 || value.toLowerCase().indexOf("midday") >= 0);
 		return match;
@@ -24,7 +27,7 @@ public class Noon extends Midnight {
 	 * @return {@code "12"}.
 	 */
 	@Override
-	public String getHourElement() {
+	public @Nonnull String getHourElement() {
 		return "12";
 	}
 }

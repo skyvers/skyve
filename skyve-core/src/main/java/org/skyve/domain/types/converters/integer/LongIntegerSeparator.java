@@ -1,14 +1,25 @@
 package org.skyve.domain.types.converters.integer;
 
+import java.util.Locale;
+
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format;
+import org.skyve.domain.types.converters.NumberText;
 import org.skyve.domain.types.converters.Validator;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.util.BeanValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
- * Converts long values using grouped thousands separator formatting.
+ * Converts long values using grouped thousands separator formatting ({@code 12,345,678,901}).
+ * <p>
+ * Parsing reads the whole text, trimmed: an optional {@code +} or {@code -} sign and digits, with optional {@code ,}
+ * grouping between digits (read leniently). Anything else (non-ASCII digits, a {@code ,} not between digits such as
+ * {@code 1,} or {@code ,1}), or a value beyond a {@code long}, is refused. The grouping is {@code ,} whatever the JVM's
+ * locale.
  */
 public class LongIntegerSeparator implements Converter<Long> {
 	/**
@@ -16,7 +27,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Class<Long> getValueType() {
+	public @Nonnull Class<Long> getValueType() {
 		return Long.class;
 	}
 	
@@ -26,9 +37,14 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Long fromDisplayValue(String displayValue) throws ConversionException {
+	public @Nonnull Long fromDisplayValue(@Nonnull String displayValue) throws ConversionException {
 		try {
-			String result = displayValue.replace(",", "");
+			String text = displayValue.trim();
+			// ASCII digits only, each , between two digits (Integer.valueOf reads other digits)
+			if (! NumberText.isPlain(text)) {
+				throw new NumberFormatException(displayValue);
+			}
+			String result = text.replace(",", "");
 			return Long.valueOf(result);
 		}
 		catch (NumberFormatException e) {
@@ -51,9 +67,9 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public String toDisplayValue(Long value) throws ConversionException {
+	public @Nonnull String toDisplayValue(@Nonnull Long value) throws ConversionException {
 		try {
-			return String.format("%,d",value);
+			return String.format(Locale.ENGLISH, "%,d", value);
 		}
 		catch (Exception e) {
 			throw new ConversionException(ConversionException.LONG_INTEGER_SEPARATOR_KEY, e);
@@ -65,7 +81,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public AttributeType getAttributeType() {
+	public @Nonnull AttributeType getAttributeType() {
 		return AttributeType.longInteger;
 	}
 
@@ -74,7 +90,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Format<Long> getFormat() {
+	public @Nullable Format<Long> getFormat() {
 		return null;
 	}
 
@@ -83,7 +99,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public Validator<Long> getValidator() {
+	public @Nullable Validator<Long> getValidator() {
 		return null;
 	}
 	
@@ -92,7 +108,7 @@ public class LongIntegerSeparator implements Converter<Long> {
 	 * @return the result value
 	 */
 	@Override
-	public String getFormatPattern() {
+	public @Nullable String getFormatPattern() {
 		return null;
 	}
 }

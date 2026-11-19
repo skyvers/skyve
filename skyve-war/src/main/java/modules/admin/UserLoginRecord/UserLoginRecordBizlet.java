@@ -12,15 +12,13 @@ import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.util.IPGeolocation;
 import org.skyve.util.SecurityUtil;
 import org.skyve.web.WebContext;
 
-import modules.admin.UserLoginRecord.jobs.DifferentCountryLoginNotificationJob;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.Startup;
-import modules.admin.domain.User;
 import modules.admin.domain.UserLoginRecord;
 
 /**
@@ -156,8 +154,7 @@ public class UserLoginRecordBizlet extends Bizlet<UserLoginRecordExtension> {
 												UtilImpl.DIFFERENT_COUNTRY_LOGIN_NOTIFICATIONS);
 							
 							// Run job to email user on country change
-							final Module module = CORE.getCustomer().getModule(User.MODULE_NAME);
-							final JobMetaData countryChangeNotificationJobMetaData = module.getJob(DifferentCountryLoginNotificationJob.JOB_NAME);
+							final JobMetaData countryChangeNotificationJobMetaData = AdminJob.J_DIFFERENT_COUNTRY_LOGIN_NOTIFICATION.toJob(CORE.getCustomer());
 							EXT.getJobScheduler().runOneShotJob(countryChangeNotificationJobMetaData, bean, CORE.getUser());
 						} else {
 							// If only IP is new, log IP change

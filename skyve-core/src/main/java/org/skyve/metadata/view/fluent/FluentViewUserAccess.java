@@ -3,6 +3,8 @@ package org.skyve.metadata.view.fluent;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessMetaData;
 import org.skyve.impl.metadata.repository.view.access.ViewUserAccessUxUiMetadata;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Abstract base fluent builder class for working with {@link FluentViewUserAccess}.
  * 
@@ -21,13 +23,13 @@ public abstract class FluentViewUserAccess<T extends FluentViewUserAccess<T, M>,
 	/**
 	 * Returns the underlying view user access metadata from this builder.
 	 */
-	public abstract M get();
+	public abstract @Nonnull M get();
 
 	/**
 	 * Add a new ViewUserAccessUxUiMetadata to this view user access.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addUxUi(ViewUserAccessUxUiMetadata uxui) {
+	public @Nonnull T addUxUi(@Nonnull ViewUserAccessUxUiMetadata uxui) {
 		access.getUxuis().add(uxui);
 		return (T) this;
 	}
@@ -36,7 +38,7 @@ public abstract class FluentViewUserAccess<T extends FluentViewUserAccess<T, M>,
 	 * Add a new uxui to this view user access with the specified uxui name.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addUxUi(String uxui) {
+	public @Nonnull T addUxUi(@Nonnull String uxui) {
 		ViewUserAccessUxUiMetadata namedUxUi = new ViewUserAccessUxUiMetadata();
 		namedUxUi.setName(uxui);
 		access.getUxuis().add(namedUxUi);
@@ -47,7 +49,7 @@ public abstract class FluentViewUserAccess<T extends FluentViewUserAccess<T, M>,
 	 * Clears all the uxuis for this view user access.
 	 */
 	@SuppressWarnings("unchecked")
-	public T clearUxUis() {
+	public @Nonnull T clearUxUis() {
 		access.getUxuis().clear();
 		return (T) this;
 	}
@@ -57,7 +59,7 @@ public abstract class FluentViewUserAccess<T extends FluentViewUserAccess<T, M>,
 	 * for this access.
 	 */
 	@SuppressWarnings("unchecked")
-	public T removeUxUi(String uxui) {
+	public @Nonnull T removeUxUi(@Nonnull String uxui) {
 		access.getUxuis().removeIf(u -> uxui.equals(u.getName()));
 		return (T) this;
 	}

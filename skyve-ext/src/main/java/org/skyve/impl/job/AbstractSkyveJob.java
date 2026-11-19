@@ -27,6 +27,9 @@ import org.skyve.metadata.user.User;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base implementation for all Skyve background jobs.
  *
@@ -60,14 +63,14 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	/**
 	 * Returns the displayName.
 	 */
-	public String getDisplayName() {
+	public @Nullable String getDisplayName() {
 		return displayName;
 	}
 
 	/**
 	 * Sets the displayName.
 	 */
-	public void setDisplayName(String displayName) {
+	public void setDisplayName(@Nullable String displayName) {
 		this.displayName = displayName;
 	}
 
@@ -95,42 +98,42 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	/**
 	 * Returns the startTime.
 	 */
-	public final Timestamp getStartTime() {
+	public final @Nonnull Timestamp getStartTime() {
 		return startTime;
 	}
 
 	/**
 	 * Returns the endTime.
 	 */
-	public final Timestamp getEndTime() {
+	public final @Nullable Timestamp getEndTime() {
 		return endTime;
 	}
 
 	/**
 	 * Returns the status.
 	 */
-	public final JobStatus getStatus() {
+	public final @Nullable JobStatus getStatus() {
 		return status;
 	}
 
 	/**
 	 * Returns the log.
 	 */
-	public final List<String> getLog() {
+	public final @Nonnull List<String> getLog() {
 		return log;
 	}
 
 	/**
 	 * Sets the log.
 	 */
-	protected final void setLog(List<String> log) {
+	protected final void setLog(@Nonnull List<String> log) {
 		this.log = log;
 	}
 
 	/**
 	 * Creates the logDescriptionString.
 	 */
-	public final String createLogDescriptionString() {
+	public final @Nonnull String createLogDescriptionString() {
 		StringBuilder sb = new StringBuilder(256);
 		synchronized (log) {
 			for (String logEntry : log) {
@@ -144,22 +147,22 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 	/**
 	 * Returns the bean.
 	 */
-	public final Bean getBean() {
+	public final @Nullable Bean getBean() {
 		return bean;
 	}
 
 	/**
 	 * Sets the bean.
 	 */
-	public final void setBean(Bean bean) {
+	public final void setBean(@Nullable Bean bean) {
 		this.bean = bean;
 	}
 
 	public abstract void execute() throws Exception;
 
-	public abstract void execute(Job job) throws Exception;
+	public abstract void execute(@Nonnull Job job) throws Exception;
 
-	public abstract String cancel();
+	public abstract @Nullable String cancel();
 	
 	public abstract boolean shouldRollbackOnCancel();
 	
@@ -187,7 +190,7 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 
 	@Override
 	@SuppressWarnings({"java:S1143", "java:S1163", "java:S3776"}) // OK to throw in the finally block here as it stops deployment; Complexity OK
-	public final void execute(JobExecutionContext context)
+	public final void execute(@SuppressWarnings("null") @Nonnull JobExecutionContext context)
 	throws JobExecutionException {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = null;
@@ -246,44 +249,55 @@ public abstract class AbstractSkyveJob implements InterruptableJob, MetaData {
 		finally {
 			endTime = new Timestamp();
 
-			persistence.evictAllCached();
-			persistence.commit(false);
+			try {
+				persistence.evictAllCached();
+				persistence.commit(false);
 
-			persistence.setAsyncThread(false);
-			persistence.begin();
+				persistence.setAsyncThread(false);
+				persistence.begin();
 
-			if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
-				// save the job to the database
-				if ((customer == null) || (user == null)) {
-					throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");
-				}
-
-				try {
-					Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
-					Document document = module.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME);
-					PersistentBean job = document.newInstance(user);
-
-					BindUtil.set(job, AppConstants.START_TIME_ATTRIBUTE_NAME, getStartTime());
-					BindUtil.set(job, AppConstants.DISPLAY_NAME_ATTRIBUTE_NAME, getDisplayName());
-					BindUtil.set(job, AppConstants.STATUS_ATTRIBUTE_NAME, status.toString());
-					BindUtil.set(job, AppConstants.END_TIME_ATTRIBUTE_NAME, getEndTime());
-					BindUtil.set(job, AppConstants.PERCENTAGE_COMPLETE_ATTRIBUTE_NAME, Integer.valueOf(getPercentComplete()));
-					BindUtil.set(job, AppConstants.LOG_ATTRIBUTE_NAME, createLogDescriptionString());
-					if (bean != null) {
-						BindUtil.set(job, AppConstants.BEAN_BIZID_ATTRIBUTE_NAME, bean.getBizId());
-						BindUtil.set(job, AppConstants.BEAN_MODULE_NAME_ATTRIBUTE_NAME, bean.getBizModule());
-						BindUtil.set(job, AppConstants.BEAN_DOCUMENT_NAME_ATTRIBUTE_NAME, bean.getBizDocument());
+				if (persistJobExecutionOnSuccess() || status != JobStatus.complete) {
+					// save the job to the database
+					if ((customer == null) || (user == null)) {
+						throw new JobExecutionException("Could not insert completed job in the database as customer or user is undefined");
 					}
 
-					persistence.save(document, job);
-				}
-				catch (Exception e) {
-					throw new JobExecutionException("Could not insert completed job in the database", e);
-				}
-			}
+					try {
+						Module module = customer.getModule(AppConstants.ADMIN_MODULE_NAME);
+						Document document = module.getDocument(customer, AppConstants.JOB_DOCUMENT_NAME);
+						PersistentBean job = document.newInstance(user);
 
-			persistence.evictAllCached();
-			persistence.commit(true);
+						BindUtil.set(job, AppConstants.START_TIME_ATTRIBUTE_NAME, getStartTime());
+						BindUtil.set(job, AppConstants.DISPLAY_NAME_ATTRIBUTE_NAME, getDisplayName());
+						BindUtil.set(job, AppConstants.STATUS_ATTRIBUTE_NAME, status.toString());
+						BindUtil.set(job, AppConstants.END_TIME_ATTRIBUTE_NAME, getEndTime());
+						BindUtil.set(job, AppConstants.PERCENTAGE_COMPLETE_ATTRIBUTE_NAME, Integer.valueOf(getPercentComplete()));
+						BindUtil.set(job, AppConstants.LOG_ATTRIBUTE_NAME, createLogDescriptionString());
+						if (bean != null) {
+							BindUtil.set(job, AppConstants.BEAN_BIZID_ATTRIBUTE_NAME, bean.getBizId());
+							BindUtil.set(job, AppConstants.BEAN_MODULE_NAME_ATTRIBUTE_NAME, bean.getBizModule());
+							BindUtil.set(job, AppConstants.BEAN_DOCUMENT_NAME_ATTRIBUTE_NAME, bean.getBizDocument());
+						}
+
+						persistence.save(document, job);
+					}
+					catch (Exception e) {
+						throw new JobExecutionException("Could not insert completed job in the database", e);
+					}
+				}
+
+				persistence.evictAllCached();
+			}
+			catch (Throwable t) {
+				// Roll back a partly recorded job so the commit(true) below doesn't commit it
+				persistence.rollback();
+				throw t;
+			}
+			finally {
+				// Always close the persistence and remove it from this thread, even if the steps above threw,
+				// otherwise the next job on this pooled Quartz thread inherits it and its (possibly dead) connection.
+				persistence.commit(true);
+			}
 
 			if ((sleepInSeconds != null) && (sleepInSeconds.intValue() > 0)) {
 				try {

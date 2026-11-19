@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound.input;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
 import org.skyve.impl.metadata.view.AbsoluteSize;
@@ -10,6 +10,8 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -37,7 +39,7 @@ public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	@Override
 	public boolean showsLabelByDefault() {
@@ -45,28 +47,28 @@ public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 	}
 	
 	@Override
-	public Integer getPixelWidth() {
+	public @Nonnull Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
 	@Override
 	@XmlAttribute(required = true)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
 	@Override
-	public Integer getPixelHeight() {
+	public @Nonnull Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
 	@Override
 	@XmlAttribute(required = true)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
-	public String getMentionMarkers() {
+	public @Nullable String getMentionMarkers() {
 		return mentionMarkers;
 	}
 
@@ -75,21 +77,21 @@ public class HTML extends InputWidget implements AbsoluteSize, FormItemWidget {
 	 * @param mentionMarkers A comma separated list of 1 or 2 chars such as '{}' or '@' - eg {},@,#
 	 */
 	@XmlAttribute
-	public void setMentionMarkers(String mentionMarkers) {
+	public void setMentionMarkers(@Nullable String mentionMarkers) {
 		this.mentionMarkers = UtilImpl.processStringValue(mentionMarkers);
 	}
 
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
 	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

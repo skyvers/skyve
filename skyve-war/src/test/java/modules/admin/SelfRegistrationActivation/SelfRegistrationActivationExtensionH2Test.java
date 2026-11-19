@@ -56,6 +56,7 @@ class SelfRegistrationActivationExtensionH2Test extends AbstractH2Test {
 		assertThat(activation.getResult(), is(Result.SUCCESS));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	private static UserExtension savedUser(String prefix, Boolean activated) {
 		String unique = prefix + "-" + UUID.randomUUID();
 		UserExtension user = new DataBuilder().fixture(FixtureType.crud).build(User.MODULE_NAME, User.DOCUMENT_NAME);

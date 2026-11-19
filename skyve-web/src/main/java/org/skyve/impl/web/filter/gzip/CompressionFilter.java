@@ -23,6 +23,8 @@ import java.util.Enumeration;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.FilterConfig;
@@ -75,7 +77,7 @@ public class CompressionFilter implements Filter {
 
     @Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void init(FilterConfig filterConfig) {
+	public void init(@Nullable FilterConfig filterConfig) {
 
         config = filterConfig;
         if (filterConfig != null) {
@@ -135,9 +137,9 @@ public class CompressionFilter implements Filter {
 
     @Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void doFilter(ServletRequest request,
-							ServletResponse response,
-							FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+							@SuppressWarnings("null") @Nonnull ServletResponse response,
+							@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
         if (debug > 0) {
         	LOGGER.info("@doFilter");
@@ -213,7 +215,7 @@ public class CompressionFilter implements Filter {
      *
      * @param filterConfig The filter configuration object
      */
-    public void setFilterConfig(FilterConfig filterConfig) {
+    public void setFilterConfig(@Nullable FilterConfig filterConfig) {
         init(filterConfig);
     }
 
@@ -221,7 +223,7 @@ public class CompressionFilter implements Filter {
      * Return filter config
      * Required by Weblogic 6.1
      */
-    public FilterConfig getFilterConfig() {
+    public @Nullable FilterConfig getFilterConfig() {
         return config;
     }
 

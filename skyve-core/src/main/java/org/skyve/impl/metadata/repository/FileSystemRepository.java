@@ -127,7 +127,21 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * Prevent external instantiation.
 	 */
 	protected FileSystemRepository() {
-		this(UtilImpl.getAbsoluteBasePath());
+		this(absoluteBasePath());
+	}
+
+	/**
+	 * Returns the absolute base path of the application, failing when it cannot be determined.
+	 *
+	 * @return the absolute base path; never {@code null}
+	 * @throws MetaDataException when the base path cannot be determined from the classpath
+	 */
+	private static @Nonnull String absoluteBasePath() {
+		String result = UtilImpl.getAbsoluteBasePath();
+		if (result == null) {
+			throw new MetaDataException("Cannot determine absolute base path. Where is schemas/common.xsd?");
+		}
+		return result;
 	}
 	
 	/**
@@ -149,6 +163,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 			CustomerMetaData customer = loadCustomer(customerName);
 			for (CustomerModuleMetaData module : customer.getModules().getModules()) {
 				String moduleName = module.getName();
+				// An unnamed module reference has no location to populate
+				if (moduleName == null) {
+					continue;
+				}
 				// populate the module XML file from the customer overridden area.
 				populateModuleLocation(customerName, moduleName);
 
@@ -396,7 +414,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if no router files are found or router XML cannot be parsed
 	 */
 	@Override
-	public Router loadRouter() {
+	public @Nonnull Router loadRouter() {
 		Router result = null;
 
 		try {
@@ -418,7 +436,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		catch (Exception e) {
 			throw new MetaDataException(e);
 		}
-		
+		if (result == null) { // cannot happen as there is at least 1 router file
+			throw new IllegalStateException("No router was loaded");
+		}
+
 		return result;
 	}
 
@@ -496,7 +517,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return the converted global router, or {@code null} when no global router exists
 	 */
 	@Override
-	public Router getGlobalRouter() {
+	public @Nullable Router getGlobalRouter() {
 		final Map<String, Long> routersFileInfo = routersFileInfo(true, false);
  		Optional<String> path = routersFileInfo.keySet().stream().findFirst();
  		if (path.isPresent()) {
@@ -512,7 +533,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return converted, self-contained module routers in discovery order
 	 */
 	@Override
-	public List<Router> getModuleRouters() {
+	public @Nonnull List<Router> getModuleRouters() {
 		final Map<String, Long> routersFileInfo = routersFileInfo(false, true);
 		final List<Router> result = new ArrayList<>(routersFileInfo.size());
 		for (String path : routersFileInfo.keySet()) {
@@ -530,7 +551,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return customer directory names that are not hidden entries
 	 */
 	@Override
-	public List<String> getAllCustomerNames() {
+	public @Nonnull List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>();
 		
 		File customersDirectory = new File(absolutePath + CUSTOMERS_NAMESPACE);
@@ -558,7 +579,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public List<String> getAllVanillaModuleNames() {
+	public @Nonnull List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>();
 
 		File modulesDirectory = new File(absolutePath + MODULES_NAMESPACE);
@@ -601,7 +622,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
 	 */
 	@Override
-	public CustomerMetaData loadCustomer(String customerName) {
+	public @Nonnull CustomerMetaData loadCustomer(@Nonnull String customerName) {
 		CustomerMetaData result = null;
 		
 		try {
@@ -629,7 +650,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
 	 */
 	@Override
-	public long customerLastModifiedMillis(String customerName) {
+	public long customerLastModifiedMillis(@Nonnull String customerName) {
 		String path = customerPath(customerName);
 		File f = new File(path);
 		if (f.exists()) {
@@ -658,7 +679,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
 	 */
 	@Override
-	public ModuleMetaData loadModule(String customerName, String moduleName) {
+	public @Nonnull ModuleMetaData loadModule(@Nullable String customerName, @Nonnull String moduleName) {
 		ModuleMetaData result = null;
 		
 		try {
@@ -687,7 +708,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
 	 */
 	@Override
-	public long moduleLastModifiedMillis(String customerName, String moduleName) {
+	public long moduleLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName) {
 		String path = modulePath(customerName, moduleName);
 		File f = new File(path);
 		if (f.exists()) {
@@ -718,7 +739,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
 	 */
 	@Override
-	public DocumentMetaData loadDocument(String customerName, String moduleName, String documentName) {
+	public @Nonnull DocumentMetaData loadDocument(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		DocumentMetaData result = null;
 		
 		try {
@@ -748,7 +769,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
 	 */
 	@Override
-	public long documentLastModifiedMillis(String customerName, String moduleName, String documentName) {
+	public long documentLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		String path = documentPath(customerName, moduleName, documentName);
 		File f = new File(path);
 		if (f.exists()) {
@@ -789,7 +810,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
 	 */
 	@Override
-	public ViewMetaData loadView(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+	public @Nonnull ViewMetaData loadView(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName) {
 		ViewMetaData result = null;
 		
 		try {
@@ -821,7 +842,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
 	 */
 	@Override
-	public long viewLastModifiedMillis(String customerName, String moduleName, String documentName, String uxui, String viewName) {
+	public long viewLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nullable String uxui, @Nonnull String viewName) {
 		String path = viewPath(customerName, moduleName, documentName, uxui, viewName);
 		File f = new File(path);
 		if (f.exists()) {
@@ -857,7 +878,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if metadata cannot be loaded or the XML name does not match
 	 */
 	@Override
-	public ActionMetaData loadMetaDataAction(String customerName, String moduleName, String documentName, String actionName) {
+	public @Nonnull ActionMetaData loadMetaDataAction(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName) {
 		ActionMetaData result = null;
 		
 		try {
@@ -888,7 +909,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
 	 */
 	@Override
-	public long metaDataActionLastModifiedMillis(String customerName, String moduleName, String documentName, String actionName) {
+	public long metaDataActionLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName, @Nonnull String actionName) {
 		String path = actionPath(customerName, moduleName, documentName, actionName);
 		File f = new File(path);
 		if (f.exists()) {
@@ -910,7 +931,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return the Bizlet instance, or {@code null} when no Bizlet is configured
 	 */
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer, @Nonnull Document document, boolean runtime) {
 		// If dynamic, use the bizletClassName if defined
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -953,7 +974,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if metadata cannot be loaded
 	 */
 	@Override
-	public BizletMetaData loadMetaDataBizlet(String customerName, String moduleName, String documentName) {
+	public @Nonnull BizletMetaData loadMetaDataBizlet(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		BizletMetaData result = null;
 		
 		try {
@@ -979,7 +1000,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return file timestamp in milliseconds, or {@link Long#MIN_VALUE} when the file is missing
 	 */
 	@Override
-	public long metaDataBizletLastModifiedMillis(String customerName, String moduleName, String documentName) {
+	public long metaDataBizletLastModifiedMillis(@Nullable String customerName, @Nonnull String moduleName, @Nonnull String documentName) {
 		String path = bizletPath(customerName, moduleName, documentName);
 		File f = new File(path);
 		if (f.exists()) {
@@ -1000,7 +1021,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if the image is not configured for a dynamic document
 	 */
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
+	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull Document document, @Nonnull String imageName, boolean runtime) {
 		// If dynamic, use the images map
 		Dynamic dynamic = document.getDynamism();
 		if (dynamic != null) {
@@ -1009,7 +1030,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				throw new MetaDataException(imageName + " is not defined under dynamic.images in document " + document.getName());
 			}
 			addKey(imageClassName);
-			return getJavaMetaData(customer, imageClassName, true, runtime);
+			return getRequiredJavaMetaData(customer, imageClassName, runtime);
 		}
 
 		// Otherwise load from the file system
@@ -1017,7 +1038,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
 		key.append(ProvidedRepository.IMAGES_NAMESPACE).append(imageName);
-		return getJavaMetaData(customer, key.toString(), true, runtime);
+		return getRequiredJavaMetaData(customer, key.toString(), runtime);
 	}
 
 	/**
@@ -1045,7 +1066,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 				throw new MetaDataException(modelName + " is not defined under dynamic.models in document " + document.getName());
 			}
 			addKey(modelClassName);
-			return getJavaMetaData(customer, modelClassName, true, runtime);
+			return getRequiredJavaMetaData(customer, modelClassName, runtime);
 		}
 
 		// Otherwise load from the file system
@@ -1053,7 +1074,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 		key.append(ProvidedRepository.MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		key.append(document.getName()).append('/');
 		key.append(ProvidedRepository.MODELS_NAMESPACE).append(modelName);
-		return getJavaMetaData(customer, key.toString(), true, runtime);
+		return getRequiredJavaMetaData(customer, key.toString(), runtime);
 	}
 
 	/**
@@ -1068,10 +1089,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return an initialized comparison model
 	 */
 	@Override
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, 
-																						Document document, 
-																						String modelName,
-																						boolean runtime) {
+	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, 
+																								@Nonnull Document document, 
+																								@Nonnull String modelName,
+																								boolean runtime) {
 		ComparisonModel<T, C> result = getModel(customer, document, modelName, runtime);
 		result.postConstruct(customer, runtime);
 		return result;
@@ -1088,7 +1109,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return an initialized map model
 	 */
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		MapModel<T> result = getModel(customer, document, modelName, runtime);
 		result.postConstruct(customer, runtime);
 		return result;
@@ -1105,10 +1126,10 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return an initialized chart model
 	 */
 	@Override
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer,
-															Document document,
-															String modelName,
-															boolean runtime) {
+	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer,
+																	@Nonnull Document document,
+																	@Nonnull String modelName,
+																	boolean runtime) {
 		ChartModel<T> result = getModel(customer, document, modelName, runtime);
 		result.postConstruct(customer, runtime);
 		return result;
@@ -1125,7 +1146,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return an initialized list model
 	 */
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		ListModel<T> result = getModel(customer, document, modelName, runtime);
 		result.postConstruct(customer, runtime);
 		return result;
@@ -1184,7 +1205,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String actionName, boolean runtime) {
+	public @Nullable ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName, boolean runtime) {
 		MetaData result = getClassAction(customer, document, actionName, true, runtime);
 		if (loadClasses) {
 			return (ServerSideAction<Bean>) result;
@@ -1203,7 +1224,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return a BizExport action instance, or {@code null} when class loading is disabled
 	 */
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, Document document, String exportActionName, boolean runtime) {
+	public @Nullable BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String exportActionName, boolean runtime) {
 		MetaData result = getClassAction(customer, document, exportActionName, true, runtime);
 		if (loadClasses) {
 			return (BizExportAction) result;
@@ -1222,7 +1243,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return a BizImport action instance, or {@code null} when class loading is disabled
 	 */
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, Document document, String importActionName, boolean runtime) {
+	public @Nullable BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String importActionName, boolean runtime) {
 		MetaData result = getClassAction(customer, document, importActionName, true, runtime);
 		if (loadClasses) {
 			return (BizImportAction) result;
@@ -1242,7 +1263,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 */
 	@Override
 	@SuppressWarnings("unchecked")
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String downloadActionName, boolean runtime) {
+	public @Nullable DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String downloadActionName, boolean runtime) {
 		MetaData result = getClassAction(customer, document, downloadActionName, true, runtime);
 		if (loadClasses) {
 			return (DownloadAction<Bean>) result;
@@ -1261,8 +1282,12 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return an upload action instance
 	 */
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String uploadActionName, boolean runtime) {
-		return getClassAction(customer, document, uploadActionName, true, runtime);
+	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String uploadActionName, boolean runtime) {
+		UploadAction<Bean> result = getClassAction(customer, document, uploadActionName, true, runtime);
+		if (result == null) { // cannot happen as existence is asserted
+			throw new IllegalStateException("Upload action " + uploadActionName + " was not resolved for document " + document.getName());
+		}
+		return result;
 	}
 
 	/**
@@ -1277,7 +1302,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @throws MetaDataException if the factory class exists but cannot be instantiated
 	 */
 	@Override
-	public Object getDataFactory(Customer customer, Document document) {
+	public @Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document) {
 		Object result = null;
 
 		final String moduleName = document.getOwningModuleName();
@@ -1323,7 +1348,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @param customer the customer whose metadata should be evicted, or {@code null} to evict all
 	 */
 	@Override
-	public void evictCachedMetaData(Customer customer) {
+	public void evictCachedMetaData(@Nullable Customer customer) {
 		AbstractPersistence persistence = AbstractPersistence.get();
 		User user = persistence.getUser();
 		if (customer == null) {
@@ -1352,7 +1377,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return the resolved class, {@link WidgetReference}, or {@code null} if not found
 	 */
 	@Override
-	public Class<?> getJavaClass(Customer customer, String key) {
+	public @Nullable Class<?> getJavaClass(@Nullable Customer customer, @Nonnull String key) {
 		Class<?> result = null;
 		
 		String newKey = vtable((customer == null) ? null : customer.getName(), key);
@@ -1426,6 +1451,26 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	}
 
 	/**
+	 * Instantiates a Java-backed metadata class that must exist in the repository vtable.
+	 *
+	 * @param <T> the metadata type
+	 * @param customer the customer context for vtable lookup, or {@code null}
+	 * @param key repository key for the Java metadata class
+	 * @param runtime whether runtime dependency injection should be applied
+	 * @return a new metadata instance; never {@code null}
+	 * @throws MetaDataException when the class does not exist or cannot be instantiated
+	 */
+	private @Nonnull <T extends MetaData> T getRequiredJavaMetaData(@Nullable Customer customer,
+																		@Nonnull String key,
+																		boolean runtime) {
+		T result = getJavaMetaData(customer, key, true, runtime);
+		if (result == null) { // cannot happen as existence is asserted
+			throw new IllegalStateException(key + " was not instantiated from the repository vtable");
+		}
+		return result;
+	}
+
+	/**
 	 * Resolves the physical report output filename for a named document report.
 	 *
 	 * <p>Checks Jasper first, then Freemarker report variants using vtable resolution.
@@ -1437,7 +1482,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return the absolute report output filename, or {@code null} when no report exists
 	 */
 	@Override
-	public String getReportFileName(Customer customer, Document document, String reportName) {
+	public @Nullable String getReportFileName(@Nullable Customer customer, @Nonnull Document document, @Nonnull String reportName) {
 		StringBuilder path = new StringBuilder(64);
 		path.append(MODULES_NAMESPACE).append(document.getOwningModuleName()).append('/');
 		path.append(document.getName()).append('/');
@@ -1481,7 +1526,7 @@ public abstract class FileSystemRepository extends MutableCachedRepository {
 	 * @return the resolved file (which may not exist when only the final fallback is used)
 	 */
 	@Override
-	public final File findResourceFile(String resourcePath, String customerName, String moduleName) {
+	public final @Nonnull File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName) {
 		File file = null;
 		StringBuilder path = new StringBuilder(64);
 

@@ -22,6 +22,7 @@ class CommunicationBizletTest extends AbstractH2Test {
 		assertDoesNotThrow(() -> CommunicationBizlet.checkForUnsavedData(bean));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithModuleNameSourceClearsDocumentName() throws Exception {
 		CommunicationExtension bean = new CommunicationExtension();
@@ -30,6 +31,7 @@ class CommunicationBizletTest extends AbstractH2Test {
 		assertNull(bean.getDocumentName());
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void preRerenderWithUnknownSourceDoesNothing() throws Exception {
 		CommunicationExtension bean = Assertions.assertDoesNotThrow(CommunicationExtension::new);

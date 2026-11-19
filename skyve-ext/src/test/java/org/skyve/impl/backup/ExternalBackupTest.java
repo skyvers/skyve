@@ -1,26 +1,26 @@
 package org.skyve.impl.backup;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.OutputStream;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 
 @SuppressWarnings("static-method")
-public class ExternalBackupTest {
+class ExternalBackupTest {
 
 	@Test
-	public void areExternalBackupsEnabledReturnsFalseByDefault() {
+	void areExternalBackupsEnabledReturnsFalseByDefault() {
 		// BACKUP_EXTERNAL_BACKUP_CLASS defaults to null
 		assertFalse(ExternalBackup.areExternalBackupsEnabled());
 	}
 
 	@Test
-	public void getInstanceThrowsWhenConfigurationCannotCreateBackup() {
+	void getInstanceThrowsWhenConfigurationCannotCreateBackup() {
 		String saved = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
 		try {
 			String[] invalidClassNames = {null, "com.example.NonExistentBackupClass", "java.net.InetSocketAddress"};
@@ -34,7 +34,7 @@ public class ExternalBackupTest {
 	}
 
         @Test
-        public void areExternalBackupsEnabledReturnsTrueWhenConfigured() {
+        void areExternalBackupsEnabledReturnsTrueWhenConfigured() {
                 String saved = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
                 try {
                         UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = "com.example.SomeClass";
@@ -45,7 +45,7 @@ public class ExternalBackupTest {
         }
 
 	@Test
-	public void getInstanceCreatesConfiguredExternalBackupImplementation() {
+	void getInstanceCreatesConfiguredExternalBackupImplementation() {
 		String saved = UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS;
 		try {
 			UtilImpl.BACKUP_EXTERNAL_BACKUP_CLASS = TestExternalBackup.class.getName();

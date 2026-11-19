@@ -16,6 +16,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.metadata.view.View.ViewType;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Renders Flutter edit view scaffolding from Skyve metadata.
  */
@@ -28,14 +30,14 @@ public class FlutterEditView extends FlutterView {
 
     private final User user;
 
-    public FlutterEditView(FlutterGenerator generator, String moduleName, String viewName) {
+    public FlutterEditView(@Nonnull FlutterGenerator generator, @Nonnull String moduleName, @Nonnull String viewName) {
         super(generator, moduleName, viewName);
 
         user = new SuperUser();
         user.setCustomerName(generator.getConfig().getCustomerName());
     }
 
-    public void setViews(Module module, Document document) {
+    public void setViews(@Nonnull Module module, @Nonnull Document document) {
         this.module = module;
         this.document = document;
         GeneratorConfig config = generator.getConfig();
@@ -45,18 +47,21 @@ public class FlutterEditView extends FlutterView {
      }
 
     @Override
-    protected void create(FileWriter fw) throws IOException {
+    protected void create(@Nonnull FileWriter fw) throws IOException {
         Set<String> imports = new TreeSet<>();
         String editDart = null;
         // FIXME the create view may be needed at some point (possibly folded together with the edit view)
 //        String createDart = null;
 
         String uxui = generator.getConfig().getUxui();
+        if (uxui == null) { // validated when the generator is constructed
+            throw new IllegalStateException("No UX/UI is configured");
+        }
 
         if (editView != null) {
             FlutterViewRenderer v = new FlutterViewRenderer(user, module, document, editView, uxui, imports);
             v.visit();
-            editDart = v.getResult().toString();
+            editDart = v.getNullSafeResult().toString();
         }
 //        if (createView != null) {
 //            FlutterViewRenderer v = new FlutterViewRenderer(user, module, document, createView, uxui, imports);

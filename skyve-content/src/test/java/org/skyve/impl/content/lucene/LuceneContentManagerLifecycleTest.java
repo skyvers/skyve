@@ -445,6 +445,7 @@ class LuceneContentManagerLifecycleTest {
 	}
 
 	/** Confirms that truncate clears indexed content and drop removes the index for clean recreation. */
+	@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 	@Test
 	void testTruncateAndDropIndexing() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-truncate-");
@@ -549,6 +550,7 @@ class LuceneContentManagerLifecycleTest {
 	}
 
 	/** Confirms bean-content search results and enforcement of requested and maximum result limits. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGoogleSearchFindsBeanContentAndHonoursLimits() throws Exception {
 		tempContentDirectory = Files.createTempDirectory("skyve-content-lucene-google-");

@@ -81,6 +81,21 @@ public class StandardLoader {
 	}
 
 	/**
+	 * Returns the workbook sheet for a key known to be in the workbook.
+	 *
+	 * @param key	The sheet key from the workbook's sheet keys or from a loaded bean.
+	 * @return	The sheet.
+	 * @throws IllegalStateException	if the workbook has no sheet for the key.
+	 */
+	private @Nonnull BizPortSheet getSheet(@Nullable SheetKey key) {
+		BizPortSheet result = workbook.getSheet(key);
+		if (result == null) {
+			throw new IllegalStateException("The workbook has no sheet for " + key);
+		}
+		return result;
+	}
+
+	/**
 	 * Populate from document sheets.
 	 * Link from association columns.
 	 * Link from collection sheets.
@@ -101,7 +116,7 @@ public class StandardLoader {
 		// Populate from document sheets
 		boolean drivingDocumentSheet = true;
 		for (SheetKey key : workbook.getSheetKeys()) {
-			BizPortSheet sheet = workbook.getSheet(key);
+			BizPortSheet sheet = getSheet(key);
 			if ((key.getCollectionBinding() == null) || sheet.getColumnBindings().contains(ChildBean.PARENT_NAME)) { // document sheet (including ChildDocument)
 				Module module = customer.getModule(key.getModuleName());
 				Document document = module.getDocument(customer, key.getDocumentName());
@@ -117,7 +132,7 @@ public class StandardLoader {
 		
 		// Populate from association columns within documents
 		for (SheetKey key : workbook.getSheetKeys()) {
-			BizPortSheet sheet = workbook.getSheet(key);
+			BizPortSheet sheet = getSheet(key);
 			if ((key.getCollectionBinding() == null) || sheet.getColumnBindings().contains(ChildBean.PARENT_NAME)) { // document sheet (including ChildDocument)
 				Module module = customer.getModule(key.getModuleName());
 				Document document = module.getDocument(customer, key.getDocumentName());
@@ -128,7 +143,7 @@ public class StandardLoader {
 		// Populate from collection sheets
 		for (SheetKey key : workbook.getSheetKeys()) {
 			String collectionBinding = key.getCollectionBinding(); 
-			BizPortSheet sheet = workbook.getSheet(key);
+			BizPortSheet sheet = getSheet(key);
 			if ((collectionBinding != null) && (! sheet.getColumnBindings().contains(ChildBean.PARENT_NAME))) { // collection sheet
 				Module module = customer.getModule(key.getModuleName());
 				Document keyDocument = module.getDocument(customer, key.getDocumentName());
@@ -374,7 +389,11 @@ public class StandardLoader {
 			return;
 		}
 
+		// The parent column exists as it has a value
 		BizPortColumn parentKeyColumn = sheet.getColumn(ChildBean.PARENT_NAME);
+		if (parentKeyColumn == null) {
+			throw new IllegalStateException("Sheet " + sheet.getTitle() + " has no " + ChildBean.PARENT_NAME + " column");
+		}
 		SheetKey parentKeySheetKey = parentKeyColumn.getReferencedSheet();
 		BizPortSheet parentKeySheet = workbook.getSheet(parentKeySheetKey);
 		if (parentKeySheet == null) {
@@ -462,6 +481,9 @@ public class StandardLoader {
 			
 			// Process the FK ID - FK column is not null so the column definition must exist
 			BizPortColumn foreignKeyColumn = sheet.getColumn(associationBinding);
+			if (foreignKeyColumn == null) {
+				throw new IllegalStateException("Sheet " + sheet.getTitle() + " has no " + associationBinding + " column");
+			}
 			SheetKey foreignKeySheetKey = foreignKeyColumn.getReferencedSheet();
 			// if the column has been redefined to not be a foreign key column,
 			// then we do not try to resolve the reference
@@ -539,7 +561,10 @@ public class StandardLoader {
 			return;
 		}
 		
-		// Lookup the foreign key row for owner
+		// Lookup the foreign key row for owner - the owner column exists as it has a value
+		if (ownerSheetIdColumn == null) {
+			throw new IllegalStateException("Sheet " + collectionSheet.getTitle() + " has no " + PersistentBean.OWNER_COLUMN_NAME + " column");
+		}
 		SheetKey ownerSheetKey = ownerSheetIdColumn.getReferencedSheet();
 		BizPortSheet ownerSheet = workbook.getSheet(ownerSheetKey);
 			if (ownerSheet == null) {
@@ -556,7 +581,10 @@ public class StandardLoader {
 			return;
 		}
 
-		// Lookup the foreign key row for element
+		// Lookup the foreign key row for element - the element column exists as it has a value
+		if (elementSheetIdColumn == null) {
+			throw new IllegalStateException("Sheet " + collectionSheet.getTitle() + " has no " + PersistentBean.ELEMENT_COLUMN_NAME + " column");
+		}
 		SheetKey elementSheetKey = elementSheetIdColumn.getReferencedSheet();
 		BizPortSheet elementSheet = workbook.getSheet(elementSheetKey);
 			if (elementSheet == null) {
@@ -623,7 +651,7 @@ public class StandardLoader {
 	 */
 	public void addError(@Nonnull Customer customer, @Nonnull Bean bean, @Nonnull Exception e) {
 		final SheetKey key = bizIdToSheetKey.get(bean.getBizId());
-		BizPortSheet sheet = workbook.getSheet(key);
+		BizPortSheet sheet = getSheet(key);
 		BizPortColumn column = sheet.getColumn(Bean.DOCUMENT_ID);
 		Object sheetRowId = bizIdToSheetRowId.get(bean.getBizId());
 		sheet.moveToRow(sheetRowId);

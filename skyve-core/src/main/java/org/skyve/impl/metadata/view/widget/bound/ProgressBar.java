@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget.bound;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -12,9 +12,12 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -36,8 +39,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"pixelHeight",
 							"minPixelHeight",
 							"maxPixelHeight",
-							"invisibleConditionName", 
-							"visibleConditionName",
+							"xmlInvisibleCondition", 
+							"xmlVisibleCondition",
 							"properties"})
 public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSize, ConstrainableSize, FormItemWidget {
 	private static final long serialVersionUID = 4360024000275982927L;
@@ -48,11 +51,12 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	private Integer pixelHeight;
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates progress bars render a label by default.
@@ -70,7 +74,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the configured pixel width
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -81,7 +85,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -91,7 +95,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the minimum width in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -102,7 +106,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -112,7 +116,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the maximum width in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -123,7 +127,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -133,7 +137,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the configured pixel height
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -144,7 +148,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -154,7 +158,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the minimum height in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -165,7 +169,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -175,7 +179,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return the maximum height in pixels, or {@code null} when unconstrained
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -186,51 +190,69 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
 	/**
-	 * Returns the internal invisible condition expression.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return the invisible condition expression
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible condition expression directly.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition expression
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB-only placeholder for {@code visible}; value is derived via {@link #setVisibleConditionName(String)}.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; JAXB writes via {@code setVisibleConditionName}
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName a condition expression that enables visibility
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
@@ -239,7 +261,7 @@ public class ProgressBar extends AbstractBound implements Invisible, AbsoluteSiz
 	 * @return mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

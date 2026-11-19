@@ -9,13 +9,13 @@ import org.junit.jupiter.api.Test;
 class CustomisationsStaticSingletonTest {
 
 	@AfterEach
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void resetSingleton() {
 		CustomisationsStaticSingleton.set(null);
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // passes null on purpose
 	void getReturnsNullInitially() {
 		CustomisationsStaticSingleton.set(null);
 		assertNull(CustomisationsStaticSingleton.get());

@@ -218,7 +218,7 @@ public class PushMessage {
 	}
 
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		return MoreObjects.toStringHelper(this)
 				.add("userIds", userIds)
 				.add("items", items)
@@ -240,14 +240,14 @@ public class PushMessage {
 		 * 
 		 * @return The user's UUID
 		 */
-		public String forUserId();
+		public @Nonnull String forUserId();
 
 		/**
 		 * Send the given PushMessage to the receiver's client.
 		 * 
 		 * @param message The message to send.
 		 */
-		public void sendMessage(PushMessage message);
+		public void sendMessage(@Nonnull PushMessage message);
 
 		/**
 		 * Whether this receiver is stale and should be removed by the reaper.

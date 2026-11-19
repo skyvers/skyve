@@ -65,7 +65,7 @@ public class SnapshotCriteria extends SnapshotFilter {
 	 * @return A map containing operator and nested filter values.
 	 */
 	@Override
-	protected LinkedHashMap<String, Object> toMap() {
+	protected @Nonnull LinkedHashMap<String, Object> toMap() {
 		LinkedHashMap<String, Object> result = new LinkedHashMap<>();
 		
 		result.put(OPERATOR_PROPERTY_NAME, operator);
@@ -87,7 +87,7 @@ public class SnapshotCriteria extends SnapshotFilter {
 	 * @param map The source map containing criteria state.
 	 */
 	@Override
-	protected void populate(Map<String, Object> map) {
+	protected void populate(@Nonnull Map<String, Object> map) {
 		Object value = map.get(OPERATOR_PROPERTY_NAME);
 		if (value != null) {
 			operator = CompoundFilterOperator.valueOf(value.toString());

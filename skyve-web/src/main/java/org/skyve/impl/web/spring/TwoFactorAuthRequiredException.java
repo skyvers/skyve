@@ -2,6 +2,8 @@ package org.skyve.impl.web.spring;
 
 import org.springframework.security.core.AuthenticationException;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Signals that primary authentication succeeded but the user must complete a two-factor challenge.
  */
@@ -19,7 +21,7 @@ public class TwoFactorAuthRequiredException extends AuthenticationException {
 	 * @param msg The exception message.
 	 * @param invalidTwoFactorCode Whether the submitted two-factor code is invalid or expired.
 	 */
-	public TwoFactorAuthRequiredException(String msg, boolean invalidTwoFactorCode) {
+	public TwoFactorAuthRequiredException(@Nullable String msg, boolean invalidTwoFactorCode) {
 		super(msg);
 		this.invalidTwoFactorCode = invalidTwoFactorCode;
 	}

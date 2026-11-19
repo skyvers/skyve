@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator;
 import org.skyve.impl.metadata.model.document.field.validator.TextValidator.ValidatorType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentTextValidator metadata.
  */
@@ -19,7 +22,7 @@ public class FluentTextValidator {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentTextValidator(TextValidator validator) {
+	public FluentTextValidator(@Nonnull TextValidator validator) {
 		this.validator = validator;
 	}
 
@@ -27,7 +30,7 @@ public class FluentTextValidator {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentTextValidator from(@SuppressWarnings("hiding") TextValidator validator) {
+	public @Nonnull FluentTextValidator from(@SuppressWarnings("hiding") @Nonnull TextValidator validator) {
 		type(validator.getType());
 		regularExpression(validator.getRegularExpression());
 		validationMessage(validator.getValidationMessage());
@@ -37,7 +40,7 @@ public class FluentTextValidator {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentTextValidator type(ValidatorType type) {
+	public @Nonnull FluentTextValidator type(@Nullable ValidatorType type) {
 		validator.setType(type);
 		return this;
 	}
@@ -45,7 +48,7 @@ public class FluentTextValidator {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentTextValidator regularExpression(String regularExpression) {
+	public @Nonnull FluentTextValidator regularExpression(@Nullable String regularExpression) {
 		validator.setRegularExpression(regularExpression);
 		return this;
 	}
@@ -53,14 +56,14 @@ public class FluentTextValidator {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentTextValidator validationMessage(String validationMessage) {
+	public @Nonnull FluentTextValidator validationMessage(@Nullable String validationMessage) {
 		validator.setValidationMessage(validationMessage);
 		return this;
 	}
 	/**
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
-	public TextValidator get() {
+	public @Nonnull TextValidator get() {
 		return validator;
 	}
 }

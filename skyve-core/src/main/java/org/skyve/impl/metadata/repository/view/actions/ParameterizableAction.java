@@ -9,6 +9,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Parameterizable;
 import org.skyve.metadata.view.widget.bound.Parameter;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -39,7 +40,7 @@ public abstract class ParameterizableAction extends PositionableAction implement
 					name = "parameter",
 					type = ParameterImpl.class,
 					required = false)
-	public List<Parameter> getParameters() {
+	public @Nonnull List<Parameter> getParameters() {
 		return parameters;
 	}
 
@@ -49,7 +50,7 @@ public abstract class ParameterizableAction extends PositionableAction implement
 	 * @return runtime action metadata with parameters appended in declaration order
 	 */
 	@Override
-	public ActionImpl toMetaDataAction() {
+	public @Nonnull ActionImpl toMetaDataAction() {
 		ActionImpl result = super.toMetaDataAction();
 		result.getParameters().addAll(parameters);
 		return result;

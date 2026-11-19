@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- A set-up member and a member, for SailSuiteLoginSailIT: the second signs in first, as the first signed out. -->
+<suite xmlns="http://www.skyve.org/xml/sail">
+	<setUp file="login-suite-00.xml"/>
+	<member file="login-suite-01.xml"/>
+</suite>

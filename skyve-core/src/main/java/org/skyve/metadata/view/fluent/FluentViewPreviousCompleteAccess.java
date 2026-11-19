@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.view.access.ViewPreviousCompleteUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ViewPreviousCompleteUserAccessMetaData} metadata.
  * 
@@ -20,14 +22,14 @@ public class FluentViewPreviousCompleteAccess extends FluentViewUserAccess<Fluen
 	/**
 	 * Creates a new FluentViewPreviousCompleteAccess from the specified ViewPreviousCompleteUserAccessMetaData.
 	 */
-	public FluentViewPreviousCompleteAccess(ViewPreviousCompleteUserAccessMetaData access) {
+	public FluentViewPreviousCompleteAccess(@Nonnull ViewPreviousCompleteUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentViewPreviousCompleteAccess from a runtime metadata.
 	 */
-	protected FluentViewPreviousCompleteAccess from(String binding, Set<String> uxuis) {
+	protected @Nonnull FluentViewPreviousCompleteAccess from(@Nonnull String binding, @Nonnull Set<String> uxuis) {
 		binding(binding);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -36,7 +38,7 @@ public class FluentViewPreviousCompleteAccess extends FluentViewUserAccess<Fluen
 	/**
 	 * Specifies the binding for this FluentViewPreviousCompleteAccess.
 	 */
-	public FluentViewPreviousCompleteAccess binding(final String binding) {
+	public @Nonnull FluentViewPreviousCompleteAccess binding(final @Nonnull String binding) {
 		access.setBinding(binding);
 		return this;
 	}
@@ -45,7 +47,7 @@ public class FluentViewPreviousCompleteAccess extends FluentViewUserAccess<Fluen
 	 * Returns the underlying view user access metadata from this builder.
 	 */
 	@Override
-	public ViewPreviousCompleteUserAccessMetaData get() {
+	public @Nonnull ViewPreviousCompleteUserAccessMetaData get() {
 		return access;
 	}
 }

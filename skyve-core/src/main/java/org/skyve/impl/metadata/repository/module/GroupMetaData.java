@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlRootElement;
@@ -36,7 +37,7 @@ public class GroupMetaData extends ActionMetaData {
 						@XmlElementRef(type = TreeItemMetaData.class),
 						@XmlElementRef(type = LinkItemMetaData.class),
 						@XmlElementRef(type = GroupMetaData.class)})
-	public List<ActionMetaData> getActions() {
+	public @Nonnull List<ActionMetaData> getActions() {
 		return actions;
 	}
 }

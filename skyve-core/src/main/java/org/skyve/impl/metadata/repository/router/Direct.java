@@ -5,6 +5,7 @@ import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.SerializableMetaData;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlEnum;
@@ -52,43 +53,42 @@ public class Direct implements SerializableMetaData {
 	/**
 	 * Returns the normalized context-relative target path.
 	 *
-	 * @return the trimmed path, or {@code null} before a required value is supplied
+	 * @return the trimmed path
 	 * @since 10.0
 	 */
-	public @Nullable String getPath() {
+	public @Nonnull String getPath() {
 		return path;
 	}
 
 	/**
 	 * Sets the context-relative target path after trimming blank input to {@code null}.
 	 *
-	 * @param path the path to store; may be {@code null} until conversion validates the declaration
+	 * @param path the path to store
 	 * @since 10.0
 	 */
 	@XmlAttribute(required = true)
-	public void setPath(@Nullable String path) {
+	public void setPath(@Nonnull String path) {
 		this.path = UtilImpl.processStringValue(path);
 	}
 
 	/**
 	 * Returns the name of the effective router UX/UI selected by this declaration.
 	 *
-	 * @return the trimmed UX/UI name, or {@code null} before a required value is supplied
+	 * @return the trimmed UX/UI name
 	 * @since 10.0
 	 */
-	public @Nullable String getUxui() {
+	public @Nonnull String getUxui() {
 		return uxui;
 	}
 
 	/**
 	 * Sets the target UX/UI name after trimming blank input to {@code null}.
 	 *
-	 * @param uxui the effective router UX/UI name; may be {@code null} until conversion validates
-	 *             the declaration
+	 * @param uxui the effective router UX/UI name
 	 * @since 10.0
 	 */
 	@XmlAttribute(required = true)
-	public void setUxui(@Nullable String uxui) {
+	public void setUxui(@Nonnull String uxui) {
 		this.uxui = UtilImpl.processStringValue(uxui);
 	}
 

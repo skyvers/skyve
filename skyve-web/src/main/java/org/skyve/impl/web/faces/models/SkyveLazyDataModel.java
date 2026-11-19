@@ -33,6 +33,7 @@ import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.DomainType;
 import org.skyve.metadata.module.Module;
+import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.user.UserAccess;
@@ -52,6 +53,7 @@ import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
@@ -70,6 +72,8 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	private List<FilterParameter> filterParameters;
 	private List<Parameter> parameters;
 	private boolean escape;
+	private List<String> lookupFilterFields;
+	private String lookupSearch;
 	
 	/**
 	 * Creates a lazy data model for query/model-backed list rendering with optional filter parameters.
@@ -85,12 +89,12 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 */
 	@SuppressWarnings("java:S107") // too many params OK
 	public SkyveLazyDataModel(@Nonnull FacesView view,
-								String moduleName, 
-								String documentName, 
-								String queryName,
-								String modelName,
-								List<FilterParameter> filterParameters,
-								List<Parameter> parameters,
+								@Nonnull String moduleName, 
+								@Nullable String documentName, 
+								@Nullable String queryName,
+								@Nullable String modelName,
+								@Nullable List<FilterParameter> filterParameters,
+								@Nullable List<Parameter> parameters,
 								boolean escape) {
 		this.view = view;
 		this.moduleName = moduleName;
@@ -103,13 +107,24 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	}
 	
 	/**
+	 * Configures a lookup substring search, ORed across fields and ANDed with existing filters.
+	 *
+	 * @param fields query column names or bindings to search
+	 * @param search typed text; blank text leaves the model unfiltered
+	 */
+	public void setLookupFilter(@Nullable List<String> fields, @Nullable String search) {
+		lookupFilterFields = fields;
+		lookupSearch = Util.processStringValue(search);
+	}
+
+	/**
 	 * Can't implement this as the rows and the count come back together in the load method.
 	 *
 	 * @param filterBy filter metadata supplied by PrimeFaces
 	 * @return always {@code 0}; row count is set inside {@link #load(int, int, Map, Map)}
 	 */
 	@Override
-	public int count(Map<String, FilterMeta> filterBy) {
+	public int count(@SuppressWarnings("null") @Nonnull Map<String, FilterMeta> filterBy) {
 		return 0;
 	}
 	
@@ -124,10 +139,10 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // complexity OK
-	public List<BeanMapAdapter> load(int first,
-										int pageSize,
-										Map<String, SortMeta> multiSortMeta,
-										Map<String, FilterMeta> filters) {
+	public @Nonnull List<BeanMapAdapter> load(int first,
+												int pageSize,
+												@Nullable Map<String, SortMeta> multiSortMeta,
+												@Nullable Map<String, FilterMeta> filters) {
 		User u = CORE.getUser();
 		Customer c = u.getCustomer();
 		Module m = c.getModule(moduleName);
@@ -178,6 +193,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			model.setBean(currentBean.getBean());
 		}
 		d = model.getDrivingDocument();
+		if (d == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		
 		if (! u.canReadDocument(d)) {
 			LOGGER.info("User {} cannot read document {}.{}", u.getName(), d.getOwningModuleName(), d.getName());
@@ -200,7 +218,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			if (filters != null) {
 				filter(filters, model, c);
 			}
-			
+			applyLookupFilter(model, c, d);
 			page = model.fetch();
 		}
 		catch (Exception e) {
@@ -212,6 +230,9 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 		setRowCount((int) page.getTotalRows());
 		
 		List<Bean> beans = page.getRows();
+		if (beans == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " fetched a page with no rows list");
+		}
 		OWASP.sanitiseAndEscapeListModelRows(beans, model.getColumns(), escape);
 		List<BeanMapAdapter> result = new ArrayList<>(beans.size());
 		for (Bean bean : beans) {
@@ -228,8 +249,11 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return a stable row key composed of biz id, document, and module
 	 */
 	@Override
-	public String getRowKey(BeanMapAdapter bean) {
+	public @Nonnull String getRowKey(@SuppressWarnings("null") @Nonnull BeanMapAdapter bean) {
 		Bean row = bean.getBean();
+		if (row == null) { // load() adapts each fetched row bean
+			throw new IllegalStateException("Cannot make a row key for a row with no bean");
+		}
 		return new StringBuilder(128).append(row.getBizId()).append('#').append(row.getBizDocument()).append('.').append(row.getBizModule()).toString();
 	}
 	
@@ -240,7 +264,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @return a bean adapter created from the row key components
 	 */
 	@Override
-	public BeanMapAdapter getRowData(String rowKey) {
+	public @Nonnull BeanMapAdapter getRowData(@SuppressWarnings("null") @Nonnull String rowKey) {
 		Map<String, Object> properties = new TreeMap<>();
 		int hashIndex = rowKey.lastIndexOf('#');
 		int dotIndex = rowKey.lastIndexOf('.');
@@ -257,7 +281,7 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param multiSortMeta sort metadata entries
 	 * @param model the target list model
 	 */
-	private static void sort(Map<String, SortMeta> multiSortMeta, ListModel<Bean> model) {
+	private static void sort(@Nonnull Map<String, SortMeta> multiSortMeta, @Nonnull ListModel<Bean> model) {
 		int l = multiSortMeta.size();
 		SortParameter[] sortParameters = new SortParameter[l];
 		int i = 0;
@@ -273,6 +297,64 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	}
 	
 	/**
+	 * Adds the configured lookup search to the model, ORing fields and ANDing existing filters.
+	 *
+	 * @param model the target list model
+	 * @param customer the current customer metadata
+	 * @param drivingDocument the model's driving document
+	 * @throws Exception if metadata resolution or variant domain lookup fails
+	 */
+	@SuppressWarnings("java:S3776") // complexity OK
+	private void applyLookupFilter(@Nonnull ListModel<Bean> model,
+								@Nonnull Customer customer,
+								@Nonnull Document drivingDocument) {
+		if ((lookupSearch != null) && (lookupFilterFields != null)) {
+			Filter searchFilter = null;
+			Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
+			for (String field : lookupFilterFields) {
+				String binding = field;
+				boolean expression = false;
+				for (MetaDataQueryColumn column : model.getColumns()) {
+					if (field.equals(column.getName())) {
+						String columnBinding = column.getBinding();
+						expression = (columnBinding == null);
+						if (columnBinding != null) {
+							binding = columnBinding;
+						}
+						break;
+					}
+				}
+				// Expression aliases have no document attribute to resolve.
+				TargetMetaData target = expression ? null : BindUtil.getMetaDataForBinding(customer, drivingModule, drivingDocument, binding);
+				Attribute attribute = (target == null) ? null : target.getAttribute();
+				Filter fieldFilter = model.newFilter();
+				if (fieldFilter == null) {
+					throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+				}
+				if ((target != null) && (attribute != null) && (attribute.getDomainType() == DomainType.variant)) {
+					fieldFilter.addIn(binding, ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(target.getDocument(), attribute, lookupSearch));
+				}
+				else {
+					fieldFilter.addContains(binding, lookupSearch);
+				}
+				if (searchFilter == null) {
+					searchFilter = fieldFilter;
+				}
+				else {
+					searchFilter.addOr(fieldFilter);
+				}
+			}
+			if (searchFilter != null) {
+				Filter modelFilter = model.getFilter();
+				if (modelFilter == null) {
+					throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+				}
+				modelFilter.addAnd(searchFilter);
+			}
+		}
+	}
+
+	/**
 	 * Applies PrimeFaces filter metadata to the list model.
 	 *
 	 * @param filters filter metadata entries
@@ -280,10 +362,13 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 	 * @param customer the current customer metadata
 	 * @throws Exception if metadata resolution or conversion fails
 	 */
-	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112"}) // complex method OK
-	private static void filter(Map<String, FilterMeta> filters, ListModel<Bean> model, Customer customer)
+	@SuppressWarnings({"java:S3776", "java:S6541", "java:S112", "java:S135"}) // complex method OK
+	private static void filter(@Nonnull Map<String, FilterMeta> filters, @Nonnull ListModel<Bean> model, @Nonnull Customer customer)
 	throws Exception {
 		Document drivingDocument = model.getDrivingDocument();
+		if (drivingDocument == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
 		Module drivingModule = customer.getModule(drivingDocument.getOwningModuleName());
 		Filter modelFilter = model.getFilter();
 		for (Map.Entry<String, FilterMeta> filterEntry : filters.entrySet()) {
@@ -347,8 +432,11 @@ public class SkyveLazyDataModel extends LazyDataModel<BeanMapAdapter> {
 			}
 
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("    FILTER {} {} {}", key, contains ? "contains" : "=", value);
-			if (contains) {
-				modelFilter.addContains(key, (String) value);
+			if (modelFilter == null) {
+				throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+			}
+			if (contains && (value instanceof String string)) {
+				modelFilter.addContains(key, string);
 			}
 			else {
 				if (value instanceof Boolean bool) {

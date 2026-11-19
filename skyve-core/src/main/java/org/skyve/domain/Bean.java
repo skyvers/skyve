@@ -8,6 +8,9 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * The root interface for all Skyve domain objects.
  *
@@ -137,7 +140,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the bean's unique identifier, or {@code null} for uninitialised instances
 	 */
-	public String getBizId();
+	public @Nonnull String getBizId();
 
 	/**
 	 * Returns the module name this bean belongs to.
@@ -146,7 +149,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the module name; never {@code null} for properly initialised beans
 	 */
-	public String getBizModule();
+	public @Nonnull String getBizModule();
 
 	/**
 	 * Returns the {@link Module} metadata for this bean in the context of the current customer.
@@ -155,7 +158,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the module metadata; never {@code null}
 	 */
-	public default Module getModuleMetaData() {
+	public default @Nonnull Module getModuleMetaData() {
 		return CORE.getCustomer().getModule(getBizModule());
 	}
 	
@@ -166,7 +169,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the document name; never {@code null} for properly initialised beans
 	 */
-	public String getBizDocument();
+	public @Nonnull String getBizDocument();
 
 	/**
 	 * Returns the {@link Document} metadata for this bean in the context of the current customer.
@@ -176,7 +179,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the document metadata; never {@code null}
 	 */
-	public default Document getDocumentMetaData() {
+	public default @Nonnull Document getDocumentMetaData() {
 		Customer customer = CORE.getCustomer();
 		return customer.getModule(getBizModule()).getDocument(customer, getBizDocument());
 	}
@@ -186,42 +189,42 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the customer name, or {@code null} if not yet set
 	 */
-	public String getBizCustomer();
+	public @Nullable String getBizCustomer();
 
 	/**
 	 * Sets the customer name this bean is scoped to.
 	 *
 	 * @param bizCustomer the customer name
 	 */
-	public void setBizCustomer(String bizCustomer);
+	public void setBizCustomer(@Nonnull String bizCustomer);
 
 	/**
 	 * Returns the data-group identifier for row-level security partitioning.
 	 *
 	 * @return the data-group ID, or {@code null} if this bean is not scoped to a data group
 	 */
-	public String getBizDataGroupId();
+	public @Nullable String getBizDataGroupId();
 
 	/**
 	 * Sets the data-group identifier for row-level security partitioning.
 	 *
 	 * @param bizDataGroupId the data-group ID, or {@code null} to remove data-group scoping
 	 */
-	public void setBizDataGroupId(String bizDataGroupId);
+	public void setBizDataGroupId(@Nullable String bizDataGroupId);
 
 	/**
 	 * Returns the identifier of the user who owns this bean.
 	 *
 	 * @return the user ID, or {@code null} if not yet assigned
 	 */
-	public String getBizUserId();
+	public @Nullable String getBizUserId();
 
 	/**
 	 * Sets the identifier of the user who owns this bean.
 	 *
 	 * @param bizUserId the user ID
 	 */
-	public void setBizUserId(String bizUserId);
+	public void setBizUserId(@Nonnull String bizUserId);
 
 	/**
 	 * Returns the human-readable display key for this bean.
@@ -232,21 +235,26 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 *
 	 * @return the display key; may be {@code null} for newly created instances
 	 */
-	public String getBizKey();
+	public @Nullable String getBizKey();
 	
 	/**
-	 * Evaluates a named condition defined on this bean's document metadata.
+	 * Evaluates a condition against this bean.
 	 *
-	 * <p>Conditions are declared in the document XML as boolean expressions over the
-	 * bean's attributes. The framework evaluates them using BeanShell and caches the
-	 * result in the bean. Condition names starting with {@code "not"} are automatically
-	 * negated (e.g. {@code "notActive"} evaluates the inverse of the {@code "active"}
-	 * condition).
+	 * <p>A condition is one of
+	 * <ul>
+	 * <li>the name of a condition declared on this bean's document metadata,
+	 * <li>an inline condition expression - a Skyve expression such as
+	 * <code>{el:bean.status eq 'rejected'}</code> that yields a boolean, or
+	 * <li>the literal {@code "true"} or {@code "false"}.
+	 * </ul>
+	 * A condition name or inline condition expression prefixed with {@code "not"} is negated
+	 * (e.g. {@code "notActive"} evaluates the inverse of the {@code "active"} condition).
+	 * An inline condition expression that yields {@code null} is false.
 	 *
-	 * @param conditionName the unqualified condition name as declared in document metadata; must not be {@code null}
+	 * @param condition the condition name or inline condition expression; must not be {@code null}
 	 * @return {@code true} if the condition is satisfied, {@code false} otherwise
 	 */
-	public boolean evaluateCondition(String conditionName);
+	public boolean evaluateCondition(@Nonnull String condition);
 
 	/**
 	 * Returns a map of property names to their original (pre-modification) values.
@@ -261,7 +269,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @return a mutable map of property name to original value; never {@code null},
 	 *         but may be empty if nothing has changed
 	 */
-	public Map<String, Serializable> originalValues();
+	public @Nonnull Map<String, Serializable> originalValues();
 	
 	/**
 	 * Returns {@code true} if any property on this bean has been modified.
@@ -344,7 +352,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @param attributeName the simple (non-compound) attribute name to test; must not be {@code null}
 	 * @return {@code true} if the attribute is dynamic
 	 */
-	public boolean isDynamic(String attributeName);
+	public boolean isDynamic(@Nonnull String attributeName);
 
 	/**
 	 * Returns the value of a dynamic (schema-less) attribute.
@@ -353,7 +361,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @return the dynamic attribute value, or {@code null} if the attribute has no value
 	 * @throws IllegalArgumentException if {@code simpleBinding} does not refer to a known dynamic attribute
 	 */
-	public Object getDynamic(String simpleBinding);
+	public @Nullable Object getDynamic(@Nonnull String simpleBinding);
 	
 	/**
 	 * Sets the value of an existing dynamic (schema-less) attribute.
@@ -362,7 +370,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @param value         the new value; may be {@code null}
 	 * @throws IllegalArgumentException if {@code simpleBinding} does not refer to a known dynamic attribute
 	 */
-	public void setDynamic(String simpleBinding, Object value);
+	public void setDynamic(@Nonnull String simpleBinding, @Nullable Object value);
 
 	/**
 	 * Creates a new dynamic attribute with the given value if one does not already exist.
@@ -373,7 +381,7 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @param simpleBinding a non-compound binding expression; must not be {@code null}
 	 * @param value         the value to set; may be {@code null}
 	 */
-	public void putDynamic(String simpleBinding, Object value);
+	public void putDynamic(@Nonnull String simpleBinding, @Nullable Object value);
 
 	/**
 	 * Merges all entries from {@code dynamic} into this bean's dynamic attribute map,
@@ -386,5 +394,5 @@ public interface Bean extends Serializable, Comparable<Bean> {
 	 * @param dynamic the map of attribute names to values to merge, or {@code null} to
 	 *                clear all dynamic attributes
 	 */
-	public void putAllDynamic(Map<String, Object> dynamic);
+	public void putAllDynamic(@Nullable Map<String, Object> dynamic);
 }

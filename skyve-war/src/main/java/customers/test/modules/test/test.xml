@@ -29,13 +29,36 @@
 		<document ref="MappedExtensionSingleStrategy" />
 		<document ref="MappedSubclassedJoinedStrategy" />
 		<document ref="MappedSubclassedSingleStrategy" />
+		<document ref="OverrideAdds" />
+		<document ref="OverrideEnumExtended" />
+		<document ref="OverrideEnumJoinedBase" />
+		<document ref="OverrideEnumJoinedSub" />
+		<document ref="OverrideEnumReferrer" />
+		<document ref="OverrideExtended" />
+		<document ref="OverrideJoinedBase" />
+		<document ref="OverrideJoinedSub" />
+		<document ref="OverrideLength" />
+		<document ref="OverrideLinkTarget" />
+		<document ref="OverrideMappedBase" />
+		<document ref="OverrideMappedSub" />
+		<document ref="OverrideNarrowed" />
+		<document ref="OverrideNarrowedExtended" />
+		<document ref="OverrideNarrowedLinked" />
+		<document ref="OverrideProxied" />
+		<document ref="OverrideProxy" />
+		<document ref="OverrideReferrer" />
+		<document ref="OverrideSingleBase" />
+		<document ref="OverrideSingleSub" />
 		<document ref="Reachability" />
 		<document ref="UniqueConstraintOptimisation" />
 		<document ref="UniqueConstraintNonNullable" />
 		<document ref="UniqueConstraintNullable" />
-		
+		<!-- OverrideRemoved is left out -->
+
 		<!-- A new document -->
 		<document ref="Test" />
+		<!-- A new persistent document, referenced from the OverrideAdds override -->
+		<document ref="OverrideCustomerOnly" />
 	</documents>
 	<roles>
 		<role name="TestRole">

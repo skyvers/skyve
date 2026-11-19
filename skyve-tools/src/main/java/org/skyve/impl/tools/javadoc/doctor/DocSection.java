@@ -3,6 +3,9 @@ package org.skyve.impl.tools.javadoc.doctor;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Represents a titled documentation section with optional HTML content.
  */
@@ -35,7 +38,7 @@ public class DocSection {
 	 *
 	 * @return section heading type
 	 */
-	public SectionType getSectionType() {
+	public @Nullable SectionType getSectionType() {
 		return sectionType;
 	}
 
@@ -44,7 +47,7 @@ public class DocSection {
 	 *
 	 * @param sectionType heading type
 	 */
-	public void setSectionType(SectionType sectionType) {
+	public void setSectionType(@Nullable SectionType sectionType) {
 		this.sectionType = sectionType;
 	}
 
@@ -55,7 +58,7 @@ public class DocSection {
 	 *
 	 * @param id section identifier
 	 */
-	public DocSection(String id) {
+	public DocSection(@Nullable String id) {
 		super();
 		this.id = id;
 		this.sectionType = SectionType.Section;
@@ -66,7 +69,7 @@ public class DocSection {
 	 *
 	 * @return section id
 	 */
-	public String getId() {
+	public @Nullable String getId() {
 		return id;
 	}
 
@@ -75,7 +78,7 @@ public class DocSection {
 	 *
 	 * @param id section id
 	 */
-	public void setId(String id) {
+	public void setId(@Nullable String id) {
 		this.id = id;
 	}
 
@@ -84,7 +87,7 @@ public class DocSection {
 	 *
 	 * @return section title
 	 */
-	public String getSectionTitle() {
+	public @Nullable String getSectionTitle() {
 		return sectionTitle;
 	}
 
@@ -93,7 +96,7 @@ public class DocSection {
 	 *
 	 * @param sectionTitle section title
 	 */
-	public void setSectionTitle(String sectionTitle) {
+	public void setSectionTitle(@Nullable String sectionTitle) {
 		this.sectionTitle = sectionTitle;
 	}
 
@@ -102,7 +105,7 @@ public class DocSection {
 	 *
 	 * @return mutable list of HTML fragments
 	 */
-	public List<String> getHtmlContent() {
+	public @Nonnull List<String> getHtmlContent() {
 		return htmlContent;
 	}
 	
@@ -111,7 +114,7 @@ public class DocSection {
 	 *
 	 * @return HTML string representation
 	 */
-	public String toHTML(){
+	public @Nonnull String toHTML(){
 		
 		StringBuilder html = new StringBuilder();
 		String cssClass;

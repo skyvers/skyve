@@ -6,13 +6,14 @@ import org.primefaces.component.barchart.BarChartRenderer;
 import org.primefaces.model.charts.ChartModel;
 import org.skyve.impl.sail.mock.MockFacesContext;
 
+import jakarta.annotation.Nonnull;
 import jakarta.faces.context.FacesContext;
 
 /**
  * Renders Skyve metadata into JSF or PrimeFaces output for this concern.
  */
 public class SkyveBarChartRenderer extends BarChartRenderer {
-	public String encodeConfig(ChartModel model) throws IOException {
+	public @Nonnull String encodeConfig(@Nonnull ChartModel model) throws IOException {
 		FacesContext fc = new MockFacesContext();
 		try (ChartResponseWriter writer = new ChartResponseWriter()) {
 			fc.setResponseWriter(writer);

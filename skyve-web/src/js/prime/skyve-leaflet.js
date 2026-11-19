@@ -151,9 +151,13 @@ SKYVE.BizMap = function() {
 											',"zoom":' + display.webmap.getZoom() + '}');
 			}
 			
-			var result = layer.zoomData.infoMarkup;
-	    	result += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
-			result += '?a=e&m=' + layer.zoomData.mod + '&d=' + layer.zoomData.doc + '&i=' + layer.zoomData.bizId + "'\"/>";
+			var zoomData = layer.zoomData;
+			var result = zoomData.infoMarkup;
+			// Only offer zoom when the map item names a module, document and bizId to zoom to
+			if (zoomData.mod && zoomData.doc && zoomData.bizId) {
+				result += '<br/><br/><input type="button" value="Zoom" onclick="window.location=\'' + SKYVE.Util.CONTEXT_URL;
+				result += '?a=e&m=' + zoomData.mod + '&d=' + zoomData.doc + '&i=' + zoomData.bizId + "'\"/>";
+			}
 			return result;
 		},
 		

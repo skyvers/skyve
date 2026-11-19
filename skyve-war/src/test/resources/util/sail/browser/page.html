@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SAIL browser control</title>
+</head>
+<body>
+<a id="away" href="/away">away</a>
+<script>
+// Resolves once the service worker controls this page (it claims its clients as it activates): the event the test
+// waits for before it starts
+window.serviceWorkerReady = new Promise((resolve) => {
+	if (navigator.serviceWorker.controller) {
+		resolve(true);
+	}
+	else {
+		navigator.serviceWorker.addEventListener('controllerchange', () => resolve(true), { once: true });
+	}
+});
+navigator.serviceWorker.register('/sw.js');
+// The page lifecycle events, kept where another tab can read them, as a frozen page answers nothing
+document.addEventListener('freeze', () => localStorage.setItem('lifecycle' + location.pathname, 'frozen'));
+document.addEventListener('resume', () => localStorage.setItem('lifecycle' + location.pathname, 'resumed'));
+</script>
+</body>
+</html>

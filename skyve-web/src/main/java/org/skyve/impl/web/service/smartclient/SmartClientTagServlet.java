@@ -38,6 +38,8 @@ import org.skyve.util.Util;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -66,7 +68,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -76,7 +79,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		processRequest(request, response);
 	}
@@ -90,8 +94,8 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @throws IOException when response writing fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void processRequest(HttpServletRequest request, 
-										HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, 
+										@Nonnull HttpServletResponse response)
 	throws IOException {
 		StringBuilder sb = new StringBuilder(256);
 
@@ -135,10 +139,16 @@ public class SmartClientTagServlet extends HttpServlet {
 					TagManager tm = EXT.getTagManager();
 
 					if ("L".equals(action)) {
+						if (menuButtonId == null) {
+							throw new ServletException("No menu button ID in the request.");
+						}
 						list(tagId, menuButtonId, sb);
 					}
 					else if ("T".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
+							throw new ServletException("No tag, data source or criteria in the request.");
+						}
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
@@ -158,6 +168,9 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("U".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if ((tagId == null) || (dataSourceName == null) || (criteria == null)) {
+							throw new ServletException("No tag, data source or criteria in the request.");
+						}
 						
 						// Note - if there is no form in the view then there is no web context
 						String contextKey = OWASP.sanitise(Sanitisation.text, Util.processStringValue(request.getParameter(AbstractWebContext.CONTEXT_NAME)));
@@ -177,11 +190,17 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("C".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (tagId == null) {
+							throw new ServletException("No tag in the request.");
+						}
 						
 						tm.clear(tagId);
 					}
 					else if ("N".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (tagName == null) {
+							throw new ServletException("No tag name in the request.");
+						}
 						
 						tagId = tm.create(tagName, true);
 						sb.append("{bizId:'");
@@ -190,6 +209,9 @@ public class SmartClientTagServlet extends HttpServlet {
 					}
 					else if ("D".equals(action)) {
 						SmartClientListServlet.checkCsrfToken(session, request, response, currentCsrfToken);
+						if (tagId == null) {
+							throw new ServletException("No tag in the request.");
+						}
 						
 						tm.delete(tagId);
 					}
@@ -232,7 +254,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @param reference support reference token
 	 * @param pw response writer
 	 */
-	static void appendUnexpectedWarning(String reference, PrintWriter pw) {
+	static void appendUnexpectedWarning(@Nonnull String reference, @Nonnull PrintWriter pw) {
 		pw.append("The tag operation was unsuccessful. ");
 		pw.append(WebErrorUtil.escapeJsStringWithHtmlFormatting(WebErrorUtil.genericMessage(reference)));
 	}
@@ -245,7 +267,7 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @param sb response builder receiving menu JSON
 	 * @throws Exception when tag listing fails
 	 */
-	private static void list(String tagId, String menuButtonId, StringBuilder sb)
+	private static void list(@Nullable String tagId, @Nonnull String menuButtonId, @Nonnull StringBuilder sb)
 	throws Exception {
 	    sb.append("[{title:'New Tag',icon:'icons/tag_add.png',click:'");
 	    sb.append(menuButtonId).append(".newTag()'},");
@@ -309,13 +331,13 @@ public class SmartClientTagServlet extends HttpServlet {
 	 * @return auto-closing iterable of beans matching the criteria
 	 * @throws Exception when model/query resolution or criteria parsing fails
 	 */
-	private static AutoClosingIterable<Bean> iterate(String tagId,
-														String dataSourceName,
-														String criteriaJSON,
-														Bean bean,
-														User user,
-														Customer customer,
-														UxUi uxui)
+	private static @Nonnull AutoClosingIterable<Bean> iterate(@Nullable String tagId,
+																@Nonnull String dataSourceName,
+																@Nonnull String criteriaJSON,
+																@Nullable Bean bean,
+																@Nonnull User user,
+																@Nonnull Customer customer,
+																@Nonnull UxUi uxui)
 	throws Exception {
 		// Determine
 		int _Index = dataSourceName.indexOf('_');
@@ -335,6 +357,9 @@ public class SmartClientTagServlet extends HttpServlet {
 			model = document.getListModel(customer, modelName, true);
 			model.setBean(bean);
 			drivingDocument = model.getDrivingDocument();
+			if (drivingDocument == null) {
+				throw new IllegalStateException("List model " + modelName + " in document " + documentName + " has no driving document");
+			}
 		}
 		// query type of request
 		else {

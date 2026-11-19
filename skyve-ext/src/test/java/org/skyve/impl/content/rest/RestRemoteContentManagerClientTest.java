@@ -62,6 +62,7 @@ class RestRemoteContentManagerClientTest {
 		}
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void unsupportedRepositoryOperationsThrow() throws Exception {
 		try (RestRemoteContentManagerClient client = new RestRemoteContentManagerClient()) {

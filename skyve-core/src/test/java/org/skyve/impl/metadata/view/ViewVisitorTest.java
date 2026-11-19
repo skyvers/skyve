@@ -1,9 +1,11 @@
 package org.skyve.impl.metadata.view;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
@@ -40,6 +42,7 @@ import org.skyve.impl.metadata.view.widget.bound.input.CheckMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.Comparison;
+import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.GeometryMap;
@@ -60,6 +63,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 
 /**
@@ -78,11 +82,11 @@ class ViewVisitorTest {
 	}
 
 	private static CustomerImpl mockCustomer() {
-		return Mockito.mock(CustomerImpl.class);
+		return mock(CustomerImpl.class);
 	}
 
 	private static ModuleImpl mockModule() {
-		return Mockito.mock(ModuleImpl.class);
+		return mock(ModuleImpl.class);
 	}
 
 	/** DocumentImpl is final — pass null (none of these tests dereference the document parameter). */
@@ -479,5 +483,48 @@ class ViewVisitorTest {
 		}
 		TestNoOpViewVisitor visitor = new TestNoOpViewVisitor(mockCustomer(), mockModule(), nullDocument(), view);
 		assertDoesNotThrow(visitor::visit);
+	}
+
+	// ---- Metadata that the XSD requires but code can omit ----
+
+	@Test
+	void visitThrowsWhenAFormItemHasNoWidget() {
+		ViewImpl view = viewWithFormItem(null);
+		TestNoOpViewVisitor visitor = new TestNoOpViewVisitor(mockCustomer(), mockModule(), nullDocument(), view);
+		MetaDataException e = assertThrows(MetaDataException.class, visitor::visit);
+		assertEquals("A form item in view edit has no widget.", e.getMessage());
+	}
+
+	@Test
+	void visitThrowsWhenADefaultWidgetHasNoBinding() {
+		ViewImpl view = viewWithFormItem(new DefaultWidget());
+		TestNoOpViewVisitor visitor = new TestNoOpViewVisitor(mockCustomer(), mockModule(), nullDocument(), view);
+		MetaDataException e = assertThrows(MetaDataException.class, visitor::visit);
+		assertEquals("A default widget in view edit has no binding.", e.getMessage());
+	}
+
+	@Test
+	void visitThrowsWhenAnUnboundDataGridHasAnUnboundColumnWithoutAnInputWidget() {
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		DataGrid grid = new DataGrid(); // no binding
+		grid.getColumns().add(new DataGridBoundColumn()); // no binding and no input widget
+		view.getContained().add(grid);
+		TestNoOpViewVisitor visitor = new TestNoOpViewVisitor(mockCustomer(), mockModule(), nullDocument(), view);
+		MetaDataException e = assertThrows(MetaDataException.class, visitor::visit);
+		assertEquals("A data widget in view edit has no binding.", e.getMessage());
+	}
+
+	private static ViewImpl viewWithFormItem(org.skyve.metadata.MetaData widget) {
+		ViewImpl view = new ViewImpl();
+		view.setName("edit");
+		Form form = new Form();
+		FormRow row = new FormRow();
+		FormItem item = new FormItem();
+		item.setWidget(widget);
+		row.getItems().add(item);
+		form.getRows().add(row);
+		view.getContained().add(form);
+		return view;
 	}
 }

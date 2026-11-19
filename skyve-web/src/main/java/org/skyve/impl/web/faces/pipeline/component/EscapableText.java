@@ -1,5 +1,8 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Carries metadata-owned text with its resolved HTML escape decision through the
  * PrimeFaces component-building layer.
@@ -8,7 +11,7 @@ package org.skyve.impl.web.faces.pipeline.component;
  * @param escape {@code true} to escape at the output boundary; {@code false}
  *        to allow trusted markup
  */
-public record EscapableText(String value, boolean escape) {
+public record EscapableText(@Nullable String value, boolean escape) {
 	/**
 	 * Creates a text value paired with its metadata escape flag.
 	 *
@@ -17,7 +20,7 @@ public record EscapableText(String value, boolean escape) {
 	 *        to allow trusted markup
 	 * @return an immutable text/escape pair; never {@code null}
 	 */
-	public static EscapableText of(String value, boolean escape) {
+	public static @Nonnull EscapableText of(@Nullable String value, boolean escape) {
 		return new EscapableText(value, escape);
 	}
 
@@ -26,7 +29,7 @@ public record EscapableText(String value, boolean escape) {
 	 *
 	 * @return metadata text, or {@code null} when no text is configured
 	 */
-	public String getValue() {
+	public @Nullable String getValue() {
 		return value;
 	}
 

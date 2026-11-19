@@ -9,6 +9,8 @@ import org.skyve.domain.types.Enumeration;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlEnum;
 
 /**
@@ -61,7 +63,7 @@ public interface DataMaintenance extends PersistentBean {
 		/** @hidden */
 		private static List<DomainValue> domainValues = Stream.of(values()).map(DataSensitivity::toDomainValue).collect(Collectors.toUnmodifiableList());
 
-		private DataSensitivity(String code, String description) {
+		private DataSensitivity(@Nonnull String code, @Nonnull String description) {
 			this.code = code;
 			this.description = description;
 			this.domainValue = new DomainValue(code, description);
@@ -73,7 +75,7 @@ public interface DataMaintenance extends PersistentBean {
 		 * @return the persisted sensitivity code
 		 */
 		@Override
-		public String toCode() {
+		public @Nonnull String toCode() {
 			return code;
 		}
 
@@ -83,8 +85,8 @@ public interface DataMaintenance extends PersistentBean {
 		 * @return the localised description
 		 */
 		@Override
-		public String toLocalisedDescription() {
-			return Util.i18n(description);
+		public @Nonnull String toLocalisedDescription() {
+			return Util.nullSafeI18n(description);
 		}
 
 		/**
@@ -93,7 +95,7 @@ public interface DataMaintenance extends PersistentBean {
 		 * @return the corresponding domain value
 		 */
 		@Override
-		public DomainValue toDomainValue() {
+		public @Nonnull DomainValue toDomainValue() {
 			return domainValue;
 		}
 
@@ -103,7 +105,7 @@ public interface DataMaintenance extends PersistentBean {
 		 * @param code the persisted code to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static DataSensitivity fromCode(String code) {
+		public static @Nullable DataSensitivity fromCode(@Nullable String code) {
 			DataSensitivity result = null;
 
 			for (DataSensitivity value : values()) {
@@ -122,7 +124,7 @@ public interface DataMaintenance extends PersistentBean {
 		 * @param description the localised description to match
 		 * @return the matching enum value, or {@code null} when no value matches
 		 */
-		public static DataSensitivity fromLocalisedDescription(String description) {
+		public static @Nullable DataSensitivity fromLocalisedDescription(@Nullable String description) {
 			DataSensitivity result = null;
 
 			for (DataSensitivity value : values()) {
@@ -140,7 +142,7 @@ public interface DataMaintenance extends PersistentBean {
 		 *
 		 * @return immutable domain values for this enum
 		 */
-		public static List<DomainValue> toDomainValues() {
+		public static @Nonnull List<DomainValue> toDomainValues() {
 			return domainValues;
 		}
 	}
@@ -150,19 +152,19 @@ public interface DataMaintenance extends PersistentBean {
 	 *
 	 * @return {@code true} when audit logs are included
 	 */
-	Boolean getIncludeAuditLog();
+	@Nullable Boolean getIncludeAuditLog();
 
 	/**
 	 * Returns whether binary/content payloads should be included.
 	 *
 	 * @return {@code true} when content should be included
 	 */
-	Boolean getIncludeContent();
+	@Nullable Boolean getIncludeContent();
 
 	/**
 	 * Returns the sensitivity threshold used for ad-hoc backup redaction.
 	 *
 	 * @return the configured sensitivity threshold
 	 */
-	DataSensitivity getDataSensitivity();
+	@Nullable DataSensitivity getDataSensitivity();
 }

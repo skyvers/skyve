@@ -15,6 +15,8 @@ import org.skyve.metadata.repository.ProvidedRepository;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Starts the content management system asynchronously, creates the configured bootstrap user, and invokes customer
  * data-tier-ready observers in the same super user persistence context.
@@ -28,7 +30,7 @@ public class DataTierStartupJob implements Job {
 
 	@Override
 	@SuppressWarnings("java:S1141") // nested try/catch OK here - its simple
-	public void execute(JobExecutionContext context)
+	public void execute(@Nullable JobExecutionContext context)
 	throws JobExecutionException {
 		LOGGER.info("Starting the content manager");
 		try (ContentManager cm = EXT.newContentManager()) {

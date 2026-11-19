@@ -53,6 +53,7 @@ class RuntimeCompilerTest {
 	void compileAndLoadClassFromFileSystem() throws Exception {
 		JavaFileObject file = RuntimeCompiler.javaSource("SimpleCalc", SIMPLE_JAVA);
 		try {
+			@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 			boolean success = RuntimeCompiler.compile(file, UtilImpl.TEMP_DIRECTORY);
 			assertTrue(success);
 			Class<?> type = RuntimeCompiler.loadClass(UtilImpl.TEMP_DIRECTORY, "SimpleCalc");
@@ -82,6 +83,7 @@ class RuntimeCompilerTest {
 	@Test
 	void compilingInvalidJavaThrowsRuntimeException() {
 		JavaFileObject badFile = RuntimeCompiler.javaSource("BadClass", "public class BadClass { INVALID CODE }");
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		RuntimeException e = assertThrows(RuntimeException.class, () -> RuntimeCompiler.compile(badFile, UtilImpl.TEMP_DIRECTORY));
 		assertTrue(e.getCause() instanceof DomainException);
 	}

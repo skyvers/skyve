@@ -530,7 +530,7 @@ public class MenuRenderer {
         MetaDataQueryDefinition query = null;
 		if (queryName != null) {
             query = module.getMetaDataQuery(queryName);
-            if ((query == null) || (query.getName() == null)) {
+            if (query == null) {
             	throw new MetaDataException("The target query " + queryName + " for menu action " +
                 								item.getName() + " is invalid in module " + module.getName());
             }

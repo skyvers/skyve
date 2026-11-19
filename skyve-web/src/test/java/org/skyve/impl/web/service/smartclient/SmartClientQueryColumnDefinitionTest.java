@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +53,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(false);
 		when(column.isEditable()).thenReturn(false);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -91,6 +93,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.getEmptyThumbnailRelativeFile()).thenReturn("images/empty.png");
 		when(column.getDisplay()).thenReturn(DisplayType.thumbnail);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -123,6 +126,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.getEmptyThumbnailRelativeFile()).thenReturn(null);
 		when(column.getDisplay()).thenReturn(DisplayType.link);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -151,6 +155,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.getEmptyThumbnailRelativeFile()).thenReturn(null);
 		when(column.getDisplay()).thenReturn(DisplayType.thumbnail);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -179,6 +184,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(true);
 		when(column.isEditable()).thenReturn(true);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -285,6 +291,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(true);
 		when(column.isEditable()).thenReturn(true);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -317,6 +324,7 @@ class SmartClientQueryColumnDefinitionTest {
 		when(column.isSortable()).thenReturn(true);
 		when(column.isEditable()).thenReturn(true);
 
+		@SuppressWarnings("null") // passes null on purpose
 		SmartClientQueryColumnDefinition definition = new SmartClientQueryColumnDefinition(null,
 				null,
 				null,
@@ -349,7 +357,7 @@ class SmartClientQueryColumnDefinitionTest {
 
 	private static SmartClientQueryColumnDefinition definitionFor(Attribute attribute) throws Exception {
 		User user = mock(User.class);
-		CustomerImpl customer = org.mockito.Mockito.spy(new CustomerImpl());
+		CustomerImpl customer = spy(new CustomerImpl());
 		Module module = mock(Module.class);
 		DocumentImpl document = new DocumentImpl();
 		document.setName("Contact");

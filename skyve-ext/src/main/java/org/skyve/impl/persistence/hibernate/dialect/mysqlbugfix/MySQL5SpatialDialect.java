@@ -19,6 +19,8 @@ import org.hibernate.spatial.SpatialFunction;
 import org.hibernate.spatial.dialect.mysql.MySQLGeometryTypeDescriptor;
 import org.hibernate.spatial.dialect.mysql.MySQLSpatialDialect;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides the copied MySQL 5 spatial dialect variant used by Skyve's InnoDB wrapper dialects.
  */
@@ -45,7 +47,8 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Contributes MySQL spatial Hibernate types via the copied delegate dialect.
 	 */
 	@Override
-	public void contributeTypes(TypeContributions typeContributions, ServiceRegistry serviceRegistry) {
+	public void contributeTypes(@SuppressWarnings("null") @Nonnull TypeContributions typeContributions,
+								@SuppressWarnings("null") @Nonnull ServiceRegistry serviceRegistry) {
 		dialectDelegate.contributeTypes( typeContributions, serviceRegistry );
 	}
 
@@ -65,7 +68,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Returns the SQL predicate for the requested spatial relation.
 	 */
 	@Override
-	public String getSpatialRelateSQL(String columnName, int spatialRelation) {
+	public @Nonnull String getSpatialRelateSQL(@SuppressWarnings("null") @Nonnull String columnName, int spatialRelation) {
 		return dialectDelegate.getSpatialRelateSQL( columnName, spatialRelation );
 	}
 
@@ -73,7 +76,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Returns the spatial filter expression for the supplied geometry column.
 	 */
 	@Override
-	public String getSpatialFilterExpression(String columnName) {
+	public @Nonnull String getSpatialFilterExpression(@SuppressWarnings("null") @Nonnull String columnName) {
 		return dialectDelegate.getSpatialFilterExpression( columnName );
 	}
 
@@ -81,7 +84,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Returns SQL for the requested spatial aggregate operation.
 	 */
 	@Override
-	public String getSpatialAggregateSQL(String columnName, int aggregation) {
+	public @Nonnull String getSpatialAggregateSQL(@SuppressWarnings("null") @Nonnull String columnName, int aggregation) {
 		return dialectDelegate.getSpatialAggregateSQL( columnName, aggregation );
 	}
 
@@ -89,7 +92,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Returns SQL for distance-within comparisons against a geometry parameter.
 	 */
 	@Override
-	public String getDWithinSQL(String columnName) {
+	public @Nonnull String getDWithinSQL(@SuppressWarnings("null") @Nonnull String columnName) {
 		return dialectDelegate.getDWithinSQL( columnName );
 	}
 
@@ -97,7 +100,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Returns SQL that checks the SRID of the geometry column against a bind value.
 	 */
 	@Override
-	public String getHavingSridSQL(String columnName) {
+	public @Nonnull String getHavingSridSQL(@SuppressWarnings("null") @Nonnull String columnName) {
 		return dialectDelegate.getHavingSridSQL( columnName );
 	}
 
@@ -105,7 +108,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Returns SQL that tests whether the geometry column is empty or non-empty.
 	 */
 	@Override
-	public String getIsEmptySQL(String columnName, boolean isEmpty) {
+	public @Nonnull String getIsEmptySQL(@SuppressWarnings("null") @Nonnull String columnName, boolean isEmpty) {
 		return dialectDelegate.getIsEmptySQL( columnName, isEmpty );
 	}
 
@@ -121,7 +124,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * Indicates whether the given spatial function is supported by this dialect.
 	 */
 	@Override
-	public boolean supports(SpatialFunction function) {
+	public boolean supports(@SuppressWarnings("null") @Nonnull SpatialFunction function) {
 		return dialectDelegate.supports( function );
 	}
 
@@ -131,7 +134,7 @@ public class MySQL5SpatialDialect extends MySQL5Dialect implements SpatialDialec
 	 * @return {@link InnoDBStorageEngine#INSTANCE}
 	 */
 	@Override
-	protected MySQLStorageEngine getDefaultMySQLStorageEngine() {
+	protected @Nonnull MySQLStorageEngine getDefaultMySQLStorageEngine() {
 		return InnoDBStorageEngine.INSTANCE;
 	}
 }

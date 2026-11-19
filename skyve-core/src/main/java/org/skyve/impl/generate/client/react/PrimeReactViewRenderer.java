@@ -8,6 +8,8 @@ import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * PrimeReact-oriented view renderer specialisation.
  */
@@ -16,12 +18,12 @@ public class PrimeReactViewRenderer extends ReactViewRenderer {
 	static final String PRIME_REACT_VIEW_FILE = "../../PrimeReactView.js";
 	static final String STARTING_INDENT = "\t\t\t";
 	
-	protected PrimeReactViewRenderer(User user,
-										Module module,
-										Document document,
-										View view,
-										String uxui,
-										Map<String, String> imports,
+	protected PrimeReactViewRenderer(@Nonnull User user,
+										@Nonnull Module module,
+										@Nonnull Document document,
+										@Nonnull View view,
+										@Nonnull String uxui,
+										@Nonnull Map<String, String> imports,
 										boolean extraIndent) {
 		super(user, module, document, view, uxui, imports);
 		final String startingIndent = (extraIndent ? STARTING_INDENT + "\t" : STARTING_INDENT);

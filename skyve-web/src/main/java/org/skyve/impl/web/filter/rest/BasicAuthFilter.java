@@ -22,6 +22,8 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -44,7 +46,9 @@ public class BasicAuthFilter extends AbstractRestFilter {
 	private static final String INVALID_CREDENTIALS = "Invalid username/password";
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		if (super.doUnsecuredFilter(request, response, chain)) {
 			return;
@@ -79,18 +83,18 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		processAuthenticatedRequest(httpRequest, httpResponse, chain, username, password);
 	}
 
-	private void processAuthenticatedRequest(HttpServletRequest httpRequest,
-										HttpServletResponse httpResponse,
-										FilterChain chain,
-										String username,
-										String password) {
+	private void processAuthenticatedRequest(@Nonnull HttpServletRequest httpRequest,
+										@Nonnull HttpServletResponse httpResponse,
+										@Nonnull FilterChain chain,
+										@Nonnull String username,
+										@Nonnull String password) {
 		AbstractPersistence persistence = null;
 		try {
 			persistence = AbstractPersistence.get();
 			persistence.evictAllCached();
 			persistence.begin();
 
-			UserImpl user = ProvidedRepositoryFactory.get().retrieveUser(username);
+			UserImpl user = ProvidedRepositoryFactory.getNullSafe().retrieveUser(username);
 			if (user == null) {
 				error(persistence, httpRequest, httpResponse, HttpServletResponse.SC_FORBIDDEN, realm, AUTH_FAILURE_MESSAGE);
 				return;
@@ -111,10 +115,10 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		}
 	}
 
-	private void handleAuthFailure(AbstractPersistence persistence,
-								HttpServletRequest httpRequest,
-								HttpServletResponse httpResponse,
-								Throwable throwable) {
+	private void handleAuthFailure(@Nullable AbstractPersistence persistence,
+								@Nonnull HttpServletRequest httpRequest,
+								@Nonnull HttpServletResponse httpResponse,
+								@Nonnull Throwable throwable) {
 		if (throwable instanceof Error error) {
 			throw error;
 		}
@@ -132,8 +136,8 @@ public class BasicAuthFilter extends AbstractRestFilter {
 		error(persistence, httpRequest, httpResponse, WebErrorUtil.genericMessage(reference));
 	}
 	
-	private static void validateUserCredentials(Persistence p, String username, String password) {
-		ProvidedRepository r = ProvidedRepositoryFactory.get();
+	private static void validateUserCredentials(@Nonnull Persistence p, @Nonnull String username, @Nonnull String password) {
+		ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 		Module admin = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
 		String admSecurityUser = admin.getDocument(null, AppConstants.USER_DOCUMENT_NAME).getPersistent().getPersistentIdentifier();
 		StringBuilder sql = new StringBuilder(128);

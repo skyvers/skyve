@@ -2,12 +2,14 @@ package org.skyve.impl.sail.execution;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.UserAgentType;
 
@@ -30,6 +32,7 @@ class AutomationContextTest {
 		assertNull(ctx.getViewType());
 		assertNull(ctx.getUxui());
 		assertNull(ctx.getUserAgentType());
+		assertNull(ctx.getList());
 	}
 
 	@Test
@@ -81,6 +84,8 @@ class AutomationContextTest {
 		source.setViewType(ViewType.list);
 		source.setUxui("desktop");
 		source.setUserAgentType(UserAgentType.desktop);
+		PushListContext list = new PushListContext();
+		source.setList(list);
 
 		AutomationContext<GenerateListContext, GenerateEditContext> copy = new AutomationContext<>(source) {
 			@Override public void generate(GenerateListContext lc) { /* no-op */ }
@@ -92,6 +97,7 @@ class AutomationContextTest {
 		assertThat(copy.getViewType(), is(ViewType.list));
 		assertThat(copy.getUxui(), is("desktop"));
 		assertThat(copy.getUserAgentType(), is(UserAgentType.desktop));
+		assertThat(copy.getList(), is(sameInstance(list)));
 	}
 
 	@Test
@@ -109,6 +115,7 @@ class AutomationContextTest {
 		assertThat(copy.getViewType(), is(nullValue()));
 		assertThat(copy.getUxui(), is(nullValue()));
 		assertThat(copy.getUserAgentType(), is(nullValue()));
+		assertThat(copy.getList(), is(nullValue()));
 	}
 
 	@Test

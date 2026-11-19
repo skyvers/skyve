@@ -19,6 +19,8 @@ import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.query.QueryExecuterFactory;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Compiles one or more JasperReports templates from the Skyve module tree.
  *
@@ -69,7 +71,7 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 	 * @return the matching report templates
 	 * @throws FileNotFoundException if the Skyve modules directory cannot be found
 	 */
-	List<File> getReports(String reportName) throws FileNotFoundException {
+	@Nonnull List<File> getReports(@Nonnull String reportName) throws FileNotFoundException {
 		final Path modulesDirectory = getModulesDirectory();
 		LOGGER.info("Searching for reports in {}.", modulesDirectory);
 		final String extension = "." + JRXML_EXTENSION;
@@ -82,7 +84,7 @@ public class CompileJasperReportMojo extends AbstractSkyveMojo {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	void compileReport(File report, String compiledReportFilename) throws JRException {
+	void compileReport(@Nonnull File report, @Nonnull String compiledReportFilename) throws JRException {
 		JasperCompileManager.compileReportToFile(report.getAbsolutePath(), compiledReportFilename);
 	}
 }

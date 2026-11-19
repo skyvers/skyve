@@ -2,6 +2,8 @@ package org.skyve.domain.messages;
 
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Thrown when a page or resource is requested by a user agent (browser, mobile device,
  * or API client) that the current user does not have access to according to the Skyve
@@ -22,7 +24,7 @@ import org.skyve.impl.util.UtilImpl;
 public class AccessException extends SecurityException {
 	private static final long serialVersionUID = 6386350703055578L;
 
-	public AccessException(String resource, String userName) {
+	public AccessException(@Nullable String resource, @Nullable String userName) {
 		super(resource, userName);
 	}
 

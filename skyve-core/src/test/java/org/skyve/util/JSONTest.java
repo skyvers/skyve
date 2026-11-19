@@ -2,12 +2,13 @@ package org.skyve.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.metadata.customer.Customer;
 
 /**
@@ -64,11 +65,26 @@ class JSONTest {
 		assertEquals(expected, untypedResult);
 	}
 
+	@Test
+	void unmarshallWithoutUserReconstructsJavaValuesAndNull() throws Exception {
+		ExampleRecord expected = new ExampleRecord("example", 3);
+
+		assertEquals(expected, JSON.unmarshall(null, JSON.marshall(expected)));
+		assertNull(JSON.unmarshall(null, "null"));
+	}
+
+	@Test
+	void marshallWithNullPropertyNamesWritesCompleteValue() {
+		String json = JSON.marshall(null, new ExampleRecord("example", 3), null);
+
+		assertEquals("{\"class\":\"org.skyve.util.JSONTest$ExampleRecord\",\"name\":\"example\",\"count\":3}", json);
+	}
+
 	// ---- marshall(Customer, Object) -- exercises the 2-arg Customer overload ----
 
 	@Test
 	void marshallWithNullCustomerAndObjectReturnsJson() {
-		String result = JSON.marshall(Mockito.mock(Customer.class), "hello");
+		String result = JSON.marshall(mock(Customer.class), "hello");
 		assertNotNull(result);
 	}
 
@@ -77,7 +93,7 @@ class JSONTest {
 	@Test
 	void marshallWithNullCustomerObjectAndPropertyNamesReturnsJson() {
 		Set<String> props = new HashSet<>();
-		String result = JSON.marshall(Mockito.mock(Customer.class), "hello", props);
+		String result = JSON.marshall(mock(Customer.class), "hello", props);
 		assertNotNull(result);
 	}
 }

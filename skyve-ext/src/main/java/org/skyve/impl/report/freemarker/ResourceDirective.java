@@ -18,6 +18,9 @@ import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * FreeMarker user-defined directive that loads a specified resource using Skyve's fall-through resource handling.
  *
@@ -46,7 +49,10 @@ public class ResourceDirective implements TemplateDirectiveModel {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@SuppressWarnings("null") @Nonnull Environment env,
+						@SuppressWarnings("null") @Nonnull Map params,
+						@SuppressWarnings("null") @Nonnull TemplateModel[] loopVars,
+						@Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");

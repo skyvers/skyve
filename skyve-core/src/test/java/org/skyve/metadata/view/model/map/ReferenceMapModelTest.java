@@ -71,6 +71,7 @@ class ReferenceMapModelTest {
 		}
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getResultHandlesCollectionReferenceBinding() throws Exception {
 		TestBean owner = new TestBean("O1", "Owner");
@@ -89,6 +90,7 @@ class ReferenceMapModelTest {
 		assertEquals(2, model.getAddItemCalls());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getResultHandlesSingularBeanReferenceBinding() throws Exception {
 		TestBean owner = new TestBean("O2", "Owner");
@@ -104,6 +106,7 @@ class ReferenceMapModelTest {
 		assertEquals(1, model.getAddItemCalls());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getResultReturnsEmptyWhenReferenceIsNeitherBeanNorList() throws Exception {
 		TestBean owner = new TestBean("O3", "Owner");

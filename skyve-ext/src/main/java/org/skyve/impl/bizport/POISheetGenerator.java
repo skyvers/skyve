@@ -20,6 +20,9 @@ import org.skyve.persistence.Persistence;
 import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates styled Excel ({@code .xlsx}) worksheets from a Skyve document's
  * query results using Apache POI.
@@ -33,20 +36,20 @@ public class POISheetGenerator {
 	private String downloadName;
 	private Boolean columnTitlesOnly;
 
-	public Boolean getColumnTitlesOnly() {
+	public @Nullable Boolean getColumnTitlesOnly() {
 		return columnTitlesOnly;
 	}
-	public void setColumnTitlesOnly(Boolean columnTitlesOnly) {
+	public void setColumnTitlesOnly(@Nullable Boolean columnTitlesOnly) {
 		this.columnTitlesOnly = columnTitlesOnly;
 	}
 
 	protected List<DataFileExportField> fields; // maintain order
 
-	public String getDownloadName() {
+	public @Nullable String getDownloadName() {
 		return downloadName;
 	}
 
-	public void setDownloadName(String downloadName) {
+	public void setDownloadName(@Nonnull String downloadName) {
 		// ensure download is correctly named for POI sheet export
 		if (downloadName.endsWith(XLSX)) {
 			this.downloadName = downloadName;
@@ -55,39 +58,39 @@ public class POISheetGenerator {
 		}
 	}
 
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = moduleName;
 	}
 
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
 
-	public Boolean isColumnTitles() {
+	public @Nullable Boolean isColumnTitles() {
 		return columnTitles;
 	}
 
-	public void setColumnTitles(Boolean columnTitles) {
+	public void setColumnTitles(@Nullable Boolean columnTitles) {
 		this.columnTitles = columnTitles;
 	}
 
-	public List<DataFileExportField> getFields() {
+	public @Nonnull List<DataFileExportField> getFields() {
 		return fields;
 	}
 
-	public void setFields(List<DataFileExportField> fields) {
+	public void setFields(@Nonnull List<DataFileExportField> fields) {
 		this.fields = fields;
 	}
 
-	public POISheetGenerator(String moduleName, String documentName) {
+	public POISheetGenerator(@Nullable String moduleName, @Nullable String documentName) {
 		this.moduleName = moduleName;
 		this.documentName = documentName;
 		this.fields = new ArrayList<>();
@@ -99,7 +102,7 @@ public class POISheetGenerator {
 	 * @param dff
 	 * @throws Exception
 	 */
-	public void addField(DataFileExportField field) {
+	public void addField(@Nonnull DataFileExportField field) {
 		fields.add(field);
 	}
 
@@ -109,12 +112,12 @@ public class POISheetGenerator {
 	 * @param fieldTitle
 	 * @param binding
 	 */
-	public void addField(String fieldTitle, String binding) {
+	public void addField(@Nullable String fieldTitle, @Nullable String binding) {
 		fields.add(new DataFileExportField(fieldTitle, binding));
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Download getDownload() throws Exception {
+	public @Nullable Download getDownload() throws Exception {
 
 		Download result= null;
 
@@ -153,12 +156,13 @@ public class POISheetGenerator {
 	
 							// attempt to find attribute with the binding
 							// if not assume it is a compound expression and use binder.formatMessage
-							String resolvedBinding = f.getBindingExpression();
+							String bindingExpression = f.getBindingExpression();
+							String resolvedBinding = bindingExpression;
 							if (resolvedBinding != null && resolvedBinding.startsWith("{") && resolvedBinding.endsWith("}")) {
-								resolvedBinding = f.getBindingExpression().substring(1, f.getBindingExpression().length() - 1);
+								resolvedBinding = resolvedBinding.substring(1, resolvedBinding.length() - 1);
 							}
 	
-							if (resolvedBinding != null) {
+							if ((bindingExpression != null) && (resolvedBinding != null)) {
 								try {
 									TargetMetaData tm = Binder.getMetaDataForBinding(customer, module, document, resolvedBinding);
 									Object value = null;
@@ -195,7 +199,7 @@ public class POISheetGenerator {
 									}
 								} catch (@SuppressWarnings("unused") Exception e) {
 //									Util.LOGGER.info("Putting compound expression {} with value {}", f.getBindingExpression(), Binder.formatMessage(customer, f.getBindingExpression(), b));
-									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(f.getBindingExpression(), b));
+									POIWorkbook.putPOICellValue(sheet, rowNum, colNum, CellType.STRING, Binder.formatMessage(bindingExpression, b));
 								}
 							}
 	

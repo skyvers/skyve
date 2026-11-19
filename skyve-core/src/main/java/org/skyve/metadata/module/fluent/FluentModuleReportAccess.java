@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleDynamicImageUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleDynamicImageUserAccessMetaData} metadata.
  * 
@@ -21,14 +23,14 @@ public class FluentModuleReportAccess extends
 	/**
 	 * Creates a new FluentModuleRoleDynamicImageAccess from the specified ModuleRoleDynamicImageUserAccessMetaData.
 	 */
-	public FluentModuleReportAccess(ModuleRoleDynamicImageUserAccessMetaData access) {
+	public FluentModuleReportAccess(@Nonnull ModuleRoleDynamicImageUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleDynamicImageAccess from runtime metadata.
 	 */
-	protected FluentModuleReportAccess from(String documentName, String imageName, Set<String> uxuis) {
+	protected @Nonnull FluentModuleReportAccess from(@Nonnull String documentName, @Nonnull String imageName, @Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		imageName(imageName);
 		uxuis.forEach(u -> addUxUi(u));
@@ -38,7 +40,7 @@ public class FluentModuleReportAccess extends
 	/**
 	 * Specifies the document name for this FluentModuleRoleDynamicImageAccess.
 	 */
-	public FluentModuleReportAccess documentName(final String documentName) {
+	public @Nonnull FluentModuleReportAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -46,7 +48,7 @@ public class FluentModuleReportAccess extends
 	/**
 	 * Specifies the image name for this FluentModuleRoleDynamicImageAccess.
 	 */
-	public FluentModuleReportAccess imageName(final String imageName) {
+	public @Nonnull FluentModuleReportAccess imageName(final @Nonnull String imageName) {
 		access.setImageName(imageName);
 		return this;
 	}
@@ -55,7 +57,7 @@ public class FluentModuleReportAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleDynamicImageUserAccessMetaData get() {
+	public @Nonnull ModuleRoleDynamicImageUserAccessMetaData get() {
 		return access;
 	}
 }

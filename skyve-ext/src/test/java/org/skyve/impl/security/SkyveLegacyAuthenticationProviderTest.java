@@ -1,46 +1,46 @@
 package org.skyve.impl.security;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @SuppressWarnings("static-method")
-public class SkyveLegacyAuthenticationProviderTest {
+class SkyveLegacyAuthenticationProviderTest {
 
 	@Test
-	public void testSupportsUsernamePasswordAuthentication() {
+	void testSupportsUsernamePasswordAuthentication() {
 		SkyveLegacyAuthenticationProvider provider = new SkyveLegacyAuthenticationProvider();
 		assertTrue(provider.supports(UsernamePasswordAuthenticationToken.class));
 	}
 
 	@Test
-	public void testSupportsArbitraryClass() {
+	void testSupportsArbitraryClass() {
 		SkyveLegacyAuthenticationProvider provider = new SkyveLegacyAuthenticationProvider();
 		assertTrue(provider.supports(Object.class));
 	}
 
 	@Test
-	public void testGetHashedPasswordSqlReturnsNullByDefault() {
+	void testGetHashedPasswordSqlReturnsNullByDefault() {
 		SkyveLegacyAuthenticationProvider provider = new SkyveLegacyAuthenticationProvider();
 		assertNull(provider.getHashedPasswordSql());
 	}
 
 	@Test
-	public void testSetHashedPasswordSqlRoundTrips() {
+	void testSetHashedPasswordSqlRoundTrips() {
 		SkyveLegacyAuthenticationProvider provider = new SkyveLegacyAuthenticationProvider();
 		provider.setHashedPasswordSql("select password from ADM_SecurityUser where userName = ?");
 		assertEquals("select password from ADM_SecurityUser where userName = ?", provider.getHashedPasswordSql());
 	}
 
 	@Test
-	public void testAuthenticateWithUnsupportedHashingAlgorithmThrowsInternalAuthenticationServiceException() {
+	void testAuthenticateWithUnsupportedHashingAlgorithmThrowsInternalAuthenticationServiceException() {
 		String originalAlgorithm = UtilImpl.PASSWORD_HASHING_ALGORITHM;
 		try {
 			UtilImpl.PASSWORD_HASHING_ALGORITHM = "not-a-message-digest";
@@ -55,7 +55,7 @@ public class SkyveLegacyAuthenticationProviderTest {
 	}
 
 	@Test
-	public void testNewInstanceIsNotNull() {
+	void testNewInstanceIsNotNull() {
 		assertNotNull(new SkyveLegacyAuthenticationProvider());
 	}
 }

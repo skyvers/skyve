@@ -3,9 +3,39 @@ package org.skyve.impl.sail.execution;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.metadata.sail.language.step.Call;
+import org.skyve.metadata.sail.language.step.CaptureCell;
+import org.skyve.metadata.sail.language.step.CaptureTitle;
+import org.skyve.metadata.sail.language.step.CaptureValue;
 import org.skyve.metadata.sail.language.step.Comment;
+import org.skyve.metadata.sail.language.step.Execute;
+import org.skyve.metadata.sail.language.step.ExecuteAsync;
 import org.skyve.metadata.sail.language.step.Pause;
+import org.skyve.metadata.sail.language.step.TestGridRows;
+import org.skyve.metadata.sail.language.step.TestMessage;
+import org.skyve.metadata.sail.language.step.TestScript;
+import org.skyve.metadata.sail.language.step.TestWidget;
+import org.skyve.metadata.sail.language.step.WaitFor;
+import org.skyve.metadata.sail.language.step.interaction.Upload;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridLink;
+import org.skyve.metadata.sail.language.step.interaction.grids.DataGridMove;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridClearFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridFilter;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridSort;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListGridTool;
+import org.skyve.metadata.sail.language.step.interaction.grids.ListMembershipMove;
+import org.skyve.metadata.sail.language.step.interaction.navigation.CloseWindow;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateBack;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateLink;
+import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateMenu;
+import org.skyve.metadata.sail.language.step.interaction.navigation.Refresh;
+import org.skyve.metadata.sail.language.step.interaction.navigation.TestMenu;
+import org.skyve.metadata.sail.language.step.interaction.session.SwitchMode;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Base executor that generates WebDriver-style Java test methods from SAIL scripts.
@@ -19,28 +49,71 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	/**
 	 * Emits a trace comment statement into generated test code.
 	 *
-	 * @param comment Comment text.
+	 * @param comment Comment text, which may hold quotes, backslashes or line breaks (see {@link #literal(String)}).
 	 */
-	protected void comment(String comment) {
-		indent().append("trace(\"").append(comment).append("\");").newline();
+	@Override
+	protected void comment(@Nullable String comment) {
+		indent().append("trace(").append(literal(comment)).append(");").newline();
+	}
+
+	/**
+	 * Returns a Java string literal for a value from a SAIL script, so that the value's quotes, backslashes, line breaks
+	 * and other special characters cannot break the generated code.
+	 *
+	 * @param value	the value, as the script has it
+	 * @return	the value in double quotes, escaped as Java source; or {@code null} (unquoted) for a null value
+	 */
+	protected static @Nonnull String literal(@Nullable String value) {
+		return (value == null) ? "null" : ('"' + StringEscapeUtils.escapeJava(value) + '"');
 	}
 	
 	/**
-	 * Starts a generated WebDriver test method for the supplied SAIL test heading.
+	 * Starts a generated WebDriver test method for the supplied SAIL test heading. The method is named from the heading,
+	 * numbered from 2 if an earlier method has the name, and the heading is its comment, with what could end the comment
+	 * or start a Unicode escape made inert.
 	 *
 	 * @param heading Test heading used to derive a Java-safe method name.
 	 */
 	@Override
-	protected void startTest(String heading) {
-		String testMethodName = BindUtil.toJavaTypeIdentifier(heading);
+	protected void startTest(@Nonnull String heading) {
+		String name = BindUtil.toJavaTypeIdentifier(heading);
+		String testMethodName = name;
+		for (int i = 2; testMethodNames.contains(testMethodName); i++) {
+			testMethodName = name + i;
+		}
 		testMethodNames.add(testMethodName);
 		
 		indent().append("/**").newline();
-		indent().append(" * ").append(heading).newline();
+		indent().append(" * ").append(commentText(heading)).newline();
 		indent().append(" */").newline();
 		indent().append("private void test").append(testMethodName).append("() {").newline().in();
 	}
 	
+	/**
+	 * Returns text for a line of a Java comment: backslashes doubled (so none starts a Unicode escape, which Java reads
+	 * even in comments), a space put between the two characters that would end the comment, and line breaks as spaces.
+	 *
+	 * @param text	the text
+	 * @return	the text, inert in a Java comment
+	 */
+	private static @Nonnull String commentText(@Nonnull String text) {
+		return text.replace("\\", "\\\\").replace("*/", "* /").replace('\r', ' ').replace('\n', ' ');
+	}
+
+	/**
+	 * Emits a call to the harness's {@code execute(String)}, which runs the step's JavaScript in the page, and with
+	 * {@code variable}, a comment that the generated code keeps no result.
+	 *
+	 * @param execute the step
+	 */
+	@Override
+	public void executeExecute(@Nonnull Execute execute) {
+		indent().append("execute(").append(literal(execute.getScript())).append(");").newline();
+		if (execute.getVariable() != null) {
+			comment("<execute variable/> not supported by this generator: the generated code keeps no result");
+		}
+	}
+
 	/**
 	 * Ends the current generated WebDriver test method.
 	 */
@@ -55,20 +128,289 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 * @param comment The comment step to render.
 	 */
 	@Override
-	public void executeComment(Comment comment) {
+	public void executeComment(@Nonnull Comment comment) {
 		comment(comment.getComment());
 	}
 	
 	/**
-	 * Emits a pause call for a SAIL pause step.
+	 * Emits a pause call for a SAIL pause step, as the harness's {@code pause(long)}.
 	 *
 	 * @param pause The pause step containing delay duration.
 	 */
 	@Override
-	public void executePause(Pause pause) {
-		indent().append("pause(\"").append(Long.toString(pause.getMillis())).append("\");").newline();
+	public void executePause(@Nonnull Pause pause) {
+		indent().append("pause(").append(Long.toString(pause.getMillis())).append("L);").newline();
 	}
 	
+	/**
+	 * Emits a comment that {@code <upload/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param upload the step being skipped
+	 */
+	@Override
+	public void executeUpload(@Nonnull Upload upload) {
+		comment("<upload/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testMessage/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestMessage(@Nonnull TestMessage test) {
+		comment("<testMessage/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testGridRows/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestGridRows(@Nonnull TestGridRows test) {
+		comment("<testGridRows/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testWidget/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestWidget(@Nonnull TestWidget test) {
+		comment("<testWidget/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <navigateMenu/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param menu the step being skipped
+	 */
+	@Override
+	public void executeNavigateMenu(@Nonnull NavigateMenu menu) {
+		comment("<navigateMenu/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testMenu/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestMenu(@Nonnull TestMenu test) {
+		comment("<testMenu/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <switchMode/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param switchMode the step being skipped
+	 */
+	@Override
+	public void executeSwitchMode(@Nonnull SwitchMode switchMode) {
+		comment("<switchMode/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridFilter/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param filter the step being skipped
+	 */
+	@Override
+	public void executeListGridFilter(@Nonnull ListGridFilter filter) {
+		comment("<listGridFilter/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridClearFilter/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param clear the step being skipped
+	 */
+	@Override
+	public void executeListGridClearFilter(@Nonnull ListGridClearFilter clear) {
+		comment("<listGridClearFilter/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridSort/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param sort the step being skipped
+	 */
+	@Override
+	public void executeListGridSort(@Nonnull ListGridSort sort) {
+		comment("<listGridSort/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <captureValue/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param capture the step being skipped
+	 */
+	@Override
+	public void executeCaptureValue(@Nonnull CaptureValue capture) {
+		comment("<captureValue/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <captureCell/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param capture the step being skipped
+	 */
+	@Override
+	public void executeCaptureCell(@Nonnull CaptureCell capture) {
+		comment("<captureCell/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <captureTitle/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 *
+	 * @param capture the step being skipped
+	 */
+	@Override
+	public void executeCaptureTitle(@Nonnull CaptureTitle capture) {
+		comment("<captureTitle/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <dataGridLink/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param link the step being skipped
+	 */
+	@Override
+	public void executeDataGridLink(@Nonnull DataGridLink link) {
+		comment("<dataGridLink/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <dataGridMove/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param move the step being skipped
+	 */
+	@Override
+	public void executeDataGridMove(@Nonnull DataGridMove move) {
+		comment("<dataGridMove/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listMembershipMove/>} is not supported, because this generator has no WebDriver equivalent
+	 * yet. The context is left as it is.
+	 *
+	 * @param move the step being skipped
+	 */
+	@Override
+	public void executeListMembershipMove(@Nonnull ListMembershipMove move) {
+		comment("<listMembershipMove/> not supported by this generator");
+	}
+
+	/**
+	 * Sets the contexts aside for a new window, as the interpreted executors do, and for {@code window="new"} emits a
+	 * comment that the generated code does not follow the new window (the comment has no quotes, as it goes into a
+	 * generated string literal). A link in the same window is handled as before.
+	 *
+	 * @param link the step
+	 */
+	@Override
+	public void executeNavigateLink(@Nonnull NavigateLink link) {
+		super.executeNavigateLink(link);
+		if (NavigateLink.Window.newWindow == link.getWindow()) {
+			comment("<navigateLink window=new/> not supported by this generator: the generated code does not follow the new window");
+		}
+	}
+
+	/**
+	 * Emits a comment that {@code <navigateBack/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The top context loses its document and view type, as the interpreted executors' does.
+	 *
+	 * @param back the step being skipped
+	 */
+	@Override
+	public void executeNavigateBack(@Nonnull NavigateBack back) {
+		super.executeNavigateBack(back);
+		comment("<navigateBack/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <refresh/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param refresh the step being skipped
+	 */
+	@Override
+	public void executeRefresh(@Nonnull Refresh refresh) {
+		comment("<refresh/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <closeWindow/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The contexts of the window that opened the closed one are put back, as the interpreted executors' are.
+	 *
+	 * @param close the step being skipped
+	 * @throws org.skyve.metadata.MetaDataException	if no {@code <navigateLink window="new"/>} opened a window
+	 */
+	@Override
+	public void executeCloseWindow(@Nonnull CloseWindow close) {
+		super.executeCloseWindow(close);
+		comment("<closeWindow/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <listGridTool/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param tool the step being skipped
+	 */
+	@Override
+	public void executeListGridTool(@Nonnull ListGridTool tool) {
+		comment("<listGridTool/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <executeAsync/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param execute the step being skipped
+	 */
+	@Override
+	public void executeExecuteAsync(@Nonnull ExecuteAsync execute) {
+		comment("<executeAsync/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <waitFor/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param wait the step being skipped
+	 */
+	@Override
+	public void executeWaitFor(@Nonnull WaitFor wait) {
+		comment("<waitFor/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <testScript/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param test the step being skipped
+	 */
+	@Override
+	public void executeTestScript(@Nonnull TestScript test) {
+		comment("<testScript/> not supported by this generator");
+	}
+
+	/**
+	 * Emits a comment that {@code <call/>} is not supported, because this generator has no WebDriver equivalent yet.
+	 * The context is left as it is.
+	 *
+	 * @param call the step being skipped
+	 */
+	@Override
+	public void executeCall(@Nonnull Call call) {
+		comment("<call/> not supported by this generator");
+	}
+
 	/**
 	 * Builds the final generated source including a test harness that calls each
 	 * generated test method in declaration order.
@@ -76,7 +418,7 @@ public abstract class WebDriverExecutor<T extends AutomationContext> extends Scr
 	 * @return Generated source text.
 	 */
 	@Override
-	public String toString() {
+	public @Nonnull String toString() {
 		indent().append("/**").newline();
 		indent().append(" * Test Harness").newline();
 		indent().append(" */").newline();

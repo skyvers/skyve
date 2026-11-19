@@ -64,6 +64,7 @@ import jakarta.faces.context.FacesContext;
 /**
  * Tests for NoOpComponentBuilder - verifies each method returns the input component unchanged.
  */
+@SuppressWarnings("java:S5960") // JUnit assertions belong in this test class.
 class NoOpComponentBuilderTest {
 
 	private abstract static class FacesContextBridge extends FacesContext {
@@ -211,6 +212,7 @@ class NoOpComponentBuilderTest {
 		assertSame(component, builder.addDataGridBoundColumn(component, component, mock(AbstractDataWidget.class), new DataGridBoundColumn(), "var", "title", "binding", new StringBuilder(), null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void addedDataGridBoundColumnReturnsInputComponent() {
 		assertSame(component, builder.addedDataGridBoundColumn(component, component, null));
@@ -307,9 +309,10 @@ class NoOpComponentBuilderTest {
 		assertSame(component, builder.html(component, "var", new HTML(), "disabled", "title", null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void lookupDescriptionReturnsInputEventSource() {
-		assertSame(eventSourceComponent, builder.lookupDescription(eventSourceComponent, "var", new LookupDescription(), "disabled", "title", null, HorizontalAlignment.left, "displayBinding", mock(QueryDefinition.class)));
+		assertSame(eventSourceComponent, builder.lookupDescription(eventSourceComponent, "var", new LookupDescription(), "disabled", "title", null, HorizontalAlignment.left, "displayBinding", mock(QueryDefinition.class), null));
 	}
 
 	@Test

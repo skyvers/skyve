@@ -87,8 +87,8 @@ class BizPortTest extends AbstractSkyveTest {
 		grandChild.setBizParentId(child.getBizId());
 		
 		root = p.save(root);
-		child = p.save(child);
-		grandChild = p.save(grandChild);
+		p.save(child);
+		p.save(grandChild);
 		bizport(root);
 	}
 	

@@ -1,5 +1,9 @@
 package org.skyve.impl.sail.execution.sc;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.List;
+
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.Container;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -7,22 +11,21 @@ import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ActionImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
+import org.skyve.impl.metadata.view.WidgetReference;
 import org.skyve.impl.metadata.view.component.Component;
-import org.skyve.impl.metadata.view.container.HBox;
 import org.skyve.impl.metadata.view.container.Tab;
 import org.skyve.impl.metadata.view.container.TabPane;
-import org.skyve.impl.metadata.view.container.VBox;
 import org.skyve.impl.metadata.view.container.form.Form;
 import org.skyve.impl.metadata.view.container.form.FormItem;
 import org.skyve.impl.metadata.view.container.form.FormRow;
 import org.skyve.impl.metadata.view.widget.Button;
-import org.skyve.impl.metadata.view.widget.Link;
-import org.skyve.impl.metadata.view.widget.MapDisplay;
 import org.skyve.impl.metadata.view.widget.bound.ZoomIn;
 import org.skyve.impl.metadata.view.widget.bound.input.CheckBox;
 import org.skyve.impl.metadata.view.widget.bound.input.ColourPicker;
 import org.skyve.impl.metadata.view.widget.bound.input.Combo;
 import org.skyve.impl.metadata.view.widget.bound.input.ContentSignature;
+import org.skyve.impl.metadata.view.widget.bound.input.ContentUpload;
+import org.skyve.impl.metadata.view.widget.bound.input.ListMembership;
 import org.skyve.impl.metadata.view.widget.bound.input.DefaultWidget;
 import org.skyve.impl.metadata.view.widget.bound.input.Geometry;
 import org.skyve.impl.metadata.view.widget.bound.input.HTML;
@@ -34,17 +37,22 @@ import org.skyve.impl.metadata.view.widget.bound.input.Slider;
 import org.skyve.impl.metadata.view.widget.bound.input.Spinner;
 import org.skyve.impl.metadata.view.widget.bound.input.TextArea;
 import org.skyve.impl.metadata.view.widget.bound.input.TextField;
+import org.skyve.impl.metadata.view.widget.bound.tabular.AbstractDataWidget;
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridBoundColumn;
+import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListRepeater;
-import org.skyve.impl.metadata.view.widget.bound.tabular.TreeGrid;
+import org.skyve.impl.metadata.view.widget.bound.tabular.TabularColumn;
 import org.skyve.impl.sail.execution.sc.Locator.InputType;
+import org.skyve.impl.sail.execution.sc.Locator.Kind;
 import org.skyve.metadata.MetaData;
 import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
 import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.model.document.Relation;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.sail.language.step.interaction.navigation.NavigateList;
 import org.skyve.metadata.user.User;
@@ -55,31 +63,45 @@ import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Responsible for traversing a SmartClient (SC) view definition and
  * generating locators for all supported user interactions.
  * <p>
- * It processes containers, forms, widgets, and actions within the view,
- * using contextual metadata to build locators for SAIL automation.
- * 
+ * It processes containers, forms, widgets, and actions within the view and registers a
+ * {@link Locator} per SAIL identifier in the {@link SmartClientAutomationContext}.
+ * The locators are SAIL locators (see {@link Locator}): they name the widget by its binding,
+ * action name, tab title or grid ordinal, and the harness resolves them against the live view in
+ * the browser. They do not re-derive SmartClient's generated component IDs, so they are not
+ * affected by create views, the per-page ID counter, window nesting or the order of containers.
+ *
  * @author simeonsolomou
  */
 public class SmartClientSAILViewVisitor {
+	private static final String ELEMENT = "/element";
+	private static final String DATE_ELEMENT = "/item[name=dateTextField]/element";
+	private static final String TIME_ELEMENT = "/item[name=timeTextField]/element";
+	private static final String GEOMETRY_ELEMENT = "/canvas/member[Class=DynamicForm||classIndex=0]/item[Class=TextItem||name=value]/element";
+	private static final String LOOKUP_CANVAS = "/canvas";
+	private static final String RICH_TEXT_AREA = "/canvas/editArea";
+	private static final String ROW_CELL = "/body/row[%d]/col[%d]";
 
 	private CustomerImpl customer;
 	private ModuleImpl module;
 	private DocumentImpl document;
 	private ViewImpl view;
 	private String currentUxUi;
+	private String viewName;
 
 	private SmartClientAutomationContext automationContext;
 
-	private String windowPrefix;
+	// The zero-based ordinal of the next list grid, tree grid or list repeater (BizListGrid) in the view
+	private int listGridOrdinal = 0;
 
-	int containerIndex = 0;
-	int formIndex = 0;
-
-	private boolean visitingForm = false;
+	// The titles of the tabs being visited, outermost first
+	private Deque<String> tabPath = new ArrayDeque<>();
 
 	/**
 	 * Creates a SmartClient view visitor that records interaction locators into the supplied context.
@@ -90,23 +112,32 @@ public class SmartClientSAILViewVisitor {
 	 * @param view the view metadata being traversed
 	 * @param uxui the active UX/UI name
 	 * @param automationContext the automation context receiving generated locators
-	 * @param windowPrefix the SmartClient window locator prefix
 	 */
 	public SmartClientSAILViewVisitor(
-			User user,
-			Module module,
-			Document document,
-			View view,
-			String uxui,
-			SmartClientAutomationContext automationContext,
-			String windowPrefix) {
+			@Nonnull User user,
+			@Nonnull Module module,
+			@Nonnull Document document,
+			@Nonnull View view,
+			@Nonnull String uxui,
+			@Nonnull SmartClientAutomationContext automationContext) {
 		this.customer = (CustomerImpl) user.getCustomer();
 		this.module = (ModuleImpl) module;
 		this.document = (DocumentImpl) document;
 		this.view = (ViewImpl) view;
 		this.currentUxUi = uxui;
 		this.automationContext = automationContext;
-		this.windowPrefix = windowPrefix;
+		this.viewName = viewName(module.getName(), document.getName());
+	}
+
+	/**
+	 * The name the SAIL harness expects the browser's view to have.
+	 *
+	 * @param moduleName	the module name
+	 * @param documentName	the document name
+	 * @return {@code module.Document}
+	 */
+	public static @Nonnull String viewName(@Nonnull String moduleName, @Nonnull String documentName) {
+		return moduleName + '.' + documentName;
 	}
 
 	/**
@@ -117,56 +148,33 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	/**
-	 * Visits a supported container type and dispatches traversal to contained metadata.
+	 * Visits a container and dispatches traversal to contained metadata.
 	 *
 	 * @param container the container metadata to traverse
 	 */
-	private void visitContainer(Container container) {
-		if (container == view) {
-			for (MetaData widget : container.getContained()) {
-				visitWidget(widget);
+	private void visitContainer(@Nonnull Container container) {
+		if (container instanceof Tab tab) {
+			String title = tabTitle(tab);
+			tabPath.addLast(title);
+			try {
+				visitTab(title);
+				for (MetaData widget : container.getContained()) {
+					visitWidget(widget);
+				}
 			}
-
-			visitActions();
-		}
-		else if (container instanceof Tab tab) {
-			visitTab(tab);
-
-			for (MetaData widget : container.getContained()) {
-				visitWidget(widget);
-			}
-		}
-		else if (container instanceof VBox) {
-			for (MetaData widget : container.getContained()) {
-				visitWidget(widget);
-			}
-		}
-		else if (container instanceof HBox) {
-			for (MetaData widget : container.getContained()) {
-				visitWidget(widget);
+			finally {
+				tabPath.removeLast();
 			}
 		}
 		else {
-			throw new MetaDataException(String.format("Container %s not catered for", container));
+			for (MetaData widget : container.getContained()) {
+				visitWidget(widget);
+			}
 		}
-	}
 
-	/**
-	 * Enters form traversal mode and resets the form-item index for locator generation.
-	 */
-	private final void visitForm() {
-		formIndex = 0;
-
-		visitingForm = true;
-	}
-
-	/**
-	 * Leaves form traversal mode and advances the container index.
-	 */
-	private final void visitedForm() {
-		containerIndex++;
-
-		visitingForm = false;
+		if (container == view) {
+			visitActions();
+		}
 	}
 
 	/**
@@ -175,28 +183,22 @@ public class SmartClientSAILViewVisitor {
 	 * @param widget the metadata widget to visit
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void visitWidget(MetaData widget) {
+	private void visitWidget(@Nullable MetaData widget) {
 		if (widget instanceof Container container) {
 			visitContainer(container);
 		}
 		else if (widget instanceof Form form) {
-			visitForm();
-
 			for (FormRow row : form.getRows()) {
 				for (FormItem item : row.getItems()) {
 					MetaData itemWidget = item.getWidget();
 					if (itemWidget instanceof DefaultWidget defaultWidget) {
-						visitDefaultWidget(defaultWidget);
+						visitDefaultWidget(defaultWidget, null);
 					}
 					else {
 						visitWidget(itemWidget);
 					}
-
-					formIndex++;
 				}
 			}
-
-			visitedForm();
 		}
 		else if (widget instanceof TabPane tabPane) {
 			for (Tab tab : tabPane.getTabs()) {
@@ -209,78 +211,23 @@ public class SmartClientSAILViewVisitor {
 		else if (widget instanceof ZoomIn zoomIn) {
 			visitZoomIn(zoomIn);
 		}
-		else if (widget instanceof Geometry geometry) {
-			visitGeometry(geometry);
+		else if (widget instanceof ListGrid grid) { // includes TreeGrid
+			visitListGrid(grid.getQueryName(), grid.getModelName());
 		}
-		else if (widget instanceof MapDisplay map) {
-			visitMap(map);
-		}
-		else if (widget instanceof Link link) {
-			visitLink(link);
-		}
-		else if (widget instanceof TreeGrid grid) {
-			visitTreeGrid(grid);
-		}
-		else if (widget instanceof ListGrid grid) {
-			visitListGrid(grid);
-			visitedListGrid();
-		}
-		else if (widget instanceof ListRepeater) {
-			visitedListRepeater();
+		else if (widget instanceof ListRepeater repeater) {
+			visitListGrid(repeater.getQueryName(), repeater.getModelName());
 		}
 		else if (widget instanceof DataGrid grid) {
-			String gridBindingPrefix = grid.getBinding();
-			if (gridBindingPrefix == null) {
-				gridBindingPrefix = "";
-			}
-			else {
-				gridBindingPrefix += '.';
-			}
-
-			visitDataGrid(grid);
-			visitedDataGrid();
+			visitDataGrid(grid, Boolean.TRUE.equals(grid.getInline()));
 		}
-		else if (widget instanceof CheckBox box) {
-			visitCheckBox(box);
-		}
-		else if (widget instanceof ColourPicker colour) {
-			visitColourPicker(colour);
-		}
-		else if (widget instanceof Combo combo) {
-			visitCombo(combo);
-		}
-		else if (widget instanceof ContentSignature signature) {
-			visitContentSignature(signature);
-		}
-		else if (widget instanceof HTML html) {
-			visitHTML(html);
-		}
-		else if (widget instanceof LookupDescription lookup) {
-			visitLookupDescription(lookup);
-		}
-		else if (widget instanceof Password password) {
-			visitPassword(password);
-		}
-		else if (widget instanceof Radio radio) {
-			visitRadio(radio);
-		}
-		else if (widget instanceof RichText text) {
-			visitRichText(text);
-		}
-		else if (widget instanceof Slider slider) {
-			visitSlider(slider);
-		}
-		else if (widget instanceof Spinner spinner) {
-			visitSpinner(spinner);
-		}
-		else if (widget instanceof TextArea text) {
-			visitTextArea(text);
-		}
-		else if (widget instanceof TextField text) {
-			visitTextField(text);
+		else if (widget instanceof DataRepeater repeater) {
+			visitDataGrid(repeater, false);
 		}
 		else if (widget instanceof Component component) {
 			visitComponent(component);
+		}
+		else if (widget instanceof Bound bound) {
+			visitInput(bound, bound.getBinding(), null);
 		}
 	}
 
@@ -288,12 +235,25 @@ public class SmartClientSAILViewVisitor {
 	 * Resolves a default widget to its concrete input widget and visits the resolved widget.
 	 *
 	 * @param widget the default widget metadata
+	 * @param grid the inline data grid whose column this is, or {@code null} in a form
 	 */
-	private void visitDefaultWidget(DefaultWidget widget) {
+	private void visitDefaultWidget(@Nonnull DefaultWidget widget, @Nullable AbstractDataWidget grid) {
 		String binding = widget.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("DefaultWidget in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
+		visitDefaultBinding(binding, document, grid);
+	}
 
-		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-
+	/**
+	 * Visits the default input widget of a binding.
+	 *
+	 * @param binding the binding, relative to {@code owner}
+	 * @param owner the document the binding is relative to
+	 * @param grid the inline data grid whose column this is, or {@code null} in a form
+	 */
+	private void visitDefaultBinding(@Nonnull String binding, @Nonnull Document owner, @Nullable AbstractDataWidget grid) {
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, owner, binding);
 		Attribute attribute = target.getAttribute();
 		if (attribute != null) {
 			Bound defaultWidget = attribute.getDefaultInputWidget();
@@ -301,7 +261,12 @@ public class SmartClientSAILViewVisitor {
 
 			try {
 				defaultWidget.setBinding(binding);
-				visitWidget(defaultWidget);
+				if (grid == null) {
+					visitWidget(defaultWidget);
+				}
+				else {
+					visitInput(defaultWidget, binding, grid);
+				}
 			} finally {
 				defaultWidget.setBinding(definedBinding);
 			}
@@ -309,480 +274,256 @@ public class SmartClientSAILViewVisitor {
 	}
 
 	/**
-	 * Registers a locator for a form button action.
+	 * Registers a locator for an input widget, in a form or as an inline data grid cell.
+	 * Widgets that cannot take data entry (such as HTML) are registered without an input type so that
+	 * {@code testValue} can still read them.
 	 *
-	 * @param button the button metadata
+	 * @param widget the input widget
+	 * @param binding the binding to register it under: the widget's own, or a data grid column's
+	 * @param grid the inline data grid whose column this is, or {@code null} in a form
 	 */
-	private final void visitButton(Button button) {
-		String actionName = button.getActionName();
+	@SuppressWarnings("java:S3776") // Complexity OK
+	private void visitInput(@Nonnull Bound widget, @Nullable String binding, @Nullable AbstractDataWidget grid) {
+		if (binding == null) {
+			return;
+		}
 
-		automationContext.put(actionName,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=CanvasItem]/canvas/member[Class=BizButton||classIndex=0]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex))));
-	}
+		InputType type = null;
+		String suffix = null;
+		if (widget instanceof CheckBox) {
+			type = InputType.CHECKBOX;
+		}
+		else if (widget instanceof Combo) {
+			type = InputType.COMBO;
+		}
+		else if (widget instanceof Radio) {
+			type = InputType.RADIO;
+		}
+		else if (widget instanceof LookupDescription) {
+			type = InputType.LOOKUP_DESCRIPTION;
+			// in an inline data grid row, the cell's editor is the combo box itself
+			suffix = (grid == null) ? LOOKUP_CANVAS : null;
+		}
+		else if (widget instanceof RichText) {
+			type = InputType.RICH_TEXT;
+			suffix = RICH_TEXT_AREA;
+		}
+		else if (widget instanceof Slider) {
+			type = InputType.SLIDER;
+		}
+		else if (widget instanceof Geometry) {
+			type = InputType.TEXT;
+			suffix = GEOMETRY_ELEMENT;
+		}
+		else if ((widget instanceof ColourPicker) ||
+					(widget instanceof Password) ||
+					(widget instanceof Spinner) ||
+					(widget instanceof TextArea)) {
+			type = InputType.TEXT;
+			suffix = ELEMENT;
+		}
+		else if (widget instanceof TextField) {
+			type = InputType.TEXT;
+			suffix = textSuffix(binding, grid);
+		}
+		else if (widget instanceof HTML) {
+			type = InputType.HTML;
+		}
+		else if (widget instanceof ListMembership) {
+			if (grid == null) {
+				automationContext.put(binding, new Locator(Locator.sail(viewName, Kind.membership, sanitise(binding), null, null, null, null),
+															InputType.MEMBERSHIP));
+			}
+			return;
+		}
+		else if (! ((widget instanceof ContentUpload) || (widget instanceof ContentSignature))) {
+			// Not an input SAIL can address (check membership, comparison...)
+			return;
+		}
+		// content widgets are registered without an input type: <upload> and testValue use them, dataEnter does not
 
-	/**
-	 * Registers a locator for a zoom-in widget.
-	 *
-	 * @param zoomIn the zoom-in metadata
-	 */
-	private final void visitZoomIn(ZoomIn zoomIn) {
-		String binding = zoomIn.getBinding();
-		String identifier = String.format("%s.zoomIn", binding.replaceAll("\\.", "_"));
-
-		if (visitingForm) {
-			automationContext.put(identifier,
-					new Locator(String.format(
-							"//:DynamicForm[ID=\"%s_%s_edit_%d\"]//IButton[name=\"%s\"]",
-							module.getName(),
-							document.getName(),
-							Integer.valueOf(containerIndex),
-							identifier)));
-		} else {
-			automationContext.put(binding, new Locator(String.format("%s//IButton[name=\"%s\"]", windowPrefix, identifier)));
+		if (grid == null) {
+			automationContext.put(binding, Locator.item(viewName, sanitise(binding), suffix, type));
+		}
+		else {
+			String gridBinding = grid.getBinding();
+			if (gridBinding != null) {
+				automationContext.put(gridBinding + '.' + binding,
+										Locator.cell(viewName, sanitise(gridBinding), sanitise(binding), suffix, type));
+			}
 		}
 	}
 
 	/**
-	 * Placeholder for map widget locator generation.
+	 * Determines the AutoTest suffix to a text field's input, which depends on the attribute type:
+	 * date and time items have an inner text field.
 	 *
-	 * @param map the map metadata
+	 * @param binding the binding
+	 * @param grid the inline data grid whose column this is, or {@code null} in a form
+	 * @return the suffix
 	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitMap(MapDisplay map) {
-		// TODO
+	private @Nonnull String textSuffix(@Nonnull String binding, @Nullable AbstractDataWidget grid) {
+		Document owner = (grid == null) ? document : gridDocument(grid);
+		Attribute attribute = (owner == null) ? null : BindUtil.getMetaDataForBinding(customer, module, owner, binding).getAttribute();
+		if (attribute != null) {
+			AttributeType attributeType = attribute.getAttributeType();
+			if ((attributeType == AttributeType.date) ||
+					(attributeType == AttributeType.dateTime) ||
+					(attributeType == AttributeType.timestamp)) {
+				return DATE_ELEMENT;
+			}
+			if (attributeType == AttributeType.time) {
+				return TIME_ELEMENT;
+			}
+		}
+		return ELEMENT;
 	}
 
 	/**
-	 * Registers a locator for a geometry widget.
+	 * Resolves the document of a data grid's rows.
 	 *
-	 * @param geometry the geometry metadata
+	 * @param grid the data grid
+	 * @return the row document, or {@code null} if the binding is not a relation
 	 */
-	private final void visitGeometry(Geometry geometry) {
-		String binding = geometry.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=GeometryItem]/canvas/member[Class=DynamicForm||classIndex=0]/item[Class=TextItem||name=value]/element",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.TEXT));
+	private @Nullable Document gridDocument(@Nonnull AbstractDataWidget grid) {
+		String binding = grid.getBinding();
+		if (binding == null) {
+			return null;
+		}
+		TargetMetaData target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		if (target.getAttribute() instanceof Relation relation) {
+			return module.getDocument(customer, relation.getDocumentName());
+		}
+		return null;
 	}
 
 	/**
-	 * Placeholder for tree-grid locator generation.
+	 * Registers a locator for a form button action.
 	 *
-	 * @param grid the tree-grid metadata
+	 * @param button the button metadata
 	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitTreeGrid(TreeGrid grid) {
-		// TODO
+	private final void visitButton(@Nonnull Button button) {
+		String actionName = button.getActionName();
+		automationContext.put(actionName, Locator.widget(viewName, Kind.button, buttonName(actionName), null, null, null));
 	}
 
 	/**
-	 * Placeholder for link locator generation.
+	 * Returns whether buttons of this kind of implicit action are named after the action (its class), not the implicit action.
 	 *
-	 * @param link the link metadata
+	 * @param implicitName the implicit action, or {@code null}
+	 * @return {@code true} for upload, download, import and export actions
 	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitLink(Link link) {
-		// TODO
+	private static boolean classNamed(@Nullable ImplicitActionName implicitName) {
+		return ImplicitActionName.Upload.equals(implicitName) ||
+				ImplicitActionName.Download.equals(implicitName) ||
+				ImplicitActionName.BizImport.equals(implicitName) ||
+				ImplicitActionName.BizExport.equals(implicitName);
 	}
 
 	/**
-	 * Registers list-grid action and selection locators.
+	 * The action name SmartClient gives an action's buttons: an implicit action's name, or a custom action's class
+	 * (such as {@code Save} for {@code <action name="Refresh" className="Save"/>}).
 	 *
-	 * @param grid the list-grid metadata
+	 * @param actionName the action's name
+	 * @return the buttons' action name
 	 */
-	private final void visitListGrid(ListGrid grid) {
+	private @Nonnull String buttonName(@Nonnull String actionName) {
+		Action action = view.getAction(actionName);
+		if (action == null) {
+			return actionName;
+		}
+		ImplicitActionName implicitName = action.getImplicitName();
+		if (classNamed(implicitName)) {
+			return actionName;
+		}
+		if ((implicitName != null) && (! ImplicitActionName.DEFAULTS.equals(implicitName))) {
+			return implicitName.toString();
+		}
+		// a custom action's buttons carry its class (resource) name, which a named action can give differently
+		String resourceName = action.getResourceName();
+		return (resourceName == null) ? actionName : resourceName;
+	}
+
+	/**
+	 * Registers a locator for a zoom-in widget under {@code <binding>.zoomIn}.
+	 *
+	 * @param zoomIn the zoom-in metadata
+	 */
+	private final void visitZoomIn(@Nonnull ZoomIn zoomIn) {
+		String binding = zoomIn.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("ZoomIn in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
+		automationContext.put(binding + ".zoomIn", Locator.widget(viewName, Kind.zoomIn, sanitise(binding), null, null, null));
+	}
+
+	/**
+	 * Registers list-grid action and selection locators for a list grid, tree grid or list repeater.
+	 *
+	 * @param queryName the grid's query, or {@code null}
+	 * @param modelName the grid's model, or {@code null}
+	 */
+	private final void visitListGrid(@Nullable String queryName, @Nullable String modelName) {
 		String key = NavigateList.listGridIdentifier(
 				automationContext,
 				module.getName(),
-				grid.getQueryName(),
+				queryName,
 				document.getName(),
-				grid.getModelName());
+				modelName);
+		Integer ordinal = Integer.valueOf(listGridOrdinal++);
 
-		visitListGridNew(key);
-		visitListGridZoom(key);
-		visitListGridSelect(key);
+		automationContext.put(key + ".new", Locator.widget(viewName, Kind.listGrid, null, ordinal, "new", null));
+		automationContext.put(key + ".zoom", Locator.widget(viewName, Kind.listGrid, null, ordinal, "zoom", null));
+		automationContext.put(key + ".select", Locator.widget(viewName, Kind.listGrid, null, ordinal, "rows", ROW_CELL));
+		if ((queryName == null) && (modelName != null)) {
+			// also as module.model, as a script naming the model in query="" (as for a query) identifies it
+			String alias = module.getName() + '.' + modelName;
+			automationContext.put(alias + ".new", Locator.widget(viewName, Kind.listGrid, null, ordinal, "new", null));
+			automationContext.put(alias + ".zoom", Locator.widget(viewName, Kind.listGrid, null, ordinal, "zoom", null));
+			automationContext.put(alias + ".select", Locator.widget(viewName, Kind.listGrid, null, ordinal, "rows", ROW_CELL));
+		}
 	}
 
 	/**
-	 * Marks completion of list-grid traversal by advancing the container index.
-	 */
-	private final void visitedListGrid() {
-		containerIndex++;
-	}
-
-	/**
-	 * Marks completion of list-repeater traversal by advancing the container index.
-	 */
-	private final void visitedListRepeater() {
-		containerIndex++;
-	}
-
-	/**
-	 * Registers the list-grid new-action locator.
+	 * Registers the data-grid toolbar and row-selection locators, and inline cell locators for inline grids.
 	 *
-	 * @param key the list-grid automation key
+	 * @param grid the data grid or data repeater
+	 * @param inline whether the grid edits its rows inline
 	 */
-	private final void visitListGridNew(String key) {
-		automationContext.put(String.format("%s.new", key),
-				new Locator(String.format(
-						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip||classIndex=0]/member[Class=ToolstripButton||name=new]/icon",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the list-grid zoom-action locator.
-	 *
-	 * @param key the list-grid automation key
-	 */
-	private final void visitListGridZoom(String key) {
-		automationContext.put(String.format("%s.zoom", key),
-				new Locator(String.format(
-						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip||classIndex=0]/member[Class=ToolstripButton||name=zoom]/icon",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the list-grid row-selection locator.
-	 *
-	 * @param key the list-grid automation key
-	 */
-	private final void visitListGridSelect(String key) {
-		automationContext.put(String.format("%s.select", key),
-				new Locator(String.format(
-						"//BizListGrid[ID=\"%s_%s_edit_%d\"]/member[Class=ListGrid||classIndex=0]/body/row[%%d]/col[%%d]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the standard SmartClient data-grid toolbar and row-selection locators for the given binding.
-	 *
-	 * @param grid the data-grid metadata to visit
-	 */
-	private final void visitDataGrid(DataGrid grid) {
+	private final void visitDataGrid(@Nonnull AbstractDataWidget grid, boolean inline) {
 		String binding = grid.getBinding();
+		if (binding == null) { // validated as required when the view is loaded
+			throw new MetaDataException("Data widget in view " + view.getName() + " of document " + module.getName() + '.' + document.getName() + " has no binding");
+		}
+		String name = sanitise(binding);
 
-		visitDataGridNew(binding);
-		visitDataGridZoom(binding);
-		visitDataGridEdit(binding);
-		visitDataGridRemove(binding);
-		visitDataGridSelect(binding);
-	}
+		automationContext.put(binding + ".new", Locator.widget(viewName, Kind.dataGrid, name, null, "new", null));
+		automationContext.put(binding + ".zoom", Locator.widget(viewName, Kind.dataGrid, name, null, "zoom", null));
+		automationContext.put(binding + ".edit", Locator.widget(viewName, Kind.dataGrid, name, null, "edit", null));
+		automationContext.put(binding + ".remove", Locator.widget(viewName, Kind.dataGrid, name, null, "remove", null));
+		automationContext.put(binding + ".select", Locator.widget(viewName, Kind.dataGrid, name, null, "rows", ROW_CELL));
 
-	/**
-	 * Marks completion of data-grid traversal by advancing the container index.
-	 */
-	private final void visitedDataGrid() {
-		containerIndex++;
-	}
+		if (inline) {
+			// marks the grid as inline: New adds a row to edit in place instead of opening a view
+			automationContext.put(binding + ".inline", Locator.widget(viewName, Kind.dataGrid, name, null, null, null));
 
-	/**
-	 * Registers the data-grid new-action locator.
-	 *
-	 * @param binding the data-grid binding
-	 */
-	private final void visitDataGridNew(String binding) {
-		automationContext.put(String.format("%s.new", binding),
-				new Locator(String.format(
-						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=new]/icon",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the data-grid zoom-action locator.
-	 *
-	 * @param binding the data-grid binding
-	 */
-	private final void visitDataGridZoom(String binding) {
-		automationContext.put(String.format("%s.zoom", binding),
-				new Locator(String.format(
-						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=zoom]/icon",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the data-grid edit-action locator.
-	 *
-	 * @param binding the data-grid binding
-	 */
-	private final void visitDataGridEdit(String binding) {
-		automationContext.put(String.format("%s.edit", binding),
-				new Locator(String.format(
-						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=edit]/icon",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the data-grid remove-action locator.
-	 *
-	 * @param binding the data-grid binding
-	 */
-	private final void visitDataGridRemove(String binding) {
-		automationContext.put(String.format("%s.remove", binding),
-				new Locator(String.format(
-						"//:VLayout[ID=\"%s_%s_edit_%d\"]/member[Class=Toolstrip]/member[Class=ToolstripButton||name=deleteRemoveSelected]/icon",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers the data-grid row-selection locator.
-	 *
-	 * @param binding the data-grid binding
-	 */
-	private final void visitDataGridSelect(String binding) {
-		automationContext.put(String.format("%s.select", binding),
-				new Locator(String.format(
-						"//BizDataGrid[ID=\"%s_%s_edit_%d\"]/member[Class=ListGrid||classIndex=0]/body/row[%%d]/col[%%d]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex))));
-	}
-
-	/**
-	 * Registers a locator for a checkbox widget.
-	 *
-	 * @param checkBox the checkbox metadata
-	 */
-	private final void visitCheckBox(CheckBox checkBox) {
-		String binding = checkBox.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=CheckboxItem]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.CHECKBOX));
-	}
-
-	/**
-	 * Registers a locator for a colour-picker widget.
-	 *
-	 * @param colour the colour-picker metadata
-	 */
-	private final void visitColourPicker(ColourPicker colour) {
-		String binding = colour.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=ColorItem]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.TEXT));
-	}
-
-	/**
-	 * Registers a locator for a combo widget.
-	 *
-	 * @param combo the combo metadata
-	 */
-	private final void visitCombo(Combo combo) {
-		String binding = combo.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=SelectItem]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.COMBO));
-	}
-
-	/**
-	 * Placeholder for content-signature locator generation.
-	 *
-	 * @param contentSignature the content-signature metadata
-	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitContentSignature(ContentSignature contentSignature) {
-		// TODO
-	}
-
-	/**
-	 * Placeholder for HTML widget locator generation.
-	 *
-	 * @param html the HTML metadata
-	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitHTML(HTML html) {
-		// TODO
-	}
-
-	/**
-	 * Registers a locator for a lookup-description widget.
-	 *
-	 * @param lookup the lookup-description metadata
-	 */
-	private final void visitLookupDescription(LookupDescription lookup) {
-		String binding = lookup.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=BizLookupDescriptionItem]/canvas",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.LOOKUP_DESCRIPTION));
-	}
-
-	/**
-	 * Registers a locator for a password widget.
-	 *
-	 * @param password the password metadata
-	 */
-	private final void visitPassword(Password password) {
-		String binding = password.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format("//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=PasswordItem]/element",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.TEXT));
-	}
-
-	/**
-	 * Registers a locator for a radio widget.
-	 *
-	 * @param radio the radio metadata
-	 */
-	private final void visitRadio(Radio radio) {
-		String binding = radio.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=RadioGroupItem]",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.RADIO));
-	}
-
-	/**
-	 * Registers a locator for a rich-text widget.
-	 *
-	 * @param text the rich-text metadata
-	 */
-	private final void visitRichText(RichText text) {
-		String binding = text.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=RichTextItem]/canvas/editArea",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.TEXT));
-	}
-
-	/**
-	 * Placeholder for slider widget locator generation.
-	 *
-	 * @param slider the slider metadata
-	 */
-	@SuppressWarnings("java:S1172")
-	private final void visitSlider(Slider slider) {
-		// TODO
-	}
-
-	/**
-	 * Registers a locator for a spinner widget.
-	 *
-	 * @param spinner the spinner metadata
-	 */
-	private final void visitSpinner(Spinner spinner) {
-		String binding = spinner.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=SpinnerItem]/element",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.TEXT));
-	}
-
-	/**
-	 * Registers a locator for a text-area widget.
-	 *
-	 * @param text the text-area metadata
-	 */
-	private final void visitTextArea(TextArea text) {
-		String binding = text.getBinding();
-
-		automationContext.put(binding,
-				new Locator(String.format(
-						"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=TextItem]/element",
-						module.getName(),
-						document.getName(),
-						Integer.valueOf(containerIndex),
-						Integer.valueOf(formIndex)), InputType.TEXT));
-	}
-
-	/**
-	 * Registers a text-field locator, selecting the correct sub-input for date/time-oriented attribute types.
-	 *
-	 * @param text the text-field metadata to visit
-	 */
-	private final void visitTextField(TextField text) {
-		String binding = text.getBinding();
-
-		Attribute attribute = BindUtil.getMetaDataForBinding(customer, module, document, binding).getAttribute();
-		if (attribute != null) {
-			AttributeType attributeType = attribute.getAttributeType();
-			switch (attributeType) {
-				case date:
-				case dateTime:
-				case timestamp:
-					automationContext.put(binding,
-							new Locator(String.format(
-									"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=dateTextField]/element",
-									module.getName(),
-									document.getName(),
-									Integer.valueOf(containerIndex),
-											Integer.valueOf(formIndex)),
-									InputType.TEXT));
-					break;
-				case time:
-					automationContext.put(binding,
-							new Locator(String.format(
-									"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d]/item[name=timeTextField]/element",
-									module.getName(),
-									document.getName(),
-									Integer.valueOf(containerIndex),
-											Integer.valueOf(formIndex)),
-									InputType.TEXT));
-	
-					break;
-				default:
-					automationContext.put(binding,
-							new Locator(String.format(
-									"//DynamicForm[ID=\"%s_%s_edit_%d\"]/item[index=%d||Class=TextItem]/element",
-									module.getName(),
-									document.getName(),
-									Integer.valueOf(containerIndex),
-									Integer.valueOf(formIndex)), InputType.TEXT));
-					break;
+			Document rowDocument = gridDocument(grid);
+			List<? extends TabularColumn> columns = grid.getColumns();
+			for (TabularColumn column : columns) {
+				if ((rowDocument != null) && (column instanceof DataGridBoundColumn bound)) {
+					String columnBinding = bound.getBinding();
+					if (columnBinding != null) {
+						WidgetReference reference = bound.getInputWidget();
+						Bound input = (reference == null) ? null : reference.getWidget();
+						if (input == null) {
+							visitDefaultBinding(columnBinding, rowDocument, grid);
+						}
+						else {
+							// the input names no binding of its own: its cell is the column's
+							visitInput(input, columnBinding, grid);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -792,7 +533,7 @@ public class SmartClientSAILViewVisitor {
 	 *
 	 * @param component the component metadata defining the fragment
 	 */
-	private void visitComponent(Component component) {
+	private void visitComponent(@Nonnull Component component) {
 		for (MetaData widget : component.getFragment(customer, currentUxUi).getContained()) {
 			visitWidget(widget);
 		}
@@ -815,27 +556,35 @@ public class SmartClientSAILViewVisitor {
 	 * @param viewName the current view name
 	 * @param action the action metadata definition
 	 */
-	private void visit(String viewName, ActionImpl action) {
+	private void visit(@Nullable String viewType, @Nonnull ActionImpl action) {
 		ImplicitActionName implicitName = action.getImplicitName();
-		if (implicitName != null) {
-			visit(viewName, implicitName, action);
+		if (classNamed(implicitName)) {
+			// an upload, download, import or export action's button carries the action's name (its class)
+			visitAction(action.getName());
+		}
+		else if (implicitName != null) {
+			visit(viewType, implicitName);
+			// a named action of an implicit kind is also addressed by its name
+			String name = action.getName();
+			if ((! name.equals(implicitName.toString())) && (! ImplicitActionName.DEFAULTS.equals(implicitName))) {
+				automationContext.put(name, Locator.widget(viewName, Kind.button, implicitName.toString(), null, null, null));
+			}
 		} else {
-			visitCustomAction(action);
+			String name = action.getName();
+			automationContext.put(name, Locator.widget(viewName, Kind.button, buttonName(name), null, null, null));
 		}
 	}
 
 	/**
 	 * Expands implicit actions into the SmartClient locator set appropriate for the current view type.
 	 *
-	 * @param viewName the current view name
+	 * @param viewType the current view name
 	 * @param implicitName the implicit action being expanded
-	 * @param action the action metadata definition
 	 */
-	@SuppressWarnings("java:S3776") // Complexity OK
-	private void visit(String viewName, ImplicitActionName implicitName, ActionImpl action) {
+	private void visit(@Nullable String viewType, @Nonnull ImplicitActionName implicitName) {
 		if (ImplicitActionName.DEFAULTS.equals(implicitName)) {
-			if (ViewType.list.toString().equals(viewName)) {
-				visit(viewName, ImplicitActionName.New, action);
+			if (ViewType.list.toString().equals(viewType)) {
+				visit(viewType, ImplicitActionName.New);
 			} else {
 				for (ImplicitActionName value : ImplicitActionName.values()) {
 					if (ImplicitActionName.DEFAULTS != value
@@ -847,116 +596,65 @@ public class SmartClientSAILViewVisitor {
 							&& ImplicitActionName.Upload != value
 							&& ImplicitActionName.Navigate != value
 							&& ImplicitActionName.Print != value) {
-						visit(viewName, value, action);
+						visit(viewType, value);
 					}
 				}
 			}
-		} else if (ImplicitActionName.Remove.equals(implicitName)) {
-			visitRemoveAction();
-		} else if (ImplicitActionName.ZoomOut.equals(implicitName)) {
-			visitZoomOutAction();
-		} else if (ImplicitActionName.OK.equals(implicitName)) {
-			visitOKAction();
-		} else if (ImplicitActionName.Save.equals(implicitName)) {
-			visitSaveAction();
-		} else if (ImplicitActionName.Cancel.equals(implicitName)) {
-			visitCancelAction();
-		} else if (ImplicitActionName.Delete.equals(implicitName)) {
-			visitDeleteAction();
-		} else if (ImplicitActionName.Add.equals(implicitName)) {
-			visitAddAction();
-		} else if (ImplicitActionName.Edit.equals(implicitName)) {
-			visitEditAction();
+		} else if (ImplicitActionName.Remove.equals(implicitName) ||
+					ImplicitActionName.ZoomOut.equals(implicitName) ||
+					ImplicitActionName.OK.equals(implicitName) ||
+					ImplicitActionName.Save.equals(implicitName) ||
+					ImplicitActionName.Cancel.equals(implicitName) ||
+					ImplicitActionName.Delete.equals(implicitName) ||
+					ImplicitActionName.Add.equals(implicitName) ||
+					ImplicitActionName.Edit.equals(implicitName)) {
+			visitAction(implicitName.toString());
 		}
 	}
 
 	/**
-	 * Registers the implicit remove-action locator.
-	 */
-	private final void visitRemoveAction() {
-		automationContext.put(ImplicitActionName.Remove.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"Remove\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit zoom-out action locator.
-	 */
-	private final void visitZoomOutAction() {
-		automationContext.put(ImplicitActionName.ZoomOut.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"ZoomOut\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit OK action locator.
-	 */
-	private final void visitOKAction() {
-		automationContext.put(ImplicitActionName.OK.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"OK\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit save action locator.
-	 */
-	private final void visitSaveAction() {
-		automationContext.put(ImplicitActionName.Save.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"Save\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit cancel action locator.
-	 */
-	private final void visitCancelAction() {
-		automationContext.put(ImplicitActionName.Cancel.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"Cancel\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit delete action locator.
-	 */
-	private final void visitDeleteAction() {
-		automationContext.put(ImplicitActionName.Delete.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"Delete\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit add action locator.
-	 */
-	private final void visitAddAction() {
-		automationContext.put(ImplicitActionName.Add.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"Add\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers the implicit edit action locator.
-	 */
-	private final void visitEditAction() {
-		automationContext.put(ImplicitActionName.Edit.toString(),
-				new Locator(String.format("%s//IButton[actionName=\"Edit\"]", windowPrefix)));
-	}
-
-	/**
-	 * Registers a custom action locator by action name.
+	 * Registers an action button locator by action name; implicit actions use their implicit name.
 	 *
-	 * @param action the custom action metadata definition
+	 * @param actionName the action name
 	 */
-	private final void visitCustomAction(ActionImpl action) {
-		String actionName = action.getName();
-
-		automationContext.put(actionName, new Locator(String.format("%s//IButton[actionName=\"%s\"]", windowPrefix, actionName)));
+	private final void visitAction(@Nonnull String actionName) {
+		automationContext.put(actionName, Locator.widget(viewName, Kind.button, actionName, null, null, null));
 	}
 
 	/**
-	 * Registers a tab-selection locator by localized tab title.
+	 * Registers tab-selection locators by localised tab title, under {@code <title> Tab} and,
+	 * for nested tabs, under the {@code ::}-separated path {@code <outer>::<inner> Tab}.
 	 *
-	 * @param tab the tab metadata definition
+	 * @param title the localised tab title
 	 */
-	private final void visitTab(Tab tab) {
-		String path = tab.getTitle();
+	private final void visitTab(@Nonnull String title) {
+		Locator locator = Locator.widget(viewName, Kind.tab, title, null, null, null);
+		automationContext.put(title + " Tab", locator);
+		if (tabPath.size() > 1) {
+			automationContext.put(String.join("::", tabPath) + " Tab", locator);
+		}
+	}
 
-		// Check if this tab path represents an internationalised value
-		String internationalisedPath = Util.i18n(path);
+	/**
+	 * Localises a tab title.
+	 *
+	 * @param tab the tab
+	 * @return the localised title
+	 */
+	private static @Nonnull String tabTitle(@Nonnull Tab tab) {
+		String title = tab.getTitle();
+		String internationalised = Util.i18n(title);
+		return (internationalised == null) ? title : internationalised;
+	}
 
-		automationContext.put(String.format("%s Tab", internationalisedPath == null ? path : internationalisedPath),
-				new Locator(String.format("%s//SimpleTabButton[title=\"%s\"]", windowPrefix, internationalisedPath == null ? path : internationalisedPath)));
+	/**
+	 * Sanitises a binding the way the SmartClient renderer names form items and grids.
+	 *
+	 * @param binding the binding
+	 * @return the sanitised binding
+	 */
+	@SuppressWarnings("null") // a non-null binding sanitises to a non-null name
+	private static @Nonnull String sanitise(@Nonnull String binding) {
+		return BindUtil.sanitiseBinding(binding);
 	}
 }

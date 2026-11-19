@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.CORE;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -39,12 +40,6 @@ class CustomerOverrideTests extends AbstractSkyveTest {
 		assertNull(document.getCondition("test"));
 		View view = document.getView(null, c, "edit");
 		assertNotEquals("Test", view.getTitle());
-		try {
-			m.getDocument(c, "Test");
-			fail("Test should not exist");
-		}
-		catch (@SuppressWarnings("unused") Exception e) {
-			// do nothing here
-		}
+		assertThrows(MetaDataException.class, () -> m.getDocument(c, "Test"), "Test should not exist");
 	}
 }

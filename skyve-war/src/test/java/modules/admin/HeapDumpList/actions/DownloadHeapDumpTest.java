@@ -11,6 +11,7 @@ import util.AbstractH2Test;
 @SuppressWarnings("static-method")
 class DownloadHeapDumpTest extends AbstractH2Test {
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void prepareWithNonExistentFileThrowsValidationException() {
 		DownloadHeapDump action = new DownloadHeapDump();

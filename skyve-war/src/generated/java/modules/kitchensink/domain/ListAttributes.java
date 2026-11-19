@@ -11,6 +11,7 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.locationtech.jts.geom.Geometry;
 import org.skyve.CORE;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.DateOnly;
@@ -27,6 +28,7 @@ import org.skyve.impl.domain.types.jaxb.DateTimeMapper;
 import org.skyve.impl.domain.types.jaxb.Decimal10Mapper;
 import org.skyve.impl.domain.types.jaxb.Decimal2Mapper;
 import org.skyve.impl.domain.types.jaxb.Decimal5Mapper;
+import org.skyve.impl.domain.types.jaxb.GeometryMapper;
 import org.skyve.impl.domain.types.jaxb.TimeOnlyMapper;
 import org.skyve.impl.domain.types.jaxb.TimestampMapper;
 import org.skyve.metadata.model.document.Bizlet.DomainValue;
@@ -90,6 +92,9 @@ public class ListAttributes extends AbstractPersistentBean {
 	public static final String decimal5PropertyName = "decimal5";
 
 	/** @hidden */
+	public static final String geometryPropertyName = "geometry";
+
+	/** @hidden */
 	public static final String idPropertyName = "id";
 
 	/** @hidden */
@@ -115,6 +120,21 @@ public class ListAttributes extends AbstractPersistentBean {
 
 	/** @hidden */
 	public static final String imagePropertyName = "image";
+
+	/** @hidden */
+	public static final String monthFirstDatePropertyName = "monthFirstDate";
+
+	/** @hidden */
+	public static final String twelveHourDateTimePropertyName = "twelveHourDateTime";
+
+	/** @hidden */
+	public static final String monthNameTimestampPropertyName = "monthNameTimestamp";
+
+	/** @hidden */
+	public static final String twelveHourTimePropertyName = "twelveHourTime";
+
+	/** @hidden */
+	public static final String dateTimeAsDatePropertyName = "dateTimeAsDate";
 
 	/**
 	 * ConstantEnum
@@ -148,7 +168,7 @@ public class ListAttributes extends AbstractPersistentBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -243,6 +263,11 @@ public class ListAttributes extends AbstractPersistentBean {
 	private Decimal5 decimal5 = (Decimal5) ExpressionEvaluator.evaluate("{el:Decimal5.ZERO}", this);
 
 	/**
+	 * Geometry
+	 **/
+	private Geometry geometry = (Geometry) ExpressionEvaluator.evaluate("{el:newGeometry('POINT(0 0)')}", this);
+
+	/**
 	 * Id
 	 **/
 	private String id;
@@ -286,6 +311,31 @@ public class ListAttributes extends AbstractPersistentBean {
 	 * Image
 	 **/
 	private String image;
+
+	/**
+	 * Month First Date
+	 **/
+	private DateOnly monthFirstDate;
+
+	/**
+	 * 12 Hour Date Time
+	 **/
+	private DateTime twelveHourDateTime;
+
+	/**
+	 * Month Name Timestamp
+	 **/
+	private Timestamp monthNameTimestamp;
+
+	/**
+	 * 12 Hour Time
+	 **/
+	private TimeOnly twelveHourTime;
+
+	/**
+	 * Date Time As Date
+	 **/
+	private DateTime dateTimeAsDate;
 
 	@Override
 	@XmlTransient
@@ -528,6 +578,25 @@ public class ListAttributes extends AbstractPersistentBean {
 	}
 
 	/**
+	 * {@link #geometry} accessor.
+	 * @return	The value.
+	 **/
+	public Geometry getGeometry() {
+		return geometry;
+	}
+
+	/**
+	 * {@link #geometry} mutator.
+	 * @param geometry	The new value.
+	 **/
+	@XmlElement
+	@XmlJavaTypeAdapter(GeometryMapper.class)
+	public void setGeometry(Geometry geometry) {
+		preset(geometryPropertyName, geometry);
+		this.geometry = geometry;
+	}
+
+	/**
 	 * {@link #id} accessor.
 	 * @return	The value.
 	 **/
@@ -691,6 +760,106 @@ public class ListAttributes extends AbstractPersistentBean {
 	public void setImage(String image) {
 		preset(imagePropertyName, image);
 		this.image = image;
+	}
+
+	/**
+	 * {@link #monthFirstDate} accessor.
+	 * @return	The value.
+	 **/
+	public DateOnly getMonthFirstDate() {
+		return monthFirstDate;
+	}
+
+	/**
+	 * {@link #monthFirstDate} mutator.
+	 * @param monthFirstDate	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "date")
+	@XmlJavaTypeAdapter(DateOnlyMapper.class)
+	public void setMonthFirstDate(DateOnly monthFirstDate) {
+		preset(monthFirstDatePropertyName, monthFirstDate);
+		this.monthFirstDate = monthFirstDate;
+	}
+
+	/**
+	 * {@link #twelveHourDateTime} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getTwelveHourDateTime() {
+		return twelveHourDateTime;
+	}
+
+	/**
+	 * {@link #twelveHourDateTime} mutator.
+	 * @param twelveHourDateTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setTwelveHourDateTime(DateTime twelveHourDateTime) {
+		preset(twelveHourDateTimePropertyName, twelveHourDateTime);
+		this.twelveHourDateTime = twelveHourDateTime;
+	}
+
+	/**
+	 * {@link #monthNameTimestamp} accessor.
+	 * @return	The value.
+	 **/
+	public Timestamp getMonthNameTimestamp() {
+		return monthNameTimestamp;
+	}
+
+	/**
+	 * {@link #monthNameTimestamp} mutator.
+	 * @param monthNameTimestamp	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(TimestampMapper.class)
+	public void setMonthNameTimestamp(Timestamp monthNameTimestamp) {
+		preset(monthNameTimestampPropertyName, monthNameTimestamp);
+		this.monthNameTimestamp = monthNameTimestamp;
+	}
+
+	/**
+	 * {@link #twelveHourTime} accessor.
+	 * @return	The value.
+	 **/
+	public TimeOnly getTwelveHourTime() {
+		return twelveHourTime;
+	}
+
+	/**
+	 * {@link #twelveHourTime} mutator.
+	 * @param twelveHourTime	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "time")
+	@XmlJavaTypeAdapter(TimeOnlyMapper.class)
+	public void setTwelveHourTime(TimeOnly twelveHourTime) {
+		preset(twelveHourTimePropertyName, twelveHourTime);
+		this.twelveHourTime = twelveHourTime;
+	}
+
+	/**
+	 * {@link #dateTimeAsDate} accessor.
+	 * @return	The value.
+	 **/
+	public DateTime getDateTimeAsDate() {
+		return dateTimeAsDate;
+	}
+
+	/**
+	 * {@link #dateTimeAsDate} mutator.
+	 * @param dateTimeAsDate	The new value.
+	 **/
+	@XmlElement
+	@XmlSchemaType(name = "dateTime")
+	@XmlJavaTypeAdapter(DateTimeMapper.class)
+	public void setDateTimeAsDate(DateTime dateTimeAsDate) {
+		preset(dateTimeAsDatePropertyName, dateTimeAsDate);
+		this.dateTimeAsDate = dateTimeAsDate;
 	}
 
 	/**

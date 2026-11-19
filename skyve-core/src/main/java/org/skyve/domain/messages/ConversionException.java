@@ -19,7 +19,11 @@ import org.skyve.domain.types.converters.datetime.MM_DD_YYYY_HH_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH24_MI;
 import org.skyve.domain.types.converters.datetime.YYYY_MM_DD_HH_MI;
 import org.skyve.domain.types.converters.decimal.Decimal10Converter;
+import org.skyve.domain.types.converters.decimal.Decimal10Integer;
+import org.skyve.domain.types.converters.decimal.Decimal10IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal10OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2Converter;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
@@ -59,6 +63,7 @@ import org.skyve.domain.types.converters.timestamp.YYYY_MM_DD_HH_MI_SS;
 import org.skyve.util.Util;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Signals that a {@link org.skyve.domain.types.converters.Converter} could not parse a
@@ -195,10 +200,30 @@ public class ConversionException extends DomainException implements MessageExcep
 	 */
 	public static final String DECIMAL_10_CONVERTER_KEY = I18N_DECIMAL_PREFIX + Decimal10Converter.class.getSimpleName();
 	/**
+	 * Executes Decimal10Integer.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_INTEGER_KEY = I18N_DECIMAL_PREFIX + Decimal10Integer.class.getSimpleName();
+	/**
+	 * Executes Decimal10IntegerPercentage.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_INTEGER_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal10IntegerPercentage.class.getSimpleName();
+	/**
+	 * Executes Decimal10OneDecimalPlace.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_ONE_DECIMAL_PLACE_KEY = I18N_DECIMAL_PREFIX + Decimal10OneDecimalPlace.class.getSimpleName();
+	/**
 	 * Executes Decimal10TwoDecimalPlaces.class.getSimpleName.
 	 * @return the result
 	 */
 	public static final String DECIMAL_10_TWO_DECIMAL_PLACES_KEY = I18N_DECIMAL_PREFIX + Decimal10TwoDecimalPlaces.class.getSimpleName();
+	/**
+	 * Executes Decimal10TwoDecimalPlacesPercentage.class.getSimpleName.
+	 * @return the result
+	 */
+	public static final String DECIMAL_10_TWO_DECIMAL_PLACES_PERCENTAGE_KEY = I18N_DECIMAL_PREFIX + Decimal10TwoDecimalPlacesPercentage.class.getSimpleName();
 	/**
 	 * Executes Decimal2Converter.class.getSimpleName.
 	 * @return the result
@@ -422,7 +447,7 @@ public class ConversionException extends DomainException implements MessageExcep
 	 * @param i18nKey the i18nKey
 	 * @param i18nValues the i18nValues
 	 */
-	public ConversionException(@Nonnull String i18nKey, String... i18nValues) {
+	public ConversionException(@Nonnull String i18nKey, @Nullable String... i18nValues) {
 		super("Conversion failed for converter :- " + i18nKey, false);
 		messages = Collections.singletonList(new Message(Util.nullSafeI18n(i18nKey, i18nValues)));
 	}
@@ -442,7 +467,7 @@ public class ConversionException extends DomainException implements MessageExcep
 	 * @return the result
 	 */
 	@Override
-	public List<Message> getMessages() {
+	public @Nonnull List<Message> getMessages() {
 		return messages;
 	}
 }

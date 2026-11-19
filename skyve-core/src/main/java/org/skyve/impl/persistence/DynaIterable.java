@@ -14,6 +14,8 @@ import org.skyve.impl.util.LoggingIteratorAdapter;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.persistence.DataStore;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A lazy, auto-closing {@link org.skyve.persistence.AutoClosingIterable} over a raw
  * SQL query result set, surfacing each row as an Apache Commons
@@ -44,9 +46,10 @@ public class DynaIterable implements AutoClosingIterable<DynaBean> {
 	 * @param dialect SQL dialect used for parameter conversion
 	 */
 	@SuppressWarnings("resource")
-	public DynaIterable(Connection c, AbstractSQL sql, DataStore ds, SkyveDialect dialect) {
+	public DynaIterable(@Nonnull Connection c, @Nonnull AbstractSQL sql, @Nonnull DataStore ds, @Nonnull SkyveDialect dialect) {
 		try {
 			ps = new NamedParameterPreparedStatement(c, sql.toQueryString());
+			ps.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 			sql.prepareStatement(ps, ds, dialect);
 			rs = ps.executeQuery();
 		}
@@ -65,7 +68,7 @@ public class DynaIterable implements AutoClosingIterable<DynaBean> {
 	 * @return iterator over query rows as {@link DynaBean} instances
 	 */
 	@Override
-	public Iterator<DynaBean> iterator() {
+	public @Nonnull Iterator<DynaBean> iterator() {
 		try {
 			final ResultSetDynaClass rsdc = new ResultSetDynaClass(rs, true, true);
 			return new LoggingIteratorAdapter<>(rsdc.iterator());

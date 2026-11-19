@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
@@ -20,7 +21,6 @@ import org.apache.commons.beanutils.DynaBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.skyve.CORE;
@@ -60,13 +60,36 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		closeable.close();
 	}
 
+	/** A date parameter's name has ASCII digits in a JVM whose locale writes other digits (ar-EG writes ١ for 1). */
+	@Test
+	void testGetSubstitutedQueryParameterNameIsAsciiInAnArabicJvm() {
+		java.util.Locale display = java.util.Locale.getDefault(java.util.Locale.Category.DISPLAY);
+		java.util.Locale format = java.util.Locale.getDefault(java.util.Locale.Category.FORMAT);
+		java.util.Locale locale = java.util.Locale.getDefault();
+		java.util.Locale.setDefault(java.util.Locale.forLanguageTag("ar-EG"));
+		try {
+			when(bean.getQuery()).thenReturn("SELECT * FROM ADM_SecurityUser where createdDateTime < {DATE}");
+
+			SubstitutedQueryResult result = bean.getSubstitutedQuery();
+
+			String name = result.getParameters().keySet().iterator().next();
+			assertTrue(name.matches("d_\\d{12}_1"), name);
+			assertThat(result.getQuery(), containsString(":" + name));
+		}
+		finally {
+			java.util.Locale.setDefault(locale);
+			java.util.Locale.setDefault(java.util.Locale.Category.DISPLAY, display);
+			java.util.Locale.setDefault(java.util.Locale.Category.FORMAT, format);
+		}
+	}
+
 	@Test
 	void testGetSubstitutedQueryOneParameter() {
 		// setup the test data
 		String query = "SELECT * FROM ADM_SecurityUser where createdDateTime < {DATE}";
 
 		// setup mocks
-		Mockito.when(bean.getQuery()).thenReturn(query);
+		when(bean.getQuery()).thenReturn(query);
 
 		// call the method under test
 		SubstitutedQueryResult result = bean.getSubstitutedQuery();
@@ -85,7 +108,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		String query = "SELECT * FROM ADM_SecurityUser where createdDateTime BETWEEN {DATE} AND {DATE+1d}";
 
 		// setup mocks
-		Mockito.when(bean.getQuery()).thenReturn(query);
+		when(bean.getQuery()).thenReturn(query);
 
 		// call the method under test
 		SubstitutedQueryResult result = bean.getSubstitutedQuery();
@@ -315,6 +338,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		assertThrows(IllegalArgumentException.class, () -> bean.executeTestSQLQuery());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteSQLQueryBindsInputAndDefaultValues() throws Exception {
 		ReportDatasetExtension dataset = ReportDataset.newInstance();
@@ -334,6 +358,7 @@ class ReportDatasetExtensionTest extends AbstractH2Test {
 		assertEquals(1, results.size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testExecuteQueryBindsInputAndDefaultValues() throws Exception {
 		DateOnly savedDate = new DateOnly(LocalDate.of(2026, Month.FEBRUARY, 1));

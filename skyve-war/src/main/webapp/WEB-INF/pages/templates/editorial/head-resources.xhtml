@@ -1,6 +1,7 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
 		xmlns:ui="http://java.sun.com/jsf/facelets"
-		xmlns:h="http://java.sun.com/jsf/html">
+		xmlns:h="http://java.sun.com/jsf/html"
+		xmlns:c="http://java.sun.com/jsp/jstl/core">
 	<!-- Resource order is intentional. -->
 	<!-- 4.7 is disabled by default
 	<link type="text/css" rel="stylesheet" href="fontawesome-4.7.0/css/font-awesome.min.css" />
@@ -12,5 +13,5 @@
 	<h:outputStylesheet name="#{'editorial/assets/css/themes/'.concat(_skyveTheme.baseColour).concat('.css?v=').concat(bean.webResourceFileVersion)}" library="skyve" />
 	<h:outputStylesheet name="editorial/assets/css/themes/dark.css?v=#{bean.webResourceFileVersion}" library="skyve" media="(prefers-color-scheme: dark)" rendered="#{not _skyveTheme.forcedDark and not _skyveTheme.smartClient}" />
 	<link type="text/css" rel="stylesheet" href="pages/css/admin.css?v=#{bean.webResourceFileVersion}" />
-	<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script>
+	<script type="text/javascript" src="skyve/prime/skyve-min.js?v=#{bean.webResourceFileVersion}"></script><c:if test="#{bean.sailRecording}"><script type="text/javascript" src="skyve/sail/recorder-pf-min.js?v=#{bean.webResourceFileVersion}"></script></c:if>
 </ui:composition>

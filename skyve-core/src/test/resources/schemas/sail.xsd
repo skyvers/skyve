@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- Hand-maintained: XMLMetaData.main (schemagen) cannot emit block="#all" or xs:documentation; regenerate only to diff, then merge by hand. -->
 <xs:schema version="1.0" targetNamespace="http://www.skyve.org/xml/sail" xmlns:tns="http://www.skyve.org/xml/sail" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:ns1="http://www.skyve.org/xml/common">
 
   <xs:import namespace="http://www.skyve.org/xml/common" schemaLocation="common.xsd"/>
@@ -9,15 +10,38 @@
 
   <xs:element name="automation" type="tns:automation"/>
 
+  <xs:element name="call" type="tns:call">
+    <xs:annotation>
+      <xs:documentation>
+        Runs a handwritten Java step in the test JVM: a new instance of className, a SailCall with a public no-argument
+        constructor, given the parameters by name, with {run} and {var:name} substituted in their values. With variable,
+        the string it returns is kept for {var:name}; a null return then fails the step. An AssertionError from the call
+        is a failed assertion (recorded under Verify); any other exception fails the step. The contexts do not change.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
   <xs:element name="cancel" type="tns:cancel"/>
 
+  <xs:element name="captureCell" type="tns:captureCell"/>
+
+  <xs:element name="captureTitle" type="tns:captureTitle"/>
+
+  <xs:element name="captureValue" type="tns:captureValue"/>
+
   <xs:element name="clearContext" type="tns:clearContext"/>
+
+  <xs:element name="closeWindow" type="tns:closeWindow"/>
 
   <xs:element name="comment" type="tns:comment"/>
 
   <xs:element name="dataEnter" type="tns:dataEnter"/>
 
   <xs:element name="dataGridEdit" type="tns:dataGridEdit"/>
+
+  <xs:element name="dataGridLink" type="tns:dataGridLink"/>
+
+  <xs:element name="dataGridMove" type="tns:dataGridMove"/>
 
   <xs:element name="dataGridNew" type="tns:dataGridNew"/>
 
@@ -29,15 +53,43 @@
 
   <xs:element name="delete" type="tns:delete"/>
 
-  <xs:element name="execute" type="tns:execute"/>
+  <xs:element name="execute" type="tns:execute">
+    <xs:annotation>
+      <xs:documentation>
+        Runs JavaScript in the page: the body of a function of one argument, sail = {run, vars}, also arguments[0]. The
+        body is not token-substituted. With variable, the result (return) is kept as text for {var:name}; a null or
+        undefined result then fails the step. The contexts do not change.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="executeAsync" type="tns:executeAsync">
+    <xs:annotation>
+      <xs:documentation>
+        Runs the body of an async JavaScript function in the page, as execute does, so await works, and waits for it to
+        settle: within timeoutMillis, by default sail.timeoutSeconds. A rejection fails the step with the error's message.
+        With variable, the resolved value is kept as text for {var:name}; a null or undefined value then fails the step.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
 
   <xs:element name="interaction" type="tns:interaction"/>
+
+  <xs:element name="listGridClearFilter" type="tns:listGridClearFilter"/>
+
+  <xs:element name="listGridFilter" type="tns:listGridFilter"/>
 
   <xs:element name="listGridNew" type="tns:listGridNew"/>
 
   <xs:element name="listGridSelect" type="tns:listGridSelect"/>
 
+  <xs:element name="listGridSort" type="tns:listGridSort"/>
+
+  <xs:element name="listGridTool" type="tns:listGridTool"/>
+
   <xs:element name="listGridZoom" type="tns:listGridZoom"/>
+
+  <xs:element name="listMembershipMove" type="tns:listMembershipMove"/>
 
   <xs:element name="login" type="tns:login"/>
 
@@ -51,6 +103,8 @@
 
   <xs:element name="lookupDescriptionPick" type="tns:lookupDescriptionPick"/>
 
+  <xs:element name="navigateBack" type="tns:navigateBack"/>
+
   <xs:element name="navigateCalendar" type="tns:navigateCalendar"/>
 
   <xs:element name="navigateEdit" type="tns:navigateEdit"/>
@@ -60,6 +114,8 @@
   <xs:element name="navigateList" type="tns:navigateList"/>
 
   <xs:element name="navigateMap" type="tns:navigateMap"/>
+
+  <xs:element name="navigateMenu" type="tns:navigateMenu"/>
 
   <xs:element name="navigateTree" type="tns:navigateTree"/>
 
@@ -75,9 +131,24 @@
 
   <xs:element name="pushListContext" type="tns:pushListContext"/>
 
+  <xs:element name="refresh" type="tns:refresh"/>
+
   <xs:element name="remove" type="tns:remove"/>
 
   <xs:element name="save" type="tns:save"/>
+
+  <xs:element name="suite" type="tns:suite">
+    <xs:annotation>
+      <xs:documentation>
+        A SAIL suite: an execution plan of independent members, each a workflow or automation file relative to the
+        suite file's folder. Set-up members run first, in order; then the ordinary members, in order; then the
+        optional restore, even after failures, if its own requirements passed. Each member gets its own run (no
+        {run} or {var:name} sharing). Every ordinary member requires every set-up member.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="switchMode" type="tns:switchMode"/>
 
   <xs:element name="tabSelect" type="tns:tabSelect"/>
 
@@ -85,9 +156,42 @@
 
   <xs:element name="testFailure" type="tns:testFailure"/>
 
+  <xs:element name="testGridRows" type="tns:testGridRows"/>
+
+  <xs:element name="testMenu" type="tns:testMenu"/>
+
+  <xs:element name="testMessage" type="tns:testMessage"/>
+
+  <xs:element name="testScript" type="tns:testScript">
+    <xs:annotation>
+      <xs:documentation>
+        Asserts in JavaScript: the body of an async function, as executeAsync runs it, holds when it returns a truthy
+        value. It runs once, or with timeoutMillis every 250 ms until it holds; a run that throws counts as false. The
+        failure's message is message, with {run} and {var:name} substituted, or the script's first line. Follows the test
+        strategy: skipped under None.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
   <xs:element name="testSuccess" type="tns:testSuccess"/>
 
   <xs:element name="testValue" type="tns:testValue"/>
+
+  <xs:element name="testWidget" type="tns:testWidget"/>
+
+  <xs:element name="upload" type="tns:upload"/>
+
+  <xs:element name="waitFor" type="tns:waitFor">
+    <xs:annotation>
+      <xs:documentation>
+        Waits until JavaScript holds: the body of an async function, as executeAsync runs it, polled every 250 ms until it
+        returns a truthy value, within timeoutMillis, by default sail.timeoutSeconds. A poll that throws counts as false. A
+        wait, not a test: it runs under every test strategy, and a timeout fails the step.
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
+  <xs:element name="workflow" type="tns:workflow"/>
 
   <xs:element name="zoomIn" type="tns:zoomIn"/>
 
@@ -144,10 +248,34 @@
         <xs:element ref="tns:testFailure"/>
         <xs:element ref="tns:comment"/>
         <xs:element ref="tns:execute"/>
+        <xs:element ref="tns:executeAsync"/>
+        <xs:element ref="tns:waitFor"/>
+        <xs:element ref="tns:testScript"/>
+        <xs:element ref="tns:call"/>
         <xs:element ref="tns:pause"/>
         <xs:element ref="tns:pushEditContext"/>
         <xs:element ref="tns:popContext"/>
         <xs:element ref="tns:clearContext"/>
+        <xs:element ref="tns:upload"/>
+        <xs:element ref="tns:testMessage"/>
+        <xs:element ref="tns:testGridRows"/>
+        <xs:element ref="tns:testWidget"/>
+        <xs:element ref="tns:navigateMenu"/>
+        <xs:element ref="tns:testMenu"/>
+        <xs:element ref="tns:switchMode"/>
+        <xs:element ref="tns:listGridFilter"/>
+        <xs:element ref="tns:listGridClearFilter"/>
+        <xs:element ref="tns:listGridSort"/>
+        <xs:element ref="tns:captureValue"/>
+        <xs:element ref="tns:captureCell"/>
+        <xs:element ref="tns:captureTitle"/>
+        <xs:element ref="tns:dataGridLink"/>
+        <xs:element ref="tns:dataGridMove"/>
+        <xs:element ref="tns:listMembershipMove"/>
+        <xs:element ref="tns:navigateBack"/>
+        <xs:element ref="tns:refresh"/>
+        <xs:element ref="tns:closeWindow"/>
+        <xs:element ref="tns:listGridTool"/>
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
@@ -156,6 +284,7 @@
     <xs:sequence/>
     <xs:attribute name="customer" type="xs:string"/>
     <xs:attribute name="password" type="xs:string" use="required"/>
+    <xs:attribute name="remember" type="xs:boolean"/>
     <xs:attribute name="user" type="xs:string" use="required"/>
   </xs:complexType>
 
@@ -209,7 +338,10 @@
 
   <xs:complexType name="navigateLink">
     <xs:sequence/>
-    <xs:attribute name="href" type="xs:string" use="required"/>
+    <xs:attribute name="exact" type="xs:boolean"/>
+    <xs:attribute name="href" type="xs:string"/>
+    <xs:attribute name="text" type="xs:string"/>
+    <xs:attribute name="window" type="tns:window"/>
   </xs:complexType>
 
   <xs:complexType name="tabSelect">
@@ -225,6 +357,7 @@
   <xs:complexType name="dataEnter">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="match" type="tns:match"/>
     <xs:attribute name="navigateToWidget" type="xs:boolean"/>
     <xs:attribute name="value" type="xs:string" use="required"/>
   </xs:complexType>
@@ -233,6 +366,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -246,6 +380,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
         <xs:attribute name="createView" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
@@ -263,6 +398,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -271,6 +407,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -279,6 +416,7 @@
     <xs:complexContent>
       <xs:extension base="tns:abstractAction">
         <xs:sequence/>
+        <xs:attribute name="confirm" type="xs:boolean"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
@@ -296,13 +434,15 @@
   <xs:complexType name="lookupDescriptionAutoComplete">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="pick" type="xs:string"/>
     <xs:attribute name="search" type="xs:string" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionPick">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="lookupDescriptionNew">
@@ -332,25 +472,29 @@
   <xs:complexType name="dataGridZoom">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridEdit">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridRemove">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="dataGridSelect">
     <xs:sequence/>
     <xs:attribute name="binding" type="xs:string" use="required"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="listGridNew">
@@ -368,7 +512,8 @@
     <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="listGridSelect">
@@ -377,7 +522,8 @@
     <xs:attribute name="model" type="xs:string"/>
     <xs:attribute name="module" type="xs:string"/>
     <xs:attribute name="query" type="xs:string"/>
-    <xs:attribute name="row" type="xs:int" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
   </xs:complexType>
 
   <xs:complexType name="testValue">
@@ -399,9 +545,113 @@
     <xs:restriction base="xs:string"/>
   </xs:simpleType>
 
-  <xs:simpleType name="execute">
-    <xs:restriction base="xs:string"/>
-  </xs:simpleType>
+  <xs:complexType name="execute">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="variable" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              The variable that keeps the result, for {var:name}: a letter, then letters, digits or underscores.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="executeAsync">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="timeoutMillis" type="xs:int">
+          <xs:annotation>
+            <xs:documentation>
+              How long the promise may take to settle; by default sail.timeoutSeconds.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="variable" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              The variable that keeps the result, for {var:name}: a letter, then letters, digits or underscores.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="waitFor">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="timeoutMillis" type="xs:int">
+          <xs:annotation>
+            <xs:documentation>
+              How long to wait; by default sail.timeoutSeconds.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="testScript">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="message" type="xs:string">
+          <xs:annotation>
+            <xs:documentation>
+              The failure's message, with {run} and {var:name} substituted; by default the script's first line.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="timeoutMillis" type="xs:int">
+          <xs:annotation>
+            <xs:documentation>
+              How long to keep running the script until it holds; without it, it runs once.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="call">
+    <xs:sequence>
+      <xs:element name="parameter" type="tns:callParameter" form="qualified" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="className" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The fully qualified name of a SailCall class with a public no-argument constructor.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="variable" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          The variable that keeps the string the call returns, for {var:name}: a letter, then letters, digits or underscores.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="callParameter">
+    <xs:sequence/>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The parameter's name; each name only once in a call. Not substituted.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The parameter's value, with {run} and {var:name} substituted.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
 
   <xs:complexType name="pause">
     <xs:sequence/>
@@ -433,6 +683,162 @@
 
   <xs:complexType name="clearContext">
     <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="upload">
+    <xs:sequence/>
+    <xs:attribute name="action" type="xs:string"/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="file" type="xs:string" use="required"/>
+    <xs:attribute name="testSuccess" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="testMessage">
+    <xs:sequence/>
+    <xs:attribute name="contains" type="xs:string" use="required"/>
+    <xs:attribute name="type" type="tns:messageType"/>
+  </xs:complexType>
+
+  <xs:complexType name="testGridRows">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="maxRows" type="xs:int"/>
+    <xs:attribute name="minRows" type="xs:int"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="timeoutMillis" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="testWidget">
+    <xs:sequence/>
+    <xs:attribute name="action" type="xs:string"/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="enabled" type="xs:boolean"/>
+    <xs:attribute name="tab" type="xs:string"/>
+    <xs:attribute name="visible" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="navigateMenu">
+    <xs:sequence/>
+    <xs:attribute name="item" type="xs:string" use="required"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="testMenu">
+    <xs:sequence/>
+    <xs:attribute name="item" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string" use="required"/>
+    <xs:attribute name="present" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="switchMode">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridFilter">
+    <xs:sequence/>
+    <xs:attribute name="column" type="xs:string" use="required"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="operator" type="tns:filterOperator"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="value" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridClearFilter">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridSort">
+    <xs:sequence/>
+    <xs:attribute name="column" type="xs:string" use="required"/>
+    <xs:attribute name="descending" type="xs:boolean"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="captureValue">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="captureCell">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string"/>
+    <xs:attribute name="column" type="xs:string" use="required"/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="captureTitle">
+    <xs:sequence/>
+    <xs:attribute name="pattern" type="xs:string"/>
+    <xs:attribute name="variable" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridLink">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="confirm" type="xs:boolean"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="testSuccess" type="xs:boolean"/>
+    <xs:attribute name="text" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="dataGridMove">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="to" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="listMembershipMove">
+    <xs:sequence/>
+    <xs:attribute name="binding" type="xs:string" use="required"/>
+    <xs:attribute name="row" type="xs:int"/>
+    <xs:attribute name="rowContaining" type="xs:string"/>
+    <xs:attribute name="to" type="xs:int" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="navigateBack">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="refresh">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="closeWindow">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="listGridTool">
+    <xs:sequence/>
+    <xs:attribute name="document" type="xs:string"/>
+    <xs:attribute name="model" type="xs:string"/>
+    <xs:attribute name="module" type="xs:string"/>
+    <xs:attribute name="query" type="xs:string"/>
+    <xs:attribute name="tool" type="tns:tool" use="required"/>
   </xs:complexType>
 
   <xs:complexType name="interaction">
@@ -479,10 +885,34 @@
               <xs:element ref="tns:testFailure"/>
               <xs:element ref="tns:comment"/>
               <xs:element ref="tns:execute"/>
+              <xs:element ref="tns:executeAsync"/>
+              <xs:element ref="tns:waitFor"/>
+              <xs:element ref="tns:testScript"/>
+              <xs:element ref="tns:call"/>
               <xs:element ref="tns:pause"/>
               <xs:element ref="tns:pushEditContext"/>
               <xs:element ref="tns:popContext"/>
               <xs:element ref="tns:clearContext"/>
+              <xs:element ref="tns:upload"/>
+              <xs:element ref="tns:testMessage"/>
+              <xs:element ref="tns:testGridRows"/>
+              <xs:element ref="tns:testWidget"/>
+              <xs:element ref="tns:navigateMenu"/>
+              <xs:element ref="tns:testMenu"/>
+              <xs:element ref="tns:switchMode"/>
+              <xs:element ref="tns:listGridFilter"/>
+              <xs:element ref="tns:listGridClearFilter"/>
+              <xs:element ref="tns:listGridSort"/>
+              <xs:element ref="tns:captureValue"/>
+              <xs:element ref="tns:captureCell"/>
+              <xs:element ref="tns:captureTitle"/>
+              <xs:element ref="tns:dataGridLink"/>
+              <xs:element ref="tns:dataGridMove"/>
+              <xs:element ref="tns:listMembershipMove"/>
+              <xs:element ref="tns:navigateBack"/>
+              <xs:element ref="tns:refresh"/>
+              <xs:element ref="tns:closeWindow"/>
+              <xs:element ref="tns:listGridTool"/>
             </xs:choice>
           </xs:sequence>
         </xs:complexType>
@@ -492,11 +922,185 @@
     <xs:attribute name="name" type="xs:string" use="required"/>
   </xs:complexType>
 
+  <xs:complexType name="workflow">
+    <xs:sequence>
+      <xs:element ref="tns:automation" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="testStrategy" type="tns:testStrategy">
+      <xs:annotation>
+        <xs:documentation>
+          The default test strategy for the automations that state none; an automation's own testStrategy wins.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="suite">
+    <xs:sequence>
+      <xs:element name="viewRoles" type="tns:viewRoles" form="qualified" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            The roles the runner builds views with for one user that the members sign in as; one per user.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="setUp" type="tns:suiteMember" form="qualified" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            A set-up member: runs first, in order, locked to its own test strategy. Every later set-up member and every
+            ordinary member requires it.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="member" type="tns:ordinarySuiteMember" form="qualified" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            An ordinary member: runs in order after the set-up members; a failure does not stop the others.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="restore" type="tns:suiteMember" form="qualified" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            The restore member: runs last, even after failures, if its own requirements passed. It can require only
+            set-up members, and is locked to its own test strategy.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="testStrategy" type="tns:testStrategy">
+      <xs:annotation>
+        <xs:documentation>
+          The default test strategy for the automations of unlocked members that state none; a workflow's or an
+          automation's own testStrategy wins. Set-up, restore and lockTestStrategy="true" members ignore it.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="evidence" type="tns:evidence">
+      <xs:annotation>
+        <xs:documentation>The evidence the suite asks its run to keep; the run can override it.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="browserPerMember" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          true to run each member in a browser of its own, stopped when the member ends, so that no cookies, storage or
+          other browser state carry over to the next member. Default false: a suite hands its browser on from member to
+          member when the configuration matches. A run that also asks for it in code (SailSuite.browserPerMember())
+          gets it if either asks.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="viewRoles">
+    <xs:sequence>
+      <xs:element name="role" type="xs:token" form="qualified" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>A role: module.Role, or a customer role's name.</xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="user" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>The user name as the members sign in with it; can hold {run} and {var:name}.</xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="suiteMember" block="#all">
+    <xs:sequence/>
+    <xs:attribute name="file" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The workflow or automation file: a normalised path relative to the suite file's folder, with / between
+          folders and no . or .. segments. It also names the member in requires.
+        </xs:documentation>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="requires">
+      <xs:annotation>
+        <xs:documentation>
+          Space-separated files of earlier members that must pass before this one runs; otherwise it is skipped.
+        </xs:documentation>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:list itemType="xs:string"/>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <xs:complexType name="ordinarySuiteMember" block="#all">
+    <xs:complexContent>
+      <xs:extension base="tns:suiteMember">
+        <xs:sequence/>
+        <xs:attribute name="lockTestStrategy" type="xs:boolean">
+          <xs:annotation>
+            <xs:documentation>
+              true to run this member with its own test strategy, ignoring a run's override and the suite's default.
+              Default false.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
   <xs:simpleType name="testStrategy">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Assert"/>
       <xs:enumeration value="Verify"/>
       <xs:enumeration value="None"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="evidence">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="none"/>
+      <xs:enumeration value="failures"/>
+      <xs:enumeration value="snapshots"/>
+      <xs:enumeration value="video"/>
+      <xs:enumeration value="all"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="window">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="new"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="match">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="index"/>
+      <xs:enumeration value="code"/>
+      <xs:enumeration value="label"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="messageType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="info"/>
+      <xs:enumeration value="warning"/>
+      <xs:enumeration value="error"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="filterOperator">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="contains"/>
+      <xs:enumeration value="startsWith"/>
+      <xs:enumeration value="equals"/>
+      <xs:enumeration value="notEquals"/>
+      <xs:enumeration value="lessThan"/>
+      <xs:enumeration value="greaterThan"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="tool">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="refresh"/>
+      <xs:enumeration value="clearSelection"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

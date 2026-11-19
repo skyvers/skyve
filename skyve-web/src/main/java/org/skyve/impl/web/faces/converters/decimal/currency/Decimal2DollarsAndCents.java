@@ -4,6 +4,8 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
@@ -26,7 +28,7 @@ public class Decimal2DollarsAndCents extends org.skyve.domain.types.converters.d
 	 * @throws ConverterException when the submitted value cannot be parsed using this format
 	 */
 	@Override
-	public Decimal2 getAsObject(FacesContext fc, UIComponent component, String value) {
+	public @Nullable Decimal2 getAsObject(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable String value) {
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
@@ -49,7 +51,7 @@ public class Decimal2DollarsAndCents extends org.skyve.domain.types.converters.d
 	 * @return a formatted display value, or an empty string when the value is {@code null} or formatting fails
 	 */
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Decimal2 value) {
+	public @Nonnull String getAsString(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable Decimal2 value) {
 		if (value == null) {
 			return "";
 		}

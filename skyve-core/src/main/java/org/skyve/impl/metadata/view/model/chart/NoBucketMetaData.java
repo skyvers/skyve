@@ -3,6 +3,8 @@ package org.skyve.impl.metadata.view.model.chart;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.model.chart.Bucket;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -19,12 +21,12 @@ public class NoBucketMetaData implements Bucket {
 	private static final long serialVersionUID = 4689094392124560560L;
 
 	@Override
-	public String bizQLExpression(String categoryBindingOrAlias) {
+	public @Nonnull String bizQLExpression(@Nonnull String categoryBindingOrAlias) {
 		return "bean." + categoryBindingOrAlias;
 	}
 
 	@Override
-	public String label(Object category) {
+	public @Nullable String label(@Nullable Object category) {
 		return (category == null) ? null : category.toString();
 	}
 }

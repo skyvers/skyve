@@ -1,7 +1,7 @@
 package org.skyve.impl.cdi;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,13 +9,13 @@ import java.lang.reflect.Field;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.impl.persistence.AbstractPersistence;
 
 @SuppressWarnings("static-method")
-public class SkyveCDIProducerTest {
+class SkyveCDIProducerTest {
 	@Test
-	public void producerMethodsReturnExpectedInjectablesAndStash() throws Exception {
+	void producerMethodsReturnExpectedInjectablesAndStash() throws Exception {
 		SortedMap<String, Object> stash = new TreeMap<>();
 		stash.put("k", "v");
 

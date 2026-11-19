@@ -2,9 +2,9 @@ package org.skyve.metadata.view.model.chart;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.skyve.persistence.BizQL;
 import org.skyve.persistence.DocumentQuery;
 
@@ -58,7 +58,7 @@ class ProjectedChartBuilderTest {
 	@SuppressWarnings("static-method")
 	void withDocumentQueryReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
-		DocumentQuery mockQuery = Mockito.mock(DocumentQuery.class);
+		DocumentQuery mockQuery = mock(DocumentQuery.class);
 		ProjectedChartBuilder result = builder.with(mockQuery);
 		assertThat(result, sameInstance(builder));
 	}
@@ -67,7 +67,7 @@ class ProjectedChartBuilderTest {
 	@SuppressWarnings("static-method")
 	void withBizQLReturnsSelf() {
 		ProjectedChartBuilder builder = new ProjectedChartBuilder();
-		BizQL mockBizQL = Mockito.mock(BizQL.class);
+		BizQL mockBizQL = mock(BizQL.class);
 		ProjectedChartBuilder result = builder.with(mockBizQL);
 		assertThat(result, sameInstance(builder));
 	}

@@ -343,9 +343,9 @@ abstract class BeanVisitorImpl {
 	/**
 	 * @return The bizId of the instance unless vectorCyclicDetection is on, then return a path through the relation, module and document to the bean.
 	 */
-	private String determineVisitedKey(@Nonnull Bean bean, 
-										@Nullable Document owningDocument,
-										@Nullable Relation owningRelation) {
+	private @Nullable String determineVisitedKey(@Nonnull Bean bean, 
+													@Nullable Document owningDocument,
+													@Nullable Relation owningRelation) {
 		if (vectorCyclicDetection) {
 			StringBuilder sb = new StringBuilder(128).append(bean.getBizId());
 			if (owningRelation != null) {

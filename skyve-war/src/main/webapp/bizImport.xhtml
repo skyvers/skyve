@@ -17,10 +17,23 @@
 				<link type="text/css" rel="stylesheet" href="skyve/css/upload-min.css?v=#{_skyveBizImport.webResourceFileVersion}" />
 				<script type="text/javascript">
 					//<![CDATA[
-					function skyveAfterBizImport() {
+					// Once an import has run, refresh the view, and if it succeeded without problems
+					// (args.bizImportSucceeded), close the window and show this page's messages (args.uploadMessages) in
+					// the view's growl; an import with problems, or that failed, leaves it open, showing them.
+					// The window closes last: the opener is read from the window stack, and closing it removes this page.
+					// The messages are shown once the refresh has returned, and with keep, as upload.xhtml shows an
+					// upload's (see skyveAfterActionUpload there).
+					function skyveAfterBizImport(args) {
 						var owner = SKYVE.Util.findSmartClientWindow();
 						if (owner) {
-							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH');
+							var succeeded = args && args.bizImportSucceeded;
+							var growl = (succeeded && args.uploadMessages) ?
+											owner.isc.BizUtil.growl.bind(owner.isc.BizUtil, owner.JSON.parse(args.uploadMessages), null, null, true) :
+											null;
+							owner.isc.WindowStack.getOpener().saveInstance(true, '_PUSH', growl);
+							if (succeeded) {
+								owner.isc.WindowStack.popoff(false);
+							}
 						}
 					}
 					//]]>
@@ -38,7 +51,7 @@
 									allowTypes="#{'/'.concat(_skyveBizImport.whitelistRegex).concat('/i')}"
 									invalidFileMessage="#{_skyveBizImport.i18n['page.bizImport.invalidFile']}"
 									update="messages problems"
-									oncomplete="skyveAfterBizImport()">
+									oncomplete="skyveAfterBizImport(args)">
 						<div class="skyve-upload-watermark">
 							<i class="fa-solid fa-cloud-arrow-up" aria-hidden="true"></i>
 							<span>#{_skyveBizImport.i18n['page.fileUpload.dropInstruction']}</span>

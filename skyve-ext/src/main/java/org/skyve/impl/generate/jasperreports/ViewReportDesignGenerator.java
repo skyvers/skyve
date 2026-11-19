@@ -7,6 +7,9 @@ import org.skyve.impl.metadata.module.ModuleImpl;
 import org.skyve.impl.metadata.view.ViewImpl;
 import org.skyve.metadata.view.View;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Generates a JasperReports design from a Skyve view definition, producing a
  * layout that mirrors the view's sections and widget arrangement.
@@ -24,7 +27,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      *
      * @param visitor The visitor used to extract fields and layout bands.
      */
-    public ViewReportDesignGenerator(ReportViewVisitor visitor) {
+    public ViewReportDesignGenerator(@Nullable ReportViewVisitor visitor) {
         this.visitor = visitor;
     }
 
@@ -33,7 +36,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      *
      * @return The configured visitor, or {@code null} when not initialised.
      */
-    public ReportViewVisitor getVisitor() {
+    public @Nullable ReportViewVisitor getVisitor() {
         return visitor;
     }
 
@@ -42,7 +45,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      *
      * @param visitor The visitor to use for subsequent generation calls.
      */
-    public void setVisitor(ReportViewVisitor visitor) {
+    public void setVisitor(@Nullable ReportViewVisitor visitor) {
         this.visitor = visitor;
     }
 
@@ -52,7 +55,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @return A new view-based generator instance.
      */
     @Override
-    protected ViewReportDesignGenerator getSubreportGenerator() {
+    protected @Nonnull ViewReportDesignGenerator getSubreportGenerator() {
         return new ViewReportDesignGenerator();
     }
 
@@ -62,7 +65,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design to populate.
      */
     @Override
-    protected void addFields(DesignSpecification design) {
+    protected void addFields(@Nonnull DesignSpecification design) {
         super.addFields(design);
 
         initialiseVisitorIfNull(design);
@@ -78,7 +81,7 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @param design The design to populate.
      */
     @Override
-    protected void addBands(DesignSpecification design) {
+    protected void addBands(@Nonnull DesignSpecification design) {
         super.addBands(design);
 
         initialiseVisitorIfNull(design);
@@ -97,12 +100,17 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
      * @return The title band.
      */
     @Override
-    protected ReportBand createTitleBand(DesignSpecification design) {
+    protected @Nonnull ReportBand createTitleBand(@Nonnull DesignSpecification design) {
         ReportBand title = super.createTitleBand(design);
 
         // construct title band
         if (DesignSpecification.ReportType.report.equals(design.getReportType())) {
-            title = Renderer.addElement(title, ReportElement.ElementType.textField, "title", Renderer.renderBoundMessage(design, visitor.getViewTitle()), null, null,
+            // a view always has a title - View.getTitle() is mandatory
+            final String viewTitle = visitor.getViewTitle();
+            if (viewTitle == null) {
+                throw new IllegalStateException("The view for report design " + design.getName() + " has no title");
+            }
+            title = Renderer.addElement(title, ReportElement.ElementType.textField, "title", Renderer.renderBoundMessage(design, viewTitle), null, null,
             		Integer.valueOf(0), Integer.valueOf(0), design.getColumnWidth(), Integer.valueOf(design.getDefaultElementHeight().intValue() * 2),
                     null, ReportElement.ElementAlignment.center, Boolean.TRUE, null, null, null, null);
 
@@ -121,10 +129,15 @@ public class ViewReportDesignGenerator extends ReportDesignGenerator {
         return title;
     }
 
-    private void initialiseVisitorIfNull(DesignSpecification design) {
+    private void initialiseVisitorIfNull(@Nonnull DesignSpecification design) {
         if (visitor == null) {
-            final View view = design.getDocument().getView(design.getUxui(), CORE.getCustomer(), View.ViewType.edit.toString());
-            visitor = new ReportViewVisitor(this, (CustomerImpl) CORE.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view, design.getUxui());
+            final String uxui = design.getUxui();
+            if (uxui == null) {
+                throw new IllegalStateException("The view report design for " + design.getModuleName() + '.' + design.getDocumentName() +
+                                                    " has no UX/UI to choose the view with");
+            }
+            final View view = design.getDocument().getView(uxui, CORE.getCustomer(), View.ViewType.edit.toString());
+            visitor = new ReportViewVisitor(this, (CustomerImpl) CORE.getCustomer(), (ModuleImpl) design.getModule(), (DocumentImpl) design.getDocument(), (ViewImpl) view, uxui);
         }
     }
 }

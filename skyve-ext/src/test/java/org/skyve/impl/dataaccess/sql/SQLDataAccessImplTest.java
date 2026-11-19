@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -33,6 +34,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void closeWithNoConnectionDoesNothing() {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 
 		assertDoesNotThrow(dataAccess::close);
@@ -40,6 +42,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void closeWithOpenConnectionClosesConnection() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.FALSE);
@@ -52,6 +55,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void closeWithClosedConnectionDoesNotCloseAgain() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.TRUE);
@@ -64,6 +68,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void commitWithOpenConnectionCommits() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.FALSE);
@@ -76,6 +81,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void commitWithClosedConnectionSkipsCommit() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.TRUE);
@@ -88,6 +94,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void commitWrapsSQLExceptionAsDomainException() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.FALSE);
@@ -100,6 +107,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void rollbackWithOpenConnectionRollsBack() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.FALSE);
@@ -112,6 +120,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void rollbackWithClosedConnectionSkipsRollback() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.TRUE);
@@ -124,6 +133,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void rollbackWrapsSQLExceptionAsDomainException() throws Exception {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Connection connection = mock(Connection.class);
 		when(connection.isClosed()).thenReturn(Boolean.FALSE);
@@ -136,6 +146,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void newSQLWithDocumentReturnsSQLDataAccessSQL() {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 		Document document = mock(Document.class);
 
@@ -146,6 +157,7 @@ class SQLDataAccessImplTest {
 
 	@Test
 	void newSQLWithQueryOnlyReturnsSQLDataAccessSQL() {
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 
 		SQLDataAccessSQL sql = (SQLDataAccessSQL) dataAccess.newSQL("select 1");
@@ -157,6 +169,7 @@ class SQLDataAccessImplTest {
 	void newSQLWithModuleAndDocumentLooksUpDrivingDocument() throws Exception {
 		Fixture fixture = fixture("select * from orders", 15);
 		bindPersistenceWithUser(fixture.user);
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 
 		AbstractSQL sql = (AbstractSQL) dataAccess.newSQL("sales", "Order", "select * from orders");
@@ -172,6 +185,7 @@ class SQLDataAccessImplTest {
 	void newNamedSQLWithDocumentUsesModuleQueryAndTimeout() throws Exception {
 		Fixture fixture = fixture("select * from orders where status = :status", 20);
 		bindPersistenceWithUser(fixture.user);
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 
 		AbstractSQL sql = (AbstractSQL) dataAccess.newNamedSQL(fixture.document, "OpenOrders");
@@ -181,13 +195,14 @@ class SQLDataAccessImplTest {
 		assertEquals("sales", sql.getModuleName());
 		assertEquals("Order", sql.getDocumentName());
 		assertEquals(20, sql.getTimeoutInSeconds());
-		verify(fixture.module).getSQL("OpenOrders");
+		verify(fixture.module).getNullSafeSQL("OpenOrders");
 	}
 
 	@Test
 	void newNamedSQLWithModuleAndDocumentUsesModuleQueryAndTimeout() throws Exception {
 		Fixture fixture = fixture("select * from archived_orders", 30);
 		bindPersistenceWithUser(fixture.user);
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 
 		AbstractSQL sql = (AbstractSQL) dataAccess.newNamedSQL("sales", "Order", "ArchivedOrders");
@@ -197,7 +212,7 @@ class SQLDataAccessImplTest {
 		assertEquals("sales", sql.getModuleName());
 		assertEquals("Order", sql.getDocumentName());
 		assertEquals(30, sql.getTimeoutInSeconds());
-		verify(fixture.module).getSQL("ArchivedOrders");
+		verify(fixture.module).getNullSafeSQL("ArchivedOrders");
 		verify(fixture.module).getDocument(fixture.customer, "Order");
 	}
 
@@ -205,6 +220,7 @@ class SQLDataAccessImplTest {
 	void newNamedSQLWithModuleOnlyUsesModuleQueryAndTimeout() throws Exception {
 		Fixture fixture = fixture("select count(*) from orders", 45);
 		bindPersistenceWithUser(fixture.user);
+		@SuppressWarnings("null") // passes null on purpose
 		SQLDataAccessImpl dataAccess = new SQLDataAccessImpl(null);
 
 		AbstractSQL sql = (AbstractSQL) dataAccess.newNamedSQL("sales", "OrderCount");
@@ -212,15 +228,15 @@ class SQLDataAccessImplTest {
 		assertInstanceOf(SQLDataAccessSQL.class, sql);
 		assertEquals("select count(*) from orders", sql.toQueryString());
 		assertEquals(45, sql.getTimeoutInSeconds());
-		verify(fixture.module).getSQL("OrderCount");
+		verify(fixture.module).getNullSafeSQL("OrderCount");
 	}
 
 	private static void doThrowOnCommit(Connection connection) throws SQLException {
-		org.mockito.Mockito.doThrow(new SQLException("commit failed")).when(connection).commit();
+		doThrow(new SQLException("commit failed")).when(connection).commit();
 	}
 
 	private static void doThrowOnRollback(Connection connection) throws SQLException {
-		org.mockito.Mockito.doThrow(new SQLException("rollback failed")).when(connection).rollback();
+		doThrow(new SQLException("rollback failed")).when(connection).rollback();
 	}
 
 	private static void setConnection(SQLDataAccessImpl dataAccess, Connection connection) throws Exception {
@@ -239,9 +255,9 @@ class SQLDataAccessImplTest {
 		when(user.getCustomer()).thenReturn(customer);
 		when(customer.getModule("sales")).thenReturn(module);
 		when(module.getDocument(customer, "Order")).thenReturn(document);
-		when(module.getSQL("OpenOrders")).thenReturn(sqlDefinition);
-		when(module.getSQL("ArchivedOrders")).thenReturn(sqlDefinition);
-		when(module.getSQL("OrderCount")).thenReturn(sqlDefinition);
+		when(module.getNullSafeSQL("OpenOrders")).thenReturn(sqlDefinition);
+		when(module.getNullSafeSQL("ArchivedOrders")).thenReturn(sqlDefinition);
+		when(module.getNullSafeSQL("OrderCount")).thenReturn(sqlDefinition);
 		when(document.getOwningModuleName()).thenReturn("sales");
 		when(document.getName()).thenReturn("Order");
 		when(sqlDefinition.getQuery()).thenReturn(query);

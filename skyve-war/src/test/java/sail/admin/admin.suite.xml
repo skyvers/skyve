@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	The admin module suite, across both renderers: every admin menu item and the actions behind it, in PrimeFaces (pf/,
+	tablet; pf/10-phone-smoke.xml on a phone) and SmartClient (sc/). Run it only against a disposable server: it backs up,
+	changes, truncates and restores the data. AdminSuiteSailIT runs it; so can SailRunIT (-Dsail.run=sail/admin/admin.suite.xml).
+
+	The bracket, across both renderers: 00-precondition.xml (PrimeFaces) checks that no earlier run left its restore
+	marker; 00-backup.xml (a workflow) clears the completed jobs list and backs up in PrimeFaces, then clears it again and
+	backs up in SmartClient; 00-marker.xml (SmartClient) leaves the marker that the restore must remove. Every member
+	requires the set-ups, so when one fails nothing else runs. 99-restore.xml (a workflow) first restores the newest backup
+	(SmartClient's), once; then both renderers check the marker has gone and each deletes its backup; it runs
+	last, after failures too, but only when the precondition and the backup passed (otherwise the newest backup could be
+	another one).
+
+	Members are independent: each signs in, makes what it needs with its own run token, and cleans up. None requires another.
+	The order still matters for one thing: the 05-reports-misc.xml members check the backup job's row in the completed jobs
+	list, and the 11-user-list.xml and 98-destructive.xml members clear that list, so both 11 members run after both 05
+	members, the destructive members run after every other one, and sc/99-truncate.xml (SmartClient's Truncate) runs last,
+	just before the restore. pf/07-reports.xml is a workflow of SmartClient and PrimeFaces legs (report design is
+	SmartClient only; the Reports list and scheduling are PrimeFaces only). The 06 and 08 members share fixed contact names
+	(their spreadsheets cannot hold the run token), and the 11 members a generated user name family, so neither pair may run at
+	the same time; a suite runs its members one at a time.
+
+	-Dsail.suite.only=pf/ or sc/ chooses one renderer's members, and -Dsail.suite.only=03 both 03 members; the bracket
+	always runs, in both renderers.
+	Each member's strategy is its own (Assert); -Dsail.testStrategy=Verify applies to the ordinary members, while the set-ups
+	and the restore stay locked to theirs.
+-->
+<suite xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+		xmlns="http://www.skyve.org/xml/sail"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<viewRoles user="sail{run}">
+		<!-- 03-security-admin.xml makes this user in a group with these roles, then signs in as them -->
+		<role>admin.BasicUser</role>
+		<role>admin.ContactViewer</role>
+	</viewRoles>
+	<setUp file="00-precondition.xml"/>
+	<setUp file="00-backup.xml"/>
+	<setUp file="00-marker.xml"/>
+	<member file="pf/01-session.xml"/>
+	<member file="pf/02-contacts-communications.xml"/>
+	<member file="pf/03-security-admin.xml"/>
+	<member file="pf/04-devops.xml"/>
+	<member file="pf/05-reports-misc.xml"/>
+	<member file="pf/06-import-export.xml"/>
+	<member file="pf/07-reports.xml"/>
+	<member file="pf/08-tags-communications.xml"/>
+	<member file="pf/09-operations.xml"/>
+	<member file="pf/10-phone-smoke.xml"/>
+	<member file="sc/01-session.xml"/>
+	<member file="sc/02-contacts-communications.xml"/>
+	<member file="sc/03-security-admin.xml"/>
+	<member file="sc/04-devops.xml"/>
+	<member file="sc/05-reports-misc.xml"/>
+	<member file="sc/06-import-export.xml"/>
+	<member file="sc/07-reports.xml"/>
+	<member file="sc/08-tags-communications.xml"/>
+	<member file="sc/09-operations.xml"/>
+	<member file="pf/11-user-list.xml"/>
+	<member file="sc/11-user-list.xml"/>
+	<member file="pf/98-destructive.xml"/>
+	<member file="sc/98-destructive.xml"/>
+	<member file="sc/99-truncate.xml"/>
+	<restore file="99-restore.xml" requires="00-precondition.xml 00-backup.xml"/>
+</suite>

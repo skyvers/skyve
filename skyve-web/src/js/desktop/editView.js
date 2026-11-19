@@ -38,12 +38,32 @@ isc.BizContainer.addMethods({
 isc.ClassFactory.defineClass("EditView", "BizContainer");
 
 isc.EditView.addClassProperties({
+	// The response status of a request that asks the user a question before it is resent
+	_QUESTION: -50,
+	// The response status of a request for an action that the view, as last rendered, offered no trigger for
+	_UNAVAILABLE: -51,
 	_DATA_SOURCE: isc.RestDataSource.create({
 		dataFormat: "json",
 		jsonPrefix: "",
 		jsonSuffix: "",
 		dataURL: "smartedit",
 		sendExtraFields: false, // Ensure that only datasource defined fields are sent
+		// A server-side question (status -50), and the growls and messages raised before an error,
+		// are sent beside the standard response properties, which RestDataSource does not copy to the DSResponse
+		transformResponse: function (dsResponse, dsRequest, data) {
+			const result = this.Super("transformResponse", arguments);
+			const response = data?.response;
+			if (response?.question) {
+				result.question = response.question;
+			}
+			if (response?._growls) {
+				result._growls = response._growls;
+			}
+			if (response?._messages) {
+				result._messages = response._messages;
+			}
+			return result;
+		},
 	}),
 });
 
@@ -306,8 +326,8 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
@@ -425,9 +445,9 @@ isc.EditView.addMethods({
 					this.scatter(values);
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					// Display a warning if there are issues
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					// Display the problem, and any growls and messages raised before it
+					this._displayFailure(dsResponse, data);
 				}
 
 				// Execute the completed callback if provided
@@ -507,7 +527,7 @@ isc.EditView.addMethods({
 	 * @param {Function} completedCallback(instance, success) - callback function on completion.
 	 */
 	saveInstance: function (validate, action, completedCallback) {
-		const instance = this.gather(validate);
+		const instance = this.gather(validate, true);
 		if (!instance) {
 			this._source = null;
 			if (completedCallback) {
@@ -548,7 +568,7 @@ isc.EditView.addMethods({
 
 		this._vm.disableValidation = true;
 		this._vm.saveData(
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				let success = false;
 				if (dsResponse.status >= 0) {
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -622,14 +642,14 @@ isc.EditView.addMethods({
 					}
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
 					completedCallback(data, success);
 				}
-			},
+			}),
 			{ params, willHandleError: true },
 		);
 		this._vm.disableValidation = false;
@@ -641,7 +661,7 @@ isc.EditView.addMethods({
 	 * @param {Function} completedCallback - callback function on completion.
 	 */
 	deleteInstance: function (validate, completedCallback) {
-		const instance = this.gather(validate);
+		const instance = this.gather(validate, true);
 		if (!instance) {
 			if (completedCallback) {
 				completedCallback({}, false); // Validation errors occurred, no data
@@ -658,23 +678,27 @@ isc.EditView.addMethods({
 			params._csrf = this._csrf;
 		}
 
+		const resendRemove = (answered, callback) => {
+			isc.EditView._DATA_SOURCE.removeData(instance, callback, { params: answered, willHandleError: true });
+		};
+
 		isc.EditView._DATA_SOURCE.removeData(
 			instance,
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				let success = false;
 				if (dsResponse.status >= 0) {
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
 					isc.WindowStack.popoff(true);
 
 					success = true;
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 				}
 
 				if (completedCallback) {
 					completedCallback(data, success);
 				}
-			},
+			}, resendRemove),
 			{ params, willHandleError: true },
 		);
 	},
@@ -699,7 +723,7 @@ isc.EditView.addMethods({
 		gridRowBizId,
 		completedCallback,
 	) {
-		const instance = this.gather(validate);
+		const instance = this.gather(validate, true);
 		if (!instance) {
 			if (completedCallback) {
 				completedCallback({}, false); // Did not pass validation, no data
@@ -731,7 +755,7 @@ isc.EditView.addMethods({
 
 		// Save data and handle the response
 		this._vm.saveData(
-			(dsResponse, data) => {
+			this._askable(params, completedCallback, (dsResponse, data) => {
 				if (dsResponse.status >= 0) {
 					// Update CSRF token from response header
 					this._csrf = dsResponse.httpHeaders["x-csrf-token"];
@@ -749,23 +773,103 @@ isc.EditView.addMethods({
 					if (data._redirectUrl) {
 						window.location.assign(data._redirectUrl);
 					}
-				} else if (dsResponse.status === -1) {
-					isc.warn(data, null, { title: isc.i18nMessages.editView_Problems });
+				} else {
+					this._displayFailure(dsResponse, data);
 
 					if (completedCallback) {
 						completedCallback(data, false);
 					}
-				} else if (completedCallback) {
-					completedCallback(data, false);
 				}
 
 				return true;
-			},
+			}),
 			{ params, willHandleError: true },
 		);
 
 		// Re-enable validation immediately after the call
 		this._vm.disableValidation = false;
+	},
+
+	/**
+	 * Wraps a DataSource callback so that a question the server asks (response status -50) is shown before the
+	 * callback sees a response. A button that does not abort adds its answer to the answers given so far in this
+	 * gesture and resends the request with all of them in the _q parameter; the request parameters are otherwise
+	 * unchanged, so the CSRF token, source and action are those of the original request. A button that aborts,
+	 * Escape or the close box ends the gesture, calling completedCallback with success false.
+	 * Any other response goes to the callback.
+	 *
+	 * @param {Object} params - the parameters of the request; the answers are kept on it for the rest of the gesture.
+	 * @param {Function} completedCallback - the calling method's completion callback, or null.
+	 * @param {Function} callback - the DataSource callback to wrap.
+	 * @param {Function} resend - function(params, callback) that sends the same request again with the given
+	 *                            parameters and callback; by default, the values manager saves again.
+	 * @returns {Function} the wrapped DataSource callback.
+	 */
+	_askable: function (
+		params,
+		completedCallback,
+		callback,
+		resend = (answered, askable) => {
+			this._vm.disableValidation = true;
+			this._vm.saveData(askable, { params: answered, willHandleError: true });
+			this._vm.disableValidation = false;
+		},
+	) {
+		const askable = (dsResponse, data) => {
+			if (dsResponse.status !== isc.EditView._QUESTION) {
+				return callback(dsResponse, data);
+			}
+
+			const question = dsResponse.question;
+			let dialog = null;
+			let aborting = null;
+			let defaultIndex = 0;
+			const answer = (button) => {
+				dialog.destroy();
+				if (button.aborts) {
+					completedCallback?.(data, false);
+				} else {
+					const answers = params._q ? JSON.parse(params._q) : [];
+					answers.push({ id: question.id, code: button.code });
+					params._q = JSON.stringify(answers);
+					resend({ ...params }, askable);
+				}
+			};
+			const buttons = question.buttons.map((button, index) => {
+				if (button.aborts) {
+					aborting = button;
+				}
+				if (button.default) {
+					defaultIndex = index;
+				}
+				return isc.IButton.create({
+					title: isc.makeXMLSafe(button.label),
+					click: () => answer(button),
+				});
+			});
+			dialog = isc.Dialog.create({
+				title: isc.makeXMLSafe(question.title),
+				message: question.message.asHTML(),
+				icon: "[SKIN]ask.png",
+				isModal: true,
+				showModalMask: true,
+				autoCenter: true,
+				// Only a question with a button that aborts can be dismissed
+				showCloseButton: aborting !== null,
+				dismissOnEscape: aborting !== null,
+				closeClick: () => {
+					answer(aborting);
+					return false;
+				},
+				buttons,
+				autoFocusButton: defaultIndex,
+			});
+			dialog.show();
+			// Showing a modal window can move the focus to its first button, so focus the default button again
+			buttons[defaultIndex].focus();
+			return true;
+		};
+		return askable;
 	},
 
 	/**
@@ -807,6 +911,8 @@ isc.EditView.addMethods({
 
 	/**
 	 * Scatter method for distributing values into corresponding UI components and grids.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record the user's data entry before a response
+	 * replaces the values, and what the response changed on screen: keep its values argument (bizId, created).
 	 *
 	 * @param {Object} values - the values to be scattered into the UI components and grids.
 	 * @param {boolean} values.persisted - whether the data has been persisted.
@@ -816,11 +922,13 @@ isc.EditView.addMethods({
 	 * @param {Array} values._growls - growl messages to be displayed.
 	 * @param {Array} values._messages - informational or warning messages to be displayed.
 	 * @param {string} values.bizId - business identifier associated with the values.
+	 * @param {string} values._c - the conversation (web context) identifier.
 	 */
 	scatter: function (values) {
-		// Clear any errors and reset values
+		// Clear any errors and reset values, keeping the conversation so that requests made
+		// while the fields are cleared and set (such as a lookup's pick list refetch) send it
 		this._vm.clearErrors(true);
-		this._vm.clearValues();
+		this._vm.setValues(values._c ? { _c: values._c } : {});
 
 		// Prepare link and header template
 		let link = "";
@@ -874,7 +982,7 @@ isc.EditView.addMethods({
 					} else if (grid._candidateList && grid._memberList) {
 						this._handleListMembership(data, valueMaps, gridBinding, grid);
 					} else if (grid.grid) {
-						this._handleDataGrid(data, valueMaps, gridBinding, grid);
+						this._handleDataGrid(data, valueMaps, gridBinding, grid, values);
 					}
 				}
 			});
@@ -952,8 +1060,9 @@ isc.EditView.addMethods({
 	 * @param {Object} valueMaps - the value maps associated w
 	 * @param {Object} gridBinding - the binding name of the grid.
 	 * @param {Object} grid - the grid object to be updated.
+	 * @param {Object} values - the scattered values, used to select the grid row bound to selectedIdBinding.
 	 */
-	_handleDataGrid: function (data, valueMaps, gridBinding, grid) {
+	_handleDataGrid: function (data, valueMaps, gridBinding, grid, values) {
 		const gridFields = grid.grid.fields;
 		gridFields.forEach((gridField) => {
 			const { type, name } = gridField;
@@ -972,7 +1081,7 @@ isc.EditView.addMethods({
 
 		// Handle selection from server
 		if (grid.selectedIdBinding) {
-			this._handleGridSelection(data, grid);
+			this._handleGridSelection(data, grid, values);
 		} else {
 			grid.grid.setData(data);
 		}
@@ -1004,8 +1113,9 @@ isc.EditView.addMethods({
 	 *
 	 * @param {Array} data - the data to be set in the grid.
 	 * @param {Object} grid - the grid object to be updated.
+	 * @param {Object} values - the scattered values, used to select the grid row bound to selectedIdBinding.
 	 */
-	_handleGridSelection: function (data, grid) {
+	_handleGridSelection: function (data, grid, values) {
 		const method = grid.grid.selectionUpdated;
 		try {
 			grid.grid.selectionUpdated = null;
@@ -1086,6 +1196,7 @@ isc.EditView.addMethods({
 
 	/**
 	 * Displays growls and messages based on the provided data.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the messages shown: keep its arguments.
 	 *
 	 * @param {Array} growls - the growl messages to be displayed.
 	 * @param {Array} messages - the informational or warning messages to be displayed.
@@ -1096,13 +1207,46 @@ isc.EditView.addMethods({
 		}
 
 		if (messages) {
-			const markup =
-				messages.length > 1
-					? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
-					: messages[0].summary;
+			const markup = this._messagesMarkup(messages);
 			const warn = messages.some((message) => message.severity !== "info");
 			warn ? isc.warn(markup) : isc.say(markup);
 		}
+	},
+
+	/**
+	 * Displays a failed response: the growls and messages raised before the failure, and the problem.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the problem and errors shown: keep its arguments.
+	 * Status -1 and -51 responses hold the problem as markup in data; the messages are shown in the same
+	 * dialog so that only one dialog is shown. Other failures, such as validation errors (status -4), show
+	 * the messages on their own, as SmartClient shows the errors.
+	 *
+	 * @param {Object} dsResponse - the failed response, with any _growls and _messages copied from the server.
+	 * @param {Object} data - the response data.
+	 */
+	_displayFailure: function (dsResponse, data) {
+		const { _growls: growls, _messages: messages, status } = dsResponse;
+		if (status === -1 || status === isc.EditView._UNAVAILABLE) {
+			if (growls) {
+				isc.BizUtil.growl(growls);
+			}
+			// The margin separates the messages from the problem, whether or not the messages are a list
+			const markup = messages ? `<div style="margin-bottom:1em">${this._messagesMarkup(messages)}</div>${data}` : data;
+			isc.warn(markup, null, { title: isc.i18nMessages.editView_Problems });
+		} else {
+			this._displayGrowlsAndMessages(growls, messages);
+		}
+	},
+
+	/**
+	 * Returns the markup for messages: a list when there is more than one, otherwise the message.
+	 *
+	 * @param {Array} messages - the messages, each with a summary.
+	 * @returns {string} the markup.
+	 */
+	_messagesMarkup: function (messages) {
+		return messages.length > 1
+			? `<ul>${messages.map((message) => `<li>${message.summary}</li>`).join("")}</ul>`
+			: messages[0].summary;
 	},
 
 	/**
@@ -1133,8 +1277,8 @@ isc.EditView.addMethods({
 
 					const shouldRefresh =
 						forcePostRefresh ||
-						grid.postRefreshConditionName === undefined ||
-						this._evaluateConditionName(grid.postRefreshConditionName, values);
+						grid.postRefreshCondition === undefined ||
+						this._evaluateCondition(grid.postRefreshCondition, values);
 
 					if (!shouldRefresh) {
 						continue; // Skip if the condition doesn't allow refresh
@@ -1178,12 +1322,24 @@ isc.EditView.addMethods({
 
 	/**
 	 * Extracts values from view controls into the instance.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to note the errors when validation fails: keep
+	 * its validate argument and null result.
 	 * If validation errors exist, returns null.
 	 *
+	 * For a gather the user asked for (an action, a save, a zoom, a cancel, or a check for changes before leaving the
+	 * view), pass commit: the value being typed into the focused item is committed first (see _commitFocusedItem), so that
+	 * what is gathered, validated, and checked for changes afterwards (valuesHaveChanged) includes it. A gather for a
+	 * request in the background (a list grid's fetch, a pick list, a completion, a refresh) commits nothing, as committing
+	 * runs the item's change handler while the user is still typing.
+	 *
 	 * @param {boolean} validate - determines whether to perform validation before gathering data.
+	 * @param {boolean} [commit] - whether to commit the value being typed into the focused item first.
 	 * @returns {Object|null} - the gathered data object or null if validation fails.
 	 */
-	gather: function (validate) {
+	gather: function (validate, commit) {
+		if (commit) {
+			this._commitFocusedItem();
+		}
 		if (validate && !this._vm.validate()) {
 			return null; // Return early if validation fails
 		}
@@ -1191,6 +1347,23 @@ isc.EditView.addMethods({
 		// TODO: Add extra list validation here if necessary
 
 		return this._gather();
+	},
+
+	/**
+	 * Commits the value being typed into the focused item of one of the view's forms, as leaving the item would.
+	 * An item that changes on commit rather than on every keypress (changeOnKeypress false: Skyve's date, time and number
+	 * items, and a typed item whose change handler calls the server) holds the typed text only in its element until the
+	 * user leaves it. SmartClient's getValues() commits such an item only when it is a text item that knows it was typed
+	 * into, which leaves out a date item's text field. Committing fires the item's change handler, as leaving it would.
+	 */
+	_commitFocusedItem: function () {
+		const form = isc.EH.getFocusCanvas();
+		if (form && this._vm.members?.contains(form) && isc.isA.Function(form.getFocusItem)) {
+			const item = form.getFocusItem();
+			if (item && !item.changeOnKeypress && isc.isA.Function(item.updateValue)) {
+				item.updateValue();
+			}
+		}
 	},
 
 	/**
@@ -1225,9 +1398,10 @@ isc.EditView.addMethods({
 						const smartClientGrid = grid.grid;
 
 						if (smartClientGrid) {
-							// Ensure correct ordering when user reorders data via drag-and-drop
+							// Number an ordered grid's rows in the order they show, which a drag-and-drop may have
+							// changed. The data is the grid's own array, already in that order, so it is not sorted
+							// here: sorting it in place fires the grid's dataChanged, which closes an inline edit.
 							smartClientGrid.reorderData();
-							data = data.sortByProperty(grid._ordinal, true);
 						}
 
 						// Process list memberships or aggregated references in data grids
@@ -1238,8 +1412,10 @@ isc.EditView.addMethods({
 								smartClientGrid.fields[0].type === "enum")
 						) {
 							if (grid._ordinal) {
+								// Number an ordered membership's members in the order they show, which a drag may have
+								// changed. The data is the member list's own array, already in that order, so it is
+								// not sorted here (sorting it in place would fire the list's dataChanged).
 								grid._memberList.reorderData();
-								data = data.sortByProperty(grid._ordinal, true);
 							}
 
 							// Extract bizIds from list memberships
@@ -1263,7 +1439,7 @@ isc.EditView.addMethods({
 	 * @param {Object} values - the values object to evaluate the condition against.
 	 * @returns {boolean} - the result of the condition evaluation.
 	 */
-	_evaluateConditionName: function (conditionName, values) {
+	_evaluateCondition: function (conditionName, values) {
 		if (!conditionName) return false;
 
 		switch (conditionName) {
@@ -1405,22 +1581,22 @@ isc.EditView.addMethods({
 		// Helper function to update a widget's capability based on a condition name
 		const updateCapability = (capabilityKey, conditionName) => {
 			if (widget[conditionName]) {
-				widget[capabilityKey] = !this._evaluateConditionName(
+				widget[capabilityKey] = !this._evaluateCondition(
 					widget[conditionName],
 					values,
 				);
 			}
 		};
 
-		updateCapability("canPick", "disablePickConditionName");
-		updateCapability("canAdd", "disableAddConditionName");
-		updateCapability("canZoom", "disableZoomConditionName");
-		updateCapability("canEdit", "disableEditConditionName");
-		updateCapability("canRemove", "disableRemoveConditionName");
-		updateCapability("canClear", "disableClearConditionName");
+		updateCapability("canPick", "disablePickCondition");
+		updateCapability("canAdd", "disableAddCondition");
+		updateCapability("canZoom", "disableZoomCondition");
+		updateCapability("canEdit", "disableEditCondition");
+		updateCapability("canRemove", "disableRemoveCondition");
+		updateCapability("canClear", "disableClearCondition");
 
 		// Set overall disabled state based on a specific condition
-		this._setDisabled(widget, parent, widget.disabledConditionName, values);
+		this._setDisabled(widget, parent, widget.disabledCondition, values);
 	},
 
 	/**
@@ -1428,12 +1604,12 @@ isc.EditView.addMethods({
 	 *
 	 * @param {Object} widget - the widget to enable or disable.
 	 * @param {Object} parent - the parent container of the widget.
-	 * @param {string} disabledConditionName - the condition name used for evaluation.
+	 * @param {string} disabledCondition - the condition name used for evaluation.
 	 * @param {Object} values - the values to evaluate the condition against.
 	 */
-	_setDisabled: function (widget, parent, disabledConditionName, values) {
+	_setDisabled: function (widget, parent, disabledCondition, values) {
 		// Evaluate whether the widget should be disabled
-		const isDisabled = this._evaluateConditionName(disabledConditionName, values);
+		const isDisabled = this._evaluateCondition(disabledCondition, values);
 
 		// Set required state if applicable (visibility takes precedence)
 		if (
@@ -1468,9 +1644,9 @@ isc.EditView.addMethods({
 	 * Applies a disabled state to a widget based on the provided binding and condition.
 	 *
 	 * @param {string} binding - the binding key used to retrieve the widget.
-	 * @param {string} disabledConditionName - the condition name used to determine if the widget should be disabled.
+	 * @param {string} disabledCondition - the condition name used to determine if the widget should be disabled.
 	 */
-	setDisabled: function (binding, disabledConditionName) {
+	setDisabled: function (binding, disabledCondition) {
 		const widget = this._vm.getItem(binding);
 
 		if (!widget) {
@@ -1478,7 +1654,7 @@ isc.EditView.addMethods({
 		}
 
 		const values = this.gather(false);
-		this._updateDisabledState(widget, null, disabledConditionName, values);
+		this._updateDisabledState(widget, null, disabledCondition, values);
 	},
 
 	/**
@@ -1530,7 +1706,7 @@ isc.EditView.addMethods({
 		return this._setInvisible(
 			widget,
 			parent,
-			widget.invisibleConditionName,
+			widget.invisibleCondition,
 			values,
 			forceInvisible,
 		);
@@ -1542,7 +1718,7 @@ isc.EditView.addMethods({
 	 *
 	 * @param {Object} widget - the widget whose visibility will be updated.
 	 * @param {Object} parent - the parent container of the widget.
-	 * @param {string} invisibleConditionName - the condition to evaluate for widget invisibility.
+	 * @param {string} invisibleCondition - the condition to evaluate for widget invisibility.
 	 * @param {Object} values - the values used to evaluate the invisibility condition.
 	 * @param {boolean} [forceInvisible=false] - if set to `true`, forces the widget to be invisible regardless of the condition.
 	 * @returns {boolean} - the final invisibility state (`true` if invisible, `false` otherwise).
@@ -1550,14 +1726,14 @@ isc.EditView.addMethods({
 	_setInvisible: function (
 		widget,
 		parent,
-		invisibleConditionName,
+		invisibleCondition,
 		values,
 		forceInvisible = false,
 	) {
 		let invisible = forceInvisible;
 
 		if (!invisible) {
-			invisible = this._evaluateConditionName(invisibleConditionName, values);
+			invisible = this._evaluateCondition(invisibleCondition, values);
 		}
 
 		// Adjust 'required' state based on visibility
@@ -1583,9 +1759,9 @@ isc.EditView.addMethods({
 	 * Sets the visibility of a widget based on a condition name. If the widget exists, it will evaluate the invisibility condition and apply the corresponding visibility state.
 	 *
 	 * @param {string} binding - the binding key used to retrieve the widget.
-	 * @param {string} invisibleConditionName - the condition to evaluate for widget invisibility.
+	 * @param {string} invisibleCondition - the condition to evaluate for widget invisibility.
 	 */
-	setInvisible: function (binding, invisibleConditionName) {
+	setInvisible: function (binding, invisibleCondition) {
 		const widget = this._vm.getItem(binding);
 
 		if (!widget) {
@@ -1593,7 +1769,7 @@ isc.EditView.addMethods({
 		}
 
 		const values = this.gather(false);
-		this._setInvisible(widget, null, invisibleConditionName, values);
+		this._setInvisible(widget, null, invisibleCondition, values);
 	},
 });
 
@@ -1625,7 +1801,9 @@ isc.BizButton.addMethods({
 			this.showDisabledIcon = this.hasDisabledIcon;
 		}
 
-		// Defines the action triggered on button click
+		// Defines the action triggered on button click.
+		// The SAIL recorder (src/js/sail/recorder-sc.js) wraps initWidget and then this action, to record the step for
+		// the button's type and actionName: keep the _blurry handling and the confirmation through isc.ask in step.
 		this.action = function () {
 			if (this._view && this._view._blurry) {
 				this._view._blurry = this;
@@ -1657,9 +1835,6 @@ isc.BizButton.addMethods({
 		this._action = function () {
 			const validate = this.validate === undefined ? true : this.validate;
 
-			// Declare variables outside the switch to avoid redefinition
-			let instance, opener, gridBinding, bizId, url;
-
 			// Handle different button types
 			switch (this.type) {
 				case "OK":
@@ -1685,12 +1860,12 @@ isc.BizButton.addMethods({
 
 				case "ZoomOut": {
 					// Handle ZoomOut action with changes validation
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					const { _apply: apply, _changed: changedOnServer } = instance;
 					if (apply || changedOnServer || this._view._vm.valuesHaveChanged()) {
 						this._view.saveInstance(validate, this.actionName);
 					} else {
-						opener = isc.WindowStack.getOpener();
+						const opener = isc.WindowStack.getOpener();
 						isc.WindowStack.popoff(this._view._saved);
 						opener._source = null;
 					}
@@ -1699,9 +1874,9 @@ isc.BizButton.addMethods({
 
 				case "Cancel": {
 					// Cancel action with unsaved changes check
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					const { _changed: changedOnServerCancel } = instance;
-					opener = isc.WindowStack.getOpener();
+					const opener = isc.WindowStack.getOpener();
 
 					if (changedOnServerCancel || this._view._vm.valuesHaveChanged()) {
 						isc.ask(
@@ -1726,15 +1901,15 @@ isc.BizButton.addMethods({
 					this._view.deleteInstance(validate);
 					break;
 
-				case "Remove":
+				case "Remove": {
 					// Remove action on child edit view
-					instance = this._view.gather(false);
-					bizId = instance.bizId;
-					gridBinding = this._view._b.substring(
+					const instance = this._view.gather(false, true);
+					const bizId = instance.bizId;
+					const gridBinding = this._view._b.substring(
 						this._view._b.lastIndexOf(".") + 1,
 						this._view._b.lastIndexOf("ElementById"),
 					);
-					opener = isc.WindowStack.getOpener();
+					const opener = isc.WindowStack.getOpener();
 
 					if (opener) {
 						const openerListGrids = opener._grids[gridBinding];
@@ -1751,35 +1926,40 @@ isc.BizButton.addMethods({
 					}
 					isc.WindowStack.popoff(false);
 					break;
+				}
 
 				case "Report":
 					// Report action
 					isc.ReportDialog.popupReport(this._view, this.params);
 					break;
 
-				case "BizExport":
+				case "BizExport": {
 					// BizExport action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								window.location.assign(
-									`bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
-										this._view._doc
-									}&_c=${instance._c}&_ctim=${new Date().getTime()}`,
-								);
+								let url = `bizexport.xls?_n=${this.actionName}&_doc=${this._view._mod}.${
+									this._view._doc
+								}&_c=${instance._c}&_ctim=${new Date().getTime()}`;
+								// the servlet unsanitises the form binding, as for edit requests
+								if (this._view._b) {
+									url += `&_b=${this._view._b}`;
+								}
+								window.location.assign(url);
 							}
 						});
 					}
 					break;
+				}
 
-				case "BizImport":
+				case "BizImport": {
 					// BizImport action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
+								let url = `bizImport.xhtml?_a=${this.actionName}&_c=${instance._c}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}
@@ -1795,19 +1975,20 @@ isc.BizButton.addMethods({
 						});
 					}
 					break;
+				}
 
 				case "Download":
 					// Download action
 					this._view.doAction(this.actionName, validate);
 					break;
 
-				case "Upload":
+				case "Upload": {
 					// Upload action
-					instance = this._view.gather(false);
+					const instance = this._view.gather(false, true);
 					if (instance) {
 						this._view.saveInstance(validate, null, (data, success) => {
 							if (success) {
-								url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
+								let url = `upload.xhtml?_u=action&_a=${this.actionName}&_c=${instance._c}&_cap=${this.capture || "none"}`;
 								if (this._view._b) {
 									url += `&_b=${this._view._b.replaceAll("_", ".")}`;
 								}
@@ -1823,6 +2004,7 @@ isc.BizButton.addMethods({
 						});
 					}
 					break;
+				}
 
 				case "Navigate":
 					// Navigate to a binding within a conversation
@@ -1876,7 +2058,7 @@ isc.BizZoomIn.addMethods({
 		 */
 		this.action = () => {
 			// Validate here so we can show the zoom message if required
-			const instance = this._view.gather(true);
+			const instance = this._view.gather(true, true);
 
 			if (instance) {
 				const bizId = instance[this.binding];
@@ -2122,6 +2304,11 @@ isc.BizTabPane.addMethods({
 
 	/**
 	 * Handles the selection of a tab.
+	 * The SAIL recorder (src/js/sail/recorder-sc.js) wraps this method to record tabSelect when the user selects a tab.
+	 * The tab number goes into the view's values at the selectedTabIndexBinding, if there is one, so that the next request
+	 * sends it and the response, which selects the bound tab, keeps the user's tab. A tab that a
+	 * response selects is the bound tab already. Selecting a tab does not make an unchanged view dirty, as selecting a
+	 * list grid row with a selectedIdBinding does not.
 	 *
 	 * @function
 	 * @param {number} tabNum - the tab number that was selected
@@ -2131,6 +2318,11 @@ isc.BizTabPane.addMethods({
 	 * @returns {void}
 	 */
 	tabSelected: function (tabNum, tabPane, ID, tab) {
+		if (this.selectedTabIndexBinding) {
+			const changes = this._view._vm.valuesHaveChanged();
+			this._view._vm.setValue(this.selectedTabIndexBinding, tabNum);
+			if (!changes) this._view._vm.rememberValues();
+		}
 		if (this._view.isVisible()) {
 			this._view.delayCall("refreshListGrids", [
 				false,
@@ -2155,9 +2347,9 @@ isc.BizTabPane.addMethods({
 			icon: bizTab.icon,
 			prompt: bizTab.prompt,
 			pane: bizTab.pane,
-			disabledConditionName: bizTab.disabledConditionName,
-			invisibleConditionName: bizTab.invisibleConditionName,
-			selectedConditionName: bizTab.selectedConditionName,
+			disabledCondition: bizTab.disabledCondition,
+			invisibleCondition: bizTab.invisibleCondition,
+			selectedCondition: bizTab.selectedCondition,
 		});
 	},
 
@@ -2189,9 +2381,9 @@ isc.BizTabPane.addMethods({
 					name: bizTab.name,
 					title: bizTab.title,
 					pane: bizTab.pane,
-					disabledConditionName: bizTab.disabledConditionName,
-					invisibleConditionName: bizTab.invisibleConditionName,
-					selectedConditionName: bizTab.selectedConditionName,
+					disabledCondition: bizTab.disabledCondition,
+					invisibleCondition: bizTab.invisibleCondition,
+					selectedCondition: bizTab.selectedCondition,
 				},
 				tabPosition,
 			);
@@ -2219,6 +2411,9 @@ isc.BizTabPane.addMethods({
 /**
  * Implements the BizListMembership UI component.
  * Extends HLayout from the SmartClient library.
+ * The SAIL recorder (src/js/sail/recorder-sc.js) records a membership's changes from its lists' ListGrid
+ * recordDrop (which each list's recordDrop calls with Super) and transferSelectedData (the buttons'), and reads
+ * _memberList, _candidateList, _b and _view: keep them.
  */
 isc.ClassFactory.defineClass("BizListMembership", "HLayout");
 

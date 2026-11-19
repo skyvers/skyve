@@ -3,6 +3,8 @@ package org.skyve.impl.web.faces.converters.integer;
 import org.skyve.domain.messages.ConversionException;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
@@ -25,7 +27,7 @@ public class LongIntegerConverter extends org.skyve.domain.types.converters.inte
 	 * @throws ConverterException when the submitted value cannot be parsed using this format
 	 */
 	@Override
-	public Long getAsObject(FacesContext fc, UIComponent component, String value) {
+	public @Nullable Long getAsObject(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable String value) {
 		String processedValue = UtilImpl.processStringValue(value);
 		if (processedValue != null) {
 			try {
@@ -48,7 +50,7 @@ public class LongIntegerConverter extends org.skyve.domain.types.converters.inte
 	 * @return a formatted display value, or an empty string when the value is {@code null} or formatting fails
 	 */
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, Long value) {
+	public @Nonnull String getAsString(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable Long value) {
 		if (value == null) {
 			return "";
 		}

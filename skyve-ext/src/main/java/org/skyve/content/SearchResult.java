@@ -3,6 +3,8 @@ package org.skyve.content;
 import java.io.Serializable;
 import java.util.Date;
 
+import jakarta.annotation.Nullable;
+
 /**
  * A single search result for either a bean or attachment content.
  * @author mike
@@ -34,7 +36,7 @@ public final class SearchResult implements Serializable {
 	 * From the attachment
 	 * @return
 	 */
-	public String getContentId() {
+	public @Nullable String getContentId() {
 		return contentId;
 	}
 
@@ -42,7 +44,7 @@ public final class SearchResult implements Serializable {
 	 * From the attachment
 	 * @param contentId
 	 */
-	public void setContentId(String contentId) {
+	public void setContentId(@Nullable String contentId) {
 		this.contentId = contentId;
 	}
 
@@ -50,7 +52,7 @@ public final class SearchResult implements Serializable {
 	 * A highlighted snippet of the match within the text.
 	 * @return
 	 */
-	public String getExcerpt() {
+	public @Nullable String getExcerpt() {
 		return excerpt;
 	}
 
@@ -58,7 +60,7 @@ public final class SearchResult implements Serializable {
 	 * A highlighted snippet of the match within the text.
 	 * @param excerpt
 	 */
-	public void setExcerpt(String excerpt) {
+	public void setExcerpt(@Nullable String excerpt) {
 		this.excerpt = excerpt;
 	}
 
@@ -82,7 +84,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @return
 	 */
-	public String getCustomerName() {
+	public @Nullable String getCustomerName() {
 		return customerName;
 	}
 
@@ -90,7 +92,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @param customerName
 	 */
-	public void setCustomerName(String customerName) {
+	public void setCustomerName(@Nullable String customerName) {
 		this.customerName = customerName;
 	}
 
@@ -98,7 +100,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @return
 	 */
-	public String getModuleName() {
+	public @Nullable String getModuleName() {
 		return moduleName;
 	}
 
@@ -106,7 +108,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @param moduleName
 	 */
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nullable String moduleName) {
 		this.moduleName = moduleName;
 	}
 
@@ -114,7 +116,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @return
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -122,7 +124,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @param documentName
 	 */
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = documentName;
 	}
 
@@ -130,7 +132,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @return
 	 */
-	public String getBizDataGroupId() {
+	public @Nullable String getBizDataGroupId() {
 		return bizDataGroupId;
 	}
 
@@ -138,7 +140,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @param bizDataGroupId
 	 */
-	public void setBizDataGroupId(String bizDataGroupId) {
+	public void setBizDataGroupId(@Nullable String bizDataGroupId) {
 		this.bizDataGroupId = bizDataGroupId;
 	}
 
@@ -146,7 +148,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @return
 	 */
-	public String getBizUserId() {
+	public @Nullable String getBizUserId() {
 		return bizUserId;
 	}
 
@@ -154,7 +156,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @param bizUserId
 	 */
-	public void setBizUserId(String bizUserId) {
+	public void setBizUserId(@Nullable String bizUserId) {
 		this.bizUserId = bizUserId;
 	}
 
@@ -162,7 +164,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @return
 	 */
-	public String getBizId() {
+	public @Nullable String getBizId() {
 		return bizId;
 	}
 
@@ -170,7 +172,7 @@ public final class SearchResult implements Serializable {
 	 * From the content
 	 * @param bizId
 	 */
-	public void setBizId(String bizId) {
+	public void setBizId(@Nullable String bizId) {
 		this.bizId = bizId;
 	}
 
@@ -178,7 +180,7 @@ public final class SearchResult implements Serializable {
 	 * From the attachment
 	 * @return
 	 */
-	public String getAttributeName() {
+	public @Nullable String getAttributeName() {
 		return attributeName;
 	}
 
@@ -186,7 +188,7 @@ public final class SearchResult implements Serializable {
 	 * From the attachment
 	 * @param attributeName
 	 */
-	public void setAttributeName(String attributeName) {
+	public void setAttributeName(@Nullable String attributeName) {
 		this.attributeName = attributeName;
 	}
 
@@ -194,7 +196,7 @@ public final class SearchResult implements Serializable {
 	 * From the attachment
 	 * @return
 	 */
-	public Date getLastModified() {
+	public @Nullable Date getLastModified() {
 		return lastModified;
 	}
 
@@ -202,7 +204,7 @@ public final class SearchResult implements Serializable {
 	 * From the attachment
 	 * @param lastModified
 	 */
-	public void setLastModified(Date lastModified) {
+	public void setLastModified(@Nullable Date lastModified) {
 		this.lastModified = lastModified;
 	}
 }

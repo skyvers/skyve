@@ -12,7 +12,11 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal;
 import org.skyve.domain.types.converters.Converter;
 import org.skyve.domain.types.converters.Format.TextCase;
+import org.skyve.domain.types.converters.decimal.Decimal10Integer;
+import org.skyve.domain.types.converters.decimal.Decimal10IntegerPercentage;
+import org.skyve.domain.types.converters.decimal.Decimal10OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlaces;
+import org.skyve.domain.types.converters.decimal.Decimal10TwoDecimalPlacesPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2Integer;
 import org.skyve.domain.types.converters.decimal.Decimal2IntegerPercentage;
 import org.skyve.domain.types.converters.decimal.Decimal2OneDecimalPlace;
@@ -22,6 +26,7 @@ import org.skyve.domain.types.converters.decimal.Decimal5OneDecimalPlace;
 import org.skyve.domain.types.converters.decimal.Decimal5TimeDuration;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlaces;
 import org.skyve.domain.types.converters.decimal.Decimal5TwoDecimalPlacesPercentage;
+import org.skyve.domain.types.converters.decimal.currency.Decimal10DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCents;
 import org.skyve.domain.types.converters.decimal.currency.Decimal2DollarsAndCentsAbsolute;
 import org.skyve.domain.types.converters.decimal.currency.Decimal5DollarsAndCents;
@@ -66,6 +71,9 @@ import org.skyve.util.Binder;
 import org.skyve.util.Binder.TargetMetaData;
 import org.skyve.util.OWASP;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implements internal web-module behavior for this Skyve runtime concern.
  */
@@ -106,16 +114,16 @@ abstract class SmartClientAttributeDefinition {
 	 * @param uxui the active UX/UI profile name
 	 */
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	protected SmartClientAttributeDefinition(User user,
-												Customer customer, 
-												Module module,
-												Document document,
-												String binding,
-												String name,
+	protected SmartClientAttributeDefinition(@Nullable User user,
+												@Nonnull Customer customer, 
+												@Nonnull Module module,
+												@Nonnull Document document,
+												@Nullable String binding,
+												@Nullable String name,
 												boolean runtime,
 												boolean isQueryColumn,
 												boolean isField,
-												String uxui) {
+												@Nonnull String uxui) {
 		this.name = (name != null) ? name : BindUtil.sanitiseBinding(binding);
 		title = this.name;
 
@@ -357,7 +365,8 @@ abstract class SmartClientAttributeDefinition {
 					type = "bizDollarsAndCents";
 				}
 				else if (converter instanceof Decimal2DollarsAndCentsAbsolute) {
-					type = "bizDollarsAndCents";
+					// shown without its sign, as the converter writes it
+					type = "bizDollarsAndCentsAbsolute";
 				}
 				else if (converter instanceof Decimal2Integer) {
 					type = "bizDecimal0";
@@ -395,7 +404,22 @@ abstract class SmartClientAttributeDefinition {
 				break;
 			case decimal10:
 				type = "bizDecimal10";
-				if (converter instanceof Decimal10TwoDecimalPlaces) {
+				if (converter instanceof Decimal10DollarsAndCents) {
+					type = "bizDollarsAndCents";
+				}
+				else if (converter instanceof Decimal10Integer) {
+					type = "bizDecimal0";
+				}
+				else if (converter instanceof Decimal10IntegerPercentage) {
+					type = "bizIntegerPercentage";
+				}
+				else if (converter instanceof Decimal10OneDecimalPlace) {
+					type = "bizDecimal1";
+				}
+				else if (converter instanceof Decimal10TwoDecimalPlacesPercentage) {
+					type = "bizTwoDecimalPlacesPercentage";
+				}
+				else if (converter instanceof Decimal10TwoDecimalPlaces) {
 					type = "bizDecimal2";
 				}
 				break;
@@ -406,7 +430,8 @@ abstract class SmartClientAttributeDefinition {
 			case integer, longInteger:
 				type = "integer";
 				if (converter instanceof SimplePercentage) {
-					type = "bizIntegerPercentage";
+					// a whole number of percent (12 is 12%), not a fraction (bizIntegerPercentage: 0.12 is 12%)
+					type = "bizSimplePercentage";
 				}
 				else if(converter instanceof IntegerSeparator){
 					type = "bizIntegerSeparator";
@@ -417,6 +442,11 @@ abstract class SmartClientAttributeDefinition {
 				break;
 			case date, dateTime, timestamp:
 				type = (converter == null) ? "DD_MMM_YYYY" : converter.getClass().getSimpleName();
+				// A date time or timestamp whose converter shows only the date is a date time with a date-only field
+				// (DD_MM_YYYY_DateTime), not a date, which SmartClient would send without its time
+				if ((attributeType != AttributeType.date) && (converter != null) && dateOnly(converter.getFormatPattern())) {
+					type += "_DateTime";
+				}
 				break;
 			case time:
 				type = (converter == null) ? "HH24_MI" : converter.getClass().getSimpleName();
@@ -443,7 +473,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return target binding metadata, or {@code null}
 	 */
-	public TargetMetaData getTarget() {
+	public @Nullable TargetMetaData getTarget() {
 	    return target;
 	}
 	
@@ -452,7 +482,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return editor type name, or {@code null}
 	 */
-	public String getEditorType() {
+	public @Nullable String getEditorType() {
 		return editorType;
 	}
 
@@ -461,7 +491,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param editorType editor type name
 	 */
-	public void setEditorType(String editorType) {
+	public void setEditorType(@Nullable String editorType) {
 		this.editorType = editorType;
 	}
 
@@ -470,7 +500,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return lookup metadata, or {@code null}
 	 */
-    public SmartClientLookupDefinition getLookup() {
+    public @Nullable SmartClientLookupDefinition getLookup() {
         return lookup;
     }
 
@@ -479,7 +509,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return maximum display/input length, or {@code null}
 	 */
-	public Integer getLength() {
+	public @Nullable Integer getLength() {
 		return length;
 	}
 
@@ -488,7 +518,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param length maximum display/input length
 	 */
-	public void setLength(Integer length) {
+	public void setLength(@Nullable Integer length) {
 		this.length = length;
 	}
 
@@ -497,7 +527,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return attribute name
 	 */
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
@@ -506,7 +536,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param name attribute name
 	 */
-	public void setName(String name) {
+	public void setName(@Nonnull String name) {
 		this.name = name;
 	}
 
@@ -515,7 +545,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return required-message text, or {@code null}
 	 */
-	public String getRequiredMessage() {
+	public @Nullable String getRequiredMessage() {
 		return requiredMessage;
 	}
 
@@ -524,7 +554,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param requiredMessage required-message text
 	 */
-	public void setRequiredMessage(String requiredMessage) {
+	public void setRequiredMessage(@Nullable String requiredMessage) {
 		this.requiredMessage = requiredMessage;
 		required = (requiredMessage != null);
 	}
@@ -534,7 +564,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return display title
 	 */
-	public String getTitle() {
+	public @Nullable String getTitle() {
 		return title;
 	}
 
@@ -543,7 +573,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param title display title
 	 */
-	public void setTitle(String title) {
+	public void setTitle(@Nullable String title) {
 		this.title = title;
 	}
 
@@ -552,7 +582,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return SmartClient logical type identifier
 	 */
-	public String getType() {
+	public @Nonnull String getType() {
 		return type;
 	}
 
@@ -561,7 +591,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param type SmartClient logical type identifier
 	 */
-	public void setType(String type) {
+	public void setType(@Nonnull String type) {
 		this.type = type;
 	}
 
@@ -606,7 +636,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return domain value-map entries, or {@code null}
 	 */
-	public Map<String, String> getValueMap() {
+	public @Nullable Map<String, String> getValueMap() {
 		return valueMap;
 	}
 
@@ -617,7 +647,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return value-map JavaScript literal string
 	 */
-	protected String getValueMapAsString() {
+	protected @Nonnull String getValueMapAsString() {
 		if (valueMap.isEmpty()) {
 			// this valueMap will be replaced in client logic but this defn ensures that the
 			// select widget doesn't try to use the form's data source to get values when opened
@@ -630,11 +660,11 @@ abstract class SmartClientAttributeDefinition {
 						.collect(joining(", ", "{", "}"));
 	}
 
-	void setMask(String mask) {
+	void setMask(@Nullable String mask) {
 		this.mask = mask;
 	}
 
-	void setTextBoxStyle(String textBoxStyle) {
+	void setTextBoxStyle(@Nullable String textBoxStyle) {
 		this.textBoxStyle = textBoxStyle;
 	}
 	
@@ -643,7 +673,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return preferred pixel width, or {@code null}
 	 */
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -652,7 +682,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param pixelWidth preferred pixel width
 	 */
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -661,7 +691,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @return text/content alignment preference, or {@code null}
 	 */
-	public HorizontalAlignment getAlign() {
+	public @Nullable HorizontalAlignment getAlign() {
 		return align;
 	}
 
@@ -670,7 +700,7 @@ abstract class SmartClientAttributeDefinition {
 	 *
 	 * @param align text/content alignment preference
 	 */
-	public void setAlign(HorizontalAlignment align) {
+	public void setAlign(@Nullable HorizontalAlignment align) {
 		this.align = align;
 	}
 
@@ -700,7 +730,7 @@ abstract class SmartClientAttributeDefinition {
 	 * @param text text attribute metadata whose format determines mask and text style
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void setMaskAndStyle(Text text) {
+	public void setMaskAndStyle(@Nonnull Text text) {
 		String result = null;
 		
 		TextFormat format = text.getFormat();
@@ -766,10 +796,10 @@ abstract class SmartClientAttributeDefinition {
 	 * @param emptyThumbnailRelativeFile fallback thumbnail resource path, or {@code null}
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	void appendEditorProperties(StringBuilder result,
+	void appendEditorProperties(@Nonnull StringBuilder result,
 									boolean forDataGrid,
-									Integer pixelHeight,
-									String emptyThumbnailRelativeFile) {
+									@Nullable Integer pixelHeight,
+									@Nullable String emptyThumbnailRelativeFile) {
 		if (lookup == null) {
 			if (triStateCheckBox) {
 				result.append(",editorProperties:{allowEmptyValue:true}");
@@ -787,20 +817,23 @@ abstract class SmartClientAttributeDefinition {
 				String hpx = (pixelHeight == null) ? 
 								((pixelWidth == null) ? "64" : pixelWidth.toString()) : 
 								pixelHeight.toString();
-				result.append(",formatCellValue:function(v,rec,row,col){if(v){var u='content?_n='+v+'");
+				// A thumbnail sized to the box, allowing for the screen's pixel ratio, rounded up so few sizes are cached
+				result.append(",formatCellValue:function(v,rec,row,col){var s=SKYVE.Util.contentPreviewSize(");
+				result.append(wpx).append(',').append(hpx).append(");if(v){var u='content?_n='+v+'");
 				result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+'&_b=").append(BindUtil.unsanitiseBinding(name));
 				result.append("';return '<a href=\"'+u+'\" target=\"_blank\"><img src=\"'+u+'");
-				result.append("&_w=").append(wpx).append("&_h=").append(hpx);
+				result.append("&_w='+s+'&_h='+s+'");
         		result.append("\" style=\"width:").append(wpx).append("px;height:").append(hpx);
-        		result.append("px:object-fit:contain\"/></a>'}if(rec && rec.bizId){return '");
+        		result.append("px;object-fit:contain\"/></a>'}if(rec && rec.bizId){return '");
         		if (emptyThumbnailRelativeFile == null) {
         			result.append("'}");
         		}
         		else {
 					result.append("<img src=\"resources?_n=").append(emptyThumbnailRelativeFile);
 					result.append("&_doc='+rec.bizModule+'.'+rec.bizDocument+");
-					result.append("'&_w=").append(wpx).append("&_h=").append(hpx);
-					result.append("\"/>'}");
+					result.append("'&_w='+s+'&_h='+s+'");
+					result.append("\" style=\"width:").append(wpx).append("px;height:").append(hpx);
+					result.append("px;object-fit:contain\"/>'}");
         		}
         		result.append("return ''}");
 			}
@@ -844,6 +877,15 @@ abstract class SmartClientAttributeDefinition {
         	}
         	
         	// defaultDynamicValue and value map processing
+			if (forDataGrid && (lookup.getQuery() == null)) {
+				// Model lookups in grid editors need the enclosing view's conversation bean.
+				result.append(",pickListProperties:{filterData:function(criteria,callback,requestProperties){");
+				result.append("var view=this.formItem.grid.parentElement._view;");
+				result.append("requestProperties=requestProperties||{};requestProperties.params=requestProperties.params||{};");
+				result.append("requestProperties.params._c=view.gather(false)._c;requestProperties.params._cc='';");
+				result.append("if(view._b){requestProperties.params._b=view._b;}");
+				result.append("return this.Super('filterData',[criteria,callback,requestProperties]);}}");
+			}
 			result.append(",defaultDynamicValue:'if(this.grid){var r=this.grid.getRecord(this.rowNum);var v=(r?r.");
 			if (! bindingToDataGrid) {
 			    result.append(name);
@@ -913,6 +955,17 @@ abstract class SmartClientAttributeDefinition {
     }
 
 	/**
+	 * Indicates if a date or time format pattern has no time: a date time or timestamp converter with such a pattern shows
+	 * only the date (DD_MM_YYYY_DateTime, MM_DD_YYYY_Timestamp ...).
+	 *
+	 * @param pattern	the converter's format pattern, or null
+	 * @return true if the pattern has no hours
+	 */
+	private static boolean dateOnly(@Nullable String pattern) {
+		return (pattern != null) && (pattern.indexOf('H') < 0) && (pattern.indexOf('h') < 0);
+	}
+
+	/**
 	 * Builds a constant-domain code-to-description value map for client-side enumeration rendering.
 	 *
 	 * @param customer customer metadata context
@@ -921,9 +974,9 @@ abstract class SmartClientAttributeDefinition {
 	 * @param runtime whether runtime domain values should be resolved
 	 * @return ordered map of escaped domain codes to escaped localised descriptions
 	 */
-	private static Map<String, String> getConstantDomainValueMap(Customer customer,
-															Document document,
-															Attribute attribute,
+	private static @Nonnull Map<String, String> getConstantDomainValueMap(@Nonnull Customer customer,
+															@Nonnull Document document,
+															@Nonnull Attribute attribute,
 															boolean runtime) {
 		List<DomainValue> values = ((DocumentImpl) document).getDomainValues((CustomerImpl) customer, 
 																				DomainType.constant, 

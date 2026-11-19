@@ -3,8 +3,12 @@ package org.skyve.impl.web;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +25,19 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.skyve.content.MimeType;
+import org.skyve.domain.Bean;
+import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.report.jasperreports.ReportDesignParameters;
+import org.skyve.metadata.customer.Customer;
+import org.skyve.metadata.model.document.Document;
+import org.skyve.metadata.module.Module;
+import org.skyve.metadata.router.UxUi;
+import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.report.ReportFormat;
+import org.skyve.web.UserAgentType;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.WriteListener;
@@ -160,7 +177,7 @@ class ReportServletTest {
 	@Test
 	void writeReportErrorWritesHtmlWhenResponseNotCommitted() throws Exception {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		org.mockito.Mockito.doReturn(Boolean.FALSE).when(response).isCommitted();
+		doReturn(Boolean.FALSE).when(response).isCommitted();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		invokeWriteReportError(response, out, "ERR-123");
@@ -176,7 +193,7 @@ class ReportServletTest {
 	@Test
 	void writeReportErrorDoesNothingWhenCommitted() throws Exception {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(response).isCommitted();
+		doReturn(Boolean.TRUE).when(response).isCommitted();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 		invokeWriteReportError(response, out, "ERR-456");
@@ -190,7 +207,7 @@ class ReportServletTest {
 	@SuppressWarnings("resource")
 	void writeReportErrorSwallowsIoExceptionFromOutputStreamWrite() throws Exception {
 		HttpServletResponse response = mock(HttpServletResponse.class);
-		org.mockito.Mockito.doReturn(Boolean.FALSE).when(response).isCommitted();
+		doReturn(Boolean.FALSE).when(response).isCommitted();
 
 		invokeWriteReportError(response, new ThrowingOutputStream(), "ERR-789");
 
@@ -216,6 +233,75 @@ class ReportServletTest {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> result = (Map<String, Object>) method.invoke(null, request);
 		return result;
+	}
+
+	@Test
+	@SuppressWarnings("resource")
+	void doExportReportsMissingParametersWhenValuesAreJsonNull() throws Exception {
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(mock(User.class));
+		persistence.setForThread();
+		try (CapturingServletOutputStream out = new CapturingServletOutputStream()) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getParameter("values")).thenReturn("null");
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			when(response.getOutputStream()).thenReturn(out);
+
+			Method method = ReportServlet.class.getDeclaredMethod("doExport", HttpServletRequest.class, HttpServletResponse.class);
+			method.setAccessible(true);
+			invokeVoid(method, request, response);
+
+			verify(response).setContentType(MimeType.html.toString());
+			assertTrue(out.asString().contains("There are no report parameters in this request"), out.asString());
+		}
+		finally {
+			clearThreadPersistence();
+		}
+	}
+
+	@Test
+	@SuppressWarnings({"resource", "boxing"})
+	void doExportOfAModelWithoutADrivingDocumentWritesTheGenericError() throws Exception {
+		User user = mock(User.class);
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		ListModel<Bean> model = mock(ListModel.class);
+		when(user.getCustomer()).thenReturn(customer);
+		when(user.canAccess(any(UserAccess.class), anyString())).thenReturn(true);
+		when(customer.getModule("mod")).thenReturn(module);
+		when(module.getDocument(customer, "Doc")).thenReturn(document);
+		when(document.getListModel(customer, "Model", true)).thenReturn(model); // getDrivingDocument() returns null
+		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
+		persistence.setUser(user);
+		persistence.setForThread();
+		try (CapturingServletOutputStream out = new CapturingServletOutputStream()) {
+			HttpServletRequest request = mock(HttpServletRequest.class);
+			when(request.getParameter("values")).thenReturn("{\"ds\":\"mod_Doc__Model\",\"reportFormat\":\"csv\"}");
+			when(request.getAttribute(UserAgent.class.getName() + ".selection")).thenReturn(
+					new RequestUxUiSelection(UserAgentType.desktop, false, UxUi.newSmartClient(UxUi.DESKTOP_NAME, "Cerulean", "omega")));
+			HttpServletResponse response = mock(HttpServletResponse.class);
+			when(response.getOutputStream()).thenReturn(out);
+
+			Method method = ReportServlet.class.getDeclaredMethod("doExport", HttpServletRequest.class, HttpServletResponse.class);
+			method.setAccessible(true);
+			invokeVoid(method, request, response);
+
+			verify(model).getDrivingDocument();
+			verify(user, never()).canReadDocument(any());
+			verify(response).setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			assertTrue(out.asString().startsWith("<html><head/><body><h3>"), out.asString());
+		}
+		finally {
+			clearThreadPersistence();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void clearThreadPersistence() throws Exception {
+		Field field = AbstractPersistence.class.getDeclaredField("threadLocalPersistence");
+		field.setAccessible(true);
+		((ThreadLocal<AbstractPersistence>) field.get(null)).remove();
 	}
 
 	private static void invokePumpOutReportFormat(byte[] bytes,
@@ -288,5 +374,23 @@ class ReportServletTest {
 		public void write(int b) throws IOException {
 			throw new IOException("forced failure");
 		}
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void applyMarginsSetsEachMarginFromItsOwnValue() {
+		Map<String, Object> values = new LinkedHashMap<>();
+		values.put("top", 11);
+		values.put("bottom", 12);
+		values.put("left", 13);
+		values.put("right", 14);
+		ReportDesignParameters designParams = new ReportDesignParameters();
+
+		ReportServlet.applyMargins(designParams, values);
+
+		assertEquals(11, designParams.getTopMargin());
+		assertEquals(12, designParams.getBottomMargin());
+		assertEquals(13, designParams.getLeftMargin());
+		assertEquals(14, designParams.getRightMargin());
 	}
 }

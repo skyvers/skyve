@@ -1,12 +1,18 @@
 package org.skyve.impl.web;
 
+import java.io.Serializable;
+import java.util.Objects;
+
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 
@@ -16,6 +22,11 @@ import jakarta.servlet.http.HttpSession;
  */
 public abstract class ViewWebContext extends AbstractWebContext {
 	private static final long serialVersionUID = 3308226433681394241L;
+	private @Nullable PreparedDownload preparedDownload;
+
+	private record PreparedDownload(String document, String action, String binding, String bizId) implements Serializable {
+		private static final long serialVersionUID = 1L;
+	}
 
 	/**
 	 * Creates a view web context bound to the active HTTP session.
@@ -23,7 +34,7 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 * @param key the web-context cache key
 	 * @param request the request used to resolve the active session
 	 */
-	protected ViewWebContext(String key, HttpServletRequest request) {
+	protected ViewWebContext(@Nonnull String key, @Nonnull HttpServletRequest request) {
 		super(key);
 		// Set the sessionId
 		HttpSession session = request.getSession(false);
@@ -31,6 +42,29 @@ public abstract class ViewWebContext extends AbstractWebContext {
 			throw new SessionEndedException(request.getLocale());
 		}
 		sessionId = session.getId();
+	}
+
+	/** Records the last prepared download in the serialised conversation. */
+	public void recordPreparedDownload(@Nonnull String actionName,
+										@Nonnull String moduleName,
+										@Nonnull String documentName,
+										@Nullable String viewBinding,
+										@Nullable String dataWidgetBinding,
+										@Nullable String elementBizId) {
+		preparedDownload = new PreparedDownload(moduleName + '.' + documentName,
+															actionName,
+															WebUtil.getDownloadBinding(viewBinding, dataWidgetBinding),
+															(dataWidgetBinding == null) ? null : elementBizId);
+	}
+
+	/** Checks the request against the last prepared download without consuming it, allowing HEAD and range requests. */
+	public boolean isPreparedDownload(@Nullable String document, @Nullable String action, @Nullable String binding, @Nullable String bizId) {
+		PreparedDownload prepared = preparedDownload;
+		return (prepared != null) &&
+				Objects.equals(prepared.document(), document) &&
+				Objects.equals(prepared.action(), action) &&
+				Objects.equals(prepared.binding(), binding) &&
+				Objects.equals(prepared.bizId(), bizId);
 	}
 
 	@Override
@@ -50,9 +84,9 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 * @param <T> the bean type used by the background task
 	 */
 	@Override
-	public <T extends Bean> void background(Class<? extends BackgroundTask<T>> taskClass) {
+	public <T extends Bean> void background(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
 		cacheConversationAndCycleTransaction();
-		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversationUser(), getWebId());
 	}
 
 	/**
@@ -62,7 +96,21 @@ public abstract class ViewWebContext extends AbstractWebContext {
 	 * @param <T> the bean type used by the background task
 	 */
 	@Override
-	public <T extends Bean> void backgroundWithoutCachingConversation(Class<? extends BackgroundTask<T>> taskClass) {
-		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversation().getUser(), getWebId());
+	public <T extends Bean> void backgroundWithoutCachingConversation(@Nonnull Class<? extends BackgroundTask<T>> taskClass) {
+		EXT.getJobScheduler().runBackgroundTask(taskClass, getConversationUser(), getWebId());
+	}
+
+	/**
+	 * Returns the user of this context's conversation, which a background task runs as.
+	 *
+	 * @return the conversation user
+	 * @throws IllegalStateException if this context has no conversation
+	 */
+	private @Nonnull User getConversationUser() {
+		AbstractPersistence p = getConversation();
+		if (p == null) {
+			throw new IllegalStateException("Web context " + getWebId() + " has no conversation to run a background task as");
+		}
+		return p.getUser();
 	}
 }

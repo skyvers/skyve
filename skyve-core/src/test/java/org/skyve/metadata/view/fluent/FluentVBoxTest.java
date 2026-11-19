@@ -51,76 +51,91 @@ class FluentVBoxTest {
 		assertThat(new FluentVBox().collapsible(Collapsible.closed).get().getCollapsible(), is(Collapsible.closed));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelWidthSetsValue() {
 		assertEquals(300, new FluentVBox().pixelWidth(300).get().getPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void responsiveWidthSetsValue() {
 		assertEquals(6, new FluentVBox().responsiveWidth(6).get().getResponsiveWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void smSetsValue() {
 		assertEquals(3, new FluentVBox().sm(3).get().getSm().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void mdSetsValue() {
 		assertEquals(6, new FluentVBox().md(6).get().getMd().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void lgSetsValue() {
 		assertEquals(9, new FluentVBox().lg(9).get().getLg().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void xlSetsValue() {
 		assertEquals(12, new FluentVBox().xl(12).get().getXl().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageWidthSetsValue() {
 		assertEquals(50, new FluentVBox().percentageWidth(50).get().getPercentageWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelWidthSetsValue() {
 		assertEquals(100, new FluentVBox().minPixelWidth(100).get().getMinPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelWidthSetsValue() {
 		assertEquals(800, new FluentVBox().maxPixelWidth(800).get().getMaxPixelWidth().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelHeightSetsValue() {
 		assertEquals(200, new FluentVBox().pixelHeight(200).get().getPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void percentageHeightSetsValue() {
 		assertEquals(75, new FluentVBox().percentageHeight(75).get().getPercentageHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void minPixelHeightSetsValue() {
 		assertEquals(50, new FluentVBox().minPixelHeight(50).get().getMinPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void maxPixelHeightSetsValue() {
 		assertEquals(500, new FluentVBox().maxPixelHeight(500).get().getMaxPixelHeight().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelPaddingSetsValue() {
 		assertEquals(10, new FluentVBox().pixelPadding(10).get().getPixelPadding().intValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void pixelMemberPaddingSetsValue() {
 		assertEquals(5, new FluentVBox().pixelMemberPadding(5).get().getPixelMemberPadding().intValue());
@@ -144,8 +159,8 @@ class FluentVBoxTest {
 	}
 
 	@Test
-	void invisibleConditionNameSetsValue() {
-		assertThat(new FluentVBox().invisibleConditionName("invisible").get().getInvisibleConditionName(), is("invisible"));
+	void invisibleConditionSetsValue() {
+		assertThat(new FluentVBox().invisibleCondition("invisible").get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test
@@ -170,10 +185,10 @@ class FluentVBoxTest {
 	}
 
 	@Test
-	void fromCopiesInvisibleConditionName() {
+	void fromCopiesInvisibleCondition() {
 		VBox src = new VBox();
-		src.setInvisibleConditionName("invisible");
-		assertThat(new FluentVBox().from(src).get().getInvisibleConditionName(), is("invisible"));
+		src.setXmlInvisibleCondition("invisible");
+		assertThat(new FluentVBox().from(src).get().getInvisibleCondition(), is("invisible"));
 	}
 
 	@Test

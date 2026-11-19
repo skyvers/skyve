@@ -2,6 +2,7 @@ package org.skyve.metadata.view.fluent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.metadata.view.component.Component;
@@ -54,9 +55,62 @@ class FluentComponentProgressBarSpinnerTest {
 	}
 
 	@Test
-	void componentInvisibleConditionNameSetsValue() {
-		FluentComponent fc = new FluentComponent().invisibleConditionName("hide");
-		assertEquals("hide", fc.get().getInvisibleConditionName());
+	void componentInvisibleConditionSetsValue() {
+		FluentComponent fc = new FluentComponent().invisibleCondition("hide");
+		assertEquals("hide", fc.get().getInvisibleCondition());
+	}
+
+	@Test
+	void componentAddActionAddsAnActionMapping() {
+		FluentComponent fc = new FluentComponent().addAction("Check", "Verify").addAction("New", "Create");
+		assertEquals(2, fc.get().getActions().size());
+		assertEquals("Check", fc.get().getActions().get(0).getFromComponent());
+		assertEquals("Verify", fc.get().getActions().get(0).getMappedTo());
+		assertEquals("Create", fc.get().getActions().get(1).getMappedTo());
+		assertEquals(0, fc.get().getConditions().size());
+	}
+
+	@Test
+	void componentAddConditionAddsAConditionMapping() {
+		FluentComponent fc = new FluentComponent().addCondition("editable", "canEdit").addCondition("{el:bean.flag}", "{el:bean.other}");
+		assertEquals(2, fc.get().getConditions().size());
+		assertEquals("editable", fc.get().getConditions().get(0).getFromComponent());
+		assertEquals("canEdit", fc.get().getConditions().get(0).getMappedTo());
+		assertEquals("{el:bean.flag}", fc.get().getConditions().get(1).getFromComponent());
+		assertEquals("{el:bean.other}", fc.get().getConditions().get(1).getMappedTo());
+		assertEquals(0, fc.get().getActions().size());
+	}
+
+	@Test
+	void componentClearActionsAndConditionsRemoveOnlyTheirOwnMappings() {
+		FluentComponent fc = new FluentComponent().addAction("Check", "Verify").addCondition("editable", "canEdit");
+		fc.clearActions();
+		assertEquals(0, fc.get().getActions().size());
+		assertEquals(1, fc.get().getConditions().size());
+		fc.addAction("Check", "Verify").clearConditions();
+		assertEquals(1, fc.get().getActions().size());
+		assertEquals(0, fc.get().getConditions().size());
+	}
+
+	@Test
+	void componentFromCopiesActionAndConditionMappings() {
+		Component source = new FluentComponent().name("cmp")
+													.addAction("Check", "Verify")
+													.addCondition("editable", "canEdit")
+													.addCondition("{el:bean.flag}", "locked")
+													.get();
+
+		Component copy = new FluentComponent().from(source).get();
+
+		assertEquals(1, copy.getActions().size());
+		assertEquals("Check", copy.getActions().get(0).getFromComponent());
+		assertEquals("Verify", copy.getActions().get(0).getMappedTo());
+		assertEquals(2, copy.getConditions().size());
+		assertEquals("{el:bean.flag}", copy.getConditions().get(1).getFromComponent());
+		assertEquals("locked", copy.getConditions().get(1).getMappedTo());
+		// the mappings are copies, not the source's own
+		assertNotSame(source.getActions().get(0), copy.getActions().get(0));
+		assertNotSame(source.getConditions().get(0), copy.getConditions().get(0));
 	}
 
 	@Test
@@ -66,7 +120,7 @@ class FluentComponentProgressBarSpinnerTest {
 		source.setDocumentName("User");
 		source.setName("cmpUser");
 		source.setWidgetId("w99");
-		source.setInvisibleConditionName("noShow");
+		source.setXmlInvisibleCondition("noShow");
 
 		FluentComponent copy = new FluentComponent().from(source);
 
@@ -74,7 +128,7 @@ class FluentComponentProgressBarSpinnerTest {
 		assertEquals("User", copy.get().getDocumentName());
 		assertEquals("cmpUser", copy.get().getName());
 		assertEquals("w99", copy.get().getWidgetId());
-		assertEquals("noShow", copy.get().getInvisibleConditionName());
+		assertEquals("noShow", copy.get().getInvisibleCondition());
 	}
 
 	// --- FluentProgressBar ---
@@ -92,9 +146,9 @@ class FluentComponentProgressBarSpinnerTest {
 	}
 
 	@Test
-	void progressBarInvisibleConditionNameSetsValue() {
-		FluentProgressBar fpb = new FluentProgressBar().invisibleConditionName("hide");
-		assertEquals("hide", fpb.get().getInvisibleConditionName());
+	void progressBarInvisibleConditionSetsValue() {
+		FluentProgressBar fpb = new FluentProgressBar().invisibleCondition("hide");
+		assertEquals("hide", fpb.get().getInvisibleCondition());
 	}
 
 	@Test
@@ -122,12 +176,12 @@ class FluentComponentProgressBarSpinnerTest {
 	}
 
 	@Test
-	void progressBarFromCopiesInvisibleConditionName() {
+	void progressBarFromCopiesInvisibleCondition() {
 		ProgressBar source = new ProgressBar();
-		source.setInvisibleConditionName("gone");
+		source.setXmlInvisibleCondition("gone");
 
 		FluentProgressBar copy = new FluentProgressBar().from(source);
-		assertEquals("gone", copy.get().getInvisibleConditionName());
+		assertEquals("gone", copy.get().getInvisibleCondition());
 	}
 
 	// --- FluentSpinner ---

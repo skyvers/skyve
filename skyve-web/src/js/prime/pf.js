@@ -14,6 +14,8 @@ SKYVE.PF = function() {
 	};
 	
 	var contentOverlayIdsByBinding = {};
+	// The ids of the upload page frames whose upload action has run since they were shown (see afterActionUpload)
+	var actionUploadFrameIds = {};
 	var contentMarkupIdsByBinding = {};
 	var contentMarkupCompanionIdsByBinding = {};
 	var pageScrollLock = {
@@ -49,6 +51,21 @@ SKYVE.PF = function() {
 		return element;
 	};
 
+	// Shows growls from script in the push growl: the view's own growl is updated by every response, which would
+	// remove them (a pushed growl, or an upload page's messages as it closes, before the refresh that follows).
+	// They are added to the growls showing (keepAlive), so that neither removes the other before it is read: a growl
+	// pushed by a job finishing soon after the action that started it, or an upload's messages (as SmartClient, SC-6).
+	var pushGrowls = function(msgs) {
+		PrimeFaces.cw('Growl', 'pushGrowl', {
+			id: 'pushGrowl',
+			widgetVar: 'pushGrowl',
+			life: 6000,
+			sticky: false,
+			keepAlive: true,
+			msgs: msgs
+		});
+	};
+
 	var getWidgetElement = function(widgetVar) {
 		var widget = window.PF ? window.PF(widgetVar) : null;
 		return widget && widget.jq ? widget.jq[0] : null;
@@ -68,30 +85,90 @@ SKYVE.PF = function() {
 		}
 	};
 
+	var getStickyDataTableWrapper = function(dataTable) {
+		return dataTable.jq.children('.ui-datatable-tablewrapper').first();
+	};
+
+	// Keep the sticky header scrolled sideways by the same amount as the rows.
+	var syncStickyDataTableHeaderScroll = function(dataTable) {
+		var wrapper = getStickyDataTableWrapper(dataTable)[0];
+		var sticky = dataTable.stickyContainer && dataTable.stickyContainer[0];
+		if (wrapper && sticky && (sticky.scrollLeft !== wrapper.scrollLeft)) {
+			sticky.scrollLeft = wrapper.scrollLeft;
+		}
+	};
+
+	// PrimeFaces sizes the sticky header to the whole table and places it at the table's left edge.
+	// When the table is wider than its scrolling wrapper, that header overhangs the grid (and the page),
+	// and moves out of line with the rows once they scroll sideways.
+	// So clip the header to the wrapper's visible area and scroll its contents in step with the rows.
 	var alignStickyDataTableHeader = function(dataTable) {
 		if ((! dataTable) || (! dataTable.jq) || (! dataTable.stickyContainer)) {
 			return;
 		}
 
-		var sourceTable = dataTable.jq.children('.ui-datatable-tablewrapper').children('table');
-		if (sourceTable.length === 0) {
-			sourceTable = dataTable.jq.find('> .ui-datatable-tablewrapper table').first();
-		}
+		var wrapper = getStickyDataTableWrapper(dataTable);
+		var sourceTable = wrapper.children('table');
 		if (sourceTable.length === 0) {
 			return;
 		}
 
-		var offset = sourceTable.offset();
+		var offset = wrapper.offset();
 		if (! offset) {
 			return;
 		}
 
-		var width = sourceTable.outerWidth();
+		var wrapperElement = wrapper[0];
 		dataTable.stickyContainer.css({
-			left: offset.left + 'px',
-			width: width + 'px'
+			left: (offset.left + wrapperElement.clientLeft) + 'px',
+			width: wrapperElement.clientWidth + 'px',
+			overflow: 'hidden'
 		});
-		dataTable.stickyContainer.children('table').css('width', width + 'px');
+		dataTable.stickyContainer.children('table').css('width', sourceTable.outerWidth() + 'px');
+		syncStickyDataTableHeaderScroll(dataTable);
+	};
+
+	// The clipped header can't be scrolled by the user, so pass sideways wheel and trackpad scrolling
+	// over the header on to the rows, and follow any scrolling the browser does itself
+	// (eg focusing a filter input that is out of view).
+	var bindStickyDataTableHeaderScroll = function(dataTable, namespace) {
+		var wrapper = getStickyDataTableWrapper(dataTable);
+		var sticky = dataTable.stickyContainer;
+		if ((wrapper.length === 0) || (! sticky)) {
+			return;
+		}
+
+		wrapper.on('scroll' + namespace, function() {
+			syncStickyDataTableHeaderScroll(dataTable);
+		});
+		sticky.on('scroll' + namespace, function() {
+			var wrapperElement = wrapper[0];
+			if (wrapperElement.scrollLeft !== sticky[0].scrollLeft) {
+				wrapperElement.scrollLeft = sticky[0].scrollLeft;
+			}
+		});
+		// Native listener because the default action has to be cancellable (jQuery can't set passive: false)
+		sticky[0].addEventListener('wheel', function(event) {
+			var wrapperElement = wrapper[0];
+			var deltaX = event.deltaX;
+			var deltaY = event.deltaY;
+			if (event.shiftKey && (! deltaX)) { // shift + mouse wheel scrolls sideways
+				deltaX = deltaY;
+				deltaY = 0;
+			}
+			if ((Math.abs(deltaX) <= Math.abs(deltaY)) ||
+					(wrapperElement.scrollWidth <= wrapperElement.clientWidth)) {
+				return; // vertical scrolling - let the page scroll
+			}
+			if (event.deltaMode === 1) { // lines
+				deltaX *= 16;
+			}
+			else if (event.deltaMode === 2) { // pages
+				deltaX *= wrapperElement.clientWidth;
+			}
+			wrapperElement.scrollLeft += deltaX;
+			event.preventDefault();
+		}, {passive: false});
 	};
 
 	var refreshStickyDataTableHeader = function(dataTable) {
@@ -141,6 +218,7 @@ SKYVE.PF = function() {
 		};
 
 		$(window).on('resize' + namespace + ' orientationchange' + namespace, refresh);
+		bindStickyDataTableHeaderScroll(dataTable, namespace);
 		$(document).on('click' + namespace, '.layout-menu-button,.menu-button,#topbar-menu-button', function() {
 			refreshStickyDataTableHeader(dataTable);
 			window.setTimeout(function() {
@@ -155,6 +233,7 @@ SKYVE.PF = function() {
 			}
 			$(window).off(namespace);
 			$(document).off(namespace);
+			getStickyDataTableWrapper(dataTable).off(namespace);
 		});
 		dataTable.skyveStickyResizePatch = true;
 	};
@@ -189,6 +268,66 @@ SKYVE.PF = function() {
 	$(patchPrimeFacesStickyDataTableFilters);
 
 	// end of sticky header fixes
+
+	// Skyve's converters write a 12 hour time's AM and PM in English (Locale.ENGLISH), and read them in either case.
+	// A PrimeFaces date picker writes and reads only the AM and PM of its user's locale (am and pm in en-AU and en-GB),
+	// so it refused a typed PM and emptied itself. It takes the AM and PM of its locale settings over its user's, so
+	// every locale's settings get Skyve's; their day and month names are untouched. Patched here, as this script loads
+	// after PrimeFaces' core and before the date pickers are made.
+	var patchPrimeFacesLocaleAmPm = function() {
+		var getLocaleSettings = window.PrimeFaces && PrimeFaces.getLocaleSettings;
+		if ((typeof getLocaleSettings !== 'function') || getLocaleSettings.skyveAmPmPatch) {
+			return;
+		}
+
+		PrimeFaces.getLocaleSettings = function() {
+			var result = getLocaleSettings.apply(this, arguments);
+			if (result) {
+				result.am = 'AM';
+				result.pm = 'PM';
+			}
+			return result;
+		};
+		PrimeFaces.getLocaleSettings.skyveAmPmPatch = true;
+	};
+
+	patchPrimeFacesLocaleAmPm();
+
+	// The date picker compares a typed AM or PM with its locale's exactly, so with Skyve's AM and PM it refused a typed
+	// am or pm, which Skyve's converters read. Its time parse matches a typed AM or PM in either case; it still writes
+	// AM and PM. The date picker's script loads after this one, so its plugin is patched once it is loaded: now if it
+	// is, when the page is ready (before any value is typed), and after each ajax response (which may load it).
+	var patchPrimeFacesDatePickerAmPmCase = function() {
+		var datePickerPrototype = window.jQuery && $.prime && $.prime.datePicker && $.prime.datePicker.prototype;
+		if ((! datePickerPrototype) || datePickerPrototype.skyveAmPmCasePatch) {
+			return;
+		}
+
+		var populateTime = datePickerPrototype.populateTime;
+		if (typeof populateTime !== 'function') {
+			return;
+		}
+
+		datePickerPrototype.populateTime = function(value, timeString, ampm) {
+			var locale = this.options && this.options.locale;
+			var marker = ampm;
+			if (marker && locale) {
+				var upper = String(marker).toUpperCase();
+				if (locale.am && (upper === String(locale.am).toUpperCase())) {
+					marker = locale.am;
+				}
+				else if (locale.pm && (upper === String(locale.pm).toUpperCase())) {
+					marker = locale.pm;
+				}
+			}
+			return populateTime.call(this, value, timeString, marker);
+		};
+		datePickerPrototype.skyveAmPmCasePatch = true;
+	};
+
+	patchPrimeFacesDatePickerAmPmCase();
+	$(patchPrimeFacesDatePickerAmPmCase);
+	$(document).on('pfAjaxComplete', patchPrimeFacesDatePickerAmPmCase);
 	
 	var prepareMorph = function(source, target, options) {
 		var sourceElement = getElement(source);
@@ -428,6 +567,15 @@ SKYVE.PF = function() {
 		}
 	};
 	
+	// Show the image as a thumbnail at the size the server chose for the box (see data-skyve-preview-size)
+	var setContentImageSrc = function(root, id, binding, url) {
+		getContentElements(root, id, binding, '_image').each(function() {
+			var image = root.$(this);
+			var size = image.attr('data-skyve-preview-size');
+			image.attr('src', size ? url + '&_w=' + size + '&_h=' + size : url);
+		});
+	};
+
 	var clearContentAnchor = function(root, id, binding) {
 		getContentElements(root, id, binding, '_link').attr('href','javascript:void(0)').text('<Empty>').attr('onclick', 'return false').off('click.skyveContentClear').on('click.skyveContentClear', function() { return false; });
 	};
@@ -490,10 +638,156 @@ SKYVE.PF = function() {
 		return widget || window.PF(binding + suffix);
 	};
 
+	// The last PrimeFaces AJAX request sent, and the answers given so far in its gesture,
+	// so that the request can be resent when the server asks a question.
+	var lastRequest = null;
+
+	// Remembers each PrimeFaces AJAX request as it is sent. Command buttons and p:ajax behaviours
+	// both send through PrimeFaces.ajax.Request.send, which sends one queued request at a time.
+	var recordRequests = function() {
+		var request = PrimeFaces.ajax.Request;
+		var send = request.send;
+		request.send = function(cfg) {
+			// A resend carries the answers of its gesture; any other request starts a new gesture
+			lastRequest = {cfg: cfg, answers: cfg.skyveAnswers || []};
+			return send.apply(this, arguments);
+		};
+	};
+	if (window.PrimeFaces?.ajax?.Request) {
+		recordRequests();
+	}
+	else {
+		document.addEventListener('DOMContentLoaded', recordRequests);
+	}
+
+	// Sends the last request again with the given answers in the _q request parameter.
+	// The copy keeps the original's source, form, process, update and parameters, but not the state
+	// PrimeFaces added when it handled the original (its promise, early post parameters and extension).
+	var resendLastRequest = function(answers) {
+		var cfg = $.extend({}, lastRequest.cfg);
+		var ext = cfg.ext;
+		delete cfg.ext;
+		delete cfg.promise;
+		delete cfg.earlyPostParams;
+		cfg.params = $.grep(cfg.params || [], function(param) {
+			return param.name !== '_q';
+		});
+		cfg.params.push({name: '_q', value: JSON.stringify(answers)});
+		cfg.skyveAnswers = answers;
+		PrimeFaces.ajax.Request.handle(cfg, ext);
+	};
+
+	// Shows a question as a modal dialog. Its text is set as text, never as markup.
+	// The default button has the focus, the focus stays within the dialog, and Escape and the close box
+	// choose the button that aborts; if no button aborts, the user must choose one.
+	var showQuestion = function(question, choose) {
+		var previousFocus = document.activeElement;
+		var zIndex = PrimeFaces.nextZindex();
+		var mask = $('<div class="ui-widget-overlay ui-dialog-mask"></div>')
+						.css({position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: zIndex});
+		var titleId = 'skyveQuestionTitle';
+		var messageId = 'skyveQuestionMessage';
+		var dialog = $('<div class="ui-dialog ui-confirm-dialog ui-widget ui-widget-content ui-corner-all ui-shadow" role="alertdialog" aria-modal="true"></div>')
+						.attr({'aria-labelledby': titleId, 'aria-describedby': messageId})
+						.css({display: 'block', position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: zIndex + 1, maxWidth: '90vw'});
+		var titleBar = $('<div class="ui-dialog-titlebar ui-widget-header ui-helper-clearfix ui-corner-top"></div>').appendTo(dialog);
+		$('<span class="ui-dialog-title"></span>').attr('id', titleId).text(question.title).appendTo(titleBar);
+		$('<div class="ui-dialog-content ui-widget-content"></div>')
+			.append($('<span class="ui-confirm-dialog-message"></span>').attr('id', messageId).css('white-space', 'pre-wrap').text(question.message))
+			.appendTo(dialog);
+		var buttonPane = $('<div class="ui-dialog-buttonpane ui-dialog-footer ui-widget-content ui-helper-clearfix"></div>').appendTo(dialog);
+
+		var aborting = null;
+		var defaultButton = null;
+		var close = function(button) {
+			$(document).off('focusin.skyveQuestion');
+			dialog.remove();
+			mask.remove();
+			if (previousFocus?.focus) {
+				previousFocus.focus();
+			}
+			choose(button);
+		};
+		$.each(question.buttons, function(index, button) {
+			var element = $('<button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only"></button>')
+							.append($('<span class="ui-button-text ui-c"></span>').text(button.label))
+							.on('click', function() {
+								close(button);
+							})
+							.appendTo(buttonPane);
+			if (button.aborts) {
+				aborting = button;
+			}
+			if (button.default) {
+				defaultButton = element;
+			}
+		});
+		if (aborting) {
+			$('<a href="#" class="ui-dialog-titlebar-icon ui-dialog-titlebar-close ui-corner-all" role="button"></a>')
+				.attr('aria-label', aborting.label)
+				.append('<span class="ui-icon ui-icon-closethick"></span>')
+				.on('click', function(event) {
+					event.preventDefault();
+					close(aborting);
+				})
+				.appendTo(titleBar);
+		}
+
+		dialog.on('keydown', function(event) {
+			if ((event.key === 'Escape') && aborting) {
+				event.preventDefault();
+				close(aborting);
+			}
+			else if (event.key === 'Tab') {
+				var focusable = dialog.find('button, a[href]');
+				var first = focusable.first()[0];
+				var last = focusable.last()[0];
+				if (event.shiftKey && (document.activeElement === first)) {
+					event.preventDefault();
+					last.focus();
+				}
+				else if ((! event.shiftKey) && (document.activeElement === last)) {
+					event.preventDefault();
+					first.focus();
+				}
+			}
+		});
+
+		$(document.body).append(mask).append(dialog);
+		var focusDefault = function() {
+			(defaultButton || buttonPane.children().first()).trigger('focus');
+		};
+		// Keep the focus in the dialog, even when another component returns focus elsewhere as it closes
+		$(document).on('focusin.skyveQuestion', function(event) {
+			if (! $.contains(dialog[0], event.target)) {
+				focusDefault();
+			}
+		});
+		focusDefault();
+	};
+
 	// public
 	return {
 		getById: function(id) {
 			return $(PrimeFaces.escapeClientId(id));
+		},
+
+		/**
+		 * Shows a question the server asked while handling the last AJAX request, and acts on the user's answer.
+		 * A button that does not abort adds its answer to the answers given so far in this gesture and resends
+		 * the request with all of them in the _q parameter; a button that aborts ends the gesture.
+		 *
+		 * @param question	The question: its id, title, message and buttons, each with a code, label,
+		 * 					whether it aborts and whether it is the default.
+		 */
+		ask: function(question) {
+			var request = lastRequest;
+			showQuestion(question, function(button) {
+				if (! button.aborts) {
+					lastRequest = request;
+					resendLastRequest(request.answers.concat([{id: question.id, code: button.code}]));
+				}
+			});
 		},
 
 		morphFrom: function(source, target, options) {
@@ -524,6 +818,7 @@ SKYVE.PF = function() {
 			if (binding) {
 				contentOverlayIdsByBinding[binding] = id;
 			}
+			delete actionUploadFrameIds[id + '_overlayiframe'];
 			var iframe = SKYVE.PF.getById(id + '_overlayiframe');
 			if (iframe.attr('src') !== url) {
 				iframe.attr('src', url);
@@ -547,7 +842,7 @@ SKYVE.PF = function() {
 			}
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
 			getContentElements(window, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text('Content').attr('onclick', 'return true');
-			getContentElements(window, id, binding, '_image').attr('src', url);
+			setContentImageSrc(window, id, binding, url);
 			setContentImagePlaceholder(window, id, binding, false);
 			showContentVideo(window, id, binding, url);
 			if (companionBinding) {
@@ -560,6 +855,48 @@ SKYVE.PF = function() {
 			}
 			SKYVE.PF.getById(id + '_overlayiframe').attr('src','');
 			delete contentOverlayIdsByBinding[binding];
+		},
+
+		/**
+		 * Notes that an upload page's upload action has run, so that hiding the page refreshes the view
+		 * (see actionUploadRan), and closes the page of an upload that has succeeded, as afterContentUpload closes a
+		 * content upload's: shows the page's messages in the view's growl, so that the user still sees them, then hides
+		 * the overlay or dialog that holds the page's frame, whose hide handler then refreshes the view.
+		 *
+		 * @param uploadWindow	The upload page's window, in the frame.
+		 * @param close	Whether to close the page: true when the upload succeeded, false when the page shows its problems.
+		 * @param messages	When closing, the page's messages: each a severity, summary and detail, shown unescaped, as the
+		 * 					page's growl shows them.
+		 */
+		afterActionUpload: function(uploadWindow, close, messages) {
+			var frame = uploadWindow.frameElement;
+			actionUploadFrameIds[frame.id] = true;
+			if (close) {
+				if (messages && (messages.length > 0)) {
+					pushGrowls(messages);
+				}
+				var panel = $(frame).closest('.ui-overlaypanel, .ui-dialog');
+				var widget = panel.length ? PrimeFaces.getWidgetById(panel.attr('id')) : null;
+				if (widget) {
+					widget.hide();
+				}
+			}
+		},
+
+		/**
+		 * Indicates if the upload page in the overlay or dialog with this id has run its upload action since it was
+		 * shown, and forgets it: its hide handler refreshes the view only then. A page closed without an upload has
+		 * changed nothing, and a refresh sent when its hide ends could follow the request of the click that hid it, and
+		 * re-render the view without that request's messages.
+		 *
+		 * @param id	The overlay's or dialog's id.
+		 * @returns {boolean} true if the upload action has run.
+		 */
+		actionUploadRan: function(id) {
+			var frameId = id + '_overlayiframe';
+			var result = (actionUploadFrameIds[frameId] === true);
+			delete actionUploadFrameIds[frameId];
+			return result;
 		},
 
 		clearContentImage: function(binding, id, companionBinding) {
@@ -618,7 +955,7 @@ SKYVE.PF = function() {
 			}
 			var url = 'content?_n=' + contentId + '&_doc=' + modoc + '&_b=' + unsanitiseBinding(binding);
 			getContentElements(window, id, binding, '_link').off('click.skyveContentClear').attr('href', url).text('Content').attr('onclick', 'return true');
-			getContentElements(window, id, binding, '_image').attr('src', url);
+			setContentImageSrc(window, id, binding, url);
 			setContentImagePlaceholder(window, id, binding, false);
 			if (companionBinding) {
 				setAutoContentVisibility(window, id, binding, 'image');
@@ -872,13 +1209,7 @@ SKYVE.PF = function() {
 			}
 			
 			if (growls.length > 0) {
-				PrimeFaces.cw('Growl', 'pushGrowl', {
-					id: 'pushGrowl', 
-					widgetVar: 'pushGrowl',
-					life: 6000, 
-					sticky: false, 
-					msgs: growls 
-				});
+				pushGrowls(growls);
 			}
 		},
 		
@@ -1013,6 +1344,242 @@ SKYVE.PF = function() {
 		}
 	};
 }();
+
+// Reserve label space per visual form row. Hidden measurement labels stay floated so
+// focusing an empty field does not change row height. No polling or per-keystroke work.
+(function() {
+	var rows = new Map();
+	var dirtyRows = new Set();
+	var frame = null;
+	var observedSizes = new WeakMap();
+	var owners = new WeakMap();
+	var resizeObserver = new ResizeObserver(function(entries) {
+		entries.forEach(function(entry) {
+			var previous = observedSizes.get(entry.target);
+			var width = entry.contentRect.width;
+			// Padding can change row/cell height; only label height is an input.
+			var height = entry.target.tagName === 'LABEL' ? entry.contentRect.height : 0;
+			if (!previous || previous.width !== width || previous.height !== height) {
+				observedSizes.set(entry.target, {width: width, height: height});
+				schedule(owners.get(entry.target));
+			}
+		});
+	});
+
+	function schedule(row) {
+		if (row) {
+			dirtyRows.add(row);
+		}
+		if (frame === null && dirtyRows.size) {
+			frame = requestAnimationFrame(updateRows);
+		}
+	}
+
+	function updateRows() {
+		frame = null;
+		var changes = [];
+		// Complete all geometry reads before writing any padding.
+		dirtyRows.forEach(function(row) {
+			var state = rows.get(row);
+			if (!state || !row.isConnected || !row.getClientRects().length) {
+				return;
+			}
+			var lines = new Map();
+			state.cells.forEach(function(originalPadding, cell) {
+				if (!cell.getClientRects().length) {
+					return;
+				}
+				var top = cell.offsetTop;
+				var line = lines.get(top);
+				if (!line) {
+					line = {height: 0, cells: []};
+					lines.set(top, line);
+				}
+				line.cells.push({cell: cell, padding: originalPadding});
+			});
+			state.fields.forEach(function(field) {
+				if (field.label.getClientRects().length) {
+					var line = lines.get(field.cell.offsetTop);
+					if (line) {
+						line.height = Math.max(line.height, 16, Math.ceil(field.measure.getBoundingClientRect().height + 4));
+					}
+				}
+			});
+			lines.forEach(function(line) {
+				line.cells.forEach(function(item) {
+					changes.push({cell: item.cell, padding: line.height ? line.height + 'px' : item.padding});
+				});
+			});
+		});
+		dirtyRows.clear();
+		changes.forEach(function(change) {
+			if (change.cell.style.paddingTop !== change.padding) {
+				change.cell.style.paddingTop = change.padding;
+			}
+		});
+	}
+
+	function removeField(field) {
+		resizeObserver.unobserve(field.measure);
+		field.mirror.remove();
+	}
+
+	function registerRow(row, records) {
+		var state = rows.get(row);
+		if (!state) {
+			state = {cells: new Map(), fields: new Map(), observer: new MutationObserver(function(mutations) {
+				// Rebuild a removed mirror or measurement label; ignore other mirror changes.
+				var changes = mutations.filter(function(mutation) {
+					var target = mutation.target.nodeType === 1 ? mutation.target : mutation.target.parentElement;
+					if (target && mutation.type === 'childList' && Array.from(mutation.removedNodes).some(function(node) {
+						return node.nodeType === 1 && (node.classList.contains('skyve-floating-label-measure') ||
+							(target.classList.contains('skyve-floating-label-measure') && node.tagName === 'LABEL'));
+					})) {
+						return true;
+					}
+					if (!target || target.closest('.skyve-floating-label-measure')) {
+						return false;
+					}
+					if (mutation.type === 'attributes' || target.closest('.skyve-floating-label > label')) {
+						return true;
+					}
+					// Ignore editing inside controls; only field/cell structure affects registration.
+					return mutation.type === 'childList' && Array.from(mutation.addedNodes).concat(Array.from(mutation.removedNodes)).some(function(node) {
+						return node.nodeType === 1 && !node.classList.contains('skyve-floating-label-measure') &&
+							(target === row || node.matches('.field, .skyve-floating-label, label') || node.querySelector('.field > .skyve-floating-label'));
+					});
+				});
+				if (changes.length) {
+					// Class/style changes usually only need geometry recalculation.
+					if (changes.some(function(change) {
+						return change.type !== 'attributes' || change.target.closest('label') ||
+							state.fields.has(change.target) || change.target.matches('.field, .skyve-floating-label');
+					})) {
+						registerRow(row, changes);
+					}
+					schedule(row);
+				}
+			})};
+			rows.set(row, state);
+			owners.set(row, row);
+			resizeObserver.observe(row);
+			state.observer.observe(row, {childList: true, characterData: true, subtree: true,
+				attributes: true, attributeFilter: ['class', 'style', 'hidden']});
+		}
+		var fields = new Set();
+		var changed = false;
+		state.cells.forEach(function(padding, cell) {
+			if (cell.parentElement !== row) {
+				resizeObserver.unobserve(cell);
+				cell.style.paddingTop = padding;
+				state.cells.delete(cell);
+				changed = true;
+			}
+		});
+		Array.from(row.children).forEach(function(cell) {
+			if (!state.cells.has(cell)) {
+				state.cells.set(cell, cell.style.paddingTop);
+				owners.set(cell, row);
+				resizeObserver.observe(cell);
+				changed = true;
+			}
+			cell.querySelectorAll('.field > .skyve-floating-label').forEach(function(span) {
+				if (span.closest('.skyve-form-row') !== row) {
+					return;
+				}
+				var label = span.querySelector(':scope > label');
+				if (!label) {
+					return;
+				}
+				fields.add(span);
+				var field = state.fields.get(span);
+				if (field && field.label === label && field.cell === cell &&
+					field.mirror.parentElement === span && field.measure.parentElement === field.mirror &&
+					!(records || []).some(function(record) { return label.contains(record.target); })) {
+					return;
+				}
+				if (field) {
+					removeField(field);
+				}
+				var mirror = document.createElement('span');
+				mirror.className = 'ui-float-label skyve-floating-label skyve-floating-label-measure';
+				mirror.setAttribute('aria-hidden', 'true');
+				mirror.inert = true;
+				var filled = document.createElement('span');
+				filled.className = 'ui-inputwrapper-filled';
+				mirror.appendChild(filled);
+				var measure = label.cloneNode(true);
+				measure.removeAttribute('id');
+				measure.removeAttribute('for');
+				measure.querySelectorAll('[id]').forEach(function(element) {
+					element.removeAttribute('id');
+				});
+				mirror.appendChild(measure);
+				span.appendChild(mirror);
+				state.fields.set(span, {cell: cell, label: label, mirror: mirror, measure: measure});
+				owners.set(measure, row);
+				resizeObserver.observe(measure);
+				changed = true;
+			});
+		});
+		state.fields.forEach(function(field, span) {
+			if (!fields.has(span)) {
+				removeField(field);
+				state.fields.delete(span);
+				changed = true;
+			}
+		});
+		if (changed) {
+			schedule(row);
+		}
+	}
+
+	function cleanupDetachedRows() {
+		rows.forEach(function(state, row) {
+			if (!row.isConnected) {
+				state.observer.disconnect();
+				resizeObserver.unobserve(row);
+				state.cells.forEach(function(padding, cell) {
+					resizeObserver.unobserve(cell);
+					cell.style.paddingTop = padding;
+				});
+				state.fields.forEach(removeField);
+				rows.delete(row);
+				dirtyRows.delete(row);
+			}
+		});
+	}
+
+	function registerRows() {
+		cleanupDetachedRows();
+		document.querySelectorAll('.skyve-form-row').forEach(function(row) {
+			// Side-label-only rows need no observers or measurements.
+			if (rows.has(row) || row.querySelector('.field > .skyve-floating-label')) {
+				registerRow(row);
+			}
+		});
+	}
+
+	function start() {
+		registerRows();
+		$(document).on('pfAjaxComplete', registerRows);
+		new MutationObserver(function(mutations) {
+			if (mutations.some(function(mutation) {
+				return Array.from(mutation.removedNodes).some(function(node) {
+					return node.nodeType === 1 && (rows.has(node) || node.querySelector('.skyve-form-row'));
+				});
+			})) {
+				cleanupDetachedRows();
+			}
+		}).observe(document.documentElement, {childList: true, subtree: true});
+	}
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', start);
+	}
+	else {
+		start();
+	}
+})();
 
 // Keep Skyve DataGrids as tables while their columns and rendered content fit.
 // Observe the containing column rather than the table: switching to cards changes table width.

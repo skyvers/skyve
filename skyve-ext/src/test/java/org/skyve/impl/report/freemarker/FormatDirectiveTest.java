@@ -37,6 +37,7 @@ class FormatDirectiveTest {
 		unbindPersistenceFromThread();
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsMissingParameters() {
 		FormatDirective directive = new FormatDirective();
@@ -44,6 +45,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, Map.of(), new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsLoopVariables() {
 		FormatDirective directive = new FormatDirective();
@@ -52,6 +54,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[] { scalar("loop") }, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNestedBody() {
 		FormatDirective directive = new FormatDirective();
@@ -63,6 +66,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], body));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNullBeanParameter() {
 		FormatDirective directive = new FormatDirective();
@@ -72,6 +76,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNonBeanParameter() {
 		FormatDirective directive = new FormatDirective();
@@ -81,6 +86,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNonScalarBinding() {
 		FormatDirective directive = new FormatDirective();
@@ -89,6 +95,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNonScalarExpression() {
 		FormatDirective directive = new FormatDirective();
@@ -97,6 +104,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsBothBindingAndExpression() {
 		FormatDirective directive = new FormatDirective();
@@ -107,6 +115,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsNonBooleanEscape() {
 		FormatDirective directive = new FormatDirective();
@@ -117,6 +126,7 @@ class FormatDirectiveTest {
 		assertThrows(TemplateModelException.class, () -> directive.execute(null, params, new TemplateModel[0], null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void executeRejectsUnsupportedParameter() {
 		FormatDirective directive = new FormatDirective();

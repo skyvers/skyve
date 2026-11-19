@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.view.widget;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -9,9 +10,9 @@ import org.junit.jupiter.api.Test;
 class MapDisplayTest {
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
+	void xmlVisibleConditionIsNullByDefault() {
 		MapDisplay widget = new MapDisplay();
-		assertNull(widget.getVisibleConditionName());
+		assertNull(widget.getXmlVisibleCondition());
 	}
 
 	@Test
@@ -21,9 +22,9 @@ class MapDisplayTest {
 	}
 
 	@Test
-	void setVisibleConditionNameNegatesCondition() {
+	void setVisibleConditionNegatesCondition() {
 		MapDisplay widget = new MapDisplay();
-		widget.setVisibleConditionName("visible");
-		assertNotNull(widget.getInvisibleConditionName());
+		widget.setXmlVisibleCondition("visible");
+		assertEquals("notVisible", widget.getInvisibleCondition());
 	}
 }

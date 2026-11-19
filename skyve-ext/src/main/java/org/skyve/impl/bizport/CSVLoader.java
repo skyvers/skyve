@@ -15,6 +15,9 @@ import org.skyve.domain.types.converters.Converter;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * {@link AbstractDataFileLoader} implementation that reads CSV files via
  * SuperCSV, mapping each header column to a Skyve binding expression.
@@ -25,16 +28,16 @@ public class CSVLoader extends AbstractDataFileLoader {
 	private String[] headers;
 	private Map<String, String> valueMap;
 
-	public Map<String, String> getValueMap() {
+	public @Nullable Map<String, String> getValueMap() {
 		return valueMap;
 	}
 
-	public CSVLoader(LoaderActivityType activityType,
-						InputStream fileInputStream,
-						UploadException exception,
-						String moduleName,
-						String documentName,
-						String... bindings) {
+	public CSVLoader(@Nonnull LoaderActivityType activityType,
+						@Nonnull InputStream fileInputStream,
+						@Nonnull UploadException exception,
+						@Nonnull String moduleName,
+						@Nonnull String documentName,
+						@Nonnull String... bindings) {
 
 		super(activityType, exception, moduleName, documentName);
 		addFields(bindings);
@@ -67,7 +70,7 @@ public class CSVLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public String getStringFieldValue(int index, boolean blankAsNull) {
+	public @Nullable String getStringFieldValue(int index, boolean blankAsNull) {
 		String hdr = headers[index];
 		if (valueMap != null && valueMap.containsKey(hdr)) {
 			String value = valueMap.get(hdr);
@@ -82,7 +85,7 @@ public class CSVLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public Date getDateFieldValue(int index) {
+	public @Nullable Date getDateFieldValue(int index) {
 		String value = getStringFieldValue(index, true);
 		if (null == value)
 			return null;
@@ -99,7 +102,7 @@ public class CSVLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public Double getNumericFieldValue(int index, boolean emptyAsZero) {
+	public @Nonnull Double getNumericFieldValue(int index, boolean emptyAsZero) {
 		String value = getStringFieldValue(index, true);
 		if (null == value)
 			return Double.valueOf(0);
@@ -131,7 +134,7 @@ public class CSVLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public String getWhere(int index) {
+	public @Nonnull String getWhere(int index) {
 		StringBuilder where = new StringBuilder(128);
 		where.append("Line ").append(dataIndex);
 		where.append(" ").append(headers[index]);
@@ -140,7 +143,7 @@ public class CSVLoader extends AbstractDataFileLoader {
 	}
 
 	@Override
-	public String debugData() {
+	public @Nonnull String debugData() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Line ").append(dataIndex);
 

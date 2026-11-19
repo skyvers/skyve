@@ -1,6 +1,6 @@
 package org.skyve.impl.persistence.hibernate.dialect;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
@@ -16,12 +16,12 @@ import org.hibernate.engine.jdbc.env.spi.QualifiedObjectNameFormatter;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.Table;
 import org.hibernate.mapping.UniqueKey;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({"static-method", "deprecation"})
-public class SQLServer2008NullTolerantUniqueDelegateTest {
+class SQLServer2008NullTolerantUniqueDelegateTest {
 	@Test
-	public void addUniqueKeyCommandCreatesFilteredIndexForEveryColumn() {
+	void addUniqueKeyCommandCreatesFilteredIndexForEveryColumn() {
 		SQLServer2008NullTolerantUniqueDelegate delegate = new SQLServer2008NullTolerantUniqueDelegate(new SQLServer2008Dialect());
 		UniqueKey uniqueKey = uniqueKey();
 		Metadata metadata = metadataFormattingTableAs("dbo.Customer");
@@ -33,7 +33,7 @@ public class SQLServer2008NullTolerantUniqueDelegateTest {
 	}
 
 	@Test
-	public void contextAddUniqueKeyCommandDelegatesToFilteredIndexCommand() {
+	void contextAddUniqueKeyCommandDelegatesToFilteredIndexCommand() {
 		SQLServer2008NullTolerantUniqueDelegate delegate = new SQLServer2008NullTolerantUniqueDelegate(new SQLServer2008Dialect());
 		UniqueKey uniqueKey = uniqueKey();
 		Metadata metadata = metadataFormattingTableAs("dbo.Customer");
@@ -45,7 +45,7 @@ public class SQLServer2008NullTolerantUniqueDelegateTest {
 	}
 
 	@Test
-	public void dropUniqueKeyCommandDropsFilteredIndexFromTable() {
+	void dropUniqueKeyCommandDropsFilteredIndexFromTable() {
 		SQLServer2008NullTolerantUniqueDelegate delegate = new SQLServer2008NullTolerantUniqueDelegate(new SQLServer2008Dialect());
 		UniqueKey uniqueKey = uniqueKey();
 		Metadata metadata = metadataFormattingTableAs("dbo.Customer");
@@ -56,7 +56,7 @@ public class SQLServer2008NullTolerantUniqueDelegateTest {
 	}
 
 	@Test
-	public void contextDropUniqueKeyCommandDelegatesToDropIndexCommand() {
+	void contextDropUniqueKeyCommandDelegatesToDropIndexCommand() {
 		SQLServer2008NullTolerantUniqueDelegate delegate = new SQLServer2008NullTolerantUniqueDelegate(new SQLServer2008Dialect());
 		UniqueKey uniqueKey = uniqueKey();
 		Metadata metadata = metadataFormattingTableAs("dbo.Customer");

@@ -3,15 +3,15 @@ package org.skyve.nlp.cron;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CronExpressionTest {
+class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testFluentSetters() {
+	void testFluentSetters() {
 		// setup the test data
 		CronExpression c = new CronExpression();
 
@@ -32,7 +32,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromExpressionNullString() {
+	void testFromExpressionNullString() {
 		// call the method under test
 		CronExpression c = CronExpression.fromExpression(null);
 
@@ -40,33 +40,29 @@ public class CronExpressionTest {
 		assertThat(c, is(nullValue()));
 	}
 
-	@Test(expected = CronParserException.class)
+	@Test
 	@SuppressWarnings("static-method")
-	public void testFromExpressionTooFewParametersThrowsException() {
+	void testFromExpressionTooFewParametersThrowsException() {
 		// setup the test data
 		String expression = "* * * *";
 
 		// call the method under test
-		CronExpression.fromExpression(expression);
-
-		fail("Should throw exception before this line");
-	}
-
-	@Test(expected = CronParserException.class)
-	@SuppressWarnings("static-method")
-	public void testFromExpressionTooManyParametersThrowsException() {
-		// setup the test data
-		String expression = "* * * * * * *";
-
-		// call the method under test
-		CronExpression.fromExpression(expression);
-
-		fail("Should throw exception before this line");
+		assertThrows(CronParserException.class, () -> CronExpression.fromExpression(expression));
 	}
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testFromExpressionValidParameters() {
+	void testFromExpressionTooManyParametersThrowsException() {
+		// setup the test data
+		String expression = "* * * * * * *";
+
+		// call the method under test
+		assertThrows(CronParserException.class, () -> CronExpression.fromExpression(expression));
+	}
+
+	@Test
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void testFromExpressionValidParameters() {
 		// setup the test data
 		String expression = "* * * * * *";
 
@@ -83,8 +79,8 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testFromExpressionValidParametersWithSteps() {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void testFromExpressionValidParametersWithSteps() {
 		// setup the test data
 		String expression = "0 0 */6 * * *";
 
@@ -102,7 +98,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHasNothingAllNullReturnsTrue() {
+	void testHasNothingAllNullReturnsTrue() {
 		// setup the test data
 		CronExpression c = new CronExpression();
 
@@ -115,7 +111,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testHasNothingOneValueReturnsFalse() {
+	void testHasNothingOneValueReturnsFalse() {
 		// setup the test data
 		CronExpression c = new CronExpression(null, Integer.valueOf(1), null, null, null, null);
 
@@ -128,7 +124,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void toNaturalLanguageNoExpressionReturnsNull() {
+	void toNaturalLanguageNoExpressionReturnsNull() {
 		// setup the test data
 		CronExpression c = new CronExpression();
 
@@ -143,8 +139,8 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void toNaturalLanguageFormatsExpressions() {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void toNaturalLanguageFormatsExpressions() {
 		String[][] cases = {
 				{"0 0 0 1 1 *", "yearly"},
 				{"0 0 0 * * 1", "every Monday"},
@@ -168,7 +164,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testToStringAllNullReturnsEveryMinute() {
+	void testToStringAllNullReturnsEveryMinute() {
 		// setup the test data
 		CronExpression c = new CronExpression();
 
@@ -181,7 +177,7 @@ public class CronExpressionTest {
 
 	@Test
 	@SuppressWarnings({ "static-method", "boxing" })
-	public void testToStringValidValuesReturnsCorrectExpression() {
+	void testToStringValidValuesReturnsCorrectExpression() {
 		// setup the test data
 		CronExpression c = new CronExpression(1, 2, 0, 3, null, 5);
 
@@ -193,8 +189,8 @@ public class CronExpressionTest {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
-	public void testToNaturalLanguageDayNumberSuffixes() {
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
+	void testToNaturalLanguageDayNumberSuffixes() {
 		String[][] cases = {
 				{"0 0 0 2 * *", "every 2nd"},
 				{"0 0 0 3 * *", "every 3rd"},
@@ -208,7 +204,7 @@ public class CronExpressionTest {
 
         @Test
         @SuppressWarnings("static-method")
-        public void testIntegerConstructorWithNullsStoresNulls() {
+        void testIntegerConstructorWithNullsStoresNulls() {
                 // covers null branch in Integer constructor at L35 and L38
                 CronExpression c = new CronExpression((Integer) null, (Integer) null, (Integer) null, (Integer) null, (Integer) null, (Integer) null);
                 assertThat(c.getSecond(), is(nullValue()));
@@ -221,25 +217,27 @@ public class CronExpressionTest {
 
         @Test
         @SuppressWarnings("static-method")
-        public void testToNaturalLanguagePmHourWithStepMinute() {
+        void testToNaturalLanguagePmHourWithStepMinute() {
                 // covers L229-230: timeStepSetPattern matches for minute, hour >= 12 (PM)
                 CronExpression c = CronExpression.fromExpression("0 */5 14 * * *");
+                @SuppressWarnings("null") // a null here fails the test
                 String result = c.toNaturalLanguage();
                 assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
         }
 
         @Test
         @SuppressWarnings("static-method")
-        public void testToNaturalLanguagePmHourWithZeroMinute() {
+        void testToNaturalLanguagePmHourWithZeroMinute() {
                 // covers L244-245: minute = "0", hour >= 12 (PM)
                 CronExpression c = CronExpression.fromExpression("0 0 15 * * *");
+                @SuppressWarnings("null") // a null here fails the test
                 String result = c.toNaturalLanguage();
                 assertThat(result, is(org.hamcrest.CoreMatchers.notNullValue()));
         }
 
 	@Test
 	@SuppressWarnings("static-method")
-	public void testConstructorWithNonNullMonthCoversL38TrueBranch() {
+	void testConstructorWithNonNullMonthCoversL38TrueBranch() {
 		// Call the Integer constructor with a non-null month to cover
 		// the String.valueOf(month) branch of the ternary on that line.
 		CronExpression c = new CronExpression(null, null, null, null, Integer.valueOf(6), null);

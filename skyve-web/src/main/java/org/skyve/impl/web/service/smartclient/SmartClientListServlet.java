@@ -83,6 +83,8 @@ import org.skyve.web.SortParameter;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -120,7 +122,8 @@ public class SmartClientListServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientList - get....");
 		processRequest(request, response);
@@ -136,14 +139,15 @@ public class SmartClientListServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+	protected void doPost(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+							@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		LOGGER.info("SmartClientList - post....");
 		processRequest(request, response);
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void processRequest(HttpServletRequest request, HttpServletResponse response)
+	private static void processRequest(@Nonnull HttpServletRequest request, @Nonnull HttpServletResponse response)
 	throws IOException {
 		response.setContentType(MimeType.json.toString());
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
@@ -184,6 +188,9 @@ public class SmartClientListServlet extends HttpServlet {
 							(request.getParameter(AbstractWebContext.CONTINUE_CONVERSATION) != null)) {
 						LOGGER.info("USE VIEW CONVERSATION!!!!");
 						persistence = webContext.getConversation();
+						if (persistence == null) {
+							throw new IllegalStateException("Cached conversation " + webId + " has no persistence");
+						}
 						persistence.setForThread();
 					}
 					
@@ -227,12 +234,9 @@ public class SmartClientListServlet extends HttpServlet {
 
 							drivingDocument = module.getDocument(customer, documentName);
 							model = drivingDocument.getListModel(customer, modelName, true);
-							if (model == null) {
-								throw new ServletException("DataSource does not reference a valid model " + tokens[3]);
-							}
 							key = RequestKey.model(drivingDocument, modelName);
 							model.setBean(bean);
-							drivingDocument = model.getDrivingDocument();
+							drivingDocument = getDrivingDocument(model);
 						}
 						// query type of request
 						else {
@@ -330,6 +334,9 @@ public class SmartClientListServlet extends HttpServlet {
 								sortParameters = new SortParameter[sortBys.length];
 								for (int i = 0; i < sortBys.length; i++) {
 									String sortBy = OWASP.sanitise(Sanitisation.text, Util.processStringValue(sortBys[i]));
+									if (sortBy == null) {
+										throw new ServletException("Blank _sortBy parameter in the request.");
+									}
 	
 									SortParameter sortParameter = new SortParameterImpl();
 									if (sortBy.startsWith("-")) {
@@ -339,7 +346,11 @@ public class SmartClientListServlet extends HttpServlet {
 									else {
 										sortParameter.setDirection(SortDirection.ascending);
 									}
-									sortParameter.setBy(BindUtil.unsanitiseBinding(sortBy));
+									String sortBinding = BindUtil.unsanitiseBinding(sortBy);
+									if (sortBinding == null) { // only null for a null binding
+										throw new IllegalStateException("No binding for sort parameter " + sortBy);
+									}
+									sortParameter.setBy(sortBinding);
 	
 									sortParameters[i] = sortParameter;
 								}
@@ -378,9 +389,15 @@ public class SmartClientListServlet extends HttpServlet {
 							String bizTagged = (String) parameters.get(PersistentBean.TAGGED_NAME);
 							String bizFlagComment = request.getParameter(PersistentBean.FLAG_COMMENT_NAME);
 							if ("TAG".equals(bizTagged)) {
+								if (tagId == null) {
+									throw new ServletException("No _tagId in the request to tag with.");
+								}
 								tag(user, customer, module, model, tagId, parameters, pw);
 							}
 							else if ("UNTAG".equals(bizTagged)) {
+								if (tagId == null) {
+									throw new ServletException("No _tagId in the request to untag with.");
+								}
 								untag(user, customer, module, model, tagId, parameters, pw);
 							}
 							else if (bizFlagComment != null) {
@@ -441,9 +458,7 @@ public class SmartClientListServlet extends HttpServlet {
 						StateUtil.commitAndCacheConversation(webContext);
 					}
 					
-					if (key != null) {
-						Monitoring.measure(key);
-					}
+					Monitoring.measure(key);
 				}
 				catch (InvocationTargetException e) {
 					throw e.getTargetException();
@@ -454,7 +469,7 @@ public class SmartClientListServlet extends HttpServlet {
 					persistence.rollback();
 				}
 
-				String reference = WebErrorUtil.logUnexpectedAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
+				String reference = WebErrorUtil.logFailureAndGetReference(LOGGER, "SmartClient list request failed for operation " + operation, t);
 				SmartClientEditServlet.produceErrorResponse(t, operation, false, pw, reference);
 			}
 			finally {
@@ -466,20 +481,20 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void fetch(Module module,
-								Document queryDocument,
+	private static void fetch(@Nonnull Module module,
+								@Nonnull Document queryDocument,
 								int startRow,
 								int endRow,
-								SmartClientFilterOperator operator,
-								String[] criteria,
-								SortParameter[] sortParameters,
-								AggregateFunction summaryType,
+								@Nullable SmartClientFilterOperator operator,
+								@Nullable String[] criteria,
+								@Nullable SortParameter[] sortParameters,
+								@Nullable AggregateFunction summaryType,
 								boolean includeExtraSummaryRow,
-								String tagId,
-								SortedMap<String, Object> parameters,
-								AbstractPersistence persistence,
-								PrintWriter pw,
-								ListModel<Bean> model)
+								@Nullable String tagId,
+								@Nonnull SortedMap<String, Object> parameters,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull PrintWriter pw,
+								@Nonnull ListModel<Bean> model)
 	throws Exception {
 		StringBuilder message = new StringBuilder(256);
 
@@ -497,6 +512,9 @@ public class SmartClientListServlet extends HttpServlet {
 
 		Page page = model.fetch();
 		List<Bean> beans = page.getRows();
+		if (beans == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " fetched a page with no rows list");
+		}
 
 		Bean summaryBean = page.getSummary();
 		if (includeExtraSummaryRow) {
@@ -505,7 +523,7 @@ public class SmartClientListServlet extends HttpServlet {
 		long totalRows = page.getTotalRows();
 		if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("totalRows = {}, row size = {}",
 																		Long.valueOf(page.getTotalRows()),
-																		Integer.valueOf(page.getRows().size()));
+																		Integer.valueOf(beans.size()));
 
 		Set<String> projections = processRows(beans, model, user, customer, module, queryDocument);
 
@@ -526,14 +544,14 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK.
-	private static void addFilterCriteriaToQuery(Module module,
-													Document document,
-													User user,
-													SmartClientFilterOperator filterOperator,
-													String[] criteria,
-													SortedMap<String, Object> parameters,
-													String tagId,
-													ListModel<Bean> model)
+	private static void addFilterCriteriaToQuery(@Nonnull Module module,
+													@Nonnull Document document,
+													@Nonnull User user,
+													@Nullable SmartClientFilterOperator filterOperator,
+													@Nullable String[] criteria,
+													@Nonnull SortedMap<String, Object> parameters,
+													@Nullable String tagId,
+													@Nonnull ListModel<Bean> model)
 	throws Exception {
 		SortedMap<String, Object> mutableParameters = new TreeMap<>(parameters);
 		CompoundFilterOperator compoundFilterOperator = CompoundFilterOperator.and;
@@ -558,6 +576,9 @@ public class SmartClientListServlet extends HttpServlet {
 					// Get each criterion name, operator and operands
 					@SuppressWarnings("unchecked")
 					Map<String, Object> criterion = (Map<String, Object>) JSON.unmarshall(user, jsonCriteria);
+					if (criterion == null) {
+						throw new ServletException("Null criterion in the request.");
+					}
 
 					// Check for filter by flag permissions
 					if (PersistentBean.FLAG_COMMENT_NAME.equals(criterion.get("fieldName"))) {
@@ -587,12 +608,12 @@ public class SmartClientListServlet extends HttpServlet {
 	// Add display values and sanitise
 	// Returns the projections required from JSON.marshall()
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Set<String> processRows(List<Bean> beans,
-											ListModel<Bean> model,
-											User user,
-											Customer customer,
-											Module module,
-											Document document) {
+	private static @Nonnull Set<String> processRows(@Nonnull List<Bean> beans,
+													@Nonnull ListModel<Bean> model,
+													@Nonnull User user,
+													@Nonnull Customer customer,
+													@Nonnull Module module,
+													@Nonnull Document document) {
 		// Determine if any display bindings are required for dynamic or variant domain attributes
 		// or for formats defined on the columns.
 		// Map of binding to synthesized display binding for SC.
@@ -719,10 +740,10 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 
 	@SuppressWarnings("unused")
-	static void checkCsrfToken(HttpSession session,
-								HttpServletRequest request,
-								HttpServletResponse response,
-								Integer currentCsrfToken) {
+	static void checkCsrfToken(@Nonnull HttpSession session,
+								@Nonnull HttpServletRequest request,
+								@Nonnull HttpServletResponse response,
+								@Nullable Integer currentCsrfToken) {
 /* TODO Commented out until I can work out the async problems in SC
 		if (! StateUtil.checkToken(session, currentCsrfToken)) {
 			WebUtil.logout(request, response);
@@ -747,13 +768,13 @@ public class SmartClientListServlet extends HttpServlet {
 	 * @throws Exception if metadata resolution or value conversion fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static void addSimpleFilterCriteriaToQuery(Module module,
-														Document document,
-														Customer customer,
-														SmartClientFilterOperator filterOperator,
-														Map<String, Object> criteria,
-														String tagId,
-														ListModel<Bean> model)
+	public static void addSimpleFilterCriteriaToQuery(@Nonnull Module module,
+														@Nonnull Document document,
+														@Nonnull Customer customer,
+														@Nullable SmartClientFilterOperator filterOperator,
+														@Nonnull Map<String, Object> criteria,
+														@Nullable String tagId,
+														@Nonnull ListModel<Bean> model)
 	throws Exception {
 		Filter filter = model.getFilter();
 
@@ -810,7 +831,7 @@ public class SmartClientListServlet extends HttpServlet {
 						if (! parameter) {
 							if (value != null) {
 								Object[] codes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, value.toString());
-								filter.addIn(binding, codes);
+								nonNullFilter(filter, model).addIn(binding, codes);
 								continue;
 							}
 						}
@@ -875,11 +896,11 @@ public class SmartClientListServlet extends HttpServlet {
 				}
 			}
 
-			if (parameter) {
+			if (parameterName != null) { // set for a parameter
 				model.putParameter(parameterName, value);
 			}
 			else {
-				addCriterionToFilter(binding, fo, value, null, null, tagId, filter);
+				addCriterionToFilter(binding, fo, value, null, null, tagId, nonNullFilter(filter, model));
 			}
 		}
 	}
@@ -899,53 +920,76 @@ public class SmartClientListServlet extends HttpServlet {
 	 * @param model list model receiving the filter criteria
 	 * @throws Exception if metadata resolution or value conversion fails
 	 */
-	public static void addAdvancedFilterCriteriaToQuery(Module module,
-															Document document,
-															User user,
-															CompoundFilterOperator compoundFilterOperator,
-															List<Map<String, Object>> criteria,
-															String tagId,
-															ListModel<?> model)
+	public static void addAdvancedFilterCriteriaToQuery(@Nonnull Module module,
+															@Nonnull Document document,
+															@Nonnull User user,
+															@Nonnull CompoundFilterOperator compoundFilterOperator,
+															@Nullable List<Map<String, Object>> criteria,
+															@Nullable String tagId,
+															@Nonnull ListModel<?> model)
 	throws Exception {
 		// We have to unconditionally add a new filter here as the metadata query might have a filter stanza
 		// in it which we can't detect and we need to ensure any filtering done here is 
 		// AND'd with any existing criteria (hard-coded in a filter stanza or not)
 		Filter filter = model.getFilter();
-		Filter newFilter = model.newFilter();
+		Filter newFilter = nonNullFilter(model.newFilter(), model);
 		addAdvancedFilterCriteriaToQueryInternal(module, document, user, compoundFilterOperator, criteria, tagId, model, newFilter);
 		if (! newFilter.isEmpty()) {
-			filter.addAnd(newFilter);
+			nonNullFilter(filter, model).addAnd(newFilter);
 		}
 	}
 
 	private static final String HIERARCHICAL_PARENT_ID_SUFFIX = "." + HierarchicalBean.PARENT_ID;
 
-	@SuppressWarnings({"java:S107", "java:S3776", "java:S6541"}) // Long parameter list preserves the existing framework/API contract; complexity OK
-	private static void addAdvancedFilterCriteriaToQueryInternal(Module module,
-																	Document document,
-																	User user,
-																	CompoundFilterOperator compoundFilterOperator,
-																	List<Map<String, Object>> criteria,
-																	String tagId,
-																	ListModel<?> model,
-																	Filter filter)
+	@SuppressWarnings({"java:S107", "java:S3776"}) // Long parameter list preserves the existing framework/API contract; complexity OK
+	private static void addAdvancedFilterCriteriaToQueryInternal(@Nonnull Module module,
+																	@Nonnull Document document,
+																	@Nonnull User user,
+																	@Nonnull CompoundFilterOperator compoundFilterOperator,
+																	@Nullable List<Map<String, Object>> criteria,
+																	@Nullable String tagId,
+																	@Nonnull ListModel<?> model,
+																	@Nonnull Filter filter)
 	throws Exception {
 		if (criteria == null) {
 			return;
 		}
 
-		boolean firstCriteriaIteration = true; // the first filter criteria encountered - not a bound parameter
+		// Under "or", the first criterion that adds to the filter is its base, and each later one is ORed with it,
+		// whether it is a group (nested advanced criteria) or a simple criterion. A bound parameter adds nothing.
+		// Ask the filter rather than counting criteria: an OR onto an empty filter is wrong for some filters (an
+		// empty InMemoryFilter's predicate is always true, so the OR would match every row).
 		for (Map<String, Object> criterion : criteria) {
 			if (UtilImpl.COMMAND_TRACE) COMMAND_LOGGER.info("criterion = {}", JSON.marshall(criterion));
-			String binding = (String) criterion.get("fieldName");
-			binding = BindUtil.unsanitiseBinding(binding);
+			// a criterion without a field name is a group (nested advanced criteria)
+			String fieldName = BindUtil.unsanitiseBinding((String) criterion.get("fieldName"));
 			SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get(OPERATOR_FIELD));
 
-			if (binding == null) { // advanced criteria
-				Filter subFilter = model.newFilter();
+			if (fieldName == null) { // advanced criteria
+				Filter subFilter = nonNullFilter(model.newFilter(), model);
 				CompoundFilterOperator subCompoundFilterOperator = CompoundFilterOperator.valueOf(filterOperator.toString());
 				@SuppressWarnings("unchecked")
 				List<Map<String, Object>> subCritiera = (List<Map<String, Object>>) criterion.get(CRITERIA_FIELD);
+				if (CompoundFilterOperator.not.equals(compoundFilterOperator)) {
+					// Under not, each criterion is negated, so a group is negated as a whole (De Morgan), not just its leaves:
+					// not (a and b) is (not a) or (not b), not (a or b) is not [a, b] and not (not [a, b]) is a or b.
+					if (CompoundFilterOperator.and.equals(subCompoundFilterOperator)) {
+						subCompoundFilterOperator = CompoundFilterOperator.or;
+						if (subCritiera != null) {
+							List<Map<String, Object>> negated = new ArrayList<>(subCritiera.size());
+							for (Map<String, Object> subCriterion : subCritiera) {
+								negated.add(Map.of(OPERATOR_FIELD, CompoundFilterOperator.not.toString(), CRITERIA_FIELD, List.of(subCriterion)));
+							}
+							subCritiera = negated;
+						}
+					}
+					else if (CompoundFilterOperator.or.equals(subCompoundFilterOperator)) {
+						subCompoundFilterOperator = CompoundFilterOperator.not;
+					}
+					else {
+						subCompoundFilterOperator = CompoundFilterOperator.or;
+					}
+				}
 				addAdvancedFilterCriteriaToQueryInternal(module,
 															document,
 															user,
@@ -955,374 +999,256 @@ public class SmartClientListServlet extends HttpServlet {
 															model,
 															subFilter);
 				if (! subFilter.isEmpty()) {
-					if (CompoundFilterOperator.or.equals(compoundFilterOperator)) {
+					if (CompoundFilterOperator.or.equals(compoundFilterOperator) && (! filter.isEmpty())) {
 						filter.addOr(subFilter);
 					}
-					else { // not is taken into account below
+					else { // and, not (the group is negated above), and the first group under or
 						filter.addAnd(subFilter);
 					}
 				}
 			}
-			else { // simple criteria
-				Object value = criterion.get(VALUE_FIELD);
-				String valueString = null;
-				if (value != null) {
-					valueString = Util.processStringValue(value.toString());
-				}
-
-				String parameterName = null;
-				boolean parameter = (binding.charAt(0) == ':');
-				if (parameter) {
-					binding = binding.substring(1);
-					parameterName = binding;
-				}
-
-				// Determine the type and converter of the filtered attribute
-				Customer customer = user.getCustomer();
-				Converter<?> converter = null;
-				Class<?> type = String.class;
-
-				TargetMetaData target = null;
-				try {
-					target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
-				}
-				catch (MetaDataException e) {
-					if (! parameter) {
-						throw e;
-					}
-				}
-				if (target != null) {
-					Document targetDocument = target.getDocument();
-					Attribute attribute = target.getAttribute();
-					if (attribute != null) {
-						type = attribute.getImplementingType();
-						if (attribute instanceof Enumeration enumeration) {
-							converter = enumeration.getConverter();
-							filterOperator = transformWildcardFilterOperator(filterOperator);
-						}
-
-						DomainType domainType = attribute.getDomainType();
-						if (domainType != null) {
-							filterOperator = transformWildcardFilterOperator(filterOperator);
-							// Translate variant domain filters to a set of codes to search for
-							if (! parameter) {
-								if ((valueString != null) && (domainType == DomainType.variant)) {
-									value = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
-									filter.addIn(binding, (Object[]) value);
-									continue;
-								}
-							}
-						}
-						if (attribute instanceof ConvertibleField field) {
-							converter = field.getConverterForCustomer(customer);
-						}
-						else if (attribute instanceof Association association) {
-							if (parameter) {
-								if (valueString != null) {
-									Module m = customer.getModule(targetDocument.getOwningModuleName());
-									Document d = m.getDocument(customer, association.getDocumentName());
-									value = CORE.getPersistence().retrieve(d, valueString);
-								}
-							}
-							else {
-								type = String.class;
-								binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
-								filterOperator = transformWildcardFilterOperator(filterOperator);
-							}
-						}
-					}
-					else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
-						type = String.class;
-						binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
-					}
-					else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
-						type = String.class;
-					}
-				}
-
-				if (value instanceof List<?>) {
-					@SuppressWarnings("unchecked")
-					List<Object> values = (List<Object>) value;
-					for (int i = 0, l = values.size(); i < l; i++) {
-						Object v = values.get(i);
-						if (v != null) {
-							v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
-							values.set(i, v);
-						}
-					}
-					// If we got an array and there is no operator (multi-select in filter header),
-					// or the operator is "exact" or "equals" (still multi-select in filter header but with other criteria)
-					// then set it to inSet
-					if ((filterOperator == null) ||
-							(filterOperator == SmartClientFilterOperator.equals) ||
-							(filterOperator == SmartClientFilterOperator.exact)) {
-						filterOperator = SmartClientFilterOperator.inSet;
-					}
-					// If the operator is notEquals, then set it to notInSet
-					else if (filterOperator == SmartClientFilterOperator.notEqual) {
-						filterOperator = SmartClientFilterOperator.notInSet;
-					}
-				}
-				else {
-					// Only convert filter parameters and parameters that aren't beans already
-					if (! (parameter && (value instanceof Bean))) {
-						value = fromString(binding, VALUE_FIELD, valueString, customer, converter, type);
-					}
-				}
-
-				if (parameter) {
-					model.putParameter(parameterName, value);
-					continue;
-				}
-
-				Object start = criterion.get("start");
-				String startString = null;
-				if (start != null) {
-					startString = start.toString();
-					if ("".equals(startString)) {
-						startString = null;
-					}
-				}
-
-				Object end = criterion.get("end");
-				String endString = null;
-				if (end != null) {
-					endString = end.toString();
-					if ("".equals(endString)) {
-						endString = null;
-					}
-				}
-
-				start = fromString(binding, "start", startString, customer, converter, type);
-				end = fromString(binding, "end", endString, customer, converter, type);
-
-				// These types do not support String wildcards, so we transform the positive ones to equals and the negative ones to notEqual
-				if ((value instanceof Date) ||
-						(value instanceof Number) ||
-						(value instanceof Boolean) ||
-						(start instanceof Date) ||
-						(start instanceof Number) ||
-						(start instanceof Boolean) ||
-						(end instanceof Date) ||
-						(end instanceof Number) ||
-						(end instanceof Boolean)) {
-					filterOperator = transformWildcardFilterOperator(filterOperator);
-				}
-
-				switch (compoundFilterOperator) {
-					case and:
-						addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
-						break;
-					case or:
-						if (firstCriteriaIteration) {
-							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
-						}
-						else {
-							Filter orFilter = model.newFilter();
-							addCriterionToFilter(binding, filterOperator, value, start, end, tagId, orFilter);
-							if (! orFilter.isEmpty()) {
-								filter.addOr(orFilter);
-							}
-						}
-						break;
-					case not:
-						switch (filterOperator) {
-							case substring, contains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notContains, value, start, end, tagId, filter);
-								break;
-							case iContains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotContains, value, start, end, tagId, filter);
-								break;
-							case notContains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.contains, value, start, end, tagId, filter);
-								break;
-							case iNotContains:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iContains, value, start, end, tagId, filter);
-								break;
-							case startsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notStartsWith, value, start, end, tagId, filter);
-								break;
-							case iStartsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotStartsWith, value, start, end, tagId, filter);
-								break;
-							case notStartsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.startsWith, value, start, end, tagId, filter);
-								break;
-							case iNotStartsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iStartsWith, value, start, end, tagId, filter);
-								break;
-							case endsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEndsWith, value, start, end, tagId, filter);
-								break;
-							case iEndsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEndsWith, value, start, end, tagId, filter);
-								break;
-							case notEndsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.endsWith, value, start, end, tagId, filter);
-								break;
-							case iNotEndsWith:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEndsWith, value, start, end, tagId, filter);
-								break;
-							case exact, equals:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEqual, value, start, end, tagId, filter);
-								break;
-							case iEquals:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEqual, value, start, end, tagId, filter);
-								break;
-							case notEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.equals, value, start, end, tagId, filter);
-								break;
-							case iNotEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEquals, value, start, end, tagId, filter);
-								break;
-							case greaterThan:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, value, start, end, tagId, filter);
-								break;
-							case greaterOrEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessThan, value, start, end, tagId, filter);
-								break;
-							case lessThan:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterOrEqual, value, start, end, tagId, filter);
-								break;
-							case lessOrEqual:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterThan, value, start, end, tagId, filter);
-								break;
-							case betweenInclusive, iBetweenInclusive:
-								if (start != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
-								}
-								if (end != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.greaterThan, end, null, null, tagId, filter);
-								}
-								break;
-							case iBetween:
-								if (start != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqual, start, null, null, tagId, filter);
-								}
-								if (end != null) {
-									addCriterionToFilter(binding, SmartClientFilterOperator.greaterOrEqual, end, null, null, tagId, filter);
-								}
-								break;
-							case isNull:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notNull, value, start, end, tagId, filter);
-								break;
-							case notNull:
-								addCriterionToFilter(binding, SmartClientFilterOperator.isNull, value, start, end, tagId, filter);
-								break;
-							case isBlank:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
-								break;
-							case notBlank:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notBlank, value, start, end, tagId, filter);
-								break;
-							case equalsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEqualField, value, start, end, tagId, filter);
-								break;
-							case iEqualsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEqualField, value, start, end, tagId, filter);
-								break;
-							case notEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.equalsField, value, start, end, tagId, filter);
-								break;
-							case iNotEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEqualsField, value, start, end, tagId, filter);
-								break;
-							case containsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notContainsField, value, start, end, tagId, filter);
-								break;
-							case iContainsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotContainsField, value, start, end, tagId, filter);
-								break;
-							case notContainsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.containsField, value, start, end, tagId, filter);
-								break;
-							case iNotContainsField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iContainsField, value, start, end, tagId, filter);
-								break;
-							case startsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notStartsWithField, value, start, end, tagId, filter);
-								break;
-							case iStartsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotStartsWithField, value, start, end, tagId, filter);
-								break;
-							case notStartsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.startsWithField, value, start, end, tagId, filter);
-								break;
-							case iNotStartsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iStartsWithField, value, start, end, tagId, filter);
-								break;
-							case endsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notEndsWithField, value, start, end, tagId, filter);
-								break;
-							case iEndsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iNotEndsWithField, value, start, end, tagId, filter);
-								break;
-							case notEndsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.endsWithField, value, start, end, tagId, filter);
-								break;
-							case iNotEndsWithField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.iEndsWithField, value, start, end, tagId, filter);
-								break;
-							case greaterThanField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessOrEqualField, value, start, end, tagId, filter);
-								break;
-							case greaterOrEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.lessThanField, value, start, end, tagId, filter);
-								break;
-							case lessThanField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterOrEqualField, value, start, end, tagId, filter);
-								break;
-							case lessOrEqualField:
-								addCriterionToFilter(binding, SmartClientFilterOperator.greaterThanField, value, start, end, tagId, filter);
-								break;
-							case inSet:
-								addCriterionToFilter(binding, SmartClientFilterOperator.notInSet, value, start, end, tagId, filter);
-								break;
-							case notInSet:
-								addCriterionToFilter(binding, SmartClientFilterOperator.inSet, value, start, end, tagId, filter);
-								break;
-							case regexp, iregexp:
-								// nothing to do
-								break;
-							case containsPattern:
-							case iContainsPattern:
-							case matchesPattern:
-							case iMatchesPattern:
-							case startsWithPattern:
-							case iStartsWithPattern:
-							case endsWithPattern:
-							case iEndsWithPattern:
-								// nothing to do
-								break;
-							case geoContains:
-							case geoCrosses:
-							case geoDisjoint:
-							case geoEquals:
-							case geoIntersects:
-							case geoOverlaps:
-							case geoTouches:
-							case geoWithin:
-								// TODO fix this later
-								break;
-							case and, or, not:
-								// nothing to do
-								break;
-							default:
-						}
-						break;
-					default:
-				}
-				firstCriteriaIteration = false;
+			else {
+				addSimpleCriterion(fieldName, criterion, module, document, user, compoundFilterOperator, tagId, model, filter);
 			}
 		}
 	}
 
-	private static Object fromString(String valueBinding,
-										String valueDescription,
-										String valueString,
-										Customer customer,
-										Converter<?> converter,
-										Class<?> type) {
+	/**
+	 * Adds a simple criterion (a field name, an operator and a value or range) to the filter, combined with the
+	 * criteria before it by the compound operator (a negation under not, see {@link #addNegation}).
+	 */
+	// S2637: Sonar flags the calls with the criterion's binding, a local made from the @Nonnull field name (and
+	// non-null after each change), as possibly null; S112: it throws what the criteria method throws
+	@SuppressWarnings({"java:S107", "java:S112", "java:S2637", "java:S3776", "java:S6541"}) // the criterion and the criteria method's context; complexity OK
+	private static void addSimpleCriterion(@Nonnull String fieldName,
+											@Nonnull Map<String, Object> criterion,
+											@Nonnull Module module,
+											@Nonnull Document document,
+											@Nonnull User user,
+											@Nonnull CompoundFilterOperator compoundFilterOperator,
+											@Nullable String tagId,
+											@Nonnull ListModel<?> model,
+											@Nonnull Filter filter)
+	throws Exception {
+		String binding = fieldName;
+		SmartClientFilterOperator filterOperator = SmartClientFilterOperator.valueOf((String) criterion.get(OPERATOR_FIELD));
+		Object value = criterion.get(VALUE_FIELD);
+		String valueString = null;
+		if (value != null) {
+			valueString = Util.processStringValue(value.toString());
+		}
+
+		String parameterName = null;
+		boolean parameter = (binding.charAt(0) == ':');
+		if (parameter) {
+			binding = binding.substring(1);
+			parameterName = binding;
+		}
+
+		// Determine the type and converter of the filtered attribute
+		Customer customer = user.getCustomer();
+		// the codes of a variant domain whose descriptions match the filter, filtered as a set
+		Object[] variantCodes = null;
+		Converter<?> converter = null;
+		Class<?> type = String.class;
+
+		TargetMetaData target = null;
+		try {
+			target = BindUtil.getMetaDataForBinding(customer, module, document, binding);
+		}
+		catch (MetaDataException e) {
+			if (! parameter) {
+				throw e;
+			}
+		}
+		if (target != null) {
+			Document targetDocument = target.getDocument();
+			Attribute attribute = target.getAttribute();
+			if (attribute != null) {
+				type = attribute.getImplementingType();
+				if (attribute instanceof Enumeration enumeration) {
+					converter = enumeration.getConverter();
+					filterOperator = transformWildcardFilterOperator(filterOperator);
+				}
+
+				DomainType domainType = attribute.getDomainType();
+				if (domainType != null) {
+					filterOperator = transformWildcardFilterOperator(filterOperator);
+					// Translate variant domain filters to a set of codes to search for
+					// a typed description (a list's values are codes already)
+					if ((! parameter) && (valueString != null) && (domainType == DomainType.variant) && (! (value instanceof List<?>))) {
+						// at most 100 codes: a negated filter by more matching descriptions lets the rest through
+						variantCodes = ListModel.getTop100VariantDomainValueCodesFromDescriptionFilter(targetDocument, attribute, valueString);
+					}
+				}
+				if (attribute instanceof ConvertibleField field) {
+					converter = field.getConverterForCustomer(customer);
+				}
+				else if (attribute instanceof Association association) {
+					if (parameter) {
+						if (valueString != null) {
+							Module m = customer.getModule(targetDocument.getOwningModuleName());
+							Document d = m.getDocument(customer, association.getDocumentName());
+							value = CORE.getPersistence().retrieve(d, valueString);
+						}
+					}
+					else {
+						type = String.class;
+						binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+						filterOperator = transformWildcardFilterOperator(filterOperator);
+					}
+				}
+			}
+			else if (ChildBean.PARENT_NAME.equals(binding) || binding.endsWith(ChildBean.CHILD_PARENT_NAME_SUFFIX)) {
+				type = String.class;
+				binding = new StringBuilder(binding.length() + 6).append(binding).append('.').append(Bean.DOCUMENT_ID).toString();
+			}
+			else if (HierarchicalBean.PARENT_ID.equals(binding) || binding.endsWith(HIERARCHICAL_PARENT_ID_SUFFIX)) {
+				type = String.class;
+			}
+		}
+
+		if (variantCodes != null) {
+			// in the set of codes, or not in it for a negative operator (transformWildcardFilterOperator gives notEqual)
+			value = variantCodes;
+			filterOperator = (filterOperator == SmartClientFilterOperator.notEqual) ?
+								SmartClientFilterOperator.notInSet :
+								SmartClientFilterOperator.inSet;
+		}
+		else if (value instanceof List<?>) {
+			@SuppressWarnings("unchecked")
+			List<Object> values = (List<Object>) value;
+			for (int i = 0, l = values.size(); i < l; i++) {
+				Object v = values.get(i);
+				if (v != null) {
+					v = fromString(binding, VALUE_FIELD, v.toString(), customer, converter, type);
+					values.set(i, v);
+				}
+			}
+			// If we got an array and there is no operator (multi-select in filter header),
+			// or the operator is "exact" or "equals" (still multi-select in filter header but with other criteria)
+			// then set it to inSet
+			if ((filterOperator == SmartClientFilterOperator.equals) ||
+					(filterOperator == SmartClientFilterOperator.exact)) {
+				filterOperator = SmartClientFilterOperator.inSet;
+			}
+			// If the operator is notEquals, then set it to notInSet
+			else if (filterOperator == SmartClientFilterOperator.notEqual) {
+				filterOperator = SmartClientFilterOperator.notInSet;
+			}
+		}
+		else {
+			// Only convert filter parameters and parameters that aren't beans already
+			if (! (parameter && (value instanceof Bean))) {
+				value = fromString(binding, VALUE_FIELD, valueString, customer, converter, type);
+			}
+		}
+
+		if (parameterName != null) { // set for a parameter
+			model.putParameter(parameterName, value);
+			return;
+		}
+
+		Object start = criterion.get("start");
+		String startString = null;
+		if (start != null) {
+			startString = start.toString();
+			if ("".equals(startString)) {
+				startString = null;
+			}
+		}
+
+		Object end = criterion.get("end");
+		String endString = null;
+		if (end != null) {
+			endString = end.toString();
+			if ("".equals(endString)) {
+				endString = null;
+			}
+		}
+
+		start = fromString(binding, "start", startString, customer, converter, type);
+		end = fromString(binding, "end", endString, customer, converter, type);
+
+		// These types do not support String wildcards, so we transform the positive ones to equals and the negative ones to notEqual
+		if ((value instanceof Date) ||
+				(value instanceof Number) ||
+				(value instanceof Boolean) ||
+				(start instanceof Date) ||
+				(start instanceof Number) ||
+				(start instanceof Boolean) ||
+				(end instanceof Date) ||
+				(end instanceof Number) ||
+				(end instanceof Boolean)) {
+			filterOperator = transformWildcardFilterOperator(filterOperator);
+		}
+
+		switch (compoundFilterOperator) {
+			case and:
+				addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
+				break;
+			case or:
+				if (filter.isEmpty()) {
+					addCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
+				}
+				else {
+					Filter orFilter = nonNullFilter(model.newFilter(), model);
+					addCriterion(binding, filterOperator, value, start, end, tagId, orFilter, model);
+					if (! orFilter.isEmpty()) {
+						filter.addOr(orFilter);
+					}
+				}
+				break;
+			case not:
+				addNegation(binding, filterOperator, value, start, end, tagId, filter, model);
+				break;
+			default:
+		}
+	}
+
+	/**
+	 * Adds a simple criterion's negation for Match None (see {@link SmartClientFilterOperator#negation()}), or a range's
+	 * outside. The negation of a condition on a value also matches a row with no value, as SmartClient's own
+	 * evaluation does; the negation of a negative operator or of a null check does not. Field comparisons are not
+	 * implemented on the server, so they add nothing (were they, a negated field comparison would also have to match
+	 * when the other field has no value).
+	 */
+	@SuppressWarnings("java:S107") // the criterion's parts, as addCriterionToFilter takes them, and the model
+	private static void addNegation(@Nonnull String binding,
+									@Nonnull SmartClientFilterOperator filterOperator,
+									@Nullable Object value,
+									@Nullable Object start,
+									@Nullable Object end,
+									@Nullable String tagId,
+									@Nonnull Filter filter,
+									@Nonnull ListModel<?> model) {
+		switch (filterOperator) {
+			case betweenInclusive, iBetweenInclusive: // outside the range: before its start or after its end
+				addOutsideRange(binding, start, end, true, tagId, filter, model);
+				return;
+			case between, iBetween: // outside the range: at or before its start, or at or after its end
+				addOutsideRange(binding, start, end, false, tagId, filter, model);
+				return;
+			default:
+		}
+		SmartClientFilterOperator negation = filterOperator.negation();
+		if (negation == null) { // patterns, geometries, field comparisons and the logical operators
+			return;
+		}
+		if (filterOperator.isNegative() || filterOperator.isNullCheck()) {
+			addCriterionToFilter(binding, negation, value, start, end, tagId, filter);
+		}
+		else {
+			addNullOrCriterion(binding, negation, value, start, end, tagId, filter, model);
+		}
+	}
+
+	private static @Nullable Object fromString(@Nullable String valueBinding,
+													@Nonnull String valueDescription,
+													@Nullable String valueString,
+													@Nonnull Customer customer,
+													@Nullable Converter<?> converter,
+													@Nonnull Class<?> type) {
 		Object result = null;
 
 		if (valueString != null) {
@@ -1357,7 +1283,7 @@ public class SmartClientListServlet extends HttpServlet {
 		return result;
 	}
 
-	private static SmartClientFilterOperator transformWildcardFilterOperator(SmartClientFilterOperator filterOperator) {
+	private static @Nonnull SmartClientFilterOperator transformWildcardFilterOperator(@Nonnull SmartClientFilterOperator filterOperator) {
 		if (SmartClientFilterOperator.iContains.equals(filterOperator) ||
 				SmartClientFilterOperator.iEndsWith.equals(filterOperator) ||
 				SmartClientFilterOperator.iEquals.equals(filterOperator) ||
@@ -1379,26 +1305,121 @@ public class SmartClientListServlet extends HttpServlet {
 		return filterOperator;
 	}
 
-	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private static void addCriterionToFilter(String binding,
-												SmartClientFilterOperator filterOperator,
-												Object value,
-												Object start,
-												Object end,
-												String tagId,
-												Filter filter) {
-		if (PersistentBean.TAGGED_NAME.equals(binding)) {
-			if ("true".equals(value)) {
-				filter.addTagged(tagId, true);
+	/**
+	 * Adds a criterion; a negative one (see {@link SmartClientFilterOperator#isNegative()}) also matches a row with no
+	 * value.
+	 */
+	@SuppressWarnings("java:S107") // the criterion's parts, as addCriterionToFilter takes them, and the model
+	private static void addCriterion(@Nonnull String binding,
+										@Nullable SmartClientFilterOperator filterOperator,
+										@Nullable Object value,
+										@Nullable Object start,
+										@Nullable Object end,
+										@Nullable String tagId,
+										@Nonnull Filter filter,
+										@Nonnull ListModel<?> model) {
+		if ((filterOperator != null) && filterOperator.isNegative()) {
+			addNullOrCriterion(binding, filterOperator, value, start, end, tagId, filter, model);
+		}
+		else {
+			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
+		}
+	}
+
+	/**
+	 * Adds a negation that also matches a row with no value: the column is null, or the criterion holds. The tagged
+	 * and tree parent pseudo-bindings are not columns, so their criteria are added as they are.
+	 */
+	@SuppressWarnings("java:S107") // the criterion's parts, as addCriterionToFilter takes them, and the model
+	private static void addNullOrCriterion(@Nonnull String binding,
+											@Nonnull SmartClientFilterOperator filterOperator,
+											@Nullable Object value,
+											@Nullable Object start,
+											@Nullable Object end,
+											@Nullable String tagId,
+											@Nonnull Filter filter,
+											@Nonnull ListModel<?> model) {
+		if (PersistentBean.TAGGED_NAME.equals(binding) || HierarchicalBean.PARENT_ID.equals(binding)) {
+			addCriterionToFilter(binding, filterOperator, value, start, end, tagId, filter);
+			return;
+		}
+		Filter criterion = nonNullFilter(model.newFilter(), model);
+		addCriterionToFilter(binding, filterOperator, value, start, end, tagId, criterion);
+		addNullOrFilter(binding, criterion, filter, model);
+	}
+
+	/**
+	 * ANDs "the column is null, or the criterion holds" onto the filter, when the criterion adds anything.
+	 */
+	private static void addNullOrFilter(@Nonnull String binding, @Nonnull Filter criterion, @Nonnull Filter filter, @Nonnull ListModel<?> model) {
+		if (criterion.isEmpty()) {
+			return;
+		}
+		Filter nullOr = nonNullFilter(model.newFilter(), model);
+		nullOr.addNull(binding);
+		nullOr.addOr(criterion);
+		filter.addAnd(nullOr);
+	}
+
+	/**
+	 * Adds a range's negation for Match None: before its start or after its end for an inclusive range
+	 * (betweenInclusive), at or before its start or at or after its end for an exclusive one (between). A missing end is
+	 * open, so it adds nothing on that side.
+	 *
+	 * @param start the range's start, or null
+	 * @param end the range's end, or null
+	 * @param inclusive whether the range includes its ends
+	 * @param filter the filter that gets the negation (ANDed)
+	 * @param model the list model, for a new filter
+	 */
+	private static void addOutsideRange(@Nonnull String binding,
+											@Nullable Object start,
+											@Nullable Object end,
+											boolean inclusive,
+											@Nullable String tagId,
+											@Nonnull Filter filter,
+											@Nonnull ListModel<?> model) {
+		Filter outside = nonNullFilter(model.newFilter(), model);
+		if (start != null) {
+			addCriterionToFilter(binding,
+									inclusive ? SmartClientFilterOperator.lessThan : SmartClientFilterOperator.lessOrEqual,
+									start, null, null, tagId, outside);
+		}
+		if (end != null) {
+			Filter after = nonNullFilter(model.newFilter(), model);
+			addCriterionToFilter(binding,
+									inclusive ? SmartClientFilterOperator.greaterThan : SmartClientFilterOperator.greaterOrEqual,
+									end, null, null, tagId, after);
+			if (outside.isEmpty()) {
+				outside.addAnd(after);
 			}
-			else if ("false".equals(value)) {
-				filter.addTagged(tagId, false);
+			else {
+				outside.addOr(after);
+			}
+		}
+		addNullOrFilter(binding, outside, filter, model);
+	}
+
+	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
+	private static void addCriterionToFilter(@Nonnull String binding,
+												@Nullable SmartClientFilterOperator filterOperator,
+												@Nullable Object value,
+												@Nullable Object start,
+												@Nullable Object end,
+												@Nullable String tagId,
+												@Nonnull Filter filter) {
+		if (PersistentBean.TAGGED_NAME.equals(binding)) {
+			if ("true".equals(value) || "false".equals(value)) {
+				if (tagId == null) {
+					throw new DomainException("A " + PersistentBean.TAGGED_NAME + " criterion needs a tag to filter by");
+				}
+				filter.addTagged(tagId, "true".equals(value));
 			}
 		}
 		else if (filterOperator == null) {
 			if (HierarchicalBean.PARENT_ID.equals(binding)) {
 				String parentId = (String) value;
-				if (value == null) { // get all root nodes in the data
+				if (parentId == null) { // get all root nodes in the data
 					filter.addNull(binding);
 				}
 				else if (parentId.startsWith("_")) { // get a particular root node
@@ -1504,7 +1525,7 @@ public class SmartClientListServlet extends HttpServlet {
 							ListModel.addLessThanOrEqualTo(filter, binding, value);
 						}
 						break;
-					case iBetweenInclusive, betweenInclusive, iBetween:
+					case iBetweenInclusive, betweenInclusive: // greaterOrEqual and lessOrEqual, as SmartClient defines them
 						if ((start != null) && (end != null)) {
 							ListModel.addBetween(filter, binding, start, end);
 						}
@@ -1513,6 +1534,14 @@ public class SmartClientListServlet extends HttpServlet {
 						}
 						else if (end != null) {
 							ListModel.addLessThanOrEqualTo(filter, binding, end);
+						}
+						break;
+					case iBetween, between: // greaterThan and lessThan (exclusive), as SmartClient defines them
+						if (start != null) {
+							ListModel.addGreaterThan(filter, binding, start);
+						}
+						if (end != null) {
+							ListModel.addLessThan(filter, binding, end);
 						}
 						break;
 					case isNull, isBlank:
@@ -1639,16 +1668,16 @@ public class SmartClientListServlet extends HttpServlet {
 	}
 */
     
-	private static void update(Module module,
-								ListModel<Bean> model,
+	private static void update(@Nonnull Module module,
+								@Nonnull ListModel<Bean> model,
 								boolean rowIsTagged,
-								SortedMap<String, Object> properties,
-								AbstractPersistence persistence,
-								PrintWriter pw)
+								@Nonnull SortedMap<String, Object> properties,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		User user = persistence.getUser();
 		Customer customer = user.getCustomer();
-		Document document = model.getDrivingDocument();
+		Document document = getDrivingDocument(model);
 
 		// remove read-only property parameters as they have no setters
 		properties.remove(Bean.MODULE_KEY);
@@ -1664,6 +1693,9 @@ public class SmartClientListServlet extends HttpServlet {
 			String columnBinding = column.getBinding();
 			if (columnBinding == null) {
 				columnBinding = column.getName();
+				if (columnBinding == null) {
+					throw new MetaDataException("A column in list model " + model.getClass().getName() + " has no binding or name");
+				}
 			}
 
 			if ((! (column instanceof MetaDataQueryProjectedColumn projected)) || (! projected.isEditable())) {
@@ -1690,52 +1722,55 @@ public class SmartClientListServlet extends HttpServlet {
 
 		String bizId = (String) properties.remove(Bean.DOCUMENT_ID);
 		Bean bean = model.update(bizId, properties);
+		if (bean == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " returned no bean from update of " + bizId);
+		}
 
 		// return the updated row
 		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, document, model, bean, rowIsTagged), pw);
 	}
 
-	private static void tag(User user,
-								Customer customer,
-								Module module,
-								ListModel<Bean> model,
-								String tagId,
-								Map<String, Object> parameters,
-								PrintWriter pw)
+	private static void tag(@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module module,
+								@Nonnull ListModel<Bean> model,
+								@Nonnull String tagId,
+								@Nonnull Map<String, Object> parameters,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		EXT.getTagManager().tag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
+		EXT.getTagManager().tag(tagId, module.getName(), getDrivingDocument(model).getName(), bizId);
 
 		// return the updated row
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, true), pw);
 	}
 
-	private static void untag(User user,
-								Customer customer,
-								Module module,
-								ListModel<Bean> model,
-								String tagId,
-								Map<String, Object> parameters,
-								PrintWriter pw)
+	private static void untag(@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module module,
+								@Nonnull ListModel<Bean> model,
+								@Nonnull String tagId,
+								@Nonnull Map<String, Object> parameters,
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
-		EXT.getTagManager().untag(tagId, module.getName(), model.getDrivingDocument().getName(), bizId);
+		EXT.getTagManager().untag(tagId, module.getName(), getDrivingDocument(model).getName(), bizId);
 
 		// return the updated row
 		Util.chunkCharsToWriter(returnTagUpdateMessage(user, customer, parameters, module, model, false), pw);
 	}
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void flag(HttpServletRequest request,
-								PrintWriter pw,
-								AbstractPersistence persistence,
-								User user,
-								Customer customer,
-								Module module,
-								Document drivingDocument,
-								ListModel<Bean> model,
-								SortedMap<String, Object> parameters,
-								String bizFlagComment)
+	private static void flag(@Nonnull HttpServletRequest request,
+								@Nonnull PrintWriter pw,
+								@Nonnull AbstractPersistence persistence,
+								@Nonnull User user,
+								@Nonnull Customer customer,
+								@Nonnull Module module,
+								@Nonnull Document drivingDocument,
+								@Nonnull ListModel<Bean> model,
+								@Nonnull SortedMap<String, Object> parameters,
+								@Nullable String bizFlagComment)
 	throws Exception {
 		String bizId = (String) parameters.get(Bean.DOCUMENT_ID);
 		Bean bean = persistence.retrieve(drivingDocument, bizId);
@@ -1748,13 +1783,13 @@ public class SmartClientListServlet extends HttpServlet {
 		Util.chunkCharsToWriter(returnUpdatedMessage(user, customer, module, drivingDocument, model, bean, isRowTagged(request)), pw);
 	}
 
-	private static StringBuilder returnUpdatedMessage(User user,
-														Customer customer,
-														Module module,
-														Document document,
-														ListModel<Bean> model, 
-														Bean bean,
-														boolean rowIstagged) {
+	private static @Nonnull StringBuilder returnUpdatedMessage(@Nonnull User user,
+																@Nonnull Customer customer,
+																@Nonnull Module module,
+																@Nonnull Document document,
+																@Nonnull ListModel<Bean> model, 
+																@Nonnull Bean bean,
+																boolean rowIstagged) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":");
 
@@ -1777,12 +1812,12 @@ public class SmartClientListServlet extends HttpServlet {
 		return message;
 	}
 
-	private static StringBuilder returnTagUpdateMessage(User user,
-															Customer customer,
-															Map<String, Object> parameters,
-															Module module,
-															ListModel<Bean> model,
-															boolean tagging) {
+	private static @Nonnull StringBuilder returnTagUpdateMessage(@Nonnull User user,
+																	@Nonnull Customer customer,
+																	@Nonnull Map<String, Object> parameters,
+																	@Nonnull Module module,
+																	@Nonnull ListModel<Bean> model,
+																	boolean tagging) {
 		StringBuilder message = new StringBuilder(256);
 		message.append("{\"response\":{\"status\":0,\"data\":[");
 
@@ -1805,7 +1840,7 @@ public class SmartClientListServlet extends HttpServlet {
 
 		message.append(JSON.marshall(customer,
 										new DynamicBean(module.getName(),
-															model.getDrivingDocument().getName(),
+															getDrivingDocument(model).getName(),
 															properties),
 										projections));
 		message.append("]}}");
@@ -1813,15 +1848,45 @@ public class SmartClientListServlet extends HttpServlet {
 		return message;
 	}
 
-	private static void remove(ListModel<Bean> model,
-								Map<String, Object> parameters, 
-								PrintWriter pw)
+	/**
+	 * Returns the driving document of a list model served by this servlet.
+	 *
+	 * @param model the list model
+	 * @return the model's driving document
+	 * @throws IllegalStateException if the model has no driving document
+	 */
+	private static @Nonnull Document getDrivingDocument(@Nonnull ListModel<?> model) {
+		Document result = model.getDrivingDocument();
+		if (result == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " has no driving document");
+		}
+		return result;
+	}
+
+	/**
+	 * Returns a filter obtained from a list model, to add criteria to.
+	 *
+	 * @param filter the filter from {@link ListModel#getFilter()} or {@link ListModel#newFilter()}
+	 * @param model the list model the filter came from
+	 * @return the filter
+	 * @throws IllegalStateException if the model does not support filtering (the filter is null)
+	 */
+	private static @Nonnull Filter nonNullFilter(@Nullable Filter filter, @Nonnull ListModel<?> model) {
+		if (filter == null) {
+			throw new IllegalStateException("List model " + model.getClass().getName() + " does not support filtering");
+		}
+		return filter;
+	}
+
+	private static void remove(@Nonnull ListModel<Bean> model,
+								@Nonnull Map<String, Object> parameters, 
+								@Nonnull PrintWriter pw)
 	throws Exception {
 		model.remove((String) parameters.get(Bean.DOCUMENT_ID));
 		pw.append("{\"response\":{\"status\":0}}");
 	}
 
-	private static void upsertFlag(Document drivingDocument, Bean bean, String flag) {
+	private static void upsertFlag(@Nonnull Document drivingDocument, @Nonnull Bean bean, @Nullable String flag) {
 		StringBuilder sql = new StringBuilder(64);
 		@SuppressWarnings("null")
 		String persistentIdentifier = drivingDocument.getPersistent().getPersistentIdentifier();
@@ -1833,7 +1898,7 @@ public class SmartClientListServlet extends HttpServlet {
 				.putParameter(Bean.DOCUMENT_ID, bean.getBizId(), false).execute();
 	}
 
-	private static boolean isRowTagged(HttpServletRequest request) {
+	private static boolean isRowTagged(@Nonnull HttpServletRequest request) {
 		boolean rowIsTagged = false;
 		String oldValuesJSON = request.getParameter(OLD_VALUES);
 		if (oldValuesJSON != null) {

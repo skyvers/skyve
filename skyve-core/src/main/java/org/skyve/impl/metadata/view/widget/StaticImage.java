@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.repository.PropertyMapAdapter;
@@ -11,9 +11,12 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.Invisible;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -42,8 +45,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 						"percentageHeight",
 						"minPixelHeight", 
 						"maxPixelHeight", 
-						"invisibleConditionName",
-						"visibleConditionName",
+						"xmlInvisibleCondition",
+						"xmlVisibleCondition",
 						"properties"})
 public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	private static final long serialVersionUID = 314857374179338882L;
@@ -65,11 +68,12 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	private Integer minPixelHeight;
 	private Integer maxPixelHeight;
 	
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates that static-image widgets do not render a form label by default.
@@ -86,7 +90,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 *
 	 * @return the relative image file path
 	 */
-	public String getRelativeFile() {
+	public @Nullable String getRelativeFile() {
 		return relativeFile;
 	}
 
@@ -96,7 +100,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @param relativeFile the relative image file path
 	 */
 	@XmlAttribute(required = false)
-	public void setRelativeFile(String relativeFile) {
+	public void setRelativeFile(@Nullable String relativeFile) {
 		this.relativeFile = UtilImpl.processStringValue(relativeFile);
 	}
 
@@ -106,7 +110,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the pixel width, or {@code null} when width is not fixed
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -117,7 +121,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -127,7 +131,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the responsive width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
@@ -138,7 +142,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
@@ -148,7 +152,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the small-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getSm() {
+	public @Nullable Integer getSm() {
 		return sm;
 	}
 	
@@ -159,7 +163,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setSm(Integer sm) {
+	public void setSm(@Nullable Integer sm) {
 		this.sm = sm;
 	}
 
@@ -169,7 +173,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the medium-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getMd() {
+	public @Nullable Integer getMd() {
 		return md;
 	}
 	
@@ -180,7 +184,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMd(Integer md) {
+	public void setMd(@Nullable Integer md) {
 		this.md = md;
 	}
 	
@@ -190,7 +194,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getLg() {
+	public @Nullable Integer getLg() {
 		return lg;
 	}
 	
@@ -201,7 +205,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setLg(Integer lg) {
+	public void setLg(@Nullable Integer lg) {
 		this.lg = lg;
 	}
 
@@ -211,7 +215,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the extra-large-breakpoint width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getXl() {
+	public @Nullable Integer getXl() {
 		return xl;
 	}
 	
@@ -222,7 +226,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setXl(Integer xl) {
+	public void setXl(@Nullable Integer xl) {
 		this.xl = xl;
 	}
 
@@ -232,7 +236,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the percentage width, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
@@ -243,7 +247,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
@@ -253,7 +257,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the minimum pixel width, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelWidth() {
+	public @Nullable Integer getMinPixelWidth() {
 		return minPixelWidth;
 	}
 
@@ -264,7 +268,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelWidth(Integer minPixelWidth) {
+	public void setMinPixelWidth(@Nullable Integer minPixelWidth) {
 		this.minPixelWidth = minPixelWidth;
 	}
 
@@ -274,7 +278,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the maximum pixel width, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelWidth() {
+	public @Nullable Integer getMaxPixelWidth() {
 		return maxPixelWidth;
 	}
 
@@ -285,7 +289,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelWidth(Integer maxPixelWidth) {
+	public void setMaxPixelWidth(@Nullable Integer maxPixelWidth) {
 		this.maxPixelWidth = maxPixelWidth;
 	}
 
@@ -295,7 +299,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the pixel height, or {@code null} when height is not fixed
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -306,7 +310,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
@@ -316,7 +320,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the percentage height, or {@code null} when not set
 	 */
 	@Override
-	public Integer getPercentageHeight() {
+	public @Nullable Integer getPercentageHeight() {
 		return percentageHeight;
 	}
 
@@ -327,7 +331,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPercentageHeight(Integer percentageHeight) {
+	public void setPercentageHeight(@Nullable Integer percentageHeight) {
 		this.percentageHeight = percentageHeight;
 	}
 
@@ -337,7 +341,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the minimum pixel height, or {@code null} when no minimum is enforced
 	 */
 	@Override
-	public Integer getMinPixelHeight() {
+	public @Nullable Integer getMinPixelHeight() {
 		return minPixelHeight;
 	}
 
@@ -348,7 +352,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMinPixelHeight(Integer minPixelHeight) {
+	public void setMinPixelHeight(@Nullable Integer minPixelHeight) {
 		this.minPixelHeight = minPixelHeight;
 	}
 
@@ -358,7 +362,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the maximum pixel height, or {@code null} when no maximum is enforced
 	 */
 	@Override
-	public Integer getMaxPixelHeight() {
+	public @Nullable Integer getMaxPixelHeight() {
 		return maxPixelHeight;
 	}
 
@@ -369,51 +373,69 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setMaxPixelHeight(Integer maxPixelHeight) {
+	public void setMaxPixelHeight(@Nullable Integer maxPixelHeight) {
 		this.maxPixelHeight = maxPixelHeight;
 	}
 
 	/**
-	 * Returns the invisible condition expression.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
 	 *
-	 * @return the invisible condition expression, or {@code null} when not set
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the invisible condition expression directly.
+	 * Sets the {@code invisible} attribute as authored.
 	 *
-	 * @param invisibleConditionName the invisible condition expression
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * JAXB placeholder for the visible condition attribute.
+	 * Returns the {@code invisible} attribute as authored.
 	 *
-	 * @return always {@code null}; the visible condition is derived from the invisible condition
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
 	 */
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code visible} attribute as authored.
 	 *
-	 * @param visibleConditionName the visible condition expression
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 	
 	/**
@@ -422,7 +444,7 @@ public class StaticImage implements RelativeSize, Invisible, FormItemWidget {
 	 * @return the mutable decorator property map keyed by property name
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -6,6 +6,9 @@ import org.skyve.metadata.FilterOperator;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Base fluent builder for metadata query column definitions.
  */
@@ -24,7 +27,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	protected T from(MetaDataQueryColumn column) {
+	protected @Nonnull T from(@Nonnull MetaDataQueryColumn column) {
 		name(column.getName());
 		binding(column.getBinding());
 		displayName(column.getDisplayName());
@@ -37,6 +40,8 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 			pixelWidth(i.intValue());
 		}
 		alignment(column.getAlignment());
+		column.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return (T) this;
 	}
 	
@@ -47,7 +52,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T name(String name) {
+	public @Nonnull T name(@Nullable String name) {
 		get().setName(name);
 		return (T) this;
 	}
@@ -59,7 +64,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T binding(String binding) {
+	public @Nonnull T binding(@Nullable String binding) {
 		get().setBinding(binding);
 		return (T) this;
 	}
@@ -71,7 +76,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T displayName(String displayName) {
+	public @Nonnull T displayName(@Nullable String displayName) {
 		get().setDisplayName(displayName);
 		return (T) this;
 	}
@@ -83,7 +88,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T sortOrder(SortDirection sortOrder) {
+	public @Nonnull T sortOrder(@Nullable SortDirection sortOrder) {
 		get().setSortOrder(sortOrder);
 		return (T) this;
 	}
@@ -95,7 +100,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T filterOperator(FilterOperator filterOperator) {
+	public @Nonnull T filterOperator(@Nullable FilterOperator filterOperator) {
 		get().setFilterOperator(filterOperator);
 		return (T) this;
 	}
@@ -107,7 +112,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T filterExpression(String filterExpression) {
+	public @Nonnull T filterExpression(@Nullable String filterExpression) {
 		get().setFilterExpression(filterExpression);
 		return (T) this;
 	}
@@ -119,7 +124,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T hidden(boolean hidden) {
+	public @Nonnull T hidden(boolean hidden) {
 		get().setHidden(hidden ? Boolean.TRUE : Boolean.FALSE);
 		return (T) this;
 	}
@@ -131,7 +136,7 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T pixelWidth(int pixelWidth) {
+	public @Nonnull T pixelWidth(int pixelWidth) {
 		get().setPixelWidth(Integer.valueOf(pixelWidth));
 		return (T) this;
 	}
@@ -143,8 +148,22 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 * @return this fluent instance.
 	 */
 	@SuppressWarnings("unchecked")
-	public T alignment(HorizontalAlignment alignment) {
+	public @Nonnull T alignment(@Nullable HorizontalAlignment alignment) {
 		get().setAlignment(alignment);
+		return (T) this;
+	}
+
+	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	@SuppressWarnings("unchecked")
+	public @Nonnull T putProperty(@Nonnull String k, @Nonnull String v) {
+		get().getProperties().put(k, v);
 		return (T) this;
 	}
 
@@ -153,5 +172,5 @@ public abstract class FluentMetaDataQueryColumn<T extends FluentMetaDataQueryCol
 	 *
 	 * @return The metadata query column metadata instance.
 	 */
-	public abstract MetaDataQueryColumnMetaData get();
+	public abstract @Nonnull MetaDataQueryColumnMetaData get();
 }

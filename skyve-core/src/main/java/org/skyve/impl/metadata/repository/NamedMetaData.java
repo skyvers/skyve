@@ -5,6 +5,8 @@ import org.skyve.impl.util.XMLMetaData;
 
 import com.google.common.base.MoreObjects;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -28,17 +30,17 @@ public abstract class NamedMetaData implements org.skyve.metadata.NamedMetaData 
 	private String name;
 
 	@Override
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
 	@XmlAttribute
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = UtilImpl.processStringValue(name);
 	}
 	
     @Override
-    public String toString() {
+    public @Nonnull String toString() {
 
         return MoreObjects.toStringHelper(this)
                           .add("name", name)

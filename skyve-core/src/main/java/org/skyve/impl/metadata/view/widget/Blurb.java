@@ -1,7 +1,7 @@
 package org.skyve.impl.metadata.view.widget;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.domain.types.jaxb.CDATAAdapter;
@@ -15,8 +15,11 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.TextOutput;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import jakarta.xml.bind.annotation.XmlType;
 import jakarta.xml.bind.annotation.XmlValue;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -38,8 +41,8 @@ import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 							"pixelWidth", 
 							"pixelHeight", 
 							"textAlignment",
-							"invisibleConditionName",
-							"visibleConditionName",
+							"xmlInvisibleCondition",
+							"xmlVisibleCondition",
 							"escape", 
 							"sanitise"})
 							//"properties"})
@@ -55,7 +58,8 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	private Integer pixelWidth;
 	private Integer pixelHeight;
 	
-	private String invisibleConditionName;
+	private String invisibleCondition;
+	private String visibleCondition;
 
 	/**
 	 * Default alignment is left.
@@ -67,7 +71,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 
 //	@XmlElement(namespace = XMLMetaData.VIEW_NAMESPACE)
 //	@XmlJavaTypeAdapter(PropertyMapAdapter.class)
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 
 	/**
 	 * Indicates that this widget does not render an external form label by default.
@@ -80,14 +84,14 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	/**
 	 * Returns the configured markup content.
 	 */
-	public String getMarkup() {
+	public @Nullable String getMarkup() {
 		return markup;
 	}
 
 	/**
 	 * Returns the markup localised for the current user locale.
 	 */
-	public String getLocalisedMarkup() {
+	public @Nullable String getLocalisedMarkup() {
 		return Util.i18n(markup);
 	}
 	
@@ -96,7 +100,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	@XmlValue
 	@XmlJavaTypeAdapter(CDATAAdapter.class)
-	public void setMarkup(String markup) {
+	public void setMarkup(@Nullable String markup) {
 		this.markup = UtilImpl.processStringValue(markup);
 	}
 
@@ -104,7 +108,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the absolute pixel width, or {@code null} when content-driven sizing is used.
 	 */
 	@Override
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
@@ -113,7 +117,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
@@ -121,7 +125,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the absolute pixel height, or {@code null} when content-driven sizing is used.
 	 */
 	@Override
-	public Integer getPixelHeight() {
+	public @Nullable Integer getPixelHeight() {
 		return pixelHeight;
 	}
 
@@ -130,40 +134,69 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 */
 	@Override
 	@XmlAttribute(required = false)
-	public void setPixelHeight(Integer pixelHeight) {
+	public void setPixelHeight(@Nullable Integer pixelHeight) {
 		this.pixelHeight = pixelHeight;
 	}
 
 	/**
-	 * Returns the condition expression that hides this widget.
+	 * Returns the derived {@code invisible} condition that renderers and other consumers read.
+	 *
+	 * @return the {@code invisible} attribute as authored, or else the negation of the authored
+	 * 			{@code visible} attribute; {@code null} when neither was authored
 	 */
 	@Override
-	public String getInvisibleConditionName() {
-		return invisibleConditionName;
+	@XmlTransient
+	public @Nullable String getInvisibleCondition() {
+		return (invisibleCondition != null) ? invisibleCondition : BindUtil.negateCondition(visibleCondition);
 	}
 
 	/**
-	 * Sets the condition expression that hides this widget.
+	 * Sets the {@code invisible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code visible} attribute.
+	 *
+	 * @param invisibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "invisible", required = false)
-	public void setInvisibleConditionName(String invisibleConditionName) {
-		this.invisibleConditionName = UtilImpl.processStringValue(invisibleConditionName);
-	}
-
-	// to enable JAXB XML marshaling
-	@SuppressWarnings("static-method")
-	String getVisibleConditionName() {
-		return null;
+	public void setXmlInvisibleCondition(@Nullable String invisibleCondition) {
+		this.invisibleCondition = UtilImpl.processStringValue(invisibleCondition);
+		this.visibleCondition = null;
 	}
 
 	/**
-	 * Sets the visible condition by storing its negation as the internal invisible condition.
+	 * Returns the {@code invisible} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code visible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlInvisibleCondition() {
+		return invisibleCondition;
+	}
+
+	/**
+	 * Returns the {@code visible} attribute as authored.
+	 *
+	 * @return the authored condition, or {@code null} when {@code invisible} or neither was authored
+	 */
+	@Override
+	public @Nullable String getXmlVisibleCondition() {
+		return visibleCondition;
+	}
+
+	/**
+	 * Sets the {@code visible} attribute as authored.
+	 *
+	 * <p>Side effects: clears any authored {@code invisible} attribute, so that
+	 * {@link #getInvisibleCondition()} returns the negation of this condition.
+	 *
+	 * @param visibleCondition a condition name, an inline condition expression or a boolean literal; may be {@code null}
 	 */
 	@Override
 	@XmlAttribute(name = "visible", required = false)
-	public void setVisibleConditionName(String visibleConditionName) {
-		this.invisibleConditionName = BindUtil.negateCondition(UtilImpl.processStringValue(visibleConditionName));
+	public void setXmlVisibleCondition(@Nullable String visibleCondition) {
+		this.visibleCondition = UtilImpl.processStringValue(visibleCondition);
+		this.invisibleCondition = null;
 	}
 
 	/**
@@ -171,7 +204,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 *
 	 * <p>When {@code null}, renderer defaults apply.
 	 */
-	public HorizontalAlignment getTextAlignment() {
+	public @Nullable HorizontalAlignment getTextAlignment() {
 		return textAlignment;
 	}
 
@@ -179,7 +212,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Sets the text alignment override.
 	 */
 	@XmlAttribute(name = "textAlignment", required = false)
-	public void setTextAlignment(HorizontalAlignment textAlignment) {
+	public void setTextAlignment(@Nullable HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
 	}
 
@@ -187,7 +220,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns whether output escaping is explicitly configured.
 	 */
 	@Override
-	public Boolean getEscape() {
+	public @Nullable Boolean getEscape() {
 		return escape;
 	}
 
@@ -195,7 +228,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Sets explicit output escaping behaviour.
 	 */
 	@XmlAttribute
-	public void setEscape(Boolean escape) {
+	public void setEscape(@Nullable Boolean escape) {
 		this.escape = escape;
 	}
 
@@ -203,7 +236,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the configured sanitisation mode.
 	 */
 	@Override
-	public Sanitisation getSanitise() {
+	public @Nullable Sanitisation getSanitise() {
 		return sanitise;
 	}
 
@@ -211,7 +244,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Sets the sanitisation mode for markup rendering.
 	 */
 	@XmlAttribute
-	public void setSanitise(Sanitisation sanitise) {
+	public void setSanitise(@Nullable Sanitisation sanitise) {
 		this.sanitise = sanitise;
 	}
 	
@@ -219,7 +252,7 @@ public class Blurb implements Invisible, AbsoluteSize, ContentSpecifiedWidth, Fo
 	 * Returns the mutable decorator property map.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 }

@@ -69,8 +69,24 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *
 	 * @param builders ordered builders participating in the chain
 	 */
-	public ComponentBuilderChain(ComponentBuilder... builders) {
+	public ComponentBuilderChain(@Nonnull ComponentBuilder... builders) {
 		this.builders = builders;
+	}
+
+	/**
+	 * Indicates whether this chain, or a chain nested in it, delegates to a builder of the given type.
+	 *
+	 * @param type	the builder type (a class or interface) to look for
+	 * @return	{@code true} if any delegated builder is an instance of {@code type}
+	 */
+	public boolean contains(@Nonnull Class<?> type) {
+		for (ComponentBuilder builder : builders) {
+			if (type.isInstance(builder) ||
+					((builder instanceof ComponentBuilderChain chain) && chain.contains(type))) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -79,7 +95,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param managedBeanName the managed bean name
 	 */
 	@Override
-	public void setManagedBeanName(String managedBeanName) {
+	public void setManagedBeanName(@Nullable String managedBeanName) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setManagedBeanName(managedBeanName);
 		// Now set the state on all builders in the chain
@@ -94,7 +110,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param managedBean the SAIL managed bean
 	 */
 	@Override
-	public void setSAILManagedBean(FacesView managedBean) {
+	public void setSAILManagedBean(@Nullable FacesView managedBean) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setSAILManagedBean(managedBean);
 		// Now set the state on all builders in the chain
@@ -109,7 +125,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param process the process expression
 	 */
 	@Override
-	public void setProcess(String process) {
+	public void setProcess(@Nullable String process) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setProcess(process);
 		// Now set the state on all builders in the chain
@@ -124,7 +140,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param update the update expression
 	 */
 	@Override
-	public void setUpdate(String update) {
+	public void setUpdate(@Nullable String update) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setUpdate(update);
 		// Now set the state on all builders in the chain
@@ -139,7 +155,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param userAgentType the current user agent type
 	 */
 	@Override
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		// Set the state of the chain too so that utility methods in AbstractFacesBuilder can work
 		super.setUserAgentType(userAgentType);
 		// Now set the state on all builders in the chain
@@ -156,7 +172,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent view(UIComponent component, boolean createView) {
+	public @Nullable UIComponent view(@Nullable UIComponent component, boolean createView) {
 		@Nullable UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.view(result, createView);
@@ -172,7 +188,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed toolbar components
 	 */
 	@Override
-	public List<UIComponent> toolbars(List<UIComponent> components, String widgetId) {
+	public @Nullable List<UIComponent> toolbars(@Nullable List<UIComponent> components, @Nullable String widgetId) {
 		List<UIComponent> result = components;
 		for (ComponentBuilder builder : builders) {
 			result = builder.toolbars(result, widgetId);
@@ -190,10 +206,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent tabPane(UIComponent component,
-								TabPane tabPane,
-								String moduleName,
-								String documentName) {
+	public @Nullable UIComponent tabPane(@Nullable UIComponent component,
+											@Nonnull TabPane tabPane,
+											@Nonnull String moduleName,
+											@Nonnull String documentName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.tabPane(result, tabPane, moduleName, documentName);
@@ -210,7 +226,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent tab(UIComponent component, String title, Tab tab) {
+	public @Nullable UIComponent tab(@Nullable UIComponent component, @Nullable String title, @Nonnull Tab tab) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.tab(result, title, tab);
@@ -242,11 +258,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent tabPaneScript(UIComponent component,
-										TabPane tabPane,
-										String moduleName,
-										String documentName,
-										String tabPaneComponentId) {
+	public @Nullable UIComponent tabPaneScript(@Nullable UIComponent component,
+													@Nonnull TabPane tabPane,
+													@Nonnull String moduleName,
+													@Nonnull String documentName,
+													@Nonnull String tabPaneComponentId) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.tabPaneScript(result, tabPane, moduleName, documentName, tabPaneComponentId);
@@ -264,10 +280,10 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent sidebarScript(UIComponent component,
-										Sidebar sidebar,
-										boolean createView,
-										String sidebarComponentId) {
+	public @Nullable UIComponent sidebarScript(@Nullable UIComponent component,
+													@Nonnull Sidebar sidebar,
+													boolean createView,
+													@Nonnull String sidebarComponentId) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.sidebarScript(result, sidebar, createView, sidebarComponentId);
@@ -280,20 +296,20 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *
 	 * @param component the source component
 	 * @param title the border title
-	 * @param invisibileConditionName optional invisible condition
+	 * @param invisibleCondition optional invisible condition
 	 * @param pixelWidth optional pixel width
 	 * @param collapsible collapsible metadata
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent border(UIComponent component,
-								String title,
-								String invisibileConditionName,
-								Integer pixelWidth,
-								Collapsible collapsible) {
+	public @Nullable UIComponent border(@Nullable UIComponent component,
+											@Nullable String title,
+											@Nullable String invisibleCondition,
+											@Nullable Integer pixelWidth,
+											@Nullable Collapsible collapsible) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.border(result, title, invisibileConditionName, pixelWidth, collapsible);
+			result = builder.border(result, title, invisibleCondition, pixelWidth, collapsible);
 		}
 		return result;
 	}
@@ -306,7 +322,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent label(UIComponent component, String value) {
+	public @Nullable UIComponent label(@Nullable UIComponent component, @Nonnull String value) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.label(result, value);
@@ -320,17 +336,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param label raw button label and nullable escape flag
 	 * @param button dialog-button metadata
-	 * @param formDisabledConditionName optional form-level disabled condition
+	 * @param formDisabledCondition optional form-level disabled condition
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent dialogButton(UIComponent component,
-										EscapableText label,
-										DialogButton button,
-										String formDisabledConditionName) {
+	public @Nullable UIComponent dialogButton(@Nullable UIComponent component,
+													@Nullable EscapableText label,
+													@Nonnull DialogButton button,
+													@Nullable String formDisabledCondition) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.dialogButton(result, label, button, formDisabledConditionName);
+			result = builder.dialogButton(result, label, button, formDisabledCondition);
 		}
 		return result;
 	}
@@ -343,7 +359,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent spacer(UIComponent component, Spacer spacer) {
+	public @Nullable UIComponent spacer(@Nullable UIComponent component, @Nonnull Spacer spacer) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.spacer(result, spacer);
@@ -359,16 +375,16 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param iconStyleClass icon style class
 	 * @param toolTip tooltip text
 	 * @param zoomIn zoom-in metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent zoomIn(UIComponent component, 
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										ZoomIn zoomIn,
-										String formDisabledConditionName) {
+	public @Nullable UIComponent zoomIn(@Nullable UIComponent component, 
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nonnull ZoomIn zoomIn,
+													@Nullable String formDisabledCondition) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.zoomIn(result, 
@@ -376,7 +392,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 										iconStyleClass,
 										toolTip,
 										zoomIn,
-										formDisabledConditionName);
+										formDisabledCondition);
 		}
 		return result;
 	}
@@ -392,21 +408,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent actionButton(UIComponent component, 
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText, 
-										Button button,
-										String formDisabledConditionName,
-										Action action) {
+	public @Nullable UIComponent actionButton(@Nullable UIComponent component, 
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.actionButton(result, 
@@ -417,7 +433,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
-											formDisabledConditionName,
+											formDisabledCondition,
 											action);
 		}
 		return result;
@@ -432,19 +448,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent reportButton(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText, 
-										Button button,
-										String formDisabledConditionName,
-										Action action) {
+	public @Nullable UIComponent reportButton(@Nullable UIComponent component,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.reportButton(result,
@@ -453,7 +469,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
-											formDisabledConditionName,
+											formDisabledCondition,
 											action);
 		}
 		return result;
@@ -470,21 +486,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent downloadButton(UIComponent component,
-										String dataWidgetBinding,
-										String dataWidgetVar,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText, 
-										Button button,
-										String formDisabledConditionName,
-										Action action) {
+	public @Nullable UIComponent downloadButton(@Nullable UIComponent component,
+													@Nullable String dataWidgetBinding,
+													@Nullable String dataWidgetVar,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.downloadButton(result,
@@ -495,7 +511,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 												toolTip,
 												confirmationText,
 												button,
-												formDisabledConditionName,
+												formDisabledCondition,
 												action);
 		}
 		return result;
@@ -510,19 +526,19 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param toolTip tooltip text
 	 * @param confirmationText confirmation text
 	 * @param button button metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param action action metadata
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent uploadButton(UIComponent component,
-										String label,
-										String iconStyleClass,
-										String toolTip,
-										String confirmationText, 
-										Button button,
-										String formDisabledConditionName,
-										Action action) {
+	public @Nullable UIComponent uploadButton(@Nullable UIComponent component,
+													@Nullable String label,
+													@Nullable String iconStyleClass,
+													@Nullable String toolTip,
+													@Nullable String confirmationText, 
+													@Nonnull Button button,
+													@Nullable String formDisabledCondition,
+													@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.uploadButton(result,
@@ -531,7 +547,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											toolTip,
 											confirmationText,
 											button,
-											formDisabledConditionName,
+											formDisabledCondition,
 											action);
 		}
 		return result;
@@ -546,7 +562,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent staticImage(UIComponent component, String fileUrl, StaticImage image) {
+	public @Nullable UIComponent staticImage(@Nullable UIComponent component, @Nonnull String fileUrl, @Nonnull StaticImage image) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.staticImage(result, fileUrl, image);
@@ -564,7 +580,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent dynamicImage(UIComponent component, DynamicImage image, String moduleName, String documentName) {
+	public @Nullable UIComponent dynamicImage(@Nullable UIComponent component, @Nonnull DynamicImage image, @Nonnull String moduleName, @Nonnull String documentName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.dynamicImage(result, image, moduleName, documentName);
@@ -583,7 +599,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent blurb(UIComponent component, String dataWidgetVar, String value, String binding, Blurb blurb) {
+	public @Nullable UIComponent blurb(@Nullable UIComponent component, @Nullable String dataWidgetVar, @Nullable String value, @Nullable String binding, @Nonnull Blurb blurb) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.blurb(result, dataWidgetVar, value, binding, blurb);
@@ -602,7 +618,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent label(UIComponent component, String dataWidgetVar, String value, String binding, Label label) {
+	public @Nullable UIComponent label(@Nullable UIComponent component, @Nullable String dataWidgetVar, @Nullable String value, @Nullable String binding, @Nonnull Label label) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.label(result, dataWidgetVar, value, binding, label);
@@ -620,7 +636,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent dataGrid(UIComponent component, String dataWidgetVar, boolean ordered, DataGrid grid) {
+	public @Nullable UIComponent dataGrid(@Nullable UIComponent component, @Nonnull String dataWidgetVar, boolean ordered, @Nonnull DataGrid grid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.dataGrid(result, dataWidgetVar, ordered, grid);
@@ -637,7 +653,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent dataRepeater(UIComponent component, String dataWidgetVar, DataRepeater repeater) {
+	public @Nullable UIComponent dataRepeater(@Nullable UIComponent component, @Nonnull String dataWidgetVar, @Nonnull DataRepeater repeater) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.dataRepeater(result, dataWidgetVar, repeater);
@@ -661,16 +677,16 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent addDataGridBoundColumn(UIComponent component,
-												UIComponent current,
-												AbstractDataWidget widget,
-												DataGridBoundColumn column,
-												String dataWidgetVar,
-												String columnTitle,
-												String columnBinding,
-												StringBuilder gridColumnExpression,
-												HorizontalAlignment alignment,
-												Integer pixelWidth) {
+	public @Nullable UIComponent addDataGridBoundColumn(@Nullable UIComponent component,
+															@Nonnull UIComponent current,
+															@Nonnull AbstractDataWidget widget,
+															@Nonnull DataGridBoundColumn column,
+															@Nullable String dataWidgetVar,
+															@Nullable String columnTitle,
+															@Nonnull String columnBinding,
+															@Nonnull StringBuilder gridColumnExpression,
+															@Nullable HorizontalAlignment alignment,
+															@Nullable Integer pixelWidth) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridBoundColumn(result, 
@@ -696,9 +712,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent addedDataGridBoundColumn(UIComponent component,
-													UIComponent current,
-													HorizontalAlignment alignment) {
+	public @Nullable UIComponent addedDataGridBoundColumn(@Nullable UIComponent component,
+																@Nonnull UIComponent current,
+																@Nonnull HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addedDataGridBoundColumn(result, current, alignment);
@@ -718,12 +734,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent addDataGridContainerColumn(UIComponent component,
-													UIComponent current,
-													AbstractDataWidget widget,
-													String title,
-													DataGridContainerColumn column,
-													HorizontalAlignment alignment) {
+	public @Nullable UIComponent addDataGridContainerColumn(@Nullable UIComponent component,
+																@Nonnull UIComponent current,
+																@Nonnull AbstractDataWidget widget,
+																@Nullable String title,
+																@Nonnull DataGridContainerColumn column,
+																@Nullable HorizontalAlignment alignment) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridContainerColumn(result, current, widget, title, column,alignment);
@@ -739,7 +755,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent addedDataGridContainerColumn(UIComponent component, UIComponent current) {
+	public @Nullable UIComponent addedDataGridContainerColumn(@Nullable UIComponent component, @Nonnull UIComponent current) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addedDataGridContainerColumn(result, current);
@@ -762,15 +778,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent addDataGridActionColumn(UIComponent component,
-												UIComponent current,
-												DataGrid grid,
-												String dataWidgetVar,
-												String gridColumnExpression,
-												String singluarDocumentAlias,
-												boolean inline,
-												boolean canCreate,
-												boolean canDelete) {
+	public @Nullable UIComponent addDataGridActionColumn(@Nullable UIComponent component,
+															@Nonnull UIComponent current,
+															@Nonnull DataGrid grid,
+															@Nullable String dataWidgetVar,
+															@Nonnull String gridColumnExpression,
+															@Nullable String singluarDocumentAlias,
+															boolean inline,
+															boolean canCreate,
+															boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.addDataGridActionColumn(result,
@@ -797,11 +813,11 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent map(UIComponent component,
-							MapDisplay map,
-							String moduleName,
-							String queryName,
-							String geometryBinding) {
+	public @Nullable UIComponent map(@Nullable UIComponent component,
+										@Nonnull MapDisplay map,
+										@Nonnull String moduleName,
+										@Nonnull String queryName,
+										@Nonnull String geometryBinding) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.map(result, map, moduleName, queryName, geometryBinding);
@@ -818,7 +834,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent map(UIComponent component, MapDisplay map, String modelName) {
+	public @Nullable UIComponent map(@Nullable UIComponent component, @Nonnull MapDisplay map, @Nonnull String modelName) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.map(result, map, modelName);
@@ -832,23 +848,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param geometry the geometry metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent geometry(EventSourceComponent component,
-											String dataWidgetVar,
-											Geometry geometry,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment) {
+	public @Nullable EventSourceComponent geometry(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull Geometry geometry,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledConditionName, title, requiredMessage, textAlignment);
+			result = builder.geometry(result, dataWidgetVar, geometry, formDisabledCondition, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -858,20 +874,20 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *
 	 * @param component the source event source component
 	 * @param geometry the geometry-map metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent geometryMap(EventSourceComponent component,
-												GeometryMap geometry,
-												String formDisabledConditionName,
-												String title,
-												@Nullable String requiredMessage) {
+	public @Nullable EventSourceComponent geometryMap(@Nullable EventSourceComponent component,
+															@Nonnull GeometryMap geometry,
+															@Nullable String formDisabledCondition,
+															@Nullable String title,
+															@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.geometryMap(result, geometry, formDisabledConditionName, title, requiredMessage);
+			result = builder.geometryMap(result, geometry, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -884,7 +900,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent chart(UIComponent component, Chart chart) {
+	public @Nullable UIComponent chart(@Nullable UIComponent component, @Nonnull Chart chart) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.chart(result, chart);
@@ -908,16 +924,16 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent listGrid(UIComponent component,
-									String moduleName,
-									String modelDocumentName,
-									String modelName,
-									String uxui,
-									ListModel<Bean> model,
-									Document owningDocument,
-									ListGrid listGrid,
-									String stickyHeaderAnchorSelector,
-									boolean aggregateQuery) {
+	public @Nullable UIComponent listGrid(@Nullable UIComponent component,
+												@Nonnull String moduleName,
+												@Nullable String modelDocumentName,
+												@Nullable String modelName,
+												@Nonnull String uxui,
+												@Nonnull ListModel<Bean> model,
+												@Nullable Document owningDocument,
+												@Nonnull ListGrid listGrid,
+												@Nullable String stickyHeaderAnchorSelector,
+												boolean aggregateQuery) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGrid(result,
@@ -943,9 +959,9 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent listGridContextMenu(UIComponent component,
-												String listGridId,
-												ListGrid listGrid) {
+	public @Nullable UIComponent listGridContextMenu(@Nullable UIComponent component,
+															@Nonnull String listGridId,
+															@Nonnull ListGrid listGrid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listGridContextMenu(result, listGridId, listGrid);
@@ -968,15 +984,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent listRepeater(UIComponent component,
-										String modelDocumentName,
-										String modelName,
-										String uxui,
-										ListModel<Bean> model,
-										List<FilterParameter> filterParameters,
-										List<Parameter> parameters,
-										boolean showColumnHeaders,
-										boolean showGrid) {
+	public @Nullable UIComponent listRepeater(@Nullable UIComponent component,
+													@Nullable String modelDocumentName,
+													@Nullable String modelName,
+													@Nonnull String uxui,
+													@Nonnull ListModel<Bean> model,
+													@Nullable List<FilterParameter> filterParameters,
+													@Nullable List<Parameter> parameters,
+													boolean showColumnHeaders,
+													boolean showGrid) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listRepeater(result,
@@ -1006,13 +1022,36 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent listMembership(EventSourceComponent component,
-												EscapableText candidatesHeading,
-												EscapableText membersHeading,
-												ListMembership membership) {
+	public @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.listMembership(result, candidatesHeading, membersHeading, membership);
+		}
+		return result;
+	}
+
+	/**
+	 * Delegates list-membership input construction for a membership whose collection may be ordered.
+	 *
+	 * @param component the source event source component
+	 * @param candidatesHeading raw candidates-list heading and nullable escape flag
+	 * @param membersHeading raw members-list heading and nullable escape flag
+	 * @param membership the list-membership metadata
+	 * @param ordered whether the membership's collection is ordered
+	 * @return the transformed event source component
+	 */
+	@Override
+	public @Nullable EventSourceComponent listMembership(@Nullable EventSourceComponent component,
+															@Nullable EscapableText candidatesHeading,
+															@Nullable EscapableText membersHeading,
+															@Nonnull ListMembership membership,
+															boolean ordered) {
+		EventSourceComponent result = component;
+		for (ComponentBuilder builder : builders) {
+			result = builder.listMembership(result, candidatesHeading, membersHeading, membership, ordered);
 		}
 		return result;
 	}
@@ -1023,24 +1062,24 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param checkBox the checkbox metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent checkBox(EventSourceComponent component,
-											String dataWidgetVar,
-											CheckBox checkBox,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage) {
+	public @Nullable EventSourceComponent checkBox(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull CheckBox checkBox,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.checkBox(result,
 										dataWidgetVar,
 										checkBox,
-										formDisabledConditionName,
+										formDisabledCondition,
 										title,
 										requiredMessage);
 		}
@@ -1053,26 +1092,26 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param colour the colour-picker metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent colourPicker(EventSourceComponent component,
-												String dataWidgetVar,
-												ColourPicker colour,
-												String formDisabledConditionName,
-												String title,
-												@Nullable String requiredMessage,
-												HorizontalAlignment textAlignment) {
+	public @Nullable EventSourceComponent colourPicker(@Nullable EventSourceComponent component,
+															@Nullable String dataWidgetVar,
+															@Nonnull ColourPicker colour,
+															@Nullable String formDisabledCondition,
+															@Nullable String title,
+															@Nullable String requiredMessage,
+															@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.colourPicker(result,
 											dataWidgetVar,
 											colour,
-											formDisabledConditionName,
+											formDisabledCondition,
 											title,
 											requiredMessage,
 											textAlignment);
@@ -1086,21 +1125,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param combo the combo metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent combo(EventSourceComponent component,
-										String dataWidgetVar,
-										Combo combo,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
+	public @Nullable EventSourceComponent combo(@Nullable EventSourceComponent component,
+													@Nullable String dataWidgetVar,
+													@Nonnull Combo combo,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.combo(result, dataWidgetVar, combo, formDisabledConditionName,  title, requiredMessage);
+			result = builder.combo(result, dataWidgetVar, combo, formDisabledCondition,  title, requiredMessage);
 		}
 		return result;
 	}
@@ -1112,7 +1151,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 *        produced one
 	 * @param dataWidgetVar the data widget variable, or {@code null}
 	 * @param content the content metadata; must not be {@code null}
-	 * @param formDisabledConditionName the form disabled condition name, or
+	 * @param formDisabledCondition the form disabled condition name, or
 	 *        {@code null}
 	 * @param title the field title, or {@code null}
 	 * @param requiredMessage the optional required message
@@ -1124,7 +1163,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	public @Nullable UIComponent content(@Nullable UIComponent component,
 											@Nullable String dataWidgetVar,
 											@Nonnull ContentUpload content,
-											@Nullable String formDisabledConditionName,
+											@Nullable String formDisabledCondition,
 											@Nullable String title,
 											@Nullable String requiredMessage,
 											@Nullable HorizontalAlignment textAlignment,
@@ -1132,7 +1171,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 											boolean imageUpload) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.content(result, dataWidgetVar, content, formDisabledConditionName, title, requiredMessage, textAlignment, formContext, imageUpload);
+			result = builder.content(result, dataWidgetVar, content, formDisabledCondition, title, requiredMessage, textAlignment, formContext, imageUpload);
 		}
 		return result;
 	}
@@ -1143,21 +1182,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param layout the current layout component
 	 * @param signature the signature metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent addContentSignature(UIComponent component,
-											UIComponent layout,
-											ContentSignature signature,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage) {
+	public @Nullable UIComponent addContentSignature(@Nullable UIComponent component,
+														@Nonnull UIComponent layout,
+														@Nonnull ContentSignature signature,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.addContentSignature(result, layout, signature, formDisabledConditionName, title, requiredMessage);
+			result = builder.addContentSignature(result, layout, signature, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1168,21 +1207,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param html the HTML metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent html(UIComponent component,
-								String dataWidgetVar,
-								HTML html,
-								String formDisabledConditionName,
-								String title,
-								@Nullable String requiredMessage) {
+	public @Nullable UIComponent html(@Nullable UIComponent component,
+											@Nullable String dataWidgetVar,
+											@Nonnull HTML html,
+											@Nullable String formDisabledCondition,
+											@Nullable String title,
+											@Nullable String requiredMessage) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.html(result, dataWidgetVar, html, formDisabledConditionName, title, requiredMessage);
+			result = builder.html(result, dataWidgetVar, html, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1193,35 +1232,38 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param lookup the lookup metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
 	 * @param displayBinding the display binding
 	 * @param query the lookup query definition
+	 * @param owningDocument document owning the lookup model
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent lookupDescription(EventSourceComponent component,
-													String dataWidgetVar,
-													LookupDescription lookup,
-													String formDisabledConditionName,
-													String title,
-													@Nullable String requiredMessage,
-													HorizontalAlignment textAlignment,
-													String displayBinding,
-													QueryDefinition query) {
+	public @Nullable EventSourceComponent lookupDescription(@Nullable EventSourceComponent component,
+																@Nullable String dataWidgetVar,
+																@Nonnull LookupDescription lookup,
+																@Nullable String formDisabledCondition,
+																@Nullable String title,
+																@Nullable String requiredMessage,
+																@Nullable HorizontalAlignment textAlignment,
+																@Nonnull String displayBinding,
+																@Nullable QueryDefinition query,
+																@Nonnull Document owningDocument) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.lookupDescription(result,
 												dataWidgetVar,
 												lookup,
-												formDisabledConditionName,
+												formDisabledCondition,
 												title,
 												requiredMessage,
 												textAlignment,
 												displayBinding,
-												query);
+												query,
+												owningDocument);
 		}
 		return result;
 	}
@@ -1232,23 +1274,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param password the password metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent password(EventSourceComponent component,
-											String dataWidgetVar,
-											Password password,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment) {
+	public @Nullable EventSourceComponent password(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull Password password,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.password(result, dataWidgetVar, password, formDisabledConditionName, title, requiredMessage, textAlignment);
+			result = builder.password(result, dataWidgetVar, password, formDisabledCondition, title, requiredMessage, textAlignment);
 		}
 		return result;
 	}
@@ -1259,21 +1301,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param radio the radio metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent radio(EventSourceComponent component,
-										String dataWidgetVar,
-										Radio radio,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage) {
+	public @Nullable EventSourceComponent radio(@Nullable EventSourceComponent component,
+													@Nullable String dataWidgetVar,
+													@Nonnull Radio radio,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.radio(result, dataWidgetVar, radio, formDisabledConditionName, title, requiredMessage);
+			result = builder.radio(result, dataWidgetVar, radio, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1284,21 +1326,21 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param text the rich-text metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent richText(EventSourceComponent component,
-											String dataWidgetVar,
-											RichText text,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage) {
+	public @Nullable EventSourceComponent richText(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull RichText text,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.richText(result, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage);
+			result = builder.richText(result, dataWidgetVar, text, formDisabledCondition, title, requiredMessage);
 		}
 		return result;
 	}
@@ -1309,7 +1351,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param spinner the spinner metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1317,17 +1359,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent spinner(EventSourceComponent component,
-											String dataWidgetVar,
-											Spinner spinner,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment,
-											jakarta.faces.convert.Converter<?> facesConverter) {
+	public @Nullable EventSourceComponent spinner(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull Spinner spinner,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment,
+														@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledConditionName, title, requiredMessage, textAlignment, facesConverter);
+			result = builder.spinner(result, dataWidgetVar, spinner, formDisabledCondition, title, requiredMessage, textAlignment, facesConverter);
 		}
 		return result;
 	}
@@ -1338,23 +1380,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param slider the slider metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param facesConverter the Faces converter
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent slider(EventSourceComponent component,
-											String dataWidgetVar,
-											Slider slider,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage,
-											jakarta.faces.convert.Converter<?> facesConverter) {
+	public @Nullable EventSourceComponent slider(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull Slider slider,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.slider(result, dataWidgetVar, slider, formDisabledConditionName, title, requiredMessage, facesConverter);
+			result = builder.slider(result, dataWidgetVar, slider, formDisabledCondition, title, requiredMessage, facesConverter);
 		}
 		return result;
 	}
@@ -1365,7 +1407,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source event source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param text the text-area metadata
-	 * @param formDisabledConditionName the form disabled condition name
+	 * @param formDisabledCondition the form disabled condition name
 	 * @param title the field title
 	 * @param requiredMessage the optional required message
 	 * @param textAlignment the text alignment
@@ -1373,17 +1415,17 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent textArea(EventSourceComponent component,
-											String dataWidgetVar,
-											TextArea text,
-											String formDisabledConditionName,
-											String title,
-											@Nullable String requiredMessage,
-											HorizontalAlignment textAlignment,
-											Integer length) {
+	public @Nullable EventSourceComponent textArea(@Nullable EventSourceComponent component,
+														@Nullable String dataWidgetVar,
+														@Nonnull TextArea text,
+														@Nullable String formDisabledCondition,
+														@Nullable String title,
+														@Nullable String requiredMessage,
+														@Nullable HorizontalAlignment textAlignment,
+														@Nullable Integer length) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
-			result = builder.textArea(result, dataWidgetVar, text, formDisabledConditionName, title, requiredMessage, textAlignment, length);
+			result = builder.textArea(result, dataWidgetVar, text, formDisabledCondition, title, requiredMessage, textAlignment, length);
 		}
 		return result;
 	}
@@ -1394,7 +1436,7 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @param component the source component
 	 * @param dataWidgetVar the data widget variable
 	 * @param text text metadata
-	 * @param formDisabledConditionName form disabled condition
+	 * @param formDisabledCondition form disabled condition
 	 * @param title field title
 	 * @param requiredMessage optional required message
 	 * @param textAlignment text alignment
@@ -1405,23 +1447,23 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed event source component
 	 */
 	@Override
-	public EventSourceComponent text(EventSourceComponent component,
-										String dataWidgetVar,
-										TextField text,
-										String formDisabledConditionName,
-										String title,
-										@Nullable String requiredMessage,
-										HorizontalAlignment textAlignment,
-										Integer length,
-										Converter<?> converter,
-										Format<?> format,
-										jakarta.faces.convert.Converter<?> facesConverter) {
+	public @Nullable EventSourceComponent text(@Nullable EventSourceComponent component,
+													@Nullable String dataWidgetVar,
+													@Nonnull TextField text,
+													@Nullable String formDisabledCondition,
+													@Nullable String title,
+													@Nullable String requiredMessage,
+													@Nullable HorizontalAlignment textAlignment,
+													@Nullable Integer length,
+													@Nullable Converter<?> converter,
+													@Nullable Format<?> format,
+													@Nullable jakarta.faces.convert.Converter<?> facesConverter) {
 		EventSourceComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.text(result,
 									dataWidgetVar,
 									text,
-									formDisabledConditionName,
+									formDisabledCondition,
 									title,
 									requiredMessage,
 									textAlignment,
@@ -1448,15 +1490,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent actionLink(UIComponent component,
-									String dataWidgetBinding,
-									String dataWidgetVar,
-									String value,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText, 
-									Link link,
-									Action action) {
+	public @Nullable UIComponent actionLink(@Nullable UIComponent component,
+												@Nullable String dataWidgetBinding,
+												@Nullable String dataWidgetVar,
+												@Nullable String value,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Link link,
+												@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.actionLink(result, dataWidgetBinding, dataWidgetVar, value, iconStyleClass, toolTip, confirmationText, link, action);
@@ -1476,12 +1518,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent report(UIComponent component,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText, 
-								Action action) {
+	public @Nullable UIComponent report(@Nullable UIComponent component,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.report(result, label, iconStyleClass, toolTip, confirmationText, action);
@@ -1503,14 +1545,14 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent download(UIComponent component,
-									String dataWidgetBinding,
-									String dataWidgetVar,
-									String label,
-									String iconStyleClass,
-									String toolTip,
-									String confirmationText, 
-									Action action) {
+	public @Nullable UIComponent download(@Nullable UIComponent component,
+												@Nullable String dataWidgetBinding,
+												@Nullable String dataWidgetVar,
+												@Nullable String label,
+												@Nullable String iconStyleClass,
+												@Nullable String toolTip,
+												@Nullable String confirmationText, 
+												@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.download(result, dataWidgetBinding, dataWidgetVar, label, iconStyleClass, toolTip, confirmationText, action);
@@ -1530,12 +1572,12 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent upload(UIComponent component, 
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText, 
-								Action action) {
+	public @Nullable UIComponent upload(@Nullable UIComponent component, 
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.upload(result, label, iconStyleClass, toolTip, confirmationText, action);
@@ -1556,13 +1598,13 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent remove(UIComponent component, 
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText, 
-								Action action,
-								boolean canDelete) {
+	public @Nullable UIComponent remove(@Nullable UIComponent component, 
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nonnull Action action,
+											boolean canDelete) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.remove(result, label, iconStyleClass, toolTip, confirmationText, action, canDelete);
@@ -1585,15 +1627,15 @@ public class ComponentBuilderChain extends ComponentBuilder {
 	 * @return the transformed component
 	 */
 	@Override
-	public UIComponent action(UIComponent component,
-								String dataWidgetBinding,
-								String dataWidgetVar,
-								String label,
-								String iconStyleClass,
-								String toolTip,
-								String confirmationText, 
-								ImplicitActionName name,
-								Action action) {
+	public @Nullable UIComponent action(@Nullable UIComponent component,
+											@Nullable String dataWidgetBinding,
+											@Nullable String dataWidgetVar,
+											@Nullable String label,
+											@Nullable String iconStyleClass,
+											@Nullable String toolTip,
+											@Nullable String confirmationText, 
+											@Nullable ImplicitActionName name,
+											@Nonnull Action action) {
 		UIComponent result = component;
 		for (ComponentBuilder builder : builders) {
 			result = builder.action(result,

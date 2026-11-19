@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
@@ -37,7 +38,8 @@ class RelationTreeModelH2Test extends AbstractH2Test {
 	void mutationMethodsAreNotImplemented() {
 		RelationTreeModel<Bean> model = new TestRelationTreeModel();
 
-		assertThrows(IllegalStateException.class, () -> model.update("id", new TreeMap<>()));
+		SortedMap<String, Object> properties = new TreeMap<>();
+		assertThrows(IllegalStateException.class, () -> model.update("id", properties));
 		assertThrows(IllegalStateException.class, () -> model.remove("id"));
 	}
 

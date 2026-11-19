@@ -135,6 +135,7 @@ class MetaDataQueryDefinitionImplTest {
 
 	// ---- QueryDefinitionImpl (parent) getter/setter coverage ----
 
+	@SuppressWarnings("unused") // asserts null where the annotations say non-null
 	@Test
 	void setAndGetName() {
 		MetaDataQueryDefinitionImpl query = new MetaDataQueryDefinitionImpl();

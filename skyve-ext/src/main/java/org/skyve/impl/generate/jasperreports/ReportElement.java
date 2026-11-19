@@ -4,6 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.metadata.view.HorizontalAlignment;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Describes a single positioned element (text field, static text, image) within
  * a JasperReports band during programmatic {@code .jrxml} generation.
@@ -35,7 +38,7 @@ public class ReportElement {
 		left, right, center;
 
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			return StringUtils.capitalize(super.toString());
 		}
 		/**
@@ -44,7 +47,7 @@ public class ReportElement {
 		 * @param ha
 		 * @return
 		 */
-		public static ElementAlignment fromHorizontalAlignment(HorizontalAlignment ha) {
+		public static @Nullable ElementAlignment fromHorizontalAlignment(@Nullable HorizontalAlignment ha) {
 			if (ha != null) {
 				return ElementAlignment.valueOf(ha.toTextAlignmentString());
 			}
@@ -57,7 +60,7 @@ public class ReportElement {
 		now, report, page, column, band, auto;
 		
 		@Override
-		public String toString() {
+		public @Nonnull String toString() {
 			return StringUtils.capitalize(super.toString());
 		}
 	}
@@ -207,302 +210,316 @@ public class ReportElement {
 	
 	private ReportField field;
 
-	public Integer getOrdinal() {
+	public @Nullable Integer getOrdinal() {
 		return ordinal;
 	}
 
-	public void setOrdinal(Integer ordinal) {
+	public void setOrdinal(@Nullable Integer ordinal) {
 		this.ordinal = ordinal;
 	}
 
-	public String getName() {
+	public @Nullable String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
+	public void setName(@Nullable String name) {
 		this.name = name;
 	}
 
-	public ElementType getElementType() {
+	public @Nonnull ElementType getElementType() {
 		return elementType;
 	}
 
-	public void setElementType(ElementType elementType) {
+	public void setElementType(@Nonnull ElementType elementType) {
 		this.elementType = elementType;
 	}
 
-	public Integer getElementTop() {
+	public @Nullable Integer getElementTop() {
 		return elementTop;
 	}
 
-	public void setElementTop(Integer elementTop) {
+	public void setElementTop(@Nullable Integer elementTop) {
 		this.elementTop = elementTop;
 	}
 
-	public Integer getElementLeft() {
+	public @Nullable Integer getElementLeft() {
 		return elementLeft;
 	}
 
-	public void setElementLeft(Integer elementLeft) {
+	public void setElementLeft(@Nullable Integer elementLeft) {
 		this.elementLeft = elementLeft;
 	}
 
-	public Integer getElementWidth() {
+	public @Nullable Integer getElementWidth() {
 		return elementWidth;
 	}
 
-	public void setElementWidth(Integer elementWidth) {
+	public void setElementWidth(@Nullable Integer elementWidth) {
 		this.elementWidth = elementWidth;
 	}
 
-	public Integer getElementHeight() {
+	public @Nullable Integer getElementHeight() {
 		return elementHeight;
 	}
 
-	public void setElementHeight(Integer elementHeight) {
+	public void setElementHeight(@Nullable Integer elementHeight) {
 		this.elementHeight = elementHeight;
 	}
 
-	public Boolean getElementBorder() {
+	public @Nullable Boolean getElementBorder() {
 		return elementBorder;
 	}
 
-	public void setElementBorder(Boolean elementBorder) {
+	public void setElementBorder(@Nullable Boolean elementBorder) {
 		this.elementBorder = elementBorder;
 	}
 
-	public String getElementValue() {
+	public @Nullable String getElementValue() {
 		return elementValue;
 	}
 
-	public void setElementValue(String elementValue) {
+	public void setElementValue(@Nullable String elementValue) {
 		this.elementValue = elementValue;
 	}
 
-	public ElementAlignment getElementAlignment() {
+	public @Nullable ElementAlignment getElementAlignment() {
 		return elementAlignment;
 	}
 
-	public void setElementAlignment(ElementAlignment elementAlignment) {
+	public void setElementAlignment(@Nullable ElementAlignment elementAlignment) {
 		this.elementAlignment = elementAlignment;
 	}
 
-	public String getElementFontName() {
+	public @Nullable String getElementFontName() {
 		return elementFontName;
 	}
 
-	public void setElementFontName(String elementFontName) {
+	public void setElementFontName(@Nullable String elementFontName) {
 		this.elementFontName = elementFontName;
 	}
 
-	public Integer getElementFontSize() {
+	public @Nullable Integer getElementFontSize() {
 		return elementFontSize;
 	}
 
-	public void setElementFontSize(Integer elementFontSize) {
+	public void setElementFontSize(@Nullable Integer elementFontSize) {
 		this.elementFontSize = elementFontSize;
 	}
 
-	public EvaluationTime getEvaluationTime() {
+	public @Nullable EvaluationTime getEvaluationTime() {
 		return evaluationTime;
 	}
 
-	public void setEvaluationTime(EvaluationTime evaluationTime) {
+	public void setEvaluationTime(@Nullable EvaluationTime evaluationTime) {
 		this.evaluationTime = evaluationTime;
 	}
 
-	public String getCollectionDocumentName() {
+	public @Nullable String getCollectionDocumentName() {
 		return collectionDocumentName;
 	}
 
-	public void setCollectionDocumentName(String collectionDocumentName) {
+	public void setCollectionDocumentName(@Nullable String collectionDocumentName) {
 		this.collectionDocumentName = collectionDocumentName;
 	}
 
-	public Integer getTopPadding() {
+	public @Nullable Integer getTopPadding() {
 		return topPadding;
 	}
 
-	public void setTopPadding(Integer topPadding) {
+	public void setTopPadding(@Nullable Integer topPadding) {
 		this.topPadding = topPadding;
 	}
 
-	public Integer getLeftPadding() {
+	public @Nullable Integer getLeftPadding() {
 		return leftPadding;
 	}
 
-	public void setLeftPadding(Integer leftPadding) {
+	public void setLeftPadding(@Nullable Integer leftPadding) {
 		this.leftPadding = leftPadding;
 	}
 
-	public Integer getBottomPadding() {
+	public @Nullable Integer getBottomPadding() {
 		return bottomPadding;
 	}
 
-	public void setBottomPadding(Integer bottomPadding) {
+	public void setBottomPadding(@Nullable Integer bottomPadding) {
 		this.bottomPadding = bottomPadding;
 	}
 
-	public Integer getRightPadding() {
+	public @Nullable Integer getRightPadding() {
 		return rightPadding;
 	}
 
-	public void setRightPadding(Integer rightPadding) {
+	public void setRightPadding(@Nullable Integer rightPadding) {
 		this.rightPadding = rightPadding;
 	}
 
-	public String getBorderColour() {
+	public @Nullable String getBorderColour() {
 		return borderColour;
 	}
 
-	public void setBorderColour(String borderColour) {
+	public void setBorderColour(@Nullable String borderColour) {
 		this.borderColour = borderColour;
 	}
 
-	public Decimal2 getBorderLineWidth() {
+	public @Nullable Decimal2 getBorderLineWidth() {
 		return borderLineWidth;
 	}
 
-	public void setBorderLineWidth(Decimal2 borderLineWidth) {
+	public void setBorderLineWidth(@Nullable Decimal2 borderLineWidth) {
 		this.borderLineWidth = borderLineWidth;
 	}
 
-	public Boolean getBorderTop() {
+	public @Nullable Boolean getBorderTop() {
 		return borderTop;
 	}
 
-	public void setBorderTop(Boolean borderTop) {
+	public void setBorderTop(@Nullable Boolean borderTop) {
 		this.borderTop = borderTop;
 	}
 
-	public Boolean getBorderLeft() {
+	public @Nullable Boolean getBorderLeft() {
 		return borderLeft;
 	}
 
-	public void setBorderLeft(Boolean borderLeft) {
+	public void setBorderLeft(@Nullable Boolean borderLeft) {
 		this.borderLeft = borderLeft;
 	}
 
-	public Boolean getBorderBottom() {
+	public @Nullable Boolean getBorderBottom() {
 		return borderBottom;
 	}
 
-	public void setBorderBottom(Boolean borderBottom) {
+	public void setBorderBottom(@Nullable Boolean borderBottom) {
 		this.borderBottom = borderBottom;
 	}
 
-	public Boolean getBorderRight() {
+	public @Nullable Boolean getBorderRight() {
 		return borderRight;
 	}
 
-	public void setBorderRight(Boolean borderRight) {
+	public void setBorderRight(@Nullable Boolean borderRight) {
 		this.borderRight = borderRight;
 	}
 
-	public Boolean getDynamicFlow() {
+	public @Nullable Boolean getDynamicFlow() {
 		return dynamicFlow;
 	}
 
-	public void setDynamicFlow(Boolean dynamicFlow) {
+	public void setDynamicFlow(@Nullable Boolean dynamicFlow) {
 		this.dynamicFlow = dynamicFlow;
 	}
 
-	public Boolean getElementBold() {
+	public @Nullable Boolean getElementBold() {
 		return elementBold;
 	}
 
-	public void setElementBold(Boolean elementBold) {
+	public void setElementBold(@Nullable Boolean elementBold) {
 		this.elementBold = elementBold;
 	}
 
-	public Boolean getElementItalic() {
+	public @Nullable Boolean getElementItalic() {
 		return elementItalic;
 	}
 
-	public void setElementItalic(Boolean elementItalic) {
+	public void setElementItalic(@Nullable Boolean elementItalic) {
 		this.elementItalic = elementItalic;
 	}
 
-	public String getInvisibleConditionName() {
+	public @Nullable String getInvisibleConditionName() {
 		return invisibleConditionName;
 	}
 
-	public void setInvisibleConditionName(String invisibleConditionName) {
+	public void setInvisibleConditionName(@Nullable String invisibleConditionName) {
 		this.invisibleConditionName = invisibleConditionName;
 	}
 
-	public Integer getPixelWidth() {
+	public @Nullable Integer getPixelWidth() {
 		return pixelWidth;
 	}
 
-	public void setPixelWidth(Integer pixelWidth) {
+	public void setPixelWidth(@Nullable Integer pixelWidth) {
 		this.pixelWidth = pixelWidth;
 	}
 
-	public Integer getPercentageWidth() {
+	public @Nullable Integer getPercentageWidth() {
 		return percentageWidth;
 	}
 
-	public void setPercentageWidth(Integer percentageWidth) {
+	public void setPercentageWidth(@Nullable Integer percentageWidth) {
 		this.percentageWidth = percentageWidth;
 	}
 
-	public Integer getResponsiveWidth() {
+	public @Nullable Integer getResponsiveWidth() {
 		return responsiveWidth;
 	}
 
-	public void setResponsiveWidth(Integer responsiveWidth) {
+	public void setResponsiveWidth(@Nullable Integer responsiveWidth) {
 		this.responsiveWidth = responsiveWidth;
 	}
 
-	public Integer getRow() {
+	public @Nullable Integer getRow() {
 		return row;
 	}
 
-	public void setRow(Integer row) {
+	public void setRow(@Nullable Integer row) {
 		this.row = row;
 	}
 
-	public String getElementForeColour() {
+	public @Nullable String getElementForeColour() {
 		return elementForeColour;
 	}
 
-	public void setElementForeColour(String elementForeColour) {
+	public void setElementForeColour(@Nullable String elementForeColour) {
 		this.elementForeColour = elementForeColour;
 	}
 
-	public String getElementBackColour() {
+	public @Nullable String getElementBackColour() {
 		return elementBackColour;
 	}
 
-	public void setElementBackColour(String elementBackColour) {
+	public void setElementBackColour(@Nullable String elementBackColour) {
 		this.elementBackColour = elementBackColour;
 	}
 
-	public String getJrxml() {
+	public @Nonnull String getJrxml() {
 		return Renderer.renderElement(this);
 	}
 
-	public ReportBand getParent() {
+	public @Nullable ReportBand getParent() {
 		return parent;
 	}
 
-	public void setParent(ReportBand parent) {
+	public void setParent(@Nullable ReportBand parent) {
 		this.parent = parent;
 	}
-	
-	public String getReportFileName() {
+
+	/**
+	 * Returns the band this element has been added to.
+	 *
+	 * @return The parent band.
+	 * @throws IllegalStateException If the element has not been added to a band.
+	 */
+	@Nonnull ReportBand getNullSafeParent() {
+		final ReportBand result = parent;
+		if (result == null) {
+			throw new IllegalStateException("Report element " + name + " has not been added to a band");
+		}
+		return result;
+	}
+
+	public @Nullable String getReportFileName() {
 		return reportFileName;
 	}
 
-	public void setReportFileName(String reportFileName) {
+	public void setReportFileName(@Nullable String reportFileName) {
 		this.reportFileName = reportFileName;
 	}
-	public ReportField getField() {
+	public @Nullable ReportField getField() {
 		return field;
 	}
 
-	public void setField(ReportField field) {
+	public void setField(@Nullable ReportField field) {
 		this.field = field;
 	}
 
@@ -528,8 +545,8 @@ public class ReportElement {
 	 * @param printWhenExpression
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public ReportElement(ElementType type, String name, String valueExpression, String fontName, Integer fontSize, Integer top, Integer left,
-			Integer width, Integer height, Boolean border, ElementAlignment alignment, Boolean bold, Boolean italic, String invisibleConditionName) {
+	public ReportElement(@Nonnull ElementType type, @Nullable String name, @Nullable String valueExpression, @Nullable String fontName, @Nullable Integer fontSize, @Nullable Integer top, @Nullable Integer left,
+			@Nullable Integer width, @Nullable Integer height, @Nullable Boolean border, @Nullable ElementAlignment alignment, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable String invisibleConditionName) {
 
 		this.setElementType(type);
 
@@ -577,7 +594,7 @@ public class ReportElement {
 	 * @param width
 	 * @param invisibleConditionName
 	 */
-	public ReportElement(ElementType type, String name, String valueExpression, Integer top, Integer left, Integer width, String invisibleConditionName) {
+	public ReportElement(@Nonnull ElementType type, @Nullable String name, @Nullable String valueExpression, @Nullable Integer top, @Nullable Integer left, @Nullable Integer width, @Nullable String invisibleConditionName) {
 		this(type, name, valueExpression, null, null, top, left, width, null, null, null, Boolean.FALSE,
 				Boolean.FALSE, invisibleConditionName);
 	}

@@ -1,7 +1,7 @@
 package org.skyve.impl.geoip;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -11,7 +11,7 @@ import java.lang.reflect.Field;
 
 import org.ehcache.Cache;
 import org.ehcache.PersistentCacheManager;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.skyve.cache.GeoIPCacheConfig;
@@ -20,9 +20,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.util.IPGeolocation;
 
 @SuppressWarnings({ "static-method", "resource" })
-public class AbstractCachingGeoIPServiceTest {
+class AbstractCachingGeoIPServiceTest {
 	@Test
-	public void geolocateReturnsCachedValueWithoutCallingDelegate() throws Exception {
+	void geolocateReturnsCachedValueWithoutCallingDelegate() throws Exception {
 		DefaultCaching caching = DefaultCaching.get();
 		PersistentCacheManager ehManager = mock(PersistentCacheManager.class);
 		Cache<String, IPGeolocation> cache = mock(Cache.class);
@@ -55,7 +55,7 @@ public class AbstractCachingGeoIPServiceTest {
 	}
 
 	@Test
-	public void geolocateCachesDelegateValueOnMiss() throws Exception {
+	void geolocateCachesDelegateValueOnMiss() throws Exception {
 		DefaultCaching caching = DefaultCaching.get();
 		PersistentCacheManager ehManager = mock(PersistentCacheManager.class);
 		Cache<String, IPGeolocation> cache = mock(Cache.class);

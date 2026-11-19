@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -87,21 +88,34 @@ import org.skyve.metadata.view.Invisible;
 import org.skyve.metadata.view.widget.FilterParameter;
 import org.skyve.metadata.view.widget.bound.Bound;
 import org.skyve.metadata.view.widget.bound.Parameter;
+import org.skyve.util.ExpressionEvaluator;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Rewrites component metadata so it can be embedded safely in an owning view context.
  *
- * <p>This visitor prefixes bindings, remaps action and condition names through the
- * supplied component-name map, and optionally narrows traversal output to a targeted
- * widget id.
+ * <p>This visitor prefixes bindings, remaps action names and conditions through the
+ * supplied action and condition mappings, and optionally narrows traversal output to a
+ * targeted widget id.
+ *
+ * <p>Conditions are rewritten so that the owning view can evaluate them, since that is
+ * where they are evaluated. A condition that has a mapping - a condition name, or an inline
+ * condition expression exactly as the component view writes it - becomes what it is mapped
+ * to, which is already in the owning view's terms. Without a mapping, a condition name is
+ * kept as it is, and an inline condition expression has its bindings prefixed with the
+ * binding prefix when there is one. Either way the result must be a condition of the owning
+ * view's document, which is checked when the owning view is validated, not here.
+ * Each condition pair keeps the attribute that was authored, unless that would mean storing
+ * the inverse of an inline condition expression, in which case the opposite attribute is used.
  *
  * <p>Threading: not thread-safe; intended for one traversal instance per conversion.
  */
 public class ComponentViewVisitor extends ViewVisitor {
 	private String bindingPrefix;
-	private Map<String, String> names;
+	private Map<String, String> actionMappings;
+	private Map<String, String> conditionMappings;
 	private String widgetId;
 	
 	/**
@@ -113,26 +127,44 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param view the destination view receiving converted metadata
 	 * @param currentUxUi the active UX/UI profile
 	 * @param bindingPrefix optional binding prefix applied to bound expressions
-	 * @param names mapping from component-local names to owning-view names
+	 * @param actions mappings from component-view action names to owning-view action names
+	 * @param conditions mappings from component-view conditions to owning-view conditions
 	 * @param widgetId optional widget id used to extract a single targeted fragment
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public ComponentViewVisitor(CustomerImpl customer, 
-									ModuleImpl module, 
-									DocumentImpl document, 
-									ViewImpl view,
-									String currentUxUi,
-									String bindingPrefix,
-									List<ComponentNameMap> names,
-									String widgetId) {
+	public ComponentViewVisitor(@Nonnull CustomerImpl customer, 
+									@Nonnull ModuleImpl module, 
+									@Nonnull DocumentImpl document, 
+									@Nonnull ViewImpl view,
+									@Nonnull String currentUxUi,
+									@Nullable String bindingPrefix,
+									@Nonnull List<ComponentTranslation> actions,
+									@Nonnull List<ComponentTranslation> conditions,
+									@Nullable String widgetId) {
 		super(customer, module, document, view, currentUxUi);
 		setUseMetaData(false);
 		this.bindingPrefix = bindingPrefix;
-		this.names = new TreeMap<>();
-		for (ComponentNameMap name : names) {
-			this.names.put(name.getFromComponent(), name.getMappedTo());
-		}
+		actionMappings = toMap(actions);
+		conditionMappings = toMap(conditions);
 		this.widgetId = widgetId;
+	}
+
+	/**
+	 * Indexes translations by what the component view calls a thing.
+	 * A translation with a blank side translates nothing and is left out.
+	 */
+	private static @Nonnull Map<String, String> toMap(@Nonnull List<ComponentTranslation> translations) {
+		Map<String, String> result = new TreeMap<>();
+		for (ComponentTranslation translation : translations) {
+			String fromComponent = translation.getFromComponent();
+			String mappedTo = translation.getMappedTo();
+			@SuppressWarnings("null") // a blank side in the XML is processed to null
+			boolean bothSidesPresent = (fromComponent != null) && (mappedTo != null);
+			if (bothSidesPresent) {
+				result.put(fromComponent, mappedTo);
+			}
+		}
+		return result;
 	}
 	
 	private Identifiable identifiable;
@@ -147,7 +179,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @return converted metadata elements to persist in the owning view
 	 * @throws MetaDataException if a target widget id was requested but not found
 	 */
-	public List<SerializableMetaData> getContained() {
+	public @Nonnull List<SerializableMetaData> getContained() {
 		if (identifiable == null) {
 			if (widgetId != null) {
 				throw new MetaDataException(String.format("Component definition with widgetId %s is not a valid widgetId.", widgetId));
@@ -178,14 +210,14 @@ public class ComponentViewVisitor extends ViewVisitor {
 
 	/**
 	 * Prefixes the selected-tab-index binding, translates disable and invisible
-	 * condition names, and captures the tab pane if it matches the target widget id.
+	 * conditions, and captures the tab pane if it matches the target widget id.
 	 *
 	 * @param tabPane the tab pane being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
+	public void visitTabPane(@Nonnull TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		tabPane.setSelectedTabIndexBinding(prefixBinding(tabPane.getSelectedTabIndexBinding()));
 		disable(tabPane);
 		invisible(tabPane);
@@ -200,19 +232,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedTabPane(TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTabPane(@Nonnull TabPane tabPane, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the disable and invisible condition names of the tab.
+	 * Translates the disable and invisible conditions of the tab.
 	 *
 	 * @param tab the tab being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		disable(tab);
 		invisible(tab);
 	}
@@ -221,12 +253,12 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedTab(Tab tab, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTab(@Nonnull Tab tab, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the invisible condition name and captures the vbox if it matches
+	 * Translates the invisible condition and captures the vbox if it matches
 	 * the target widget id.
 	 *
 	 * @param vbox the vbox being visited
@@ -234,7 +266,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitVBox(@Nonnull VBox vbox, boolean parentVisible, boolean parentEnabled) {
 		invisible(vbox);
 
 		// capture the targeted widget, if applicable
@@ -247,12 +279,12 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedVBox(VBox vbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitedVBox(@Nonnull VBox vbox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the invisible condition name and captures the hbox if it matches
+	 * Translates the invisible condition and captures the hbox if it matches
 	 * the target widget id.
 	 *
 	 * @param hbox the hbox being visited
@@ -260,7 +292,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitHBox(@Nonnull HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		invisible(hbox);
 
 		// capture the targeted widget, if applicable
@@ -273,12 +305,12 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedHBox(HBox hbox, boolean parentVisible, boolean parentEnabled) {
+	public void visitedHBox(@Nonnull HBox hbox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the disable and invisible condition names, normalises the label layout
+	 * Translates the disable and invisible conditions, normalises the label layout
 	 * when the owning module declares top-defined forms, and captures the form if it
 	 * matches the target widget id.
 	 *
@@ -287,7 +319,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitForm(Form form, boolean parentVisible, boolean parentEnabled) {
+	public void visitForm(@Nonnull Form form, boolean parentVisible, boolean parentEnabled) {
 		disable(form);
 		invisible(form);
 
@@ -311,7 +343,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedForm(Form form, boolean parentVisible, boolean parentEnabled) {
+	public void visitedForm(@Nonnull Form form, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -319,7 +351,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitFormColumn(FormColumn column, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormColumn(@Nonnull FormColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -327,7 +359,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormRow(@Nonnull FormRow row, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -335,7 +367,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -343,7 +375,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedFormItem(FormItem item, boolean parentVisible, boolean parentEnabled) {
+	public void visitedFormItem(@Nonnull FormItem item, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -351,45 +383,45 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedFormRow(FormRow row, boolean parentVisible, boolean parentEnabled) {
+	public void visitedFormRow(@Nonnull FormRow row, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the button's action name through the component name map.
+	 * Translates the button's action name through the action mappings.
 	 *
 	 * @param button the button being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitButton(Button button, boolean parentVisible, boolean parentEnabled) {
-		button.setActionName(translate(button.getActionName()));
+	public void visitButton(@Nonnull Button button, boolean parentVisible, boolean parentEnabled) {
+		button.setActionName(translateAction(button.getActionName()));
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param zoomIn the zoom-in widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitZoomIn(ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
+	public void visitZoomIn(@Nonnull ZoomIn zoomIn, boolean parentVisible, boolean parentEnabled) {
 		bound(zoomIn);
 		disable(zoomIn);
 		invisible(zoomIn);
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param geometry the geometry widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		bound(geometry);
 		disable(geometry);
 		invisible(geometry);
@@ -399,19 +431,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedGeometry(Geometry geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitedGeometry(@Nonnull Geometry geometry, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param geometry the geometry map widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitGeometryMap(@Nonnull GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		bound(geometry);
 		disable(geometry);
 		invisible(geometry);
@@ -421,83 +453,83 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedGeometryMap(GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
+	public void visitedGeometryMap(@Nonnull GeometryMap geometry, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 	
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param map the map display widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitMap(MapDisplay map, boolean parentVisible, boolean parentEnabled) {
+	public void visitMap(@Nonnull MapDisplay map, boolean parentVisible, boolean parentEnabled) {
 		invisible(map);
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param chart the chart widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitChart(Chart chart, boolean parentVisible, boolean parentEnabled) {
+	public void visitChart(@Nonnull Chart chart, boolean parentVisible, boolean parentEnabled) {
 		invisible(chart);
 	}
 
 	/**
-	 * Translates the disable and invisible condition names.
+	 * Translates the disable and invisible conditions.
 	 *
 	 * @param button the dialog button being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitDialogButton(DialogButton button, boolean parentVisible, boolean parentEnabled) {
+	public void visitDialogButton(@Nonnull DialogButton button, boolean parentVisible, boolean parentEnabled) {
 		disable(button);
 		invisible(button);
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param image the dynamic image widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitDynamicImage(DynamicImage image, boolean parentVisible, boolean parentEnabled) {
+	public void visitDynamicImage(@Nonnull DynamicImage image, boolean parentVisible, boolean parentEnabled) {
 		invisible(image);
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param spacer the spacer widget being visited
 	 */
 	@Override
-	public void visitSpacer(Spacer spacer) {
+	public void visitSpacer(@Nonnull Spacer spacer) {
 		invisible(spacer);
 	}
 
 	/**
-	 * Translates the invisible condition name.
+	 * Translates the invisible condition.
 	 *
 	 * @param image the static image widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitStaticImage(StaticImage image, boolean parentVisible, boolean parentEnabled) {
+	public void visitStaticImage(@Nonnull StaticImage image, boolean parentVisible, boolean parentEnabled) {
 		invisible(image);
 	}
 
 	/**
-	 * Translates the invisible condition name and prefixes binding expressions
+	 * Translates the invisible condition and prefixes binding expressions
 	 * within the link value.
 	 *
 	 * @param link the link widget being visited
@@ -505,13 +537,13 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitLink(Link link, boolean parentVisible, boolean parentEnabled) {
+	public void visitLink(@Nonnull Link link, boolean parentVisible, boolean parentEnabled) {
 		invisible(link);
 		link.setValue(prefixExpression(link.getLocalisedValue()));
 	}
 
 	/**
-	 * Translates the invisible condition name and prefixes binding expressions
+	 * Translates the invisible condition and prefixes binding expressions
 	 * within the blurb markup.
 	 *
 	 * @param blurb the blurb widget being visited
@@ -519,13 +551,13 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitBlurb(Blurb blurb, boolean parentVisible, boolean parentEnabled) {
+	public void visitBlurb(@Nonnull Blurb blurb, boolean parentVisible, boolean parentEnabled) {
 		invisible(blurb);
 		blurb.setMarkup(prefixExpression(blurb.getLocalisedMarkup()));
 	}
 
 	/**
-	 * Prefixes the binding, translates the invisible condition name, prefixes the
+	 * Prefixes the binding, translates the invisible condition, prefixes the
 	 * {@code for} target binding and any binding expressions within the label value.
 	 *
 	 * @param label the label widget being visited
@@ -533,7 +565,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitLabel(Label label, boolean parentVisible, boolean parentEnabled) {
+	public void visitLabel(@Nonnull Label label, boolean parentVisible, boolean parentEnabled) {
 		bound(label);
 		invisible(label);
 		label.setFor(prefixBinding(label.getFor()));
@@ -541,35 +573,35 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the invisible condition name.
+	 * Prefixes the binding and translates the invisible condition.
 	 *
 	 * @param progressBar the progress bar widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitProgressBar(ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {
+	public void visitProgressBar(@Nonnull ProgressBar progressBar, boolean parentVisible, boolean parentEnabled) {
 		bound(progressBar);
 		invisible(progressBar);
 	}
 
 	/**
-	 * Translates the disable and invisible condition names, translates all
-	 * condition names used for row-level actions, and prefixes the selected-id binding.
+	 * Translates the disable and invisible conditions, translates all
+	 * conditions used for row-level actions, and prefixes the selected-id binding.
 	 *
 	 * @param grid the list grid being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitListGrid(@Nonnull ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		disable(grid);
 		invisible(grid);
-		grid.setDisableAddConditionName(translate(grid.getDisableAddConditionName()));
-		grid.setDisableEditConditionName(translate(grid.getDisableEditConditionName()));
-		grid.setDisableRemoveConditionName(translate(grid.getDisableRemoveConditionName()));
-		grid.setDisableZoomConditionName(translate(grid.getDisableZoomConditionName()));
-		grid.setPostRefreshConditionName(translate(grid.getPostRefreshConditionName()));
+		translate(grid.getDisableAddCondition(), grid.getXmlEnableAddCondition(), grid::setXmlDisableAddCondition, grid::setXmlEnableAddCondition);
+		translate(grid.getDisableEditCondition(), grid.getXmlEnableEditCondition(), grid::setXmlDisableEditCondition, grid::setXmlEnableEditCondition);
+		translate(grid.getDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), grid::setXmlDisableRemoveCondition, grid::setXmlEnableRemoveCondition);
+		translate(grid.getDisableZoomCondition(), grid.getXmlEnableZoomCondition(), grid::setXmlDisableZoomCondition, grid::setXmlEnableZoomCondition);
+		grid.setPostRefreshCondition(translateCondition(grid.getPostRefreshCondition()));
 		grid.setSelectedIdBinding(prefixBinding(grid.getSelectedIdBinding()));
 	}
 
@@ -577,7 +609,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedListGrid(ListGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedListGrid(@Nonnull ListGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -590,7 +622,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitTreeGrid(@Nonnull TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		visitListGrid(grid, parentVisible, parentEnabled);
 		grid.setRootIdBinding(prefixBinding(grid.getRootIdBinding()));
 	}
@@ -599,34 +631,34 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedTreeGrid(TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTreeGrid(@Nonnull TreeGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the invisible condition name and the post-refresh condition name.
+	 * Translates the invisible condition and the post-refresh condition.
 	 *
 	 * @param repeater the list repeater being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitListRepeater(ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitListRepeater(@Nonnull ListRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		invisible(repeater);
-		repeater.setPostRefreshConditionName(translate(repeater.getPostRefreshConditionName()));
+		repeater.setPostRefreshCondition(translateCondition(repeater.getPostRefreshCondition()));
 	}
 
 	/**
 	 * No-op.
 	 */
 	@Override
-	public void visitedListRepeater(ListRepeater grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedListRepeater(@Nonnull ListRepeater grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding, translates the disable and invisible condition names,
-	 * translates row-level action condition names and the selected-id binding,
+	 * Prefixes the binding, translates the disable and invisible conditions,
+	 * translates row-level action conditions and the selected-id binding,
 	 * and captures the data grid if it matches the target widget id.
 	 *
 	 * @param grid the data grid being visited
@@ -634,14 +666,14 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		bound(grid);
 		disable(grid);
 		invisible(grid);
-		grid.setDisableAddConditionName(translate(grid.getDisableAddConditionName()));
-		grid.setDisableEditConditionName(translate(grid.getDisableEditConditionName()));
-		grid.setDisableRemoveConditionName(translate(grid.getDisableRemoveConditionName()));
-		grid.setDisableZoomConditionName(translate(grid.getDisableZoomConditionName()));
+		translate(grid.getDisableAddCondition(), grid.getXmlEnableAddCondition(), grid::setXmlDisableAddCondition, grid::setXmlEnableAddCondition);
+		translate(grid.getDisableEditCondition(), grid.getXmlEnableEditCondition(), grid::setXmlDisableEditCondition, grid::setXmlEnableEditCondition);
+		translate(grid.getDisableRemoveCondition(), grid.getXmlEnableRemoveCondition(), grid::setXmlDisableRemoveCondition, grid::setXmlEnableRemoveCondition);
+		translate(grid.getDisableZoomCondition(), grid.getXmlEnableZoomCondition(), grid::setXmlDisableZoomCondition, grid::setXmlEnableZoomCondition);
 		grid.setSelectedIdBinding(prefixBinding(grid.getSelectedIdBinding()));
 
 		// capture the targeted widget, if applicable
@@ -654,12 +686,12 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedDataGrid(DataGrid grid, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataGrid(@Nonnull DataGrid grid, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding, translates the invisible condition name, and captures
+	 * Prefixes the binding, translates the invisible condition, and captures
 	 * the data repeater if it matches the target widget id.
 	 *
 	 * @param repeater the data repeater being visited
@@ -667,7 +699,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataRepeater(@Nonnull DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		bound(repeater);
 		invisible(repeater);
 
@@ -681,7 +713,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedDataRepeater(DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataRepeater(@Nonnull DataRepeater repeater, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -689,7 +721,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGridBoundColumn(@Nonnull DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -697,7 +729,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedDataGridBoundColumn(DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataGridBoundColumn(@Nonnull DataGridBoundColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -705,7 +737,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitDataGridContainerColumn(DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
+	public void visitDataGridContainerColumn(@Nonnull DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -713,19 +745,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedDataGridContainerColumn(DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
+	public void visitedDataGridContainerColumn(@Nonnull DataGridContainerColumn column, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param checkBox the check box widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckBox(@Nonnull CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
 		bound(checkBox);
 		disable(checkBox);
 		invisible(checkBox);
@@ -735,19 +767,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedCheckBox(CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
+	public void visitedCheckBox(@Nonnull CheckBox checkBox, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param membership the check membership widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitCheckMembership(@Nonnull CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
 		bound(membership);
 		disable(membership);
 		invisible(membership);
@@ -757,19 +789,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedCheckMembership(CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitedCheckMembership(@Nonnull CheckMembership membership, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param colour the colour picker widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitColourPicker(ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
+	public void visitColourPicker(@Nonnull ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
 		bound(colour);
 		disable(colour);
 		invisible(colour);
@@ -779,19 +811,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedColourPicker(ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
+	public void visitedColourPicker(@Nonnull ColourPicker colour, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param combo the combo widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
+	public void visitCombo(@Nonnull Combo combo, boolean parentVisible, boolean parentEnabled) {
 		bound(combo);
 		disable(combo);
 		invisible(combo);
@@ -801,7 +833,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedCombo(Combo combo, boolean parentVisible, boolean parentEnabled) {
+	public void visitedCombo(@Nonnull Combo combo, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -820,42 +852,42 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param signature the content signature widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitContentSignature(ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
+	public void visitContentSignature(@Nonnull ContentSignature signature, boolean parentVisible, boolean parentEnabled) {
 		bound(signature);
 		disable(signature);
 		invisible(signature);
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param html the HTML widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitHTML(HTML html, boolean parentVisible, boolean parentEnabled) {
+	public void visitHTML(@Nonnull HTML html, boolean parentVisible, boolean parentEnabled) {
 		bound(html);
 		disable(html);
 		invisible(html);
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param membership the list membership widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitListMembership(@Nonnull ListMembership membership, boolean parentVisible, boolean parentEnabled) {
 		bound(membership);
 		disable(membership);
 		invisible(membership);
@@ -865,60 +897,60 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedListMembership(ListMembership membership, boolean parentVisible, boolean parentEnabled) {
+	public void visitedListMembership(@Nonnull ListMembership membership, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param comparison the comparison widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitComparison(Comparison comparison, boolean parentVisible, boolean parentEnabled) {
+	public void visitComparison(@Nonnull Comparison comparison, boolean parentVisible, boolean parentEnabled) {
 		bound(comparison);
 		disable(comparison);
 		invisible(comparison);
 	}
 
 	/**
-	 * Prefixes the binding, translates the disable and invisible condition names,
-	 * and translates action-level condition names (add, clear, edit, pick).
+	 * Prefixes the binding, translates the disable and invisible conditions,
+	 * and translates action-level conditions (add, clear, edit, pick).
 	 *
 	 * @param lookup the lookup description widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		bound(lookup);
 		disable(lookup);
 		invisible(lookup);
-		lookup.setDisableAddConditionName(translate(lookup.getDisableAddConditionName()));
-		lookup.setDisableClearConditionName(translate(lookup.getDisableClearConditionName()));
-		lookup.setDisableEditConditionName(translate(lookup.getDisableEditConditionName()));
-		lookup.setDisablePickConditionName(translate(lookup.getDisablePickConditionName()));
+		translate(lookup.getDisableAddCondition(), lookup.getXmlEnableAddCondition(), lookup::setXmlDisableAddCondition, lookup::setXmlEnableAddCondition);
+		translate(lookup.getDisableClearCondition(), lookup.getXmlEnableClearCondition(), lookup::setXmlDisableClearCondition, lookup::setXmlEnableClearCondition);
+		translate(lookup.getDisableEditCondition(), lookup.getXmlEnableEditCondition(), lookup::setXmlDisableEditCondition, lookup::setXmlEnableEditCondition);
+		translate(lookup.getDisablePickCondition(), lookup.getXmlEnablePickCondition(), lookup::setXmlDisablePickCondition, lookup::setXmlEnablePickCondition);
 	}
 
 	/**
 	 * No-op.
 	 */
 	@Override
-	public void visitedLookupDescription(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedLookupDescription(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param password the password widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitPassword(Password password, boolean parentVisible, boolean parentEnabled) {
+	public void visitPassword(@Nonnull Password password, boolean parentVisible, boolean parentEnabled) {
 		bound(password);
 		disable(password);
 		invisible(password);
@@ -928,19 +960,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedPassword(Password password, boolean parentVisible, boolean parentEnabled) {
+	public void visitedPassword(@Nonnull Password password, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param radio the radio widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
+	public void visitRadio(@Nonnull Radio radio, boolean parentVisible, boolean parentEnabled) {
 		bound(radio);
 		disable(radio);
 		invisible(radio);
@@ -950,19 +982,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedRadio(Radio radio, boolean parentVisible, boolean parentEnabled) {
+	public void visitedRadio(@Nonnull Radio radio, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param richText the rich text widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
+	public void visitRichText(@Nonnull RichText richText, boolean parentVisible, boolean parentEnabled) {
 		bound(richText);
 		disable(richText);
 		invisible(richText);
@@ -972,19 +1004,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedRichText(RichText richText, boolean parentVisible, boolean parentEnabled) {
+	public void visitedRichText(@Nonnull RichText richText, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param slider the slider widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
+	public void visitSlider(@Nonnull Slider slider, boolean parentVisible, boolean parentEnabled) {
 		bound(slider);
 		disable(slider);
 		invisible(slider);
@@ -994,19 +1026,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedSlider(Slider slider, boolean parentVisible, boolean parentEnabled) {
+	public void visitedSlider(@Nonnull Slider slider, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param spinner the spinner widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
+	public void visitSpinner(@Nonnull Spinner spinner, boolean parentVisible, boolean parentEnabled) {
 		bound(spinner);
 		disable(spinner);
 		invisible(spinner);
@@ -1016,19 +1048,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedSpinner(Spinner spinner, boolean parentVisible, boolean parentEnabled) {
+	public void visitedSpinner(@Nonnull Spinner spinner, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param text the text area widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextArea(@Nonnull TextArea text, boolean parentVisible, boolean parentEnabled) {
 		bound(text);
 		disable(text);
 		invisible(text);
@@ -1038,19 +1070,19 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedTextArea(TextArea text, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTextArea(@Nonnull TextArea text, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable and invisible condition names.
+	 * Prefixes the binding and translates the disable and invisible conditions.
 	 *
 	 * @param text the text field widget being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+	public void visitTextField(@Nonnull TextField text, boolean parentVisible, boolean parentEnabled) {
 		bound(text);
 		disable(text);
 		invisible(text);
@@ -1060,7 +1092,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedTextField(TextField text, boolean parentVisible, boolean parentEnabled) {
+	public void visitedTextField(@Nonnull TextField text, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1072,7 +1104,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitInject(Inject inject, boolean parentVisible, boolean parentEnabled) {
+	public void visitInject(@Nonnull Inject inject, boolean parentVisible, boolean parentEnabled) {
 		for (InjectBinding binding : inject.getBindings()) {
 			bound(binding);
 		}
@@ -1086,7 +1118,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		event(changeable.getChangedActions());
 	}
 
@@ -1094,7 +1126,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnChangedEventHandler(Changeable changeable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnChangedEventHandler(@Nonnull Changeable changeable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1106,7 +1138,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		event(blurable.getFocusActions());
 	}
 
@@ -1114,7 +1146,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnFocusEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnFocusEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1126,7 +1158,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		event(blurable.getBlurActions());
 	}
 
@@ -1134,7 +1166,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnBlurEventHandler(Focusable blurable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnBlurEventHandler(@Nonnull Focusable blurable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1146,7 +1178,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 		event(addable.getAddedActions());
 	}
 
@@ -1154,7 +1186,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnAddedEventHandler(Addable addable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnAddedEventHandler(@Nonnull Addable addable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1166,7 +1198,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 		event(editable.getEditedActions());
 	}
 
@@ -1174,7 +1206,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnEditedEventHandler(Editable editable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnEditedEventHandler(@Nonnull Editable editable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1186,7 +1218,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 		event(removable.getRemovedActions());
 	}
 
@@ -1194,7 +1226,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnRemovedEventHandler(Removable removable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnRemovedEventHandler(@Nonnull Removable removable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1206,7 +1238,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		event(selectable.getSelectedActions());
 	}
 
@@ -1214,7 +1246,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnSelectedEventHandler(Selectable selectable, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnSelectedEventHandler(@Nonnull Selectable selectable, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1226,7 +1258,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		event(lookup.getPickedActions());
 	}
 
@@ -1234,7 +1266,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnPickedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnPickedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1246,7 +1278,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		event(lookup.getClearedActions());
 	}
 
@@ -1254,7 +1286,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedOnClearedEventHandler(LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
+	public void visitedOnClearedEventHandler(@Nonnull LookupDescription lookup, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
@@ -1262,44 +1294,44 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op; re-render event actions carry no name that requires translation.
 	 */
 	@Override
-	public void visitRerenderEventAction(RerenderEventAction rerender, EventSource source, boolean parentVisible, boolean parentEnabled) {
+	public void visitRerenderEventAction(@Nonnull RerenderEventAction rerender, @Nonnull EventSource source, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 
 	/**
-	 * Translates the server-side action name through the component name map.
+	 * Translates the server-side action name through the action mappings.
 	 *
 	 * @param server the server-side action event action being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitServerSideActionEventAction(ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
-		server.setActionName(translate(server.getActionName()));
+	public void visitServerSideActionEventAction(@Nonnull ServerSideActionEventAction server, boolean parentVisible, boolean parentEnabled) {
+		server.setActionName(translateAction(server.getActionName()));
 	}
 
 	/**
-	 * Prefixes the binding and translates the disable condition name.
+	 * Prefixes the binding and translates the disable condition.
 	 *
 	 * @param setDisabled the set-disabled event action being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitSetDisabledEventAction(SetDisabledEventAction setDisabled, boolean parentVisible, boolean parentEnabled) {
+	public void visitSetDisabledEventAction(@Nonnull SetDisabledEventAction setDisabled, boolean parentVisible, boolean parentEnabled) {
 		bound(setDisabled);
 		disable(setDisabled);
 	}
 
 	/**
-	 * Prefixes the binding and translates the invisible condition name.
+	 * Prefixes the binding and translates the invisible condition.
 	 *
 	 * @param setInvisible the set-invisible event action being visited
 	 * @param parentVisible whether the parent container is visible
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitSetInvisibleEventAction(SetInvisibleEventAction setInvisible, boolean parentVisible, boolean parentEnabled) {
+	public void visitSetInvisibleEventAction(@Nonnull SetInvisibleEventAction setInvisible, boolean parentVisible, boolean parentEnabled) {
 		bound(setInvisible);
 		invisible(setInvisible);
 	}
@@ -1312,7 +1344,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitToggleDisabledEventAction(ToggleDisabledEventAction toggleDisabled, boolean parentVisible, boolean parentEnabled) {
+	public void visitToggleDisabledEventAction(@Nonnull ToggleDisabledEventAction toggleDisabled, boolean parentVisible, boolean parentEnabled) {
 		bound(toggleDisabled);
 	}
 
@@ -1324,7 +1356,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitToggleVisibilityEventAction(ToggleVisibilityEventAction toggleVisibility, boolean parentVisible, boolean parentEnabled) {
+	public void visitToggleVisibilityEventAction(@Nonnull ToggleVisibilityEventAction toggleVisibility, boolean parentVisible, boolean parentEnabled) {
 		bound(toggleVisibility);
 	}
 
@@ -1332,7 +1364,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op; component embedding does not generate view-level actions.
 	 */
 	@Override
-	public void visitCustomAction(ActionImpl action) {
+	public void visitCustomAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1340,7 +1372,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitAddAction(ActionImpl action) {
+	public void visitAddAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1348,7 +1380,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitRemoveAction(ActionImpl action) {
+	public void visitRemoveAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1356,7 +1388,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitZoomOutAction(ActionImpl action) {
+	public void visitZoomOutAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1364,7 +1396,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitNavigateAction(ActionImpl action) {
+	public void visitNavigateAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1372,7 +1404,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitOKAction(ActionImpl action) {
+	public void visitOKAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1380,7 +1412,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitSaveAction(ActionImpl action) {
+	public void visitSaveAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1388,7 +1420,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitCancelAction(ActionImpl action) {
+	public void visitCancelAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1396,7 +1428,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitDeleteAction(ActionImpl action) {
+	public void visitDeleteAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1404,7 +1436,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitReportAction(ActionImpl action) {
+	public void visitReportAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1412,7 +1444,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitBizExportAction(ActionImpl action) {
+	public void visitBizExportAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1420,7 +1452,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitBizImportAction(ActionImpl action) {
+	public void visitBizImportAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1428,7 +1460,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitDownloadAction(ActionImpl action) {
+	public void visitDownloadAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1436,7 +1468,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitUploadAction(ActionImpl action) {
+	public void visitUploadAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1444,7 +1476,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitNewAction(ActionImpl action) {
+	public void visitNewAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1452,7 +1484,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitEditAction(ActionImpl action) {
+	public void visitEditAction(@Nonnull ActionImpl action) {
 		// nothing to do here
 	}
 
@@ -1465,7 +1497,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitParameter(Parameter parameter, boolean parentVisible, boolean parentEnabled) {
+	public void visitParameter(@Nonnull Parameter parameter, boolean parentVisible, boolean parentEnabled) {
 		if (parameter instanceof ParameterImpl p) {
 			p.setValueBinding(prefixBinding(parameter.getValueBinding()));
 			p.setValue(prefixExpression(parameter.getValue()));
@@ -1481,7 +1513,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitFilterParameter(FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
+	public void visitFilterParameter(@Nonnull FilterParameter parameter, boolean parentVisible, boolean parentEnabled) {
 		if (parameter instanceof FilterParameterImpl p) {
 			p.setValueBinding(prefixBinding(parameter.getValueBinding()));
 			p.setValue(prefixExpression(parameter.getValue()));
@@ -1493,7 +1525,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * but instead just changes the binding used.
 	 */
 	@Override
-	public void visitDefaultWidget(DefaultWidget widget, boolean parentVisible, boolean parentEnabled) {
+	public void visitDefaultWidget(@Nonnull DefaultWidget widget, boolean parentVisible, boolean parentEnabled) {
 		bound(widget);
 	}
 	
@@ -1502,40 +1534,81 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 *
 	 * @param bound the bound element whose binding is to be prefixed
 	 */
-	private void bound(Bound bound) {
+	private void bound(@Nonnull Bound bound) {
 		bound.setBinding(prefixBinding(bound.getBinding()));
 	}
 
 	/**
-	 * Translates the disabled condition name of a disableable element through
-	 * the component name map.
+	 * Translates the disabled/enabled condition pair of a disableable element for the owning view,
+	 * keeping the attribute that was authored.
 	 *
-	 * @param disableable the element whose disabled condition name is to be translated
+	 * @param disableable the element whose condition pair is to be translated
 	 */
-	private void disable(Disableable disableable) {
-		disableable.setDisabledConditionName(translate(disableable.getDisabledConditionName()));
+	private void disable(@Nonnull Disableable disableable) {
+		translate(disableable.getDisabledCondition(),
+					disableable.getXmlEnabledCondition(),
+					disableable::setXmlDisabledCondition,
+					disableable::setXmlEnabledCondition);
 	}
 	
 	/**
-	 * Translates the invisible condition name of an invisible element through
-	 * the component name map.
+	 * Translates the invisible/visible condition pair of an invisible element for the owning view,
+	 * keeping the attribute that was authored.
 	 *
-	 * @param invisible the element whose invisible condition name is to be translated
+	 * @param invisible the element whose condition pair is to be translated
 	 */
-	private void invisible(Invisible invisible) {
-		invisible.setInvisibleConditionName(translate(invisible.getInvisibleConditionName()));
+	private void invisible(@Nonnull Invisible invisible) {
+		translate(invisible.getInvisibleCondition(),
+					invisible.getXmlVisibleCondition(),
+					invisible::setXmlInvisibleCondition,
+					invisible::setXmlVisibleCondition);
 	}
 
 	/**
-	 * Translates action names in a list of event actions through the component
-	 * name map. Only {@link ServerSideActionEventAction} entries carry translatable names.
+	 * Translates a condition pair, keeping the attribute that was authored.
+	 *
+	 * <p>The derived (negative sense) condition is translated, as it always has been.
+	 * The result is stored through the negative attribute when that is the one authored,
+	 * or negated back and stored through the positive attribute when that is.
+	 *
+	 * <p>The inverse of an inline condition expression is never stored. Where a mapping turns
+	 * a condition into an expression of the opposite sense to the attribute that was authored,
+	 * the expression is stored through the other attribute of the pair instead.
+	 *
+	 * @param derivedCondition the derived condition of the pair, may be {@code null}
+	 * @param authoredPositiveCondition the positive attribute as authored, {@code null} when it was not authored
+	 * @param negativeSetter sets the negative attribute as authored
+	 * @param positiveSetter sets the positive attribute as authored
+	 */
+	private void translate(@Nullable String derivedCondition,
+							@Nullable String authoredPositiveCondition,
+							@Nonnull Consumer<String> negativeSetter,
+							@Nonnull Consumer<String> positiveSetter) {
+		String negative = translateCondition(derivedCondition);
+		String positive = BindUtil.negateCondition(negative);
+		boolean storePositive = (authoredPositiveCondition != null);
+		String toStore = storePositive ? positive : negative;
+		if ((toStore != null) && BindUtil.isNegatedSkyveExpression(toStore)) {
+			storePositive = (! storePositive);
+		}
+		if (storePositive) {
+			positiveSetter.accept(positive);
+		}
+		else {
+			negativeSetter.accept(negative);
+		}
+	}
+
+	/**
+	 * Translates action names in a list of event actions through the action
+	 * mappings. Only {@link ServerSideActionEventAction} entries carry translatable names.
 	 *
 	 * @param actions the event actions to translate
 	 */
-	private void event(List<EventAction> actions) {
+	private void event(@Nonnull List<EventAction> actions) {
 		for (EventAction action : actions) {
 			if (action instanceof ServerSideActionEventAction server) {
-				server.setActionName(translate(server.getActionName()));
+				server.setActionName(translateAction(server.getActionName()));
 			}
 		}
 	}
@@ -1548,7 +1621,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param expression the message expression to rewrite, may be {@code null}
 	 * @return the rewritten expression, or {@code null} if the input was {@code null}
 	 */
-	private String prefixExpression(String expression) {
+	private @Nullable String prefixExpression(@Nullable String expression) {
 		if (bindingPrefix == null) {
 			return expression;
 		}
@@ -1556,37 +1629,84 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Maps a component-local condition or action name to the corresponding
-	 * owning-view name via the component name map. When the name is not found
-	 * directly, the negated form is tried and the negation of its mapped value
-	 * is returned. Returns the original name unchanged when no mapping exists.
+	 * Maps a component-view action name to the owning-view action name through the action mappings.
 	 *
-	 * @param name the condition or action name to translate, may be {@code null}
-	 * @return the translated name, or {@code null} if the input was {@code null}
+	 * @param name the action name to translate, which buttons and server-side event actions always have
+	 * @return the mapped action name, or the name unchanged when it has no mapping
 	 */
-	private String translate(String name) {
-		if (name == null) {
+	private @Nonnull String translateAction(@Nonnull String name) {
+		@SuppressWarnings("null") // widgets built in code bypass the XSD; a unit test asserts a null name stays null
+		boolean nameMissing = (name == null);
+		if (nameMissing) {
+			return name;
+		}
+		String result = actionMappings.get(name);
+		return (result == null) ? name : result;
+	}
+
+	/**
+	 * Translates a component-view condition into the owning view's terms.
+	 *
+	 * <p>A condition with a mapping becomes what it is mapped to. The condition may be a
+	 * condition name or an inline condition expression as the component view writes it, and
+	 * what it is mapped to may be either as well. When the condition itself has no mapping
+	 * but is the inverse of one that does ({@code notFoo}, or the inverse of an expression),
+	 * it becomes the inverse of what that is mapped to. What a condition is mapped to is
+	 * already in the owning view's terms, so it never takes the binding prefix.
+	 *
+	 * <p>Without a mapping, a condition name is returned unchanged and an inline condition
+	 * expression, or the inverse of one, has its bindings prefixed with the component binding
+	 * prefix, when there is one.
+	 *
+	 * @param condition the condition name, inline condition expression or inverse of either to translate; may be {@code null}
+	 * @return the translated condition, or {@code null} if the input was {@code null}
+	 */
+	private @Nullable String translateCondition(@Nullable String condition) {
+		if (condition == null) {
 			return null;
 		}
-		String result = names.get(name);
+
+		String result = mappedCondition(condition);
 		if (result == null) {
-			// if we have a not condition, lookup the negation of it
-			// and use the negation of the mapping.
-			if (name.startsWith("not")) {
-				String condish = BindUtil.negateCondition(name);
-				result = names.get(condish);
-				if (result == null) { // not a mapped negated condition - not found
-					result = name;
-				}
-				else { // negate the mapped negated condition
-					result = BindUtil.negateCondition(result);
-				}
-			}
-			else { // not found
-				result = name;
-			}
+			result = (bindingPrefix == null) ? condition : prefixCondition(condition, bindingPrefix);
 		}
 		return result;
+	}
+
+	/**
+	 * Looks a condition up in the condition mappings, in the sense it is given or in the opposite sense.
+	 *
+	 * @param condition the condition name, inline condition expression or inverse of either to look up
+	 * @return what the condition is mapped to, or {@code null} when neither it nor its inverse has a mapping
+	 */
+	private @Nullable String mappedCondition(@Nonnull String condition) {
+		String result = conditionMappings.get(condition);
+		// if we have a not condition, lookup the negation of it
+		// and use the negation of the mapping.
+		if ((result == null) &&
+				(BindUtil.isNegatedSkyveExpression(condition) ||
+					((! BindUtil.isSkyveExpression(condition)) && condition.startsWith("not")))) {
+			result = BindUtil.negateCondition(conditionMappings.get(BindUtil.negateCondition(condition)));
+		}
+		return result;
+	}
+
+	/**
+	 * Prefixes the bindings of an inline condition expression, or of the inverse of one.
+	 * An expression is relative to the component, so its bindings take the component binding prefix.
+	 *
+	 * @param condition the condition to prefix
+	 * @param prefix the component binding prefix
+	 * @return the prefixed condition, or the condition unchanged when it is a condition name
+	 */
+	private static @Nullable String prefixCondition(@Nonnull String condition, @Nonnull String prefix) {
+		if (BindUtil.isNegatedSkyveExpression(condition)) {
+			return BindUtil.negateCondition(ExpressionEvaluator.prefixBinding(condition.substring(3), prefix));
+		}
+		if (BindUtil.isSkyveExpression(condition)) {
+			return ExpressionEvaluator.prefixBinding(condition, prefix);
+		}
+		return condition;
 	}
 	
 	/**
@@ -1597,7 +1717,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param binding the binding string to prefix, may be {@code null}
 	 * @return the prefixed binding, or {@code null} if the input was {@code null}
 	 */
-	private String prefixBinding(String binding) {
+	private @Nullable String prefixBinding(@Nullable String binding) {
 		if (binding == null) {
 			return null;
 		}
@@ -1608,7 +1728,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	}
 
 	/**
-	 * Translates the invisible condition name and captures the sidebar if it matches
+	 * Translates the invisible condition and captures the sidebar if it matches
 	 * the target widget id.
 	 *
 	 * @param sidebar the sidebar being visited
@@ -1616,7 +1736,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * @param parentEnabled whether the parent container is enabled
 	 */
 	@Override
-	public void visitSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+	public void visitSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		invisible(sidebar);
 
 		// capture the targeted widget, if applicable
@@ -1629,7 +1749,7 @@ public class ComponentViewVisitor extends ViewVisitor {
 	 * No-op.
 	 */
 	@Override
-	public void visitedSidebar(Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
+	public void visitedSidebar(@Nonnull Sidebar sidebar, boolean parentVisible, boolean parentEnabled) {
 		// nothing to do here
 	}
 }

@@ -30,6 +30,14 @@ import jakarta.annotation.Nullable;
  */
 public interface QueryDefinition extends NamedMetaData, DecoratedMetaData  {
 	/**
+	 * Returns the name of this query definition; an imported query reference without a name uses its {@code ref}.
+	 *
+	 * @return the query name; never {@code null}
+	 */
+	@Override
+	@Nonnull String getName();
+
+	/**
 	 * Returns the module that owns this query definition.
 	 *
 	 * @return the owning module; never {@code null}

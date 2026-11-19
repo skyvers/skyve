@@ -11,6 +11,9 @@ import org.skyve.util.Util;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Manages PF4J-based add-in lifecycle and extension lookup for Skyve runtime.
  */
@@ -27,7 +30,7 @@ public class PF4JAddInManager implements AddInManager {
 	/**
 	 * Returns the singleton instance.
 	 */
-	public static PF4JAddInManager get() {
+	public static @Nonnull PF4JAddInManager get() {
 		return INSTANCE;
 	}
 	
@@ -72,7 +75,7 @@ public class PF4JAddInManager implements AddInManager {
 	 * @return The matching extension instance, or {@code null} when none are available.
 	 */
 	@Override
-	public <T extends Object> T getExtension(Class<T> type) {
+	public @Nullable <T extends Object> T getExtension(@Nonnull Class<T> type) {
 		if (plugInManager != null) {
 			List<T> extensions = plugInManager.getExtensions(type);
 			if ((extensions != null) && (! extensions.isEmpty())) {

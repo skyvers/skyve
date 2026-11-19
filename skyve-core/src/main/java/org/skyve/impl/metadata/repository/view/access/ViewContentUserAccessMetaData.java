@@ -6,6 +6,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -25,17 +26,17 @@ public class ViewContentUserAccessMetaData extends ViewUserAccessMetaData {
 
 	private String binding;
 
-	public String getBinding() {
+	public @Nonnull String getBinding() {
 		return binding;
 	}
 
 	@XmlAttribute(name = "binding", required = true)
-	public void setBinding(String binding) {
+	public void setBinding(@Nonnull String binding) {
 		this.binding = UtilImpl.processStringValue(binding);
 	}
 	
 	@Override
-	public void validate(String metaDataName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull Module module) {
 		if (binding == null) {
 			throw new MetaDataException(metaDataName + " : [binding] is required for all content user accesses.");
 		}
@@ -43,7 +44,7 @@ public class ViewContentUserAccessMetaData extends ViewUserAccessMetaData {
 	}
 
 	@Override
-	public UserAccess toUserAccess(String moduleName, String documentName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName, @Nonnull String documentName) {
 		return UserAccess.content(moduleName, documentName, binding);
 	}
 }

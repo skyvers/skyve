@@ -1,19 +1,938 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces SAIL conformance script, a member of kitchensink.suite.xml: exercises every op-code that applies to PrimeFaces and every kitchen sink widget that
+	SAIL can enter data into, checking values with testValue after data entry.
+	Not here, as PrimeFaces has no such UI (the executor fails them with a reason):
+	navigateTree and navigateCalendar (no a=t or a=c page), lookupDescriptionNew and lookupDescriptionEdit (the lookup is an
+	auto complete), dataGridEdit on a grid that is not inline (no row edit gesture), listGridTool (no Refresh or Deselect tool:
+	PrimeFacesKitchenSinkSailIT's failure test checks the reason).
+	listGridSelect needs a list grid with a selectedIdBinding (selecting a row of other grids zooms in PrimeFaces): the List Grid
+	Fixture has one of each PrimeFaces kind. dataGridSelect needs a data grid with a selectedIdBinding: the List Grid
+	Fixture's grid of rows has one (PrimeFacesRecorderRoundTripSailIT, pf-recorder-round-trip-more.xml).
+	Not here, as the language cannot express it yet: contentSignature. Data entry into inline grid cells (dataGridNew or
+	dataGridEdit on an inline grid, then dataEnter and testValue) is in the converters scripts (pf-converters-*.xml).
+	dataGridLink is in pf-kitchensink-row-link.xml, another member of the suite.
+	Rows are found with rowContaining and {run}-unique values, so the script can run in any order, and again, on the same server.
+-->
 <automation uxui="tablet"
 			userAgentType="tablet"
-			testStrategy="Verify"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
 			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<interaction name="Login">
 		<method>
+			<comment>A bad password is refused, then admin signs in</comment>
+			<login user="admin" password="not the password" />
+			<testFailure />
 			<login user="admin" password="admin" />
+			<testSuccess />
+			<comment>This run's token is {run}</comment>
 		</method>
 	</interaction>
-	<interaction name="Kitchen Sink">
+	<interaction name="Lookup values: create one to look up">
+		<method>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<save />
+			<testSuccess />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<ok />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="Model Lookup Fixture: a model's list grid in an edit view">
+		<method>
+			<comment>A list grid of a model is named by the model's document (here, the view's) and the model</comment>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<testGridRows module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<testGridRows model="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<comment>Scripts written before model= worked name it as a query: that still finds it</comment>
+			<testGridRows module="kitchensink" query="LookupValuesModel" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" document="ModelLookupFixture" model="LookupValuesModel" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Lookup description columns in an inline data grid">
+		<method>
+			<comment>After dataGridNew or dataGridEdit on an inline grid, dataEnter, testValue and the lookup description steps address the row's cells, not the form's lookups of the same bindings. The single-column lookup: PF SAIL reads a lookup's suggestions as a list, not as a multi-column table</comment>
+			<navigateEdit module="kitchensink" document="ModelLookupFixture" />
+			<dataEnter binding="name" value="SAIL inline lookups {run}" />
+			<dataGridNew binding="rows" />
+			<lookupDescriptionAutoComplete binding="singleSelection" search="SAIL lookup {run}" pick="SAIL lookup {run}" />
+			<testValue binding="singleSelection" value="SAIL lookup {run}" />
+			<save />
+			<comment>Save ended the row's steps, so this is the form's lookup of the same binding, which is untouched</comment>
+			<testValue binding="singleSelection" value="" />
+			<comment>A row is found by the values its cells' inputs hold</comment>
+			<testGridRows binding="rows" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<dataGridEdit binding="rows" rowContaining="SAIL lookup {run}" />
+			<testValue binding="singleSelection" value="SAIL lookup {run}" />
+			<lookupDescriptionPick binding="singleSelection" rowContaining="SAIL lookup {run}" />
+			<testValue binding="singleSelection" value="SAIL lookup {run}" />
+			<comment>The row is removed, as the lookup value is deleted later; the fixture is left: its {run} name keeps it apart</comment>
+			<dataGridRemove binding="rows" row="0" />
+			<save />
+			<testGridRows binding="rows" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Lookup values: generated numbers, filters and sorts">
+		<method>
+			<comment>Each new lookup value gets the next number when it is first saved: keep each one in a variable</comment>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL filter {run} a" />
+			<save />
+			<captureValue binding="number" variable="numberA" />
+			<testValue binding="number" value="{var:numberA}" />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL filter {run} b" />
+			<save />
+			<captureValue binding="number" variable="numberB" />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL filter {run} c" />
+			<save />
+			<captureValue binding="number" variable="numberC" />
+			<ok />
+			<comment>The list is a Vue list grid: filter its text column, then AND a filter on its number column</comment>
+			<listGridFilter module="kitchensink" document="LookupDescription" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="3" maxRows="3" />
+			<comment>A list cell shows the number the view showed: capture it from the row and find the row by it</comment>
+			<captureCell module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" column="number" variable="cellB" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:cellB}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<comment>A pattern keeps part of a cell's text: its first group</comment>
+			<captureCell rowContaining="SAIL filter {run} b" column="description" variable="cellRun" pattern="SAIL filter (\S+) b" />
+			<testGridRows rowContaining="filter {var:cellRun} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:numberA}" operator="greaterThan" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} a" maxRows="0" />
+			<comment>A new filter on a column replaces its old one</comment>
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:numberB}" operator="equals" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" value="{var:numberB}" operator="lessThan" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} a" minRows="1" maxRows="1" />
+			<comment>No value clears the column's filter</comment>
+			<listGridFilter module="kitchensink" document="LookupDescription" column="number" />
+			<testGridRows module="kitchensink" document="LookupDescription" minRows="3" maxRows="3" />
+			<comment>The newest value has the highest number, so it is first when sorted by number descending</comment>
+			<listGridSort module="kitchensink" document="LookupDescription" column="number" descending="true" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<testValue binding="number" value="{var:numberC}" />
+			<cancel />
+			<listGridSort module="kitchensink" document="LookupDescription" column="number" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} a" />
+			<cancel />
+			<listGridSort module="kitchensink" document="LookupDescription" column="description" descending="true" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<cancel />
+			<listGridClearFilter module="kitchensink" document="LookupDescription" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSort module="kitchensink" document="LookupDescription" column="description" />
+		</method>
+	</interaction>
+	<interaction name="List Grid Fixture: filters and sorts in a Vue list grid and a PrimeFaces data table">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>Vue list grid</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVue" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVue" column="description" value="SAIL filter {run} b" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVue" column="description" value="SAIL filter {run}" operator="startsWith" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" minRows="3" maxRows="3" />
+			<listGridSort module="kitchensink" query="qListGridFixtureVue" column="description" descending="true" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<cancel />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureVue" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSort module="kitchensink" query="qListGridFixtureVue" column="description" />
+			<comment>PrimeFaces data table: its text filters compare with contains</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="{run} b" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<listGridSort module="kitchensink" query="qListGridFixtureFaces" column="description" descending="true" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} c" />
+			<cancel />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<listGridSort module="kitchensink" query="qListGridFixtureFaces" column="description" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL filter {run}" />
+			<testValue binding="description" value="SAIL filter {run} a" />
+			<cancel />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFaces" column="description" value="SAIL filter {run}" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureFaces" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="List attributes: a value of each column type">
+		<method>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL types {run} a" />
+			<dataEnter binding="constantEnum" value="one" match="code" />
+			<dataEnter binding="constantDomain" value="one" match="code" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="date" value="01-Jan-2020" />
+			<dataEnter binding="dateTime" value="01-Jan-2020 10:00" />
+			<dataEnter binding="time" value="10:00" />
+			<dataEnter binding="timestamp" value="01-Jan-2020 10:00:10" />
+			<dataEnter binding="monthFirstDate" value="05/06/2026" />
+			<dataEnter binding="twelveHourDateTime" value="05/06/2026 02:47 PM" />
+			<dataEnter binding="monthNameTimestamp" value="May-06-2026 02:47:25 PM" />
+			<dataEnter binding="twelveHourTime" value="02:47:25 PM" />
+			<ok />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL types {run} b" />
+			<dataEnter binding="constantEnum" value="two" match="code" />
+			<dataEnter binding="constantDomain" value="two" match="code" />
+			<dataEnter binding="booleanFlag" value="false" />
+			<dataEnter binding="date" value="15-Jun-2021" />
+			<dataEnter binding="dateTime" value="15-Jun-2021 12:30" />
+			<dataEnter binding="time" value="12:30" />
+			<dataEnter binding="timestamp" value="15-Jun-2021 12:30:30" />
+			<dataEnter binding="monthFirstDate" value="06/05/2026" />
+			<dataEnter binding="twelveHourDateTime" value="06/05/2026 09:15 AM" />
+			<dataEnter binding="monthNameTimestamp" value="Jun-05-2026 09:15:05 AM" />
+			<dataEnter binding="twelveHourTime" value="09:15:05 AM" />
+			<ok />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL types {run} c" />
+			<dataEnter binding="constantEnum" value="three" match="code" />
+			<dataEnter binding="constantDomain" value="three" match="code" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="date" value="31-Dec-2022" />
+			<dataEnter binding="dateTime" value="31-Dec-2022 18:45" />
+			<dataEnter binding="time" value="18:45" />
+			<dataEnter binding="timestamp" value="31-Dec-2022 18:45:50" />
+			<dataEnter binding="monthFirstDate" value="12/31/2026" />
+			<dataEnter binding="twelveHourDateTime" value="12/31/2026 11:59 PM" />
+			<dataEnter binding="monthNameTimestamp" value="Dec-31-2026 11:59:59 PM" />
+			<dataEnter binding="twelveHourTime" value="11:59:59 PM" />
+			<ok />
+		</method>
+	</interaction>
+	<interaction name="List attributes: multi-line text">
+		<method>
+			<comment>A new line in an attribute value is written &amp;#10; (XML makes a literal new line in an attribute a space)</comment>
+			<navigateList module="kitchensink" document="ListAttributes" />
+			<listGridNew module="kitchensink" document="ListAttributes" />
+			<dataEnter binding="text" value="SAIL lines {run}" />
+			<dataEnter binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<dataEnter binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<save />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<ok />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL lines {run}" />
+			<testValue binding="memo" value="SAIL line 1 {run}&#10;line 2&#10;&#10;line 4" />
+			<testValue binding="markup" value="Rich line 1&#10;Rich line 2" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="List Grid Fixture: filters on each column type">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<comment>Vue list grid: an enum by its label or its code, a boolean, dates, date times, times and timestamps written as their attributes show them</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="text" value="SAIL types {run}" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="constantEnum" value="Two (2)!" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="constantEnum" value="three" operator="notEquals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="constantEnum" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="constantDomain" value="one" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="constantDomain" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="booleanFlag" value="true" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="booleanFlag" value="false" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="booleanFlag" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" value="15-Jun-2021" operator="notEquals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="date" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTime" value="15-Jun-2021 12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTime" value="15-Jun-2021 12:00" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTime" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="time" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="timestamp" value="15-Jun-2021 12:30:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="timestamp" value="15-Jun-2021 12:30:30" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="timestamp" />
+			<comment>Vue list grid: dates and times with other converters, typed as their cells show them (a month first date, a 12 hour date time, a timestamp with a month name, and a 12 hour time); a's 05/06/2026 is b's 06/05/2026 with the day and month swapped</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="06/05/2026" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" value="05/06/2026" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthFirstDate" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="05/06/2026 02:47 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="06/05/2026 09:15 AM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" value="06/05/2026 09:15 AM" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourDateTime" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="Jun-05-2026 09:15:05 AM" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" value="Dec-31-2026 11:59:59 PM" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="monthNameTimestamp" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourTime" value="11:59:59 PM" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="twelveHourTime" />
+			<comment>Vue list grid: a date time shown as a date is filtered by the day it shows. It is each record's dateTime (01-Jan-2020 10:00, 15-Jun-2021 12:30 and 31-Dec-2022 18:45), with its time, shown as 01/01/2020, 06/15/2021 and 12/31/2022</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" value="06/15/2021" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" value="06/15/2021" operator="notEquals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" value="06/15/2021" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" value="06/15/2021" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="dateTimeAsDate" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureVueAttributes" column="booleanFlag" value="true" operator="equals" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureVueAttributes" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<comment>PrimeFaces data table: combo and check box filters compare with equals; typed date and time filters with equals</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="text" value="SAIL types {run}" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantEnum" value="Two (2)!" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantEnum" value="three" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantDomain" value="one" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantEnum" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantDomain" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="booleanFlag" value="false" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="booleanFlag" value="true" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="booleanFlag" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
+			<comment>Each typed date and time filter alone, then all of them together</comment>
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="date" value="15-Jun-2021" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="date" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="dateTime" value="15-Jun-2021 12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="dateTime" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="3" maxRows="3" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="timestamp" value="15-Jun-2021 12:30:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="date" value="15-Jun-2021" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="dateTime" value="15-Jun-2021 12:30" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="time" value="12:30" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="constantEnum" value="one" operator="equals" />
+			<listGridFilter module="kitchensink" query="qListGridFixtureFacesAttributes" column="booleanFlag" value="true" operator="equals" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" maxRows="0" />
+			<listGridClearFilter module="kitchensink" query="qListGridFixtureFacesAttributes" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFacesAttributes" rowContaining="SAIL types {run} c" minRows="1" maxRows="1" />
+		</method>
+	</interaction>
+	<interaction name="List Grid Fixture: a Vue list grid and a PrimeFaces data table">
+		<method>
+			<comment>Each list grid chooses how PrimeFaces renders it with its componentBuilderClass property. The same steps run on each.</comment>
+			<comment>Vue list grid: componentBuilderClass is vue</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+			<listGridNew module="kitchensink" query="qListGridFixtureVue" />
+			<dataEnter binding="description" value="SAIL vue grid {run}" />
+			<ok />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL vue grid {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL vue grid {run}" />
+			<testValue binding="description" value="SAIL vue grid {run}" />
+			<delete />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL vue grid {run}" maxRows="0" />
+			<comment>PrimeFaces data table: componentBuilderClass is faces</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" minRows="1" maxRows="1" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<cancel />
+			<listGridNew module="kitchensink" query="qListGridFixtureFaces" />
+			<dataEnter binding="description" value="SAIL faces grid {run}" />
+			<ok />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" minRows="1" maxRows="1" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" />
+			<testValue binding="description" value="SAIL faces grid {run}" />
+			<delete />
+			<testGridRows module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL faces grid {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Links: a link in page markup, and tokens in href and bizId">
+		<method>
+			<comment>Selecting a data table row shows its id, and a blurb's link to it</comment>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<captureValue binding="selectedFacesId" variable="lookupId" />
+			<navigateLink text="Open the selected lookup value" exact="true" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+			<comment>The captured id in a bizId and in an href</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:lookupId}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=LookupDescription&amp;i={var:lookupId}" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+		</method>
+	</interaction>
+	<interaction name="Windows, back and refresh">
+		<method>
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridSelect module="kitchensink" query="qListGridFixtureFaces" rowContaining="SAIL lookup {run}" />
+			<captureValue binding="selectedFacesId" variable="windowsLookupId" />
+			<comment>A link that opens a new window: make a lookup value there, close it, and reload the page that opened it,
+				whose Vue list grid shows the new value only then (PrimeFaces' list grids have no Refresh tool)</comment>
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" maxRows="0" />
+			<navigateLink text="Open a new lookup value in a new window" window="new" />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL new window {run}" />
+			<save />
+			<comment>Windows nest: open the List Grid Fixture by its URL in another new window, where its list grid shows the new value</comment>
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ListGridFixture" window="new" />
+			<pushEditContext module="kitchensink" document="ListGridFixture" />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" minRows="1" maxRows="1" />
+			<closeWindow />
+			<comment>Back in the lookup value's window, with its context</comment>
+			<testValue binding="description" value="SAIL new window {run}" />
+			<closeWindow />
+			<comment>Back in the List Grid Fixture, with its context: its Vue list grid has not fetched the new value yet</comment>
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" maxRows="0" />
+			<refresh />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" minRows="1" maxRows="1" />
+			<comment>A link to a PDF in a new window: the window closes as any other</comment>
+			<navigateLink text="Open a PDF in a new window" window="new" />
+			<closeWindow />
+			<testGridRows module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL new window {run}" minRows="1" maxRows="1" />
+			<comment>Back and refresh: open a lookup value by its id, then a list; back returns to the lookup value, and a
+				refresh drops a value that was not saved</comment>
+			<navigateEdit module="kitchensink" document="LookupDescription" bizId="{var:windowsLookupId}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<navigateBack />
+			<pushEditContext module="kitchensink" document="LookupDescription" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<dataEnter binding="description" value="SAIL not saved {run}" />
+			<refresh />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<comment>Remove the value made in the new window</comment>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL new window {run}" />
+			<delete />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL new window {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Kitchen Sink: generated test data">
 		<method>
 			<navigateEdit module="kitchensink" document="KitchenSink" />
 			<testDataEnter />
+		</method>
+	</interaction>
+	<interaction name="Kitchen Sink: every widget">
+		<method>
+			<navigateEdit module="kitchensink" document="KitchenSink" />
+			<tabSelect path="Widgets" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<testValue binding="booleanFlag" value="true" />
+			<dataEnter binding="colour" value="#336699" />
+			<testValue binding="colour" value="#336699" />
+			<dataEnter binding="date" value="07-Nov-2025" />
+			<testValue binding="date" value="07-Nov-2025" />
+			<dataEnter binding="dateTime" value="07-Nov-2025 15:38" />
+			<testValue binding="dateTime" value="07-Nov-2025 15:38" />
+			<dataEnter binding="decimal10" value="0.0123456789" />
+			<testValue binding="decimal10" value="0.0123456789" />
+			<dataEnter binding="decimal2" value="0.25" />
+			<testValue binding="decimal2" value="0.25" />
+			<dataEnter binding="decimal5" value="0.12345" />
+			<testValue binding="decimal5" value="0.12345" />
+			<comment>Combos and radios take a zero-based index; testValue matches the index, the code or the label</comment>
+			<dataEnter binding="combo" value="2" />
+			<testValue binding="combo" value="two" />
+			<dataEnter binding="radio" value="2" />
+			<testValue binding="radio" value="three" />
+			<comment>match chooses an option by its code or its label; captureValue keeps the label a combo shows</comment>
+			<dataEnter binding="combo" value="three" match="code" />
+			<testValue binding="combo" value="Third" />
+			<dataEnter binding="combo" value="Second" match="label" />
+			<testValue binding="combo" value="two" />
+			<captureValue binding="combo" variable="comboLabel" />
+			<testValue binding="combo" value="{var:comboLabel}" />
+			<testValue binding="combo" value="Second" />
+			<dataEnter binding="radio" value="one" match="code" />
+			<testValue binding="radio" value="First" />
+			<dataEnter binding="radio" value="Third" match="label" />
+			<testValue binding="radio" value="three" />
+			<dataEnter binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
+			<testValue binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
+			<dataEnter binding="id" value="01949764-173c-7f8f-8b2a-0e19f7e52650" />
+			<testValue binding="id" value="01949764-173c-7f8f-8b2a-0e19f7e52650" />
+			<dataEnter binding="normalInteger" value="42" />
+			<testValue binding="normalInteger" value="42" />
+			<dataEnter binding="spinner" value="5" />
+			<testValue binding="spinner" value="5" />
+			<comment>A spinner that holds a value is typed over, not added to</comment>
+			<dataEnter binding="spinner" value="7" />
+			<testValue binding="spinner" value="7" />
+			<dataEnter binding="slider" value="30" />
+			<testValue binding="slider" value="30" />
+			<dataEnter binding="longInteger" value="111" />
+			<testValue binding="longInteger" value="111" />
+			<dataEnter binding="html" value="SAIL HTML" />
+			<testValue binding="html" value="SAIL HTML" />
+			<dataEnter binding="markup" value="Test paragraph" />
+			<testValue binding="markup" value="Test paragraph" />
+			<dataEnter binding="memo" value="This is a test memo field." />
+			<testValue binding="memo" value="This is a test memo field." />
+			<dataEnter binding="text" value="Sample text entry" />
+			<testValue binding="text" value="Sample text entry" />
+			<dataEnter binding="time" value="11:11" />
+			<testValue binding="time" value="11:11" />
+			<dataEnter binding="timestamp" value="07-Nov-2025 15:43:16" />
+			<testValue binding="timestamp" value="07-Nov-2025 15:43:16" />
+			<lookupDescriptionPick binding="lookupDescription" row="0" />
+			<comment>Pick lookup rows by their text, from the drop down and from a search's suggestions</comment>
+			<lookupDescriptionPick binding="lookupDescription" rowContaining="SAIL filter {run} b" />
+			<testValue binding="lookupDescription" value="SAIL filter {run} b" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL filter {run}" pick="{run} c" />
+			<testValue binding="lookupDescription" value="SAIL filter {run} c" />
+			<lookupDescriptionAutoComplete binding="lookupDescription" search="SAIL lookup {run}" />
+			<testValue binding="lookupDescription" value="SAIL lookup {run}" />
+			<tabSelect path="Data Grids" />
+			<dataGridNew binding="containerGrid" />
+			<dataEnter binding="url" value="https://example.com" />
+			<testValue binding="url" value="https://example.com" />
+			<zoomOut />
+			<testGridRows binding="containerGrid" minRows="1" maxRows="1" />
+			<dataGridZoom binding="containerGrid" row="0" />
+			<testValue binding="url" value="https://example.com" />
+			<zoomOut />
+			<dataGridRemove binding="containerGrid" row="0" />
+			<testGridRows binding="containerGrid" maxRows="0" />
+			<dataGridNew binding="orderedGrid" />
+			<dataEnter binding="booleanFlag" value="true" />
+			<dataEnter binding="colour" value="#993366" />
+			<dataEnter binding="date" value="07-Nov-2025" />
+			<zoomOut />
+			<dataGridZoom binding="orderedGrid" rowContaining="#993366" />
+			<testValue binding="colour" value="#993366" />
+			<testValue binding="date" value="07-Nov-2025" />
+			<comment>Decline the removal first, then remove</comment>
+			<remove confirm="false" />
+			<remove />
+			<testGridRows binding="orderedGrid" maxRows="0" />
+			<comment>An inline grid adds and removes rows in place; the new row's cells take dataEnter and testValue, a combo's too</comment>
+			<testGridRows binding="inlineGrid" maxRows="0" />
+			<dataGridNew binding="inlineGrid" />
+			<dataEnter binding="constantDomain" value="two" match="code" />
+			<comment>A comment does not touch the page, so the steps after it still address the row's cells</comment>
+			<testValue binding="constantDomain" value="two" />
+			<dataEnter binding="constantDomain" value="Three (3)!" match="label" />
+			<testValue binding="constantDomain" value="three" />
+			<testGridRows binding="inlineGrid" minRows="1" maxRows="1" />
+			<dataGridRemove binding="inlineGrid" row="0" />
+			<testGridRows binding="inlineGrid" maxRows="0" />
+			<tabSelect path="List/Check Membership" />
+			<tabSelect path="Charts" />
+			<tabSelect path="Comparison" />
+			<tabSelect path="ListGrid" />
+			<tabSelect path="Map" />
+			<tabSelect path="Tree Grid" />
+			<tabSelect path="Widgets" />
+			<comment>The values survive the zooms, which round trip to the server</comment>
+			<testValue binding="booleanFlag" value="true" />
+			<testValue binding="colour" value="#336699" />
+			<testValue binding="decimal2" value="0.25" />
+			<testValue binding="combo" value="two" />
+			<testValue binding="radio" value="three" />
+			<testValue binding="geometry" value="POINT (138.9596428009031 -34.521214140240495)" />
+			<testValue binding="slider" value="30" />
+			<testValue binding="markup" value="Test paragraph" />
+			<testValue binding="lookupDescription" value="SAIL lookup {run}" />
+			<comment>Upload into a content widget</comment>
+			<upload binding="contentLink" file="sail/files/sail-upload.txt" />
+			<comment>Kitchen sink is transient and the dev role cannot save it</comment>
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Actions Fixture: actions, buttons and change events">
+		<method>
+			<navigateEdit module="kitchensink" document="ActionsFixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<action name="RunFromFormButton" />
+			<testValue binding="outcome" value="Run From Form Button ran" />
+			<tabSelect path="Tab button" />
+			<action name="RunFromTabButton" />
+			<testValue binding="outcome" value="Run From Tab Button ran" />
+			<action name="RunSharedFirst" />
+			<testValue binding="outcome" value="Run Shared ran" />
+			<dataEnter binding="eventText" value="changed" />
+			<testValue binding="outcome" value="Run From Event ran" />
+			<comment>The upload action refuses this file; testSuccess="false" lets testFailure check the refusal on the upload page</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-refused.txt" testSuccess="false" />
+			<testFailure message="sail-refused.txt already exists" />
+			<comment>This file is refused by a validation, which the upload page shows as a refusal too</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-invalid.txt" testSuccess="false" />
+			<testFailure message="sail-invalid.txt is not a valid upload" />
+			<comment>This file makes the action find itself unavailable: the upload page shows the refusal, as for any action</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-unavailable.txt" testSuccess="false" />
+			<testFailure message="This action is no longer available." />
+			<comment>A successful action upload closes its upload page, which refreshes the view</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
+			<testValue binding="outcome" value="Actions Upload ran" />
+			<dataEnter binding="disableUpload" value="true" />
+			<testWidget action="ActionsUpload" enabled="false" />
+			<dataEnter binding="disableUpload" value="false" />
+			<comment>Each check box makes a trigger unavailable</comment>
+			<testWidget action="RunFromToolbar" enabled="true" />
+			<comment>Actions with no button are not shown: Run From Event is not in the action panel, and Run Without Trigger is invisible</comment>
+			<testWidget action="RunFromEvent" visible="false" />
+			<testWidget action="RunWithoutTrigger" visible="false" />
+			<dataEnter binding="disableToolbarAction" value="true" />
+			<testWidget action="RunFromToolbar" enabled="false" />
+			<dataEnter binding="disableToolbarAction" value="false" />
+			<testWidget action="RunFromToolbar" enabled="true" />
+			<testWidget binding="eventText" visible="true" />
+			<dataEnter binding="hideEventText" value="true" />
+			<testWidget binding="eventText" visible="false" />
+			<dataEnter binding="hideEventText" value="false" />
+			<testWidget binding="eventText" />
+			<testWidget tab="Tab button" enabled="true" />
+			<dataEnter binding="disableTab" value="true" />
+			<testWidget tab="Tab button" enabled="false" />
+			<dataEnter binding="disableTab" value="false" />
+			<testWidget binding="outcome" enabled="false" />
+			<comment>A click low on the page straight after an upload: closing the upload page refreshes the view, which must not move the page</comment>
+			<upload action="ActionsUpload" file="sail/files/sail-upload.txt" />
+			<tabSelect path="Rows" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="SAIL row" />
+			<testValue binding="name" value="SAIL row" />
+			<zoomOut />
+			<testGridRows binding="rows" rowContaining="SAIL row" minRows="1" maxRows="1" />
+			<dataGridZoom binding="rows" rowContaining="SAIL row" />
+			<testValue binding="name" value="SAIL row" />
+			<zoomOut />
+			<comment>Read a row's cell, and the view's title; a pattern keeps the first word of the title</comment>
+			<captureCell binding="rows" rowContaining="SAIL row" column="name" variable="rowName" />
+			<testGridRows binding="rows" rowContaining="{var:rowName}" minRows="1" maxRows="1" />
+			<captureTitle variable="fixture" pattern="(\w+) Fixture" />
+			<dataGridZoom binding="rows" rowContaining="SAIL row" />
+			<dataEnter binding="name" value="SAIL row of {var:fixture}" />
+			<zoomOut />
+			<testGridRows binding="rows" rowContaining="SAIL row of Actions" minRows="1" maxRows="1" />
+			<save />
+			<testSuccess />
+			<comment>Decline the delete first, then delete</comment>
+			<delete confirm="false" />
+			<testWidget action="Delete" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Dialogs Fixture: confirmations and server-side questions">
+		<method>
+			<navigateEdit module="kitchensink" document="DialogsFixture" />
+			<comment>No confirm attribute answers yes; confirm="false" answers no</comment>
+			<action name="AskYesNo" />
+			<testValue binding="outcome" value="Yes or No answered Yes" />
+			<action name="AskYesNo" confirm="false" />
+			<testValue binding="outcome" value="Yes or No answered No" />
+			<comment>A client-side confirmation, then two questions in turn</comment>
+			<action name="AskTwice" confirm="true" />
+			<testValue binding="outcome" value="Ask twice answered YES then OK" />
+			<comment>Declining the client-side confirmation sends nothing</comment>
+			<action name="AskTwice" confirm="false" />
+			<testValue binding="outcome" value="Ask twice answered YES then OK" />
+			<action name="AskOnce" />
+			<testValue binding="outcome" value="Ask once answered OK" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Escaping Fixture: zoom in">
+		<method>
+			<navigateEdit module="kitchensink" document="EscapingFixture" />
+			<comment>Zooming in validates the required fields first</comment>
+			<zoomIn binding="zoomTarget" testSuccess="false" />
+			<testMessage contains="required message" type="error" />
+			<testFailure message="required message" />
+			<dataEnter binding="text1" value="First" />
+			<dataEnter binding="text2" value="Second" />
+			<zoomIn binding="zoomTarget" />
+			<dataEnter binding="description" value="Zoomed in" />
+			<testValue binding="description" value="Zoomed in" />
+			<zoomOut />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Contexts, links, maps and scripts">
+		<method>
+			<clearContext />
+			<navigateLink href="?a=e&amp;m=kitchensink&amp;d=ActionsFixture" />
+			<comment>Say which view the link opened, so steps can find its widgets</comment>
+			<pushEditContext module="kitchensink" document="ActionsFixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<popContext />
+			<navigateLink href="?a=l&amp;m=kitchensink&amp;q=LookupDescription" />
+			<pushListContext module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+			<popContext />
+			<comment>A query's list, opened by its URL: its context is named by the query</comment>
+			<navigateLink href="?a=l&amp;m=kitchensink&amp;q=qListGridFixtureVue" />
+			<pushListContext module="kitchensink" query="qListGridFixtureVue" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVue" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<popContext />
+			<popContext />
+			<navigateMap module="kitchensink" document="ListAttributes" geometryBinding="geometry" />
+			<testSuccess />
+			<comment>execute runs a script in the page: show a growl, then check it (op-code conformance, not a user gesture)</comment>
+			<execute>PF('growl').renderMessage({summary: 'SAIL executed this script', detail: '', severity: 'info'});</execute>
+			<testMessage contains="SAIL executed this script" type="info" />
+			<comment>Script steps get the run token and the variables as sail, and keep a result with variable; this execute also starts a timer for waitFor</comment>
+			<execute variable="executed"><![CDATA[
+				window._sailTimerDone = false;
+				setTimeout(function () { window._sailTimerDone = true; }, 200);
+				return 'executed in ' + sail.run;
+			]]></execute>
+			<comment>waitFor polls until the timer has set its flag: a wait, not a test</comment>
+			<waitFor timeoutMillis="10000"><![CDATA[
+				return window._sailTimerDone === true;
+			]]></waitFor>
+			<comment>executeAsync awaits a promise: here a request for the page's own URL</comment>
+			<executeAsync variable="status" timeoutMillis="20000"><![CDATA[
+				const response = await fetch(location.href, {method: 'HEAD'});
+				return response.status;
+			]]></executeAsync>
+			<testScript message="execute and executeAsync should keep their results in run {run}" timeoutMillis="5000"><![CDATA[
+				return (sail.vars.executed === 'executed in ' + sail.run) && (sail.vars.status === '200');
+			]]></testScript>
+			<testScript><![CDATA[return window._sailTimerDone === true;]]></testScript>
+			<comment>call runs a SailCall in the test JVM, with the run token and the variables substituted in its parameter values</comment>
+			<call className="util.sail.EchoCall" variable="echo">
+				<parameter name="text" value="echoed {var:executed} in {run}" />
+			</call>
+			<testScript message="EchoCall should give back its text"><![CDATA[
+				return sail.vars.echo === 'echoed executed in ' + sail.run + ' in ' + sail.run;
+			]]></testScript>
+			<comment>pause waits for the given time (op-code conformance: it has nothing to check)</comment>
+			<pause millis="100" />
+		</method>
+	</interaction>
+	<interaction name="Lookup values: zoom and delete">
+		<method>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" />
+			<testValue binding="description" value="SAIL lookup {run}" />
+			<delete />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" maxRows="0" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} b" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run} c" />
+			<delete />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL filter {run}" maxRows="0" />
+			<navigateEdit module="kitchensink" document="ListGridFixture" />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} b" />
+			<delete />
+			<listGridZoom module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run} c" />
+			<delete />
+			<testGridRows module="kitchensink" query="qListGridFixtureVueAttributes" rowContaining="SAIL types {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Ordered grid: drag rows into a new order, and keep it once saved">
+		<method>
+			<navigateList module="kitchensink" document="OrderedGridFixture" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered {run}" />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="First {run}" />
+			<zoomOut />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="Second {run}" />
+			<zoomOut />
+			<dataGridNew binding="rows" />
+			<dataEnter binding="name" value="Third {run}" />
+			<zoomOut />
+			<comment>Drag the last row to the top. A captured cell's pattern must find its text, so it checks the row's position</comment>
+			<dataGridMove binding="rows" rowContaining="Third {run}" to="0" />
+			<captureCell binding="rows" row="0" column="name" variable="top" pattern="^Third " />
+			<save />
+			<ok />
+			<comment>Reopen it from its list, so the rows come from the database in their saved order</comment>
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered {run}" />
+			<captureCell binding="rows" row="0" column="name" variable="row0" pattern="^Third " />
+			<captureCell binding="rows" row="1" column="name" variable="row1" pattern="^First " />
+			<captureCell binding="rows" row="2" column="name" variable="row2" pattern="^Second " />
+			<comment>Drag a row down, by its position</comment>
+			<dataGridMove binding="rows" row="0" to="2" />
+			<captureCell binding="rows" row="0" column="name" variable="row0" pattern="^First " />
+			<captureCell binding="rows" row="2" column="name" variable="row2" pattern="^Third " />
+			<save />
+			<ok />
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered {run}" />
+			<captureCell binding="rows" row="0" column="name" variable="row0" pattern="^First " />
+			<captureCell binding="rows" row="1" column="name" variable="row1" pattern="^Second " />
+			<captureCell binding="rows" row="2" column="name" variable="row2" pattern="^Third " />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Ordered list membership: keep its order once saved">
+		<method>
+			<comment>Lookup values to be members</comment>
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} a" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} b" />
+			<save />
+			<ok />
+			<listGridNew module="kitchensink" document="LookupDescription" />
+			<dataEnter binding="description" value="SAIL member {run} c" />
+			<save />
+			<ok />
+			<navigateList module="kitchensink" document="OrderedGridFixture" />
+			<listGridNew module="kitchensink" document="OrderedGridFixture" />
+			<dataEnter binding="name" value="SAIL ordered members {run}" />
+			<comment>PrimeFaces' pick list assigns members in the order of the candidates; an ordered membership's move up and down buttons then reorder them</comment>
+			<dataEnter binding="members" value="SAIL member {run} a|SAIL member {run} b|SAIL member {run} c" />
+			<listMembershipMove binding="members" rowContaining="SAIL member {run} c" to="0" />
+			<testValue binding="members" value="SAIL member {run} c|SAIL member {run} a|SAIL member {run} b" />
+			<listMembershipMove binding="members" row="0" to="1" />
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} c|SAIL member {run} b" />
+			<save />
+			<comment>The view shown after the save lists the members in the order saved</comment>
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} c|SAIL member {run} b" />
+			<ok />
+			<comment>Reopen it from its list, so the order comes from the database. The order is not sorted either way, so it
+				cannot match the candidates' order by chance: the pick list must show the saved order</comment>
+			<listGridZoom module="kitchensink" document="OrderedGridFixture" rowContaining="SAIL ordered members {run}" />
+			<testValue binding="members" value="SAIL member {run} a|SAIL member {run} c|SAIL member {run} b" />
+			<delete />
+			<navigateList module="kitchensink" document="LookupDescription" />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} a" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} b" />
+			<delete />
+			<listGridZoom module="kitchensink" document="LookupDescription" rowContaining="SAIL member {run} c" />
+			<delete />
+		</method>
+	</interaction>
+	<interaction name="Menus">
+		<method>
+			<testMenu module="kitchensink" />
+			<testMenu module="kitchensink" item="Actions Fixture" />
+			<testMenu module="admin" item="Security Admin/Users" />
+			<comment>Heap Dumps is a desktop (SmartClient) menu item</comment>
+			<testMenu module="admin" item="DevOps/Heap Dumps" present="false" />
+			<navigateMenu module="kitchensink" item="Actions Fixture" />
+			<action name="RunFromToolbar" />
+			<testValue binding="outcome" value="Run From Toolbar ran" />
+			<navigateMenu module="kitchensink" item="Lookup values" />
+			<testGridRows module="kitchensink" document="LookupDescription" rowContaining="SAIL lookup {run}" maxRows="0" />
+			<navigateMenu module="admin" item="Security Admin/Users" />
+			<testWidget tab="Users" />
+		</method>
+	</interaction>
+	<interaction name="Switch mode">
+		<method>
+			<comment>PrimeFaces is showing already: nothing to do</comment>
+			<switchMode />
+			<testMenu module="kitchensink" />
+			<comment>Switching back from SmartClient is PrimeFacesKitchenSinkSailIT.switchModeFromSmartClient (its user menu is clicked from Java, as SAIL has no step to switch away from the automation's renderer)</comment>
 		</method>
 	</interaction>
 	<interaction name="Logout">

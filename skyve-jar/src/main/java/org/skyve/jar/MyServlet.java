@@ -2,6 +2,8 @@ package org.skyve.jar;
 
 import java.io.IOException;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -23,7 +25,7 @@ public class MyServlet extends HttpServlet {
 	 * @throws IOException if the response writer cannot be obtained or written
 	 */
 	@Override
-	protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void doGet(@Nullable HttpServletRequest req, @Nonnull HttpServletResponse resp) throws ServletException, IOException {
 		resp.getWriter().print("SHITER");
 	}
 }

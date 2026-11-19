@@ -8,6 +8,9 @@ import org.skyve.domain.types.Decimal;
 import org.skyve.metadata.user.User;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 public class SQLFilter implements Filter {
 	@SuppressWarnings("unused")
 	private SQL detailSQL;
@@ -17,14 +20,14 @@ public class SQLFilter implements Filter {
 	private User user;
 	private boolean empty = true;
 	
-	SQLFilter(SQL detailSQL, SQL summarySQL) {
+	SQLFilter(@Nullable SQL detailSQL, @Nullable SQL summarySQL) {
 		this.detailSQL = detailSQL;
 		this.summarySQL = summarySQL;
 		user = CORE.getUser();
 	}
 	
 	@Override
-	public void addAnd(Filter filter) {
+	public void addAnd(@Nonnull Filter filter) {
 		empty = false;
 /*
 		detailFilter.addAnd(((SQLFilter) filter).detailFilter);
@@ -35,7 +38,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addOr(Filter filter) {
+	public void addOr(@Nonnull Filter filter) {
 		empty = false;
 /*
 		detailFilter.addOr(((SQLFilter) filter).detailFilter);
@@ -46,7 +49,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addTagged(String tagId, boolean tagged) {
+	public void addTagged(@Nonnull String tagId, boolean tagged) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("add tagged {} with tagId {}", Boolean.valueOf(tagged), tagId);
@@ -74,7 +77,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNull(String binding) {
+	public void addNull(@Nonnull String binding) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} is null", binding);
@@ -86,7 +89,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotNull(String binding) {
+	public void addNotNull(@Nonnull String binding) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} is not null", binding);
@@ -98,7 +101,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, String value) {
+	public void addEquals(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, value);
@@ -110,7 +113,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Date value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -122,7 +125,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Integer value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -134,7 +137,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Long value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -146,7 +149,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Decimal value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -158,7 +161,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Boolean value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -170,7 +173,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Enum<?> value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -182,7 +185,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEquals(String binding, Geometry value) {
+	public void addEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equals {}", binding, (value == null) ? "null" : value.toString());
@@ -194,7 +197,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, String value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value);
@@ -206,7 +209,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Date value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -218,7 +221,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Integer value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -230,7 +233,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Long value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -242,7 +245,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Decimal value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -254,7 +257,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Boolean value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Boolean value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -266,7 +269,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Enum<?> value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Enum<?> value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -278,7 +281,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEquals(String binding, Geometry value) {
+	public void addNotEquals(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEquals {}", binding, (value == null) ? "null" : value.toString());
@@ -290,7 +293,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEqualsIgnoreCase(String binding, String value) {
+	public void addEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} equalsIgnoreCase {}", binding, (value == null) ? "null" : value);
@@ -302,7 +305,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEqualsIgnoreCase(String binding, String value) {
+	public void addNotEqualsIgnoreCase(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEqualsIgnoreCase {}", binding, (value == null) ? "null" : value);
@@ -314,7 +317,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addContains(String binding, String value) {
+	public void addContains(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} contains {}", binding, (value == null) ? "null" : value);
@@ -327,7 +330,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotContains(String binding, String value) {
+	public void addNotContains(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notContains {}", binding, (value == null) ? "null" : value);
@@ -340,7 +343,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addStartsWith(String binding, String value) {
+	public void addStartsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} startsWith {}", binding, (value == null) ? "null" : value);
@@ -353,7 +356,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotStartsWith(String binding, String value) {
+	public void addNotStartsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notStartsWith {}", binding, (value == null) ? "null" : value);
@@ -366,7 +369,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addEndsWith(String binding, String value) {
+	public void addEndsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} endsWith {}", binding, (value == null) ? "null" : value);
@@ -379,7 +382,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addNotEndsWith(String binding, String value) {
+	public void addNotEndsWith(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} notEndsWith {}", binding, (value == null) ? "null" : value);
@@ -392,7 +395,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, String value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value);
@@ -404,7 +407,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Date value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
@@ -416,7 +419,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Integer value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
@@ -428,7 +431,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Long value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
@@ -440,7 +443,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThan(String binding, Decimal value) {
+	public void addGreaterThan(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThan {}", binding, (value == null) ? "null" : value.toString());
@@ -452,7 +455,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, String value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value);
@@ -464,7 +467,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Date value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -476,7 +479,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Integer value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -488,7 +491,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Long value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -500,7 +503,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addGreaterThanOrEqualTo(String binding, Decimal value) {
+	public void addGreaterThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} greaterThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -512,7 +515,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, String value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value);
@@ -524,7 +527,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Date value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
@@ -536,7 +539,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Integer value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
@@ -548,7 +551,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Long value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
@@ -560,7 +563,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThan(String binding, Decimal value) {
+	public void addLessThan(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThan {}", binding, (value == null) ? "null" : value.toString());
@@ -572,7 +575,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, String value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull String value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value);
@@ -584,7 +587,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Date value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Date value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -596,7 +599,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Integer value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Integer value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -608,7 +611,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Long value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Long value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -620,7 +623,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addLessThanOrEqualTo(String binding, Decimal value) {
+	public void addLessThanOrEqualTo(@Nonnull String binding, @Nonnull Decimal value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} lessThanOrEqualTo {}", binding, (value == null) ? "null" : value.toString());
@@ -632,7 +635,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, String start, String end) {
+	public void addBetween(@Nonnull String binding, @Nonnull String start, @Nonnull String end) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s between %s and %s", 
@@ -647,7 +650,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Date start, Date end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Date start, @Nonnull Date end) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s between %s and %s", 
@@ -662,7 +665,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Integer start, Integer end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Integer start, @Nonnull Integer end) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s between %s and %s", 
@@ -677,7 +680,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Long start, Long end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Long start, @Nonnull Long end) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s between %s and %s", 
@@ -692,7 +695,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addBetween(String binding, Decimal start, Decimal end) {
+	public void addBetween(@Nonnull String binding, @Nonnull Decimal start, @Nonnull Decimal end) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info(String.format("%s between %s and %s", 
@@ -707,7 +710,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addIn(String binding, Object... values) {
+	public void addIn(@Nonnull String binding, @Nonnull Object... values) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) {
@@ -741,12 +744,12 @@ public class SQLFilter implements Filter {
 	}
 	
 	@Override
-	public void addNotIn(String binding, Object... values) {
+	public void addNotIn(@Nonnull String binding, @Nonnull Object... values) {
 		// Nothing to see yet
 	}
 	
 	@Override
-	public void addWithin(String binding, Geometry value) {
+	public void addWithin(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} within {}", binding, (value == null) ? "null" : value.toString());
@@ -758,7 +761,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addContains(String binding, Geometry value) {
+	public void addContains(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} contains {}", binding, (value == null) ? "null" : value.toString());
@@ -770,7 +773,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addCrosses(String binding, Geometry value) {
+	public void addCrosses(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} crosses {}", binding, (value == null) ? "null" : value.toString());
@@ -782,7 +785,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addDisjoint(String binding, Geometry value) {
+	public void addDisjoint(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} disjoint {}", binding, (value == null) ? "null" : value.toString());
@@ -794,7 +797,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addIntersects(String binding, Geometry value) {
+	public void addIntersects(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} intersects {}", binding, (value == null) ? "null" : value.toString());
@@ -806,7 +809,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addOverlaps(String binding, Geometry value) {
+	public void addOverlaps(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} overlaps {}", binding, (value == null) ? "null" : value.toString());
@@ -818,7 +821,7 @@ public class SQLFilter implements Filter {
 	}
 
 	@Override
-	public void addTouches(String binding, Geometry value) {
+	public void addTouches(@Nonnull String binding, @Nonnull Geometry value) {
 		empty = false;
 /*
 		if (UtilImpl.QUERY_TRACE) UtilImpl.LOGGER.info("{} touches {}", binding, (value == null) ? "null" : value.toString());

@@ -32,6 +32,7 @@ import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.metadata.view.model.map.MapModel;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Composes multiple {@link ProvidedRepository} delegates as an ordered lookup
@@ -101,7 +102,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param customer the customer
 	 */
 	@Override
-	public void evictCachedMetaData(Customer customer) {
+	public void evictCachedMetaData(@Nullable Customer customer) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.evictCachedMetaData(customer);
 		}
@@ -115,7 +116,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public File findResourceFile(String resourcePath, String customerName, String moduleName) {
+	public @Nullable File findResourceFile(@Nonnull String resourcePath, @Nullable String customerName, @Nullable String moduleName) {
 		for (ProvidedRepository delegate : delegates) {
 			File result = delegate.findResourceFile(resourcePath, customerName, moduleName);
 			if (result != null) {
@@ -130,7 +131,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Router getRouter() {
+	public @Nullable Router getRouter() {
 		for (ProvidedRepository delegate : delegates) {
 			Router result = delegate.getRouter();
 			if (result != null) {
@@ -146,7 +147,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Customer getCustomer(String customerName) {
+	public @Nullable Customer getCustomer(@Nonnull String customerName) {
 		for (ProvidedRepository delegate : delegates) {
 			Customer result = delegate.getCustomer(customerName);
 			if (result != null) {
@@ -165,7 +166,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, Document document, String imageName, boolean runtime) {
+	public @Nullable <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull Document document, @Nonnull String imageName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			DynamicImage<T> result = delegate.getDynamicImage(customer, document, imageName, runtime);
 			if (result != null) {
@@ -184,7 +185,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public View getView(String uxui, Customer customer, Document document, String name) {
+	public @Nullable View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull Document document, @Nonnull String name) {
 		for (ProvidedRepository delegate : delegates) {
 			View result = delegate.getView(uxui, customer, document, name);
 			if (result != null) {
@@ -202,7 +203,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public ActionMetaData getMetaDataAction(Customer customer, Document document, String actionName) {
+	public @Nullable ActionMetaData getMetaDataAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String actionName) {
 		for (ProvidedRepository delegate : delegates) {
 			ActionMetaData result = delegate.getMetaDataAction(customer, document, actionName);
 			if (result != null) {
@@ -221,7 +222,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			ComparisonModel<T, C> result = delegate.getComparisonModel(customer, document, modelName, runtime);
 			if (result != null) {
@@ -240,7 +241,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			MapModel<T> result = delegate.getMapModel(customer, document, modelName, runtime);
 			if (result != null) {
@@ -259,7 +260,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			ChartModel<T> result = delegate.getChartModel(customer, document, modelName, runtime);
 			if (result != null) {
@@ -278,7 +279,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, Document document, String modelName, boolean runtime) {
+	public @Nullable <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull Document document, @Nonnull String modelName, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			ListModel<T> result = delegate.getListModel(customer, document, modelName, runtime);
 			if (result != null) {
@@ -297,7 +298,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			ServerSideAction<Bean> result = delegate.getServerSideAction(customer, document, className, runtime);
 			if (result != null) {
@@ -316,7 +317,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			BizExportAction result = delegate.getBizExportAction(customer, document, className, runtime);
 			if (result != null) {
@@ -335,7 +336,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			BizImportAction result = delegate.getBizImportAction(customer, document, className, runtime);
 			if (result != null) {
@@ -354,7 +355,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			DownloadAction<Bean> result = delegate.getDownloadAction(customer, document, className, runtime);
 			if (result != null) {
@@ -373,7 +374,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, Document document, String className, boolean runtime) {
+	public @Nullable UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull Document document, @Nonnull String className, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			UploadAction<Bean> result = delegate.getUploadAction(customer, document, className, runtime);
 			if (result != null) {
@@ -390,7 +391,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Object getDataFactory(Customer customer, Document document) {
+	public @Nullable Object getDataFactory(@Nullable Customer customer, @Nonnull Document document) {
 		for (ProvidedRepository delegate : delegates) {
 			Object result = delegate.getDataFactory(customer, document);
 			if (result != null) {
@@ -406,7 +407,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public UserImpl retrieveUser(String userName) {
+	public @Nullable UserImpl retrieveUser(@Nonnull String userName) {
 		for (ProvidedRepository delegate : delegates) {
 			UserImpl result = delegate.retrieveUser(userName);
 			if (result != null) {
@@ -421,7 +422,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledJobsForAllCustomers() {
 		List<UserJobSchedule> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
 			result.addAll(delegate.retrieveAllScheduledJobsForAllCustomers());
@@ -434,7 +435,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
+	public @Nonnull List<UserJobSchedule> retrieveAllScheduledReportsForAllCustomers() {
 		List<UserJobSchedule> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
 			result.addAll(delegate.retrieveAllScheduledReportsForAllCustomers());
@@ -448,7 +449,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public String retrievePublicUserName(String customerName) {
+	public @Nullable String retrievePublicUserName(@Nonnull String customerName) {
 		for (ProvidedRepository delegate : delegates) {
 			String result = delegate.retrievePublicUserName(customerName);
 			if (result != null) {
@@ -463,7 +464,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param user the user
 	 */
 	@Override
-	public void resetMenus(User user) {
+	public void resetMenus(@Nonnull User user) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.resetMenus(user);
 		}
@@ -475,7 +476,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public boolean populatePermissions(User user) {
+	public boolean populatePermissions(@Nonnull User user) {
 	    for (ProvidedRepository delegate : delegates) {
 			if (delegate.populatePermissions(user)) {
 	            return true;
@@ -489,7 +490,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param user the user
 	 */
 	@Override
-	public void resetUserPermissions(User user) {
+	public void resetUserPermissions(@Nonnull User user) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.resetUserPermissions(user);
 		}
@@ -503,7 +504,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 */
 	@Override
 	@SuppressWarnings("resource") // Connection lifecycle is owned by the caller and delegates.
-	public boolean populateUser(User user, Connection connection) {
+	public boolean populateUser(@Nonnull User user, @Nonnull Connection connection) {
 		for (ProvidedRepository delegate : delegates) {
 			if (delegate.populateUser(user, connection)) {
 				return true;
@@ -517,7 +518,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public List<String> getAllCustomerNames() {
+	public @Nonnull List<String> getAllCustomerNames() {
 		List<String> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
 			result.addAll(delegate.getAllCustomerNames());
@@ -530,7 +531,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public List<String> getAllVanillaModuleNames() {
+	public @Nonnull List<String> getAllVanillaModuleNames() {
 		List<String> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
 			result.addAll(delegate.getAllVanillaModuleNames());
@@ -545,7 +546,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Module getModule(Customer customer, String moduleName) {
+	public @Nonnull Module getModule(@Nullable Customer customer, @Nonnull String moduleName) {
 		for (ProvidedRepository delegate : delegates) {
 			Module result = delegate.getModule(customer, moduleName);
 			if (result != null) {
@@ -563,7 +564,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Document getDocument(Customer customer, Module module, String documentName) {
+	public @Nonnull Document getDocument(@Nullable Customer customer, @Nonnull Module module, @Nonnull String documentName) {
 		for (ProvidedRepository delegate : delegates) {
 			Document result = delegate.getDocument(customer, module, documentName);
 			if (result != null) {
@@ -581,7 +582,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer, Document document, boolean runtime) {
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer, @Nonnull Document document, boolean runtime) {
 		for (ProvidedRepository delegate : delegates) {
 			Bizlet<T> result = delegate.getBizlet(customer, document, runtime);
 			if (result != null) {
@@ -598,7 +599,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public BizletMetaData getMetaDataBizlet(Customer customer, Document document) {
+	public @Nullable BizletMetaData getMetaDataBizlet(@Nullable Customer customer, @Nonnull Document document) {
 		for (ProvidedRepository delegate : delegates) {
 			BizletMetaData result = delegate.getMetaDataBizlet(customer, document);
 			if (result != null) {
@@ -613,7 +614,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param customer the customer
 	 */
 	@Override
-	public void validateCustomerForGenerateDomain(Customer customer) {
+	public void validateCustomerForGenerateDomain(@Nonnull Customer customer) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.validateCustomerForGenerateDomain(customer);
 		}
@@ -625,7 +626,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param module the module
 	 */
 	@Override
-	public void validateModuleForGenerateDomain(Customer customer, Module module) {
+	public void validateModuleForGenerateDomain(@Nonnull Customer customer, @Nonnull Module module) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.validateModuleForGenerateDomain(customer, module);
 		}
@@ -637,7 +638,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param document the document
 	 */
 	@Override
-	public void validateDocumentForGenerateDomain(Customer customer, Document document) {
+	public void validateDocumentForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.validateDocumentForGenerateDomain(customer, document);
 		}
@@ -651,7 +652,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @param uxui the uxui
 	 */
 	@Override
-	public void validateViewForGenerateDomain(Customer customer, Document document, View view, String uxui) {
+	public void validateViewForGenerateDomain(@Nonnull Customer customer, @Nonnull Document document, @Nonnull View view, @Nonnull String uxui) {
 		for (ProvidedRepository delegate : delegates) {
 			delegate.validateViewForGenerateDomain(customer, document, view, uxui);
 		}
@@ -662,7 +663,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Router getGlobalRouter() {
+	public @Nullable Router getGlobalRouter() {
 		for (ProvidedRepository delegate : delegates) {
 			Router result = delegate.getGlobalRouter();
 			if (result != null) {
@@ -677,7 +678,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public List<Router> getModuleRouters() {
+	public @Nonnull List<Router> getModuleRouters() {
 		List<Router> result = new ArrayList<>(10);
 		for (ProvidedRepository delegate : delegates) {
 			result.addAll(delegate.getModuleRouters());
@@ -693,7 +694,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public String getReportFileName(Customer customer, Document document, String reportName) {
+	public @Nullable String getReportFileName(@Nullable Customer customer, @Nonnull Document document, @Nonnull String reportName) {
 		for (ProvidedRepository delegate : delegates) {
 			String result = delegate.getReportFileName(customer, document, reportName);
 			if (result != null) {
@@ -710,7 +711,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public Class<?> getJavaClass(Customer customer, String key) {
+	public @Nullable Class<?> getJavaClass(@Nullable Customer customer, @Nonnull String key) {
 		for (ProvidedRepository delegate : delegates) {
 			Class<?> result = delegate.getJavaClass(customer, key);
 			if (result != null) {
@@ -727,7 +728,7 @@ public class DelegatingProvidedRepositoryChain extends ProvidedRepositoryFactory
 	 * @return the result
 	 */
 	@Override
-	public String vtable(String customerName, String key) {
+	public @Nullable String vtable(@Nullable String customerName, @Nonnull String key) {
 		for (ProvidedRepository delegate : delegates) {
 			String result = delegate.vtable(customerName, key);
 			if (result != null) {

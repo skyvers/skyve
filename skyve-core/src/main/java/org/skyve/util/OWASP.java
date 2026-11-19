@@ -11,6 +11,7 @@ import org.owasp.html.Sanitizers;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
 import org.skyve.impl.util.SafeFileName;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.query.MetaDataQueryColumn;
 import org.skyve.metadata.module.query.MetaDataQueryProjectedColumn;
 import org.skyve.metadata.view.TextOutput.Sanitisation;
@@ -308,6 +309,9 @@ public class OWASP {
 				boolean escapeColumn = escape && column.isEscape();
 				Sanitisation sanitiseColumn = column.getSanitise();
 				if (escapeColumn || ((sanitiseColumn != null) && (! Sanitisation.none.equals(sanitiseColumn)))) {
+					if (key == null) {
+						throw new MetaDataException("A query column to escape or sanitise has neither a binding nor a name");
+					}
 					Object value = BindUtil.get(row, key);
 					if (value instanceof String string) {
 						string = OWASP.sanitise(sanitiseColumn, string);

@@ -9,6 +9,8 @@ import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlType;
 
 /**
@@ -53,12 +55,18 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	}
 
 	/**
+	 * Returns the action name, which defaults to the resource name or else the implicit action name.
+	 */
+	@Override
+	public @Nonnull String getName();
+
+	/**
 	 * Returns the implicit (built-in) action name if this action is a framework action,
 	 * or {@code null} if this is a custom server-side action.
 	 *
 	 * @return the implicit action name, or {@code null}
 	 */
-	public ImplicitActionName getImplicitName();
+	public @Nullable ImplicitActionName getImplicitName();
 	
 	/**
 	 * Returns the resource name (simple class name or fully-qualified name) of the
@@ -66,7 +74,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return the action class resource name, or {@code null}
 	 */
-	public String getResourceName();
+	public @Nullable String getResourceName();
 	
 	/**
 	 * Returns whether client-side validation runs before this action is submitted
@@ -75,7 +83,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @return {@code Boolean.TRUE} to run client validation; {@code Boolean.FALSE} to
 	 *         skip it; {@code null} to use the view default
 	 */
-	public Boolean getClientValidation();
+	public @Nullable Boolean getClientValidation();
 	
 	/**
 	 * Returns the button label for this action.
@@ -84,7 +92,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return the display name; may be {@code null} to use the implicit or resource name
 	 */
-	public String getDisplayName();
+	public @Nullable String getDisplayName();
 
 	/**
 	 * Returns whether the action display name should be escaped before rendering.
@@ -93,7 +101,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public default Boolean getEscapeDisplayName() {
+	public default @Nullable Boolean getEscapeDisplayName() {
 		return null;
 	}
 
@@ -102,7 +110,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return a non-{@code null} localised display name
 	 */
-	public default String getLocalisedDisplayName() {
+	public default @Nullable String getLocalisedDisplayName() {
 		return Util.i18n(getDisplayName());
 	}
 
@@ -111,7 +119,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return the relative icon path, or {@code null} if no icon file is specified
 	 */
-	public String getRelativeIconFileName();
+	public @Nullable String getRelativeIconFileName();
 	
 	/**
 	 * Returns the CSS class used to render a vector icon (e.g. Font Awesome) on the
@@ -119,7 +127,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return the icon CSS class, or {@code null} if no CSS icon is specified
 	 */
-	public String getIconStyleClass();
+	public @Nullable String getIconStyleClass();
 
 	/**
 	 * Returns the text of the confirmation dialog shown before executing this action.
@@ -130,7 +138,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return the confirmation text, or {@code null} for no confirmation dialog
 	 */
-	public String getConfirmationText();
+	public @Nullable String getConfirmationText();
 
 	/**
 	 * Returns whether the confirmation dialog text should be escaped before rendering.
@@ -139,7 +147,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public default Boolean getEscapeConfirm() {
+	public default @Nullable Boolean getEscapeConfirm() {
 		return null;
 	}
 	
@@ -148,7 +156,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return a non-{@code null} localised confirmation text
 	 */
-	public default String getLocalisedConfirmationText() {
+	public default @Nullable String getLocalisedConfirmationText() {
 		return Util.i18n(getConfirmationText());
 	}
 	
@@ -159,7 +167,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return the tooltip text, or {@code null} if none
 	 */
-	public String getToolTip();
+	public @Nullable String getToolTip();
 
 	/**
 	 * Returns whether the tooltip text should be escaped before rendering.
@@ -168,7 +176,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return {@code Boolean.FALSE} to allow trusted markup; {@code null} or {@code Boolean.TRUE} to escape at the renderer boundary
 	 */
-	public default Boolean getEscapeToolTip() {
+	public default @Nullable Boolean getEscapeToolTip() {
 		return null;
 	}
 	
@@ -177,7 +185,7 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 *
 	 * @return a non-{@code null} localised tooltip
 	 */
-	public default String getLocalisedToolTip() {
+	public default @Nullable String getLocalisedToolTip() {
 		return Util.i18n(getToolTip());
 	}
 	
@@ -190,14 +198,14 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @return {@code Boolean.TRUE} to include in action panel; {@code Boolean.FALSE}
 	 *         to exclude; {@code null} to use the view default
 	 */
-	public Boolean getInActionPanel();
+	public @Nullable Boolean getInActionPanel();
 	
 	/**
 	 * Returns whether to show icon only, text only, or both on the action button.
 	 *
 	 * @return the display mode; may be {@code null} to use the UX/UI default
 	 */
-	public ActionShow getShow();
+	public @Nullable ActionShow getShow();
 	
 	/**
 	 * Resolves and returns the {@link ServerSideAction} implementation for this action
@@ -207,5 +215,5 @@ public interface Action extends NamedMetaData, Disableable, Invisible, Parameter
 	 * @param document  the document this action is declared on; must not be {@code null}
 	 * @return the resolved server-side action implementation; never {@code null}
 	 */
-	public ServerSideAction<?> getServerSideAction(Customer customer, Document document);
+	public @Nonnull ServerSideAction<?> getServerSideAction(@Nonnull Customer customer, @Nonnull Document document);
 }

@@ -113,6 +113,7 @@ class FluentCustomerTest {
 	}
 
 	/** Verifies that fluent customer mutators manage roles, hooks, and UI resource metadata. */
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void customerMutatorsManageRolesHooksAndResources() {
 		FluentCustomer customer = new FluentCustomer().name("bizhub")
@@ -182,7 +183,7 @@ class FluentCustomerTest {
 
 	/** Verifies that {@link FluentCustomer#from(Customer)} copies structured customer metadata. */
 	@Test
-	@SuppressWarnings("boxing")
+	@SuppressWarnings({"boxing", "null"}) // a null here fails the test
 	void customerFromCopiesStructuredMetadata() {
 		Module sales = mock(Module.class);
 		when(sales.getName()).thenReturn("sales");

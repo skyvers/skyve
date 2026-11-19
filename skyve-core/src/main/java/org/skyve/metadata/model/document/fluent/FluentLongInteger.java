@@ -3,6 +3,9 @@ package org.skyve.metadata.model.document.fluent;
 import org.skyve.impl.metadata.model.document.field.LongInteger;
 import org.skyve.impl.metadata.model.document.field.validator.LongValidator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentLongInteger metadata.
  */
@@ -19,7 +22,7 @@ public class FluentLongInteger extends FluentConvertibleField<FluentLongInteger>
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentLongInteger(LongInteger integer) {
+	public FluentLongInteger(@Nonnull LongInteger integer) {
 		this.longInteger = integer;
 	}
 
@@ -27,7 +30,7 @@ public class FluentLongInteger extends FluentConvertibleField<FluentLongInteger>
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentLongInteger from(@SuppressWarnings("hiding") LongInteger longInteger) {
+	public @Nonnull FluentLongInteger from(@SuppressWarnings("hiding") @Nonnull LongInteger longInteger) {
 		super.from(longInteger);
 		validator(longInteger.getValidator());
 		return this;
@@ -35,7 +38,7 @@ public class FluentLongInteger extends FluentConvertibleField<FluentLongInteger>
 	/**
 	 * Sets validation metadata used by this field definition.
 	 */
-	public FluentLongInteger validator(LongValidator validator) {
+	public @Nonnull FluentLongInteger validator(@Nullable LongValidator validator) {
 		longInteger.setValidator(validator);
 		return this;
 	}
@@ -44,7 +47,7 @@ public class FluentLongInteger extends FluentConvertibleField<FluentLongInteger>
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public LongInteger get() {
+	public @Nonnull LongInteger get() {
 		return longInteger;
 	}
 }

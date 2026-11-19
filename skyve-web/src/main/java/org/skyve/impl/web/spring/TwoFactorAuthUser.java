@@ -7,6 +7,9 @@ import org.skyve.impl.util.UtilImpl;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extends the Spring Security user model to include Skyve-specific two-factor authentication and identity metadata.
  */
@@ -40,20 +43,20 @@ public class TwoFactorAuthUser extends User {
 	 * @param userPassword The original user password value for downstream flows.
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public TwoFactorAuthUser(String username,
-					String password,
+	public TwoFactorAuthUser(@Nonnull String username,
+					@Nonnull String password,
 					boolean enabled,
 					boolean accountNonExpired,
 					boolean credentialsNonExpired,
 					boolean accountNonLocked,
-					Collection<? extends GrantedAuthority> authorities,
-					String customer,
-					String user,
-					String tfaCode,
-					String tfaToken,
-					Timestamp tfaCodeGeneratedTimestamp,
-					String email,
-					String userPassword) {
+					@Nonnull Collection<? extends GrantedAuthority> authorities,
+					@Nullable String customer,
+					@Nonnull String user,
+					@Nullable String tfaCode,
+					@Nullable String tfaToken,
+					@Nullable Timestamp tfaCodeGeneratedTimestamp,
+					@Nullable String email,
+					@Nullable String userPassword) {
 		super(username, password, enabled, accountNonExpired, credentialsNonExpired, accountNonLocked, authorities);
 		this.tfaCode = UtilImpl.processStringValue(tfaCode);
 		this.tfaToken = UtilImpl.processStringValue(tfaToken);
@@ -69,7 +72,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The current two-factor code.
 	 */
-	public String getTfaCode() {
+	public @Nullable String getTfaCode() {
 		return tfaCode;
 	}
 
@@ -78,7 +81,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @param tfaCode The new two-factor code.
 	 */
-	public void setTfaCode(String tfaCode) {
+	public void setTfaCode(@Nullable String tfaCode) {
 		this.tfaCode = UtilImpl.processStringValue(tfaCode);
 	}
 
@@ -87,7 +90,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The current two-factor challenge token.
 	 */
-	public String getTfaToken() {
+	public @Nullable String getTfaToken() {
 		return tfaToken;
 	}
 
@@ -96,7 +99,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @param tfaToken The new two-factor challenge token.
 	 */
-	public void setTfaToken(String tfaToken) {
+	public void setTfaToken(@Nullable String tfaToken) {
 		this.tfaToken = UtilImpl.processStringValue(tfaToken);
 	}
 
@@ -105,7 +108,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The timestamp for the current two-factor code generation.
 	 */
-	public Timestamp getTfaCodeGeneratedTimestamp() {
+	public @Nullable Timestamp getTfaCodeGeneratedTimestamp() {
 		return tfaCodeGeneratedTimestamp;
 	}
 
@@ -114,7 +117,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @param tfaCodeGeneratedTimestamp The timestamp for the current two-factor code generation.
 	 */
-	public void setTfaCodeGeneratedTimestamp(Timestamp tfaCodeGeneratedTimestamp) {
+	public void setTfaCodeGeneratedTimestamp(@Nullable Timestamp tfaCodeGeneratedTimestamp) {
 		this.tfaCodeGeneratedTimestamp = tfaCodeGeneratedTimestamp;
 	}
 
@@ -123,7 +126,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The effective customer.
 	 */
-	public String getCustomer() {
+	public @Nullable String getCustomer() {
 		return customer;
 	}
 
@@ -132,7 +135,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The Skyve user name.
 	 */
-	public String getUser() {
+	public @Nullable String getUser() {
 		return user;
 	}
 
@@ -141,7 +144,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The principal email address.
 	 */
-	public String getEmail() {
+	public @Nullable String getEmail() {
 		return email;
 	}
 
@@ -150,7 +153,7 @@ public class TwoFactorAuthUser extends User {
 	 *
 	 * @return The original user password.
 	 */
-	public String getUserPassword() {
+	public @Nullable String getUserPassword() {
 		return userPassword;
 	}
 }

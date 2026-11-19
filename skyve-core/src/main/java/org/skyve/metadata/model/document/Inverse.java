@@ -1,5 +1,8 @@
 package org.skyve.metadata.model.document;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Defines the inverse side of a document relationship.
  *
@@ -24,19 +27,19 @@ public interface Inverse extends Relation {
 	 *
 	 * @return the reference name.
 	 */
-	public String getReferenceName();
+	public @Nonnull String getReferenceName();
 
 	/**
 	 * The cardinality of this (inverse) side of the relationship.
 	 * 
 	 * @return	one or many.
 	 */
-	public InverseCardinality getCardinality();
+	public @Nonnull InverseCardinality getCardinality();
 
 	/**
 	 * If true, changes are propagated when the inverse is mutated.
 	 * 
 	 * @return Boolean.TRUE, or Boolean.FALSE/null.
 	 */
-	public Boolean getCascade();
+	public @Nullable Boolean getCascade();
 }

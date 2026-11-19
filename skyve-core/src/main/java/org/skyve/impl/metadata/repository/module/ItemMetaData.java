@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -31,7 +32,7 @@ public abstract class ItemMetaData extends ActionMetaData {
 	private List<GrantedTo> roles = new ArrayList<>();
 
 	@XmlElement(namespace = XMLMetaData.MODULE_NAMESPACE, name = "role", required = true)
-	public List<GrantedTo> getRoles() {
+	public @Nonnull List<GrantedTo> getRoles() {
 		return roles;
 	}
 }

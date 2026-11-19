@@ -30,7 +30,7 @@ import util.AbstractH2Test;
 
 class ContentModelH2Test extends AbstractH2Test {
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void postConstructPopulatesDrivingDocumentColumnsAndProjections() {
 		ContentModel model = new ContentModel();
 
@@ -67,7 +67,7 @@ class ContentModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void fetchBuildsPageRowsFromAccessibleContentResults() throws Exception {
 		SearchResult skippedByStartRow = result("content-1", "biz-1", "text", new Date(1_000L));
 		SearchResult includedWithLastModified = result("content-2", "biz-2", "markup", new Date(2_000L));
@@ -107,7 +107,7 @@ class ContentModelH2Test extends AbstractH2Test {
 	}
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void fetchStopsAddingRowsWhenEndRowIsReached() throws Exception {
 		TestableContentModel model = new TestableContentModel(result("content-1", "biz-1", "text", new Date(1_000L)),
 				result("content-2", "biz-2", "markup", new Date(2_000L)),

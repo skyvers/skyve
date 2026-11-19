@@ -2,7 +2,7 @@
 <view title="admin.controlPanel.edit.title" name="edit" xmlns="http://www.skyve.org/xml/view" xsi:schemaLocation="http://www.skyve.org/xml/view ../../../../schemas/view.xsd"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<tabPane selectedTabIndexBinding="tabIndex">
-		<tab title="admin.controlPanel.edit.design.tabTitle">
+		<tab title="admin.controlPanel.edit.design.tabTitle" visible="devOps">
 			<component name="_generateTestData" />
 			<form border="true" borderTitle="admin.controlPanel.edit.design.swapCustomer.borderTitle">
 				<column pixelWidth="175" />
@@ -69,7 +69,49 @@
 			</form>
 		</tab>
 		<tab title="admin.controlPanel.edit.sail.tabTitle">
-			<form border="true" borderTitle="admin.controlPanel.edit.sail.user.borderTitle">
+			<inject>
+				<script>
+					<![CDATA[
+						// When this session starts SAIL recording, load the recorder without a reload (docs/sail.md, Recording).
+						// Pages loaded while it records include the recorder themselves (desktop/home.xhtml).
+						(function (v) {
+							var scatter = v.scatter;
+							v.scatter = function (values) {
+								var result = scatter.apply(this, arguments);
+								if (values && values.sailRecording && ! (window.SKYVE && SKYVE.SailRecorder && SKYVE.SailRecorder.active())) {
+									SKYVE.Util.loadJS('skyve/sail/recorder-sc-min.js?v=' + SKYVE.Util.v);
+								}
+								return result;
+							};
+						})(view);
+					]]>
+				</script>
+			</inject>
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.recording.borderTitle" visible="sailRecordingAllowed">
+				<column />
+				<column pixelWidth="130" />
+				<column pixelWidth="130" />
+				<row>
+					<item>
+						<label value="admin.controlPanel.edit.sail.recording.notRecording.label" invisible="sailRecording" />
+					</item>
+					<item align="right">
+						<button action="StartSAILRecording" pixelWidth="120" />
+					</item>
+					<item align="right">
+						<button action="DownloadSAILRecording" pixelWidth="120" />
+					</item>
+				</row>
+				<row>
+					<item>
+						<label value="admin.controlPanel.edit.sail.recording.recording.label" visible="sailRecording" />
+					</item>
+					<item align="right">
+						<button action="StopSAILRecording" pixelWidth="120" />
+					</item>
+				</row>
+			</form>
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.user.borderTitle" visible="devOps">
 				<column pixelWidth="120" />
 				<column />
 				<row>
@@ -93,7 +135,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="admin.controlPanel.edit.sail.generate.borderTitle">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.generate.borderTitle" visible="devOps">
 				<column pixelWidth="120" />
 				<column />
 				<column pixelWidth="130" />
@@ -125,7 +167,7 @@
 					</item>
 				</row>
 			</form>
-			<form border="true" borderTitle="admin.controlPanel.edit.sail.execute.borderTitle">
+			<form border="true" borderTitle="admin.controlPanel.edit.sail.execute.borderTitle" visible="devOps">
 				<column pixelWidth="120" />
 				<column />
 				<column pixelWidth="130" />
@@ -158,7 +200,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="admin.controlPanel.edit.results.tabTitle">
+		<tab title="admin.controlPanel.edit.results.tabTitle" visible="devOps">
 			<form visible="resultsNotNull">
 				<column />
 				<row>
@@ -191,7 +233,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="admin.controlPanel.edit.instrumentation.tabTitle">
+		<tab title="admin.controlPanel.edit.instrumentation.tabTitle" visible="devOps">
 			<form border="true" borderTitle="admin.controlPanel.edit.instrumentation.web.borderTitle">
 				<column responsiveWidth="1" />
 				<column responsiveWidth="1" />
@@ -309,7 +351,7 @@
 				</row>
 			</form>
 		</tab>
-		<tab title="admin.controlPanel.edit.userRememberMeTokens.tabTitle">
+		<tab title="admin.controlPanel.edit.userRememberMeTokens.tabTitle" visible="devOps">
 			<listGrid query="qUserTokens" continueConversation="false" />
 		</tab>
 	</tabPane>
@@ -325,6 +367,9 @@
 		<action className="ExecuteSAIL" displayName="admin.controlPanel.actions.executeSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.executeSail.toolTip" />
 		<download className="DownloadResults" displayName="admin.controlPanel.actions.downloadResults.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadResults.toolTip"/>
 		<download className="DownloadSAIL" displayName="admin.controlPanel.actions.downloadSail.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSail.toolTip" />
+		<action className="StartSAILRecording" displayName="admin.controlPanel.actions.startSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.startSailRecording.toolTip" clientValidation="false" invisible="sailRecording" />
+		<action className="StopSAILRecording" displayName="admin.controlPanel.actions.stopSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.stopSailRecording.toolTip" clientValidation="false" visible="sailRecording" />
+		<download className="DownloadSAILRecording" displayName="admin.controlPanel.actions.downloadSailRecording.actionName" inActionPanel="false" toolTip="admin.controlPanel.actions.downloadSailRecording.toolTip" clientValidation="false" visible="sailRecordingDownloadable" />
 		<action className="GenerateTestData" displayName="admin.controlPanel.actions.generateTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-plus" clientValidation="false"/>
 		<action className="DeleteTestData" displayName="admin.controlPanel.actions.deleteTestData.actionName" inActionPanel="false" iconStyleClass="fa-solid fa-trash-can" clientValidation="false" />
 	</actions>

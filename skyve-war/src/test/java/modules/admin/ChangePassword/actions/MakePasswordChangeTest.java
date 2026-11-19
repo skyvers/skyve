@@ -19,9 +19,13 @@ import util.AbstractH2Test;
 
 class MakePasswordChangeTest extends AbstractH2Test {
 
+	/** The user's current plain password, which every change must give as the old one. */
+	private static String currentPassword = PASSWORD;
+
 	@BeforeEach
 	@SuppressWarnings("static-method")
 	void beforeEach() {
+		currentPassword = PASSWORD;
 		HttpServletRequest httpServletRequest = new MockHttpServletRequest(); // mock session too
 		HttpServletResponse httpServletResponse = new MockHttpServletResponse();
 		WebContainer.setHttpServletRequestResponse(httpServletRequest, httpServletResponse);
@@ -32,13 +36,13 @@ class MakePasswordChangeTest extends AbstractH2Test {
 	void testNewAndConfirmPasswordNotTheSame() {
 		assertThrows(ValidationException.class, () -> changePassword("Password0!", "Password0@"));
 	}
-	
+
 	@Test
 	@SuppressWarnings("static-method")
 	void testOldPasswordMatchesNewPassword() {
 		assertThrows(ValidationException.class, () -> changePassword(PASSWORD));
 	}
-	
+
 	@Test
 	@SuppressWarnings("static-method")
 	void checkNoPasswordHistory() throws Exception {
@@ -51,7 +55,7 @@ class MakePasswordChangeTest extends AbstractH2Test {
 		changePassword(PASSWORD);
 		assertEquals(0, getPasswordHistory(false).length);
 	}
-	
+
 	@Test
 	@SuppressWarnings("static-method")
 	void checkPasswordHistoryOfOne() throws Exception {
@@ -61,7 +65,7 @@ class MakePasswordChangeTest extends AbstractH2Test {
 		changePassword("Password0!0!"); // sets the password history
 
 		assertEquals(1, getPasswordHistory(false).length);
-		
+
 		// change password back
 		changePassword(PASSWORD);
 
@@ -99,7 +103,7 @@ class MakePasswordChangeTest extends AbstractH2Test {
 		changePassword("Password0!0!"); // sets the password history
 
 		assertEquals(1, getPasswordHistory(false).length);
-		
+
 		// change password back
 		changePassword(PASSWORD);
 
@@ -170,12 +174,14 @@ class MakePasswordChangeTest extends AbstractH2Test {
 		changePassword("Password0!0!");
 		assertEquals(2, getPasswordHistory(false).length);
 	}
-	
+
 	private static void changePassword(String newPassword, String confirmPassword) throws Exception {
 		ChangePassword changePassword = ChangePassword.newInstance();
+		changePassword.setOldPassword(currentPassword);
 		changePassword.setNewPassword(newPassword);
 		changePassword.setConfirmPassword(confirmPassword);
 		new MakePasswordChange().execute(changePassword, null);
+		currentPassword = newPassword; // only reached when the change succeeded
 	}
 
 	private static void changePassword(String newPassword) throws Exception {
@@ -184,7 +190,8 @@ class MakePasswordChangeTest extends AbstractH2Test {
 
 	private static String[] getPasswordHistory(boolean print) {
 		String history = CORE.getPersistence().newSQL("select passwordHistory from ADM_SecurityUser").scalarResult(String.class);
-		if (print) System.out.println(history);
+		if (print)
+			System.out.println(history);
 		return (history == null) ? new String[0] : history.split("\\t");
 	}
 }

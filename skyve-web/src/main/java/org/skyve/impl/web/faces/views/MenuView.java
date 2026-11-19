@@ -82,6 +82,11 @@ public class MenuView extends HarnessView {
 			public @Nullable Void callback() throws Exception {
 				if (! fc.isPostback()) {
 					setBizModuleParameter(request.getParameter("m"));
+					// The menu only needs the module - clear the document, query and action left by a previous
+					// build in this session, otherwise initialise() validates them against the new module
+					setBizDocumentParameter(null);
+					setQueryNameParameter(null);
+					setWebActionParameter(null);
 					initialise(); // check m parameter and set to default if DNE
 				}
 
@@ -112,8 +117,8 @@ public class MenuView extends HarnessView {
 			private Deque<Submenu> subs = new ArrayDeque<>(16); // non-null elements
 			
 			@Override
-			public void renderModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu,
-											Module menuModule,
+			public void renderModuleMenu(@Nonnull org.skyve.metadata.module.menu.Menu moduleMenu,
+											@Nonnull Module menuModule,
 											boolean open) {
 				DefaultSubMenu moduleSub = DefaultSubMenu.builder().id(String.valueOf(menuItemId++)).label(menuModule.getLocalisedTitle()).build();
 				result.getElements().add(moduleSub);
@@ -122,81 +127,81 @@ public class MenuView extends HarnessView {
 			}
 
 			@Override
-			public void renderMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				DefaultSubMenu sub = DefaultSubMenu.builder().id(String.valueOf(menuItemId++)).label(group.getLocalisedName()).build();
 				subs.peek().getElements().add(sub);
 				subs.push(sub);
 			}
 
 			@Override
-			public void renderCalendarItem(CalendarItem item,
-											Module menuModule,
-											Module itemModule,
-											Document itemDocument,
-											String itemQueryName, 
-											String icon16,
-											String iconStyleClass) {
+			public void renderCalendarItem(@Nonnull CalendarItem item,
+											@Nonnull Module menuModule,
+											@Nonnull Module itemModule,
+											@Nonnull Document itemDocument,
+											@Nullable String itemQueryName, 
+											@Nullable String icon16,
+											@Nullable String iconStyleClass) {
 				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 			
 			@Override
-			public void renderEditItem(EditItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String icon16,
-										String iconStyleClass) {
+			public void renderEditItem(@Nonnull EditItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, null, null));
 			}
 			
 			@Override
-			public void renderLinkItem(LinkItem item,
-										Module menuModule,
+			public void renderLinkItem(@Nonnull LinkItem item,
+										@Nonnull Module menuModule,
 										boolean relative,
-										String absoluteHref) {
+										@Nonnull String absoluteHref) {
 				subs.peek().getElements().add(createMenuItem(item, null, menuModule, null, null, absoluteHref));
 			}
 			
 			@Override
-			public void renderListItem(ListItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderListItem(@Nonnull ListItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 
 			@Override
-			public void renderMapItem(MapItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderMapItem(@Nonnull MapItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 			
 			@Override
-			public void renderTreeItem(TreeItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderTreeItem(@Nonnull TreeItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				subs.peek().getElements().add(createMenuItem(item, iconStyleClass, menuModule, itemModule, itemQueryName, null));
 			}
 
 			@Override
-			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderedMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				subs.pop();
 			}
 			
 			@Override
-			public void renderedModuleMenu(org.skyve.metadata.module.menu.Menu moduleMenu, Module menuModule, boolean open) {
+			public void renderedModuleMenu(@Nonnull org.skyve.metadata.module.menu.Menu moduleMenu, @Nonnull Module menuModule, boolean open) {
 				subs.pop();
 			}
 		}.render(Objects.requireNonNull(getUser(), "user"));

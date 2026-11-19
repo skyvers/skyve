@@ -105,6 +105,7 @@ class MonitoringDashboardBizletH2Test extends AbstractH2Test {
 
 	// ---- complete with valid requestType ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void completeRsModuleNameWithAllRequestTypeReturnsEmpty() throws Exception {
 		bean.setRsRequestType(RequestType.all);

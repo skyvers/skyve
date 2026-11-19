@@ -2,6 +2,9 @@ package org.skyve.domain;
 
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extends {@link Bean} for self-referencing tree (hierarchical) documents.
  *
@@ -34,14 +37,14 @@ public interface HierarchicalBean<T extends Bean> extends Bean {
 	 *
 	 * @return the parent's ID, or {@code null} if this is a root node
 	 */
-	public String getBizParentId();
+	public @Nullable String getBizParentId();
 	
 	/**
 	 * Sets the {@code bizId} of this bean's parent node.
 	 *
 	 * @param bizParentId the parent ID, or {@code null} to make this a root node
 	 */
-	public void setBizParentId(String bizParentId);
+	public void setBizParentId(@Nullable String bizParentId);
 
 	/**
 	 * Returns the parent bean for this node, or {@code null} if this is a root node.
@@ -51,7 +54,7 @@ public interface HierarchicalBean<T extends Bean> extends Bean {
 	 *
 	 * @return the parent bean, or {@code null} if this is a root node
 	 */
-	public T getParent();
+	public @Nullable T getParent();
 
 	/**
 	 * Returns the direct children of this node.
@@ -64,5 +67,5 @@ public interface HierarchicalBean<T extends Bean> extends Bean {
 	 *
 	 * @return a mutable list of direct children; never {@code null}, but may be empty
 	 */
-	public List<T> getChildren();
+	public @Nonnull List<T> getChildren();
 }

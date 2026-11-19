@@ -10,6 +10,9 @@ import org.ehcache.config.Builder;
 import org.ehcache.config.CacheConfiguration;
 import org.ehcache.config.Configuration;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A wrapper for a simple non-persistent, on-heap EHCache Manager that ensures no cache folder (and lock file) is created
  * and no off-heap memory is required.
@@ -17,27 +20,31 @@ import org.ehcache.config.Configuration;
 public class NonPersistentCacheManager implements PersistentCacheManager {
 	private CacheManager delegate;
 	
-	public NonPersistentCacheManager(CacheManager delegate) {
+	public NonPersistentCacheManager(@Nonnull CacheManager delegate) {
 		this.delegate = delegate;
 	}
 	
 	@Override
-	public <K, V> Cache<K, V> createCache(String alias, CacheConfiguration<K, V> config) {
+	public @Nonnull <K, V> Cache<K, V> createCache(@SuppressWarnings("null") @Nonnull String alias,
+													@SuppressWarnings("null") @Nonnull CacheConfiguration<K, V> config) {
 		return delegate.createCache(alias, config);
 	}
 
 	@Override
-	public <K, V> Cache<K, V> createCache(String alias, Builder<? extends CacheConfiguration<K, V>> configBuilder) {
+	public @Nonnull <K, V> Cache<K, V> createCache(@SuppressWarnings("null") @Nonnull String alias,
+													@SuppressWarnings("null") @Nonnull Builder<? extends CacheConfiguration<K, V>> configBuilder) {
 		return delegate.createCache(alias, configBuilder);
 	}
 
 	@Override
-	public <K, V> Cache<K, V> getCache(String alias, Class<K> keyType, Class<V> valueType) {
+	public @Nullable <K, V> Cache<K, V> getCache(@SuppressWarnings("null") @Nonnull String alias,
+												@SuppressWarnings("null") @Nonnull Class<K> keyType,
+												@SuppressWarnings("null") @Nonnull Class<V> valueType) {
 		return delegate.getCache(alias, keyType, valueType);
 	}
 
 	@Override
-	public void removeCache(String alias) {
+	public void removeCache(@SuppressWarnings("null") @Nonnull String alias) {
 		delegate.removeCache(alias);
 	}
 
@@ -52,12 +59,12 @@ public class NonPersistentCacheManager implements PersistentCacheManager {
 	}
 
 	@Override
-	public Status getStatus() {
+	public @Nonnull Status getStatus() {
 		return delegate.getStatus();
 	}
 
 	@Override
-	public Configuration getRuntimeConfiguration() {
+	public @Nonnull Configuration getRuntimeConfiguration() {
 		return delegate.getRuntimeConfiguration();
 	}
 
@@ -67,7 +74,7 @@ public class NonPersistentCacheManager implements PersistentCacheManager {
 	}
 
 	@Override
-	public void destroyCache(String alias) throws CachePersistenceException {
+	public void destroyCache(@SuppressWarnings("null") @Nonnull String alias) throws CachePersistenceException {
 		// no-op
 	}
 }

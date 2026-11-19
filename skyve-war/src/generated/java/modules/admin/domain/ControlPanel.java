@@ -176,7 +176,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -249,7 +249,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -294,8 +294,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	@XmlEnum
 	@Generated(value = "org.skyve.impl.generate.OverridableDomainGenerator")
 	public enum SailExecutor implements Enumeration {
-		primeFacesInlineSelenese("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor", "PrimeFaces Inline Selenese"),
-		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");
+		primeFacesInlineWebDriver("org.skyve.impl.sail.execution.pf.PrimeFacesInlineWebDriverExecutor", "PrimeFaces Inline Web Driver");
 
 		private String code;
 		private String description;
@@ -319,7 +318,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 
 		@Override
 		public String toLocalisedDescription() {
-			return Util.i18n(description);
+			return Util.nullSafeI18n(description);
 		}
 
 		@Override
@@ -461,7 +460,7 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	/**
 	 * Executor
 	 **/
-	private SailExecutor sailExecutor;
+	private SailExecutor sailExecutor = SailExecutor.primeFacesInlineWebDriver;
 
 	/**
 	 * Component Builder
@@ -1197,6 +1196,25 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	}
 
 	/**
+	 * The user has the DevOps role, so sees all of the Control Panel, not only its SAIL recording controls.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isDevOps() {
+		return (isUserInRole("admin", "DevOps"));
+	}
+
+	/**
+	 * {@link #isDevOps} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotDevOps() {
+		return (! isDevOps());
+	}
+
+	/**
 	 * If this instance is for 1 fixed customer only.
 	 *
 	 * @return The condition
@@ -1251,6 +1269,63 @@ public abstract class ControlPanel extends AbstractTransientBean {
 	 */
 	public boolean isNotResultsNotNull() {
 		return (! isResultsNotNull());
+	}
+
+	/**
+	 * This session is recording SAIL.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSailRecording() {
+		return (modules.admin.ControlPanel.ControlPanelExtension.recordingStarted());
+	}
+
+	/**
+	 * {@link #isSailRecording} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSailRecording() {
+		return (! isSailRecording());
+	}
+
+	/**
+	 * The configuration (sail.recording) and the user's roles (admin.SAILRecorder) allow SAIL recording.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSailRecordingAllowed() {
+		return (modules.admin.ControlPanel.ControlPanelExtension.recordingAllowed());
+	}
+
+	/**
+	 * {@link #isSailRecordingAllowed} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSailRecordingAllowed() {
+		return (! isSailRecordingAllowed());
+	}
+
+	/**
+	 * This session's SAIL recording has stopped and its script can be downloaded.
+	 *
+	 * @return The condition
+	 */
+	@XmlTransient
+	public boolean isSailRecordingDownloadable() {
+		return (modules.admin.ControlPanel.ControlPanelExtension.recordingDownloadable());
+	}
+
+	/**
+	 * {@link #isSailRecordingDownloadable} negation.
+	 *
+	 * @return The negated condition
+	 */
+	public boolean isNotSailRecordingDownloadable() {
+		return (! isSailRecordingDownloadable());
 	}
 
 	/**

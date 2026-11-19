@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ConvertersFixture"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Kitchen Sink fixture with one attribute for each converter (ConverterName), named after it, of the
+			attribute type the converter takes.
+
+			Its edit view shows every attribute, grouped by type, and an inline data grid for each group, so that each
+			converter's values can be entered in a form field and in a grid cell. Its queries list each group's columns
+			for the list grids' filters: the PrimeFaces Vue list grid and SmartClient list grid of a list view, and the
+			PrimeFaces data tables of ConvertersDataTables. The rows are ConvertersFixtureRow, which has the same
+			attributes.
+		]]>
+	</documentation>
+	<persistent name="KS_ConvertersFixture" />
+	<singularAlias>Converters Fixture</singularAlias>
+	<pluralAlias>Converters Fixtures</pluralAlias>
+	<bizKey expression="{name}" />
+	<attributes>
+		<text name="name" required="true">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+		<!-- Dates -->
+		<date name="ddMmYyyy">
+			<displayName>DD_MM_YYYY</displayName>
+			<converterName>DD_MM_YYYY</converterName>
+		</date>
+		<date name="ddMmmYyyy">
+			<displayName>DD_MMM_YYYY</displayName>
+			<converterName>DD_MMM_YYYY</converterName>
+		</date>
+		<date name="mmDdYyyy">
+			<displayName>MM_DD_YYYY</displayName>
+			<converterName>MM_DD_YYYY</converterName>
+		</date>
+		<date name="mmmDdYyyy">
+			<displayName>MMM_DD_YYYY</displayName>
+			<converterName>MMM_DD_YYYY</converterName>
+		</date>
+		<date name="yyyyMmDd">
+			<displayName>YYYY_MM_DD</displayName>
+			<converterName>YYYY_MM_DD</converterName>
+		</date>
+		<!-- Date times -->
+		<dateTime name="ddMmYyyyHhMi">
+			<displayName>DD_MM_YYYY_HH_MI</displayName>
+			<converterName>DD_MM_YYYY_HH_MI</converterName>
+		</dateTime>
+		<dateTime name="ddMmYyyyHh24Mi">
+			<displayName>DD_MM_YYYY_HH24_MI</displayName>
+			<converterName>DD_MM_YYYY_HH24_MI</converterName>
+		</dateTime>
+		<dateTime name="ddMmmYyyyHhMi">
+			<displayName>DD_MMM_YYYY_HH_MI</displayName>
+			<converterName>DD_MMM_YYYY_HH_MI</converterName>
+		</dateTime>
+		<dateTime name="ddMmmYyyyHh24Mi">
+			<displayName>DD_MMM_YYYY_HH24_MI</displayName>
+			<converterName>DD_MMM_YYYY_HH24_MI</converterName>
+		</dateTime>
+		<dateTime name="mmDdYyyyHhMi">
+			<displayName>MM_DD_YYYY_HH_MI</displayName>
+			<converterName>MM_DD_YYYY_HH_MI</converterName>
+		</dateTime>
+		<dateTime name="mmDdYyyyHh24Mi">
+			<displayName>MM_DD_YYYY_HH24_MI</displayName>
+			<converterName>MM_DD_YYYY_HH24_MI</converterName>
+		</dateTime>
+		<dateTime name="mmmDdYyyyHhMi">
+			<displayName>MMM_DD_YYYY_HH_MI</displayName>
+			<converterName>MMM_DD_YYYY_HH_MI</converterName>
+		</dateTime>
+		<dateTime name="mmmDdYyyyHh24Mi">
+			<displayName>MMM_DD_YYYY_HH24_MI</displayName>
+			<converterName>MMM_DD_YYYY_HH24_MI</converterName>
+		</dateTime>
+		<dateTime name="yyyyMmDdHhMi">
+			<displayName>YYYY_MM_DD_HH_MI</displayName>
+			<converterName>YYYY_MM_DD_HH_MI</converterName>
+		</dateTime>
+		<dateTime name="yyyyMmDdHh24Mi">
+			<displayName>YYYY_MM_DD_HH24_MI</displayName>
+			<converterName>YYYY_MM_DD_HH24_MI</converterName>
+		</dateTime>
+		<!-- Timestamps -->
+		<timestamp name="ddMmYyyyHhMiSs">
+			<displayName>DD_MM_YYYY_HH_MI_SS</displayName>
+			<converterName>DD_MM_YYYY_HH_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="ddMmYyyyHh24MiSs">
+			<displayName>DD_MM_YYYY_HH24_MI_SS</displayName>
+			<converterName>DD_MM_YYYY_HH24_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="ddMmmYyyyHhMiSs">
+			<displayName>DD_MMM_YYYY_HH_MI_SS</displayName>
+			<converterName>DD_MMM_YYYY_HH_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="ddMmmYyyyHh24MiSs">
+			<displayName>DD_MMM_YYYY_HH24_MI_SS</displayName>
+			<converterName>DD_MMM_YYYY_HH24_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="mmDdYyyyHhMiSs">
+			<displayName>MM_DD_YYYY_HH_MI_SS</displayName>
+			<converterName>MM_DD_YYYY_HH_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="mmDdYyyyHh24MiSs">
+			<displayName>MM_DD_YYYY_HH24_MI_SS</displayName>
+			<converterName>MM_DD_YYYY_HH24_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="mmmDdYyyyHhMiSs">
+			<displayName>MMM_DD_YYYY_HH_MI_SS</displayName>
+			<converterName>MMM_DD_YYYY_HH_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="mmmDdYyyyHh24MiSs">
+			<displayName>MMM_DD_YYYY_HH24_MI_SS</displayName>
+			<converterName>MMM_DD_YYYY_HH24_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="yyyyMmDdHhMiSs">
+			<displayName>YYYY_MM_DD_HH_MI_SS</displayName>
+			<converterName>YYYY_MM_DD_HH_MI_SS</converterName>
+		</timestamp>
+		<timestamp name="yyyyMmDdHh24MiSs">
+			<displayName>YYYY_MM_DD_HH24_MI_SS</displayName>
+			<converterName>YYYY_MM_DD_HH24_MI_SS</converterName>
+		</timestamp>
+		<!-- Date times and timestamps shown as dates -->
+		<dateTime name="ddMmYyyyDateTime">
+			<displayName>DD_MM_YYYY_DateTime</displayName>
+			<converterName>DD_MM_YYYY_DateTime</converterName>
+		</dateTime>
+		<dateTime name="ddMmmYyyyDateTime">
+			<displayName>DD_MMM_YYYY_DateTime</displayName>
+			<converterName>DD_MMM_YYYY_DateTime</converterName>
+		</dateTime>
+		<dateTime name="mmDdYyyyDateTime">
+			<displayName>MM_DD_YYYY_DateTime</displayName>
+			<converterName>MM_DD_YYYY_DateTime</converterName>
+		</dateTime>
+		<dateTime name="mmmDdYyyyDateTime">
+			<displayName>MMM_DD_YYYY_DateTime</displayName>
+			<converterName>MMM_DD_YYYY_DateTime</converterName>
+		</dateTime>
+		<dateTime name="yyyyMmDdDateTime">
+			<displayName>YYYY_MM_DD_DateTime</displayName>
+			<converterName>YYYY_MM_DD_DateTime</converterName>
+		</dateTime>
+		<timestamp name="ddMmYyyyTimestamp">
+			<displayName>DD_MM_YYYY_Timestamp</displayName>
+			<converterName>DD_MM_YYYY_Timestamp</converterName>
+		</timestamp>
+		<timestamp name="ddMmmYyyyTimestamp">
+			<displayName>DD_MMM_YYYY_Timestamp</displayName>
+			<converterName>DD_MMM_YYYY_Timestamp</converterName>
+		</timestamp>
+		<timestamp name="mmDdYyyyTimestamp">
+			<displayName>MM_DD_YYYY_Timestamp</displayName>
+			<converterName>MM_DD_YYYY_Timestamp</converterName>
+		</timestamp>
+		<timestamp name="mmmDdYyyyTimestamp">
+			<displayName>MMM_DD_YYYY_Timestamp</displayName>
+			<converterName>MMM_DD_YYYY_Timestamp</converterName>
+		</timestamp>
+		<timestamp name="yyyyMmDdTimestamp">
+			<displayName>YYYY_MM_DD_Timestamp</displayName>
+			<converterName>YYYY_MM_DD_Timestamp</converterName>
+		</timestamp>
+		<!-- Times -->
+		<time name="hhMi">
+			<displayName>HH_MI</displayName>
+			<converterName>HH_MI</converterName>
+		</time>
+		<time name="hh24Mi">
+			<displayName>HH24_MI</displayName>
+			<converterName>HH24_MI</converterName>
+		</time>
+		<time name="hhMiSs">
+			<displayName>HH_MI_SS</displayName>
+			<converterName>HH_MI_SS</converterName>
+		</time>
+		<time name="hh24MiSs">
+			<displayName>HH24_MI_SS</displayName>
+			<converterName>HH24_MI_SS</converterName>
+		</time>
+		<!-- Numbers -->
+		<decimal2 name="decimal2DollarsAndCents">
+			<displayName>Decimal2DollarsAndCents</displayName>
+			<converterName>Decimal2DollarsAndCents</converterName>
+		</decimal2>
+		<decimal2 name="decimal2DollarsAndCentsAbsolute">
+			<displayName>Decimal2DollarsAndCentsAbsolute</displayName>
+			<converterName>Decimal2DollarsAndCentsAbsolute</converterName>
+		</decimal2>
+		<decimal2 name="decimal2Integer">
+			<displayName>Decimal2Integer</displayName>
+			<converterName>Decimal2Integer</converterName>
+		</decimal2>
+		<decimal2 name="decimal2IntegerPercentage">
+			<displayName>Decimal2IntegerPercentage</displayName>
+			<converterName>Decimal2IntegerPercentage</converterName>
+		</decimal2>
+		<decimal2 name="decimal2OneDecimalPlace">
+			<displayName>Decimal2OneDecimalPlace</displayName>
+			<converterName>Decimal2OneDecimalPlace</converterName>
+		</decimal2>
+		<decimal5 name="decimal5Integer">
+			<displayName>Decimal5Integer</displayName>
+			<converterName>Decimal5Integer</converterName>
+		</decimal5>
+		<decimal5 name="decimal5IntegerPercentage">
+			<displayName>Decimal5IntegerPercentage</displayName>
+			<converterName>Decimal5IntegerPercentage</converterName>
+		</decimal5>
+		<decimal5 name="decimal5DollarsAndCents">
+			<displayName>Decimal5DollarsAndCents</displayName>
+			<converterName>Decimal5DollarsAndCents</converterName>
+		</decimal5>
+		<decimal5 name="decimal5TimeDuration">
+			<displayName>Decimal5TimeDuration</displayName>
+			<converterName>Decimal5TimeDuration</converterName>
+		</decimal5>
+		<decimal5 name="decimal5OneDecimalPlace">
+			<displayName>Decimal5OneDecimalPlace</displayName>
+			<converterName>Decimal5OneDecimalPlace</converterName>
+		</decimal5>
+		<decimal5 name="decimal5TwoDecimalPlaces">
+			<displayName>Decimal5TwoDecimalPlaces</displayName>
+			<converterName>Decimal5TwoDecimalPlaces</converterName>
+		</decimal5>
+		<decimal5 name="decimal5TwoDecimalPlacesPercentage">
+			<displayName>Decimal5TwoDecimalPlacesPercentage</displayName>
+			<converterName>Decimal5TwoDecimalPlacesPercentage</converterName>
+		</decimal5>
+		<decimal10 name="decimal10Integer">
+			<displayName>Decimal10Integer</displayName>
+			<converterName>Decimal10Integer</converterName>
+		</decimal10>
+		<decimal10 name="decimal10IntegerPercentage">
+			<displayName>Decimal10IntegerPercentage</displayName>
+			<converterName>Decimal10IntegerPercentage</converterName>
+		</decimal10>
+		<decimal10 name="decimal10DollarsAndCents">
+			<displayName>Decimal10DollarsAndCents</displayName>
+			<converterName>Decimal10DollarsAndCents</converterName>
+		</decimal10>
+		<decimal10 name="decimal10OneDecimalPlace">
+			<displayName>Decimal10OneDecimalPlace</displayName>
+			<converterName>Decimal10OneDecimalPlace</converterName>
+		</decimal10>
+		<decimal10 name="decimal10TwoDecimalPlaces">
+			<displayName>Decimal10TwoDecimalPlaces</displayName>
+			<converterName>Decimal10TwoDecimalPlaces</converterName>
+		</decimal10>
+		<decimal10 name="decimal10TwoDecimalPlacesPercentage">
+			<displayName>Decimal10TwoDecimalPlacesPercentage</displayName>
+			<converterName>Decimal10TwoDecimalPlacesPercentage</converterName>
+		</decimal10>
+		<integer name="simplePercentage">
+			<displayName>SimplePercentage</displayName>
+			<converterName>SimplePercentage</converterName>
+		</integer>
+		<integer name="integerSeparator">
+			<displayName>IntegerSeparator</displayName>
+			<converterName>IntegerSeparator</converterName>
+		</integer>
+		<longInteger name="longIntegerSeparator">
+			<displayName>LongIntegerSeparator</displayName>
+			<converterName>LongIntegerSeparator</converterName>
+		</longInteger>
+		<!-- A decimal with no converter (the default display), for list filters typed with separators -->
+		<decimal2 name="plainDecimal2">
+			<displayName>Decimal2 (no converter)</displayName>
+		</decimal2>
+		<collection name="dateRows" type="composition">
+			<displayName>Dates rows</displayName>
+			<description>Rows of the inline data grid of dates, for entering each converter's values in a grid cell.</description>
+			<documentName>ConvertersFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dateTimeRows" type="composition">
+			<displayName>Date times rows</displayName>
+			<description>Rows of the inline data grid of date times, for entering each converter's values in a grid cell.</description>
+			<documentName>ConvertersFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="timestampRows" type="composition">
+			<displayName>Timestamps rows</displayName>
+			<description>Rows of the inline data grid of timestamps, for entering each converter's values in a grid cell.</description>
+			<documentName>ConvertersFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="dateOnlyRows" type="composition">
+			<displayName>Date times and timestamps shown as dates rows</displayName>
+			<description>Rows of the inline data grid of date times and timestamps shown as dates, for entering each converter's values in a grid cell.</description>
+			<documentName>ConvertersFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="timeRows" type="composition">
+			<displayName>Times rows</displayName>
+			<description>Rows of the inline data grid of times, for entering each converter's values in a grid cell.</description>
+			<documentName>ConvertersFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+		<collection name="numberRows" type="composition">
+			<displayName>Numbers rows</displayName>
+			<description>Rows of the inline data grid of numbers, for entering each converter's values in a grid cell.</description>
+			<documentName>ConvertersFixtureRow</documentName>
+			<minCardinality>0</minCardinality>
+		</collection>
+	</attributes>
+</document>

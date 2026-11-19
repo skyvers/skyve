@@ -26,6 +26,7 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.user.User;
 import org.skyve.util.FileUtil;
 import org.skyve.util.JSON;
+import org.skyve.util.Thumbnail;
 import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
@@ -64,7 +65,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @throws IllegalArgumentException if the configured implementation cannot be instantiated.
 	 */
 	@SuppressWarnings("resource") // handled by caller
-	public static AbstractContentManager get() {
+	public static @Nonnull AbstractContentManager get() {
 		try {
 			return IMPLEMENTATION_CLASS.getDeclaredConstructor().newInstance();
 		}
@@ -81,15 +82,34 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @throws Exception if the reindex operation fails.
 	 */
 	@SuppressWarnings("java:S112") // allow throws Exception for implementations
-	public abstract void reindex(AttachmentContent attachment, boolean index) throws Exception;
+	public abstract void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception;
 	
+	/**
+	 * Deletes the stored thumbnails of a removed attachment, so they don't stay on the disk forever.
+	 * A problem is logged rather than thrown, as the attachment has already been removed.
+	 * Call this at the end of {@link #removeAttachment(String)} in the process that serves the attachment,
+	 * as that is where its thumbnails are made - a remote content client calls it after the remote removal.
+	 *
+	 * @param contentId	The removed attachment's content id.
+	 */
+	protected static void deleteStoredThumbnails(@Nonnull String contentId) {
+		try {
+			Thumbnail.deleteStoredThumbnails(contentId);
+		}
+		catch (Exception e) {
+			CONTENT_LOGGER.warn("Could not delete the stored thumbnails of removed attachment {} - delete its folder in the thumbnail directory - {}",
+									contentId,
+									e.getLocalizedMessage());
+		}
+	}
+
 	/**
 	 * Append a balanced folder structure for storing a content file based on it's content ID.
 	 * 
 	 * @param id The content ID
 	 * @param pathToAppendTo	The path to append to.
 	 */
-	public static void appendBalancedFolderPathFromContentId(String id, StringBuilder pathToAppendTo) {
+	public static void appendBalancedFolderPathFromContentId(@Nonnull String id, @Nonnull StringBuilder pathToAppendTo) {
 		pathToAppendTo.append(id.substring(5, 7).toLowerCase()).append('/');
 		pathToAppendTo.append(id.substring(10, 12).toLowerCase()).append('/');
 		pathToAppendTo.append(id.substring(15, 17).toLowerCase()).append('/');
@@ -100,7 +120,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * Call this to get the folder structure of a content where args[0] is the contentId.
 	 */
 	@SuppressWarnings("java:S106") // allow System.out.println for this utility method
-	public static void main(String[] args) {
+	public static void main(@Nonnull String[] args) {
 		if (args.length != 1) {
 			throw new IllegalArgumentException("Add the contentId as an argument to the command line");
 		}
@@ -121,13 +141,13 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param attributeName
 	 * @return true if the content can be read and accessed, otherwise false.
 	 */
-	public static boolean canAccessContent(String bizCustomer,
-											String bizModule,
-											String bizDocument,
-											String bizDataGroupId,
-											String bizUserId,
-											String bizId,
-											String attributeName) {
+	public static boolean canAccessContent(@Nullable String bizCustomer,
+											@Nonnull String bizModule,
+											@Nonnull String bizDocument,
+											@Nullable String bizDataGroupId,
+											@Nullable String bizUserId,
+											@Nonnull String bizId,
+											@Nullable String attributeName) {
 		User user = CORE.getUser();
 		if (user instanceof SuperUser) {
 			return true;
@@ -229,7 +249,7 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @param attachment The attachment metadata to serialize.
 	 * @throws IOException if an IO error occurs while writing the metadata file.
 	 */
-	protected static void writeContentMeta(String absoluteBalancedFolderPath, AttachmentContent attachment) 
+	protected static void writeContentMeta(@Nonnull String absoluteBalancedFolderPath, @Nonnull AttachmentContent attachment) 
 	throws IOException {
 		Map<String, Object> meta = new TreeMap<>();
 		String fileName = attachment.getFileName();
@@ -298,9 +318,9 @@ public abstract class AbstractContentManager implements ContentManager {
 	 * @return The resolved {@link AttachmentContent}, or null if not found.
 	 * @throws Exception if reading or parsing the metadata fails.
 	 */
-	public static AttachmentContent getFromFileSystem(StringBuilder absoluteContentStoreFolderPath,
-														String contentId,
-														boolean noSuffix) throws Exception {
+	public static @Nullable AttachmentContent getFromFileSystem(@Nonnull StringBuilder absoluteContentStoreFolderPath,
+																	@Nonnull String contentId,
+																	boolean noSuffix) throws Exception {
 		AbstractContentManager.appendBalancedFolderPathFromContentId(contentId, absoluteContentStoreFolderPath);
 		String path = absoluteContentStoreFolderPath.toString();
 
@@ -314,8 +334,7 @@ public abstract class AbstractContentManager implements ContentManager {
 			if (UtilImpl.CONTENT_TRACE) CONTENT_LOGGER.info("AbstractContentManager.get({}) - Meta File DNE", metaFile.getPath());
 			return null;
 		}
-		@SuppressWarnings("unchecked")
-		Map<String, Object> meta = (Map<String, Object>) JSON.unmarshall(FileUtil.string(metaFile));
+		Map<String, Object> meta = readContentMeta(dir);
 
 		String contentType = (String) meta.get(CONTENT_TYPE);
 
@@ -361,6 +380,26 @@ public abstract class AbstractContentManager implements ContentManager {
 		return result;
 	}
 	
+	/**
+	 * Reads and parses the meta.json in a content folder of the file content store.
+	 *
+	 * <p>The keys are those written by {@link #writeContentMeta(String, AttachmentContent)}.
+	 *
+	 * @param contentFolder	the content ID folder
+	 * @return the meta.json properties
+	 * @throws java.io.FileNotFoundException if there is no meta.json, or contentFolder is not a folder
+	 * @throws Exception if the meta.json cannot be read or is not a JSON object
+	 */
+	@SuppressWarnings("unchecked")
+	static @Nonnull Map<String, Object> readContentMeta(@Nonnull File contentFolder) throws Exception {
+		Object meta = JSON.unmarshall(FileUtil.string(new File(contentFolder, META_JSON)));
+		// meta.json is data on disk, so it can hold anything - "null" or an array is not a content's properties
+		if (meta instanceof Map<?, ?>) {
+			return (Map<String, Object>) meta;
+		}
+		throw new IllegalStateException(META_JSON + " in " + contentFolder + " is not a JSON object");
+	}
+
 	/**
 	 * Determine the filename to use for stored content based on name/type and suffix rules.
 	 *

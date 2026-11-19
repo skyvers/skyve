@@ -38,6 +38,9 @@ import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.model.document.Interface;
 import org.skyve.metadata.model.document.UniqueConstraint;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Provides a fluent builder for FluentDocument metadata.
  */
@@ -54,7 +57,7 @@ public class FluentDocument {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentDocument(DocumentMetaData document) {
+	public FluentDocument(@Nonnull DocumentMetaData document) {
 		this.document = document;
 	}
 
@@ -66,7 +69,7 @@ public class FluentDocument {
 	 * Unknown attribute implementations cause an {@link IllegalStateException}.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public FluentDocument from(@SuppressWarnings("hiding") Document document) {
+	public @Nonnull FluentDocument from(@SuppressWarnings("hiding") @Nonnull Document document) {
 		DocumentImpl impl = (DocumentImpl) document;
 		name(document.getName());
 		abstractDocument(document.isAbstract());
@@ -198,13 +201,15 @@ public class FluentDocument {
 			addUniqueConstraint(new FluentDocumentUniqueConstraint().from(constraint));
 		}
 		
+		document.getProperties().entrySet().forEach(p -> putProperty(p.getKey(), p.getValue()));
+
 		return this;
 	}
 
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument name(String name) {
+	public @Nonnull FluentDocument name(@Nullable String name) {
 		document.setName(name);
 		return this;
 	}
@@ -212,7 +217,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument abstractDocument(boolean abstractDocument) {
+	public @Nonnull FluentDocument abstractDocument(boolean abstractDocument) {
 		document.setAbstract(abstractDocument ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
@@ -220,7 +225,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument documentation(String documentation) {
+	public @Nonnull FluentDocument documentation(@Nullable String documentation) {
 		document.setDocumentation(documentation);
 		return this;
 	}
@@ -230,7 +235,7 @@ public class FluentDocument {
 	 *
 	 * <p>Side effects: replaces any existing {@code extends} definition.
 	 */
-	public FluentDocument extendsDocument(String baseDocumentName) {
+	public @Nonnull FluentDocument extendsDocument(@Nonnull String baseDocumentName) {
 		Extends inherits = new Extends();
 		inherits.setDocumentName(baseDocumentName);
 		document.setExtends(inherits);
@@ -240,7 +245,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument parentDocument(FluentParentDocument parent) {
+	public @Nonnull FluentDocument parentDocument(@Nonnull FluentParentDocument parent) {
 		document.setParentDocument(parent.get());
 		return this;
 	}
@@ -248,7 +253,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument persistent(FluentPersistent persistent) {
+	public @Nonnull FluentDocument persistent(@Nonnull FluentPersistent persistent) {
 		document.setPersistent(persistent.get());
 		return this;
 	}
@@ -256,7 +261,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument dynamic(FluentDynamic dynamic) {
+	public @Nonnull FluentDocument dynamic(@Nonnull FluentDynamic dynamic) {
 		document.setDynamic(dynamic.get());
 		return this;
 	}
@@ -264,7 +269,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument singularAlias(String singularAlias) {
+	public @Nonnull FluentDocument singularAlias(@Nonnull String singularAlias) {
 		document.setSingularAlias(singularAlias);
 		return this;
 	}
@@ -272,7 +277,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument pluralAlias(String pluralAlias) {
+	public @Nonnull FluentDocument pluralAlias(@Nonnull String pluralAlias) {
 		document.setPluralAlias(pluralAlias);
 		return this;
 	}
@@ -280,7 +285,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument description(String description) {
+	public @Nonnull FluentDocument description(@Nullable String description) {
 		document.setDescription(description);
 		return this;
 	}
@@ -288,7 +293,7 @@ public class FluentDocument {
 	/**
 	 * Sets the BizKey expression, creating the BizKey block when absent.
 	 */
-	public FluentDocument bizKeyExpression(String expression) {
+	public @Nonnull FluentDocument bizKeyExpression(@Nullable String expression) {
 		BizKey bizKey = document.getBizKey();
 		if (bizKey == null) {
 			bizKey = new BizKey();
@@ -301,7 +306,7 @@ public class FluentDocument {
 	/**
 	 * Sets BizKey sensitivity, creating the BizKey block when absent.
 	 */
-	public FluentDocument bizKeySensitivity(Sensitivity sensitivity) {
+	public @Nonnull FluentDocument bizKeySensitivity(@Nullable Sensitivity sensitivity) {
 		BizKey bizKey = document.getBizKey();
 		if (bizKey == null) {
 			bizKey = new BizKey();
@@ -314,7 +319,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument iconStyleClass(String iconStyleClass) {
+	public @Nonnull FluentDocument iconStyleClass(@Nullable String iconStyleClass) {
 		document.setIconStyleClass(iconStyleClass);
 		return this;
 	}
@@ -322,7 +327,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument icon16x16RelativeFilePath(String icon16x16RelativeFilePath) {
+	public @Nonnull FluentDocument icon16x16RelativeFilePath(@Nullable String icon16x16RelativeFilePath) {
 		document.setIcon16x16RelativeFilePath(icon16x16RelativeFilePath);
 		return this;
 	}
@@ -330,7 +335,7 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument icon32x32RelativeFilePath(String icon32x32RelativeFilePath) {
+	public @Nonnull FluentDocument icon32x32RelativeFilePath(@Nullable String icon32x32RelativeFilePath) {
 		document.setIcon32x32RelativeFilePath(icon32x32RelativeFilePath);
 		return this;
 	}
@@ -338,14 +343,14 @@ public class FluentDocument {
 	/**
 	 * Updates metadata on this fluent builder.
 	 */
-	public FluentDocument audited(boolean audited) {
+	public @Nonnull FluentDocument audited(boolean audited) {
 		document.setAudited(audited ? Boolean.TRUE : Boolean.FALSE);
 		return this;
 	}
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addImplementingInterface(String fullyQualifiedInterfaceClassName) {
+	public @Nonnull FluentDocument addImplementingInterface(@Nullable String fullyQualifiedInterfaceClassName) {
 		InterfaceImpl i = new InterfaceImpl();
 		i.setInterfaceName(fullyQualifiedInterfaceClassName);
 		document.getImplements().add(i);
@@ -354,7 +359,7 @@ public class FluentDocument {
 	/**
 	 * Removes matching metadata definitions from this builder.
 	 */
-	public FluentDocument removeImplementingInterface(String fullyQualifiedInterfaceClassName) {
+	public @Nonnull FluentDocument removeImplementingInterface(@Nonnull String fullyQualifiedInterfaceClassName) {
 		document.getImplements().removeIf(i -> fullyQualifiedInterfaceClassName.equals(i.getInterfaceName()));
 		return this;
 	}
@@ -364,24 +369,24 @@ public class FluentDocument {
 	 *
 	 * <p>Side effects: appends to the current attribute list; ordering is preserved.
 	 */
-	public FluentDocument addAttribute(FluentAttribute<?> attribute) {
+	public @Nonnull FluentDocument addAttribute(@Nonnull FluentAttribute<?> attribute) {
 		document.getAttributes().add(attribute.get());
 		return this;
 	}
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addText(FluentText text) {
+	public @Nonnull FluentDocument addText(@Nonnull FluentText text) {
 		return addAttribute(text);
 	}
 	
-	private Attribute findAttribute(String name) {
+	private @Nullable Attribute findAttribute(@Nonnull String name) {
 		return document.getAttributes().stream().filter(a -> name.equals(a.getName())).findAny().orElse(null);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentText findText(String name) {
+	public @Nullable FluentText findText(@Nonnull String name) {
 		Text result = (Text) findAttribute(name);
 		if (result != null) {
 			return new FluentText(result);
@@ -391,13 +396,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addDate(FluentDate date) {
+	public @Nonnull FluentDocument addDate(@Nonnull FluentDate date) {
 		return addAttribute(date);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentDate findDate(String name) {
+	public @Nullable FluentDate findDate(@Nonnull String name) {
 		Date result = (Date) findAttribute(name);
 		if (result != null) {
 			return new FluentDate(result);
@@ -407,13 +412,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addTime(FluentTime time) {
+	public @Nonnull FluentDocument addTime(@Nonnull FluentTime time) {
 		return addAttribute(time);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentTime findTime(String name) {
+	public @Nullable FluentTime findTime(@Nonnull String name) {
 		Time result = (Time) findAttribute(name);
 		if (result != null) {
 			return new FluentTime(result);
@@ -423,13 +428,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addDateTime(FluentDateTime dateTime) {
+	public @Nonnull FluentDocument addDateTime(@Nonnull FluentDateTime dateTime) {
 		return addAttribute(dateTime);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentDateTime findDateTime(String name) {
+	public @Nullable FluentDateTime findDateTime(@Nonnull String name) {
 		DateTime result = (DateTime) findAttribute(name);
 		if (result != null) {
 			return new FluentDateTime(result);
@@ -439,13 +444,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addTimestamp(FluentTimestamp timestamp) {
+	public @Nonnull FluentDocument addTimestamp(@Nonnull FluentTimestamp timestamp) {
 		return addAttribute(timestamp);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentTimestamp findTimestamp(String name) {
+	public @Nullable FluentTimestamp findTimestamp(@Nonnull String name) {
 		Timestamp result = (Timestamp) findAttribute(name);
 		if (result != null) {
 			return new FluentTimestamp(result);
@@ -455,13 +460,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addInteger(FluentInteger integer) {
+	public @Nonnull FluentDocument addInteger(@Nonnull FluentInteger integer) {
 		return addAttribute(integer);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentInteger findInteger(String name) {
+	public @Nullable FluentInteger findInteger(@Nonnull String name) {
 		org.skyve.impl.metadata.model.document.field.Integer result = (org.skyve.impl.metadata.model.document.field.Integer) findAttribute(name);
 		if (result != null) {
 			return new FluentInteger(result);
@@ -471,13 +476,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addLongInteger(FluentLongInteger longInteger) {
+	public @Nonnull FluentDocument addLongInteger(@Nonnull FluentLongInteger longInteger) {
 		return addAttribute(longInteger);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentLongInteger findLongInteger(String name) {
+	public @Nullable FluentLongInteger findLongInteger(@Nonnull String name) {
 		LongInteger result = (LongInteger) findAttribute(name);
 		if (result != null) {
 			return new FluentLongInteger(result);
@@ -487,13 +492,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addDecimal2(FluentDecimal2 decimal) {
+	public @Nonnull FluentDocument addDecimal2(@Nonnull FluentDecimal2 decimal) {
 		return addAttribute(decimal);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentDecimal2 findDecimal2(String name) {
+	public @Nullable FluentDecimal2 findDecimal2(@Nonnull String name) {
 		Decimal2 result = (Decimal2) findAttribute(name);
 		if (result != null) {
 			return new FluentDecimal2(result);
@@ -503,13 +508,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addDecimal5(FluentDecimal5 decimal) {
+	public @Nonnull FluentDocument addDecimal5(@Nonnull FluentDecimal5 decimal) {
 		return addAttribute(decimal);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentDecimal5 findDecimal5(String name) {
+	public @Nullable FluentDecimal5 findDecimal5(@Nonnull String name) {
 		Decimal5 result = (Decimal5) findAttribute(name);
 		if (result != null) {
 			return new FluentDecimal5(result);
@@ -519,13 +524,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addDecimal10(FluentDecimal10 decimal) {
+	public @Nonnull FluentDocument addDecimal10(@Nonnull FluentDecimal10 decimal) {
 		return addAttribute(decimal);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentDecimal10 findDecimal10(String name) {
+	public @Nullable FluentDecimal10 findDecimal10(@Nonnull String name) {
 		Decimal10 result = (Decimal10) findAttribute(name);
 		if (result != null) {
 			return new FluentDecimal10(result);
@@ -535,13 +540,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addBoolean(FluentBoolean bool) {
+	public @Nonnull FluentDocument addBoolean(@Nonnull FluentBoolean bool) {
 		return addAttribute(bool);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentBoolean findBoolean(String name) {
+	public @Nullable FluentBoolean findBoolean(@Nonnull String name) {
 		org.skyve.impl.metadata.model.document.field.Boolean result = (org.skyve.impl.metadata.model.document.field.Boolean) findAttribute(name);
 		if (result != null) {
 			return new FluentBoolean(result);
@@ -551,13 +556,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addEnumeration(FluentEnumeration enumeration) {
+	public @Nonnull FluentDocument addEnumeration(@Nonnull FluentEnumeration enumeration) {
 		return addAttribute(enumeration);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentEnumeration findEnumeration(String name) {
+	public @Nullable FluentEnumeration findEnumeration(@Nonnull String name) {
 		Enumeration result = (Enumeration) findAttribute(name);
 		if (result != null) {
 			return new FluentEnumeration(result);
@@ -567,13 +572,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addMemo(FluentMemo memo) {
+	public @Nonnull FluentDocument addMemo(@Nonnull FluentMemo memo) {
 		return addAttribute(memo);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentMemo findMemo(String name) {
+	public @Nullable FluentMemo findMemo(@Nonnull String name) {
 		Memo result = (Memo) findAttribute(name);
 		if (result != null) {
 			return new FluentMemo(result);
@@ -583,13 +588,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addMarkup(FluentMarkup markup) {
+	public @Nonnull FluentDocument addMarkup(@Nonnull FluentMarkup markup) {
 		return addAttribute(markup);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentMarkup findMarkup(String name) {
+	public @Nullable FluentMarkup findMarkup(@Nonnull String name) {
 		Markup result = (Markup) findAttribute(name);
 		if (result != null) {
 			return new FluentMarkup(result);
@@ -599,13 +604,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addColour(FluentColour colour) {
+	public @Nonnull FluentDocument addColour(@Nonnull FluentColour colour) {
 		return addAttribute(colour);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentColour findColour(String name) {
+	public @Nullable FluentColour findColour(@Nonnull String name) {
 		Colour result = (Colour) findAttribute(name);
 		if (result != null) {
 			return new FluentColour(result);
@@ -615,13 +620,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addContent(FluentContent content) {
+	public @Nonnull FluentDocument addContent(@Nonnull FluentContent content) {
 		return addAttribute(content);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentContent findContent(String name) {
+	public @Nullable FluentContent findContent(@Nonnull String name) {
 		Content result = (Content) findAttribute(name);
 		if (result != null) {
 			return new FluentContent(result);
@@ -631,13 +636,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addImage(FluentImage image) {
+	public @Nonnull FluentDocument addImage(@Nonnull FluentImage image) {
 		return addAttribute(image);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentImage findImage(String name) {
+	public @Nullable FluentImage findImage(@Nonnull String name) {
 		Image result = (Image) findAttribute(name);
 		if (result != null) {
 			return new FluentImage(result);
@@ -647,13 +652,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addGeometry(FluentGeometry geometry) {
+	public @Nonnull FluentDocument addGeometry(@Nonnull FluentGeometry geometry) {
 		return addAttribute(geometry);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentGeometry findGeometry(String name) {
+	public @Nullable FluentGeometry findGeometry(@Nonnull String name) {
 		Geometry result = (Geometry) findAttribute(name);
 		if (result != null) {
 			return new FluentGeometry(result);
@@ -663,13 +668,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addId(FluentId id) {
+	public @Nonnull FluentDocument addId(@Nonnull FluentId id) {
 		return addAttribute(id);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentId findId(String name) {
+	public @Nullable FluentId findId(@Nonnull String name) {
 		Id result = (Id) findAttribute(name);
 		if (result != null) {
 			return new FluentId(result);
@@ -679,13 +684,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addAssociation(FluentAssociation association) {
+	public @Nonnull FluentDocument addAssociation(@Nonnull FluentAssociation association) {
 		return addAttribute(association);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentAssociation findAssociation(String name) {
+	public @Nullable FluentAssociation findAssociation(@Nonnull String name) {
 		AssociationImpl result = (AssociationImpl) findAttribute(name);
 		if (result != null) {
 			return new FluentAssociation(result);
@@ -695,13 +700,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addCollection(FluentCollection collection) {
+	public @Nonnull FluentDocument addCollection(@Nonnull FluentCollection collection) {
 		return addAttribute(collection);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentCollection findCollection(String name) {
+	public @Nullable FluentCollection findCollection(@Nonnull String name) {
 		CollectionImpl result = (CollectionImpl) findAttribute(name);
 		if (result != null) {
 			return new FluentCollection(result);
@@ -711,13 +716,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addInverseOne(FluentInverseOne inverseOne) {
+	public @Nonnull FluentDocument addInverseOne(@Nonnull FluentInverseOne inverseOne) {
 		return addAttribute(inverseOne);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentInverseOne findInverseOne(String name) {
+	public @Nullable FluentInverseOne findInverseOne(@Nonnull String name) {
 		InverseOne result = (InverseOne) findAttribute(name);
 		if (result != null) {
 			return new FluentInverseOne(result);
@@ -727,13 +732,13 @@ public class FluentDocument {
 	/**
 	 * Adds a metadata definition to this builder.
 	 */
-	public FluentDocument addInverseMany(FluentInverseMany inverseMany) {
+	public @Nonnull FluentDocument addInverseMany(@Nonnull FluentInverseMany inverseMany) {
 		return addAttribute(inverseMany);
 	}
 	/**
 	 * Finds a matching definition by key and returns null when no match exists.
 	 */
-	public FluentInverseMany findInverseMany(String name) {
+	public @Nullable FluentInverseMany findInverseMany(@Nonnull String name) {
 		InverseMany result = (InverseMany) findAttribute(name);
 		if (result != null) {
 			return new FluentInverseMany(result);
@@ -744,7 +749,7 @@ public class FluentDocument {
 	/**
 	 * Removes all attributes whose name matches {@code name}.
 	 */
-	public FluentDocument removeAttribute(String name) {
+	public @Nonnull FluentDocument removeAttribute(@Nonnull String name) {
 		document.getAttributes().removeIf(a -> name.equals(a.getName()));
 		return this;
 	}
@@ -752,7 +757,7 @@ public class FluentDocument {
 	/**
 	 * Removes all configured attributes.
 	 */
-	public FluentDocument clearAttributes() {
+	public @Nonnull FluentDocument clearAttributes() {
 		document.getAttributes().clear();
 		return this;
 	}
@@ -760,7 +765,7 @@ public class FluentDocument {
 	/**
 	 * Appends a condition definition.
 	 */
-	public FluentDocument addCondition(FluentCondition condition) {
+	public @Nonnull FluentDocument addCondition(@Nonnull FluentCondition condition) {
 		document.getConditions().add(condition.get());
 		return this;
 	}
@@ -768,7 +773,7 @@ public class FluentDocument {
 	/**
 	 * Removes conditions that match {@code name}.
 	 */
-	public FluentDocument removeCondition(String name) {
+	public @Nonnull FluentDocument removeCondition(@Nonnull String name) {
 		document.getConditions().removeIf(c -> name.equals(c.getName()));
 		return this;
 	}
@@ -776,7 +781,7 @@ public class FluentDocument {
 	/**
 	 * Removes all configured conditions.
 	 */
-	public FluentDocument clearConditions() {
+	public @Nonnull FluentDocument clearConditions() {
 		document.getConditions().clear();
 		return this;
 	}
@@ -786,7 +791,7 @@ public class FluentDocument {
 	 *
 	 * @return a fluent wrapper around the first matching condition, or {@code null} when absent
 	 */
-	public FluentCondition findCondition(String name) {
+	public @Nullable FluentCondition findCondition(@Nonnull String name) {
 		ConditionMetaData result = document.getConditions().stream().filter(c -> name.equals(c.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentCondition(result);
@@ -796,7 +801,7 @@ public class FluentDocument {
 	/**
 	 * Appends a document-level unique-constraint definition.
 	 */
-	public FluentDocument addUniqueConstraint(FluentDocumentUniqueConstraint constraint) {
+	public @Nonnull FluentDocument addUniqueConstraint(@Nonnull FluentDocumentUniqueConstraint constraint) {
 		document.getUniqueConstraints().add(constraint.get());
 		return this;
 	}
@@ -804,7 +809,7 @@ public class FluentDocument {
 	/**
 	 * Removes document-level unique constraints that match {@code name}.
 	 */
-	public FluentDocument removeUniqueConstraint(String name) {
+	public @Nonnull FluentDocument removeUniqueConstraint(@Nonnull String name) {
 		document.getUniqueConstraints().removeIf(c -> name.equals(c.getName()));
 		return this;
 	}
@@ -812,7 +817,7 @@ public class FluentDocument {
 	/**
 	 * Removes all document-level unique constraints.
 	 */
-	public FluentDocument clearUniqueConstraint() {
+	public @Nonnull FluentDocument clearUniqueConstraint() {
 		document.getUniqueConstraints().clear();
 		return this;
 	}
@@ -822,7 +827,7 @@ public class FluentDocument {
 	 *
 	 * @return a fluent wrapper around the first matching constraint, or {@code null} when absent
 	 */
-	public FluentDocumentUniqueConstraint findUniqueConstraint(String name) {
+	public @Nullable FluentDocumentUniqueConstraint findUniqueConstraint(@Nonnull String name) {
 		org.skyve.impl.metadata.repository.document.UniqueConstraint result = document.getUniqueConstraints().stream().filter(c -> name.equals(c.getName())).findAny().orElse(null);
 		if (result != null) {
 			return new FluentDocumentUniqueConstraint(result);
@@ -831,9 +836,22 @@ public class FluentDocument {
 	}
 	
 	/**
+	 * Adds or replaces a custom property on the wrapped metadata.
+	 * Properties keep the order in which they were first added.
+	 *
+	 * @param k the property name
+	 * @param v the property value
+	 * @return this builder
+	 */
+	public @Nonnull FluentDocument putProperty(@Nonnull String k, @Nonnull String v) {
+		document.getProperties().put(k, v);
+		return this;
+	}
+
+	/**
 	 * Returns the mutable document metadata instance being built.
 	 */
-	public DocumentMetaData get() {
+	public @Nonnull DocumentMetaData get() {
 		return document;
 	}
 }

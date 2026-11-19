@@ -386,10 +386,10 @@
       <xs:extension base="tns:itemMetaData">
         <xs:sequence/>
         <xs:attribute name="document" type="xs:string"/>
-        <xs:attribute name="endBinding" type="xs:string" use="required"/>
+        <xs:attribute name="endBinding" type="xs:string"/>
         <xs:attribute name="model" type="xs:string"/>
         <xs:attribute name="query" type="xs:string"/>
-        <xs:attribute name="startBinding" type="xs:string" use="required"/>
+        <xs:attribute name="startBinding" type="xs:string"/>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

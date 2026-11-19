@@ -14,6 +14,9 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 import org.springframework.security.provisioning.UserDetailsManager;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Implements two-factor authentication push via email, using customer-configured or fallback email templates.
  * The email body template must include the "{tfaCode}" placeholder for the generated code to be included in the message.
@@ -41,7 +44,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	 *
 	 * @param userDetailsManager Spring Security user manager used by the parent filter.
 	 */
-	public TwoFactorAuthPushEmailFilter(UserDetailsManager userDetailsManager) {
+	public TwoFactorAuthPushEmailFilter(@Nonnull UserDetailsManager userDetailsManager) {
 		super(userDetailsManager);
 	}
 
@@ -52,7 +55,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	 * @return {@code true} when email push is enabled for the customer.
 	 */
 	@Override
-	protected boolean supportsPushConfiguration(TwoFactorAuthCustomerConfiguration config) {
+	protected boolean supportsPushConfiguration(@Nullable TwoFactorAuthCustomerConfiguration config) {
 		return (config != null) && config.isTfaEmail();
 	}
 	
@@ -64,7 +67,7 @@ public class TwoFactorAuthPushEmailFilter extends TwoFactorAuthPushFilter {
 	 * @throws DomainException If the configured email template cannot be loaded.
 	 */
 	@Override
-	protected void pushNotification(TwoFactorAuthUser user, String code) {
+	protected void pushNotification(@Nonnull TwoFactorAuthUser user, @Nonnull String code) {
 		String emailAddress = user.getEmail();
 		if (emailAddress == null) {
 			LOGGER.warn("No email found for user : {}", user.getUsername()); 

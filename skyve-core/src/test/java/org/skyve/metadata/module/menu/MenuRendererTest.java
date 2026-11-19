@@ -129,61 +129,73 @@ class MenuRendererTest {
 		assertNotNull(new RecordingMenuRenderer("desktop", null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderModuleMenuDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderModuleMenu(null, null, false));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderMenuRootDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderMenuRoot(null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderMenuGroupDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderMenuGroup(null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderTreeItemDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderTreeItem(null, null, null, null, null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderListItemDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderListItem(null, null, null, null, null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderCalendarItemDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderCalendarItem(null, null, null, null, null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderMapItemDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderMapItem(null, null, null, null, null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderEditItemDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderEditItem(null, null, null, null, null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderLinkItemDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderLinkItem(null, null, false, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderedMenuGroupDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderedMenuGroup(null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderedMenuRootDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderedMenuRoot(null, null));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void renderedModuleMenuDoesNotThrow() {
 		assertDoesNotThrow(() -> new RecordingMenuRenderer("desktop", null).renderedModuleMenu(null, null, false));
@@ -486,6 +498,7 @@ class MenuRendererTest {
 		assertThat(renderer.lastHref, containsString("/health"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void baseClassNoOpRenderMethodsDoNotThrow() {
 		MenuRenderer base = new MenuRenderer("desktop", null);

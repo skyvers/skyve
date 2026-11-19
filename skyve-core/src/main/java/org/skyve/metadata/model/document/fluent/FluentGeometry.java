@@ -2,6 +2,8 @@ package org.skyve.metadata.model.document.fluent;
 
 import org.skyve.impl.metadata.model.document.field.Geometry;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides a fluent builder for FluentGeometry metadata.
  */
@@ -18,7 +20,7 @@ public class FluentGeometry extends FluentField<FluentGeometry> {
 	/**
 	 * Creates a fluent builder instance.
 	 */
-	public FluentGeometry(Geometry geometry) {
+	public FluentGeometry(@Nonnull Geometry geometry) {
 		this.geometry = geometry;
 	}
 
@@ -26,7 +28,7 @@ public class FluentGeometry extends FluentField<FluentGeometry> {
 	 * Copies metadata values from an existing definition into this builder.
 	 */
 
-	public FluentGeometry from(@SuppressWarnings("hiding") Geometry geometry) {
+	public @Nonnull FluentGeometry from(@SuppressWarnings("hiding") @Nonnull Geometry geometry) {
 		super.from(geometry);
 		return this;
 	}
@@ -35,7 +37,7 @@ public class FluentGeometry extends FluentField<FluentGeometry> {
 	 * Returns the mutable metadata instance represented by this builder.
 	 */
 	@Override
-	public Geometry get() {
+	public @Nonnull Geometry get() {
 		return geometry;
 	}
 }

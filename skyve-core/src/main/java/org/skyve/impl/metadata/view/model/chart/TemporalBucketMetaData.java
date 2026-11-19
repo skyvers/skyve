@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.view.model.chart;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.view.model.chart.TemporalBucket;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -23,12 +24,12 @@ public class TemporalBucketMetaData extends TemporalBucket {
 		super(TemporalBucketType.day);
 	}
 	
-	public TemporalBucketType getType() {
+	public @Nonnull TemporalBucketType getType() {
 		return type;
 	}
 	
 	@XmlAttribute(required = true)
-	public void setType(TemporalBucketType type) {
+	public void setType(@Nonnull TemporalBucketType type) {
 		this.type = type;
 	}
 }

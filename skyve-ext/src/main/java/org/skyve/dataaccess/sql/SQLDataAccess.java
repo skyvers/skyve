@@ -3,6 +3,8 @@ package org.skyve.dataaccess.sql;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.persistence.SQL;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Provides direct SQL data access capabilities for executing raw SQL queries
  * outside of the standard Skyve persistence layer.
@@ -31,7 +33,7 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @param query the SQL query string to execute
 	 * @return a new {@link SQL} instance configured with the specified query and document binding
 	 */
-	public SQL newSQL(String moduleName, String documentName, String query);
+	public @Nonnull SQL newSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String query);
 
 	/**
 	 * Creates a new SQL query from a named query definition bound to a specific document.
@@ -41,7 +43,7 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @param queryName the name of the predefined query to use
 	 * @return a new {@link SQL} instance configured with the named query and document binding
 	 */
-	public SQL newNamedSQL(String moduleName, String documentName, String queryName);
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String documentName, @Nonnull String queryName);
 	
 	/**
 	 * Creates a new SQL query bound to a specific document.
@@ -50,7 +52,7 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @param query the SQL query string to execute
 	 * @return a new {@link SQL} instance configured with the specified query and document binding
 	 */
-	public SQL newSQL(Document document, String query);
+	public @Nonnull SQL newSQL(@Nonnull Document document, @Nonnull String query);
 
 	/**
 	 * Creates a new SQL query from a named query definition bound to a specific document.
@@ -59,7 +61,7 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @param queryName the name of the predefined query to use
 	 * @return a new {@link SQL} instance configured with the named query and document binding
 	 */
-	public SQL newNamedSQL(Document document, String queryName);
+	public @Nonnull SQL newNamedSQL(@Nonnull Document document, @Nonnull String queryName);
 	
 	/**
 	 * Creates a new standalone SQL query without document binding.
@@ -71,7 +73,7 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @param query the SQL query string to execute
 	 * @return a new {@link SQL} instance configured with the specified query
 	 */
-	public SQL newSQL(String query);
+	public @Nonnull SQL newSQL(@Nonnull String query);
 	
 	/**
 	 * Creates a new SQL query from a named query definition within a module.
@@ -80,7 +82,7 @@ public interface SQLDataAccess extends AutoCloseable {
 	 * @param queryName the name of the predefined query to use
 	 * @return a new {@link SQL} instance configured with the named query
 	 */
-	public SQL newNamedSQL(String moduleName, String queryName);
+	public @Nonnull SQL newNamedSQL(@Nonnull String moduleName, @Nonnull String queryName);
 	
 	/**
 	 * Commits the current transaction.

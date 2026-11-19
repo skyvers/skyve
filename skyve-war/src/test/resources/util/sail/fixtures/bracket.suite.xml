@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- A suite with a bracket (a set-up and a restore), for the harness's own tests. -->
+<suite xmlns="http://www.skyve.org/xml/sail">
+	<setUp file="setup.xml"/>
+	<member file="m1.xml"/>
+	<restore file="restore.xml" requires="setup.xml"/>
+</suite>

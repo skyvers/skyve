@@ -1,25 +1,27 @@
 package org.skyve.content;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Date;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 @SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
-public class AttachmentContentTest {
+class AttachmentContentTest {
 
-	@Rule
-	public TemporaryFolder tmp = new TemporaryFolder();
+	@TempDir
+	Path tmp;
 
 	private static AttachmentContent newAC(String attributeName) {
 		return new AttachmentContent("demo", "admin", "User", null, "user1", "biz1", attributeName);
@@ -28,7 +30,7 @@ public class AttachmentContentTest {
 	// ---- Constructor ----
 
 	@Test
-	public void testConstructorStoresFields() {
+	void testConstructorStoresFields() {
 		AttachmentContent ac = new AttachmentContent("cust", "mod", "doc", "dg", "uid", "bid", "photo");
 		assertEquals("cust", ac.getBizCustomer());
 		assertEquals("mod", ac.getBizModule());
@@ -39,22 +41,22 @@ public class AttachmentContentTest {
 		assertEquals("photo", ac.getAttributeName());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testConstructorRejectsCompoundAttributeName() {
-		newAC("parent.photo");
+	@Test
+	void testConstructorRejectsCompoundAttributeName() {
+		assertThrows(IllegalArgumentException.class, () -> newAC("parent.photo"));
 	}
 
 	// ---- attachment(fileName, MimeType, bytes) ----
 
 	@Test
-	public void testAttachmentMimeTypeAndBytesFluentReturn() {
+	void testAttachmentMimeTypeAndBytesFluentReturn() {
 		AttachmentContent ac = newAC("doc");
 		AttachmentContent returned = ac.attachment("report.pdf", MimeType.pdf, "hello".getBytes());
-		assertSame("attachment() must return this for fluent chaining", ac, returned);
+		assertSame(ac, returned, "attachment() must return this for fluent chaining");
 	}
 
 	@Test
-	public void testAttachmentMimeTypeAndBytesSetsFields() {
+	void testAttachmentMimeTypeAndBytesSetsFields() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("report.pdf", MimeType.pdf, "hello".getBytes());
 		assertEquals("report.pdf", ac.getFileName());
@@ -63,7 +65,7 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testAttachmentNullFileNameDerivesFromMimeType() {
+	void testAttachmentNullFileNameDerivesFromMimeType() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment(null, MimeType.pdf, "data".getBytes());
 		assertEquals("content.pdf", ac.getFileName());
@@ -73,8 +75,8 @@ public class AttachmentContentTest {
 	// ---- attachment(fileName, MimeType, file) ----
 
 	@Test
-	public void testAttachmentMimeTypeAndFile() throws Exception {
-		File f = tmp.newFile("test.pdf");
+	void testAttachmentMimeTypeAndFile() throws Exception {
+		File f = Files.createFile(tmp.resolve("test.pdf")).toFile();
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("report.pdf", MimeType.pdf, f);
 		assertEquals("report.pdf", ac.getFileName());
@@ -84,7 +86,7 @@ public class AttachmentContentTest {
 	// ---- attachment(fileName, String contentType, bytes) ----
 
 	@Test
-	public void testAttachmentStringContentTypeAndBytes() {
+	void testAttachmentStringContentTypeAndBytes() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("report.pdf", "application/pdf", "data".getBytes());
 		assertEquals("report.pdf", ac.getFileName());
@@ -92,7 +94,7 @@ public class AttachmentContentTest {
 	}
 
         @Test
-        public void testAttachmentNullFileNameUnrecognisedContentTypeDefaultsToContent() {
+        void testAttachmentNullFileNameUnrecognisedContentTypeDefaultsToContent() {
                 // covers L158: fileName==null, contentType not null but not a known MimeType
                 AttachmentContent ac = newAC("doc");
                 ac.attachment(null, "application/x-completely-unknown-fake-type", "data".getBytes());
@@ -102,8 +104,8 @@ public class AttachmentContentTest {
 	// ---- attachment(fileName, String contentType, file) ----
 
 	@Test
-	public void testAttachmentStringContentTypeAndFile() throws Exception {
-		File f = tmp.newFile("report.pdf");
+	void testAttachmentStringContentTypeAndFile() throws Exception {
+		File f = Files.createFile(tmp.resolve("report.pdf")).toFile();
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("report.pdf", "application/pdf", f);
 		assertEquals("report.pdf", ac.getFileName());
@@ -113,7 +115,7 @@ public class AttachmentContentTest {
 	// ---- attachment(fileNameWithStandardSuffix, bytes) ----
 
 	@Test
-	public void testAttachmentFileNameSuffixDerivesContentType() {
+	void testAttachmentFileNameSuffixDerivesContentType() {
 		AttachmentContent ac = newAC("img");
 		ac.attachment("image.png", "pngdata".getBytes());
 		assertEquals("image.png", ac.getFileName());
@@ -124,8 +126,8 @@ public class AttachmentContentTest {
 	// ---- attachment(fileNameWithStandardSuffix, file) ----
 
 	@Test
-	public void testAttachmentFileWithSuffixDerivesContentType() throws Exception {
-		File f = tmp.newFile("img.png");
+	void testAttachmentFileWithSuffixDerivesContentType() throws Exception {
+		File f = Files.createFile(tmp.resolve("img.png")).toFile();
 		AttachmentContent ac = newAC("img");
 		ac.attachment("img.png", f);
 		assertEquals("img.png", ac.getFileName());
@@ -135,14 +137,14 @@ public class AttachmentContentTest {
 	// ---- Filename sanitisation ----
 
 	@Test
-	public void testAttachmentFilenamePrefixPathIsStripped() {
+	void testAttachmentFilenamePrefixPathIsStripped() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("/tmp/report.pdf", "data".getBytes());
 		assertEquals("report.pdf", ac.getFileName());
 	}
 
 	@Test
-	public void testAttachmentFilenameInvalidCharsAreStripped() {
+	void testAttachmentFilenameInvalidCharsAreStripped() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("report<>.pdf", "data".getBytes());
 		assertEquals("report.pdf", ac.getFileName());
@@ -151,7 +153,7 @@ public class AttachmentContentTest {
 	// ---- getContentStream ----
 
 	@Test
-	public void testGetContentStreamFromBytes() throws Exception {
+	void testGetContentStreamFromBytes() throws Exception {
 		AttachmentContent ac = newAC("doc");
 		byte[] data = "hello world".getBytes();
 		ac.attachment("test.txt", "text/plain", data);
@@ -161,7 +163,7 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testGetContentLengthFromBytes() {
+	void testGetContentLengthFromBytes() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("test.txt", "text/plain", "hello world".getBytes());
 
@@ -169,8 +171,8 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testGetContentStreamFromFile() throws Exception {
-		File f = tmp.newFile("test.txt");
+	void testGetContentStreamFromFile() throws Exception {
+		File f = Files.createFile(tmp.resolve("test.txt")).toFile();
 		try (FileOutputStream out = new FileOutputStream(f)) {
 			out.write("file content".getBytes());
 		}
@@ -182,8 +184,8 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testGetContentLengthFromFile() throws Exception {
-		File f = tmp.newFile("length.txt");
+	void testGetContentLengthFromFile() throws Exception {
+		File f = Files.createFile(tmp.resolve("length.txt")).toFile();
 		try (FileOutputStream out = new FileOutputStream(f)) {
 			out.write("file content".getBytes());
 		}
@@ -194,14 +196,14 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testGetContentLengthWithoutAttachment() {
+	void testGetContentLengthWithoutAttachment() {
 		AttachmentContent ac = newAC("doc");
 
 		assertEquals(-1L, ac.getContentLength());
 	}
 
 	@Test
-	public void testGetContentStreamFromMissingFileReturnsEmpty() throws Exception {
+	void testGetContentStreamFromMissingFileReturnsEmpty() throws Exception {
 		File f = new File("/nonexistent_path_8392/missing_9281.txt");
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("missing.txt", "text/plain", f);
@@ -213,7 +215,7 @@ public class AttachmentContentTest {
 	// ---- getContentBytes ----
 
 	@Test
-	public void testGetContentBytesFromBytes() throws Exception {
+	void testGetContentBytesFromBytes() throws Exception {
 		AttachmentContent ac = newAC("doc");
 		byte[] data = "hello".getBytes();
 		ac.attachment("test.txt", "text/plain", data);
@@ -221,8 +223,8 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testGetContentBytesFromFile() throws Exception {
-		File f = tmp.newFile("test.txt");
+	void testGetContentBytesFromFile() throws Exception {
+		File f = Files.createFile(tmp.resolve("test.txt")).toFile();
 		try (FileOutputStream out = new FileOutputStream(f)) {
 			out.write("fromfile".getBytes());
 		}
@@ -234,7 +236,7 @@ public class AttachmentContentTest {
 	// ---- Cloning ----
 
 	@Test
-	public void testCloneForRemoteUpdate() throws Exception {
+	void testCloneForRemoteUpdate() throws Exception {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("test.pdf", MimeType.pdf, "content".getBytes());
 		ac.setContentId("cid-123");
@@ -250,7 +252,7 @@ public class AttachmentContentTest {
 	}
 
 	@Test
-	public void testCloneNewForPut() {
+	void testCloneNewForPut() {
 		AttachmentContent ac = newAC("doc");
 		ac.attachment("test.pdf", MimeType.pdf, "content".getBytes());
 		ac.setContentId("cid-123");
@@ -258,13 +260,13 @@ public class AttachmentContentTest {
 
 		assertEquals("test.pdf", clone.getFileName());
 		assertEquals(MimeType.pdf.toString(), clone.getContentType());
-		assertNull("cloneNewForPut must not copy contentId", clone.getContentId());
+		assertNull(clone.getContentId(), "cloneNewForPut must not copy contentId");
 	}
 
 	// ---- markup() fluent ----
 
 	@Test
-	public void testMarkupFluentAndGetter() {
+	void testMarkupFluentAndGetter() {
 		AttachmentContent ac = newAC("img");
 		AttachmentContent returned = ac.markup("<svg/>");
 		assertSame(ac, returned);
@@ -274,7 +276,7 @@ public class AttachmentContentTest {
 	// ---- Setters ----
 
 	@Test
-	public void testSetters() {
+	void testSetters() {
 		AttachmentContent ac = newAC("doc");
 
 		ac.setAttributeName("newAttr");
@@ -317,15 +319,15 @@ public class AttachmentContentTest {
 
 	// ---- externalAbsoluteFilePath() fluent ----
 
-	@Test(expected = IllegalArgumentException.class)
-	public void testExternalAbsoluteFilePathFluentThrowsIfNotExists() {
+	@Test
+	void testExternalAbsoluteFilePathFluentThrowsIfNotExists() {
 		AttachmentContent ac = newAC("doc");
-		ac.externalAbsoluteFilePath("/nonexistent_path_8392/missing_file_9281.pdf");
+		assertThrows(IllegalArgumentException.class, () -> ac.externalAbsoluteFilePath("/nonexistent_path_8392/missing_file_9281.pdf"));
 	}
 
 	@Test
-	public void testExternalAbsoluteFilePathFluentWithExistingFile() throws Exception {
-		File f = tmp.newFile("test.pdf");
+	void testExternalAbsoluteFilePathFluentWithExistingFile() throws Exception {
+		File f = Files.createFile(tmp.resolve("test.pdf")).toFile();
 		AttachmentContent ac = newAC("doc");
 		ac.externalAbsoluteFilePath(f.getAbsolutePath());
 		assertEquals(f.getAbsolutePath(), ac.getExternalAbsoluteFilePath());
@@ -335,13 +337,13 @@ public class AttachmentContentTest {
 	// ---- getMimeType() null-safety ----
 
 	@Test
-	public void testGetMimeTypeNullWhenNoContentType() {
+	void testGetMimeTypeNullWhenNoContentType() {
 		AttachmentContent ac = newAC("doc");
 		assertNull(ac.getMimeType());
 	}
 
         @Test
-        public void testAttachmentNullFileNameAndNullContentTypeDefaultsToContent() throws Exception {
+        void testAttachmentNullFileNameAndNullContentTypeDefaultsToContent() throws Exception {
                 AttachmentContent ac = newAC("doc");
                 // Call attachment(String, String, byte[]) with null fileName, null contentType
                 java.lang.reflect.Method m = AttachmentContent.class.getDeclaredMethod(
@@ -352,7 +354,7 @@ public class AttachmentContentTest {
         }
 
         @Test
-        public void testSerializationRoundTrip() throws Exception {
+        void testSerializationRoundTrip() throws Exception {
                 AttachmentContent ac = newAC("doc");
                 ac.attachment("hello.txt", MimeType.plain, "text content".getBytes());
                 // Serialise then deserialise — exercises writeReplace

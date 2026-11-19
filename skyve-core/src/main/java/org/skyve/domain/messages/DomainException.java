@@ -1,5 +1,8 @@
 package org.skyve.domain.messages;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * General-purpose Skyve framework exception for unrecoverable domain and infrastructure errors.
  *
@@ -30,7 +33,7 @@ public class DomainException extends SkyveException {
 	 * Creates a new DomainException instance.
 	 * @param message the message
 	 */
-	public DomainException(String message) {
+	public DomainException(@Nonnull String message) {
 		super(message);
 	}
 
@@ -38,7 +41,7 @@ public class DomainException extends SkyveException {
 	 * Creates a new DomainException instance.
 	 * @param t the t
 	 */
-	public DomainException(Throwable t) {
+	public DomainException(@Nonnull Throwable t) {
 		super(t);
 	}
 
@@ -47,7 +50,7 @@ public class DomainException extends SkyveException {
 	 * @param message the message
 	 * @param t the t
 	 */
-	public DomainException(String message, Throwable t) {
+	public DomainException(@Nonnull String message, @Nonnull Throwable t) {
 		super(message, t);
 	}
 
@@ -58,7 +61,7 @@ public class DomainException extends SkyveException {
 	 * @param enableSuppression the enableSuppression
 	 * @param writableStackTrace the writableStackTrace
 	 */
-	public DomainException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+	public DomainException(@Nonnull String message, @Nonnull Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
 		super(message, cause, enableSuppression, writableStackTrace);
 	}
 
@@ -67,7 +70,7 @@ public class DomainException extends SkyveException {
 	 * @param message the message
 	 * @param i18nValues the i18nValues
 	 */
-	public DomainException(String message, String... i18nValues) {
+	public DomainException(@Nonnull String message, @Nullable String... i18nValues) {
 		super(message, i18nValues);
 	}
 
@@ -77,7 +80,7 @@ public class DomainException extends SkyveException {
 	 * @param cause the cause
 	 * @param i18nValues the i18nValues
 	 */
-	public DomainException(String message, Throwable cause, String... i18nValues) {
+	public DomainException(@Nonnull String message, @Nonnull Throwable cause, @Nullable String... i18nValues) {
 		super(message, cause, i18nValues);
 	}
 
@@ -89,7 +92,7 @@ public class DomainException extends SkyveException {
 	 * @param writableStackTrace the writableStackTrace
 	 * @param i18nValues the i18nValues
 	 */
-	public DomainException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, String... i18nValues) {
+	public DomainException(@Nonnull String message, @Nonnull Throwable cause, boolean enableSuppression, boolean writableStackTrace, @Nullable String... i18nValues) {
 		super(message, cause, enableSuppression, writableStackTrace, i18nValues);
 	}
 
@@ -98,7 +101,7 @@ public class DomainException extends SkyveException {
 	 * @param message the message
 	 * @param i18n the i18n
 	 */
-	public DomainException(String message, boolean i18n) {
+	public DomainException(@Nonnull String message, boolean i18n) {
 		super(message, i18n);
 	}
 
@@ -110,7 +113,7 @@ public class DomainException extends SkyveException {
 	 * @param writableStackTrace the writableStackTrace
 	 * @param i18n the i18n
 	 */
-	public DomainException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace, boolean i18n) {
+	public DomainException(@Nonnull String message, @Nonnull Throwable cause, boolean enableSuppression, boolean writableStackTrace, boolean i18n) {
 		super(message, cause, enableSuppression, writableStackTrace, i18n);
 	}
 
@@ -120,7 +123,7 @@ public class DomainException extends SkyveException {
 	 * @param cause the cause
 	 * @param i18n the i18n
 	 */
-	public DomainException(String message, Throwable cause, boolean i18n) {
+	public DomainException(@Nonnull String message, @Nonnull Throwable cause, boolean i18n) {
 		super(message, cause, i18n);
 	}
 }

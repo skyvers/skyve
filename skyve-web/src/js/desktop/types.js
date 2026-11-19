@@ -1417,6 +1417,75 @@ isc.BizTimeItem.addMethods({
 	},
 });
 
+/**
+ * Implements BizDateOnlyDateTimeItem: the field of a date time (or timestamp) whose converter shows only the date
+ * (DD_MM_YYYY_DateTime, MM_DD_YYYY_Timestamp ...). Its value is a date time, so a value that is not changed keeps its
+ * time; a day typed or picked is that day's local midnight, and typing the day the value already has keeps its time.
+ * Extends BizDateTimeItem implemented above.
+ */
+isc.ClassFactory.defineClass("BizDateOnlyDateTimeItem", "BizDateTimeItem");
+
+isc.BizDateOnlyDateTimeItem.addProperties({
+	width: 100,
+	showPickerTimeItem: false,
+});
+
+isc.BizDateOnlyDateTimeItem.addMethods({
+	/**
+	 * Maps the text to a date time: the day's local midnight, or the current value when it is on that day.
+	 *
+	 * @param {string} value - the display value to map.
+	 * @returns {Date|null} - the date time, or null if the text is empty.
+	 */
+	mapDisplayToValue: function (value) {
+		const result = this.Super("mapDisplayToValue", arguments);
+		const current = this.getValue();
+		if (isc.isA.Date(result) && isc.isA.Date(current) &&
+				(result.getFullYear() === current.getFullYear()) &&
+				(result.getMonth() === current.getMonth()) &&
+				(result.getDate() === current.getDate())) {
+			return current;
+		}
+		return result;
+	},
+});
+
+// A date time type for each date-only converter: the type's name is the converter's date format and _DateTime (both the
+// date time and the timestamp converters of that format use it), see SmartClientAttributeDefinition
+[
+	["DD_MM_YYYY", "DD MM(M) YY(YY)"],
+	["DD_MMM_YYYY", "DD MM(M) YY(YY)"],
+	["MM_DD_YYYY", "MM(M) DD YY(YY)"],
+	["MMM_DD_YYYY", "MM(M) DD YY(YY)"],
+	["YYYY_MM_DD", "YY(YY) MM(M) DD"],
+].forEach(([format, hint]) => {
+	const itemClass = `${format}_DateTime_Item`;
+	isc.ClassFactory.defineClass(itemClass, "BizDateOnlyDateTimeItem");
+	isc[itemClass].addProperties({
+		hint: hint,
+		dateFormatter: `to${format}`,
+	});
+
+	isc.SimpleType.create({
+		name: `${format}_DateTime`,
+		inheritsFrom: "bizDateTime",
+		editorType: itemClass,
+
+		/**
+		 * Formats the internal date time value as its date only.
+		 *
+		 * @param {Date|string|null} internalValue - the value to be formatted.
+		 * @param {Object} field - the field definition.
+		 * @param {Object} component - the component displaying the value.
+		 * @param {Object} record - the record associated with the value.
+		 * @returns {string} - the formatted date.
+		 */
+		shortDisplayFormatter: function (internalValue, field, component, record) {
+			return isc.BizDateItem.format(internalValue, `to${format}`);
+		},
+	});
+});
+
 isc.SimpleType.create({
 	name: "bizTime",
 	inheritsFrom: "time",
@@ -1464,9 +1533,40 @@ isc.SimpleType.create({
 	},
 });
 
+// 12 hour times show AM and PM in upper case, as Skyve's converters (hh:mm a in English) write them
+isc.Time.addClassProperties({
+	AMIndicator: " AM",
+	PMIndicator: " PM",
+});
+
+/**
+ * Registers HH_MI_Item: a 12 hour time with its hour padded, as the converter writes it (02:47 PM).
+ * Extends BizTimeItem.
+ */
+isc.ClassFactory.defineClass("HH_MI_Item", "BizTimeItem");
+
+isc.HH_MI_Item.addProperties({
+	displayFormat: "toShortPaddedTime",
+	timeFormatter: "toShortPaddedTime",
+});
+
 isc.SimpleType.create({
 	name: "HH_MI",
 	inheritsFrom: "bizTime",
+	editorType: "HH_MI_Item",
+
+	/**
+	 * Formats the internal time value into the `HH_MI` format (`02:47 PM`).
+	 *
+	 * @param {Date|string|null} internalValue - the value to be formatted.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} component - the component instance.
+	 * @param {Object} record - the record object containing the value.
+	 * @returns {string} The formatted time string.
+	 */
+	shortDisplayFormatter: function (internalValue, field, component, record) {
+		return isc.Time.toShortTime(internalValue, "toShortPaddedTime", true);
+	},
 });
 
 /**
@@ -1478,8 +1578,8 @@ isc.ClassFactory.defineClass("HH_MI_SS_Item", "BizTimeItem");
 isc.HH_MI_SS_Item.addProperties({
 	use24HourTime: false,
 	hint: "HH:MI:SS am/pm",
-	dateFormatter: "toTime",
-	timeFormatter: "toTime",
+	dateFormatter: "toPaddedTime",
+	timeFormatter: "toPaddedTime",
 });
 
 isc.SimpleType.create({
@@ -1496,7 +1596,7 @@ isc.SimpleType.create({
 	 * @returns {string} The formatted time string.
 	 */
 	shortDisplayFormatter: function (internalValue, field, component, record) {
-		return isc.Time.toTime(internalValue, "toTime", true);
+		return isc.Time.toTime(internalValue, "toPaddedTime", true);
 	},
 });
 
@@ -1568,47 +1668,105 @@ isc.SimpleType.create({
  */
 isc.ClassFactory.defineClass("BizDecimal2Item", "TextItem");
 
+isc.BizDecimal2Item.addClassProperties({
+	_numberFormats: {}, // Intl number formats by places and style, made as they are needed
+});
+
 isc.BizDecimal2Item.addClassMethods({
 	/**
-	 * Parses the input value into a decimal number.
+	 * Returns an Intl number format for a number of places (en-US, as Skyve's converters write numbers: 1,234.56): it
+	 * rounds half up (away from zero) from the number's shortest decimal (1.005 is 1.01, not the 1.00 of its binary
+	 * fraction), and a value that rounds to zero shows no sign (0.00, not -0.00).
+	 *
+	 * @param {number} places - the decimal places shown.
+	 * @param {boolean} percent - true for a percentage (the value times 100 with a %).
+	 * @returns {{format: function(number): string}} - the format.
+	 */
+	numberFormat: function (places, percent) {
+		const key = places + (percent ? "%" : "");
+		let result = isc.BizDecimal2Item._numberFormats[key];
+		if (!result) {
+			// Not signDisplay "negative" for the zero, which browsers before Intl.NumberFormat v3 refuse (a RangeError)
+			const intl = new Intl.NumberFormat("en-US", {
+				style: percent ? "percent" : "decimal",
+				minimumFractionDigits: places,
+				maximumFractionDigits: places,
+				roundingMode: "halfExpand",
+			});
+			const zero = intl.format(0);
+			// a value that rounds to zero shows no sign: its magnitude shows as zero does
+			result = { format: (value) => (intl.format(Math.abs(value)) === zero ? zero : intl.format(value)) };
+			isc.BizDecimal2Item._numberFormats[key] = result;
+		}
+		return result;
+	},
+
+	/**
+	 * Reads a decimal number as the Java converters do: an optional -, ASCII digits with optional , grouping between
+	 * them (read leniently) and an optional . with places; anything else (a +, an exponent, a , not between digits such
+	 * as 1, or ,1, other text) is not a number.
+	 *
+	 * @param {string} text - the trimmed text.
+	 * @returns {string|null} - the number's text without grouping, or null if it is not a number.
+	 */
+	numberText: function (text) {
+		if (!/^-?(\d+(,\d+)*)?(\.\d*)?$/.test(text) || !/\d/.test(text)) {
+			return null;
+		}
+		return text.replace(/,/g, "");
+	},
+
+	/**
+	 * Rounds a number's text half up (away from zero) to a number of places, from its decimal digits.
+	 *
+	 * @param {string} text - the number's text, without grouping.
+	 * @param {number} places - the places to keep.
+	 * @returns {number} - the rounded number.
+	 */
+	roundText: function (text, places) {
+		const key = "round" + places;
+		let format = isc.BizDecimal2Item._numberFormats[key];
+		if (!format) {
+			format = new Intl.NumberFormat("en-US", { useGrouping: false, maximumFractionDigits: places, roundingMode: "halfExpand" });
+			isc.BizDecimal2Item._numberFormats[key] = format;
+		}
+		return Number(format.format(text)); // a string is formatted as its exact decimal
+	},
+
+	/**
+	 * Parses the input value into a decimal number as the Java converters read it (see numberText).
 	 *
 	 * @param {string|number|null} value - the input value, which can be a number or a string.
-	 * @returns {number|string} - the parsed float value, or an empty string if parsing fails.
+	 * @returns {number|string} - the parsed number, or an empty string if it is not a number.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
 		if (value) {
-			value = value.toString().trim().replace(/\$|\,/g, "");
-
-			if (isNaN(value)) {
+			const text = isc.BizDecimal2Item.numberText(value.toString().trim());
+			if (text === null) {
 				return "";
 			}
-
-			const result = parseFloat(value);
-
+			const result = parseFloat(text);
 			// Ensure the parsed number is within a reasonable range
-			return result >= 1e18 ? "" : result;
+			return Math.abs(result) >= 1e18 ? "" : result;
 		}
-
 		return "";
 	},
 
 	/**
-	 * Formats a given number to a localized string with the specified number of decimal places.
+	 * Formats a number with the specified number of decimal places, as the Java converters do (see numberFormat).
 	 *
 	 * @param {number|string|null} value - the value to format. If not a number, it is returned as is.
 	 * @param {number} decimalPlaces - the number of decimal places to format to.
-	 * @returns {string} - the formatted number as a localized string, or the original value if it's not a number.
+	 * @returns {string} - the formatted number, or the original value if it's not a number.
 	 */
 	format: function (value, decimalPlaces) {
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		return value.toLocalizedString(decimalPlaces, ".", ",", "-");
+		return isc.BizDecimal2Item.numberFormat(decimalPlaces, false).format(value);
 	},
 });
 
@@ -1633,7 +1791,7 @@ isc.BizDecimal2Item.addMethods({
 			return isc.emptyString;
 		}
 		if (!isc.isA.Number(value)) {
-			value = isc.BizDecimal2Item.parseInput(value);
+			value = this.getClass().parseInput(value);
 		}
 		return isc.BizDecimal2Item.format(value, this.decimalPlaces);
 	},
@@ -1648,7 +1806,7 @@ isc.BizDecimal2Item.addMethods({
 		if (isc.isAn.emptyString(value)) {
 			return null;
 		}
-		return isc.BizDecimal2Item.parseInput(value);
+		return this.getClass().parseInput(value);
 	},
 
 	/**
@@ -1671,7 +1829,7 @@ isc.BizDecimal2Item.addMethods({
 	 */
 	setValue: function (newValue) {
 		if (isc.isA.String(newValue)) {
-			newValue = isc.BizDecimal2Item.parseInput(newValue);
+			newValue = this.getClass().parseInput(newValue);
 		}
 		return this.Super("setValue", [newValue]);
 	},
@@ -2003,6 +2161,28 @@ isc.SimpleType.create({
  */
 isc.ClassFactory.defineClass("BizDollarsAndCentsItem", "BizDecimal2Item");
 
+isc.BizDollarsAndCentsItem.addClassMethods({
+	/**
+	 * Parses dollars as the Java converters read them: a number (see BizDecimal2Item.numberText), with or without a $
+	 * before it, or between a - and it ($1.00, $-1.00 and -$1.00).
+	 *
+	 * @param {string|number|null} value - the input value.
+	 * @returns {number|string} - the parsed number, or an empty string if it is not dollars.
+	 */
+	parseInput: function (value) {
+		if (isc.isA.Number(value) || !value) {
+			return isc.BizDecimal2Item.parseInput(value);
+		}
+		let text = value.toString().trim();
+		if (text.startsWith("-$")) {
+			text = "-" + text.substring(2).trim();
+		} else if (text.startsWith("$")) {
+			text = text.substring(1).trim();
+		}
+		return isc.BizDecimal2Item.parseInput(text);
+	},
+});
+
 isc.BizDollarsAndCentsItem.addProperties({
 	showHint: true,
 	showHintInField: true,
@@ -2067,6 +2247,93 @@ isc.SimpleType.create({
 });
 
 /**
+ * Implements the BizDollarsAndCentsAbsoluteItem widget: dollars and cents shown without a sign, as the Java converter
+ * (Decimal2DollarsAndCentsAbsolute) writes them, for entering positive dollars or showing a magnitude.
+ * Extends BizDollarsAndCentsItem implemented above.
+ */
+isc.ClassFactory.defineClass("BizDollarsAndCentsAbsoluteItem", "BizDollarsAndCentsItem");
+
+isc.BizDollarsAndCentsAbsoluteItem.addProperties({
+	hint: "$$$$$.cc",
+});
+
+isc.BizDollarsAndCentsAbsoluteItem.addMethods({
+	/**
+	 * Formats the value without its sign, with 2 decimal places.
+	 *
+	 * @param {number|string|null} value - the value to format.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	mapValueToDisplay: function (value) {
+		if (value == null) {
+			return isc.emptyString;
+		}
+		if (!isc.isA.Number(value)) {
+			value = isc.BizDecimal2Item.parseInput(value);
+		}
+		return isc.BizDecimal2Item.format(isc.isA.Number(value) ? Math.abs(value) : value, this.decimalPlaces);
+	},
+});
+
+isc.SimpleType.create({
+	name: "bizDollarsAndCentsAbsolute",
+	inheritsFrom: "float",
+	editorType: "BizDollarsAndCentsAbsoluteItem",
+	// a filter is signed dollars: -7.50 filters at -7.5 and shows -7.50 (see BizUtil.filterEditorType)
+	filterEditorType: "BizDollarsAndCentsItem",
+
+	/**
+	 * Formats the internal value for editing in the UI, without its sign.
+	 *
+	 * @param {number|null} internalValue - the raw currency value stored in the system.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} form - the form containing this field.
+	 * @param {Object} record - the record containing this field.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	editFormatter: function (internalValue, field, form, record) {
+		return this.shortDisplayFormatter(internalValue, field, form, record);
+	},
+
+	/**
+	 * Formats the internal value for normal (read-only) display in the UI, without its sign.
+	 *
+	 * @param {number|null} internalValue - the raw currency value stored in the system.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} component - the UI component displaying the field.
+	 * @param {Object} record - the record containing this field.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	normalDisplayFormatter: function (internalValue, field, component, record) {
+		return this.shortDisplayFormatter(internalValue, field, component, record);
+	},
+
+	/**
+	 * Converts the internal value to its magnitude with 2 decimal places (-1234.5 is "1,234.50").
+	 *
+	 * @param {number|null} internalValue - the raw currency value stored in the system.
+	 * @param {Object} field - the field definition.
+	 * @param {Object} component - the UI component displaying the field.
+	 * @param {Object} record - the record containing this field.
+	 * @returns {string} - the formatted magnitude.
+	 */
+	shortDisplayFormatter: function (internalValue, field, component, record) {
+		return isc.BizDollarsAndCentsItem.format(isc.isA.Number(internalValue) ? Math.abs(internalValue) : internalValue, 2);
+	},
+
+	/**
+	 * Validators to ensure the value is either null or a valid number.
+	 */
+	validators: [
+		{
+			type: "custom",
+			clientOnly: true,
+			condition: "(value == null) || isc.isA.Number(value)",
+		},
+	],
+});
+
+/**
  * Implements the BizIntegerPercentageItem widget.
  * Extends TextItem implemented above.
  */
@@ -2074,49 +2341,42 @@ isc.ClassFactory.defineClass("BizIntegerPercentageItem", "TextItem");
 
 isc.BizIntegerPercentageItem.addClassMethods({
 	/**
-	 * Parses the input value as a percentage.
-	 * If the value is a string, it removes any leading/trailing whitespace and the '%' sign.
-	 * Then, it converts the value to a float, divides it by 100, and returns the result.
-	 * If the value is invalid or exceeds the maximum threshold, `null` is returned.
+	 * Parses a percentage as the Java converters read it: a number (see BizDecimal2Item.numberText), with or without a
+	 * % at its end, rounded half up to the 0 place(s) shown, then divided by 100 (12% is 0.12).
 	 *
-	 * @param {string|number} value - the value to parse, which could be a string or a number.
-	 * @returns {number|null} - the parsed percentage as a float, or `null` if the value is invalid.
+	 * @param {string|number} value - the value to parse.
+	 * @returns {number|null} - the fraction, or null if it is not a percentage.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			value = value.toString().trim().trim("%");
-			if (isNaN(value)) {
-				return null;
-			} else {
-				let result = Math.round(parseFloat(value)) / 100;
-				// Ensure the result is not too large
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+		let text = value.toString().trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length - 1).trim();
+		}
+		text = isc.BizDecimal2Item.numberText(text);
+		if (text === null) {
+			return null;
+		}
+		const result = isc.BizDecimal2Item.roundText(text, 0) / 100;
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
-	 * Formats the value as a percentage.
-	 * The value is multiplied by 100 and localized for display, with a '%' symbol added at the end.
+	 * Formats the value as a percentage, as the Java converters do: times 100, 0 place(s), grouped, with a %.
 	 *
-	 * @param {number|string} value - the value to format as a percentage.
-	 * @returns {string} - the formatted percentage string, e.g., "12%" or "50.5%".
+	 * @param {number|string} value - the value to format.
+	 * @returns {string} - the formatted percentage, or the value if it is not a number.
 	 */
 	format: function (value) {
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		return (value * 100).toLocalizedString(0, ".", ",", "-") + "%";
+		return isc.BizDecimal2Item.numberFormat(0, true).format(value);
 	},
 });
 
@@ -2196,7 +2456,8 @@ isc.BizIntegerPercentageItem.addMethods({
 
 isc.SimpleType.create({
 	name: "bizIntegerPercentage",
-	inheritsFrom: "integer",
+	// a decimal: 12% is 0.12
+	inheritsFrom: "float",
 	editorType: "BizIntegerPercentageItem",
 
 	/**
@@ -2267,32 +2528,28 @@ isc.ClassFactory.defineClass(
 
 isc.BizSimplePercentageItem.addClassMethods({
 	/**
-	 * Parses the input value, converting it to a number (float) representation.
-	 * This method handles both strings (with or without the '%' sign) and numbers.
-	 * If the input is a valid percentage string, it converts it to a float and returns it.
+	 * Parses a whole number of percent as the Java converter (SimplePercentage) reads it: an optional + or - and digits,
+	 * with or without a % at the end (12% and 12 are 12); anything else is not a percentage.
 	 *
 	 * @param {string|number} value - the value to be parsed. Can be a string or a number.
-	 * @returns {number|null} - the parsed float value, or null if parsing fails.
+	 * @returns {number|null} - the number of percent, or null if it is not one.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			value = value.toString().trim(" ").trim("%");
-			if (isNaN(value)) {
-				return null;
-			} else {
-				let result = Math.round(parseFloat(value));
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+		let text = value.toString().trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length - 1).trim();
+		}
+		if (!/^[-+]?\d+$/.test(text)) {
+			return null;
+		}
+		const result = parseInt(text, 10);
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
@@ -2308,7 +2565,8 @@ isc.BizSimplePercentageItem.addClassMethods({
 			return value;
 		}
 
-		return value.toLocalizedString(0, ".", ",", "-") + "%";
+		// no thousands separator, as the Java converter (SimplePercentage) writes it and reads it back
+		return Math.round(value) + "%";
 	},
 });
 
@@ -2440,58 +2698,38 @@ isc.ClassFactory.defineClass("BizIntegerSeparatorItem", "TextItem");
 
 isc.BizIntegerSeparatorItem.addClassMethods({
 	/**
-	 * Parses the input value, ensuring that it is a valid number.
-	 * Removes commas and trims the string before converting it into a valid float.
+	 * Parses a whole number as the Java converters (IntegerSeparator, LongIntegerSeparator) read it: an optional + or -
+	 * and ASCII digits, with optional , grouping between them (read leniently); anything else is not a number.
 	 *
-	 * @param {string|number} value - the value to be parsed. Can be a string or a number.
-	 * @returns {number|null} - the parsed float or `null` if the value is invalid.
+	 * @param {string|number} value - the value to parse.
+	 * @returns {number|null} - the number, or null if it is not one.
 	 */
 	parseInput: function (value) {
-		// If the value is already a number, return it as is.
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		// If the value exists, process it.
-		if (value) {
-			// Remove commas and trim the string
-			value = value.toString().replace(/,/g, "").trim(" ");
-
-			// Check if the value is a valid number after removing commas.
-			if (isNaN(value)) {
-				return null;
-			} else {
-				// Round the parsed value and return it
-				let result = Math.round(parseFloat(value));
-
-				// If the result is too large, return null
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		}
-		// Return null if the value is empty
-		else {
+		if (!value) {
 			return null;
 		}
+		const text = value.toString().trim();
+		if (!/^[-+]?\d+(,\d+)*$/.test(text)) {
+			return null;
+		}
+		const result = parseInt(text.replace(/,/g, ""), 10);
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
-	 * Formats the value as a localized string with thousands separators.
-	 * If the value is a number, it is formatted and returned as a string.
+	 * Formats the number grouped in thousands, as the Java converters do (1,234,567).
 	 *
-	 * @param {number|string} value - the value to be formatted. Can be a number or a string.
-	 * @returns {string} - the formatted value as a string with thousands separators.
+	 * @param {number|string} value - the value to format.
+	 * @returns {string} - the formatted number, or the value if it is not a number.
 	 */
 	format: function (value) {
-		// If the value is not a number, return it as is.
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		// Format the value using a localized string with separators for thousands
-		return value.toLocalizedString(0, ".", ",", "-");
+		return isc.BizDecimal2Item.numberFormat(0, false).format(value);
 	},
 });
 
@@ -2654,49 +2892,42 @@ isc.ClassFactory.defineClass(
 
 isc.BizTwoDecimalPlacesPercentageItem.addClassMethods({
 	/**
-	 * Parses the input value, which can be a string or a number, and returns a float value.
-	 * The input string is trimmed, any percentage sign is removed, and the value is parsed as a float.
-	 * The result is rounded to two decimal places.
-	 * If the parsed value is too large or invalid, `null` is returned.
+	 * Parses a percentage as the Java converters read it: a number (see BizDecimal2Item.numberText), with or without a
+	 * % at its end, rounded half up to the 2 place(s) shown, then divided by 100 (12% is 0.12).
 	 *
-	 * @param {string|number} value - the input value to be parsed. It can be a string representing a percentage (e.g., "25%") or a number.
-	 * @returns {number|null} - the parsed float value, or `null` if the input is invalid or too large.
+	 * @param {string|number} value - the value to parse.
+	 * @returns {number|null} - the fraction, or null if it is not a percentage.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			value = value.toString().trim(" ").trim("%");
-			if (isNaN(value)) {
-				return null;
-			} else {
-				let result = Math.round(parseFloat(value) * 100) / 10000;
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+		let text = value.toString().trim();
+		if (text.endsWith("%")) {
+			text = text.substring(0, text.length - 1).trim();
+		}
+		text = isc.BizDecimal2Item.numberText(text);
+		if (text === null) {
+			return null;
+		}
+		const result = isc.BizDecimal2Item.roundText(text, 2) / 100;
+		return Math.abs(result) >= 1e18 ? null : result;
 	},
 
 	/**
-	 * Formats the value as a percentage, ensuring it's displayed with two decimal places.
-	 * If the value is a valid number, it's multiplied by 100 and formatted using `toLocalizedString` with two decimal places.
-	 * The formatted result includes a percentage sign ('%').
+	 * Formats the value as a percentage, as the Java converters do: times 100, 2 place(s), grouped, with a %.
 	 *
-	 * @param {string|number} value - the value to be formatted. It can be a number or a string representing a percentage.
-	 * @returns {string} - the formatted percentage string, or the original string if the value is not a valid number.
+	 * @param {number|string} value - the value to format.
+	 * @returns {string} - the formatted percentage, or the value if it is not a number.
 	 */
 	format: function (value) {
 		if (!isc.isA.Number(value)) {
 			return value;
 		}
-
-		return (value * 100).toLocalizedString(2, ".", ",", "-") + "%";
+		return isc.BizDecimal2Item.numberFormat(2, true).format(value);
 	},
 });
 
@@ -2819,51 +3050,43 @@ isc.ClassFactory.defineClass("BizTimeDurationItem", "TextItem");
 
 isc.BizTimeDurationItem.addClassMethods({
 	/**
-	 * Parses the input value and converts it to a float representing a time duration. It can handle:
-	 * - Decimal format (e.g., "2.5")
-	 * - time format with hours and minutes (e.g., "2:30" or "2 30")
+	 * Parses the input value as the Java converter (Decimal5TimeDuration) reads it: hours, a colon, then minutes, each
+	 * a decimal number (1:30 is 1.5 hours, 1:75 is 2.25 and -0:30 is -0.5: the sign is the hours' text's).
 	 *
 	 * @param {string|number} value - the input value to be parsed, either a string or a number.
-	 * @returns {number|null} - the parsed time duration as a float, or `null` if parsing fails.
+	 * @returns {number|null} - the parsed time duration in hours, or `null` if it is not a duration.
 	 */
 	parseInput: function (value) {
 		if (isc.isA.Number(value)) {
 			return value;
 		}
-
-		if (value) {
-			// Look for a decimal formatted match (e.g., "2.5")
-			let match = /^\s*\s*([-+]?\d+)\s*\.\s*(\d?\d)?\s*$/.exec(value); // sign, 1 or more digits, a decimal point, 1 or 2 digits
-			if (match) {
-				let result = parseFloat(match[1] + "." + (match[2] | 0));
-				if (result >= 1000000000000000000.0) {
-					result = null;
-				}
-				return result;
-			}
-
-			// Look for a time formatted match (e.g., "2 30" or "2:30")
-			match = /^\s*\s*([-+]?\d+)\s*\D?\s*(\d?\d)?\s*$/.exec(value); // sign, 1 or more digits, any non digit, 1 or 2 digits
-			if (match) {
-				const hours = parseInt(match[1] | 0, 10);
-				const minutes = Math.min(parseInt(match[2] | 0, 10), 59);
-				if (hours >= 0) {
-					return hours + minutes / 60.0;
-				}
-				return hours - minutes / 60.0;
-			} else {
-				return null;
-			}
-		} else {
+		if (!value) {
 			return null;
 		}
+
+		const text = value.toString().trim();
+		const colon = text.indexOf(":");
+		if (colon < 0) {
+			return null;
+		}
+		const hoursText = text.substring(0, colon).trim();
+		const minutesText = text.substring(colon + 1).trim();
+		const decimal = /^[-+]?(\d+\.?\d*|\.\d+)$/;
+		if (!decimal.test(hoursText) || !decimal.test(minutesText)) {
+			return null;
+		}
+
+		const hours = Number(hoursText);
+		const minutes = Number(minutesText) / 60.0;
+		const result = (hoursText.charAt(0) === "-") ? hours - minutes : hours + minutes;
+		return (Math.abs(result) >= 1000000000000000000.0) ? null : result;
 	},
 
 	/**
-	 * Formats the time duration value into a string with hours and minutes. It formats the value as:
-	 * - Positive values: "H:MM"
-	 * - Negative values: "-H:MM"
-	 * It ensures that the minutes part is always two digits (e.g., "02" instead of "2").
+	 * Formats the time duration value as the Java formatter (TimeDurationFormatter) does: the hours truncated, a colon,
+	 * then the minutes rounded once, half up, from the exact fraction of an hour, with a sign for a negative duration:
+	 * 1.26 is 1:16, 0.49166 is 0:29, 0.99999 is 1:00 and -0.01 is -0:01. The value is a Decimal5, so it is taken as a
+	 * whole number of hundred-thousandths of an hour, and the minutes are worked out in whole numbers.
 	 *
 	 * @param {number} value - the time duration to be formatted.
 	 * @returns {string} - the formatted time duration string (e.g., "2:30", "-2:30").
@@ -2873,25 +3096,17 @@ isc.BizTimeDurationItem.addClassMethods({
 			return value;
 		}
 
-		let decimalMinutes;
-		let hours;
-		if (value >= 0) {
-			hours = Math.floor(value);
-			decimalMinutes = value - hours;
-		} else {
-			hours = Math.ceil(value);
-			decimalMinutes = Math.abs(value - hours);
+		const units = Math.round(Math.abs(value) * 100000);
+		let hours = Math.trunc(units / 100000);
+		// (fraction * 60) / 100000 minutes, plus a half, rounded down: half up
+		let minutes = Math.floor(((units % 100000) * 60 + 50000) / 100000);
+		if (minutes === 60) {
+			minutes = 0;
+			hours++;
 		}
 
-		let stringMinutes = Math.round(decimalMinutes * 60).toString();
-		if (stringMinutes == "60") {
-			hours = value >= 0 ? hours + 1 : hours - 1;
-			stringMinutes = "00";
-		} else if (stringMinutes.length == 1) {
-			stringMinutes = "0" + stringMinutes;
-		}
-
-		return hours + ":" + stringMinutes;
+		const sign = (value < 0) && ((hours > 0) || (minutes > 0)) ? "-" : "";
+		return sign + hours + ":" + String(minutes).padStart(2, "0");
 	},
 });
 
@@ -3233,6 +3448,8 @@ isc.BizContentImageItem.addMethods({
 		// Ensure the image is updated only if the canvas is initialized and the value is not user-set
 		if (this.canvas != null && !this.userSetValue) {
 			if (newValue) {
+				// A thumbnail sized to the box (-20 for the border), rounded up so few sizes are cached
+				const size = SKYVE.Util.contentPreviewSize(this._img.getWidth() - 20, this._img.getHeight() - 20);
 				// Construct the URL with required query parameters
 				const url =
 					SKYVE.Util.CONTEXT_URL +
@@ -3245,9 +3462,9 @@ isc.BizContentImageItem.addMethods({
 					"&_b=" +
 					SKYVE.Util.unsanitiseBinding(this.name) +
 					"&_w=" +
-					(this._img.getWidth() - 20) + // -20 for the border
+					size +
 					"&_h=" +
-					(this._img.getHeight() - 20); // -20 for the border
+					size;
 				// Update the image source
 				this._img.setSrc(url);
 			} else {
@@ -3534,13 +3751,9 @@ isc.BizContentItem.addMethods({
 				const kind = this._resolveMediaKind();
 				this._currentMediaKind = kind;
 				if (kind === "image") {
-					let imageUrl = url;
-					if (typeof this._previewWidth === "number") {
-						imageUrl += "&_w=" + this._previewWidth;
-					}
-					if (typeof this._previewHeight === "number") {
-						imageUrl += "&_h=" + this._previewHeight;
-					}
+					// A thumbnail sized to the box, rounded up so few sizes are cached; the link opens the original
+					const size = SKYVE.Util.contentPreviewSize(this._previewWidth, this._previewHeight);
+					const imageUrl = url + "&_w=" + size + "&_h=" + size;
 					this._preview.setContents(
 						`<a href="${url}" target="_blank"><img src="${imageUrl}" style="border:1px solid #bfbfbf;${this._previewMediaStyle("1 / 1")}object-fit:contain"/></a>`,
 					);
@@ -3695,6 +3908,34 @@ isc.BizLookupDescriptionItem.addMethods({
 					optionDataSource._drop = true;
 				}
 				this.Super("showPicker");
+			},
+
+			/**
+			 * Sets the value map without refetching a hidden pick list.
+			 * SmartClient's setValueMap() sets an existing pick list up again, which fetches from the
+			 * server even while the pick list is hidden. The edit view sets the value map on every
+			 * response, and showing the pick list (by the picker or by typing) sets it up and filters
+			 * again, so that fetch is wasted. Instead the hidden pick list's rows are dropped, so the
+			 * next filter fetches rather than reusing rows from before the response.
+			 * A visible pick list keeps SmartClient's behaviour.
+			 *
+			 * @override
+			 * @returns {void}
+			 */
+			setValueMap: function () {
+				const pickList = this.pickList;
+				if (pickList && !pickList.isVisible()) {
+					pickList.setData([]);
+					delete pickList.formItem; // set up again when next shown, as SmartClient does
+					this.pickList = null;
+					try {
+						this.Super("setValueMap", arguments);
+					} finally {
+						this.pickList = pickList;
+					}
+				} else {
+					this.Super("setValueMap", arguments);
+				}
 			},
 
 			/**
@@ -3957,7 +4198,7 @@ isc.BizLookupDescriptionItem.addMethods({
 					this.setRequired(false);
 				}
 
-				const instance = this._view.gather(true);
+				const instance = this._view.gather(true, true);
 				if (instance) {
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {
@@ -3979,7 +4220,7 @@ isc.BizLookupDescriptionItem.addMethods({
 				}
 			} else {
 				// Handle case for zooming into an existing record
-				const instance = this._view.gather(true);
+				const instance = this._view.gather(true, true);
 				if (instance) {
 					// Apply changes before zooming in
 					if (instance._apply || this._view._vm.valuesHaveChanged()) {
@@ -4654,4 +4895,47 @@ isc.SimpleType.create({
 	inheritsFrom: "canvas",
 	editorType: "GeometryMapItem",
 	validOperators: isc.GeometryItem.validOperators,
+});
+
+/**
+ * A number typed into a list grid's filter row that the Java converter would refuse (+5, $5 in a column that is not
+ * dollars, 1e3, 1,000% for a whole percentage) is not dropped from the filter: the item keeps the text and remembers
+ * it (_refusedText), and the grid shows an error and does not filter (see BizListGrid's filterEditorSubmit). Elsewhere
+ * (forms, and the advanced filter's clauses, which would drop the clause while showing the text) a refused number
+ * leaves the field empty, as it is filtered.
+ */
+[
+	"BizDecimal2Item",
+	"BizDollarsAndCentsAbsoluteItem",
+	"BizIntegerPercentageItem",
+	"BizSimplePercentageItem",
+	"BizIntegerSeparatorItem",
+	"BizTwoDecimalPlacesPercentageItem",
+	"BizTimeDurationItem",
+].forEach((className) => {
+	const prototype = isc[className].getPrototype();
+	const mapDisplayToValue = prototype.mapDisplayToValue;
+	const mapValueToDisplay = prototype.mapValueToDisplay;
+	const setValue = prototype.setValue;
+	isc[className].addMethods({
+		mapDisplayToValue: function (value) {
+			const result = mapDisplayToValue.call(this, value);
+			const typed = value == null ? "" : String(value).trim();
+			// only in a list grid's filter row (a RecordEditor), which checks before it filters
+			const grid = this.grid || (this.form && this.form.grid);
+			const filterRow = isc.isA.RecordEditor(grid) && grid.isAFilterEditor();
+			this._refusedText = filterRow && typed !== "" && !isc.isA.Number(result) ? typed : null;
+			// no value (an empty string, not null, which would clear the item and its text)
+			return this._refusedText ? "" : result;
+		},
+
+		mapValueToDisplay: function (value) {
+			return this._refusedText && (value == null || value === "") ? this._refusedText : mapValueToDisplay.call(this, value);
+		},
+
+		setValue: function () {
+			this._refusedText = null;
+			return setValue.apply(this, arguments);
+		},
+	});
 });

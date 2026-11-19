@@ -2,6 +2,7 @@ package org.skyve.impl.web.filter;
 
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterConfig;
 import jakarta.servlet.ServletException;
@@ -23,7 +24,7 @@ public abstract class ExcludeStaticFilter implements Filter {
 	 * @throws ServletException when filter initialization fails
 	 */
 	@Override
-	public void init(FilterConfig config) throws ServletException {
+	public void init(@SuppressWarnings("null") @Nonnull FilterConfig config) throws ServletException {
 		String urls = Util.processStringValue(config.getServletContext().getInitParameter("staticURLPrefixes"));
 		if (urls != null) {
 			staticURLPrefixes = urls.split("\n");
@@ -46,7 +47,7 @@ public abstract class ExcludeStaticFilter implements Filter {
 	 * @param request	The request to check
 	 * @return	true if the request is to a static web resource (as defined in web.xml "staticURLPrefixes" context-param), otherwise false.
 	 */
-	protected boolean staticURLPrefix(HttpServletRequest request) {
+	protected boolean staticURLPrefix(@Nonnull HttpServletRequest request) {
 		String servletPath = request.getServletPath();
 
         // Test if this URL is a static URL prefix in the web.xml, and bug out if so

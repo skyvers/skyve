@@ -1,12 +1,19 @@
 package modules.admin.domain;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Arrays;
+
 import org.junit.jupiter.api.Test;
+import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder;
+import org.skyve.impl.web.faces.pipeline.layout.LayoutBuilder;
+import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.util.DataBuilder;
 import org.skyve.util.test.SkyveFixture.FixtureType;
 
@@ -70,14 +77,6 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
 		ControlPanel bean = ControlPanel.newInstance();
 		bean.setSailTestStrategy(ControlPanel.SailTestStrategy.Verify);
 		assertEquals(ControlPanel.SailTestStrategy.Verify, bean.getSailTestStrategy());
-	}
-
-	@Test
-	@SuppressWarnings("static-method")
-	void sailExecutorPrimeFacesSetAndGet() {
-		ControlPanel bean = ControlPanel.newInstance();
-		bean.setSailExecutor(ControlPanel.SailExecutor.primeFacesInlineSelenese);
-		assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese, bean.getSailExecutor());
 	}
 
 	@Test
@@ -331,8 +330,24 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void sailExecutorEnumFromCode() {
-		assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese,
-				ControlPanel.SailExecutor.fromCode("org.skyve.impl.sail.execution.PrimeFacesInlineSeleneseExecutor"));
+		assertEquals(ControlPanel.SailExecutor.primeFacesInlineWebDriver,
+				ControlPanel.SailExecutor.fromCode("org.skyve.impl.sail.execution.pf.PrimeFacesInlineWebDriverExecutor"));
+	}
+
+	/**
+	 * ExecuteSAIL loads the executor named by the enum's code and calls its first constructor with the component and
+	 * layout builders, so each code must name such an executor (the codes once named classes that had moved).
+	 */
+	@Test
+	@SuppressWarnings("static-method")
+	void sailExecutorCodesNameExecutorsTakingTheBuilders() {
+		assertAll(Arrays.stream(ControlPanel.SailExecutor.values()).map(executor -> () -> {
+			Class<?> type = Class.forName(executor.toCode());
+			assertTrue(Executor.class.isAssignableFrom(type), executor + " is an Executor");
+			assertArrayEquals(new Class<?>[] {ComponentBuilder.class, LayoutBuilder.class},
+								type.getConstructors()[0].getParameterTypes(),
+								executor + "'s first constructor takes the component and layout builders");
+		}));
 	}
 
 	@Test
@@ -404,14 +419,14 @@ class ControlPanelDomainTest extends AbstractSkyveTest {
         @Test
         @SuppressWarnings("static-method")
         void sailExecutorToLocalisedDescription() {
-                assertNotNull(ControlPanel.SailExecutor.primeFacesInlineSelenese.toLocalisedDescription());
+                assertNotNull(ControlPanel.SailExecutor.primeFacesInlineWebDriver.toLocalisedDescription());
         }
 
         @Test
         @SuppressWarnings("static-method")
         void sailExecutorFromLocalisedDescription() {
-                String desc = ControlPanel.SailExecutor.primeFacesInlineSelenese.toLocalisedDescription();
-                assertEquals(ControlPanel.SailExecutor.primeFacesInlineSelenese,
+                String desc = ControlPanel.SailExecutor.primeFacesInlineWebDriver.toLocalisedDescription();
+                assertEquals(ControlPanel.SailExecutor.primeFacesInlineWebDriver,
                                 ControlPanel.SailExecutor.fromLocalisedDescription(desc));
         }
 

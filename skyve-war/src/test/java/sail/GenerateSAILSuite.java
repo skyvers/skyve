@@ -22,6 +22,7 @@ import modules.admin.domain.User;
 public class GenerateSAILSuite extends Job {
 	private static String baseSailXMLPath = "C:/_/skyve/skyve-core/src/test/resources/schemas/";
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Override
 	public void execute() throws Exception {
 
@@ -45,12 +46,10 @@ public class GenerateSAILSuite extends Job {
 
 					for (UserAgentType uat : UserAgentType.values()) {
 						switch (uat) {
-						case desktop:
-						case other:
+						case desktop, other:
 							// do nothing
 							break;
-						case phone:
-						case tablet:
+						case phone, tablet:
 							generateSAIL(u, "admin", uxui, uat, testStrategy);
 							break;
 						default:
@@ -66,16 +65,17 @@ public class GenerateSAILSuite extends Job {
 			throws Exception {
 
 		// check that the module folder exists, and if not, create it
-		File module_directory = new File(String.format("%s%s", baseSailXMLPath, moduleName));
-		if (!module_directory.exists()) {
-			module_directory.mkdir();
+		File moduleDirectory = new File(String.format("%s%s", baseSailXMLPath, moduleName));
+		if (!moduleDirectory.exists()) {
+			moduleDirectory.mkdir();
 		}
 
 		// generate the SAIL XML to a named file
+		@SuppressWarnings("null") // uses a nullable result where the API expects non-null
 		Automation menuSail = Generator.visitMenu(user, moduleName, uxui.getName(), uat, testStrategy);
 		String xmlMenuSail = XMLMetaData.marshalSAIL(menuSail);
 		String menuFileName = String.format("sail_menu_%s_%s_%s.xml", uxui.getName(), uat.name(), user.getName());
-//		Path menuPath = Paths.get(String.format("%s%s%s", module_directory, File.separator, menuFileName));
+//		Path menuPath = Paths.get(String.format("%s%s%s", moduleDirectory, File.separator, menuFileName));
 		try (FileOutputStream menuOutputStream = new FileOutputStream(menuFileName)) {
 			menuOutputStream.write(xmlMenuSail.getBytes());
 		}
@@ -83,7 +83,7 @@ public class GenerateSAILSuite extends Job {
 		Automation moduleSail = Generator.visitMenu(user, moduleName, uxui.getName(), uat, testStrategy);
 		String xmlModouleSail = XMLMetaData.marshalSAIL(moduleSail);
 		String moduleFileName = String.format("sail_menu_%s_%s_%s.xml", uxui.getName(), uat.name(), user.getName());
-		Path modulePath = Paths.get(String.format("%s%s%s", module_directory, File.separator, moduleFileName));
+		Path modulePath = Paths.get(String.format("%s%s%s", moduleDirectory, File.separator, moduleFileName));
 		try (FileOutputStream moduleOutputStream = new FileOutputStream(menuFileName)) {
 			moduleOutputStream.write(xmlMenuSail.getBytes());
 		}

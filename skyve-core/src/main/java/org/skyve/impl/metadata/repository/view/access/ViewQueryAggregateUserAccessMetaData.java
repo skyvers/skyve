@@ -6,6 +6,8 @@ import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.module.Module;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -25,17 +27,17 @@ public class ViewQueryAggregateUserAccessMetaData extends ViewUserAccessMetaData
 
 	private String queryName;
 
-	public String getQueryName() {
+	public @Nonnull String getQueryName() {
 		return queryName;
 	}
 
 	@XmlAttribute(name = "query", required = true)
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nonnull String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 	
 	@Override
-	public void validate(String metaDataName, Module module) {
+	public void validate(@Nonnull String metaDataName, @Nonnull Module module) {
 		if (queryName == null) {
 			throw new MetaDataException(metaDataName + " : [query] is required for all queryAggregate user accesses.");
 		}
@@ -46,7 +48,7 @@ public class ViewQueryAggregateUserAccessMetaData extends ViewUserAccessMetaData
 	}
 
 	@Override
-	public UserAccess toUserAccess(String moduleName, String documentName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName, @Nullable String documentName) {
 		return UserAccess.queryAggregate(moduleName, queryName);
 	}
 }

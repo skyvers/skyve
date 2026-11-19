@@ -189,6 +189,12 @@ public abstract class DomainGenerator {
 	
 	protected boolean write;
 	protected boolean debug;
+	/**
+	 * Whether metadata validation is on for this run - {@link #generate(boolean, boolean, boolean, DialectOptions, String, String, String, String, String...)}
+	 * sets it from its validate flag before generating. Checks that only validate, rather than being needed
+	 * to generate a working domain, warn instead of failing when it is off. Defaults to on.
+	 */
+	protected boolean validate = true;
 	protected boolean multiTenant;
 	protected String srcPath;
 	protected String generatedSrcPath;
@@ -206,16 +212,16 @@ public abstract class DomainGenerator {
 	protected DomainGenerator(boolean write,
 								boolean debug,
 								boolean multiTenant,
-								DialectOptions dialectOptions,
-								String srcPath,
-								String generatedSrcPath,
-								String testPath,
-								String generatedTestPath,
-								String[] excludedModules) {
+								@Nonnull DialectOptions dialectOptions,
+								@Nonnull String srcPath,
+								@Nonnull String generatedSrcPath,
+								@Nonnull String testPath,
+								@Nonnull String generatedTestPath,
+								@Nullable String[] excludedModules) {
 		this.write = write;
 		this.debug = debug;
 		this.multiTenant = multiTenant;
-		this.repository = ProvidedRepositoryFactory.get();
+		this.repository = ProvidedRepositoryFactory.get(); // tooling and tests can install the repository afterwards
 		this.dialectOptions = dialectOptions;
 		this.srcPath = srcPath;
 		this.generatedSrcPath = generatedSrcPath;
@@ -277,6 +283,9 @@ public abstract class DomainGenerator {
 				repository.validateDocumentForGenerateDomain(customer, document);
 				for (UxUiMetadata uxui : router.getUxUis()) {
 					String uxuiName = uxui.getName();
+					if (uxuiName == null) {
+						throw new MetaDataException("The router defines a UX/UI with no name.");
+					}
 					if (debug) System.out.println("Get edit view for document " + documentName + " and uxui " + uxuiName);
 					View view = repository.getView(uxuiName, customer, document, ViewType.edit.toString());
 					if (view != null) {
@@ -297,15 +306,15 @@ public abstract class DomainGenerator {
 	public abstract void generate() throws Exception;
 
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	public static final DomainGenerator newDomainGenerator(boolean write,
-															boolean debug,
-															boolean multiTenant,
-															DialectOptions dialectOptions,
-															String srcPath,
-															String generatedSrcPath,
-															String testPath,
-															String generatedTestPath,
-															String... excludedModules) {
+	public static final @Nonnull DomainGenerator newDomainGenerator(boolean write,
+																	boolean debug,
+																	boolean multiTenant,
+																	@Nonnull DialectOptions dialectOptions,
+																	@Nonnull String srcPath,
+																	@Nonnull String generatedSrcPath,
+																	@Nonnull String testPath,
+																	@Nonnull String generatedTestPath,
+																	@Nullable String... excludedModules) {
 		return new OverridableDomainGenerator(write,
 												debug,
 												multiTenant,
@@ -321,7 +330,7 @@ public abstract class DomainGenerator {
 	 * Validate a customer.
 	 */
 	@SuppressWarnings("java:S106") // command line utility can use stdout/stderr
-	public static void validate(String customerName) {
+	public static void validate(@Nonnull String customerName) {
 		long millis = System.currentTimeMillis();
 		DomainGenerator jenny = DomainGenerator.newDomainGenerator(false, false, false, DialectOptions.H2_NO_INDEXES, "", "", "", "", "");
 		try {
@@ -368,12 +377,12 @@ public abstract class DomainGenerator {
 	public static void generate(boolean validate,
 									boolean debug,
 									boolean multiTenant,
-									DialectOptions dialectOptions,
-									String srcPath,
-									String generatedSrcPath,
-									String testPath,
-									String generatedTestPath,
-									String... excludedModules)
+									@Nonnull DialectOptions dialectOptions,
+									@Nonnull String srcPath,
+									@Nonnull String generatedSrcPath,
+									@Nonnull String testPath,
+									@Nonnull String generatedTestPath,
+									@Nullable String... excludedModules)
 	throws Exception {
 		System.out.println("SRC PATH=" + srcPath);
 		System.out.println("GENERATED SRC PATH=" + generatedSrcPath);
@@ -414,6 +423,7 @@ public abstract class DomainGenerator {
 		ProvidedRepository repository = new LocalDesignRepository();
 		ProvidedRepositoryFactory.set(repository);
 		DomainGenerator jenny = newDomainGenerator(true, debug, multiTenant, dialectOptions, srcPath, generatedSrcPath, testPath, generatedTestPath, excludedModules);
+		jenny.validate = validate;
 
 		if (validate) {
 			// validate all customers before generation
@@ -457,7 +467,7 @@ public abstract class DomainGenerator {
 	 * @throws Exception
 	 */
 	@SuppressWarnings({"java:S3776", "java:S106"}) // Complexity OK, command line utility can use stdout/stderr
-	public static void main(String[] args) throws Exception {
+	public static void main(@Nonnull String[] args) throws Exception {
 		if (args.length < 5) {
 			System.err.println("You must have at least the validate flag, src path, generated path, test path and generated test path as arguments"
 					+ " - usually \"true src/main/java/ src/generated/java/ src/test/java/ src/generatedTest/java/\"");

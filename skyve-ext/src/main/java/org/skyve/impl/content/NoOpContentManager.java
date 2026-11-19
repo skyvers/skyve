@@ -5,6 +5,9 @@ import org.skyve.content.BeanContent;
 import org.skyve.content.ContentIterable;
 import org.skyve.content.SearchResults;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * No-operation {@link AbstractContentManager} implementation that silently
  * discards all content store operations.
@@ -14,43 +17,43 @@ import org.skyve.content.SearchResults;
  */
 public class NoOpContentManager extends AbstractContentManager {
 	@Override
-	public void put(BeanContent content) throws Exception {
+	public void put(@Nonnull BeanContent content) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public void put(AttachmentContent content, boolean index) throws Exception {
+	public void put(@Nonnull AttachmentContent content, boolean index) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public void update(AttachmentContent content) throws Exception {
+	public void update(@Nonnull AttachmentContent content) throws Exception {
 		// no-op
 	}
 	
 	@Override
-	public void reindex(AttachmentContent attachment, boolean index) throws Exception {
+	public void reindex(@Nonnull AttachmentContent attachment, boolean index) throws Exception {
 		// no-op
 	}
 	
 	@Override
-	public AttachmentContent getAttachment(String contentId) throws Exception {
+	public @Nullable AttachmentContent getAttachment(@Nonnull String contentId) throws Exception {
 		// no-op
 		return null;
 	}
 
 	@Override
-	public void removeBean(String bizId) throws Exception {
+	public void removeBean(@Nonnull String bizId) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public void removeAttachment(String contentId) throws Exception {
+	public void removeAttachment(@Nonnull String contentId) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public SearchResults google(String search, int maxResults) throws Exception {
+	public @Nonnull SearchResults google(@Nullable String search, int maxResults) throws Exception {
 		// no-op
 		return null;
 	}
@@ -61,22 +64,22 @@ public class NoOpContentManager extends AbstractContentManager {
 	}
 	
 	@Override
-	public void truncateIndexing(String customerName) throws Exception {
+	public void truncateIndexing(@Nonnull String customerName) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public void truncateAttachmentIndexing(String customerName) throws Exception {
+	public void truncateAttachmentIndexing(@Nonnull String customerName) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public void truncateBeanIndexing(String customerName) throws Exception {
+	public void truncateBeanIndexing(@Nonnull String customerName) throws Exception {
 		// no-op
 	}
 
 	@Override
-	public ContentIterable all() throws Exception {
+	public @Nonnull ContentIterable all() throws Exception {
 		// no-op
 		return null;
 	}

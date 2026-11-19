@@ -1,0 +1,9 @@
+/*
+	PrimeVue's Lara theme, in the primevue cascade layer.
+	Lara defines :root variables (--primary-color, --surface-*, --text-color, --font-family etc) with
+	the same names as the PrimeFaces themes and layouts use (eg ultima and ecuador). Unlayered, Lara's
+	values would override the page's theme wherever the Vue list grid is loaded. In the layer, the
+	page's (unlayered) theme variables win, and the Vue components pick them up where they use them.
+	Templates that remap the variables for the grid (eg editorial's vue.css) still do so.
+*/
+@import "primevue/resources/themes/lara-light-blue/theme.css" layer(primevue);

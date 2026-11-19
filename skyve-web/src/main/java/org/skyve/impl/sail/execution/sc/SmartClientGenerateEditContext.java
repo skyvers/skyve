@@ -3,6 +3,8 @@ package org.skyve.impl.sail.execution.sc;
 import org.skyve.impl.sail.execution.GenerateEditContext;
 import org.skyve.metadata.sail.language.step.context.PushEditContext;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Edit context generation in a SmartClient UI.
  * <p>
@@ -11,5 +13,5 @@ import org.skyve.metadata.sail.language.step.context.PushEditContext;
  * @param pushEditContext the edit context to push
  */
 public record SmartClientGenerateEditContext(
-		PushEditContext pushEditContext) implements GenerateEditContext {
+		@Nonnull PushEditContext pushEditContext) implements GenerateEditContext {
 }

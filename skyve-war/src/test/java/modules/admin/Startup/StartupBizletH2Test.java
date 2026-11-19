@@ -50,6 +50,7 @@ class StartupBizletH2Test extends AbstractH2Test {
 		assertThat(e.getMessages().get(0).getText(), containsString("3 characters"));
 	}
 
+	@SuppressWarnings("null") // passes null on purpose
 	@Test
 	void testPreRerenderMapTypeLeafletSetsSupportedOpenStreetMapLayer() throws Exception {
 		// setup the test data
@@ -63,8 +64,9 @@ class StartupBizletH2Test extends AbstractH2Test {
 		assertThat(bean.getMapLayer(), containsString("referrerPolicy: 'strict-origin-when-cross-origin'"));
 	}
 
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	@Test
-	void testMapLayerFieldCanHoldOpenStreetMapDefault() throws Exception {
+	void testMapLayerFieldCanHoldOpenStreetMapDefault() {
 		Customer customer = CORE.getCustomer();
 		Document document = customer.getModule(Startup.MODULE_NAME).getDocument(customer, Startup.DOCUMENT_NAME);
 		Text mapLayer = (Text) document.getAttribute(Startup.mapLayerPropertyName);

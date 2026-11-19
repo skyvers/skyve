@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs for responsive grid-width breakpoints.
  *
@@ -14,7 +16,7 @@ interface FluentResponsiveWidth<T extends FluentResponsiveWidth<T>> extends Flue
 	 *            the small breakpoint width value
 	 * @return the fluent builder
 	 */
-	T sm(int sm);
+	@Nonnull T sm(int sm);
 
 	/**
 	 * Sets the medium breakpoint width.
@@ -23,7 +25,7 @@ interface FluentResponsiveWidth<T extends FluentResponsiveWidth<T>> extends Flue
 	 *            the medium breakpoint width value
 	 * @return the fluent builder
 	 */
-	T md(int md);
+	@Nonnull T md(int md);
 
 	/**
 	 * Sets the large breakpoint width.
@@ -32,7 +34,7 @@ interface FluentResponsiveWidth<T extends FluentResponsiveWidth<T>> extends Flue
 	 *            the large breakpoint width value
 	 * @return the fluent builder
 	 */
-	T lg(int lg);
+	@Nonnull T lg(int lg);
 
 	/**
 	 * Sets the extra-large breakpoint width.
@@ -41,5 +43,5 @@ interface FluentResponsiveWidth<T extends FluentResponsiveWidth<T>> extends Flue
 	 *            the extra-large breakpoint width value
 	 * @return the fluent builder
 	 */
-	T xl(int xl);
+	@Nonnull T xl(int xl);
 }

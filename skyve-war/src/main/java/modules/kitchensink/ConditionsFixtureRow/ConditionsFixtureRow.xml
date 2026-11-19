@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ConditionsFixtureRow"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent row of the Kitchen Sink conditions fixture's data grids and data repeaters,
+			with an attribute for each widget a grid column can hold.
+		]]>
+	</documentation>
+	<singularAlias>Conditions Fixture Row</singularAlias>
+	<pluralAlias>Conditions Fixture Rows</pluralAlias>
+	<bizKey expression="Conditions Fixture Row" />
+	<attributes>
+		<text name="text">
+			<displayName>Text</displayName>
+			<length>100</length>
+		</text>
+		<text name="password">
+			<displayName>Password</displayName>
+			<length>100</length>
+		</text>
+		<memo name="memo">
+			<displayName>Memo</displayName>
+		</memo>
+		<markup name="markup">
+			<displayName>Markup</displayName>
+		</markup>
+		<markup name="html">
+			<displayName>Html</displayName>
+		</markup>
+		<boolean name="flag">
+			<displayName>Flag</displayName>
+		</boolean>
+		<colour name="colour">
+			<displayName>Colour</displayName>
+		</colour>
+		<enum name="choice">
+			<displayName>Choice</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<enum name="radio">
+			<displayName>Radio</displayName>
+			<values>
+				<value code="one" />
+				<value code="two" />
+			</values>
+		</enum>
+		<integer name="number">
+			<displayName>Number</displayName>
+		</integer>
+		<integer name="slider">
+			<displayName>Slider</displayName>
+		</integer>
+		<geometry name="geometry">
+			<displayName>Geometry</displayName>
+		</geometry>
+		<content name="content">
+			<displayName>Content</displayName>
+		</content>
+		<association name="lookup" type="aggregation" persistent="false" usage="view">
+			<displayName>Lookup</displayName>
+			<documentName>LookupDescription</documentName>
+		</association>
+	</attributes>
+</document>

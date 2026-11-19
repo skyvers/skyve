@@ -10,6 +10,9 @@ import org.skyve.metadata.module.Module;
 import org.skyve.util.ExpressionEvaluator;
 import org.skyve.util.Util;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Resolves {@code {i18n:...}} expressions using configured message bundles.
  *
@@ -34,7 +37,7 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the resolved i18n value
 	 */
 	@Override
-	public Object evaluateWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull Object evaluateWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return formatWithoutPrefixOrSuffix(expression, bean);
 	}
 
@@ -46,7 +49,7 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 	 * @return the resolved i18n value, or fallback text when undefined
 	 */
 	@Override
-	public String formatWithoutPrefixOrSuffix(String expression, Bean bean) {
+	public @Nonnull String formatWithoutPrefixOrSuffix(@Nonnull String expression, @Nullable Bean bean) {
 		return Util.nullSafeI18n(expression);
 	}
 	
@@ -61,11 +64,11 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 	 * @return always {@code null} because any key is valid
 	 */
 	@Override
-	public String validateWithoutPrefixOrSuffix(String expression,
-													Class<?> returnType,
-													Customer customer,
-													Module module,
-													Document document) {
+	public @Nullable String validateWithoutPrefixOrSuffix(@Nonnull String expression,
+																@Nullable Class<?> returnType,
+																@Nullable Customer customer,
+																@Nullable Module module,
+																@Nullable Document document) {
 		return null; // any key is valid
 	}
 	
@@ -79,10 +82,10 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 	 * @return an empty list because keys are not enumerated
 	 */
 	@Override
-	public List<String> completeWithoutPrefixOrSuffix(String fragment,
-														Customer customer, 
-														Module module,
-														Document document) {
+	public @Nonnull List<String> completeWithoutPrefixOrSuffix(@Nullable String fragment,
+																@Nonnull Customer customer, 
+																@Nonnull Module module,
+																@Nonnull Document document) {
 		return Collections.emptyList(); // any key is valid
 	}
 
@@ -93,7 +96,7 @@ public class I18NExpressionEvaluator extends ExpressionEvaluator {
 	 * @param binding ignored for i18n expressions
 	 */
 	@Override
-	public void prefixBindingWithoutPrefixOrSuffix(StringBuilder expression, String binding) {
+	public void prefixBindingWithoutPrefixOrSuffix(@Nonnull StringBuilder expression, @Nonnull String binding) {
 		// nothing to do here as i18n uses keys
 	}
 }

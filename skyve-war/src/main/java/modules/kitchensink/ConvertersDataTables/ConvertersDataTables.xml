@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ConvertersDataTables"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Non-persistent Kitchen Sink fixture that lists the converters fixtures in a PrimeFaces data table for each
+			group of converters (each list grid's componentBuilderClass is faces), for filters typed as the cells show
+			the values. The list views of the same queries are the Vue list grids (PrimeFaces) and SmartClient's.
+		]]>
+	</documentation>
+	<singularAlias>Converters Data Tables</singularAlias>
+	<pluralAlias>Converters Data Tables</pluralAlias>
+	<bizKey expression="Converters Data Tables" />
+	<attributes>
+		<text name="note">
+			<displayName>Note</displayName>
+			<description>Unused: a document needs an attribute.</description>
+			<length>10</length>
+		</text>
+	</attributes>
+</document>

@@ -2,6 +2,8 @@ package org.skyve.metadata.view;
 
 import org.skyve.metadata.FormatterName;
 
+import jakarta.annotation.Nullable;
+
 /**
  * Mixin interface for view elements that support declarative Skyve formatting.
  *
@@ -18,7 +20,7 @@ public interface FormattedText {
 	 *
 	 * @return the formatter name, or {@code null} if no built-in formatter is selected
 	 */
-	FormatterName getFormatterName();
+	@Nullable FormatterName getFormatterName();
 
 	/**
 	 * Returns the fully-qualified name of a custom formatter class to apply.
@@ -28,5 +30,5 @@ public interface FormattedText {
 	 *
 	 * @return the custom formatter class name, or {@code null} if none
 	 */
-	String getCustomFormatterName();
+	@Nullable String getCustomFormatterName();
 }

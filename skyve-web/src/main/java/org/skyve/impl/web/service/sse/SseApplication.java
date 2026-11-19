@@ -2,6 +2,7 @@ package org.skyve.impl.web.service.sse;
 
 import java.util.Set;
 
+import jakarta.annotation.Nonnull;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
@@ -14,7 +15,7 @@ public class SseApplication extends Application {
 	 * Returns SSE resource classes exposed by the Skyve SSE application.
 	 */
 	@Override
-	public Set<Class<?>> getClasses() {
+	public @Nonnull Set<Class<?>> getClasses() {
 		return Set.of(SseClientHandler.class);
 	}
 }

@@ -5,6 +5,7 @@ import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.views.PublicFacesView;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nullable;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
@@ -47,7 +48,7 @@ public class UnsubscribeView extends PublicFacesView {
 		
 		new FacesAction<Void>() {
 			@Override
-			public Void callback() throws Exception {
+			public @Nullable Void callback() throws Exception {
 				FacesContext fc = FacesContext.getCurrentInstance();
 				if (! fc.isPostback()) {
 					initialise();

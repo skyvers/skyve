@@ -6,6 +6,7 @@ import java.util.Set;
 import org.skyve.domain.Bean;
 import org.skyve.domain.PersistentBean;
 import org.skyve.metadata.DecoratedMetaData;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.PersistentMetaData;
 import org.skyve.metadata.ReloadableMetaData;
 import org.skyve.metadata.controller.BizExportAction;
@@ -81,9 +82,9 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param <T> The bean type
 	 * @param customer The customer context
 	 * @param name The name of the dynamic image
-	 * @return The dynamic image definition or null if not found
+	 * @return The dynamic image definition
 	 */
-	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name);
+	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name);
 
 	/**
 	 * Gets all unique constraints defined directly on this document (not including those from parent documents).
@@ -98,14 +99,30 @@ public interface Document extends Model, PersistentMetaData, ReloadableMetaData,
 	 * @param referenceName The name of the reference to retrieve
 	 * @return The reference or null if not found
 	 */
-	public @Nonnull Reference getReferenceByName(String referenceName);
+	public @Nullable Reference getReferenceByName(@Nonnull String referenceName);
+
+	/**
+	 * Returns the named reference, throwing if it does not exist.
+	 *
+	 * @param referenceName  the reference name; must not be {@code null}
+	 * @return the reference; never {@code null}
+	 * @throws org.skyve.metadata.MetaDataException if no reference with that name exists in this document
+	 */
+	public default @Nonnull Reference getNullSafeReferenceByName(@Nonnull String referenceName) {
+		Reference result = getReferenceByName(referenceName);
+		if (result == null) {
+			throw new MetaDataException("Reference " + referenceName + " does not exist in document " +
+											getOwningModuleName() + '.' + getName());
+		}
+		return result;
+	}
 
 	/**
 	 * Retrieves the document that is related through the specified relation.
 	 * 
 	 * @param customer The customer context
 	 * @param relationName The name of the relation
-	 * @return The related document or null if not found
+	 * @return The related document
 	 */
 	public @Nonnull Document getRelatedDocument(@Nonnull Customer customer, @Nonnull String relationName);
 	

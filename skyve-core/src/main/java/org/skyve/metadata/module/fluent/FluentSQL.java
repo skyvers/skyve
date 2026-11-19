@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.SQLMetaData;
 import org.skyve.metadata.module.query.SQLDefinition;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link SQLMetaData} query definitions.
  */
@@ -21,7 +23,7 @@ public class FluentSQL extends FluentQueryDefinition<FluentSQL> {
 	 *
 	 * @param sql The metadata to mutate.
 	 */
-	public FluentSQL(SQLMetaData sql) {
+	public FluentSQL(@Nonnull SQLMetaData sql) {
 		this.sql = sql;
 	}
 
@@ -31,7 +33,7 @@ public class FluentSQL extends FluentQueryDefinition<FluentSQL> {
 	 * @param sql The source definition.
 	 * @return this fluent instance.
 	 */
-	public FluentSQL from(@SuppressWarnings("hiding") SQLDefinition sql) {
+	public @Nonnull FluentSQL from(@SuppressWarnings("hiding") @Nonnull SQLDefinition sql) {
 		super.from(sql);
 		query(sql.getQuery());
 		return this;
@@ -43,7 +45,7 @@ public class FluentSQL extends FluentQueryDefinition<FluentSQL> {
 	 * @param query The SQL statement.
 	 * @return this fluent instance.
 	 */
-	public FluentSQL query(String query) {
+	public @Nonnull FluentSQL query(@Nonnull String query) {
 		sql.setQuery(query);
 		return this;
 	}
@@ -54,7 +56,7 @@ public class FluentSQL extends FluentQueryDefinition<FluentSQL> {
 	 * @return The SQL metadata instance.
 	 */
 	@Override
-	public SQLMetaData get() {
+	public @Nonnull SQLMetaData get() {
 		return sql;
 	}
 }

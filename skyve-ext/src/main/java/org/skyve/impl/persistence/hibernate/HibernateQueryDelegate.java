@@ -16,8 +16,8 @@ import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.messages.SkyveException;
 import org.skyve.domain.messages.TimeoutException;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.persistence.AbstractPersistence;
 import org.skyve.impl.persistence.AbstractQuery;
-import org.skyve.impl.persistence.hibernate.dialect.SkyveDialect.RDBMS;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.persistence.AutoClosingIterable;
 import org.skyve.util.logging.Category;
@@ -69,9 +69,6 @@ class HibernateQueryDelegate {
 			}
 			
 			timeoutQuery(result, query.getTimeoutInSeconds(), persistence.isAsyncThread());
-			
-			// Always use streaming JDBC results to avoid out of memory errors on large result sets
-			result.setFetchSize(RDBMS.mysql.equals(AbstractHibernatePersistence.getDialect().getRDBMS()) ? Integer.MIN_VALUE : 1000);
 			
 			for (String parameterName : query.getParameterNames()) {
 				Object value = query.getParameter(parameterName);
@@ -176,6 +173,7 @@ class HibernateQueryDelegate {
 				else if (assertMultiple && (returnAliases.length <= 1)) {
 					throw new DomainException("There should be more than 1 projected value in the query when using tupleIterable()");
 				}
+				query.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 				ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 				return new HibernateAutoClosingIterable<>(results, false, false);
 			}
@@ -186,6 +184,7 @@ class HibernateQueryDelegate {
 				aliases[i] = BindUtil.unsanitiseBinding(aliases[i]);
 			}
 
+			query.setFetchSize(AbstractPersistence.JDBC_FETCH_SIZE);
 			ScrollableResults results = query.scroll(ScrollMode.FORWARD_ONLY);
 			return new HibernateAutoClosingIterable<>(drivingModuleName, 
 														drivingDocumentName, 

@@ -2,6 +2,9 @@ package org.skyve.impl.snapshot;
 
 import org.skyve.metadata.FilterOperator;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Enumerates SmartClient-compatible filter operators used by snapshot serialization.
  */
@@ -31,6 +34,7 @@ public enum SmartClientFilterOperator {
 	iNotStartsWith, // Does not start with (case insensitive)
 	iNotEndsWith, // Does not end with (case insensitive)
 	iBetween, // shortcut for "greaterThan" + "and" + "lessThan" (case insensitive)
+	between, // shortcut for "greaterThan" + "lessThan" + "and". Specify criterion.start and criterion.end
 	matchesPattern, // Basic GLOB matching using wildcards (see DataSource.translatePatternOperators for more information on available patterns)
 	iMatchesPattern, // Basic GLOB matching using wildcards (case insensitive) (see DataSource.translatePatternOperators for more information on available patterns)
 	containsPattern, // GLOB matching using wildcards. Value is considered to meet the criterion if it contains the pattern. See DataSource.translatePatternOperators for more information on available patterns)
@@ -70,7 +74,7 @@ public enum SmartClientFilterOperator {
 	and, // all subcriteria (criterion.criteria) are true
 	not, // all subcriteria (criterion.criteria) are false
 	or, // at least one subcriteria (criterion.criteria) is true
-	betweenInclusive, // shortcut for "greaterThan" + "lessThan" + "and". Specify criterion.start and criterion.end
+	betweenInclusive, // shortcut for "greaterOrEqual" + "lessOrEqual" + "and". Specify criterion.start and criterion.end
 	iBetweenInclusive, // shortcut for "greaterOrEqual" + "lessOrEqual" + "and". Specify criterion.start and criterion.end
 	geoWithin, // the geometry field is within (contained by) the operand geometry
 	geoContains, // the operand geometry is within (contained by) the geometry field
@@ -85,69 +89,94 @@ public enum SmartClientFilterOperator {
 	 * Maps a framework {@link FilterOperator} to the closest SmartClient operator.
 	 *
 	 * @param operator The framework operator.
-	 * @return The mapped SmartClient operator, or {@code null} when no mapping exists.
+	 * @return The mapped SmartClient operator.
 	 */
-	public static SmartClientFilterOperator fromFilterOperator(FilterOperator operator) {
-		SmartClientFilterOperator result = null;
-		
-		switch (operator) {
-		case equal:
-			result = equals;
-			break;
-		case greater:
-			result = greaterThan;
-			break;
-		case greaterEqual:
-			result = greaterOrEqual;
-			break;
-		case isNull:
-			result = isNull;
-			break;
-		case less:
-			result = lessThan;
-			break;
-		case lessEqual:
-			result = lessOrEqual;
-			break;
-		case like:
-			result = iContains;
-			break;
-		case notEqual:
-			result = iNotEqual;
-			break;
-		case notLike:
-			result = iNotContains;
-			break;
-		case notNull:
-			result = notNull;
-			break;
-		case nullOrEqual:
-			result = equals;
-			break;
-		case nullOrGreater:
-			result = greaterThan;
-			break;
-		case nullOrGreaterEqual:
-			result = greaterOrEqual;
-			break;
-		case nullOrLess:
-			result = lessThan;
-			break;
-		case nullOrLessEqual:
-			result = lessOrEqual;
-			break;
-		case nullOrLike:
-			result = iContains;
-			break;
-		case nullOrNotEqual:
-			result = notEqual;
-			break;
-		case nullOrNotLike:
-			result = iNotContains;
-			break;
-		default:
-		}
-		
-		return result;
+	public static @Nonnull SmartClientFilterOperator fromFilterOperator(@Nonnull FilterOperator operator) {
+		return switch (operator) {
+			case equal -> equals;
+			case greater -> greaterThan;
+			case greaterEqual -> greaterOrEqual;
+			case isNull -> isNull;
+			case less -> lessThan;
+			case lessEqual -> lessOrEqual;
+			case like -> iContains;
+			case notEqual -> iNotEqual;
+			case notLike -> iNotContains;
+			case notNull -> notNull;
+			case nullOrEqual -> equals;
+			case nullOrGreater -> greaterThan;
+			case nullOrGreaterEqual -> greaterOrEqual;
+			case nullOrLess -> lessThan;
+			case nullOrLessEqual -> lessOrEqual;
+			case nullOrLike -> iContains;
+			case nullOrNotEqual -> notEqual;
+			case nullOrNotLike -> iNotContains;
+		};
+	}
+
+	/**
+	 * Indicates if this operator negates a condition on a value (notEqual, the not contains, starts with and ends with
+	 * family, notInSet). SmartClient evaluates such a criterion as "not the condition", so it also matches a row with
+	 * no value.
+	 *
+	 * @return true for a negative operator
+	 */
+	public boolean isNegative() {
+		return switch (this) {
+			case notEqual, iNotEqual, notContains, iNotContains, notStartsWith, iNotStartsWith, notEndsWith, iNotEndsWith,
+					notInSet -> true;
+			default -> false;
+		};
+	}
+
+	/**
+	 * Indicates if this operator tests for no value (isNull, notNull, isBlank, notBlank).
+	 *
+	 * @return true for a null or blank check
+	 */
+	public boolean isNullCheck() {
+		return switch (this) {
+			case isNull, notNull, isBlank, notBlank -> true;
+			default -> false;
+		};
+	}
+
+	/**
+	 * Returns the operator that negates this one for a criterion under Match None (not): contains becomes notContains,
+	 * greaterThan lessOrEqual, isNull notNull and so on. Ranges (between and the rest) are negated by their outside,
+	 * not by one operator; patterns, geometries, field comparisons and the logical operators have no negation here.
+	 *
+	 * @return the negating operator, or null if there is none
+	 */
+	public @Nullable SmartClientFilterOperator negation() {
+		return switch (this) {
+			case substring, contains -> notContains;
+			case iContains -> iNotContains;
+			case notContains -> contains;
+			case iNotContains -> iContains;
+			case startsWith -> notStartsWith;
+			case iStartsWith -> iNotStartsWith;
+			case notStartsWith -> startsWith;
+			case iNotStartsWith -> iStartsWith;
+			case endsWith -> notEndsWith;
+			case iEndsWith -> iNotEndsWith;
+			case notEndsWith -> endsWith;
+			case iNotEndsWith -> iEndsWith;
+			case exact, equals -> notEqual;
+			case iEquals -> iNotEqual;
+			case notEqual -> equals;
+			case iNotEqual -> iEquals;
+			case greaterThan -> lessOrEqual;
+			case greaterOrEqual -> lessThan;
+			case lessThan -> greaterOrEqual;
+			case lessOrEqual -> greaterThan;
+			case isNull -> notNull;
+			case notNull -> isNull;
+			case isBlank -> notBlank;
+			case notBlank -> isBlank;
+			case inSet -> notInSet;
+			case notInSet -> inSet;
+			default -> null;
+		};
 	}
 }

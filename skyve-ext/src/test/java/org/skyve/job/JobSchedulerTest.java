@@ -2,20 +2,20 @@ package org.skyve.job;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.metadata.module.JobMetaData;
 import org.skyve.metadata.user.User;
 import org.skyve.web.BackgroundTask;
 
 @SuppressWarnings("static-method")
-public class JobSchedulerTest {
+class JobSchedulerTest {
 	private static class RecordingScheduler implements JobScheduler {
 		private boolean preRestoreCalled;
 		private boolean runRestoreJobCalled;
@@ -109,7 +109,7 @@ public class JobSchedulerTest {
 	}
 
 	@Test
-	public void defaultRestoreCallsPreRestoreAndRunRestoreJob() {
+	void defaultRestoreCallsPreRestoreAndRunRestoreJob() {
 		RecordingScheduler scheduler = new RecordingScheduler();
 		Bean restoreOptions = mock(Bean.class);
 

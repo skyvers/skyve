@@ -68,6 +68,7 @@ import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.TemplateModel;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Central utility for executing FreeMarker report templates and rendering PDF output.
@@ -170,7 +171,7 @@ public final class FreemarkerReportUtil {
 	 * @param templateName The name of the template, e.g. <code>myDynamicReport</code>
 	 * @param templateMarkup The markup in the template, e.g. <code>"Hello ${user}"</code>
 	 */
-	public static void addTemplate(final String templateName, final String templateMarkup) {
+	public static void addTemplate(final @Nonnull String templateName, final @Nonnull String templateMarkup) {
 		strl.putTemplate(templateName, templateMarkup);
 	}
 
@@ -193,20 +194,16 @@ public final class FreemarkerReportUtil {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
-	public static String createBeanReport(final Bean bean, final String reportName, final Map<String, Object> reportParameters)
+	public static @Nonnull String createBeanReport(final @Nonnull Bean bean, final @Nonnull String reportName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception {
 		// retrieve the report template
 		Template template = getBeanReport(bean, reportName);
 
 		// create the report
-		if (template != null) {
-			try (StringWriter sw = new StringWriter()) {
-				template.process(reportParameters, sw);
-				return sw.toString();
-			}
+		try (StringWriter sw = new StringWriter()) {
+			template.process(reportParameters, sw);
+			return sw.toString();
 		}
-
-		return null;
 	}
 
 	/**
@@ -220,10 +217,10 @@ public final class FreemarkerReportUtil {
 	 * @return A temporary {@link File} pointing to the written out PDF report on disk
 	 * @throws Exception
 	 */
-	public static File createBeanReportPDF(final Bean bean,
-											final String reportName,
-											final Map<String, Object> reportParameters,
-											final String reportFilename) throws Exception {
+	public static @Nonnull File createBeanReportPDF(final @Nonnull Bean bean,
+													final @Nonnull String reportName,
+													final @Nullable Map<String, Object> reportParameters,
+													final @Nonnull String reportFilename) throws Exception {
 		// retrieve the report template
 		Template template = getBeanReport(bean, reportName);
 
@@ -240,19 +237,15 @@ public final class FreemarkerReportUtil {
 	 * @return A String with the merged output of the template with the report parameters
 	 * @throws Exception
 	 */
-	public static String createReport(final String templateName, final Map<String, Object> reportParameters) throws Exception {
+	public static @Nonnull String createReport(final @Nonnull String templateName, final @Nullable Map<String, Object> reportParameters) throws Exception {
 		// retrieve the report template
 		Template template = getTemplate(templateName);
 
 		// create the report
-		if (template != null) {
-			try (StringWriter sw = new StringWriter()) {
-				template.process(reportParameters, sw);
-				return sw.toString();
-			}
+		try (StringWriter sw = new StringWriter()) {
+			template.process(reportParameters, sw);
+			return sw.toString();
 		}
-
-		return null;
 	}
 
 	/**
@@ -266,7 +259,7 @@ public final class FreemarkerReportUtil {
 	 * @return A temporary {@link File} pointing to the written out PDF report on disk
 	 * @throws Exception
 	 */
-	public static File createReportPDF(final String templateName, final Map<String, Object> reportParameters, final String reportFilename)
+	public static @Nonnull File createReportPDF(final @Nonnull String templateName, final @Nullable Map<String, Object> reportParameters, final @Nonnull String reportFilename)
 	throws Exception {
 		// retrieve the report template
 		Template template = getTemplate(templateName);
@@ -288,10 +281,10 @@ public final class FreemarkerReportUtil {
 	 * @return A download to be returned from a {@link DownloadAction}
 	 * @throws Exception
 	 */
-	public static Download downloadReport(final String reportName,
-											final Map<String, Object> reportParameters,
-											final ReportFormat format,
-											final String downloadFilename)
+	public static @Nonnull Download downloadReport(final @Nonnull String reportName,
+													final @Nullable Map<String, Object> reportParameters,
+													final @Nonnull ReportFormat format,
+													final @Nonnull String downloadFilename)
 	throws Exception {
 		final String reportOutput = runReport(reportName, reportParameters);
 
@@ -317,7 +310,7 @@ public final class FreemarkerReportUtil {
 	 * @param outputFile The file to write the resulting PDF file to
 	 * @throws Exception
 	 */
-	public static void generatePDFFromHTML(InputStream in, File outputFile)
+	public static void generatePDFFromHTML(@Nonnull InputStream in, @Nonnull File outputFile)
 	throws Exception {
 		try (OutputStream out = new FileOutputStream(outputFile)) {
 			generatePDFFromHTML(in, out);
@@ -331,7 +324,7 @@ public final class FreemarkerReportUtil {
 	 * @param outputStream The outputStream to write the resulting PDF to
 	 * @throws Exception
 	 */
-	public static void generatePDFFromHTML(InputStream in, OutputStream outputStream)
+	public static void generatePDFFromHTML(@Nonnull InputStream in, @Nonnull OutputStream outputStream)
 	throws Exception {
 		ITextRenderer renderer = new ITextRenderer();
 		ResourceLoaderUserAgent callback = new ResourceLoaderUserAgent(renderer.getOutputDevice(),
@@ -352,7 +345,7 @@ public final class FreemarkerReportUtil {
 	 * @param outputFile The file to write the resulting PDF file to
 	 * @throws Exception
 	 */
-	public static void generatePDFFromHTML(String url, File outputFile)
+	public static void generatePDFFromHTML(@Nonnull String url, @Nonnull File outputFile)
 			throws Exception {
 		try (OutputStream os = new FileOutputStream(outputFile); InputStream in = new URL(url).openStream()) {
 			ITextRenderer renderer = new ITextRenderer();
@@ -374,8 +367,10 @@ public final class FreemarkerReportUtil {
 	 * @return a W3C Document
 	 * @throws IOException
 	 */
-	private static org.w3c.dom.Document html5ParseDocument(final InputStream in) throws IOException {
-		if (in == null) {
+	private static @Nonnull org.w3c.dom.Document html5ParseDocument(final @Nonnull InputStream in) throws IOException {
+		@SuppressWarnings("null") // FreemarkerReportUtilTest asserts that a null stream is rejected
+		boolean inMissing = (in == null);
+		if (inMissing) {
 			throw new IllegalArgumentException("InputStream cannot be null");
 		}
 		org.jsoup.nodes.Document doc;
@@ -394,7 +389,7 @@ public final class FreemarkerReportUtil {
 	 * @return The resolved FreeMarker template.
 	 * @throws Exception If template lookup fails.
 	 */
-	public static Template getBeanReport(final Bean bean, final String reportName)
+	public static @Nonnull Template getBeanReport(final @Nonnull Bean bean, final @Nonnull String reportName)
 	throws Exception {
 		final String templateName = String.format("%s/%s/reports/%s", bean.getBizModule(), bean.getBizDocument(), reportName);
 		return cfg.getTemplate(templateName);
@@ -407,7 +402,7 @@ public final class FreemarkerReportUtil {
 	 * @return The resolved template.
 	 * @throws Exception If template lookup fails.
 	 */
-	public static Template getTemplate(final String templateName) {
+	public static @Nonnull Template getTemplate(final @Nonnull String templateName) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			try {
 				return cfg.getTemplate(templateName);
@@ -429,7 +424,7 @@ public final class FreemarkerReportUtil {
 	 * @param templateName Exactly the key with which the template was added.
 	 * @return Whether a template was found with the given key (and hence was removed now)
 	 */
-	public static boolean removeTemplate(final String templateName) {
+	public static boolean removeTemplate(final @Nonnull String templateName) {
 		return strl.removeTemplate(templateName);
 	}
 
@@ -444,7 +439,7 @@ public final class FreemarkerReportUtil {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public static String runReport(final String reportName, final Map<String, Object> reportParameters)
+	public static @Nonnull String runReport(final @Nonnull String reportName, final @Nullable Map<String, Object> reportParameters)
 	throws Exception {
 		// get the report template with the specified name
 		ReportTemplate reportTemplate = retrieveReportTemplate(reportName);
@@ -517,28 +512,24 @@ public final class FreemarkerReportUtil {
 		}
 	}
 
-	private static File createReport(final Template template, final Map<String, Object> reportParameters, final String reportFilename)
+	private static @Nonnull File createReport(final @Nonnull Template template, final @Nullable Map<String, Object> reportParameters, final @Nonnull String reportFilename)
 	throws Exception {
-		if (template != null) {
-			try (StringWriter sw = new StringWriter()) {
-				template.process(reportParameters, sw);
+		try (StringWriter sw = new StringWriter()) {
+			template.process(reportParameters, sw);
 
-				// write the output string to an input stream
-				InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
+			// write the output string to an input stream
+			InputStream inputStream = new ByteArrayInputStream(sw.toString().getBytes(StandardCharsets.UTF_8));
 
-				Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
-				tempDir.toFile().mkdirs();
+			Path tempDir = Paths.get(Util.getContentDirectory(), "temp");
+			tempDir.toFile().mkdirs();
 
-				File pdfFile = tempDir.resolve(String.format("%s.pdf", reportFilename)).toFile();
-				pdfFile.deleteOnExit();
+			File pdfFile = tempDir.resolve(String.format("%s.pdf", reportFilename)).toFile();
+			pdfFile.deleteOnExit();
 
-				generatePDFFromHTML(inputStream, pdfFile);
+			generatePDFFromHTML(inputStream, pdfFile);
 
-				return pdfFile;
-			}
+			return pdfFile;
 		}
-
-		return null;
 	}
 
 	/**
@@ -547,7 +538,7 @@ public final class FreemarkerReportUtil {
 	 * @return List of *.ttf font resources found in the fonts directory
 	 * @throws IOException
 	 */
-	private static List<Resource> getFontResources() throws IOException {
+	private static @Nonnull List<Resource> getFontResources() throws IOException {
 		return Arrays.asList(resolver.getResources("classpath:fonts/*.ttf"));
 	}
 
@@ -557,7 +548,7 @@ public final class FreemarkerReportUtil {
 	 * @return List of *.ttf font resources found in the fonts directory
 	 * @throws IOException
 	 */
-	private static List<Resource> getUnicodeFontResources() throws IOException {
+	private static @Nonnull List<Resource> getUnicodeFontResources() throws IOException {
 		return Arrays.asList(resolver.getResources("classpath:fonts/unicode/*.ttf"));
 	}
 
@@ -567,7 +558,7 @@ public final class FreemarkerReportUtil {
 	 * @param renderer The PDF Renderer to embed the font into
 	 * @throws IOException
 	 */
-	private static void loadFonts(ITextRenderer renderer) throws IOException {
+	private static void loadFonts(@Nonnull ITextRenderer renderer) throws IOException {
 		// load any fonts found on the classpath in fonts/
 		try {
 			getFontResources().stream()
@@ -611,7 +602,7 @@ public final class FreemarkerReportUtil {
 	 * @param templateName The name of the report template to retrieve
 	 * @return The ReportTemplate, if one is found
 	 */
-	private static ReportTemplate retrieveReportTemplate(final String templateName) {
+	private static @Nonnull ReportTemplate retrieveReportTemplate(final @Nonnull String templateName) {
 		return CORE.getPersistence().withDocumentPermissionScopes(DocumentPermissionScope.customer, p -> {
 			DocumentQuery q = p.newDocumentQuery(AppConstants.ADMIN_MODULE_NAME, AppConstants.REPORT_TEMPLATE_DOCUMENT_NAME);
 			q.getFilter().addEquals(AppConstants.TEMPLATE_NAME_ATTRIBUTE_NAME, templateName);
@@ -630,12 +621,12 @@ public final class FreemarkerReportUtil {
 	 */
 	@ParametersAreNonnullByDefault
 	private static class ResourceLoaderUserAgent extends ITextUserAgent {
-		private ResourceLoaderUserAgent(ITextOutputDevice outputDevice, int dotsPerPixel) {
+		private ResourceLoaderUserAgent(@Nonnull ITextOutputDevice outputDevice, int dotsPerPixel) {
 			super(outputDevice, dotsPerPixel);
 		}
 
 		@Override
-		protected InputStream resolveAndOpenStream(String uri) {
+		protected @Nullable InputStream resolveAndOpenStream(@SuppressWarnings("null") @Nonnull String uri) {
 			InputStream is = super.resolveAndOpenStream(uri);
 			return is;
 		}

@@ -43,7 +43,7 @@ class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: modDocName ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void getConstantDomainValuesForModDocNameReturnsPersistableDocuments() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(DataMaintenance.modDocNamePropertyName);
 		assertThat(result, is(notNullValue()));
@@ -53,7 +53,7 @@ class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: auditModuleName ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void getConstantDomainValuesForAuditModuleNameReturnsModules() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(DataMaintenance.auditModuleNamePropertyName);
 		assertThat(result, is(notNullValue()));
@@ -63,7 +63,7 @@ class DataMaintenanceBizletH2Test extends AbstractH2Test {
 	// ---- getConstantDomainValues: restorePreProcess ----
 
 	@Test
-	@SuppressWarnings("static-method")
+	@SuppressWarnings({"static-method", "null"}) // a null here fails the test
 	void getConstantDomainValuesForRestorePreProcessReturnsOptions() throws Exception {
 		List<DomainValue> result = bizlet.getConstantDomainValues(DataMaintenance.restorePreProcessPropertyName);
 		assertThat(result, is(notNullValue()));
@@ -82,6 +82,7 @@ class DataMaintenanceBizletH2Test extends AbstractH2Test {
 
 	// ---- getDynamicDomainValues: auditDocumentName ----
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getDynamicDomainValuesForAuditDocumentNameWithModuleSetReturnsDocs() throws Exception {
 		bean.setAuditModuleName("admin");

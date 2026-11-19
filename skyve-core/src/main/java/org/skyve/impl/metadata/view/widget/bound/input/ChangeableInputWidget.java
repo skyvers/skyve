@@ -13,6 +13,7 @@ import org.skyve.impl.metadata.view.event.ToggleDisabledEventAction;
 import org.skyve.impl.metadata.view.event.ToggleVisibilityEventAction;
 import org.skyve.impl.util.XMLMetaData;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlElementRef;
 import jakarta.xml.bind.annotation.XmlElementRefs;
 import jakarta.xml.bind.annotation.XmlElementWrapper;
@@ -41,7 +42,7 @@ public abstract class ChangeableInputWidget extends FocusableInputWidget impleme
 						@XmlElementRef(type = SetInvisibleEventAction.class),
 						@XmlElementRef(type = ToggleDisabledEventAction.class),
 						@XmlElementRef(type = ToggleVisibilityEventAction.class)})
-	public List<EventAction> getChangedActions() {
+	public @Nonnull List<EventAction> getChangedActions() {
 		return changedActions;
 	}
 }

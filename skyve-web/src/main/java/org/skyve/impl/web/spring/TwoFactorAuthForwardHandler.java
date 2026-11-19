@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.ForwardAuthenticationFailureHandler;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,7 +24,7 @@ public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHan
 	 *
 	 * @param forwardUrl the servlet path used for forwarding authentication failures
 	 */
-	public TwoFactorAuthForwardHandler(String forwardUrl) {
+	public TwoFactorAuthForwardHandler(@Nonnull String forwardUrl) {
 		super(forwardUrl);
 	}
 
@@ -37,9 +38,9 @@ public class TwoFactorAuthForwardHandler extends ForwardAuthenticationFailureHan
 	 * @throws ServletException when forwarding fails in the servlet container
 	 */
 	@Override
-	public void onAuthenticationFailure(HttpServletRequest request,
-											HttpServletResponse response,
-		AuthenticationException exception)
+	public void onAuthenticationFailure(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+											@SuppressWarnings("null") @Nonnull HttpServletResponse response,
+		@SuppressWarnings("null") @Nonnull AuthenticationException exception)
 	throws IOException, ServletException {
 		if ((exception instanceof TwoFactorAuthRequiredException tfaEx) && tfaEx.isInvalidTwoFactorCode()) {
 			request.setAttribute(TWO_FACTOR_AUTH_ERROR_ATTRIBUTE, "1");

@@ -3,6 +3,7 @@ package org.skyve.impl.metadata.repository.view.access;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.user.UserAccess;
 
+import jakarta.annotation.Nonnull;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -21,7 +22,7 @@ public class ViewSingularUserAccessMetaData extends ViewDocumentAggregateUserAcc
 	private static final long serialVersionUID = 2888202790675893096L;
 	
 	@Override
-	public UserAccess toUserAccess(String moduleName, String documentName) {
+	public @Nonnull UserAccess toUserAccess(@Nonnull String moduleName, @Nonnull String documentName) {
 		return UserAccess.singular(moduleName, getDocumentName());
 	}
 }

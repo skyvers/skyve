@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -105,6 +106,7 @@ class ReportDesignGeneratorTest {
 		assertThat(design.getParameters().get(2).getDefaultValueExpression(), is((String) null));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void populateDesignClearsGeneratedCollectionsAndInitialisesBaseState() {
 		DesignSpecification design = new DesignSpecification();
@@ -129,13 +131,6 @@ class ReportDesignGeneratorTest {
 		assertEquals(0, design.getVariables().size());
 		assertEquals(0, design.getSubReports().size());
 		assertEquals(1, design.getBands().size());
-	}
-
-	@Test
-	void generateDesignPopulatesAFreshDesignInstance() {
-		DesignSpecification result = new GenerateOnlyReportDesignGenerator().generateDesign();
-
-		assertThat(result.getName(), is("generated"));
 	}
 
 	@Test
@@ -165,6 +160,7 @@ class ReportDesignGeneratorTest {
 		assertThat(design.getFields().get(2).getNameSql(), is("a.bizKey"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void addFieldsForJoinedDocumentAddsBizKeyJoinToBaseDocument() throws Exception {
 		Customer customer = mock(Customer.class);
@@ -437,6 +433,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result.getSkyveType(), is(AttributeType.decimal10.name()));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromBindingSimpleTextAttributeReturnsField() {
 		DesignSpecification spec = new DesignSpecification();
@@ -475,6 +472,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result, org.hamcrest.CoreMatchers.nullValue());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromBindingDottedAssociationBuildsJoinAndPrefixedSqlField() {
 		DesignSpecification spec = designWithJoinState();
@@ -502,6 +500,7 @@ class ReportDesignGeneratorTest {
 		assertThat(result.getNameSql(), is("b.name as customer_name"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromAttributeAssociationInBeanModeBuildsLeftJoinAndBizKeyField() {
 		DesignSpecification spec = designWithJoinState();
@@ -523,6 +522,7 @@ class ReportDesignGeneratorTest {
 		assertEquals("association", result.getSkyveType());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void fieldFromAttributeAssociationInSqlModeBuildsInnerJoinAndAliasExpression() {
 		DesignSpecification spec = designWithJoinState();
@@ -809,6 +809,101 @@ class ReportDesignGeneratorTest {
 		assertTrue(design.getBands().size() > 0);
 	}
 
+	@Test
+	void addParametersThrowsWhenTheDesignHasNoDocumentName() {
+		DesignSpecification design = new DesignSpecification();
+		design.setName("Orders");
+		design.setModuleName("sales");
+
+		IllegalStateException e = assertThrows(IllegalStateException.class, () -> ReportDesignGenerator.addParameters(design));
+
+		assertEquals("Report design Orders has no module or document name", e.getMessage());
+	}
+
+	@Test
+	void addFieldsForJoinedDocumentThrowsWhenTheJoinAliasesAreMissingAfterAddingAJoin() throws Exception {
+		Customer customer = mock(Customer.class);
+		Module module = mock(Module.class);
+		Document document = mock(Document.class);
+		Document baseDocument = document("BaseOrder", "BASE_ORDER");
+		Extends inherits = new Extends();
+		inherits.setDocumentName("BaseOrder");
+		Persistent persistent = new Persistent();
+		persistent.setName("SPECIAL_ORDER");
+		persistent.setStrategy(Persistent.ExtensionStrategy.joined);
+		when(document.getPersistent()).thenReturn(persistent);
+		when(document.getExtends()).thenReturn(inherits);
+		when(module.getDocument(customer, "BaseOrder")).thenReturn(baseDocument);
+
+		DesignSpecification design = new NoJoinAliasDesignSpecification(module, document);
+		design.setName("SpecialOrders");
+		design.setModuleName("sales");
+		design.setDocumentName("SpecialOrder");
+		design.setReportType(DesignSpecification.ReportType.report);
+		design.setMode(DesignSpecification.Mode.sql);
+		design.setJoins(new HashMap<>());
+		design.setJoinAlias(new HashMap<>());
+		design.setAlias('a');
+
+		BaseFieldReportDesignGenerator generator = new BaseFieldReportDesignGenerator();
+		IllegalStateException[] thrown = new IllegalStateException[1];
+		withThreadLocalCustomer(customer, () -> thrown[0] = assertThrows(IllegalStateException.class,
+																			() -> generator.addFields(design)));
+
+		assertEquals("Report design SpecialOrders has no join aliases after adding a join", thrown[0].getMessage());
+	}
+
+	@Test
+	void fieldFromAttributeForAJoinedScalarThrowsWhenTheDesignHasNoJoinAliases() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setName("Orders");
+		Text text = new Text();
+		text.setName("name");
+		text.setDisplayName("Name");
+		text.setLength(100);
+		StringBuilder join = new StringBuilder(" left join CUSTOMER b on a.bizId = b.customer_id");
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		StringBuilder fieldPrefix = new StringBuilder();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> ReportDesignGenerator.fieldFromAttribute(spec, customer, document, text, join, fieldPrefix));
+
+		assertEquals("Report design Orders has no join aliases", e.getMessage());
+	}
+
+	@Test
+	void addJoinForAssociationThrowsWhenTheDesignHasNoJoins() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setName("Orders");
+		spec.setModuleName("sales");
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		AssociationImpl association = association("customer", "Customer", true);
+		StringBuilder join = new StringBuilder();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> ReportDesignGenerator.addJoinForAssociation(join, customer, spec, document, association, "customer"));
+
+		assertEquals("Report design Orders has no joins", e.getMessage());
+	}
+
+	@Test
+	void addJoinForAssociationThrowsWhenTheDesignHasNoModuleName() {
+		DesignSpecification spec = new DesignSpecification();
+		spec.setName("Orders");
+		spec.setJoins(new HashMap<>());
+		Customer customer = mock(Customer.class);
+		Document document = mock(Document.class);
+		AssociationImpl association = association("customer", "Customer", true);
+		StringBuilder join = new StringBuilder();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> ReportDesignGenerator.addJoinForAssociation(join, customer, spec, document, association, "customer"));
+
+		assertEquals("Report design Orders has no module name", e.getMessage());
+	}
+
 	private static DesignSpecification designWithJoinState() {
 		DesignSpecification spec = new DesignSpecification();
 		spec.setModuleName("mod");
@@ -847,6 +942,34 @@ class ReportDesignGeneratorTest {
 		@Override
 		public Document getDocument() {
 			return document;
+		}
+	}
+
+	/**
+	 * Fixed metadata whose join aliases are never available, breaking the invariant that adding a join creates them.
+	 */
+	private static final class NoJoinAliasDesignSpecification extends DesignSpecification {
+		private final Module module;
+		private final Document document;
+
+		private NoJoinAliasDesignSpecification(Module module, Document document) {
+			this.module = module;
+			this.document = document;
+		}
+
+		@Override
+		public Module getModule() {
+			return module;
+		}
+
+		@Override
+		public Document getDocument() {
+			return document;
+		}
+
+		@Override
+		public java.util.Map<String, String> getJoinAlias() {
+			return null;
 		}
 	}
 
@@ -907,19 +1030,6 @@ class ReportDesignGeneratorTest {
 	}
 
 	private static final class BaseFieldReportDesignGenerator extends ReportDesignGenerator {
-		@Override
-		protected ReportDesignGenerator getSubreportGenerator() {
-			return this;
-		}
-	}
-
-	private static final class GenerateOnlyReportDesignGenerator extends ReportDesignGenerator {
-		@Override
-		public DesignSpecification populateDesign(DesignSpecification design) {
-			design.setName("generated");
-			return design;
-		}
-
 		@Override
 		protected ReportDesignGenerator getSubreportGenerator() {
 			return this;

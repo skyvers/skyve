@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.PrintWriter;
@@ -17,15 +19,20 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.domain.PersistentBean;
+import org.skyve.domain.messages.ConversationEndedException;
 import org.skyve.domain.messages.Message;
 import org.skyve.domain.messages.MessageException;
 import org.skyve.domain.messages.OptimisticLockException;
+import org.skyve.domain.messages.SessionEndedException;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.OptimisticLock;
 import org.skyve.impl.metadata.customer.CustomerImpl;
@@ -38,6 +45,7 @@ import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.user.User;
 import org.skyve.metadata.view.View;
+import org.skyve.util.JSON;
 import org.skyve.util.OWASP;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -114,6 +122,74 @@ class SmartClientEditServletErrorResponseTest {
 		assertTrue(response.contains("\"status\":-1"));
 		assertTrue(response.contains("Cannot update this record"));
 		assertFalse(response.contains("startRow"));
+		assertFalse(response.contains("_growls"));
+		assertFalse(response.contains("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void unboundMessageExceptionIncludesGrowlsAndMessagesRaisedBeforeIt() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")),
+														List.of(notification("warn", "Check the address")));
+
+		Map<?, ?> response = parseResponse(produce(new TestMessageException(new Message("Cannot send")),
+															Operation.update,
+															true,
+															REFERENCE,
+															webContext));
+
+		assertEquals(-1, ((Number) response.get("status")).intValue());
+		assertTrue(((String) response.get("data")).contains("Cannot send"));
+		assertEquals(List.of(notification("info", "Email sent")), response.get("_growls"));
+		assertEquals(List.of(notification("warn", "Check the address")), response.get("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void boundMessageExceptionIncludesGrowlsBesideFieldErrors() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")), null);
+
+		Map<?, ?> response = parseResponse(produce(new TestMessageException(new Message("customer.name", "Name is required")),
+															Operation.update,
+															true,
+															REFERENCE,
+															webContext));
+
+		assertEquals(-4, ((Number) response.get("status")).intValue());
+		assertEquals("Name is required", ((Map<?, ?>) response.get("errors")).get("customer_name"));
+		assertEquals(List.of(notification("info", "Email sent")), response.get("_growls"));
+		assertFalse(response.containsKey("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void technicalErrorIncludesGrowlsRaisedBeforeIt() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")), List.of());
+
+		Map<?, ?> response = parseResponse(produce(new IllegalStateException("boom"),
+															Operation.update,
+															true,
+															REFERENCE,
+															webContext));
+
+		assertEquals(-1, ((Number) response.get("status")).intValue());
+		assertEquals(WebErrorUtil.genericMessage(REFERENCE), response.get("data"));
+		assertEquals(List.of(notification("info", "Email sent")), response.get("_growls"));
+		assertFalse(response.containsKey("_messages"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void endedSessionOrConversationLeavesOutGrowlsAndMessages() throws Exception {
+		AbstractWebContext webContext = webContextWith(List.of(notification("info", "Email sent")),
+														List.of(notification("info", "Done")));
+
+		for (Throwable t : List.of(new SessionEndedException(Locale.ENGLISH), new ConversationEndedException(Locale.ENGLISH))) {
+			Map<?, ?> response = parseResponse(produce(t, Operation.update, true, REFERENCE, webContext));
+
+			assertFalse(response.containsKey("_growls"), t.getClass().getSimpleName());
+			assertFalse(response.containsKey("_messages"), t.getClass().getSimpleName());
+		}
 	}
 
 	@Test
@@ -239,6 +315,17 @@ class SmartClientEditServletErrorResponseTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void technicalErrorWithoutReferenceIsGivenANewReference() {
+		String response = produce(new IllegalStateException("sensitive detail"), Operation.update, true, null);
+
+		assertTrue(response.contains("\"status\":-1"));
+		assertTrue(response.contains(WebErrorUtil.GENERIC_ERROR_MESSAGE));
+		assertTrue(response.contains("Reference: "));
+		assertFalse(response.contains("sensitive detail"));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void technicalErrorOverloadIncludesGenericMessage() {
 		StringWriter writer = new StringWriter();
 		try (PrintWriter printWriter = new PrintWriter(writer)) {
@@ -357,7 +444,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(processBean).isCreated();
+		doReturn(Boolean.TRUE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 		when(view.getParameters()).thenReturn(List.<View.ViewParameter>of());
 
@@ -384,7 +471,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(Boolean.FALSE).when(processBean).isCreated();
+		doReturn(Boolean.FALSE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "create")).thenReturn(view);
 		when(view.getParameters()).thenReturn(List.<View.ViewParameter>of());
 
@@ -411,7 +498,7 @@ class SmartClientEditServletErrorResponseTest {
 		org.skyve.domain.Bean processBean = mock(org.skyve.domain.Bean.class);
 		View view = mock(View.class);
 
-		org.mockito.Mockito.doReturn(Boolean.TRUE).when(processBean).isCreated();
+		doReturn(Boolean.TRUE).when(processBean).isCreated();
 		when(processDocument.getView("ux", customer, "edit")).thenReturn(view);
 
 		View.ViewParameter declared = new View.ViewParameter();
@@ -762,7 +849,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
 		doReturn(Boolean.FALSE).when(user).canDeleteDocument(processDocument);
@@ -780,12 +867,65 @@ class SmartClientEditServletErrorResponseTest {
 
 	@Test
 	@SuppressWarnings("static-method")
+	void removePrivateTakesANonPersistentBeanThroughPreExecuteWithoutChecksOrDeleting() throws Exception {
+		assertRemovedWithoutDeleting(mock(Bean.class));
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateTakesAnUnpersistedBeanThroughPreExecuteWithoutChecksOrDeleting() throws Exception {
+		assertRemovedWithoutDeleting(mock(PersistentBean.class));
+	}
+
+	private static void assertRemovedWithoutDeleting(Bean bean) throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+		when(bizlet.preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete, bean, null, webContext)).thenReturn(bean);
+
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, mock(Document.class), bean, bizlet, persistence, pw));
+		pw.flush();
+
+		verify(bizlet).preExecute(org.skyve.metadata.controller.ImplicitActionName.Delete, bean, null, webContext);
+		verify(bizlet).postRender(bean, webContext);
+		verify(user, never()).canDeleteDocument(any());
+		verify(persistence, never()).delete(any(Document.class), any(PersistentBean.class));
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
+	void removePrivateWithNoBeanWritesSuccessWithoutRunningCallbacks() throws Exception {
+		AbstractWebContext webContext = mock(AbstractWebContext.class);
+		User user = mock(User.class);
+		CustomerImpl customer = mock(CustomerImpl.class);
+		Bizlet<Bean> bizlet = mock(Bizlet.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class);
+		StringWriter sink = new StringWriter();
+		PrintWriter pw = new PrintWriter(sink);
+
+		// As above, caching the conversation fails last as there is no conversation cache here
+		assertThrows(NullPointerException.class,
+				() -> invokeRemovePrivate(webContext, user, customer, mock(Document.class), null, bizlet, persistence, pw));
+		pw.flush();
+
+		assertEquals("{\"response\":{\"status\":0}}", sink.toString());
+		verifyNoInteractions(user, customer, bizlet, persistence);
+	}
+
+	@Test
+	@SuppressWarnings("static-method")
 	void removePrivateThrowsValidationWhenBeanAlreadyDeleted() throws Exception {
 		AbstractWebContext webContext = mock(AbstractWebContext.class);
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
 		doReturn(Boolean.TRUE).when(user).canDeleteDocument(processDocument);
@@ -810,7 +950,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
@@ -843,7 +983,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 
@@ -878,7 +1018,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		StringWriter sink = new StringWriter();
@@ -918,7 +1058,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
@@ -967,7 +1107,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
 		StringWriter sink = new StringWriter();
@@ -1011,7 +1151,7 @@ class SmartClientEditServletErrorResponseTest {
 		User user = mock(User.class);
 		CustomerImpl customer = mock(CustomerImpl.class);
 		Document processDocument = mock(Document.class);
-		PersistentBean beanToDelete = mock(PersistentBean.class);
+		PersistentBean beanToDelete = persistedBean();
 		PersistentBean retrieved = mock(PersistentBean.class);
 		Bizlet<PersistentBean> bizlet = mock(Bizlet.class);
 		AbstractPersistence persistence = mock(AbstractPersistence.class);
@@ -1101,12 +1241,19 @@ class SmartClientEditServletErrorResponseTest {
 		verify(customer).interceptAfterPostRender(bean, webContext);
 	}
 
+	/** A mocked bean that has been persisted, so there is something to delete. */
+	private static PersistentBean persistedBean() {
+		PersistentBean result = mock(PersistentBean.class);
+		doReturn(Boolean.TRUE).when(result).isPersisted();
+		return result;
+	}
+
 	private static void invokeRemovePrivate(AbstractWebContext webContext,
 										User user,
 										CustomerImpl customer,
 										Document processDocument,
-										PersistentBean beanToDelete,
-										Bizlet<PersistentBean> bizlet,
+										Bean beanToDelete,
+										Bizlet<?> bizlet,
 										AbstractPersistence persistence,
 										PrintWriter pw) throws Exception {
 		Method method = SmartClientEditServlet.class.getDeclaredMethod("remove",
@@ -1114,7 +1261,7 @@ class SmartClientEditServletErrorResponseTest {
 				User.class,
 				org.skyve.metadata.customer.Customer.class,
 				Document.class,
-				PersistentBean.class,
+				Bean.class,
 				Bizlet.class,
 				AbstractPersistence.class,
 				PrintWriter.class);
@@ -1159,6 +1306,40 @@ class SmartClientEditServletErrorResponseTest {
 			SmartClientEditServlet.produceErrorResponse(t, operation, includeBindings, printWriter, reference);
 		}
 		return writer.toString();
+	}
+
+	private static String produce(Throwable t,
+									Operation operation,
+									boolean includeBindings,
+									String reference,
+									AbstractWebContext webContext) {
+		StringWriter writer = new StringWriter();
+		try (PrintWriter printWriter = new PrintWriter(writer)) {
+			SmartClientEditServlet.produceErrorResponse(t, operation, includeBindings, printWriter, reference, webContext);
+		}
+		return writer.toString();
+	}
+
+	/**
+	 * Parses an error response, which also checks that it is well formed JSON, and returns its response object.
+	 */
+	@SuppressWarnings("null") // the response is well formed JSON
+	private static Map<?, ?> parseResponse(String json) throws Exception {
+		return (Map<?, ?>) ((Map<?, ?>) JSON.unmarshall(json)).get("response");
+	}
+
+	private static AbstractWebContext webContextWith(List<Map<String, String>> growls, List<Map<String, String>> messages) {
+		AbstractWebContext result = mock(AbstractWebContext.class);
+		doReturn(growls).when(result).getGrowls();
+		doReturn(messages).when(result).getMessages();
+		return result;
+	}
+
+	private static Map<String, String> notification(String severity, String summary) {
+		Map<String, String> result = new TreeMap<>();
+		result.put("severity", severity);
+		result.put("summary", summary);
+		return result;
 	}
 
 	private static final class TestMessageException extends RuntimeException implements MessageException {

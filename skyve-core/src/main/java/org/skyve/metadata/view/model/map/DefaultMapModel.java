@@ -8,6 +8,9 @@ import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.util.Binder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extend to add map features to a map.
  * NB Skyve cannot determine the access control required to zoom in on features
@@ -20,16 +23,16 @@ import org.skyve.util.Binder;
  */
 public abstract class DefaultMapModel<T extends Bean> extends MapModel<T> {
 	private String geometryBinding;
-	public final String getGeometryBinding() {
+	public final @Nullable String getGeometryBinding() {
 		return geometryBinding;
 	}
-	public final void setGeometryBinding(String geometryBinding) {
+	public final void setGeometryBinding(@Nonnull String geometryBinding) {
 		this.geometryBinding = geometryBinding;
 	}
 
-	protected void addItem(Bean beanContainingGeometry, 
-							List<MapItem> itemsToAddTo,
-							Envelope mapExtents) {
+	protected void addItem(@Nonnull Bean beanContainingGeometry, 
+							@Nonnull List<MapItem> itemsToAddTo,
+							@Nonnull Envelope mapExtents) {
 		Geometry geometry = (Geometry) Binder.get(beanContainingGeometry, geometryBinding);
 		if ((geometry != null) && mapExtents.intersects(geometry.getEnvelopeInternal())) {
 			MapItem item = new MapItem();

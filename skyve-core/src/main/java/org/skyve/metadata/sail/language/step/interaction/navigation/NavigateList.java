@@ -5,7 +5,10 @@ import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.util.XMLMetaData;
 import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
+import org.skyve.metadata.sail.language.step.context.PushListContext;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -37,7 +40,7 @@ public class NavigateList implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 
@@ -46,7 +49,7 @@ public class NavigateList implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -54,7 +57,7 @@ public class NavigateList implements Step {
 	 * Returns the documentName.
 	 * @return the result
 	 */
-	public String getDocumentName() {
+	public @Nullable String getDocumentName() {
 		return documentName;
 	}
 
@@ -63,7 +66,7 @@ public class NavigateList implements Step {
 	 * @param documentName the documentName
 	 */
 	@XmlAttribute(name = "document")
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nullable String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -71,7 +74,7 @@ public class NavigateList implements Step {
 	 * Returns the queryName.
 	 * @return the result
 	 */
-	public String getQueryName() {
+	public @Nullable String getQueryName() {
 		return queryName;
 	}
 
@@ -80,7 +83,7 @@ public class NavigateList implements Step {
 	 * @param queryName the queryName
 	 */
 	@XmlAttribute(name = "query")
-	public void setQueryName(String queryName) {
+	public void setQueryName(@Nullable String queryName) {
 		this.queryName = UtilImpl.processStringValue(queryName);
 	}
 
@@ -88,7 +91,7 @@ public class NavigateList implements Step {
 	 * Returns the modelName.
 	 * @return the result
 	 */
-	public String getModelName() {
+	public @Nullable String getModelName() {
 		return modelName;
 	}
 
@@ -97,7 +100,7 @@ public class NavigateList implements Step {
 	 * @param modelName the modelName
 	 */
 	@XmlAttribute(name = "model")
-	public void setModelName(String modelName) {
+	public void setModelName(@Nullable String modelName) {
 		this.modelName = UtilImpl.processStringValue(modelName);
 	}
 
@@ -106,7 +109,7 @@ public class NavigateList implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executeNavigateList(this);
 	}
 	
@@ -116,7 +119,7 @@ public class NavigateList implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return listGridIdentifier(context, moduleName, queryName, documentName, modelName);
 	}
 	
@@ -129,11 +132,17 @@ public class NavigateList implements Step {
 	 * @param modelName the modelName
 	 * @return the result
 	 */
-	public static String listGridIdentifier(AutomationContext context,
-												String moduleName,
-												String queryName,
-												String documentName,
-												String modelName) {
+	public static @Nonnull String listGridIdentifier(@Nonnull AutomationContext context,
+														@Nullable String moduleName,
+														@Nullable String queryName,
+														@Nullable String documentName,
+														@Nullable String modelName) {
+		// A step that names no list means the list the context shows, such as a query list a menu item opened
+		PushListContext list = context.getList();
+		if ((moduleName == null) && (queryName == null) && (documentName == null) && (modelName == null) && (list != null)) {
+			return list.getIdentifier(context);
+		}
+
 		String result = null;
 		
 		String keyModuleName = (moduleName == null) ? context.getModuleName() : moduleName;

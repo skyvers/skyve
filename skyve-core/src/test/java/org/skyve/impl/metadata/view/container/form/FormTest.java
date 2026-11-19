@@ -1,5 +1,6 @@
 package org.skyve.impl.metadata.view.container.form;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -9,13 +10,13 @@ import org.junit.jupiter.api.Test;
 class FormTest {
 
 	@Test
-	void jaxbHelperGetEnabledConditionNameReturnsNull() {
-		assertNull(new Form().getEnabledConditionName());
+	void xmlEnabledConditionIsNullByDefault() {
+		assertNull(new Form().getXmlEnabledCondition());
 	}
 
 	@Test
-	void jaxbHelperGetVisibleConditionNameReturnsNull() {
-		assertNull(new Form().getVisibleConditionName());
+	void xmlVisibleConditionIsNullByDefault() {
+		assertNull(new Form().getXmlVisibleCondition());
 	}
 
 	@Test
@@ -23,17 +24,17 @@ class FormTest {
 		assertNotNull(new Form().getProperties());
 	}
 
-        @Test
-        void setEnabledConditionNameStoresNegatedCondition() {
-                Form form = new Form();
-                form.setEnabledConditionName("myCondition");
-                assertNotNull(form.getDisabledConditionName());
-        }
+	@Test
+	void setEnabledConditionDerivesNegatedCondition() {
+		Form form = new Form();
+		form.setXmlEnabledCondition("myCondition");
+		assertEquals("notMyCondition", form.getDisabledCondition());
+	}
 
-        @Test
-        void setVisibleConditionNameStoresNegatedCondition() {
-                Form form = new Form();
-                form.setVisibleConditionName("myVisible");
-                assertNotNull(form.getInvisibleConditionName());
-        }
+	@Test
+	void setVisibleConditionDerivesNegatedCondition() {
+		Form form = new Form();
+		form.setXmlVisibleCondition("myVisible");
+		assertEquals("notMyVisible", form.getInvisibleCondition());
+	}
 }

@@ -208,6 +208,7 @@
 				</script>
 		</head>
 			<body onload="<%=initialFocusScript%>">
+		<%@include file="fragments/environmentBanners.jsp" %>
 		<SCRIPT>//'"]]>>isc_loginRequired
 		var isc = top.isc ? top.isc : window.opener ? window.opener.isc : null;
 		if (isc && isc.RPCManager) isc.RPCManager.delayCall("handleLoginRequired", [window]);
@@ -384,7 +385,7 @@
 									<div class="ui gray button">
 										<i class="microsoft icon"></i>
 									</div>
-									<a href="oauth2/authorization/microsoft" class="ui basic gray left pointing label">Azure AD</a>
+									<a href="oauth2/authorization/microsoft" class="ui basic gray left pointing label">Entra ID</a>
 								</div>
 							</div>
 							<% } %>							

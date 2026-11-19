@@ -3,6 +3,8 @@ package org.skyve.metadata.module.fluent;
 import org.skyve.impl.metadata.repository.module.ModuleRoleUserAccessMetaData;
 import org.skyve.impl.metadata.repository.module.ModuleRoleUserAccessUxUiMetadata;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Abstract base fluent builder class for working with {@link FluentModuleRoleAccess}.
  * 
@@ -24,13 +26,13 @@ public abstract class FluentModuleRoleAccess<T extends FluentModuleRoleAccess<T,
 	/**
 	 * Returns the underlying module role access metadata from this builder.
 	 */
-	public abstract M get();
+	public abstract @Nonnull M get();
 	
 	/**
 	 * Add a new ModuleRoleUserAccessUxUiMetadata to this module role access.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addUxUi(ModuleRoleUserAccessUxUiMetadata uxui) {
+	public @Nonnull T addUxUi(@Nonnull ModuleRoleUserAccessUxUiMetadata uxui) {
 		access.getUxuis().add(uxui);
 		return (T) this;
 	}
@@ -39,7 +41,7 @@ public abstract class FluentModuleRoleAccess<T extends FluentModuleRoleAccess<T,
 	 * Add a new uxui to this module role access with the specified uxui name.
 	 */
 	@SuppressWarnings("unchecked")
-	public T addUxUi(String uxui) {
+	public @Nonnull T addUxUi(@Nonnull String uxui) {
 		ModuleRoleUserAccessUxUiMetadata namedUxUi = new ModuleRoleUserAccessUxUiMetadata();
 		namedUxUi.setName(uxui);
 		access.getUxuis().add(namedUxUi);
@@ -50,7 +52,7 @@ public abstract class FluentModuleRoleAccess<T extends FluentModuleRoleAccess<T,
 	 * Clears all the uxuis for this module role access.
 	 */
 	@SuppressWarnings("unchecked")
-	public T clearUxUis() {
+	public @Nonnull T clearUxUis() {
 		access.getUxuis().clear();
 		return (T) this;
 	}
@@ -60,7 +62,7 @@ public abstract class FluentModuleRoleAccess<T extends FluentModuleRoleAccess<T,
 	 * for this access.
 	 */
 	@SuppressWarnings("unchecked")
-	public T removeUxUi(String uxui) {
+	public @Nonnull T removeUxUi(@Nonnull String uxui) {
 		access.getUxuis().removeIf(u -> uxui.equals(u.getName()));
 		return (T) this;
 	}

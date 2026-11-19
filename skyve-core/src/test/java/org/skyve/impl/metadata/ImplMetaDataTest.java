@@ -48,6 +48,13 @@ class ImplMetaDataTest {
 	}
 
 	@Test
+	void orderingSetByTrimsPaddedValue() {
+		OrderingImpl o = new OrderingImpl();
+		o.setBy("  createdDate  ");
+		assertThat(o.getBy(), is("createdDate"));
+	}
+
+	@Test
 	void orderingSetSort() {
 		OrderingImpl o = new OrderingImpl();
 		o.setSort(SortDirection.descending);

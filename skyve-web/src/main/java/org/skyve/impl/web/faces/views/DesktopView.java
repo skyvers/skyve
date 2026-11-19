@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import org.skyve.CORE;
+import org.skyve.domain.Bean;
 import org.skyve.impl.metadata.module.menu.CalendarItem;
 import org.skyve.impl.metadata.module.menu.EditItem;
 import org.skyve.impl.metadata.module.menu.LinkItem;
@@ -16,9 +17,11 @@ import org.skyve.impl.metadata.module.menu.TreeItem;
 import org.skyve.impl.metadata.user.UserImpl;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.UserAgent;
+import org.skyve.impl.web.WebUtil;
 import org.skyve.impl.web.faces.FacesAction;
 import org.skyve.impl.web.faces.actions.ActionUtil;
 import org.skyve.impl.web.service.smartclient.SmartClientViewRenderer;
+import org.skyve.metadata.MetaDataException;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Document;
 import org.skyve.metadata.module.Module;
@@ -30,7 +33,9 @@ import org.skyve.metadata.module.query.MetaDataQueryDefinition;
 import org.skyve.metadata.module.query.QueryDefinition;
 import org.skyve.metadata.router.UxUi;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.user.UserAccess;
 import org.skyve.metadata.view.View.ViewType;
+import org.skyve.metadata.view.model.list.ListModel;
 import org.skyve.util.Icons;
 import org.skyve.util.OWASP;
 import org.skyve.web.WebAction;
@@ -38,6 +43,7 @@ import org.skyve.web.WebAction;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.FacesException;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Named;
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,7 +77,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return locale bootstrap script markup, or {@code null}
 	 */
-	public String getLocaleScript() {
+	public @Nullable String getLocaleScript() {
 		return localeScript;
 	}
 	
@@ -82,7 +88,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated desktop menu bootstrap script, or {@code null}
 	 */
-	public String getMenuScript() {
+	public @Nullable String getMenuScript() {
 		return menuScript;
 	}
 	
@@ -93,7 +99,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated SmartClient datasource bootstrap script, or {@code null}
 	 */
-	public String getDataSourceScript() {
+	public @Nullable String getDataSourceScript() {
 		return dataSourceScript;
 	}
 	
@@ -104,7 +110,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return generated initial UI action script, or {@code null}
 	 */
-	public String getUiScript() {
+	public @Nullable String getUiScript() {
 		return uiScript;
 	}
 	
@@ -113,10 +119,22 @@ public class DesktopView extends HarnessView {
 	/**
 	 * Returns generated environment banner script.
 	 *
-	 * @return generated environment banner script, or {@code null}
+	 * @return generated environment banner script, empty when no environment identifier is set,
+	 * 			or {@code null} before {@link #preRender()}
 	 */
-	public String getBannerScript() {
+	public @Nullable String getBannerScript() {
 		return bannerScript;
+	}
+
+	/**
+	 * Builds the script that appends the environment banners to the page body, after SmartClient has drawn into it.
+	 * The banner markup is escaped as a JavaScript string.
+	 *
+	 * @return the script, or an empty string when no environment identifier is set
+	 */
+	static @Nonnull String buildBannerScript() {
+		String banners = WebUtil.getEnvironmentBannersHtml();
+		return (banners == null) ? "" : "$('body').append('" + OWASP.escapeJsString(banners) + "');";
 	}
 
 	/**
@@ -125,7 +143,7 @@ public class DesktopView extends HarnessView {
 	 * @return SmartClient base directory
 	 */
 	@SuppressWarnings("static-method")
-	public String getSmartClientDir() {
+	public @Nonnull String getSmartClientDir() {
 		return UtilImpl.SMART_CLIENT_DIR;
 	}
 
@@ -136,7 +154,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return SmartClient skin name, or {@code null}
 	 */
-	public String getSkin() {
+	public @Nullable String getSkin() {
 		return skin;
 	}
 	
@@ -149,7 +167,7 @@ public class DesktopView extends HarnessView {
         if (! fc.isPostback()) {
         	new FacesAction<Void>() {
 				@Override
-				public Void callback() throws Exception {
+				public @Nullable Void callback() throws Exception {
 			    	UserImpl user = (UserImpl) CORE.getUser();
 			    	Customer customer = user.getCustomer();
 			    	
@@ -178,7 +196,7 @@ public class DesktopView extends HarnessView {
 					constructMenu(bizModule, uxui.getName(), sb);
 					menuScript = sb.toString();
 					sb.setLength(0); 
-					listDataSources(customer, user, uxui.getName(), sb);
+					Set<String> menuDataSourceIds = listDataSources(customer, user, uxui.getName(), sb);
 					dataSourceScript = sb.toString();
 					sb.setLength(0);
 	
@@ -196,6 +214,8 @@ public class DesktopView extends HarnessView {
 						}
 					}
 					else {
+						// the definition of the list's data source, when the menu did not define it (see listDataSourceDefinition())
+						String definition = "";
 						sb.append("details.showMember(isc.ListView.contents);");
 						sb.append("isc.ListView.set");
 						if (WebAction.l.equals(a)) {
@@ -212,23 +232,28 @@ public class DesktopView extends HarnessView {
 						}
 						
 						if (bizDocument != null) {
-							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(getQueryNameParameter()).append("');");
+							String modelName = getQueryNameParameter();
+							sb.append("DataSource('").append(bizModule).append('_').append(bizDocument).append("__").append(modelName).append("');");
+							if ((bizModule != null) && (modelName != null)) {
+								definition = listDataSourceDefinition(user, customer, bizModule, bizDocument, modelName, uxui.getName(), menuDataSourceIds);
+							}
 						}
 						else {
-							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, getQueryNameParameter());
+							String queryName = getQueryNameParameter();
+							if (bizModule == null) { // initialise() defaults the module
+								throw new IllegalStateException("Cannot show a list as the DesktopView has no module parameter");
+							}
+							if (queryName == null) {
+								throw new FacesException("Malformed URL - a list of module " + bizModule + " requires a query name");
+							}
+							QueryDefinition query = ActionUtil.getMetaDataQuery(bizModule, queryName);
 							sb.append("DataSource('").append(bizModule).append('_').append(query.getName()).append("');");
+							definition = listDataSourceDefinition(user, customer, bizModule, null, queryName, uxui.getName(), menuDataSourceIds);
 						}
+						sb.insert(0, definition);
 					}
 					uiScript = sb.toString();
-					sb.setLength(0);
-					
-					if (UtilImpl.ENVIRONMENT_IDENTIFIER != null) {
-						sb.append("$('body').append('<div class=\"skyveEnvBanner skyveTopEnvBanner\">");
-						sb.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
-						sb.append("$('body').append('<div class=\"skyveEnvBanner skyveBottomEnvBanner\">");
-						sb.append(UtilImpl.ENVIRONMENT_IDENTIFIER).append("</div>');");
-					}
-					bannerScript = sb.toString();
+					bannerScript = buildBannerScript();
 					
 					return null;
 				}
@@ -241,7 +266,7 @@ public class DesktopView extends HarnessView {
 	 *
 	 * @return header template HTML
 	 */
-	public String getHeaderTemplate() {
+	public @Nonnull String getHeaderTemplate() {
 		StringBuilder result = new StringBuilder(256);
 		result.append("<table class=\"skyveHeaderTable\">");
 		result.append("<tr>");
@@ -269,7 +294,8 @@ public class DesktopView extends HarnessView {
 	 * Creates locale-specific script include markup for SmartClient and Skyve messages.
 	 */
 	private void createLocaleScripts() {
-		createLocaleScripts(CORE.getUser().getLocale());
+		Locale locale = CORE.getUser().getLocale();
+		createLocaleScripts((locale == null) ? Locale.ENGLISH : locale); // as for SuperUser
 	}
 	
 	/**
@@ -478,9 +504,9 @@ public class DesktopView extends HarnessView {
 	 * @param result buffer that receives the generated script
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private void constructMenu(String chosenModuleName,
-								String uxui,
-								StringBuilder result) {
+	private void constructMenu(@Nullable String chosenModuleName,
+								@Nonnull String uxui,
+								@Nonnull StringBuilder result) {
 		result.append("isc.BizUtil.init('../").append(getLogoRelativeFileNameUrl());
 		result.append("',[");
 
@@ -490,7 +516,7 @@ public class DesktopView extends HarnessView {
 			 * Starts rendering a module menu descriptor.
 			 */
 			@Override
-			public void renderModuleMenu(Menu menu, Module menuModule, boolean open) {
+			public void renderModuleMenu(@Nonnull Menu menu, @Nonnull Module menuModule, boolean open) {
 				result.append("{name:'");
 				result.append(menuModule.getName());
 				result.append("',");
@@ -503,7 +529,7 @@ public class DesktopView extends HarnessView {
 			 * Starts rendering the root menu node for a module.
 			 */
 			@Override
-			public void renderMenuRoot(Menu menu, Module menuModule) {
+			public void renderMenuRoot(@Nonnull Menu menu, @Nonnull Module menuModule) {
 				result.append("root:{name:'");
 				result.append(OWASP.escapeJsStringWithHtmlFormatting(menuModule.getName()));
 				result.append("',sub:[");
@@ -513,57 +539,57 @@ public class DesktopView extends HarnessView {
 			 * Starts rendering a menu-group node.
 			 */
 			@Override
-			public void renderMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				result.append("{desc:'");
 				result.append(OWASP.escapeJsStringWithHtmlFormatting(group.getLocalisedName()));
 				result.append("', sub:[");
 			}
 			
 			@Override
-			public void renderCalendarItem(CalendarItem item,
-											Module menuModule,
-											Module itemModule,
-											Document itemDocument,
-											String itemQueryName,
-											String icon16,
-											String iconStyleClass) {
+			public void renderCalendarItem(@Nonnull CalendarItem item,
+											@Nonnull Module menuModule,
+											@Nonnull Module itemModule,
+											@Nonnull Document itemDocument,
+											@Nullable String itemQueryName,
+											@Nullable String icon16,
+											@Nullable String iconStyleClass) {
 				result.append("{name:'").append(itemQueryName);
 				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "cal", itemModule, itemDocument);
 			}
 			
 			@Override
-			public void renderEditItem(EditItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String icon16,
-										String iconStyleClass) {
+			public void renderEditItem(@Nonnull EditItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'").append(itemDocument.getName());
 				String menuModuleName = menuModule.getName();
 				String itemModuleName = itemModule.getName();
-				if ((menuModuleName != null) && (! menuModuleName.equals(itemModuleName))) {
+				if (! menuModuleName.equals(itemModuleName)) {
 					result.append("',module:'").append(itemModuleName);
 				}
 				renderItem(item.getLocalisedName(), icon16, iconStyleClass, null, "edit", itemModule, itemDocument);
 			}
 			
 			@Override
-			public void renderLinkItem(LinkItem item,
-										Module menuModule,
+			public void renderLinkItem(@Nonnull LinkItem item,
+										@Nonnull Module menuModule,
 										boolean relative,
-										String absoluteHref) {
+										@Nonnull String absoluteHref) {
 				result.append("{name:'").append(absoluteHref);
 				renderItem(item.getLocalisedName(), null, null, null, "link", null, null);
 			}
 			
 			@Override
-			public void renderListItem(ListItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderListItem(@Nonnull ListItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'");
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -582,13 +608,13 @@ public class DesktopView extends HarnessView {
 			}
 			
 			@Override
-			public void renderMapItem(MapItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName, 
-										String icon16,
-										String iconStyleClass) {
+			public void renderMapItem(@Nonnull MapItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName, 
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'");
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -602,13 +628,13 @@ public class DesktopView extends HarnessView {
 			}
 			
 			@Override
-			public void renderTreeItem(TreeItem item,
-										Module menuModule,
-										Module itemModule,
-										Document itemDocument,
-										String itemQueryName,
-										String icon16,
-										String iconStyleClass) {
+			public void renderTreeItem(@Nonnull TreeItem item,
+										@Nonnull Module menuModule,
+										@Nonnull Module itemModule,
+										@Nonnull Document itemDocument,
+										@Nullable String itemQueryName,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass) {
 				result.append("{name:'");
 				String modelName = item.getModelName();
 				if (modelName != null) {
@@ -626,13 +652,13 @@ public class DesktopView extends HarnessView {
 							itemDocument);
 			}
 			
-			private void renderItem(String name,
-										String icon16,
-										String iconStyleClass,
-										String config,
-										String ref,
-										Module itemModule,
-										Document itemDocument) {
+			private void renderItem(@Nullable String name,
+										@Nullable String icon16,
+										@Nullable String iconStyleClass,
+										@Nullable String config,
+										@Nonnull String ref,
+										@Nullable Module itemModule,
+										@Nullable Document itemDocument) {
 				result.append("',desc:'");
 				if (iconStyleClass != null) {
 					result.append("<i class=\"bizhubFontIcon ").append(iconStyleClass).append("\"></i>");
@@ -661,7 +687,7 @@ public class DesktopView extends HarnessView {
 			 * Finalizes a rendered menu-group node.
 			 */
 			@Override
-			public void renderedMenuGroup(MenuGroup group, Module menuModule) {
+			public void renderedMenuGroup(@Nonnull MenuGroup group, @Nonnull Module menuModule) {
 				result.setLength(result.length() - 1);
 				result.append("]},");
 			}
@@ -670,7 +696,7 @@ public class DesktopView extends HarnessView {
 			 * Finalizes the rendered root menu node.
 			 */
 			@Override
-			public void renderedMenuRoot(Menu menu, Module menuModule) {
+			public void renderedMenuRoot(@Nonnull Menu menu, @Nonnull Module menuModule) {
 				result.setLength(result.length() -1); // remove the last comma
 				result.append("]}");
 			}
@@ -679,7 +705,7 @@ public class DesktopView extends HarnessView {
 			 * Finalizes a rendered module menu descriptor.
 			 */
 			@Override
-			public void renderedModuleMenu(Menu menu, Module menuModule, boolean open) {
+			public void renderedModuleMenu(@Nonnull Menu menu, @Nonnull Module menuModule, boolean open) {
 				result.append(",open:").append(open).append("},");
 			}
 		}.render(requireUser());
@@ -699,15 +725,74 @@ public class DesktopView extends HarnessView {
 	}
 
 	/**
+	 * Returns the definition of the data source of a list opened by its URL, so that a list with no menu item can show.
+	 * The menu's data sources ({@link #listDataSources}) cover only the module home lists and the menu items, and the
+	 * list view finds the others undefined.
+	 *
+	 * <p>The definition is made only when the user may fetch the list's rows: the user has access to the list, as
+	 * {@code SmartClientListServlet} checks for every fetch, and can read its driving document. So it shows no list
+	 * the list servlet would refuse. The menu's data sources are passed to the renderer as visited, so it defines neither
+	 * the list's data source nor a lookup's that the menu defined. A model is built once, and only when the user has
+	 * access to it.
+	 *
+	 * @param user	the user
+	 * @param customer	the user's customer
+	 * @param moduleName	the list's module
+	 * @param documentName	the model's document, or {@code null} for a query or a document's default query
+	 * @param queryOrModelName	the model, or the query or document of the default query
+	 * @param uxui	the UX/UI name
+	 * @param menuDataSourceIds	the ids of the data sources the menu defined (see {@link #listDataSources})
+	 * @return the JavaScript defining the data source, or an empty string when the menu defined it or the user may
+	 * 			not fetch the list
+	 */
+	private static @Nonnull String listDataSourceDefinition(@Nonnull UserImpl user,
+																@Nonnull Customer customer,
+																@Nonnull String moduleName,
+																@Nullable String documentName,
+																@Nonnull String queryOrModelName,
+																@Nonnull String uxui,
+																@Nonnull Set<String> menuDataSourceIds) {
+		StringBuilder result = new StringBuilder(1024);
+		Module module = customer.getModule(moduleName);
+		if (documentName != null) { // a model
+			if (user.canAccess(UserAccess.modelAggregate(moduleName, documentName, queryOrModelName), uxui)) {
+				Document document = module.getDocument(customer, documentName);
+				ListModel<Bean> model = document.getListModel(customer, queryOrModelName, true);
+				Document drivingDocument = model.getDrivingDocument();
+				if ((drivingDocument != null) && user.canReadDocument(drivingDocument)) {
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, module, document, queryOrModelName, model, uxui, false, result, new TreeSet<>(menuDataSourceIds));
+				}
+			}
+		}
+		else {
+			MetaDataQueryDefinition query = module.getMetaDataQuery(queryOrModelName);
+			UserAccess access = UserAccess.queryAggregate(moduleName, queryOrModelName);
+			if (query == null) { // a document's default query
+				query = module.getDocumentDefaultQuery(customer, queryOrModelName);
+				access = UserAccess.documentAggregate(moduleName, queryOrModelName);
+			}
+			if (user.canAccess(access, uxui)) {
+				Document drivingDocument = query.getDocumentModule(customer).getDocument(customer, query.getDocumentName());
+				if (user.canReadDocument(drivingDocument)) {
+					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, false, result, new TreeSet<>(menuDataSourceIds));
+				}
+			}
+		}
+		return result.toString();
+	}
+
+	/**
 	 * Appends SmartClient datasource definitions for accessible module menu items.
 	 *
 	 * @param customer customer whose modules are being rendered
 	 * @param user current user whose permissions determine accessible menus
 	 * @param uxui UX/UI name used to resolve the menu structure
 	 * @param result buffer that receives the generated script
+	 * @return the ids of the data sources defined
 	 */
-	private static void listDataSources(Customer customer, UserImpl user, String uxui, StringBuilder result) {
+	private static @Nonnull Set<String> listDataSources(@Nonnull Customer customer, @Nonnull UserImpl user, @Nonnull String uxui, @Nonnull StringBuilder result) {
 		StringBuilder dataSources = new StringBuilder(1024);
+		Set<String> ids = new TreeSet<>();
 
 		result.append(",[");
 		for (Module module : customer.getModules()) {
@@ -715,21 +800,24 @@ public class DesktopView extends HarnessView {
 			
 			if (ViewType.list.equals(module.getHomeRef())) {
 				String homeDocumentName = module.getHomeDocumentName();
-				if (homeDocumentName != null) {
-					MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
-					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
-				}
+				MetaDataQueryDefinition query = module.getDocumentDefaultQuery(customer, homeDocumentName);
+				SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 			}
 			
 			String moduleName = module.getName();
 			Menu menu = user.getModuleMenu(moduleName);
+			if (menu == null) { // menus are reset for every customer module
+				throw new IllegalStateException("User " + user.getName() + " has no menu for module " + moduleName);
+			}
 			listDataSourcesForMenuItems(user, customer, moduleName, module, menu.getItems(), uxui, dataSources, visitedQueryNames);
+			ids.addAll(visitedQueryNames);
 		}
 		if (! dataSources.isEmpty()) { // we have appended some data sources
 			dataSources.setLength(dataSources.length() - 2); // remove the last data source comma
 			result.append(dataSources);
 		}
 		result.append("]);");
+		return ids;
 	}
 
 	/**
@@ -745,14 +833,14 @@ public class DesktopView extends HarnessView {
 	 * @param visitedQueryNames set used to avoid duplicate query definitions
 	 */
 	@SuppressWarnings("java:S107") // Long parameter list preserves the existing framework/API contract.
-	private static void listDataSourcesForMenuItems(UserImpl user,
-														Customer customer, 
-														String moduleName, 
-														Module module, 
-														List<MenuItem> items,
-														String uxui,
-														StringBuilder dataSources,
-														Set<String> visitedQueryNames) {
+	private static void listDataSourcesForMenuItems(@Nonnull UserImpl user,
+														@Nonnull Customer customer, 
+														@Nonnull String moduleName, 
+														@Nonnull Module module, 
+														@Nonnull List<MenuItem> items,
+														@Nonnull String uxui,
+														@Nonnull StringBuilder dataSources,
+														@Nonnull Set<String> visitedQueryNames) {
 		for (MenuItem item : items) {
 			if (item instanceof MenuGroup group) {
 				listDataSourcesForMenuItems(user, customer, moduleName, module, group.getItems(), uxui, dataSources, visitedQueryNames);
@@ -764,10 +852,13 @@ public class DesktopView extends HarnessView {
 				String documentName = listOrTree.getDocumentName();
 				
 				if (queryName != null) { // its a query
-					query = module.getMetaDataQuery(queryName);
+					query = module.getNullSafeMetaDataQuery(queryName);
 					SmartClientViewRenderer.appendDataSourceDefinition(user, customer, query, null, null, uxui, true, dataSources, visitedQueryNames);
 				}
 				else {
+					if (documentName == null) { // a list item has a query or a document
+						throw new MetaDataException("Menu item " + listOrTree.getName() + " in module " + moduleName + " has no query or document name");
+					}
 					if (modelName != null) { // its a model
 						Document document = module.getDocument(customer, documentName);
 						SmartClientViewRenderer.appendDataSourceDefinition(user, 

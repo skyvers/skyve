@@ -24,6 +24,9 @@ import freemarker.template.TemplateNumberModel;
 import freemarker.template.TemplateScalarModel;
 import freemarker.template.utility.DeepUnwrap;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * FreeMarker user-defined directive which loads a specified content image from Skyve's content
  * repository and outputs a HTML img with a data URL set to the loaded image.
@@ -69,7 +72,10 @@ public class ContentDirective implements TemplateDirectiveModel {
 
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public void execute(Environment env, Map params, TemplateModel[] loopVars, TemplateDirectiveBody body)
+	public void execute(@SuppressWarnings("null") @Nonnull Environment env,
+						@SuppressWarnings("null") @Nonnull Map params,
+						@SuppressWarnings("null") @Nonnull TemplateModel[] loopVars,
+						@Nullable TemplateDirectiveBody body)
 	throws TemplateException, IOException {
 		if (params.isEmpty()) {
 			throw new TemplateModelException("This directive requires parameters.");

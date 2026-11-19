@@ -3,6 +3,9 @@ package org.skyve.job;
 import org.skyve.impl.job.AbstractSkyveJob;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Extension point for Jobs.
  * The job will not be able to be cancelled by default.
@@ -22,7 +25,7 @@ public abstract class Job extends AbstractSkyveJob {
 	 * If the job can't be cancelled then return a reason why the job cannot be cancelled, otherwise return null.
 	 */
 	@Override
-	public String cancel() {
+	public @Nullable String cancel() {
 		return "Job cannot be cancelled.";
 	}
 	
@@ -52,7 +55,7 @@ public abstract class Job extends AbstractSkyveJob {
 	 * execute another job as part of this job in the same thread.
 	 */
 	@Override
-	public final void execute(Job job) throws Exception {
+	public final void execute(@Nonnull Job job) throws Exception {
 		job.setBean(getBean());
 		job.setLog(getLog());
 		UtilImpl.inject(job);

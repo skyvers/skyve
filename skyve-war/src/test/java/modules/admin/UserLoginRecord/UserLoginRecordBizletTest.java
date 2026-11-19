@@ -13,6 +13,7 @@ class UserLoginRecordBizletTest {
 	@Test
 	void preExecuteNewReturnsBean() throws Exception {
 		UserLoginRecordExtension bean = new UserLoginRecordExtension();
+		@SuppressWarnings("null") // passes null on purpose
 		UserLoginRecordExtension result = bizlet.preExecute(ImplicitActionName.New, bean, null, null);
 		assertNotNull(result);
 	}

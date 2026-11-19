@@ -3,6 +3,8 @@ package org.skyve.addin;
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Base class for PF4J-based Skyve add-ins.
  *
@@ -19,7 +21,7 @@ public abstract class AddIn extends Plugin {
 	// Expose configuration of add-in required
 	
 	@SuppressWarnings("deprecation")
-	public AddIn(PluginWrapper wrapper) {
+	public AddIn(@Nonnull PluginWrapper wrapper) {
 		super(wrapper);
 	}
 }

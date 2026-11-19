@@ -5,6 +5,7 @@ import org.skyve.metadata.controller.ServerSideAction;
 import org.skyve.metadata.controller.ServerSideActionResult;
 import org.skyve.web.WebContext;
 
+import modules.admin.Contact.ContactExtension;
 import modules.admin.SelfRegistration.SelfRegistrationExtension;
 import modules.admin.User.UserExtension;
 import modules.admin.domain.User;
@@ -27,7 +28,8 @@ public class ResendActivation implements ServerSideAction<SelfRegistrationExtens
 	public ServerSideActionResult<SelfRegistrationExtension> execute(SelfRegistrationExtension bean, WebContext webContext)
 			throws Exception {
 		if (bean != null) {
-			if (bean.getUser().getContact() == null || bean.getUser().getContact().getName() == null) {
+			ContactExtension contact = bean.getUser().getContact();
+			if (contact == null || contact.getName() == null) {
 				// this came from a public page, retrieve the user
 				UserExtension user = CORE.getPersistence().retrieve(User.MODULE_NAME, User.DOCUMENT_NAME,
 						bean.getUser().getBizId());

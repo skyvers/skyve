@@ -47,11 +47,11 @@ public abstract class NullableBeanVisitor extends BeanVisitorImpl {
 	 * Delegates to acceptNullable() in this implementation.
 	 */
 	@Override
-	final boolean accept(String binding,
-							Document document,
-							Document owningDocument,
-							Relation owningRelation,
-							Bean bean)
+	final boolean accept(@Nonnull String binding,
+							@Nonnull Document document,
+							@Nullable Document owningDocument,
+							@Nullable Relation owningRelation,
+							@Nonnull Bean bean)
 	throws Exception {
 		return acceptNulls(binding, document, owningDocument, owningRelation, bean);
 	}

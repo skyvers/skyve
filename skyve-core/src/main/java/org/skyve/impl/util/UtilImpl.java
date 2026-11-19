@@ -55,6 +55,9 @@ import org.slf4j.Logger;
 
 import net.gcardone.junidecode.Junidecode;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Primary framework configuration façade and miscellaneous utility class.
  *
@@ -238,11 +241,13 @@ public class UtilImpl {
     // Where to store/retrieve archive documents (Audits, etc)
     public static ArchiveConfig ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 
-	// The number of threads that are allowed to serve thumb nails at once.
-	// Too many threads can cause out of memory errors.
-	// You can calculate this as concurrentThreads * memory usage determined by targetSize below
-	// For the default of 10 concurrentThreads at 4MB the approximately max memory usage is 40MB.
-	public static int THUMBNAIL_CONCURRENT_THREADS = 10;
+	// The number of thumb nails that can be made at once - 0 means half the processors.
+	// Either way it is no more than a quarter of the maximum heap allows, at up to 128MB per thumb nail for the default
+	// maximumDimension of 2048 (a photo taken on its side is turned upright in a copy), so making thumb nails uses at most
+	// about a quarter of the heap.
+	// Other requests wait their turn. Stored thumb nails are served without waiting.
+	// A request that cannot start within 60 seconds (a safety limit) gets a 503 (Service Unavailable) response.
+	public static int THUMBNAIL_CONCURRENT_THREADS = 0;
 
 	// The sub-sampling doesn't kick in until the image's largest dimension is at least double the target size
 	// Then it sub-samples pixels by 2, 3 etc.
@@ -250,9 +255,23 @@ public class UtilImpl {
 	// targetSize * 2 (double width) * targetSize * 2 (double height) * 4 (ARGB bytes per pixel) / 1024 (KB) / 1024 (MB)
 	// assuming the images are relatively square.
 	// target of 256 = max 1MB; target of 512 = max 4MB, target of 1024 = max 16MB per image.
+	// This applies to an image read without a size, such as an original with its markup drawn in.
+	// A thumbnail is instead decoded at between once and twice its own size, so it shrinks smoothly - see maximumDimension.
 	public static int THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
 
-	// Thumbnails can be stored on the file system or generated on the fly each time
+	// The largest width or height in pixels of a requested thumbnail or dynamic image; a bigger image is shrunk to fit, keeping its shape.
+	// A requested thumbnail fits a square of its larger side rounded up to 64, 128, 256 and so on, up to this size,
+	// so a request can only choose from a few sizes, and only a few are stored per image.
+	// This limits the memory a thumbnail can use: one of up to half this size decodes at most maximumDimension squared
+	// pixels at 4 bytes each (16MB for 2048), and one of this size at most (2 x maximumDimension) squared (64MB for 2048).
+	// An image of more than 256 megapixels is not read at all, and shows its file type icon.
+	// It must be a whole number greater than 0.
+	public static int THUMBNAIL_MAXIMUM_DIMENSION = 2048;
+
+	// Thumbnails can be stored on the file system or generated on the fly each time.
+	// Nothing is stored when the drive has less than 10% of its space free.
+	// An attachment's thumbnails are deleted with it by content garbage collection.
+	// Making thumbnails still takes CPU, so rate limit the content and resources URLs at your reverse proxy.
 	public static boolean THUMBNAIL_FILE_STORAGE = true;
 
 	// Where to put thumbnails if fileStorage is true - defaults to <content.directory>/SKYVE_THUMBNAILS/
@@ -296,6 +315,10 @@ public class UtilImpl {
 	public static String SKYVE_GEOIP_SERVICE_CLASS = null;
 	public static String SKYVE_MAIL_SERVICE_CLASS = null;
 	public static String SKYVE_SMS_SERVICE_CLASS = null;
+	/** The {@code factories.dialogsClass} setting: the dialogs service class, or {@code null} for the default. */
+	public static String SKYVE_DIALOGS_CLASS = null;
+	/** The {@code factories.connectionCustomiserClass} setting: the connection customiser class, or {@code null} for none. */
+	public static String SKYVE_CONNECTION_CUSTOMISER_CLASS = null;
 
 	// The directory used for temp files for file uploads etc
 	public static final String TEMP_DIRECTORY = System.getProperty("java.io.tmpdir");
@@ -339,6 +362,13 @@ public class UtilImpl {
 	public static String SMTP_TEST_RECIPIENT = null;
 	// used to switch whether to send an email or not - false to actually send the email
 	public static boolean SMTP_TEST_BOGUS_SEND = false;
+	// used to switch whether MailLog stores a masked plain-text body excerpt - false to always redact
+	public static boolean SMTP_LOG_BODY_EXCERPT = false;
+	// used to switch whether MailLog stores the mail attachments as a zip - false to store attachment file names only
+	public static boolean SMTP_LOG_ATTACHMENTS = false;
+	// the maximum total size in bytes of the attachments stored against a single MailLog
+	public static final long DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES = 5242880L;
+	public static long SMTP_LOG_ATTACHMENTS_MAX_BYTES = DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 
 	// Map Keys
 	@SuppressWarnings("java:S115") // Suppress "Constant names should comply with a naming convention" as these are not constants but enum values
@@ -424,6 +454,11 @@ public class UtilImpl {
 	public static boolean HEALTH_CHECK = true;
 	// Number of seconds to cache the health results to alleviate denial of service
 	public static int HEALTH_CACHE_TIME_IN_SECONDS = 60; // 1 min
+
+	// Allow users with the admin.SAILRecorder role to record SAIL scripts (sail.recording)
+	public static boolean SAIL_RECORDING = false;
+	// The most steps one SAIL recording keeps (sail.maximumSteps)
+	public static int SAIL_RECORDING_MAXIMUM_STEPS = 5000;
 	
 	// These 3 are used to create a user with all roles for the customer assigned, if the user does not already exist
 	public static String BOOTSTRAP_CUSTOMER = null;
@@ -461,7 +496,7 @@ public class UtilImpl {
 	private static String absoluteBasePath;
 
 	@SuppressWarnings("java:S3776")
-	public static String getAbsoluteBasePath() {
+	public static @Nullable String getAbsoluteBasePath() {
 		if (absoluteBasePath == null) {
 			if (APPS_JAR_DIRECTORY != null) {
 				absoluteBasePath = APPS_JAR_DIRECTORY;
@@ -493,7 +528,7 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Map<String, Object> readJSONConfig(InputStream inputStream) throws Exception {
+	public static @Nullable Map<String, Object> readJSONConfig(@Nonnull InputStream inputStream) throws Exception {
 		String json = null;
 		try (Scanner scanner = new Scanner(inputStream)) {
 			json = scanner.useDelimiter("\\Z").next();
@@ -506,11 +541,11 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static final <T extends Serializable> T cloneBySerialization(T object) {
+	public static final @Nonnull <T extends Serializable> T cloneBySerialization(@Nonnull T object) {
 		return (T) SerializationHelper.clone(object);
 	}
 
-	public static final <T extends Serializable> T cloneToTransientBySerialization(T object) {
+	public static final @Nonnull <T extends Serializable> T cloneToTransientBySerialization(@Nonnull T object) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				if (element instanceof AbstractPersistentBean bean) {
@@ -533,7 +568,7 @@ public class UtilImpl {
 	 * 
 	 * @param bean The bean to load.
 	 */
-	public static void populateFully(final Bean bean) {
+	public static void populateFully(final @Nonnull Bean bean) {
 		User user = CORE.getUser();
 		Customer customer = user.getCustomer();
 
@@ -543,11 +578,11 @@ public class UtilImpl {
 		// Ensure that everything is loaded
 		new BeanVisitor(true, false) {
 			@Override
-			protected boolean accept(String binding,
-										Document documentAccepted,
-										Document owningDocument,
-										Relation owningRelation,
-										Bean beanAccepted) {
+			protected boolean accept(@Nonnull String binding,
+										@Nonnull Document documentAccepted,
+										@Nullable Document owningDocument,
+										@Nullable Relation owningRelation,
+										@Nonnull Bean beanAccepted) {
 				// do nothing - just visiting loads the instance from the database
 				return true;
 			}
@@ -558,7 +593,7 @@ public class UtilImpl {
 	 * Utility method to ensure that CDI injects are performed on existing (newly created) objects.
 	 * @param target	The target object to inject dependencies into (recursively)
 	 */
-	public static void inject(Object target) {
+	public static void inject(@Nonnull Object target) {
 		BeanProvider.injectFields(target);
 	}
 	
@@ -570,7 +605,7 @@ public class UtilImpl {
 	 * @return the resolved proxy or possibleProxy
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T deproxy(T possibleProxy) throws ClassCastException {
+	public static @Nullable <T> T deproxy(@Nullable T possibleProxy) throws ClassCastException {
 		if (possibleProxy instanceof HibernateProxy hibernateProxy) {
 			return (T) hibernateProxy.getHibernateLazyInitializer().getImplementation();
 		}
@@ -579,7 +614,7 @@ public class UtilImpl {
 	}
 
 	@SuppressWarnings("java:S3776")
-	public static void setTransient(Object object) {
+	public static void setTransient(@Nullable Object object) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				setTransient(element);
@@ -596,7 +631,7 @@ public class UtilImpl {
 			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				if (reference.isPersistent()) {
 					if (reference instanceof Association association) {
 						if (association.getType() != AssociationType.aggregation) {
@@ -615,7 +650,7 @@ public class UtilImpl {
 
 	// set the data group of a bean and all its children
 	@SuppressWarnings("java:S3776")
-	public static void setDataGroup(Object object, String bizDataGroupId) {
+	public static void setDataGroup(@Nullable Object object, @Nullable String bizDataGroupId) {
 		if (object instanceof List<?> list) {
 			for (Object element : list) {
 				setDataGroup(element, bizDataGroupId);
@@ -630,7 +665,7 @@ public class UtilImpl {
 			Document document = module.getDocument(customer, bean.getBizDocument());
 
 			for (String referenceName : document.getReferenceNames()) {
-				Reference reference = document.getReferenceByName(referenceName);
+				Reference reference = document.getNullSafeReferenceByName(referenceName);
 				if (reference.isPersistent()) {
 					if (reference instanceof Association association) {
 						if (association.getType() != AssociationType.aggregation) {
@@ -653,7 +688,7 @@ public class UtilImpl {
 	 * @param value The String.
 	 * @return null, if the trimmed value is empty, otherwise value.
 	 */
-	public static String processStringValue(String value) {
+	public static @Nullable String processStringValue(@Nullable String value) {
 		String result = value;
 
 		if (result != null) {
@@ -669,7 +704,7 @@ public class UtilImpl {
 	/**
 	 * Change unicode text to ascii.
 	 */
-	public static String unidecode(String value) {
+	public static @Nonnull String unidecode(@Nonnull String value) {
 		return Junidecode.unidecode(value);
 	}
 
@@ -684,7 +719,7 @@ public class UtilImpl {
 	 * @return The updated path if any slashes or <code>/modules</code> need to be added
 	 */
 	@SuppressWarnings("java:S1075") // always use *nix style slashes internally
-	public static String cleanupModuleDirectory(final String path) {
+	public static @Nullable String cleanupModuleDirectory(final @Nullable String path) {
 		if ((path != null) && (! path.isEmpty())) {
 			String updatedPath = path;
 
@@ -710,9 +745,9 @@ public class UtilImpl {
     public static record ArchiveConfig(
             int exportRuntimeSec,
             int exportBatchSize,
-            List<ArchiveDocConfig> docConfigs,
-            ArchivedDocumentCacheConfig cacheConfig, 
-            ArchiveSchedule schedule) {
+            @Nullable List<ArchiveDocConfig> docConfigs,
+            @Nullable ArchivedDocumentCacheConfig cacheConfig, 
+            @Nonnull ArchiveSchedule schedule) {
 
         protected static final String ARCHIVE_DIR = "archive";
         protected static final String INDEX_DIR = "index";
@@ -728,7 +763,7 @@ public class UtilImpl {
             return StringUtils.trimToNull(schedule().cron()) != null;
         }
 
-        public Optional<ArchiveDocConfig> findArchiveDocConfig(String module, String document) {
+        public @Nonnull Optional<ArchiveDocConfig> findArchiveDocConfig(@Nullable String module, @Nullable String document) {
 
             if (docConfigs == null || module == null || document == null) {
                 return Optional.empty();
@@ -740,14 +775,14 @@ public class UtilImpl {
                              .findFirst();
         }
 
-        public static record ArchiveDocConfig(String module, String document, String directory, int retainDeletedDocumentsDays) {
+        public static record ArchiveDocConfig(@Nonnull String module, @Nonnull String document, @Nonnull String directory, int retainDeletedDocumentsDays) {
 
             /**
              * The directory we will store exported documents in <em>.archive</em> files
              * 
              * @return
              */
-            public Path getArchiveDirectory() {
+            public @Nonnull Path getArchiveDirectory() {
                 return Path.of(CONTENT_DIRECTORY, ARCHIVE_DIR, this.directory);
             }
 
@@ -756,16 +791,16 @@ public class UtilImpl {
              * 
              * @return
              */
-            public Path getIndexDirectory() {
+            public @Nonnull Path getIndexDirectory() {
                 return getArchiveDirectory().resolve(INDEX_DIR);
             }
         }
         
-        public static record ArchiveSchedule(String cron, String customerName, String userName) {
+        public static record ArchiveSchedule(@Nonnull String cron, @Nonnull String customerName, @Nonnull String userName) {
 
             public static final ArchiveSchedule DEFUALT = new ArchiveSchedule("", "", "");
 
-            public User getUser() {
+            public @Nonnull User getUser() {
                 SuperUser u = new SuperUser();
                 u.setName(userName());
                 u.setId(userName());
@@ -833,8 +868,9 @@ public class UtilImpl {
     	ADDINS_DIRECTORY = null;
         ARCHIVE_CONFIG = ArchiveConfig.DISABLED;
 
-    	THUMBNAIL_CONCURRENT_THREADS = 10;
+    	THUMBNAIL_CONCURRENT_THREADS = 0;
     	THUMBNAIL_SUBSAMPLING_MINIMUM_TARGET_SIZE = 512;
+    	THUMBNAIL_MAXIMUM_DIMENSION = 2048;
     	THUMBNAIL_FILE_STORAGE = true;
     	THUMBNAIL_DIRECTORY = null;
     	
@@ -858,6 +894,8 @@ public class UtilImpl {
     	SKYVE_GEOIP_SERVICE_CLASS = null;
     	SKYVE_MAIL_SERVICE_CLASS = null;
     	SKYVE_SMS_SERVICE_CLASS = null;
+    	SKYVE_DIALOGS_CLASS = null;
+    	SKYVE_CONNECTION_CUSTOMISER_CLASS = null;
 
     	CACHE_DIRECTORY = null;
     	CACHE_MULTIPLE = false;
@@ -885,6 +923,9 @@ public class UtilImpl {
     	SMTP_SENDER = null;
     	SMTP_TEST_RECIPIENT = null;
     	SMTP_TEST_BOGUS_SEND = false;
+    	SMTP_LOG_BODY_EXCERPT = false;
+    	SMTP_LOG_ATTACHMENTS = false;
+    	SMTP_LOG_ATTACHMENTS_MAX_BYTES = DEFAULT_SMTP_LOG_ATTACHMENTS_MAX_BYTES;
 
     	MAP_TYPE = MapType.leaflet;
     	MAP_LAYERS = null;
@@ -933,6 +974,9 @@ public class UtilImpl {
     	
     	HEALTH_CHECK = true;
     	HEALTH_CACHE_TIME_IN_SECONDS = 60; // 1 min
+
+    	SAIL_RECORDING = false;
+    	SAIL_RECORDING_MAXIMUM_STEPS = 5000;
     	
     	BOOTSTRAP_CUSTOMER = null;
     	BOOTSTRAP_USER = null;

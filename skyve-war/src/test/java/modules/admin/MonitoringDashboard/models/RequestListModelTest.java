@@ -272,6 +272,7 @@ class RequestListModelTest extends AbstractH2Test {
 		assertNotNull(result);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void postConstructDefinesGenericDrivingDocumentAndReadOnlyColumns() {
 		RequestListModel model = new RequestListModel();
@@ -289,6 +290,7 @@ class RequestListModelTest extends AbstractH2Test {
 		assertEquals(Integer.valueOf(125), columns.get(3).getPixelWidth());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getRowsReturnsEmptyListWhenMonitoringHasNoRequestMeasurements() throws Exception {
 		RequestListModel model = new RequestListModel();
@@ -296,6 +298,7 @@ class RequestListModelTest extends AbstractH2Test {
 		assertTrue(model.getRows().isEmpty());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void getRowsMaterialisesSeededMonitoringMeasurements() throws Exception {
 		Monitoring.start();

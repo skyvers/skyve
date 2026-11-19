@@ -4,11 +4,13 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.skyve.domain.Bean;
 import org.skyve.domain.ChildBean;
@@ -72,6 +74,7 @@ import org.skyve.util.logging.Category;
 import org.slf4j.Logger;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Runtime implementation of the {@link Document} contract, populated from a
@@ -98,6 +101,33 @@ public class DocumentImpl extends ModelImpl implements Document {
     private static final Logger BIZLET_LOGGER = Category.BIZLET.logger();
     
 	private static final String DOCUMENT_PREFIX = "Document ";
+
+	/**
+	 * The suffix of the concrete vanilla class the domain generator generates when a customer's
+	 * override leaves out a vanilla attribute, and so makes the vanilla domain class abstract -
+	 * <code>modules.&lt;m&gt;.domain.&lt;Document&gt;Vanilla</code>.
+	 */
+	public static final String VANILLA_CLASS_SUFFIX = "Vanilla";
+
+	/**
+	 * The suffix of the class the domain generator generates for a customer's override of a vanilla
+	 * document - <code>customers.&lt;c&gt;.modules.&lt;m&gt;.domain.&lt;Document&gt;Override</code>.
+	 */
+	public static final String OVERRIDE_CLASS_SUFFIX = "Override";
+
+	/**
+	 * A bean class, with the context class loader it was loaded through.
+	 */
+	private record LoadedBeanClass(@Nonnull ClassLoader classLoader, @Nonnull Class<?> beanClass) {
+	}
+
+	/**
+	 * The bean classes {@link #getBeanClass(Customer)} resolved outside dev mode, by customer name,
+	 * or "" for the vanilla bean class. Thread-safe. Evicting cached metadata loads the document
+	 * again, which drops them. A bean class loaded through another context class loader is resolved
+	 * again. Transient, as class loaders are not serializable - see {@link #readResolve()}.
+	 */
+	private transient Map<String, LoadedBeanClass> beanClasses = new ConcurrentHashMap<>();
 
 	private long lastModifiedMillis = Long.MAX_VALUE;
 	private long lastCheckedMillis = System.currentTimeMillis();
@@ -144,7 +174,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	
 	private String documentation;
 	
-	private Map<String, String> properties = new TreeMap<>();
+	private Map<String, String> properties = new LinkedHashMap<>();
 	
 	/**
 	 * Returns the last metadata modification timestamp recorded for this document.
@@ -198,7 +228,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 */
 	@Override
 	@SuppressWarnings({ "unused", "null" }) // Defensive check against App coders Bizlet.newIntance() returning null
-	public <T extends Bean> T newInstance(User user) throws Exception {
+	public @Nonnull <T extends Bean> T newInstance(@Nonnull User user) throws Exception {
 		Customer customer = user.getCustomer();
 		T result = newInstance(customer);
 		
@@ -244,92 +274,92 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * documents this resolves generated domain and optional extension classes through the
 	 * repository vtable, including customer overrides.
 	 *
-	 * @param customer the customer context used for repository vtable resolution.
+	 * <p>Side effects: outside dev mode, caches the class for the customer, so that the classes
+	 * that do not exist are looked for once. Evicting cached metadata, which loads the document
+	 * again, or another context class loader, resolves it again.
+	 *
+	 * @param customer the customer context used for repository vtable resolution, or {@code null}
+	 * 			for the vanilla bean class, which a customer that does not override the document gets.
 	 * @return the concrete bean class.
 	 * @throws ClassNotFoundException if a mapped class cannot be loaded.
 	 */
-	@SuppressWarnings({"unchecked", "java:S3776", "java:S1141"}) // Complexity OK; try-catch is clearer here than multiple ifs and throws is required for Class.forName()
-	public <T extends Bean> Class<T> getBeanClass(@Nonnull Customer customer)
+	@SuppressWarnings("unchecked")
+	public @Nonnull <T extends Bean> Class<T> getBeanClass(@Nullable Customer customer)
 	throws ClassNotFoundException {
 		if (isDynamic()) {
-			Persistent persistent = getPersistent();
-			if (parentDocumentName != null) {
-				if (parentDocumentName.equals(getName())) { // hierarchical
-					return (persistent == null) ?
-								(Class<T>) DynamicHierarchicalBean.class : 
-								(Class<T>) DynamicPersistentHierarchicalBean.class;
-				}
-				// child
-				return (persistent == null) ?
-							(Class<T>) DynamicChildBean.class :
-							(Class<T>) DynamicPersistentChildBean.class;
-			}
-			return (persistent == null) ? (Class<T>) DynamicBean.class : (Class<T>) DynamicPersistentBean.class;
+			return (Class<T>) dynamicBeanClass();
 		}
 		
-		Class<T> result = null;
-		
-		String customerName = customer.getName();
+		String customerName = (customer == null) ? null : customer.getName();
+		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+		if (UtilImpl.DEV_MODE) { // classes can be regenerated and reloaded
+			return (Class<T>) loadBeanClass(customerName, classLoader);
+		}
+		String key = (customerName == null) ? "" : customerName;
+		LoadedBeanClass result = beanClasses.get(key);
+		if ((result == null) || (result.classLoader() != classLoader)) {
+			result = new LoadedBeanClass(classLoader, loadBeanClass(customerName, classLoader));
+			beanClasses.put(key, result);
+		}
+		return (Class<T>) result.beanClass();
+	}
+
+	/**
+	 * Returns the framework bean class of this dynamic document, by whether it is persistent and
+	 * whether it is hierarchical or a child.
+	 *
+	 * @return	the dynamic bean class.
+	 */
+	private @Nonnull Class<? extends Bean> dynamicBeanClass() {
+		boolean persistent = (getPersistent() != null);
+		if (parentDocumentName == null) {
+			return persistent ? DynamicPersistentBean.class : DynamicBean.class;
+		}
+		if (parentDocumentName.equals(getName())) { // hierarchical
+			return persistent ? DynamicPersistentHierarchicalBean.class : DynamicHierarchicalBean.class;
+		}
+		// child
+		return persistent ? DynamicPersistentChildBean.class : DynamicChildBean.class;
+	}
+
+	/**
+	 * Loads the bean class of this static document for a customer (see {@link #getBeanClass(Customer)}).
+	 * A hand-crafted extension is looked for first, in the module or as a customer override, unless the
+	 * customer overrides the document with the vanilla extension - its generated override class extends it.
+	 *
+	 * @param customerName	The customer name, or {@code null} for the vanilla bean class.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if a mapped class cannot be loaded.
+	 */
+	private @Nonnull Class<?> loadBeanClass(@Nullable String customerName, @Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
 		String documentName = getName();
 
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		StringBuilder key = new StringBuilder(128).append(ProvidedRepository.MODULES_NAMESPACE).append(getOwningModuleName()).append('/').append(documentName);
 		String packagePath = repository.vtable(customerName, key.toString());
 		if (packagePath == null) {
 			throw new ClassNotFoundException(key + " not found in the repository vtable");
 		}
 		
-		// Look for a hand-crafted extension first (in module or as a customer override)
 		StringBuilder className = new StringBuilder(128);
 		try {
 			key.append('/').append(documentName).append("Extension");
 			String extensionKey = repository.vtable(customerName, key.toString());
-			if (extensionKey != null) {
-				result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(extensionKey.replace('/', '.'));
+			boolean customerDocument = packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE);
+			if ((extensionKey != null) &&
+					((! customerDocument) || extensionKey.startsWith(ProvidedRepository.CUSTOMERS_NAMESPACE))) {
+				className.append(extensionKey.replace('/', '.'));
+				return classLoader.loadClass(className.toString());
 			}
-			else {
-				// Convert the vtable key to a package path
-				packagePath = packagePath.replace('/', '.');
-				int lastDotIndex = packagePath.lastIndexOf('.');
-				packagePath = packagePath.substring(0, lastDotIndex + 1);
-	
-				if (packagePath.startsWith(ProvidedRepository.CUSTOMERS_NAME)) {
-					// Look for an override first and if not found look for a domain class
-					try {
-						className.setLength(0);
-						className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName).append("Ext");
-						result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-					}
-					catch (@SuppressWarnings("unused") ClassNotFoundException e1) { // no override class
-						// Look for the domain class in the customer area
-						try {
-							className.setLength(className.length() - 3); // remove "Ext"
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-						}
-						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no override or base class in customer area
-							// Look for the domain class in the modules area
-							className.setLength(0);
-							className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-						}
-					}
-				}
-				else {
-					// Look for domain class and if abstract, look for an override
-					className.setLength(0);
-					className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
-					result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-					if (Modifier.isAbstract(result.getModifiers())) {
-						className.append("Ext");
-						try {
-							result = (Class<T>) Thread.currentThread().getContextClassLoader().loadClass(className.toString());
-						}
-						catch (@SuppressWarnings("unused") ClassNotFoundException e2) { // no extension or base class in customer area
-							// stick with the domain class
-						}
-					}
-				}
-			}
+
+			// Convert the vtable key to a package path
+			packagePath = packagePath.replace('/', '.');
+			packagePath = packagePath.substring(0, packagePath.lastIndexOf('.') + 1);
+			return customerDocument ?
+					loadCustomerBeanClass(packagePath, extensionKey, className, classLoader) :
+					loadVanillaBeanClass(packagePath, className, classLoader);
 		}
 		catch (ClassNotFoundException e) {
 			if (UtilImpl.DEV_MODE) {
@@ -337,8 +367,100 @@ public class DocumentImpl extends ModelImpl implements Document {
 			}
 			throw e;
 		}
-		
+	}
+
+	/**
+	 * Loads the bean class of a customer's override of this document, or of a new customer document:
+	 * the customer's <code>&lt;Document&gt;Override</code>, else the customer's domain class, else the
+	 * vanilla extension or the vanilla domain class.
+	 *
+	 * @param packagePath	The customer's package of the document, ending in '.'.
+	 * @param extensionKey	The vtable key of the vanilla extension, or {@code null} if there is none.
+	 * @param className	Set to the name of the class last looked for.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if no class can be loaded.
+	 */
+	private @Nonnull Class<?> loadCustomerBeanClass(@Nonnull String packagePath,
+														@Nullable String extensionKey,
+														@Nonnull StringBuilder className,
+														@Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
+		String documentName = getName();
+		String customerClassName = packagePath + ProvidedRepository.DOMAIN_NAME + '.' + documentName;
+		Class<?> result = loadClassIfPresent(customerClassName + OVERRIDE_CLASS_SUFFIX, className, classLoader);
+		if (result == null) {
+			result = loadClassIfPresent(customerClassName, className, classLoader);
+		}
+		if (result == null) { // no override or base class in customer area
+			// Use the vanilla extension, or else the domain class in the modules area
+			className.setLength(0);
+			if (extensionKey != null) {
+				className.append(extensionKey.replace('/', '.'));
+			}
+			else {
+				className.append(ProvidedRepository.MODULES_NAME).append('.').append(getOwningModuleName()).append('.').append(ProvidedRepository.DOMAIN_NAME).append('.').append(documentName);
+			}
+			result = classLoader.loadClass(className.toString());
+		}
 		return result;
+	}
+
+	/**
+	 * Loads the vanilla bean class of this document: its domain class, or <code>&lt;Document&gt;Vanilla</code>
+	 * if the domain class is abstract because a customer's override leaves out a vanilla attribute.
+	 *
+	 * @param packagePath	The module's package of the document, ending in '.'.
+	 * @param className	Set to the name of the class last looked for.
+	 * @param classLoader	The context class loader to load it through.
+	 * @return	the bean class.
+	 * @throws ClassNotFoundException	if the domain class cannot be loaded.
+	 */
+	private @Nonnull Class<?> loadVanillaBeanClass(@Nonnull String packagePath,
+													@Nonnull StringBuilder className,
+													@Nonnull ClassLoader classLoader)
+	throws ClassNotFoundException {
+		className.setLength(0);
+		className.append(packagePath).append(ProvidedRepository.DOMAIN_NAME).append('.').append(getName());
+		Class<?> result = classLoader.loadClass(className.toString());
+		if (Modifier.isAbstract(result.getModifiers())) {
+			Class<?> vanillaClass = loadClassIfPresent(className + VANILLA_CLASS_SUFFIX, className, classLoader);
+			if (vanillaClass != null) { // otherwise stick with the domain class
+				result = vanillaClass;
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Loads a class if it exists.
+	 *
+	 * @param name	The class name.
+	 * @param className	Set to the class name.
+	 * @param classLoader	The class loader to load it through.
+	 * @return	the class, or {@code null} if it does not exist.
+	 */
+	private static @Nullable Class<?> loadClassIfPresent(@Nonnull String name,
+															@Nonnull StringBuilder className,
+															@Nonnull ClassLoader classLoader) {
+		className.setLength(0);
+		className.append(name);
+		try {
+			return classLoader.loadClass(name);
+		}
+		catch (@SuppressWarnings("unused") ClassNotFoundException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Creates the transient bean class cache again after deserialisation.
+	 *
+	 * @return	this document.
+	 */
+	protected @Nonnull Object readResolve() {
+		beanClasses = new ConcurrentHashMap<>();
+		return this;
 	}
 
 	/**
@@ -352,7 +474,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws Exception if class resolution or object construction fails.
 	 */
 	@SuppressWarnings({"java:S3776", "java:S112"}) // Complexity OK; throws Exception in API for app coder convenience
-	public <T extends Bean> T newInstance(Customer customer) throws Exception {
+	public @Nonnull <T extends Bean> T newInstance(@Nonnull Customer customer) throws Exception {
 		T result = null;
 		
 		if (isDynamic()) {
@@ -430,7 +552,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	/**
 	 * Populates dynamic default values for dynamic attributes on a compiled bean instance.
 	 */
-	public void populateDynamicAttributeDefaults(Customer customer, Bean bean) {
+	public void populateDynamicAttributeDefaults(@Nonnull Customer customer, @Nonnull Bean bean) {
 		Module m = customer.getModule(getOwningModuleName());
 
 		getAllAttributes(customer).forEach(a -> {
@@ -448,7 +570,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved default value, or {@code null} when no default applies.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static Object dynamicDefaultValue(Attribute attribute, Bean bean) {
+	private static @Nullable Object dynamicDefaultValue(@Nonnull Attribute attribute, @Nonnull Bean bean) {
 		Object result = null;
 		
 		if (attribute instanceof Field field) {
@@ -493,7 +615,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching constraint, or {@code null} if it is not defined.
 	 */
 	@Override
-	public UniqueConstraint getUniqueConstraint(String name) {
+	public @Nullable UniqueConstraint getUniqueConstraint(@Nonnull String name) {
 		return (UniqueConstraint) getMetaData(name);
 	}
 
@@ -505,7 +627,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param constraint the constraint metadata to register.
 	 */
-	public void putUniqueConstraint(UniqueConstraint constraint) {
+	public void putUniqueConstraint(@Nonnull UniqueConstraint constraint) {
 		putMetaData(constraint.getName(), constraint);
 		uniqueConstraints.add(constraint);
 	}
@@ -515,11 +637,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param customer the customer context used for repository lookup.
 	 * @param name the dynamic-image name.
-	 * @return the resolved dynamic image, or {@code null} if none is defined.
+	 * @return the resolved dynamic image.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public <T extends Bean> DynamicImage<T> getDynamicImage(Customer customer, String name) {
-		DynamicImage<T> result = ProvidedRepositoryFactory.get().getDynamicImage(customer, this, name, true);
+	public @Nonnull <T extends Bean> DynamicImage<T> getDynamicImage(@Nullable Customer customer, @Nonnull String name) {
+		DynamicImage<T> result = ProvidedRepositoryFactory.getNullSafe().getDynamicImage(customer, this, name, true);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no dynamic image defined for " + name);
 		}
@@ -532,7 +655,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return an unmodifiable list of unique constraints in declaration order.
 	 */
 	@Override
-	public List<UniqueConstraint> getUniqueConstraints() {
+	public @Nonnull List<UniqueConstraint> getUniqueConstraints() {
 		return Collections.unmodifiableList(uniqueConstraints);
 	}
 
@@ -543,7 +666,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching reference, or {@code null} if the field is not a reference.
 	 */
 	@Override
-	public Reference getReferenceByName(String referenceName) {
+	public @Nullable Reference getReferenceByName(@Nonnull String referenceName) {
 		return referencesByFieldNames.get(referenceName);
 	}
 
@@ -557,7 +680,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws IllegalStateException if the relation or its target document is not defined.
 	 */
 	@Override
-	public Document getRelatedDocument(Customer customer, String relationName) {
+	public @Nonnull Document getRelatedDocument(@Nonnull Customer customer, @Nonnull String relationName) {
 		Relation relation = relationsByFieldNames.get(relationName);
 
 		// Find the relation up the document extension hierarchy
@@ -574,7 +697,9 @@ public class DocumentImpl extends ModelImpl implements Document {
 		}
 
 		String relatedDocumentName = relation.getDocumentName();
-		if (relatedDocumentName == null) {
+		@SuppressWarnings("null") // relations built in code bypass the XSD; unit tests assert this
+		boolean relatedDocumentNameMissing = (relatedDocumentName == null);
+		if (relatedDocumentNameMissing) {
 			throw new IllegalStateException("Document has no related document defined for " + relationName);
 		}
 
@@ -587,7 +712,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live set view of reference field names.
 	 */
 	@Override
-	public Set<String> getReferenceNames() {
+	public @Nonnull Set<String> getReferenceNames() {
 		return referencesByFieldNames.keySet();
 	}
 
@@ -599,7 +724,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param relation the relation metadata to register.
 	 */
-	public void putRelation(Relation relation) {
+	public void putRelation(@Nonnull Relation relation) {
 		relationsByFieldNames.put(relation.getName(), relation);
 		if (relation instanceof Reference reference) {
 			referencesByFieldNames.put(reference.getName(), reference);
@@ -613,7 +738,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the parent document name, or {@code null} when this document has no parent.
 	 */
 	@Override
-	public String getParentDocumentName() {
+	public @Nullable String getParentDocumentName() {
 		return parentDocumentName;
 	}
 
@@ -622,7 +747,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param parentDocumentName the parent document name, or {@code null} for a root document.
 	 */
-	public void setParentDocumentName(String parentDocumentName) {
+	public void setParentDocumentName(@Nullable String parentDocumentName) {
 		this.parentDocumentName = parentDocumentName;
 	}
 	
@@ -632,7 +757,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return {@code Boolean.TRUE} to create the index, {@code Boolean.FALSE} to suppress it,
 	 *         or {@code null} to use repository defaults.
 	 */
-	public Boolean getParentDatabaseIndex() {
+	public @Nullable Boolean getParentDatabaseIndex() {
 		return parentDatabaseIndex;
 	}
 
@@ -642,7 +767,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param parentDatabaseIndex {@code Boolean.TRUE} to create the index,
 	 *        {@code Boolean.FALSE} to suppress it, or {@code null} to use repository defaults.
 	 */
-	public void setParentDatabaseIndex(Boolean parentDatabaseIndex) {
+	public void setParentDatabaseIndex(@Nullable Boolean parentDatabaseIndex) {
 		this.parentDatabaseIndex = parentDatabaseIndex;
 	}
 
@@ -651,7 +776,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the business-key method source, or {@code null} if none is defined.
 	 */
-	public String getBizKeyMethodCode() {
+	public @Nullable String getBizKeyMethodCode() {
 		return bizKeyMethodCode;
 	}
 
@@ -660,7 +785,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param bizKeyMethodCode the business-key method source.
 	 */
-	public void setBizKeyMethodCode(String bizKeyMethodCode) {
+	public void setBizKeyMethodCode(@Nullable String bizKeyMethodCode) {
 		this.bizKeyMethodCode = bizKeyMethodCode;
 	}
 
@@ -670,7 +795,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the business-key expression, or {@code null} if none is defined.
 	 */
 	@Override
-	public String getBizKeyExpression() {
+	public @Nullable String getBizKeyExpression() {
 		return bizKeyExpression;
 	}
 
@@ -679,7 +804,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param bizKeyExpression the expression used to derive the business key.
 	 */
-	public void setBizKeyExpression(String bizKeyExpression) {
+	public void setBizKeyExpression(@Nullable String bizKeyExpression) {
 		this.bizKeyExpression = bizKeyExpression;
 	}
 	
@@ -689,7 +814,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the business-key sensitivity.
 	 */
 	@Override
-	public Sensitivity getBizKeySensitity() {
+	public @Nullable Sensitivity getBizKeySensitity() {
 		return bizKeySensitity;
 	}
 
@@ -698,7 +823,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param bizKeySensitity the business-key sensitivity.
 	 */
-	public void setBizKeySensitity(Sensitivity bizKeySensitity) {
+	public void setBizKeySensitity(@Nullable Sensitivity bizKeySensitity) {
 		this.bizKeySensitity = bizKeySensitity;
 	}
 
@@ -712,7 +837,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param bean the persistent bean whose business key should be updated.
 	 */
 	@Override
-	public void setBizKey(PersistentBean bean) {
+	public void setBizKey(@Nonnull PersistentBean bean) {
 		// Get the bizKey value
 		String bizKey = null;
 		if (isDynamic()) {
@@ -769,7 +894,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the live condition map keyed by condition name.
 	 */
-	public Map<String, Condition> getConditions() {
+	public @Nonnull Map<String, Condition> getConditions() {
 		return conditions;
 	}
 
@@ -781,13 +906,13 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the parent document metadata, or {@code null} when this document has no parent.
 	 */
 	@Override
-	public Document getParentDocument(Customer customer) {
+	public @Nullable Document getParentDocument(@Nullable Customer customer) {
 		Document result = null;
 
 		if (parentDocumentName != null) {
 			String owningModuleName = getOwningModuleName();
 			if (customer == null) {
-				Module owningModule = ProvidedRepositoryFactory.get().getModule(null, owningModuleName);
+				Module owningModule = ProvidedRepositoryFactory.getNullSafe().getModule(null, owningModuleName);
 				if (owningModule != null) {
 					result = owningModule.getDocument(null, parentDocumentName);
 				}
@@ -810,8 +935,8 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved bizlet, a metadata-only adapter, or {@code null} if no bizlet exists.
 	 */
 	@Override
-	public <T extends Bean> Bizlet<T> getBizlet(Customer customer) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+	public @Nullable <T extends Bean> Bizlet<T> getBizlet(@Nullable Customer customer) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		Bizlet<T> result = repository.getBizlet(customer, this, true);
 		BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
 		if (result != null) {
@@ -830,11 +955,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the comparison-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved comparison model, or {@code null} if none is defined.
+	 * @return the resolved comparison model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(Customer customer, String modelName, boolean runtime) {
-		ComparisonModel<T, C> result = ProvidedRepositoryFactory.get().getComparisonModel(customer, this, modelName, runtime);
+	public @Nonnull <T extends Bean, C extends Bean> ComparisonModel<T, C> getComparisonModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
+		ComparisonModel<T, C> result = ProvidedRepositoryFactory.getNullSafe().getComparisonModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no comparison model defined for " + modelName);
 		}
@@ -847,11 +973,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the map-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved map model, or {@code null} if none is defined.
+	 * @return the resolved map model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public <T extends Bean> MapModel<T> getMapModel(Customer customer, String modelName, boolean runtime) {
-		MapModel<T> result = ProvidedRepositoryFactory.get().getMapModel(customer, this, modelName, runtime);
+	public @Nonnull <T extends Bean> MapModel<T> getMapModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
+		MapModel<T> result = ProvidedRepositoryFactory.getNullSafe().getMapModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no map model defined for " + modelName);
 		}
@@ -864,11 +991,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the chart-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved chart model, or {@code null} if none is defined.
+	 * @return the resolved chart model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public <T extends Bean> ChartModel<T> getChartModel(Customer customer, String modelName, boolean runtime) {
-		ChartModel<T> result = ProvidedRepositoryFactory.get().getChartModel(customer, this, modelName, runtime);
+	public @Nonnull <T extends Bean> ChartModel<T> getChartModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
+		ChartModel<T> result = ProvidedRepositoryFactory.getNullSafe().getChartModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no chart model defined for " + modelName);
 		}
@@ -881,11 +1009,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param modelName the list-model name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved list model, or {@code null} if none is defined.
+	 * @return the resolved list model.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public <T extends Bean> ListModel<T> getListModel(Customer customer, String modelName, boolean runtime) {
-		ListModel<T> result = ProvidedRepositoryFactory.get().getListModel(customer, this, modelName, runtime);
+	public @Nonnull <T extends Bean> ListModel<T> getListModel(@Nullable Customer customer, @Nonnull String modelName, boolean runtime) {
+		ListModel<T> result = ProvidedRepositoryFactory.getNullSafe().getListModel(customer, this, modelName, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no list model defined for " + modelName);
 		}
@@ -901,11 +1030,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the action class or metadata action name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved server-side action, or {@code null} if none is defined.
+	 * @return the resolved server-side action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public ServerSideAction<Bean> getServerSideAction(Customer customer, String className, boolean runtime) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+	public @Nonnull ServerSideAction<Bean> getServerSideAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		ActionMetaData metaDataAction = repository.getMetaDataAction(customer, this, className);
 		if (metaDataAction != null) {
 			return new ServerSideMetaDataAction(metaDataAction);
@@ -924,11 +1054,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the export action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved export action, or {@code null} if none is defined.
+	 * @return the resolved export action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public BizExportAction getBizExportAction(Customer customer, String className, boolean runtime) {
-		BizExportAction result = ProvidedRepositoryFactory.get().getBizExportAction(customer, this, className, runtime);
+	public @Nonnull BizExportAction getBizExportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
+		BizExportAction result = ProvidedRepositoryFactory.getNullSafe().getBizExportAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort export action defined for " + className);
 		}
@@ -941,11 +1072,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the import action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved import action, or {@code null} if none is defined.
+	 * @return the resolved import action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public BizImportAction getBizImportAction(Customer customer, String className, boolean runtime) {
-		BizImportAction result = ProvidedRepositoryFactory.get().getBizImportAction(customer, this, className, runtime);
+	public @Nonnull BizImportAction getBizImportAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
+		BizImportAction result = ProvidedRepositoryFactory.getNullSafe().getBizImportAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no BizPort import action defined for " + className);
 		}
@@ -958,11 +1090,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the download action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved download action, or {@code null} if none is defined.
+	 * @return the resolved download action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public DownloadAction<Bean> getDownloadAction(Customer customer, String className, boolean runtime) {
-		DownloadAction<Bean> result = ProvidedRepositoryFactory.get().getDownloadAction(customer, this, className, runtime);
+	public @Nonnull DownloadAction<Bean> getDownloadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
+		DownloadAction<Bean> result = ProvidedRepositoryFactory.getNullSafe().getDownloadAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no download action defined for " + className);
 		}
@@ -975,11 +1108,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param customer the customer context used for repository lookup.
 	 * @param className the upload action class name.
 	 * @param runtime whether runtime overrides should be consulted.
-	 * @return the resolved upload action, or {@code null} if none is defined.
+	 * @return the resolved upload action.
+	 * @throws MetaDataException if none is defined.
 	 */
 	@Override
-	public UploadAction<Bean> getUploadAction(Customer customer, String className, boolean runtime) {
-		UploadAction<Bean> result = ProvidedRepositoryFactory.get().getUploadAction(customer, this, className, runtime);
+	public @Nonnull UploadAction<Bean> getUploadAction(@Nullable Customer customer, @Nonnull String className, boolean runtime) {
+		UploadAction<Bean> result = ProvidedRepositoryFactory.getNullSafe().getUploadAction(customer, this, className, runtime);
 		if (result == null) {
 			throw new MetaDataException(DOCUMENT_PREFIX + getName() + " has no upload action defined for " + className);
 		}
@@ -1002,15 +1136,15 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @throws MetaDataException if bizlet or query-based resolution fails.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public <T extends Bean> List<DomainValue> getDomainValues(CustomerImpl customer,
-																DomainType domainType,
-																Attribute attribute,
-																T owningBean,
-																boolean runtime) {
+	public @Nonnull <T extends Bean> List<DomainValue> getDomainValues(@Nonnull CustomerImpl customer,
+																		@Nullable DomainType domainType,
+																		@Nonnull Attribute attribute,
+																		@Nullable T owningBean,
+																		boolean runtime) {
 		List<DomainValue> result = null;
 		
 		if (domainType != null) {
-			ProvidedRepository repository = ProvidedRepositoryFactory.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 			// Note - Can't call this.getBizlet() here as it has no runtime parameter
 			Bizlet<T> bizlet = repository.getBizlet(customer, this, runtime);
 			BizletMetaData metaDataBizlet = repository.getMetaDataBizlet(customer, this);
@@ -1078,7 +1212,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the resolved query-backed domain values, an empty list for transient targets,
 	 *         or {@code null} when the attribute is not query-backed.
 	 */
-	private List<DomainValue> useQuery(Customer customer, Attribute attribute) {
+	private @Nullable List<DomainValue> useQuery(@Nonnull Customer customer, @Nonnull Attribute attribute) {
 		List<DomainValue> result = null;
 		
 		if (attribute instanceof Reference reference) {
@@ -1126,7 +1260,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live set of defined action names.
 	 */
 	@Override
-	public Set<String> getDefinedActionNames() {
+	public @Nonnull Set<String> getDefinedActionNames() {
 		return definedActionNames;
 	}
 
@@ -1136,7 +1270,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live set view of condition names.
 	 */
 	@Override
-	public Set<String> getConditionNames() {
+	public @Nonnull Set<String> getConditionNames() {
 		return conditions.keySet();
 	}
 
@@ -1147,7 +1281,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the matching condition, or {@code null} if it is not defined.
 	 */
 	@Override
-	public Condition getCondition(String conditionName) {
+	public @Nullable Condition getCondition(@Nonnull String conditionName) {
 		return conditions.get(conditionName);
 	}
 
@@ -1159,11 +1293,12 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @param uxui the UX/UI profile.
 	 * @param customer the customer context used for repository lookup.
 	 * @param name the view name.
-	 * @return the resolved view, or {@code null} if no suitable view exists.
+	 * @return the resolved view.
+	 * @throws MetaDataException if no suitable view exists.
 	 */
 	@Override
-	public View getView(String uxui, Customer customer, String name) {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+	public @Nonnull View getView(@Nullable String uxui, @Nullable Customer customer, @Nonnull String name) {
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 		View view = repository.getView(uxui, customer, this, name);
 		// if we want a create view and there isn't one, get the edit view instead
 		if ((view == null) && (ViewType.create.toString().equals(name))) {
@@ -1183,7 +1318,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the document documentation, or {@code null} if none is defined.
 	 */
 	@Override
-	public String getDocumentation() {
+	public @Nullable String getDocumentation() {
 		return documentation;
 	}
 
@@ -1194,7 +1329,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @param documentation the documentation text.
 	 */
-	public void setDocumentation(String documentation) {
+	public void setDocumentation(@Nullable String documentation) {
 		this.documentation = UtilImpl.processStringValue(documentation);
 	}
 	
@@ -1204,7 +1339,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 * @return the live property map keyed by property name.
 	 */
 	@Override
-	public Map<String, String> getProperties() {
+	public @Nonnull Map<String, String> getProperties() {
 		return properties;
 	}
 	
@@ -1225,7 +1360,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the shared business-key attribute metadata.
 	 */
-	public static Text getBizKeyAttribute() {
+	public static @Nonnull Text getBizKeyAttribute() {
 		return bizKeyField;
 	}
 	
@@ -1245,7 +1380,7 @@ public class DocumentImpl extends ModelImpl implements Document {
 	 *
 	 * @return the shared ordinal attribute metadata.
 	 */
-	public static org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
+	public static @Nonnull org.skyve.impl.metadata.model.document.field.Integer getBizOrdinalAttribute() {
 		return bizOrdinalField;
 	}
 }

@@ -12,5 +12,9 @@
 			<displayName>description</displayName>
 			<length>1024</length>
 		</text>
+		<integer name="number">
+			<displayName>Number</displayName>
+			<description>Set from a number sequence when the lookup value is first saved.</description>
+		</integer>
 	</attributes>
 </document>

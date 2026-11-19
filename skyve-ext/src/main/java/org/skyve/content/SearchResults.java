@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * A mix of search results for both bean and attachment content.
  * @author mike
@@ -20,7 +23,7 @@ public final class SearchResults implements Serializable {
 	 * Amount of time in seconds that the search operation took to execute.
 	 * @return
 	 */
-	public String getSearchTimeInSecs() {
+	public @Nullable String getSearchTimeInSecs() {
 		return searchTimeInSecs;
 	}
 
@@ -28,7 +31,7 @@ public final class SearchResults implements Serializable {
 	 * Amount of time in seconds that the search operation took to execute.
 	 * @param searchTimeInSecs
 	 */
-	public void setSearchTimeInSecs(String searchTimeInSecs) {
+	public void setSearchTimeInSecs(@Nullable String searchTimeInSecs) {
 		this.searchTimeInSecs = searchTimeInSecs;
 	}
 
@@ -36,7 +39,7 @@ public final class SearchResults implements Serializable {
 	 * A suggestion/correction of a search term based on the existing content.
 	 * @return
 	 */
-	public String getSuggestion() {
+	public @Nullable String getSuggestion() {
 		return suggestion;
 	}
 
@@ -44,7 +47,7 @@ public final class SearchResults implements Serializable {
 	 * A suggestion/correction of a search term based on the existing content.
 	 * @param suggestion
 	 */
-	public void setSuggestion(String suggestion) {
+	public void setSuggestion(@Nullable String suggestion) {
 		this.suggestion = suggestion;
 	}
 
@@ -52,7 +55,7 @@ public final class SearchResults implements Serializable {
 	 * The search results.
 	 * @return
 	 */
-	public List<SearchResult> getResults() {
+	public @Nonnull List<SearchResult> getResults() {
 		return results;
 	}
 
@@ -60,7 +63,7 @@ public final class SearchResults implements Serializable {
 	 * The search results.
 	 * @param results
 	 */
-	public void setResults(List<SearchResult> results) {
+	public void setResults(@Nonnull List<SearchResult> results) {
 		this.results = results;
 	}
 }

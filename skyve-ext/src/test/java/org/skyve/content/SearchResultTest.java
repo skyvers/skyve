@@ -1,25 +1,25 @@
 package org.skyve.content;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 @SuppressWarnings({ "static-method", "java:S8692" }) // system clock OK
-public class SearchResultTest {
+class SearchResultTest {
 
 	// ---- SearchResult ----
 
 	@Test
-	public void testSearchResultDefaults() {
+	void testSearchResultDefaults() {
 		SearchResult r = new SearchResult();
 		assertNull(r.getContentId());
 		assertNull(r.getExcerpt());
@@ -32,11 +32,11 @@ public class SearchResultTest {
 		assertNull(r.getBizId());
 		assertNull(r.getAttributeName());
 		assertNull(r.getLastModified());
-		assertFalse("isAttachment() must be false when attributeName is null", r.isAttachment());
+		assertFalse(r.isAttachment(), "isAttachment() must be false when attributeName is null");
 	}
 
 	@Test
-	public void testSearchResultSettersAndGetters() {
+	void testSearchResultSettersAndGetters() {
 		SearchResult r = new SearchResult();
 
 		r.setContentId("cid-001");
@@ -68,7 +68,7 @@ public class SearchResultTest {
 
 		r.setAttributeName("photo");
 		assertEquals("photo", r.getAttributeName());
-		assertTrue("isAttachment() must be true when attributeName is set", r.isAttachment());
+		assertTrue(r.isAttachment(), "isAttachment() must be true when attributeName is set");
 
 		Date now = new Date();
 		r.setLastModified(now);
@@ -76,14 +76,14 @@ public class SearchResultTest {
 	}
 
 	@Test
-	public void testIsAttachmentFalseWhenAttributeNameNull() {
+	void testIsAttachmentFalseWhenAttributeNameNull() {
 		SearchResult r = new SearchResult();
 		r.setAttributeName(null);
 		assertFalse(r.isAttachment());
 	}
 
 	@Test
-	public void testIsAttachmentTrueWhenAttributeNameSet() {
+	void testIsAttachmentTrueWhenAttributeNameSet() {
 		SearchResult r = new SearchResult();
 		r.setAttributeName("file");
 		assertTrue(r.isAttachment());
@@ -92,7 +92,7 @@ public class SearchResultTest {
 	// ---- SearchResults ----
 
 	@Test
-	public void testSearchResultsDefaults() {
+	void testSearchResultsDefaults() {
 		SearchResults sr = new SearchResults();
 		assertNull(sr.getSearchTimeInSecs());
 		assertNull(sr.getSuggestion());
@@ -101,7 +101,7 @@ public class SearchResultTest {
 	}
 
 	@Test
-	public void testSearchResultsSettersAndGetters() {
+	void testSearchResultsSettersAndGetters() {
 		SearchResults sr = new SearchResults();
 
 		sr.setSearchTimeInSecs("0.005");

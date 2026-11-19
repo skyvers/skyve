@@ -1,5 +1,7 @@
 package org.skyve.metadata.view.fluent;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Defines fluent APIs for widgets that support both relative and absolute dimensions.
  *
@@ -14,5 +16,5 @@ interface FluentRelativeSize<T extends FluentRelativeSize<T>> extends FluentAbso
 	 *            the percentage height value
 	 * @return the fluent builder
 	 */
-	T percentageHeight(int percentageHeight);
+	@Nonnull T percentageHeight(int percentageHeight);
 }

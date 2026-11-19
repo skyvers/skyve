@@ -54,6 +54,9 @@ import org.skyve.web.BackgroundTask;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * {@link org.skyve.job.JobScheduler} implementation backed by the Quartz scheduler.
  *
@@ -90,7 +93,7 @@ public class QuartzJobScheduler implements JobScheduler {
 
 		try {
 			// Add metadata jobs
-			ProvidedRepository repository = ProvidedRepositoryFactory.get();
+			ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 			for (String moduleName : repository.getAllVanillaModuleNames()) {
 				Module module = repository.getModule(null, moduleName);
 				addJobs(module);
@@ -146,7 +149,7 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 	
-	private static void addJobs(Module module)
+	private static void addJobs(@Nonnull Module module)
 	throws SchedulerException, ClassNotFoundException {
 		for (JobMetaData job : module.getJobs()) {
 			@SuppressWarnings("unchecked")
@@ -159,7 +162,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 
 	private void scheduleJobsAndReports() {
-		ProvidedRepository repository = ProvidedRepositoryFactory.get();
+		ProvidedRepository repository = ProvidedRepositoryFactory.getNullSafe();
 
 		// Add job triggers
 		List<UserJobSchedule> jobSchedules = repository.retrieveAllScheduledJobsForAllCustomers();
@@ -296,7 +299,7 @@ public class QuartzJobScheduler implements JobScheduler {
      * {@inheritDoc}
      */
     @Override
-	public void runOneShotJob(JobMetaData job, Bean parameter, User user) {
+	public void runOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user) {
 		Trigger trigger = TriggerBuilder.newTrigger()
 											.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
 											.forJob(job.getName(), job.getOwningModuleName())
@@ -308,7 +311,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void runOneShotJob(JobMetaData job, Bean parameter, User user, int sleepAtEndInSeconds) {
+	public void runOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user, int sleepAtEndInSeconds) {
 		Trigger trigger = TriggerBuilder.newTrigger()
 											.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
 											.forJob(job.getName(), job.getOwningModuleName())
@@ -320,7 +323,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public <T extends Bean> void runBackgroundTask(Class<? extends BackgroundTask<T>> taskClass, User user, String webId) {
+	public <T extends Bean> void runBackgroundTask(@Nonnull Class<? extends BackgroundTask<T>> taskClass, @Nonnull User user, @Nonnull String webId) {
 		@SuppressWarnings("unchecked")
 		Class<? extends org.quartz.Job> jobClass = (Class<? extends org.quartz.Job>) taskClass;
 		JobDetail detail = JobBuilder.newJob(jobClass)
@@ -368,7 +371,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void scheduleOneShotJob(JobMetaData job, Bean parameter, User user, Date when) {
+	public void scheduleOneShotJob(@Nonnull JobMetaData job, @Nullable Bean parameter, @Nonnull User user, @Nonnull Date when) {
 		Trigger trigger = TriggerBuilder.newTrigger()
 													.withIdentity(UUID.randomUUID().toString(), user.getCustomer().getName())
 													.forJob(job.getName(), job.getOwningModuleName())
@@ -381,7 +384,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void scheduleJob(JobSchedule jobSchedule, User user) {
+	public void scheduleJob(@Nonnull JobSchedule jobSchedule, @Nonnull User user) {
 		String jobName = jobSchedule.getJobName();
 		int dotIndex = jobName.indexOf('.');
 		String moduleName = jobName.substring(0, dotIndex);
@@ -409,11 +412,11 @@ public class QuartzJobScheduler implements JobScheduler {
 	}
 	
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static void scheduleJob(JobMetaData job,
-										Bean parameter,
-										User user,
-										Trigger trigger, 
-										Integer sleepAtEndInSeconds) {
+	private static void scheduleJob(@Nonnull JobMetaData job,
+										@Nullable Bean parameter,
+										@Nonnull User user,
+										@Nonnull Trigger trigger, 
+										@Nullable Integer sleepAtEndInSeconds) {
 		Trigger mutableTrigger = trigger;
 		
 		// Add the job data
@@ -479,7 +482,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void unscheduleJob(String uuid, String customerName) {
+	public void unscheduleJob(@Nonnull String uuid, @Nonnull String customerName) {
 		try {
 			JOB_SCHEDULER.unscheduleJob(new TriggerKey(uuid, customerName));
 			LOGGER.info("Unscheduled Job {} for customer {}", uuid, customerName);
@@ -493,7 +496,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void scheduleReport(JobSchedule reportSchedule, User user) {
+	public void scheduleReport(@Nonnull JobSchedule reportSchedule, @Nonnull User user) {
 		String uuid = reportSchedule.getUuid();
 		String reportName = reportSchedule.getJobName();
 
@@ -528,9 +531,9 @@ public class QuartzJobScheduler implements JobScheduler {
 		}
 	}
 
-	private static void scheduleReport(JobDetail job,
-									   User user,
-									   Trigger trigger) {
+	private static void scheduleReport(@Nonnull JobDetail job,
+									   @Nonnull User user,
+									   @Nonnull Trigger trigger) {
 		Trigger mutableTrigger = trigger;
 		
 		// Add the job data
@@ -598,7 +601,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void unscheduleReport(String uuid, String customerName) {
+	public void unscheduleReport(@Nonnull String uuid, @Nonnull String customerName) {
 		if (JOB_SCHEDULER != null) {
 			try {
 				JOB_SCHEDULER.unscheduleJob(new TriggerKey(uuid, customerName));
@@ -614,7 +617,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public List<JobDescription> getCustomerRunningJobs() {
+	public @Nonnull List<JobDescription> getCustomerRunningJobs() {
 		User user = AbstractPersistence.get().getUser();
 		List<JobDescription> result = new ArrayList<>();
 
@@ -650,7 +653,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public boolean cancelJob(String instanceId) {
+	public boolean cancelJob(@Nonnull String instanceId) {
 		try {
 			boolean result = JOB_SCHEDULER.interrupt(instanceId);
 			LOGGER.info("{} job {}", (result ? "Cancelled" : "Unable to cancel"), instanceId);
@@ -720,7 +723,7 @@ public class QuartzJobScheduler implements JobScheduler {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public void runRestoreJob(Bean restoreOptions) {
+	public void runRestoreJob(@Nonnull Bean restoreOptions) {
 		String customerName = CORE.getCustomer().getName();
 		JobDetail job = JobBuilder.newJob(RestoreJob.class)
 									.withIdentity("Restore customer " + customerName, customerName)

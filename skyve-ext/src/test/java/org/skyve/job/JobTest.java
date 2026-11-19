@@ -3,17 +3,17 @@ package org.skyve.job;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 
 @SuppressWarnings("static-method")
-public class JobTest {
+class JobTest {
 	private static class RecordingJob extends Job {
 		@Override
 		public void execute() {
@@ -29,7 +29,7 @@ public class JobTest {
 	}
 
 	@Test
-	public void defaultCancelAndFlagsAreStable() {
+	void defaultCancelAndFlagsAreStable() {
 		RecordingJob job = new RecordingJob();
 		assertThat(job.cancel(), is("Job cannot be cancelled."));
 		assertTrue(job.shouldRollbackOnCancel());
@@ -38,7 +38,7 @@ public class JobTest {
 	}
 
 	@Test
-	public void executeOtherJobSetsContextBeforeInjectionFailure() {
+	void executeOtherJobSetsContextBeforeInjectionFailure() {
 		RecordingJob parent = new RecordingJob();
 		RecordingJob child = new RecordingJob();
 		Bean bean = mock(Bean.class);
@@ -46,13 +46,8 @@ public class JobTest {
 		parent.setBean(bean);
 		parent.getLog().add("seed");
 
-		try {
-			parent.execute(child);
-			fail("Expected injection failure without CDI container");
-		}
-		catch (Exception e) {
-			assertTrue(e instanceof IllegalStateException);
-		}
+		// injection fails without a CDI container
+		assertThrows(IllegalStateException.class, () -> parent.execute(child));
 
 		assertThat(child.getBean(), is(sameInstance(bean)));
 		assertThat(child.getLog(), is(sameInstance(parent.getLog())));
@@ -60,7 +55,7 @@ public class JobTest {
 	}
 
 	@Test
-	public void cancellableJobTogglesCancelledState() {
+	void cancellableJobTogglesCancelledState() {
 		RecordingCancellableJob job = new RecordingCancellableJob();
 		assertFalse(job.isCancelled());
 		assertNull(job.cancel());

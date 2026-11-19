@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.content.ContentManager;
 import org.skyve.content.MimeType;
@@ -28,6 +27,7 @@ import org.skyve.util.monitoring.Monitoring;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,7 +69,8 @@ public class HealthServlet extends HttpServlet {
 	 */
 	@Override
 	@SuppressWarnings("java:S1989") // there exists JavaEE error pages
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+	protected void doGet(@SuppressWarnings("null") @Nonnull HttpServletRequest request,
+						@SuppressWarnings("null") @Nonnull HttpServletResponse response)
 	throws ServletException, IOException {
 		// If health check is off, send the 404 page
 		if (! UtilImpl.HEALTH_CHECK) {
@@ -107,7 +108,7 @@ public class HealthServlet extends HttpServlet {
 	 * @return	The JSON.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static StringBuilder determineResponse() {
+	private static @Nonnull StringBuilder determineResponse() {
 		StringBuilder result = new StringBuilder(128);
 		
 		// Persistence
@@ -121,7 +122,7 @@ public class HealthServlet extends HttpServlet {
 				result.append("\",\"database\":\"");
 				p.begin();
 				try {
-					ProvidedRepository r = ProvidedRepositoryFactory.get();
+					ProvidedRepository r = ProvidedRepositoryFactory.getNullSafe();
 					Module m = r.getModule(null, AppConstants.ADMIN_MODULE_NAME);
 					Document d = m.getDocument(null, AppConstants.CONFIGURATION_DOCUMENT_NAME);
 					Persistent persistent = d.getPersistent();
@@ -151,7 +152,7 @@ public class HealthServlet extends HttpServlet {
 		try {
 			for (DataStore ds : UtilImpl.DATA_STORES.values()) {
 				if (ds != UtilImpl.DATA_STORE) {
-					try (Connection c = EXT.getDataStoreConnection(ds, false)) {
+					try (Connection c = EXT.getDataStoreConnection(ds)) {
 						// Nothing to do with the connection once obtained but close it
 					}
 				}
@@ -166,8 +167,8 @@ public class HealthServlet extends HttpServlet {
 		// Repository
 		result.append("\",\"repository\":\"");
 		try {
-			// Obtain the repository
-			if (CORE.getRepository() == null) {
+			// Check the repository is installed
+			if (! ProvidedRepositoryFactory.isConfigured()) {
 				result.append(STATUS_ERROR);
 			}
 			else {

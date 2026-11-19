@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -114,7 +115,7 @@ class GzipFilterTest {
 		stream.setBuffer(0);
 		stream.writeToGZip(new byte[]{'A'}, 0, 1);
 		// When committed, no Content-Encoding header is added
-		verify(mockResponse, org.mockito.Mockito.never()).addHeader(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
+		verify(mockResponse, never()).addHeader(org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString());
 	}
 
 	@Test

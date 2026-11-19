@@ -5,6 +5,7 @@ import java.util.Deque;
 import org.skyve.CORE;
 import org.skyve.domain.Bean;
 import org.skyve.impl.bind.BindUtil;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.util.UtilImpl;
@@ -23,6 +24,9 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Strip the last term off the view binding
  */
@@ -37,19 +41,24 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 *
 	 * @param facesView the current Faces view context
 	 */
-	public ZoomOutAction(FacesView facesView) {
+	public ZoomOutAction(@Nonnull FacesView facesView) {
 		this.facesView = facesView;
 	}
 	
 	/**
 	 * Validates the current nested bean, runs zoom-out pre-execute hooks, and returns to the owning view.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
 	 * @return always {@code null} because this action mutates view and model state only
 	 * @throws Exception if validation, bizlet hooks, binding updates, or redirect handling fails
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("ZoomOutAction by zoom in binding of {} with view binding of {}",
 																	zoomInBindings.isEmpty() ? "null" : zoomInBindings.peek(),
@@ -61,6 +70,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 			// Call the bizlet
 			// Find the Collection/InverseMany element or association/inverseOne
 			Bean referenceBean = ActionUtil.getTargetBeanForView(facesView);
+			if (referenceBean == null) {
+				throw new IllegalStateException("Cannot zoom out as the FacesView has no target bean");
+			}
 			User user = CORE.getUser();
 			Customer customer = user.getCustomer();
 			Module referenceModule = customer.getModule(referenceBean.getBizModule());
@@ -68,6 +80,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 			Bizlet<Bean> bizlet = ((DocumentImpl) referenceDocument).getBizlet(customer);
 
 			WebContext webContext = facesView.getWebContext();
+			if (webContext == null) {
+				throw new IllegalStateException("Cannot zoom out as the FacesView has no web context");
+			}
 			CustomerImpl internalCustomer = (CustomerImpl) customer;
 			boolean vetoed = internalCustomer.interceptBeforePreExecute(ImplicitActionName.ZoomOut, referenceBean, null, webContext);
 			if (! vetoed) {
@@ -87,13 +102,16 @@ public class ZoomOutAction extends FacesAction<Void> {
 
 				// Sort the owning collection/inverseMany (if this is a collection element binding)
 				String viewBinding = facesView.getViewBinding();
+				if (viewBinding == null) { // zoom out is only rendered when there is a view binding
+					throw new IllegalStateException("Cannot zoom out as the FacesView has no view binding");
+				}
 				// NB Is a collection/inverseMany element binding if the last "ElementById(" exists 
 				// and is further towards the end of the binding than the last '.' (if that exists)
 				int lastDotIndex = viewBinding.lastIndexOf('.');
 				int lastCollectionindex = viewBinding.lastIndexOf("ElementById(");
 				if ((lastCollectionindex >= 0) && (lastDotIndex < lastCollectionindex)) {
 					String collectionBinding = viewBinding.substring(0, lastCollectionindex);
-					Bean currentBean = facesView.getWebContext().getCurrentBean();
+					Bean currentBean = webContext.getCurrentBean();
 					BindUtil.orderByMetaData(currentBean, collectionBinding);
 				}
 				
@@ -114,7 +132,7 @@ public class ZoomOutAction extends FacesAction<Void> {
 	 * @throws Exception if target bean resolution or redirect handling fails
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	static void zoomOut(FacesView facesView, CustomerImpl internalCustomer) throws Exception {
+	static void zoomOut(@Nonnull FacesView facesView, @Nonnull CustomerImpl internalCustomer) throws Exception {
 		String viewBinding = facesView.getViewBinding();
 		Deque<String> zoomInBindings = facesView.getZoomInBindings();
 		String zoomInBinding = zoomInBindings.isEmpty() ? null : zoomInBindings.pop();
@@ -153,6 +171,9 @@ public class ZoomOutAction extends FacesAction<Void> {
 		facesView.setViewBinding(newViewBinding);
 
 		Bean currentBean = ActionUtil.getTargetBeanForView(facesView);
+		if (currentBean == null) {
+			throw new IllegalStateException("Cannot zoom out to " + newViewBinding + " as the FacesView has no target bean");
+		}
 		Module m = internalCustomer.getModule(currentBean.getBizModule());
 		Document d = m.getDocument(internalCustomer, currentBean.getBizDocument());
 		Bizlet<? extends Bean> b = d.getBizlet(internalCustomer);

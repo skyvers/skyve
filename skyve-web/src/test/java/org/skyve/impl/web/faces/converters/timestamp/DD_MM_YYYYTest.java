@@ -2,33 +2,31 @@ package org.skyve.impl.web.faces.converters.timestamp;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.skyve.domain.types.Timestamp;
 import org.skyve.util.Time;
 
 import jakarta.faces.convert.ConverterException;
-public class DD_MM_YYYYTest {
+class DD_MM_YYYYTest {
 	private DD_MM_YYYY formatter;
 
-	@Before
-	public void before() {
+	@BeforeEach
+	void before() {
 		formatter = new DD_MM_YYYY();
 	}
 
-	@Test(expected = ConverterException.class)
-	public void testGetAsObjectInvalidFormat() {
+	@Test
+	void testGetAsObjectInvalidFormat() {
 		// call the method under test
-		formatter.getAsObject(null, null, "03-01-2020");
-
-		fail("Should throw exception before this line.");
+		assertThrows(ConverterException.class, () -> formatter.getAsObject(null, null, "03-01-2020"));
 	}
 
 	@Test
-	public void testGetAsObjectValidFormat() {
+	void testGetAsObjectValidFormat() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 
@@ -37,7 +35,16 @@ public class DD_MM_YYYYTest {
 	}
 
 	@Test
-	public void testGetAsString() {
+	void testGetAsObjectTrimsSurroundingSpaces() {
+		// setup the test data
+		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
+
+		// call the method under test with the value padded by spaces
+		assertThat(formatter.getAsObject(null, null, "  01/03/2020  "), is(testDate));
+	}
+
+	@Test
+	void testGetAsString() {
 		// setup the test data
 		Timestamp testDate = new Timestamp(Time.withDate(01, 03, 2020));
 
@@ -46,12 +53,12 @@ public class DD_MM_YYYYTest {
 	}
 
 	@Test
-	public void testGetAsObjectNullValue() {
+	void testGetAsObjectNullValue() {
 		assertNull(formatter.getAsObject(null, null, null));
 	}
 
 	@Test
-	public void testGetAsStringNullValue() {
+	void testGetAsStringNullValue() {
 		assertThat(formatter.getAsString(null, null, null), is(""));
 	}
 }

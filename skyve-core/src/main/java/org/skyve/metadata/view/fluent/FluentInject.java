@@ -2,6 +2,8 @@ package org.skyve.metadata.view.fluent;
 
 import org.skyve.impl.metadata.view.Inject;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Builds {@link Inject} metadata for script-based client injection.
  */
@@ -21,7 +23,7 @@ public class FluentInject extends FluentWidget {
 	 * @param inject
 	 *            the metadata instance to mutate
 	 */
-	public FluentInject(Inject inject) {
+	public FluentInject(@Nonnull Inject inject) {
 		this.inject = inject;
 	}
 
@@ -32,7 +34,7 @@ public class FluentInject extends FluentWidget {
 	 *            the source metadata to copy
 	 * @return this builder
 	 */
-	public FluentInject from(@SuppressWarnings("hiding") Inject inject) {
+	public @Nonnull FluentInject from(@SuppressWarnings("hiding") @Nonnull Inject inject) {
 
 		script(inject.getScript());
 
@@ -48,7 +50,7 @@ public class FluentInject extends FluentWidget {
 	 *            the script body or identifier
 	 * @return this builder
 	 */
-	public FluentInject script(String script) {
+	public @Nonnull FluentInject script(@Nonnull String script) {
 		inject.setScript(script);
 		return this;
 	}
@@ -60,7 +62,7 @@ public class FluentInject extends FluentWidget {
 	 *            the binding builder whose metadata is appended
 	 * @return this builder
 	 */
-	public FluentInject addBinding(FluentInjectBinding binding) {
+	public @Nonnull FluentInject addBinding(@Nonnull FluentInjectBinding binding) {
 		inject.getBindings().add(binding.get());
 		return this;
 	}
@@ -71,7 +73,7 @@ public class FluentInject extends FluentWidget {
 	 * @return the wrapped inject metadata
 	 */
 	@Override
-	public Inject get() {
+	public @Nonnull Inject get() {
 		return inject;
 	}
 }

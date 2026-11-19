@@ -7,6 +7,12 @@ const COMMON = {
     twoDecimalPlaces: _createNumberFormatter({ scale: 2 }),
 };
 
+/**
+ * Creates a function that formats a date or time value from the server (ISO 8601) as the Java converter of
+ * the same name does: the format is the converter's pattern (Luxon and Java's SimpleDateFormat read the
+ * letters used here the same way), in English, as the Java converters format in Locale.ENGLISH
+ * (so 'Sep' and 'PM' whatever the browser's language).
+ */
 function _createDateFormatter(format) {
 
     return (stringValue) => {
@@ -15,24 +21,29 @@ function _createDateFormatter(format) {
             return "";
         }
 
-        const dt = DateTime.fromISO(stringValue);
+        const dt = DateTime.fromISO(stringValue, { locale: 'en-US' });
         return dt.toFormat(format);
     };
 }
 
 /**
  * Creates a function which can be used to format display values in
- * a row.
+ * a row, as the Java converters do: rounded half up (away from zero) from the
+ * number's shortest decimal, and with no sign on a value that rounds to zero
+ * (0.00, not -0.00).
  * 
  * Returns a lambda with signature: (number) => string
  */
 function _createNumberFormatter({ scale, style = 'decimal' }) {
 
+    // Not signDisplay 'negative' for the zero, which browsers before Intl.NumberFormat v3 refuse (a RangeError)
     const numberFormat = new Intl.NumberFormat(undefined, {
         style,
         minimumFractionDigits: scale,
-        maximumFractionDigits: scale
+        maximumFractionDigits: scale,
+        roundingMode: 'halfExpand'
     });
+    const zero = numberFormat.format(0);
 
     return (numValue) => {
 
@@ -41,22 +52,30 @@ function _createNumberFormatter({ scale, style = 'decimal' }) {
             return numValue;
         }
 
-        return numberFormat.format(numValue);
+        // a value that rounds to zero shows no sign: its magnitude shows as zero does
+        const magnitude = numberFormat.format(Math.abs(numValue));
+        return (magnitude === zero) ? zero : numberFormat.format(numValue);
     };
 }
 
 /**
- * Decimal5TimeDuration formatter function
- * 
- * Modifies the given field value in the supplied row
+ * Formats decimal hours as the Java converter (TimeDurationFormatter) does: the hours truncated, a colon, then the
+ * minutes rounded once, half up, from the exact fraction of an hour, with a sign for a negative duration (1.5 is 1:30,
+ * 0.49166 is 0:29, 0.99999 is 1:00, -0.01 is -0:01). The value is a Decimal5, so it is taken as a whole number of
+ * hundred-thousandths of an hour, and the minutes are worked out in whole numbers, without binary fractions.
  */
 function Decimal5TimeDuration(numValue) {
 
-    let newVal = COMMON.twoDecimalPlaces(numValue);
-
-    // Decimal seperator is locale dependent
-    const decSep = newVal.at(-3);
-    return newVal.replace(decSep, ':');
+    const units = Math.round(Math.abs(numValue) * 100000);
+    let hours = Math.trunc(units / 100000);
+    // (fraction * 60) / 100000 minutes, plus a half, rounded down: half up
+    let minutes = Math.floor((((units % 100000) * 60) + 50000) / 100000);
+    if (minutes === 60) {
+        minutes = 0;
+        hours++;
+    }
+    const sign = ((numValue < 0) && ((hours > 0) || (minutes > 0))) ? '-' : '';
+    return `${sign}${hours}:${String(minutes).padStart(2, '0')}`;
 }
 
 function Decimal2DollarsAndCentsAbsolute(numValue) {
@@ -70,11 +89,12 @@ function Decimal2DollarsAndCentsAbsolute(numValue) {
 
 /**
  * This one works a bit differently to the other percentage
- * converters, no multiplication here (ie: 45 => '45%')
+ * converters, no multiplication here (ie: 45 => '45%'), and no thousands
+ * separator, as the Java converter writes it and reads it back (1000%)
  */
 function SimplePercentage(numValue) {
 
-    return COMMON.zeroDecimalPlaces(numValue) + '%';
+    return `${Math.round(numValue)}%`;
 }
 
 
@@ -82,7 +102,7 @@ const Converters = {
 
     // date type
     DD_MM_YYYY: _createDateFormatter('dd/MM/yyyy'),  // 20/05/2024
-    DD_MMM_YYYY: _createDateFormatter('dd MMM yyyy'),  // 20-May-2024
+    DD_MMM_YYYY: _createDateFormatter('dd-MMM-yyyy'),  // 20-May-2024
     MM_DD_YYYY: _createDateFormatter('MM/dd/yyyy'),  // 05/20/2024
     MMM_DD_YYYY: _createDateFormatter('MMM-dd-yyyy'),  // May-20-2024
     YYYY_MM_DD: _createDateFormatter('yyyy/MM/dd'),  // 2024/05/20
@@ -128,13 +148,18 @@ const Converters = {
     HH24_MI_SS: _createDateFormatter('HH:mm:ss'),  // 23:59:12
 
     // decimal10
+    Decimal10Integer: COMMON.zeroDecimalPlaces,  // 9,510
+    Decimal10IntegerPercentage: _createNumberFormatter({ scale: 0, style: 'percent' }),  // 951,001%
+    Decimal10DollarsAndCents: COMMON.twoDecimalPlaces,  // 9,510.01
+    Decimal10OneDecimalPlace: COMMON.oneDecimalPlaces,  // 9,510.0
     Decimal10TwoDecimalPlaces: COMMON.twoDecimalPlaces,  // 10.01
+    Decimal10TwoDecimalPlacesPercentage: _createNumberFormatter({ scale: 2, style: 'percent' }),  // 951,001.23%
 
     // decimal5
     Decimal5Integer: COMMON.zeroDecimalPlaces,  // 9,510
     Decimal5IntegerPercentage: _createNumberFormatter({ scale: 0, style: 'percent' }),  // 951,001%
     Decimal5DollarsAndCents: COMMON.twoDecimalPlaces,  // 9,510.01
-    Decimal5TimeDuration,  // 9510:00
+    Decimal5TimeDuration,  // 9510:00 (1.5 is 1:30)
     Decimal5OneDecimalPlace: COMMON.oneDecimalPlaces,  // 9,510.0
     Decimal5TwoDecimalPlaces: COMMON.twoDecimalPlaces,  // 9,510.01
     Decimal5TwoDecimalPlacesPercentage: _createNumberFormatter({ scale: 2, style: 'percent' }),  // 951,001.23%
@@ -145,7 +170,6 @@ const Converters = {
     Decimal2Integer: COMMON.zeroDecimalPlaces, // 9,510
     Decimal2IntegerPercentage: _createNumberFormatter({ scale: 0, style: 'percent' }), // 951,001%
     Decimal2OneDecimalPlace: COMMON.oneDecimalPlaces, // 9,510.0
-    Decimal2TwoDecimalPlacesPercentage: _createNumberFormatter({ scale: 2, style: 'percent' }), // 951,001.00%
 
     // integer
     SimplePercentage, // 14999%
@@ -155,6 +179,86 @@ const Converters = {
     LongIntegerSeparator: COMMON.zeroDecimalPlaces, // 14,999
 };
 
+
+/**
+ * The filter calendar of each date and time converter: the PrimeVue Calendar formats that make a column's
+ * filter take and show its values as the column's cells show them (the Java converter's format), so that a
+ * user can type what a cell shows.
+ * - dateFormat: the date, in PrimeVue's letters (dd day, mm month, M short month name, yy 4 digit year);
+ *   none for a time.
+ * - hourFormat: '24' (HH) or '12' (hh, then a space and AM or PM - see the locale in main.js); none for a
+ *   date without a time. PrimeVue writes a time after the date and a space.
+ * - showSeconds: the time has seconds.
+ * ConverterRegistrationTest (skyve-core) checks each one against its Java converter.
+ */
+const CALENDARS = {
+
+    // date
+    DD_MM_YYYY: { dateFormat: 'dd/mm/yy' },
+    DD_MMM_YYYY: { dateFormat: 'dd-M-yy' },
+    MM_DD_YYYY: { dateFormat: 'mm/dd/yy' },
+    MMM_DD_YYYY: { dateFormat: 'M-dd-yy' },
+    YYYY_MM_DD: { dateFormat: 'yy/mm/dd' },
+
+    // dateTime
+    DD_MM_YYYY_HH_MI: { dateFormat: 'dd/mm/yy', hourFormat: '12' },
+    DD_MM_YYYY_HH24_MI: { dateFormat: 'dd/mm/yy', hourFormat: '24' },
+    DD_MM_YYYY_DateTime: { dateFormat: 'dd/mm/yy' },
+    DD_MMM_YYYY_HH_MI: { dateFormat: 'dd-M-yy', hourFormat: '12' },
+    DD_MMM_YYYY_HH24_MI: { dateFormat: 'dd-M-yy', hourFormat: '24' },
+    DD_MMM_YYYY_DateTime: { dateFormat: 'dd-M-yy' },
+    MM_DD_YYYY_HH_MI: { dateFormat: 'mm/dd/yy', hourFormat: '12' },
+    MM_DD_YYYY_HH24_MI: { dateFormat: 'mm/dd/yy', hourFormat: '24' },
+    MM_DD_YYYY_DateTime: { dateFormat: 'mm/dd/yy' },
+    MMM_DD_YYYY_HH_MI: { dateFormat: 'M-dd-yy', hourFormat: '12' },
+    MMM_DD_YYYY_HH24_MI: { dateFormat: 'M-dd-yy', hourFormat: '24' },
+    MMM_DD_YYYY_DateTime: { dateFormat: 'M-dd-yy' },
+    YYYY_MM_DD_HH_MI: { dateFormat: 'yy/mm/dd', hourFormat: '12' },
+    YYYY_MM_DD_HH24_MI: { dateFormat: 'yy/mm/dd', hourFormat: '24' },
+    YYYY_MM_DD_DateTime: { dateFormat: 'yy/mm/dd' },
+
+    // timestamp
+    DD_MM_YYYY_HH_MI_SS: { dateFormat: 'dd/mm/yy', hourFormat: '12', showSeconds: true },
+    DD_MM_YYYY_HH24_MI_SS: { dateFormat: 'dd/mm/yy', hourFormat: '24', showSeconds: true },
+    DD_MM_YYYY_Timestamp: { dateFormat: 'dd/mm/yy' },
+    DD_MMM_YYYY_HH_MI_SS: { dateFormat: 'dd-M-yy', hourFormat: '12', showSeconds: true },
+    DD_MMM_YYYY_HH24_MI_SS: { dateFormat: 'dd-M-yy', hourFormat: '24', showSeconds: true },
+    DD_MMM_YYYY_Timestamp: { dateFormat: 'dd-M-yy' },
+    MM_DD_YYYY_HH_MI_SS: { dateFormat: 'mm/dd/yy', hourFormat: '12', showSeconds: true },
+    MM_DD_YYYY_HH24_MI_SS: { dateFormat: 'mm/dd/yy', hourFormat: '24', showSeconds: true },
+    MM_DD_YYYY_Timestamp: { dateFormat: 'mm/dd/yy' },
+    MMM_DD_YYYY_HH_MI_SS: { dateFormat: 'M-dd-yy', hourFormat: '12', showSeconds: true },
+    MMM_DD_YYYY_HH24_MI_SS: { dateFormat: 'M-dd-yy', hourFormat: '24', showSeconds: true },
+    MMM_DD_YYYY_Timestamp: { dateFormat: 'M-dd-yy' },
+    YYYY_MM_DD_HH_MI_SS: { dateFormat: 'yy/mm/dd', hourFormat: '12', showSeconds: true },
+    YYYY_MM_DD_HH24_MI_SS: { dateFormat: 'yy/mm/dd', hourFormat: '24', showSeconds: true },
+    YYYY_MM_DD_Timestamp: { dateFormat: 'yy/mm/dd' },
+
+    // time
+    HH_MI: { hourFormat: '12' },
+    HH24_MI: { hourFormat: '24' },
+    HH_MI_SS: { hourFormat: '12', showSeconds: true },
+    HH24_MI_SS: { hourFormat: '24', showSeconds: true },
+};
+
+/**
+ * Returns the props of the filter calendar for a column with the converter (see CALENDARS):
+ * { dateFormat, showTime, hourFormat, showSeconds }; or null if the converter is not a date or time converter.
+ */
+export function calendarProps(converterName) {
+
+    const calendar = CALENDARS[converterName];
+    if (!calendar) {
+        return null;
+    }
+
+    return {
+        dateFormat: calendar.dateFormat,
+        showTime: !!calendar.dateFormat && !!calendar.hourFormat,
+        hourFormat: calendar.hourFormat ?? '24',
+        showSeconds: !!calendar.showSeconds
+    };
+}
 
 export function applyConverters(row, columnDefinitionMap) {
 
@@ -173,6 +277,16 @@ export function applyConverters(row, columnDefinitionMap) {
         // If the value is null, skip it
         const oldValue = row[field];
         if (oldValue == null || oldValue == undefined) {
+            continue;
+        }
+
+        // Enumerations and constant domains display the description of the code
+        if (columnDef.enumValues) {
+            const code = String(oldValue);
+            const enumValue = columnDef.enumValues.find(ev => ev.value === code);
+            if (enumValue) {
+                row[field] = enumValue.label;
+            }
             continue;
         }
 

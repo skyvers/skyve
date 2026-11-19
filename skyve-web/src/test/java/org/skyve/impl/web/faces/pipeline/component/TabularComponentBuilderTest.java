@@ -1,5 +1,6 @@
 package org.skyve.impl.web.faces.pipeline.component;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -119,6 +120,7 @@ import org.skyve.impl.metadata.view.widget.bound.tabular.DataGridContainerColumn
 import org.skyve.impl.metadata.view.widget.bound.tabular.DataRepeater;
 import org.skyve.impl.metadata.view.widget.bound.tabular.ListGrid;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.impl.web.AbstractWebContext;
 import org.skyve.impl.web.faces.models.SkyveLazyDataModel;
 import org.skyve.impl.web.faces.pipeline.component.ComponentBuilder.EventSourceComponent;
@@ -188,8 +190,8 @@ class TabularComponentBuilderTest {
 			setValueOrValueExpression(value, valueSetter, valueExpressionName, component);
 		}
 
-		void invokeSetDisabledForTest(UIComponent component, String disabledConditionName, String parentDisabledConditionName) {
-			setDisabled(component, disabledConditionName, parentDisabledConditionName);
+		void invokeSetDisabledForTest(UIComponent component, String disabledCondition, String parentDisabledCondition) {
+			setDisabled(component, disabledCondition, parentDisabledCondition);
 		}
 
 		UIComponent invokeCreateSpecialColumnFilterFacetComponentForTest(Document modelDrivingDocument,
@@ -441,7 +443,7 @@ class TabularComponentBuilderTest {
 		}
 
 		@Override
-		protected UIComponent createListGridZoomButton(String zoomDisabledConditionName, Map<String, String> properties) {
+		protected UIComponent createListGridZoomButton(String zoomDisabledCondition, Map<String, String> properties) {
 			return zoomButton;
 		}
 	}
@@ -581,7 +583,10 @@ class TabularComponentBuilderTest {
 													List<org.skyve.metadata.view.widget.FilterParameter> filterParameters,
 													List<org.skyve.metadata.view.widget.bound.Parameter> parameters,
 													Integer pixelWidth,
-													boolean dontDisplay) {
+													boolean dontDisplay,
+													Document owningDocument,
+													String modelName,
+													List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns) {
 			this.lookupDataWidgetVar = dataWidgetVar;
 			this.lookupBinding = binding;
 			this.lookupTitle = title;
@@ -737,7 +742,7 @@ class TabularComponentBuilderTest {
 		String[] actionCreateDisabled;
 		String actionCreateUrlParams;
 		boolean actionZoomRendered;
-		String actionZoomDisabledConditionName;
+		String actionZoomDisabledCondition;
 		boolean actionShowFilter;
 		String actionParentId;
 		Map<String, String> actionProperties;
@@ -769,10 +774,10 @@ class TabularComponentBuilderTest {
 															String documentName,
 															boolean canCreateDocument,
 															boolean createRendered,
-															String[] createDisabledConditionNames,
+															String[] createDisabledConditions,
 															String createUrlParams,
 															boolean zoomRendered,
-															String zoomDisabledConditionName,
+															String zoomDisabledCondition,
 															boolean showFilter,
 															String parentId,
 															Map<String, String> properties) {
@@ -781,10 +786,10 @@ class TabularComponentBuilderTest {
 			this.actionDocumentName = documentName;
 			this.actionCanCreateDocument = canCreateDocument;
 			this.actionCreateRendered = createRendered;
-			this.actionCreateDisabled = createDisabledConditionNames;
+			this.actionCreateDisabled = createDisabledConditions;
 			this.actionCreateUrlParams = createUrlParams;
 			this.actionZoomRendered = zoomRendered;
-			this.actionZoomDisabledConditionName = zoomDisabledConditionName;
+			this.actionZoomDisabledCondition = zoomDisabledCondition;
 			this.actionShowFilter = showFilter;
 			this.actionParentId = parentId;
 			this.actionProperties = properties;
@@ -845,8 +850,8 @@ class TabularComponentBuilderTest {
 		return invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition("disableGrid");
 			grid.getProperties().put("process", "@this");
 		});
 	}
@@ -859,6 +864,13 @@ class TabularComponentBuilderTest {
 	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
 											java.util.function.Consumer<ListGrid> gridConfigurer,
 											String stickyHeaderAnchorSelector) {
+		return invokeListGrid(canCreateDocument, gridConfigurer, stickyHeaderAnchorSelector, null);
+	}
+
+	private static ListGridCallResult invokeListGrid(boolean canCreateDocument,
+											java.util.function.Consumer<ListGrid> gridConfigurer,
+											String stickyHeaderAnchorSelector,
+											Document owningDocument) {
 		CapturingListGridBuilder builder = new CapturingListGridBuilder();
 		DataTable dataTable = mock(DataTable.class);
 		UIOutput emptyMessage = mock(UIOutput.class);
@@ -916,7 +928,7 @@ class TabularComponentBuilderTest {
 											"recentOrders",
 											"desktop",
 											model,
-											null,
+											owningDocument,
 											grid,
 											stickyHeaderAnchorSelector,
 											false);
@@ -944,6 +956,46 @@ class TabularComponentBuilderTest {
 	@AfterAll
 	static void tearDownFacesContext() {
 		FacesContextBridge.setCurrent(null);
+	}
+
+	@Test
+	void contentPreviewSizeRoundsTheLargerSideUpToAFewFixedSteps() {
+		assertAll(
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(0), Integer.valueOf(-5)), "no usable size"),
+			() -> assertEquals(64, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(24), null), "smallest step"),
+			() -> assertEquals(128, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(65), null), "small box"),
+			() -> assertEquals(256, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(256), Integer.valueOf(100)), "exactly a step"),
+			() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(200), Integer.valueOf(257)), "taller than wide"),
+			() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, Integer.valueOf(600)), "height only"),
+			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(1025), Integer.valueOf(10)), "large box"),
+			() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), Integer.valueOf(4000)), "capped"));
+	}
+
+	@Test
+	void contentPreviewSizeEndsAtTheThumbnailMaximumDimension() {
+		int originalMaximum = UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION;
+		try {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 1000;
+			assertAll(
+				() -> assertEquals(512, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(300), null), "below the maximum"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(600), null), "the maximum is the last step"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(5000), null), "above the maximum"),
+				() -> assertEquals(1000, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"));
+
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 4096;
+			assertAll(
+				() -> assertEquals(2048, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(2000), null), "the default steps still apply"),
+				() -> assertEquals(4096, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(3000), null), "a larger maximum adds a step"),
+				() -> assertEquals(1024, TabularComponentBuilder.contentPreviewSize(null, null), "responsive box"),
+				() -> assertEquals(4096, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(Integer.MAX_VALUE), null), "no overflow"));
+
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = 50;
+			assertEquals(50, TabularComponentBuilder.contentPreviewSize(Integer.valueOf(24), null), "a maximum below the first step");
+		}
+		finally {
+			UtilImpl.THUMBNAIL_MAXIMUM_DIMENSION = originalMaximum;
+		}
 	}
 
 	@Test
@@ -1533,7 +1585,7 @@ class TabularComponentBuilderTest {
 		CheckBox checkBox = new CheckBox();
 		checkBox.setBinding("active");
 		checkBox.setTriState(Boolean.TRUE);
-		checkBox.setDisabledConditionName("checkDisabled");
+		checkBox.setXmlDisabledCondition("checkDisabled");
 
 		EventSourceComponent result = builder.checkBox(null, "row", checkBox, "formDisabled", "Active", "Required");
 
@@ -1568,7 +1620,7 @@ class TabularComponentBuilderTest {
 		ColourPicker colourPicker = new ColourPicker();
 		colourPicker.setBinding("themeColour");
 		colourPicker.setPixelWidth(Integer.valueOf(160));
-		colourPicker.setDisabledConditionName("colourDisabled");
+		colourPicker.setXmlDisabledCondition("colourDisabled");
 
 		EventSourceComponent result = builder.colourPicker(null,
 															"row",
@@ -1853,7 +1905,7 @@ class TabularComponentBuilderTest {
 		content.setBinding("doc.attachment");
 		content.setDisplay(ContentDisplay.auto);
 		content.setEditable(Boolean.TRUE);
-		content.setDisabledConditionName("attachmentDisabled");
+		content.setXmlDisabledCondition("attachmentDisabled");
 		content.setShowMarkup(Boolean.FALSE);
 		UIComponent result = builder.content(null, "row", content, "formDisabled", "Attachment", null, HorizontalAlignment.left, true, false);
 
@@ -2029,7 +2081,7 @@ class TabularComponentBuilderTest {
 		content.setDisplay(ContentDisplay.link);
 		content.setCapture(ContentCapture.camera);
 		content.setEditable(Boolean.TRUE);
-		content.setDisabledConditionName("attachmentDisabled");
+		content.setXmlDisabledCondition("attachmentDisabled");
 		content.setShowMarkup(Boolean.FALSE);
 		UIComponent result = builder.content(null, "row", content, "formDisabled", "Attachment", null, HorizontalAlignment.left, true, false);
 
@@ -2050,7 +2102,7 @@ class TabularComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',true,true)");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('contentGrid',false,true)");
 		verify(uploadItem).setValueExpression(eq("onclick"), any(ValueExpression.class));
 		verify(uploadItem, never()).setOnclick(anyString());
 		verify(iframe).setValue("<iframe id=\"contentGrid_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
@@ -2325,9 +2377,10 @@ class TabularComponentBuilderTest {
 		LookupDescription lookup = new LookupDescription();
 		lookup.setBinding("customer");
 		lookup.setPixelWidth(Integer.valueOf(280));
-		lookup.setDisabledConditionName("lookupDisabled");
+		lookup.setXmlDisabledCondition("lookupDisabled");
 		QueryDefinition query = mock(QueryDefinition.class);
 
+		@SuppressWarnings("null") // passes null on purpose
 		EventSourceComponent result = builder.lookupDescription(null,
 																	"row",
 																	lookup,
@@ -2336,7 +2389,7 @@ class TabularComponentBuilderTest {
 																	"Required",
 																	HorizontalAlignment.left,
 																	"name",
-																	query);
+																	query, null);
 
 		assertSame(builder.delegatedLookupDescriptionResult, result.getComponent());
 		assertSame(builder.delegatedLookupDescriptionResult, result.getEventSource());
@@ -2358,7 +2411,7 @@ class TabularComponentBuilderTest {
 		org.skyve.impl.metadata.view.widget.bound.input.Password password = new org.skyve.impl.metadata.view.widget.bound.input.Password();
 		password.setBinding("secret");
 		password.setPixelWidth(Integer.valueOf(220));
-		password.setDisabledConditionName("passwordDisabled");
+		password.setXmlDisabledCondition("passwordDisabled");
 
 		EventSourceComponent result = builder.password(null,
 														"row",
@@ -2455,7 +2508,7 @@ class TabularComponentBuilderTest {
 		spinner.setMax(Double.valueOf(5.0));
 		spinner.setStep(Double.valueOf(0.5));
 		spinner.setPixelWidth(Integer.valueOf(120));
-		spinner.setDisabledConditionName("spinnerDisabled");
+		spinner.setXmlDisabledCondition("spinnerDisabled");
 		Converter<?> facesConverter = mock(Converter.class);
 
 		EventSourceComponent result = builder.spinner(null,
@@ -2538,7 +2591,7 @@ class TabularComponentBuilderTest {
 		textArea.setBinding("notes");
 		textArea.setEditable(Boolean.FALSE);
 		textArea.setKeyboardType(KeyboardType.tel);
-		textArea.setDisabledConditionName("textAreaDisabled");
+		textArea.setXmlDisabledCondition("textAreaDisabled");
 		textArea.setPixelWidth(Integer.valueOf(300));
 		textArea.setPixelHeight(Integer.valueOf(80));
 
@@ -2603,12 +2656,12 @@ class TabularComponentBuilderTest {
 		assertEquals("tel", passThroughAttributes.get("inputmode"));
 	}
 
-	@Test
-	void testLookupDescriptionUsesBaseLookupDescriptionBuilder() {
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+	void lookupWithoutDropdownColumnsHasNoHeading(boolean modelBacked) {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
-		AutoComplete autoComplete = mock(AutoComplete.class);
-		Map<String, Object> attributes = new HashMap<>();
-		when(autoComplete.getAttributes()).thenReturn(attributes);
+		AutoComplete autoComplete = new AutoComplete();
+		Map<String, Object> attributes = autoComplete.getAttributes();
 
 		FacesView managedBean = mock(FacesView.class);
 		when(managedBean.nextId()).thenReturn("lookupBaseId");
@@ -2621,6 +2674,13 @@ class TabularComponentBuilderTest {
 		LookupDescription lookupDescription = new LookupDescription();
 		lookupDescription.setBinding("customer");
 		lookupDescription.setPixelWidth(Integer.valueOf(240));
+		if (modelBacked) {
+			lookupDescription.setModelName("CustomersModel");
+		}
+
+		Document owningDocument = mock(Document.class);
+		when(owningDocument.getOwningModuleName()).thenReturn("sales");
+		when(owningDocument.getName()).thenReturn("Order");
 
 		QueryDefinition query = mock(QueryDefinition.class);
 		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
@@ -2636,13 +2696,123 @@ class TabularComponentBuilderTest {
 													null,
 													HorizontalAlignment.left,
 													"name",
-													query);
+													query, owningDocument);
 
 		assertSame(autoComplete, result.getComponent());
 		assertSame(autoComplete, result.getEventSource());
 		assertEquals("sales", attributes.get("module"));
-		assertEquals("CustomerLookup", attributes.get("query"));
+		assertEquals(modelBacked ? "Order" : null, attributes.get("document"));
+		assertEquals(modelBacked ? "CustomersModel" : null, attributes.get("model"));
+		assertEquals(modelBacked ? null : "CustomerLookup", attributes.get("query"));
 		assertEquals("name", attributes.get("display"));
+		// PrimeFaces renders suggestions as a plain list when there are no Column children.
+		assertTrue(autoComplete.getColums().isEmpty());
+		assertTrue(autoComplete.getFacets().isEmpty());
+		assertFalse(attributes.containsKey("filterFields"));
+	}
+
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+	@SuppressWarnings("boxing")
+	void lookupBuildsColumnsAndHonoursFilterability(boolean queryBacked) {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autocomplete = new AutoComplete();
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autocomplete);
+		Map<String, Object> attributes = autocomplete.getAttributes();
+		List<UIComponent> children = autocomplete.getChildren();
+		when(mockApplication.createComponent(Column.COMPONENT_TYPE)).thenAnswer(invocation -> new Column());
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenAnswer(invocation -> new HtmlOutputText());
+		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Object.class)))
+				.thenAnswer(invocation -> {
+					ValueExpression expression = mock(ValueExpression.class);
+					when(expression.getExpressionString()).thenReturn(invocation.getArgument(1));
+					return expression;
+				});
+		FacesView faces = mock(FacesView.class);
+		builder.setManagedBeanForTest(faces);
+		java.util.concurrent.atomic.AtomicInteger ids = new java.util.concurrent.atomic.AtomicInteger();
+		when(faces.nextId()).thenAnswer(invocation -> "column" + ids.incrementAndGet());
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		org.skyve.metadata.module.Module module = mock(org.skyve.metadata.module.Module.class);
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(document.getName()).thenReturn("Order");
+		when(user.getCustomer()).thenReturn(customer);
+		when(customer.getModule("sales")).thenReturn(module);
+		when(module.getDocument(customer, "Order")).thenReturn(document);
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		when(document.getListModel(customer, "Contacts", true)).thenReturn(model);
+		when(model.getDrivingDocument()).thenReturn(document);
+		LookupDescription lookup = new LookupDescription();
+		lookup.setBinding("customer");
+		lookup.setModelName("Contacts");
+		List<org.skyve.metadata.module.query.MetaDataQueryColumn> columns = new ArrayList<>();
+		String[] names = {"name", "email", "disabled", "count", "forced", "variant", "dynamic", "unprojected"};
+		for (String name : names) {
+			MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+			when(column.getBinding()).thenReturn(name);
+			when(column.isProjected()).thenReturn(Boolean.valueOf(! "unprojected".equals(name)));
+			when(column.isFilterable()).thenReturn(Boolean.TRUE);
+			when(column.isEscape()).thenReturn(Boolean.TRUE);
+			when(model.determineColumnTitle(column)).thenReturn(name);
+			columns.add(column);
+			org.skyve.metadata.model.Attribute attribute = mock(org.skyve.metadata.model.Attribute.class);
+			when(attribute.getAttributeType()).thenReturn("count".equals(name) ? org.skyve.metadata.model.Attribute.AttributeType.integer : org.skyve.metadata.model.Attribute.AttributeType.text);
+			if ("variant".equals(name) || "dynamic".equals(name)) {
+				when(attribute.getDomainType()).thenReturn(org.skyve.metadata.model.document.DomainType.valueOf(name));
+			}
+			doReturn(String.class).when(attribute).getImplementingType();
+			when(document.getAttribute(name)).thenReturn(attribute);
+			org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropdown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
+			dropdown.setName(name);
+			if ("disabled".equals(name)) {
+				dropdown.setFilterable(Boolean.FALSE);
+			}
+			if ("forced".equals(name)) {
+				dropdown.setFilterable(Boolean.TRUE);
+				when(column.isFilterable()).thenReturn(Boolean.FALSE);
+				when(column.getBinding()).thenReturn(null);
+				when(column.getName()).thenReturn(name);
+			}
+			lookup.getDropDownColumns().add(dropdown);
+		}
+		MetaDataQueryProjectedColumn formatted = (MetaDataQueryProjectedColumn) columns.get(0);
+		when(formatted.getCustomFormatterName()).thenReturn("customName");
+		when(formatted.getPixelWidth()).thenReturn(Integer.valueOf(140));
+		when(formatted.getAlignment()).thenReturn(HorizontalAlignment.right);
+		when(model.getColumns()).thenReturn(columns);
+		org.skyve.metadata.module.query.MetaDataQueryDefinition query = null;
+		if (queryBacked) {
+			lookup.setModelName(null);
+			query = mock(org.skyve.metadata.module.query.MetaDataQueryDefinition.class);
+			when(query.getOwningModule()).thenReturn(module);
+			when(module.getName()).thenReturn("sales");
+			when(query.getName()).thenReturn("Contacts");
+			when(query.getDocumentModule(customer)).thenReturn(module);
+			when(query.getDocumentName()).thenReturn("Order");
+			when(query.getColumns()).thenReturn(columns);
+		}
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		when(persistence.getUser()).thenReturn(user);
+		try {
+			persistence.setForThread();
+			builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
+					"bizKey", query, lookup.getFilterParameters(), lookup.getParameters(), null, false,
+					document, lookup.getModelName(), lookup.getDropDownColumns());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+		assertEquals(List.of("name", "email", "forced", "variant"), attributes.get("filterFields"));
+		assertEquals(7, children.size());
+		Column first = (Column) children.get(0);
+		assertEquals("width:140px;text-align:right;", first.getStyle());
+		HtmlOutputText text = (HtmlOutputText) first.getChildren().get(0);
+		assertTrue(text.isEscape());
+		assertEquals("#{customerRow['{name|customName}']}", text.getValueExpression("value").getExpressionString());
+		assertEquals("bizKey", attributes.get("display"));
 	}
 
 	@Test
@@ -2687,7 +2857,7 @@ class TabularComponentBuilderTest {
 		CapturingInputDelegationBuilder builder = new CapturingInputDelegationBuilder();
 		TextField textField = new TextField();
 		textField.setBinding("name");
-		textField.setDisabledConditionName("textDisabled");
+		textField.setXmlDisabledCondition("textDisabled");
 		textField.setKeyboardType(KeyboardType.search);
 		textField.setPixelWidth(Integer.valueOf(180));
 		Converter<?> facesConverter = mock(Converter.class);
@@ -2793,7 +2963,7 @@ class TabularComponentBuilderTest {
 		textField.setComplete(CompleteType.suggest);
 		textField.setKeyboardType(KeyboardType.search);
 		textField.setPixelWidth(Integer.valueOf(220));
-		textField.setDisabledConditionName("completeDisabled");
+		textField.setXmlDisabledCondition("completeDisabled");
 
 		EventSourceComponent result = builder.text(null,
 													"row",
@@ -2887,8 +3057,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("saveAction");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("linkDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("linkInvisible");
+		when(action.getDisabledCondition()).thenReturn("linkDisabled");
+		when(action.getInvisibleCondition()).thenReturn("linkInvisible");
 
 		UIComponent result = builder.actionLink(null,
 													"orders",
@@ -2931,8 +3101,8 @@ class TabularComponentBuilderTest {
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("downloadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("downloadInvisible");
+		when(action.getDisabledCondition()).thenReturn("downloadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("downloadInvisible");
 
 		UIComponent result = builder.actionLink(null,
 													"orders",
@@ -3043,8 +3213,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.Download);
 		when(action.getName()).thenReturn("downloadCsv");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.actionLink(null,
 												"orders",
@@ -3060,6 +3230,8 @@ class TabularComponentBuilderTest {
 		assertTrue(commandLinkChildren.contains(outputText));
 		assertEquals("Download", outputText.getValue());
 		assertTrue(outputText.isEscape());
+		// the text's span must not select its data table row when clicked (PrimeFaces skips span.ui-c)
+		assertEquals("ui-c", outputText.getStyleClass());
 		verify(commandLink).setProcess("@form");
 		verify(commandLink).setUpdate("@(form)");
 		verify(commandLink).setActionExpression(actionExpression);
@@ -3079,8 +3251,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadInvoice");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -3111,8 +3283,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
+		when(action.getDisabledCondition()).thenReturn("uploadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("uploadInvisible");
 
 		UIComponent result = builder.upload(null, "Upload", "pi pi-upload", "Upload file", "Proceed?", action);
 
@@ -3142,8 +3314,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("removeLine");
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn("removeDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("removeInvisible");
+		when(action.getDisabledCondition()).thenReturn("removeDisabled");
+		when(action.getInvisibleCondition()).thenReturn("removeInvisible");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -3180,8 +3352,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("approve");
-		when(action.getDisabledConditionName()).thenReturn("approveDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("approveInvisible");
+		when(action.getDisabledCondition()).thenReturn("approveDisabled");
+		when(action.getInvisibleCondition()).thenReturn("approveInvisible");
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@form");
 		properties.put("update", "@(form)");
@@ -3331,8 +3503,8 @@ class TabularComponentBuilderTest {
 		when(action.getParameters()).thenReturn(parameters);
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.report(null, "Run Report", null, "Open report", null, action);
 
@@ -3438,7 +3610,7 @@ class TabularComponentBuilderTest {
 		assertEquals("disableGrid", r.builder.actionCreateDisabled[1]);
 		assertNull(r.builder.actionCreateUrlParams);
 		assertFalse(r.builder.actionZoomRendered);
-		assertNull(r.builder.actionZoomDisabledConditionName);
+		assertNull(r.builder.actionZoomDisabledCondition);
 		assertTrue(r.builder.actionShowFilter);
 		assertEquals("listGridId", r.builder.actionParentId);
 		assertSame(r.grid.getProperties(), r.builder.actionProperties);
@@ -3449,8 +3621,8 @@ class TabularComponentBuilderTest {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName(null);
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition(null);
+			grid.setXmlDisabledCondition("disableGrid");
 		});
 
 		assertNotNull(r.builder.actionCreateDisabled);
@@ -3463,8 +3635,8 @@ class TabularComponentBuilderTest {
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName(null);
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition(null);
 		});
 
 		assertNotNull(r.builder.actionCreateDisabled);
@@ -3492,8 +3664,8 @@ class TabularComponentBuilderTest {
 		ListGridCallResult r = invokeListGrid(false, grid -> {
 			grid.setShowZoom(Boolean.FALSE);
 			grid.setShowFilter(Boolean.TRUE);
-			grid.setDisableAddConditionName("disableAdd");
-			grid.setDisabledConditionName("disableGrid");
+			grid.setXmlDisableAddCondition("disableAdd");
+			grid.setXmlDisabledCondition("disableGrid");
 		});
 
 		verify(r.emptyMessage).setValue(TabularComponentBuilder.EMPTY_DATA_TABLE_MESSAGE);
@@ -3505,7 +3677,7 @@ class TabularComponentBuilderTest {
 
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.TRUE);
-			grid.setDisableZoomConditionName("disableZoom");
+			grid.setXmlDisableZoomCondition("disableZoom");
 			grid.setShowFilter(Boolean.TRUE);
 			grid.setSelectedIdBinding(null);
 		});
@@ -3521,7 +3693,7 @@ class TabularComponentBuilderTest {
 
 		ListGridCallResult r = invokeListGrid(true, grid -> {
 			grid.setShowZoom(Boolean.TRUE);
-			grid.setDisableZoomConditionName(null);
+			grid.setXmlDisableZoomCondition(null);
 			grid.setShowFilter(Boolean.TRUE);
 			grid.setSelectedIdBinding(null);
 		});
@@ -3573,6 +3745,195 @@ class TabularComponentBuilderTest {
 	}
 
 	@Test
+	void testListGridCreateUrlParamsUseTheBizIdOfAnAssociationAndIgnoreANonAttributeBinding() {
+		FilterParameter associationFilter = mock(FilterParameter.class);
+		when(associationFilter.getFilterBinding()).thenReturn("account");
+		when(associationFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(associationFilter.getValueBinding()).thenReturn("account");
+
+		FilterParameter expressionFilter = mock(FilterParameter.class);
+		when(expressionFilter.getFilterBinding()).thenReturn("status");
+		when(expressionFilter.getOperator()).thenReturn(org.skyve.metadata.FilterOperator.equal);
+		when(expressionFilter.getValueBinding()).thenReturn("notAnAttribute");
+
+		Document owningDocument = mock(Document.class);
+		when(owningDocument.getOwningModuleName()).thenReturn("sales");
+		when(owningDocument.getName()).thenReturn("Order");
+		org.skyve.metadata.model.document.Association association = mock(org.skyve.metadata.model.document.Association.class);
+		when(association.getDocumentName()).thenReturn("Account");
+		when(owningDocument.getAttribute("account")).thenReturn(association);
+
+		ListGridCallResult r = invokeListGrid(true, grid -> {
+			grid.setShowZoom(Boolean.FALSE);
+			grid.getFilterParameters().add(associationFilter);
+			grid.getFilterParameters().add(expressionFilter);
+		}, null, owningDocument);
+
+		String createUrlParams = r.builder.actionCreateUrlParams;
+		assertNotNull(createUrlParams);
+		// an association is passed as its bizId
+		assertTrue(createUrlParams.contains("&account=#{skyve.currentBean['account.bizId']}"), createUrlParams);
+		// a binding that is not an attribute of the owning document is passed as a binding expression
+		assertTrue(createUrlParams.contains("&status=#{skyve.currentBean['{notAnAttribute}']}"), createUrlParams);
+	}
+
+	@Test
+	void testListGridThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		ListGrid grid = new ListGrid();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listGrid(null, "sales", "Order", "recent", "desktop", model, null, grid, null, false));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	void testListRepeaterThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.listRepeater(null, "Order", "recent", "desktop", model, null, null, true, true));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	void testAddListGridDataColumnsThrowsWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		List<UIComponent> children = new ArrayList<>();
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		try {
+			persistence.setForThread();
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> builder.addListGridDataColumns(model, children, false, "rows", "desktop"));
+
+			assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+			assertTrue(children.isEmpty());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+	}
+
+	@Test
+	void testLookupDropDownColumnsThrowWhenTheListModelHasNoDrivingDocument() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		AutoComplete autoComplete = new AutoComplete();
+		List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of();
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.addLookupDropDownColumns(autoComplete, dropDownColumns, model, customer));
+
+		assertEquals("List model " + model.getClass().getName() + " has no driving document", e.getMessage());
+	}
+
+	@Test
+	@SuppressWarnings("boxing")
+	void testLookupDropDownColumnsThrowForAProjectedColumnWithNoNameOrBinding() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		ListModel<org.skyve.domain.Bean> model = mockListModel();
+		Document document = mock(Document.class);
+		when(document.getOwningModuleName()).thenReturn("sales");
+		when(model.getDrivingDocument()).thenReturn(document);
+		MetaDataQueryProjectedColumn column = mock(MetaDataQueryProjectedColumn.class);
+		when(column.isProjected()).thenReturn(Boolean.TRUE);
+		when(column.getName()).thenReturn(null);
+		when(column.getBinding()).thenReturn(null);
+		when(model.getColumns()).thenReturn(List.of(column));
+		AutoComplete autoComplete = new AutoComplete();
+		List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of();
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+
+		IllegalStateException e = assertThrows(IllegalStateException.class,
+												() -> builder.addLookupDropDownColumns(autoComplete, dropDownColumns, model, customer));
+
+		assertEquals("A query column of list model " + model.getClass().getName() + " has no name or binding", e.getMessage());
+	}
+
+	@Test
+	void testLookupDescriptionWithDropDownColumnsThrowsWithNeitherAModelNorAQuery() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		AutoComplete autoComplete = new AutoComplete();
+		when(mockApplication.createComponent(AutoComplete.COMPONENT_TYPE)).thenReturn(autoComplete);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("lookupId");
+		builder.setManagedBeanForTest(managedBean);
+		Document owningDocument = mock(Document.class);
+		org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn dropDown = new org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn();
+		dropDown.setName("name");
+		org.skyve.metadata.user.User user = mock(org.skyve.metadata.user.User.class);
+		org.skyve.metadata.customer.Customer customer = mock(org.skyve.metadata.customer.Customer.class);
+		when(user.getCustomer()).thenReturn(customer);
+		AbstractPersistence persistence = mock(AbstractPersistence.class, org.mockito.Mockito.CALLS_REAL_METHODS);
+		when(persistence.getUser()).thenReturn(user);
+		AbstractPersistence previous = currentPersistenceIfPresent();
+		try {
+			persistence.setForThread();
+			List<FilterParameter> filterParameters = List.of();
+			List<Parameter> parameters = List.of();
+			List<org.skyve.impl.metadata.view.widget.bound.input.LookupDescriptionColumn> dropDownColumns = List.of(dropDown);
+
+			IllegalStateException e = assertThrows(IllegalStateException.class,
+													() -> builder.lookupDescription(null, "customer", "Customer", null, HorizontalAlignment.left, null, null,
+																					"bizKey", null, filterParameters, parameters, null, false,
+																					owningDocument, null, dropDownColumns));
+
+			assertEquals("A lookup description of customer has neither a model nor a query", e.getMessage());
+		}
+		finally {
+			restorePersistence(previous);
+		}
+	}
+
+	@Test
+	void testUnboundWidgetsAreRejected() {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("unboundId");
+		builder.setManagedBeanForTest(managedBean);
+		HtmlOutputText outputText = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(outputText);
+		HtmlPanelGrid panelGrid = mock(HtmlPanelGrid.class);
+		when(panelGrid.getChildren()).thenReturn(new ArrayList<>());
+		when(mockApplication.createComponent(HtmlPanelGrid.COMPONENT_TYPE)).thenReturn(panelGrid);
+		Blurb blurb = new Blurb();
+		DataGrid grid = new DataGrid();
+		DataRepeater repeater = new DataRepeater();
+		ContentUpload content = new ContentUpload();
+		UIComponent layout = new HtmlPanelGroup();
+		ContentSignature signature = new ContentSignature();
+
+		assertAll(
+			() -> assertEquals("An output text needs a value or a binding",
+								assertThrows(IllegalStateException.class, () -> builder.blurb(null, null, null, null, blurb)).getMessage(),
+								"blurb"),
+			() -> assertEquals("A data grid has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class, () -> builder.dataGrid(null, "row", false, grid)).getMessage(),
+								"data grid"),
+			() -> assertEquals("A data repeater has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class, () -> builder.dataRepeater(null, "row", repeater)).getMessage(),
+								"data repeater"),
+			() -> assertEquals("A content widget has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class,
+												() -> builder.content(null, null, content, null, null, null, null, true, false)).getMessage(),
+								"content"),
+			() -> assertEquals("A content signature has no binding",
+								assertThrows(org.skyve.metadata.MetaDataException.class,
+												() -> builder.addContentSignature(null, layout, signature, null, null, null)).getMessage(),
+								"content signature"));
+	}
+
+	@Test
 	void testListMembershipNonShortcutPathSetsDefaultFacetHeadings() {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		PickList pickList = mock(PickList.class);
@@ -3600,6 +3961,39 @@ class TabularComponentBuilderTest {
 		verify(sourceCaption).setEscape(true);
 		verify(targetCaption).setValue("Members");
 		verify(targetCaption).setEscape(true);
+	}
+
+	@Test
+	void testListMembershipShowsTargetControlsOnlyForAnOrderedCollection() {
+		assertAll(() -> assertEquals(Boolean.TRUE, lastShowTargetControls(true), "an ordered membership's members can be reordered"),
+					() -> assertEquals(Boolean.FALSE, lastShowTargetControls(false), "an unordered membership is unchanged"));
+	}
+
+	/**
+	 * Builds a list membership's pick-list through the ordered overload and returns the last value its
+	 * {@code showTargetControls} was set to.
+	 */
+	private Boolean lastShowTargetControls(boolean ordered) {
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		PickList pickList = mock(PickList.class);
+		FacesView managedBean = mock(FacesView.class);
+		when(managedBean.nextId()).thenReturn("pickListId", "sourceCaptionId", "targetCaptionId");
+		builder.setManagedBeanForTest(managedBean);
+		when(mockApplication.createComponent(PickList.COMPONENT_TYPE)).thenReturn(pickList);
+		HtmlOutputText sourceCaption = mock(HtmlOutputText.class);
+		HtmlOutputText targetCaption = mock(HtmlOutputText.class);
+		when(mockApplication.createComponent(HtmlOutputText.COMPONENT_TYPE)).thenReturn(sourceCaption, targetCaption);
+		when(pickList.getFacets()).thenReturn(new HashMap<>());
+		ListMembership membership = new ListMembership();
+		membership.setBinding("roles");
+
+		EventSourceComponent result = builder.listMembership(null, null, null, membership, ordered);
+
+		assertSame(pickList, result.getComponent());
+		org.mockito.ArgumentCaptor<Boolean> shown = org.mockito.ArgumentCaptor.forClass(Boolean.class);
+		verify(pickList, atLeastOnce()).setShowTargetControls(shown.capture().booleanValue());
+		List<Boolean> values = shown.getAllValues();
+		return values.get(values.size() - 1);
 	}
 
 	@Test
@@ -3686,7 +4080,7 @@ class TabularComponentBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(disabledExpression);
 
 		ListGrid grid = new ListGrid();
-		grid.setDisableZoomConditionName("disableZoom");
+		grid.setXmlDisableZoomCondition("disableZoom");
 
 		UIComponent result = builder.listGridContextMenu(null, "listGrid1", grid);
 
@@ -4266,8 +4660,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getImplicitName()).thenReturn(ImplicitActionName.OK);
 		when(action.getName()).thenReturn("saveAction");
-		when(action.getDisabledConditionName()).thenReturn("disabledExpr");
-		when(action.getInvisibleConditionName()).thenReturn("invisibleExpr");
+		when(action.getDisabledCondition()).thenReturn("disabledExpr");
+		when(action.getInvisibleCondition()).thenReturn("invisibleExpr");
 
 		UIComponent result = builder.actionButton(null,
 													"orders",
@@ -4312,8 +4706,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("uploadContent");
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
-		when(action.getDisabledConditionName()).thenReturn("uploadDisabled");
-		when(action.getInvisibleConditionName()).thenReturn("uploadInvisible");
+		when(action.getDisabledCondition()).thenReturn("uploadDisabled");
+		when(action.getInvisibleCondition()).thenReturn("uploadInvisible");
 
 		UIComponent result = builder.uploadButton(null,
 													"Upload",
@@ -4376,8 +4770,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.TRUE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of());
 
 		UIComponent result = builder.upload(null,
@@ -4395,6 +4789,11 @@ class TabularComponentBuilderTest {
 		verify(uploadButton).setValue("Upload");
 		verify(uploadButton).setEscape(true);
 		verify(uploadButton).setType("button");
+		// appended to the body so a fixed or scrolling action bar cannot clip it
+		verify(overlayPanel).setFor("uploadButtonId");
+		verify(overlayPanel).setAppendTo("@(body)");
+		// closing it refreshes the view only after its upload action has run
+		verify(overlayPanel).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadOverlayId');if(SKYVE.PF.actionUploadRan('uploadOverlayId'))uploadRefreshId()");
 		assertEquals(1, overlayChildren.size());
 		assertSame(iframe, overlayChildren.get(0));
 		ArgumentCaptor<String> iframeMarkupCaptor = ArgumentCaptor.forClass(String.class);
@@ -4441,8 +4840,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "camera"));
 
 		UIComponent result = builder.upload(null,
@@ -4456,7 +4855,7 @@ class TabularComponentBuilderTest {
 		assertEquals(3, wrapperChildren.size());
 		assertSame(dialog, wrapperChildren.get(2));
 		assertSame(iframe, dialogChildren.get(0));
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);uploadRefreshId()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);if(SKYVE.PF.actionUploadRan('uploadDialogId'))uploadRefreshId()");
 		verify(uploadButton).setOnclick("PF('uploadDialogIdDialog').show()");
 		verify(iframe).setValue("<iframe id=\"uploadDialogId_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
@@ -4503,8 +4902,8 @@ class TabularComponentBuilderTest {
 		when(action.getClientValidation()).thenReturn(Boolean.FALSE);
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		when(action.getProperties()).thenReturn(Map.of("capture", "all"));
 
 		UIComponent result = builder.uploadButton(null,
@@ -4586,7 +4985,7 @@ class TabularComponentBuilderTest {
 		verify(dialog).setWidth("96vw");
 		verify(dialog).setHeight("96vh");
 		verify(dialog).setStyle("max-width:100vw;max-height:100vh;");
-		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);uploadRefreshId()");
+		verify(dialog).setOnHide("SKYVE.PF.contentOverlayOnHide('uploadDialogId',false,true);if(SKYVE.PF.actionUploadRan('uploadDialogId'))uploadRefreshId()");
 		verify(uploadButton).setOnclick("PF('uploadDialogIdDialog').show()");
 		verify(iframe).setValue("<iframe id=\"uploadDialogId_overlayiframe\" src=\"\" loading=\"eager\" scrolling=\"no\" style=\"display:block;width:100%;height:100%;border:none;overflow:hidden\"></iframe>");
 		ArgumentCaptor<String> expressions = ArgumentCaptor.forClass(String.class);
@@ -4611,8 +5010,8 @@ class TabularComponentBuilderTest {
 		when(action.getName()).thenReturn("downloadCsv");
 		when(action.getEscapeDisplayName()).thenReturn(null);
 		when(action.getEscapeConfirm()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		when(action.getProperties()).thenReturn(properties);
 
@@ -4655,8 +5054,8 @@ class TabularComponentBuilderTest {
 
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("downloadPdf");
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 		Map<String, String> properties = new HashMap<>();
 		properties.put("process", "@this");
 		properties.put("update", "@none");
@@ -5022,6 +5421,7 @@ class TabularComponentBuilderTest {
 		when(current.getChildren()).thenReturn(new ArrayList<>());
 		when(current.getParent()).thenReturn(parent);
 
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.addedDataGridBoundColumn(null, current, null);
 
 		assertSame(parent, result);
@@ -5693,7 +6093,7 @@ class TabularComponentBuilderTest {
 		when(mockExpressionFactory.createValueExpression(any(ELContext.class), anyString(), eq(Boolean.class))).thenReturn(renderedExpr);
 
 		StaticImage imageWidget = new StaticImage();
-		imageWidget.setInvisibleConditionName("condition");
+		imageWidget.setXmlInvisibleCondition("condition");
 
 		UIComponent result = builder.staticImage(null, "test.png", imageWidget);
 
@@ -6017,7 +6417,7 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableAddConditionName("disableAdd");
+		grid.setXmlDisableAddCondition("disableAdd");
 
 		builder.createDataGridAddButton(grid, "row", "Item", false, "items", null);
 
@@ -6035,7 +6435,7 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableRemoveConditionName("disableRemove");
+		grid.setXmlDisableRemoveCondition("disableRemove");
 
 		builder.createDataGridRemoveButton(grid, "row", "Item", "items", null);
 
@@ -6053,7 +6453,7 @@ class TabularComponentBuilderTest {
 
 		DataGrid grid = new DataGrid();
 		grid.setBinding("items");
-		grid.setDisableZoomConditionName("disableZoom");
+		grid.setXmlDisableZoomCondition("disableZoom");
 
 		builder.createDataGridZoomButton(grid, "row", "Item", false, "items", null);
 
@@ -6281,8 +6681,8 @@ class TabularComponentBuilderTest {
 		Action action = mock(Action.class);
 		when(action.getName()).thenReturn("doUpload");
 		when(action.getClientValidation()).thenReturn(null);
-		when(action.getDisabledConditionName()).thenReturn(null);
-		when(action.getInvisibleConditionName()).thenReturn(null);
+		when(action.getDisabledCondition()).thenReturn(null);
+		when(action.getInvisibleCondition()).thenReturn(null);
 
 		UIComponent result = builder.upload(null, "UploadLabel", "icon", "tip", null, action);
 		assertSame(builder.delegatedUploadButtonResult, result);
@@ -6377,6 +6777,24 @@ class TabularComponentBuilderTest {
 		assertThrows(IllegalStateException.class, () ->
 				builder.text(null, "row", textField, null, "Date", null, null, null,
 						skyveDateConverter, null, unknownFacesConverter));
+	}
+
+	@Test
+	void testTextWithDateConverterAndNoFacesConverterThrowsIllegalState() {
+		// A date converter with no equivalent faces converter cannot determine a date picker pattern.
+		org.skyve.domain.types.converters.Converter<?> skyveDateConverter =
+				mock(org.skyve.domain.types.converters.Converter.class);
+		when(skyveDateConverter.getAttributeType()).thenReturn(org.skyve.metadata.model.Attribute.AttributeType.date);
+
+		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
+		builder.setManagedBeanForTest(mock(FacesView.class));
+
+		TextField textField = new TextField();
+		textField.setBinding("dateField3");
+
+		assertThrows(IllegalStateException.class, () ->
+				builder.text(null, "row", textField, null, "Date", null, null, null,
+						skyveDateConverter, null, null));
 	}
 
 	@Test
@@ -6871,6 +7289,7 @@ class TabularComponentBuilderTest {
 		NoOpTabularComponentBuilder builder = new NoOpTabularComponentBuilder();
 		UIComponent existing = mock(UIComponent.class);
 		MapDisplay mapDisplay = new MapDisplay();
+		@SuppressWarnings("null") // passes null on purpose
 		UIComponent result = builder.map(existing, mapDisplay, null, "widgets", null);
 		assertSame(existing, result);
 	}

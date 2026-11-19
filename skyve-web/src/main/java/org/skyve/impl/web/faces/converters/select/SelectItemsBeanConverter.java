@@ -7,6 +7,8 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.types.Enumeration;
 import org.skyve.impl.web.faces.models.BeanMapAdapter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.convert.Converter;
@@ -26,7 +28,9 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @return the resolved domain value or identifier object
 	 */
 	@Override
-	public Object getAsObject(FacesContext context, UIComponent component, String value) {
+	public @Nullable Object getAsObject(@SuppressWarnings("null") @Nonnull FacesContext context,
+										@SuppressWarnings("null") @Nonnull UIComponent component,
+										@Nullable String value) {
 		Object result = null;
 
 		if ((value != null) && (! value.isEmpty())) {
@@ -45,11 +49,14 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @return the display or identifier string for the supplied value
 	 */
 	@Override
-	public String getAsString(FacesContext context, UIComponent component, Object value) {
+	public @Nonnull String getAsString(@Nullable FacesContext context, @Nullable UIComponent component, @Nullable Object value) {
 		String result = "";
 		
 		if (value instanceof BeanMapAdapter beanMapAdapter) {
-			result = beanMapAdapter.getBean().getBizId();
+			Bean bean = beanMapAdapter.getBean();
+			if (bean != null) { // an adapter of no bean converts like a null value
+				result = bean.getBizId();
+			}
 		}
 		else if (value instanceof Bean bean) {
 			result = bean.getBizId();
@@ -73,7 +80,7 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @param converter the converter used for string comparisons
 	 * @return the matching item value, or {@code null} when no item matches
 	 */
-	private static Object findValueByStringConversion(FacesContext context, UIComponent component, String value, Converter<Object> converter) {
+	private static @Nullable Object findValueByStringConversion(@Nonnull FacesContext context, @Nonnull UIComponent component, @Nonnull String value, @Nonnull Converter<Object> converter) {
 		return findValueByStringConversion(context, component, new SelectItemsIterator(context, component), value, converter);
 	}
 
@@ -87,11 +94,11 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @param converter the converter used for string comparisons
 	 * @return the matching item value, or {@code null} when no item matches
 	 */
-	private static Object findValueByStringConversion(FacesContext context,
-														UIComponent component,
-														Iterator<SelectItem> items,
-														String value,
-														Converter<Object> converter) {
+	private static @Nullable Object findValueByStringConversion(@Nonnull FacesContext context,
+																	@Nonnull UIComponent component,
+																	@Nonnull Iterator<SelectItem> items,
+																	@Nonnull String value,
+																	@Nonnull Converter<Object> converter) {
 		while (items.hasNext()) {
 			SelectItem item = items.next();
 			Object itemValue = item.getValue();
@@ -122,7 +129,7 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 	 * @param array the array to test
 	 * @return {@code true} when null or empty, otherwise {@code false}
 	 */
-	public static boolean isEmpty(Object[] array) {
+	public static boolean isEmpty(@Nullable Object[] array) {
 		return array == null || array.length == 0;
 	}
 
@@ -135,7 +142,7 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 		 *
 		 * @param items the backing array of select items
 		 */
-		public ArrayIterator(SelectItem[] items) {
+		public ArrayIterator(@Nonnull SelectItem[] items) {
 			this.items = items;
 		}
 
@@ -148,7 +155,7 @@ public class SelectItemsBeanConverter implements Converter<Object> {
 		}
 
 		@Override
-		public SelectItem next() {
+		public @Nonnull SelectItem next() {
 			try {
 				return (items[index++]);
 			} catch (@SuppressWarnings("unused") IndexOutOfBoundsException e) {

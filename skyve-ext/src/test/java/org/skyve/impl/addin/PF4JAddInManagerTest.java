@@ -1,8 +1,8 @@
 package org.skyve.impl.addin;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,12 +13,12 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.pf4j.PluginManager;
 import org.skyve.impl.util.UtilImpl;
 
 @SuppressWarnings("static-method")
-public class PF4JAddInManagerTest {
+class PF4JAddInManagerTest {
 	private static void setPluginManager(PF4JAddInManager manager, PluginManager pluginManager) {
 		try {
 			Field field = PF4JAddInManager.class.getDeclaredField("plugInManager");
@@ -31,14 +31,14 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void getReturnsSingletonInstance() {
+	void getReturnsSingletonInstance() {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		assertNotNull(instance);
 		assertSame(instance, PF4JAddInManager.get());
 	}
 
 	@Test
-	public void shutdownWhenPluginManagerIsNullDoesNotThrow() {
+	void shutdownWhenPluginManagerIsNullDoesNotThrow() {
 		// After construction, plugInManager is null — shutdown must be safe
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		// This exercises the null-guard in shutdown()
@@ -47,7 +47,7 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void getExtensionReturnsNullWhenNotStarted() {
+	void getExtensionReturnsNullWhenNotStarted() {
 		// plugInManager is null before startup() is called
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		setPluginManager(instance, null);
@@ -55,7 +55,7 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void shutdownStopsPluginsWhenPluginManagerPresent() {
+	void shutdownStopsPluginsWhenPluginManagerPresent() {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		PluginManager pluginManager = mock(PluginManager.class);
 		setPluginManager(instance, pluginManager);
@@ -67,7 +67,7 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void getExtensionReturnsFirstRegisteredExtension() {
+	void getExtensionReturnsFirstRegisteredExtension() {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		PluginManager pluginManager = mock(PluginManager.class);
 		Runnable first = mock(Runnable.class);
@@ -79,7 +79,7 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void getExtensionReturnsNullWhenExtensionsEmpty() {
+	void getExtensionReturnsNullWhenExtensionsEmpty() {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		PluginManager pluginManager = mock(PluginManager.class);
 		when(pluginManager.getExtensions(Runnable.class)).thenReturn(Collections.emptyList());
@@ -89,7 +89,7 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void getExtensionReturnsNullWhenExtensionsListIsNull() {
+	void getExtensionReturnsNullWhenExtensionsListIsNull() {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		PluginManager pluginManager = mock(PluginManager.class);
 		when(pluginManager.getExtensions(Runnable.class)).thenReturn(null);
@@ -99,7 +99,7 @@ public class PF4JAddInManagerTest {
 	}
 
 	@Test
-	public void startupAndShutdownWithEmptyAddinsDirectory() throws Exception {
+	void startupAndShutdownWithEmptyAddinsDirectory() throws Exception {
 		PF4JAddInManager instance = PF4JAddInManager.get();
 		String originalAddinsDirectory = UtilImpl.ADDINS_DIRECTORY;
 		Path tempDir = Files.createTempDirectory("pf4j-addins-");

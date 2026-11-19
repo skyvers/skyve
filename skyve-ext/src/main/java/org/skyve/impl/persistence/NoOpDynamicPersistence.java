@@ -6,6 +6,9 @@ import org.skyve.domain.PersistentBean;
 import org.skyve.persistence.DynamicPersistence;
 import org.skyve.persistence.Persistence;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * No-operation {@link org.skyve.persistence.DynamicPersistence} implementation
  * that silently accepts all dynamic entity operations without persisting them.
@@ -16,28 +19,28 @@ public class NoOpDynamicPersistence implements DynamicPersistence {
 	private static final long serialVersionUID = 2810341864186864562L;
 
 	@Override
-	public void postConstruct(Persistence persistence) {
+	public void postConstruct(@Nonnull Persistence persistence) {
 		// No-op
 	}
 	
 	@Override
-	public void persist(PersistentBean bean) {
+	public void persist(@Nonnull PersistentBean bean) {
 		// No-op
 	}
 
 	@Override
-	public void delete(PersistentBean bean) {
+	public void delete(@Nonnull PersistentBean bean) {
 		// No-op
 	}
 
 	@Override
-	public DynamicPersistentBean populate(String bizId) {
+	public @Nullable DynamicPersistentBean populate(@Nonnull String bizId) {
 		// No-op
 		return null;
 	}
 
 	@Override
-	public void populate(PersistentBean bean) {
+	public void populate(@Nonnull PersistentBean bean) {
 		// No-op
 	}
 	
@@ -47,12 +50,12 @@ public class NoOpDynamicPersistence implements DynamicPersistence {
 	}
 	
 	@Override
-	public void evictCached(Bean bean) {
+	public void evictCached(@Nonnull Bean bean) {
 		// No-op
 	}
 	
 	@Override
-	public boolean cached(Bean bean) {
+	public boolean cached(@Nonnull Bean bean) {
 		// No-op
 		return false;
 	}

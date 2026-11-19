@@ -17,6 +17,8 @@ import org.skyve.web.WebContext;
 import modules.whosin.domain.Staff;
 import modules.whosin.domain.StaffQualification;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * Imports staff qualifications from uploaded CSV or XLSX files.
  */
@@ -32,7 +34,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 	 * @throws Exception if parsing or validation fails
 	 */
 	@Override
-	public Staff upload(Staff bean, Upload upload, UploadException exception, WebContext webContext) throws Exception {
+	public @Nonnull Staff upload(@Nonnull Staff bean, @Nonnull Upload upload, @Nonnull UploadException exception, @Nonnull WebContext webContext) throws Exception {
 		List<StaffQualification> quals = null;
 		if (upload.getFileName().endsWith(MimeType.xlsx.getStandardFileSuffix())) {
 			try (InputStream is = upload.getInputStream()) {
@@ -81,45 +83,45 @@ public class UploadQualifications extends UploadAction<Staff> {
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	protected QualificationLoader newPOISheetLoader(LoaderActivityType activityType,
-			InputStream is,
+	protected @Nonnull QualificationLoader newPOISheetLoader(@Nonnull LoaderActivityType activityType,
+			@Nonnull InputStream is,
 			int sheetIndex,
-			UploadException exception,
-			String moduleName,
-			String documentName)
+			@Nonnull UploadException exception,
+			@Nonnull String moduleName,
+			@Nonnull String documentName)
 	throws Exception {
 		return new POISheetQualificationLoader(new POISheetLoader(activityType, is, sheetIndex, exception, moduleName, documentName));
 	}
 
 	@SuppressWarnings("static-method") // test seam
-	protected QualificationLoader newCSVLoader(LoaderActivityType activityType,
-			InputStream is,
-			UploadException exception,
-			String moduleName,
-			String documentName,
-			String... bindings) {
+	protected @Nonnull QualificationLoader newCSVLoader(@Nonnull LoaderActivityType activityType,
+			@Nonnull InputStream is,
+			@Nonnull UploadException exception,
+			@Nonnull String moduleName,
+			@Nonnull String documentName,
+			@Nonnull String... bindings) {
 		return new CSVQualificationLoader(new CSVLoader(activityType, is, exception, moduleName, documentName, bindings));
 	}
 
 	protected interface QualificationLoader {
-		void addFields(String... bindings);
+		void addFields(@Nonnull String... bindings);
 
 		void setDebugMode(boolean debugMode);
 
 		void setDataIndex(int dataIndex);
 
-		List<StaffQualification> beanResults();
+		@Nonnull List<StaffQualification> beanResults();
 	}
 
 	private static class POISheetQualificationLoader implements QualificationLoader {
 		private final POISheetLoader loader;
 
-		private POISheetQualificationLoader(POISheetLoader loader) {
+		private POISheetQualificationLoader(@Nonnull POISheetLoader loader) {
 			this.loader = loader;
 		}
 
 		@Override
-		public void addFields(String... bindings) {
+		public void addFields(@Nonnull String... bindings) {
 			loader.addFields(bindings);
 		}
 
@@ -135,7 +137,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public List<StaffQualification> beanResults() {
+		public @Nonnull List<StaffQualification> beanResults() {
 			return (List<StaffQualification>) (List<?>) loader.beanResults();
 		}
 	}
@@ -143,12 +145,12 @@ public class UploadQualifications extends UploadAction<Staff> {
 	private static class CSVQualificationLoader implements QualificationLoader {
 		private final CSVLoader loader;
 
-		private CSVQualificationLoader(CSVLoader loader) {
+		private CSVQualificationLoader(@Nonnull CSVLoader loader) {
 			this.loader = loader;
 		}
 
 		@Override
-		public void addFields(String... bindings) {
+		public void addFields(@Nonnull String... bindings) {
 			loader.addFields(bindings);
 		}
 
@@ -164,7 +166,7 @@ public class UploadQualifications extends UploadAction<Staff> {
 
 		@Override
 		@SuppressWarnings("unchecked")
-		public List<StaffQualification> beanResults() {
+		public @Nonnull List<StaffQualification> beanResults() {
 			return (List<StaffQualification>) (List<?>) loader.beanResults();
 		}
 	}

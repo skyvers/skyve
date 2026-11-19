@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document name="ActionsFixtureRow"
+			xmlns="http://www.skyve.org/xml/document"
+			xsi:schemaLocation="http://www.skyve.org/xml/document ../../../schemas/document.xsd"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<documentation>
+		<![CDATA[
+			Row of the Kitchen Sink actions fixture. The fixture's rows grid links each row to the Run From Row action,
+			which this document's edit view declares out of its action panel, so the link is the action's only trigger.
+
+			SmartClient shows the link from the link's own condition, rowLinkHidden, evaluated for the row, and ignores the action's.
+			PrimeFaces shows it from the action's conditions, rowActionDisabled here, evaluated for the row, and ignores the link's.
+
+			The edit view also offers Export From Row, so that an export requested while zoomed in on a row can be checked against the row's view.
+		]]>
+	</documentation>
+	<persistent name="KS_ActionsFixtureRow" />
+	<singularAlias>Actions Fixture Row</singularAlias>
+	<pluralAlias>Actions Fixture Rows</pluralAlias>
+	<parentDocument>ActionsFixture</parentDocument>
+	<bizKey expression="Actions Fixture Row" />
+	<attributes>
+		<text name="name">
+			<displayName>Name</displayName>
+			<length>100</length>
+		</text>
+		<boolean name="hideLink">
+			<displayName>Hide Link</displayName>
+			<description>Hides this row's Run From Row link in the fixture's rows grid in SmartClient.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<boolean name="disableRowAction">
+			<displayName>Disable Row Action</displayName>
+			<description>Disables Run From Row's link in the fixture's rows grid in PrimeFaces, which applies the row action's conditions to the link. SmartClient, and the server check, apply only the link's own condition.</description>
+			<defaultValue>false</defaultValue>
+		</boolean>
+		<text name="outcome">
+			<displayName>Outcome</displayName>
+			<description>Whether Run From Row ran for this row.</description>
+			<length>500</length>
+		</text>
+	</attributes>
+	<conditions>
+		<condition name="rowLinkHidden">
+			<description>Hide Link is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getHideLink())
+				]]>
+			</expression>
+		</condition>
+		<condition name="rowActionDisabled">
+			<description>Disable Row Action is set.</description>
+			<expression>
+				<![CDATA[
+					Boolean.TRUE.equals(getDisableRowAction())
+				]]>
+			</expression>
+		</condition>
+	</conditions>
+</document>

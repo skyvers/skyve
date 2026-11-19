@@ -56,7 +56,7 @@ public class View extends HtmlPanelGroup {
 	// The method intentionally preserves the existing request-scoped generation flow.
     @Override
     @SuppressWarnings("java:S3776") // Complexity OK
-    public void encodeBegin(FacesContext context) throws IOException {
+    public void encodeBegin(@SuppressWarnings("null") @Nonnull FacesContext context) throws IOException {
 		Map<String, Object> attributes = getAttributes();
 
 		if (Boolean.TRUE.toString().equals(attributes.get("dynamic"))) {
@@ -126,7 +126,7 @@ public class View extends HtmlPanelGroup {
 	    	final UserAgentType finalUAT = userAgentType;
 	    	new FacesAction<Void>() {
 				@Override
-				public Void callback() throws Exception {
+				public @Nullable Void callback() throws Exception {
 					List<UIComponent> views = View.generate(moduleName,
 																documentName,
 																widgetId,

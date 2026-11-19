@@ -10,19 +10,20 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.skyve.CORE;
 import org.skyve.EXT;
 import org.skyve.domain.Bean;
 import org.skyve.domain.types.Decimal2;
 import org.skyve.impl.generate.jasperreports.DesignSpecification.Mode;
 import org.skyve.impl.generate.jasperreports.ReportBand.BandType;
+import org.skyve.impl.metadata.view.HorizontalAlignment;
 import org.skyve.impl.report.jasperreports.ReportDesignParameters;
 import org.skyve.impl.report.jasperreports.SkyveDataSource;
 import org.skyve.impl.tools.jasperreports.SkyveDocumentExecuterFactory;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.Attribute;
 import org.skyve.metadata.model.Attribute.AttributeType;
+import org.skyve.metadata.model.Extends;
 import org.skyve.metadata.model.Persistent;
 import org.skyve.metadata.model.document.Collection;
 import org.skyve.metadata.model.document.Document;
@@ -81,6 +82,9 @@ import net.sf.jasperreports.engine.type.TextAdjustEnum;
 import net.sf.jasperreports.engine.type.VerticalTextAlignEnum;
 import net.sf.jasperreports.engine.xml.JRXmlWriter;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Renders JasperReports designs to various output formats (PDF, HTML, XLSX) by
  * compiling the design, filling it with a Skyve data source, and exporting.
@@ -127,7 +131,7 @@ public class JasperReportRenderer {
 	 *
 	 * @param designSpecification The source design specification.
 	 */
-	public JasperReportRenderer(DesignSpecification designSpecification) {
+	public JasperReportRenderer(@Nonnull DesignSpecification designSpecification) {
 		// Currently lists can only be rendered using the alternative report design abstraction
 		// so instead of re-implementing we convert to that design.
 		if (DesignSpecification.DefinitionSource.list.equals(designSpecification.getDefinitionSource())) {
@@ -146,7 +150,7 @@ public class JasperReportRenderer {
 	 *
 	 * @param reportDesignParameters The source report design parameters.
 	 */
-	public JasperReportRenderer(ReportDesignParameters reportDesignParameters) {
+	public JasperReportRenderer(@Nonnull ReportDesignParameters reportDesignParameters) {
 		this.reportDesignParameters = reportDesignParameters;
 		this.designSpecification = null;
 		jasperDesign = new JasperDesign();
@@ -161,7 +165,7 @@ public class JasperReportRenderer {
 	 * @return The compiled Jasper report.
 	 * @throws Exception If rendering or compilation fails.
 	 */
-	public JasperReport getReport() throws Exception {
+	public @Nonnull JasperReport getReport() throws Exception {
 		if (! rendered) {
 			renderDesign();
 		}
@@ -176,7 +180,7 @@ public class JasperReportRenderer {
 	 * @return The generated JRXML document.
 	 * @throws Exception If rendering fails.
 	 */
-	public String getJrxml() throws Exception {
+	public @Nonnull String getJrxml() throws Exception {
 		if (! rendered) {
 			renderDesign();
 		}
@@ -192,10 +196,10 @@ public class JasperReportRenderer {
 	 * @return The compiled subreport.
 	 * @throws Exception If subreport rendering or compilation fails.
 	 */
-	public static JasperReport getSubReport(DesignSpecification designSpecification, String subReport)
+	public static @Nonnull JasperReport getSubReport(@Nonnull DesignSpecification designSpecification, @Nonnull String subReport)
 	throws Exception {
 		final DesignSpecification subReportSpec = designSpecification.getSubReports().stream()
-													.filter(r -> r.getName().equals(subReport))
+													.filter(r -> subReport.equals(r.getName()))
 													.findFirst()
 													.orElse(null);
 		if (subReportSpec == null) {
@@ -212,7 +216,7 @@ public class JasperReportRenderer {
 	 * @return The generated JRXML.
 	 * @throws Exception If rendering fails or no design was configured.
 	 */
-	public String renderDesign() throws Exception {
+	public @Nonnull String renderDesign() throws Exception {
 		if (rendered) {
 			throw new IllegalStateException("Report has already been rendered.");
 		}
@@ -232,7 +236,7 @@ public class JasperReportRenderer {
 		throw new IllegalStateException("No design to render.");
 	}
 
-	private String renderFromDesignSpecification() throws JRException {
+	private @Nonnull String renderFromDesignSpecification() throws JRException {
 		if (designSpecification.getModuleName() != null && designSpecification.getDocumentName() != null) {
 			configureReportProperties(designSpecification);
 
@@ -259,7 +263,7 @@ public class JasperReportRenderer {
 	}
 
 	@SuppressWarnings({"java:S3776", "java:S6541"}) // complexity OK
-	private String renderFromReportDesignParameters() throws JRException {
+	private @Nonnull String renderFromReportDesignParameters() throws JRException {
 		int reportColumnWidth = reportDesignParameters.getPageWidth() - 
 									reportDesignParameters.getLeftMargin() -
 									reportDesignParameters.getRightMargin();
@@ -342,7 +346,11 @@ public class JasperReportRenderer {
 		// Determine the size of the labels (for columnar reports)
 		if (ReportDesignParameters.ReportStyle.columnar.equals(reportDesignParameters.getReportStyle())) {
 			for (ReportDesignParameters.ReportColumn column : reportDesignParameters.getColumns()) {
-				columnarLabelWidth = Math.max(columnarLabelWidth, column.getTitle().length() * 8);
+				final String title = column.getTitle();
+				// an untitled column has no label to size
+				if (title != null) {
+					columnarLabelWidth = Math.max(columnarLabelWidth, title.length() * 8);
+				}
 			}
 		}
 
@@ -415,7 +423,12 @@ public class JasperReportRenderer {
 			}
 
 			HorizontalTextAlignEnum alignment = null;
-			switch (column.getAlignment()) {
+			ReportDesignParameters.ColumnAlignment columnAlignment = column.getAlignment();
+			if (columnAlignment == null) {
+				// the same default as when the report columns are defined
+				columnAlignment = ReportDesignParameters.ColumnAlignment.left;
+			}
+			switch (columnAlignment) {
 				case left:
 					alignment = HorizontalTextAlignEnum.LEFT;
 					break;
@@ -446,6 +459,9 @@ public class JasperReportRenderer {
 				textField.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
 				expression = new JRDesignExpression();
 				String title = column.getTitle();
+				if (title == null) {
+					title = ""; // an untitled column has an empty heading
+				}
 				StringBuilder e = new StringBuilder(title.length() + 2);
 				expression.setText(e.append('"').append(title).append('"').toString());
 				textField.setExpression(expression);
@@ -524,6 +540,9 @@ public class JasperReportRenderer {
 				textField.setItalic(Boolean.TRUE);
 				expression = new JRDesignExpression();
 				String title = column.getTitle();
+				if (title == null) {
+					title = ""; // an untitled column has an empty heading
+				}
 				StringBuilder e = new StringBuilder(title.length() + 2);
 				expression.setText(e.append('"').append(title).append('"').toString());
 				textField.setExpression(expression);
@@ -739,7 +758,7 @@ public class JasperReportRenderer {
 	 * @param design The source design specification.
 	 * @throws JRException If Jasper rejects a parameter declaration.
 	 */
-	protected void addParameters(DesignSpecification design) throws JRException {
+	protected void addParameters(@Nonnull DesignSpecification design) throws JRException {
 		for (ReportParameter reportParameter : design.getParameters()) {
 			final JRDesignParameter parameter = new JRDesignParameter();
 			parameter.setName(reportParameter.getName());
@@ -768,7 +787,7 @@ public class JasperReportRenderer {
 	 * @param design The source design specification.
 	 */
 	@SuppressWarnings("boxing")
-	protected void configureReportProperties(DesignSpecification design) {
+	protected void configureReportProperties(@Nonnull DesignSpecification design) {
 		jasperDesign.setName(design.getName());
 		jasperDesign.setPageWidth(design.getWidth());
 		jasperDesign.setPageHeight(design.getHeight());
@@ -784,7 +803,7 @@ public class JasperReportRenderer {
 	 *
 	 * @return Immutable-by-convention list of import entries.
 	 */
-	protected static List<String> getImports() {
+	protected static @Nonnull List<String> getImports() {
 		return IMPORTS;
 	}
 
@@ -797,7 +816,7 @@ public class JasperReportRenderer {
 	 *
 	 * @return Property map used to configure generated designs.
 	 */
-	protected static Map<String, String> getProperties() {
+	protected static @Nonnull Map<String, String> getProperties() {
 		return PROPERTIES;
 	}
 
@@ -811,7 +830,7 @@ public class JasperReportRenderer {
 	 * @param designSpecification The source design specification.
 	 */
 	@SuppressWarnings("java:S3776") // Complexity OK
-	protected void addQuery(@SuppressWarnings("hiding") DesignSpecification designSpecification) {
+	protected void addQuery(@SuppressWarnings("hiding") @Nonnull DesignSpecification designSpecification) {
 		final JRDesignQuery query = new JRDesignQuery();
 		if (DesignSpecification.Mode.bean.equals(designSpecification.getMode())) {
 			query.setLanguage("document");
@@ -821,18 +840,25 @@ public class JasperReportRenderer {
 			}
 		}
 		else {
+			// renderFromDesignSpecification() only renders a design with a module and document name
+			final String moduleName = designSpecification.getModuleName();
+			final String documentName = designSpecification.getDocumentName();
+			if ((moduleName == null) || (documentName == null)) {
+				throw new IllegalStateException("Report design " + designSpecification.getName() + " has no module or document name");
+			}
 			final Customer customer = CORE.getPersistence().getUser().getCustomer();
-			final Module module = customer.getModule(designSpecification.getModuleName());
-			final Document document = module.getDocument(customer, designSpecification.getDocumentName());
+			final Module module = customer.getModule(moduleName);
+			final Document document = module.getDocument(customer, documentName);
 
 			String sqlName = null;
-			if (document.getExtends() != null) {
+			final Extends inherits = document.getExtends();
+			if (inherits != null) {
 				Document extDocument = null;
 				Persistent persistent = document.getPersistent();
-				if ((document.getExtends().getDocumentName() != null) &&
-						(persistent != null) &&
+				final String extDocumentName = inherits.getDocumentName();
+				if ((persistent != null) &&
 						Persistent.ExtensionStrategy.joined.equals(persistent.getStrategy())) {
-					extDocument = module.getDocument(customer, document.getExtends().getDocumentName());
+					extDocument = module.getDocument(customer, extDocumentName);
 					designSpecification.setAlias(designSpecification.getAlias() + 1);
 				}
 				if (extDocument != null) {
@@ -860,9 +886,10 @@ public class JasperReportRenderer {
 			query.addTextChunk("select " + sql.toString() + " from " + Renderer.getPersistentIdentifierForDocument(document) + " a");
 
 			// joins
-			if (designSpecification.getJoins() != null) {
-				for (String k : designSpecification.getJoins().keySet()) {
-					query.addTextChunk("\n" + designSpecification.getJoins().get(k));
+			final Map<String, String> joins = designSpecification.getJoins();
+			if (joins != null) {
+				for (String k : joins.keySet()) {
+					query.addTextChunk("\n" + joins.get(k));
 				}
 			}
 
@@ -870,7 +897,7 @@ public class JasperReportRenderer {
 				query.addTextChunk("\n where a.bizId = $P{ID}");
 			}
 			else if (DesignSpecification.ReportType.subreport.equals(designSpecification.getReportType())) {
-				LOGGER.info("SUBREPORT {} IS {}", designSpecification.getName(), designSpecification.getCollectionType().name());
+				LOGGER.info("SUBREPORT {} IS {}", designSpecification.getName(), designSpecification.getCollectionType());
 
 				// join to either parent or joiner table
 				if (Collection.CollectionType.child.equals(designSpecification.getCollectionType())) {
@@ -880,10 +907,14 @@ public class JasperReportRenderer {
 				else {
 					// joiner
 					// TODO - join correctly for aggregated collections - probably obviated by the getJoins() above
-					query.addTextChunk("\n join " + designSpecification.getParentReportPersistentName() + "_" + designSpecification.getField().getName());
-					query.addTextChunk(" " + designSpecification.getField().getName() + " on " + designSpecification.getField().getName() + ".element_id = ");
+					final ReportField field = designSpecification.getField();
+					if (field == null) {
+						throw new IllegalStateException("Subreport design " + designSpecification.getName() + " has no collection field");
+					}
+					query.addTextChunk("\n join " + designSpecification.getParentReportPersistentName() + "_" + field.getName());
+					query.addTextChunk(" " + field.getName() + " on " + field.getName() + ".element_id = ");
 					query.addTextChunk(" " + document.getName() + ".bizId");
-					query.addTextChunk("\n where " + designSpecification.getField().getName() + ".owner_id = $P{ID}");
+					query.addTextChunk("\n where " + field.getName() + ".owner_id = $P{ID}");
 				}
 			}
 		}
@@ -891,7 +922,7 @@ public class JasperReportRenderer {
 		jasperDesign.setQuery(query);
 	}
 
-	private void addFields(@SuppressWarnings("hiding") DesignSpecification designSpecification) throws JRException {
+	private void addFields(@SuppressWarnings("hiding") @Nonnull DesignSpecification designSpecification) throws JRException {
 		for (ReportField reportField : designSpecification.getFields()) {
 			final JRField field = createField(reportField);
 			if (field != null) {
@@ -906,16 +937,17 @@ public class JasperReportRenderer {
 	 * @param reportField The source report field.
 	 * @return A Jasper field, or {@code null} when the field is intentionally skipped.
 	 */
-	protected static JRField createField(ReportField reportField) {
+	protected static @Nullable JRField createField(@Nonnull ReportField reportField) {
 		final JRDesignField jrField = new JRDesignField();
 
-		if (reportField.getParent() != null) {
+		final DesignSpecification design = reportField.getParent();
+		if (design != null) {
 			if (! (Boolean.TRUE.equals(reportField.getCollection()) && 
-						Mode.sql.equals(reportField.getParent().getMode()))) {
+						Mode.sql.equals(design.getMode()))) {
 				jrField.setName(reportField.getName());
 				jrField.setValueClassName(reportField.getTypeClass());
 
-				if ((! Mode.sql.equals(reportField.getParent().getMode())) && 
+				if ((! Mode.sql.equals(design.getMode())) && 
 						String.class.getTypeName().equals(reportField.getTypeClass())) {
 					// Setting the field description will cause the SkyveDataSource to return the display value (String) for the field.
 					jrField.setDescription(reportField.getName());
@@ -928,7 +960,7 @@ public class JasperReportRenderer {
 		return null;
 	}
 
-	private void addVariables(@SuppressWarnings("hiding") DesignSpecification designSpecification) throws JRException {
+	private void addVariables(@SuppressWarnings("hiding") @Nonnull DesignSpecification designSpecification) throws JRException {
 		for (ReportVariable reportVariable : designSpecification.getVariables()) {
 			jasperDesign.addVariable(createVariable(reportVariable));
 		}
@@ -940,7 +972,7 @@ public class JasperReportRenderer {
 	 * @param reportVariable The source report variable descriptor.
 	 * @return A configured Jasper variable.
 	 */
-	protected static JRDesignVariable createVariable(ReportVariable reportVariable) {
+	protected static @Nonnull JRDesignVariable createVariable(@Nonnull ReportVariable reportVariable) {
 		final JRDesignVariable jrVariable = new JRDesignVariable();
 
 		jrVariable.setName(reportVariable.getName());
@@ -957,7 +989,7 @@ public class JasperReportRenderer {
 	 *
 	 * @return The Jasper increment type.
 	 */
-	protected static IncrementTypeEnum getIncrementType() {
+	protected static @Nonnull IncrementTypeEnum getIncrementType() {
 		return IncrementTypeEnum.COLUMN;
 	}
 
@@ -967,7 +999,7 @@ public class JasperReportRenderer {
 	 * @param reportVariable The source report variable descriptor.
 	 * @return The configured Jasper expression.
 	 */
-	protected static JRExpression createVariableExpression(ReportVariable reportVariable) {
+	protected static @Nonnull JRExpression createVariableExpression(@Nonnull ReportVariable reportVariable) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 		jrExpression.setText(String.format("$V{%s}.add($F{%s})", reportVariable.getTypeClass(), reportVariable.getName()));
 		return jrExpression;
@@ -979,13 +1011,13 @@ public class JasperReportRenderer {
 	 * @param reportVariable The source report variable descriptor.
 	 * @return The configured Jasper expression.
 	 */
-	protected static JRExpression createInitialValueVariableExpression(ReportVariable reportVariable) {
+	protected static @Nonnull JRExpression createInitialValueVariableExpression(@Nonnull ReportVariable reportVariable) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 		jrExpression.setText(String.format("new %s(0)", reportVariable.getTypeClass()));
 		return jrExpression;
 	}
 
-	private void addBands(@SuppressWarnings("hiding") DesignSpecification designSpecification) {
+	private void addBands(@SuppressWarnings("hiding") @Nonnull DesignSpecification designSpecification) {
 		getBandByType(designSpecification, BandType.background).ifPresent(jasperDesign::setBackground);
 		getBandByType(designSpecification, BandType.title).ifPresent(titleBand -> {
 			if (designSpecification.isIncludeCustomerLogo()) {
@@ -1008,7 +1040,7 @@ public class JasperReportRenderer {
 	 *
 	 * @param titleBand The Jasper title band to decorate.
 	 */
-	protected static void addCustomerLogo(JRBand titleBand) {
+	protected static void addCustomerLogo(@Nonnull JRBand titleBand) {
 		final int logoWidth = 200;
 		final JRDesignImage logoImage = new JRDesignImage(null);
 		logoImage.setWidth(logoWidth);
@@ -1020,7 +1052,7 @@ public class JasperReportRenderer {
 		((JRDesignBand) titleBand).addElement(logoImage);
 	}
 
-	private Optional<JRBand> getBandByType(@SuppressWarnings("hiding") DesignSpecification designSpecification, BandType bandType) {
+	private @Nonnull Optional<JRBand> getBandByType(@SuppressWarnings("hiding") @Nonnull DesignSpecification designSpecification, @Nonnull BandType bandType) {
 		if (BandType.detail.equals(bandType)) {
 			throw new IllegalArgumentException("Invalid use of method, please use getDetailBands().");
 		}
@@ -1028,7 +1060,7 @@ public class JasperReportRenderer {
 		return designSpecification.getBands().stream().filter(b -> bandType.equals(b.getBandType())).findAny().map(this::createBand);
 	}
 
-	private List<JRBand> getDetailBands(@SuppressWarnings("hiding") DesignSpecification designSpecification) {
+	private @Nonnull List<JRBand> getDetailBands(@SuppressWarnings("hiding") @Nonnull DesignSpecification designSpecification) {
 		return designSpecification.getBands().stream().filter(b -> BandType.detail.equals(b.getBandType())).map(this::createBand).collect(Collectors.toList());
 	}
 
@@ -1037,7 +1069,7 @@ public class JasperReportRenderer {
 	 *
 	 * @param band The band to append.
 	 */
-	protected void addDetailBand(JRBand band) {
+	protected void addDetailBand(@Nonnull JRBand band) {
 		((JRDesignSection) jasperDesign.getDetailSection()).addBand(band);
 	}
 
@@ -1047,15 +1079,14 @@ public class JasperReportRenderer {
 	 * @param reportBand The source report band metadata.
 	 * @return The generated Jasper band, or {@code null} when there are no elements.
 	 */
-	protected JRBand createBand(ReportBand reportBand) {
+	protected @Nullable JRBand createBand(@Nonnull ReportBand reportBand) {
 		if (reportBand.getElements().isEmpty()) {
 			return null;
 		}
 
 		final JRDesignBand jrBand = new JRDesignBand();
 
-		Integer height = reportBand.getHeight();
-		jrBand.setHeight((height == null) ? 0 : height.intValue());
+		jrBand.setHeight(reportBand.getHeight().intValue());
 
 		Optional.ofNullable(reportBand.getSplitType())
 					.map(this::getSplitType)
@@ -1070,40 +1101,26 @@ public class JasperReportRenderer {
 		return jrBand;
 	}
 
-	private SplitTypeEnum getSplitType(ReportBand.SplitType splitType) {
+	private @Nullable SplitTypeEnum getSplitType(@Nonnull ReportBand.SplitType splitType) {
 		return SplitTypeEnum.getByName(splitType.toString());
 	}
 
-	private JRExpression getPrintWhenExpressionFromInvisibleCondition(String invisibleConditionName) {
+	private @Nonnull JRExpression getPrintWhenExpressionFromInvisibleCondition(@Nullable String invisibleCondition) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
 		final String expressionText;
-		if (StringUtils.isBlank(invisibleConditionName)) {
+		if ((invisibleCondition == null) || invisibleCondition.isBlank()) {
 			expressionText = "";
 		}
 		else {
-			if (Mode.bean.equals(designSpecification.getMode())) {
-				expressionText = String.format("$F{THIS}.%s()", flipCondition(invisibleConditionName));
-			}
-			else {
-				final String subExpression = String.format("org.skyve.impl.generate.jasperreports.BeanForReport.evaluateCondition(\"%s\", \"%s\", $P{ID}, \"%s\")",
-															designSpecification.getModuleName(),
-															designSpecification.getDocumentName(),
-															rawConditionName(invisibleConditionName));
-				if (! invisibleConditionName.startsWith("not")) {
-					expressionText = "!" + subExpression;
-				}
-				else {
-					expressionText = subExpression;
-				}
-			}
+			expressionText = Renderer.printWhenExpression(designSpecification, invisibleCondition);
 		}
 
 		jrExpression.setText(expressionText);
 		return jrExpression;
 	}
 
-	private JRElement createElement(ReportElement reportElement) {
+	private @Nullable JRElement createElement(@Nonnull ReportElement reportElement) {
 		switch (reportElement.getElementType()) {
 		case staticText:
 			final JRDesignStaticText staticTextElement = new JRDesignStaticText();
@@ -1214,7 +1231,7 @@ public class JasperReportRenderer {
 		}
 	}
 
-	private static void wrapInBox(ReportElement reportElement, JRLineBox box) {
+	private static void wrapInBox(@Nonnull ReportElement reportElement, @Nonnull JRLineBox box) {
 		box.setTopPadding(reportElement.getTopPadding());
 		box.setBottomPadding(reportElement.getBottomPadding());
 		box.setLeftPadding(reportElement.getLeftPadding());
@@ -1260,7 +1277,7 @@ public class JasperReportRenderer {
 	 * @param textElement The Jasper text element to configure.
 	 * @param reportElement The source report element metadata.
 	 */
-	protected void configureCommonTextFieldProperties(JRDesignTextElement textElement, ReportElement reportElement) {
+	protected void configureCommonTextFieldProperties(@Nonnull JRDesignTextElement textElement, @Nonnull ReportElement reportElement) {
 		textElement.setKey(reportElement.getElementType().toString()+ "_" + 
 							(reportElement.getOrdinal() == null ? "1" : reportElement.getOrdinal()));
 		textElement.setStretchType(StretchTypeEnum.ELEMENT_GROUP_HEIGHT);
@@ -1289,7 +1306,7 @@ public class JasperReportRenderer {
 
 		textElement.setFontName(reportElement.getElementFontName());
 
-		if (BandType.title.equals(reportElement.getParent().getBandType())) {
+		if (BandType.title.equals(reportElement.getNullSafeParent().getBandType())) {
 			Integer titleFontSize = designSpecification.getTitleFontSize();
 			textElement.setFontSize((titleFontSize == null) ? Float.valueOf(16f) : Float.valueOf(titleFontSize.floatValue()));
 		}
@@ -1310,7 +1327,7 @@ public class JasperReportRenderer {
 	 * @param reportElement The source report element metadata.
 	 */
 	@SuppressWarnings("boxing")
-	protected static void configureDimensions(JRDesignElement jrDesignElement, ReportElement reportElement) {
+	protected static void configureDimensions(@Nonnull JRDesignElement jrDesignElement, @Nonnull ReportElement reportElement) {
 		jrDesignElement.setX(Optional.ofNullable(reportElement.getElementLeft()).orElse(0));
 		jrDesignElement.setY(Optional.ofNullable(reportElement.getElementTop()).orElse(0));
 		jrDesignElement.setHeight(Optional.ofNullable(reportElement.getElementHeight()).orElse(0));
@@ -1323,7 +1340,7 @@ public class JasperReportRenderer {
 	 * @param reportElement The source report element metadata.
 	 * @return The configured Jasper expression.
 	 */
-	protected static JRExpression createTextElementExpression(ReportElement reportElement) {
+	protected static @Nonnull JRExpression createTextElementExpression(@Nonnull ReportElement reportElement) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
 		if (reportElement.getElementValue() == null) {
@@ -1342,7 +1359,7 @@ public class JasperReportRenderer {
 	 * @param reportElement The source report element metadata.
 	 * @return The configured Jasper expression.
 	 */
-	protected static JRExpression createImageElementExpression(ReportElement reportElement) {
+	protected static @Nonnull JRExpression createImageElementExpression(@Nonnull ReportElement reportElement) {
 		final JRDesignExpression jrExpression = new JRDesignExpression();
 
 		final String expression;
@@ -1352,33 +1369,36 @@ public class JasperReportRenderer {
 			contentExpressionBuilder.append("org.skyve.impl.generate.jasperreports.ContentImageForReport.image(");
 			contentExpressionBuilder.append("$F{").append(reportElement.getElementValue()).append("}, ");
 
-			if (reportElement.getElementWidth() != null) {
-				contentExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
-				contentExpressionBuilder.append(reportElement.getElementWidth().toString());
+			final Integer contentWidth = reportElement.getElementWidth();
+			if (contentWidth != null) {
+				contentExpressionBuilder.append(contentWidth.toString()).append(", ");
+				contentExpressionBuilder.append(contentWidth.toString());
 			}
 			contentExpressionBuilder.append(")");
 			expression = contentExpressionBuilder.toString();
 			break;
 		case dynamicImage:
 			final StringBuilder dynamicExpressionBuilder = new StringBuilder();
+			final DesignSpecification imageDesign = reportElement.getNullSafeParent().getNullSafeParent();
 			dynamicExpressionBuilder.append("new modules").append('.');
-			dynamicExpressionBuilder.append(reportElement.getParent().getParent().getModuleName()).append('.');
-			dynamicExpressionBuilder.append(reportElement.getParent().getParent().getDocumentName()).append('.');
+			dynamicExpressionBuilder.append(imageDesign.getModuleName()).append('.');
+			dynamicExpressionBuilder.append(imageDesign.getDocumentName()).append('.');
 			dynamicExpressionBuilder.append("images").append('.');
 			dynamicExpressionBuilder.append(reportElement.getElementValue()).append("().getImage(");
-			if (Mode.bean.equals(reportElement.getParent().getParent().getMode())) {
+			if (Mode.bean.equals(imageDesign.getMode())) {
 				dynamicExpressionBuilder.append("$F{THIS}, ");
 			}
 			else {
 				// sql
 				dynamicExpressionBuilder.append("org.skyve.impl.generate.jasperreports.BeanForReport.getBean(");
-				dynamicExpressionBuilder.append(reportElement.getParent().getParent().getModuleName()).append(", ");
-				dynamicExpressionBuilder.append(reportElement.getParent().getParent().getDocumentName()).append(", ");
+				dynamicExpressionBuilder.append(imageDesign.getModuleName()).append(", ");
+				dynamicExpressionBuilder.append(imageDesign.getDocumentName()).append(", ");
 				dynamicExpressionBuilder.append("$P{ID})");
 			}
-			if (reportElement.getElementWidth() != null) {
-				dynamicExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
-				dynamicExpressionBuilder.append(reportElement.getElementWidth().toString()).append(", ");
+			final Integer dynamicWidth = reportElement.getElementWidth();
+			if (dynamicWidth != null) {
+				dynamicExpressionBuilder.append(dynamicWidth.toString()).append(", ");
+				dynamicExpressionBuilder.append(dynamicWidth.toString()).append(", ");
 			}
 			// TODO vertical sizing - for now assume square based on pixelWidth
 			dynamicExpressionBuilder.append(" (org.skyve.impl.generate.jasperreports.BeanForReport.getUser())");
@@ -1395,40 +1415,7 @@ public class JasperReportRenderer {
 		return jrExpression;
 	}
 
-	/**
-	 * Converts a condition method name to its logical inverse form.
-	 *
-	 * @param conditionName The source condition name.
-	 * @return The inverse condition name, or {@code null} when input is {@code null}.
-	 */
-	public static String flipCondition(String conditionName) {
-		String result = null;
-		if (conditionName != null) {
-			if (conditionName.startsWith("not")) {
-				result = "is" + rawConditionName(conditionName).substring(0, 1).toUpperCase() + 
-							rawConditionName(conditionName).substring(1);
-			}
-			else {
-				result = "not" + conditionName.substring(0, 1).toUpperCase() + conditionName.substring(1);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * Normalises a condition name to its non-prefixed form.
-	 *
-	 * @param conditionName The condition name (possibly prefixed with {@code not}).
-	 * @return The normalised condition name.
-	 */
-	public static String rawConditionName(String conditionName) {
-		if (conditionName.startsWith("not")) {
-			return conditionName.substring(3, 4).toLowerCase() + conditionName.substring(4);
-		}
-		return conditionName.substring(0, 1).toLowerCase() + conditionName.substring(1);
-	}
-
-	private static ReportDesignParameters convertDesign(DesignSpecification designSpecification) {
+	private static @Nonnull ReportDesignParameters convertDesign(@Nonnull DesignSpecification designSpecification) {
 		final ReportDesignParameters reportDesignParameters = new ReportDesignParameters();
 
 		reportDesignParameters.setReportFormat(ReportFormat.pdf);
@@ -1449,16 +1436,19 @@ public class JasperReportRenderer {
 			reportColumn.setLine(1);
 			reportColumn.setName(queryColumn.getBinding());
 			reportColumn.setTitle(queryColumn.getBinding());
-			reportColumn.setWidth(queryColumn.getPixelWidth() != null ? queryColumn.getPixelWidth().intValue() : 100);
-			String align = queryColumn.getAlignment() != null ? queryColumn.getAlignment().toTextAlignmentString() : null;
+			final Integer pixelWidth = queryColumn.getPixelWidth();
+			reportColumn.setWidth(pixelWidth != null ? pixelWidth.intValue() : 100);
+			final HorizontalAlignment queryAlignment = queryColumn.getAlignment();
+			String align = queryAlignment != null ? queryAlignment.toTextAlignmentString() : null;
 			if (align != null) {
 				reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.valueOf(align));
 			}
 			else {
 				reportColumn.setAlignment(ReportDesignParameters.ColumnAlignment.left);
 			}
-			if (drivingDocument != null && reportColumn.getName() != null) {
-				final Attribute attribute = drivingDocument.getAttribute(reportColumn.getName());
+			final String columnName = reportColumn.getName();
+			if (drivingDocument != null && columnName != null) {
+				final Attribute attribute = drivingDocument.getAttribute(columnName);
 				if (attribute != null) {
 					reportColumn.setAttributeType(attribute.getAttributeType());
 				}
@@ -1476,16 +1466,21 @@ public class JasperReportRenderer {
 	 * @param designSpecification The source design specification.
 	 * @return The resolved list model.
 	 */
-	protected static ListModel<Bean> getListModel(DesignSpecification designSpecification) {
+	protected static @Nonnull ListModel<Bean> getListModel(@Nonnull DesignSpecification designSpecification) {
 		final Customer customer = CORE.getCustomer();
 		final Module module = designSpecification.getModule();
 
 		MetaDataQueryDefinition query = null;
-		if (designSpecification.getQueryName() != null) {
-			query = module.getMetaDataQuery(designSpecification.getQueryName());
+		final String queryName = designSpecification.getQueryName();
+		if (queryName != null) {
+			query = module.getMetaDataQuery(queryName);
 		}
 		if (query == null) {
-			query = module.getDocumentDefaultQuery(customer, designSpecification.getDocumentName());
+			final String documentName = designSpecification.getDocumentName();
+			if (documentName == null) {
+				throw new IllegalArgumentException("Report design " + designSpecification.getName() + " has no query or document name");
+			}
+			query = module.getDocumentDefaultQuery(customer, documentName);
 		}
 
 		return EXT.newListModel(query);
@@ -1497,7 +1492,7 @@ public class JasperReportRenderer {
 	 * @param attributeType The Skyve attribute type.
 	 * @return {@code true} when the type is numeric or temporal and can be aggregated.
 	 */
-	protected static boolean isAggregatableAttribute(AttributeType attributeType) {
+	protected static boolean isAggregatableAttribute(@Nullable AttributeType attributeType) {
 		return attributeType == AttributeType.integer ||
 				attributeType == AttributeType.longInteger ||
 				attributeType == AttributeType.decimal2 ||
@@ -1515,7 +1510,7 @@ public class JasperReportRenderer {
 	 * @param attributeType The Skyve attribute type.
 	 * @return {@code true} when the type is one of date, dateTime, time or timestamp.
 	 */
-	protected static boolean isDateOrTimeAttribute(AttributeType attributeType) {
+	protected static boolean isDateOrTimeAttribute(@Nullable AttributeType attributeType) {
 		return attributeType == AttributeType.date ||
 				attributeType == AttributeType.dateTime ||
 				attributeType == AttributeType.time ||

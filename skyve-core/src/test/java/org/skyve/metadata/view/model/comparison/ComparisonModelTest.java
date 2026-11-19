@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
@@ -32,7 +33,7 @@ class ComparisonModelTest {
 	@Test
 	void setBeanRoundtrip() {
 		TestComparisonModel model = new TestComparisonModel();
-		Bean mockBean = org.mockito.Mockito.mock(Bean.class);
+		Bean mockBean = mock(Bean.class);
 		model.setBean(mockBean);
 		assertThat(model.getBean(), is(mockBean));
 	}
@@ -40,7 +41,7 @@ class ComparisonModelTest {
 	@Test
 	void postConstructDoesNotThrow() {
 		TestComparisonModel model = new TestComparisonModel();
-		Customer mockCustomer = org.mockito.Mockito.mock(Customer.class);
+		Customer mockCustomer = mock(Customer.class);
 		model.postConstruct(mockCustomer, true);
 		assertNotNull(model);
 	}

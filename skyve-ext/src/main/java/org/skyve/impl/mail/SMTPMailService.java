@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.activation.DataHandler;
 import jakarta.activation.DataSource;
 import jakarta.mail.Address;
@@ -86,7 +87,7 @@ public class SMTPMailService implements MailService {
 	}
 
 	@SuppressWarnings("java:S3776") // Complexity OK
-	private static MimeMessage createMail(Mail mail, boolean forWriting) throws MessagingException {
+	private static @Nonnull MimeMessage createMail(@Nonnull Mail mail, boolean forWriting) throws MessagingException {
 		Set<String> recipientEmailAddresses = mail.getRecipientEmailAddresses();
 		Set<String> ccEmailAddresses = mail.getCcEmailAddresses();
 		Set<String> bccEmailAddresses = mail.getBccEmailAddresses();
@@ -176,19 +177,15 @@ public class SMTPMailService implements MailService {
 				message.setHeader(entry.getKey(), entry.getValue());
 			}
 		}
-		if (headers != null) {
-			for (Entry<String, String> header : headers.entrySet()) {
-				message.setHeader(header.getKey(), header.getValue());
-			}
+		for (Entry<String, String> header : headers.entrySet()) {
+			message.setHeader(header.getKey(), header.getValue());
 		}
 
 		// add attachments
-		if (attachments != null) {
-			for (MailAttachment attachment : attachments) {
-				MimeBodyPart bodyPart = addAttachment(attachment);
-				if (bodyPart != null) {
-					multipart.addBodyPart(bodyPart);
-				}
+		for (MailAttachment attachment : attachments) {
+			MimeBodyPart bodyPart = addAttachment(attachment);
+			if (bodyPart != null) {
+				multipart.addBodyPart(bodyPart);
 			}
 		}
 		
@@ -198,7 +195,7 @@ public class SMTPMailService implements MailService {
 		return message;
 	}
 
-	private static void addAddresses(MimeMessage message, Set<String> addresses, Message.RecipientType type)
+	private static void addAddresses(@Nonnull MimeMessage message, @Nullable Set<String> addresses, @Nonnull Message.RecipientType type)
 	throws MessagingException {
 		if (addresses != null) {
 			for (String address : addresses) {
@@ -207,7 +204,7 @@ public class SMTPMailService implements MailService {
 		}
 	}
 	
-	private static final MimeBodyPart addAttachment(MailAttachment mailAttachment)
+	private static final @Nullable MimeBodyPart addAttachment(@Nullable MailAttachment mailAttachment)
 	throws MessagingException {
 		MimeBodyPart result = null;
 		
@@ -234,7 +231,7 @@ public class SMTPMailService implements MailService {
 		}
 
 		@Override
-		protected PasswordAuthentication getPasswordAuthentication() {
+		protected @Nonnull PasswordAuthentication getPasswordAuthentication() {
 			return authentication;
 		}
 	}

@@ -7,6 +7,8 @@ import org.skyve.metadata.sail.execution.Executor;
 import org.skyve.metadata.sail.language.Step;
 import org.skyve.web.UserAgentType;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
@@ -38,7 +40,7 @@ public class PushEditContext implements Step {
 	 * Returns the moduleName.
 	 * @return the result
 	 */
-	public String getModuleName() {
+	public @Nonnull String getModuleName() {
 		return moduleName;
 	}
 	
@@ -47,7 +49,7 @@ public class PushEditContext implements Step {
 	 * @param moduleName the moduleName
 	 */
 	@XmlAttribute(name = "module", required = true)
-	public void setModuleName(String moduleName) {
+	public void setModuleName(@Nonnull String moduleName) {
 		this.moduleName = UtilImpl.processStringValue(moduleName);
 	}
 
@@ -55,7 +57,7 @@ public class PushEditContext implements Step {
 	 * Returns the documentName.
 	 * @return the result
 	 */
-	public String getDocumentName() {
+	public @Nonnull String getDocumentName() {
 		return documentName;
 	}
 	
@@ -64,7 +66,7 @@ public class PushEditContext implements Step {
 	 * @param documentName the documentName
 	 */
 	@XmlAttribute(name = "document", required = true)
-	public void setDocumentName(String documentName) {
+	public void setDocumentName(@Nonnull String documentName) {
 		this.documentName = UtilImpl.processStringValue(documentName);
 	}
 
@@ -72,7 +74,7 @@ public class PushEditContext implements Step {
 	 * Returns the createView.
 	 * @return the result
 	 */
-	public Boolean getCreateView() {
+	public @Nullable Boolean getCreateView() {
 		return createView;
 	}
 	
@@ -81,7 +83,7 @@ public class PushEditContext implements Step {
 	 * @param createView the createView
 	 */
 	@XmlAttribute(name = "createView")
-	public void setCreateView(Boolean createView) {
+	public void setCreateView(@Nullable Boolean createView) {
 		this.createView = createView;
 	}
 
@@ -89,7 +91,7 @@ public class PushEditContext implements Step {
 	 * Returns the uxui.
 	 * @return the result
 	 */
-	public String getUxui() {
+	public @Nullable String getUxui() {
 		return uxui;
 	}
 	
@@ -98,7 +100,7 @@ public class PushEditContext implements Step {
 	 * @param uxui the uxui
 	 */
 	@XmlAttribute(name = "uxui")
-	public void setUxui(String uxui) {
+	public void setUxui(@Nullable String uxui) {
 		this.uxui = UtilImpl.processStringValue(uxui);
 	}
 
@@ -106,7 +108,7 @@ public class PushEditContext implements Step {
 	 * Returns the userAgentType.
 	 * @return the result
 	 */
-	public UserAgentType getUserAgentType() {
+	public @Nullable UserAgentType getUserAgentType() {
 		return userAgentType;
 	}
 	
@@ -115,7 +117,7 @@ public class PushEditContext implements Step {
 	 * @param userAgentType the userAgentType
 	 */
 	@XmlAttribute(name = "userAgentType")
-	public void setUserAgentType(UserAgentType userAgentType) {
+	public void setUserAgentType(@Nullable UserAgentType userAgentType) {
 		this.userAgentType = userAgentType;
 	}
 
@@ -124,7 +126,7 @@ public class PushEditContext implements Step {
 	 * @param executor the executor
 	 */
 	@Override
-	public void execute(Executor executor) {
+	public void execute(@Nonnull Executor executor) {
 		executor.executePushEditContext(this);
 	}
 
@@ -134,7 +136,7 @@ public class PushEditContext implements Step {
 	 * @return the result
 	 */
 	@Override
-	public String getIdentifier(AutomationContext context) {
+	public @Nonnull String getIdentifier(@Nonnull AutomationContext context) {
 		return String.format("%s.%s", moduleName, documentName);
 	}
 }

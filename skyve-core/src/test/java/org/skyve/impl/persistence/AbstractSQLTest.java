@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.sql.Types;
 import java.util.Collections;
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.mockito.Mockito;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.Communication.FormatType;
 import org.skyve.domain.messages.NoResultsException;
@@ -280,8 +280,8 @@ class AbstractSQLTest {
 	@SuppressWarnings("static-method")
 	void putParameterNonNullBeanStoresBizIdWithIdType() {
 		TestSQL sql = new TestSQL("q");
-		Bean bean = Mockito.mock(Bean.class);
-		Mockito.when(bean.getBizId()).thenReturn("biz-1");
+		Bean bean = mock(Bean.class);
+		when(bean.getBizId()).thenReturn("biz-1");
 		sql.putParameter("bean", bean);
 		assertEquals(AttributeType.id, sql.getParameterType("bean"));
 	}
@@ -289,9 +289,9 @@ class AbstractSQLTest {
 	@Test
 	@SuppressWarnings("static-method")
 	void constructorWithDocumentStoresModuleAndDocument() {
-		Document doc = Mockito.mock(Document.class);
-		Mockito.when(doc.getOwningModuleName()).thenReturn("admin");
-		Mockito.when(doc.getName()).thenReturn("Contact");
+		Document doc = mock(Document.class);
+		when(doc.getOwningModuleName()).thenReturn("admin");
+		when(doc.getName()).thenReturn("Contact");
 		TestSQL sql = new TestSQL(doc, "SELECT 1");
 		assertEquals("admin", sql.getModuleName());
 		assertEquals("Contact", sql.getDocumentName());
@@ -308,7 +308,7 @@ class AbstractSQLTest {
 	@SuppressWarnings("static-method")
 	void retrieveBeanThrowsNoResultsExceptionWhenEmpty() {
 		TestSQL sql = new TestSQL("q");
-		assertThrows(NoResultsException.class, () -> sql.retrieveBean());
+		assertThrows(NoResultsException.class, sql::retrieveBean);
 	}
 
 	@Test
@@ -336,7 +336,7 @@ class AbstractSQLTest {
 	@SuppressWarnings("static-method")
 	void retrieveTupleThrowsNoResultsExceptionWhenEmpty() {
 		TestSQL sql = new TestSQL("q");
-		assertThrows(NoResultsException.class, () -> sql.retrieveTuple());
+		assertThrows(NoResultsException.class, sql::retrieveTuple);
 	}
 
 	@Test
@@ -350,7 +350,7 @@ class AbstractSQLTest {
 	@SuppressWarnings("static-method")
 	void retrieveDynaThrowsNoResultsExceptionWhenEmpty() {
 		TestSQL sql = new TestSQL("q");
-		assertThrows(NoResultsException.class, () -> sql.retrieveDyna());
+		assertThrows(NoResultsException.class, sql::retrieveDyna);
 	}
 
 	@Test
@@ -375,7 +375,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("flag"), eq(Types.BOOLEAN));
+		verify(ps).setNull("flag", Types.BOOLEAN);
 	}
 
 	@Test
@@ -388,7 +388,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setBoolean(eq("flag"), eq(true));
+		verify(ps).setBoolean("flag", true);
 	}
 
 	@Test
@@ -401,7 +401,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("name"), eq(Types.VARCHAR));
+		verify(ps).setNull("name", Types.VARCHAR);
 	}
 
 	@Test
@@ -414,7 +414,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setString(eq("name"), eq("Alice"));
+		verify(ps).setString("name", "Alice");
 	}
 
 	@Test
@@ -427,7 +427,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("notes"), eq(Types.LONGVARCHAR));
+		verify(ps).setNull("notes", Types.LONGVARCHAR);
 	}
 
 	@Test
@@ -440,7 +440,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setString(eq("notes"), eq("some notes"));
+		verify(ps).setString("notes", "some notes");
 	}
 
 	@Test
@@ -453,7 +453,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setInt(eq("count"), eq(42));
+		verify(ps).setInt("count", 42);
 	}
 
 	@Test
@@ -466,7 +466,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setLong(eq("bigcount"), eq(999L));
+		verify(ps).setLong("bigcount", 999L);
 	}
 
 	@Test
@@ -475,13 +475,13 @@ class AbstractSQLTest {
 		TestSQL sql = new TestSQL("SELECT 1");
 		sql.noTimeout();
 		Bean mockBean = mock(Bean.class);
-		Mockito.when(mockBean.getBizId()).thenReturn("beanId123");
+		when(mockBean.getBizId()).thenReturn("beanId123");
 		sql.putParameter("ref", mockBean);
 		NamedParameterPreparedStatement ps = mock(NamedParameterPreparedStatement.class);
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setString(eq("ref"), eq("beanId123"));
+		verify(ps).setString("ref", "beanId123");
 	}
 
 	@Test
@@ -494,7 +494,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("d"), eq(Types.DATE));
+		verify(ps).setNull("d", Types.DATE);
 	}
 
 	@Test
@@ -520,7 +520,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("dt"), eq(Types.TIMESTAMP));
+		verify(ps).setNull("dt", Types.TIMESTAMP);
 	}
 
 	@Test
@@ -546,7 +546,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("dec"), eq(Types.DECIMAL));
+		verify(ps).setNull("dec", Types.DECIMAL);
 	}
 
 	@Test
@@ -572,7 +572,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("t"), eq(Types.TIME));
+		verify(ps).setNull("t", Types.TIME);
 	}
 
 	@Test
@@ -597,9 +597,9 @@ class AbstractSQLTest {
 		NamedParameterPreparedStatement ps = mock(NamedParameterPreparedStatement.class);
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
-		Mockito.when(dialect.getGeometrySqlType()).thenReturn(Types.OTHER);
+		when(dialect.getGeometrySqlType()).thenReturn(Types.OTHER);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("geom"), eq(Types.OTHER));
+		verify(ps).setNull("geom", Types.OTHER);
 	}
 
 	@Test
@@ -612,7 +612,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("n"), eq(Types.INTEGER));
+		verify(ps).setNull("n", Types.INTEGER);
 	}
 
 	@Test
@@ -625,7 +625,7 @@ class AbstractSQLTest {
 		DataStore ds = new DataStore("jndi/test", "org.H2Dialect");
 		SkyveDialect dialect = mock(SkyveDialect.class);
 		sql.prepareStatement(ps, ds, dialect);
-		verify(ps).setNull(eq("n"), eq(Types.NUMERIC));
+		verify(ps).setNull("n", Types.NUMERIC);
 	}
 
 	@Test
@@ -652,7 +652,7 @@ class AbstractSQLTest {
 		OneResultSQL(String query, StubBean bean) {
 			super(query);
 			this.bean = bean;
-			this.dynaBean = org.mockito.Mockito.mock(org.apache.commons.beanutils.DynaBean.class);
+			this.dynaBean = mock(org.apache.commons.beanutils.DynaBean.class);
 		}
 
 		@SuppressWarnings("unchecked")

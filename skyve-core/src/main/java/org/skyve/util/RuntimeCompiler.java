@@ -29,6 +29,9 @@ import org.skyve.domain.messages.DomainException;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Compile a java class definition String and load the class or write it to the file system.
  */
@@ -44,7 +47,7 @@ public class RuntimeCompiler {
 	 */
 	private static class ExceptionProducingDiagnosticListener implements DiagnosticListener<JavaFileObject> {
 		@Override
-		public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
+		public void report(@SuppressWarnings("null") @Nonnull Diagnostic<? extends JavaFileObject> diagnostic) {
 			String message = String.format("%s at line %d, column %d\nCode %s\nMessage %s\nSource %s", 
 											diagnostic.getKind(),
 											Long.valueOf(diagnostic.getLineNumber()),
@@ -65,13 +68,13 @@ public class RuntimeCompiler {
 	private static class InMemoryJavaSourceFileObject extends SimpleJavaFileObject {
 		private String contents = null;
 
-		private InMemoryJavaSourceFileObject(String className, String contents) {
+		private InMemoryJavaSourceFileObject(@Nonnull String className, @Nonnull String contents) {
 			super(URI.create("string:///" + className.replace('.', '/') + Kind.SOURCE.extension), Kind.SOURCE);
 			this.contents = contents;
 		}
 
 		@Override
-		public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
+		public @Nonnull CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
 			return contents;
 		}
 	}
@@ -82,16 +85,16 @@ public class RuntimeCompiler {
 	private static class InMemoryJavaClassFileObject extends SimpleJavaFileObject {
 		private ByteArrayOutputStream stream = new ByteArrayOutputStream(2048);
 
-		private InMemoryJavaClassFileObject(String className) {
+		private InMemoryJavaClassFileObject(@Nonnull String className) {
 			super(URI.create("bytes:///" + className.replace('.', '/') + Kind.CLASS.extension), Kind.CLASS);
 		}
 
 		@Override
-		public OutputStream openOutputStream() throws IOException {
+		public @Nonnull OutputStream openOutputStream() throws IOException {
 			return stream;
 		}
 		
-		byte[] getByteCode() {
+		@Nonnull byte[] getByteCode() {
 			return stream.toByteArray();
 		}
 	}
@@ -99,12 +102,12 @@ public class RuntimeCompiler {
 	public static class InMemoryClassLoader extends ClassLoader {
 		private Map<String, InMemoryJavaClassFileObject> classes = new TreeMap<>();
 		
-		public void putClass(String fullyQualifiedClassName, InMemoryJavaClassFileObject javaClass) {
+		public void putClass(@Nonnull String fullyQualifiedClassName, @Nonnull InMemoryJavaClassFileObject javaClass) {
 			classes.put(fullyQualifiedClassName, javaClass);
 		}
 		
 		@Override
-		protected Class<?> findClass(String fullyQualifiedClassName) throws ClassNotFoundException {
+		protected @Nonnull Class<?> findClass(@SuppressWarnings("null") @Nonnull String fullyQualifiedClassName) throws ClassNotFoundException {
 			InMemoryJavaClassFileObject classFile = classes.get(fullyQualifiedClassName);
 			if (classFile == null) {
 				return super.findClass(fullyQualifiedClassName);
@@ -121,7 +124,7 @@ public class RuntimeCompiler {
 	/**
 	 * Create a java source file object from the code ready to compile.
 	 */
-	public static JavaFileObject javaSource(String fullyQualifiedClassName, String code) {
+	public static @Nullable JavaFileObject javaSource(@Nonnull String fullyQualifiedClassName, @Nonnull String code) {
 		JavaFileObject result = null;
 		try {
 			result = new InMemoryJavaSourceFileObject(fullyQualifiedClassName, code);
@@ -134,7 +137,7 @@ public class RuntimeCompiler {
 	/**
 	 * Create a java class file object to compile to.
 	 */
-	public static InMemoryJavaClassFileObject javaClass(String fullyQualifiedClassName) {
+	public static @Nullable InMemoryJavaClassFileObject javaClass(@Nonnull String fullyQualifiedClassName) {
 		InMemoryJavaClassFileObject result = null;
 		try {
 			result = new InMemoryJavaClassFileObject(fullyQualifiedClassName);
@@ -149,9 +152,9 @@ public class RuntimeCompiler {
 	 * @param source	The java source to compile
 	 * @return	true if successful, otherwise false
 	 */
-	public static boolean compile(JavaFileObject source,
-									String classesFolder,
-									String... classPath) throws IOException {
+	public static boolean compile(@Nonnull JavaFileObject source,
+									@Nonnull String classesFolder,
+									@Nonnull String... classPath) throws IOException {
 		return compile(Arrays.asList(source), classesFolder, classPath);
 	}
 	
@@ -160,9 +163,9 @@ public class RuntimeCompiler {
 	 * @param sources	The java sources to compile
 	 * @return	true if successful, otherwise false
 	 */
-	public static boolean compile(Iterable<? extends JavaFileObject> sources,
-									String classesFolder,
-									String... classPath) throws IOException {
+	public static boolean compile(@Nonnull Iterable<? extends JavaFileObject> sources,
+									@Nonnull String classesFolder,
+									@Nonnull String... classPath) throws IOException {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
 		ExceptionProducingDiagnosticListener diagnosticListener = new ExceptionProducingDiagnosticListener();
@@ -174,9 +177,9 @@ public class RuntimeCompiler {
 		}
 	}
 	
-	public static boolean compile(String sourceFolder,
-									String classesFolder,
-									String... classPath) {
+	public static boolean compile(@Nonnull String sourceFolder,
+									@Nonnull String classesFolder,
+									@Nonnull String... classPath) {
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 		ExceptionProducingDiagnosticListener diagnosticListener = new ExceptionProducingDiagnosticListener();
 		Iterable<String> options = Arrays.asList("-sourcepath", sourceFolder, "-d", classesFolder, CLASS_PATH_OPTION, Arrays.asList(classPath).stream().collect(Collectors.joining(File.pathSeparator)));
@@ -195,7 +198,7 @@ public class RuntimeCompiler {
 	 * @param fullyQualifiedClassName
 	 * @return
 	 */
-	public static Class<?> loadClass(String classesFolder, String fullyQualifiedClassName) {
+	public static @Nonnull Class<?> loadClass(@Nonnull String classesFolder, @Nonnull String fullyQualifiedClassName) {
 		// Create a File object on the root of the directory containing the class file
 		File file = new File(classesFolder);
 
@@ -216,8 +219,8 @@ public class RuntimeCompiler {
 	 * @param sources	The java sources to compile
 	 * @return	true if successful, otherwise false
 	 */
-	public static InMemoryClassLoader compile(Iterable<? extends JavaFileObject> sources,
-												String... classPath) throws Exception {
+	public static @Nonnull InMemoryClassLoader compile(@Nonnull Iterable<? extends JavaFileObject> sources,
+														@Nonnull String... classPath) throws Exception {
 		InMemoryClassLoader result = new InMemoryClassLoader();
 		
 		JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -225,10 +228,10 @@ public class RuntimeCompiler {
 		try (StandardJavaFileManager fileManager = compiler.getStandardFileManager(diagnosticListener, null, null)) {
 			try (ForwardingJavaFileManager<JavaFileManager> forwardingFileManager = new ForwardingJavaFileManager<>(fileManager) {
 				@Override
-				public JavaFileObject getJavaFileForOutput(Location location,
-															String className,
-															Kind kind,
-															FileObject sibling) throws IOException {
+				public @Nonnull JavaFileObject getJavaFileForOutput(@SuppressWarnings("null") @Nonnull Location location,
+																	@SuppressWarnings("null") @Nonnull String className,
+																	@SuppressWarnings("null") @Nonnull Kind kind,
+																	@Nullable FileObject sibling) throws IOException {
 					// Only for default package and module classes
 					if ((className.indexOf('.') < 0) || className.startsWith("modules.")) {
 						InMemoryJavaClassFileObject javaClass = new InMemoryJavaClassFileObject(className);

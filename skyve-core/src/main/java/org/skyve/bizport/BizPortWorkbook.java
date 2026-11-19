@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Set;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Abstracts an Excel workbook used for BizPort bulk import and export.
  *
@@ -46,7 +49,7 @@ public interface BizPortWorkbook {
 	 * @param key the module/document key identifying the sheet
 	 * @return the matching sheet, or {@code null} when the workbook does not contain the key
 	 */
-	public BizPortSheet getSheet(SheetKey key);
+	public @Nullable BizPortSheet getSheet(@Nullable SheetKey key);
 	
 	/**
 	 * Registers a sheet in this workbook under the given key.
@@ -57,7 +60,7 @@ public interface BizPortWorkbook {
 	 * @implSpec If a sheet already exists for {@code key}, implementations should replace
 	 * the existing sheet with the supplied instance.
 	 */
-	public void addSheet(SheetKey key, BizPortSheet sheet);
+	public void addSheet(@Nonnull SheetKey key, @Nonnull BizPortSheet sheet);
 	
 	/**
 	 * Removes the sheet with the given key and returns it, or {@code null} if not found.
@@ -65,14 +68,14 @@ public interface BizPortWorkbook {
 	 * @param key the module/document key identifying the sheet
 	 * @return the removed sheet, or {@code null} if no sheet exists for {@code key}
 	 */
-	public BizPortSheet removeSheet(SheetKey key);
+	public @Nullable BizPortSheet removeSheet(@Nonnull SheetKey key);
 	
 	/**
 	 * Returns the set of all sheet keys currently registered in this workbook.
 	 *
 	 * @return the registered sheet keys
 	 */
-	public Set<SheetKey> getSheetKeys();
+	public @Nonnull Set<SheetKey> getSheetKeys();
 	
 	/**
 	 * Populates the backing Excel data structure from the in-memory sheet and column
@@ -91,12 +94,12 @@ public interface BizPortWorkbook {
 	 * @param out the target stream; the caller is responsible for closing it
 	 * @throws IOException if an I/O error occurs during serialisation
 	 */
-	public void write(OutputStream out) throws IOException;
+	public void write(@Nonnull OutputStream out) throws IOException;
 	
 	/**
 	 * Returns the output format ({@code xls} or {@code xlsx}) for this workbook.
 	 *
 	 * @return the workbook serialisation format
 	 */
-	public BizPortFormat getFormat();
+	public @Nonnull BizPortFormat getFormat();
 }

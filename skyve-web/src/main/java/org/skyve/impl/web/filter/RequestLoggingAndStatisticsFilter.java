@@ -17,6 +17,7 @@ import org.skyve.web.UserAgentType;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -34,7 +35,9 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
     private static final Logger COMMAND_LOGGER = Category.COMMAND.logger();
 
     @Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+	public void doFilter(@SuppressWarnings("null") @Nonnull ServletRequest request,
+						@SuppressWarnings("null") @Nonnull ServletResponse response,
+						@SuppressWarnings("null") @Nonnull FilterChain chain)
 	throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
     	if (staticURLPrefix(httpRequest)) {
@@ -95,7 +98,7 @@ public class RequestLoggingAndStatisticsFilter extends ExcludeStaticFilter {
 	}
     
     @SuppressWarnings({"java:S3776", "java:S2254", "java:S2629"})
-    private static void log(HttpServletRequest request) {
+    private static void log(@Nonnull HttpServletRequest request) {
 		HTTP_LOGGER.info("*********************************** REQUEST ************************************");
 		HTTP_LOGGER.info("ContextPath={}", request.getContextPath());
 		HTTP_LOGGER.info("LocalAddr={}", request.getLocalAddr());

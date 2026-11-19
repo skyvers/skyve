@@ -99,6 +99,7 @@ class RequestTypeComparisonModelTest {
 
 	// --- empty monitoring data path ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataWithAllRequestTypeAndNoMonitoringDataReturnsNoData() {
 		bean.setRequestType(RequestType.all);
@@ -113,6 +114,7 @@ class RequestTypeComparisonModelTest {
 		assertHasNoDataLabel(cd);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataWithSpecificRequestTypeAndNoMonitoringDataReturnsNoData() {
 		bean.setRequestType(RequestType.A);
@@ -128,6 +130,7 @@ class RequestTypeComparisonModelTest {
 
 	// --- metric label coverage ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataElapsedRequestTimeNoData() {
 		bean.setRequestType(RequestType.all);
@@ -139,6 +142,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataRequestCPUUtilisationNoData() {
 		bean.setRequestType(RequestType.all);
@@ -150,6 +154,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataSystemCPUUsageNoData() {
 		bean.setRequestType(RequestType.all);
@@ -161,6 +166,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataSystemRAMUsageNoData() {
 		bean.setRequestType(RequestType.all);
@@ -174,6 +180,7 @@ class RequestTypeComparisonModelTest {
 
 	// --- period coverage ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataCurrentDayPeriodNoData() {
 		bean.setRequestType(RequestType.S);
@@ -185,6 +192,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataCurrentWeekPeriodNoData() {
 		bean.setRequestType(RequestType.E);
@@ -196,6 +204,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataCurrentYearPeriodNoData() {
 		bean.setRequestType(RequestType.C);
@@ -209,6 +218,7 @@ class RequestTypeComparisonModelTest {
 
 	// --- topN default ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataNullTopNUsesDefault() {
 		bean.setRequestType(RequestType.all);
@@ -222,6 +232,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("10"), "default topN should be 10");
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataCustomTopN() {
 		bean.setRequestType(RequestType.all);
@@ -236,6 +247,7 @@ class RequestTypeComparisonModelTest {
 
 	// --- seeded monitoring data paths ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataWithAllRequestTypesSortsAndLimitsSeededMonitoringData() {
 		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 400);
@@ -257,6 +269,7 @@ class RequestTypeComparisonModelTest {
 		assertEquals(1, cd.getBorders().size());
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataWithSpecificModelRequestTypeIncludesOnlyModelMeasurements() {
 		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 400);
@@ -272,6 +285,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getValues().get(0).doubleValue() >= 10D);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataWithDifferentSpecificRequestTypeIgnoresSeededModelMeasurements() {
 		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 400);
@@ -286,6 +300,7 @@ class RequestTypeComparisonModelTest {
 		assertHasNoDataLabel(cd);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataRequestCpuUtilisationUsesSeededMonitoringData() {
 		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 1234, (short) 300, (short) 400);
@@ -301,6 +316,7 @@ class RequestTypeComparisonModelTest {
 		assertEquals(12.34D, cd.getValues().get(0).doubleValue(), 0.01D);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataSystemCpuUsageUsesSeededMonitoringData() {
 		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 987, (short) 400);
@@ -316,6 +332,7 @@ class RequestTypeComparisonModelTest {
 		assertEquals(9.87D, cd.getValues().get(0).doubleValue(), 0.01D);
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataSystemRamUsageUsesSeededMonitoringData() {
 		seedRequestMeasurement(RequestKey.queryListModel("admin", "Users"), 10, (short) 200, (short) 300, (short) 765);
@@ -333,6 +350,7 @@ class RequestTypeComparisonModelTest {
 
 	// --- all request type codes ---
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataActionRequestTypeNoData() {
 		bean.setRequestType(RequestType.A);
@@ -343,6 +361,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataDeleteRequestTypeNoData() {
 		bean.setRequestType(RequestType.D);
@@ -353,6 +372,7 @@ class RequestTypeComparisonModelTest {
 		assertTrue(cd.getTitle().contains("No Data"));
 	}
 
+	@SuppressWarnings("null") // a null here fails the test
 	@Test
 	void testGetChartDataZoomOutRequestTypeNoData() {
 		bean.setRequestType(RequestType.Z);

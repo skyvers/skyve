@@ -4,6 +4,8 @@ import org.skyve.domain.messages.ConversionException;
 import org.skyve.domain.types.DateTime;
 import org.skyve.impl.util.UtilImpl;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.component.UIComponent;
 import jakarta.faces.context.FacesContext;
@@ -26,7 +28,7 @@ public class DD_MM_YYYY_HH_MI extends org.skyve.domain.types.converters.datetime
 	 * @throws ConverterException when the submitted value cannot be parsed using this format
 	 */
 	@Override
-	public DateTime getAsObject(FacesContext fc, UIComponent component, String value) {
+	public @Nullable DateTime getAsObject(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable String value) {
     	String processedValue = UtilImpl.processStringValue(value);
     	if (processedValue != null) {
 			try {
@@ -49,7 +51,7 @@ public class DD_MM_YYYY_HH_MI extends org.skyve.domain.types.converters.datetime
 	 * @return a formatted display value, or an empty string when the value is {@code null} or formatting fails
 	 */
 	@Override
-	public String getAsString(FacesContext fc, UIComponent component, DateTime value) {
+	public @Nonnull String getAsString(@Nullable FacesContext fc, @Nullable UIComponent component, @Nullable DateTime value) {
 		if (value == null) {
 			return "";
 		}

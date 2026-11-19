@@ -1,6 +1,7 @@
 package org.skyve.impl.web.faces.actions;
 
 import org.skyve.domain.Bean;
+import org.skyve.impl.dialog.DialogsProtocol;
 import org.skyve.impl.metadata.customer.CustomerImpl;
 import org.skyve.impl.metadata.model.document.DocumentImpl;
 import org.skyve.impl.persistence.AbstractPersistence;
@@ -17,6 +18,9 @@ import org.skyve.util.monitoring.RequestKey;
 import org.skyve.web.WebContext;
 import org.slf4j.Logger;
 import org.skyve.util.logging.SkyveLoggerFactory;
+
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Executes a Faces callback action within the current Skyve web context.
@@ -37,7 +41,7 @@ public class RerenderAction extends FacesAction<Void> {
 	 * @param source the rerender source identifier
 	 * @param validate whether required-field validation should run before rerender hooks
 	 */
-	public RerenderAction(FacesView facesView, String source, boolean validate) {
+	public RerenderAction(@Nonnull FacesView facesView, @Nullable String source, boolean validate) {
 		this.facesView = facesView;
 		this.source = source;
 		this.validate = validate;
@@ -46,12 +50,17 @@ public class RerenderAction extends FacesAction<Void> {
 	/**
 	 * Executes rerender pre-hooks and schedules post-render processing for the active faces view.
 	 *
+	 * <p>Side effects: marks the current HTTP request, if there is one, as able to ask questions
+	 * (see {@link org.skyve.dialog.Dialogs}), as the client can resend it with the answers.
+	 *
 	 * @return always {@code null} because this action mutates view state only
 	 * @throws Exception if target bean resolution, interception, or bizlet processing fails
 	 */
 	@Override
 	@SuppressWarnings("java:S3776") // Complexity OK
-	public Void callback() throws Exception {
+	public @Nullable Void callback() throws Exception {
+		// This action can ask questions, as the client can resend its request
+		DialogsProtocol.markAskable();
 		if (UtilImpl.FACES_TRACE) FACES_LOGGER.info("RerenderAction - EXECUTE RERENDER with source {} {} validation", source, (validate ? "with" : "without"));
 
 		AbstractPersistence persistence = AbstractPersistence.get();
@@ -68,7 +77,10 @@ public class RerenderAction extends FacesAction<Void> {
 			Document targetDocument = targetModule.getDocument(customer, targetBean.getBizDocument());
 			Bizlet<Bean> targetBizlet = ((DocumentImpl) targetDocument).getBizlet(customer);
 			WebContext webContext = facesView.getWebContext();
-			
+			if (webContext == null) { // the target bean comes from the web context, so this should never happen
+				throw new IllegalStateException("Cannot rerender from " + source + " as the FacesView has no web context");
+			}
+
 		    if ((! validate) || FacesAction.validateRequiredFields()) {
 				boolean vetoed = customer.interceptBeforePreRerender(source, targetBean, webContext);
 				if (! vetoed) {

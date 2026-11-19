@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -20,14 +21,15 @@ import org.junit.jupiter.api.Test;
 import org.skyve.domain.Bean;
 import org.skyve.domain.DynamicBean;
 import org.skyve.impl.persistence.AbstractPersistence;
+import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.customer.Customer;
-import org.skyve.metadata.view.TextOutput.Sanitisation;
 import org.skyve.metadata.user.User;
+import org.skyve.metadata.view.TextOutput.Sanitisation;
 
 import jakarta.faces.context.FacesContext;
 import jakarta.faces.context.PartialViewContext;
 
-@SuppressWarnings("static-method")
+@SuppressWarnings({"static-method", "java:S3011"})
 class BeanMapAdapterTest {
 	private static final class StubBean extends org.skyve.impl.domain.AbstractBean {
 		private static final long serialVersionUID = 1L;
@@ -213,6 +215,63 @@ class BeanMapAdapterTest {
 	}
 
 	@Test
+	void evaluateConditionEvaluatesAnInlineExpressionAndItsInverse() {
+		FacesContextBridge.setCurrent(createFacesContext());
+		bindPersistenceForUser(userInRole("admin", "Manager"));
+
+		BeanMapAdapter adapter = new BeanMapAdapter(new DynamicBean("sales", "Order", new HashMap<>()), null);
+
+		assertTrue(adapter.evaluateCondition("{role:admin.Manager}"));
+		assertFalse(adapter.evaluateCondition("not{role:admin.Manager}"));
+		assertFalse(adapter.evaluateCondition("{role:admin.Clerk}"));
+		assertTrue(adapter.evaluateCondition("not{role:admin.Clerk}"));
+	}
+
+	@Test
+	void evaluateConditionStoresTheResultUnderTheConditionText() {
+		FacesContextBridge.setCurrent(createFacesContext());
+		bindPersistenceForUser(userInRole("admin", "Manager"));
+
+		BeanMapAdapter adapter = new BeanMapAdapter(new DynamicBean("sales", "Order", new HashMap<>()), null);
+		adapter.evaluateCondition("{role:admin.Manager}");
+
+		assertTrue(adapter.containsKey("{role:admin.Manager}"));
+		assertTrue(adapter.containsValue(Boolean.TRUE));
+	}
+
+	@Test
+	void evaluateConditionTracesWhenFacesTraceIsOn() {
+		FacesContextBridge.setCurrent(createFacesContext());
+		bindPersistenceForUser(userInRole("admin", "Manager"));
+		boolean facesTrace = UtilImpl.FACES_TRACE;
+		UtilImpl.FACES_TRACE = true;
+		try {
+			BeanMapAdapter adapter = new BeanMapAdapter(new DynamicBean("sales", "Order", new HashMap<>()), null);
+			assertTrue(adapter.evaluateCondition("{role:admin.Manager}"));
+		}
+		finally {
+			UtilImpl.FACES_TRACE = facesTrace;
+		}
+	}
+
+	@Test
+	void evaluateConditionIsFalseWhenTheExpressionCannotBeEvaluated() {
+		FacesContextBridge.setCurrent(createFacesContext());
+		bindPersistenceForUser(mock(User.class));
+
+		BeanMapAdapter adapter = new BeanMapAdapter(new DynamicBean("sales", "Order", new HashMap<>()), null);
+
+		// the faces action reports the failure and yields no result
+		assertFalse(adapter.evaluateCondition("{noSuchPrefix:whatever}"));
+	}
+
+	private static User userInRole(String moduleName, String roleName) {
+		User user = mock(User.class);
+		when(Boolean.valueOf(user.isInRole(moduleName, roleName))).thenReturn(Boolean.TRUE);
+		return user;
+	}
+
+	@Test
 	void putConvertsBeanMapAdapterAndUpdatesUnderlyingBean() {
 		FacesContextBridge.setCurrent(createFacesContext());
 		bindPersistenceForUser(mock(User.class));
@@ -253,7 +312,7 @@ class BeanMapAdapterTest {
 
 	private static void bindPersistenceForUser(User user) {
 		Customer customer = mock(Customer.class);
-		org.mockito.Mockito.when(user.getCustomer()).thenReturn(customer);
+		when(user.getCustomer()).thenReturn(customer);
 		AbstractPersistence persistence = mock(AbstractPersistence.class, CALLS_REAL_METHODS);
 		persistence.setUser(user);
 		persistence.setForThread();
@@ -275,8 +334,8 @@ class BeanMapAdapterTest {
 	private static FacesContext createFacesContext() {
 		FacesContext context = mock(FacesContext.class);
 		PartialViewContext partialViewContext = mock(PartialViewContext.class);
-		org.mockito.Mockito.when(partialViewContext.getRenderIds()).thenReturn(new LinkedHashSet<>());
-		org.mockito.Mockito.when(context.getPartialViewContext()).thenReturn(partialViewContext);
+		when(partialViewContext.getRenderIds()).thenReturn(new LinkedHashSet<>());
+		when(context.getPartialViewContext()).thenReturn(partialViewContext);
 		return context;
 	}
 }

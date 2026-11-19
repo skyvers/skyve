@@ -4,6 +4,8 @@ import java.util.Set;
 
 import org.skyve.impl.metadata.repository.module.ModuleRoleDocumentAggregateUserAccessMetaData;
 
+import jakarta.annotation.Nonnull;
+
 /**
  * A fluent helper builder class to construct and manipulate the {@link ModuleRoleDocumentAggregateUserAccessMetaData} metadata.
  * 
@@ -21,14 +23,14 @@ public class FluentModuleRoleDocumentAggregateAccess extends
 	/**
 	 * Creates a new FluentModuleRoleDocumentAggregateAccess from the specified ModuleRoleDocumentAggregateUserAccessMetaData.
 	 */
-	public FluentModuleRoleDocumentAggregateAccess(ModuleRoleDocumentAggregateUserAccessMetaData access) {
+	public FluentModuleRoleDocumentAggregateAccess(@Nonnull ModuleRoleDocumentAggregateUserAccessMetaData access) {
 		this.access = access;
 	}
 
 	/**
 	 * Returns a FluentModuleRoleDocumentAggregateAccess from a runtime metadata.
 	 */
-	protected FluentModuleRoleDocumentAggregateAccess from(String documentName, Set<String> uxuis) {
+	protected @Nonnull FluentModuleRoleDocumentAggregateAccess from(@Nonnull String documentName, @Nonnull Set<String> uxuis) {
 		documentName(documentName);
 		uxuis.forEach(u -> addUxUi(u));
 		return this;
@@ -37,7 +39,7 @@ public class FluentModuleRoleDocumentAggregateAccess extends
 	/**
 	 * Specifies the document name for this FluentModuleRoleDocumentAggregateAccess.
 	 */
-	public FluentModuleRoleDocumentAggregateAccess documentName(final String documentName) {
+	public @Nonnull FluentModuleRoleDocumentAggregateAccess documentName(final @Nonnull String documentName) {
 		access.setDocumentName(documentName);
 		return this;
 	}
@@ -46,7 +48,7 @@ public class FluentModuleRoleDocumentAggregateAccess extends
 	 * Returns the underlying module role access metadata from this builder.
 	 */
 	@Override
-	public ModuleRoleDocumentAggregateUserAccessMetaData get() {
+	public @Nonnull ModuleRoleDocumentAggregateUserAccessMetaData get() {
 		return access;
 	}
 }

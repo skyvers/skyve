@@ -4,6 +4,9 @@ import org.skyve.impl.metadata.repository.router.RouteCriteria;
 import org.skyve.metadata.view.View.ViewType;
 import org.skyve.web.WebAction;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Builds one route criteria block used to match an incoming request context.
  */
@@ -22,7 +25,7 @@ public class FluentRouteCriteria {
 	 *
 	 * @param criteria backing metadata
 	 */
-	public FluentRouteCriteria(RouteCriteria criteria) {
+	public FluentRouteCriteria(@Nonnull RouteCriteria criteria) {
 		this.criteria = criteria;
 	}
 
@@ -32,7 +35,7 @@ public class FluentRouteCriteria {
 	 * @param criteria source criteria metadata
 	 * @return this builder
 	 */
-	public FluentRouteCriteria from(@SuppressWarnings("hiding") RouteCriteria criteria) {
+	public @Nonnull FluentRouteCriteria from(@SuppressWarnings("hiding") @Nonnull RouteCriteria criteria) {
 		viewType(criteria.getViewType());
 		webAction(criteria.getWebAction());
 		moduleName(criteria.getModuleName());
@@ -50,7 +53,7 @@ public class FluentRouteCriteria {
 	 * @param viewType view type
 	 * @return this builder
 	 */
-	public FluentRouteCriteria viewType(ViewType viewType) {
+	public @Nonnull FluentRouteCriteria viewType(@Nullable ViewType viewType) {
 		criteria.setViewType(viewType);
 		return this;
 	}
@@ -61,7 +64,7 @@ public class FluentRouteCriteria {
 	 * @param webAction web action
 	 * @return this builder
 	 */
-	public FluentRouteCriteria webAction(WebAction webAction) {
+	public @Nonnull FluentRouteCriteria webAction(@Nullable WebAction webAction) {
 		criteria.setWebAction(webAction);
 		return this;
 	}
@@ -72,7 +75,7 @@ public class FluentRouteCriteria {
 	 * @param moduleName module name
 	 * @return this builder
 	 */
-	public FluentRouteCriteria moduleName(String moduleName) {
+	public @Nonnull FluentRouteCriteria moduleName(@Nullable String moduleName) {
 		criteria.setModuleName(moduleName);
 		return this;
 	}
@@ -83,7 +86,7 @@ public class FluentRouteCriteria {
 	 * @param documentName document name
 	 * @return this builder
 	 */
-	public FluentRouteCriteria documentName(String documentName) {
+	public @Nonnull FluentRouteCriteria documentName(@Nullable String documentName) {
 		criteria.setDocumentName(documentName);
 		return this;
 	}
@@ -94,7 +97,7 @@ public class FluentRouteCriteria {
 	 * @param queryName query name
 	 * @return this builder
 	 */
-	public FluentRouteCriteria queryName(String queryName) {
+	public @Nonnull FluentRouteCriteria queryName(@Nullable String queryName) {
 		criteria.setQueryName(queryName);
 		return this;
 	}
@@ -105,7 +108,7 @@ public class FluentRouteCriteria {
 	 * @param customerName customer name
 	 * @return this builder
 	 */
-	public FluentRouteCriteria customerName(String customerName) {
+	public @Nonnull FluentRouteCriteria customerName(@Nullable String customerName) {
 		criteria.setCustomerName(customerName);
 		return this;
 	}
@@ -116,7 +119,7 @@ public class FluentRouteCriteria {
 	 * @param dataGroupId data-group identifier
 	 * @return this builder
 	 */
-	public FluentRouteCriteria dataGroupId(String dataGroupId) {
+	public @Nonnull FluentRouteCriteria dataGroupId(@Nullable String dataGroupId) {
 		criteria.setDataGroupId(dataGroupId);
 		return this;
 	}
@@ -127,7 +130,7 @@ public class FluentRouteCriteria {
 	 * @param userId user identifier
 	 * @return this builder
 	 */
-	public FluentRouteCriteria userId(String userId) {
+	public @Nonnull FluentRouteCriteria userId(@Nullable String userId) {
 		criteria.setUserId(userId);
 		return this;
 	}
@@ -137,7 +140,7 @@ public class FluentRouteCriteria {
 	 *
 	 * @return backing route criteria metadata
 	 */
-	public RouteCriteria get() {
+	public @Nonnull RouteCriteria get() {
 		return criteria;
 	}
 }

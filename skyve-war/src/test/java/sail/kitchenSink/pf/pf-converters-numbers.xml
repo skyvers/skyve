@@ -1,0 +1,1383 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	PrimeFaces SAIL conformance for converters: numbers (kitchensink.ConvertersFixture, an attribute per converter).
+	Records a, b and c (and d and e for the duration) are typed into each field, and into an inline grid row with the
+	next record's values, then checked with testValue after the save and once reopened from the list. Then each
+	column is filtered in the Vue list grid (the list view) and in the PrimeFaces data table (ConvertersDataTables),
+	with values written as the cells show them, and the rows each filter leaves are checked. The values catch day and
+	month swapped, 12 hour times at PM, noon and midnight, month names, seconds, negatives, separators, $, percentages
+	(over 1000% too), rounding, durations rounded to the minute, and the absolute converter of a stored negative.
+	Equals compares the stored value exactly, so a value shown rounded is not filtered by what it shows.
+	Run by PrimeFacesConvertersSailIT.
+-->
+<automation uxui="tablet"
+			userAgentType="tablet"
+			testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<before>
+		<login user="admin" password="admin" />
+	</before>
+	<interaction name="Numbers: record a, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersNumbers" />
+			<listGridNew module="kitchensink" query="qConvertersNumbers" />
+			<dataEnter binding="name" value="SAIL numbers {run} a" />
+			<dataEnter binding="decimal2DollarsAndCents" value="$1,234.56" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<dataEnter binding="decimal2Integer" value="1,234" />
+			<dataEnter binding="decimal2IntegerPercentage" value="12%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<dataEnter binding="decimal5Integer" value="1,234,567" />
+			<dataEnter binding="decimal5IntegerPercentage" value="7%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="$99.99" />
+			<dataEnter binding="decimal5TimeDuration" value="0:20" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="12.3" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="2.345" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.5%" />
+			<dataEnter binding="decimal10Integer" value="9,876,543,210" />
+			<dataEnter binding="decimal10IntegerPercentage" value="45%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="$1,000,000.00" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="0.1" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="3.14159" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="0.5%" />
+			<dataEnter binding="simplePercentage" value="12%" />
+			<dataEnter binding="integerSeparator" value="1,234,567" />
+			<dataEnter binding="longIntegerSeparator" value="12,345,678,901" />
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
+			<dataGridNew binding="numberRows" />
+			<dataEnter binding="decimal2DollarsAndCents" value="-42.5" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="1,000" />
+			<dataEnter binding="decimal2Integer" value="-7" />
+			<dataEnter binding="decimal2IntegerPercentage" value="-5%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="-0.5" />
+			<dataEnter binding="decimal5Integer" value="-3" />
+			<dataEnter binding="decimal5IntegerPercentage" value="-25%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="-5" />
+			<dataEnter binding="decimal5TimeDuration" value="-0:0.6" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="-0.05" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="-2.345" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="-3.25%" />
+			<dataEnter binding="decimal10Integer" value="-1" />
+			<dataEnter binding="decimal10IntegerPercentage" value="-100%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="-0.01" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="-9.95" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="-2.5" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<dataEnter binding="simplePercentage" value="-5%" />
+			<dataEnter binding="integerSeparator" value="-42" />
+			<dataEnter binding="longIntegerSeparator" value="-9,876" />
+			<save />
+			<testSuccess />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="0:20" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="-5.00" />
+			<testValue binding="decimal5TimeDuration" value="-0:01" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="-3.25%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.50" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="-9,876" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="0:20" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="-5.00" />
+			<testValue binding="decimal5TimeDuration" value="-0:01" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="-3.25%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.50" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="-9,876" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Numbers: record b, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersNumbers" />
+			<listGridNew module="kitchensink" query="qConvertersNumbers" />
+			<dataEnter binding="name" value="SAIL numbers {run} b" />
+			<dataEnter binding="decimal2DollarsAndCents" value="-42.5" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="1,000" />
+			<dataEnter binding="decimal2Integer" value="-7" />
+			<dataEnter binding="decimal2IntegerPercentage" value="-5%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="-0.5" />
+			<dataEnter binding="decimal5Integer" value="-3" />
+			<dataEnter binding="decimal5IntegerPercentage" value="-25%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="-5" />
+			<dataEnter binding="decimal5TimeDuration" value="-0:0.6" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="-0.05" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="-2.345" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="-3.25%" />
+			<dataEnter binding="decimal10Integer" value="-1" />
+			<dataEnter binding="decimal10IntegerPercentage" value="-100%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="-0.01" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="-9.95" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="-2.5" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<dataEnter binding="simplePercentage" value="-5%" />
+			<dataEnter binding="integerSeparator" value="-42" />
+			<dataEnter binding="longIntegerSeparator" value="-9,876" />
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
+			<dataGridNew binding="numberRows" />
+			<dataEnter binding="decimal2DollarsAndCents" value="0.005" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="7.5" />
+			<dataEnter binding="decimal2Integer" value="2.5" />
+			<dataEnter binding="decimal2IntegerPercentage" value="1,250%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="2.25" />
+			<dataEnter binding="decimal5Integer" value="0.4" />
+			<dataEnter binding="decimal5IntegerPercentage" value="33.333%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="1234.567" />
+			<dataEnter binding="decimal5TimeDuration" value="0:29.4996" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="1,000.0" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="0" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="1,234.5%" />
+			<dataEnter binding="decimal10Integer" value="0" />
+			<dataEnter binding="decimal10IntegerPercentage" value="0%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="12.345" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="123,456.7" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="1,000" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="250%" />
+			<dataEnter binding="simplePercentage" value="1000" />
+			<dataEnter binding="integerSeparator" value="0" />
+			<dataEnter binding="longIntegerSeparator" value="7" />
+			<save />
+			<testSuccess />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="-5.00" />
+			<testValue binding="decimal5TimeDuration" value="-0:01" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="-3.25%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.50" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="-9,876" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="0.01" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="7.50" />
+			<testValue binding="decimal2Integer" value="3" />
+			<testValue binding="decimal2IntegerPercentage" value="1,250%" />
+			<testValue binding="decimal2OneDecimalPlace" value="2.3" />
+			<testValue binding="decimal5Integer" value="0" />
+			<testValue binding="decimal5IntegerPercentage" value="33%" />
+			<testValue binding="decimal5DollarsAndCents" value="1,234.57" />
+			<testValue binding="decimal5TimeDuration" value="0:29" />
+			<testValue binding="decimal5OneDecimalPlace" value="1,000.0" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="0.00" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="1,234.50%" />
+			<testValue binding="decimal10Integer" value="0" />
+			<testValue binding="decimal10IntegerPercentage" value="0%" />
+			<testValue binding="decimal10DollarsAndCents" value="12.35" />
+			<testValue binding="decimal10OneDecimalPlace" value="123,456.7" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="1,000.00" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="250.00%" />
+			<testValue binding="simplePercentage" value="1000%" />
+			<testValue binding="integerSeparator" value="0" />
+			<testValue binding="longIntegerSeparator" value="7" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="-5.00" />
+			<testValue binding="decimal5TimeDuration" value="-0:01" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="-3.25%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.50" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="-9,876" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="0.01" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="7.50" />
+			<testValue binding="decimal2Integer" value="3" />
+			<testValue binding="decimal2IntegerPercentage" value="1,250%" />
+			<testValue binding="decimal2OneDecimalPlace" value="2.3" />
+			<testValue binding="decimal5Integer" value="0" />
+			<testValue binding="decimal5IntegerPercentage" value="33%" />
+			<testValue binding="decimal5DollarsAndCents" value="1,234.57" />
+			<testValue binding="decimal5TimeDuration" value="0:29" />
+			<testValue binding="decimal5OneDecimalPlace" value="1,000.0" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="0.00" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="1,234.50%" />
+			<testValue binding="decimal10Integer" value="0" />
+			<testValue binding="decimal10IntegerPercentage" value="0%" />
+			<testValue binding="decimal10DollarsAndCents" value="12.35" />
+			<testValue binding="decimal10OneDecimalPlace" value="123,456.7" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="1,000.00" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="250.00%" />
+			<testValue binding="simplePercentage" value="1000%" />
+			<testValue binding="integerSeparator" value="0" />
+			<testValue binding="longIntegerSeparator" value="7" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Numbers: record c, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersNumbers" />
+			<listGridNew module="kitchensink" query="qConvertersNumbers" />
+			<dataEnter binding="name" value="SAIL numbers {run} c negative" />
+			<dataEnter binding="decimal2DollarsAndCents" value="0.005" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="7.5" />
+			<dataEnter binding="decimal2Integer" value="2.5" />
+			<dataEnter binding="decimal2IntegerPercentage" value="1,250%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="2.25" />
+			<dataEnter binding="decimal5Integer" value="0.4" />
+			<dataEnter binding="decimal5IntegerPercentage" value="33.333%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="1234.567" />
+			<dataEnter binding="decimal5TimeDuration" value="0:29.4996" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="1,000.0" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="0" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="1,234.5%" />
+			<dataEnter binding="decimal10Integer" value="0" />
+			<dataEnter binding="decimal10IntegerPercentage" value="0%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="12.345" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="123,456.7" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="1,000" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="250%" />
+			<dataEnter binding="simplePercentage" value="1000" />
+			<dataEnter binding="integerSeparator" value="0" />
+			<dataEnter binding="longIntegerSeparator" value="7" />
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
+			<dataGridNew binding="numberRows" />
+			<dataEnter binding="decimal2DollarsAndCents" value="$1,234.56" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<dataEnter binding="decimal2Integer" value="1,234" />
+			<dataEnter binding="decimal2IntegerPercentage" value="12%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<dataEnter binding="decimal5Integer" value="1,234,567" />
+			<dataEnter binding="decimal5IntegerPercentage" value="7%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="$99.99" />
+			<dataEnter binding="decimal5TimeDuration" value="2:29.994" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="12.3" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="1.005" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.5%" />
+			<dataEnter binding="decimal10Integer" value="9,876,543,210" />
+			<dataEnter binding="decimal10IntegerPercentage" value="45%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="$1,000,000.00" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="0.1" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="3.14159" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="0.5%" />
+			<dataEnter binding="simplePercentage" value="12%" />
+			<dataEnter binding="integerSeparator" value="1,234,567" />
+			<dataEnter binding="longIntegerSeparator" value="12,345,678,901" />
+			<save />
+			<testSuccess />
+			<testValue binding="decimal2DollarsAndCents" value="0.01" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="7.50" />
+			<testValue binding="decimal2Integer" value="3" />
+			<testValue binding="decimal2IntegerPercentage" value="1,250%" />
+			<testValue binding="decimal2OneDecimalPlace" value="2.3" />
+			<testValue binding="decimal5Integer" value="0" />
+			<testValue binding="decimal5IntegerPercentage" value="33%" />
+			<testValue binding="decimal5DollarsAndCents" value="1,234.57" />
+			<testValue binding="decimal5TimeDuration" value="0:29" />
+			<testValue binding="decimal5OneDecimalPlace" value="1,000.0" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="0.00" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="1,234.50%" />
+			<testValue binding="decimal10Integer" value="0" />
+			<testValue binding="decimal10IntegerPercentage" value="0%" />
+			<testValue binding="decimal10DollarsAndCents" value="12.35" />
+			<testValue binding="decimal10OneDecimalPlace" value="123,456.7" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="1,000.00" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="250.00%" />
+			<testValue binding="simplePercentage" value="1000%" />
+			<testValue binding="integerSeparator" value="0" />
+			<testValue binding="longIntegerSeparator" value="7" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="2:30" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" />
+			<testValue binding="decimal2DollarsAndCents" value="0.01" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="7.50" />
+			<testValue binding="decimal2Integer" value="3" />
+			<testValue binding="decimal2IntegerPercentage" value="1,250%" />
+			<testValue binding="decimal2OneDecimalPlace" value="2.3" />
+			<testValue binding="decimal5Integer" value="0" />
+			<testValue binding="decimal5IntegerPercentage" value="33%" />
+			<testValue binding="decimal5DollarsAndCents" value="1,234.57" />
+			<testValue binding="decimal5TimeDuration" value="0:29" />
+			<testValue binding="decimal5OneDecimalPlace" value="1,000.0" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="0.00" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="1,234.50%" />
+			<testValue binding="decimal10Integer" value="0" />
+			<testValue binding="decimal10IntegerPercentage" value="0%" />
+			<testValue binding="decimal10DollarsAndCents" value="12.35" />
+			<testValue binding="decimal10OneDecimalPlace" value="123,456.7" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="1,000.00" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="250.00%" />
+			<testValue binding="simplePercentage" value="1000%" />
+			<testValue binding="integerSeparator" value="0" />
+			<testValue binding="longIntegerSeparator" value="7" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="2:30" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Numbers: record d, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersNumbers" />
+			<listGridNew module="kitchensink" query="qConvertersNumbers" />
+			<dataEnter binding="name" value="SAIL numbers {run} d" />
+			<dataEnter binding="decimal2DollarsAndCents" value="$1,234.56" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<dataEnter binding="decimal2Integer" value="1,234" />
+			<dataEnter binding="decimal2IntegerPercentage" value="12%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<dataEnter binding="decimal5Integer" value="1,234,567" />
+			<dataEnter binding="decimal5IntegerPercentage" value="7%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="$99.99" />
+			<dataEnter binding="decimal5TimeDuration" value="2:29.994" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="12.3" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="1.005" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.5%" />
+			<dataEnter binding="decimal10Integer" value="9,876,543,210" />
+			<dataEnter binding="decimal10IntegerPercentage" value="45%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="$1,000,000.00" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="0.1" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="3.14159" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="0.5%" />
+			<dataEnter binding="simplePercentage" value="12%" />
+			<dataEnter binding="integerSeparator" value="1,234,567" />
+			<dataEnter binding="longIntegerSeparator" value="12,345,678,901" />
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
+			<dataGridNew binding="numberRows" />
+			<dataEnter binding="decimal2DollarsAndCents" value="-42.5" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="1,000" />
+			<dataEnter binding="decimal2Integer" value="-7" />
+			<dataEnter binding="decimal2IntegerPercentage" value="-5%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="-0.5" />
+			<dataEnter binding="decimal5Integer" value="-3" />
+			<dataEnter binding="decimal5IntegerPercentage" value="-25%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="0.00" />
+			<dataEnter binding="decimal5TimeDuration" value="0:59.9994" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="-0.05" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.35%" />
+			<dataEnter binding="decimal10Integer" value="-1" />
+			<dataEnter binding="decimal10IntegerPercentage" value="-100%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="-0.01" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="-9.95" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="-2.35" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<dataEnter binding="simplePercentage" value="-5%" />
+			<dataEnter binding="integerSeparator" value="-42" />
+			<dataEnter binding="longIntegerSeparator" value="9,007,199,254,740,991" />
+			<save />
+			<testSuccess />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="2:30" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="0.00" />
+			<testValue binding="decimal5TimeDuration" value="1:00" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.35%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="9,007,199,254,740,991" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="2:30" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="0.00" />
+			<testValue binding="decimal5TimeDuration" value="1:00" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.35%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="9,007,199,254,740,991" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Numbers: record e, in each field and an inline grid row, checked when saved and reopened">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersNumbers" />
+			<listGridNew module="kitchensink" query="qConvertersNumbers" />
+			<dataEnter binding="name" value="SAIL numbers {run} e half way" />
+			<dataEnter binding="decimal2DollarsAndCents" value="-42.5" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="1,000" />
+			<dataEnter binding="decimal2Integer" value="-7" />
+			<dataEnter binding="decimal2IntegerPercentage" value="-5%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="-0.5" />
+			<dataEnter binding="decimal5Integer" value="-3" />
+			<dataEnter binding="decimal5IntegerPercentage" value="-25%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="0.00" />
+			<dataEnter binding="decimal5TimeDuration" value="0:59.9994" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="-0.05" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.35%" />
+			<dataEnter binding="decimal10Integer" value="-1" />
+			<dataEnter binding="decimal10IntegerPercentage" value="-100%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="-0.01" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="-9.95" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="-2.35" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<dataEnter binding="simplePercentage" value="-5%" />
+			<dataEnter binding="integerSeparator" value="-42" />
+			<dataEnter binding="longIntegerSeparator" value="9,007,199,254,740,991" />
+			<comment>An inline grid row: its cells take the next record's values, so that they differ from the fields'</comment>
+			<dataGridNew binding="numberRows" />
+			<dataEnter binding="decimal2DollarsAndCents" value="$1,234.56" />
+			<dataEnter binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<dataEnter binding="decimal2Integer" value="1,234" />
+			<dataEnter binding="decimal2IntegerPercentage" value="12%" />
+			<dataEnter binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<dataEnter binding="decimal5Integer" value="1,234,567" />
+			<dataEnter binding="decimal5IntegerPercentage" value="7%" />
+			<dataEnter binding="decimal5DollarsAndCents" value="$99.99" />
+			<dataEnter binding="decimal5TimeDuration" value="0:20" />
+			<dataEnter binding="decimal5OneDecimalPlace" value="12.3" />
+			<dataEnter binding="decimal5TwoDecimalPlaces" value="2.345" />
+			<dataEnter binding="decimal5TwoDecimalPlacesPercentage" value="12.5%" />
+			<dataEnter binding="decimal10Integer" value="9,876,543,210" />
+			<dataEnter binding="decimal10IntegerPercentage" value="45%" />
+			<dataEnter binding="decimal10DollarsAndCents" value="$1,000,000.00" />
+			<dataEnter binding="decimal10OneDecimalPlace" value="0.1" />
+			<dataEnter binding="decimal10TwoDecimalPlaces" value="3.14159" />
+			<dataEnter binding="decimal10TwoDecimalPlacesPercentage" value="0.5%" />
+			<dataEnter binding="simplePercentage" value="12%" />
+			<dataEnter binding="integerSeparator" value="1,234,567" />
+			<dataEnter binding="longIntegerSeparator" value="12,345,678,901" />
+			<save />
+			<testSuccess />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="0.00" />
+			<testValue binding="decimal5TimeDuration" value="1:00" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.35%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="9,007,199,254,740,991" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="0:20" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<ok />
+			<comment>Reopened from the list</comment>
+			<listGridZoom module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" />
+			<testValue binding="decimal2DollarsAndCents" value="-42.50" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="1,000.00" />
+			<testValue binding="decimal2Integer" value="-7" />
+			<testValue binding="decimal2IntegerPercentage" value="-5%" />
+			<testValue binding="decimal2OneDecimalPlace" value="-0.5" />
+			<testValue binding="decimal5Integer" value="-3" />
+			<testValue binding="decimal5IntegerPercentage" value="-25%" />
+			<testValue binding="decimal5DollarsAndCents" value="0.00" />
+			<testValue binding="decimal5TimeDuration" value="1:00" />
+			<testValue binding="decimal5OneDecimalPlace" value="-0.1" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="1.01" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.35%" />
+			<testValue binding="decimal10Integer" value="-1" />
+			<testValue binding="decimal10IntegerPercentage" value="-100%" />
+			<testValue binding="decimal10DollarsAndCents" value="-0.01" />
+			<testValue binding="decimal10OneDecimalPlace" value="-10.0" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="-2.35" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="-12.34%" />
+			<testValue binding="simplePercentage" value="-5%" />
+			<testValue binding="integerSeparator" value="-42" />
+			<testValue binding="longIntegerSeparator" value="9,007,199,254,740,991" />
+			<comment>The saved row's cells</comment>
+			<dataGridEdit binding="numberRows" row="0" />
+			<testValue binding="decimal2DollarsAndCents" value="1,234.56" />
+			<testValue binding="decimal2DollarsAndCentsAbsolute" value="5.25" />
+			<testValue binding="decimal2Integer" value="1,234" />
+			<testValue binding="decimal2IntegerPercentage" value="12%" />
+			<testValue binding="decimal2OneDecimalPlace" value="1,234.5" />
+			<testValue binding="decimal5Integer" value="1,234,567" />
+			<testValue binding="decimal5IntegerPercentage" value="7%" />
+			<testValue binding="decimal5DollarsAndCents" value="99.99" />
+			<testValue binding="decimal5TimeDuration" value="0:20" />
+			<testValue binding="decimal5OneDecimalPlace" value="12.3" />
+			<testValue binding="decimal5TwoDecimalPlaces" value="2.35" />
+			<testValue binding="decimal5TwoDecimalPlacesPercentage" value="12.50%" />
+			<testValue binding="decimal10Integer" value="9,876,543,210" />
+			<testValue binding="decimal10IntegerPercentage" value="45%" />
+			<testValue binding="decimal10DollarsAndCents" value="1,000,000.00" />
+			<testValue binding="decimal10OneDecimalPlace" value="0.1" />
+			<testValue binding="decimal10TwoDecimalPlaces" value="3.14" />
+			<testValue binding="decimal10TwoDecimalPlacesPercentage" value="0.50%" />
+			<testValue binding="simplePercentage" value="12%" />
+			<testValue binding="integerSeparator" value="1,234,567" />
+			<testValue binding="longIntegerSeparator" value="12,345,678,901" />
+			<cancel />
+		</method>
+	</interaction>
+	<interaction name="Numbers: filter the Vue list grid by each column, as its cells show the values">
+		<method>
+			<navigateList module="kitchensink" query="qConvertersNumbers" />
+			<listGridClearFilter module="kitchensink" query="qConvertersNumbers" />
+			<comment>Only this run's records</comment>
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="name" value="{run}" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="5" maxRows="5" />
+			<comment>Each record's cells show its values as the converters write them</comment>
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.56" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.56" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,250%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2.3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-25%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="33%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-25%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="99.99" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.57" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="99.99" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0:20" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0:01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0:29" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2:30" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-2.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-3.25%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.35%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="9,876,543,210" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="9,876,543,210" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="45%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-100%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="45%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-100%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-10.0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="123,456.7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-10.0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3.14" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-2.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3.14" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-2.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-12.34%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="250.00%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-12.34%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1000%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12,345,678,901" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-9,876" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12,345,678,901" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="9,007,199,254,740,991" minRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" value="0.01" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.01" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" value="0.01" operator="notEquals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="4" maxRows="4" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" value="0.01" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" value="0.01" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="2" maxRows="2" />
+			<comment>Record c's -7.50 (stored when it was created) became 7.50 when it was saved again without typing (OK): PrimeFaces sends every field's shown text, and an absolute field shows the magnitude</comment>
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="0" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" maxRows="0" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="3" maxRows="3" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="7.50" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" value="3" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" value="3" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" value="3" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2IntegerPercentage" value="12%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2IntegerPercentage" value="12%" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2IntegerPercentage" value="12%" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2IntegerPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2OneDecimalPlace" value="2.3" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2.3" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2OneDecimalPlace" value="2.3" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2OneDecimalPlace" value="2.3" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2OneDecimalPlace" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5Integer" value="0" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5Integer" value="0" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5Integer" value="0" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5Integer" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5IntegerPercentage" value="7%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5IntegerPercentage" value="7%" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5IntegerPercentage" value="7%" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5IntegerPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5DollarsAndCents" value="99.99" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="99.99" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5DollarsAndCents" value="99.99" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5DollarsAndCents" value="99.99" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5DollarsAndCents" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TimeDuration" value="0:20" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0:20" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TimeDuration" value="0:20" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TimeDuration" value="0:20" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="3" maxRows="3" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TimeDuration" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5OneDecimalPlace" value="12.3" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.3" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5OneDecimalPlace" value="12.3" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5OneDecimalPlace" value="12.3" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5OneDecimalPlace" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlaces" value="0.00" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.00" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlaces" value="0.00" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlaces" value="0.00" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="3" maxRows="3" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlaces" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlacesPercentage" value="12.50%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.50%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlacesPercentage" value="12.50%" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlacesPercentage" value="12.50%" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlacesPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10Integer" value="0" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10Integer" value="0" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10Integer" value="0" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10Integer" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10IntegerPercentage" value="0%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0%" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10IntegerPercentage" value="0%" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10IntegerPercentage" value="0%" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10IntegerPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10DollarsAndCents" value="12.35" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.35" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10DollarsAndCents" value="12.35" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10DollarsAndCents" value="12.35" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10DollarsAndCents" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10OneDecimalPlace" value="0.1" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.1" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10OneDecimalPlace" value="0.1" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10OneDecimalPlace" value="0.1" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10OneDecimalPlace" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlaces" value="3.14" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3.14" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlaces" value="3.14" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlaces" value="3.14" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlaces" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlacesPercentage" value="0.50%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.50%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlacesPercentage" value="0.50%" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlacesPercentage" value="0.50%" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlacesPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="simplePercentage" value="12%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="simplePercentage" value="12%" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="simplePercentage" value="12%" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="simplePercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="integerSeparator" value="0" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="integerSeparator" value="0" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="integerSeparator" value="0" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="integerSeparator" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="longIntegerSeparator" value="12,345,678,901" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12,345,678,901" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="longIntegerSeparator" value="12,345,678,901" operator="lessThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} b" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="longIntegerSeparator" value="12,345,678,901" operator="greaterThan" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} e half way" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="longIntegerSeparator" />
+			<listGridClearFilter module="kitchensink" query="qConvertersNumbers" />
+		</method>
+	</interaction>
+	<interaction name="Numbers: filter the PrimeFaces data table by each column, as its cells show the values">
+		<method>
+			<navigateEdit module="kitchensink" document="ConvertersDataTables" />
+			<listGridClearFilter module="kitchensink" query="qConvertersNumbers" />
+			<comment>Only this run's records</comment>
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="name" value="{run}" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="5" maxRows="5" />
+			<comment>Each record's cells show its values as the converters write them</comment>
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.56" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.56" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,250%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2.3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.5" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-25%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="33%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-25%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="99.99" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.57" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="99.99" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0:20" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0:01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0:29" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2:30" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1:00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.3" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-2.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-3.25%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.35%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="9,876,543,210" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="9,876,543,210" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="45%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-100%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="45%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-100%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-0.01" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-10.0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="123,456.7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.1" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-10.0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3.14" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-2.50" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,000.00" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3.14" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-2.35" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-12.34%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="250.00%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.50%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-12.34%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1000%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-5%" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="1,234,567" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-42" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12,345,678,901" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="-9,876" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12,345,678,901" minRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="9,007,199,254,740,991" minRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" value="0.01" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.01" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCents" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" value="5.25" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="5.25" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2DollarsAndCentsAbsolute" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" value="3" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2Integer" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2IntegerPercentage" value="12%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2IntegerPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2OneDecimalPlace" value="2.3" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="2.3" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal2OneDecimalPlace" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5Integer" value="0" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5Integer" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5IntegerPercentage" value="7%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="7%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5IntegerPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5DollarsAndCents" value="99.99" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="99.99" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5DollarsAndCents" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TimeDuration" value="0:20" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0:20" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TimeDuration" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5OneDecimalPlace" value="12.3" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.3" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5OneDecimalPlace" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlaces" value="0.00" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.00" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlaces" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlacesPercentage" value="12.50%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.50%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal5TwoDecimalPlacesPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10Integer" value="0" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10Integer" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10IntegerPercentage" value="0%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0%" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10IntegerPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10DollarsAndCents" value="12.35" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12.35" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10DollarsAndCents" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10OneDecimalPlace" value="0.1" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.1" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10OneDecimalPlace" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlaces" value="3.14" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="3.14" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlaces" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlacesPercentage" value="0.50%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0.50%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="decimal10TwoDecimalPlacesPercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="simplePercentage" value="12%" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12%" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="simplePercentage" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="integerSeparator" value="0" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} c negative" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="0" minRows="1" maxRows="1" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="integerSeparator" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="longIntegerSeparator" value="12,345,678,901" operator="equals" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" minRows="2" maxRows="2" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} a" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="SAIL numbers {run} d" minRows="1" maxRows="1" />
+			<testGridRows module="kitchensink" query="qConvertersNumbers" rowContaining="12,345,678,901" minRows="2" maxRows="2" />
+			<listGridFilter module="kitchensink" query="qConvertersNumbers" column="longIntegerSeparator" />
+			<listGridClearFilter module="kitchensink" query="qConvertersNumbers" />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

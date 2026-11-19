@@ -2,6 +2,7 @@ package modules.admin.User;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import org.skyve.CORE;
@@ -10,16 +11,13 @@ import org.skyve.domain.Bean;
 import org.skyve.domain.messages.MessageSeverity;
 import org.skyve.domain.messages.ValidationException;
 import org.skyve.domain.types.DateTime;
-import org.skyve.impl.cache.StateUtil;
 import org.skyve.impl.security.HIBPPasswordValidator;
-import org.skyve.impl.security.SkyveRememberMeTokenRepository;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.SortDirection;
 import org.skyve.metadata.controller.ImplicitActionName;
 import org.skyve.metadata.customer.Customer;
 import org.skyve.metadata.model.document.Bizlet;
 import org.skyve.metadata.module.JobMetaData;
-import org.skyve.metadata.module.Module;
 import org.skyve.persistence.DocumentQuery;
 import org.skyve.persistence.Persistence;
 import org.skyve.util.SecurityUtil;
@@ -29,18 +27,20 @@ import org.skyve.web.WebContext;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import modules.admin.Contact.ContactExtension;
-import modules.admin.domain.ChangePassword;
+import modules.admin.domain.AdminJob;
 import modules.admin.domain.DataGroup;
 import modules.admin.domain.Group;
 import modules.admin.domain.User;
 import modules.admin.domain.User.GroupSelection;
 import modules.admin.domain.User.WizardState;
+import modules.admin.domain.UserProxy;
 
 /**
  * Implements admin user document lifecycle rules for defaults, validation, and security events.
  */
 public class UserBizlet extends Bizlet<UserExtension> {
 	private static final String PASSWORD_CHANGED_STASH_KEY = "passwordChanged";
+	private static final String PREVIOUS_USER_NAME_STASH_KEY = "previousUserName";
 
 	@Inject
 	@SuppressWarnings("java:S6813") // allow member injection
@@ -243,6 +243,14 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			// Set switch in stash (see postSave)
 			CORE.getStash().put(PASSWORD_CHANGED_STASH_KEY, Boolean.TRUE);
 		}
+
+		// If the user name has changed, remember the old one (see postSave)
+		if (bean.isPersisted() && bean.originalValues().containsKey(UserProxy.userNamePropertyName)) {
+			Object previousUserName = bean.originalValues().get(UserProxy.userNamePropertyName);
+			if (previousUserName instanceof String) {
+				CORE.getStash().put(PREVIOUS_USER_NAME_STASH_KEY, previousUserName);
+			}
+		}
 	}
 
 	/**
@@ -252,19 +260,14 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	public void postSave(UserExtension bean) throws Exception {
 		// If password has changed...
 		if (Boolean.TRUE.equals(CORE.getStash().get(PASSWORD_CHANGED_STASH_KEY))) {
-			// Remove any remember-me tokens
-			Persistence persistence = CORE.getPersistence();
-			new SkyveRememberMeTokenRepository().removeUserTokens(persistence, bean.getBizCustomer() + '/' + bean.getUserName());
-
-			// Remove any active user sessions
-			StateUtil.removeSessions(bean.getBizId());
+			// Remove any remember-me tokens and active user sessions
+			signOutEverywhere(bean, bean.getUserName());
 
 			// Send email notification
 			try {
 				org.skyve.metadata.user.User user = bean.toMetaDataUser();
 				Customer customer = user.getCustomer();
-				Module module = customer.getModule(ChangePassword.MODULE_NAME);
-				final JobMetaData passwordChangeNotificationJobMetadata = module.getJob("jPasswordChangeNotification");
+				final JobMetaData passwordChangeNotificationJobMetadata = AdminJob.J_PASSWORD_CHANGE_NOTIFICATION.toJob(customer);
 				EXT.getJobScheduler().runOneShotJob(passwordChangeNotificationJobMetadata, bean, user);
 			} catch (Exception e) {
 				LOGGER.warn("Failed to kick off password change notification job", e);
@@ -278,10 +281,34 @@ public class UserBizlet extends Bizlet<UserExtension> {
 			CORE.getStash().remove(PASSWORD_CHANGED_STASH_KEY);
 		}
 
+		// If the user name has changed, the old name's remember-me tokens would sign in a later user of that name
+		Object previousUserName = CORE.getStash().remove(PREVIOUS_USER_NAME_STASH_KEY);
+		if (previousUserName instanceof String name) {
+			signOutEverywhere(bean, name);
+		}
+
+		// A disabled user must not be signed in by an old cookie or session, nor have them come back if re-enabled.
+		// (Spring refuses to sign in a disabled user, so this only removes what would otherwise live on.)
+		if (isDisabled(bean)) {
+			signOutEverywhere(bean, bean.getUserName());
+		}
+
 		bean.clearAssignedRoles();
 		bean.setNewGroup(null);
 		bean.setNewPassword(null);
 		userService.evictUserProxy(bean);
+	}
+
+	/**
+	 * Removes a deleted user's remember-me tokens and sessions, so a user created later with the same
+	 * user name cannot be signed in by the old cookies.
+	 *
+	 * @param bean The user that was deleted.
+	 * @throws Exception If removal fails.
+	 */
+	@Override
+	public void postDelete(UserExtension bean) throws Exception {
+		signOutEverywhere(bean, bean.getUserName());
 	}
 
 	/**
@@ -293,5 +320,23 @@ public class UserBizlet extends Bizlet<UserExtension> {
 	@Override
 	public void preDelete(UserExtension bean) throws Exception {
 		userService.evictUserProxy(bean);
+	}
+
+	/**
+	 * Whether Spring Security refuses to sign this user in: {@code inactive}, or not {@code activated}
+	 * (see {@code not inactive and activated} in the sign in queries).
+	 */
+	private static boolean isDisabled(UserExtension bean) {
+		return Boolean.TRUE.equals(bean.getInactive()) || Boolean.FALSE.equals(bean.getActivated());
+	}
+
+	/**
+	 * Removes all of a user's remember-me tokens (every device, in the current transaction) and ends all their sessions.
+	 *
+	 * @param bean The user.
+	 * @param userName The user name the tokens are keyed by, which is not the bean's if it was renamed.
+	 */
+	private static void signOutEverywhere(UserExtension bean, String userName) {
+		SignOut.everywhere(CORE.getPersistence(), Objects.requireNonNull(bean.getBizCustomer()), userName, bean.getBizId());
 	}
 }

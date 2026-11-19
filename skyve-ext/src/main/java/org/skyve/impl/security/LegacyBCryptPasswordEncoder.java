@@ -5,6 +5,9 @@ import java.nio.charset.StandardCharsets;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
 /**
  * Preserves bcrypt compatibility with historical behavior where inputs longer than
  * 72 UTF-8 bytes are truncated before hashing and comparison.
@@ -15,22 +18,24 @@ public class LegacyBCryptPasswordEncoder implements PasswordEncoder {
 	private final BCryptPasswordEncoder delegate = new BCryptPasswordEncoder();
 
 	@Override
-	public String encode(CharSequence rawPassword) {
+	public @Nonnull String encode(@SuppressWarnings("null") @Nonnull CharSequence rawPassword) {
 		return delegate.encode(normalizeRawPassword(rawPassword));
 	}
 
 	@Override
-	public boolean matches(CharSequence rawPassword, String encodedPassword) {
+	public boolean matches(@SuppressWarnings("null") @Nonnull CharSequence rawPassword, @Nullable String encodedPassword) {
 		return delegate.matches(normalizeRawPassword(rawPassword), encodedPassword);
 	}
 
 	@Override
-	public boolean upgradeEncoding(String encodedPassword) {
+	public boolean upgradeEncoding(@Nullable String encodedPassword) {
 		return delegate.upgradeEncoding(encodedPassword);
 	}
 
-	private static String normalizeRawPassword(CharSequence rawPassword) {
-		if (rawPassword == null) {
+	private static @Nonnull String normalizeRawPassword(@Nonnull CharSequence rawPassword) {
+		@SuppressWarnings("null") // Spring Security callers can pass null
+		boolean rawPasswordMissing = (rawPassword == null);
+		if (rawPasswordMissing) {
 			throw new IllegalArgumentException("rawPassword cannot be null");
 		}
 
