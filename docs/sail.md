@@ -1244,7 +1244,9 @@ custom widget, client-side storage, an asynchronous browser API, browser
 DevTools, an extra window or a fixture in the test JVM. Keep the UI assertions
 in SAIL steps, which check what a user can do and see. A script that clicks or
 types hides exactly the faults SAIL exists to find (see
-[Synchronisation Rules](#synchronisation-rules)).
+[Synchronisation Rules](#synchronisation-rules)). Standard calls for the browser's
+network, requests, dialogs, cookies, tabs and devices are in
+[Browser control and standard calls](#browser-control-and-standard-calls).
 
 ### Values
 
@@ -2309,6 +2311,319 @@ runner first. It covers suite members too, and is for one thread.
 Chrome, against a page that a JDK `HttpServer` serves, so it needs no Skyve
 server: `mvn -o -pl skyve-war -am test -Dtest=DeviceProfileSailIT
 -DskipUnitTests=false -DskipIntegrationTests=true -Dsurefire.failIfNoSpecifiedTests=false`.
+
+## Browser control and standard calls
+
+WebDriver can click, type and read, but it cannot take a browser offline,
+fail one request, answer a dialog or shrink a storage quota. `util.sail.browser`
+gives tests those controls, and `util.sail.call` has a library of
+[`<call>`](#scripts-and-calls) steps that use them, so a script can test a
+slow network, a failing server, a lost response or a second tab without any Java.
+
+Both packages are test code in skyve-war, so `skyve:assemble` copies them into an
+app with the rest of `util/**`.
+
+### Capabilities
+
+A call never talks to a browser directly. It asks `SailBrowserControl.of(driver)`
+for the interface of the *capability* it needs. Chrome and Edge get the Chromium
+control, which uses the Chrome DevTools Protocol (CDP) for most things and plain
+WebDriver for the rest. Any other browser gets the WebDriver control, which has
+only what every browser has. No CDP type appears in an interface, so a
+control for another protocol can be added later (WebDriver BiDi is planned for
+Firefox) without changing a call.
+
+| Capability | Interface | Chromium (Chrome, Edge) | Other browsers |
+|---|---|---|---|
+| `REQUEST_INTERCEPTION` | `RequestInterception`: rules that fail, hold, answer or change requests, or lose their responses | yes | no |
+| `REQUEST_LOG` | `RequestLog`: the requests pages and workers made | yes | no |
+| `NETWORK_CONDITIONS` | `NetworkConditions`: offline, online, throttle, for pages and service and shared workers | yes | no |
+| `INIT_SCRIPTS` | `InitScripts`: a script that runs before the page's own in every new document | yes | no |
+| `DIALOGS` | `Dialogs`: the JavaScript dialogs pages opened, and answering them | yes | no |
+| `COOKIES` | `Cookies`: list and delete cookies, HttpOnly included | yes (WebDriver) | yes |
+| `STORAGE_QUOTA` | `StorageQuota`: an origin's quota | yes | no |
+| `PAGE_LIFECYCLE` | `PageLifecycle`: freeze and resume a tab | yes | no |
+| `TOUCH` | `TouchEmulation`: a touch screen | yes | no |
+| `TABS` | `Tabs`: open, switch, close, visit a new tab and return | yes (WebDriver) | yes |
+| `KEYS` | `Keys`: trusted key presses and chords | yes (WebDriver) | yes |
+| `WINDOW` | `Window`: resize | yes (WebDriver) | yes |
+
+Chromium supports all twelve. They are tested on Chrome; Edge and a remote (grid)
+Chromium without a DevTools endpoint are not yet verified.
+
+A custom `<call>` can use them too:
+
+```java
+NetworkConditions network = SailBrowserControl.of(driver).require(NetworkConditions.class, "MyCall");
+network.offline();
+```
+
+`supports(Capability)` answers without stopping the test, for code that has a
+fallback.
+
+### Unsupported means skipped
+
+A call that needs a capability the browser lacks stops the test as **skipped**,
+never failed: the test can say nothing about the application in that browser.
+`require` throws `SailCapabilityUnavailableException`, a JUnit
+`TestAbortedException`, with the message
+
+```
+Offline needs NETWORK_CONDITIONS, which firefox doesn't support
+```
+
+(the call's class name, the capability, the browser). The harness lets it
+through as a skip:
+
+- The step after it does not run, under every test strategy. The workflow's
+  message is `SAIL workflow: <automation> skipped: <message>`.
+- A [suite](#suites) counts the member as skipped, and the suite's own result is
+  skipped, as long as no member failed. If one did, the suite fails.
+- Under **Verify**, a failure recorded before the skip wins. The test fails with
+  those failures, its message ends `Then a step skipped the test, so no later step
+  ran: <message>`, and the skip is attached as suppressed. Only when nothing had
+  failed is the test reported skipped.
+- A call that throws any `TestAbortedException` is skipped the same way, not only
+  this one. This is how `StartDevice` and `RestartDevice` skip in a browser that
+  cannot take a profile, with a message of the same shape:
+  `StartDevice needs a device profile, which firefox doesn't support`.
+- A call checks its parameters before it asks for a capability, so a script's
+  mistake (an unknown or missing parameter, a bad value) fails on every browser,
+  and only a valid step skips.
+
+### The standard calls
+
+A call is named in `<call className="util.sail.call.X">`. Parameters are the
+`<parameter name value/>` children; `{run}` and `{var:name}` are substituted as in
+any call. An unknown parameter name is an error that names the call and the names
+it takes, and a missing required one, or a value of the wrong type, says so by name.
+A blank value counts as left out. With `variable`, the step keeps the call's
+"variable" column, as `String.valueOf`. Each class's Javadoc lists the same
+parameters. `url` parameters are a glob over the whole URL (`*` any run, `?` any one
+character, `\` escapes), such as `*/api/orders/*`. Where a call waits, its
+`timeoutMillis` defaults to `sail.timeoutSeconds`.
+
+| Call | Parameters | Variable | Needs |
+|---|---|---|---|
+| `Offline` | none | none | `NETWORK_CONDITIONS` |
+| `Online` | none | none | `NETWORK_CONDITIONS` |
+| `Throttle` | `latencyMillis` (required), `downKbps`, `upKbps` (both unlimited by default) | none | `NETWORK_CONDITIONS` |
+| `FailRequests` | `url` (required), `reason` (default `InternetDisconnected`), `method`, `times` | none | `REQUEST_INTERCEPTION` |
+| `HoldRequests` | `url` (required), `method`, `times` | none | `REQUEST_INTERCEPTION` |
+| `AwaitHeldRequests` | `count` (default 1), `timeoutMillis` (default `sail.timeoutSeconds`) | the number held | `REQUEST_INTERCEPTION` |
+| `ReleaseRequests` | `fail` (an error reason; default: let them carry on) | none | `REQUEST_INTERCEPTION` |
+| `RespondToRequests` | `url`, `status` (both required), `body`, `contentType` (default `application/json`), `atResponse`, `method`, `times` | none | `REQUEST_INTERCEPTION` |
+| `LoseResponses` | `url` (required), `reason` (default `ConnectionReset`), `method`, `times` | none | `REQUEST_INTERCEPTION` |
+| `RewriteRequestHeaders` | `url` (required), `set` (`Name=value;...`), `remove` (comma separated), `method`, `times`; `set` or `remove` needed | none | `REQUEST_INTERCEPTION` |
+| `ClearRequestRules` | none | none | `REQUEST_INTERCEPTION` |
+| `CheckRequests` | `matching` (a regex over `METHOD url`, required), `failed`, `exactly`, `atLeast`, `atMost` (at least 1 if none is given), `waitMillis` (default 0), `clear`, `ignoreServiceWorkerCopies` (default true) | the count | `REQUEST_LOG` |
+| `RequestLog` | `matching` (default every request), `clear` | the log as a JSON array | `REQUEST_LOG` |
+| `CheckDialog` | `type` (`beforeunload` default, `alert`, `confirm`, `prompt`), `expected` (default true) | none | `DIALOGS` |
+| `DeleteCookies` | `names` (comma separated, required) | the number deleted | `COOKIES` |
+| `LowerQuota` | `headroomKb` (required unless `restore`), `restore` | the quota in bytes, or `restored` | `STORAGE_QUOTA` |
+| `BlockIndexedDb` | none | none | `INIT_SCRIPTS` |
+| `ShiftClock` | `days` (required; negative for behind, down to -3650) | none | `INIT_SCRIPTS` |
+| `PressKey` | `key` (a Selenium `Keys` name, required), `count` (default 1) | none | `KEYS` |
+| `ResizeWindow` | `width`, `height` (both 200 or more, required) | the size as `<width>x<height>` | `WINDOW` |
+| `FreezeTab` | `action` (`freeze` or `resume`), `index` (0 is the first tab; both required) | none | `PAGE_LIFECYCLE` |
+| `SwitchTab` | `action` (`open`, `switch` or `close`, required), `url` (for `open`), `index` (for `switch`) | the number of tabs open | `TABS` |
+| `CheckOpenedTab` | `script` (required), `timeoutMillis`, `close` (default true) | the new tab's address | `TABS` |
+| `StartDevice` | `profile` (required), `offline`, `touch`, `remembered` (default true) | the profile's folder | Chrome or Edge; `offline` needs `NETWORK_CONDITIONS`, `touch` needs `TOUCH` |
+| `RestartDevice` | `offline`, `touch` | the profile's folder | Chrome or Edge |
+
+`util.sail.call.RequestLog` is the call; `util.sail.browser.RequestLog` is the
+capability's interface that it reads.
+
+Notes on the less obvious ones:
+
+- **Request rules** apply to pages and to service and shared workers, from the step
+  until `ClearRequestRules`. `HoldRequests` returns at once: follow it with
+  `AwaitHeldRequests`, do the thing that should stay unanswered, then
+  `ReleaseRequests`. `LoseResponses` lets the server handle the request and then
+  drops the answer in the browser, as a connection that failed after the server
+  committed. `RewriteRequestHeaders`' `set` and `remove` are applied before the
+  request is sent.
+- **`CheckRequests`** counts what the log holds from when the browser's control began
+  watching, or the last `clear`. When a service worker answers a request for the page,
+  the log has the page's copy (marked) and, if the worker went to the network, the
+  worker's own; by default the marked copy is not counted, so a request counts once.
+  `waitMillis` keeps looking until the count holds, for requests the page sends a little later.
+- **`RequestLog`**'s variable is a JSON array of `{method, url, status, failure,
+  fromServiceWorker}` in the order the requests started; a script reads it with
+  `JSON.parse(sail.vars.name)`.
+- **`CheckDialog`**: ChromeDriver accepts a `beforeunload` prompt at once, so this is the
+  only way a script sees one. Chrome asks only after the user used the page, so
+  press a key or click first.
+- **`LowerQuota`** limits writes to CacheStorage and IndexedDB. Chrome's
+  `navigator.storage.estimate()` still reports the real quota.
+- **`ShiftClock`** and **`BlockIndexedDb`** affect documents loaded after the step, so
+  call them before navigating to the page under test. Nothing puts them back while the
+  browser runs, and a second `ShiftClock` adds to the first.
+- **`SwitchTab`** and **`CheckOpenedTab`**: the executor's contexts stay with the tab the
+  automation started in, so work in another tab with script steps and calls only, and
+  come back before the next gesture. `CheckOpenedTab` visits a new tab and returns within
+  one step, because a SmartClient leg waits for SmartClient in the tab in front after every step.
+- **`StartDevice`** and **`RestartDevice`** make a named browser profile that a leg can
+  put down and pick up again; see [Devices and browser profiles](#devices-and-browser-profiles)
+  and [Device profiles](#device-profiles) below. Use `StartDevice` first in a device's leg and
+  follow it with a navigate step. `RestartDevice` refuses a profile that isn't this run's
+  device (one from another run, or set outside `StartDevice`): use `StartDevice` first.
+
+This is a script that runs against a page with a service worker (from `StandardCallsSailIT`,
+which serves its own page, so it needs no Skyve server; `{var:origin}` is that server's address). It fails the first
+request to `/fail`, holds one to `/held` and lets it go, answers `/answer` itself, then clears the rules.
+In Firefox it is skipped at the first call that needs interception.
+
+```xml
+<automation uxui="external" userAgentType="desktop" testStrategy="Assert"
+			xmlns="http://www.skyve.org/xml/sail">
+	<interaction name="request rules">
+		<method>
+			<navigateLink href="{var:origin}/" />
+			<call className="util.sail.call.FailRequests">
+				<parameter name="url" value="*/fail*" />
+				<parameter name="times" value="1" />
+			</call>
+			<testScript message="FailRequests failed the first request only"><![CDATA[
+				const first = await fetch('/fail', {cache: 'no-store'}).then(r => r.status, () => 'ERR');
+				const second = await fetch('/fail', {cache: 'no-store'}).then(r => r.status, () => 'ERR');
+				return first === 'ERR' && second === 200;
+			]]></testScript>
+
+			<call className="util.sail.call.HoldRequests">
+				<parameter name="url" value="*/held*" />
+			</call>
+			<execute><![CDATA[ window.held = fetch('/held', {cache: 'no-store'}).then(r => r.text(), () => 'ERR'); ]]></execute>
+			<call className="util.sail.call.AwaitHeldRequests" variable="held" />
+			<call className="util.sail.call.ReleaseRequests" />
+			<testScript message="The request was held, then let through"><![CDATA[
+				return sail.vars.held === '1' && (await window.held) === 'real';
+			]]></testScript>
+
+			<call className="util.sail.call.RespondToRequests">
+				<parameter name="url" value="*/answer*" />
+				<parameter name="status" value="503" />
+				<parameter name="body" value="busy" />
+				<parameter name="contentType" value="text/plain" />
+			</call>
+			<testScript message="RespondToRequests answered without the server"><![CDATA[
+				const r = await fetch('/answer', {cache: 'no-store'});
+				return r.status === 503 && (await r.text()) === 'busy';
+			]]></testScript>
+			<call className="util.sail.call.ClearRequestRules" />
+		</method>
+	</interaction>
+</automation>
+```
+
+### Test files
+
+`util.sail.SailTestFiles` makes files for upload steps, so a test does not need
+a fixture in the repository. It is separate from `SailMedia`, which writes a run's
+evidence. Every method returns the file's absolute `Path`.
+
+| Method | Makes | Reused when |
+|---|---|---|
+| `photo(long bytes)` | a JPEG of exactly that many bytes (`photo-<bytes>.jpg`); one byte over a limit tests the limit | the file is that size |
+| `photo(int width, int height)` | a small labelled gradient JPEG of that size in pixels (`photo-<w>x<h>.jpg`) | its header has those dimensions |
+| `oversizePhoto()` | a 9000 by 7000 JPEG of about 14 MB, over Skyve's 10 MB upload limit, which a page must redraw smaller | the file is over 10 MB |
+| `video(WebDriver, long bytes)`, `video(WebDriver, long bytes, Duration timeout)` | a playable WebM of at least that many bytes (`video-<bytes>.webm`), 640 by 360; the timeout defaults to `sail.timeoutSeconds` | the file is at least that size |
+
+The video is recorded in the browser the driver drives (a canvas of noise, `captureStream`,
+`MediaRecorder`), so ffmpeg is not needed, and it takes about a second for every 3 MB. The photos need no
+browser. Files go under `target/sail-test-files/` (`SailTestFiles.FOLDER`), are written under a temporary name and then moved into
+place, and are the same every run (the video's noise aside), so JVMs that share the folder don't collide. Like any
+`MediaRecorder` WebM, the video's header has no duration: a `<video>` reports an infinite one until it has seen the end.
+
+```java
+Path photo = SailTestFiles.photo(10L * 1024 * 1024 + 1);
+Path video = SailTestFiles.video(driver, 6_000_000L);
+```
+
+### Promoting a capability to an op-code
+
+There are no op-codes for these, and `sail.xsd` is unchanged. A capability becomes an
+op-code once it has an implementation for Chromium **and** Firefox, so a script written
+with it runs in both. A script that uses such an op-code then declares the capabilities
+it needs, so a browser without them skips it, as a `<call>` does today. Until then, a
+`<call>` is the way, and its skip is the declaration. Request interception, the request log, init scripts and
+dialogs are the first candidates (WebDriver BiDi can do them in Firefox); network conditions, quota and lifecycle stay
+Chromium-only until BiDi settles.
+
+### Device profiles
+
+`StartDevice` and `RestartDevice` put a leg on a named browser profile (see
+[Devices and browser profiles](#devices-and-browser-profiles) for what survives a
+restart). `util.sail.SailProfiles` owns where those profiles live and when they go.
+
+**Where.** Every profile is the folder `<root>/<run token>/<profile>`. The root is the
+setting `sail.profiles` (`-Dsail.profiles=...`, `SAIL_PROFILES`, `sail.properties`, as any
+[setting](#settings)), `target/sail-profiles` under the working directory by default. Each
+run starts with new devices, because the run token ([The run token and variables](#the-run-token-and-variables))
+is in the path. Code that builds its own `BrowserConfiguration.profile(Path)` still owns and
+deletes its folder.
+
+**When they are deleted.** When a run ends, after its browsers have quit:
+
+- A run that **passed** has its folder `<root>/<run>` deleted.
+- A run that **failed** keeps it, and prints
+  `SAIL device profiles kept for the failed run <run>: <folder>`. A run that was skipped counts as not
+  passed, so its folder is kept too, and the message says "failed run".
+- A run of its own ends when its `runResources`, `runFiles` or `runStrings` call returns,
+  or its suite member does. A run shared with `shareRunAcrossCalls()` ends when the
+  workflow is closed: `SailWorkflow` is `AutoCloseable`, and `close()` stops a kept browser, then ends the
+  shared run's profiles. That run failed if any of its calls threw.
+  `AbstractInterpretedSailWorkflow` closes its workflows in its `@AfterAll`
+  (`closeWorkflowsAndReleaseServer()`); a test that builds its own shared workflow closes it itself,
+  for example with try-with-resources.
+- The single-renderer bases, `AbstractPrimeFacesInterpretedSail` and `AbstractSmartClientInterpretedSail`, don't run
+  through `SailWorkflow`, so a `StartDevice` in one of their tests leaves its folder to the sweep.
+
+**Settings.**
+
+| Setting | Values | Default |
+|---|---|---|
+| `sail.profiles` | the profile root | `target/sail-profiles` |
+| `sail.profiles.keep` | `failed` keeps a failed run's folder; `all` keeps every run's; `none` deletes every run's | `failed` |
+| `sail.profiles.keepHours` | a whole number of hours above 0: how old a run folder must be before the sweep deletes it | `12` |
+
+Set `sail.profiles.keep=all` to open a profile after a run that passed.
+
+**The sweep.** Once for each root in a JVM, before the first profile folder under it is given out, `SailProfiles`
+deletes the run folders under the root that are old enough and not in use. This catches runs that
+were killed, stopped with Ctrl-C or ended in a JVM that never closed its workflow, and the
+failed runs that were kept. A folder is deleted only if it:
+
+- is a real folder (a link is never followed) named like a run token (`[0-9a-z]{8,13}`, the run's start time in base 36).
+  Anything else under the root is left alone;
+- is not one of this JVM's runs;
+- is older than `sail.profiles.keepHours` by both its token's start time and the newest last-modified
+  time of any file inside it;
+- is not in use: no profile in it has a Chrome `SingletonLock` that names a live process. On macOS and Linux the
+  lock is a symbolic link to `host-pid`, and the pid is checked with `ProcessHandle.of(pid)`. On Windows the lock is a file,
+  so a profile in use cannot be deleted, and a folder that fails to delete is skipped.
+
+Several JVMs (parallel lanes) can share a root. Housekeeping never fails or skips
+a test: a folder that cannot be deleted or checked gets a one-line warning,
+`SAIL device profiles: could not delete <folder>: <reason>`, and is left for a later sweep.
+
+**Chrome and Edge launch flags.** A profile's bulk is Chrome's own background downloads, not the application's
+data. Chrome and Edge now start with:
+
+- `--disable-component-update`, which stops `component_crx_cache`, `WasmTtsEngine`, `CertificateRevocation`
+  and the other components;
+- `--disable-features=OptimizationGuideModelDownloading,OptimizationHintsFetching,OptimizationTargetPrediction,OptimizationHints`,
+  which stops `optimization_guide_model_store` and `OnDeviceHeadSuggestModel`.
+
+Both are needed. Measured on Chrome 158, headless, after loading a page with a service worker and keeping the
+browser open for 240 s, a profile was **151 MB** without them (`optimization_guide_model_store` 47 MB,
+`component_crx_cache` 47 MB, `WasmTtsEngine` 25 MB, `CertificateRevocation` 9 MB, `OnDeviceHeadSuggestModel` 8 MB) and
+**12 MB** with both. The device profiles of a `StandardCallsSailIT` run were about 8.5 MB each, against 35 to 70 MB before the
+flags. A restart on the same folder still kept IndexedDB, CacheStorage, the service worker
+registration and a persistent cookie. Chrome honours only the last `--disable-features`, so the features of any
+`--disable-features` in a configuration's `arguments(...)` are merged with the built-in list into the one argument
+(each once, in order). The flags apply to every SAIL Chrome and Edge, with or without a profile. Not measured:
+headed Chrome, Edge, and runs longer than 240 s.
 
 ## The Suites
 
@@ -3705,6 +4020,31 @@ SAIL:
   consolidated test and the two performance ITs) are gone. The kitchen sink
   conformance scripts no longer state a `testStrategy`: the kitchen sink suite's
   default applies.
+
+**Browser control and standard calls.** `util.sail.browser` and `util.sail.call` are new
+([Browser control and standard calls](#browser-control-and-standard-calls)); the
+SAIL XML is unchanged. Four behaviours change for existing tests:
+
+- A `<call>` that throws a `TestAbortedException` is now **skipped**, not failed. Before,
+  `InterpretedWebDriverExecutor` wrapped it into an `IllegalStateException` and a `SailFailure`, and
+  `SailWorkflow` into an `AssertionError`. Now `executeCall` and `runSteps` rethrow it as it is, under every
+  strategy, so no later step runs; `SailWorkflow.run` throws a `TestAbortedException`
+  (`SAIL workflow: <automation> skipped: ...`); and `SailSuite` counts the member as skipped, and throws one from
+  `run()` when no member failed. Under Verify, failures recorded before the skip win: the test fails with them and
+  its message names the skip. A call that threw `TestAbortedException` to stop a test must now expect a skip where it
+  reported a failure.
+- A passed run's device profile folders (`<sail.profiles>/<run token>`) are deleted when the run ends, and
+  run folders older than `sail.profiles.keepHours` (12) are swept. Set `sail.profiles.keep=all` to keep them. A failed
+  (or skipped) run's folders are kept and named in the output.
+- Chrome and Edge start with `--disable-component-update` and
+  `--disable-features=OptimizationGuideModelDownloading,...`, so they download no components or models: a SAIL profile
+  is about 8.5 MB, not 35 to 70 MB. Tests don't depend on those downloads. A configuration's own `--disable-features`
+  argument is merged with the built-in one.
+- `SailWorkflow` is `AutoCloseable`. A test that builds its own workflow and calls `shareRunAcrossCalls()` must close it
+  (for example with try-with-resources), or its profile folders wait for the sweep. Tests that extend
+  `AbstractInterpretedSailWorkflow` change nothing: its `@AfterAll`, now `closeWorkflowsAndReleaseServer()` (it was
+  `releaseServer()`), closes their workflows.
+- New `SailSettings` keys: `sail.profiles`, `sail.profiles.keep` and `sail.profiles.keepHours`.
 
 ## Troubleshooting
 

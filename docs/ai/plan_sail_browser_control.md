@@ -234,7 +234,7 @@ Anything else needs Mike's approval: ask, with the reason and the smallest alter
 - [ ] After `StandardCallsSailIT` passes, its run's folder under `target/sail-profiles` is gone. After a forced failure, it is kept and its path printed.
 - [ ] `SailProfilesTest` covers every case in W5, and housekeeping never fails a test.
 - [ ] `HarnessSelfContainedTest` and every existing `util.sail` test pass.
-- [ ] The docs describe the capabilities, the calls, skipping and the op-code rule.
+- [x] The docs describe the capabilities, the calls, skipping and the op-code rule.
 - [ ] Gates pass.
 
 ## Better engineering notes
@@ -459,6 +459,19 @@ Not verified in W0: headed Chrome, Edge, Firefox, runs longer than 240 s, and wh
   - The single-renderer test bases (`AbstractPrimeFacesInterpretedSail`, `AbstractSmartClientInterpretedSail`) don't run through `SailWorkflow`, so a `StartDevice` in one of their tests leaves its folder to the sweep.
   - Not verified: Windows (the undeletable-folder path was exercised with POSIX permissions), Edge, a headed run.
 
+
+### W6
+
+- Wrote the docs from the draft in `~/skyve-sail-work/browser-control/w6-draft/`, checking each statement against the code at `106fef4005`, and resolved every `TODO(W3/W4/W5)`:
+  - `docs/sail.md`: new "Browser control and standard calls" (capabilities, skipping, the 25 calls, test files, op-code rule, "Device profiles") before "The Suites"; a cross-link in "Use them sparingly"; a new "Upgrading" group at the end. `sail.md` has no table of contents of `##` sections, so none changed.
+  - `docs/skyve-10-changes.md`: one SAIL bullet with three behaviour-change sub-bullets, before "Number converters, ...".
+  - `docs/architecture-design.md`: not changed. Its one SAIL subsection names no test-harness classes beyond `SailLoad` in passing, so there is no list to add to.
+- Checked against the code:
+  - the call table against each call's Javadoc and `super(...)` parameter names, its defaults in `run`, and its variable and capability (25 classes in `util/sail/call`, none added or renamed since the draft; the draft table was right, and gained the `CheckRequests` count default, `RequestLog`'s `matching` default and `FreezeTab`'s index base);
+  - the skip message in `SailCapabilityUnavailableException` and `StartDevice.requireProfiles`, the Verify wording in `InterpretedWebDriverExecutor` (lines 296 to 330), and `SailWorkflow`'s "SAIL workflow: <name> skipped: ...";
+  - `SailTestFiles`' four methods, their reuse rules and `FOLDER`; `SailSettings` (`sail.profiles`, `sail.profiles.keep` = `failed`, `all`, `none`, `sail.profiles.keepHours` = 12); `SailProfiles` (the kept-run message, the sweep's checks, the warning line); `CrossBrowserSelenium` (flags for Chrome and Edge, the `--disable-features` merge); `SailWorkflow implements AutoCloseable`; `AbstractInterpretedSailWorkflow.closeWorkflowsAndReleaseServer()`;
+  - the example XML is the request-rules case of `StandardCallsSailIT`, shortened, in the attribute style of `sail.md`'s examples.
+- Not run: no tests (docs only). Anchors in the new text point at headings that exist.
 
 ## User validation suggestions
 
