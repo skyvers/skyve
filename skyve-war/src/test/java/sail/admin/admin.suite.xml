@@ -17,8 +17,8 @@
 	list, and the 11-user-list.xml and 98-destructive.xml members clear that list, so both 11 members run after both 05
 	members, the destructive members run after every other one, and sc/99-truncate.xml (SmartClient's Truncate) runs last,
 	just before the restore. pf/07-reports.xml is a workflow of SmartClient and PrimeFaces legs (report design is
-	SmartClient only; the Reports list and scheduling are PrimeFaces only). The 08 members share fixed contact names (their
-	spreadsheet cannot hold the run token), and the 11 members a generated user name family, so neither pair may run at
+	SmartClient only; the Reports list and scheduling are PrimeFaces only). The 06 and 08 members share fixed contact names
+	(their spreadsheets cannot hold the run token), and the 11 members a generated user name family, so neither pair may run at
 	the same time; a suite runs its members one at a time.
 
 	-Dsail.suite.only=pf/ or sc/ chooses one renderer's members, and -Dsail.suite.only=03 both 03 members; the bracket

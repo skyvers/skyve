@@ -2649,10 +2649,11 @@ still matters for one thing: both 05 members check the backup job's row in the
 completed jobs list, and both 11 and both 98 members clear that list, so the 11
 members run after both 05 members, the destructive members run after every
 other member, and `sc/99-truncate.xml` runs last, just before the restore. The
-08 members use fixed contact names (their spreadsheet cannot hold the run
-token) and assert that none is left over, and the 11 members a generated user
-name family, so a failed run of either, outside the suite's restore, leaves
-data that fails the next run; reset the server's data then. Each 98 member clears the list first, so that a row
+06 and 08 members use fixed contact names (their spreadsheets cannot hold the
+run token), and 06 the one Contact import definition, and each asserts first
+that none is left over; the 11 members use a generated user name family. So a
+failed run of one of them, outside the suite's restore, leaves data that fails
+the next run; reset the server's data then. Each 98 member clears the list first, so that a row
 the other renderer's 98 left, if it stopped early, cannot satisfy its waits.
 
 **Running part of it.** `-Dsail.suite.only=pf/` or `sc/` chooses one
