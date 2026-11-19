@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.io.File;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,10 +25,10 @@ import org.junit.jupiter.api.io.TempDir;
 import org.skyve.domain.Bean;
 import org.skyve.domain.app.admin.DataMaintenance;
 import org.skyve.domain.app.admin.DataMaintenance.DataSensitivity;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 import org.skyve.metadata.model.Attribute.Sensitivity;
-import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 
 @SuppressWarnings("static-method")
@@ -81,12 +80,12 @@ class BackupJobTest {
 
 		BackupJob.emailProblem(jobLog, "simulated failure");
 
-		assertEquals(1, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("support@skyve.org"));
-		assertThat(capture.lastSend.getSenderEmailAddress(), is("noreply@skyve.org"));
-		assertThat(capture.lastSend.getSubject(), is("[SkyveTest - TEST] Backup Problem"));
-		assertThat(capture.lastSend.getBody(), containsString("a problem:- simulated failure"));
-		assertThat(capture.lastSend.getBody(), containsString("See the backup job log (admin -> Jobs) for details."));
+		assertEquals(1, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains("support@skyve.org"));
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is("noreply@skyve.org"));
+		assertThat(capture.getLastSent().getSubject(), is("[SkyveTest - TEST] Backup Problem"));
+		assertThat(capture.getLastSent().getBody(), containsString("a problem:- simulated failure"));
+		assertThat(capture.getLastSent().getBody(), containsString("See the backup job log (admin -> Jobs) for details."));
 	}
 
 	@Test
@@ -129,8 +128,8 @@ class BackupJobTest {
 
                 BackupJob.emailProblem(jobLog, null);
 
-                assertEquals(1, capture.sendCount);
-                assertThat(capture.lastSend.getBody(), containsString("problems."));
+                assertEquals(1, capture.getSent().size());
+                assertThat(capture.getLastSent().getBody(), containsString("problems."));
                 assertEquals(0, jobLog.size(), "No log entry when support email is set");
         }
 
@@ -141,7 +140,7 @@ class BackupJobTest {
 
                 BackupJob.emailProblem(jobLog, "disk full");
 
-                assertEquals(0, capture.sendCount, "No email should be sent when no support address");
+                assertEquals(0, capture.getSent().size(), "No email should be sent when no support address");
                 assertEquals(1, jobLog.size(), "Problem should be logged when no support address");
                 assertThat(jobLog.get(0), containsString("disk full"));
         }
@@ -153,9 +152,9 @@ class BackupJobTest {
 
                 BackupJob.emailProblem(jobLog, "test problem");
 
-                assertEquals(1, capture.sendCount);
-                assertThat(capture.lastSend.getSubject(), is("[SkyveTest] Backup Problem"));
-			assertThat(capture.lastSend.getSubject(), not(containsString(" - ")));
+                assertEquals(1, capture.getSent().size());
+                assertThat(capture.getLastSent().getSubject(), is("[SkyveTest] Backup Problem"));
+			assertThat(capture.getLastSent().getSubject(), not(containsString(" - ")));
 	}
 
 	@Test
@@ -224,26 +223,5 @@ class BackupJobTest {
 		Method method = BackupJob.class.getDeclaredMethod("getIncludeAuditLog", Bean.class);
 		method.setAccessible(true);
 		return ((Boolean) method.invoke(null, bean)).booleanValue();
-	}
-
-	private static class CaptureMailService implements MailService {
-		int sendCount = 0;
-		Mail lastSend = null;
-
-		@Override
-		public void sendMail(@jakarta.annotation.Nonnull Mail mail) {
-			lastSend = mail;
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(@jakarta.annotation.Nonnull List<Mail> mails) {
-			// no-op
-		}
-
-		@Override
-		public void writeMail(@jakarta.annotation.Nonnull Mail mail, @jakarta.annotation.Nonnull OutputStream out) {
-			// no-op
-		}
 	}
 }

@@ -11,9 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -22,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.impl.cdi.MailServiceInjectable;
 import org.skyve.impl.mail.AzureCommunication;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.mail.Postmark;
 import org.skyve.impl.mail.SMTPMailService;
@@ -78,11 +77,11 @@ class MailServiceTest {
 										.subject("subject")
 										.body("body"));
 
-		assertEquals(1, capture.sendCount);
-		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
-		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
-		assertTrue(capture.lastSend.getCcEmailAddresses().isEmpty());
-		assertTrue(capture.lastSend.getBccEmailAddresses().isEmpty());
+		assertEquals(1, capture.getSent().size());
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is("default-sender@skyve.org"));
+		assertThat(capture.getLastSent().getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
+		assertTrue(capture.getLastSent().getCcEmailAddresses().isEmpty());
+		assertTrue(capture.getLastSent().getBccEmailAddresses().isEmpty());
 	}
 
 	@SuppressWarnings({"static-method"})
@@ -97,10 +96,10 @@ class MailServiceTest {
 
 		mailService.sendMail(mail);
 
-		assertEquals(1, capture.sendCount);
-		assertSame(mail, capture.lastSend);
-		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
-		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
+		assertEquals(1, capture.getSent().size());
+		assertSame(mail, capture.getLastSent());
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is("default-sender@skyve.org"));
+		assertThat(capture.getLastSent().getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
 	}
 
 	@SuppressWarnings({"static-method"})
@@ -116,9 +115,9 @@ class MailServiceTest {
 		mailService.writeMail(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body"), out);
 		mailService.sendBulkMail(Arrays.asList(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body")));
 
-		assertEquals(0, capture.sendCount);
-		assertEquals(0, capture.writeCount);
-		assertEquals(0, capture.bulkCount);
+		assertEquals(0, capture.getSent().size());
+		assertEquals(0, capture.getWritten().size());
+		assertEquals(0, capture.getBulkSent().size());
 		assertEquals(0, out.size());
 	}
 
@@ -142,14 +141,14 @@ class MailServiceTest {
 
 		mailService.sendBulkMail(Arrays.asList(first, second));
 
-		assertEquals(1, capture.bulkCount);
-		assertEquals(2, capture.lastBulk.size());
-		assertThat(capture.lastBulk.get(0).getSenderEmailAddress(), is("default-sender@skyve.org"));
-		assertThat(capture.lastBulk.get(0).getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
-		assertTrue(capture.lastBulk.get(0).getCcEmailAddresses().isEmpty());
-		assertThat(capture.lastBulk.get(1).getSenderEmailAddress(), is("sender2@skyve.org"));
-		assertThat(capture.lastBulk.get(1).getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
-		assertTrue(capture.lastBulk.get(1).getBccEmailAddresses().isEmpty());
+		assertEquals(1, capture.getBulkSent().size());
+		assertEquals(2, capture.getLastBulkSent().size());
+		assertThat(capture.getLastBulkSent().get(0).getSenderEmailAddress(), is("default-sender@skyve.org"));
+		assertThat(capture.getLastBulkSent().get(0).getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
+		assertTrue(capture.getLastBulkSent().get(0).getCcEmailAddresses().isEmpty());
+		assertThat(capture.getLastBulkSent().get(1).getSenderEmailAddress(), is("sender2@skyve.org"));
+		assertThat(capture.getLastBulkSent().get(1).getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
+		assertTrue(capture.getLastBulkSent().get(1).getBccEmailAddresses().isEmpty());
 	}
 
 	@SuppressWarnings({"static-method"})
@@ -164,9 +163,9 @@ class MailServiceTest {
 									.subject("subject")
 									.body("body"));
 
-		assertEquals(1, capture.sendCount);
-		assertThat(capture.lastSend.getSenderEmailAddress(), is("default-sender@skyve.org"));
-		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
+		assertEquals(1, capture.getSent().size());
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is("default-sender@skyve.org"));
+		assertThat(capture.getLastSent().getRecipientEmailAddresses(), is(setOf("redirect@skyve.org")));
 	}
 
 	@SuppressWarnings({"static-method", "deprecation"})
@@ -177,8 +176,8 @@ class MailServiceTest {
 
 		EXT.sendMail(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body"));
 
-		assertEquals(1, capture.sendCount);
-		assertThat(capture.lastSend.getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
+		assertEquals(1, capture.getSent().size());
+		assertThat(capture.getLastSent().getRecipientEmailAddresses(), is(setOf("to@skyve.org")));
 	}
 
 	@SuppressWarnings({"static-method", "deprecation"})
@@ -190,7 +189,7 @@ class MailServiceTest {
 
 		EXT.writeMail(new Mail().from("sender@skyve.org").addTo("to@skyve.org").subject("subject").body("body"), out);
 
-		assertEquals(1, capture.writeCount);
+		assertEquals(1, capture.getWritten().size());
 	}
 
 	@SuppressWarnings("static-method")
@@ -224,30 +223,5 @@ class MailServiceTest {
 			result.add(value);
 		}
 		return result;
-	}
-
-	private static class CaptureMailService implements MailService {
-		private Mail lastSend;
-		private List<Mail> lastBulk;
-		private int sendCount;
-		private int writeCount;
-		private int bulkCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			writeCount++;
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			lastSend = mail;
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			lastBulk = mails;
-			bulkCount++;
-		}
 	}
 }

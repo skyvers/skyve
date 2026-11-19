@@ -11,9 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +21,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.skyve.domain.app.admin.SecurityLog;
 import org.skyve.domain.messages.DomainException;
 import org.skyve.domain.types.Timestamp;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
 
@@ -87,11 +86,11 @@ class SecurityUtilTest {
 
 		invokeEmail(securityLog);
 
-		assertEquals(1, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("security@skyve.org"));
-		assertThat(capture.lastSend.getSenderEmailAddress(), is("noreply@skyve.org"));
-		assertThat(capture.lastSend.getSubject(), is("[SkyveTest - TEST] Security Log Entry - Login Failure"));
-		assertThat(capture.lastSend.getBody(), containsString("Event Message: Bad password"));
+		assertEquals(1, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains("security@skyve.org"));
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is("noreply@skyve.org"));
+		assertThat(capture.getLastSent().getSubject(), is("[SkyveTest - TEST] Security Log Entry - Login Failure"));
+		assertThat(capture.getLastSent().getBody(), containsString("Event Message: Bad password"));
 	}
 
 	@Test
@@ -110,13 +109,13 @@ class SecurityUtilTest {
 
 		invokeEmail(securityLog);
 
-		assertEquals(1, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("support@skyve.org"));
-		assertThat(capture.lastSend.getBody(), containsString("Thread ID: 42"));
-		assertThat(capture.lastSend.getBody(), containsString("Thread Name: worker"));
-		assertThat(capture.lastSend.getBody(), containsString("Username: admin"));
-		assertThat(capture.lastSend.getBody(), containsString("Logged in User ID: U1"));
-		assertThat(capture.lastSend.getBody(), containsString("Provenance: SecurityUtilTest.java:1"));
+		assertEquals(1, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains("support@skyve.org"));
+		assertThat(capture.getLastSent().getBody(), containsString("Thread ID: 42"));
+		assertThat(capture.getLastSent().getBody(), containsString("Thread Name: worker"));
+		assertThat(capture.getLastSent().getBody(), containsString("Username: admin"));
+		assertThat(capture.getLastSent().getBody(), containsString("Logged in User ID: U1"));
+		assertThat(capture.getLastSent().getBody(), containsString("Provenance: SecurityUtilTest.java:1"));
 	}
 
 	@Test
@@ -126,7 +125,7 @@ class SecurityUtilTest {
 
 		invokeEmail(mock(SecurityLog.class));
 
-		assertEquals(0, capture.sendCount);
+		assertEquals(0, capture.getSent().size());
 	}
 
 	@Test
@@ -135,7 +134,7 @@ class SecurityUtilTest {
 
 		invokeEmail(mock(SecurityLog.class));
 
-		assertEquals(0, capture.sendCount);
+		assertEquals(0, capture.getSent().size());
 	}
 
 	@Test
@@ -145,9 +144,9 @@ class SecurityUtilTest {
 
 		invokeEmail(securityLog);
 
-		assertEquals(1, capture.sendCount);
-		assertThat(capture.lastSend.getSubject(), is("[SkyveTest] Security Log Entry - Unknown"));
-		assertThat(capture.lastSend.getBody(), containsString("A new security event has been logged for application: [SkyveTest]"));
+		assertEquals(1, capture.getSent().size());
+		assertThat(capture.getLastSent().getSubject(), is("[SkyveTest] Security Log Entry - Unknown"));
+		assertThat(capture.getLastSent().getBody(), containsString("A new security event has been logged for application: [SkyveTest]"));
 	}
 
 	@Test
@@ -411,26 +410,5 @@ class SecurityUtilTest {
 		org.springframework.security.crypto.password.PasswordEncoder encoder = SecurityUtil.createDelegatingPasswordEncoder();
 		String encoded = encoder.encode("myPassword");
 		assertTrue(encoder.matches("myPassword", encoded));
-	}
-
-	private static class CaptureMailService implements MailService {
-		private Mail lastSend;
-		private int sendCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// no-op
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			lastSend = mail;
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			// no-op
-		}
 	}
 }

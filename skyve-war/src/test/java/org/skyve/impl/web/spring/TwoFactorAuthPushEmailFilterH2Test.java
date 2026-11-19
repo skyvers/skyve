@@ -8,20 +8,18 @@ import static org.mockito.Mockito.mock;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.skyve.EXT;
+import org.skyve.impl.mail.CaptureMailService;
 import org.skyve.impl.mail.MailServiceStaticSingleton;
 import org.skyve.impl.util.UtilImpl;
-import org.skyve.util.Mail;
 import org.skyve.util.MailService;
 import org.springframework.security.provisioning.UserDetailsManager;
 
@@ -74,11 +72,11 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 
 		filter.send(user, "654321");
 
-		assertEquals(1, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"));
-		assertThat(capture.lastSend.getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
-		assertThat(capture.lastSend.getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
-		assertThat(capture.lastSend.getBody(), containsString("654321"));
+		assertEquals(1, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains("to@skyve.org"));
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
+		assertThat(capture.getLastSent().getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
+		assertThat(capture.getLastSent().getBody(), containsString("654321"));
 	}
 
 	@Test
@@ -102,12 +100,12 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 		filter.send(user, "111111");
 		filter.send(user, "222222");
 
-		assertEquals(2, capture.sendCount);
-		assertTrue(capture.lastSend.getRecipientEmailAddresses().contains("to@skyve.org"));
-		assertThat(capture.lastSend.getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
-		assertThat(capture.lastSend.getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
-		assertThat(capture.lastSend.getBody(), containsString("222222"));
-		assertThat(capture.lastSend.getBody(), not(containsString("111111")));
+		assertEquals(2, capture.getSent().size());
+		assertTrue(capture.getLastSent().getRecipientEmailAddresses().contains("to@skyve.org"));
+		assertThat(capture.getLastSent().getSenderEmailAddress(), is(UtilImpl.SMTP_SENDER));
+		assertThat(capture.getLastSent().getSubject(), is(TwoFactorAuthPushEmailFilter.SYSTEM_TWO_FACTOR_CODE_SUBJECT));
+		assertThat(capture.getLastSent().getBody(), containsString("222222"));
+		assertThat(capture.getLastSent().getBody(), not(containsString("111111")));
 	}
 
 	private static final class ExposedTwoFactorAuthPushEmailFilter extends TwoFactorAuthPushEmailFilter {
@@ -127,27 +125,6 @@ class TwoFactorAuthPushEmailFilterH2Test extends AbstractH2Test {
 			s.setString(1, CUSTOMER);
 			s.executeUpdate();
 			c.commit();
-		}
-	}
-
-	private static class CaptureMailService implements MailService {
-		private Mail lastSend;
-		private int sendCount;
-
-		@Override
-		public void writeMail(Mail mail, OutputStream out) {
-			// no-op
-		}
-
-		@Override
-		public void sendMail(Mail mail) {
-			lastSend = mail;
-			sendCount++;
-		}
-
-		@Override
-		public void sendBulkMail(List<Mail> mails) {
-			// no-op
 		}
 	}
 }
