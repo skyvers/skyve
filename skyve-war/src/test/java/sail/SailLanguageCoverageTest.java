@@ -86,7 +86,6 @@ class SailLanguageCoverageTest {
 			Map.entry("cancel@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Cancel does"),
 			Map.entry("ok@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped OK does"),
 			Map.entry("remove@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Remove does"),
-			Map.entry("zoomOut@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Zoom Out does"),
 			Map.entry("dataGridLink@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped row link does"));
 
 	@Test
