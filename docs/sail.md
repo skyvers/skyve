@@ -325,11 +325,17 @@ skyve-war/target/sail/
     20261117-101500-123-SailRunIT.run-recordings-contacts.xml/
       index.html                    the film strip: each step, how it went, its screenshot
       player.html                   the video, captioned with the step that was running
+      run.json                      the run's title, outcome and timing, for the list of runs
 ```
 
+- The list of runs shows each session (one `mvn` run) newest first, and its
+  runs in the order they ran: under each suite file's name, with a
+  workflow's legs grouped together. Each run is named by its first
+  interaction, with its outcome, steps and time. "Failed only" and a filter
+  box narrow it.
 - The film strip highlights failed steps, and a link jumps to the first one.
-- The video player has play, pause, a speed control and a list of steps to
-  jump to.
+- The video player has play, pause, previous and next step, a speed control
+  and a list of the steps, in words, to jump to.
 - The other values are `failures` (failures only), `snapshots` (failures and
   step screenshots), `video` (failures and video) and `none`. A suite file can
   ask for evidence itself, with `evidence="failures"`; the option replaces
@@ -2221,16 +2227,21 @@ strip and the player into the same folder.
   fails (before the test strategy acts on it), the executor saves a
   screenshot, named by sequence, interaction and step, for example
   `012-Contacts-create-save.png`. With `-Dsail.snapshotSource=true` it also
-  saves the page source. The run's `index.html` is a film strip: each step's
-  number, interaction, the step as SAIL XML, its outcome (with the failure),
-  its duration and its screenshot. Failed steps are highlighted, and a link
-  jumps to the first failure.
+  saves the page source. The run's `index.html` is a film strip: the steps
+  under their interactions, each with its number, what it does in words, the
+  step as SAIL XML, its outcome (with the failure), its duration and its
+  screenshot. Failed steps are highlighted, and a link jumps to the first
+  failure.
 - **Video (`sail.videoDir`).** The executor records Chrome's DevTools
   screencast (`Page.startScreencast`: JPEG, quality 60, at most 1280×800),
   saving each frame with the time Chrome drew it, and each step's start and end.
-  The run's `player.html` plays the frames at their real timing, captioned
-  with the step that was running. It has play and pause, a speed of 0.5x to 4x,
-  a slider, and a step list to jump to. The screencast uses raw CDP commands
+  The run's `player.html` plays the frames at their real timing, fitted to
+  the window, with the step that was running underneath: its interaction,
+  what it does in words, any failure, and the step as SAIL. It has play and
+  pause, previous and next step, a speed of 0.5x to 8x and a slider. Beside
+  the frames, the steps are listed in words under their interactions; clicking
+  one shows its first frame. Space plays and pauses, and the arrow keys move a
+  step. The screencast uses raw CDP commands
   through Selenium's DevTools, so it does not depend on the DevTools version
   Selenium was built for. Frames are written and acknowledged on a thread of
   their own, so the test does not wait for them. A browser without DevTools
@@ -2238,13 +2249,20 @@ strip and the player into the same folder.
 - **Folders.** Each automation run gets its own folder under each directory,
   named by its start time, the test (`Class.method`) and, in a suite, the
   member's file. Suites, workflows and ITs with several tests therefore keep
-  every run. Each directory's `index.html` lists the runs, newest first. The
-  pages are static files that open from the file system. When both
+  every run. Each directory's `index.html` lists the runs by session (the
+  JVM's run of tests), newest first; in a session, the runs are in the order
+  they ran, under their suite file (the script that labelled them) and, for
+  a workflow's legs, under the workflow. Each run shows its first
+  interaction, outcome, steps and time. This comes from each run's
+  `run.json`; runs written before that file existed come last, by their
+  folders' names. The pages are static files that open from the file
+  system, light or dark as the system is. When both
   properties name the same directory, a run's film strip and player are in one
   folder and link to each other.
 
-- **Settings.** The film strip and the player list the run's settings that
-  are not defaults, with their sources, as the `SAIL settings:` line does.
+- **Settings.** The film strip and the player have a Settings button that
+  shows the run's details and its settings that are not defaults, with their
+  sources, as the `SAIL settings:` line does.
 - **Keeping only failures.** With `sail.keepMedia=failed`, a unit that passed
   deletes its folders when it ends, and the directory's list of runs is
   written again. The unit is a whole workflow, a whole suite member, or one
