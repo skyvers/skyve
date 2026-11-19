@@ -325,11 +325,17 @@ skyve-war/target/sail/
     20261117-101500-123-SailRunIT.run-recordings-contacts.xml/
       index.html                    the film strip: each step, how it went, its screenshot
       player.html                   the video, captioned with the step that was running
+      run.json                      the run's title, outcome and timing, for the list of runs
 ```
 
+- The list of runs shows each session (one `mvn` run) newest first, and its
+  runs in the order they ran: under each suite file's name, with a
+  workflow's legs grouped together. Each run is named by its first
+  interaction, with its outcome, steps and time. "Failed only" and a filter
+  box narrow it.
 - The film strip highlights failed steps, and a link jumps to the first one.
-- The video player has play, pause, a speed control and a list of steps to
-  jump to.
+- The video player has play, pause, previous and next step, a speed control
+  and a list of the steps, in words, to jump to.
 - The other values are `failures` (failures only), `snapshots` (failures and
   step screenshots), `video` (failures and video) and `none`. A suite file can
   ask for evidence itself, with `evidence="failures"`; the option replaces
@@ -587,6 +593,7 @@ script from the test classpath and runs it with an interpreted executor:
 | `util.sail.SailSettings` | Resolves every SAIL setting from `-D`, the environment, the test's code, the properties file, the browser configuration and the scripts; see [Settings](#settings). |
 | `util.sail.SailServerLock` | A cross-JVM file lock per base URL, so that only one SAIL IT at a time uses a server; see [One test per server](#one-test-per-server). |
 | `util.sail.SailMedia` | Step snapshots, the film strip, and the video and its player; see [Snapshots and video](#snapshots-and-video). |
+| `util.sail.SailRunPages`, `util.sail.SailRunsList`, `util.sail.SailStepWords`, `util.sail.SailMediaHtml` | The media pages: a run's film strip and player, each directory's list of runs, each step in words, and the pages' shared parts. Their CSS and JavaScript are files in `skyve-war/src/test/resources/util/sail/media/`, inlined into each page. |
 | `util.sail.SailLoad` | Runs SAIL as many virtual users at once, with a summary, a report and thresholds; see [Load Testing](#load-testing). |
 | `sail.SailRunIT` | The generic runner: runs the suites and scripts that `sail.run` names, with no Java; see [For BAs and testers](#for-bas-and-testers). |
 | `util.sail.InterpretedWebDriverExecutor` | Shared executor base. Runs the automation, applies the test strategy, records failures, and implements login, logout, URL navigation, the context steps, `testSuccess`, `testFailure`, `comment`, the [script and call steps](#scripts-and-calls) and `pause`. It also keeps the [variables](#the-run-token-and-variables), checks the list grid steps' columns, and switches the [view roles](#the-test-user) at each login. |
@@ -1957,6 +1964,7 @@ ITs where you meant to run unit tests.
 | `SignOutOtherSessionsSailIT` (`util/sail`) | two Chrome profiles (a phone and a PC) sign in as `admin` with `<login remember="true"/>`; on the PC, My Current Sessions, `SignOutOtherSessions` confirmed; after a restart the phone is signed out and the PC is still signed in. A second test does the same with the administrator's `SignOutEverywhere` on their own user (it keeps this browser) | PF | `sail` |
 | `SignOutOtherSessionsSmartClientSailIT` (`util/sail`) | the same two actions in SmartClient: the confirmation, the message and that this browser's own session carries on | SC | `sail` |
 | `PasswordPromptSailIT` (`util/sail`) | real typing reaches a page 3 s after a sign in as `setup` / `setup`, a leaked pair whose Chrome prompt otherwise blocks all input; a JDK `HttpServer` serves the form, so it needs Chrome (headed) and the network but no Skyve server | none | `sail` |
+| `SailMediaPagesSailIT` (`util/sail`) | the media pages in a headless Chrome. The video player: the steps in words by interaction, a clicked step is the step shown (also one during which no frame was drawn), the step buttons and arrow keys, seeking, and playing to the end. The list of runs: "Failed only" and the text filter hide the runs, file and workflow headings and sessions with nothing to show. A JDK `HttpServer` serves the generated pages, so it needs Chrome but no Skyve server | none | `sail` |
 
 To run the SAIL unit tests without any browser IT, exclude ITs and give a base
 URL that nothing answers:
@@ -2226,16 +2234,21 @@ strip and the player into the same folder.
   fails (before the test strategy acts on it), the executor saves a
   screenshot, named by sequence, interaction and step, for example
   `012-Contacts-create-save.png`. With `-Dsail.snapshotSource=true` it also
-  saves the page source. The run's `index.html` is a film strip: each step's
-  number, interaction, the step as SAIL XML, its outcome (with the failure),
-  its duration and its screenshot. Failed steps are highlighted, and a link
-  jumps to the first failure.
+  saves the page source. The run's `index.html` is a film strip: the steps
+  under their interactions, each with its number, what it does in words, the
+  step as SAIL XML, its outcome (with the failure), its duration and its
+  screenshot. Failed steps are highlighted, and a link jumps to the first
+  failure.
 - **Video (`sail.videoDir`).** The executor records Chrome's DevTools
   screencast (`Page.startScreencast`: JPEG, quality 60, at most 1280×800),
   saving each frame with the time Chrome drew it, and each step's start and end.
-  The run's `player.html` plays the frames at their real timing, captioned
-  with the step that was running. It has play and pause, a speed of 0.5x to 4x,
-  a slider, and a step list to jump to. The screencast uses raw CDP commands
+  The run's `player.html` plays the frames at their real timing, fitted to
+  the window, with the step that was running underneath: its interaction,
+  what it does in words, any failure, and the step as SAIL. It has play and
+  pause, previous and next step, a speed of 0.5x to 8x and a slider. Beside
+  the frames, the steps are listed in words under their interactions; clicking
+  one shows its first frame. Space plays and pauses, and the arrow keys move a
+  step. The screencast uses raw CDP commands
   through Selenium's DevTools, so it does not depend on the DevTools version
   Selenium was built for. Frames are written and acknowledged on a thread of
   their own, so the test does not wait for them. A browser without DevTools
@@ -2243,13 +2256,20 @@ strip and the player into the same folder.
 - **Folders.** Each automation run gets its own folder under each directory,
   named by its start time, the test (`Class.method`) and, in a suite, the
   member's file. Suites, workflows and ITs with several tests therefore keep
-  every run. Each directory's `index.html` lists the runs, newest first. The
-  pages are static files that open from the file system. When both
+  every run. Each directory's `index.html` lists the runs by session (the
+  JVM's run of tests), newest first; in a session, the runs are in the order
+  they ran, under their suite file (the script that labelled them) and, for
+  a workflow's legs, under the workflow. Each run shows its first
+  interaction, outcome, steps and time. This comes from each run's
+  `run.json`; runs written before that file existed come last, by their
+  folders' names. The pages are static files that open from the file
+  system, light or dark as the system is. When both
   properties name the same directory, a run's film strip and player are in one
   folder and link to each other.
 
-- **Settings.** The film strip and the player list the run's settings that
-  are not defaults, with their sources, as the `SAIL settings:` line does.
+- **Settings.** The film strip and the player have a Settings button that
+  shows the run's details and its settings that are not defaults, with their
+  sources, as the `SAIL settings:` line does.
 - **Keeping only failures.** With `sail.keepMedia=failed`, a unit that passed
   deletes its folders when it ends, and the directory's list of runs is
   written again. The unit is a whole workflow, a whole suite member, or one
@@ -2945,8 +2965,13 @@ PrimeFaces (`pf/`, tablet, and one phone member) and SmartClient (`sc/`).
 | `pf/02-contacts-communications.xml`, `sc/02-…` | member | Contact create, find, change and delete, with an image upload and a declined delete; Communication Templates; Communications: every tab, attachments, and the send actions' refusals; generated contacts (`testDataEnter`) from the contacts query |
 | `pf/03-security-admin.xml`, `sc/03-…` | member | Data Groups; Groups (roles through list membership); the User wizard; the new user signs in, sees a role-filtered menu and changes their password; Sign In History; Security Log; Configuration tabs; Mail Log; generated data groups (and, in SC, a generated group with a role), each saved twice |
 | `pf/04-devops.xml`, `sc/04-…` | member | Control Panel (every tab, a query, cache statistics, generated SAIL); Data Maintenance (the backup list, import/export; in PF also a save and the upload backup page); Document Creator, and its Submit refused (PF without a module, SC without an output location); Monitoring Dashboard |
-| `pf/05-reports-misc.xml`, `sc/05-…` | member | Reports, Audits, System Dashboard, Document Numbers (and generated ones), and that the backup job completed |
+| `pf/05-reports-misc.xml`, `sc/05-…` | member | Audits, System Dashboard, Document Numbers (and generated ones), and that the backup job completed |
+| `pf/06-import-export.xml`, `sc/06-…` | member | Data Maintenance Import/Export for Contact: an import definition from an uploaded spreadsheet (`sail/files/sail-import-contacts.xlsx`), Clear Import and Run Import each declined then confirmed, the three imported contacts found in the Contacts list; an export definition, Reset Columns and Run Export; both definitions and the contacts deleted |
+| `pf/07-reports.xml` (a workflow: SC, PF, SC, PF, SC), `sc/07-…` | member | SC: the report tools in the menu; a report designed with constant and BizQL datasets, the BizQL parameter added for the query and refused until typed; a duplicate name refused; Test Query (and its refusal for a missing class), Test Report, the template download and specification export; Report Schedules following the enabled flag; Report Manager export (refused with nothing selected), validate-only import, an invalid file refused, import and re-import. PF (the Reports list and scheduling are PF only): the report listed and run with a parameter; scheduling refused while a parameter is required, then without Run As or a recipient; a schedule saved and read back. SC then finds it in Report Schedules and deletes it |
+| `pf/08-tags-communications.xml`, `sc/08-…` | member | Two tags loaded from a spreadsheet (`sail/files/sail-tags.xlsx`) and combined (intersect, union, except, an untagging upload, Clear), each count asserted; Tag All on a third tag; Copy Tag To User; a communication to a tag: Get Count, Get Results, Create Files, the batch listed, zipped, its delete declined then confirmed; a Bulk Document Action that deletes the tagged contacts. SC also: Snapshots made, reordered, copied and deleted. Tags and Snapshots are SC menu items; PF reaches Tags through the `qTags` list |
+| `pf/09-operations.xml`, `sc/09-…` | member | Data Refresh refused without an option, then run and read through its job; a refresh notification logged, not sent, in the Mail Log (mail settings restored afterwards); Control Panel cache eviction by its entry counts, and a built-in cache refusing to stop; Monitoring Dashboard Save and Purge. SC also: User Hits counting, a content item in the Content list, Reindex Data, Reindex Content and Reindex read through their jobs |
 | `pf/10-phone-smoke.xml` | member | The admin menu items the phone UX/UI shows, in a phone browser |
+| `pf/11-user-list.xml`, `sc/11-…` | member | Create Users refused without a group, without addresses and with a bad address; then run as a job whose log and the Users list show two users, one of whom signs in once given a password; Invite Users (with `mailBogusSend` on, which it leaves on) and its invitations in the Mail Log; the User wizard's Back steps and password mismatch; Generate Unique User Name and Generate Password, whose password signs in to the change password page |
 | `pf/98-destructive.xml`, `sc/98-…` | member | Clears the completed jobs list; Configuration saved with safe values (`mailBogusSend` on, so mail is only logged); a mail send that is refused; generate tagged test data, check that its job cannot be rerun, and delete the data; delete completed jobs (declined, then confirmed) |
 | `sc/99-truncate.xml` | member | Checks that a backup is listed, then truncates all data, keeping the bootstrap user, and checks the result |
 | `99-restore.xml` | restore, a workflow: SC, PF, SC | SC restores the newest backup, its own (declined, then confirmed), waits for the restore job, signs in again, checks that the marker has gone and deletes its backup. PF checks that the marker has gone, selects its own backup, declines a restore of it and deletes it, then uses Update My Details. SC then uses Update My Details. |
@@ -2955,6 +2980,21 @@ The SC members mirror the PF ones file by file and interaction by
 interaction. They also cover the menu items and actions that only SmartClient
 has, among them User Hits, Heap Dumps, Report Manager, Snapshots and Tags. SC's
 98 also drops the content index and reindexes, and truncates the audit log.
+Where a function is split between the renderers, a member is a workflow:
+report design is SmartClient only, and the Reports list and scheduling are
+PrimeFaces only, so `pf/07-reports.xml` moves between them.
+
+**How the functional members were written.** The metadata gives the steps:
+the menu (`admin.xml`), the documents' attributes and conditions, and the
+views' tabs, bindings and actions. The action and Bizlet Java gives the
+assertions: what each action changes, refuses and says. Each step that does
+something is followed by a check of what it did (a count, a value, a listed
+row, a job's status and log, or a sign in that works only if it worked), and
+refusals are covered where the Java has one. What could not be driven or
+checked is recorded in an XML comment where the step would be: downloads
+(no step reads one), job logs and mail log details (blurbs, read with
+`testScript`), Run Job Now (hidden while the job scheduler is off), a link
+that only an email carries, and Heap Dumps (nothing in the UI makes one).
 
 **The bracket.** The three set-up members run first, in this order: a marker
 made before the backups would be in them, so the restore could not show that
@@ -2970,9 +3010,14 @@ both backups are deleted.
 **Independent members, in an order.** Each member signs in, makes what it
 needs with its own run token, and cleans up; none requires another. The order
 still matters for one thing: both 05 members check the backup job's row in the
-completed jobs list, and both 98 members clear that list, so the destructive
-members run after every other member, and `sc/99-truncate.xml` runs last,
-just before the restore. Each 98 member clears the list first, so that a row
+completed jobs list, and both 11 and both 98 members clear that list, so the 11
+members run after both 05 members, the destructive members run after every
+other member, and `sc/99-truncate.xml` runs last, just before the restore. The
+06 and 08 members use fixed contact names (their spreadsheets cannot hold the
+run token), and 06 the one Contact import definition, and each asserts first
+that none is left over; the 11 members use a generated user name family. So a
+failed run of one of them, outside the suite's restore, leaves data that fails
+the next run; reset the server's data then. Each 98 member clears the list first, so that a row
 the other renderer's 98 left, if it stopped early, cannot satisfy its waits.
 
 **Running part of it.** `-Dsail.suite.only=pf/` or `sc/` chooses one
@@ -3192,6 +3237,8 @@ that show it, relative to the repository root:
 | Tags | every `*SailIT` and `*IT` under `skyve-war/src/test/java/sail/`, for example `skyve-war/src/test/java/sail/admin/AdminSuiteSailIT.java`, and the two under `skyve-war/src/test/java/util/sail/`: `SelenideFocusProbeSailIT.java` and `PrimeFacesSelenideClickSailIT.java` |
 | The Maven profile | the `sail` profile in `pom.xml` |
 | Snapshots, the film strip, video, `keepMedia` and media units | `skyve-war/src/test/java/util/sail/SailMediaTest.java` |
+| The video player's controls and the list of runs' filters, in a browser | `skyve-war/src/test/java/util/sail/SailMediaPagesSailIT.java` |
+| The media pages' CSS and JavaScript | `skyve-war/src/test/resources/util/sail/media/` |
 | A suite's browser lifecycle: handed on, stopped after a failure, closed at the end | `skyve-war/src/test/java/util/sail/SailWorkflowTest.java` |
 | A click on a covered element | `skyve-war/src/test/java/util/sail/PrimeFacesSelenideClickSailIT.java` |
 | A load run | `skyve-war/src/test/java/sail/load/KitchenSinkLoadSailIT.java`; the runner's shape, thresholds and stopping: `skyve-war/src/test/java/util/sail/SailLoadTest.java`; its statistics and report: `skyve-war/src/test/java/util/sail/SailLoadReportTest.java` |

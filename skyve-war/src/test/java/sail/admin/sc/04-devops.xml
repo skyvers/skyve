@@ -92,15 +92,11 @@
 			<testGridRows module="admin" query="RequestListModel" minRows="1" />
 		</method>
 	</interaction>
-	<interaction name="User Hits (SmartClient only)">
-		<method>
-			<navigateMenu module="admin" item="DevOps/User Hits" />
-			<testGridRows module="admin" document="UserMonthlyHits" minRows="0" />
-		</method>
-	</interaction>
+	<!-- User Hits (SmartClient only) is checked, with its counts, in 09-operations.xml -->
 	<interaction name="Heap Dumps (SmartClient only)">
 		<method>
 			<navigateMenu module="admin" item="DevOps/Heap Dumps" />
+			<comment>Nothing in the UI makes a heap dump (the Dump Heap job has no menu item or action), so the list is whatever the server has, and nothing is selected</comment>
 			<testWidget action="DownloadHeapDump" enabled="false" />
 		</method>
 	</interaction>

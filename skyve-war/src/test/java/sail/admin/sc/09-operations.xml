@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+	Admin suite (admin.suite.xml), SmartClient: Operations. What an administrator does to keep the system running, with a check after every
+	step that does something: a document data refresh and the job it starts (read from the completed jobs list), the mail that job sends
+	(read from the Mail Log, with mail only logged), the Control Panel's caches, and the Monitoring Dashboard's purge. SmartClient also has the
+	User Hits (counts that grow with the administrator's requests) and the Content tab (a listed, selectable upload; the reindex jobs).
+
+	Order: this member never runs a Backup job and never deletes completed jobs, so it can run anywhere before the 98-destructive.xml
+	members (the 05-reports-misc.xml members expect exactly one Backup row in the completed jobs list). It leaves its own jobs in that list.
+
+	Not scripted, and why (details in the ops findings.md):
+	- JobSchedule's Run Job Now: its button and the schedules list are only available when the job scheduler runs (the jobScheduler
+	  condition), and the test server runs without it.
+	- Job's Cancel Job (only for a running job: the jobs here finish in well under a second, so there is nothing to catch) and Re-run Job
+	  (only for a job started without a bean, which the UI never does: a refresh, reindex or test data job is started with its bean).
+	- Control Panel's Evict All Cached Metadata (EvictFromCache): on this single customer server it leaves the application without a
+	  Hibernate session factory, so every later request fails; and Swap Customer, which shows no change in the menu or the module lists.
+	- Data Maintenance's Download Backup: SAIL has no step for downloads.
+	- The Startup view (Dismiss, Save Changes): it is only shown by the set-up page at first sign-in, which the test server turns off.
+-->
+<automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
+			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
+			xmlns="http://www.skyve.org/xml/sail"
+			xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<!--
+		The mail settings put-back at the end of the Mail Log interaction runs only if the steps before it pass (a failed Assert stops the
+		member, and the language has no cleanup that runs after a failure). A failed run leaves mailBogusSend and mailTestRecipient as set,
+		which is what 98-destructive.xml sets anyway (mail only logged), so nothing sends real mail.
+	-->
+	<before>
+		<login user="admin" password="admin" />
+		<testSuccess />
+		<switchMode />
+	</before>
+	<interaction name="Clear the completed jobs list">
+		<method>
+			<comment>This member waits for its jobs by their rows in the completed jobs list, and pf/09-operations.xml leaves refresh jobs there that this member's log checks would read: clear it first. Safe because every sc/05 to sc/09 member runs after both 05-reports-misc.xml members (which check the backup's row) and before the 98-destructive.xml members. pf/09 must not do this: sc/05 runs after it.</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<action name="DeleteCompletedJobs" />
+			<action name="Refresh" />
+			<testGridRows module="admin" query="qCompletedJobs" maxRows="0" timeoutMillis="10000" />
+		</method>
+	</interaction>
+	<interaction name="Data Refresh: refused without a refresh option">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data Refresh" />
+			<testGridRows binding="refreshDocuments" minRows="1" />
+			<action name="RefreshDocumentTuples" testSuccess="false" />
+			<testFailure message="Value required" />
+		</method>
+	</interaction>
+	<interaction name="Data Refresh: refresh a document, read the job it ran">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data Refresh" />
+			<!--
+				LANGUAGE GAP: SmartClient's Data Refresh grid has showEdit="false" (its cells are edited by clicking them), and dataGridEdit
+				needs the grid's edit tool button, while dataEnter finds no cell widget until a row is being edited. So no document can
+				be included here: the refresh runs over none, which still starts, runs and logs the job. PrimeFaces includes the DataGroup.
+			-->
+			<dataEnter binding="refreshOption" value="Upsert" match="label" />
+			<action name="RefreshDocumentTuples" confirm="false" />
+			<comment>Declined: the confirmation is answered No, so the refresh is not sent</comment>
+			<action name="RefreshDocumentTuples" />
+			<testMessage contains="Refresh Job has been started" type="info" />
+			<comment>The refresh is a job: wait for its row in the completed jobs list</comment>
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Refresh Persisted Document Data" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Refresh Persisted Document Data" />
+			<testValue binding="status" value="complete" />
+			<testValue binding="percentComplete" value="100" />
+			<comment>The job's log shows it started and finished, and that it refreshed no document</comment>
+			<testScript message="The job log should show a refresh that included no document"><![CDATA[
+				const t = document.body.innerText;
+				return t.includes('Started Document Data Refresh Job')
+					&& t.includes('Finished Document Data Refresh Job')
+					&& ! t.includes('Document Data Refresh requested for');
+			]]></testScript>
+			<comment>The job was started with the Data Maintenance bean, which the job record does not keep, so it cannot be rerun; it has finished, so it cannot be cancelled</comment>
+			<testWidget action="RerunJob" visible="false" />
+			<testWidget action="CancelJob" visible="false" />
+			<cancel />
+			<navigateMenu module="admin" item="Jobs" />
+			<tabSelect path="Actual" />
+			<action name="Refresh" />
+			<testGridRows binding="runningJobs" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Mail Log: the mail a job sends is logged, not sent">
+		<method>
+			<comment>Mail is only logged: mailBogusSend is set here (98-destructive.xml sets it too) and put back at the end</comment>
+			<navigateMenu module="admin" item="Security Admin/Configuration" />
+			<tabSelect path="Startup Configuration" />
+			<captureValue binding="startup.mailBogusSend" variable="bogus" />
+			<captureValue binding="startup.mailTestRecipient" variable="recipient" />
+			<dataEnter binding="startup.mailBogusSend" value="true" />
+			<dataEnter binding="startup.mailTestRecipient" value="ops{run}@example.com" />
+			<save />
+			<testSuccess />
+			<testValue binding="startup.mailBogusSend" value="true" />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Data Refresh" />
+			<dataEnter binding="refreshOption" value="Upsert" match="label" />
+			<dataEnter binding="notification" value="true" />
+			<action name="RefreshDocumentTuples" />
+			<testMessage contains="Refresh Job has been started" type="info" />
+			<navigateMenu module="admin" item="Security Admin/Mail Log" />
+			<tabSelect path="Database Mail Logs" />
+			<testGridRows module="admin" query="qMailLogs" rowContaining="ops{run}@example.com" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qMailLogs" rowContaining="ops{run}@example.com" />
+			<comment>The mail was skipped by the bogus send, and says so; it went to the test recipient, not the contact</comment>
+			<comment>SmartClient draws the details as separate cells in order (Dispatch Status, Provider, ..., Relay Status, Relay Detail, To Recipients, ..., Subject), so the script joins the visible cells and checks the sequence</comment>
+			<testScript message="The mail log should show a skipped test bogus send to ops{run}@example.com about the refresh"><![CDATA[
+				const cells = Array.from(document.querySelectorAll('div')).filter(d => d.children.length == 0 && d.offsetParent && d.innerText).map(d => d.innerText.trim()).join('|');
+				return cells.includes('|SKIPPED|SMTPMailService|skipped|testBogusSend|ops' + sail.run + '@example.com|Perform Document Data Refresh - Complete|');
+			]]></testScript>
+			<cancel />
+			<comment>Put the mail settings back</comment>
+			<navigateMenu module="admin" item="Security Admin/Configuration" />
+			<tabSelect path="Startup Configuration" />
+			<testValue binding="startup.mailBogusSend" value="true" />
+			<dataEnter binding="startup.mailBogusSend" value="{var:bogus}" />
+			<dataEnter binding="startup.mailTestRecipient" value="{var:recipient}" />
+			<save />
+			<testSuccess />
+			<testValue binding="startup.mailBogusSend" value="{var:bogus}" />
+			<testValue binding="startup.mailTestRecipient" value="{var:recipient}" />
+		</method>
+	</interaction>
+	<interaction name="Control Panel: caches, evicting and statistics">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Control Panel" />
+			<tabSelect path="Design" />
+			<testWidget action="DownloadResults" visible="false" />
+			<action name="CacheStats" />
+			<comment>The statistics open the Results tab and make Download Results available; they count what each cache holds (its disk tier's entries)</comment>
+			<testWidget action="DownloadResults" />
+			<execute variable="conversationsBefore"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\nconversations\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return /Entries:\s*(\d+)/.exec(t.substring(d))[1];
+			]]></execute>
+			<testScript message="The conversation cache should hold the conversations opened so far"><![CDATA[
+				return Number(sail.vars.conversationsBefore) > 1;
+			]]></testScript>
+			<tabSelect path="Design" />
+			<comment>The CSRF token cache holds only the current request's token on a fresh server, so its count cannot show an eviction reliably: the growl is checked, and the conversation cache's count below proves eviction</comment>
+			<dataEnter binding="selectedCache" value="CSRF Tokens" match="label" />
+			<action name="EvictSelectedCache" confirm="false" />
+			<action name="CacheStats" />
+			<tabSelect path="Design" />
+			<action name="EvictSelectedCache" />
+			<testMessage contains="Cache tokens has been cleared" type="info" />
+			<action name="CacheStats" />
+			<tabSelect path="Design" />
+			<dataEnter binding="selectedCache" value="Conversations" match="label" />
+			<action name="EvictSelectedCache" />
+			<testMessage contains="Cache conversations has been cleared" type="info" />
+			<action name="CacheStats" />
+			<testScript message="Evicting the conversation cache should empty it"><![CDATA[
+				const t = document.body.innerText;
+				const h = t.search(/\nconversations\nEvictions/);
+				const d = t.indexOf('\nDisk\n', h);
+				return Number(/Entries:\s*(\d+)/.exec(t.substring(d))[1]) < Number(sail.vars.conversationsBefore);
+			]]></testScript>
+			<tabSelect path="Design" />
+			<dataEnter binding="selectedCache" value="reference (Hibernate)" match="label" />
+			<action name="EvictSelectedCache" />
+			<testMessage contains="Cache reference has been cleared" type="info" />
+			<comment>Only application caches can be stopped and started; the built-in caches refuse</comment>
+			<dataEnter binding="selectedCache" value="GeoIPs" match="label" />
+			<action name="StopOrStartSelectedCache" testSuccess="false" />
+			<testMessage contains="Cant stop/start cache geoips" type="error" />
+			<comment>Not scripted: Evict All Cached Metadata (EvictFromCache). On a single customer server it disposes the persistence and leaves the application with no Hibernate session factory, so every later request fails: see findings.md</comment>
+			<action name="CacheStats" />
+			<testWidget action="DownloadResults" />
+		</method>
+	</interaction>
+	<interaction name="Monitoring Dashboard: settings are saved, purge forgets the requests">
+		<method>
+			<comment>Use a document nothing else in this member opens, so the purge's effect shows in the request list</comment>
+			<navigateMenu module="admin" item="DevOps/DocumentCreator" />
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Charts" />
+			<captureValue binding="topN" variable="topN" />
+			<comment>Changing a setting saves the dashboard (its Save action)</comment>
+			<dataEnter binding="topN" value="7" />
+			<testValue binding="topN" value="7" />
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Charts" />
+			<testValue binding="topN" value="7" />
+			<comment>Put the setting back</comment>
+			<dataEnter binding="topN" value="{var:topN}" />
+			<testValue binding="topN" value="{var:topN}" />
+			<tabSelect path="Requests" />
+			<testGridRows module="admin" query="RequestListModel" rowContaining="DocumentCreator" minRows="1" />
+			<action name="Purge" confirm="false" />
+			<comment>Declined: the requests are still listed</comment>
+			<testGridRows module="admin" query="RequestListModel" rowContaining="DocumentCreator" minRows="1" />
+			<action name="Purge" />
+			<comment>The dashboard shows the purge when it is opened again: only the requests since then are listed</comment>
+			<navigateMenu module="admin" item="DevOps/Monitoring Dashboard" />
+			<tabSelect path="Requests" />
+			<testGridRows module="admin" query="RequestListModel" minRows="1" />
+			<testGridRows module="admin" query="RequestListModel" rowContaining="DocumentCreator" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="User Hits (SmartClient only): the hits count what the administrator does">
+		<method>
+			<comment>Every request a signed-in user makes adds a hit to the user's count for the month and device; the list shows nothing until it is fetched, so refresh it</comment>
+			<navigateMenu module="admin" item="DevOps/User Hits" />
+			<listGridTool module="admin" document="UserMonthlyHits" tool="refresh" />
+			<listGridFilter module="admin" document="UserMonthlyHits" column="userName" value="admin" operator="equals" />
+			<listGridFilter module="admin" document="UserMonthlyHits" column="device" value="Desktop" operator="equals" />
+			<testGridRows module="admin" document="UserMonthlyHits" minRows="1" />
+			<listGridSort module="admin" document="UserMonthlyHits" column="hitMonth" descending="true" />
+			<captureCell module="admin" document="UserMonthlyHits" row="0" column="numberOfHits" variable="hitsBefore" />
+			<navigateMenu module="admin" item="Contacts" />
+			<navigateMenu module="admin" item="Communication/Communications" />
+			<navigateMenu module="admin" item="DevOps/User Hits" />
+			<listGridTool module="admin" document="UserMonthlyHits" tool="refresh" />
+			<listGridFilter module="admin" document="UserMonthlyHits" column="userName" value="admin" operator="equals" />
+			<listGridFilter module="admin" document="UserMonthlyHits" column="device" value="Desktop" operator="equals" />
+			<listGridSort module="admin" document="UserMonthlyHits" column="hitMonth" descending="true" />
+			<captureCell module="admin" document="UserMonthlyHits" row="0" column="numberOfHits" variable="hitsAfter" />
+			<comment>HITS {var:hitsBefore} then {var:hitsAfter}</comment>
+			<testScript message="The administrator's desktop hits should have grown with the requests made"><![CDATA[
+				return Number(sail.vars.hitsAfter) > Number(sail.vars.hitsBefore);
+			]]></testScript>
+		</method>
+	</interaction>
+	<interaction name="Content (SmartClient only): an uploaded image is listed, and selecting it shows its link">
+		<method>
+			<navigateMenu module="admin" item="Contacts" />
+			<listGridNew module="admin" document="Contact" />
+			<dataEnter binding="name" value="SAIL Ops {run}" />
+			<upload binding="image" file="sail/files/sail-image.png" />
+			<save />
+			<ok />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Content" />
+			<comment>Leftover images from other members stay listed (deleting a contact keeps its content), so find this run's by its contact's bizId, which the content row of the contact's text carries, and which its image row shares</comment>
+			<testGridRows module="admin" document="DataMaintenance" model="ContentModel" rowContaining="SAIL Ops {run}" minRows="1" timeoutMillis="30000" />
+			<captureCell module="admin" document="DataMaintenance" model="ContentModel" rowContaining="SAIL Ops {run}" column="contentBizId" variable="contactId" />
+			<listGridSelect module="admin" document="DataMaintenance" model="ContentModel" rowContaining="{var:contactId}" />
+			<comment>The selected content's link names the file and its type</comment>
+			<testScript message="Selecting the image should show its link" timeoutMillis="10000"><![CDATA[
+				return document.body.innerText.includes('sail-image.png (image/png)');
+			]]></testScript>
+			<comment>Delete the contact (its image goes with it)</comment>
+			<navigateMenu module="admin" item="Contacts" />
+			<listGridZoom module="admin" document="Contact" rowContaining="SAIL Ops {run}" />
+			<delete />
+			<testGridRows module="admin" document="Contact" rowContaining="SAIL Ops {run}" maxRows="0" />
+		</method>
+	</interaction>
+	<interaction name="Content (SmartClient only): reindex the data, the attachments and both, and read each job">
+		<method>
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Content" />
+			<action name="ReindexData" confirm="false" />
+			<comment>Declined: nothing runs (the next job's row is the first to look for)</comment>
+			<action name="ReindexData" />
+			<testMessage contains="Reindex Job has been started" type="info" />
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Reindex all data" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Reindex all data" />
+			<testValue binding="status" value="complete" />
+			<testValue binding="percentComplete" value="100" />
+			<testScript message="The Reindex all data job's log should say Reindex beans complete"><![CDATA[
+				return document.body.innerText.includes('Reindex beans complete');
+			]]></testScript>
+			<cancel />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Content" />
+			<action name="ReindexContent" />
+			<testMessage contains="Reindex Job has been started" type="info" />
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Reindex all attachments" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Reindex all attachments" />
+			<testValue binding="status" value="complete" />
+			<testValue binding="percentComplete" value="100" />
+			<testScript message="The Reindex all attachments job's log should say Reindexing content complete"><![CDATA[
+				return document.body.innerText.includes('Reindexing content complete');
+			]]></testScript>
+			<cancel />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Content" />
+			<action name="Reindex" />
+			<testMessage contains="Reindex Job has been started" type="info" />
+			<navigateMenu module="admin" item="Jobs" />
+			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Reindex all data and attachments" minRows="1" timeoutMillis="60000" />
+			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Reindex all data and attachments" />
+			<testValue binding="status" value="complete" />
+			<testValue binding="percentComplete" value="100" />
+			<testScript message="The Reindex all data and attachments job's log should say Reindexing content complete"><![CDATA[
+				return document.body.innerText.includes('Reindexing content complete');
+			]]></testScript>
+			<cancel />
+			<navigateMenu module="admin" item="DevOps/Data Maintenance" />
+			<tabSelect path="Content" />
+			<action name="CollectContentGarbage" />
+			<testMessage contains="Content Garbage Collection Job has been started" type="info" />
+			<comment>CheckContent compares the content in the data with the index; it reports to the server log only, so check that it runs</comment>
+			<action name="CheckContent" />
+			<testSuccess />
+		</method>
+	</interaction>
+	<after>
+		<logout />
+	</after>
+</automation>

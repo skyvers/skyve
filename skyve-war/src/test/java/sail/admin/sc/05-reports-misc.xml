@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
-	Admin suite (admin.suite.xml), SmartClient: Reports (the SmartClient-only Report Manager, Report Designer and Report Schedules), the
-	SmartClient-only Snapshots and Tags, Audits, System Dashboard, Document Numbers and Jobs.
+	Admin suite (admin.suite.xml), SmartClient: Audits, System Dashboard, Document Numbers and Jobs.
 -->
 <automation uxui="desktop" userAgentType="desktop" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
@@ -12,49 +11,6 @@
 		<testSuccess />
 		<switchMode />
 	</before>
-	<interaction name="Reports: the SmartClient menu has the report tools, not the Reports list">
-		<method>
-			<testMenu module="admin" item="Reports/Reports" present="false" />
-			<navigateMenu module="admin" item="Reports/Report Manager" />
-			<testWidget binding="currentReports" />
-			<testWidget action="ExportReportSpecifications" />
-			<navigateMenu module="admin" item="Reports/Report Designer" />
-			<testGridRows module="admin" document="ReportTemplate" minRows="0" />
-			<listGridNew module="admin" document="ReportTemplate" createView="true" />
-			<testWidget binding="name" />
-			<cancel />
-			<navigateMenu module="admin" item="Reports/Report Schedules" />
-			<testGridRows module="admin" query="qReportSchedules" minRows="0" />
-		</method>
-	</interaction>
-	<interaction name="Snapshots">
-		<method>
-			<navigateMenu module="admin" item="Snapshots" />
-			<tabSelect path="All Snapshots" />
-			<testGridRows module="admin" query="qSnapshots" minRows="0" />
-			<tabSelect path="Reorder Snapshots" />
-			<testWidget action="Reorder" />
-		</method>
-	</interaction>
-	<interaction name="Tags: create, every tab, delete">
-		<method>
-			<navigateMenu module="admin" item="Tags" />
-			<listGridNew module="admin" document="Tag" />
-			<tabSelect path="Details" />
-			<dataEnter binding="name" value="SAIL Tag {run}" />
-			<save />
-			<testValue binding="name" value="SAIL Tag {run}" />
-			<tabSelect path="Combinations" />
-			<tabSelect path="Load" />
-			<tabSelect path="Action" />
-			<tabSelect path="Details" />
-			<ok />
-			<testGridRows module="admin" document="Tag" rowContaining="SAIL Tag {run}" minRows="1" maxRows="1" />
-			<listGridZoom module="admin" document="Tag" rowContaining="SAIL Tag {run}" />
-			<delete />
-			<testGridRows module="admin" document="Tag" rowContaining="SAIL Tag {run}" maxRows="0" />
-		</method>
-	</interaction>
 	<interaction name="Audits: the saves made by the suite are audited">
 		<method>
 			<navigateMenu module="admin" item="Audits" />

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -720,7 +721,30 @@ public abstract class InterpretedWebDriverExecutor<
 	 */
 	public static @Nonnull String describe(@Nonnull Step step) {
 		StringBuilder result = new StringBuilder(64);
-		result.append('<').append(Introspector.decapitalize(step.getClass().getSimpleName()));
+		result.append('<').append(opCode(step));
+		properties(step).forEach((property, value) -> result.append(' ').append(property).append("=\"").append(value).append('"'));
+		return result.append(" />").toString();
+	}
+
+	/**
+	 * Returns a step's op-code, as SAIL XML names it, e.g. {@code dataEnter}.
+	 *
+	 * @param step	the step
+	 * @return the op-code
+	 */
+	static @Nonnull String opCode(@Nonnull Step step) {
+		return Introspector.decapitalize(step.getClass().getSimpleName());
+	}
+
+	/**
+	 * Returns a step's simple properties (those with a value that is not a collection), as text, with any password
+	 * masked; {@link #describe(Step)} writes them as they are, and the SAIL media pages escape them as XML.
+	 *
+	 * @param step	the step
+	 * @return the properties, by name
+	 */
+	static @Nonnull Map<String, String> properties(@Nonnull Step step) {
+		Map<String, String> result = new LinkedHashMap<>();
 		for (Method method : step.getClass().getMethods()) {
 			String methodName = method.getName();
 			if ((method.getParameterCount() > 0) ||
@@ -743,14 +767,14 @@ public abstract class InterpretedWebDriverExecutor<
 				if ((value != null) && (! (value instanceof Collection<?>))) {
 					// never print a password into a failure message (they end up in test reports)
 					boolean secret = property.toLowerCase().contains("password");
-					result.append(' ').append(property).append("=\"").append(secret ? "****" : value).append('"');
+					result.put(property, secret ? "****" : value.toString());
 				}
 			}
 			catch (@SuppressWarnings("unused") ReflectiveOperationException | RuntimeException e) {
 				// not a simple property
 			}
 		}
-		return result.append(" />").toString();
+		return result;
 	}
 
 	@Override

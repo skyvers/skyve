@@ -14,8 +14,12 @@
 
 	Members are independent: each signs in, makes what it needs with its own run token, and cleans up. None requires another.
 	The order still matters for one thing: the 05-reports-misc.xml members check the backup job's row in the completed jobs
-	list, and the 98-destructive.xml members clear that list, so the destructive members run after every other one, and
-	sc/99-truncate.xml (SmartClient's Truncate) runs last, just before the restore.
+	list, and the 11-user-list.xml and 98-destructive.xml members clear that list, so both 11 members run after both 05
+	members, the destructive members run after every other one, and sc/99-truncate.xml (SmartClient's Truncate) runs last,
+	just before the restore. pf/07-reports.xml is a workflow of SmartClient and PrimeFaces legs (report design is
+	SmartClient only; the Reports list and scheduling are PrimeFaces only). The 06 and 08 members share fixed contact names
+	(their spreadsheets cannot hold the run token), and the 11 members a generated user name family, so neither pair may run at
+	the same time; a suite runs its members one at a time.
 
 	-Dsail.suite.only=pf/ or sc/ chooses one renderer's members, and -Dsail.suite.only=03 both 03 members; the bracket
 	always runs, in both renderers.
@@ -38,12 +42,22 @@
 	<member file="pf/03-security-admin.xml"/>
 	<member file="pf/04-devops.xml"/>
 	<member file="pf/05-reports-misc.xml"/>
+	<member file="pf/06-import-export.xml"/>
+	<member file="pf/07-reports.xml"/>
+	<member file="pf/08-tags-communications.xml"/>
+	<member file="pf/09-operations.xml"/>
 	<member file="pf/10-phone-smoke.xml"/>
 	<member file="sc/01-session.xml"/>
 	<member file="sc/02-contacts-communications.xml"/>
 	<member file="sc/03-security-admin.xml"/>
 	<member file="sc/04-devops.xml"/>
 	<member file="sc/05-reports-misc.xml"/>
+	<member file="sc/06-import-export.xml"/>
+	<member file="sc/07-reports.xml"/>
+	<member file="sc/08-tags-communications.xml"/>
+	<member file="sc/09-operations.xml"/>
+	<member file="pf/11-user-list.xml"/>
+	<member file="sc/11-user-list.xml"/>
 	<member file="pf/98-destructive.xml"/>
 	<member file="sc/98-destructive.xml"/>
 	<member file="sc/99-truncate.xml"/>

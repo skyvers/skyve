@@ -76,7 +76,6 @@ class SailLanguageCoverageTest {
 			Map.entry("pushListContext@userAgentType", "a pushed context takes the automation's user agent unless a generated script says otherwise"),
 			Map.entry("navigateMap@refreshTimeInSeconds", "no executor reads it; kept for older scripts"),
 			Map.entry("navigateMap@showRefreshControls", "no executor reads it; kept for older scripts"),
-			Map.entry("listGridSelect@model", "the kitchen sink's only list model grid has no selectedIdBinding, so a selected row has nothing to check"),
 			Map.entry("listGridTool@model", "the kitchen sink's only list model grid lists values that do not change while a script runs, so a refresh has nothing to check"),
 			Map.entry("dataEnter@navigateToWidget", "no executor reads it (the interpreted ones find the widget wherever it is); kept for older scripts"),
 			// defaults that the kitchen sink has no reason to state
@@ -86,7 +85,6 @@ class SailLanguageCoverageTest {
 			Map.entry("cancel@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Cancel does"),
 			Map.entry("ok@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped OK does"),
 			Map.entry("remove@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Remove does"),
-			Map.entry("zoomOut@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped Zoom Out does"),
 			Map.entry("dataGridLink@testSuccess", "testSuccess=\"false\" is for a gesture that fails; no shipped row link does"));
 
 	@Test

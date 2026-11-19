@@ -2,19 +2,21 @@ package util.sail;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,17 +46,22 @@ import jakarta.annotation.Nullable;
  * null and the executor does nothing more.
  * <ul>
  * <li>{@value SailSettings#SNAPSHOT_DIR}: after each step (and when a step fails, before the test strategy acts on
- * it), a screenshot named by sequence, interaction and step, and an {@code index.html} film strip of the steps: the
- * step as SAIL, its outcome and duration, and its screenshot. With {@value SailSettings#SNAPSHOT_SOURCE}{@code =true},
- * also each page's source.</li>
+ * it), a screenshot named by sequence, interaction and step, and an {@code index.html} film strip of the steps, under
+ * their interactions: each step in words ({@link SailStepWords#summary(Step)}) and as SAIL, its outcome and duration, and its
+ * screenshot. With {@value SailSettings#SNAPSHOT_SOURCE}{@code =true}, also each page's source.</li>
  * <li>{@value SailSettings#VIDEO_DIR}: the browser's frames, from Chrome's DevTools screencast, with their times,
- * and a {@code player.html} that plays them at their real timing, captioned with the SAIL step that was running.</li>
+ * and a {@code player.html} that plays them at their real timing, fitted to the window, captioned with the step that
+ * was running, beside a list of the steps in words to jump to.</li>
  * </ul>
  * Each automation run gets its own folder under each directory, named by its time, test and (for a suite file) the
- * script, so suites, workflows and ITs with several tests keep every run. Each directory gets an {@code index.html}
- * listing its runs. Everything is static HTML that opens from the file system. The run's pages list its settings that
- * do not come from their defaults, with their sources. With {@value SailSettings#KEEP_MEDIA}{@code =failed}, a run that
- * passed deletes its folders when it ends.
+ * script, so suites, workflows and ITs with several tests keep every run, with a {@value #RUN_JSON} summary of it.
+ * Each directory gets an {@code index.html} listing its runs by what they do (their first interaction), with their
+ * outcomes, and filters. Everything is static HTML that opens from the file system, light or dark as the system is.
+ * This class records the run; {@link SailRunPages} writes the film strip and player, {@link SailRunsList} the list of
+ * runs, {@link SailStepWords} each step's words, and {@link SailMediaHtml} holds their shared parts and the CSS and
+ * JavaScript (in {@code util/sail/media/}).
+ * The run's pages have a Settings button that shows its settings that do not come from their defaults, with their
+ * sources. With {@value SailSettings#KEEP_MEDIA}{@code =failed}, a run that passed deletes its folders when it ends.
  * <p>
  * Recordings show what the browser showed: a run against real data records real data.
  * <p>
@@ -91,19 +98,50 @@ public final class SailMedia {
 	private static final DateTimeFormatter FOLDER_TIME = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 	private static final DateTimeFormatter SHOWN_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 	private static final Pattern METHOD_CONTENT = Pattern.compile("<(?:\\w+:)?method>(.*)</(?:\\w+:)?method>", Pattern.DOTALL);
+	/** Each run folder's summary of the run, which the list of runs reads (see {@link #runJson}). */
+	static final String RUN_JSON = "run.json";
 	/** The script a suite is running on this thread, to name the run's folder; see {@link #label(String)}. */
 	private static final ThreadLocal<String> LABEL = new ThreadLocal<>();
 	/**
-	 * The runs of the unit (a workflow) running on this thread, whose media is kept or deleted together; null outside
-	 * a unit. Set by {@link #beginUnit()} and removed by {@link #endUnit(boolean)}, which its caller calls in a
-	 * {@code finally}.
+	 * The unit (a workflow) running on this thread; null outside a unit. Set by {@link #beginUnit()} and removed by
+	 * {@link #endUnit(boolean)}, which its caller calls in a {@code finally}.
 	 */
-	private static final ThreadLocal<List<SailMedia>> UNIT = new ThreadLocal<>();
+	private static final ThreadLocal<Unit> UNIT = new ThreadLocal<>();
+	/**
+	 * This JVM's run of tests, for the list of runs to show each session's runs together in the order they ran: when
+	 * this class was loaded, as a folder time.
+	 */
+	static final String SESSION = FOLDER_TIME.format(LocalDateTime.now());
+	/** Numbers the units (see {@link #beginUnit()}) of this session. */
+	private static final AtomicInteger UNITS = new AtomicInteger();
 
-	/** One executed step: where it ran, what it was, when, how it went, and its snapshot. */
+	/** A unit (a workflow): its number in the session, how many runs (legs) it has started, and its finished runs. */
+	private static final class Unit {
+		private final int number = UNITS.incrementAndGet();
+		private int legs = 0;
+		/** Its finished runs, whose media is kept or deleted together. */
+		private final List<SailMedia> runs = new ArrayList<>();
+	}
+
+	/**
+	 * Where a run is in its session: the unit (a workflow) it is a leg of, and which leg.
+	 *
+	 * @param session	the session ({@link #SESSION})
+	 * @param unit	the unit's number in the session, or 0 when the run is not in a unit
+	 * @param leg	the run's number in its unit, from 1; or 0 when it is not in a unit
+	 */
+	record Place(@Nonnull String session, int unit, int leg) {
+		// a value
+	}
+
+	/**
+	 * One executed step: where it ran, what it was (in words, see {@link SailStepWords#summary(Step)}, and as SAIL), when,
+	 * how it went, and its snapshot.
+	 */
 	record StepRecord(int sequence,
 						@Nonnull String procedure,
 						int number,
+						@Nonnull String summary,
 						@Nonnull String xml,
 						long startMillis,
 						long endMillis,
@@ -124,6 +162,7 @@ public final class SailMedia {
 	 * What a run's pages say about the run.
 	 *
 	 * @param name	the run's folder name
+	 * @param title	what the run does: its automation's first interaction (see {@link SailMedia#title(Automation, String)})
 	 * @param test	the test, as {@code Class.method}
 	 * @param label	the suite file, or null
 	 * @param started	when it started, as shown
@@ -131,6 +170,7 @@ public final class SailMedia {
 	 * @param settings	its settings that do not come from their defaults, each with its source (see {@link SailSettings#describe()})
 	 */
 	record RunInfo(@Nonnull String name,
+					@Nonnull String title,
 					@Nonnull String test,
 					@Nullable String label,
 					@Nonnull String started,
@@ -142,6 +182,7 @@ public final class SailMedia {
 	private final Selenide<?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?> selenide;
 	private final Automation automation;
 	private final RunInfo info;
+	private final Place place;
 	private final Path snapshotRun;
 	private final Path videoRun;
 	private final boolean saveSource;
@@ -159,6 +200,7 @@ public final class SailMedia {
 	private int sequence = 0;
 	private String procedure;
 	private int number;
+	private String stepSummary;
 	private String xml;
 	private String fileStem;
 	private long startMillis;
@@ -172,6 +214,8 @@ public final class SailMedia {
 		this.selenide = selenide;
 		this.automation = automation;
 		this.info = info;
+		Unit unit = UNIT.get();
+		this.place = (unit == null) ? new Place(SESSION, 0, 0) : new Place(SESSION, unit.number, ++unit.legs);
 		this.snapshotRun = snapshotRun;
 		this.videoRun = videoRun;
 		this.saveSource = settings.snapshotSource();
@@ -217,7 +261,7 @@ public final class SailMedia {
 		String label = LABEL.get();
 		// a load run's virtual users start runs at the same time: their folders name the user and iteration
 		String name = sanitise(FOLDER_TIME.format(now) + '-' + SailLoadProbe.fileLabel() + test + ((label == null) ? "" : '-' + label), 120);
-		RunInfo info = new RunInfo(name, test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe());
+		RunInfo info = new RunInfo(name, title(automation, test), test, label, SHOWN_TIME.format(now), automation.getUxui(), settings.describe());
 		try {
 			SailMedia result = new SailMedia(selenide,
 												automation,
@@ -233,6 +277,26 @@ public final class SailMedia {
 			selenide.trace("Could not make the SAIL media folders, so this run has none: " + e);
 			return null;
 		}
+	}
+
+	/**
+	 * Returns what a run does, for its pages and the list of runs: the name of its automation's first interaction, with
+	 * how many more there are; or the test when it has none.
+	 *
+	 * @param automation	the automation
+	 * @param test	the test, as {@code Class.method}
+	 * @return the title
+	 */
+	static @Nonnull String title(@Nonnull Automation automation, @Nonnull String test) {
+		List<String> names = automation.getInteractions().stream()
+											.map(Interaction::getName)
+											.filter(n -> (n != null) && (! n.isBlank()))
+											.toList();
+		if (names.isEmpty()) {
+			return test;
+		}
+		int more = names.size() - 1;
+		return names.get(0).trim() + ((more == 0) ? "" : " (+" + more + " more)");
 	}
 
 	/**
@@ -271,8 +335,15 @@ public final class SailMedia {
 		sequence++;
 		procedure = procedureName;
 		number = stepNumber;
+		try {
+			stepSummary = SailStepWords.summary(step);
+		}
+		catch (RuntimeException e) { // the media must never change how a step fails: the step reports its own problem
+			selenide.trace("Could not put step " + sequence + " in words for the SAIL media: " + e);
+			stepSummary = SailStepWords.words(InterpretedWebDriverExecutor.opCode(step));
+		}
 		xml = stepXml(step);
-		fileStem = String.format("%03d-%s", Integer.valueOf(sequence), sanitise(procedureName + '-' + opCode(xml), 80));
+		fileStem = String.format("%03d-%s", Integer.valueOf(sequence), sanitise(procedureName + '-' + InterpretedWebDriverExecutor.opCode(step), 80));
 		if (videoRun != null) {
 			WebDriver driver = selenide.driver;
 			if ((driver != null) && (driver != screencastDriver)) {
@@ -320,7 +391,7 @@ public final class SailMedia {
 				}
 			}
 		}
-		steps.add(new StepRecord(sequence, procedure, number, xml, startMillis, endMillis,
+		steps.add(new StepRecord(sequence, procedure, number, stepSummary, xml, startMillis, endMillis,
 									(failure == null) ? null : hidePasswords(failure), screenshot, source));
 		xml = null;
 	}
@@ -342,7 +413,7 @@ public final class SailMedia {
 	 * <p>Side effects: sets this thread's unit, which the caller must end in a {@code finally}.
 	 */
 	static void beginUnit() {
-		UNIT.set(new ArrayList<>());
+		UNIT.set(new Unit());
 	}
 
 	/**
@@ -354,11 +425,12 @@ public final class SailMedia {
 	 * @param unitPassed	whether the unit passed
 	 */
 	static void endUnit(boolean unitPassed) {
-		List<SailMedia> runs = UNIT.get();
+		Unit unit = UNIT.get();
 		UNIT.remove();
-		if ((runs == null) || (! unitPassed)) {
+		if ((unit == null) || (! unitPassed)) {
 			return;
 		}
+		List<SailMedia> runs = unit.runs;
 		for (SailMedia run : runs) {
 			if (! run.passed) {
 				return;
@@ -387,9 +459,9 @@ public final class SailMedia {
 		}
 		passed = automationPassed && steps.stream().noneMatch(StepRecord::failed);
 		writePages();
-		List<SailMedia> unit = UNIT.get();
+		Unit unit = UNIT.get();
 		if (unit != null) {
-			unit.add(this);
+			unit.runs.add(this);
 		}
 		else if (passed && (keepMedia == SailSettings.KeepMedia.FAILED)) {
 			delete();
@@ -401,9 +473,11 @@ public final class SailMedia {
 		try {
 			Path filmStrip = (snapshotRun == null) ? null : snapshotRun.resolve("index.html");
 			Path player = (videoRun == null) ? null : videoRun.resolve("player.html");
+			String summary = runJson(info, place, steps, passed);
 			if (filmStrip != null) {
 				String playerLink = (player == null) ? null : link(snapshotRun, player);
-				Files.writeString(filmStrip, filmStripHtml(info, steps, playerLink), StandardCharsets.UTF_8);
+				Files.writeString(filmStrip, SailRunPages.filmStripHtml(info, steps, playerLink), StandardCharsets.UTF_8);
+				Files.writeString(snapshotRun.resolve(RUN_JSON), summary, StandardCharsets.UTF_8);
 				writeRunsIndex(snapshotRun.getParent());
 			}
 			if (player != null) {
@@ -412,8 +486,9 @@ public final class SailMedia {
 				synchronized (frames) {
 					written = new ArrayList<>(frames);
 				}
-				Files.writeString(videoRun.resolve("video.js"), videoScript(info, written, steps, filmStripLink), StandardCharsets.UTF_8);
-				Files.writeString(player, playerHtml(info), StandardCharsets.UTF_8);
+				Files.writeString(videoRun.resolve("video.js"), SailRunPages.videoScript(info, written, steps, filmStripLink), StandardCharsets.UTF_8);
+				Files.writeString(player, SailRunPages.playerHtml(info, steps, filmStripLink), StandardCharsets.UTF_8);
+				Files.writeString(videoRun.resolve(RUN_JSON), summary, StandardCharsets.UTF_8);
 				writeRunsIndex(videoRun.getParent());
 			}
 			selenide.trace("SAIL media written: " + steps.size() + " steps" +
@@ -457,7 +532,7 @@ public final class SailMedia {
 	 * directory at the same time, and two writers of one file would garble it.
 	 */
 	private static synchronized void writeRunsIndex(@Nonnull Path directory) throws IOException {
-		Files.writeString(directory.resolve("index.html"), runsIndexHtml(directory), StandardCharsets.UTF_8);
+		Files.writeString(directory.resolve("index.html"), SailRunsList.runsIndexHtml(directory), StandardCharsets.UTF_8);
 	}
 
 	private static @Nonnull String link(@Nonnull Path from, @Nonnull Path to) {
@@ -466,7 +541,7 @@ public final class SailMedia {
 
 	/**
 	 * Renders a step as one line of SAIL XML, as the schema writes it; or, if it cannot be marshalled on its own, as the
-	 * executor describes it.
+	 * executor describes it. It is shown as it is (escaped), never parsed: the words come from the step itself.
 	 */
 	@Nonnull String stepXml(@Nonnull Step step) {
 		String result = null;
@@ -479,12 +554,55 @@ public final class SailMedia {
 		return hidePasswords((result == null) ? InterpretedWebDriverExecutor.describe(step) : result);
 	}
 
+	/** What a hidden password shows as. */
+	private static final String HIDDEN = "********";
+
 	/**
-	 * Hides a login's password in a step's XML or a failure that quotes it, unless it is a variable, so that the pages
-	 * can be shown to others.
+	 * Hides a login's password in a step's XML or a failure that quotes it, and the value of a call's parameter whose
+	 * name has "password" in it, unless it is a variable, so that the pages can be shown to others.
 	 */
 	static @Nonnull String hidePasswords(@Nonnull String stepXml) {
-		return stepXml.replaceAll("(\\bpassword=\")(?!\\{var:)[^\"]*\"", "$1********\"");
+		return hideParameterPasswords(stepXml.replaceAll("(\\bpassword=\")(?!\\{var:)[^\"]*\"", "$1" + HIDDEN + '"'));
+	}
+
+	/** Hides the value of each {@code <parameter>} whose name has "password" in it, unless it is a variable. */
+	private static @Nonnull String hideParameterPasswords(@Nonnull String stepXml) {
+		StringBuilder result = new StringBuilder(stepXml.length());
+		int from = 0;
+		int tag = stepXml.indexOf("<parameter ");
+		while (tag >= 0) {
+			int tagEnd = stepXml.indexOf('>', tag);
+			if (tagEnd < 0) {
+				break;
+			}
+			String element = stepXml.substring(tag, tagEnd);
+			String name = attribute(element, "name");
+			String value = attribute(element, "value");
+			if ((name != null) && (value != null) && (! hidden(name, value).equals(value))) {
+				int valueStart = tag + element.indexOf(" value=\"") + 8;
+				result.append(stepXml, from, valueStart).append(HIDDEN);
+				from = valueStart + value.length();
+			}
+			tag = stepXml.indexOf("<parameter ", tagEnd);
+		}
+		return result.append(stepXml, from, stepXml.length()).toString();
+	}
+
+	/** Returns an element's attribute as written in its start tag, or null if it has none. */
+	private static @Nullable String attribute(@Nonnull String element, @Nonnull String name) {
+		String start = ' ' + name + "=\"";
+		int valueStart = element.indexOf(start);
+		if (valueStart < 0) {
+			return null;
+		}
+		valueStart += start.length();
+		int valueEnd = element.indexOf('"', valueStart);
+		return (valueEnd < 0) ? null : element.substring(valueStart, valueEnd);
+	}
+
+	/** Returns a named value, hidden if its name has "password" in it and it is not a variable. */
+	static @Nonnull String hidden(@Nonnull String name, @Nonnull String value) {
+		return (name.toLowerCase(Locale.ROOT).contains("password") && (! value.startsWith("{var:"))) ? HIDDEN : value;
 	}
 
 	/**
@@ -515,12 +633,6 @@ public final class SailMedia {
 				.trim();
 	}
 
-	/** Returns the op-code of a step's XML, e.g. {@code dataEnter}. */
-	static @Nonnull String opCode(@Nonnull String stepXml) {
-		Matcher matcher = Pattern.compile("^<\\s*([\\w]+)").matcher(stepXml);
-		return matcher.find() ? matcher.group(1) : "step";
-	}
-
 	/** Makes text safe for a file name: letters, digits and dashes, at most {@code max} characters. */
 	static @Nonnull String sanitise(@Nonnull String text, int max) {
 		String result = text.replaceAll("[^A-Za-z0-9.]+", "-").replaceAll("-{2,}", "-").replaceAll("^-|-$", "");
@@ -530,236 +642,35 @@ public final class SailMedia {
 		return result.isEmpty() ? "step" : result;
 	}
 
-	static @Nonnull String escape(@Nullable String text) {
-		if (text == null) {
-			return "";
-		}
-		StringBuilder result = new StringBuilder(text.length() + 16);
-		for (int i = 0, l = text.length(); i < l; i++) {
-			char c = text.charAt(i);
-			switch (c) {
-				case '<' -> result.append("&lt;");
-				case '>' -> result.append("&gt;");
-				case '&' -> result.append("&amp;");
-				case '"' -> result.append("&quot;");
-				case '\'' -> result.append("&#39;");
-				default -> result.append(c);
-			}
-		}
-		return result.toString();
+	/** How long the steps took, from the first's start to the last's end. */
+	static long runMillis(@Nonnull List<StepRecord> steps) {
+		return steps.isEmpty() ? 0L : Math.max(0L, steps.get(steps.size() - 1).endMillis() - steps.get(0).startMillis());
 	}
 
-	private static final String STYLE = "<style>" +
-			"body{font:14px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:16px;color:#222;background:#fafafa}" +
-			"h1{font-size:20px;margin:0 0 4px}.meta{color:#666;margin-bottom:12px}a{color:#0b62c4}" +
-			"table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #ddd;padding:6px 8px;vertical-align:top;text-align:left}" +
-			"th{background:#eee;position:sticky;top:0}code{font:12px/1.4 Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-all}" +
-			"tr.fail td{background:#fde8e8}.pass{color:#16794a;font-weight:600}.failed{color:#b3261e;font-weight:600}" +
-			"td.shot img{max-width:360px;border:1px solid #ccc}.num{white-space:nowrap}" +
-			"@media (prefers-color-scheme: dark){body{background:#1d1f21;color:#ddd}th{background:#2b2d30}th,td{border-color:#3a3d41}" +
-			"tr.fail td{background:#4a2224}.meta{color:#999}a{color:#7ab4ff}}" +
-			"</style>";
-
 	/**
-	 * Writes the film strip of a run: one row per executed step.
+	 * Writes a run's summary for the list of runs ({@value #RUN_JSON} in each of its folders).
 	 *
 	 * @param info	the run
-	 * @param steps	the executed steps, in order
-	 * @param playerLink	the run's video player, relative to the film strip, or null
-	 * @return the page
+	 * @param place	where it is in its session
+	 * @param steps	the executed steps
+	 * @param passed	whether the run passed
+	 * @return the JSON
 	 */
-	static @Nonnull String filmStripHtml(@Nonnull RunInfo info, @Nonnull List<StepRecord> steps, @Nullable String playerLink) {
-		int failed = 0;
-		StepRecord firstFailure = null;
-		for (StepRecord step : steps) {
-			if (step.failed()) {
-				failed++;
-				if (firstFailure == null) {
-					firstFailure = step;
-				}
-			}
-		}
-		StringBuilder result = new StringBuilder(4096 + (steps.size() * 512));
-		result.append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">")
-				.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">")
-				.append("<title>SAIL run ").append(escape(info.name())).append("</title>").append(STYLE).append("</head><body>")
-				.append("<h1>").append(escape(info.test())).append((info.label() == null) ? "" : " &middot; " + escape(info.label())).append("</h1>")
-				.append("<div class=\"meta\">Started ").append(escape(info.started())).append(" &middot; UX/UI ").append(escape(info.uxui()))
-				.append(" &middot; ").append(steps.size()).append(" steps &middot; ");
-		if (firstFailure == null) {
-			result.append("<span class=\"pass\">no failures</span>");
-		}
-		else {
-			result.append("<span class=\"failed\">").append(failed).append(" failed</span> &middot; <a href=\"#step-")
-					.append(firstFailure.sequence()).append("\">jump to the first failure</a>");
-		}
-		if (playerLink != null) {
-			result.append(" &middot; <a href=\"").append(escape(playerLink)).append("\">video</a>");
-		}
-		result.append(" &middot; <a href=\"../index.html\">all runs</a></div>")
-				.append("<div class=\"meta settings\">Settings: ")
-				.append(info.settings().isEmpty() ? "all defaults" : String.join(" &middot; ", info.settings().stream().map(SailMedia::escape).toList()))
-				.append("</div>")
-				.append("<table><thead><tr><th>#</th><th>Interaction</th><th>Step</th><th>Outcome</th><th>Time</th><th>Screenshot</th></tr></thead><tbody>");
-		for (StepRecord step : steps) {
-			result.append("<tr id=\"step-").append(step.sequence()).append('"').append(step.failed() ? " class=\"fail\"" : "").append('>')
-					.append("<td class=\"num\">").append(step.sequence()).append("</td>")
-					.append("<td>").append(escape(step.procedure())).append(" <span class=\"meta\">#").append(step.number()).append("</span></td>")
-					.append("<td><code>").append(escape(step.xml())).append("</code></td><td>");
-			if (step.failed()) {
-				result.append("<span class=\"failed\">failed</span><br>").append(escape(step.failure()));
-			}
-			else {
-				result.append("<span class=\"pass\">passed</span>");
-			}
-			result.append("</td><td class=\"num\">").append(step.endMillis() - step.startMillis()).append(" ms</td><td class=\"shot\">");
-			if (step.screenshot() != null) {
-				String file = escape(step.screenshot());
-				result.append("<a href=\"").append(file).append("\"><img loading=\"lazy\" src=\"").append(file).append("\" alt=\"step ")
-						.append(step.sequence()).append("\"></a>");
-			}
-			if (step.source() != null) {
-				result.append("<br><a href=\"").append(escape(step.source())).append("\">page source</a>");
-			}
-			result.append("</td></tr>");
-		}
-		result.append("</tbody></table></body></html>\n");
-		return result.toString();
-	}
-
-	/**
-	 * Writes the player's data: the frames with their times and the steps with theirs, as a script the static player
-	 * loads (a page opened from the file system cannot fetch JSON).
-	 *
-	 * @param info	the run
-	 * @param frames	the frames, in order
-	 * @param steps	the executed steps, in order
-	 * @param filmStripLink	the run's film strip, relative to the player, or null
-	 * @return the script
-	 */
-	static @Nonnull String videoScript(@Nonnull RunInfo info, @Nonnull List<Frame> frames, @Nonnull List<StepRecord> steps, @Nullable String filmStripLink) {
-		List<Map<String, Object>> stepData = new ArrayList<>(steps.size());
-		for (StepRecord step : steps) {
-			Map<String, Object> data = new java.util.LinkedHashMap<>();
-			data.put("n", Integer.valueOf(step.sequence()));
-			data.put("p", step.procedure());
-			data.put("x", step.xml());
-			data.put("s", Long.valueOf(step.startMillis()));
-			data.put("e", Long.valueOf(step.endMillis()));
-			if (step.failed()) {
-				data.put("f", step.failure());
-			}
-			stepData.add(data);
-		}
-		List<Object> frameData = new ArrayList<>(frames.size());
-		for (Frame frame : frames) {
-			frameData.add(List.of(frame.file(), Long.valueOf(frame.millis())));
-		}
-		Map<String, Object> video = new java.util.LinkedHashMap<>();
-		video.put("title", info.test() + ((info.label() == null) ? "" : " · " + info.label()));
-		video.put("started", info.started());
-		video.put("settings", info.settings());
-		video.put("filmStrip", filmStripLink);
-		video.put("frames", frameData);
-		video.put("steps", stepData);
-		return "window.SAIL_VIDEO = " + new Json().toJson(video) + ";\n";
-	}
-
-	/**
-	 * Writes the player page, which plays {@code video.js}'s frames at their real timing.
-	 *
-	 * @param info	the run
-	 * @return the page
-	 */
-	static @Nonnull String playerHtml(@Nonnull RunInfo info) {
-		return "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
-				"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">" +
-				"<title>SAIL video " + escape(info.name()) + "</title>" + STYLE +
-				"<style>#wrap{display:flex;gap:12px;align-items:flex-start}#screen{flex:1;min-width:0}" +
-				"#frame{max-width:100%;border:1px solid #ccc;background:#fff;display:block}" +
-				"#caption{margin:8px 0;min-height:3em}#caption.fail code{color:#b3261e}" +
-				"#controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}#seek{flex:1;min-width:160px}" +
-				"#steps{width:340px;max-height:80vh;overflow:auto;margin:0;padding:0 0 0 28px;font-size:12px}" +
-				"#steps li{cursor:pointer;padding:2px 4px}#steps li.current{background:#dbe9fb}#steps li.fail{color:#b3261e}" +
-				"@media (max-width:900px){#wrap{flex-direction:column}#steps{width:auto}}" +
-				"@media (prefers-color-scheme: dark){#steps li.current{background:#2d4566}}</style>" +
-				"</head><body><h1 id=\"title\"></h1><div class=\"meta\" id=\"meta\"></div>" +
-				"<div id=\"controls\"><button id=\"play\" type=\"button\">Play</button>" +
-				"<label>Speed <select id=\"speed\"><option value=\"0.5\">0.5x</option><option value=\"1\" selected>1x</option>" +
-				"<option value=\"2\">2x</option><option value=\"4\">4x</option></select></label>" +
-				"<input id=\"seek\" type=\"range\" min=\"0\" value=\"0\"><span id=\"clock\" class=\"num\"></span></div>" +
-				"<div id=\"wrap\"><div id=\"screen\"><img id=\"frame\" alt=\"browser frame\"><div id=\"caption\"></div></div>" +
-				"<ol id=\"steps\"></ol></div>" +
-				"<script src=\"video.js\"></script>" +
-				"<script>(function(){" +
-				"var V=window.SAIL_VIDEO,F=V.frames,S=V.steps,i=0,playing=false,timer=null;" +
-				"var img=document.getElementById('frame'),cap=document.getElementById('caption'),seek=document.getElementById('seek')," +
-				"play=document.getElementById('play'),speed=document.getElementById('speed'),clock=document.getElementById('clock')," +
-				"list=document.getElementById('steps');" +
-				"document.getElementById('title').textContent=V.title;" +
-				"var meta=document.getElementById('meta');meta.textContent='Started '+V.started+' \\u00b7 '+S.length+' steps \\u00b7 '+F.length+' frames';" +
-				"if(V.filmStrip){var a=document.createElement('a');a.href=V.filmStrip;a.textContent='film strip';meta.append(' \\u00b7 ',a);}" +
-				"var all=document.createElement('a');all.href='../index.html';all.textContent='all runs';meta.append(' \\u00b7 ',all);" +
-				"var st=document.createElement('div');st.className='meta settings';" +
-				"st.textContent='Settings: '+(V.settings.length?V.settings.join(' \\u00b7 '):'all defaults');meta.after(st);" +
-				"var t0=F.length?F[0][1]:0;seek.max=Math.max(F.length-1,0);" +
-				"S.forEach(function(s,k){var li=document.createElement('li');li.value=s.n;li.textContent=s.p+': '+s.x;" +
-				"if(s.f){li.className='fail';li.title=s.f;}li.onclick=function(){go(frameAt(s.s));};list.appendChild(li);});" +
-				"function frameAt(t){var lo=0,hi=F.length-1;if(hi<0)return 0;while(lo<hi){var m=(lo+hi+1)>>1;if(F[m][1]<=t)lo=m;else hi=m-1;}return lo;}" +
-				"function stepAt(t){var r=-1;for(var k=0;k<S.length;k++){if(S[k].s<=t)r=k;else break;}return r;}" +
-				"var shown=-2;function show(){if(!F.length){cap.textContent='No frames were recorded.';return;}" +
-				"var t=F[i][1];img.src=F[i][0];seek.value=i;clock.textContent=((t-t0)/1000).toFixed(1)+' s';" +
-				"if(i+1<F.length){new Image().src=F[i+1][0];}" +
-				"var k=stepAt(t);if(k!==shown){shown=k;var cur=list.querySelector('li.current');if(cur)cur.classList.remove('current');" +
-				"if(k<0){cap.textContent='Before the first step';cap.className='';}else{var s=S[k];var li=list.children[k];li.classList.add('current');" +
-				"li.scrollIntoView({block:'nearest'});cap.className=s.f?'fail':'';cap.innerHTML='';var b=document.createElement('b');" +
-				"b.textContent='Step '+s.n+' \\u00b7 '+s.p+(s.f?' \\u00b7 failed: '+s.f:'');var c=document.createElement('code');" +
-				"c.textContent=s.x;cap.append(b,document.createElement('br'),c);}}}" +
-				"function go(k){i=Math.max(0,Math.min(F.length-1,k));show();if(playing){schedule();}}" +
-				"function schedule(){clearTimeout(timer);if(i+1>=F.length){pause();return;}" +
-				"timer=setTimeout(function(){i++;show();schedule();},Math.max(0,(F[i+1][1]-F[i][1])/parseFloat(speed.value)));}" +
-				"function pause(){playing=false;clearTimeout(timer);play.textContent='Play';}" +
-				"play.onclick=function(){if(playing){pause();}else{if(i+1>=F.length)i=0;playing=true;play.textContent='Pause';schedule();}};" +
-				"speed.onchange=function(){if(playing)schedule();};seek.oninput=function(){go(parseInt(seek.value,10));};" +
-				"show();})();</script></body></html>\n";
-	}
-
-	/**
-	 * Writes a directory's list of runs, newest first: each run folder with its film strip and player.
-	 *
-	 * @param base	the directory
-	 * @return the page
-	 * @throws IOException	if the directory cannot be read
-	 */
-	static @Nonnull String runsIndexHtml(@Nonnull Path base) throws IOException {
-		List<Path> runs = new ArrayList<>();
-		try (DirectoryStream<Path> children = Files.newDirectoryStream(base, Files::isDirectory)) {
-			for (Path child : children) {
-				if (Files.exists(child.resolve("index.html")) || Files.exists(child.resolve("player.html"))) {
-					runs.add(child);
-				}
-			}
-		}
-		runs.sort((a, b) -> b.getFileName().toString().compareTo(a.getFileName().toString()));
-		StringBuilder result = new StringBuilder(1024 + (runs.size() * 256));
-		result.append("<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">")
-				.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">")
-				.append("<title>SAIL runs</title>").append(STYLE).append("</head><body><h1>SAIL runs</h1><div class=\"meta\">")
-				.append(runs.size()).append(" runs, newest first</div><table><thead><tr><th>Run</th><th>Film strip</th><th>Video</th></tr></thead><tbody>");
-		for (Path run : runs) {
-			String name = escape(run.getFileName().toString());
-			result.append("<tr><td>").append(name).append("</td><td>");
-			if (Files.exists(run.resolve("index.html"))) {
-				result.append("<a href=\"").append(name).append("/index.html\">steps</a>");
-			}
-			result.append("</td><td>");
-			if (Files.exists(run.resolve("player.html"))) {
-				result.append("<a href=\"").append(name).append("/player.html\">play</a>");
-			}
-			result.append("</td></tr>");
-		}
-		result.append("</tbody></table></body></html>\n");
-		return result.toString();
+	static @Nonnull String runJson(@Nonnull RunInfo info, @Nonnull Place place, @Nonnull List<StepRecord> steps, boolean passed) {
+		Map<String, Object> run = new LinkedHashMap<>();
+		run.put("session", place.session());
+		run.put("unit", Integer.valueOf(place.unit()));
+		run.put("leg", Integer.valueOf(place.leg()));
+		run.put("title", info.title());
+		run.put("test", info.test());
+		run.put("label", info.label());
+		run.put("started", info.started());
+		run.put("uxui", info.uxui());
+		run.put("passed", Boolean.valueOf(passed));
+		run.put("steps", Integer.valueOf(steps.size()));
+		run.put("failed", Long.valueOf(steps.stream().filter(StepRecord::failed).count()));
+		run.put("millis", Long.valueOf(runMillis(steps)));
+		return new Json().toJson(run);
 	}
 
 	/**

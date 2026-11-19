@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- Admin suite (admin.suite.xml), PrimeFaces: Reports, Audits, System Dashboard, Document Numbers and Jobs. -->
+<!-- Admin suite (admin.suite.xml), PrimeFaces: Audits, System Dashboard, Document Numbers and Jobs. -->
 <automation uxui="tablet" userAgentType="tablet" testStrategy="Assert"
 			xsi:schemaLocation="http://www.skyve.org/xml/sail ../../../../../main/java/schemas/sail.xsd"
 			xmlns="http://www.skyve.org/xml/sail"
@@ -8,13 +8,6 @@
 		<login user="admin" password="admin" />
 		<testSuccess />
 	</before>
-	<interaction name="Reports: the enabled reports list">
-		<method>
-			<navigateMenu module="admin" item="Reports/Reports" />
-			<comment>The demo data has no reports (report templates are made in the desktop Report Manager)</comment>
-			<testGridRows module="admin" query="qEnabledReports" maxRows="0" />
-		</method>
-	</interaction>
 	<interaction name="Audits: the saves made by the suite are audited">
 		<method>
 			<navigateMenu module="admin" item="Audits" />
@@ -57,7 +50,7 @@
 			<navigateMenu module="admin" item="Jobs" />
 			<tabSelect path="Actual" />
 			<action name="Refresh" />
-			<comment>00-backup.xml (a set-up, so it runs whatever sail.suite.only chooses) cleared the list then backed up; the 98-destructive.xml members, which clear it again, run after both 05 members</comment>
+			<comment>00-backup.xml (a set-up, so it runs whatever sail.suite.only chooses) cleared the list then backed up; the 11-user-list.xml and 98-destructive.xml members, which clear it again, run after both 05 members</comment>
 			<testGridRows module="admin" query="qCompletedJobs" rowContaining="Backup" minRows="1" maxRows="1" />
 			<listGridZoom module="admin" query="qCompletedJobs" rowContaining="Backup" />
 			<cancel />
