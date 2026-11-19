@@ -685,8 +685,10 @@ public class PrimeFacesSelenide extends Selenide<
 	}
 
 	/**
-	 * Replaces the text of a spinner's input as a user does: clicks into it, goes to the end of its text and deletes it
-	 * with Backspace, types the new text, then leaves it with Tab, so that its change event fires once, with the new text.
+	 * Replaces the text of a spinner's input as a user does: clicks into it, deletes its text with a Backspace and a
+	 * Delete for each character (so wherever the click put the caret, whatever the text's alignment), types the new
+	 * text, then leaves it with Tab, so that its change event fires once, with the new text. If the spinner's key filter
+	 * dropped any of the typed characters, the input shows other text, and the step fails rather than enter it.
 	 * A spinner cannot be cleared first, as {@link #text(PrimeFacesTextCommand)} does: it puts its value back after the
 	 * change event that clearing fires, so the new text was added to the old (5 then 7 gave 57). Nor can its text be
 	 * selected and typed over, as {@link #typeOver(String, String)} does: the spinner's key handler drops the select all
@@ -695,6 +697,7 @@ public class PrimeFacesSelenide extends Selenide<
 	 * @param id	the spinner's client id
 	 * @param value	the text, or null or empty to delete the text
 	 * @return true if the input is shown, enabled and editable
+	 * @throws IllegalStateException if the input does not show the typed text
 	 */
 	public boolean spinner(@Nonnull String id, @Nullable String value) {
 		SelenideElement element = $(byId(id + "_input"));
@@ -705,14 +708,23 @@ public class PrimeFacesSelenide extends Selenide<
 		click(element);
 		String old = element.getValue();
 		int length = (old == null) ? 0 : old.length();
-		StringBuilder keys = new StringBuilder(Keys.END.toString());
+		StringBuilder keys = new StringBuilder(length * 2);
 		for (int i = 0; i < length; i++) {
-			keys.append(Keys.BACK_SPACE);
+			keys.append(Keys.BACK_SPACE).append(Keys.DELETE);
 		}
-		if (value != null) {
-			keys.append(value);
-		}
+		String expected = (value == null) ? "" : value;
+		keys.append(expected);
 		element.sendKeys(keys);
+		String typed = element.getValue();
+		if (! expected.equals(typed)) {
+			throw new IllegalStateException(String.format("Spinner %s shows '%s' after '%s' was typed into it: " +
+															"its key filter dropped characters it does not take " +
+															"(such as letters, a minus when its minimum is not negative, " +
+															"or a decimal point when it takes whole numbers)",
+															id,
+															typed,
+															expected));
+		}
 		element.sendKeys(Keys.TAB);
 		waitForAjaxResponse();
 		return true;

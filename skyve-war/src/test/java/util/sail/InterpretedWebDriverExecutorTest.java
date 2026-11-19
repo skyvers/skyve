@@ -35,6 +35,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -798,15 +799,38 @@ class InterpretedWebDriverExecutorTest {
 	 */
 	@Test
 	void aStepThatEndsOnTheServerErrorPageFails() {
+		AssertionError e = aStepEndsOnTheServerErrorPage("Verify");
+		assertTrue(e.getMessage().contains("step 1 <comment comment=\"first\" />"), e.getMessage());
+	}
+
+	/**
+	 * The same under Assert, which stops at the first failure without collecting a report.
+	 */
+	@Test
+	void aStepThatEndsOnTheServerErrorPageFailsUnderAssert() {
+		aStepEndsOnTheServerErrorPage("Assert");
+	}
+
+	/**
+	 * Runs two comment steps where the window shows the error page only once the first has run (the page is checked
+	 * after each step, not before), and checks the failure names the page and that the second step never ran.
+	 */
+	private AssertionError aStepEndsOnTheServerErrorPage(String testStrategy) {
 		String errorPage = "http://localhost/skyve/pages/error.jsp?errorReference=r1";
-		when(executor.selenide.serverErrorPage()).thenReturn(errorPage);
-		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"Verify\" xmlns=\"http://www.skyve.org/xml/sail\">" +
+		AtomicBoolean firstRan = new AtomicBoolean();
+		doAnswer(i -> {
+			firstRan.set(true);
+			return null;
+		}).when(executor.selenide).trace("first");
+		when(executor.selenide.serverErrorPage()).thenAnswer(i -> firstRan.get() ? errorPage : null);
+		String script = "<automation uxui=\"desktop\" userAgentType=\"desktop\" testStrategy=\"" + testStrategy + "\" xmlns=\"http://www.skyve.org/xml/sail\">" +
 							"<interaction name=\"i\"><method><comment>first</comment><comment>never</comment></method></interaction></automation>";
 		Automation automation = XMLMetaData.unmarshalSAILString(script);
 		AssertionError e = assertThrows(AssertionError.class, () -> executor.executeAutomation(automation));
-		assertAll(() -> assertTrue(e.getMessage().contains("step 1 <comment comment=\"first\" />"), e.getMessage()),
+		assertAll(() -> assertTrue(firstRan.get(), "the first step did not run"),
 					() -> assertTrue(e.getMessage().contains("sent the browser to its error page " + errorPage), e.getMessage()),
 					() -> verify(executor.selenide, never()).trace("never"));
+		return e;
 	}
 
 	@Test
