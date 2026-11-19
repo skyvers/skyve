@@ -718,7 +718,8 @@ class TwoFactorAuthPushFilterTest {
 		FilterChain chain = mock(FilterChain.class);
 		AuthenticationManager authenticationManager = mock(AuthenticationManager.class);
 		filter.setAuthenticationManager(authenticationManager);
-		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(mock(Authentication.class));
+		Authentication authentication = mock(Authentication.class);
+		when(authenticationManager.authenticate(any(Authentication.class))).thenReturn(authentication);
 
 		filter.doFilter(request, response, chain);
 

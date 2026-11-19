@@ -2,6 +2,7 @@ package util.sail;
 
 import static com.codeborne.selenide.Selenide.$;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -157,7 +158,7 @@ class TwoFactorRememberSailIT extends AbstractPrimeFacesInterpretedSail {
 		sailString(automation(NAVIGATE + "<testSuccess />"));
 		assertAll(() -> assertFalse(selenium.isLoginPage(), "the restarted browser is signed in"),
 					() -> assertFalse($("#tfaCode1").exists(), "and is not asked for a code"),
-					() -> assertTrue(codesSent(log) == before, "and no code was emailed"));
+					() -> assertEquals(before, codesSent(log), "and no code was emailed"));
 	}
 
 	/** A mistyped code does not lose the user's Remember me choice. */

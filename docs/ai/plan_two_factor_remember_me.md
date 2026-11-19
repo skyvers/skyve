@@ -59,9 +59,11 @@ A successful two-factor sign in with Remember me ticked leaves the browser with 
 - **Browser, green.** `TwoFactorRememberSailIT` passed, 3 of 3 (18 s), against a disposable server (private WildFly 35 base, exploded war built from this branch, H2, port 9280) with email two-factor on for `demo` and `testBogusSend`. The server was stopped afterwards.
 - **Browser, red.** Against a war built without the fix to `TwoFactorAuthPushFilter` the mistyped code test failed ("with Remember me still ticked ==> expected: true but was: false"); the other two passed, as the ordinary path was already right.
 - **Unit red/green.** Without the fix `testBadTwoFactorCodeKeepsRememberMeTicked` fails (the others pass). In `TwoFactorRememberMeSignInTest`: the chain not using the remember-me services fails the "issues the cookie" test, and `alwaysRemember` fails the "unticked issues none" test. The "bad code issues nothing" test guards the lockout and failure paths, which the unchanged existing tests also cover; it has no mutation of its own.
-- **Gate 1, `mvn -o -B package`** over `skyve-web` and `skyve-war`: see Gates below.
+- **Gate 1, `mvn -o -B package`** over `skyve-web` and `skyve-war`: BUILD SUCCESS (3425 and 5115 tests, 0 failures; the war's ITs are not part of `package`). The first run lost a forked VM in `ReportServletH2Test` ("forked VM terminated without properly saying goodbye", exit code 0, with every other test passing); that class passes alone and the whole run passed on a second try, so it was not this change.
 - **Eclipse JDT (IDE compiler 3.48, each module's prefs)** over the changed files: no warnings on changed lines in `TwoFactorAuthPushFilter` or its test; three in `TwoFactorRememberMeSignInTest` (an unused import, two resource warnings for the application context), fixed or suppressed with a reason; none remain. The remaining warnings in those files are older lines.
 - **Spotless check** (`skyve-war`; scratch git copy because the worktree's `.git` file is not found by the plugin, with `-DspotlessFiles`): `TwoFactorRememberMeSignInTest` clean (a deliberate violation was caught, so the check does look). `TwoFactorRememberSailIT` is under `util/`, which Spotless excludes; `skyve-web` has no Spotless.
+- **Local Sonar** (`skyve-local-two-factor-remember`): two issues on changed lines, both fixed and re-scanned clean: `java:S9016` (a mock created inside `thenReturn`) in `TwoFactorAuthPushFilterTest` and `java:S5785` (`assertTrue(a == b)`) in `TwoFactorRememberSailIT`. Five older issues remain in `TwoFactorAuthPushFilter` on lines this change did not touch (S1075, S5993, S2259 x3).
+- **JaCoCo** (`-Pcoverage`, `TwoFactorAuthPushFilterTest`): every changed line of `TwoFactorAuthPushFilter` is covered (the new helper's `!= null` branch both ways).
 - **Not run:** SmartClient (desktop) sign in (it posts the same `loginAttempt` form), a customer's own login page, a database other than H2, an SMS or authenticator factor (there is none), and an MFA sign in on a phone browser (the IT uses Chrome with the tablet user agent as the other remember-me ITs do).
 
 ## Acceptance
@@ -73,4 +75,4 @@ A successful two-factor sign in with Remember me ticked leaves the browser with 
 - [x] A mistyped code keeps the Remember me choice (fixed, unit and browser).
 - [x] Every two-factor path is listed with what it does.
 - [x] The security note and the controls are recorded.
-- [ ] Gates pass (see the report).
+- [x] Gates pass.
